@@ -559,11 +559,7 @@ import { createRunnerReserveDiagnosticsForSimulationAction } from "./simulation/
 import { summarizeStrategicLineMetrics } from "./simulation/strategic-line-metrics";
 import { summarizeStrategicPlanConversionMetrics } from "./simulation/strategic-plan-conversion-metrics";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
-import type {
-  RunnerCoveragePressureForMetrics,
-  RunnerPressureReadyForMetrics,
-  RunnerPressureReadyTargetForMetrics,
-} from "./simulation/runner-pressure-metric-types";
+import { createRunnerPressureMetricContext } from "./simulation/runner-pressure-metrics";
 import {
   createRunnerEconomySetupActionClassContext,
 } from "./simulation/runner-economy-setup-types";
@@ -594,9 +590,6 @@ import {
   remoteRootTrashCostForMetrics,
   remoteTrashCostForVisibleCard,
 } from "./simulation/card-metric-lookup";
-import {
-  centralPressureTargetIsGoodForMetrics,
-} from "./simulation/central-pressure-card";
 import {
   createRunnerCentralRunPressureJustificationContext,
 } from "./simulation/central-run-pressure-justification";
@@ -1413,6 +1406,24 @@ const runnerCentralPressureDiagnosticsForSimulationAction =
     runnerCreditReserveTargetForInput,
     assessKnownRezzedIcePath,
   });
+
+const {
+  assessRunnerPressureReadyForMetrics,
+  assessRunnerCoveragePressureForMetrics,
+} = createRunnerPressureMetricContext({
+  runnerStrategicBreakerTargetForMetrics,
+  assessKnownRezzedIcePath,
+  knownPositionMemoryForInput: (input) =>
+    reconstructBeliefState(input).runnerOpponentModel?.knownPositionMemory ??
+    [],
+  definitionTypeForMetrics,
+  remoteRootTrashCostForMetrics,
+  canBreakerDefinitionBreakIce,
+  runnerVisibleIceCreatesCoverageNeedForMetrics,
+  runnerMissingBreakerRolesForMetrics,
+  runnerCoverageSearchActionForMetrics,
+  runnerCoverageRecoveryActionForMetrics,
+});
 
 export function chooseAiAction(
   input: AiDecisionInput,
@@ -11699,254 +11710,5 @@ function runnerBreakerCoverageDiagnosticsForSimulationAction(
       ? { runnerSetupEconomyStalled: true }
       : {}),
     ...(pressureRun ? { runnerPhaseExitToPressure: true } : {}),
-  };
-}
-
-function runnerHasReadyPressureRunForMetrics(input: AiDecisionInput): boolean {
-  return input.legalActions.some((action) => {
-    if (
-      action.type !== "start_run" ||
-      typeof action.payload?.serverId !== "string"
-    )
-      return false;
-    const serverId = action.payload.serverId;
-    const server = input.playerView.servers.find(
-      (candidate) => candidate.id === serverId,
-    );
-    if (!server || !runnerStrategicBreakerTargetForMetrics(server))
-      return false;
-    const assessment = assessKnownRezzedIcePath(
-      server.ice,
-      input.playerView.own.rig ?? [],
-      input.playerView.own.credits,
-      server.root,
-    );
-    return !assessment.blocked;
-  });
-}
-
-function assessRunnerPressureReadyForMetrics(
-  input: AiDecisionInput,
-): RunnerPressureReadyForMetrics {
-  const readyTargets: RunnerPressureReadyTargetForMetrics[] = [];
-  const blockers = new Set<
-    | "insufficient_credits"
-    | "missing_post_run_reserve"
-    | "stale_central"
-    | "remote_too_dangerous"
-    | "no_valuable_target"
-  >();
-  let broadReady = false;
-  const seen = new Set<string>();
-  for (const action of input.legalActions) {
-    if (
-      action.type !== "start_run" ||
-      typeof action.payload?.serverId !== "string"
-    )
-      continue;
-    const serverId = action.payload.serverId;
-    if (seen.has(serverId)) continue;
-    seen.add(serverId);
-    const server = input.playerView.servers.find(
-      (candidate) => candidate.id === serverId,
-    );
-    if (!server || !runnerStrategicBreakerTargetForMetrics(server)) continue;
-    const assessment = assessKnownRezzedIcePath(
-      server.ice,
-      input.playerView.own.rig ?? [],
-      input.playerView.own.credits,
-      server.root,
-    );
-    const visibleBreakCost = assessment.visibleBreakCost ?? 0;
-    const creditsAfterPath = input.playerView.own.credits - visibleBreakCost;
-    if (!assessment.blocked) broadReady = true;
-    if (assessment.blocked) {
-      blockers.add(
-        visibleBreakCost > input.playerView.own.credits
-          ? "insufficient_credits"
-          : "no_valuable_target",
-      );
-      continue;
-    }
-    if (serverId.startsWith("remote_")) {
-      const remoteReady = runnerRemotePressureReadyForMetrics(
-        input,
-        server,
-        creditsAfterPath,
-      );
-      if (remoteReady) readyTargets.push({ serverId, targetType: "remote" });
-      else blockers.add("no_valuable_target");
-      continue;
-    }
-    const central = centralServerId(serverId);
-    if (!central) continue;
-    if (creditsAfterPath < 1) {
-      blockers.add("missing_post_run_reserve");
-      continue;
-    }
-    if (!centralPressureTargetIsGoodForMetrics(input, central)) {
-      blockers.add("stale_central");
-      continue;
-    }
-    readyTargets.push({
-      serverId,
-      targetType: central === "rd" ? "rnd" : central,
-    });
-  }
-  return {
-    broadReady,
-    readyTargets,
-    falsePositive: broadReady && readyTargets.length === 0,
-    blockers,
-  };
-}
-
-function runnerRemotePressureReadyForMetrics(
-  input: AiDecisionInput,
-  server: AiDecisionInput["playerView"]["servers"][number],
-  creditsAfterPath: number,
-): boolean {
-  const hasVisibleScoreThreat = server.root.some(
-    (card) =>
-      (card.advancementCounters ?? 0) > 0 ||
-      (card.known && card.type === "agenda"),
-  );
-  const knownMemory =
-    reconstructBeliefState(input).runnerOpponentModel?.knownPositionMemory ??
-    [];
-  const knownRemoteEntries = knownMemory.filter(
-    (entry) =>
-      entry.zone === server.id && entry.positionKey.startsWith("root:"),
-  );
-  const knownAgenda = knownRemoteEntries.some(
-    (entry) => definitionTypeForMetrics(entry.definitionId) === "agenda",
-  );
-  const relevantTrash = server.root.some((card) => {
-    if (!card.known) return false;
-    const trashCost = remoteRootTrashCostForMetrics(card);
-    if (trashCost === undefined || creditsAfterPath < trashCost + 1)
-      return false;
-    if (!card.definitionId) return false;
-    const type = definitionTypeForMetrics(card.definitionId);
-    return type === "asset" || type === "upgrade";
-  });
-  return (
-    creditsAfterPath >= (hasVisibleScoreThreat || knownAgenda ? 1 : 2) &&
-    (hasVisibleScoreThreat || knownAgenda || relevantTrash)
-  );
-}
-
-function assessRunnerCoveragePressureForMetrics(
-  input: AiDecisionInput,
-): RunnerCoveragePressureForMetrics {
-  const rigCards = input.playerView.own.rig ?? [];
-  const gripCards = input.playerView.own.gripOrHq.filter(
-    (card) => card.known && card.definitionId,
-  );
-  const heapCards = input.playerView.own.heapOrArchives.filter(
-    (card) => card.known && card.definitionId,
-  );
-  const missingIceDefinitionIds = new Set<string>();
-  const blockedServers = new Set<string>();
-  const knownIceBlockedServers = new Set<string>();
-  for (const server of input.playerView.servers) {
-    if (!runnerStrategicBreakerTargetForMetrics(server)) continue;
-    const assessment = assessKnownRezzedIcePath(
-      server.ice,
-      rigCards,
-      input.playerView.own.credits,
-      server.root,
-    );
-    const rezzedMissing = assessment.blocked
-      ? server.ice
-          .filter(
-            (ice) =>
-              ice.known &&
-              ice.rezzed === true &&
-              ice.definitionId &&
-              runnerVisibleIceCreatesCoverageNeedForMetrics(ice),
-          )
-          .map((ice) => ice.definitionId!)
-          .filter(
-            (definitionId) =>
-              !rigCards.some(
-                (card) =>
-                  card.definitionId &&
-                  canBreakerDefinitionBreakIce(card.definitionId, definitionId),
-              ),
-          )
-      : [];
-    const knownUnrezzedMissing = server.ice
-      .filter(
-        (ice) =>
-          ice.known &&
-          ice.rezzed !== true &&
-          ice.definitionId &&
-          runnerVisibleIceCreatesCoverageNeedForMetrics(ice),
-      )
-      .map((ice) => ice.definitionId!)
-      .filter(
-        (definitionId) =>
-          !rigCards.some(
-            (card) =>
-              card.definitionId &&
-              canBreakerDefinitionBreakIce(card.definitionId, definitionId),
-          ),
-      );
-    if (rezzedMissing.length > 0) blockedServers.add(server.id);
-    if (knownUnrezzedMissing.length > 0) knownIceBlockedServers.add(server.id);
-    for (const definitionId of [...rezzedMissing, ...knownUnrezzedMissing])
-      missingIceDefinitionIds.add(definitionId);
-  }
-  const missingBreakerRoles = new Set(
-    [...missingIceDefinitionIds].flatMap(runnerMissingBreakerRolesForMetrics),
-  );
-  const matchingGripIds = new Set(
-    gripCards
-      .filter((card) =>
-        [...missingIceDefinitionIds].some((iceDefinitionId) =>
-          canBreakerDefinitionBreakIce(card.definitionId!, iceDefinitionId),
-        ),
-      )
-      .map((card) => card.instanceId),
-  );
-  const heapMatchingBreakerCount = heapCards.filter((card) =>
-    [...missingIceDefinitionIds].some((iceDefinitionId) =>
-      canBreakerDefinitionBreakIce(card.definitionId!, iceDefinitionId),
-    ),
-  ).length;
-  const matchingInstallActionIds = new Set(
-    input.legalActions
-      .filter(
-        (candidate) =>
-          candidate.type === "install_card" &&
-          typeof candidate.source === "string" &&
-          matchingGripIds.has(candidate.source),
-      )
-      .map((candidate) => candidate.actionId),
-  );
-  const searchActionIds = new Set(
-    input.legalActions
-      .filter((candidate) =>
-        runnerCoverageSearchActionForMetrics(input, candidate),
-      )
-      .map((candidate) => candidate.actionId),
-  );
-  const recoveryActionIds = new Set(
-    input.legalActions
-      .filter((candidate) =>
-        runnerCoverageRecoveryActionForMetrics(input, candidate),
-      )
-      .filter(() => heapMatchingBreakerCount > 0)
-      .map((candidate) => candidate.actionId),
-  );
-  return {
-    blockedServers,
-    knownIceBlockedServers,
-    missingBreakerRoles,
-    matchingInstallActionIds,
-    searchActionIds,
-    recoveryActionIds,
-    heapMatchingBreakerCount,
   };
 }
