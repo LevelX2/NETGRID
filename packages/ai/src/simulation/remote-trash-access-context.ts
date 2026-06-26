@@ -241,3 +241,17 @@ export function buildRunnerRemoteTrashAccessContext(
     ...(trashable ? { role } : {}),
   };
 }
+
+export function createRunnerRemoteTrashAccessContext(dependencies: {
+  runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
+}): (
+  input: AiDecisionInput,
+  action: LegalAction,
+) => RunnerRemoteTrashAccessContext {
+  return (input, action) =>
+    buildRunnerRemoteTrashAccessContext(
+      input,
+      action,
+      dependencies.runnerCreditReserveTargetForInput(input),
+    );
+}

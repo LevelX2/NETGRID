@@ -654,7 +654,7 @@ import {
   remoteTrashRoleForVisibleCard,
   type RemoteTrashRole,
 } from "./simulation/remote-trash-role";
-import { buildRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-access-context";
+import { createRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-access-context";
 import { chooseRandomLegalDecision } from "./simulation/random-legal-decision";
 import {
   runnerPostRunReserveTargetForRemoteInput as runnerPostRunReserveTargetForRemoteInputWithDeps,
@@ -1181,6 +1181,10 @@ const AI_HINTS = createAiHintsByCard();
 
 const sourceDefinitionIdForSimulationAction =
   createSourceDefinitionIdForSimulationAction(findVisibleCard);
+
+const runnerRemoteTrashAccessContext = createRunnerRemoteTrashAccessContext({
+  runnerCreditReserveTargetForInput,
+});
 
 const {
   runnerDrawKindForSimulationAction,
@@ -17636,15 +17640,4 @@ function runnerCoverageRepairDiagnostic(
         : undefined,
     rolesForCardId,
   });
-}
-
-function runnerRemoteTrashAccessContext(
-  input: AiDecisionInput,
-  action: LegalAction,
-) {
-  return buildRunnerRemoteTrashAccessContext(
-    input,
-    action,
-    runnerCreditReserveTargetForInput(input),
-  );
 }
