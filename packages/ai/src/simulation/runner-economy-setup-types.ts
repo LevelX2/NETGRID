@@ -17,6 +17,16 @@ export type RunnerEconomySetupActionClass = {
   delayedPenaltyEconomy: boolean;
 };
 
+export type RunnerEconomySubcounts = Partial<{
+  runnerLegalBurstEconomyActions: number;
+  runnerLegalActionEconomyActions: number;
+  runnerLegalFinitePoolEconomyActions: number;
+  runnerLegalLoanDebtEconomyActions: number;
+  runnerLegalRecurringEconomyActions: number;
+  runnerLegalResourceEconomyActions: number;
+  runnerLegalHardwareEconomyActions: number;
+}>;
+
 export type RunnerEconomySkipReason =
   | "pressure"
   | "remote_contest"
@@ -52,4 +62,63 @@ export function runnerEconomySkipReasonForDiagnostics(context: {
   if (context.runAction) return "run";
   if (context.action.type === "end_turn") return "end_turn";
   return "unknown_higher_priority";
+}
+
+export function runnerEconomySubcounts(
+  classifications: RunnerEconomySetupActionClass[],
+): RunnerEconomySubcounts {
+  const count = (
+    selector: (classification: RunnerEconomySetupActionClass) => boolean,
+  ) => classifications.filter(selector).length;
+  return {
+    ...(count((classification) => classification.burstEconomy) > 0
+      ? {
+          runnerLegalBurstEconomyActions: count(
+            (classification) => classification.burstEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.actionEconomy) > 0
+      ? {
+          runnerLegalActionEconomyActions: count(
+            (classification) => classification.actionEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.finitePoolEconomy) > 0
+      ? {
+          runnerLegalFinitePoolEconomyActions: count(
+            (classification) => classification.finitePoolEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.loanDebtEconomy) > 0
+      ? {
+          runnerLegalLoanDebtEconomyActions: count(
+            (classification) => classification.loanDebtEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.recurringEconomy) > 0
+      ? {
+          runnerLegalRecurringEconomyActions: count(
+            (classification) => classification.recurringEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.resourceEconomy) > 0
+      ? {
+          runnerLegalResourceEconomyActions: count(
+            (classification) => classification.resourceEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.hardwareEconomy) > 0
+      ? {
+          runnerLegalHardwareEconomyActions: count(
+            (classification) => classification.hardwareEconomy,
+          ),
+        }
+      : {}),
+  };
 }

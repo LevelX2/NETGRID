@@ -551,6 +551,7 @@ import type {
 } from "./simulation/runner-pressure-metric-types";
 import {
   runnerEconomySkipReasonForDiagnostics,
+  runnerEconomySubcounts,
   type RunnerEconomySetupActionClass,
 } from "./simulation/runner-economy-setup-types";
 import {
@@ -16511,65 +16512,6 @@ function runnerEconomySetupDiagnosticsForSimulationAction(
       : {}),
     ...(classifications.length > 0
       ? { runnerEconomySetupEvidence: evidence }
-      : {}),
-  };
-}
-
-function runnerEconomySubcounts(
-  classifications: RunnerEconomySetupActionClass[],
-): Partial<AiSimulationSummary["actionSequence"][number]> {
-  const count = (
-    selector: (classification: RunnerEconomySetupActionClass) => boolean,
-  ) => classifications.filter(selector).length;
-  return {
-    ...(count((classification) => classification.burstEconomy) > 0
-      ? {
-          runnerLegalBurstEconomyActions: count(
-            (classification) => classification.burstEconomy,
-          ),
-        }
-      : {}),
-    ...(count((classification) => classification.actionEconomy) > 0
-      ? {
-          runnerLegalActionEconomyActions: count(
-            (classification) => classification.actionEconomy,
-          ),
-        }
-      : {}),
-    ...(count((classification) => classification.finitePoolEconomy) > 0
-      ? {
-          runnerLegalFinitePoolEconomyActions: count(
-            (classification) => classification.finitePoolEconomy,
-          ),
-        }
-      : {}),
-    ...(count((classification) => classification.loanDebtEconomy) > 0
-      ? {
-          runnerLegalLoanDebtEconomyActions: count(
-            (classification) => classification.loanDebtEconomy,
-          ),
-        }
-      : {}),
-    ...(count((classification) => classification.recurringEconomy) > 0
-      ? {
-          runnerLegalRecurringEconomyActions: count(
-            (classification) => classification.recurringEconomy,
-          ),
-        }
-      : {}),
-    ...(count((classification) => classification.resourceEconomy) > 0
-      ? {
-          runnerLegalResourceEconomyActions: count(
-            (classification) => classification.resourceEconomy,
-          ),
-        }
-      : {}),
-    ...(count((classification) => classification.hardwareEconomy) > 0
-      ? {
-          runnerLegalHardwareEconomyActions: count(
-            (classification) => classification.hardwareEconomy,
-          ),
-        }
       : {}),
   };
 }
