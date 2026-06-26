@@ -1291,7 +1291,6 @@ const {
   },
   install: {
     rolesForAction,
-    sourceCard: (input, action) => findVisibleCard(input, action.source),
     muPressureInstallScoreComponent: runnerMuPressureInstallScoreComponent,
     persistentInstallFitScoreComponent:
       runnerPersistentInstallFitScoreComponent,

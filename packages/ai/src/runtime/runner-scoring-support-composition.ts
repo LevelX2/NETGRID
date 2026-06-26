@@ -41,7 +41,7 @@ export type RunnerScoringSupportCompositionDependencies =
     > &
     Omit<
       RunnerScoreComponentsDependencies,
-      "recoveryCommitment" | "startRun" | "followup"
+      "recoveryCommitment" | "install" | "startRun" | "followup"
     > & {
       badPublicityRelevance: Omit<
         Parameters<typeof createRunnerBadPublicityRelevanceContext>[0],
@@ -56,6 +56,10 @@ export type RunnerScoringSupportCompositionDependencies =
         | "junkyardRecoveryScoreComponent"
         | "lowValueRecoveryRepeatScoreComponent"
         | "lateNoFundingCreditRepeatScoreComponent"
+      >;
+      install: Omit<
+        RunnerScoreComponentsDependencies["install"],
+        "sourceCard"
       >;
       startRun: Omit<
         RunnerScoreComponentsDependencies["startRun"],
@@ -193,7 +197,11 @@ export function createRunnerScoringSupportComposition(
       lateNoFundingCreditRepeatScoreComponent:
         runnerLateNoFundingCreditRepeatScoreComponent,
     },
-    install: dependencies.install,
+    install: {
+      ...dependencies.install,
+      sourceCard: (input, action) =>
+        dependencies.findVisibleCard(input, action.source),
+    },
     startRun: {
       ...dependencies.startRun,
       hqMemoryComponents: semanticRuntimeRunnerHqMemoryComponents,
