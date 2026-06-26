@@ -7,16 +7,22 @@ import {
   type SemanticRuntimeDebugContextDependencies,
 } from "./semantic-runtime-debug-context";
 import {
+  createSemanticRuntimeChoiceComposition,
+  type SemanticRuntimeChoiceCompositionDependencies,
+} from "./semantic-runtime-choice-composition";
+import {
   createSemanticRuntimeDecisionContext,
   type SemanticRuntimeDecisionContextDependencies,
 } from "./semantic-runtime-decision-context";
 
 export type SemanticRuntimeDecisionCompositionDependencies =
   PracticalMicroCandidatesContextDependencies &
-    SemanticRuntimeDebugContextDependencies &
+    SemanticRuntimeChoiceCompositionDependencies &
+    Omit<SemanticRuntimeDebugContextDependencies, "scoreBreakdown"> &
     Omit<
       SemanticRuntimeDecisionContextDependencies,
       | "practicalMicroRuntimeCandidates"
+      | "semanticRuntimeChoices"
       | "semanticRuntimeCoverageSelectionDebug"
       | "semanticRuntimeDecisionDebug"
     >;
@@ -42,15 +48,20 @@ export function createSemanticRuntimeDecisionComposition(
     });
 
   const {
+    semanticRuntimeScoreBreakdown,
+    semanticRuntimeChoices,
+  } = createSemanticRuntimeChoiceComposition(dependencies);
+
+  const {
     semanticRuntimeDecisionDebug,
     semanticRuntimeCoverageSelectionDebug,
   } = createSemanticRuntimeDebugContext({
-    scoreBreakdown: dependencies.scoreBreakdown,
+    scoreBreakdown: semanticRuntimeScoreBreakdown,
     visibleSourceCard: dependencies.visibleSourceCard,
   });
 
   return createSemanticRuntimeDecisionContext({
-    semanticRuntimeChoices: dependencies.semanticRuntimeChoices,
+    semanticRuntimeChoices,
     semanticRuntimeChoiceIsReactive:
       dependencies.semanticRuntimeChoiceIsReactive,
     buildActionSemanticCandidates: dependencies.buildActionSemanticCandidates,

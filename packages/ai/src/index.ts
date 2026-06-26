@@ -164,7 +164,6 @@ import { createSemanticRuntimeCorpScoringEvidenceComposition } from "./runtime/s
 import { createSemanticRuntimeCorpBoardScoreComposition } from "./runtime/semantic-runtime-corp-board-score-composition";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
 import { semanticRuntimeExplanation } from "./runtime/semantic-runtime-explanation";
-import { createSemanticRuntimeChoiceComposition } from "./runtime/semantic-runtime-choice-composition";
 import { stringRecordValue } from "./runtime/record-value";
 import {
   runnerRunActionSpendingCapAssessment,
@@ -1302,49 +1301,6 @@ const {
   isRemoteServerTarget,
   knownIcePathReason: semanticRuntimeKnownIcePathReason,
 });
-const {
-  semanticRuntimeScoreBreakdown,
-  semanticRuntimeChoices,
-} = createSemanticRuntimeChoiceComposition({
-  runnerComponents: (
-    componentInput,
-    componentAction,
-    componentScopeId,
-    actionSemanticCandidate,
-  ) =>
-    semanticRuntimeRunnerScoreComponents(
-      componentInput,
-      componentAction,
-      componentScopeId,
-      actionSemanticCandidate,
-    ),
-  corpComponents: (componentInput, componentAction, componentScopeId) =>
-    semanticRuntimeCorpScoreComponents(
-      componentInput,
-      componentAction,
-      componentScopeId,
-    ),
-  serverId: semanticRuntimeServerId,
-  programInstallTrashAssessmentForAction:
-    runnerProgramInstallTrashAssessmentForAction,
-  programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
-  muPressureActionEvidence: runnerMuPressureActionEvidence,
-  bankInvestmentCommitmentEvidence: runnerBankInvestmentCommitmentEvidence,
-  noRunEconomyCommitmentEvidence: runnerNoRunEconomyCommitmentEvidence,
-  selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
-  blinkRiskEvidenceForAction: runnerBlinkRiskEvidenceForAction,
-  loanLiabilityAssessment: runnerLoanLiabilityAssessment,
-  persistentInstallEvidenceForAction: runnerPersistentInstallEvidenceForAction,
-  remoteTrashAccessContext: runnerRemoteTrashAccessContext,
-  corpEvidence: semanticRuntimeCorpEvidence,
-  isRemoteServerTarget,
-  runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
-  actionExclusion: semanticRuntimeActionExclusion,
-  actionCreditCost,
-  explanation: semanticRuntimeExplanation,
-  compareAction,
-});
-
 const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionComposition({
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
   isVisibleIcebreakerProgram,
@@ -1364,8 +1320,42 @@ const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionComposition
     evaluateRunnerRunTargets({ input: runtimeInput }),
   runnerRunTargetPlausibleForMultiRun,
   runnerRunTargetHighPayoff,
-  scoreBreakdown: semanticRuntimeScoreBreakdown,
-  semanticRuntimeChoices,
+  runnerComponents: (
+    componentInput,
+    componentAction,
+    componentScopeId,
+    actionSemanticCandidate,
+  ) =>
+    semanticRuntimeRunnerScoreComponents(
+      componentInput,
+      componentAction,
+      componentScopeId,
+      actionSemanticCandidate,
+    ),
+  corpComponents: (componentInput, componentAction, componentScopeId) =>
+    semanticRuntimeCorpScoreComponents(
+      componentInput,
+      componentAction,
+      componentScopeId,
+    ),
+  programInstallTrashAssessmentForAction:
+    runnerProgramInstallTrashAssessmentForAction,
+  programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
+  muPressureActionEvidence: runnerMuPressureActionEvidence,
+  bankInvestmentCommitmentEvidence: runnerBankInvestmentCommitmentEvidence,
+  noRunEconomyCommitmentEvidence: runnerNoRunEconomyCommitmentEvidence,
+  selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
+  blinkRiskEvidenceForAction: runnerBlinkRiskEvidenceForAction,
+  loanLiabilityAssessment: runnerLoanLiabilityAssessment,
+  persistentInstallEvidenceForAction: runnerPersistentInstallEvidenceForAction,
+  remoteTrashAccessContext: runnerRemoteTrashAccessContext,
+  corpEvidence: semanticRuntimeCorpEvidence,
+  isRemoteServerTarget,
+  runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
+  actionExclusion: semanticRuntimeActionExclusion,
+  actionCreditCost,
+  explanation: semanticRuntimeExplanation,
+  compareAction,
   semanticRuntimeChoiceIsReactive,
   buildActionSemanticCandidates,
   getTacticalPlanMemorySnapshot,
