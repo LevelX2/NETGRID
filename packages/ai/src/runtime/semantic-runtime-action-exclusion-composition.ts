@@ -26,10 +26,25 @@ import {
 } from "./semantic-runtime-action-exclusion-context";
 import type { SemanticRuntimeActionExclusionDependencies } from "./semantic-runtime-action-exclusion";
 
+type ActionExclusionCardDefinition = {
+  title?: string;
+  type?: string;
+  subtypes?: string[];
+  rulesText?: string;
+  mechanics?: string[];
+};
+
+type ActionExclusionHint = {
+  effects?: readonly unknown[];
+};
+
 export type SemanticRuntimeActionExclusionCompositionDependencies =
-  Omit<RunnerSourceCardAnswerRoleDependencies, "sourceDefinitionId"> &
+  Omit<
+    RunnerSourceCardAnswerRoleDependencies,
+    "sourceDefinitionId" | "sourceDefinition"
+  > &
     RunnerSimpleExclusionsContextDependencies &
-    RunnerSelfDamageContextDependencies &
+    Omit<RunnerSelfDamageContextDependencies, "hintEffectsForCard"> &
     Omit<RunnerBlinkBreakExclusionDependencies, "shouldAvoidRun"> &
     Omit<RunnerEncounterActionExclusionDependencies, "blinkBreakExclusion"> &
     Omit<
@@ -43,6 +58,15 @@ export type SemanticRuntimeActionExclusionCompositionDependencies =
       shouldAvoidBlinkRiskAssessment: (
         assessment: BlinkRiskAssessment | undefined,
       ) => boolean;
+      runtimeDefinition: (
+        definitionId: string,
+      ) => ActionExclusionCardDefinition | undefined;
+      demoDefinition: (
+        definitionId: string,
+      ) => ActionExclusionCardDefinition | undefined;
+      hintForDefinitionId: (
+        definitionId: string,
+      ) => ActionExclusionHint | undefined;
     };
 
 export function createSemanticRuntimeActionExclusionComposition(
@@ -56,7 +80,11 @@ export function createSemanticRuntimeActionExclusionComposition(
     visibleSourceCard: dependencies.visibleSourceCard,
     sourceDefinitionId: dependencies.sourceDefinitionIdForAction,
     rolesForCardId: dependencies.rolesForCardId,
-    sourceDefinition: dependencies.sourceDefinition,
+    sourceDefinition: (definitionId) =>
+      definitionId
+        ? (dependencies.runtimeDefinition(definitionId) ??
+          dependencies.demoDefinition(definitionId))
+        : undefined,
   });
 
   const {
@@ -92,7 +120,8 @@ export function createSemanticRuntimeActionExclusionComposition(
     runnerSelfDamageSurvivalExclusion,
   } = createRunnerSelfDamageContext({
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
-    hintEffectsForCard: dependencies.hintEffectsForCard,
+    hintEffectsForCard: (definitionId) =>
+      dependencies.hintForDefinitionId(definitionId)?.effects,
     fakedHitCardId: dependencies.fakedHitCardId,
     badPublicityLossThreshold: dependencies.badPublicityLossThreshold,
     scoreRunnerActions: dependencies.scoreRunnerActions,

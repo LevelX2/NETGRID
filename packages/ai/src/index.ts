@@ -1083,10 +1083,9 @@ const {
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
   sourceDefinitionIdForAction,
   rolesForCardId,
-  sourceDefinition: (definitionId) =>
-    definitionId
-      ? (RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId])
-      : undefined,
+  runtimeDefinition: (definitionId) => RUNTIME_CARDS[definitionId],
+  demoDefinition: (definitionId) => DEMO_CARDS_BY_ID[definitionId],
+  hintForDefinitionId: (definitionId) => AI_HINTS.get(definitionId),
   evaluateKnownCentralPayoff: evaluateKnownCentralAccessPayoff,
   definitionType: definitionTypeForMetrics,
   riskAssessment: blinkRiskAssessmentForEncounterBreak,
@@ -1096,7 +1095,6 @@ const {
   planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
   corpAdvancementCounterPlacementAssessment:
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-  hintEffectsForCard: (definitionId: string) => AI_HINTS.get(definitionId)?.effects,
   fakedHitCardId: FAKED_HIT_CARD_ID,
   badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
   scoreRunnerActions: (input: AiDecisionInput) =>
