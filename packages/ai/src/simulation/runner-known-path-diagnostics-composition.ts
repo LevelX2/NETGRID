@@ -1,5 +1,9 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 
+import {
+  createRunnerEncounterCompositionContext,
+  type RunnerEncounterCompositionContextDependencies,
+} from "../runtime/runner-encounter-composition-context";
 import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { createRunnerRemoteTrashAccessContext } from "./remote-trash-access-context";
 import {
@@ -13,8 +17,16 @@ import {
 } from "./runner-setup-coverage-composition";
 
 export type RunnerKnownPathDiagnosticsCompositionDependencies =
-  RunnerSetupCoverageCompositionDependencies & {
-  runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
+  Omit<RunnerSetupCoverageCompositionDependencies, "findVisibleCard"> & {
+    findVisibleCard: (
+      input: AiDecisionInput,
+      instanceId: string,
+    ) => VisibleCard | undefined;
+  } &
+    Omit<
+      RunnerEncounterCompositionContextDependencies,
+      "rolesForCardId" | "assessKnownRezzedIcePath" | "findVisibleCard"
+    > & {
   runnerKnownPathAssessmentIsKnownNoAccess: (
     assessment: ReturnType<typeof assessKnownRezzedIcePath>,
   ) => boolean;
@@ -43,6 +55,29 @@ export function createRunnerKnownPathDiagnosticsComposition(
   dependencies: RunnerKnownPathDiagnosticsCompositionDependencies,
 ) {
   const {
+    runnerCreditReserveTargetForInput,
+    encounterBreakReserveContext,
+    breakAccessPathAssessment,
+    pumpViabilityAssessment,
+  } = createRunnerEncounterCompositionContext({
+    rolesForCardId: dependencies.rolesForCardId,
+    actionCreditCost: dependencies.actionCreditCost,
+    findVisibleCard: dependencies.findVisibleCard,
+    breakSubroutineIndexesForAction:
+      dependencies.breakSubroutineIndexesForAction,
+    currentEncounteredIceCard: dependencies.currentEncounteredIceCard,
+    assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
+    knownIcePathReason: dependencies.knownIcePathReason,
+    isRemoteServerTarget: dependencies.isRemoteServerTarget,
+    definitionType: dependencies.definitionType,
+    remoteRootTrashCost: dependencies.remoteRootTrashCost,
+    encounterRunRemainderEffectAssessment:
+      dependencies.encounterRunRemainderEffectAssessment,
+    encounterHasImmediateUnbrokenThreat:
+      dependencies.encounterHasImmediateUnbrokenThreat,
+  });
+
+  const {
     runnerRunKnownPathCost,
     runnerHasKnownUnaffordableLegalRun,
     runnerVisibleMissingBreakerCoverage,
@@ -58,8 +93,7 @@ export function createRunnerKnownPathDiagnosticsComposition(
   });
 
   const runnerRemoteTrashAccessContext = createRunnerRemoteTrashAccessContext({
-    runnerCreditReserveTargetForInput:
-      dependencies.runnerCreditReserveTargetForInput,
+    runnerCreditReserveTargetForInput,
   });
 
   const runnerKnownNoAccessLegalRunTargets =
@@ -96,6 +130,10 @@ export function createRunnerKnownPathDiagnosticsComposition(
     });
 
   return {
+    runnerCreditReserveTargetForInput,
+    encounterBreakReserveContext,
+    breakAccessPathAssessment,
+    pumpViabilityAssessment,
     runnerRunKnownPathCost,
     runnerHasKnownUnaffordableLegalRun,
     runnerVisibleMissingBreakerCoverage,

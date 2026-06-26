@@ -13,7 +13,7 @@ import {
   type RunnerPumpViabilityContextDependencies,
 } from "./runner-pump-viability-context";
 
-type RunnerEncounterCompositionContextDependencies = Omit<
+export type RunnerEncounterCompositionContextDependencies = Omit<
   RunnerEncounterBreakContextDependencies,
   "runnerCreditReserveTarget"
 > &

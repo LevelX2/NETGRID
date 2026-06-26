@@ -75,7 +75,6 @@ import {
   visibleCitySurveillanceSourceCount,
 } from "./runtime/ai-feature-server";
 import { createAiFacadeFoundationContext } from "./runtime/ai-facade-foundation-context";
-import { createRunnerEncounterCompositionContext } from "./runtime/runner-encounter-composition-context";
 import { createRunnerKnownPathDiagnosticsComposition } from "./simulation/runner-known-path-diagnostics-composition";
 import { createRunnerCentralPressureDiagnosticsComposition } from "./simulation/runner-central-pressure-diagnostics-composition";
 import { createRunnerInstallClassificationComposition } from "./simulation/runner-install-classification-composition";
@@ -795,22 +794,6 @@ const {
   encounterBreakReserveContext,
   breakAccessPathAssessment,
   pumpViabilityAssessment,
-} = createRunnerEncounterCompositionContext({
-  rolesForCardId,
-  actionCreditCost,
-  findVisibleCard,
-  breakSubroutineIndexesForAction,
-  currentEncounteredIceCard,
-  assessKnownRezzedIcePath,
-  knownIcePathReason: semanticRuntimeKnownIcePathReason,
-  isRemoteServerTarget,
-  definitionType: definitionTypeForMetrics,
-  remoteRootTrashCost: remoteRootTrashCostForMetrics,
-  encounterRunRemainderEffectAssessment,
-  encounterHasImmediateUnbrokenThreat,
-});
-
-const {
   runnerRunKnownPathCost,
   runnerHasKnownUnaffordableLegalRun,
   runnerVisibleMissingBreakerCoverage,
@@ -821,12 +804,20 @@ const {
   runnerRemoteTrashAccessContext,
   runnerKnownPathDiagnosticsForAction,
 } = createRunnerKnownPathDiagnosticsComposition({
-  runnerCreditReserveTargetForInput,
   assessKnownRezzedIcePath,
   runnerKnownPathAssessmentIsKnownNoAccess,
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
   findVisibleCard,
+  actionCreditCost,
+  breakSubroutineIndexesForAction,
+  currentEncounteredIceCard,
+  knownIcePathReason: semanticRuntimeKnownIcePathReason,
+  isRemoteServerTarget,
+  definitionType: definitionTypeForMetrics,
+  remoteRootTrashCost: remoteRootTrashCostForMetrics,
+  encounterRunRemainderEffectAssessment,
+  encounterHasImmediateUnbrokenThreat,
   rolesForAction,
   rolesForCardId,
   remoteServerHasScoreThreat,
