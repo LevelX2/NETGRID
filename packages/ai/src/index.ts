@@ -1118,13 +1118,7 @@ const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionComposition
   isVisibleIcebreakerProgram,
   visibleBreakerCardCanAddressIce,
   serverId: semanticRuntimeServerId,
-  knownPathAssessment: (server, runtimeInput) =>
-    assessKnownRezzedIcePath(
-      server.ice,
-      runtimeInput.playerView.own.rig ?? [],
-      runtimeInput.playerView.own.credits,
-      server.root,
-    ),
+  assessKnownRezzedIcePath,
   rolesForAction,
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
   actionTypeIsReactive: semanticRuntimeActionTypeIsReactive,

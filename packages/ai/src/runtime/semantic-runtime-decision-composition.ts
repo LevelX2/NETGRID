@@ -1,3 +1,4 @@
+import type { VisibleCard } from "@netgrid/shared";
 import {
   createPracticalMicroCandidatesContext,
   type PracticalMicroCandidatesContextDependencies,
@@ -15,8 +16,25 @@ import {
   type SemanticRuntimeDecisionContextDependencies,
 } from "./semantic-runtime-decision-context";
 
+type KnownPathAssessment = ReturnType<
+  PracticalMicroCandidatesContextDependencies["knownPathAssessment"]
+>;
+
+type SemanticRuntimeDecisionKnownPathDependencies = {
+  assessKnownRezzedIcePath: (
+    ice: VisibleCard[],
+    rig: VisibleCard[],
+    credits: number,
+    root: VisibleCard[],
+  ) => KnownPathAssessment;
+};
+
 export type SemanticRuntimeDecisionCompositionDependencies =
-  PracticalMicroCandidatesContextDependencies &
+  Omit<
+    PracticalMicroCandidatesContextDependencies,
+    "knownPathAssessment"
+  > &
+    SemanticRuntimeDecisionKnownPathDependencies &
     SemanticRuntimeChoiceCompositionDependencies &
     Omit<SemanticRuntimeDebugContextDependencies, "scoreBreakdown"> &
     Omit<
@@ -37,7 +55,13 @@ export function createSemanticRuntimeDecisionComposition(
       visibleBreakerCardCanAddressIce:
         dependencies.visibleBreakerCardCanAddressIce,
       serverId: dependencies.serverId,
-      knownPathAssessment: dependencies.knownPathAssessment,
+      knownPathAssessment: (server, runtimeInput) =>
+        dependencies.assessKnownRezzedIcePath(
+          server.ice,
+          runtimeInput.playerView.own.rig ?? [],
+          runtimeInput.playerView.own.credits,
+          server.root,
+        ),
       rolesForAction: dependencies.rolesForAction,
       scoreTerminalWindow: dependencies.scoreTerminalWindow,
       actionTypeIsReactive: dependencies.actionTypeIsReactive,
