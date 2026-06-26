@@ -576,9 +576,8 @@ import {
   attributeHandSizeSkip,
   attributeMemorySkip,
   attributeSearchRecoverySkip,
+  attributeStarvedEconomySkip,
   attributeRunnerSetupSupportWindows,
-  incrementChosenFamily,
-  incrementCoverageTypes,
   RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS,
   runnerSetupChosenFamilyForEntry,
   type RunnerSetupAttributionMetricKey,
@@ -10071,7 +10070,13 @@ function summarizeRunnerSetupAttributionMetrics(
       const entry = sequence[index]!;
       attributeRunnerSetupSupportWindows(metrics, entry);
       if (entry.runnerEconomyFixGateEligibleStarvedSkip === true)
-        attributeStarvedEconomySkip(metrics, sequence, index, summary);
+        attributeStarvedEconomySkip(
+          metrics,
+          sequence,
+          index,
+          summary,
+          isMeaningfulBoardProgress,
+        );
       if (entry.runnerSetupFixGateEligibleSearchRecoverySkip === true)
         attributeSearchRecoverySkip(
           metrics,
@@ -10179,99 +10184,6 @@ function summarizeRunnerSetupAttributionMetrics(
     metrics.runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis = 1;
   else metrics[strongest[0]!.key] = 1;
   return metrics;
-}
-
-function attributeStarvedEconomySkip(
-  metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  sequence: AiSimulationActionSequenceEntry[],
-  index: number,
-  summary: AiSimulationSummary,
-): void {
-  const entry = sequence[index]!;
-  metrics.runnerStarvedEconomySkipWindows += 1;
-  metrics.runnerSetupAttributionByKindStarvedEconomy += 1;
-  incrementChosenFamily(metrics, "runnerStarvedEconomySkip", entry);
-  const next = nextEntriesForSide(sequence, index, "runner", 5);
-  if (
-    entry.runStartedAgainstKnownUnaffordablePath === true ||
-    next.some((candidate) => candidate.runStartedAgainstKnownUnaffordablePath)
-  )
-    metrics.runnerStarvedEconomySkipThenUnaffordableRun += 1;
-  if (
-    entry.lowValueUnaffordableRun === true ||
-    entry.runEndedAfterFirstIceDueToCredits === true ||
-    next.some(
-      (candidate) =>
-        candidate.lowValueUnaffordableRun === true ||
-        candidate.runEndedAfterFirstIceDueToCredits === true,
-    )
-  )
-    metrics.runnerStarvedEconomySkipThenFailedRun += 1;
-  if (!hasMeaningfulProgressWithin(sequence, index, 5, isMeaningfulBoardProgress))
-    metrics.runnerStarvedEconomySkipThenNoProgress += 1;
-  const economyNextDecision = next[0]?.runnerEconomyTaken === true;
-  if (economyNextDecision)
-    metrics.runnerStarvedEconomySkipThenEconomyNextDecision += 1;
-  const reserveRecovered = next.some(
-    (candidate) =>
-      typeof candidate.runnerCreditsAfter === "number" &&
-      typeof candidate.runnerReserveTarget === "number" &&
-      candidate.runnerCreditsAfter >= candidate.runnerReserveTarget,
-  );
-  if (reserveRecovered)
-    metrics.runnerStarvedEconomySkipThenReserveRecovered += 1;
-  if (hasMeaningfulProgressWithin(sequence, index, 5, isMeaningfulBoardProgress))
-    metrics.runnerStarvedEconomySkipThenProgress += 1;
-  if (summary.winner === "action_limit_reached")
-    metrics.runnerStarvedEconomySkipThenActionLimit += 1;
-
-  const blocked =
-    entry.runnerEconomySkippedForPressure === true ||
-    entry.runnerEconomySkippedForRemoteContest === true ||
-    entry.runnerEconomySkippedForInstallBreaker === true ||
-    entry.runnerEconomySkippedForSetup === true ||
-    entry.runnerEconomySkippedForTrash === true;
-  if (entry.runnerEconomySkippedForPressure === true)
-    metrics.runnerStarvedEconomySkipPlausiblePressure += 1;
-  if (entry.runnerEconomySkippedForRemoteContest === true)
-    metrics.runnerStarvedEconomySkipPlausibleRemoteContest += 1;
-  if (
-    entry.runnerEconomySkippedForInstallBreaker === true ||
-    entry.runnerEconomySkippedForSetup === true
-  )
-    metrics.runnerStarvedEconomySkipPlausibleCriticalSetup += 1;
-  if (entry.runnerEconomySkippedForTrash === true)
-    metrics.runnerStarvedEconomySkipPlausibleTrash += 1;
-  const suspiciousLowValue =
-    entry.lowValueUnaffordableRun === true ||
-    entry.runStartedAgainstKnownUnaffordablePath === true;
-  if (suspiciousLowValue)
-    metrics.runnerStarvedEconomySkipSuspiciousLowValueRun += 1;
-  const suspiciousDraw =
-    entry.runnerEconomySkippedForDraw === true &&
-    !economyNextDecision &&
-    !reserveRecovered;
-  const suspiciousEndTurn =
-    entry.runnerEconomySkippedForEndTurn === true &&
-    !economyNextDecision &&
-    !reserveRecovered;
-  const suspiciousUnknown =
-    entry.runnerEconomySkippedForUnknownHigherPriority === true &&
-    !economyNextDecision &&
-    !reserveRecovered;
-  if (suspiciousDraw) metrics.runnerStarvedEconomySkipSuspiciousDraw += 1;
-  if (suspiciousEndTurn) metrics.runnerStarvedEconomySkipSuspiciousEndTurn += 1;
-  if (suspiciousUnknown) metrics.runnerStarvedEconomySkipSuspiciousUnknown += 1;
-  const suspicious =
-    suspiciousLowValue ||
-    suspiciousDraw ||
-    suspiciousEndTurn ||
-    suspiciousUnknown ||
-    (!blocked &&
-      !hasMeaningfulProgressWithin(sequence, index, 5, isMeaningfulBoardProgress));
-  metrics.runnerEconomyFixGateAttributionEligible += 1;
-  if (blocked) metrics.runnerEconomyFixGateAttributionBlocked += 1;
-  if (suspicious) metrics.runnerEconomyFixGateAttributionSuspicious += 1;
 }
 
 function summarizeBreakerOntologyMetrics(
