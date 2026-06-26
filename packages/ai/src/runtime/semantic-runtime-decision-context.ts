@@ -5,6 +5,7 @@ import type { SemanticRuntimeDependencies } from "./semantic-runtime";
 import { memoizeLegacyDecision } from "./legacy-decision-provider";
 import {
   applyPracticalMicroRuntimeComparator,
+  practicalMicroRuntimeMode,
   type PracticalMicroCandidate,
 } from "./practical-micro-runtime";
 import { applyPracticalTacticOverlay } from "./practical-tactic-overlay";
@@ -40,6 +41,9 @@ export function createSemanticRuntimeDecisionContext(
       options,
       dependencies,
     );
+    if (practicalMicroRuntimeMode(options) === "off") {
+      return applyPracticalTacticOverlay(input, runtimeDecision, options);
+    }
     const legacyDecision = lazyLegacyDecision();
     const practicalMicroDecision = applyPracticalMicroRuntimeComparator(
       input,

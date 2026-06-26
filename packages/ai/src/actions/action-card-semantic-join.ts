@@ -92,22 +92,26 @@ export function applyCardSemanticJoin(
     costProfile,
     cardContextSignals,
     actionTacticSignals,
-    strategySupport:
-      actionAbility !== undefined
-        ? [...candidate.strategySupport, ...(actionAbility.strategySupport ?? [])]
-        : candidate.strategySupport,
-    conditions:
-      actionAbility !== undefined
-        ? [...candidate.conditions, ...(actionAbility.conditions ?? [])]
-        : candidate.conditions,
-    risks:
-      actionAbility !== undefined
-        ? [...candidate.risks, ...(actionAbility.risks ?? [])]
-        : candidate.risks,
-    constraints:
-      actionAbility !== undefined
-        ? [...candidate.constraints, ...(actionAbility.constraints ?? [])]
-        : candidate.constraints,
+    strategySupport: [
+      ...candidate.strategySupport,
+      ...(profile.strategySupport ?? []),
+      ...(actionAbility?.strategySupport ?? []),
+    ],
+    conditions: [
+      ...candidate.conditions,
+      ...(profile.conditions ?? []),
+      ...(actionAbility?.conditions ?? []),
+    ],
+    risks: [
+      ...candidate.risks,
+      ...(profile.risks ?? []),
+      ...(actionAbility?.risks ?? []),
+    ],
+    constraints: [
+      ...candidate.constraints,
+      ...(profile.constraints ?? []),
+      ...(actionAbility?.constraints ?? []),
+    ],
     ...(joinedTargetContext !== undefined
       ? { targetContext: joinedTargetContext }
       : {}),

@@ -2845,7 +2845,7 @@ export function simulateAiGame(
             `runner-ai-v0.9-${config.runnerDifficulty ?? "normal"}`)
           : (config.corpProfileId ??
             `corp-ai-v0.9-${config.corpDifficulty ?? "normal"}`),
-      ...(controllerModeForSide(side, config) === "current_candidate"
+      ...(simulationModeUsesSemanticRuntime(controllerModeForSide(side, config))
         ? { ownDeckSnapshot: deckSnapshots[side] }
         : {}),
     });
@@ -3730,6 +3730,12 @@ function chooseDecisionForSimulation(
     case "current_candidate":
       return chooseAiAction(input, config.aiDecisionRuntimeOptions);
   }
+}
+
+function simulationModeUsesSemanticRuntime(
+  mode: SimulationControllerMode,
+): boolean {
+  return mode === "belief_ai_v1_4_2" || mode === "current_candidate";
 }
 
 // Legacy baseline decision assembly for fallback and reference decisions.

@@ -1,6 +1,7 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 
 import { rolesMatch } from "./role-match";
+import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 
 export function discardPlanFitBonus(
   input: AiDecisionInput,
@@ -8,16 +9,7 @@ export function discardPlanFitBonus(
   type: string | undefined,
   plan: string | undefined,
 ): number {
-  const doctrineWeight = plan
-    ? Math.max(
-        0,
-        Math.min(
-          15,
-          Math.round((input.ownDeckDoctrine?.planWeights[plan] ?? 0) / 2),
-        ),
-      )
-    : 0;
-  let bonus = doctrineWeight;
+  let bonus = 0;
 
   if (input.side === "runner") {
     if (
@@ -83,17 +75,20 @@ export function discardPlanFitBonus(
   return Math.max(0, Math.min(55, bonus));
 }
 
-export function discardDoctrineFitBonus(
+export function discardStrategicFitBonus(
   input: AiDecisionInput,
   roles: readonly string[],
   type: string | undefined,
   cost: number,
 ): number {
-  const tags = input.ownDeckDoctrine?.archetypeTags ?? [];
+  const strategies = discardStrategyIds(input);
   let bonus = 0;
   if (input.side === "runner") {
     if (
-      tags.includes("rig_builder") &&
+      strategies.some(
+        (strategy) =>
+          strategy === "runner.rig_first" || strategy === "runner.search.breaker",
+      ) &&
       rolesMatch(roles, [
         "breaker_",
         "memory",
@@ -104,7 +99,7 @@ export function discardDoctrineFitBonus(
     )
       bonus += 30;
     if (
-      tags.includes("hq_pressure") &&
+      strategies.includes("runner.hq_pressure") &&
       rolesMatch(roles, [
         "pressure_hq",
         "run_pressure",
@@ -115,7 +110,7 @@ export function discardDoctrineFitBonus(
     )
       bonus += 26;
     if (
-      tags.includes("rnd_pressure") &&
+      strategies.includes("runner.rnd_pressure") &&
       rolesMatch(roles, [
         "pressure_rnd",
         "run_pressure",
@@ -126,26 +121,31 @@ export function discardDoctrineFitBonus(
     )
       bonus += 26;
     if (
-      tags.includes("economy_dense") &&
+      strategies.includes("runner.economy_first") &&
       rolesMatch(roles, ["economy", "tempo"])
     )
       bonus += 24;
   } else {
     if (
-      tags.includes("glacier") &&
+      strategies.includes("corp.ice_tax_glacier") &&
       (type === "ice" ||
         rolesMatch(roles, ["ice", "etr_ice", "taxing_ice", "remote", "economy"]))
     )
       bonus += 30;
     if (
-      tags.includes("rush") &&
+      strategies.some(
+        (strategy) =>
+          strategy === "corp.rush_score" ||
+          strategy === "corp.remote_scoring" ||
+          strategy === "corp.fast_advance",
+      ) &&
       (type === "agenda" ||
         cost <= 3 ||
         rolesMatch(roles, ["score", "ice", "tempo", "advance"]))
     )
       bonus += 24;
     if (
-      tags.includes("asset_remote") &&
+      strategies.includes("corp.asset_economy") &&
       (type === "asset" ||
         type === "upgrade" ||
         rolesMatch(roles, ["asset", "upgrade", "remote", "economy"]))
@@ -153,4 +153,19 @@ export function discardDoctrineFitBonus(
       bonus += 26;
   }
   return Math.max(0, Math.min(35, bonus));
+}
+
+function discardStrategyIds(input: AiDecisionInput): string[] {
+  const semanticInput = input as AiDecisionInputWithDeckCapabilities;
+  const profile = semanticInput.ownDeckStrategyProfile;
+  const intent = semanticInput.ownStrategicIntentState;
+  const committedStrategy =
+    intent && intent.primaryStrategy.family !== "neutral"
+      ? [intent.primaryStrategy.strategyId]
+      : [];
+  return [
+    ...committedStrategy,
+    ...(profile?.primaryStrategies ?? []),
+    ...(profile?.secondaryStrategies ?? []),
+  ].filter((strategyId, index, all) => all.indexOf(strategyId) === index);
 }

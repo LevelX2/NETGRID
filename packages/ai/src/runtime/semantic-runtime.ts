@@ -6,7 +6,12 @@ import type {
   CardInstanceId,
   LegalAction,
 } from "@netgrid/shared";
-import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION } from "@netgrid/shared";
+import type {
+  ActionSemanticCandidate,
+  BuildActionSemanticCandidatesParams,
+} from "../action-semantic-candidate";
+import { buildActionCardSemanticProfilesByDefinitionId } from "../actions/action-card-semantic-profiles";
 import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
 import type {
@@ -52,14 +57,9 @@ export type SemanticRuntimeDependencies = {
     actionSemanticCandidates?: readonly ActionSemanticCandidate[],
   ) => SemanticRuntimeChoice[];
   semanticRuntimeChoiceIsReactive: (choice: SemanticRuntimeChoice) => boolean;
-  buildActionSemanticCandidates: (input: {
-    legalActions: readonly LegalAction[];
-    observerSide: AiDecisionInput["side"];
-    stateVersion: number;
-    visibleSourceDefinitionsByInstanceId?: Readonly<
-      Record<CardInstanceId, CardDefinitionId>
-    >;
-  }) => ActionSemanticCandidate[];
+  buildActionSemanticCandidates: (
+    input: BuildActionSemanticCandidatesParams,
+  ) => ActionSemanticCandidate[];
   getTacticalPlanMemorySnapshot: (
     input: AiDecisionInput,
   ) => TacticalPlanMemorySnapshot | undefined;
@@ -156,8 +156,6 @@ export type SemanticRuntimeDependencies = {
     input: AiDecisionInput,
     selected: SemanticRuntimeChoice,
     rankedChoices: SemanticRuntimeChoice[],
-    legacyDecision: AiDecision,
-    legacyActionType: LegalAction["type"] | undefined,
     planRuntime: TacticalPlanRuntimeResult,
   ) => AiDecisionDebug;
 };
@@ -187,6 +185,8 @@ export function chooseSemanticRuntimeAction(
     stateVersion: input.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId:
       visibleSourceDefinitionsByInstanceId(input),
+    cardSemanticProfilesByDefinitionId:
+      buildActionCardSemanticProfilesByDefinitionId(),
   });
   const choices = dependencies.semanticRuntimeChoices(
     input,
@@ -326,14 +326,12 @@ export function chooseSemanticRuntimeAction(
         )
       : bestChoice);
   if (!initialChoice) {
-    const legacyDecision = legacyDecisionProvider();
-    return {
-      ...legacyDecision,
-      evidence: [
-        ...(legacyDecision.evidence ?? []),
-        "semantic_runtime_no_non_excluded_legal_action",
-      ],
-    };
+    return semanticCoverageFallbackDecision(
+      input,
+      actionSemanticCandidates,
+      choices,
+      dependencies,
+    );
   }
   const effectivePlanRuntime = planMappingOverridden
     ? dependencies.tacticalPlanRuntimeAlignedToChoice(
@@ -385,10 +383,6 @@ export function chooseSemanticRuntimeAction(
       selectedChoice.action,
       effectivePlanRuntime,
     );
-  const legacyDecision = legacyDecisionProvider();
-  const legacyActionType = input.legalActions.find(
-    (action) => action.actionId === legacyDecision.actionId,
-  )?.type;
   const selectedChoices = dependencies.selectedChoicesForDecision(
     input,
     selectedChoice.action,
@@ -456,23 +450,158 @@ export function chooseSemanticRuntimeAction(
         ? ["strategic_intent_memory_preview_only:true"]
         : []),
       ...(pilotChoice ? pilotChoice.evidence : []),
-      `legacy_reference_reason:${legacyDecision.reasonCode}`,
-      ...(legacyActionType
-        ? [`legacy_reference_action_type:${legacyActionType}`]
-        : []),
     ]),
     decisionDebug: dependencies.semanticRuntimeDecisionDebug(
       input,
       selectedChoice,
       runOnlyActionAdjusted.rankedChoices,
-      legacyDecision,
-      legacyActionType,
       effectivePlanRuntime,
     ),
-    timeoutUsed: Boolean(legacyDecision.timeoutUsed),
+    timeoutUsed: false,
     profileId: input.profileId,
     difficulty: input.difficulty,
     reason: selectedReasonCode,
+  };
+}
+
+function semanticCoverageFallbackDecision(
+  input: AiDecisionInput,
+  actionSemanticCandidates: readonly ActionSemanticCandidate[],
+  choices: readonly SemanticRuntimeChoice[],
+  dependencies: SemanticRuntimeDependencies,
+): AiDecision {
+  const rankedFallbackActions = [...input.legalActions].sort(
+    (left, right) =>
+      fallbackPolicyRank(input, left) - fallbackPolicyRank(input, right) ||
+      left.actionId.localeCompare(right.actionId),
+  );
+  const action = rankedFallbackActions[0];
+  const policy = action ? fallbackPolicyForAction(input, action) : "none";
+  const evidence = dependencies.scrubEvidence([
+    "semantic_coverage_fallback:true",
+    "fallback_reason:no_semantic_candidate",
+    `fallback_action_policy:${policy}`,
+    `fallback_candidate_count:${actionSemanticCandidates.length}`,
+    `fallback_choice_count:${choices.length}`,
+    ...(action
+      ? [`fallback_action_type:${action.type}`, `fallback_action_id:${action.actionId}`]
+      : ["fallback_action:none"]),
+  ]);
+  if (!action) {
+    return {
+      actionId: "",
+      reasonCode: `${input.side}.semantic.coverage_fallback.no_legal_action`,
+      explanation:
+        "Semantic Runtime fand keine auswaehlbare Aktion und die Engine lieferte keine LegalActions.",
+      consideredActionIds: [],
+      fallbackUsed: true,
+      evidence,
+      decisionDebug: semanticCoverageFallbackDebug(input, undefined, evidence),
+      timeoutUsed: false,
+      profileId: input.profileId,
+      difficulty: input.difficulty,
+      reason: `${input.side}.semantic.coverage_fallback.no_legal_action`,
+    };
+  }
+  const selectedChoices = dependencies.selectedChoicesForDecision(input, action);
+  const reasonCode = `${input.side}.semantic.coverage_fallback.${policy}`;
+  return {
+    actionId: action.actionId,
+    ...(selectedChoices ? { selectedChoices } : {}),
+    reasonCode,
+    explanation:
+      "Semantic Runtime nutzte einen deterministischen Safety-Fallback auf vorhandenen LegalActions.",
+    consideredActionIds: input.legalActions.map((candidate) => candidate.actionId),
+    fallbackUsed: true,
+    evidence,
+    decisionDebug: semanticCoverageFallbackDebug(input, action, evidence),
+    timeoutUsed: false,
+    profileId: input.profileId,
+    difficulty: input.difficulty,
+    reason: reasonCode,
+  };
+}
+
+function fallbackPolicyRank(input: AiDecisionInput, action: LegalAction): number {
+  switch (fallbackPolicyForAction(input, action)) {
+    case "mandatory_choice":
+      return 0;
+    case "direct_closeout":
+      return 1;
+    case "tag_clear":
+      return 2;
+    case "required_run_continue":
+      return 3;
+    case "access_resolution":
+      return 4;
+    case "economy_basic":
+      return 5;
+    case "draw_setup":
+      return 6;
+    case "end_turn":
+      return 7;
+    case "lowest_risk_deterministic":
+      return 20;
+  }
+}
+
+function fallbackPolicyForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+):
+  | "mandatory_choice"
+  | "direct_closeout"
+  | "tag_clear"
+  | "required_run_continue"
+  | "access_resolution"
+  | "economy_basic"
+  | "draw_setup"
+  | "end_turn"
+  | "lowest_risk_deterministic" {
+  if (action.type === "resolve_choice") return "mandatory_choice";
+  if (action.type === "score_agenda" || action.type === "steal_agenda") {
+    return "direct_closeout";
+  }
+  if (
+    action.type === "remove_tag" &&
+    input.side === "runner" &&
+    input.playerView.own.tags > 0
+  ) {
+    return "tag_clear";
+  }
+  if (action.type === "continue_run") return "required_run_continue";
+  if (action.type === "access_card" || action.type === "trash_accessed_card") {
+    return "access_resolution";
+  }
+  if (action.type === "gain_credit") return "economy_basic";
+  if (action.type === "draw_card") return "draw_setup";
+  if (action.type === "end_turn") return "end_turn";
+  return "lowest_risk_deterministic";
+}
+
+function semanticCoverageFallbackDebug(
+  input: AiDecisionInput,
+  action: LegalAction | undefined,
+  evidence: readonly string[],
+): AiDecisionDebug {
+  return {
+    schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+    aiLevel: 2,
+    summary:
+      "Semantic Runtime Coverage-Fallback auf vorhandene Engine-LegalAction.",
+    planId: "semantic_runtime:coverage_fallback",
+    planKind: "coverage_fallback",
+    ...(action ? { selectedActionType: action.type } : {}),
+    score: 0,
+    visibleReasons: [...evidence].slice(0, 8),
+    rankedAlternatives: [],
+    actionAlternatives: [],
+    scoreBreakdown: [],
+    whyNot: ["fallback_reason:no_semantic_candidate"],
+    evidence: [...evidence].slice(0, 12),
+    fallbackUsed: true,
+    profileId: input.profileId,
+    timeoutUsed: false,
   };
 }
 

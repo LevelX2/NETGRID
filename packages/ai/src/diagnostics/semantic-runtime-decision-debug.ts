@@ -1,9 +1,7 @@
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
-  type AiDecision,
   type AiDecisionDebug,
   type AiDecisionInput,
-  type LegalAction,
 } from "@netgrid/shared";
 import type {
   SemanticRuntimeChoice,
@@ -31,8 +29,6 @@ import {
 export type BuildSemanticRuntimeDecisionDebugInput = {
   input: AiDecisionInput;
   selected: SemanticRuntimeChoice;
-  legacyDecision: AiDecision;
-  legacyActionType?: LegalAction["type"];
   planRuntime: TacticalPlanRuntimeResult;
   coverageSelection?: SemanticRuntimeCoverageSelectionDebug;
   selectedScoreBreakdown: NonNullable<AiDecisionDebug["scoreBreakdown"]>;
@@ -43,17 +39,12 @@ export type BuildSemanticRuntimeDecisionDebugInput = {
 export function buildSemanticRuntimeDecisionDebug({
   input,
   selected,
-  legacyDecision,
-  legacyActionType,
   planRuntime,
   coverageSelection,
   selectedScoreBreakdown,
   rankedAlternatives,
   actionAlternatives,
 }: BuildSemanticRuntimeDecisionDebugInput): AiDecisionDebug {
-  const legacyDebug = legacyDecision.decisionDebug;
-  const legacyPlanKind = legacyDebug?.planKind;
-  const legacyDebugSelectedActionType = legacyDebug?.selectedActionType;
   const memoryDebug = semanticRuntimeMemoryDebug(input);
   const selectedPlan = planRuntime.selectedPlan;
   const selectedStep = planRuntime.selectedStep;
@@ -72,9 +63,6 @@ export function buildSemanticRuntimeDecisionDebug({
     scopeId: selected.scopeId,
     selectedActionType: selected.action.type,
     ...(coverageSelection ? { coverageEvidence: coverageSelection.evidence } : {}),
-    ...(legacyActionType ? { legacyActionType } : {}),
-    ...(legacyPlanKind ? { legacyPlanKind } : {}),
-    ...(legacyDebugSelectedActionType ? { legacyDebugSelectedActionType } : {}),
     selectedEvidence: scrubEvidence(selected.evidence),
     ...(selectedPlan
       ? {
@@ -114,7 +102,7 @@ export function buildSemanticRuntimeDecisionDebug({
   });
   return {
     schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-    aiLevel: legacyDebug?.aiLevel ?? 2,
+    aiLevel: 2,
     summary: selected.explanation,
     planId: selectedPlan?.planId ?? `semantic_runtime:${selected.scopeId}`,
     planKind: selectedPlan?.type ?? selected.scopeId,
@@ -143,10 +131,7 @@ export function buildSemanticRuntimeDecisionDebug({
         selectedPlanSelection,
       ),
     ],
-    whyNot:
-      legacyActionType && legacyActionType !== selected.action.type
-        ? [`legacy_reference_action_type:${legacyActionType}`]
-        : [],
+    whyNot: [],
     longTermPlan: debugDiagnostics.longTermPlan,
     ...(memoryDebug.memoryVersion
       ? { memoryVersion: memoryDebug.memoryVersion }
@@ -168,14 +153,9 @@ export function buildSemanticRuntimeDecisionDebug({
       ? { warnings: debugDiagnostics.warnings }
       : {}),
     detailSections: debugDiagnostics.detailSections,
-    evidence: scrubEvidence([
-      ...selected.evidence,
-      ...(legacyDecision.evidence ?? []).map(
-        (entry) => `legacy_reference:${entry}`,
-      ),
-    ]).slice(0, 12),
+    evidence: scrubEvidence([...selected.evidence]).slice(0, 12),
     fallbackUsed: false,
     profileId: input.profileId,
-    timeoutUsed: Boolean(legacyDecision.timeoutUsed),
+    timeoutUsed: false,
   };
 }

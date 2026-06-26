@@ -3061,6 +3061,36 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.evidence).toContain("semantic_runtime_force_legacy");
   });
 
+  it("uses semantic coverage fallback instead of legacy when no choice is selectable", () => {
+    const input = aiInput("runner", [
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      () => {
+        throw new Error("legacy provider must not run in semantic fallback");
+      },
+      {},
+      semanticRuntimeDependencies([], {
+        initiallySelectedActionId: "none",
+      }),
+    );
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.fallbackUsed).toBe(true);
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "semantic_coverage_fallback:true",
+        "fallback_reason:no_semantic_candidate",
+        "fallback_action_policy:economy_basic",
+      ]),
+    );
+  });
+
   it("does not expose shadow-only diagnostics through the public AI runtime API", () => {
     const exportedKeys = Object.keys(aiPublicApi);
 

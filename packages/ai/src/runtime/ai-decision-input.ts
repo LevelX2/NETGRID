@@ -17,6 +17,7 @@ import {
 } from "../deck-doctrine";
 import {
   buildDeckDoctrineV2Diagnostic,
+  buildNeutralDeckStrategyProfile,
   buildDeckStrategyProfile,
   type AiDeckStrategyProfile,
   type DeckDoctrineV2Diagnostic,
@@ -88,6 +89,12 @@ export function buildAiDecisionInput(
     eventTail?: PublicGameEvent[];
     ownDeckSnapshot?: AiDeckDoctrineDeckSnapshot;
     ownDeckDoctrine?: AiDecisionInput["ownDeckDoctrine"];
+    /**
+     * Compatibility escape hatch for very low-level fixtures that intentionally
+     * exercise the pre-strategy DTO. Productive callers should omit this and
+     * receive an explicit neutral strategy context when no deck snapshot exists.
+     */
+    missingDeckContextMode?: "explicit_neutral" | "legacy_compatible";
   } = {},
 ): AiDecisionInput {
   const playerView = getPlayerView(state, side);
@@ -111,21 +118,32 @@ export function buildAiDecisionInput(
       options.profileId ?? `${side}-ai-v0.9-${options.difficulty ?? "normal"}`,
     ...(ownDeckDoctrine ? { ownDeckDoctrine } : {}),
   });
-  if (!options.ownDeckSnapshot) return input;
+  if (
+    !options.ownDeckSnapshot &&
+    options.missingDeckContextMode === "legacy_compatible"
+  ) {
+    return input;
+  }
+  const deckSnapshotId =
+    options.ownDeckSnapshot?.deckSnapshotId ??
+    `${input.profileId}:missing-deck-snapshot`;
   const ownDeckCapabilities = buildDeckCapabilityProfile({
     side,
     playerView,
     legalActions,
-    deckSnapshot: options.ownDeckSnapshot,
+    ...(options.ownDeckSnapshot
+      ? { deckSnapshot: options.ownDeckSnapshot }
+      : {}),
   });
-  const ownDeckStrategyProfile = buildDeckStrategyProfile(options.ownDeckSnapshot);
-  const ownDeckDoctrineV2Diagnostic = buildDeckDoctrineV2Diagnostic(
-    options.ownDeckSnapshot,
-  );
-  const previousStrategicIntentState = getStrategicIntentMemorySnapshot(
-    input,
-    options.ownDeckSnapshot.deckSnapshotId,
-  )?.state;
+  const ownDeckStrategyProfile = options.ownDeckSnapshot
+    ? buildDeckStrategyProfile(options.ownDeckSnapshot)
+    : buildNeutralDeckStrategyProfile(side, deckSnapshotId);
+  const ownDeckDoctrineV2Diagnostic =
+    buildDeckDoctrineV2Diagnostic(options.ownDeckSnapshot);
+  const previousStrategicIntentState = options.ownDeckSnapshot
+    ? getStrategicIntentMemorySnapshot(input, options.ownDeckSnapshot.deckSnapshotId)
+        ?.state
+    : undefined;
   const strategicRuntimeContext = buildStrategicRuntimeContext({
     side,
     playerView,

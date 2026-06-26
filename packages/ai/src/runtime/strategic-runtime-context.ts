@@ -1,4 +1,10 @@
-import type { LegalAction, PlayerView, Side } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  CardInstanceId,
+  LegalAction,
+  PlayerView,
+  Side,
+} from "@netgrid/shared";
 import type {
   BreakerCoverageKind,
   CoverageState,
@@ -15,6 +21,10 @@ import type {
   StrategicRoleStatusSnapshot,
   StrategicTargetVector,
 } from "../strategic-intent-state";
+import {
+  classifyTagPunishLegalActionFromOntology,
+  type StructuredTagPunishLegalActionAssessment,
+} from "../tag-punish-ontology-consumer";
 
 export type StrategicRuntimeContext = {
   roleStatuses: StrategicRoleStatusSnapshot[];
@@ -223,8 +233,9 @@ function corpRoleStatuses(
       return [
         roleStatus("corp.punish_window", corpPunishStatus(params), "player_view", [
           `runner_tags:${params.playerView.opponent.tags}`,
-          `legal_operation:${hasLegalAction(params.legalActions, "play_operation")}`,
-          `legal_trash_resource:${hasLegalAction(params.legalActions, "trash_resource")}`,
+          `legal_punish_payoff:${corpPunishAssessments(params).some((assessment) => assessment.playablePayoff)}`,
+          `legal_tag_source:${corpPunishAssessments(params).some((assessment) => assessment.isTagSource || assessment.isTraceTagSource)}`,
+          `blocked_payoff_missing_tag:${corpPunishAssessments(params).some((assessment) => assessment.blockedByMissingTag)}`,
         ]),
       ];
     default:
@@ -275,12 +286,29 @@ function corpEconomyStatus(
 function corpPunishStatus(
   params: BuildStrategicRuntimeContextParams,
 ): StrategicRoleStatus {
-  if (
-    params.playerView.opponent.tags > 0 ||
-    hasLegalAction(params.legalActions, "trash_resource") ||
-    hasLegalAction(params.legalActions, "play_operation")
-  ) {
+  const assessments = corpPunishAssessments(params);
+  if (assessments.some((assessment) => assessment.playablePayoff)) {
     return "active";
+  }
+  if (
+    assessments.some(
+      (assessment) => assessment.isTagSource || assessment.isTraceTagSource,
+    )
+  ) {
+    return "visible";
+  }
+  if (assessments.some((assessment) => assessment.blockedByMissingTag)) {
+    return "temporarily_unavailable";
+  }
+  const punishProfile = params.strategyProfile?.corpProfile?.punishProfile;
+  if (
+    punishProfile &&
+    (punishProfile.tagSources > 0 ||
+      punishProfile.tagPayoff > 0 ||
+      punishProfile.damagePayoff > 0 ||
+      punishProfile.traceDensity > 0)
+  ) {
+    return "in_deck_unseen";
   }
   return "in_deck_unseen";
 }
@@ -383,19 +411,53 @@ function corpTargetVector(
     };
   }
   if (family === "corp_tag_trace_punish") {
+    const assessments = corpPunishAssessments(params);
+    if (
+      !assessments.some(
+        (assessment) =>
+          assessment.playablePayoff ||
+          assessment.isTagSource ||
+          assessment.isTraceTagSource,
+      )
+    ) {
+      return {
+        kind: "none",
+        evidence: [
+          "target_source:runtime_context",
+          `target_strategy:${strategyId}`,
+          "target_reason:no_visible_semantic_punish_basis",
+        ],
+      };
+    }
     return {
       kind: "tag",
       evidence: [
         "target_source:runtime_context",
         `target_strategy:${strategyId}`,
         `runner_tags:${params.playerView.opponent.tags}`,
+        `semantic_punish_actions:${assessments.length}`,
       ],
     };
   }
   if (family === "corp_damage_kill" || family === "corp_ambush") {
+    const assessments = corpPunishAssessments(params);
+    if (!assessments.some((assessment) => assessment.playablePayoff)) {
+      return {
+        kind: "none",
+        evidence: [
+          "target_source:runtime_context",
+          `target_strategy:${strategyId}`,
+          "target_reason:no_visible_semantic_damage_closeout",
+        ],
+      };
+    }
     return {
       kind: "damage",
-      evidence: ["target_source:runtime_context", `target_strategy:${strategyId}`],
+      evidence: [
+        "target_source:runtime_context",
+        `target_strategy:${strategyId}`,
+        `semantic_punish_actions:${assessments.length}`,
+      ],
     };
   }
   if (family === "corp_asset_economy" || family === "corp_economy_reserve") {
@@ -497,15 +559,81 @@ function actionMatchesFamily(
     case "corp_tag_trace_punish":
     case "corp_damage_kill":
     case "corp_ambush":
-      return (
-        action.type === "play_operation" ||
-        action.type === "trash_resource" ||
-        action.type === "trigger_ability" ||
-        action.type === "activated_card_ability"
-      );
+      return false;
     default:
       return false;
   }
+}
+
+function corpPunishAssessments(
+  params: BuildStrategicRuntimeContextParams,
+): StructuredTagPunishLegalActionAssessment[] {
+  const visibleDefinitions = visibleSourceDefinitionsByInstanceId(
+    params.playerView,
+  );
+  return params.legalActions
+    .map((action) =>
+      classifyTagPunishLegalActionFromOntology(
+        action,
+        sourceDefinitionIdForAction(action, visibleDefinitions),
+        { runnerTagged: params.playerView.opponent.tags > 0 },
+      ),
+    )
+    .filter(
+      (
+        assessment,
+      ): assessment is StructuredTagPunishLegalActionAssessment =>
+        assessment !== undefined,
+    );
+}
+
+function sourceDefinitionIdForAction(
+  action: LegalAction,
+  visibleDefinitions: Readonly<Record<CardInstanceId, CardDefinitionId>>,
+): CardDefinitionId | undefined {
+  const payloadSourceDefinitionId =
+    stringPayload(action, "sourceDefinitionId") ??
+    stringPayload(action, "sourceCardDefinitionId");
+  if (payloadSourceDefinitionId !== undefined) return payloadSourceDefinitionId;
+  const sourceCardInstanceId =
+    action.abilityRef?.sourceCardInstanceId ??
+    stringPayload(action, "sourceCardId") ??
+    (action.source !== "basic_action" && action.source !== "game_rule"
+      ? action.source
+      : undefined);
+  return sourceCardInstanceId !== undefined
+    ? visibleDefinitions[sourceCardInstanceId]
+    : undefined;
+}
+
+function visibleSourceDefinitionsByInstanceId(
+  playerView: PlayerView,
+): Readonly<Record<CardInstanceId, CardDefinitionId>> {
+  const entries = [
+    playerView.own.identity,
+    ...playerView.own.gripOrHq,
+    ...playerView.own.heapOrArchives,
+    ...playerView.own.scoreArea,
+    ...(playerView.own.rig ?? []),
+  ]
+    .filter(
+      (
+        card,
+      ): card is typeof card & {
+        instanceId: CardInstanceId;
+        definitionId: CardDefinitionId;
+      } => card.known && card.definitionId !== undefined,
+    )
+    .map((card) => [card.instanceId, card.definitionId] as const);
+  return Object.fromEntries(entries) as Record<
+    CardInstanceId,
+    CardDefinitionId
+  >;
+}
+
+function stringPayload(action: LegalAction, key: string): string | undefined {
+  const value = action.payload?.[key];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
 function roleStatus(

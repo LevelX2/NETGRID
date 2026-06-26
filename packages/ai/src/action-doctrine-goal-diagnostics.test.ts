@@ -368,7 +368,7 @@ describe("buildActionToGoalDiagnosticMappingReport", () => {
     );
   });
 
-  it("marks missing evidence as unknown instead of inferring action-goal fit", () => {
+  it("keeps missing target context unknown even when BasicAction signals exist", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [
         legalAction("start_run", 0, {
@@ -387,11 +387,13 @@ describe("buildActionToGoalDiagnosticMappingReport", () => {
     expect(centralPressure).toMatchObject({
       status: "unknown",
       missingCandidateFields: expect.arrayContaining([
-        "actionTacticSignals",
         "targetContext",
       ]),
       blockerIds: [],
     });
+    expect(centralPressure?.missingCandidateFields).not.toContain(
+      "actionTacticSignals",
+    );
   });
 });
 
