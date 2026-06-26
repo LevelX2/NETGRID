@@ -379,6 +379,31 @@ describe("AI module boundaries", () => {
 
     expect(missingMarkers).toEqual([]);
   });
+
+  it("keeps the public package facade re-export only", () => {
+    const publicFacade = path.join(srcDir, "index.ts");
+    const content = readFileSync(publicFacade, "utf8");
+    const forbiddenPatterns = [
+      {
+        pattern: /^\s*import\s/m,
+        reason: "declares local imports",
+      },
+      {
+        pattern: /^\s*(?:const|let|var|function|class)\s/m,
+        reason: "declares local implementation",
+      },
+      {
+        pattern: /create[A-Za-z0-9]+Composition\s*\(/,
+        reason: "creates runtime composition directly",
+      },
+    ];
+
+    const violations = forbiddenPatterns
+      .filter(({ pattern }) => pattern.test(content))
+      .map(({ reason }) => `${relativeFile(publicFacade)} ${reason}`);
+
+    expect(violations).toEqual([]);
+  });
 });
 
 function productionFiles(

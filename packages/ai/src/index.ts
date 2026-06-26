@@ -1,7 +1,6 @@
 // Public package facade. Keep new AI behavior in focused runtime, decision,
 // action, access, diagnostics, reports or simulation modules, then re-export
 // only intentional public contracts here.
-import { buildObservedFacts } from "./observed-facts-public";
 export {
   ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION,
   ACTION_SEMANTIC_COVERAGE_GROUPS,
@@ -357,7 +356,7 @@ export {
   classifyTagPunishPayoffFromOntology,
   classifyTagSourceFromOntology,
 } from "./tag-punish-ontology-consumer";
-export { buildObservedFacts };
+export { buildObservedFacts } from "./observed-facts-public";
 
 export type {
   AiBenchmarkDeckSlotResult,
