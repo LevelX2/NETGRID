@@ -574,7 +574,7 @@ import type {
 } from "./simulation/ai-match-progression-types";
 import {
   attributeHandSizeSkip,
-  attributeNormalizedMemorySkip,
+  attributeMemorySkip,
   attributeNormalizedSearchRecoverySkip,
   attributeRunnerSetupSupportWindows,
   incrementChosenFamily,
@@ -10075,7 +10075,13 @@ function summarizeRunnerSetupAttributionMetrics(
       if (entry.runnerSetupFixGateEligibleSearchRecoverySkip === true)
         attributeSearchRecoverySkip(metrics, sequence, index, summary);
       if (entry.runnerSetupFixGateEligibleMemorySkip === true)
-        attributeMemorySkip(metrics, sequence, index, summary);
+        attributeMemorySkip(
+          metrics,
+          sequence,
+          index,
+          summary,
+          isMeaningfulBoardProgress,
+        );
       if (entry.runnerHandSizeSupportSkippedWhileDamageRiskVisible === true)
         attributeHandSizeSkip(metrics, sequence, index);
     }
@@ -10348,80 +10354,6 @@ function attributeSearchRecoverySkip(
     installFollowup,
     coverageResolved,
     knownUnaffordableRun,
-    noProgress,
-    actionLimit,
-  });
-}
-
-function attributeMemorySkip(
-  metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  sequence: AiSimulationActionSequenceEntry[],
-  index: number,
-  summary: AiSimulationSummary,
-): void {
-  const entry = sequence[index]!;
-  metrics.runnerMemoryFixGateWindows += 1;
-  metrics.runnerSetupAttributionByKindMemory += 1;
-  if ((entry.runnerLegalMemoryHardwareActions ?? 0) > 0)
-    metrics.runnerMemoryFixGateLegalSupport += 1;
-  metrics.runnerMemoryFixGateSkipped += 1;
-  metrics.runnerMemoryAttributionSkipped += 1;
-  incrementChosenFamily(metrics, "runnerMemorySkip", entry);
-  const next = nextEntriesForSide(sequence, index, "runner", 5);
-  const memoryInstalled = next.some(
-    (candidate) => candidate.runnerMemoryHardwareTaken === true,
-  );
-  const programBlocked =
-    entry.runnerMemorySupportSkippedWhileGripHasPrograms === true &&
-    !memoryInstalled;
-  const coverageStillMissing =
-    !next.some((candidate) => candidate.runnerCoverageImproved === true) &&
-    next.some(
-      (candidate) =>
-        candidate.runnerPathBlockedByMissingCoverage === true ||
-        candidate.runnerSetupFixGateEligibleSearchRecoverySkip === true,
-    );
-  const noProgress = !hasMeaningfulProgressWithin(
-    sequence, index, 5, isMeaningfulBoardProgress
-  );
-  const actionLimit = summary.winner === "action_limit_reached" && noProgress;
-  if (memoryInstalled) metrics.runnerMemorySkipThenMemoryInstalled += 1;
-  if (programBlocked) metrics.runnerMemorySkipThenProgramInstallBlocked += 1;
-  if (coverageStillMissing)
-    metrics.runnerMemorySkipThenCoverageStillMissing += 1;
-  if (noProgress) metrics.runnerMemorySkipThenNoProgress += 1;
-  if (actionLimit) metrics.runnerMemorySkipThenActionLimit += 1;
-
-  const blocked =
-    entry.runnerEconomyTaken === true ||
-    entry.runnerPressureActionTaken === true ||
-    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
-    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true;
-  if (entry.runnerEconomyTaken === true)
-    metrics.runnerMemorySkipPlausibleEconomyReserve += 1;
-  if (entry.runnerPressureActionTaken === true)
-    metrics.runnerMemorySkipPlausiblePressure += 1;
-  if (
-    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
-    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true
-  )
-    metrics.runnerMemorySkipPlausibleRemoteContest += 1;
-  if (entry.runnerMemorySupportSkippedWhileGripHasPrograms !== true)
-    metrics.runnerMemorySkipPlausibleNoProgramPressure += 1;
-  const suspiciousRig = programBlocked || coverageStillMissing;
-  if (suspiciousRig) metrics.runnerMemorySkipSuspiciousRigBlocked += 1;
-  if (coverageStillMissing)
-    metrics.runnerMemorySkipSuspiciousCoverageStillMissing += 1;
-  if (noProgress) metrics.runnerMemorySkipSuspiciousNoProgress += 1;
-  const suspicious = suspiciousRig || noProgress;
-  if (!blocked && !suspicious) metrics.runnerMemorySkipUnclassified += 1;
-  metrics.runnerMemoryFixGateAttributionEligible += 1;
-  if (blocked) metrics.runnerMemoryFixGateAttributionBlocked += 1;
-  if (suspicious) metrics.runnerMemoryFixGateAttributionSuspicious += 1;
-  attributeNormalizedMemorySkip(metrics, entry, {
-    memoryInstalled,
-    programBlocked,
-    coverageStillMissing,
     noProgress,
     actionLimit,
   });
