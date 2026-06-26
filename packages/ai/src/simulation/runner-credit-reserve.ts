@@ -103,3 +103,14 @@ export function runnerPostRunReserveTargetForRemoteInput(
   }
   return Math.min(10, Math.max(1, Math.ceil(target)));
 }
+
+export function createRunnerPostRunReserveTargetForRemoteInput(dependencies: {
+  remoteServerHasScoreThreat: (
+    input: AiDecisionInput,
+    serverId: string,
+  ) => boolean;
+  rolesForCardId: (cardId: string | undefined) => string[];
+}): (input: AiDecisionInput, serverId: string) => number {
+  return (input, serverId) =>
+    runnerPostRunReserveTargetForRemoteInput(input, serverId, dependencies);
+}

@@ -658,7 +658,7 @@ import { createRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-
 import { chooseRandomLegalDecision } from "./simulation/random-legal-decision";
 import {
   createRunnerCreditReserveTargetForInput,
-  runnerPostRunReserveTargetForRemoteInput as runnerPostRunReserveTargetForRemoteInputWithDeps,
+  createRunnerPostRunReserveTargetForRemoteInput,
 } from "./simulation/runner-credit-reserve";
 import {
   type AiQualityMetrics,
@@ -1184,6 +1184,12 @@ const sourceDefinitionIdForSimulationAction =
 const runnerCreditReserveTargetForInput = createRunnerCreditReserveTargetForInput({
   rolesForCardId,
 });
+
+const runnerPostRunReserveTargetForRemoteInput =
+  createRunnerPostRunReserveTargetForRemoteInput({
+    remoteServerHasScoreThreat,
+    rolesForCardId,
+  });
 
 const runnerRemoteTrashAccessContext = createRunnerRemoteTrashAccessContext({
   runnerCreditReserveTargetForInput,
@@ -17554,16 +17560,6 @@ function runnerRemoteThreatProfile(
     serverId,
     runnerPostRunReserveTargetForRemoteInput,
   );
-}
-
-function runnerPostRunReserveTargetForRemoteInput(
-  input: AiDecisionInput,
-  serverId: string,
-): number {
-  return runnerPostRunReserveTargetForRemoteInputWithDeps(input, serverId, {
-    remoteServerHasScoreThreat,
-    rolesForCardId,
-  });
 }
 
 function runnerCentralRunHasClearPressureJustificationForInput(
