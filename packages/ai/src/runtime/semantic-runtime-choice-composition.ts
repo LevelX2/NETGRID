@@ -14,14 +14,16 @@ import {
   createSemanticRuntimeScoreBreakdownContext,
   type SemanticRuntimeScoreBreakdownContextDependencies,
 } from "./semantic-runtime-score-breakdown";
+import type { SemanticRuntimeScopeDependencies } from "./semantic-runtime-scope";
 
 export type SemanticRuntimeChoiceCompositionDependencies =
   SemanticRuntimeScoreBreakdownContextDependencies &
     Omit<SemanticRuntimeEvidenceDependencies, "runnerEvidence"> &
     SemanticRuntimeRunnerEvidenceDependencies &
+    SemanticRuntimeScopeDependencies &
     Omit<
       SemanticRuntimeChoiceBuilderDependencies,
-      "scoreBreakdown" | "evidence"
+      "scoreBreakdown" | "evidence" | "scope"
     >;
 
 export function createSemanticRuntimeChoiceComposition(
@@ -61,7 +63,10 @@ export function createSemanticRuntimeChoiceComposition(
   });
 
   const { semanticRuntimeChoices } = createSemanticRuntimeChoiceBuilderContext({
-    scope: dependencies.scope,
+    scope: {
+      isRemoteServerTarget: dependencies.isRemoteServerTarget,
+      runnerSourceCardAnswerRole: dependencies.runnerSourceCardAnswerRole,
+    },
     actionExclusion: dependencies.actionExclusion,
     scoreBreakdown: semanticRuntimeScoreBreakdown,
     actionCreditCost: dependencies.actionCreditCost,

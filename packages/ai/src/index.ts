@@ -1351,10 +1351,6 @@ const {
   isRemoteServerTarget,
   knownIcePathReason: semanticRuntimeKnownIcePathReason,
 });
-const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
-  isRemoteServerTarget,
-  runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
-};
 const {
   semanticRuntimeScoreBreakdown,
   semanticRuntimeChoices,
@@ -1390,7 +1386,8 @@ const {
   persistentInstallEvidenceForAction: runnerPersistentInstallEvidenceForAction,
   remoteTrashAccessContext: runnerRemoteTrashAccessContext,
   corpEvidence: semanticRuntimeCorpEvidence,
-  scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
+  isRemoteServerTarget,
+  runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
   actionExclusion: semanticRuntimeActionExclusion,
   actionCreditCost,
   explanation: semanticRuntimeExplanation,
