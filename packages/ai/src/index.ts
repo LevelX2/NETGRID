@@ -574,6 +574,7 @@ import type {
 } from "./simulation/ai-match-progression-types";
 import {
   capitalizeRunnerSetupFamily,
+  incrementCoverageTypes,
   runnerSetupChosenFamilyForEntry,
   type RunnerSetupAttributionMetricKey,
 } from "./simulation/runner-setup-attribution-types";
@@ -10842,33 +10843,6 @@ function incrementChosenFamily(
     | RunnerSetupAttributionMetricKey
     | undefined;
   if (key && key in metrics) metrics[key] += 1;
-}
-
-function incrementCoverageTypes(
-  metrics: Record<RunnerSetupAttributionMetricKey, number>,
-  entry: AiSimulationActionSequenceEntry,
-): void {
-  const types = entry.runnerSetupMissingCoverageTypes ?? [];
-  if (types.includes("wall")) {
-    metrics.runnerSearchRecoveryFixGateMissingWall += 1;
-    metrics.runnerSearchRecoveryAttributionMissingWall += 1;
-  }
-  if (types.includes("code_gate")) {
-    metrics.runnerSearchRecoveryFixGateMissingCodeGate += 1;
-    metrics.runnerSearchRecoveryAttributionMissingCodeGate += 1;
-  }
-  if (types.includes("sentry")) {
-    metrics.runnerSearchRecoveryFixGateMissingSentry += 1;
-    metrics.runnerSearchRecoveryAttributionMissingSentry += 1;
-  }
-  if (types.includes("universal")) {
-    metrics.runnerSearchRecoveryFixGateMissingUniversal += 1;
-    metrics.runnerSearchRecoveryAttributionMissingUniversal += 1;
-  }
-  if (types.includes("special")) {
-    metrics.runnerSearchRecoveryFixGateMissingSpecial += 1;
-    metrics.runnerSearchRecoveryAttributionMissingSpecial += 1;
-  }
 }
 
 const BREAKER_ONTOLOGY_COVERAGE_METRIC_KEYS: Record<

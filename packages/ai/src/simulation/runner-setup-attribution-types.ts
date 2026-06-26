@@ -1,3 +1,5 @@
+import type { AiSimulationActionSequenceEntry } from "./ai-simulation-action-sequence-entry";
+
 export type RunnerSetupAttributionMetricKey =
   | "runnerStarvedEconomySkipWindows"
   | "runnerStarvedEconomySkipChosenRun"
@@ -213,4 +215,31 @@ export function capitalizeRunnerSetupFamily(
   if (family === "searchRecovery") return "SearchRecovery";
   if (family === "endTurn") return "EndTurn";
   return family.charAt(0).toUpperCase() + family.slice(1);
+}
+
+export function incrementCoverageTypes(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: AiSimulationActionSequenceEntry,
+): void {
+  const types = entry.runnerSetupMissingCoverageTypes ?? [];
+  if (types.includes("wall")) {
+    metrics.runnerSearchRecoveryFixGateMissingWall += 1;
+    metrics.runnerSearchRecoveryAttributionMissingWall += 1;
+  }
+  if (types.includes("code_gate")) {
+    metrics.runnerSearchRecoveryFixGateMissingCodeGate += 1;
+    metrics.runnerSearchRecoveryAttributionMissingCodeGate += 1;
+  }
+  if (types.includes("sentry")) {
+    metrics.runnerSearchRecoveryFixGateMissingSentry += 1;
+    metrics.runnerSearchRecoveryAttributionMissingSentry += 1;
+  }
+  if (types.includes("universal")) {
+    metrics.runnerSearchRecoveryFixGateMissingUniversal += 1;
+    metrics.runnerSearchRecoveryAttributionMissingUniversal += 1;
+  }
+  if (types.includes("special")) {
+    metrics.runnerSearchRecoveryFixGateMissingSpecial += 1;
+    metrics.runnerSearchRecoveryAttributionMissingSpecial += 1;
+  }
 }
