@@ -4,7 +4,6 @@
 import {
   applyAction,
   createGame,
-  createGameAfterSetup,
   getPlayerView,
   hashState,
   replayEvents,
@@ -733,10 +732,6 @@ import {
 } from "./simulation/selfplay-trace-facts";
 import { selfplayTraceFactsForSimulationDecision } from "./simulation/selfplay-trace-facts-adapter";
 import {
-  applyFixtureAction,
-  applyFixtureChoiceFirstOption,
-} from "./simulation/fixture-actions";
-import {
   countPassiveActionWithScoreLineAvailable,
   countUnsafeScoreChosen,
 } from "./simulation/score-window-counts";
@@ -744,7 +739,6 @@ import { isHoldoutSeed } from "./simulation/holdout-seed";
 import { simulationSafeSelectedActionId } from "./simulation/selected-action-id";
 import {
   BENCHMARK_PROFILES_143,
-  EXPLOIT_FIXTURES_143,
   listV143BenchmarkProfiles,
   listV143ExploitFixtures,
 } from "./simulation/v143-data";
@@ -756,6 +750,9 @@ import {
   createSimulationDecisionContext,
 } from "./simulation/simulation-decision-context";
 import { createV143ProfileRunner } from "./simulation/v143-profile-run";
+import {
+  createV143ExploitRegressionFixturesRunner,
+} from "./simulation/v143-exploit-regression-fixtures";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -773,7 +770,6 @@ import {
   type GameState,
   type LegalAction,
   type PlayerView,
-  type PublicGameEvent,
   type Side,
   type VisibleCard,
 } from "@netgrid/shared";
@@ -2373,6 +2369,12 @@ const {
   chooseCorpBaselineAction,
   selectedChoicesForDecision,
 });
+const { runV143ExploitRegressionFixtures } =
+  createV143ExploitRegressionFixturesRunner({
+    simulateAiGame,
+    chooseRunnerAction,
+  });
+export { runV143ExploitRegressionFixtures };
 const { runV143Profile } = createV143ProfileRunner({
   simulateAiGame,
   runExploitRegressionFixtures: runV143ExploitRegressionFixtures,
@@ -3120,138 +3122,6 @@ export function runAiSelfplayTraceMining(
     findings,
     topFindings,
     aggregate,
-  };
-}
-
-export function runV143ExploitRegressionFixtures(
-  config: Partial<AiSimulationConfig> = {},
-): V143ExploitRegressionResult[] {
-  return EXPLOIT_FIXTURES_143.fixtures.map((fixture) => {
-    if (fixture.fixtureId === "v143-rnd-repeat-access-freshness") {
-      return evaluateV143RndRepeatAccessFreshnessFixture(config);
-    }
-
-    const summary = simulateAiGame({
-      seed: "v143-exploit-visible-etr",
-      runnerDeckId: config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
-      corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
-      agendaPointsToWin:
-        config.agendaPointsToWin ?? SOAK_SEEDS_143.league.agendaPointsToWin,
-      maxActions: config.maxActions ?? 90,
-      runnerControllerMode: "plan_runner_v1_4_1",
-      corpControllerMode: "plan_corp_v1_4_0",
-      runnerProfileId: "runner-ai-v1.4.1-normal",
-      corpProfileId: "corp-ai-v1.4.0-normal",
-    });
-    const passed = summary.errors.length === 0 && summary.replayOk;
-    return {
-      fixtureId: fixture.fixtureId,
-      passed,
-      message: passed ? "ok" : summary.errors.join(" | "),
-    };
-  });
-}
-
-function evaluateV143RndRepeatAccessFreshnessFixture(
-  config: Partial<AiSimulationConfig>,
-): V143ExploitRegressionResult {
-  const fixtureId = "v143-rnd-repeat-access-freshness";
-  let state = createGameAfterSetup({
-    seed: "v143-exploit-rnd-freshness",
-    runnerDeckId: config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
-    corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
-    agendaPointsToWin:
-      config.agendaPointsToWin ?? SOAK_SEEDS_143.league.agendaPointsToWin,
-  });
-  const corpDraw = applyFixtureAction(
-    state,
-    "corp",
-    (action) => action.type === "mandatory_draw",
-    "corp_mandatory_draw",
-  );
-  if (!corpDraw.ok)
-    return { fixtureId, passed: false, message: corpDraw.message };
-  state = corpDraw.state;
-  const corpEndTurn = applyFixtureAction(
-    state,
-    "corp",
-    (action) => action.type === "end_turn",
-    "corp_end_turn",
-  );
-  if (!corpEndTurn.ok)
-    return { fixtureId, passed: false, message: corpEndTurn.message };
-  state = corpEndTurn.state;
-  if (
-    state.pendingChoice?.source === "discard_phase" &&
-    state.pendingChoice.side === "corp"
-  ) {
-    const corpDiscard = applyFixtureChoiceFirstOption(
-      state,
-      "corp",
-      "corp_discard_phase",
-    );
-    if (!corpDiscard.ok)
-      return { fixtureId, passed: false, message: corpDiscard.message };
-    state = corpDiscard.state;
-  }
-
-  const baseInput = buildAiDecisionInput(state, "runner", {
-    difficulty: "normal",
-    profileId: "runner-ai-v1.4.2-normal",
-    decisionId: `${fixtureId}:${state.stateVersion}:runner`,
-  });
-  const rdRun = baseInput.legalActions.find(
-    (action) =>
-      action.type === "start_run" && action.payload?.serverId === "rd",
-  );
-  const gainCredit = baseInput.legalActions.find(
-    (action) => action.type === "gain_credit",
-  );
-  if (!rdRun || !gainCredit) {
-    return {
-      fixtureId,
-      passed: false,
-      message: "missing_required_actions:runner_needs_rd_run_and_gain_credit",
-    };
-  }
-
-  const syntheticRdAccess: PublicGameEvent = {
-    eventId: `${fixtureId}:synthetic_access`,
-    type: "access_card",
-    stateVersionBefore: baseInput.playerView.stateVersion,
-    stateVersionAfter: baseInput.playerView.stateVersion + 1,
-    stateHashAfter: "fnv1a:v143synthetic",
-    visibilityClass: "hidden_info_barrier",
-    publicPayload: {
-      actor: "runner",
-      actionType: "access_card",
-      serverId: "rd",
-      serverLabel: "R&D",
-      redactedKind: "accessed_card",
-    },
-  };
-  const staleInput: AiDecisionInput = {
-    ...baseInput,
-    legalActions: [rdRun, gainCredit],
-    eventTail: [...baseInput.eventTail, syntheticRdAccess],
-  };
-  const decision = chooseRunnerAction(staleInput);
-  const selected = staleInput.legalActions.find(
-    (action) => action.actionId === decision.actionId,
-  );
-  const staleBelief = reconstructBeliefState(staleInput);
-  const passed =
-    selected?.type === "gain_credit" &&
-    decision.reasonCode === "runner.plan.recover_economy" &&
-    staleBelief.runnerOpponentModel?.rndTopFreshness.freshness ===
-      "stale_known_same_top";
-  const selectedType = selected?.type ?? "none";
-  return {
-    fixtureId,
-    passed,
-    message: passed
-      ? "ok:selected_gain_credit_on_stale_rnd_top"
-      : `expected_gain_credit_on_stale_rnd_top:selected_${selectedType}:reason_${decision.reasonCode}`,
   };
 }
 
