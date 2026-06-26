@@ -611,8 +611,7 @@ import {
   isProtectBeforeAdvanceSimulationAction,
 } from "./simulation/final-advance-assessment";
 import { MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS } from "./simulation/benchmark-deck-slots";
-import { resolveBenchmarkDeckSlot } from "./simulation/benchmark-deck-slot-resolver";
-import { deckReferenceLabel } from "./simulation/benchmark-deck-reference-label";
+import { runMatchProgressionBenchmarkSlot } from "./simulation/benchmark-deck-slot-runner";
 import { benchmarkProfileById } from "./simulation/benchmark-profile-lookup";
 import { validateSimulationDeckSupport } from "./simulation/deck-support";
 import {
@@ -3034,7 +3033,12 @@ export function runMatchProgressionBenchmarkSuite(
       ? SOAK_SEEDS_143.tuningSeeds
       : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
   const slots = MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.map((slot) =>
-    runMatchProgressionBenchmarkSlot(slot, config, comparisonProfiles),
+    runMatchProgressionBenchmarkSlot(
+      slot,
+      config,
+      comparisonProfiles,
+      runMatchProgressionBenchmark,
+    ),
   );
   return {
     version: "ai-match-progression-suite-v1",
@@ -3203,68 +3207,6 @@ export function runAiSelfplayTraceMining(
     findings,
     topFindings,
     aggregate,
-  };
-}
-
-function runMatchProgressionBenchmarkSlot(
-  slot: AiBenchmarkDeckSlotDefinition,
-  config: AiDoctrineQualityBenchmarkConfig,
-  comparisonProfiles: SimulationBenchmarkProfileId[],
-): AiBenchmarkDeckSlotResult {
-  const runnerDeckRef = deckReferenceLabel(slot.runner);
-  const corpDeckRef = deckReferenceLabel(slot.corp);
-  if (slot.status !== "runnable") {
-    return {
-      slotId: slot.slotId,
-      label: slot.label,
-      slotType: slot.slotType,
-      status: slot.status,
-      tuningUse: slot.tuningUse,
-      runnerDeckRef,
-      corpDeckRef,
-      reason: slot.pendingReason ?? "Slot ist nicht lauffaehig konfiguriert.",
-    };
-  }
-  const resolved = resolveBenchmarkDeckSlot(slot);
-  if (!resolved.ok) {
-    return {
-      slotId: slot.slotId,
-      label: slot.label,
-      slotType: slot.slotType,
-      status: "disabled",
-      tuningUse: slot.tuningUse,
-      runnerDeckRef,
-      corpDeckRef,
-      reason: resolved.reason,
-    };
-  }
-  const slotConfig: AiDoctrineQualityBenchmarkConfig = {
-    ...config,
-    ...resolved.config,
-    comparisonProfiles,
-  };
-  const supportErrors = validateSimulationDeckSupport(slotConfig);
-  if (supportErrors.length > 0) {
-    return {
-      slotId: slot.slotId,
-      label: slot.label,
-      slotType: slot.slotType,
-      status: "disabled",
-      tuningUse: slot.tuningUse,
-      runnerDeckRef,
-      corpDeckRef,
-      reason: supportErrors.join(" | "),
-    };
-  }
-  return {
-    slotId: slot.slotId,
-    label: slot.label,
-    slotType: slot.slotType,
-    status: "runnable",
-    tuningUse: slot.tuningUse,
-    runnerDeckRef,
-    corpDeckRef,
-    benchmark: runMatchProgressionBenchmark(slotConfig),
   };
 }
 
