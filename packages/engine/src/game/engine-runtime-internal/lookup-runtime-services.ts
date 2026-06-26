@@ -237,7 +237,6 @@ import {
 } from "../turn/runner-install-context-actions";
 import {
   buildRunnerHostedProgramInstallAction,
-  buildRunnerZetatechOverlayInstallAction,
 } from "../turn/runner-hosted-install-actions";
 import {
   buildRunnerProgramTrashBeforeInstallAction,
@@ -607,7 +606,6 @@ import {
   HQ_CARD_TRASH_EVENT_SOURCE,
   HQ_ACCESS_RETAIN_EVENT_SOURCE,
   PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
-  PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE,
 } from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
@@ -937,23 +935,6 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     return Math.max(0, Math.floor(bonus.amount));
   }
 
-  function canOverlayProgramOnInstalledProgramHost(
-    state: GameState,
-    hostId: CardInstanceId,
-    programDefinition: CardDefinition,
-  ): boolean {
-    if (programDefinition.type !== "program") return false;
-    const hostInstance = mustInstance(state.cardInstances, hostId);
-    const hostDefinition = definitionFor(state, hostId);
-    return (
-      hostDefinition.id === PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE &&
-      hostDefinition.type === "program" &&
-      state.runner.rig.programs.includes(hostId) &&
-      !hostInstance.hostedOn &&
-      hostedCardsOn(state, hostId).length === 0
-    );
-  }
-
   function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
     const ids: CardInstanceId[] = [];
     for (const server of state.corp.servers) {
@@ -1118,7 +1099,6 @@ export function createLookupRuntimeServices(deps: RuntimeDeps) {
     canHostProgramOnDaemon,
     hostedProgramStrengthModifier,
     icebreakerEncounterStrengthBonus,
-    canOverlayProgramOnInstalledProgramHost,
     rezzedCorpRootCardIds,
     visibleVirusCounterTargetIds,
     hasInstalledRunnerApDamageReducerHardware,

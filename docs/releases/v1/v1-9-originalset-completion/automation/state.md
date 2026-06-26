@@ -81,7 +81,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 
 - Zeitpunkt: 2026-05-14 14:24 CEST
 - Ergebnis: Weitere V1.9.22-Kartenfakten sind lokal verbindlich nachgezogen, ohne Runtime-, Catalog-, AI- oder Release-Promotion.
-- `Zetatech Software Installer`: Installkosten 0, MU 1; 2 restricted Recurring Credits fuer Programminstallationen, Runner-Zugstart-Refresh und Overlay-Installation ohne zusaetzliche MU sind als nicht-promotender Runtime-WIP umgesetzt.
+- `Zetatech Software Installer`: Installkosten 0, MU 1; 2 restricted Recurring Credits fuer Programminstallationen und Runner-Zugstart-Refresh sind umgesetzt. Die Credits koennen fuer eine Programminstallation genutzt werden, die Zetatech selbst per Trash-vor-Install ueberschreibt; es gibt keinen Host- oder MU-freien Overlay-Pfad.
 - `Flak`: Installkosten 4, Staerke 2, `1: Break AP subroutine`, `1: +1 Strength`; AP-Subroutine-Taxonomie und Standard-Breaker-Vertrag bestaetigt; Runtime-WIP ohne Promotion ist umgesetzt.
 - `Hammer`: Installkosten 2, MU 1, Staerke 2, `1: Break Wall subroutine`, `1: +1 Strength`; Runtime-WIP ohne Promotion ist umgesetzt mit deterministischem bis-zu-2-Stealth-Counter-Verlust bei einzelner Stealth-Quelle und Runner-privater Verteilungschoice bei mehreren Stealth-Quellen.
 - `Japanese Water Torture`: Installkosten 7, Staerke 2, `0: Break Wall subroutine`, `X: +X strength, and forgo your next X actions`; Runtime-WIP ohne Promotion ist umgesetzt mit Wall-Break, Pump und echter zuguebergreifender Future-Action-Debt.
@@ -89,7 +89,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - `Virizz`: Rez-Kosten 2, Staerke 4; Runtime-WIP ohne Promotion ist umgesetzt mit rest-of-run +1-Credit-Break-Kostenmodifier, LegalAction-Kostenprojektion und applyAction-Revalidierung.
 - Breaker-Taxonomie und Standard-Breaker-Vertrag: `Wall`/`AP` nach ICE-Subtype, `stun`/`hellbolt`/`knockout` nach benanntem Subroutine-Effekt/Text; Breaker nur installiert im aktuellen gerezzten Encounter, Staerke >= ICE-Staerke, einzelne passende ungebrochene Subroutine, sofortige Kosten, `applyAction`-Revalidierung, gebrochene Subroutinen werden beim Resolve uebersprungen.
 - `Japanese Water Torture`-Aktionsschuld: Der Runner verliert seine naechsten X normalen Aktionen, auch ueber Zugwechsel hinweg, bis die Schuld abgetragen ist.
-- Naechster sinnvoller Schnitt: finale V1.9.22-Promotion-Gates vorbereiten (Catalog/AI-Artefakte, Webclient-Version, Final Review); `Viral 15`, `Data Fort Reclamation` Rez-/Credit-Follow-up und `Zetatech Software Installer` Overlay sind als nicht-promotende Runtime-WIPs umgesetzt.
+- Naechster sinnvoller Schnitt: finale V1.9.22-Promotion-Gates vorbereiten (Catalog/AI-Artefakte, Webclient-Version, Final Review); `Viral 15`, `Data Fort Reclamation` Rez-/Credit-Follow-up und `Zetatech Software Installer` Overwrite per Trash-vor-Install sind als nicht-promotende Runtime-WIPs umgesetzt.
 
 ## Letzter Lauf
 
@@ -104,11 +104,11 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Cursor: V1.9.10 bis V1.9.22 abgeschlossen; kein naechster Release in dieser Automation.
 
 - Zeitpunkt: 2026-05-14 19:50 CEST
-- Ergebnis: V1.9.22 Zetatech-Overlay-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
+- Ergebnis: V1.9.22 Zetatech-Overwrite-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: `docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/zetatech-overlay-runtime-contract.md` begrenzt den Overlay-Pfad. `packages/engine/src/index.ts` bietet eine explizite `install_card`-LegalAction fuer Programme aus der Grip auf installiertes Zetatech an, setzt `hostedOn`, verbraucht keine zusaetzliche MU und zahlt aus Zetatech-Recurring-Credits vor Runner-Credits. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Umsetzung: `docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/zetatech-overwrite-runtime-contract.md` begrenzt den Overwrite-Pfad. Die Engine nutzt die normale Trash-vor-Install-Choice: Zetatech-Credits werden bezahlt, solange Zetatech noch installiert ist; danach wird Zetatech getrasht und das neue Programm ohne `hostedOn` normal installiert. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
 - Tests: `typecheck` pass; `engine` pass (309); `catalog` pass (44); `ai` pass (86); `server` pass (72); `web` pass (79); `test` pass; `lint` pass; `build` pass mit bekannter Turbopack-NFT-Warnung.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: zetatech overlay runtime wip`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
@@ -121,7 +121,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Umsetzung: `Data Fort Reclamation` oeffnet nach der privaten HQ-Install-Sequence ein zweites Korp-privates Rez-Fenster fuer neu installierte ICE/Root-Karten. Rez-Kosten werden zuerst aus dem 10-Credit-Effektpool und danach aus Korp-Credits bezahlt; PublicPayloads enthalten nur Counts und Credit-Summen. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
 - Tests: `typecheck` pass; `engine` pass (308); `catalog` pass (44).
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: data fort rez credit follow-up wip`); finaler Hash steht im Automationslaufbericht.
-- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Zetatech-Overwrite, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 19:27 CEST
 - Ergebnis: V1.9.22 Viral-15-Runtime-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
@@ -131,7 +131,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Umsetzung: `Viral 15` setzt nach ihrer Subroutine einen run-weiten 1-Credit-Jack-out-Tax. Beim Weiterlaufen nach dem Passieren gerezzter ICE öffnet die Engine eine Runner-private installierte-Programm-Trash-Choice; Jack-out zahlt den Tax und überspringt den Programmtrash. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
 - Tests: erster `engine`-Lauf rot wegen fehlender V0.99-Baseline im Jack-out-Smoke, danach `engine` pass (308). `catalog` war initial rot wegen ueberholter Erwartung an eine geplante No-Promotion-Karte, danach pass (44); `typecheck` pass.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: viral 15 runtime wip`); finaler Hash steht im Automationslaufbericht.
-- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overwrite, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 18:01 CEST
 - Ergebnis: V1.9.22 Data-Fort-Reclamation-Install-Sequence-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
@@ -141,7 +141,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Umsetzung: `Data Fort Reclamation` oeffnet beim Scoren eine Korp-private HQ-Choice fuer bis zu 4 installierbare Karten, erstellt beim Resolve ein neues Remote und installiert ausgewaehlte ICE/Root-Karten verdeckt. Optionales Rezzen und echte temporaere Credit-Ausgaben bleiben deferred. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
 - Tests: `engine` pass (307); `catalog` pass (44); `typecheck` pass.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: data fort install sequence wip`); finaler Hash steht im Automationslaufbericht.
-- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Viral 15`, Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Viral 15`, Data-Fort-Rez-/Credit-Follow-up, Zetatech-Overwrite, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 17:52 CEST
 - Ergebnis: V1.9.22 Data-Fort-Reclamation-Runtime-Vertrag erstellt; Cursor bleibt auf V1.9.22 `implementing`.
@@ -151,17 +151,17 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Umsetzung: `docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/data-fort-reclamation-runtime-contract.md` beschreibt den naechsten engen Codepfad: On-score Korp-private HQ-Choice bis 4 Karten, neues Remote, Install-Sequenz, temporaerer 10-Credit-Pool plus Korp-Credits, side-sichere PublicPayloads und Replay/StateHash-Pflichten. Optionales Rezzen bleibt fuer diesen ersten WIP deferred. Keine Runtime-, Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
 - Tests: keine Codeaenderung in diesem Teilschnitt; letzter breiter Verify nach Zetatech war gruen.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: data fort contract wip`); finaler Hash steht im Automationslaufbericht.
-- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation` Codeumsetzung, `Viral 15`, Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation` Codeumsetzung, `Viral 15`, Zetatech-Overwrite, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 17:43 CEST
 - Ergebnis: V1.9.22 Zetatech-Software-Installer-Recurring-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: `Zetatech Software Installer` hat 2 restricted Recurring Credits fuer Programminstallationen und Runner-Zugstart-Refresh erhalten. Overlay-Installation bleibt ohne LegalAction bis zum separaten State-Transition-Vertrag. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
+- Umsetzung: `Zetatech Software Installer` hat 2 restricted Recurring Credits fuer Programminstallationen und Runner-Zugstart-Refresh erhalten. Overwrite-Installation bleibt ohne LegalAction bis zum separaten State-Transition-Vertrag. Keine Catalog-, AI-, Webclient- oder Release-Promotion wurde vorgenommen.
 - Tests: `engine` initial rot wegen fehlender V0.99-Baseline im Refresh-Smoke, danach pass (306).
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: zetatech recurring install credits wip`); finaler Hash steht im Automationslaufbericht.
-- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation`, `Viral 15`, Zetatech-Overlay, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
+- Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil `Data Fort Reclamation`, `Viral 15`, Zetatech-Overwrite, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.
 
 - Zeitpunkt: 2026-05-14 17:35 CEST
 - Ergebnis: V1.9.22 Haunting-Inquisition-Run-Lock-WIP umgesetzt; Cursor bleibt auf V1.9.22 `implementing`.
@@ -228,7 +228,7 @@ Ein aktiver Lock bedeutet: kein zweiter paralleler Lauf. Ein alter Lock darf nur
 - Release: V1.9.22
 - Phase vorher: implementing
 - Phase nachher: implementing
-- Umsetzung: `Zetatech Software Installer` hat eine install-only Runtime-Definition mit Installkosten 0 und MU 1 erhalten. Die Restricted-Credit- und Overlay-Faehigkeit bleibt ohne LegalAction, bis Zahlungsfenster und Overlay-Zustandswechsel technisch bestaetigt sind. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
+- Umsetzung: `Zetatech Software Installer` hat eine install-only Runtime-Definition mit Installkosten 0 und MU 1 erhalten. Die Restricted-Credit- und Overwrite-Faehigkeit bleibt ohne LegalAction, bis Zahlungsfenster und Ueberschreibungs-Zustandswechsel technisch bestaetigt sind. Keine Catalog-, AI- oder Release-Promotion wurde vorgenommen.
 - Tests: `engine` pass (300), `catalog` pass (44), `typecheck` pass.
 - Git: WIP-Checkpoint fuer diesen Lauf vorgesehen (`WIP V1.9.22: zetatech install-only wip`); finaler Hash steht im Automationslaufbericht.
 - Cursor: V1.9.22 bleibt aktueller Release; Completion-Gate ist nicht erfuellt, weil weitere Resolver, finale AI-Promotion-Artefakte, Webclient-Version und Final Review offen sind.

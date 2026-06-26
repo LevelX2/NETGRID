@@ -31,4 +31,4 @@ Diese Familie dokumentiert den Per-Card-Longtail-Abschluss mit Requirements, Spe
 - `security-purge-slice-preflight.md`
 - `source-scan-review.md`
 - `spoiler-value-audit-2026-05-14.md`
-- `zetatech-overlay-runtime-contract.md`
+- `zetatech-overwrite-runtime-contract.md`

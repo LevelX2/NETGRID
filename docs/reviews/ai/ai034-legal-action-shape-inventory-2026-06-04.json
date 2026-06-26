@@ -129,7 +129,7 @@
     {
       "actionType": "install_card",
       "sourceKindCandidates": ["card"],
-      "payloadKeys": ["cardId", "placement", "serverId", "selectedCardId", "selectedSubtype", "hostOnCardId", "targetCardId", "iceInstallTotalCost", "iceInstallReductionSourceDefinitionIds", "runnerProgramTrashBeforeInstall", "xValue", "v1922EdgerunnerTempsInstallAction", "v1922ZetatechOverlayInstall"],
+      "payloadKeys": ["cardId", "placement", "serverId", "selectedCardId", "selectedSubtype", "hostOnCardId", "targetCardId", "iceInstallTotalCost", "iceInstallReductionSourceDefinitionIds", "runnerProgramTrashBeforeInstall", "runnerProgramTrashBeforeInstallCostsPrepaid", "xValue", "v1922EdgerunnerTempsInstallAction"],
       "classification": "card",
       "notes": ["Install target variants can be encoded in payload and actionId; selectedCardId and selectedSubtype are not retained by the current AI DTO."]
     },

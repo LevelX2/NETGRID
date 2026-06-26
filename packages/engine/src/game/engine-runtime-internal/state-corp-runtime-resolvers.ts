@@ -246,7 +246,6 @@ import {
 } from "../turn/runner-install-context-actions";
 import {
   buildRunnerHostedProgramInstallAction,
-  buildRunnerZetatechOverlayInstallAction,
 } from "../turn/runner-hosted-install-actions";
 import {
   buildRunnerProgramTrashBeforeInstallAction,
@@ -616,7 +615,7 @@ import {
   HQ_CARD_TRASH_EVENT_SOURCE,
   HQ_ACCESS_RETAIN_EVENT_SOURCE,
   PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
-  PROGRAM_INSTALLER_OVERLAY_HOST_SOURCE,
+  ZETATECH_SOFTWARE_INSTALLER_SOURCE,
 } from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
@@ -783,7 +782,6 @@ export function createStateCorpRuntimeResolvers(deps: RuntimeDeps) {
     canHostProgramOnDaemon,
     canInstallCorpRootCardInServer,
     canInstallRunnerProgramFromZone,
-    canOverlayProgramOnInstalledProgramHost,
     canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
     cardHasSubtype,
     cardImplementationAgendaPointInstallCost,

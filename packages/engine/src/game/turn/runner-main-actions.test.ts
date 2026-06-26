@@ -186,9 +186,6 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
       buildRunnerProgramTrashBeforeInstallAction: unexpected(
         "program trash before install",
       ),
-      buildRunnerZetatechOverlayInstallAction: unexpected(
-        "zetatech overlay install",
-      ),
       buildRunnerHostedProgramInstallAction: unexpected(
         "hosted program install",
       ),
@@ -252,7 +249,6 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
     },
     install: {
       shouldOfferRunnerProgramTrashBeforeInstall: () => false,
-      canOverlayProgramOnInstalledProgramHost: () => false,
       canHostProgramOnDaemon: () => false,
       cardImplementationAgendaPointInstallCost: () => 0,
       pickRunnerAgendaForAgendaPointCost: () => undefined,

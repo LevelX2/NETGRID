@@ -8,7 +8,7 @@ Status: planned
 | Scope | Genau 47 Zielkarten | Catalog-WIP-Guard gruen |
 | No-Promotion | Keine V1.9.22-Karte im Runtime-/AI-Releasepool vor Gate | Catalog-WIP-Guard gruen |
 | Resolver | Jede Karte hat Adapter oder Blocker | Runtime-Definitionen fuer 9 Runner-Hardware-, 10 Runner-Event-, 14 Runner-Programm- und 14 Corp-Longtail-Zielkarten; neu: `Viral 15` Jack-out-Tax und Program-trash-Choice |
-| Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Sieben nicht-Breaker-Programme sind install-only umgesetzt; `Zetatech Software Installer` hat 2 restricted Recurring Credits fuer Programminstallationen plus Refresh und Overlay-Installation ohne zusaetzliche MU; `Newsgroup Filter` ist mit Installation plus `[A]: Gain 2 Credits` umgesetzt; `Shield` ist als enger Install-/Net-Damage-Prevention-WIP umgesetzt; `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` haben enge Breaker-Smokes; offene Punkte sind AI-, Catalog- und Release-Promotion-Gates |
+| Runner-Programme | Programminstallation, MU und Breaker-Werte nur mit lokaler Wertbasis | Sieben nicht-Breaker-Programme sind install-only umgesetzt; `Zetatech Software Installer` hat 2 restricted Recurring Credits fuer Programminstallationen plus Refresh und Overwrite per Trash-vor-Install; `Newsgroup Filter` ist mit Installation plus `[A]: Gain 2 Credits` umgesetzt; `Shield` ist als enger Install-/Net-Damage-Prevention-WIP umgesetzt; `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` haben enge Breaker-Smokes; offene Punkte sind AI-, Catalog- und Release-Promotion-Gates |
 | Corp-Longtail | Agenda-, ICE- und Operationskarten nur mit konkreten Resolvern | `Corporate Retreat`, `Corporate War`, `Data Fort Reclamation`, `Marine Arcology`, `Political Overthrow`, `Security Purge`, `Haunting Inquisition`, `Zombie`, `Tutor`, `Viral 15`, `Virizz`, `Edgerunner, Inc., Temps`, `Off-Site Backups` und `Planning Consultants` haben enge Runtime-WIP-Resolver; Release-Promotion bleibt bis Final-Gates geschlossen |
 | LegalAction/applyAction | Side, Timing, Quelle, Ziel, Kosten und Choices revalidiert | 9/9 Runner-Hardware-Install-LegalActions, sieben install-only Runner-Programme, `Zetatech Software Installer` Recurring-Installationskosten, `Shield`, `Flak`, `Hammer`, `Japanese Water Torture`, `Reflector`, alle 10 Runner-Event-Resolver und alle 14 Corp-Longtail-Resolver inkl. `Viral 15` Jack-out-Kosten und Runner-privater Program-trash-Choice gruen |
 | Visibility | Keine Hidden-Info-Leaks ueber PlayerViews/PublicEvents/Reconnect/Undo | 9/9 Runner-Hardware-Install-PublicPayloads/PlayerViews, sieben install-only Runner-Programme, `Zetatech Software Installer`, `Shield`-Prevention-Choice, `Flak`-/`Hammer`-/`Japanese Water Torture`-/`Reflector`-PublicPayloads sowie alle 10 Runner-Event-Resolver- und 14 Corp-Longtail-PublicPayloads gruen; `Viral 15` zeigt dem Public-Payload nur Count-/Kontextdaten |
@@ -27,9 +27,9 @@ Update 2026-05-14 17:43 CEST: `Zetatech Software Installer` hat restricted Recur
 Update 2026-05-14 18:01 CEST: `Data Fort Reclamation` hat eine Korp-private HQ-Install-Sequence als nicht-promotenden WIP erhalten. Neuer Test: `packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::scores Data Fort Reclamation as a private HQ install sequence`; erster `engine`-Lauf rot wegen fehlender Runtime-Definition und Guards, danach `engine` gruen mit 307 Tests, `catalog` 44 und `typecheck` gruen.
 Update 2026-05-14 19:27 CEST: `Viral 15` hat einen nicht-promotenden Corp-ICE-Runtime-WIP mit run-weitem 1-Credit-Jack-out-Tax und Runner-privater Programmtrash-Choice nach dem Passieren gerezzter ICE erhalten. Neuer Test: `packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP::rezzes Viral 15 and gates pass-ice program trash behind a paid jack-out window`; erster `engine`-Lauf rot wegen fehlender V0.99-Jack-out-Window-Baseline im Smoke, danach `engine` gruen mit 308 Tests. `catalog` war initial rot wegen ueberholter geplanter-Karte-Erwartung, danach gruen mit 44 Tests; `typecheck` gruen.
 Update 2026-05-14 19:43 CEST: `Data Fort Reclamation` hat den Rez-/Credit-Follow-up erhalten. Der bestehende Smoke deckt jetzt nach der privaten HQ-Install-Sequence ein zweites Korp-privates Rez-Fenster, temporaeren Creditverbrauch zuerst, Korp-Credit-Fallback, Wrong-Side-Revalidation, side-sichere PublicPayloads und Replay/StateHash ab; `typecheck`, `engine` 308 und `catalog` 44 gruen.
-Update 2026-05-14 19:50 CEST: `Zetatech Software Installer` hat einen engen Overlay-Runtime-WIP nach `docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/zetatech-overlay-runtime-contract.md`. Der neue Smoke deckt Overlay-Install-LegalAction, Wrong-Side/Stale, Recurring-Credit-Zahlung, MU/`hostedOn`, PublicPayload und Replay/StateHash ab; `typecheck`, `engine` 309, `catalog` 44, `ai` 86, `server` 72, `web` 79, `test`, `lint` und `build` gruen.
+Update 2026-06-26: `Zetatech Software Installer` hat einen korrigierten Overwrite-Runtime-WIP nach `docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/zetatech-overwrite-runtime-contract.md`. Der Smoke deckt Trash-vor-Install, Wrong-Side/Stale, Recurring-Credit-Zahlung vor dem Trash, normale ungehostete Installation, PublicPayload und Replay/StateHash ab.
 | Server/Web | Webclient-Version erst bei Abschluss | Web-Catalog-No-Promotion- und Webclient-Version-Guard gruen; Webclient-Version bleibt Folgearbeit fuer Abschluss |
-| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Gruen nach Zetatech-Overlay: engine 309, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter Turbopack-NFT-Warnung |
+| Full Checks | catalog, engine, ai, server, web, typecheck, test, lint, build | Historisch gruen nach V1.9.22-Abschluss: engine 309, catalog 44, ai 86, server 72, web 79, typecheck, test, lint und build; Build nur mit bekannter Turbopack-NFT-Warnung |
 
 ## Tutor 2026-05-14 16:51 CEST
 
@@ -120,11 +120,11 @@ Update 2026-05-14 19:50 CEST: `Zetatech Software Installer` hat einen engen Over
 ## Zetatech Software Installer 2026-05-14 15:36 CEST
 
 - Zusatzschnitt: `Zetatech Software Installer` ist als install-only Runner-Programm-Runtime-WIP mit Installkosten 0 und MU 1 umgesetzt.
-- Zusatzabdeckung: Install-LegalAction, Wrong-Side-/Stale-Revalidation, Memory-Kosten, keine Restricted-Credit-/Overlay-Faehigkeit ohne Vertrag, PublicPayload/PlayerViews und Replay/StateHash.
+- Zusatzabdeckung: Install-LegalAction, Wrong-Side-/Stale-Revalidation, Memory-Kosten, keine Restricted-Credit-/Overwrite-Faehigkeit ohne Vertrag, PublicPayload/PlayerViews und Replay/StateHash.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task engine`: pass, 300 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task catalog`: pass, 44 Tests.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task typecheck`: pass.
-- Follow-up 2026-05-14 17:43 CEST: 2 restricted Recurring Credits fuer Programminstallationen und Runner-Zugstart-Refresh umgesetzt; Overlay bleibt gated. `engine` initial rot wegen fehlender V0.99-Baseline im Refresh-Smoke, danach pass mit 306 Tests.
+- Follow-up 2026-05-14 17:43 CEST: 2 restricted Recurring Credits fuer Programminstallationen und Runner-Zugstart-Refresh umgesetzt; Overwrite bleibt gated. `engine` initial rot wegen fehlender V0.99-Baseline im Refresh-Smoke, danach pass mit 306 Tests.
 
 ## Shield 2026-05-14 00:27 CEST
 
@@ -328,4 +328,3 @@ Update 2026-05-14 19:50 CEST: `Zetatech Software Installer` hat einen engen Over
 - `scripts/automation/v1-9-install-and-check.ps1 -Task test`: pass, Exit 0.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task lint`: pass.
 - `scripts/automation/v1-9-install-and-check.ps1 -Task build`: pass mit bekannter nicht-blockierender Turbopack-NFT-Warnung.
-

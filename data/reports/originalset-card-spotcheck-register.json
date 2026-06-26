@@ -1702,7 +1702,7 @@
           "cardId": "onr_v1_075_zetatech-software-installer",
           "title": "Zetatech Software Installer",
           "spotcheckStatus": "completed",
-          "result": "existing_overlay_program_install_path_regression_green",
+          "result": "existing_overwrite_program_install_path_regression_green",
           "followUpStatus": "fixed_and_tested"
         },
         {

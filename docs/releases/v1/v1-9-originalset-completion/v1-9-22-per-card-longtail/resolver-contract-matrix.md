@@ -16,7 +16,7 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 - 9/47 Runner-Hardwarekarten haben bereits einen eng begrenzten Installationspfad mit LegalAction, Wrong-Side-/Stale-Revalidation, Visibility und Replay/StateHash.
 - 0/47 Karten sind für Release-Promotion bereit; alle neuen Laufzeitpfade bleiben nicht-promotende WIPs.
 - Errata 1.70 und die Nutzerklärung vom 2026-05-14 reduzieren mehrere fachliche Lücken. `Newsgroup Filter` ist inhaltlich geklärt: Runner-Programm, Installkosten 5, MU 2, `[A]: Gain 2 Credits`. `Zetatech Software Installer` ist jetzt mit Installkosten 0 / MU 1 bestätigt. `Virizz` ist jetzt mit Rez-Kosten 2 / Stärke 4 und runweitem +1-Break-Kostenmodifier bestätigt. `Viral 15` ist jetzt mit Rez-Kosten 5 / Stärke 3, runweitem Jack-out-Tax und Runner-privatem Program-trash-Trigger umgesetzt. `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` haben jetzt bestätigte Installkosten, Stärke, Breaker-Kosten, Subroutine-Taxonomie und Standard-Breaker-Vertrag.
-- Der aktive Blocker bleibt fachlich korrekt, aber enger: Alle 47 Zielkarten haben jetzt nicht-promotende Runtime-WIP-Abdeckung; vor V1.9.22-Abschluss fehlen weiterhin Zetatech-Overlay, AI-/Catalog-/Release-Promotion, Webclient-Version und Final Review.
+- Der aktive Blocker bleibt fachlich korrekt, aber enger: Alle 47 Zielkarten haben jetzt nicht-promotende Runtime-WIP-Abdeckung; vor V1.9.22-Abschluss fehlen weiterhin Zetatech-Overwrite per Trash-vor-Install, AI-/Catalog-/Release-Promotion, Webclient-Version und Final Review.
 
 ## Quellenbasis
 
@@ -62,7 +62,7 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 | Shield | Programm/MU; Damage-Prevention und Turn-Reset als Teilnotiz | Installkosten, MU, Damage-Typ, Prevention-Betrag, Timingfenster, Limit pro Zug, Reset, Events, Replay/StateHash, AI |
 | Speed Trap | Installkosten 0, MU 1; Errata: nur nach Rez eines Upgrades/Nodes, nach letztem ICE erfolgreicher Run ohne Access | Rez-Interrupt-Projektion, Successful-without-access-State, Choice-Flow, Events, Replay/StateHash, AI |
 | Startup Immolator | Installkosten 0, MU 1; Errata: nur während eines Runs, nach dem Passieren von ICE, wenn alle Subroutinen gebrochen wurden | Tap-State, Broken-all-Subroutines-Tracking, Passed-ICE-Trigger, ICE-Ziel, Events, Replay/StateHash, AI |
-| Zetatech Software Installer | Nutzerklärung: Installkosten 0, MU 1; Errata: 2 recurring Credits aus der Bank für Programminstallation, Refresh zu Beginn des nächsten Runner-Zugs, Overlay-Sonderfall bekannt | Programminstall-Zahlungsfenster, Overlay-Zustandswechsel, Events, Replay/StateHash, AI |
+| Zetatech Software Installer | Nutzerklärung: Installkosten 0, MU 1; Errata: 2 recurring Credits aus der Bank für Programminstallation, Refresh zu Beginn des nächsten Runner-Zugs, Overwrite-Sonderfall bekannt | Programminstall-Zahlungsfenster, Overwrite per Trash-vor-Install, Events, Replay/StateHash, AI |
 
 ### Runner-Events
 
@@ -125,5 +125,5 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 ## Nächste Entscheidungsoptionen
 
 1. `Flak`, `Hammer`, `Japanese Water Torture` und `Reflector` sind fachlich bereit für enge nicht-promotende Runtime-Schnitte; vor Promotion fehlen weiterhin Tests, AI-Fallback und Release-Gates.
-2. Für `Zetatech Software Installer` bleibt das Overlay-Zustandsmodell offen.
+2. Für `Zetatech Software Installer` bleibt das Overwrite-Zustandsmodell offen.
 3. Bis dieses Follow-up und die finalen AI-/Catalog-/Webclient-/Review-Gates geschrieben und getestet sind, bleiben Catalog-, AI- und Release-Promotion geschlossen.

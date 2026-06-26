@@ -1,10 +1,7 @@
 import type { CardDefinition, CardInstanceId } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { createGame } from "../create-game";
-import {
-  buildRunnerHostedProgramInstallAction,
-  buildRunnerZetatechOverlayInstallAction,
-} from "./runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "./runner-hosted-install-actions";
 
 function runnerProgramDefinition(
   id: string,
@@ -62,50 +59,7 @@ describe("runner hosted install action builders", () => {
       ],
       visibility: "public",
     });
-    expect(action.payload?.programOverlayInstallRequested).toBeUndefined();
     expect(state).toEqual(before);
   });
 
-  it("builds the stable Zetatech overlay install action without mutating state", () => {
-    const state = createGame({
-      seed: "arch-10-runner-overlay-install",
-      setupMode: "completed",
-    });
-    const before = structuredClone(state);
-    const cardId = "runner_overlay_program" as CardInstanceId;
-    const hostCardId = "zetatech_host" as CardInstanceId;
-
-    const action = buildRunnerZetatechOverlayInstallAction(state, {
-      cardId,
-      definition: runnerProgramDefinition(cardId, "Overlay Program", 2),
-      hostCardId,
-      hostTitle: "Zetatech Software Installer",
-    });
-
-    expect(action).toMatchObject({
-      actionId:
-        "runner.install_card.runner_overlay_program.runner_overlay_program.zetatech_host",
-      side: "runner",
-      type: "install_card",
-      label: "Overlay Program \u00fcber Zetatech Software Installer installieren",
-      source: cardId,
-      costs: [{ clicks: 1, credits: 2 }],
-      payload: {
-        cardId,
-        hostOnCardId: hostCardId,
-        programOverlayInstallRequested: true,
-      },
-      targetRequirements: [
-        {
-          id: "programOverlayHost",
-          kind: "card",
-          side: "runner",
-          zoneScope: ["runner.rig.programs"],
-          visibility: "public",
-        },
-      ],
-      visibility: "public",
-    });
-    expect(state).toEqual(before);
-  });
 });

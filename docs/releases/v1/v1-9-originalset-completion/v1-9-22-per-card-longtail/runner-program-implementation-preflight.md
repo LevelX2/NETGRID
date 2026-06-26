@@ -5,7 +5,7 @@ Status: WIP-Preflight, Newsgroup-Filter install-only umgesetzt, keine Catalog-/A
 
 ## Befund
 
-`data/rules/v1922-local-card-facts.json` enthaelt fuer 14 Runner-Programme lokale Kosten-/MU-/Effektkerne. Seit den Shield-, install-only-, Breaker- und Zetatech-Schnitten vom 2026-05-14 bleibt nur noch der `Zetatech Software Installer`-Overlay-Vertrag als Runner-Programm-Vollvertragsluecke neben finaler Promotion offen.
+`data/rules/v1922-local-card-facts.json` enthaelt fuer 14 Runner-Programme lokale Kosten-/MU-/Effektkerne. Seit den Shield-, install-only-, Breaker- und Zetatech-Schnitten vom 2026-05-14 bleibt nur noch der `Zetatech Software Installer`-Overwrite-Vertrag als Runner-Programm-Vollvertragsluecke neben finaler Promotion offen.
 
 Die erneute historische Suche in `docs/releases/v1/card-releases/v1-0-5k-card-release/requirements.md`, `docs/releases/v1/card-releases/v1-0-5k-card-release/implementation-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/resolver-contract-matrix.md`, `data/rules/v1922-resolver-contracts.json` und `data/rules/v1922-resolver-contract-inventory.json` bestaetigt:
 
@@ -26,7 +26,7 @@ Die erneute historische Suche in `docs/releases/v1/card-releases/v1-0-5k-card-re
 
 - Breaker (`Flak`, `Hammer`, `Japanese Water Torture`, `Reflector`) brauchen Subroutine-Kategorien, Break-/Pump-LegalActions und teils Folgeeffekte. Alle vier haben durch Nutzerklaerung vom 2026-05-14 jetzt bestaetigte Installkosten, Staerke, Breaker-Kosten, Subroutine-Taxonomie und Standard-Breaker-Vertrag. `Hammer` verliert beim Hammer-Break insgesamt bis zu 2 von Stealth-Karten, mit Runner-Verteilung falls mehrere Quellen verfuegbar sind. `Japanese Water Torture`-Aktionsschuld bleibt ueber Zugwechsel bestehen, bis die naechsten X normalen Runner-Aktionen verloren wurden.
 - Run-Reaktionskarten (`False Echo`, `Netspace Inverter`, `Speed Trap`, `Startup Immolator`) brauchen konkrete Triggerfenster und Ziel-/Reihenfolge-Vertraege.
-- `Zetatech Software Installer` hat durch Nutzerklaerung vom 2026-05-14 Installkosten 0 und MU 1; restricted Recurring Credits fuer Programminstallationen und Runner-Zugstart-Refresh sind als nicht-promotender Runtime-WIP umgesetzt. Fachlich offen bleibt der Overlay-Vertrag.
+- `Zetatech Software Installer` hat durch Nutzerklaerung vom 2026-05-14 Installkosten 0 und MU 1; restricted Recurring Credits fuer Programminstallationen und Runner-Zugstart-Refresh sind als nicht-promotender Runtime-WIP umgesetzt. Fachlich offen bleibt der Overwrite-Vertrag.
 
 ## Entscheidung
 

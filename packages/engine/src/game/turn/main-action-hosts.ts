@@ -184,8 +184,6 @@ export function createMainActionHostComposition(
           actions.buildRunnerProgramInstallAction,
         buildRunnerProgramTrashBeforeInstallAction:
           actions.buildRunnerProgramTrashBeforeInstallAction,
-        buildRunnerZetatechOverlayInstallAction:
-          actions.buildRunnerZetatechOverlayInstallAction,
         buildRunnerHostedProgramInstallAction:
           actions.buildRunnerHostedProgramInstallAction,
         buildRunnerAgendaPointInstallAction:
@@ -250,8 +248,6 @@ export function createMainActionHostComposition(
       install: {
         shouldOfferRunnerProgramTrashBeforeInstall:
           install.shouldOfferRunnerProgramTrashBeforeInstall,
-        canOverlayProgramOnInstalledProgramHost:
-          install.canOverlayProgramOnInstalledProgramHost,
         canHostProgramOnDaemon: install.canHostProgramOnDaemon,
         cardImplementationAgendaPointInstallCost:
           install.cardImplementationAgendaPointInstallCost,

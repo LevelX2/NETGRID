@@ -50,7 +50,6 @@ export {
 } from "./runner-install-context-actions";
 export {
   buildRunnerHostedProgramInstallAction,
-  buildRunnerZetatechOverlayInstallAction,
   type RunnerInstallToHostActionInput,
 } from "./runner-hosted-install-actions";
 export {

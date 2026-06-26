@@ -15,7 +15,7 @@ Nach dem Haunting-Inquisition-WIP blieb eine Corp-ICE-Zielkarte ohne engen Runti
 
 ## Kleinste Kandidaten
 
-Kein Corp-ICE-Kandidat bleibt ohne Runtime-WIP. Der naechste V1.9.22-Schnitt liegt ausserhalb dieses ICE-Preflights: `Zetatech Software Installer` Overlay.
+Kein Corp-ICE-Kandidat bleibt ohne Runtime-WIP. Der naechste V1.9.22-Schnitt liegt ausserhalb dieses ICE-Preflights: `Zetatech Software Installer` Overwrite per Trash-vor-Install.
 
 ## Entscheidung
 
@@ -25,5 +25,5 @@ Der fruehere Haunting-Action-Lock-Befund ist durch den nicht-promotenden Runtime
 
 Ein weiterer ICE-Code-Schnitt ist in diesem Preflight derzeit nicht der naechste Engpass. Fuer V1.9.22-Abschluss bleiben ausserhalb dieses Dokuments:
 
-1. `Zetatech Software Installer` Overlay-Zustandsmodell,
+1. `Zetatech Software Installer` Overwrite-Zustandsmodell,
 2. finale AI-/Catalog-/Webclient-/Review-Gates.

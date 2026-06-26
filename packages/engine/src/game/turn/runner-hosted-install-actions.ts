@@ -15,12 +15,10 @@ export type RunnerInstallToHostActionInput = {
 
 function runnerInstallToHostPayload(
   input: RunnerInstallToHostActionInput,
-  overlayInstall = false,
 ): NonNullable<LegalAction["payload"]> {
   return {
     cardId: input.cardId,
     hostOnCardId: input.hostCardId,
-    ...(overlayInstall ? { programOverlayInstallRequested: true } : {}),
   };
 }
 
@@ -40,32 +38,6 @@ export function buildRunnerHostedProgramInstallAction(
       targetRequirements: [
         {
           id: "hostProgram",
-          kind: "card",
-          side: "runner",
-          zoneScope: ["runner.rig.programs"],
-          visibility: "public",
-        },
-      ],
-    },
-  );
-}
-
-export function buildRunnerZetatechOverlayInstallAction(
-  state: GameState,
-  input: RunnerInstallToHostActionInput,
-): LegalAction {
-  return buildLegalAction(
-    state,
-    "runner",
-    "install_card",
-    `${input.definition.title} \u00fcber ${input.hostTitle} installieren`,
-    input.cardId,
-    [{ clicks: 1, credits: input.definition.installCost ?? 0 }],
-    runnerInstallToHostPayload(input, true),
-    {
-      targetRequirements: [
-        {
-          id: "programOverlayHost",
           kind: "card",
           side: "runner",
           zoneScope: ["runner.rig.programs"],
