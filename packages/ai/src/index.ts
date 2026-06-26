@@ -289,9 +289,6 @@ import {
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
 } from "./simulation/runner-run-target-context";
 import {
-  createLegacyActionScoringComposition,
-} from "./legacy/legacy-action-scoring-composition";
-import {
   listV143BenchmarkProfiles,
   listV143ExploitFixtures,
 } from "./simulation/v143-data";
@@ -1059,32 +1056,18 @@ const {
   corpTaggedPayoffWindowPassiveActionPenalty,
   scoreFromComponents: semanticRuntimeScoreFromComponents,
 });
-const { scoreRunnerAction, scoreCorpAction } =
-  createLegacyActionScoringComposition({
-    rolesForAction,
-    rolesForCardId,
-    runnerProgramInstallTrashAssessment,
-    runnerProgramInstallTrashAssessmentForAction,
-    runnerProgramInstallDisplacementPenalty,
-    runnerRemoteTrashAccessContext,
-    encounterBreakReserveContext,
-    pumpViabilityAssessment,
-    runnerMuPressureInstallPriorityBonus,
-    runnerMuPressureFundingPriorityBonus,
-    runnerPersistentInstallEvaluationForAction,
-    runnerPersistentInstallLegacyScoreDelta,
-    corpTagPunishOntologyAssessmentForAction,
-    corpOntologyPayoffAvailableForTagSource,
-  });
 const {
   semanticRuntimeRunnerSourceCardAnswerRole,
   runnerSelfDamageGuardedDecision,
   runnerSelfDamageImmediateWinSemanticChoice,
   runnerSelfDamageSurvivalAssessment,
   semanticRuntimeActionExclusion,
+  scoreRunnerAction,
+  scoreCorpAction,
 } = createSemanticRuntimeActionExclusionComposition({
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
   sourceDefinitionIdForAction,
+  rolesForAction,
   rolesForCardId,
   runtimeDefinition: runtimeCardDefinitionForAi,
   demoDefinition: demoCardDefinitionForAi,
@@ -1100,11 +1083,18 @@ const {
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
   fakedHitCardId: FAKED_HIT_CARD_ID,
   badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
-  legacyActionScoring: {
-    extractAiFeatures,
-    scoreRunnerAction,
-    scoreCorpAction,
-  },
+  extractAiFeatures,
+  runnerProgramInstallTrashAssessment,
+  runnerProgramInstallTrashAssessmentForAction,
+  runnerProgramInstallDisplacementPenalty,
+  runnerRemoteTrashAccessContext,
+  encounterBreakReserveContext,
+  runnerMuPressureInstallPriorityBonus,
+  runnerMuPressureFundingPriorityBonus,
+  runnerPersistentInstallEvaluationForAction,
+  runnerPersistentInstallLegacyScoreDelta,
+  corpTagPunishOntologyAssessmentForAction,
+  corpOntologyPayoffAvailableForTagSource,
   compareAction,
   selectedChoicesForDecision,
   scrubEvidence,

@@ -4,6 +4,10 @@ import {
   type LegacyActionScorerDependencies,
 } from "../legacy/legacy-action-scorer";
 import {
+  createLegacyActionScoringComposition,
+  type LegacyActionScoringCompositionDependencies,
+} from "../legacy/legacy-action-scoring-composition";
+import {
   createRunnerBlinkBreakExclusionContext,
   type RunnerBlinkBreakExclusionDependencies,
 } from "./runner-blink-break-exclusion";
@@ -54,6 +58,8 @@ export type SemanticRuntimeActionExclusionCompositionDependencies =
     > &
     Omit<RunnerBlinkBreakExclusionDependencies, "shouldAvoidRun"> &
     Omit<RunnerEncounterActionExclusionDependencies, "blinkBreakExclusion"> &
+    LegacyActionScoringCompositionDependencies &
+    Pick<LegacyActionScorerDependencies, "extractAiFeatures"> &
     Omit<
       SemanticRuntimeActionExclusionDependencies,
       | "runnerEncounterActionExclusion"
@@ -74,14 +80,25 @@ export type SemanticRuntimeActionExclusionCompositionDependencies =
       hintForDefinitionId: (
         definitionId: string,
       ) => ActionExclusionHint | undefined;
-      legacyActionScoring: LegacyActionScorerDependencies;
     };
 
 export function createSemanticRuntimeActionExclusionComposition(
   dependencies: SemanticRuntimeActionExclusionCompositionDependencies,
 ): RunnerSourceCardAnswerRoleContext &
   Omit<RunnerSelfDamageContext, "runnerSelfDamageSurvivalExclusion"> &
-  ReturnType<typeof createSemanticRuntimeActionExclusionContext> {
+  ReturnType<typeof createSemanticRuntimeActionExclusionContext> &
+  Pick<
+    LegacyActionScorerDependencies,
+    "scoreRunnerAction" | "scoreCorpAction"
+  > {
+  const { scoreRunnerAction, scoreCorpAction } =
+    createLegacyActionScoringComposition(dependencies);
+  const legacyActionScoring = {
+    extractAiFeatures: dependencies.extractAiFeatures,
+    scoreRunnerAction,
+    scoreCorpAction,
+  };
+
   const {
     semanticRuntimeRunnerSourceCardAnswerRole,
   } = createRunnerSourceCardAnswerRoleContext({
@@ -133,7 +150,7 @@ export function createSemanticRuntimeActionExclusionComposition(
     fakedHitCardId: dependencies.fakedHitCardId,
     badPublicityLossThreshold: dependencies.badPublicityLossThreshold,
     scoreRunnerActions: (input) =>
-      scoreActionsForLegacy(input, "runner", dependencies.legacyActionScoring),
+      scoreActionsForLegacy(input, "runner", legacyActionScoring),
     compareAction: dependencies.compareAction,
     selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
     scrubEvidence: dependencies.scrubEvidence,
@@ -167,5 +184,7 @@ export function createSemanticRuntimeActionExclusionComposition(
     runnerSelfDamageImmediateWinSemanticChoice,
     runnerSelfDamageSurvivalAssessment,
     semanticRuntimeActionExclusion,
+    scoreRunnerAction,
+    scoreCorpAction,
   };
 }
