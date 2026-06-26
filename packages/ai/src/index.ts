@@ -82,7 +82,6 @@ import { createRunnerRemoteThreatTargetingComposition } from "./simulation/runne
 import { createRunnerSetupCoverageComposition } from "./simulation/runner-setup-coverage-composition";
 import { createRunnerInstallClassificationComposition } from "./simulation/runner-install-classification-composition";
 import { createRunnerSimulationDiagnosticsComposition } from "./simulation/runner-simulation-diagnostics-composition";
-import { createRunnerBreakerCoverageComposition } from "./simulation/runner-breaker-coverage-composition";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -886,6 +885,9 @@ const {
   runnerReserveDiagnosticsForSimulationAction,
   runnerHandUseDiagnosticsForSimulationAction,
   runnerEconomySetupDiagnosticsForSimulationAction,
+  assessRunnerPressureReadyForMetrics,
+  assessRunnerCoveragePressureForMetrics,
+  runnerBreakerCoverageDiagnosticsForSimulationAction,
 } = createRunnerSimulationDiagnosticsComposition({
   runnerCreditReserveTargetForInput,
   isRunnerEconomyAction,
@@ -918,6 +920,16 @@ const {
   runnerMissingCoverageTypesForInput,
   runnerRunKnownPathCost,
   runnerSetupChosenFamilyForEntry,
+  runnerStrategicBreakerTargetForMetrics,
+  assessKnownRezzedIcePath,
+  knownPositionMemoryForInput: (input) =>
+    reconstructBeliefState(input).runnerOpponentModel?.knownPositionMemory ??
+    [],
+  definitionTypeForMetrics,
+  remoteRootTrashCostForMetrics,
+  canBreakerDefinitionBreakIce,
+  runnerVisibleIceCreatesCoverageNeedForMetrics,
+  runnerMissingBreakerRolesForMetrics,
 });
 
 const {
@@ -935,27 +947,6 @@ const {
   runnerRemoteThreatProfile,
   bestTrueCentralCloseoutProfileForMetrics,
   trueCentralCloseoutProfileForMetrics,
-});
-
-const {
-  assessRunnerPressureReadyForMetrics,
-  assessRunnerCoveragePressureForMetrics,
-  runnerBreakerCoverageDiagnosticsForSimulationAction,
-} = createRunnerBreakerCoverageComposition({
-  runnerStrategicBreakerTargetForMetrics,
-  assessKnownRezzedIcePath,
-  knownPositionMemoryForInput: (input) =>
-    reconstructBeliefState(input).runnerOpponentModel?.knownPositionMemory ??
-    [],
-  definitionTypeForMetrics,
-  remoteRootTrashCostForMetrics,
-  canBreakerDefinitionBreakIce,
-  runnerVisibleIceCreatesCoverageNeedForMetrics,
-  runnerMissingBreakerRolesForMetrics,
-  runnerCoverageSearchActionForMetrics,
-  runnerCoverageRecoveryActionForMetrics,
-  isRunnerEconomyAction,
-  isRunnerRigInstallAction,
 });
 
 const {

@@ -1,6 +1,10 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import {
+  createRunnerBreakerCoverageComposition,
+  type RunnerBreakerCoverageCompositionDependencies,
+} from "./runner-breaker-coverage-composition";
+import {
   createRunnerEconomySetupDiagnosticsForSimulationAction,
   type RunnerEconomySetupDiagnosticsDependencies,
 } from "./runner-economy-setup-diagnostics";
@@ -46,6 +50,7 @@ type RunnerEconomySetupActionClassCompositionDependencies = {
 export type RunnerSimulationDiagnosticsCompositionDependencies =
   RunnerReserveDiagnosticsDependencies &
     RunnerHandUseDiagnosticsDependencies &
+    RunnerBreakerCoverageCompositionDependencies &
     Omit<
       RunnerEconomySetupDiagnosticsDependencies,
       "runnerEconomySetupActionClass"
@@ -145,9 +150,37 @@ export function createRunnerSimulationDiagnosticsComposition(
         dependencies.runnerSetupChosenFamilyForEntry,
     });
 
+  const {
+    assessRunnerPressureReadyForMetrics,
+    assessRunnerCoveragePressureForMetrics,
+    runnerBreakerCoverageDiagnosticsForSimulationAction,
+  } = createRunnerBreakerCoverageComposition({
+    runnerStrategicBreakerTargetForMetrics:
+      dependencies.runnerStrategicBreakerTargetForMetrics,
+    assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
+    knownPositionMemoryForInput: dependencies.knownPositionMemoryForInput,
+    definitionTypeForMetrics: dependencies.definitionTypeForMetrics,
+    remoteRootTrashCostForMetrics:
+      dependencies.remoteRootTrashCostForMetrics,
+    canBreakerDefinitionBreakIce: dependencies.canBreakerDefinitionBreakIce,
+    runnerVisibleIceCreatesCoverageNeedForMetrics:
+      dependencies.runnerVisibleIceCreatesCoverageNeedForMetrics,
+    runnerMissingBreakerRolesForMetrics:
+      dependencies.runnerMissingBreakerRolesForMetrics,
+    runnerCoverageSearchActionForMetrics:
+      dependencies.runnerCoverageSearchActionForMetrics,
+    runnerCoverageRecoveryActionForMetrics:
+      dependencies.runnerCoverageRecoveryActionForMetrics,
+    isRunnerEconomyAction: dependencies.isRunnerEconomyAction,
+    isRunnerRigInstallAction: dependencies.isRunnerRigInstallAction,
+  });
+
   return {
     runnerReserveDiagnosticsForSimulationAction,
     runnerHandUseDiagnosticsForSimulationAction,
     runnerEconomySetupDiagnosticsForSimulationAction,
+    assessRunnerPressureReadyForMetrics,
+    assessRunnerCoveragePressureForMetrics,
+    runnerBreakerCoverageDiagnosticsForSimulationAction,
   };
 }
