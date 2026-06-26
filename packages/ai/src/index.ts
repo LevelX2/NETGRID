@@ -1164,6 +1164,10 @@ export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local
 
 const AI_HINTS = createAiHintsByCard();
 
+const visibleRootIsKnownAgenda = (
+  card: AiDecisionInput["playerView"]["servers"][number]["root"][number],
+): boolean => visibleRootIsKnownAgendaRuntime(card, definitionTypeForMetrics);
+
 const { rolesForAction, rolesForCardId } = createRoleContext({
   findVisibleCard,
   aiHints: AI_HINTS,
@@ -2463,12 +2467,6 @@ function blinkEncounterPayoffOverride(
     return "remote_score_threat";
   }
   return "none";
-}
-
-function visibleRootIsKnownAgenda(
-  card: AiDecisionInput["playerView"]["servers"][number]["root"][number],
-): boolean {
-  return visibleRootIsKnownAgendaRuntime(card, definitionTypeForMetrics);
 }
 
 const {
