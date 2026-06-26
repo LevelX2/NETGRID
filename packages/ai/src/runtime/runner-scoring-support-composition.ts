@@ -16,7 +16,10 @@ import {
   createRunnerScoreComponentsContext,
   type RunnerScoreComponentsDependencies,
 } from "./runner-score-components";
+import type { AiDecisionInput } from "@netgrid/shared";
 import { reconstructBeliefState } from "../belief-state";
+import type { RunnerPressureReadyForMetrics } from "../simulation/runner-pressure-metric-types";
+import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { demoCardRulesTextForAi } from "./card-definition-lookup";
 import { stringRecordValue } from "./record-value";
 
@@ -24,16 +27,25 @@ type RunnerScoringSupportHint = {
   effects?: readonly unknown[];
 };
 
+type RunnerScoringKnownPathAssessment = ReturnType<
+  typeof assessKnownRezzedIcePath
+>;
+
 export type RunnerScoringSupportCompositionDependencies =
   Parameters<typeof createRunnerRunTargetGuidanceContext>[0] &
     Omit<
       Parameters<typeof createRunnerCentralMemoryContext>[0],
       "rndTopFreshness" | "hqHandMemory"
     > &
-    Parameters<typeof createRunnerRecentHistoryContext>[0] &
+    Omit<
+      Parameters<typeof createRunnerRecentHistoryContext>[0],
+      "pressureReadyTargets"
+    > &
     Omit<
       Parameters<typeof createRunnerRunComponentsContext>[0],
-      "recentStartRunsOnServer" | "candidateMemory"
+      | "recentStartRunsOnServer"
+      | "candidateMemory"
+      | "knownIcePathAssessment"
     > &
     Omit<
       Parameters<typeof createRunnerRecoveryContext>[0],
@@ -50,6 +62,15 @@ export type RunnerScoringSupportCompositionDependencies =
       hintForDefinitionId: (
         definitionId: string,
       ) => RunnerScoringSupportHint | undefined;
+      assessRunnerPressureReadyForMetrics: (
+        input: AiDecisionInput,
+      ) => RunnerPressureReadyForMetrics;
+      assessKnownRezzedIcePath: (
+        iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
+        rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
+        runnerCredits: number,
+        rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
+      ) => RunnerScoringKnownPathAssessment;
       recoveryCommitment: Omit<
         RunnerScoreComponentsDependencies["recoveryCommitment"],
         | "blinkRecoveryScoreComponent"
@@ -108,7 +129,8 @@ export function createRunnerScoringSupportComposition(
     eventVersion: dependencies.eventVersion,
     serverIdFromEvent: dependencies.serverIdFromEvent,
     closeout: dependencies.closeout,
-    pressureReadyTargets: dependencies.pressureReadyTargets,
+    pressureReadyTargets: (input) =>
+      dependencies.assessRunnerPressureReadyForMetrics(input).readyTargets,
   });
 
   const {
@@ -121,7 +143,13 @@ export function createRunnerScoringSupportComposition(
     trashAccessContext: dependencies.trashAccessContext,
     evaluationForAction: dependencies.evaluationForAction,
     definitionType: dependencies.definitionType,
-    knownIcePathAssessment: dependencies.knownIcePathAssessment,
+    knownIcePathAssessment: (input, server) =>
+      dependencies.assessKnownRezzedIcePath(
+        server.ice,
+        input.playerView.own.rig ?? [],
+        input.playerView.own.credits,
+        server.root,
+      ),
     rootTrashCost: dependencies.rootTrashCost,
     candidateMemory: (input, server) => {
       return server

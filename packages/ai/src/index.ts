@@ -1233,16 +1233,9 @@ const {
   eventVersion: aiEventVersion,
   serverIdFromEvent: aiServerIdFromEvent,
   closeout: bestTrueCentralCloseoutProfileForMetrics,
-  pressureReadyTargets: (input: AiDecisionInput) =>
-    assessRunnerPressureReadyForMetrics(input).readyTargets,
+  assessRunnerPressureReadyForMetrics,
   trashAccessContext: runnerRemoteTrashAccessContext,
-  knownIcePathAssessment: (input, server) =>
-    assessKnownRezzedIcePath(
-      server.ice,
-      input.playerView.own.rig ?? [],
-      input.playerView.own.credits,
-      server.root,
-    ),
+  assessKnownRezzedIcePath,
   rootTrashCost: remoteRootTrashCostForMetrics,
   targetServerId: semanticRuntimeServerId,
   blinkAssessment: runnerBlinkRecoveryAssessment,
