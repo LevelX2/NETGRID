@@ -300,6 +300,9 @@ import {
   createCorpTagPunishPayoffProfileContext,
 } from "./runtime/corp-tag-punish-payoff-profiles";
 import {
+  createCorpTagSourcePayoffContext,
+} from "./runtime/corp-tag-source-payoff-context";
+import {
   createSemanticRuntimeCorpRemoteScoreContext,
 } from "./runtime/semantic-runtime-corp-remote-score-context";
 import {
@@ -1845,6 +1848,17 @@ const {
   actionSourceCard: semanticRuntimeCorpActionSourceCard,
   visibleCardStoredCredits: corpVisibleCardStoredCredits,
   visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
+});
+const {
+  corpImmediateTagSourceVisiblePayoffProfile,
+  corpImmediateTagSourceAvailable,
+  corpUnprotectedPersistentTagAssetSetup,
+  corpOntologyPayoffAvailableForTagSource,
+} = createCorpTagSourcePayoffContext({
+  sourceDefinitionIdForAction,
+  visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
+  tagPunishAssessmentForAction: corpTagPunishOntologyAssessmentForAction,
+  payoffProfileForDefinition: classifyTagPunishPayoffFromOntology,
 });
 const {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment,
@@ -5887,99 +5901,6 @@ function corpTaggedRunnerPayoffProfile(
       ...assessment.evidence,
     ],
   };
-}
-
-function corpImmediateTagSourceVisiblePayoffProfile(
-  input: AiDecisionInput,
-  action: LegalAction,
-): CorpTaggedRunnerPayoffActionProfile | undefined {
-  if (!corpImmediateTagSourceAction(input, action)) return undefined;
-  const payoffKind = corpVisibleTagPunishPayoffKind(input);
-  if (!payoffKind) return undefined;
-  return {
-    kind: "tag_source",
-    value: payoffKind === "damage" ? 2350 : 1750,
-    evidence: [
-      "corp_tag_source_visible_payoff_pressure:true",
-      `corp_visible_tag_punish_payoff_kind:${payoffKind}`,
-      "immediate_operation_tag_source_available:true",
-    ],
-  };
-}
-
-function corpImmediateTagSourceAvailable(
-  input: AiDecisionInput,
-  excludedAction?: LegalAction,
-): boolean {
-  return input.legalActions.some(
-    (action) =>
-      action.actionId !== excludedAction?.actionId &&
-      corpImmediateTagSourceAction(input, action),
-  );
-}
-
-function corpImmediateTagSourceAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  return (
-    input.side === "corp" &&
-    action.side === "corp" &&
-    action.type === "play_operation" &&
-    sourceDefinitionIdForAction(input, action) ===
-      "onr_v1_284_chance-observation"
-  );
-}
-
-function corpUnprotectedPersistentTagAssetSetup(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
-  if (sourceDefinitionId !== "onr_v1_313_city-surveillance") return false;
-  return action.type === "install_card" || action.type === "rez_ice";
-}
-
-function corpVisibleTagPunishPayoffKind(
-  input: AiDecisionInput,
-): "damage" | "economic" | "trash" | undefined {
-  if (corpVisibleMeatDamagePayoff(input)) return "damage";
-  if (
-    input.playerView.own.gripOrHq.some(
-      (card) => card.definitionId === "onr_v1_285_closed-accounts",
-    )
-  )
-    return "economic";
-  return undefined;
-}
-
-function corpOntologyPayoffAvailableForTagSource(
-  input: AiDecisionInput,
-  sourceAction: LegalAction,
-): boolean {
-  if (input.side !== "corp") return false;
-  if (
-    input.legalActions.some((action) => {
-      if (action.actionId === sourceAction.actionId) return false;
-      return corpTagPunishOntologyAssessmentForAction(input, action)
-        ?.isPunishPayoff;
-    })
-  )
-    return true;
-  return [
-    ...input.playerView.own.gripOrHq,
-    ...input.playerView.own.scoreArea,
-    ...input.playerView.servers.flatMap((server) => [
-      ...server.ice,
-      ...server.root,
-    ]),
-  ].some((card) =>
-    Boolean(
-      card.known &&
-      card.definitionId &&
-      classifyTagPunishPayoffFromOntology(card.definitionId),
-    ),
-  );
 }
 
 function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
