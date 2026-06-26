@@ -792,11 +792,8 @@ const {
 
 const {
   runnerCreditReserveTargetForInput,
-  estimatedEncounterBreakCost,
   encounterBreakReserveContext,
   breakAccessPathAssessment,
-  encounterRemotePayoffAfterBreakAssessment,
-  encounterFuturePathAfterPumpBreakAssessment,
   pumpViabilityAssessment,
 } = createRunnerEncounterCompositionContext({
   rolesForCardId,
@@ -822,8 +819,6 @@ const {
   runnerCoverageSearchActionForMetrics,
   runnerCoverageRecoveryActionForMetrics,
   runnerRemoteTrashAccessContext,
-  runnerKnownNoAccessLegalRunTargets,
-  runnerCoverageRepairDiagnostic,
   runnerKnownPathDiagnosticsForAction,
 } = createRunnerKnownPathDiagnosticsComposition({
   runnerCreditReserveTargetForInput,
@@ -862,8 +857,6 @@ const {
   trueCentralCloseoutProfileForMetrics,
   runnerRemoteThreatProfile,
   runnerRemoteThreatTargetingDiagnosticsForAction,
-  noFreshCentralSubstitutionTypeForAction,
-  runnerNoFreshCentralContextForMetrics,
   runnerCentralPressureDiagnosticsForSimulationAction,
 } = createRunnerCentralPressureDiagnosticsComposition({
   isRunnerEconomyAction,
@@ -882,7 +875,6 @@ const {
   runnerHandUseDiagnosticsForSimulationAction,
   runnerEconomySetupDiagnosticsForSimulationAction,
   assessRunnerPressureReadyForMetrics,
-  assessRunnerCoveragePressureForMetrics,
   runnerBreakerCoverageDiagnosticsForSimulationAction,
 } = createRunnerSimulationDiagnosticsComposition({
   runnerCreditReserveTargetForInput,
@@ -942,7 +934,6 @@ const {
   runnerBadPublicityOrTraceTechCard,
   runnerCardAddressesVisibleBreakerNeed,
   visibleBreakerCardCanAddressIce,
-  discardKeepScore,
   selectedRunnerProgramInstallTrashOptionIds,
   selectedRunnerForcedProgramTrashOptionIds,
   runnerProgramInstallTrashAssessment,
@@ -982,10 +973,8 @@ const {
 });
 const {
   semanticRuntimeRunnerMultiRunEventExclusion,
-  runnerMultiRunEventAssessment,
   runnerMultiRunEventScoreComponent,
   runnerMultiRunTargetEvaluation,
-  semanticRuntimeRunnerRunTargetEvaluation,
   semanticRuntimeRunnerRunTargetEvaluationForAction,
   blinkRiskAssessmentForEncounterBreak,
   runnerBlinkRiskEvidenceForAction,
@@ -1080,7 +1069,6 @@ const {
   semanticRuntimeCorpActionServerId,
   semanticRuntimeCorpServer,
   semanticRuntimeCorpActionSourceCard,
-  semanticRuntimeCorpVisibleServerCard,
   semanticRuntimeCorpActionIsScoreLine,
   semanticRuntimeCorpAdvanceCompletesScore,
   semanticRuntimeCorpRemoteIsProtected,
@@ -1097,7 +1085,6 @@ const {
   normalizedRulesTextForDefinition,
   semanticRuntimeVisibleCardType,
   semanticRuntimeVisibleCardAdvancementRequirement,
-  semanticRuntimeVisibleIceRezCost,
   semanticRuntimeCorpRemoteRezFloorAssessment,
   semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
   semanticRuntimeCorpCentralRezReserveAssessment,
