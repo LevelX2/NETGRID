@@ -51,7 +51,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | --- | --- | --- | --- | --- |
 | AI-COMPLETE-01 | Produktive Action-Type-Priorität entfernen. | `VERIFIED` | `semanticRuntimeTypePriority` war produktiver Scorebestandteil in `semanticRuntimeScoreBreakdown`. | Erfüllt: produktiver Score nutzt nur noch `semanticRuntimeTypeTieBreakerScore`; Tag-Removal, Coverage-Search, kartenbasierter Draw, Run-only-Aktionen und erreichbare Runs erhalten fachliche Goal-Fit-Komponenten; Pflichtszenarien und voller AI-Testlauf sind grün. |
 | AI-COMPLETE-02 | Semantic Runtime von Legacy-Entscheidung entkoppeln. | `VERIFIED` | Runtime-Pfade enthielten `legacyDecision` als vorab berechnete Eingabe. | Erfüllt: Runner-/Corp-Einstiege übergeben einen memoisierten Legacy-Provider; die Runtime materialisiert Legacy nur bei Forced-Legacy, No-Candidate-Fallback oder nach der semantischen Auswahl für Diagnose/Comparator. |
-| AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `IN_PROGRESS` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Dünne Public-/Composition-Fassade; Boundary-Test verhindert neue Fachlogik. |
+| AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `VERIFIED` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Erfüllt: `index.ts` ist importfreie Public-Re-Export-Fassade bei 397 Zeilen; Boundary-Test verhindert lokale Imports, lokale Implementierungen und direkte Composition-Erzeugung; zwei Audits ohne neue In-Scope-Findings. |
 | AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `PENDING` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Runner, Corp, Mapping, Progression, Ranking und Debug fachlich getrennt; Fassade dünn. |
 | AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `PENDING` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Genau eine Legacy-Eingangsschnittstelle; Matrix klassifiziert alle Nutzungen; ersetzte/ungenutzte Bereiche entfernt. |
 | AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `PENDING` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Produktiver Pfad nutzt klare Doctrine-Schnittstelle mit NeutralDoctrine, Vollständigkeit und Rollenstatus. |
@@ -5878,11 +5878,11 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
 
-Nächstes aktives Ziel: `AI-COMPLETE-03`.
+Nächstes aktives Ziel: `AI-COMPLETE-04`.
 
 ## Audit-Ledger
 
 | Audit | Status | Findings |
 | --- | --- | --- |
-| Audit 1 | `PENDING` | Noch nicht gestartet. |
-| Audit 2 | `PENDING` | Noch nicht gestartet. |
+| Audit 1 | `VERIFIED` | Keine neuen In-Scope-Findings zu `AI-COMPLETE-03`: `packages/ai/src/index.ts` liegt bei 397 Zeilen, ist importfrei, enthält keine lokalen Implementierungen, keine Composition-Erzeugung und keine inline `=>`-/Funktionsadapter; `src/decision/module-boundaries.test.ts` und `src/public-export-contract.test.ts` grün, 16 Tests. |
+| Audit 2 | `VERIFIED` | Keine neuen In-Scope-Findings zu `AI-COMPLETE-03`: unabhängiger Skriptcheck bestätigt Linecount <= 450, keine Imports, keine lokalen Implementierungen, keine Composition-Aufrufe, keine Inline-Arrows und vorhandene Facade-Marker; `src/decision/module-boundaries.test.ts` und `src/public-export-contract.test.ts` grün, 16 Tests; `corepack pnpm --filter @netgrid/ai typecheck` grün. |
