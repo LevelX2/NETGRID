@@ -183,25 +183,13 @@ import {
 import { semanticRuntimeExplanation } from "./runtime/semantic-runtime-explanation";
 import { stringRecordValue } from "./runtime/record-value";
 import {
-  createSemanticRuntimeActionExclusionContext,
-} from "./runtime/semantic-runtime-action-exclusion-context";
-import {
   runnerRunActionSpendingCapAssessment,
 } from "./runtime/runner-run-only-action-adjustment";
 import {
   createRunnerSelfDamageContext,
 } from "./runtime/runner-self-damage-context";
 import { createRunnerBlinkRiskComposition } from "./runtime/runner-blink-risk-composition";
-import {
-  createRunnerBlinkBreakExclusionContext,
-} from "./runtime/runner-blink-break-exclusion";
-import {
-  createRunnerEncounterActionExclusionContext,
-} from "./runtime/runner-encounter-action-exclusion";
-import { createRunnerSimpleExclusionsContext } from "./runtime/runner-simple-exclusions-context";
-import {
-  createRunnerSourceCardAnswerRoleContext,
-} from "./runtime/runner-source-card-answer-role-context";
+import { createSemanticRuntimeActionExclusionComposition } from "./runtime/semantic-runtime-action-exclusion-composition";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
 import { createRunnerDevelopmentSupportComposition } from "./runtime/runner-development-support-composition";
 import {
@@ -1414,7 +1402,8 @@ const { semanticRuntimeEvidence } = createSemanticRuntimeEvidenceContext({
 });
 const {
   semanticRuntimeRunnerSourceCardAnswerRole,
-} = createRunnerSourceCardAnswerRoleContext({
+  semanticRuntimeActionExclusion,
+} = createSemanticRuntimeActionExclusionComposition({
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
   sourceDefinitionId: sourceDefinitionIdForAction,
   rolesForCardId,
@@ -1422,52 +1411,28 @@ const {
     definitionId
       ? (RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId])
       : undefined,
-});
-const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
-  isRemoteServerTarget,
-  runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
-};
-const {
-  semanticRuntimeKnownCentralPayoffExclusion,
-  semanticRuntimeRunnerEmptyRemoteExclusion,
-  semanticRuntimeRunnerArchivesExclusion,
-} = createRunnerSimpleExclusionsContext({
   evaluateKnownCentralPayoff: evaluateKnownCentralAccessPayoff,
   definitionType: definitionTypeForMetrics,
-});
-const {
-  semanticRuntimeRunnerBlinkBreakExclusion,
-} = createRunnerBlinkBreakExclusionContext({
   riskAssessment: blinkRiskAssessmentForEncounterBreak,
-  shouldAvoidRun: (assessment) =>
-    blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
-});
-const {
-  runnerEncounterActionExclusion,
-} = createRunnerEncounterActionExclusionContext({
-  blinkBreakExclusion: semanticRuntimeRunnerBlinkBreakExclusion,
+  shouldAvoidBlinkRiskAssessment: blinkRiskShouldAvoidRun,
   pumpViabilityAssessment,
   breakAccessPathAssessment,
-});
-const {
-  semanticRuntimeActionExclusion,
-} = createSemanticRuntimeActionExclusionContext({
   planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
   corpAdvancementCounterPlacementAssessment:
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
   runnerSelfDamageSurvivalExclusion,
-  runnerEncounterActionExclusion,
   runnerProgramSacrificeExclusion,
   runnerMultiRunEventExclusion: semanticRuntimeRunnerMultiRunEventExclusion,
   runnerRunTargetEvaluationForAction:
     semanticRuntimeRunnerRunTargetEvaluationForAction,
   runnerBlinkRunExclusion,
-  knownCentralPayoffExclusion: semanticRuntimeKnownCentralPayoffExclusion,
-  runnerArchivesExclusion: semanticRuntimeRunnerArchivesExclusion,
-  runnerEmptyRemoteExclusion: semanticRuntimeRunnerEmptyRemoteExclusion,
   isRemoteServerTarget,
   knownIcePathReason: semanticRuntimeKnownIcePathReason,
 });
+const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
+  isRemoteServerTarget,
+  runnerSourceCardAnswerRole: semanticRuntimeRunnerSourceCardAnswerRole,
+};
 const {
   semanticRuntimeScoreBreakdown,
 } = createSemanticRuntimeScoreBreakdownContext({
