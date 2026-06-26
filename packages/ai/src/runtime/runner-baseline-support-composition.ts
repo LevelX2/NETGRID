@@ -10,6 +10,10 @@ import {
   type RunnerBaselinePlanGuardContextDependencies,
 } from "./runner-baseline-plan-guard-context";
 import {
+  createRunnerProgramPressureComposition,
+  type RunnerProgramPressureCompositionDependencies,
+} from "./runner-program-pressure-composition";
+import {
   createRunnerVisibleCardDiscardComposition,
   type RunnerVisibleCardDiscardCompositionDependencies,
 } from "./runner-visible-card-discard-composition";
@@ -27,8 +31,12 @@ export type RunnerBaselineSupportCompositionDependencies =
     } &
     Omit<
       LegacyDecisionContextDependencies,
-      "discardKeepScore" | "rolesForCardId"
+      | "discardKeepScore"
+      | "rolesForCardId"
+      | "selectedRunnerProgramInstallTrashOptionIds"
+      | "selectedRunnerForcedProgramTrashOptionIds"
     > &
+    RunnerProgramPressureCompositionDependencies &
     Omit<
       RunnerVisibleCardDiscardCompositionDependencies,
       "isVisibleIcebreakerProgram"
@@ -75,6 +83,34 @@ export function createRunnerBaselineSupportComposition(
     isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
   });
 
+  const {
+    selectedRunnerProgramInstallTrashOptionIds,
+    selectedRunnerForcedProgramTrashOptionIds,
+    runnerProgramInstallTrashAssessment,
+    runnerProgramInstallTrashAssessmentForAction,
+    runnerProgramInstallDisplacementPenalty,
+    runnerProgramSacrificeExclusion,
+    runnerMuPressureInstallScoreComponent,
+    runnerMuPressureFundingScoreComponent,
+    runnerMuPressureInstallPriorityBonus,
+    runnerMuPressureFundingPriorityBonus,
+    runnerMuPressureActionEvidence,
+  } = createRunnerProgramPressureComposition({
+    safeNonNegativeInteger: dependencies.safeNonNegativeInteger,
+    findVisibleCard: dependencies.findVisibleCard,
+    visibleMemoryCost: dependencies.visibleMemoryCost,
+    visibleCardsByInstanceId: dependencies.visibleCardsByInstanceId,
+    visibleBreakerRoleCounts: dependencies.visibleBreakerRoleCounts,
+    visibleBreakerRoles: dependencies.visibleBreakerRoles,
+    rolesForCardId: dependencies.rolesForCardId,
+    isRunnerPressureRole: dependencies.isRunnerPressureRole,
+    isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
+    visibleCounterValue: dependencies.visibleCounterValue,
+    visibleInstallCost: dependencies.visibleInstallCost,
+    actionCreditCost: dependencies.actionCreditCost,
+    rolesForAction: dependencies.rolesForAction,
+  });
+
   const { decisionFromChoices, selectedChoicesForDecision } =
     createLegacyDecisionContext({
       evaluateCorpOpeningHand: dependencies.evaluateCorpOpeningHand,
@@ -82,9 +118,9 @@ export function createRunnerBaselineSupportComposition(
         dependencies.evaluateRunnerOpeningHand,
       discardKeepScore: (input, card) => discardKeepScore(input, card),
       selectedRunnerProgramInstallTrashOptionIds:
-        dependencies.selectedRunnerProgramInstallTrashOptionIds,
+        selectedRunnerProgramInstallTrashOptionIds,
       selectedRunnerForcedProgramTrashOptionIds:
-        dependencies.selectedRunnerForcedProgramTrashOptionIds,
+        selectedRunnerForcedProgramTrashOptionIds,
       extractAiFeatures: dependencies.extractAiFeatures,
       rolesForCardId: dependencies.rolesForCardId,
       scrubEvidence: dependencies.scrubEvidence,
@@ -105,5 +141,16 @@ export function createRunnerBaselineSupportComposition(
     runnerCardAddressesVisibleBreakerNeed,
     visibleBreakerCardCanAddressIce,
     discardKeepScore,
+    selectedRunnerProgramInstallTrashOptionIds,
+    selectedRunnerForcedProgramTrashOptionIds,
+    runnerProgramInstallTrashAssessment,
+    runnerProgramInstallTrashAssessmentForAction,
+    runnerProgramInstallDisplacementPenalty,
+    runnerProgramSacrificeExclusion,
+    runnerMuPressureInstallScoreComponent,
+    runnerMuPressureFundingScoreComponent,
+    runnerMuPressureInstallPriorityBonus,
+    runnerMuPressureFundingPriorityBonus,
+    runnerMuPressureActionEvidence,
   };
 }

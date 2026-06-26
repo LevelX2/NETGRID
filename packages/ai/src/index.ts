@@ -189,7 +189,6 @@ import {
   visibleBreakerRoleCounts as visibleBreakerRoleCountsForAi,
   visibleBreakerRoles as visibleBreakerRolesForAi,
 } from "./runtime/runner-visible-breaker-coverage";
-import { createRunnerProgramPressureComposition } from "./runtime/runner-program-pressure-composition";
 import {
   actionClickCost,
   actionCreditCost,
@@ -974,6 +973,17 @@ const {
   runnerCardAddressesVisibleBreakerNeed,
   visibleBreakerCardCanAddressIce,
   discardKeepScore,
+  selectedRunnerProgramInstallTrashOptionIds,
+  selectedRunnerForcedProgramTrashOptionIds,
+  runnerProgramInstallTrashAssessment,
+  runnerProgramInstallTrashAssessmentForAction,
+  runnerProgramInstallDisplacementPenalty,
+  runnerProgramSacrificeExclusion,
+  runnerMuPressureInstallScoreComponent,
+  runnerMuPressureFundingScoreComponent,
+  runnerMuPressureInstallPriorityBonus,
+  runnerMuPressureFundingPriorityBonus,
+  runnerMuPressureActionEvidence,
 } = createRunnerBaselineSupportComposition({
   delayedInstallAbilityForAction: shellTradersAbility,
   runnerHasInstalledPrograms,
@@ -984,12 +994,19 @@ const {
   rolesForCardId,
   cardDefinitionTypeForAi,
   isRunnerEconomyRole,
+  safeNonNegativeInteger,
+  findVisibleCard,
+  visibleMemoryCost: visibleMemoryCostForAi,
+  visibleCardsByInstanceId: visibleCardsByInstanceIdForAi,
+  visibleBreakerRoleCounts: visibleBreakerRoleCountsForAi,
+  visibleBreakerRoles: visibleBreakerRolesForAi,
+  isRunnerPressureRole,
+  visibleCounterValue: visibleCounterValueForAi,
+  visibleInstallCost: visibleInstallCostForAi,
+  actionCreditCost,
+  rolesForAction,
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
-  selectedRunnerProgramInstallTrashOptionIds: (input, choice, options) =>
-    selectedRunnerProgramInstallTrashOptionIds(input, choice, options),
-  selectedRunnerForcedProgramTrashOptionIds: (input, options) =>
-    selectedRunnerForcedProgramTrashOptionIds(input, options),
   extractAiFeatures,
   scrubEvidence,
 });
@@ -1088,33 +1105,6 @@ const {
       .join(" ");
   },
   isRunnerRigInstallAction,
-});
-const {
-  selectedRunnerProgramInstallTrashOptionIds,
-  selectedRunnerForcedProgramTrashOptionIds,
-  runnerProgramInstallTrashAssessment,
-  runnerProgramInstallTrashAssessmentForAction,
-  runnerProgramInstallDisplacementPenalty,
-  runnerProgramSacrificeExclusion,
-  runnerMuPressureInstallScoreComponent,
-  runnerMuPressureFundingScoreComponent,
-  runnerMuPressureInstallPriorityBonus,
-  runnerMuPressureFundingPriorityBonus,
-  runnerMuPressureActionEvidence,
-} = createRunnerProgramPressureComposition({
-  safeNonNegativeInteger,
-  findVisibleCard,
-  visibleMemoryCost: visibleMemoryCostForAi,
-  visibleCardsByInstanceId: visibleCardsByInstanceIdForAi,
-  visibleBreakerRoleCounts: visibleBreakerRoleCountsForAi,
-  visibleBreakerRoles: visibleBreakerRolesForAi,
-  rolesForCardId,
-  isRunnerPressureRole,
-  isRunnerEconomyRole,
-  visibleCounterValue: visibleCounterValueForAi,
-  visibleInstallCost: visibleInstallCostForAi,
-  actionCreditCost,
-  rolesForAction,
 });
 const {
   semanticRuntimeCorpActionServerId,
