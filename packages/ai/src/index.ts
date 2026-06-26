@@ -573,14 +573,8 @@ import type {
   AiMatchProgressionMetrics,
 } from "./simulation/ai-match-progression-types";
 import {
-  attributeHandSizeSkip,
-  attributeMemorySkip,
-  attributeSearchRecoverySkip,
-  attributeStarvedEconomySkip,
-  attributeRunnerSetupSupportWindows,
-  RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS,
   runnerSetupChosenFamilyForEntry,
-  type RunnerSetupAttributionMetricKey,
+  summarizeRunnerSetupAttributionMetrics,
 } from "./simulation/runner-setup-attribution-types";
 import {
   agendaPointsForMetrics,
@@ -7102,8 +7096,10 @@ export function summarizeMatchProgressionMetrics(
   const breakerOntologyMetrics = summarizeBreakerOntologyMetrics(summaries);
   const remoteRoleOntologyMetrics =
     summarizeRemoteRoleOntologyMetrics(summaries);
-  const runnerSetupAttributionMetrics =
-    summarizeRunnerSetupAttributionMetrics(summaries);
+  const runnerSetupAttributionMetrics = summarizeRunnerSetupAttributionMetrics(
+    summaries,
+    isMeaningfulBoardProgress,
+  );
   const runnerHandUseOpportunityWindows = actionSequence.filter(
     (entry) => entry.runnerHandUseOpportunity === true,
   ).length;
@@ -10056,134 +10052,6 @@ function summarizeOutcomeFollowupMetrics(
     outcomePivotWithReason,
     outcomeIgnored,
   };
-}
-
-function summarizeRunnerSetupAttributionMetrics(
-  summaries: AiSimulationSummary[],
-): Record<RunnerSetupAttributionMetricKey, number> {
-  const metrics = Object.fromEntries(
-    RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS.map((key) => [key, 0]),
-  ) as Record<RunnerSetupAttributionMetricKey, number>;
-  for (const summary of summaries) {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    for (let index = 0; index < sequence.length; index += 1) {
-      const entry = sequence[index]!;
-      attributeRunnerSetupSupportWindows(metrics, entry);
-      if (entry.runnerEconomyFixGateEligibleStarvedSkip === true)
-        attributeStarvedEconomySkip(
-          metrics,
-          sequence,
-          index,
-          summary,
-          isMeaningfulBoardProgress,
-        );
-      if (entry.runnerSetupFixGateEligibleSearchRecoverySkip === true)
-        attributeSearchRecoverySkip(
-          metrics,
-          sequence,
-          index,
-          summary,
-          isMeaningfulBoardProgress,
-        );
-      if (entry.runnerSetupFixGateEligibleMemorySkip === true)
-        attributeMemorySkip(
-          metrics,
-          sequence,
-          index,
-          summary,
-          isMeaningfulBoardProgress,
-        );
-      if (entry.runnerHandSizeSupportSkippedWhileDamageRiskVisible === true)
-        attributeHandSizeSkip(metrics, sequence, index);
-    }
-  }
-  metrics.runnerSetupAttributionWindows =
-    metrics.runnerSetupAttributionByKindStarvedEconomy +
-    metrics.runnerSetupAttributionByKindSearchRecovery +
-    metrics.runnerSetupAttributionByKindMemory +
-    metrics.runnerSetupAttributionByKindHandSize;
-  metrics.runnerSetupAttributionSuspicious =
-    metrics.runnerEconomyFixGateAttributionSuspicious +
-    metrics.runnerSearchRecoveryFixGateAttributionSuspicious +
-    metrics.runnerMemoryFixGateAttributionSuspicious +
-    metrics.runnerHandSizeFixGateAttributionSuspicious;
-  metrics.runnerSetupAttributionBlocked =
-    metrics.runnerEconomyFixGateAttributionBlocked +
-    metrics.runnerSearchRecoveryFixGateAttributionBlocked +
-    metrics.runnerMemoryFixGateAttributionBlocked +
-    metrics.runnerHandSizeFixGateAttributionBlocked;
-  metrics.runnerSetupAttributionUnclassified = Math.max(
-    0,
-    metrics.runnerSetupAttributionWindows -
-      metrics.runnerSetupAttributionSuspicious -
-      metrics.runnerSetupAttributionBlocked,
-  );
-  metrics.runnerSetupNormalizedWindows =
-    metrics.runnerSearchRecoveryNormalizedWindows +
-    metrics.runnerMemoryNormalizedWindows +
-    metrics.runnerHandSizeNormalizedWindows;
-  metrics.runnerSetupNormalizedSuspicious =
-    metrics.runnerSearchRecoveryNormalizedSuspicious +
-    metrics.runnerMemoryNormalizedSuspicious +
-    metrics.runnerHandSizeNormalizedSuspicious;
-  metrics.runnerSetupNormalizedBlocked =
-    metrics.runnerSearchRecoveryNormalizedBlocked +
-    metrics.runnerMemoryNormalizedBlocked +
-    metrics.runnerHandSizeNormalizedBlocked;
-  metrics.runnerSetupNormalizedMetricArtifact =
-    metrics.runnerSearchRecoveryNormalizedMetricArtifact +
-    metrics.runnerMemoryNormalizedMetricArtifact +
-    metrics.runnerHandSizeNormalizedMetricArtifact;
-  metrics.runnerSetupNormalizedUnclassified =
-    metrics.runnerSearchRecoveryNormalizedUnclassified +
-    metrics.runnerMemoryNormalizedUnclassified;
-  metrics.runnerSetupNormalizedFixGateEligible =
-    metrics.runnerSearchRecoveryNormalizedFixGateEligible +
-    metrics.runnerMemoryNormalizedFixGateEligible +
-    metrics.runnerHandSizeNormalizedSuspicious;
-  const normalizedStrongest = [
-    {
-      key: "runnerSetupNormalizedRecommendedFixKindSearchRecovery" as const,
-      value: metrics.runnerSearchRecoveryNormalizedSuspicious,
-    },
-    {
-      key: "runnerSetupNormalizedRecommendedFixKindMemory" as const,
-      value: metrics.runnerMemoryNormalizedSuspicious,
-    },
-    {
-      key: "runnerSetupNormalizedRecommendedFixKindHandSize" as const,
-      value: metrics.runnerHandSizeNormalizedSuspicious,
-    },
-  ].sort((left, right) => right.value - left.value);
-  if (metrics.runnerSetupNormalizedSuspicious === 0)
-    metrics.runnerSetupNormalizedRecommendedFixKindNone = 1;
-  else if (normalizedStrongest[0]!.value === normalizedStrongest[1]!.value)
-    metrics.runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis = 1;
-  else metrics[normalizedStrongest[0]!.key] = 1;
-  const strongest = [
-    {
-      key: "runnerSetupRecommendedFixKindEconomyStarvedSkip" as const,
-      value: metrics.runnerEconomyFixGateAttributionSuspicious,
-    },
-    {
-      key: "runnerSetupRecommendedFixKindSearchRecovery" as const,
-      value: metrics.runnerSearchRecoveryFixGateAttributionSuspicious,
-    },
-    {
-      key: "runnerSetupRecommendedFixKindMemorySetup" as const,
-      value: metrics.runnerMemoryFixGateAttributionSuspicious,
-    },
-    {
-      key: "runnerSetupRecommendedFixKindHandSizeSetup" as const,
-      value: metrics.runnerHandSizeFixGateAttributionSuspicious,
-    },
-  ].sort((left, right) => right.value - left.value);
-  if (metrics.runnerSetupAttributionSuspicious === 0)
-    metrics.runnerSetupRecommendedFixKindNone = 1;
-  else if (strongest[0]!.value === strongest[1]!.value)
-    metrics.runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis = 1;
-  else metrics[strongest[0]!.key] = 1;
-  return metrics;
 }
 
 function summarizeBreakerOntologyMetrics(
