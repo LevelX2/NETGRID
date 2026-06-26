@@ -577,11 +577,10 @@ import {
   createRunnerCentralRunPressureJustificationContext,
 } from "./simulation/central-run-pressure-justification";
 import {
-  bestTrueCentralCloseoutProfile as bestTrueCentralCloseoutProfileWithDeps,
   createCentralRunEventGoodForTarget,
   createNoFreshCentralSubstitutionTypeForAction,
+  createTrueCentralCloseoutProfileContext,
   runnerNoFreshCentralContext as runnerNoFreshCentralContextWithDeps,
-  trueCentralCloseoutProfile as trueCentralCloseoutProfileWithDeps,
 } from "./simulation/no-fresh-central";
 import {
   centralRunStreakWithoutValueForMetrics,
@@ -1179,6 +1178,15 @@ const sourceDefinitionIdForSimulationAction =
   createSourceDefinitionIdForSimulationAction(findVisibleCard);
 
 const centralRunEventGoodForTarget = createCentralRunEventGoodForTarget({
+  sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+});
+
+const {
+  bestTrueCentralCloseoutProfile: bestTrueCentralCloseoutProfileForMetrics,
+  trueCentralCloseoutProfile: trueCentralCloseoutProfileForMetrics,
+} = createTrueCentralCloseoutProfileContext({
+  assessKnownRezzedIcePath,
+  rolesForCardId,
   sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
 });
 
@@ -17395,29 +17403,6 @@ function runnerKnownCardPositionDiagnosticsForMetrics(
       ? { rigPlanInfluencedByKnownUnrezzedIce: true }
       : {}),
   };
-}
-
-function bestTrueCentralCloseoutProfileForMetrics(input: AiDecisionInput): {
-  opportunity: boolean;
-  reasons: string[];
-  target?: "hq" | "rd" | "archives";
-} {
-  return bestTrueCentralCloseoutProfileWithDeps(input, {
-    assessKnownRezzedIcePath,
-    rolesForCardId,
-    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
-  });
-}
-
-function trueCentralCloseoutProfileForMetrics(
-  input: AiDecisionInput,
-  target: "hq" | "rd" | "archives",
-): { opportunity: boolean; reasons: string[] } {
-  return trueCentralCloseoutProfileWithDeps(input, target, {
-    assessKnownRezzedIcePath,
-    rolesForCardId,
-    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
-  });
 }
 
 function runnerNoFreshCentralContextForMetrics(input: AiDecisionInput): {

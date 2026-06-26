@@ -75,6 +75,25 @@ type RunnerNoFreshCentralContextDependencies =
     ) => { contestable: boolean };
   };
 
+export function createTrueCentralCloseoutProfileContext(
+  dependencies: TrueCentralCloseoutDependencies,
+): {
+  bestTrueCentralCloseoutProfile: (
+    input: AiDecisionInput,
+  ) => BestTrueCentralCloseoutProfile;
+  trueCentralCloseoutProfile: (
+    input: AiDecisionInput,
+    target: CentralServerTarget,
+  ) => TrueCentralCloseoutProfile;
+} {
+  return {
+    bestTrueCentralCloseoutProfile: (input) =>
+      bestTrueCentralCloseoutProfile(input, dependencies),
+    trueCentralCloseoutProfile: (input, target) =>
+      trueCentralCloseoutProfile(input, target, dependencies),
+  };
+}
+
 export function bestTrueCentralCloseoutProfile(
   input: AiDecisionInput,
   dependencies: TrueCentralCloseoutDependencies,
