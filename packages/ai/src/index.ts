@@ -50,7 +50,6 @@ import {
 import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
-  iceHasEndTheRun,
   runnerKnownPathAssessmentIsKnownNoAccess,
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
 } from "./visible-run-analysis";
@@ -59,13 +58,10 @@ import {
 } from "./remote-role-ontology-consumer";
 import {
   classifyTagPunishPayoffFromOntology,
-  getStructuredTagPunishProfileForCard,
-  type StructuredTagPunishPayoffKind,
 } from "./tag-punish-ontology-consumer";
 import { buildAiDecisionInputDto } from "./input-dto";
 import {
   buildActionSemanticCandidates,
-  type ActionSemanticCandidate,
 } from "./action-semantic-candidate";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { buildObservedFacts } from "./observed-facts-public";
@@ -88,19 +84,14 @@ import { createRunnerBaselineSupportComposition } from "./runtime/runner-baselin
 import { createAiActionEntrypointsComposition } from "./runtime/ai-action-entrypoints-composition";
 import { compareAction } from "./runtime/action-order";
 import {
-  remoteTrashCostBucket,
-} from "./runtime/remote-trash-cost";
-import {
   breakSubroutineIndexesForAction,
 } from "./runtime/subroutine-indexes";
 import {
-  isEndRunSubroutine,
   isImmediateSafetyThreatSubroutine,
 } from "./runtime/encounter-subroutine";
 import {
   currentEncounteredIceCard,
   encounterHasImmediateUnbrokenThreat,
-  runnerReachedAccessMovement,
 } from "./runtime/current-encounter";
 import {
   encounterRunRemainderEffectAssessment,
@@ -112,7 +103,6 @@ import {
   semanticRuntimeVisibleSourceCard,
   sourceDefinitionIdForAction,
 } from "./runtime/visible-card-lookup";
-import { titleForCardId } from "./runtime/card-title";
 import { corpVisibleCardStoredCredits } from "./runtime/visible-card-credit";
 import {
   corpVisibleRunnerHardwarePayoffEvidence,
@@ -133,10 +123,7 @@ import {
 } from "./runtime/runner-rnd-repeat-run-score";
 import { staleKnownHqRepeatRunPenalty } from "./runtime/runner-hq-repeat-run-score";
 import { isBlockedByKnownRezzedIce } from "./runtime/runner-known-rezzed-ice-block";
-import type {
-  CorpTagPunishSkipReason,
-} from "./runtime/corp-tag-punish-types";
-import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
+import { isRemoteServerTarget } from "./runtime/server-target";
 import {
   isCorpReactiveBaselineDecision,
   isRunnerReactiveBaselineDecision,
@@ -145,7 +132,6 @@ import {
 } from "./runtime/reactive-action";
 import {
   isRunnerEconomyRole,
-  isRunnerNonAdditiveUtilityRole,
   isRunnerPressureRole,
 } from "./runtime/runner-role-classification";
 import { createSemanticRuntimeDecisionComposition } from "./runtime/semantic-runtime-decision-composition";
@@ -189,15 +175,6 @@ import {
   actionClickCost,
   actionCreditCost,
 } from "./runtime/action-cost";
-import {
-  sortedUnique,
-} from "./runtime/collection";
-import {
-  evidenceNumber,
-  evidenceValue,
-  hasEvidenceFlag,
-  hasEvidencePrefix,
-} from "./runtime/evidence-value";
 import { roundNumber as round } from "./runtime/number-rounding";
 import {
   eventMayChangeHqPressure as aiEventMayChangeHqPressure,
@@ -220,11 +197,6 @@ import {
   tacticalPlanMappingOverrideEvidence,
   tacticalPlanRuntimeAlignedToChoice,
 } from "./runtime/semantic-choice-ranking";
-import type {
-  SemanticRuntimeChoice,
-  SemanticRuntimeCoverageSelectionDebug,
-  SemanticRuntimeExclusion,
-} from "./runtime/semantic-runtime-types";
 import type {
   AiSelfplayTraceMiningConfig,
   AiSelfplayTraceMiningResult,
@@ -254,14 +226,8 @@ import type {
   AiBenchmarkSnapshotDeck,
   AiLocalBenchmarkDeckClassification,
 } from "./simulation/benchmark-deck-types";
-import { REAL_SCENE_BENCHMARK_DECKS } from "./simulation/benchmark-local-deck-data";
-import {
-  DOCTRINE_QUALITY_METRIC_NAMES,
-} from "./simulation/simulation-metric-aggregation";
 import {
   analyzeDoctrineQualityCases,
-  isAgendaFloodExposureExemptAction,
-  isEconomyStallExemptAction,
   summarizeDoctrineQualityMetrics,
   type AiDoctrineQualityCaseAnalysis,
   type AiDoctrineQualityCaseExample,
@@ -277,30 +243,24 @@ import {
   corpVisibleRunnerResourceTrashEvidence,
 } from "./simulation/corp-tag-punish-visible-payoff";
 import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/corp-ice-portfolio-diagnostics";
-import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progress";
 import { applyTagPunishOntologyDiagnostics } from "./simulation/tag-punish-ontology-diagnostics";
 import {
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
 } from "./simulation/corp-visible-tag-punish-taken-diagnostics";
 import { runnerSurvivalCounterContextForInput } from "./simulation/runner-survival-counter-context";
-import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
 import {
   runnerMissingBreakerRolesForMetrics,
   runnerStrategicBreakerTargetForMetrics,
   runnerVisibleIceCreatesCoverageNeedForMetrics,
-  type RunnerSetupMissingCoverageType,
 } from "./simulation/runner-setup-coverage-types";
-import type { AiSimulationActionSequenceEntry } from "./simulation/ai-simulation-action-sequence-entry";
 import type { AiSimulationConfig } from "./simulation/ai-simulation-config";
 import type { AiSimulationSummary } from "./simulation/ai-simulation-summary";
 import {
   runnerSetupChosenFamilyForEntry,
 } from "./simulation/runner-setup-attribution-types";
 import {
-  agendaPointsForMetrics,
   definitionTypeForMetrics,
   remoteRootTrashCostForMetrics,
-  remoteTrashCostForVisibleCard,
 } from "./simulation/card-metric-lookup";
 import {
   visibleRootIsKnownAgendaForMetrics,
@@ -328,53 +288,26 @@ import {
   LOAN_FROM_CHIBA_CARD_ID,
   TEAM_RESTRUCTURING_CARD_ID,
 } from "./runtime/runner-semantic-card-ids";
-import {
-  remoteTrashRoleForVisibleCard,
-  type RemoteTrashRole,
-} from "./simulation/remote-trash-role";
 import { type AiQualityMetrics } from "./simulation/quality-metrics";
 import {
   runnerHasRecentRunOnServer,
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
 } from "./simulation/runner-run-target-context";
-import {
-  isCorpProtectionScoreConversionAction,
-  isCorpRemoteProtectionActionEntry,
-  isRunnerCentralPressureAction,
-  isRunnerEconomyProgressAction,
-  isRunnerRigProgressAction,
-  isRunnerSetupAction,
-  isStrategicPlanDecision,
-  ownStrategicWindow,
-  serverTargetsMatch,
-} from "./simulation/plan-conversion-predicates";
 import { scoreActionsForLegacy } from "./legacy/legacy-action-scorer";
 import {
-  BENCHMARK_PROFILES_143,
   listV143BenchmarkProfiles,
   listV143ExploitFixtures,
 } from "./simulation/v143-data";
-import { SOAK_SEEDS_143 } from "./simulation/soak-seed-data";
 import { createAiSimulationComposition } from "./simulation/ai-simulation-composition";
 import { summarizeMatchProgressionMetrics } from "./simulation/match-progression-summary";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
   rememberTacticalPlanRuntime,
-  type TacticalPlanRuntimeResult,
 } from "./tactical-plans";
 import {
-  CURRENT_RULES_BASELINE,
   DEMO_CARDS_BY_ID,
-  DEMO_DECKS,
-  type AiDecision,
   type AiDecisionInput,
-  type AiDecisionScoreComponent,
-  type AiDifficulty,
-  type GameState,
-  type LegalAction,
-  type PlayerView,
-  type VisibleCard,
 } from "@netgrid/shared";
 export {
   beliefDebugSummary,
