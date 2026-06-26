@@ -172,12 +172,7 @@ import {
 import {
   createSemanticRuntimeEvidenceContext,
 } from "./runtime/semantic-runtime-evidence-context";
-import {
-  createCorpTagPunishPayoffProfileContext,
-} from "./runtime/corp-tag-punish-payoff-profiles";
-import {
-  createCorpTagSourcePayoffContext,
-} from "./runtime/corp-tag-source-payoff-context";
+import { createCorpTagPunishWindowComposition } from "./simulation/corp-tag-punish-window-composition";
 import {
   createCorpTaggedPayoffWindowContext,
 } from "./runtime/corp-tagged-payoff-window";
@@ -404,9 +399,6 @@ import {
   runnerStealBlockedByCredits,
   runnerTrashBlockedByCredits,
 } from "./simulation/remote-server-threat";
-import {
-  createTagPunishWindowDiagnosticsContext,
-} from "./simulation/tag-punish-window-diagnostics-context";
 import {
   ALL_NIGHTER_CARD_ID,
   BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
@@ -1345,37 +1337,29 @@ const {
 const {
   corpInstalledEconomyActionProfile,
   corpTagPunishPayoffFundingProfile,
-} = createCorpTagPunishPayoffProfileContext({
+  corpImmediateTagSourceVisiblePayoffProfile,
+  corpImmediateTagSourceAvailable,
+  corpUnprotectedPersistentTagAssetSetup,
+  corpOntologyPayoffAvailableForTagSource,
+  tagPunishWindowDiagnosticsForSimulationAction,
+} = createCorpTagPunishWindowComposition({
   installedEconomyCreditAmount: corpInstalledEconomyCreditAmount,
   sourceDefinitionIdForAction,
   actionSourceCard: semanticRuntimeCorpActionSourceCard,
   visibleCardStoredCredits: corpVisibleCardStoredCredits,
   visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
-});
-const {
-  corpImmediateTagSourceVisiblePayoffProfile,
-  corpImmediateTagSourceAvailable,
-  corpUnprotectedPersistentTagAssetSetup,
-  corpOntologyPayoffAvailableForTagSource,
-} = createCorpTagSourcePayoffContext({
-  sourceDefinitionIdForAction,
-  visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
   tagPunishAssessmentForAction: corpTagPunishOntologyAssessmentForAction,
   payoffProfileForDefinition: classifyTagPunishPayoffFromOntology,
+  corpVisibleTagPunishOpportunities,
+  runnerSurvivalCounterContextForInput,
+  corpTagPunishOntologyAssessmentForAction,
+  applyTagPunishOntologyDiagnostics,
+  applyCorpVisibleTagPunishTakenWindowDiagnostics,
+  applyCorpVisibleTagPunishUnknownSkipDiagnostics,
+  strongestCorpTagSourceOpportunity,
+  applyCorpTagSourceWindowDiagnostics,
+  applyActualTagCreationDiagnostics,
 });
-const { tagPunishWindowDiagnosticsForSimulationAction } =
-  createTagPunishWindowDiagnosticsContext({
-    corpVisibleTagPunishOpportunities,
-    runnerSurvivalCounterContextForInput,
-    corpTagPunishOntologyAssessmentForAction,
-    applyTagPunishOntologyDiagnostics,
-    applyCorpVisibleTagPunishTakenWindowDiagnostics,
-    applyCorpVisibleTagPunishUnknownSkipDiagnostics,
-    strongestCorpTagSourceOpportunity,
-    corpOntologyPayoffAvailableForTagSource,
-    applyCorpTagSourceWindowDiagnostics,
-    applyActualTagCreationDiagnostics,
-  });
 const {
   corpTaggedRunnerPayoffProfile,
 } = createCorpTaggedRunnerPayoffProfileContext({
