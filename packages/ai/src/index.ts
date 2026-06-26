@@ -629,7 +629,6 @@ import {
   isProtectBeforeAdvanceSimulationAction,
 } from "./simulation/final-advance-assessment";
 import { MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS } from "./simulation/benchmark-deck-slots";
-import { runMatchProgressionBenchmarkSlot } from "./simulation/benchmark-deck-slot-runner";
 import {
   averageFinalAdvanceNumber,
   averageFirstProgressionTurn,
@@ -756,6 +755,9 @@ import {
 import {
   createMatchProgressionBenchmarkRunner,
 } from "./simulation/match-progression-benchmark-runner";
+import {
+  createMatchProgressionBenchmarkSuiteRunner,
+} from "./simulation/match-progression-benchmark-suite-runner";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -2396,6 +2398,11 @@ const { runMatchProgressionBenchmark } =
     summarizeMatchProgressionMetrics,
   });
 export { runMatchProgressionBenchmark };
+const { runMatchProgressionBenchmarkSuite } =
+  createMatchProgressionBenchmarkSuiteRunner({
+    runMatchProgressionBenchmark,
+  });
+export { runMatchProgressionBenchmarkSuite };
 
 export function simulateAiGame(
   config: AiSimulationConfig = {},
@@ -2800,44 +2807,6 @@ export function simulateAiSoak(
 
 export function listMatchProgressionBenchmarkDeckSlots(): AiBenchmarkDeckSlotDefinition[] {
   return MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.map((slot) => ({ ...slot }));
-}
-
-export function runMatchProgressionBenchmarkSuite(
-  config: AiDoctrineQualityBenchmarkConfig = {},
-): AiMatchProgressionBenchmarkSuiteResult {
-  const baselineProfile = config.baselineProfile ?? "belief_ai_v1_4_2";
-  const candidateProfile = config.candidateProfile ?? "current_candidate";
-  const comparisonProfiles = sortedUnique([
-    ...(config.comparisonProfiles ?? [
-      "basic_corp_ai",
-      "basic_runner_ai",
-      "belief_ai_v1_4_2",
-      "current_candidate",
-    ]),
-    baselineProfile,
-    candidateProfile,
-  ]) as SimulationBenchmarkProfileId[];
-  const seeds =
-    config.includeHoldout === false
-      ? SOAK_SEEDS_143.tuningSeeds
-      : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
-  const slots = MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.map((slot) =>
-    runMatchProgressionBenchmarkSlot(
-      slot,
-      config,
-      comparisonProfiles,
-      runMatchProgressionBenchmark,
-    ),
-  );
-  return {
-    version: "ai-match-progression-suite-v1",
-    diagnosticOnly: true,
-    baselineProfile,
-    candidateProfile,
-    comparisonProfiles,
-    seeds,
-    slots,
-  };
 }
 
 export function runAiSelfplayTraceMining(
