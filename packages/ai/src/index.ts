@@ -156,6 +156,9 @@ import {
   runnerReachedAccessMovement,
 } from "./runtime/current-encounter";
 import {
+  currentRunFuturePathAssessment,
+} from "./runtime/runner-future-path-assessment";
+import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
 } from "./runtime/encounter-action";
@@ -776,7 +779,6 @@ import {
   type PublicGameEvent,
   type Side,
   type VisibleCard,
-  type VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 export {
   beliefDebugSummary,
@@ -6139,112 +6141,6 @@ function encounterBreakReserveContext(
           `break_reserve_target:${reserveTarget}`,
         ]
       : [],
-  };
-}
-
-function currentRunFuturePathAssessment(
-  input: AiDecisionInput,
-  effects: Array<{
-    effect: NonNullable<
-      NonNullable<
-        VisibleCard["effectiveRunQuote"]
-      >["subroutines"][number]["unbrokenRunEffect"]
-    >;
-  }> = [],
-): { blocked: boolean; visibleBreakCost?: number } {
-  const run = input.playerView.run;
-  if (!run || run.position?.kind !== "ice") return { blocked: false };
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === run.position?.serverId,
-  );
-  if (!server) return { blocked: false };
-  const futureIce = server.ice
-    .slice(0, Math.max(0, run.position.iceIndex))
-    .map((ice) => projectFutureIceForUnbrokenEffects(ice, effects));
-  const assessment = assessKnownRezzedIcePath(
-    futureIce,
-    input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
-    server.root,
-  );
-  const encounterTax = effects.reduce((sum, { effect }) => {
-    const perIce = Math.max(0, Math.floor(effect.addsFutureEncounterCost ?? 0));
-    return (
-      sum + perIce * futureIce.filter((ice) => ice.known && ice.rezzed).length
-    );
-  }, 0);
-  const visibleBreakCost = (assessment.visibleBreakCost ?? 0) + encounterTax;
-  return {
-    blocked:
-      assessment.blocked || visibleBreakCost > input.playerView.own.credits,
-    ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
-  };
-}
-
-function projectFutureIceForUnbrokenEffects(
-  ice: VisibleCard,
-  effects: Array<{
-    effect: NonNullable<
-      NonNullable<
-        VisibleCard["effectiveRunQuote"]
-      >["subroutines"][number]["unbrokenRunEffect"]
-    >;
-  }>,
-): VisibleCard {
-  if (!ice.known || ice.rezzed !== true || !ice.definitionId) return ice;
-  const quote = ice.effectiveRunQuote;
-  const baseQuote: VisibleEffectiveIceRunQuote = quote ?? {
-    iceInstanceId: ice.instanceId,
-    iceDefinitionId: ice.definitionId,
-    effectiveStrength: ice.strength ?? cardDefinitionStrength(ice.definitionId),
-    subroutines:
-      DEMO_CARDS_BY_ID[ice.definitionId]?.subroutines?.map((subroutine) => ({
-        id: subroutine.id,
-        type: subroutine.type,
-        ...(subroutine.amount !== undefined
-          ? { amount: subroutine.amount }
-          : {}),
-        ...(subroutine.breakTags
-          ? { breakTags: subroutine.breakTags.slice() }
-          : {}),
-      })) ?? [],
-  };
-  let effectiveStrength = baseQuote.effectiveStrength;
-  let breakSubroutineAdditionalCostPerSubroutine =
-    baseQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0;
-  const subroutines = baseQuote.subroutines.map((subroutine) => ({
-    ...subroutine,
-  }));
-  for (const { effect } of effects) {
-    const addedEndTheRun = Math.max(
-      0,
-      Math.floor(effect.addsFutureEndTheRunSubroutines ?? 0),
-    );
-    for (let index = 0; index < addedEndTheRun; index += 1) {
-      subroutines.push({
-        id: `visible_projection.future_end_the_run.${index + 1}`,
-        type: "end_the_run",
-      });
-    }
-    effectiveStrength += Math.max(
-      0,
-      Math.floor(effect.increasesFutureIceStrength ?? 0),
-    );
-    breakSubroutineAdditionalCostPerSubroutine += Math.max(
-      0,
-      Math.floor(effect.increasesFutureBreakCostPerSubroutine ?? 0),
-    );
-  }
-  return {
-    ...ice,
-    effectiveRunQuote: {
-      ...baseQuote,
-      effectiveStrength,
-      subroutines,
-      ...(breakSubroutineAdditionalCostPerSubroutine > 0
-        ? { breakSubroutineAdditionalCostPerSubroutine }
-        : {}),
-    },
   };
 }
 
