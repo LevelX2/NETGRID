@@ -1,6 +1,18 @@
 import { DEMO_CARDS_BY_ID, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 
+export function runtimeCardDefinitionForAi(definitionId: string) {
+  return RUNTIME_CARDS[definitionId];
+}
+
+export function demoCardDefinitionForAi(definitionId: string) {
+  return DEMO_CARDS_BY_ID[definitionId];
+}
+
+export function demoCardRulesTextForAi(definitionId: string) {
+  return DEMO_CARDS_BY_ID[definitionId]?.rulesText;
+}
+
 export function runnerCardMechanicsForAi(definitionId: string): string[] {
   const runtimeDefinition = RUNTIME_CARDS[definitionId];
   const demoDefinition = DEMO_CARDS_BY_ID[definitionId];

@@ -47,6 +47,8 @@ export function createAiFacadeFoundationContext(
   dependencies: AiFacadeFoundationContextDependencies,
 ) {
   const AI_HINTS = createAiHintsByCard();
+  const hintForDefinitionId = (definitionId: string) =>
+    AI_HINTS.get(definitionId);
 
   const { rolesForAction, rolesForCardId } = createRoleContext({
     findVisibleCard: dependencies.findVisibleCard,
@@ -106,7 +108,7 @@ export function createAiFacadeFoundationContext(
   });
 
   return {
-    AI_HINTS,
+    hintForDefinitionId,
     rolesForAction,
     rolesForCardId,
     extractAiFeatures,

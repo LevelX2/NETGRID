@@ -5604,6 +5604,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 81 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1644 Tests.
+- `AI-COMPLETE-03` fünfhundertsechsundachtzigster Struktur-Schnitt:
+  - `packages/ai/src/runtime/card-definition-lookup.ts` kapselt Runtime-/Demo-Card-Definition- und Demo-RulesText-Lookups für die AI-Fassade.
+  - `packages/ai/src/runtime/ai-facade-foundation-context.ts` gibt einen `hintForDefinitionId`-Lookup statt der rohen Hint-Map an die Fassade zurück.
+  - `packages/ai/src/index.ts` reicht diese Helper weiter und greift nicht mehr direkt auf `RUNTIME_CARDS`, `DEMO_CARDS_BY_ID` oder die Hint-Map zu.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 1.386 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 81 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1644 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

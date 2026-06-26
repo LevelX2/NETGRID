@@ -45,9 +45,6 @@ import {
   type RunnerTacticalGoal,
 } from "./runner-tactical-goals";
 import {
-  RUNTIME_CARDS,
-} from "./ai-hints";
-import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
   runnerKnownPathAssessmentIsKnownNoAccess,
@@ -77,6 +74,9 @@ import { createRunnerInstallClassificationComposition } from "./simulation/runne
 import { createRunnerSimulationDiagnosticsComposition } from "./simulation/runner-simulation-diagnostics-composition";
 import {
   cardDefinitionTypeForAi,
+  demoCardDefinitionForAi,
+  demoCardRulesTextForAi,
+  runtimeCardDefinitionForAi,
   runnerCardMechanicsForAi,
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
@@ -306,7 +306,6 @@ import {
   rememberTacticalPlanRuntime,
 } from "./tactical-plans";
 import {
-  DEMO_CARDS_BY_ID,
   type AiDecisionInput,
 } from "@netgrid/shared";
 export {
@@ -692,7 +691,7 @@ export {
 export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local-editable-deck-resolver";
 
 const {
-  AI_HINTS,
+  hintForDefinitionId,
   rolesForAction,
   rolesForCardId,
   extractAiFeatures,
@@ -932,7 +931,7 @@ const {
   runnerPersistentInstallEvaluationForAction,
 } = createRunnerDevelopmentSupportComposition({
   highRiskLoanDefinitionId: LOAN_FROM_CHIBA_CARD_ID,
-  hintForDefinitionId: (definitionId) => AI_HINTS.get(definitionId),
+  hintForDefinitionId,
   sourceDefinitionIdForAction,
   projectedCreditGainForAction: runnerProjectedCreditGainForAction,
   actionCreditCost,
@@ -955,8 +954,8 @@ const {
   rolesMatch: (roles, needles) => discardRolesMatch([...roles], [...needles]),
   previousPlan: getTacticalPlanMemorySnapshot,
   findVisibleCard,
-  runtimeDefinition: (definitionId) => RUNTIME_CARDS[definitionId],
-  demoDefinition: (definitionId) => DEMO_CARDS_BY_ID[definitionId],
+  runtimeDefinition: runtimeCardDefinitionForAi,
+  demoDefinition: demoCardDefinitionForAi,
   serverId: semanticRuntimeServerId,
   definitionType: definitionTypeForMetrics,
   runnerRunTargetEvaluation: runnerMultiRunTargetEvaluation,
@@ -994,8 +993,8 @@ const {
   rolesForAction,
   isRemoteServerTarget,
   actionCreditCost,
-  runtimeDefinition: (definitionId) => RUNTIME_CARDS[definitionId],
-  demoDefinition: (definitionId) => DEMO_CARDS_BY_ID[definitionId],
+  runtimeDefinition: runtimeCardDefinitionForAi,
+  demoDefinition: demoCardDefinitionForAi,
   sourceDefinitionIdForAction,
 });
 const {
@@ -1083,9 +1082,9 @@ const {
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
   sourceDefinitionIdForAction,
   rolesForCardId,
-  runtimeDefinition: (definitionId) => RUNTIME_CARDS[definitionId],
-  demoDefinition: (definitionId) => DEMO_CARDS_BY_ID[definitionId],
-  hintForDefinitionId: (definitionId) => AI_HINTS.get(definitionId),
+  runtimeDefinition: runtimeCardDefinitionForAi,
+  demoDefinition: demoCardDefinitionForAi,
+  hintForDefinitionId,
   evaluateKnownCentralPayoff: evaluateKnownCentralAccessPayoff,
   definitionType: definitionTypeForMetrics,
   riskAssessment: blinkRiskAssessmentForEncounterBreak,
@@ -1298,9 +1297,9 @@ const {
     cardSupport: {
       rolesForCardId,
       hintEffectsForCard: (definitionId: string) =>
-        AI_HINTS.get(definitionId)?.effects,
+        hintForDefinitionId(definitionId)?.effects,
       rulesTextForCard: (definitionId: string) =>
-        DEMO_CARDS_BY_ID[definitionId]?.rulesText,
+        demoCardRulesTextForAi(definitionId),
       effectTarget: (effect: unknown) =>
         effect && typeof effect === "object"
           ? stringRecordValue(effect as Record<string, unknown>, "target")
