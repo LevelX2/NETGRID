@@ -5850,6 +5850,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 81 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1644 Tests.
+- `AI-COMPLETE-03` sechshundertdreizehnter Struktur-Schnitt:
+  - `packages/ai/src/index.ts` bereinigt die nach der Runtime-Facade-Extraktion ungenutzten historischen Wiring-Imports per TypeScript-Organize-Imports und Prettier.
+  - Die Public-Fassade bleibt ein Re-Export-Modul ohne Runtime-Composition-Aufruf.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 398 Zeilen und enthält weiterhin keine inline `=>`-/Funktionsadapter.
+  - Status bleibt `IN_PROGRESS`, weil die Runtime-Public-Entrypoints als neues Modul noch weiter auf lokale Importklarheit und Public-Contract-Stabilität geprüft werden sollen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 81 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1644 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
