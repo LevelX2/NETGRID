@@ -153,7 +153,6 @@ import {
   isRunnerPressureRole,
 } from "./runtime/runner-role-classification";
 import { createSemanticRuntimeDecisionComposition } from "./runtime/semantic-runtime-decision-composition";
-import { createSemanticRuntimeCorpFundingContestabilityComposition } from "./runtime/semantic-runtime-corp-funding-contestability-composition";
 import {
   scrubEvidence,
   semanticRuntimeChoiceWithEvidence,
@@ -1135,15 +1134,6 @@ const {
   semanticRuntimeCorpInstallRemoteScore,
   semanticRuntimeCorpShouldBuildProtectedScoreRemote,
   semanticRuntimeCorpAdvanceRemoteScore,
-} = createSemanticRuntimeCorpBoardScoreComposition({
-  serverId: semanticRuntimeServerId,
-  findVisibleCard,
-  findVisibleCorpServerCard,
-  rolesForAction,
-  isRemoteServerTarget,
-  actionCreditCost,
-});
-const {
   normalizedRulesTextForDefinition,
   semanticRuntimeVisibleCardType,
   semanticRuntimeVisibleCardAdvancementRequirement,
@@ -1153,19 +1143,16 @@ const {
   semanticRuntimeCorpCentralRezReserveAssessment,
   semanticRuntimeCorpHasCentralRezFloorFundingNeed,
   semanticRuntimeCorpRemoteScoreContestabilityAssessment,
-} = createSemanticRuntimeCorpFundingContestabilityComposition({
+} = createSemanticRuntimeCorpBoardScoreComposition({
+  serverId: semanticRuntimeServerId,
+  findVisibleCard,
+  findVisibleCorpServerCard,
+  rolesForAction,
+  isRemoteServerTarget,
+  actionCreditCost,
   runtimeDefinition: (definitionId) => RUNTIME_CARDS[definitionId],
   demoDefinition: (definitionId) => DEMO_CARDS_BY_ID[definitionId],
-  actionServerId: semanticRuntimeCorpActionServerId,
-  server: semanticRuntimeCorpServer,
-  actionCreditCost,
-  actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-  advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
-  remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
-  actionSourceCard: semanticRuntimeCorpActionSourceCard,
   sourceDefinitionIdForAction,
-  remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
-  isRemoteServerTarget,
 });
 const {
   corpInstalledEconomyActionProfile,
