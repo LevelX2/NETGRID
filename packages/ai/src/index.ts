@@ -78,7 +78,6 @@ import { createAiFacadeFoundationContext } from "./runtime/ai-facade-foundation-
 import { createRunnerEncounterCompositionContext } from "./runtime/runner-encounter-composition-context";
 import { createRunnerKnownPathDiagnosticsComposition } from "./simulation/runner-known-path-diagnostics-composition";
 import { createRunnerCentralPressureDiagnosticsComposition } from "./simulation/runner-central-pressure-diagnostics-composition";
-import { createRunnerSetupCoverageComposition } from "./simulation/runner-setup-coverage-composition";
 import { createRunnerInstallClassificationComposition } from "./simulation/runner-install-classification-composition";
 import { createRunnerSimulationDiagnosticsComposition } from "./simulation/runner-simulation-diagnostics-composition";
 import {
@@ -822,14 +821,6 @@ const {
   runnerHasKnownBlockedPathByCoverage,
   runnerCoverageSearchActionForMetrics,
   runnerCoverageRecoveryActionForMetrics,
-} = createRunnerSetupCoverageComposition({
-  assessKnownRezzedIcePath,
-  findVisibleCard,
-  rolesForAction,
-  rolesForCardId,
-});
-
-const {
   runnerRemoteTrashAccessContext,
   runnerKnownNoAccessLegalRunTargets,
   runnerCoverageRepairDiagnostic,

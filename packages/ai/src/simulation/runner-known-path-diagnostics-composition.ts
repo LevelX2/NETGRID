@@ -7,10 +7,14 @@ import {
   createRunnerKnownPathDiagnosticsForAction,
   createRunnerKnownNoAccessLegalRunTargets,
 } from "./runner-known-no-access";
+import {
+  createRunnerSetupCoverageComposition,
+  type RunnerSetupCoverageCompositionDependencies,
+} from "./runner-setup-coverage-composition";
 
-export type RunnerKnownPathDiagnosticsCompositionDependencies = {
+export type RunnerKnownPathDiagnosticsCompositionDependencies =
+  RunnerSetupCoverageCompositionDependencies & {
   runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
-  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   runnerKnownPathAssessmentIsKnownNoAccess: (
     assessment: ReturnType<typeof assessKnownRezzedIcePath>,
   ) => boolean;
@@ -21,12 +25,6 @@ export type RunnerKnownPathDiagnosticsCompositionDependencies = {
     input: AiDecisionInput,
     serverId: string,
   ) => boolean;
-  findVisibleCard: (
-    input: AiDecisionInput,
-    instanceId: string,
-  ) => VisibleCard | undefined;
-  rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  rolesForCardId: (definitionId: string | undefined) => string[];
   remoteServerHasScoreThreat: (
     input: AiDecisionInput,
     serverId: string,
@@ -44,6 +42,21 @@ export type RunnerKnownPathDiagnosticsCompositionDependencies = {
 export function createRunnerKnownPathDiagnosticsComposition(
   dependencies: RunnerKnownPathDiagnosticsCompositionDependencies,
 ) {
+  const {
+    runnerRunKnownPathCost,
+    runnerHasKnownUnaffordableLegalRun,
+    runnerVisibleMissingBreakerCoverage,
+    runnerMissingCoverageTypesForInput,
+    runnerHasKnownBlockedPathByCoverage,
+    runnerCoverageSearchActionForMetrics,
+    runnerCoverageRecoveryActionForMetrics,
+  } = createRunnerSetupCoverageComposition({
+    assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
+    findVisibleCard: dependencies.findVisibleCard,
+    rolesForAction: dependencies.rolesForAction,
+    rolesForCardId: dependencies.rolesForCardId,
+  });
+
   const runnerRemoteTrashAccessContext = createRunnerRemoteTrashAccessContext({
     runnerCreditReserveTargetForInput:
       dependencies.runnerCreditReserveTargetForInput,
@@ -83,6 +96,13 @@ export function createRunnerKnownPathDiagnosticsComposition(
     });
 
   return {
+    runnerRunKnownPathCost,
+    runnerHasKnownUnaffordableLegalRun,
+    runnerVisibleMissingBreakerCoverage,
+    runnerMissingCoverageTypesForInput,
+    runnerHasKnownBlockedPathByCoverage,
+    runnerCoverageSearchActionForMetrics,
+    runnerCoverageRecoveryActionForMetrics,
     runnerRemoteTrashAccessContext,
     runnerKnownNoAccessLegalRunTargets,
     runnerCoverageRepairDiagnostic,
