@@ -435,6 +435,83 @@ export function incrementCoverageTypes(
   }
 }
 
+export function attributeNormalizedSearchRecoverySkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: AiSimulationActionSequenceEntry,
+  followup: {
+    installFollowup: boolean;
+    coverageResolved: boolean;
+    knownUnaffordableRun: boolean;
+    noProgress: boolean;
+    actionLimit: boolean;
+  },
+): void {
+  metrics.runnerSearchRecoveryNormalizedWindows += 1;
+  if (entry.runnerSearchTaken === true || entry.runnerRecoveryTaken === true)
+    metrics.runnerSearchRecoveryNormalizedTaken += 1;
+  else metrics.runnerSearchRecoveryNormalizedSkipped += 1;
+
+  const blockedPressure =
+    entry.runnerPressureActionTaken === true ||
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true ||
+    entry.runnerRemoteTrashTaken === true;
+  if (blockedPressure) {
+    metrics.runnerSearchRecoveryNormalizedBlocked += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest += 1;
+    return;
+  }
+
+  if (
+    entry.runnerEconomyTaken === true ||
+    entry.runnerEconomyActionTaken === true
+  ) {
+    metrics.runnerSearchRecoveryNormalizedBlocked += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve += 1;
+    return;
+  }
+
+  if (
+    entry.runnerPressureReadyTrue === true &&
+    entry.runnerPathBlockedByMissingCoverage !== true
+  ) {
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough += 1;
+    return;
+  }
+
+  const missingCoverage =
+    (entry.runnerSetupMissingCoverageTypes ?? []).length > 0;
+  const legalSearchRecovery =
+    (entry.runnerLegalSearchActions ?? 0) +
+      (entry.runnerLegalRecoveryActions ?? 0) >
+    0;
+  if (!missingCoverage || !legalSearchRecovery) {
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact += 1;
+    return;
+  }
+
+  const followupProblem =
+    !followup.coverageResolved &&
+    (followup.knownUnaffordableRun ||
+      followup.noProgress ||
+      followup.actionLimit);
+  if (followupProblem) {
+    metrics.runnerSearchRecoveryNormalizedSuspicious += 1;
+    metrics.runnerSearchRecoveryNormalizedTrueMissedCoverage += 1;
+    metrics.runnerSearchRecoveryNormalizedFixGateEligible += 1;
+    return;
+  }
+
+  if (!followup.installFollowup && !followup.coverageResolved) {
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup += 1;
+    return;
+  }
+
+  metrics.runnerSearchRecoveryNormalizedUnclassified += 1;
+}
+
 export function attributeNormalizedHandSizeSkip(
   metrics: Record<RunnerSetupAttributionMetricKey, number>,
   entry: AiSimulationActionSequenceEntry,
