@@ -36,6 +36,64 @@ export function tagSourceConvertsToPunishTaken(
     .some((entry) => entry.side === "corp" && entry.corpPunishTaken === true);
 }
 
+export function tagSourceConvertsToTaggedCorpDecision(
+  sequence: AiSimulationSummary["actionSequence"],
+  index: number,
+): boolean {
+  return sequence
+    .slice(index + 1, index + 12)
+    .some(
+      (entry) =>
+        entry.side === "corp" && entry.runnerTaggedAtCorpDecision === true,
+    );
+}
+
+export function tagSourceConvertsToVisibleLegalPayoffWindow(
+  sequence: AiSimulationSummary["actionSequence"],
+  index: number,
+): boolean {
+  return sequence
+    .slice(index + 1, index + 12)
+    .some(
+      (entry) =>
+        entry.side === "corp" &&
+        ((entry.corpVisibleTagPunishLegalActions ?? 0) > 0 ||
+          entry.corpPunishOpportunity === true),
+    );
+}
+
+export function previousFunnelSourceBefore(
+  sequence: AiSimulationSummary["actionSequence"],
+  index: number,
+): boolean {
+  return sequence
+    .slice(Math.max(0, index - 12), index)
+    .some(
+      (entry) =>
+        entry.corpTagSourceTaken === true ||
+        entry.corpFunnelSourceActionTakenWithPayoffInDeck === true ||
+        entry.corpFunnelSourceActionTakenWithVisiblePayoff === true,
+    );
+}
+
+export function previousRunnerTurnTagBefore(
+  sequence: AiSimulationSummary["actionSequence"],
+  index: number,
+): boolean {
+  return sequence
+    .slice(Math.max(0, index - 12), index)
+    .some((entry) => entry.corpTagCreatedDuringRunnerTurn === true);
+}
+
+export function previousEncounterTagBefore(
+  sequence: AiSimulationSummary["actionSequence"],
+  index: number,
+): boolean {
+  return sequence
+    .slice(Math.max(0, index - 12), index)
+    .some((entry) => entry.corpTagCreatedDuringEncounter === true);
+}
+
 export function isTerminalDamageOrEconomicPunish(
   kind: CorpPunishKind | undefined,
 ): boolean {
