@@ -541,6 +541,7 @@ import {
 import { summarizeActionLimitEndgameMetrics } from "./simulation/action-limit-endgame-metrics";
 import { summarizeBreakerOntologyMetrics } from "./simulation/breaker-ontology-metrics";
 import { summarizeCorpEffectiveRemoteSafetyMetrics } from "./simulation/corp-effective-remote-safety-metrics";
+import { summarizeCorpIcePortfolioMetrics } from "./simulation/corp-ice-portfolio-metrics";
 import { corpScoreTerminalFollowupMetrics } from "./simulation/corp-score-terminal-followup-metrics";
 import { summarizeOutcomeFollowupMetrics } from "./simulation/outcome-followup-metrics";
 import { summarizeRemoteRoleOntologyMetrics } from "./simulation/remote-role-ontology-metrics";
@@ -10648,141 +10649,6 @@ function isTerminalDamageOrEconomicPunish(kind: CorpPunishKind | undefined) {
     kind === "scored_agenda_damage_like" ||
     kind === "resource_trash_like"
   );
-}
-
-function summarizeCorpIcePortfolioMetrics(
-  summaries: AiSimulationSummary[],
-): Pick<AiMatchProgressionMetrics, CorpIcePortfolioMetricKey> {
-  const entries = summaries.flatMap((summary) => summary.actionSequence);
-  const numericValues = (
-    key: keyof AiSimulationSummary["actionSequence"][number],
-  ): number[] =>
-    entries
-      .map((entry) => entry[key])
-      .filter((value): value is number => typeof value === "number");
-  const maxNumber = (
-    key: keyof AiSimulationSummary["actionSequence"][number],
-  ): number => {
-    const values = numericValues(key);
-    return values.length > 0 ? Math.max(...values) : 0;
-  };
-  const averageMetric = (
-    key: keyof AiSimulationSummary["actionSequence"][number],
-  ): number => averageNumber(numericValues(key));
-  const count = (
-    key: keyof AiSimulationSummary["actionSequence"][number],
-  ): number => entries.filter((entry) => entry[key] === true).length;
-  return {
-    corpHqIceCount: maxNumber("corpHqIceCount"),
-    corpRndIceCount: maxNumber("corpRndIceCount"),
-    corpArchivesIceCount: maxNumber("corpArchivesIceCount"),
-    corpRemoteIceCount: maxNumber("corpRemoteIceCount"),
-    corpHqUnrezzedIceCount: maxNumber("corpHqUnrezzedIceCount"),
-    corpRndUnrezzedIceCount: maxNumber("corpRndUnrezzedIceCount"),
-    corpCentralIceCount: maxNumber("corpCentralIceCount"),
-    corpCentralUnrezzedIceCount: maxNumber("corpCentralUnrezzedIceCount"),
-    corpCentralIceInstalled: count("corpCentralIceInstalled"),
-    corpHqIceInstalled: count("corpHqIceInstalled"),
-    corpRndIceInstalled: count("corpRndIceInstalled"),
-    corpArchivesIceInstalled: count("corpArchivesIceInstalled"),
-    corpRemoteIceInstalled: count("corpRemoteIceInstalled"),
-    corpHqOverIced: count("corpHqOverIced"),
-    corpRndOverIced: count("corpRndOverIced"),
-    corpCentralOverIced: count("corpCentralOverIced"),
-    corpCentralOverIcedWithoutPressure: count(
-      "corpCentralOverIcedWithoutPressure",
-    ),
-    corpCentralOverIcedWithLowRezReserve: count(
-      "corpCentralOverIcedWithLowRezReserve",
-    ),
-    corpHqFifthIceInstalled: count("corpHqFifthIceInstalled"),
-    corpCentralIceDiminishingReturnInstall: count(
-      "corpCentralIceDiminishingReturnInstall",
-    ),
-    corpCentralIceInstallSuppressedByDiminishingReturns: count(
-      "corpCentralIceInstallSuppressedByDiminishingReturns",
-    ),
-    corpCentralIceInstallPenalizedByDiminishingReturns: count(
-      "corpCentralIceInstallPenalizedByDiminishingReturns",
-    ),
-    corpRezReserveCredits: averageMetric("corpRezReserveCredits"),
-    corpRezReserveDeficit: maxNumber("corpRezReserveDeficit"),
-    corpInstalledIceWithoutRezReserve: count(
-      "corpInstalledIceWithoutRezReserve",
-    ),
-    corpInstalledCentralIceWithoutRezReserve: count(
-      "corpInstalledCentralIceWithoutRezReserve",
-    ),
-    corpInstalledRemoteIceWithoutRezReserve: count(
-      "corpInstalledRemoteIceWithoutRezReserve",
-    ),
-    corpCanRezAtLeastOneCentralIce: count("corpCanRezAtLeastOneCentralIce"),
-    corpCanRezAtLeastOneRemoteIce: count("corpCanRezAtLeastOneRemoteIce"),
-    corpCannotRezAnyNewlyInstalledIce: count(
-      "corpCannotRezAnyNewlyInstalledIce",
-    ),
-    corpCreditsBelowCheapestRelevantRez: count(
-      "corpCreditsBelowCheapestRelevantRez",
-    ),
-    corpCreditsBelowEstimatedCentralRezNeed: count(
-      "corpCreditsBelowEstimatedCentralRezNeed",
-    ),
-    corpHqProtectionJustifiedByAgendaFlood: count(
-      "corpHqProtectionJustifiedByAgendaFlood",
-    ),
-    corpHqProtectionJustifiedByRunnerPressure: count(
-      "corpHqProtectionJustifiedByRunnerPressure",
-    ),
-    corpRndProtectionJustifiedByRunnerPressure: count(
-      "corpRndProtectionJustifiedByRunnerPressure",
-    ),
-    corpCentralOverIceBlockedByRunnerPressure: count(
-      "corpCentralOverIceBlockedByRunnerPressure",
-    ),
-    corpCentralOverIceBlockedByAgendaFlood: count(
-      "corpCentralOverIceBlockedByAgendaFlood",
-    ),
-    corpCentralOverIceBlockedByNoRemotePlan: count(
-      "corpCentralOverIceBlockedByNoRemotePlan",
-    ),
-    corpRemoteScoringUnderbuiltWhileCentralsOverIced: count(
-      "corpRemoteScoringUnderbuiltWhileCentralsOverIced",
-    ),
-    corpReadyRemoteExists: count("corpReadyRemoteExists"),
-    corpAgendaInHqWithReadyRemote: count("corpAgendaInHqWithReadyRemote"),
-    corpAgendaInHqWithoutReadyRemote: count("corpAgendaInHqWithoutReadyRemote"),
-    corpExtraCentralIceChosenOverReadyRemoteBuild: count(
-      "corpExtraCentralIceChosenOverReadyRemoteBuild",
-    ),
-    corpExtraCentralIceChosenOverEconomy: count(
-      "corpExtraCentralIceChosenOverEconomy",
-    ),
-    corpExtraCentralIceChosenOverRezReserve: count(
-      "corpExtraCentralIceChosenOverRezReserve",
-    ),
-    corpExtraCentralIceChosenOverAgendaInstall: count(
-      "corpExtraCentralIceChosenOverAgendaInstall",
-    ),
-    corpExtraCentralIceChosenOverAdvanceOrScore: count(
-      "corpExtraCentralIceChosenOverAdvanceOrScore",
-    ),
-    corpIcePortfolioFixGateEligible: count("corpIcePortfolioFixGateEligible"),
-    corpIcePortfolioFixGateSuspiciousCentralOverIce: count(
-      "corpIcePortfolioFixGateSuspiciousCentralOverIce",
-    ),
-    corpIcePortfolioFixGateBlockedByAgendaFlood: count(
-      "corpIcePortfolioFixGateBlockedByAgendaFlood",
-    ),
-    corpIcePortfolioFixGateBlockedByRunnerCentralPressure: count(
-      "corpIcePortfolioFixGateBlockedByRunnerCentralPressure",
-    ),
-    corpIcePortfolioFixGateBlockedByNoRemotePlan: count(
-      "corpIcePortfolioFixGateBlockedByNoRemotePlan",
-    ),
-    corpIcePortfolioFixGateBlockedByEmergencyProtection: count(
-      "corpIcePortfolioFixGateBlockedByEmergencyProtection",
-    ),
-  };
 }
 
 function summarizeCorpUnsafeRemoteScoreConversionMetrics(
