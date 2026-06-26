@@ -1,4 +1,4 @@
-import type { VisibleCard } from "@netgrid/shared";
+import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import {
   createPracticalMicroCandidatesContext,
   type PracticalMicroCandidatesContextDependencies,
@@ -19,6 +19,8 @@ import {
 type KnownPathAssessment = ReturnType<
   PracticalMicroCandidatesContextDependencies["knownPathAssessment"]
 >;
+type PracticalRunnerRunTargets =
+  PracticalMicroCandidatesContextDependencies["runnerRunTargets"];
 
 type SemanticRuntimeDecisionKnownPathDependencies = {
   assessKnownRezzedIcePath: (
@@ -29,12 +31,19 @@ type SemanticRuntimeDecisionKnownPathDependencies = {
   ) => KnownPathAssessment;
 };
 
+type SemanticRuntimeDecisionPracticalRunTargetDependencies = {
+  evaluatePracticalRunnerRunTargets: (params: {
+    input: AiDecisionInput;
+  }) => ReturnType<PracticalRunnerRunTargets>;
+};
+
 export type SemanticRuntimeDecisionCompositionDependencies =
   Omit<
     PracticalMicroCandidatesContextDependencies,
-    "knownPathAssessment"
+    "knownPathAssessment" | "runnerRunTargets"
   > &
     SemanticRuntimeDecisionKnownPathDependencies &
+    SemanticRuntimeDecisionPracticalRunTargetDependencies &
     SemanticRuntimeChoiceCompositionDependencies &
     Omit<SemanticRuntimeDebugContextDependencies, "scoreBreakdown"> &
     Omit<
@@ -65,7 +74,10 @@ export function createSemanticRuntimeDecisionComposition(
       rolesForAction: dependencies.rolesForAction,
       scoreTerminalWindow: dependencies.scoreTerminalWindow,
       actionTypeIsReactive: dependencies.actionTypeIsReactive,
-      runnerRunTargets: dependencies.runnerRunTargets,
+      runnerRunTargets: (runtimeInput) =>
+        dependencies.evaluatePracticalRunnerRunTargets({
+          input: runtimeInput,
+        }),
       runnerRunTargetPlausibleForMultiRun:
         dependencies.runnerRunTargetPlausibleForMultiRun,
       runnerRunTargetHighPayoff: dependencies.runnerRunTargetHighPayoff,

@@ -1110,8 +1110,7 @@ const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionComposition
   rolesForAction,
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
   actionTypeIsReactive: semanticRuntimeActionTypeIsReactive,
-  runnerRunTargets: (runtimeInput) =>
-    evaluateRunnerRunTargets({ input: runtimeInput }),
+  evaluatePracticalRunnerRunTargets: evaluateRunnerRunTargets,
   runnerRunTargetPlausibleForMultiRun,
   runnerRunTargetHighPayoff,
   runnerComponents: (
