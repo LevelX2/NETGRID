@@ -162,6 +162,9 @@ import {
   createRunnerEncounterBreakContext,
 } from "./runtime/runner-encounter-break-context";
 import {
+  createRunnerPumpFuturePathContext,
+} from "./runtime/runner-pump-future-path-context";
+import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
 } from "./runtime/encounter-action";
@@ -1219,6 +1222,12 @@ const {
   actionCreditCost,
   findVisibleCard,
   runnerCreditReserveTarget: runnerCreditReserveTargetForInput,
+});
+const {
+  encounterFuturePathAfterPumpBreakAssessment,
+} = createRunnerPumpFuturePathContext({
+  assessKnownRezzedIcePath,
+  knownIcePathReason: semanticRuntimeKnownIcePathReason,
 });
 
 const runnerPostRunReserveTargetForRemoteInput =
@@ -5889,51 +5898,6 @@ function pumpViabilityAssessment(
       `pump_required_count:${requiredPumps}`,
       ...runEffect.evidence,
     ],
-  };
-}
-
-function encounterFuturePathAfterPumpBreakAssessment(
-  input: AiDecisionInput,
-  server: AiDecisionInput["playerView"]["servers"][number],
-  creditsAfterPumpAndBreak: number,
-): { blocksPump: boolean; creditsAfterPath: number; evidence: string[] } {
-  const run = input.playerView.run;
-  if (run?.position?.kind !== "ice")
-    return {
-      blocksPump: false,
-      creditsAfterPath: creditsAfterPumpAndBreak,
-      evidence: [],
-    };
-  const futureIce = server.ice.slice(0, Math.max(0, run.position.iceIndex));
-  if (futureIce.length <= 0)
-    return {
-      blocksPump: false,
-      creditsAfterPath: creditsAfterPumpAndBreak,
-      evidence: [],
-    };
-  const pathAssessment = assessKnownRezzedIcePath(
-    futureIce,
-    input.playerView.own.rig ?? [],
-    creditsAfterPumpAndBreak,
-    server.root,
-  );
-  const pathEvidence = semanticRuntimeKnownIcePathReason(
-    pathAssessment,
-    server.id,
-  );
-  if (
-    pathAssessment.assessedKnownIceCount > 0 &&
-    !pathAssessment.canReachAccess
-  )
-    return {
-      blocksPump: true,
-      creditsAfterPath: pathAssessment.creditsAfterPath,
-      evidence: ["pump_future_path_blocked_after_cost:true", pathEvidence],
-    };
-  return {
-    blocksPump: false,
-    creditsAfterPath: pathAssessment.creditsAfterPath,
-    evidence: [pathEvidence],
   };
 }
 
