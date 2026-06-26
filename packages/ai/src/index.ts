@@ -173,14 +173,9 @@ import { createCorpTagPunishWindowComposition } from "./simulation/corp-tag-puni
 import { createCorpTaggedRunnerPayoffComposition } from "./runtime/corp-tagged-runner-payoff-composition";
 import { createSemanticRuntimeCorpScoringEvidenceComposition } from "./runtime/semantic-runtime-corp-scoring-evidence-composition";
 import { createSemanticRuntimeCorpBoardScoreComposition } from "./runtime/semantic-runtime-corp-board-score-composition";
-import {
-  createSemanticRuntimeScoreBreakdownContext,
-} from "./runtime/semantic-runtime-score-breakdown";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
-import {
-  createSemanticRuntimeChoiceBuilderContext,
-} from "./runtime/semantic-runtime-choice-builder-context";
 import { semanticRuntimeExplanation } from "./runtime/semantic-runtime-explanation";
+import { createSemanticRuntimeChoiceComposition } from "./runtime/semantic-runtime-choice-composition";
 import { stringRecordValue } from "./runtime/record-value";
 import {
   runnerRunActionSpendingCapAssessment,
@@ -1435,7 +1430,8 @@ const SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES = {
 };
 const {
   semanticRuntimeScoreBreakdown,
-} = createSemanticRuntimeScoreBreakdownContext({
+  semanticRuntimeChoices,
+} = createSemanticRuntimeChoiceComposition({
   runnerComponents: (
     componentInput,
     componentAction,
@@ -1454,12 +1450,8 @@ const {
       componentAction,
       componentScopeId,
     ),
-  actionCreditCost,
-});
-const { semanticRuntimeChoices } = createSemanticRuntimeChoiceBuilderContext({
   scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
   actionExclusion: semanticRuntimeActionExclusion,
-  scoreBreakdown: semanticRuntimeScoreBreakdown,
   actionCreditCost,
   evidence: semanticRuntimeEvidence,
   explanation: semanticRuntimeExplanation,
