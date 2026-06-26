@@ -159,6 +159,9 @@ import {
   currentRunFuturePathAssessment,
 } from "./runtime/runner-future-path-assessment";
 import {
+  createRunnerEncounterBreakContext,
+} from "./runtime/runner-encounter-break-context";
+import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
 } from "./runtime/encounter-action";
@@ -1208,6 +1211,14 @@ const {
 
 const runnerCreditReserveTargetForInput = createRunnerCreditReserveTargetForInput({
   rolesForCardId,
+});
+const {
+  estimatedEncounterBreakCost,
+  encounterBreakReserveContext,
+} = createRunnerEncounterBreakContext({
+  actionCreditCost,
+  findVisibleCard,
+  runnerCreditReserveTarget: runnerCreditReserveTargetForInput,
 });
 
 const runnerPostRunReserveTargetForRemoteInput =
@@ -6092,55 +6103,6 @@ function encounterRunRemainderEffectAssessment(
     remainingIceCount,
     remainingVisibleIceCount,
     evidence,
-  };
-}
-
-function estimatedEncounterBreakCost(
-  input: AiDecisionInput,
-  action: LegalAction,
-): number | undefined {
-  const breakerId = breakerIdForEncounterAction(action);
-  const targetIceId =
-    typeof action.payload?.iceId === "string"
-      ? action.payload.iceId
-      : undefined;
-  const currentBreakCosts = input.legalActions
-    .filter(
-      (candidate) =>
-        candidate.type === "break_subroutine" &&
-        breakerIdForEncounterAction(candidate) === breakerId &&
-        (!targetIceId || candidate.payload?.iceId === targetIceId),
-    )
-    .map((candidate) => actionCreditCost(candidate));
-  if (currentBreakCosts.length > 0) return Math.min(...currentBreakCosts);
-  const breaker = findVisibleCard(input, action.source);
-  if (!breaker?.definitionId) return 1;
-  const abilityCosts =
-    DEMO_CARDS_BY_ID[breaker.definitionId]?.abilities
-      ?.filter((ability) => ability.type === "break_subroutine")
-      .map((ability) =>
-        typeof ability.cost?.credits === "number" ? ability.cost.credits : 1,
-      ) ?? [];
-  return abilityCosts.length > 0 ? Math.min(...abilityCosts) : 1;
-}
-
-function encounterBreakReserveContext(
-  input: AiDecisionInput,
-  action: LegalAction,
-): { preserveReserve: boolean; evidence: string[] } {
-  const reserveTarget = runnerCreditReserveTargetForInput(input);
-  const creditsAfterBreak =
-    input.playerView.own.credits - actionCreditCost(action);
-  const preserveReserve = creditsAfterBreak < Math.max(2, reserveTarget - 1);
-  return {
-    preserveReserve,
-    evidence: preserveReserve
-      ? [
-          "break_skipped_to_preserve_trash_reserve:true",
-          `break_credits_after:${creditsAfterBreak}`,
-          `break_reserve_target:${reserveTarget}`,
-        ]
-      : [],
   };
 }
 
