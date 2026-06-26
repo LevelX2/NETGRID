@@ -29,6 +29,66 @@ type RunnerKnownNoAccessDependencies = {
   ) => boolean;
 };
 
+type RunnerKnownPathCostDependencies = Pick<
+  RunnerKnownNoAccessDependencies,
+  "assessKnownRezzedIcePath"
+>;
+
+export function runnerRunKnownPathCost(
+  input: AiDecisionInput,
+  targetServerId: string | undefined,
+  dependencies: RunnerKnownPathCostDependencies,
+): number {
+  if (!targetServerId) return 0;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  if (!server) return 0;
+  return (
+    dependencies.assessKnownRezzedIcePath(
+      server.ice,
+      input.playerView.own.rig ?? [],
+      input.playerView.own.credits,
+      server.root,
+    ).visibleBreakCost ?? 0
+  );
+}
+
+export function runnerHasKnownUnaffordableLegalRun(
+  input: AiDecisionInput,
+  dependencies: RunnerKnownPathCostDependencies,
+): boolean {
+  return input.legalActions.some((action) => {
+    if (
+      action.side !== "runner" ||
+      action.type !== "start_run" ||
+      typeof action.payload?.serverId !== "string"
+    )
+      return false;
+    return (
+      runnerRunKnownPathCost(input, action.payload.serverId, dependencies) >
+      input.playerView.own.credits
+    );
+  });
+}
+
+export function createRunnerKnownPathCostContext(
+  dependencies: RunnerKnownPathCostDependencies,
+): {
+  runnerRunKnownPathCost: (
+    input: AiDecisionInput,
+    targetServerId: string | undefined,
+  ) => number;
+  runnerHasKnownUnaffordableLegalRun: (input: AiDecisionInput) => boolean;
+} {
+  return {
+    runnerRunKnownPathCost: (input, targetServerId) =>
+      runnerRunKnownPathCost(input, targetServerId, dependencies),
+    runnerHasKnownUnaffordableLegalRun: (input) =>
+      runnerHasKnownUnaffordableLegalRun(input, dependencies),
+  };
+}
+
 export function runnerKnownNoAccessLegalRunTargets(
   input: AiDecisionInput,
   dependencies: RunnerKnownNoAccessDependencies,

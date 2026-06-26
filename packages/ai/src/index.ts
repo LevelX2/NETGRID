@@ -685,6 +685,7 @@ import {
 } from "./simulation/runner-run-target-context";
 import {
   createRunnerCoverageRepairDiagnostic,
+  createRunnerKnownPathCostContext,
   createRunnerKnownPathDiagnosticsForAction,
   createRunnerKnownNoAccessLegalRunTargets,
 } from "./simulation/runner-known-no-access";
@@ -1217,6 +1218,13 @@ const runnerPostRunReserveTargetForRemoteInput =
 
 const runnerRemoteThreatProfile = createRunnerRemoteThreatProfile({
   runnerPostRunReserveTargetForRemoteInput,
+});
+
+const {
+  runnerRunKnownPathCost,
+  runnerHasKnownUnaffordableLegalRun,
+} = createRunnerKnownPathCostContext({
+  assessKnownRezzedIcePath,
 });
 
 const {
@@ -16697,40 +16705,6 @@ function runnerEconomySetupActionClass(
           (role) => role.includes("delayed") || role.includes("penalty"),
         )),
   };
-}
-
-function runnerHasKnownUnaffordableLegalRun(input: AiDecisionInput): boolean {
-  return input.legalActions.some((action) => {
-    if (
-      action.side !== "runner" ||
-      action.type !== "start_run" ||
-      typeof action.payload?.serverId !== "string"
-    )
-      return false;
-    return (
-      runnerRunKnownPathCost(input, action.payload.serverId) >
-      input.playerView.own.credits
-    );
-  });
-}
-
-function runnerRunKnownPathCost(
-  input: AiDecisionInput,
-  targetServerId: string | undefined,
-): number {
-  if (!targetServerId) return 0;
-  const server = input.playerView.servers.find(
-    (candidate) => candidate.id === targetServerId,
-  );
-  if (!server) return 0;
-  return (
-    assessKnownRezzedIcePath(
-      server.ice,
-      input.playerView.own.rig ?? [],
-      input.playerView.own.credits,
-      server.root,
-    ).visibleBreakCost ?? 0
-  );
 }
 
 function runnerVisibleMissingBreakerCoverage(input: AiDecisionInput): boolean {
