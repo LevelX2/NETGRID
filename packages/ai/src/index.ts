@@ -592,13 +592,13 @@ import {
   recentCentralRunSameTargetWithoutRefresh,
 } from "./simulation/central-run-history";
 import {
+  createRunnerRemoteThreatProfile,
   hasRunnerRemoteTrashAction,
   remoteServerHasScoreThreat,
   runnerAdvancedRemoteContestContext,
   runnerContestBlockedByCredits,
   runnerHasVisibleRemoteScoreThreat,
   runnerRemoteHasKnownRelevantTrashTarget,
-  runnerRemoteThreatProfile as runnerRemoteThreatProfileWithReserve,
   runnerRemoteThreatTargetingDiagnosticsForAction as runnerRemoteThreatTargetingDiagnosticsForActionWithDeps,
   runnerStealBlockedByCredits,
   runnerTrashBlockedByCredits,
@@ -1190,6 +1190,10 @@ const runnerPostRunReserveTargetForRemoteInput =
     remoteServerHasScoreThreat,
     rolesForCardId,
   });
+
+const runnerRemoteThreatProfile = createRunnerRemoteThreatProfile({
+  runnerPostRunReserveTargetForRemoteInput,
+});
 
 const runnerRemoteTrashAccessContext = createRunnerRemoteTrashAccessContext({
   runnerCreditReserveTargetForInput,
@@ -17548,17 +17552,6 @@ function runnerRemoteThreatTargetingDiagnosticsForAction(
       runnerCentralRunBurnsRemoteContestReserve:
         runnerCentralRunBurnsRemoteContestReserveForInput,
     },
-  );
-}
-
-function runnerRemoteThreatProfile(
-  input: AiDecisionInput,
-  serverId: string,
-): RunnerRemoteThreatProfile {
-  return runnerRemoteThreatProfileWithReserve(
-    input,
-    serverId,
-    runnerPostRunReserveTargetForRemoteInput,
   );
 }
 

@@ -150,6 +150,20 @@ export function runnerRemoteThreatProfile(
   };
 }
 
+export function createRunnerRemoteThreatProfile(dependencies: {
+  runnerPostRunReserveTargetForRemoteInput: (
+    input: AiDecisionInput,
+    serverId: string,
+  ) => number;
+}): (input: AiDecisionInput, serverId: string) => RunnerRemoteThreatProfile {
+  return (input, serverId) =>
+    runnerRemoteThreatProfile(
+      input,
+      serverId,
+      dependencies.runnerPostRunReserveTargetForRemoteInput,
+    );
+}
+
 export function runnerRemoteThreatTargetingDiagnosticsForAction(
   input: AiDecisionInput,
   action: LegalAction,
