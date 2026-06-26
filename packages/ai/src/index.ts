@@ -89,6 +89,7 @@ import {
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
 import { createRunnerBaselineSupportComposition } from "./runtime/runner-baseline-support-composition";
+import { createRunnerVisibleCardDiscardComposition } from "./runtime/runner-visible-card-discard-composition";
 import { createAiActionEntrypoints } from "./runtime/ai-action-entrypoints";
 import { compareAction } from "./runtime/action-order";
 import {
@@ -287,9 +288,6 @@ import {
   visibleBreakerRoleCounts as visibleBreakerRoleCountsForAi,
   visibleBreakerRoles as visibleBreakerRolesForAi,
 } from "./runtime/runner-visible-breaker-coverage";
-import {
-  createRunnerVisibleCardContext,
-} from "./runtime/runner-visible-card-context";
 import { createRunnerPersistentInstallContext } from "./runtime/runner-persistent-install-context";
 import { createRunnerMuPressureContext } from "./runtime/runner-mu-pressure-context";
 import {
@@ -319,9 +317,6 @@ import {
   mergedPublicHistory as mergedAiPublicHistory,
   serverIdFromEvent as aiServerIdFromEvent,
 } from "./runtime/public-event-history";
-import {
-  createDiscardKeepScore,
-} from "./runtime/discard-keep-score";
 import {
   isSearchChoice,
 } from "./runtime/search-choice-option";
@@ -1178,26 +1173,15 @@ const {
   runnerBadPublicityOrTraceTechCard,
   runnerCardAddressesVisibleBreakerNeed,
   visibleBreakerCardCanAddressIce,
-} = createRunnerVisibleCardContext({
+  discardKeepScore,
+} = createRunnerVisibleCardDiscardComposition({
   visibleCardDefinition,
   isVisibleIcebreakerProgram,
-  knownPathAssessment: (runtimeInput, server) =>
-    assessKnownRezzedIcePath(
-      server.ice,
-      runtimeInput.playerView.own.rig ?? [],
-      runtimeInput.playerView.own.credits,
-      server.root,
-    ),
-  visibleBreakerRoles: visibleBreakerRolesForAi,
-});
-const discardKeepScore = createDiscardKeepScore({
+  assessKnownRezzedIcePath,
+  visibleBreakerRolesForAi,
   rolesForCardId,
-  definitionTypeForCardId: cardDefinitionTypeForAi,
-  visibleCardPlayOrInstallCost: visibleCardPlayOrInstallCostForAi,
-  runnerCardAddressesVisibleBreakerNeed,
-  runnerBadPublicityOrTraceTechCard,
+  cardDefinitionTypeForAi,
   isRunnerEconomyRole,
-  runnerCardLooksLikeCreditPayout,
 });
 const {
   semanticRuntimeRunnerMultiRunEventExclusion,
