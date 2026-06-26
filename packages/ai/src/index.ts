@@ -81,6 +81,7 @@ import { createRunnerCentralPressureDiagnosticsComposition } from "./simulation/
 import { createRunnerRemoteThreatTargetingComposition } from "./simulation/runner-remote-threat-targeting-composition";
 import { createRunnerSetupCoverageComposition } from "./simulation/runner-setup-coverage-composition";
 import { createRunnerInstallClassificationComposition } from "./simulation/runner-install-classification-composition";
+import { createRunnerSimulationDiagnosticsComposition } from "./simulation/runner-simulation-diagnostics-composition";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -414,9 +415,6 @@ import {
 import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/corp-ice-portfolio-diagnostics";
 import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progress";
 import { createRunnerBreakerCoverageDiagnosticsForSimulationAction } from "./simulation/runner-breaker-coverage-diagnostics";
-import { createRunnerEconomySetupDiagnosticsForSimulationAction } from "./simulation/runner-economy-setup-diagnostics";
-import { createRunnerHandUseDiagnosticsForSimulationAction } from "./simulation/runner-hand-use-diagnostics";
-import { createRunnerReserveDiagnosticsForSimulationAction } from "./simulation/runner-reserve-diagnostics";
 import { applyTagPunishOntologyDiagnostics } from "./simulation/tag-punish-ontology-diagnostics";
 import {
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
@@ -424,9 +422,6 @@ import {
 import { runnerSurvivalCounterContextForInput } from "./simulation/runner-survival-counter-context";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
 import { createRunnerPressureMetricContext } from "./simulation/runner-pressure-metrics";
-import {
-  createRunnerEconomySetupActionClassContext,
-} from "./simulation/runner-economy-setup-types";
 import {
   runnerMissingBreakerRolesForMetrics,
   runnerStrategicBreakerTargetForMetrics,
@@ -1045,66 +1040,43 @@ const {
   isSearchChoice,
 });
 
-const runnerReserveDiagnosticsForSimulationAction =
-  createRunnerReserveDiagnosticsForSimulationAction({
-    runnerCreditReserveTargetForInput,
-    isRunnerEconomyAction,
-    runnerKnownPathDiagnosticsForAction,
-    runnerRemoteThreatTargetingDiagnosticsForAction,
-    isRunnerLowValueDuplicateInstall,
-    runnerHasVisibleRemoteScoreThreat,
-    runnerRemoteTrashAccessContext,
-    runnerTrashBlockedByCredits,
-    runnerStealBlockedByCredits,
-    runnerContestBlockedByCredits,
-  });
-
-const runnerHandUseDiagnosticsForSimulationAction =
-  createRunnerHandUseDiagnosticsForSimulationAction({
-    runnerDrawKindForSimulationAction,
-    hasRunnerPlayableEconomyAction,
-    hasRunnerInstallableBreakerAction,
-    hasRunnerRunnablePressureAction,
-    hasRunnerRemoteTrashAction,
-    runnerDiscardChoiceRoles,
-    isRunnerDuplicateInstall,
-    isRunnerLowValueDuplicateInstall,
-    isRunnerEconomyAction,
-    isRunnerRigInstallAction,
-    isRunnerPressureAction,
-    sourceDefinitionIdForSimulationAction,
-    runnerRemoteTrashAccessContext,
-    runnerAdvancedRemoteContestContext,
-  });
-
-const runnerEconomySetupActionClass =
-  createRunnerEconomySetupActionClassContext({
-    definitionForAction: definitionForSimulationAction,
-    isRunnerEconomyAction,
-    rolesForAction,
-    runnerCoverageRecoveryActionForMetrics,
-    runnerCoverageSearchActionForMetrics,
-    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
-  });
-
-const runnerEconomySetupDiagnosticsForSimulationAction =
-  createRunnerEconomySetupDiagnosticsForSimulationAction({
-    runnerEconomySetupActionClass,
-    runnerCreditReserveTargetForInput,
-    runnerHasKnownUnaffordableLegalRun,
-    runnerAdvancedRemoteContestContext,
-    hasRunnerRunnablePressureAction,
-    hasRunnerInstallableBreakerAction,
-    hasRunnerRemoteTrashAction,
-    runnerDrawKindForSimulationAction,
-    isRunnerRigInstallAction,
-    runnerVisibleMissingBreakerCoverage,
-    runnerHasKnownBlockedPathByCoverage,
-    runnerMissingCoverageTypesForInput,
-    definitionForSimulationAction,
-    runnerRunKnownPathCost,
-    runnerSetupChosenFamilyForEntry,
-  });
+const {
+  runnerReserveDiagnosticsForSimulationAction,
+  runnerHandUseDiagnosticsForSimulationAction,
+  runnerEconomySetupDiagnosticsForSimulationAction,
+} = createRunnerSimulationDiagnosticsComposition({
+  runnerCreditReserveTargetForInput,
+  isRunnerEconomyAction,
+  runnerKnownPathDiagnosticsForAction,
+  runnerRemoteThreatTargetingDiagnosticsForAction,
+  isRunnerLowValueDuplicateInstall,
+  runnerHasVisibleRemoteScoreThreat,
+  runnerRemoteTrashAccessContext,
+  runnerTrashBlockedByCredits,
+  runnerStealBlockedByCredits,
+  runnerContestBlockedByCredits,
+  runnerDrawKindForSimulationAction,
+  hasRunnerPlayableEconomyAction,
+  hasRunnerInstallableBreakerAction,
+  hasRunnerRunnablePressureAction,
+  hasRunnerRemoteTrashAction,
+  runnerDiscardChoiceRoles,
+  isRunnerDuplicateInstall,
+  isRunnerRigInstallAction,
+  isRunnerPressureAction,
+  sourceDefinitionIdForSimulationAction,
+  runnerAdvancedRemoteContestContext,
+  definitionForSimulationAction,
+  rolesForAction,
+  runnerCoverageRecoveryActionForMetrics,
+  runnerCoverageSearchActionForMetrics,
+  runnerHasKnownUnaffordableLegalRun,
+  runnerVisibleMissingBreakerCoverage,
+  runnerHasKnownBlockedPathByCoverage,
+  runnerMissingCoverageTypesForInput,
+  runnerRunKnownPathCost,
+  runnerSetupChosenFamilyForEntry,
+});
 
 const {
   noFreshCentralSubstitutionTypeForAction,
