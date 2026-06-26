@@ -101,9 +101,6 @@ import {
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
 import {
-  visibleRootIsKnownAgenda as visibleRootIsKnownAgendaRuntime,
-} from "./runtime/visible-root-agenda";
-import {
   createVisibleIcebreakerProgramPredicate,
 } from "./runtime/visible-icebreaker-program";
 import { createAiActionEntrypoints } from "./runtime/ai-action-entrypoints";
@@ -585,6 +582,9 @@ import {
   remoteRootTrashCostForMetrics,
   remoteTrashCostForVisibleCard,
 } from "./simulation/card-metric-lookup";
+import {
+  visibleRootIsKnownAgendaForMetrics,
+} from "./simulation/visible-root-agenda-metrics";
 import {
   createRunnerCentralRunPressureJustificationContext,
 } from "./simulation/central-run-pressure-justification";
@@ -1117,10 +1117,6 @@ export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local
 
 const AI_HINTS = createAiHintsByCard();
 
-const visibleRootIsKnownAgenda = (
-  card: AiDecisionInput["playerView"]["servers"][number]["root"][number],
-): boolean => visibleRootIsKnownAgendaRuntime(card, definitionTypeForMetrics);
-
 const { rolesForAction, rolesForCardId } = createRoleContext({
   findVisibleCard,
   aiHints: AI_HINTS,
@@ -1555,7 +1551,7 @@ const { blinkRiskAssessmentForEncounterBreak } =
     buildBlinkRiskAssessment,
     isImmediateSafetyThreatSubroutine,
     isRemoteServerTarget,
-    visibleRootIsKnownAgenda,
+    visibleRootIsKnownAgenda: visibleRootIsKnownAgendaForMetrics,
   });
 const {
   runnerBlinkRiskEvidenceForAction,
