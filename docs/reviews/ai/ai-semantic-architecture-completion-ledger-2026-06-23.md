@@ -5877,6 +5877,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 94 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
+- `AI-COMPLETE-04` erster Struktur-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-redaction.ts` kapselt side-safe Redaction-/Evidence-Fact-Helper für Runner-/Corp-Intent, Access-Commitment, Access-Outcome-Memory, Runner-RunTargetEvaluation und Runner-EconomyPosture.
+  - `packages/ai/src/tactical-plans.ts` importiert diese Helper statt sie lokal zu implementieren und entfernt die dadurch überflüssigen Type-Imports.
+  - `packages/ai/src/tactical-plans.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 4.267 Zeilen; das neue Redaction-Modul liegt bei 178 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil Runner-, Corp-, Mapping-, Progression-, Ranking- und Debug-Verantwortungen in `tactical-plans.ts` noch weiter getrennt werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-04`.
 
