@@ -243,9 +243,6 @@ import {
 import {
   createRunnerEncounterActionExclusionContext,
 } from "./runtime/runner-encounter-action-exclusion";
-import {
-  createSemanticRuntimePlanMemoryExclusionContext,
-} from "./runtime/semantic-runtime-plan-memory-exclusion";
 import { createRunnerSimpleExclusionsContext } from "./runtime/runner-simple-exclusions-context";
 import {
   createRunnerSourceCardAnswerRoleContext,
@@ -259,8 +256,7 @@ import {
   runnerMultiRunEventScoreValue,
 } from "./runtime/runner-multi-run-event-score";
 import { createRunnerMultiRunContext } from "./runtime/runner-multi-run-context";
-import { createRunnerBankInvestmentContext } from "./runtime/runner-bank-investment-context";
-import { createRunnerNoRunEconomyContext } from "./runtime/runner-no-run-economy-context";
+import { createRunnerEconomyCommitmentComposition } from "./runtime/runner-economy-commitment-composition";
 import {
   createRunnerBadPublicityRelevanceContext,
 } from "./runtime/runner-bad-publicity-relevance-context";
@@ -1245,11 +1241,11 @@ const {
 const {
   runnerBankInvestmentCommitmentScoreComponents,
   runnerBankInvestmentCommitmentEvidence,
-  isRunnerBankCashOutAction,
-  runnerBankCashOutIsUsefulNow,
   runnerBankHasConcreteFundingNeed,
-  runnerBankCommitmentRunOverride,
-} = createRunnerBankInvestmentContext({
+  runnerNoRunEconomyCommitmentScoreComponents,
+  runnerNoRunEconomyCommitmentEvidence,
+  semanticRuntimePlanMemoryActionExclusion,
+} = createRunnerEconomyCommitmentComposition({
   previousPlan: getTacticalPlanMemorySnapshot,
   runnerHandFundingTarget,
   findVisibleCard,
@@ -1263,12 +1259,6 @@ const {
   definitionType: definitionTypeForMetrics,
   runnerRunTargetEvaluation: runnerMultiRunTargetEvaluation,
   runnerRunTargetHighPayoff,
-});
-const {
-  runnerNoRunEconomyCommitmentScoreComponents,
-  runnerNoRunEconomyCommitmentEvidence,
-} = createRunnerNoRunEconomyContext({
-  findVisibleCard,
   hintEffectsForDefinition: (definitionId) =>
     AI_HINTS.get(definitionId)?.effects ?? [],
   mechanicsForDefinition: runnerCardMechanicsForAi,
@@ -1284,16 +1274,7 @@ const {
       .filter(Boolean)
       .join(" ");
   },
-  runnerBankCommitmentRunOverride,
   isRunnerRigInstallAction,
-});
-const {
-  semanticRuntimePlanMemoryActionExclusion,
-} = createSemanticRuntimePlanMemoryExclusionContext({
-  previousPlan: getTacticalPlanMemorySnapshot,
-  isRunnerBankCashOutAction,
-  runnerBankCashOutIsUsefulNow,
-  runnerBankInvestmentCommitmentEvidence,
 });
 const {
   selectedRunnerProgramInstallTrashOptionIds,
