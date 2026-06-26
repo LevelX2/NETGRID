@@ -579,8 +579,8 @@ import {
 import {
   createCentralRunEventGoodForTarget,
   createNoFreshCentralSubstitutionTypeForAction,
+  createRunnerNoFreshCentralContext,
   createTrueCentralCloseoutProfileContext,
-  runnerNoFreshCentralContext as runnerNoFreshCentralContextWithDeps,
 } from "./simulation/no-fresh-central";
 import {
   centralRunStreakWithoutValueForMetrics,
@@ -1285,6 +1285,17 @@ const noFreshCentralSubstitutionTypeForAction =
     rolesForAction,
     sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
   });
+
+const runnerNoFreshCentralContextForMetrics = createRunnerNoFreshCentralContext({
+  assessKnownRezzedIcePath,
+  centralRunStreakWithoutValueForMetrics,
+  isRunnerEconomyAction,
+  rolesForAction,
+  rolesForCardId,
+  runnerCreditReserveTargetForInput,
+  runnerRemoteThreatProfile,
+  sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+});
 
 export function chooseAiAction(
   input: AiDecisionInput,
@@ -17403,23 +17414,6 @@ function runnerKnownCardPositionDiagnosticsForMetrics(
       ? { rigPlanInfluencedByKnownUnrezzedIce: true }
       : {}),
   };
-}
-
-function runnerNoFreshCentralContextForMetrics(input: AiDecisionInput): {
-  targets: Array<"hq" | "rd" | "archives">;
-  betterAlternatives: string[];
-  allowedReasons: string[];
-} {
-  return runnerNoFreshCentralContextWithDeps(input, {
-    assessKnownRezzedIcePath,
-    centralRunStreakWithoutValueForMetrics,
-    isRunnerEconomyAction,
-    rolesForAction,
-    rolesForCardId,
-    runnerCreditReserveTargetForInput,
-    runnerRemoteThreatProfile,
-    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
-  });
 }
 
 function runnerReserveDiagnosticsForSimulationAction(

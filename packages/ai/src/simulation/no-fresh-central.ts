@@ -340,6 +340,12 @@ export function runnerNoFreshCentralContext(
   };
 }
 
+export function createRunnerNoFreshCentralContext(
+  dependencies: RunnerNoFreshCentralContextDependencies,
+): (input: AiDecisionInput) => RunnerNoFreshCentralContext {
+  return (input) => runnerNoFreshCentralContext(input, dependencies);
+}
+
 export function centralRunEventGoodForTarget(
   input: AiDecisionInput,
   target: "hq" | "rd" | "archives",
