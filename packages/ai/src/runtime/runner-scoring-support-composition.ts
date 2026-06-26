@@ -17,6 +17,12 @@ import {
   type RunnerScoreComponentsDependencies,
 } from "./runner-score-components";
 import { reconstructBeliefState } from "../belief-state";
+import { demoCardRulesTextForAi } from "./card-definition-lookup";
+import { stringRecordValue } from "./record-value";
+
+type RunnerScoringSupportHint = {
+  effects?: readonly unknown[];
+};
 
 export type RunnerScoringSupportCompositionDependencies =
   Parameters<typeof createRunnerRunTargetGuidanceContext>[0] &
@@ -37,9 +43,13 @@ export type RunnerScoringSupportCompositionDependencies =
       RunnerScoreComponentsDependencies,
       "recoveryCommitment" | "startRun" | "followup"
     > & {
-      badPublicityRelevance: Parameters<
-        typeof createRunnerBadPublicityRelevanceContext
-      >[0];
+      badPublicityRelevance: Omit<
+        Parameters<typeof createRunnerBadPublicityRelevanceContext>[0],
+        "cardSupport"
+      >;
+      hintForDefinitionId: (
+        definitionId: string,
+      ) => RunnerScoringSupportHint | undefined;
       recoveryCommitment: Omit<
         RunnerScoreComponentsDependencies["recoveryCommitment"],
         | "blinkRecoveryScoreComponent"
@@ -154,9 +164,21 @@ export function createRunnerScoringSupportComposition(
 
   const {
     runnerBadPublicityRelevanceScoreComponent,
-  } = createRunnerBadPublicityRelevanceContext(
-    dependencies.badPublicityRelevance,
-  );
+  } = createRunnerBadPublicityRelevanceContext({
+    ...dependencies.badPublicityRelevance,
+    cardSupport: {
+      rolesForCardId: (definitionId) => [
+        ...dependencies.rolesForCardId(definitionId),
+      ],
+      hintEffectsForCard: (definitionId: string) =>
+        dependencies.hintForDefinitionId(definitionId)?.effects,
+      rulesTextForCard: demoCardRulesTextForAi,
+      effectTarget: (effect: unknown) =>
+        effect && typeof effect === "object"
+          ? stringRecordValue(effect as Record<string, unknown>, "target")
+          : undefined,
+    },
+  });
 
   return createRunnerScoreComponentsContext({
     loanLiabilityAssessment: dependencies.loanLiabilityAssessment,

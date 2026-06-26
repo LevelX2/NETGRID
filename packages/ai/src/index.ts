@@ -74,7 +74,6 @@ import { createRunnerSimulationDiagnosticsComposition } from "./simulation/runne
 import {
   cardDefinitionTypeForAi,
   demoCardDefinitionForAi,
-  demoCardRulesTextForAi,
   runtimeCardDefinitionForAi,
   runnerCardMechanicsForAi,
   visibleCardDefinition,
@@ -144,7 +143,6 @@ import { createSemanticRuntimeCorpScoringEvidenceComposition } from "./runtime/s
 import { createSemanticRuntimeCorpBoardScoreComposition } from "./runtime/semantic-runtime-corp-board-score-composition";
 import { semanticRuntimeServerId } from "./runtime/semantic-runtime-scope";
 import { semanticRuntimeExplanation } from "./runtime/semantic-runtime-explanation";
-import { stringRecordValue } from "./runtime/record-value";
 import {
   runnerRunActionSpendingCapAssessment,
 } from "./runtime/runner-run-only-action-adjustment";
@@ -1267,22 +1265,12 @@ const {
   actionCreditCost,
   junkyardBbsDefinitionId: JUNKYARD_BBS_CARD_ID,
   junkyardBbsReturnTopHeapAbility: JUNKYARD_BBS_RETURN_TOP_HEAP_ABILITY,
+  hintForDefinitionId,
   badPublicityRelevance: {
     sourceDefinitionIdForAction,
     selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
     actionCreditCost,
     fakedHitCardId: FAKED_HIT_CARD_ID,
-    cardSupport: {
-      rolesForCardId,
-      hintEffectsForCard: (definitionId: string) =>
-        hintForDefinitionId(definitionId)?.effects,
-      rulesTextForCard: (definitionId: string) =>
-        demoCardRulesTextForAi(definitionId),
-      effectTarget: (effect: unknown) =>
-        effect && typeof effect === "object"
-          ? stringRecordValue(effect as Record<string, unknown>, "target")
-          : undefined,
-    },
   },
   loanLiabilityAssessment: runnerLoanLiabilityAssessment,
   goalFit: {
