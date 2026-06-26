@@ -754,6 +754,9 @@ import {
   createV143ExploitRegressionFixturesRunner,
 } from "./simulation/v143-exploit-regression-fixtures";
 import {
+  createV143SimulationLeagueRunner,
+} from "./simulation/v143-simulation-league";
+import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
   rememberTacticalPlanRuntime,
@@ -2379,6 +2382,10 @@ const { runV143Profile } = createV143ProfileRunner({
   simulateAiGame,
   runExploitRegressionFixtures: runV143ExploitRegressionFixtures,
 });
+const { runV143SimulationLeague } = createV143SimulationLeagueRunner({
+  runV143Profile,
+});
+export { runV143SimulationLeague };
 
 export function simulateAiGame(
   config: AiSimulationConfig = {},
@@ -2783,26 +2790,6 @@ export function simulateAiSoak(
 
 export function listMatchProgressionBenchmarkDeckSlots(): AiBenchmarkDeckSlotDefinition[] {
   return MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.map((slot) => ({ ...slot }));
-}
-
-export function runV143SimulationLeague(
-  config: V143LeagueConfig = {},
-): V143SoakResult {
-  const tuningSeeds = SOAK_SEEDS_143.tuningSeeds;
-  const holdoutSeeds = SOAK_SEEDS_143.holdoutSeeds;
-  const seeds =
-    config.includeHoldout === false
-      ? tuningSeeds
-      : [...tuningSeeds, ...holdoutSeeds];
-  const profiles = BENCHMARK_PROFILES_143.profiles.map((profile) =>
-    runV143Profile(profile, seeds, config),
-  );
-  return {
-    version: "1.4.3",
-    profiles,
-    holdoutSeeds,
-    tuningSeeds,
-  };
 }
 
 export function runDoctrineQualityBenchmark(
