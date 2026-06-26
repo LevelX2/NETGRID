@@ -82,6 +82,7 @@ import { createRunnerRemoteThreatTargetingComposition } from "./simulation/runne
 import { createRunnerSetupCoverageComposition } from "./simulation/runner-setup-coverage-composition";
 import { createRunnerInstallClassificationComposition } from "./simulation/runner-install-classification-composition";
 import { createRunnerSimulationDiagnosticsComposition } from "./simulation/runner-simulation-diagnostics-composition";
+import { createRunnerBreakerCoverageComposition } from "./simulation/runner-breaker-coverage-composition";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -414,14 +415,12 @@ import {
 } from "./simulation/corp-tag-punish-visible-payoff";
 import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/corp-ice-portfolio-diagnostics";
 import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progress";
-import { createRunnerBreakerCoverageDiagnosticsForSimulationAction } from "./simulation/runner-breaker-coverage-diagnostics";
 import { applyTagPunishOntologyDiagnostics } from "./simulation/tag-punish-ontology-diagnostics";
 import {
   applyCorpVisibleTagPunishTakenWindowDiagnostics,
 } from "./simulation/corp-visible-tag-punish-taken-diagnostics";
 import { runnerSurvivalCounterContextForInput } from "./simulation/runner-survival-counter-context";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
-import { createRunnerPressureMetricContext } from "./simulation/runner-pressure-metrics";
 import {
   runnerMissingBreakerRolesForMetrics,
   runnerStrategicBreakerTargetForMetrics,
@@ -1098,7 +1097,8 @@ const {
 const {
   assessRunnerPressureReadyForMetrics,
   assessRunnerCoveragePressureForMetrics,
-} = createRunnerPressureMetricContext({
+  runnerBreakerCoverageDiagnosticsForSimulationAction,
+} = createRunnerBreakerCoverageComposition({
   runnerStrategicBreakerTargetForMetrics,
   assessKnownRezzedIcePath,
   knownPositionMemoryForInput: (input) =>
@@ -1111,16 +1111,9 @@ const {
   runnerMissingBreakerRolesForMetrics,
   runnerCoverageSearchActionForMetrics,
   runnerCoverageRecoveryActionForMetrics,
+  isRunnerEconomyAction,
+  isRunnerRigInstallAction,
 });
-
-const runnerBreakerCoverageDiagnosticsForSimulationAction =
-  createRunnerBreakerCoverageDiagnosticsForSimulationAction({
-    assessRunnerCoveragePressureForMetrics,
-    assessRunnerPressureReadyForMetrics,
-    isRunnerEconomyAction,
-    isRunnerRigInstallAction,
-    runnerCoverageSearchActionForMetrics,
-  });
 
 const { decisionFromChoices, selectedChoicesForDecision } =
   createLegacyDecisionContext({
