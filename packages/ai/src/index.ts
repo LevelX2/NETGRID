@@ -65,8 +65,7 @@ import {
   buildServerFeatures,
   visibleCitySurveillanceSourceCount,
 } from "./runtime/ai-feature-server";
-import { createAiFacadeFoundationContext } from "./runtime/ai-facade-foundation-context";
-import { createRunnerAiDiagnosticsComposition } from "./simulation/runner-ai-diagnostics-composition";
+import { createAiContextDiagnosticsComposition } from "./runtime/ai-context-diagnostics-composition";
 import {
   cardDefinitionTypeForAi,
   demoCardDefinitionForAi,
@@ -684,17 +683,6 @@ const {
   corpVisibleTagPunishOpportunities,
   applyCorpTagSourceWindowDiagnostics,
   applyActualTagCreationDiagnostics,
-} = createAiFacadeFoundationContext({
-  findVisibleCard,
-  buildObservedFacts,
-  buildServerFeatures,
-  assessKnownRezzedIcePath,
-  isBlockedByKnownRezzedIce,
-  visibleCitySurveillanceSourceCount,
-  sourceDefinitionIdForAction,
-});
-
-const {
   encounterBreakReserveContext,
   breakAccessPathAssessment,
   pumpViabilityAssessment,
@@ -712,12 +700,17 @@ const {
   runnerEconomySetupDiagnosticsForSimulationAction,
   assessRunnerPressureReadyForMetrics,
   runnerBreakerCoverageDiagnosticsForSimulationAction,
-} = createRunnerAiDiagnosticsComposition({
+} = createAiContextDiagnosticsComposition({
+  findVisibleCard,
+  buildObservedFacts,
+  buildServerFeatures,
   assessKnownRezzedIcePath,
+  isBlockedByKnownRezzedIce,
+  visibleCitySurveillanceSourceCount,
+  sourceDefinitionIdForAction,
   runnerKnownPathAssessmentIsKnownNoAccess,
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
-  findVisibleCard,
   actionCreditCost,
   breakSubroutineIndexesForAction,
   currentEncounteredIceCard,
@@ -727,12 +720,9 @@ const {
   remoteRootTrashCost: remoteRootTrashCostForMetrics,
   encounterRunRemainderEffectAssessment,
   encounterHasImmediateUnbrokenThreat,
-  rolesForAction,
-  rolesForCardId,
   remoteServerHasScoreThreat,
   runnerHasRecentRunOnServer,
   runnerRemoteHasKnownRelevantTrashTarget,
-  sourceDefinitionIdForSimulationAction,
   isSearchChoice,
   centralRunStreakWithoutValueForMetrics,
   recentCentralRunSameTargetWithoutRefresh,
@@ -742,7 +732,6 @@ const {
   runnerContestBlockedByCredits,
   hasRunnerRemoteTrashAction,
   runnerAdvancedRemoteContestContext,
-  definitionForSimulationAction,
   runnerSetupChosenFamilyForEntry,
   runnerStrategicBreakerTargetForMetrics,
   definitionTypeForMetrics,
