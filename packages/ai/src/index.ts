@@ -586,7 +586,6 @@ import type { AiSimulationConfig } from "./simulation/ai-simulation-config";
 import type { AiSimulationSummary } from "./simulation/ai-simulation-summary";
 import type {
   AiBenchmarkDeckSlotResult,
-  AiMatchProgressionBenchmarkResult,
   AiMatchProgressionBenchmarkSuiteResult,
   AiMatchProgressionMetrics,
 } from "./simulation/ai-match-progression-types";
@@ -631,8 +630,6 @@ import {
 } from "./simulation/final-advance-assessment";
 import { MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS } from "./simulation/benchmark-deck-slots";
 import { runMatchProgressionBenchmarkSlot } from "./simulation/benchmark-deck-slot-runner";
-import { benchmarkProfileById } from "./simulation/benchmark-profile-lookup";
-import { diffMatchProgressionMetrics } from "./simulation/match-progression-metric-delta";
 import {
   averageFinalAdvanceNumber,
   averageFirstProgressionTurn,
@@ -756,6 +753,9 @@ import {
 import {
   createDoctrineQualityBenchmarkRunner,
 } from "./simulation/doctrine-quality-benchmark-runner";
+import {
+  createMatchProgressionBenchmarkRunner,
+} from "./simulation/match-progression-benchmark-runner";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -2390,6 +2390,12 @@ const { runDoctrineQualityBenchmark } = createDoctrineQualityBenchmarkRunner({
   runV143Profile,
 });
 export { runDoctrineQualityBenchmark };
+const { runMatchProgressionBenchmark } =
+  createMatchProgressionBenchmarkRunner({
+    runV143Profile,
+    summarizeMatchProgressionMetrics,
+  });
+export { runMatchProgressionBenchmark };
 
 export function simulateAiGame(
   config: AiSimulationConfig = {},
@@ -2794,78 +2800,6 @@ export function simulateAiSoak(
 
 export function listMatchProgressionBenchmarkDeckSlots(): AiBenchmarkDeckSlotDefinition[] {
   return MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.map((slot) => ({ ...slot }));
-}
-
-export function runMatchProgressionBenchmark(
-  config: AiDoctrineQualityBenchmarkConfig = {},
-): AiMatchProgressionBenchmarkResult {
-  const baselineProfileId = config.baselineProfile ?? "belief_ai_v1_4_2";
-  const candidateProfileId = config.candidateProfile ?? "current_candidate";
-  const baselineProfile = benchmarkProfileById(
-    baselineProfileId,
-    BENCHMARK_PROFILES_143.profiles,
-  );
-  const candidateProfile = benchmarkProfileById(
-    candidateProfileId,
-    BENCHMARK_PROFILES_143.profiles,
-  );
-  const seeds =
-    config.includeHoldout === false
-      ? SOAK_SEEDS_143.tuningSeeds
-      : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
-  const baselineRun = runV143Profile(baselineProfile, seeds, config);
-  const candidateRun = runV143Profile(candidateProfile, seeds, config);
-  const baseline = summarizeMatchProgressionMetrics(baselineRun.summaries);
-  const candidate = summarizeMatchProgressionMetrics(candidateRun.summaries);
-  const comparisonProfileIds = sortedUnique([
-    ...(config.comparisonProfiles ?? [
-      "basic_corp_ai",
-      "basic_runner_ai",
-      "belief_ai_v1_4_2",
-      "current_candidate",
-    ]),
-    baselineProfileId,
-    candidateProfileId,
-  ]) as SimulationBenchmarkProfileId[];
-  const profileComparisons = comparisonProfileIds.map((profileId) => {
-    if (profileId === baselineProfileId)
-      return { profile: profileId, metrics: baseline };
-    if (profileId === candidateProfileId)
-      return { profile: profileId, metrics: candidate };
-    return {
-      profile: profileId,
-      metrics: summarizeMatchProgressionMetrics(
-        runV143Profile(
-          benchmarkProfileById(profileId, BENCHMARK_PROFILES_143.profiles),
-          seeds,
-          config,
-        )
-          .summaries,
-      ),
-    };
-  });
-  return {
-    version: "ai-match-progression-v1",
-    baselineProfile: baselineProfileId,
-    candidateProfile: candidateProfileId,
-    seeds,
-    runnerDeckId:
-      config.runnerDeck?.id ??
-      config.runnerDeckId ??
-      SOAK_SEEDS_143.league.runnerDeckId,
-    corpDeckId:
-      config.corpDeck?.id ??
-      config.corpDeckId ??
-      SOAK_SEEDS_143.league.corpDeckId,
-    maxActions: config.maxActions ?? SOAK_SEEDS_143.league.maxActions,
-    diagnosticOnly: true,
-    baseline,
-    candidate,
-    delta: diffMatchProgressionMetrics(candidate, baseline),
-    profileComparisons,
-    baselineRun,
-    candidateRun,
-  };
 }
 
 export function runMatchProgressionBenchmarkSuite(
