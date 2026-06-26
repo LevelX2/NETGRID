@@ -92,9 +92,11 @@ import {
   visibleCitySurveillanceSourceCount,
 } from "./runtime/ai-feature-server";
 import {
-  extractAiFeatures as extractAiFeaturesRuntime,
   type AiFeatures,
 } from "./runtime/ai-features";
+import {
+  createAiFeatureExtractorContext,
+} from "./runtime/ai-feature-extractor-context";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -1127,6 +1129,14 @@ const AI_HINTS = createAiHintsByCard();
 const { rolesForAction, rolesForCardId } = createRoleContext({
   findVisibleCard,
   aiHints: AI_HINTS,
+});
+const { extractAiFeatures } = createAiFeatureExtractorContext({
+  rolesForCardId,
+  buildObservedFacts,
+  buildServerFeatures,
+  assessKnownRezzedIcePath,
+  isBlockedByKnownRezzedIce,
+  visibleCitySurveillanceSourceCount,
 });
 
 const sourceDefinitionIdForSimulationAction =
@@ -3537,17 +3547,6 @@ function scoreCorpAction(
     confidence: confidence(score),
     evidence,
   };
-}
-
-function extractAiFeatures(input: AiDecisionInput): AiFeatures {
-  return extractAiFeaturesRuntime(input, {
-    rolesForCardId,
-    buildObservedFacts,
-    buildServerFeatures,
-    assessKnownRezzedIcePath,
-    isBlockedByKnownRezzedIce,
-    visibleCitySurveillanceSourceCount,
-  });
 }
 
 function tagPunishWindowDiagnosticsForSimulationAction(
