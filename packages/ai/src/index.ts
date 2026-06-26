@@ -712,26 +712,7 @@ import {
 import {
   createSimulationDecisionContext,
 } from "./simulation/simulation-decision-context";
-import { createV143ProfileRunner } from "./simulation/v143-profile-run";
-import {
-  createV143ExploitRegressionFixturesRunner,
-} from "./simulation/v143-exploit-regression-fixtures";
-import {
-  createV143SimulationLeagueRunner,
-} from "./simulation/v143-simulation-league";
-import {
-  createDoctrineQualityBenchmarkRunner,
-} from "./simulation/doctrine-quality-benchmark-runner";
-import {
-  createMatchProgressionBenchmarkRunner,
-} from "./simulation/match-progression-benchmark-runner";
-import {
-  createMatchProgressionBenchmarkSuiteRunner,
-} from "./simulation/match-progression-benchmark-suite-runner";
-import {
-  createAiSelfplayTraceMiningRunner,
-} from "./simulation/ai-selfplay-trace-mining-runner";
-import { createAiSoakRunner } from "./simulation/ai-soak-runner";
+import { createAiSimulationEntrypoints } from "./simulation/ai-simulation-entrypoints";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -2310,44 +2291,28 @@ const {
   chooseCorpBaselineAction,
   selectedChoicesForDecision,
 });
-const { runV143ExploitRegressionFixtures } =
-  createV143ExploitRegressionFixturesRunner({
-    simulateAiGame,
-    chooseRunnerAction,
-  });
-export { runV143ExploitRegressionFixtures };
-const { runV143Profile } = createV143ProfileRunner({
-  simulateAiGame,
-  runExploitRegressionFixtures: runV143ExploitRegressionFixtures,
-});
-const { runV143SimulationLeague } = createV143SimulationLeagueRunner({
-  runV143Profile,
-});
-export { runV143SimulationLeague };
-const { runDoctrineQualityBenchmark } = createDoctrineQualityBenchmarkRunner({
-  runV143Profile,
-});
-export { runDoctrineQualityBenchmark };
-const { runMatchProgressionBenchmark } =
-  createMatchProgressionBenchmarkRunner({
-    runV143Profile,
-    summarizeMatchProgressionMetrics,
-  });
-export { runMatchProgressionBenchmark };
-const { runMatchProgressionBenchmarkSuite } =
-  createMatchProgressionBenchmarkSuiteRunner({
-    runMatchProgressionBenchmark,
-  });
-export { runMatchProgressionBenchmarkSuite };
-const { runAiSelfplayTraceMining } = createAiSelfplayTraceMiningRunner({
+const {
+  runV143ExploitRegressionFixtures,
+  runV143SimulationLeague,
+  runDoctrineQualityBenchmark,
+  runMatchProgressionBenchmark,
+  runMatchProgressionBenchmarkSuite,
+  runAiSelfplayTraceMining,
+  simulateAiSoak,
+} = createAiSimulationEntrypoints({
   simulateAiGame,
   summarizeMatchProgressionMetrics,
+  chooseRunnerAction,
 });
-export { runAiSelfplayTraceMining };
-const { simulateAiSoak } = createAiSoakRunner({
-  simulateAiGame,
-});
-export { simulateAiSoak };
+export {
+  runV143ExploitRegressionFixtures,
+  runV143SimulationLeague,
+  runDoctrineQualityBenchmark,
+  runMatchProgressionBenchmark,
+  runMatchProgressionBenchmarkSuite,
+  runAiSelfplayTraceMining,
+  simulateAiSoak,
+};
 
 export function simulateAiGame(
   config: AiSimulationConfig = {},
