@@ -392,3 +392,13 @@ export function noFreshCentralSubstitutionTypeForAction(
   if (action.type === "end_turn") return "end_turn";
   return undefined;
 }
+
+export function createNoFreshCentralSubstitutionTypeForAction(
+  dependencies: NoFreshCentralDependencies,
+): (
+  input: AiDecisionInput,
+  action: LegalAction,
+) => NoFreshCentralSubstitutionType | undefined {
+  return (input, action) =>
+    noFreshCentralSubstitutionTypeForAction(input, action, dependencies);
+}

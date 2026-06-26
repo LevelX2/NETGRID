@@ -579,7 +579,7 @@ import {
 import {
   bestTrueCentralCloseoutProfile as bestTrueCentralCloseoutProfileWithDeps,
   createCentralRunEventGoodForTarget,
-  noFreshCentralSubstitutionTypeForAction as noFreshCentralSubstitutionTypeForActionWithDeps,
+  createNoFreshCentralSubstitutionTypeForAction,
   runnerNoFreshCentralContext as runnerNoFreshCentralContextWithDeps,
   trueCentralCloseoutProfile as trueCentralCloseoutProfileWithDeps,
 } from "./simulation/no-fresh-central";
@@ -1270,6 +1270,13 @@ const {
   sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
   isSearchChoice,
 });
+
+const noFreshCentralSubstitutionTypeForAction =
+  createNoFreshCentralSubstitutionTypeForAction({
+    isRunnerEconomyAction,
+    rolesForAction,
+    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+  });
 
 export function chooseAiAction(
   input: AiDecisionInput,
@@ -17426,24 +17433,6 @@ function runnerNoFreshCentralContextForMetrics(input: AiDecisionInput): {
     rolesForCardId,
     runnerCreditReserveTargetForInput,
     runnerRemoteThreatProfile,
-    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
-  });
-}
-
-function noFreshCentralSubstitutionTypeForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-):
-  | "economy"
-  | "rig_unlock"
-  | "remote_contest"
-  | "pressure_install"
-  | "setup_search"
-  | "end_turn"
-  | undefined {
-  return noFreshCentralSubstitutionTypeForActionWithDeps(input, action, {
-    isRunnerEconomyAction,
-    rolesForAction,
     sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
   });
 }
