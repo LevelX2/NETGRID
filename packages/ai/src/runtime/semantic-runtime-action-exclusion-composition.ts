@@ -27,7 +27,7 @@ import {
 import type { SemanticRuntimeActionExclusionDependencies } from "./semantic-runtime-action-exclusion";
 
 export type SemanticRuntimeActionExclusionCompositionDependencies =
-  RunnerSourceCardAnswerRoleDependencies &
+  Omit<RunnerSourceCardAnswerRoleDependencies, "sourceDefinitionId"> &
     RunnerSimpleExclusionsContextDependencies &
     RunnerSelfDamageContextDependencies &
     Omit<RunnerBlinkBreakExclusionDependencies, "shouldAvoidRun"> &
@@ -54,7 +54,7 @@ export function createSemanticRuntimeActionExclusionComposition(
     semanticRuntimeRunnerSourceCardAnswerRole,
   } = createRunnerSourceCardAnswerRoleContext({
     visibleSourceCard: dependencies.visibleSourceCard,
-    sourceDefinitionId: dependencies.sourceDefinitionId,
+    sourceDefinitionId: dependencies.sourceDefinitionIdForAction,
     rolesForCardId: dependencies.rolesForCardId,
     sourceDefinition: dependencies.sourceDefinition,
   });

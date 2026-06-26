@@ -1165,7 +1165,6 @@ const {
   semanticRuntimeActionExclusion,
 } = createSemanticRuntimeActionExclusionComposition({
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
-  sourceDefinitionId: sourceDefinitionIdForAction,
   sourceDefinitionIdForAction,
   rolesForCardId,
   sourceDefinition: (definitionId) =>
