@@ -538,10 +538,10 @@ import {
   isCorpRemoteAdvancementProgress,
   progressionEntriesWithRunTargets,
 } from "./simulation/progression-action-sequence";
-import type {
-  BreakerOntologyCoverageMetricKey,
-  RemoteRoleKindMetricKey,
-  RemoteRoleServerScopeMetricKey,
+import {
+  BREAKER_ONTOLOGY_COVERAGE_METRIC_KEYS,
+  REMOTE_ROLE_KIND_METRIC_KEYS,
+  REMOTE_ROLE_SERVER_SCOPE_METRIC_KEYS,
 } from "./simulation/ontology-metric-key-types";
 import type { CorpIcePortfolioMetricKey } from "./simulation/corp-ice-portfolio-types";
 import type {
@@ -10825,43 +10825,6 @@ function attributeNormalizedHandSizeSkip(
 
   metrics.runnerHandSizeNormalizedMetricArtifact += 1;
 }
-
-const BREAKER_ONTOLOGY_COVERAGE_METRIC_KEYS: Record<
-  string,
-  BreakerOntologyCoverageMetricKey
-> = {
-  wall: "breakerOntologyCoverageWall",
-  sentry: "breakerOntologyCoverageSentry",
-  code_gate: "breakerOntologyCoverageCodeGate",
-  ap: "breakerOntologyCoverageAp",
-  trace: "breakerOntologyCoverageTrace",
-  watchdog: "breakerOntologyCoverageWatchdog",
-  black_ice: "breakerOntologyCoverageBlackIce",
-  universal: "breakerOntologyCoverageUniversal",
-  unknown_special: "breakerOntologyCoverageUnknownSpecial",
-};
-
-const REMOTE_ROLE_KIND_METRIC_KEYS: Record<string, RemoteRoleKindMetricKey> = {
-  scoring_protection: "remoteRoleKindScoringProtection",
-  agenda_steal_tax: "remoteRoleKindAgendaStealTax",
-  run_tax: "remoteRoleKindRunTax",
-  remote_capacity: "remoteRoleKindRemoteCapacity",
-  asset_economy: "remoteRoleKindAssetEconomy",
-  bait: "remoteRoleKindBait",
-  ambush: "remoteRoleKindAmbush",
-  ice_modifier: "remoteRoleKindIceModifier",
-  tax_fort: "remoteRoleKindTaxFort",
-};
-
-const REMOTE_ROLE_SERVER_SCOPE_METRIC_KEYS: Record<
-  string,
-  RemoteRoleServerScopeMetricKey
-> = {
-  fort: "remoteRoleServerScopeFort",
-  remote: "remoteRoleServerScopeRemote",
-  central: "remoteRoleServerScopeCentral",
-  server: "remoteRoleServerScopeServer",
-};
 
 function summarizeBreakerOntologyMetrics(
   summaries: AiSimulationSummary[],
