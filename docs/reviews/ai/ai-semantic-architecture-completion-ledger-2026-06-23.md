@@ -4176,6 +4176,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1643 Tests.
+- `AI-COMPLETE-03` vierhundertachtundzwanzigster Struktur-Schnitt:
+  - `packages/ai/src/simulation/runner-setup-coverage-types.ts` kapselt zusätzlich den Runner-Coverage-Action-Kontext für Search- und Recovery-Klassifikation.
+  - `packages/ai/src/index.ts` initialisiert `runnerCoverageSearchActionForMetrics` und `runnerCoverageRecoveryActionForMetrics` früh aus dem Coverage-Action-Kontext und entfernt die lokalen Helperfunktionen.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 17.301 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1643 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 

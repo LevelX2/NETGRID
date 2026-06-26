@@ -554,6 +554,7 @@ import {
   type RunnerEconomySetupActionClass,
 } from "./simulation/runner-economy-setup-types";
 import {
+  createRunnerCoverageActionContext,
   createRunnerSetupCoverageContext,
   runnerMissingBreakerRolesForMetrics,
   runnerStrategicBreakerTargetForMetrics,
@@ -1235,6 +1236,14 @@ const {
 } = createRunnerSetupCoverageContext({
   assessKnownRezzedIcePath,
   rolesForCardId,
+});
+
+const {
+  runnerCoverageSearchActionForMetrics,
+  runnerCoverageRecoveryActionForMetrics,
+} = createRunnerCoverageActionContext({
+  findVisibleCard,
+  rolesForAction,
 });
 
 const {
@@ -15872,68 +15881,6 @@ function assessRunnerCoveragePressureForMetrics(
     recoveryActionIds,
     heapMatchingBreakerCount,
   };
-}
-
-function runnerCoverageSearchActionForMetrics(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  if (action.side !== "runner") return false;
-  if (
-    action.type !== "play_event" &&
-    action.type !== "resolve_choice" &&
-    action.type !== "trigger_ability" &&
-    action.type !== "activated_card_ability"
-  )
-    return false;
-  const roles = rolesForAction(input, action);
-  const sourceCard =
-    typeof action.source === "string"
-      ? findVisibleCard(input, action.source)
-      : undefined;
-  const sourceDefinition = sourceCard?.definitionId
-    ? (RUNTIME_CARDS[sourceCard.definitionId] ??
-      DEMO_CARDS_BY_ID[sourceCard.definitionId])
-    : undefined;
-  const mechanics =
-    sourceDefinition &&
-    "mechanics" in sourceDefinition &&
-    Array.isArray(sourceDefinition.mechanics)
-      ? sourceDefinition.mechanics
-      : [];
-  return (
-    roles.some(
-      (role) =>
-        role.includes("search") ||
-        role.includes("tutor") ||
-        role === "program_search" ||
-        role === "stack_search" ||
-        role === "search_stack" ||
-        role === "search_trash" ||
-        role === "setup_search" ||
-        role.includes("recovery") ||
-        role.includes("trash_recovery"),
-    ) ||
-    mechanics.some(
-      (mechanic: string) =>
-        mechanic.includes("search") ||
-        mechanic.includes("tutor") ||
-        mechanic.includes("hidden_zone_tool"),
-    )
-  );
-}
-
-function runnerCoverageRecoveryActionForMetrics(
-  input: AiDecisionInput,
-  action: LegalAction,
-): boolean {
-  const roles = rolesForAction(input, action);
-  return roles.some(
-    (role) =>
-      role.includes("recovery") ||
-      role.includes("trash_recovery") ||
-      role === "search_trash",
-  );
 }
 
 function runnerHandUseDiagnosticsForSimulationAction(

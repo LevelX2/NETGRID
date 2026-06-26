@@ -1,4 +1,9 @@
-import { DEMO_CARDS_BY_ID, type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
+import {
+  DEMO_CARDS_BY_ID,
+  type AiDecisionInput,
+  type LegalAction,
+  type VisibleCard,
+} from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import { iceHasEndTheRun } from "../visible-run-analysis";
@@ -19,6 +24,14 @@ type RunnerSetupCoverageDependencies = {
     runnerCredits: number,
     rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
   ) => KnownRezzedIcePathAssessment;
+};
+
+type RunnerCoverageActionDependencies = {
+  rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
+  findVisibleCard: (
+    input: AiDecisionInput,
+    cardId: string,
+  ) => Pick<VisibleCard, "definitionId"> | undefined;
 };
 
 export function runnerVisibleMissingBreakerCoverage(
@@ -107,6 +120,90 @@ export function createRunnerSetupCoverageContext(
       runnerMissingCoverageTypesForInput(input, dependencies),
     runnerHasKnownBlockedPathByCoverage: (input) =>
       runnerHasKnownBlockedPathByCoverage(input, dependencies),
+  };
+}
+
+export function runnerCoverageSearchActionForMetrics(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: RunnerCoverageActionDependencies,
+): boolean {
+  if (action.side !== "runner") return false;
+  if (
+    action.type !== "play_event" &&
+    action.type !== "resolve_choice" &&
+    action.type !== "trigger_ability" &&
+    action.type !== "activated_card_ability"
+  )
+    return false;
+  const roles = dependencies.rolesForAction(input, action);
+  const sourceCard =
+    typeof action.source === "string"
+      ? dependencies.findVisibleCard(input, action.source)
+      : undefined;
+  const sourceDefinition = sourceCard?.definitionId
+    ? (RUNTIME_CARDS[sourceCard.definitionId] ??
+      DEMO_CARDS_BY_ID[sourceCard.definitionId])
+    : undefined;
+  const mechanics =
+    sourceDefinition &&
+    "mechanics" in sourceDefinition &&
+    Array.isArray(sourceDefinition.mechanics)
+      ? sourceDefinition.mechanics
+      : [];
+  return (
+    roles.some(
+      (role) =>
+        role.includes("search") ||
+        role.includes("tutor") ||
+        role === "program_search" ||
+        role === "stack_search" ||
+        role === "search_stack" ||
+        role === "search_trash" ||
+        role === "setup_search" ||
+        role.includes("recovery") ||
+        role.includes("trash_recovery"),
+    ) ||
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("search") ||
+        mechanic.includes("tutor") ||
+        mechanic.includes("hidden_zone_tool"),
+    )
+  );
+}
+
+export function runnerCoverageRecoveryActionForMetrics(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: RunnerCoverageActionDependencies,
+): boolean {
+  const roles = dependencies.rolesForAction(input, action);
+  return roles.some(
+    (role) =>
+      role.includes("recovery") ||
+      role.includes("trash_recovery") ||
+      role === "search_trash",
+  );
+}
+
+export function createRunnerCoverageActionContext(
+  dependencies: RunnerCoverageActionDependencies,
+): {
+  runnerCoverageSearchActionForMetrics: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean;
+  runnerCoverageRecoveryActionForMetrics: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean;
+} {
+  return {
+    runnerCoverageSearchActionForMetrics: (input, action) =>
+      runnerCoverageSearchActionForMetrics(input, action, dependencies),
+    runnerCoverageRecoveryActionForMetrics: (input, action) =>
+      runnerCoverageRecoveryActionForMetrics(input, action, dependencies),
   };
 }
 
