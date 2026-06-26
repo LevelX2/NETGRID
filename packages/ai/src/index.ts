@@ -75,7 +75,7 @@ import {
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
 import { createRunnerSemanticSupportComposition } from "./runtime/runner-semantic-support-composition";
-import { createSemanticRuntimeOrchestrationComposition } from "./runtime/semantic-runtime-orchestration-composition";
+import { createAiRuntimeSimulationComposition } from "./runtime/ai-runtime-simulation-composition";
 import { compareAction } from "./runtime/action-order";
 import {
   breakSubroutineIndexesForAction,
@@ -280,7 +280,6 @@ import {
   listV143BenchmarkProfiles,
   listV143ExploitFixtures,
 } from "./simulation/v143-data";
-import { createAiSimulationComposition } from "./simulation/ai-simulation-composition";
 import { summarizeMatchProgressionMetrics } from "./simulation/match-progression-summary";
 import {
   evaluateTacticalPlans,
@@ -898,7 +897,15 @@ const {
   chooseCorpBaselineAction,
   chooseRunnerAction,
   chooseRunnerBaselineAction,
-} = createSemanticRuntimeOrchestrationComposition({
+  simulateAiGame,
+  runV143ExploitRegressionFixtures,
+  runV143SimulationLeague,
+  runDoctrineQualityBenchmark,
+  runMatchProgressionBenchmark,
+  runMatchProgressionBenchmarkSuite,
+  runAiSelfplayTraceMining,
+  simulateAiSoak,
+} = createAiRuntimeSimulationComposition({
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
   isVisibleIcebreakerProgram,
   visibleBreakerCardCanAddressIce,
@@ -1051,34 +1058,7 @@ const {
   baselineShellTradersPlanIsVisible,
   runnerHasConditionalPaymentContinueDecision,
   chooseRunnerPlanAction,
-});
-export {
-  chooseAiAction,
-  chooseCorpAction,
-  chooseCorpBaselineAction,
-  chooseRunnerAction,
-  chooseRunnerBaselineAction,
-};
-
-const {
-  simulateAiGame,
-  runV143ExploitRegressionFixtures,
-  runV143SimulationLeague,
-  runDoctrineQualityBenchmark,
-  runMatchProgressionBenchmark,
-  runMatchProgressionBenchmarkSuite,
-  runAiSelfplayTraceMining,
-  simulateAiSoak,
-} = createAiSimulationComposition({
   extractFeatures: extractAiFeatures,
-  findVisibleCard,
-  rolesForAction,
-  chooseAiAction,
-  chooseRunnerAction,
-  chooseCorpAction,
-  chooseRunnerBaselineAction,
-  chooseCorpBaselineAction,
-  selectedChoicesForDecision,
   runnerHandUseDiagnosticsForSimulationAction,
   runnerReserveDiagnosticsForSimulationAction,
   runnerCentralPressureDiagnosticsForSimulationAction,
@@ -1091,6 +1071,13 @@ const {
   corpEconomyBeforeScoreDiagnosticsForSimulationAction,
   summarizeMatchProgressionMetrics,
 });
+export {
+  chooseAiAction,
+  chooseCorpAction,
+  chooseCorpBaselineAction,
+  chooseRunnerAction,
+  chooseRunnerBaselineAction,
+};
 export { simulateAiGame };
 export { summarizeMatchProgressionMetrics };
 export {
