@@ -78,7 +78,6 @@ import { createAiFacadeFoundationContext } from "./runtime/ai-facade-foundation-
 import { createRunnerEncounterCompositionContext } from "./runtime/runner-encounter-composition-context";
 import { createRunnerKnownPathDiagnosticsComposition } from "./simulation/runner-known-path-diagnostics-composition";
 import { createRunnerCentralPressureDiagnosticsComposition } from "./simulation/runner-central-pressure-diagnostics-composition";
-import { createRunnerRemoteThreatTargetingComposition } from "./simulation/runner-remote-threat-targeting-composition";
 import { createRunnerSetupCoverageComposition } from "./simulation/runner-setup-coverage-composition";
 import { createRunnerInstallClassificationComposition } from "./simulation/runner-install-classification-composition";
 import { createRunnerSimulationDiagnosticsComposition } from "./simulation/runner-simulation-diagnostics-composition";
@@ -831,20 +830,6 @@ const {
 });
 
 const {
-  bestTrueCentralCloseoutProfileForMetrics,
-  trueCentralCloseoutProfileForMetrics,
-  runnerRemoteThreatProfile,
-  runnerRemoteThreatTargetingDiagnosticsForAction,
-} = createRunnerRemoteThreatTargetingComposition({
-  assessKnownRezzedIcePath,
-  recentCentralRunSameTargetWithoutRefresh,
-  remoteServerHasScoreThreat,
-  rolesForCardId,
-  runnerCreditReserveTargetForInput,
-  sourceDefinitionIdForSimulationAction,
-});
-
-const {
   runnerRemoteTrashAccessContext,
   runnerKnownNoAccessLegalRunTargets,
   runnerCoverageRepairDiagnostic,
@@ -879,6 +864,26 @@ const {
   rolesForCardId,
   sourceDefinitionIdForSimulationAction,
   isSearchChoice,
+});
+
+const {
+  bestTrueCentralCloseoutProfileForMetrics,
+  trueCentralCloseoutProfileForMetrics,
+  runnerRemoteThreatProfile,
+  runnerRemoteThreatTargetingDiagnosticsForAction,
+  noFreshCentralSubstitutionTypeForAction,
+  runnerNoFreshCentralContextForMetrics,
+  runnerCentralPressureDiagnosticsForSimulationAction,
+} = createRunnerCentralPressureDiagnosticsComposition({
+  isRunnerEconomyAction,
+  rolesForAction,
+  rolesForCardId,
+  sourceDefinitionIdForSimulationAction,
+  assessKnownRezzedIcePath,
+  centralRunStreakWithoutValueForMetrics,
+  runnerCreditReserveTargetForInput,
+  recentCentralRunSameTargetWithoutRefresh,
+  remoteServerHasScoreThreat,
 });
 
 const {
@@ -930,23 +935,6 @@ const {
   canBreakerDefinitionBreakIce,
   runnerVisibleIceCreatesCoverageNeedForMetrics,
   runnerMissingBreakerRolesForMetrics,
-});
-
-const {
-  noFreshCentralSubstitutionTypeForAction,
-  runnerNoFreshCentralContextForMetrics,
-  runnerCentralPressureDiagnosticsForSimulationAction,
-} = createRunnerCentralPressureDiagnosticsComposition({
-  isRunnerEconomyAction,
-  rolesForAction,
-  rolesForCardId,
-  sourceDefinitionIdForSimulationAction,
-  assessKnownRezzedIcePath,
-  centralRunStreakWithoutValueForMetrics,
-  runnerCreditReserveTargetForInput,
-  runnerRemoteThreatProfile,
-  bestTrueCentralCloseoutProfileForMetrics,
-  trueCentralCloseoutProfileForMetrics,
 });
 
 const {

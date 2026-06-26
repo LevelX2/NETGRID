@@ -6,41 +6,42 @@ import { createRunnerCentralPressureDiagnosticsForSimulationAction } from "./run
 import {
   createNoFreshCentralSubstitutionTypeForAction,
   createRunnerNoFreshCentralContext,
-  type BestTrueCentralCloseoutProfile,
-  type TrueCentralCloseoutProfile,
 } from "./no-fresh-central";
-import type { RunnerRemoteThreatProfile } from "./remote-server-threat";
+import {
+  createRunnerRemoteThreatTargetingComposition,
+  type RunnerRemoteThreatTargetingCompositionDependencies,
+} from "./runner-remote-threat-targeting-composition";
 
-export type RunnerCentralPressureDiagnosticsCompositionDependencies = {
+export type RunnerCentralPressureDiagnosticsCompositionDependencies =
+  RunnerRemoteThreatTargetingCompositionDependencies & {
   isRunnerEconomyAction: (input: AiDecisionInput, action: LegalAction) => boolean;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  rolesForCardId: (definitionId: string | undefined) => string[];
-  sourceDefinitionIdForSimulationAction: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => string | undefined;
-  assessKnownRezzedIcePath: typeof assessKnownRezzedIcePath;
   centralRunStreakWithoutValueForMetrics: (
     input: AiDecisionInput,
     serverId: CentralServerId,
   ) => number;
-  runnerCreditReserveTargetForInput: (input: AiDecisionInput) => number;
-  runnerRemoteThreatProfile: (
-    input: AiDecisionInput,
-    serverId: string,
-  ) => RunnerRemoteThreatProfile;
-  bestTrueCentralCloseoutProfileForMetrics: (
-    input: AiDecisionInput,
-  ) => BestTrueCentralCloseoutProfile;
-  trueCentralCloseoutProfileForMetrics: (
-    input: AiDecisionInput,
-    serverId: CentralServerId,
-  ) => TrueCentralCloseoutProfile;
 };
 
 export function createRunnerCentralPressureDiagnosticsComposition(
   dependencies: RunnerCentralPressureDiagnosticsCompositionDependencies,
 ) {
+  const {
+    bestTrueCentralCloseoutProfileForMetrics,
+    trueCentralCloseoutProfileForMetrics,
+    runnerRemoteThreatProfile,
+    runnerRemoteThreatTargetingDiagnosticsForAction,
+  } = createRunnerRemoteThreatTargetingComposition({
+    assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
+    recentCentralRunSameTargetWithoutRefresh:
+      dependencies.recentCentralRunSameTargetWithoutRefresh,
+    remoteServerHasScoreThreat: dependencies.remoteServerHasScoreThreat,
+    rolesForCardId: dependencies.rolesForCardId,
+    runnerCreditReserveTargetForInput:
+      dependencies.runnerCreditReserveTargetForInput,
+    sourceDefinitionIdForSimulationAction:
+      dependencies.sourceDefinitionIdForSimulationAction,
+  });
+
   const noFreshCentralSubstitutionTypeForAction =
     createNoFreshCentralSubstitutionTypeForAction({
       isRunnerEconomyAction: dependencies.isRunnerEconomyAction,
@@ -59,7 +60,7 @@ export function createRunnerCentralPressureDiagnosticsComposition(
       rolesForCardId: dependencies.rolesForCardId,
       runnerCreditReserveTargetForInput:
         dependencies.runnerCreditReserveTargetForInput,
-      runnerRemoteThreatProfile: dependencies.runnerRemoteThreatProfile,
+      runnerRemoteThreatProfile,
       sourceDefinitionIdForAction:
         dependencies.sourceDefinitionIdForSimulationAction,
     });
@@ -70,9 +71,9 @@ export function createRunnerCentralPressureDiagnosticsComposition(
       sourceDefinitionIdForSimulationAction:
         dependencies.sourceDefinitionIdForSimulationAction,
       bestTrueCentralCloseoutProfileForMetrics:
-        dependencies.bestTrueCentralCloseoutProfileForMetrics,
+        bestTrueCentralCloseoutProfileForMetrics,
       trueCentralCloseoutProfileForMetrics:
-        dependencies.trueCentralCloseoutProfileForMetrics,
+        trueCentralCloseoutProfileForMetrics,
       runnerNoFreshCentralContextForMetrics,
       noFreshCentralSubstitutionTypeForAction,
       runnerCreditReserveTargetForInput:
@@ -81,6 +82,10 @@ export function createRunnerCentralPressureDiagnosticsComposition(
     });
 
   return {
+    bestTrueCentralCloseoutProfileForMetrics,
+    trueCentralCloseoutProfileForMetrics,
+    runnerRemoteThreatProfile,
+    runnerRemoteThreatTargetingDiagnosticsForAction,
     noFreshCentralSubstitutionTypeForAction,
     runnerNoFreshCentralContextForMetrics,
     runnerCentralPressureDiagnosticsForSimulationAction,
