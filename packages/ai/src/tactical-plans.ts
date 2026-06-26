@@ -39,7 +39,6 @@ import {
 } from "./runner-tactical-goals";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { createAiHintsByCard } from "./ai-hints";
-import { TACTICAL_PLAN_SCHEMA_VERSION } from "./plans/tactical-plan-types";
 import { getTacticalPlanMemorySnapshot } from "./plans/plan-memory";
 import {
   assessRunnerDrawOverflow,
@@ -58,6 +57,10 @@ import {
   redactedRunnerStrategicIntentFacts,
   redactedStrategicIntentStateFacts,
 } from "./plans/tactical-plan-redaction";
+import {
+  createPlanStep,
+  createTacticalPlan,
+} from "./plans/tactical-plan-builders";
 import {
   planCanMapToCurrentAction,
   progressTacticalPlans,
@@ -88,6 +91,10 @@ import type {
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
+export {
+  createPlanStep,
+  createTacticalPlan,
+} from "./plans/tactical-plan-builders";
 export { TACTICAL_PLAN_SCHEMA_VERSION } from "./plans/tactical-plan-types";
 export {
   createTacticalPlanMemorySnapshot,
@@ -4075,62 +4082,4 @@ function corpHasSafeScoreAlternative(
         action.type === "rez_ice" ||
         action.type === "score_agenda"),
   );
-}
-
-export function createPlanStep(params: {
-  stepId: string;
-  kind: PlanStepKind;
-  desiredActionSemantics: string[];
-  requiredCapabilities?: RequiredCapability[];
-  mappingStatus?: PlanMappingStatus;
-  actionCandidateIds?: string[];
-  rationale?: string[];
-}): PlanStep {
-  return {
-    stepId: params.stepId,
-    kind: params.kind,
-    desiredActionSemantics: [...params.desiredActionSemantics],
-    requiredCapabilities: [...(params.requiredCapabilities ?? [])],
-    ...(params.mappingStatus ? { mappingStatus: params.mappingStatus } : {}),
-    actionCandidateIds: [...(params.actionCandidateIds ?? [])],
-    rationale: [...(params.rationale ?? [])],
-  };
-}
-
-export function createTacticalPlan(params: {
-  planId: string;
-  side: Side;
-  type: TacticalPlanType;
-  status?: PlanLifecycle;
-  priority: number;
-  horizonTurns: number;
-  target?: PlanTarget;
-  requiredCapabilities?: RequiredCapability[];
-  blockers?: PlanBlocker[];
-  currentStep: PlanStep;
-  nextSteps?: PlanStep[];
-  evidence?: string[];
-  scoreBreakdown?: PlanScoreBreakdown[];
-  stateVersion: number;
-}): TacticalPlan {
-  const blockers = [...(params.blockers ?? [])];
-  const status = params.status ?? (blockers.length > 0 ? "blocked" : "proposed");
-  return {
-    schemaVersion: TACTICAL_PLAN_SCHEMA_VERSION,
-    planId: params.planId,
-    side: params.side,
-    type: params.type,
-    status,
-    priority: params.priority,
-    horizonTurns: params.horizonTurns,
-    ...(params.target ? { target: params.target } : {}),
-    requiredCapabilities: [...(params.requiredCapabilities ?? [])],
-    blockers,
-    currentStep: params.currentStep,
-    nextSteps: [...(params.nextSteps ?? [])],
-    evidence: [...(params.evidence ?? [])],
-    scoreBreakdown: [...(params.scoreBreakdown ?? [])],
-    createdAtStateVersion: params.stateVersion,
-    updatedAtStateVersion: params.stateVersion,
-  };
 }
