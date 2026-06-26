@@ -523,7 +523,6 @@ import {
   analyzeDoctrineQualityCases,
   isAgendaFloodExposureExemptAction,
   isEconomyStallExemptAction,
-  qualityTagsForActionWithDependencies,
   summarizeDoctrineQualityMetrics,
   type AiDoctrineQualityCaseAnalysis,
   type AiDoctrineQualityCaseExample,
@@ -663,10 +662,13 @@ import {
   runnerCreditReserveTargetForInput as runnerCreditReserveTargetForInputWithRoles,
 } from "./simulation/runner-credit-reserve";
 import {
-  metricsForSimulationActionSequence,
   type AiQualityMetrics,
   type AiSoakResult,
 } from "./simulation/quality-metrics";
+import {
+  createQualityTagsForAction,
+  metricsFor,
+} from "./simulation/simulation-quality-adapters";
 import {
   hasRunnerInstallableBreakerActionForSimulation,
   hasRunnerPlayableEconomyActionForSimulation,
@@ -2493,6 +2495,12 @@ const {
   },
   semanticRuntimeScoreFromComponents,
 );
+
+const qualityTagsForAction = createQualityTagsForAction({
+  extractFeatures: extractAiFeatures,
+  findVisibleCard,
+  rolesForAction,
+});
 
 export function simulateAiGame(
   config: AiSimulationConfig = {},
@@ -17732,31 +17740,4 @@ function sourceDefinitionIdForSimulationAction(
   return sourceDefinitionIdForSimulationSource(action, (id) =>
     findVisibleCard(input, id),
   );
-}
-
-function metricsFor(
-  actionSequence: AiSimulationSummary["actionSequence"],
-  errors: string[],
-  replayOk: boolean,
-  holdout: boolean,
-): AiQualityMetrics {
-  return metricsForSimulationActionSequence(
-    actionSequence,
-    errors,
-    replayOk,
-    holdout,
-    summarizeDoctrineQualityMetrics,
-  );
-}
-
-function qualityTagsForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-  decision: AiDecision,
-): string[] {
-  return qualityTagsForActionWithDependencies(input, action, decision, {
-    extractFeatures: extractAiFeatures,
-    findVisibleCard,
-    rolesForAction,
-  });
 }
