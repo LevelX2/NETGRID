@@ -106,11 +106,7 @@ import {
 import {
   createVisibleIcebreakerProgramPredicate,
 } from "./runtime/visible-icebreaker-program";
-import {
-  chooseAiActionFromSides,
-  type AiDecisionRuntimeOptions,
-} from "./runtime/choose-ai-action";
-import { memoizeLegacyDecision } from "./runtime/legacy-decision-provider";
+import { createAiActionEntrypoints } from "./runtime/ai-action-entrypoints";
 import { compareAction } from "./runtime/action-order";
 import { advancementCountersAddedForSimulationAction } from "./runtime/simulation-action-event";
 import {
@@ -698,10 +694,6 @@ import {
   ownStrategicWindow,
   serverTargetsMatch,
 } from "./simulation/plan-conversion-predicates";
-import {
-  chooseCorpLegacyBaselineAction,
-  chooseRunnerLegacyBaselineAction,
-} from "./legacy/legacy-baseline";
 import {
   createLegacyDecisionContext,
 } from "./legacy/legacy-decision-context";
@@ -1460,72 +1452,6 @@ const runnerBreakerCoverageDiagnosticsForSimulationAction =
     runnerCoverageSearchActionForMetrics,
   });
 
-export function chooseAiAction(
-  input: AiDecisionInput,
-  options: AiDecisionRuntimeOptions = {},
-): AiDecision {
-  return chooseAiActionFromSides(input, options, {
-    corp: chooseCorpAction,
-    runner: chooseRunnerAction,
-  });
-}
-
-export function chooseCorpAction(
-  input: AiDecisionInput,
-  options: AiDecisionRuntimeOptions = {},
-): AiDecision {
-  return chooseSemanticRuntimeAction(
-    input,
-    memoizeLegacyDecision(() => {
-      const baselineDecision = chooseCorpBaselineAction(input);
-      return hasCorpPlanAction(input) &&
-        !isCorpReactiveBaselineDecision(baselineDecision)
-        ? chooseCorpPlanAction(input, baselineDecision)
-        : baselineDecision;
-    }),
-    options,
-  );
-}
-
-export function chooseCorpBaselineAction(input: AiDecisionInput): AiDecision {
-  return chooseCorpLegacyBaselineAction(input, {
-    scoreActions,
-    decisionFromChoices,
-  });
-}
-
-export function chooseRunnerAction(
-  input: AiDecisionInput,
-  options: AiDecisionRuntimeOptions = {},
-): AiDecision {
-  return chooseSemanticRuntimeAction(
-    input,
-    memoizeLegacyDecision(() => {
-      const baselineDecision = chooseRunnerBaselineAction(input);
-      const baselineAction = input.legalActions.find(
-        (candidate) => candidate.actionId === baselineDecision.actionId,
-      );
-      const shouldUsePlanAction =
-        hasRunnerPlanAction(input) &&
-        (!isRunnerReactiveBaselineDecision(baselineDecision) ||
-          baselineShellTradersPlanIsVisible(input, baselineDecision)) &&
-        !runnerHasConditionalPaymentContinueDecision(input, baselineAction);
-      const legacyDecision = shouldUsePlanAction
-        ? chooseRunnerPlanAction(input, baselineDecision)
-        : baselineDecision;
-      return runnerSelfDamageGuardedDecision(input, legacyDecision);
-    }),
-    options,
-  );
-}
-
-export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
-  return chooseRunnerLegacyBaselineAction(input, {
-    scoreActions,
-    decisionFromChoices,
-  });
-}
-
 const { decisionFromChoices, selectedChoicesForDecision } =
   createLegacyDecisionContext({
     evaluateCorpOpeningHand,
@@ -2154,6 +2080,33 @@ const { chooseSemanticRuntimeAction } = createSemanticRuntimeDecisionContext({
   semanticRuntimeDecisionDebug,
   practicalMicroRuntimeCandidates,
 });
+const {
+  chooseAiAction,
+  chooseCorpAction,
+  chooseCorpBaselineAction,
+  chooseRunnerAction,
+  chooseRunnerBaselineAction,
+} = createAiActionEntrypoints({
+  chooseSemanticRuntimeAction,
+  scoreActions,
+  decisionFromChoices,
+  hasCorpPlanAction,
+  isCorpReactiveBaselineDecision,
+  chooseCorpPlanAction,
+  hasRunnerPlanAction,
+  isRunnerReactiveBaselineDecision,
+  baselineShellTradersPlanIsVisible,
+  runnerHasConditionalPaymentContinueDecision,
+  chooseRunnerPlanAction,
+  runnerSelfDamageGuardedDecision,
+});
+export {
+  chooseAiAction,
+  chooseCorpAction,
+  chooseCorpBaselineAction,
+  chooseRunnerAction,
+  chooseRunnerBaselineAction,
+};
 
 const {
   semanticRuntimeRunnerRunTargetGuidanceComponent,
