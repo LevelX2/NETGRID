@@ -549,7 +549,7 @@ import {
 import { createCorpFutureRunIceDiagnosticsForSimulationAction } from "./simulation/corp-future-run-ice-diagnostics";
 import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/corp-ice-portfolio-diagnostics";
 import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progress";
-import { summarizeOutcomeFollowupMetrics } from "./simulation/outcome-followup-metrics";
+import { summarizePlanConversionMetrics } from "./simulation/plan-conversion-metrics";
 import { summarizeRemoteRoleOntologyMetrics } from "./simulation/remote-role-ontology-metrics";
 import { createRunnerBreakerCoverageDiagnosticsForSimulationAction } from "./simulation/runner-breaker-coverage-diagnostics";
 import { createRunnerCentralPressureDiagnosticsForSimulationAction } from "./simulation/runner-central-pressure-diagnostics";
@@ -558,7 +558,6 @@ import { createRunnerHandUseDiagnosticsForSimulationAction } from "./simulation/
 import { summarizeRunnerRepeatRemoteNoTrashMetrics } from "./simulation/runner-repeat-remote-no-trash-metrics";
 import { createRunnerReserveDiagnosticsForSimulationAction } from "./simulation/runner-reserve-diagnostics";
 import { summarizeStrategicLineMetrics } from "./simulation/strategic-line-metrics";
-import { summarizeStrategicPlanConversionMetrics } from "./simulation/strategic-plan-conversion-metrics";
 import {
   isTerminalDamageOrEconomicPunish,
   tagSourceConvertsToPunishOpportunity,
@@ -704,16 +703,11 @@ import {
   createRunnerKnownNoAccessLegalRunTargets,
 } from "./simulation/runner-known-no-access";
 import {
-  actionsUntil,
-  advanceConvertsToScore,
-  centralPressureConvertsToSteal,
   corpCompressionActionLeadsToScoreLine,
   corpRemoteCreatedConverts,
   corpRemoteCreatedConvertsTo,
-  economyActionConvertsToRun,
   isCorpProtectionScoreConversionAction,
   isCorpRemoteProtectionActionEntry,
-  hasMeaningfulProgressWithin,
   isRunnerCentralPressureAction,
   isRunnerEconomyProgressAction,
   isRunnerRigProgressAction,
@@ -722,16 +716,10 @@ import {
   nextEntries,
   nextEntriesForSide,
   ownStrategicWindow,
-  planKindForConversion,
-  planIntentConvertedWithin,
-  remoteBuildConvertsToAdvanceOrScore,
-  remoteContestConvertsToStealOrTrash,
   remoteTargetsMatch,
   runnerStealsBeforeNextCorpScore,
   serverTargetsMatch,
   scorePathFollowsCorpProtection,
-  rigActionConvertsToRun,
-  setupActionConvertsToRun,
 } from "./simulation/plan-conversion-predicates";
 import {
   chooseCorpLegacyBaselineAction,
@@ -8864,273 +8852,6 @@ export function summarizeMatchProgressionMetrics(
     timeoutRate: round(
       actionSequence.filter((entry) => entry.timeoutUsed).length / totalActions,
     ),
-  };
-}
-
-function summarizePlanConversionMetrics(
-  summaries: AiSimulationSummary[],
-): Pick<
-  AiMatchProgressionMetrics,
-  | "actionLedToProgressWithin1"
-  | "actionLedToProgressWithin2"
-  | "actionLedToProgressWithin3"
-  | "planIntentConverted"
-  | "planIntentAbandoned"
-  | "samePlanRepeatedWithoutProgress"
-  | "setupActionConvertedToRun"
-  | "economyActionConvertedToRun"
-  | "rigActionConvertedToRun"
-  | "remoteBuildConvertedToAdvanceOrScore"
-  | "advanceConvertedToScore"
-  | "remoteContestConvertedToStealOrTrash"
-  | "centralPressureConvertedToSteal"
-  | "noProgressActionChainLength"
-  | "longestNoProgressChain"
-  | "turnsWithNoProgress"
-  | "actionsUntilNextScoreOrSteal"
-  | "actionsUntilNextMeaningfulBoardProgress"
-  | "strategicNoProgressActionChainLength"
-  | "strategicLongestNoProgressChain"
-  | "microActionNoProgressContribution"
-  | "planContinuationOpportunities"
-  | "planContinuationTaken"
-  | "planContinuationRate"
-  | "planAbortOpportunities"
-  | "planAbortTaken"
-  | "planAbortWithReason"
-  | "planIntentConvertedWithin1OwnDecision"
-  | "planIntentConvertedWithin2OwnDecisions"
-  | "planIntentConvertedWithin3OwnDecisions"
-  | "planIntentExpired"
-  | "planIntentAbandonedWithoutReason"
-  | "sameStrategicPlanRepeatedWithoutProgress"
-  | "runnerEconomyConvertedToRunOrRig"
-  | "runnerRigConvertedToRun"
-  | "runnerProbeConvertedToUsefulInfoOrPivot"
-  | "runnerCentralPressureConvertedToStealOrFreshValue"
-  | "runnerRemoteContestConvertedToStealTrashOrCorrectAbort"
-  | "corpRemoteBuildConvertedToAdvanceProtectOrScore"
-  | "corpAdvanceConvertedToScoreOrProtectedWindow"
-  | "corpEconomyConvertedToRezInstallScore"
-  | "corpProtectionConvertedToScoreSafety"
-  | "runnerCentralSuccessFollowedByValue"
-  | "runnerCentralSuccessFollowedByRepeatNoValue"
-  | "runnerCentralNoValuePivoted"
-  | "runnerRemoteSuccessFollowedByValue"
-  | "runnerRemoteEmptyOrLowValuePivoted"
-  | "runnerJackOutRepeatedSameServerWithoutNewInfo"
-  | "runnerJackOutFollowedByEconomyOrRig"
-  | "runnerAccessNoValueRepeated"
-  | "runnerAccessNoValuePivoted"
-  | "runnerEconomyConvertedAfterOutcome"
-  | "runnerRigConvertedAfterOutcome"
-  | "corpRemoteStealFollowupProtectOrPivot"
-  | "corpRemoteStealFollowupRepeatedUnsafeLine"
-  | "corpCentralStealFollowupProtectCentral"
-  | "corpRunnerFailedRunFollowupScoreOrAdvance"
-  | "corpRunnerSuccessfulRunFollowupProtect"
-  | "corpAdvanceFollowupScore"
-  | "corpAdvanceFollowupProtect"
-  | "corpRemoteBuildFollowupAdvanceProtectScore"
-  | "corpRemoteBuildFollowupNoop"
-  | "outcomeFollowupOpportunities"
-  | "outcomeFollowupTaken"
-  | "outcomeFollowupRate"
-  | "outcomeFollowupApplied"
-  | "outcomeFollowupSuppressedByProgressionCost"
-  | "outcomeFollowupSuppressedByBetterImmediateValue"
-  | "outcomeFollowupLedToProgressWithin3"
-  | "outcomeFollowupLedToNoProgressChain"
-  | "outcomeFollowupDelayedScoreWindow"
-  | "outcomeFollowupPreservedScoreWindow"
-  | "outcomeFollowupDelayedStealOrTrash"
-  | "outcomeFollowupPreservedContestReserve"
-  | "runnerOutcomePivotConverted"
-  | "runnerOutcomePivotStalled"
-  | "corpOutcomePivotConverted"
-  | "corpOutcomePivotStalled"
-  | "corpScoreWindowOverriddenByFollowup"
-  | "scoreNowProtectedFromFollowup"
-  | "stealTrashProtectedFromFollowup"
-  | "effectiveRunQuoteBlockedFollowupRun"
-  | "unbrokenRunEffectChangedBreakDecision"
-  | "futureEffectSubroutinesEncountered"
-  | "futureEffectSubroutinesWithRemainingIce"
-  | "futureEffectSubroutinesWithoutRemainingIce"
-  | "futureEffectBreaksTaken"
-  | "futureEffectBreaksSkippedNoRemainingIce"
-  | "futureEffectBreaksTakenWithoutRemainingIce"
-  | "pumpActionsBeforeFutureEffectBreak"
-  | "pumpActionsThatCouldNotLeadToBreak"
-  | "pumpActionsThatDestroyedAccessReserve"
-  | "breakSkippedToPreserveTrashReserve"
-  | "unbrokenRunEffectIgnoredBecauseNoRemainingIce"
-  | "unbrokenRunEffectAppliedToRemainingPath"
-  | "badOutcomeRepeatedWithoutNewInfo"
-  | "goodOutcomeConverted"
-  | "outcomePivotWithReason"
-  | "outcomeIgnored"
-> {
-  let actionLedToProgressWithin1 = 0;
-  let actionLedToProgressWithin2 = 0;
-  let actionLedToProgressWithin3 = 0;
-  let planIntentConverted = 0;
-  let planIntentAbandoned = 0;
-  let samePlanRepeatedWithoutProgress = 0;
-  let setupActionConvertedToRun = 0;
-  let economyActionConvertedToRun = 0;
-  let rigActionConvertedToRun = 0;
-  let remoteBuildConvertedToAdvanceOrScore = 0;
-  let advanceConvertedToScore = 0;
-  let remoteContestConvertedToStealOrTrash = 0;
-  let centralPressureConvertedToSteal = 0;
-  let longestNoProgressChain = 0;
-
-  const noProgressChains: number[] = [];
-  const scoreOrStealDistances: number[] = [];
-  const boardProgressDistances: number[] = [];
-  const turnsWithActions = new Set<string>();
-  const turnsWithProgress = new Set<string>();
-
-  for (const summary of summaries) {
-    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
-    const lastPlanBySide: Partial<
-      Record<Side, { planKind: string; progressSince: boolean }>
-    > = {};
-    let noProgressChain = 0;
-
-    sequence.forEach((entry, index) => {
-      const turnKey = `${summary.seed}|${entry.turnNumber ?? 0}`;
-      turnsWithActions.add(turnKey);
-      const hasProgress = isMeaningfulBoardProgress(entry);
-      if (hasProgress) turnsWithProgress.add(turnKey);
-
-      if (hasProgress) {
-        if (noProgressChain > 0) noProgressChains.push(noProgressChain);
-        longestNoProgressChain = Math.max(
-          longestNoProgressChain,
-          noProgressChain,
-        );
-        noProgressChain = 0;
-      } else {
-        noProgressChain += 1;
-      }
-
-      if (hasMeaningfulProgressWithin(sequence, index, 1, isMeaningfulBoardProgress))
-        actionLedToProgressWithin1 += 1;
-      if (hasMeaningfulProgressWithin(sequence, index, 2, isMeaningfulBoardProgress))
-        actionLedToProgressWithin2 += 1;
-      if (hasMeaningfulProgressWithin(sequence, index, 3, isMeaningfulBoardProgress))
-        actionLedToProgressWithin3 += 1;
-
-      const planKind = planKindForConversion(entry);
-      if (planKind) {
-        const lastPlan = lastPlanBySide[entry.side];
-        if (
-          lastPlan?.planKind === planKind &&
-          lastPlan.progressSince === false
-        ) {
-          samePlanRepeatedWithoutProgress += 1;
-        }
-        const converted = planIntentConvertedWithin(
-          sequence,
-          index,
-          planKind,
-          isMeaningfulBoardProgress,
-          isCorpRemoteAdvancementProgress,
-        );
-        if (converted) planIntentConverted += 1;
-        else if (
-          !hasMeaningfulProgressWithin(sequence, index, 3, isMeaningfulBoardProgress)
-        )
-          planIntentAbandoned += 1;
-        lastPlanBySide[entry.side] = { planKind, progressSince: false };
-      }
-
-      if (setupActionConvertsToRun(sequence, index, isMeaningfulBoardProgress))
-        setupActionConvertedToRun += 1;
-      if (economyActionConvertsToRun(sequence, index, isMeaningfulBoardProgress))
-        economyActionConvertedToRun += 1;
-      if (rigActionConvertsToRun(sequence, index, isMeaningfulBoardProgress))
-        rigActionConvertedToRun += 1;
-      if (
-        remoteBuildConvertsToAdvanceOrScore(
-          sequence,
-          index,
-          isCorpRemoteAdvancementProgress,
-        )
-      )
-        remoteBuildConvertedToAdvanceOrScore += 1;
-      if (advanceConvertsToScore(sequence, index, isCorpRemoteAdvancementProgress))
-        advanceConvertedToScore += 1;
-      if (remoteContestConvertsToStealOrTrash(sequence, index))
-        remoteContestConvertedToStealOrTrash += 1;
-      if (centralPressureConvertsToSteal(sequence, index))
-        centralPressureConvertedToSteal += 1;
-
-      const scoreOrStealDistance = actionsUntil(
-        sequence,
-        index,
-        (candidate) =>
-          candidate.actionType === "score_agenda" ||
-          candidate.actionType === "steal_agenda",
-      );
-      if (scoreOrStealDistance !== undefined)
-        scoreOrStealDistances.push(scoreOrStealDistance);
-      const boardProgressDistance = actionsUntil(
-        sequence,
-        index,
-        isMeaningfulBoardProgress,
-      );
-      if (boardProgressDistance !== undefined)
-        boardProgressDistances.push(boardProgressDistance);
-
-      if (hasProgress) {
-        for (const side of Object.keys(lastPlanBySide) as Side[]) {
-          const lastPlan = lastPlanBySide[side];
-          if (lastPlan) lastPlan.progressSince = true;
-        }
-      }
-    });
-
-    if (noProgressChain > 0) {
-      noProgressChains.push(noProgressChain);
-      longestNoProgressChain = Math.max(
-        longestNoProgressChain,
-        noProgressChain,
-      );
-    }
-  }
-
-  return {
-    actionLedToProgressWithin1,
-    actionLedToProgressWithin2,
-    actionLedToProgressWithin3,
-    planIntentConverted,
-    planIntentAbandoned,
-    samePlanRepeatedWithoutProgress,
-    setupActionConvertedToRun,
-    economyActionConvertedToRun,
-    rigActionConvertedToRun,
-    remoteBuildConvertedToAdvanceOrScore,
-    advanceConvertedToScore,
-    remoteContestConvertedToStealOrTrash,
-    centralPressureConvertedToSteal,
-    noProgressActionChainLength: averageNumber(noProgressChains),
-    longestNoProgressChain,
-    turnsWithNoProgress: [...turnsWithActions].filter(
-      (turnKey) => !turnsWithProgress.has(turnKey),
-    ).length,
-    actionsUntilNextScoreOrSteal: averageNumber(scoreOrStealDistances),
-    actionsUntilNextMeaningfulBoardProgress: averageNumber(
-      boardProgressDistances,
-    ),
-    ...summarizeStrategicPlanConversionMetrics(
-      summaries,
-      isMeaningfulBoardProgress,
-      isCorpRemoteAdvancementProgress,
-    ),
-    ...summarizeOutcomeFollowupMetrics(summaries, isMeaningfulBoardProgress),
   };
 }
 
