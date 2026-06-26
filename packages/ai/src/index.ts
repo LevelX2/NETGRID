@@ -221,12 +221,7 @@ import {
   profileWeights,
 } from "./runtime/profile-weights";
 import type {
-  CorpPunishKind,
   CorpTagPunishSkipReason,
-  CorpTagPunishUnknownChosenFamily,
-  CorpTagPunishUnknownSkipAttribution,
-  CorpTagPunishUnknownSkipPlausibility,
-  CorpVisibleTagPayoffCategory,
 } from "./runtime/corp-tag-punish-types";
 import type { RankedChoice } from "./runtime/ranked-choice";
 import { centralServerId, isRemoteServerTarget } from "./runtime/server-target";
@@ -636,6 +631,9 @@ import {
 import {
   createCorpTagPunishActionContext,
 } from "./simulation/corp-tag-punish-action-context";
+import {
+  createCorpVisibleTagPunishOpportunityContext,
+} from "./simulation/corp-visible-tag-punish-opportunities";
 import {
   ALL_NIGHTER_CARD_ID,
   BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
@@ -1160,6 +1158,12 @@ const { applyCorpVisibleTagPunishUnknownSkipDiagnostics } =
   createCorpVisibleTagPunishUnknownSkipDiagnosticsContext({
     sourceDefinitionIdForAction,
     isCorpTraceTagSourceAction,
+  });
+const { corpVisibleTagPunishOpportunities } =
+  createCorpVisibleTagPunishOpportunityContext({
+    corpPunishKindForAction,
+    corpVisibleTagPayoffCategoryForAction,
+    sourceDefinitionIdForAction,
   });
 const {
   applyCorpTagSourceWindowDiagnostics,
@@ -3775,36 +3779,6 @@ function isCorpTurnStartDecision(
     (action.type === "mandatory_draw" ||
       stateBeforeAction.activeSide === "corp")
   );
-}
-
-function corpVisibleTagPunishOpportunities(input: AiDecisionInput): Array<{
-  action: LegalAction;
-  kind: CorpPunishKind;
-  category: CorpVisibleTagPayoffCategory;
-  cardId: string | undefined;
-}> {
-  if (input.side !== "corp") return [];
-  return input.legalActions
-    .map((action) => {
-      const kind = corpPunishKindForAction(input, action);
-      if (!kind) return undefined;
-      return {
-        action,
-        kind,
-        category: corpVisibleTagPayoffCategoryForAction(input, action, kind),
-        cardId: sourceDefinitionIdForAction(input, action) || undefined,
-      };
-    })
-    .filter(
-      (
-        opportunity,
-      ): opportunity is {
-        action: LegalAction;
-        kind: CorpPunishKind;
-        category: CorpVisibleTagPayoffCategory;
-        cardId: string | undefined;
-      } => opportunity !== undefined,
-    );
 }
 
 export function summarizeMatchProgressionMetrics(
