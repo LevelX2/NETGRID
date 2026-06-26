@@ -75,6 +75,7 @@ import {
   visibleCitySurveillanceSourceCount,
 } from "./runtime/ai-feature-server";
 import { createAiFacadeFoundationContext } from "./runtime/ai-facade-foundation-context";
+import { createRunnerEncounterCompositionContext } from "./runtime/runner-encounter-composition-context";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -100,18 +101,6 @@ import {
   encounterHasImmediateUnbrokenThreat,
   runnerReachedAccessMovement,
 } from "./runtime/current-encounter";
-import {
-  createRunnerAccessPathContext,
-} from "./runtime/runner-access-path-context";
-import {
-  createRunnerEncounterBreakContext,
-} from "./runtime/runner-encounter-break-context";
-import {
-  createRunnerPumpFuturePathContext,
-} from "./runtime/runner-pump-future-path-context";
-import {
-  createRunnerPumpViabilityContext,
-} from "./runtime/runner-pump-viability-context";
 import {
   encounterRunRemainderEffectAssessment,
 } from "./runtime/runner-run-remainder-effect-assessment";
@@ -499,7 +488,6 @@ import {
 } from "./simulation/remote-trash-role";
 import { createRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-access-context";
 import {
-  createRunnerCreditReserveTargetForInput,
   createRunnerPostRunReserveTargetForRemoteInput,
 } from "./simulation/runner-credit-reserve";
 import { type AiQualityMetrics } from "./simulation/quality-metrics";
@@ -988,46 +976,27 @@ const {
   sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
 });
 
-const runnerCreditReserveTargetForInput = createRunnerCreditReserveTargetForInput({
-  rolesForCardId,
-});
 const {
+  runnerCreditReserveTargetForInput,
   estimatedEncounterBreakCost,
   encounterBreakReserveContext,
-} = createRunnerEncounterBreakContext({
-  actionCreditCost,
-  findVisibleCard,
-  runnerCreditReserveTarget: runnerCreditReserveTargetForInput,
-});
-const {
   breakAccessPathAssessment,
   encounterRemotePayoffAfterBreakAssessment,
-} = createRunnerAccessPathContext({
+  encounterFuturePathAfterPumpBreakAssessment,
+  pumpViabilityAssessment,
+} = createRunnerEncounterCompositionContext({
+  rolesForCardId,
+  actionCreditCost,
+  findVisibleCard,
   breakSubroutineIndexesForAction,
   currentEncounteredIceCard,
-  actionCreditCost,
-  estimatedEncounterBreakCost,
   assessKnownRezzedIcePath,
   knownIcePathReason: semanticRuntimeKnownIcePathReason,
   isRemoteServerTarget,
   definitionType: definitionTypeForMetrics,
   remoteRootTrashCost: remoteRootTrashCostForMetrics,
-});
-const {
-  encounterFuturePathAfterPumpBreakAssessment,
-} = createRunnerPumpFuturePathContext({
-  assessKnownRezzedIcePath,
-  knownIcePathReason: semanticRuntimeKnownIcePathReason,
-});
-const { pumpViabilityAssessment } = createRunnerPumpViabilityContext({
-  findVisibleCard,
   encounterRunRemainderEffectAssessment,
   encounterHasImmediateUnbrokenThreat,
-  actionCreditCost,
-  estimatedEncounterBreakCost,
-  encounterFuturePathAfterPumpBreakAssessment,
-  encounterRemotePayoffAfterBreakAssessment,
-  runnerCreditReserveTarget: runnerCreditReserveTargetForInput,
 });
 
 const runnerPostRunReserveTargetForRemoteInput =
