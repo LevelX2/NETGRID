@@ -550,6 +550,7 @@ import type {
   RunnerPressureReadyTargetForMetrics,
 } from "./simulation/runner-pressure-metric-types";
 import {
+  createRunnerEconomySetupActionClassContext,
   runnerEconomySkipReasonForDiagnostics,
   runnerEconomySubcounts,
   type RunnerEconomySetupActionClass,
@@ -1321,6 +1322,16 @@ const {
   sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
   isSearchChoice,
 });
+
+const runnerEconomySetupActionClass =
+  createRunnerEconomySetupActionClassContext({
+    definitionForAction: definitionForSimulationAction,
+    isRunnerEconomyAction,
+    rolesForAction,
+    runnerCoverageRecoveryActionForMetrics,
+    runnerCoverageSearchActionForMetrics,
+    sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+  });
 
 const noFreshCentralSubstitutionTypeForAction =
   createNoFreshCentralSubstitutionTypeForAction({
@@ -16513,96 +16524,6 @@ function runnerEconomySetupDiagnosticsForSimulationAction(
     ...(classifications.length > 0
       ? { runnerEconomySetupEvidence: evidence }
       : {}),
-  };
-}
-
-function runnerEconomySetupActionClass(
-  input: AiDecisionInput,
-  action: LegalAction,
-): RunnerEconomySetupActionClass {
-  const definitionId = sourceDefinitionIdForSimulationAction(input, action);
-  const definition = definitionForSimulationAction(input, action);
-  const roles = rolesForAction(input, action);
-  const mechanics =
-    definition &&
-    "mechanics" in definition &&
-    Array.isArray(definition.mechanics)
-      ? definition.mechanics
-      : [];
-  const isShortTermContract = definitionId === "onr_v1_178_short-term-contract";
-  const isLoanFromChiba = definitionId === "onr_v1_168_loan-from-chiba";
-  const isMramHandSize =
-    definitionId === "onr_v1_133_militech-mram-chip" ||
-    definitionId === "onr_v1_134_mram-chip";
-  const economy = isRunnerEconomyAction(input, action);
-  const search = runnerCoverageSearchActionForMetrics(input, action);
-  const recovery = runnerCoverageRecoveryActionForMetrics(input, action);
-  const handSizeSupport =
-    isMramHandSize ||
-    roles.some(
-      (role) =>
-        role.includes("hand_size") ||
-        role.includes("damage_resilience") ||
-        role.includes("damage_prevention"),
-    ) ||
-    mechanics.some(
-      (mechanic: string) =>
-        mechanic.includes("hand") || mechanic.includes("damage_prevention"),
-    );
-  const memoryHardware =
-    !handSizeSupport &&
-    action.type === "install_card" &&
-    (roles.includes("memory") ||
-      roles.includes("memory_support") ||
-      mechanics.some((mechanic: string) => mechanic.includes("memory")));
-  return {
-    economy,
-    burstEconomy: economy && action.type === "play_event",
-    actionEconomy:
-      economy &&
-      (action.type === "gain_credit" ||
-        action.type === "trigger_ability" ||
-        action.type === "activated_card_ability"),
-    finitePoolEconomy:
-      economy &&
-      (isShortTermContract ||
-        roles.some(
-          (role) => role.includes("finite") || role.includes("pool"),
-        ) ||
-        mechanics.some(
-          (mechanic: string) =>
-            mechanic.includes("counter") ||
-            mechanic.includes("resource_action"),
-        )),
-    loanDebtEconomy:
-      economy &&
-      (isLoanFromChiba ||
-        roles.some((role) => role.includes("loan") || role.includes("debt"))),
-    recurringEconomy:
-      economy &&
-      roles.some((role) => role.includes("recurring") || role.includes("drip")),
-    resourceEconomy: economy && definition?.type === "resource",
-    hardwareEconomy: economy && definition?.type === "hardware",
-    memoryHardware,
-    handSizeSupport,
-    search,
-    recovery,
-    downsideEconomy:
-      economy &&
-      (isLoanFromChiba ||
-        roles.some(
-          (role) =>
-            role.includes("risk") ||
-            role.includes("downside") ||
-            role.includes("penalty") ||
-            role.includes("tag"),
-        )),
-    delayedPenaltyEconomy:
-      economy &&
-      (isLoanFromChiba ||
-        roles.some(
-          (role) => role.includes("delayed") || role.includes("penalty"),
-        )),
   };
 }
 
