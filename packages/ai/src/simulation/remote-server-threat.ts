@@ -306,6 +306,42 @@ export function runnerRemoteThreatTargetingDiagnosticsForAction(
   };
 }
 
+export function createRunnerRemoteThreatTargetingDiagnosticsForAction(
+  dependencies: {
+    runnerRemoteThreatProfile: (
+      input: AiDecisionInput,
+      serverId: string,
+    ) => RunnerRemoteThreatProfile;
+    runnerCentralRunHasClearPressureJustification: (
+      input: AiDecisionInput,
+      targetServerId: string,
+      contestableRemoteThreatVisible: boolean,
+    ) => boolean;
+    runnerCentralRunPressureJustificationReasons: (
+      input: AiDecisionInput,
+      targetServerId: string,
+      contestableRemoteThreatVisible: boolean,
+    ) => string[];
+    runnerCentralRunBurnsRemoteContestReserve: (
+      input: AiDecisionInput,
+      targetServerId: string,
+      contestableProfiles: RunnerRemoteThreatProfile[],
+    ) => boolean;
+  },
+): (
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string | undefined,
+) => RunnerRemoteThreatTargetingDiagnostics {
+  return (input, action, targetServerId) =>
+    runnerRemoteThreatTargetingDiagnosticsForAction(
+      input,
+      action,
+      targetServerId,
+      dependencies,
+    );
+}
+
 export function runnerContestBlockedByCredits(
   input: AiDecisionInput,
   reserveTarget: number,

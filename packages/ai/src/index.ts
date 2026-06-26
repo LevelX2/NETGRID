@@ -593,13 +593,13 @@ import {
 } from "./simulation/central-run-history";
 import {
   createRunnerRemoteThreatProfile,
+  createRunnerRemoteThreatTargetingDiagnosticsForAction,
   hasRunnerRemoteTrashAction,
   remoteServerHasScoreThreat,
   runnerAdvancedRemoteContestContext,
   runnerContestBlockedByCredits,
   runnerHasVisibleRemoteScoreThreat,
   runnerRemoteHasKnownRelevantTrashTarget,
-  runnerRemoteThreatTargetingDiagnosticsForAction as runnerRemoteThreatTargetingDiagnosticsForActionWithDeps,
   runnerStealBlockedByCredits,
   runnerTrashBlockedByCredits,
   type RunnerRemoteThreatProfile,
@@ -1194,6 +1194,17 @@ const runnerPostRunReserveTargetForRemoteInput =
 const runnerRemoteThreatProfile = createRunnerRemoteThreatProfile({
   runnerPostRunReserveTargetForRemoteInput,
 });
+
+const runnerRemoteThreatTargetingDiagnosticsForAction =
+  createRunnerRemoteThreatTargetingDiagnosticsForAction({
+    runnerRemoteThreatProfile,
+    runnerCentralRunHasClearPressureJustification:
+      runnerCentralRunHasClearPressureJustificationForInput,
+    runnerCentralRunPressureJustificationReasons:
+      runnerCentralRunPressureJustificationReasonsForInput,
+    runnerCentralRunBurnsRemoteContestReserve:
+      runnerCentralRunBurnsRemoteContestReserveForInput,
+  });
 
 const runnerRemoteTrashAccessContext = createRunnerRemoteTrashAccessContext({
   runnerCreditReserveTargetForInput,
@@ -17532,27 +17543,6 @@ function runnerReserveDiagnosticsForSimulationAction(
     ...runDiagnostics,
     ...remoteThreatTargeting,
   };
-}
-
-function runnerRemoteThreatTargetingDiagnosticsForAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-  targetServerId: string | undefined,
-): Partial<AiSimulationSummary["actionSequence"][number]> {
-  return runnerRemoteThreatTargetingDiagnosticsForActionWithDeps(
-    input,
-    action,
-    targetServerId,
-    {
-      runnerRemoteThreatProfile,
-      runnerCentralRunHasClearPressureJustification:
-        runnerCentralRunHasClearPressureJustificationForInput,
-      runnerCentralRunPressureJustificationReasons:
-        runnerCentralRunPressureJustificationReasonsForInput,
-      runnerCentralRunBurnsRemoteContestReserve:
-        runnerCentralRunBurnsRemoteContestReserveForInput,
-    },
-  );
 }
 
 function runnerCentralRunHasClearPressureJustificationForInput(
