@@ -657,8 +657,8 @@ import {
 import { createRunnerRemoteTrashAccessContext } from "./simulation/remote-trash-access-context";
 import { chooseRandomLegalDecision } from "./simulation/random-legal-decision";
 import {
+  createRunnerCreditReserveTargetForInput,
   runnerPostRunReserveTargetForRemoteInput as runnerPostRunReserveTargetForRemoteInputWithDeps,
-  runnerCreditReserveTargetForInput as runnerCreditReserveTargetForInputWithRoles,
 } from "./simulation/runner-credit-reserve";
 import {
   type AiQualityMetrics,
@@ -1180,6 +1180,10 @@ const AI_HINTS = createAiHintsByCard();
 
 const sourceDefinitionIdForSimulationAction =
   createSourceDefinitionIdForSimulationAction(findVisibleCard);
+
+const runnerCreditReserveTargetForInput = createRunnerCreditReserveTargetForInput({
+  rolesForCardId,
+});
 
 const runnerRemoteTrashAccessContext = createRunnerRemoteTrashAccessContext({
   runnerCreditReserveTargetForInput,
@@ -17611,8 +17615,4 @@ function runnerCentralRunBurnsRemoteContestReserveForInput(
     contestableProfiles,
     { assessKnownRezzedIcePath },
   );
-}
-
-function runnerCreditReserveTargetForInput(input: AiDecisionInput): number {
-  return runnerCreditReserveTargetForInputWithRoles(input, rolesForCardId);
 }

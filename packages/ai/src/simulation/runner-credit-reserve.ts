@@ -53,6 +53,13 @@ export function runnerCreditReserveTargetForInput(
   return Math.min(12, Math.max(2, Math.ceil(target)));
 }
 
+export function createRunnerCreditReserveTargetForInput(dependencies: {
+  rolesForCardId: (cardId: string | undefined) => string[];
+}): (input: AiDecisionInput) => number {
+  return (input) =>
+    runnerCreditReserveTargetForInput(input, dependencies.rolesForCardId);
+}
+
 export function runnerPostRunReserveTargetForRemoteInput(
   input: AiDecisionInput,
   serverId: string,
