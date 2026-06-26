@@ -7,13 +7,18 @@ import {
 } from "./semantic-runtime-evidence-context";
 import type { SemanticRuntimeEvidenceDependencies } from "./semantic-runtime-evidence";
 import {
+  createSemanticRuntimeRunnerEvidenceComposition,
+} from "./semantic-runtime-runner-evidence-composition";
+import type { SemanticRuntimeRunnerEvidenceDependencies } from "./semantic-runtime-runner-evidence";
+import {
   createSemanticRuntimeScoreBreakdownContext,
   type SemanticRuntimeScoreBreakdownContextDependencies,
 } from "./semantic-runtime-score-breakdown";
 
 export type SemanticRuntimeChoiceCompositionDependencies =
   SemanticRuntimeScoreBreakdownContextDependencies &
-    SemanticRuntimeEvidenceDependencies &
+    Omit<SemanticRuntimeEvidenceDependencies, "runnerEvidence"> &
+    SemanticRuntimeRunnerEvidenceDependencies &
     Omit<
       SemanticRuntimeChoiceBuilderDependencies,
       "scoreBreakdown" | "evidence"
@@ -29,9 +34,29 @@ export function createSemanticRuntimeChoiceComposition(
       actionCreditCost: dependencies.actionCreditCost,
     });
 
+  const { semanticRuntimeRunnerEvidence } =
+    createSemanticRuntimeRunnerEvidenceComposition({
+      programInstallTrashAssessmentForAction:
+        dependencies.programInstallTrashAssessmentForAction,
+      programInstallDisplacementPenalty:
+        dependencies.programInstallDisplacementPenalty,
+      muPressureActionEvidence: dependencies.muPressureActionEvidence,
+      bankInvestmentCommitmentEvidence:
+        dependencies.bankInvestmentCommitmentEvidence,
+      noRunEconomyCommitmentEvidence:
+        dependencies.noRunEconomyCommitmentEvidence,
+      selfDamageSurvivalAssessment:
+        dependencies.selfDamageSurvivalAssessment,
+      blinkRiskEvidenceForAction: dependencies.blinkRiskEvidenceForAction,
+      loanLiabilityAssessment: dependencies.loanLiabilityAssessment,
+      persistentInstallEvidenceForAction:
+        dependencies.persistentInstallEvidenceForAction,
+      remoteTrashAccessContext: dependencies.remoteTrashAccessContext,
+    });
+
   const { semanticRuntimeEvidence } = createSemanticRuntimeEvidenceContext({
     serverId: dependencies.serverId,
-    runnerEvidence: dependencies.runnerEvidence,
+    runnerEvidence: semanticRuntimeRunnerEvidence,
     corpEvidence: dependencies.corpEvidence,
   });
 

@@ -160,7 +160,6 @@ import {
   semanticRuntimeChoiceWithEvidence,
   semanticRuntimeScoreFromComponents,
 } from "./runtime/semantic-runtime-score-components";
-import { createSemanticRuntimeRunnerEvidenceComposition } from "./runtime/semantic-runtime-runner-evidence-composition";
 import { createCorpTagPunishWindowComposition } from "./simulation/corp-tag-punish-window-composition";
 import { createCorpTaggedRunnerPayoffComposition } from "./runtime/corp-tagged-runner-payoff-composition";
 import { createSemanticRuntimeCorpScoringEvidenceComposition } from "./runtime/semantic-runtime-corp-scoring-evidence-composition";
@@ -1181,19 +1180,6 @@ const {
   actionCreditCost,
   rolesForAction,
 });
-const { semanticRuntimeRunnerEvidence } = createSemanticRuntimeRunnerEvidenceComposition({
-  programInstallTrashAssessmentForAction:
-    runnerProgramInstallTrashAssessmentForAction,
-  programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
-  muPressureActionEvidence: runnerMuPressureActionEvidence,
-  bankInvestmentCommitmentEvidence: runnerBankInvestmentCommitmentEvidence,
-  noRunEconomyCommitmentEvidence: runnerNoRunEconomyCommitmentEvidence,
-  selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
-  blinkRiskEvidenceForAction: runnerBlinkRiskEvidenceForAction,
-  loanLiabilityAssessment: runnerLoanLiabilityAssessment,
-  persistentInstallEvidenceForAction: runnerPersistentInstallEvidenceForAction,
-  remoteTrashAccessContext: runnerRemoteTrashAccessContext,
-});
 const {
   semanticRuntimeCorpActionServerId,
   semanticRuntimeCorpServer,
@@ -1392,7 +1378,17 @@ const {
       componentScopeId,
     ),
   serverId: semanticRuntimeServerId,
-  runnerEvidence: semanticRuntimeRunnerEvidence,
+  programInstallTrashAssessmentForAction:
+    runnerProgramInstallTrashAssessmentForAction,
+  programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,
+  muPressureActionEvidence: runnerMuPressureActionEvidence,
+  bankInvestmentCommitmentEvidence: runnerBankInvestmentCommitmentEvidence,
+  noRunEconomyCommitmentEvidence: runnerNoRunEconomyCommitmentEvidence,
+  selfDamageSurvivalAssessment: runnerSelfDamageSurvivalAssessment,
+  blinkRiskEvidenceForAction: runnerBlinkRiskEvidenceForAction,
+  loanLiabilityAssessment: runnerLoanLiabilityAssessment,
+  persistentInstallEvidenceForAction: runnerPersistentInstallEvidenceForAction,
+  remoteTrashAccessContext: runnerRemoteTrashAccessContext,
   corpEvidence: semanticRuntimeCorpEvidence,
   scope: SEMANTIC_RUNTIME_SCOPE_DEPENDENCIES,
   actionExclusion: semanticRuntimeActionExclusion,
