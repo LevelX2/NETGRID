@@ -10,6 +10,10 @@ import {
   createSemanticRuntimeCorpScoringComposition,
   type SemanticRuntimeCorpScoringCompositionDependencies,
 } from "./semantic-runtime-corp-scoring-composition";
+import {
+  createRunnerSemanticSupportComposition,
+  type RunnerSemanticSupportCompositionDependencies,
+} from "./runner-semantic-support-composition";
 
 type RuntimeScoringDependencyObjects = Pick<
   SemanticRuntimeOrchestrationCompositionDependencies,
@@ -27,29 +31,40 @@ type AiRuntimeSimulationScoringDependencies =
   > & {
     runActionSpendingCapAssessment:
       RuntimeScoringDependencyObjects["goalFit"]["runActionSpendingCapAssessment"];
-    muPressureFundingScoreComponent:
-      RuntimeScoringDependencyObjects["recoveryCommitment"]["muPressureFundingScoreComponent"];
     handBufferNeedScoreComponent:
       RuntimeScoringDependencyObjects["recoveryCommitment"]["handBufferNeedScoreComponent"];
-    viral15JackOutScoreComponent:
-      RuntimeScoringDependencyObjects["recoveryCommitment"]["viral15JackOutScoreComponent"];
-    multiRunEventScoreComponent:
-      RuntimeScoringDependencyObjects["recoveryCommitment"]["multiRunEventScoreComponent"];
-    bankInvestmentCommitmentScoreComponents:
-      RuntimeScoringDependencyObjects["recoveryCommitment"]["bankInvestmentCommitmentScoreComponents"];
-    noRunEconomyCommitmentScoreComponents:
-      RuntimeScoringDependencyObjects["recoveryCommitment"]["noRunEconomyCommitmentScoreComponents"];
-  } & Pick<
-    RuntimeScoringDependencyObjects["install"],
-    | "rolesForAction"
-    | "muPressureInstallScoreComponent"
-    | "persistentInstallFitScoreComponent"
-    | "isRunnerEconomyRole"
-    | "isRunnerPressureRole"
-    | "badPublicityOrTraceTechCard"
-    | "programInstallTrashAssessmentForAction"
-    | "programInstallDisplacementPenalty"
-  >;
+  };
+
+type RunnerSemanticSupportOutputs = ReturnType<
+  typeof createRunnerSemanticSupportComposition
+>;
+
+type RuntimeRunnerSupportDependencyKeys =
+  | keyof RunnerSemanticSupportOutputs
+  | "badPublicityOrTraceTechCard"
+  | "bankHasConcreteFundingNeed"
+  | "bankInvestmentCommitmentEvidence"
+  | "bankInvestmentCommitmentScoreComponents"
+  | "blinkRiskEvidenceForAction"
+  | "cardAddressesVisibleBreakerNeed"
+  | "evaluationForAction"
+  | "handFundingTarget"
+  | "loanLiabilityAssessment"
+  | "multiRunEventScoreComponent"
+  | "muPressureActionEvidence"
+  | "muPressureFundingScoreComponent"
+  | "muPressureInstallScoreComponent"
+  | "noRunEconomyCommitmentEvidence"
+  | "noRunEconomyCommitmentScoreComponents"
+  | "persistentInstallEvidenceForAction"
+  | "persistentInstallFitScoreComponent"
+  | "planMemoryActionExclusion"
+  | "programInstallDisplacementPenalty"
+  | "programInstallTrashAssessmentForAction"
+  | "riskAssessment"
+  | "runnerMultiRunEventExclusion"
+  | "runnerRunTargetEvaluationForAction"
+  | "viral15JackOutScoreComponent";
 
 export type AiRuntimeSimulationCompositionDependencies =
   Omit<
@@ -63,6 +78,7 @@ export type AiRuntimeSimulationCompositionDependencies =
     | "recoveryCommitment"
     | "install"
     | "startRun"
+    | RuntimeRunnerSupportDependencyKeys
   > &
     Omit<
       AiSimulationCompositionDependencies,
@@ -72,19 +88,55 @@ export type AiRuntimeSimulationCompositionDependencies =
       | "chooseRunnerBaselineAction"
       | "chooseCorpBaselineAction"
       | "tagPunishWindowDiagnosticsForSimulationAction"
+      | RuntimeRunnerSupportDependencyKeys
     > &
     SemanticRuntimeCorpScoringCompositionDependencies<string> &
+    RunnerSemanticSupportCompositionDependencies &
     AiRuntimeSimulationScoringDependencies;
 
 export function createAiRuntimeSimulationComposition(
   dependencies: AiRuntimeSimulationCompositionDependencies,
 ) {
+  const runnerSupport =
+    createRunnerSemanticSupportComposition(dependencies);
+
   const corpScoring =
     createSemanticRuntimeCorpScoringComposition(dependencies);
 
   const semanticRuntimeDependencies: SemanticRuntimeOrchestrationCompositionDependencies =
     {
       ...dependencies,
+      ...runnerSupport,
+      riskAssessment: runnerSupport.blinkRiskAssessmentForEncounterBreak,
+      planMemoryActionExclusion:
+        runnerSupport.semanticRuntimePlanMemoryActionExclusion,
+      evaluationForAction:
+        runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
+      handFundingTarget: runnerSupport.runnerHandFundingTarget,
+      bankHasConcreteFundingNeed:
+        runnerSupport.runnerBankHasConcreteFundingNeed,
+      cardAddressesVisibleBreakerNeed:
+        runnerSupport.runnerCardAddressesVisibleBreakerNeed,
+      badPublicityOrTraceTechCard:
+        runnerSupport.runnerBadPublicityOrTraceTechCard,
+      loanLiabilityAssessment: runnerSupport.runnerLoanLiabilityAssessment,
+      runnerMultiRunEventExclusion:
+        runnerSupport.semanticRuntimeRunnerMultiRunEventExclusion,
+      runnerRunTargetEvaluationForAction:
+        runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
+      programInstallTrashAssessmentForAction:
+        runnerSupport.runnerProgramInstallTrashAssessmentForAction,
+      programInstallDisplacementPenalty:
+        runnerSupport.runnerProgramInstallDisplacementPenalty,
+      muPressureActionEvidence: runnerSupport.runnerMuPressureActionEvidence,
+      bankInvestmentCommitmentEvidence:
+        runnerSupport.runnerBankInvestmentCommitmentEvidence,
+      noRunEconomyCommitmentEvidence:
+        runnerSupport.runnerNoRunEconomyCommitmentEvidence,
+      blinkRiskEvidenceForAction:
+        runnerSupport.runnerBlinkRiskEvidenceForAction,
+      persistentInstallEvidenceForAction:
+        runnerSupport.runnerPersistentInstallEvidenceForAction,
       badPublicityRelevance: {
         sourceDefinitionIdForAction:
           dependencies.sourceDefinitionIdForAction,
@@ -94,36 +146,37 @@ export function createAiRuntimeSimulationComposition(
       goalFit: {
         runActionSpendingCapAssessment:
           dependencies.runActionSpendingCapAssessment,
-        runTargetEvaluationForAction: dependencies.evaluationForAction,
+        runTargetEvaluationForAction:
+          runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
       },
       recoveryCommitment: {
         muPressureFundingScoreComponent:
-          dependencies.muPressureFundingScoreComponent,
+          runnerSupport.runnerMuPressureFundingScoreComponent,
         handBufferNeedScoreComponent:
           dependencies.handBufferNeedScoreComponent,
         viral15JackOutScoreComponent:
-          dependencies.viral15JackOutScoreComponent,
+          runnerSupport.runnerViral15JackOutScoreComponent,
         multiRunEventScoreComponent:
-          dependencies.multiRunEventScoreComponent,
+          runnerSupport.runnerMultiRunEventScoreComponent,
         bankInvestmentCommitmentScoreComponents:
-          dependencies.bankInvestmentCommitmentScoreComponents,
+          runnerSupport.runnerBankInvestmentCommitmentScoreComponents,
         noRunEconomyCommitmentScoreComponents:
-          dependencies.noRunEconomyCommitmentScoreComponents,
+          runnerSupport.runnerNoRunEconomyCommitmentScoreComponents,
       },
       install: {
         rolesForAction: dependencies.rolesForAction,
         muPressureInstallScoreComponent:
-          dependencies.muPressureInstallScoreComponent,
+          runnerSupport.runnerMuPressureInstallScoreComponent,
         persistentInstallFitScoreComponent:
-          dependencies.persistentInstallFitScoreComponent,
+          runnerSupport.runnerPersistentInstallFitScoreComponent,
         isRunnerEconomyRole: dependencies.isRunnerEconomyRole,
         isRunnerPressureRole: dependencies.isRunnerPressureRole,
         badPublicityOrTraceTechCard:
-          dependencies.badPublicityOrTraceTechCard,
+          runnerSupport.runnerBadPublicityOrTraceTechCard,
         programInstallTrashAssessmentForAction:
-          dependencies.programInstallTrashAssessmentForAction,
+          runnerSupport.runnerProgramInstallTrashAssessmentForAction,
         programInstallDisplacementPenalty:
-          dependencies.programInstallDisplacementPenalty,
+          runnerSupport.runnerProgramInstallDisplacementPenalty,
       },
       startRun: {
         serverId: dependencies.serverId,
@@ -144,6 +197,7 @@ export function createAiRuntimeSimulationComposition(
 
   const simulationEntrypoints = createAiSimulationComposition({
     ...dependencies,
+    ...runnerSupport,
     chooseAiAction: runtimeEntrypoints.chooseAiAction,
     chooseRunnerAction: runtimeEntrypoints.chooseRunnerAction,
     chooseCorpAction: runtimeEntrypoints.chooseCorpAction,
