@@ -578,7 +578,7 @@ import {
 } from "./simulation/central-run-pressure-justification";
 import {
   bestTrueCentralCloseoutProfile as bestTrueCentralCloseoutProfileWithDeps,
-  centralRunEventGoodForTarget as centralRunEventGoodForTargetWithSource,
+  createCentralRunEventGoodForTarget,
   noFreshCentralSubstitutionTypeForAction as noFreshCentralSubstitutionTypeForActionWithDeps,
   runnerNoFreshCentralContext as runnerNoFreshCentralContextWithDeps,
   trueCentralCloseoutProfile as trueCentralCloseoutProfileWithDeps,
@@ -1177,6 +1177,10 @@ const AI_HINTS = createAiHintsByCard();
 
 const sourceDefinitionIdForSimulationAction =
   createSourceDefinitionIdForSimulationAction(findVisibleCard);
+
+const centralRunEventGoodForTarget = createCentralRunEventGoodForTarget({
+  sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
+});
 
 const runnerCreditReserveTargetForInput = createRunnerCreditReserveTargetForInput({
   rolesForCardId,
@@ -17424,17 +17428,6 @@ function runnerNoFreshCentralContextForMetrics(input: AiDecisionInput): {
     runnerRemoteThreatProfile,
     sourceDefinitionIdForAction: sourceDefinitionIdForSimulationAction,
   });
-}
-
-function centralRunEventGoodForTarget(
-  input: AiDecisionInput,
-  target: "hq" | "rd" | "archives",
-): boolean {
-  return centralRunEventGoodForTargetWithSource(
-    input,
-    target,
-    sourceDefinitionIdForSimulationAction,
-  );
 }
 
 function noFreshCentralSubstitutionTypeForAction(

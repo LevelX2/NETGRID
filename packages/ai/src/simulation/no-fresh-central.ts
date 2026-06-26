@@ -337,6 +337,20 @@ export function centralRunEventGoodForTarget(
   });
 }
 
+export function createCentralRunEventGoodForTarget(dependencies: {
+  sourceDefinitionIdForAction: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => string | undefined;
+}): (input: AiDecisionInput, target: CentralServerTarget) => boolean {
+  return (input, target) =>
+    centralRunEventGoodForTarget(
+      input,
+      target,
+      dependencies.sourceDefinitionIdForAction,
+    );
+}
+
 export function noFreshCentralSubstitutionTypeForAction(
   input: AiDecisionInput,
   action: LegalAction,
