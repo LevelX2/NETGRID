@@ -79,6 +79,7 @@ import { createRunnerEncounterCompositionContext } from "./runtime/runner-encoun
 import { createRunnerKnownPathDiagnosticsComposition } from "./simulation/runner-known-path-diagnostics-composition";
 import { createRunnerCentralPressureDiagnosticsComposition } from "./simulation/runner-central-pressure-diagnostics-composition";
 import { createRunnerRemoteThreatTargetingComposition } from "./simulation/runner-remote-threat-targeting-composition";
+import { createRunnerSetupCoverageComposition } from "./simulation/runner-setup-coverage-composition";
 import {
   cardDefinitionTypeForAi,
   runnerCardMechanicsForAi,
@@ -426,8 +427,6 @@ import {
   createRunnerEconomySetupActionClassContext,
 } from "./simulation/runner-economy-setup-types";
 import {
-  createRunnerCoverageActionContext,
-  createRunnerSetupCoverageContext,
   runnerMissingBreakerRolesForMetrics,
   runnerStrategicBreakerTargetForMetrics,
   runnerVisibleIceCreatesCoverageNeedForMetrics,
@@ -492,9 +491,6 @@ import {
   runnerHasRecentRunOnServer,
   runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
 } from "./simulation/runner-run-target-context";
-import {
-  createRunnerKnownPathCostContext,
-} from "./simulation/runner-known-no-access";
 import {
   isCorpProtectionScoreConversionAction,
   isCorpRemoteProtectionActionEntry,
@@ -990,25 +986,16 @@ const {
 const {
   runnerRunKnownPathCost,
   runnerHasKnownUnaffordableLegalRun,
-} = createRunnerKnownPathCostContext({
-  assessKnownRezzedIcePath,
-});
-
-const {
   runnerVisibleMissingBreakerCoverage,
   runnerMissingCoverageTypesForInput,
   runnerHasKnownBlockedPathByCoverage,
-} = createRunnerSetupCoverageContext({
-  assessKnownRezzedIcePath,
-  rolesForCardId,
-});
-
-const {
   runnerCoverageSearchActionForMetrics,
   runnerCoverageRecoveryActionForMetrics,
-} = createRunnerCoverageActionContext({
+} = createRunnerSetupCoverageComposition({
+  assessKnownRezzedIcePath,
   findVisibleCard,
   rolesForAction,
+  rolesForCardId,
 });
 
 const {
