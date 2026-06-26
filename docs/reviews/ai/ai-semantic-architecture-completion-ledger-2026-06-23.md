@@ -4473,6 +4473,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1643 Tests.
+- `AI-COMPLETE-03` vierhunderteinundsechzigster Struktur-Schnitt:
+  - `packages/ai/src/simulation/corp-economy-before-score-diagnostics.ts` kapselt den Economy-Before-Score-Diagnostics-Adapter als Factory mit expliziter Score-Terminal-Chosen-Family-Dependency.
+  - `packages/ai/src/index.ts` initialisiert den Economy-Before-Score-Diagnostics-Adapter aus dem bestehenden Score-Terminal-Classifier und entfernt den lokalen Economy-Before-Score-Diagnostics-Block.
+  - `packages/ai/src/index.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 13.163 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil `index.ts` noch keine dünne Public-/Composition-Fassade ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/public-export-contract.test.ts src/semantic-ai-runtime-cutover.test.ts src/runtime/semantic-runtime.test.ts src/runtime/semantic-runtime-score-components.test.ts src/runner-wilson-run-action.test.ts` grün, 80 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1643 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-03`.
 
