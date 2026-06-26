@@ -297,6 +297,9 @@ import {
   createSemanticRuntimeCorpRemoteContestabilityContext,
 } from "./runtime/semantic-runtime-corp-remote-contestability-context";
 import {
+  createCorpTagPunishPayoffProfileContext,
+} from "./runtime/corp-tag-punish-payoff-profiles";
+import {
   createSemanticRuntimeCorpRemoteScoreContext,
 } from "./runtime/semantic-runtime-corp-remote-score-context";
 import {
@@ -1832,6 +1835,16 @@ const {
   advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
   remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
   isRemoteServerTarget,
+});
+const {
+  corpInstalledEconomyActionProfile,
+  corpTagPunishPayoffFundingProfile,
+} = createCorpTagPunishPayoffProfileContext({
+  installedEconomyCreditAmount: corpInstalledEconomyCreditAmount,
+  sourceDefinitionIdForAction,
+  actionSourceCard: semanticRuntimeCorpActionSourceCard,
+  visibleCardStoredCredits: corpVisibleCardStoredCredits,
+  visibleMeatDamagePayoff: corpVisibleMeatDamagePayoff,
 });
 const {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment,
@@ -5872,59 +5885,6 @@ function corpTaggedRunnerPayoffProfile(
       `runner_tags:${runnerTags}`,
       `source_definition:${sourceDefinitionId || "unknown"}`,
       ...assessment.evidence,
-    ],
-  };
-}
-
-function corpInstalledEconomyActionProfile(
-  input: AiDecisionInput,
-  action: LegalAction,
-): CorpTaggedRunnerPayoffActionProfile | undefined {
-  if (
-    input.side !== "corp" ||
-    action.side !== "corp" ||
-    action.type !== "activated_card_ability"
-  )
-    return undefined;
-  const creditAmount = corpInstalledEconomyCreditAmount(action);
-  if (!Number.isFinite(creditAmount) || creditAmount <= 0) return undefined;
-  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
-  if (sourceDefinitionId !== "onr_v1_309_bbs-whispering-campaign")
-    return undefined;
-  const sourceCard = semanticRuntimeCorpActionSourceCard(input, action);
-  const storedCredits = sourceCard ? corpVisibleCardStoredCredits(sourceCard) : 0;
-  return {
-    kind: "installed_economy",
-    value: 1050 + creditAmount * 260 + Math.min(420, storedCredits * 18),
-    evidence: [
-      "installed_corp_economy:true",
-      "installed_corp_economy_kind:pool_payout",
-      `installed_corp_economy_immediate_gain:${creditAmount}`,
-      `installed_corp_economy_stored_credits:${storedCredits}`,
-    ],
-  };
-}
-
-function corpTagPunishPayoffFundingProfile(
-  input: AiDecisionInput,
-  action: LegalAction,
-): CorpTaggedRunnerPayoffActionProfile | undefined {
-  if (
-    input.side !== "corp" ||
-    action.side !== "corp" ||
-    action.type !== "gain_credit" ||
-    action.source !== "basic_action" ||
-    input.playerView.opponent.tags < 7
-  )
-    return undefined;
-  if (!corpVisibleMeatDamagePayoff(input)) return undefined;
-  return {
-    kind: "funding",
-    value: input.playerView.opponent.tags >= 7 ? 1150 : 550,
-    evidence: [
-      "corp_tag_punish_payoff_funding:true",
-      "corp_visible_meat_damage_payoff:true",
-      `runner_tags:${input.playerView.opponent.tags}`,
     ],
   };
 }
