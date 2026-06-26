@@ -167,3 +167,50 @@ export type RunnerSetupAttributionMetricKey =
   | "runnerSetupRecommendedFixKindMemorySetup"
   | "runnerSetupRecommendedFixKindHandSizeSetup"
   | "runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis";
+
+export type RunnerSetupChosenFamily =
+  | "economy"
+  | "run"
+  | "draw"
+  | "install"
+  | "searchRecovery"
+  | "trash"
+  | "endTurn"
+  | "unknown";
+
+export function runnerSetupChosenFamilyForEntry(entry: {
+  actionType: string;
+  runnerEconomyTaken?: boolean;
+  runnerDrawAction?: boolean;
+  runnerRigInstallAction?: boolean;
+  runnerSearchTaken?: boolean;
+  runnerRecoveryTaken?: boolean;
+  runnerRemoteTrashTaken?: boolean;
+}): RunnerSetupChosenFamily {
+  if (entry.runnerEconomyTaken === true) return "economy";
+  if (entry.actionType === "start_run") return "run";
+  if (entry.runnerDrawAction === true || entry.actionType === "draw_card")
+    return "draw";
+  if (entry.runnerSearchTaken === true || entry.runnerRecoveryTaken === true)
+    return "searchRecovery";
+  if (
+    entry.runnerRemoteTrashTaken === true ||
+    entry.actionType === "trash_accessed_card"
+  )
+    return "trash";
+  if (
+    entry.actionType === "install_card" ||
+    entry.runnerRigInstallAction === true
+  )
+    return "install";
+  if (entry.actionType === "end_turn") return "endTurn";
+  return "unknown";
+}
+
+export function capitalizeRunnerSetupFamily(
+  family: RunnerSetupChosenFamily,
+): string {
+  if (family === "searchRecovery") return "SearchRecovery";
+  if (family === "endTurn") return "EndTurn";
+  return family.charAt(0).toUpperCase() + family.slice(1);
+}
