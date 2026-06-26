@@ -12,20 +12,25 @@ import {
   type RunnerMultiRunContext,
   type RunnerMultiRunContextDependencies,
 } from "./runner-multi-run-context";
+import { currentEncounteredIceCard } from "./current-encounter";
+import type { BlinkRiskAssessment } from "../runner-run-target-evaluation";
 
 export type RunnerBlinkRiskCompositionDependencies<
   TDeckCapabilities,
   TStrategicIntent,
 > =
-  RunnerBlinkEncounterBreakContextDependencies &
+  Omit<
+    RunnerBlinkEncounterBreakContextDependencies,
+    "encounteredSubroutines"
+  > &
     RunnerMultiRunContextDependencies<TDeckCapabilities, TStrategicIntent> &
     Omit<
       RunnerBlinkRiskEvidenceDependencies,
-      "breakRiskAssessment" | "multiRunTargetEvaluation"
+      "breakRiskAssessment" | "multiRunTargetEvaluation" | "shouldAvoidRun"
     > & {
-      shouldAvoidRun: Parameters<
-        typeof createRunnerBlinkRiskContext
-      >[0]["shouldAvoidRun"];
+      shouldAvoidBlinkRiskAssessment: (
+        assessment: BlinkRiskAssessment | undefined,
+      ) => boolean;
     };
 
 export function createRunnerBlinkRiskComposition<
@@ -60,7 +65,8 @@ export function createRunnerBlinkRiskComposition<
         dependencies.randomBreakOrDamageRiskProfileForDefinitionId,
       breakSubroutineIndexesForAction:
         dependencies.breakSubroutineIndexesForAction,
-      encounteredSubroutines: dependencies.encounteredSubroutines,
+      encounteredSubroutines: (input) =>
+        currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines ?? [],
       buildBlinkRiskAssessment: dependencies.buildBlinkRiskAssessment,
       isImmediateSafetyThreatSubroutine:
         dependencies.isImmediateSafetyThreatSubroutine,
@@ -74,7 +80,10 @@ export function createRunnerBlinkRiskComposition<
         multiRunContext.runnerMultiRunTargetEvaluation,
       runRiskAssessment: dependencies.runRiskAssessment,
       breakRiskAssessment: blinkRiskAssessmentForEncounterBreak,
-      shouldAvoidRun: dependencies.shouldAvoidRun,
+      shouldAvoidRun: (assessment) =>
+        dependencies.shouldAvoidBlinkRiskAssessment(
+          assessment as BlinkRiskAssessment | undefined,
+        ),
     });
 
   return {

@@ -29,7 +29,6 @@ import {
   evaluateRunnerRunTargets,
   randomBreakOrDamageRiskProfileForDefinitionId,
   runnerBlinkRecoveryAssessment,
-  type BlinkRiskAssessment,
   type RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
 import {
@@ -899,15 +898,12 @@ const {
   runTargets: evaluateRunnerRunTargets,
   randomBreakOrDamageRiskProfileForDefinitionId,
   breakSubroutineIndexesForAction,
-  encounteredSubroutines: (input) =>
-    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines ?? [],
   buildBlinkRiskAssessment,
   isImmediateSafetyThreatSubroutine,
   isRemoteServerTarget,
   visibleRootIsKnownAgenda: visibleRootIsKnownAgendaForMetrics,
   runRiskAssessment: assessBlinkRiskForRunAction,
-  shouldAvoidRun: (assessment) =>
-    blinkRiskShouldAvoidRun(assessment as BlinkRiskAssessment | undefined),
+  shouldAvoidBlinkRiskAssessment: blinkRiskShouldAvoidRun,
 });
 const {
   runnerLoanLiabilityAssessment,
