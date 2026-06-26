@@ -14,6 +14,10 @@ import {
   createRunnerSemanticSupportComposition,
   type RunnerSemanticSupportCompositionDependencies,
 } from "./runner-semantic-support-composition";
+import {
+  createAiContextDiagnosticsComposition,
+  type AiContextDiagnosticsCompositionDependencies,
+} from "./ai-context-diagnostics-composition";
 
 type RuntimeScoringDependencyObjects = Pick<
   SemanticRuntimeOrchestrationCompositionDependencies,
@@ -66,6 +70,19 @@ type RuntimeRunnerSupportDependencyKeys =
   | "runnerRunTargetEvaluationForAction"
   | "viral15JackOutScoreComponent";
 
+type AiContextDiagnosticsOutputs = ReturnType<
+  typeof createAiContextDiagnosticsComposition
+>;
+
+type RuntimeContextDiagnosticsDependencyKeys =
+  | keyof AiContextDiagnosticsOutputs
+  | "closeout"
+  | "extractFeatures"
+  | "hasKnownUnaffordableLegalRun"
+  | "remoteTrashAccessContext"
+  | "tagPunishAssessmentForAction"
+  | "trashAccessContext";
+
 export type AiRuntimeSimulationCompositionDependencies =
   Omit<
     SemanticRuntimeOrchestrationCompositionDependencies,
@@ -79,6 +96,7 @@ export type AiRuntimeSimulationCompositionDependencies =
     | "install"
     | "startRun"
     | RuntimeRunnerSupportDependencyKeys
+    | RuntimeContextDiagnosticsDependencyKeys
   > &
     Omit<
       AiSimulationCompositionDependencies,
@@ -89,24 +107,56 @@ export type AiRuntimeSimulationCompositionDependencies =
       | "chooseCorpBaselineAction"
       | "tagPunishWindowDiagnosticsForSimulationAction"
       | RuntimeRunnerSupportDependencyKeys
+      | RuntimeContextDiagnosticsDependencyKeys
     > &
-    SemanticRuntimeCorpScoringCompositionDependencies<string> &
-    RunnerSemanticSupportCompositionDependencies &
+    AiContextDiagnosticsCompositionDependencies &
+    Omit<
+      SemanticRuntimeCorpScoringCompositionDependencies<string>,
+      RuntimeContextDiagnosticsDependencyKeys
+    > &
+    Omit<
+      RunnerSemanticSupportCompositionDependencies,
+      RuntimeContextDiagnosticsDependencyKeys
+    > &
     AiRuntimeSimulationScoringDependencies;
 
 export function createAiRuntimeSimulationComposition(
   dependencies: AiRuntimeSimulationCompositionDependencies,
 ) {
+  const contextDiagnostics =
+    createAiContextDiagnosticsComposition(dependencies);
+
+  const composedDependencies = {
+    ...dependencies,
+    ...contextDiagnostics,
+    closeout: contextDiagnostics.bestTrueCentralCloseoutProfileForMetrics,
+    extractFeatures: contextDiagnostics.extractAiFeatures,
+    hasKnownUnaffordableLegalRun:
+      contextDiagnostics.runnerHasKnownUnaffordableLegalRun,
+    remoteTrashAccessContext:
+      contextDiagnostics.runnerRemoteTrashAccessContext,
+    tagPunishAssessmentForAction:
+      contextDiagnostics.corpTagPunishOntologyAssessmentForAction,
+    trashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
+  };
+
   const runnerSupport =
-    createRunnerSemanticSupportComposition(dependencies);
+    createRunnerSemanticSupportComposition(composedDependencies);
 
   const corpScoring =
-    createSemanticRuntimeCorpScoringComposition(dependencies);
+    createSemanticRuntimeCorpScoringComposition(composedDependencies);
 
   const semanticRuntimeDependencies: SemanticRuntimeOrchestrationCompositionDependencies =
     {
       ...dependencies,
+      ...contextDiagnostics,
       ...runnerSupport,
+      closeout: contextDiagnostics.bestTrueCentralCloseoutProfileForMetrics,
+      hasKnownUnaffordableLegalRun:
+        contextDiagnostics.runnerHasKnownUnaffordableLegalRun,
+      remoteTrashAccessContext:
+        contextDiagnostics.runnerRemoteTrashAccessContext,
+      trashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
       riskAssessment: runnerSupport.blinkRiskAssessmentForEncounterBreak,
       planMemoryActionExclusion:
         runnerSupport.semanticRuntimePlanMemoryActionExclusion,
@@ -164,7 +214,7 @@ export function createAiRuntimeSimulationComposition(
           runnerSupport.runnerNoRunEconomyCommitmentScoreComponents,
       },
       install: {
-        rolesForAction: dependencies.rolesForAction,
+        rolesForAction: contextDiagnostics.rolesForAction,
         muPressureInstallScoreComponent:
           runnerSupport.runnerMuPressureInstallScoreComponent,
         persistentInstallFitScoreComponent:
@@ -197,7 +247,9 @@ export function createAiRuntimeSimulationComposition(
 
   const simulationEntrypoints = createAiSimulationComposition({
     ...dependencies,
+    ...contextDiagnostics,
     ...runnerSupport,
+    extractFeatures: contextDiagnostics.extractAiFeatures,
     chooseAiAction: runtimeEntrypoints.chooseAiAction,
     chooseRunnerAction: runtimeEntrypoints.chooseRunnerAction,
     chooseCorpAction: runtimeEntrypoints.chooseCorpAction,
