@@ -985,10 +985,6 @@ const {
   muPressureInstallScoreComponent: runnerMuPressureInstallScoreComponent,
   persistentInstallFitScoreComponent:
     runnerPersistentInstallFitScoreComponent,
-  startRun: {
-    serverId: semanticRuntimeServerId,
-    isRemoteServerTarget,
-  },
   programInstallTrashAssessmentForAction:
     runnerProgramInstallTrashAssessmentForAction,
   programInstallDisplacementPenalty: runnerProgramInstallDisplacementPenalty,

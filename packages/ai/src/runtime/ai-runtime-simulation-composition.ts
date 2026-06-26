@@ -9,7 +9,11 @@ import {
 
 type RuntimeScoringDependencyObjects = Pick<
   SemanticRuntimeOrchestrationCompositionDependencies,
-  "badPublicityRelevance" | "goalFit" | "recoveryCommitment" | "install"
+  | "badPublicityRelevance"
+  | "goalFit"
+  | "recoveryCommitment"
+  | "install"
+  | "startRun"
 >;
 
 type AiRuntimeSimulationScoringDependencies =
@@ -46,7 +50,11 @@ type AiRuntimeSimulationScoringDependencies =
 export type AiRuntimeSimulationCompositionDependencies =
   Omit<
     SemanticRuntimeOrchestrationCompositionDependencies,
-    "badPublicityRelevance" | "goalFit" | "recoveryCommitment" | "install"
+    | "badPublicityRelevance"
+    | "goalFit"
+    | "recoveryCommitment"
+    | "install"
+    | "startRun"
   > &
     Omit<
       AiSimulationCompositionDependencies,
@@ -103,6 +111,10 @@ export function createAiRuntimeSimulationComposition(
           dependencies.programInstallTrashAssessmentForAction,
         programInstallDisplacementPenalty:
           dependencies.programInstallDisplacementPenalty,
+      },
+      startRun: {
+        serverId: dependencies.serverId,
+        isRemoteServerTarget: dependencies.isRemoteServerTarget,
       },
     };
 
