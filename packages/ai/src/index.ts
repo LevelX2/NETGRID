@@ -8,7 +8,6 @@ import {
 } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import {
-  reconstructBeliefState,
   type CorpOpponentModel,
   type RunnerOpponentModel,
 } from "./belief-state";
@@ -826,9 +825,6 @@ const {
   runnerSetupChosenFamilyForEntry,
   runnerStrategicBreakerTargetForMetrics,
   assessKnownRezzedIcePath,
-  knownPositionMemoryForInput: (input) =>
-    reconstructBeliefState(input).runnerOpponentModel?.knownPositionMemory ??
-    [],
   definitionTypeForMetrics,
   remoteRootTrashCostForMetrics,
   canBreakerDefinitionBreakIce,

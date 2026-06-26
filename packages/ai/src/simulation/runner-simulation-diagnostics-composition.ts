@@ -17,6 +17,7 @@ import {
   createRunnerReserveDiagnosticsForSimulationAction,
   type RunnerReserveDiagnosticsDependencies,
 } from "./runner-reserve-diagnostics";
+import { reconstructBeliefState } from "../belief-state";
 
 type RunnerEconomySetupDefinition = {
   type?: string;
@@ -50,7 +51,10 @@ type RunnerEconomySetupActionClassCompositionDependencies = {
 export type RunnerSimulationDiagnosticsCompositionDependencies =
   RunnerReserveDiagnosticsDependencies &
     RunnerHandUseDiagnosticsDependencies &
-    RunnerBreakerCoverageCompositionDependencies &
+    Omit<
+      RunnerBreakerCoverageCompositionDependencies,
+      "knownPositionMemoryForInput"
+    > &
     Omit<
       RunnerEconomySetupDiagnosticsDependencies,
       "runnerEconomySetupActionClass"
@@ -158,7 +162,9 @@ export function createRunnerSimulationDiagnosticsComposition(
     runnerStrategicBreakerTargetForMetrics:
       dependencies.runnerStrategicBreakerTargetForMetrics,
     assessKnownRezzedIcePath: dependencies.assessKnownRezzedIcePath,
-    knownPositionMemoryForInput: dependencies.knownPositionMemoryForInput,
+    knownPositionMemoryForInput: (input) =>
+      reconstructBeliefState(input).runnerOpponentModel?.knownPositionMemory ??
+      [],
     definitionTypeForMetrics: dependencies.definitionTypeForMetrics,
     remoteRootTrashCostForMetrics:
       dependencies.remoteRootTrashCostForMetrics,
