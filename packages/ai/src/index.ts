@@ -10,11 +10,9 @@ import {
   replayEvents,
 } from "@netgrid/engine";
 import {
-  assessCorpFutureRunIcePlacement,
   assessCorpScoreTerminalWindow,
   chooseCorpPlanAction,
   classifyCorpScoredAgendaAbility,
-  classifyCorpFutureRunIceDefinitionId,
   hasCorpPlanAction,
 } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
@@ -544,6 +542,7 @@ import { summarizeCorpEffectiveRemoteSafetyMetrics } from "./simulation/corp-eff
 import { summarizeCorpIcePortfolioMetrics } from "./simulation/corp-ice-portfolio-metrics";
 import { summarizeCentralCloseoutRepeatMetrics } from "./simulation/central-closeout-repeat-metrics";
 import { corpScoreTerminalFollowupMetrics } from "./simulation/corp-score-terminal-followup-metrics";
+import { createCorpFutureRunIceDiagnosticsForSimulationAction } from "./simulation/corp-future-run-ice-diagnostics";
 import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/corp-ice-portfolio-diagnostics";
 import { isMeaningfulBoardProgress } from "./simulation/meaningful-board-progress";
 import { summarizeOutcomeFollowupMetrics } from "./simulation/outcome-followup-metrics";
@@ -1176,6 +1175,11 @@ const AI_HINTS = createAiHintsByCard();
 
 const sourceDefinitionIdForSimulationAction =
   createSourceDefinitionIdForSimulationAction(findVisibleCard);
+
+const corpFutureRunIceDiagnosticsForSimulationAction =
+  createCorpFutureRunIceDiagnosticsForSimulationAction(
+    sourceDefinitionIdForSimulationAction,
+  );
 
 const definitionForSimulationAction = createDefinitionForSimulationAction(
   sourceDefinitionIdForSimulationAction,
@@ -11472,72 +11476,6 @@ function summarizeCorpUnsafeRemoteScoreConversionMetrics(
     corpHqDilutionBackfiredAgendaDrawn,
     corpHqDensityReducedAfterDraw,
     corpHqDensityIncreasedAfterDraw,
-  };
-}
-
-function corpFutureRunIceDiagnosticsForSimulationAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-): Partial<AiSimulationSummary["actionSequence"][number]> {
-  if (input.side !== "corp" || action.side !== "corp") return {};
-  const opportunity = input.legalActions.some(
-    (candidate) =>
-      candidate.side === "corp" &&
-      candidate.type === "install_card" &&
-      candidate.payload?.placement === "ice" &&
-      Boolean(
-        classifyCorpFutureRunIceDefinitionId(
-          sourceDefinitionIdForSimulationAction(input, candidate),
-        ),
-      ),
-  );
-  const assessment = assessCorpFutureRunIcePlacement(input, action);
-  if (!assessment) {
-    return opportunity ? { corpFutureRunIceInstallOpportunity: true } : {};
-  }
-  return {
-    ...(opportunity ? { corpFutureRunIceInstallOpportunity: true } : {}),
-    corpFutureRunIceInstalled: true,
-    corpFutureRunIceClass: assessment.futureRunIceClass,
-    ...(assessment.installedOnEmptyServer
-      ? {
-          corpFutureRunIceInstalledOnEmptyServer: true,
-          corpFutureRunIceInstalledFirstOnEmptyServer: true,
-          corpFutureRunIceInstalledAsInnermost: true,
-          corpFutureRunIceInstalledWithoutLaterIce: true,
-          corpFutureRunIceInstalledAsDeadEffect: true,
-          corpIceOrderFutureEffectDead: true,
-        }
-      : {
-          corpFutureRunIceInstalledAfterInnerIceExists: true,
-          corpFutureRunIceInstalledWithLaterIce: true,
-          corpFutureRunIceInstalledAsLiveEffect: true,
-          corpIceOrderFutureEffectLive: true,
-        }),
-    corpFutureRunIceInstalledAsOutermost: true,
-    ...(assessment.deadEffect &&
-    (assessment.futureRunIceClass === "bolter_or_data_darts" ||
-      assessment.futureRunIceClass === "future_run_ice")
-      ? { corpNextIceEffectInstalledLast: true }
-      : {}),
-    ...(assessment.futureRunIceClass === "ball_and_chain" &&
-    assessment.deadEffect
-      ? {
-          corpBallAndChainInstalledInnermost: true,
-          corpBallAndChainInstalledWithoutLaterIce: true,
-        }
-      : {}),
-    ...(assessment.futureRunIceClass === "ball_and_chain" &&
-    assessment.liveEffect
-      ? { corpBallAndChainInstalledWithLaterIce: true }
-      : {}),
-    ...(assessment.futureRunIceClass === "canis" && assessment.deadEffect
-      ? { corpCanisInstalledWithoutLaterIce: true }
-      : {}),
-    ...(assessment.futureRunIceClass === "bolter_or_data_darts" &&
-    assessment.deadEffect
-      ? { corpBolterOrDataDartsInstalledWithoutNextIce: true }
-      : {}),
   };
 }
 
