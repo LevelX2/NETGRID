@@ -30,13 +30,16 @@ export type RunnerDevelopmentSupportCompositionDependencies =
   > &
     RunnerViral15JackOutContextDependencies &
     RunnerHandFundingTargetDependencies &
-    RunnerPersistentInstallContextDependencies<
-      DeckCapabilityProfile,
-      RunnerStrategicIntentProfile
+    Omit<
+      RunnerPersistentInstallContextDependencies<
+        DeckCapabilityProfile,
+        RunnerStrategicIntentProfile
+      >,
+      "deckCapabilities" | "strategicIntent"
     > &
     Omit<
       RunnerEconomyCommitmentCompositionDependencies,
-      "runnerHandFundingTarget"
+      "runnerHandFundingTarget" | "hintEffectsForDefinition"
     >;
 
 export function createRunnerDevelopmentSupportComposition(
@@ -93,8 +96,8 @@ export function createRunnerDevelopmentSupportComposition(
     runnerPersistentInstallEvidenceForAction,
     runnerPersistentInstallEvaluationForAction,
   } = createRunnerPersistentInstallContext({
-    deckCapabilities: dependencies.deckCapabilities,
-    strategicIntent: dependencies.strategicIntent,
+    deckCapabilities: dependencies.deckCapabilitiesForInput,
+    strategicIntent: dependencies.strategicIntentForInput,
     handDevelopmentEvaluations:
       dependencies.handDevelopmentEvaluations,
   });
@@ -119,7 +122,8 @@ export function createRunnerDevelopmentSupportComposition(
     definitionType: dependencies.definitionType,
     runnerRunTargetEvaluation: dependencies.runnerRunTargetEvaluation,
     runnerRunTargetHighPayoff: dependencies.runnerRunTargetHighPayoff,
-    hintEffectsForDefinition: dependencies.hintEffectsForDefinition,
+    hintEffectsForDefinition: (definitionId) =>
+      dependencies.hintForDefinitionId(definitionId)?.effects ?? [],
     mechanicsForDefinition: dependencies.mechanicsForDefinition,
     rulesTextForDefinition: dependencies.rulesTextForDefinition,
     isRunnerRigInstallAction: dependencies.isRunnerRigInstallAction,

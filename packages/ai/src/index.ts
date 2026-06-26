@@ -953,8 +953,6 @@ const {
   cardLooksLikeCreditPayout: runnerCardLooksLikeCreditPayout,
   badPublicityOrTraceTechCard: runnerBadPublicityOrTraceTechCard,
   rolesMatch: (roles, needles) => discardRolesMatch([...roles], [...needles]),
-  deckCapabilities: deckCapabilitiesForInput,
-  strategicIntent: runnerStrategicIntentForInput,
   previousPlan: getTacticalPlanMemorySnapshot,
   findVisibleCard,
   definitionForCardId: (definitionId) =>
@@ -963,8 +961,6 @@ const {
   definitionType: definitionTypeForMetrics,
   runnerRunTargetEvaluation: runnerMultiRunTargetEvaluation,
   runnerRunTargetHighPayoff,
-  hintEffectsForDefinition: (definitionId) =>
-    AI_HINTS.get(definitionId)?.effects ?? [],
   mechanicsForDefinition: runnerCardMechanicsForAi,
   rulesTextForDefinition: (definitionId) => {
     const runtimeDefinition = RUNTIME_CARDS[definitionId];
