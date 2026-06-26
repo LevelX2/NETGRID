@@ -167,23 +167,12 @@ import {
 } from "./runtime/semantic-runtime-score-components";
 import { createSemanticRuntimeRunnerEvidenceComposition } from "./runtime/semantic-runtime-runner-evidence-composition";
 import {
-  createSemanticRuntimeCorpEvidenceContext,
-} from "./runtime/semantic-runtime-corp-evidence-context";
-import {
   createSemanticRuntimeEvidenceContext,
 } from "./runtime/semantic-runtime-evidence-context";
 import { createCorpTagPunishWindowComposition } from "./simulation/corp-tag-punish-window-composition";
 import { createCorpTaggedRunnerPayoffComposition } from "./runtime/corp-tagged-runner-payoff-composition";
-import {
-  createSemanticRuntimeCorpPassiveScoreLineContext,
-} from "./runtime/semantic-runtime-corp-passive-scoreline-context";
-import {
-  createSemanticRuntimeCorpAdvancementCounterContext,
-} from "./runtime/semantic-runtime-corp-advancement-counter-context";
+import { createSemanticRuntimeCorpScoringEvidenceComposition } from "./runtime/semantic-runtime-corp-scoring-evidence-composition";
 import { createSemanticRuntimeCorpBoardScoreComposition } from "./runtime/semantic-runtime-corp-board-score-composition";
-import {
-  createSemanticRuntimeCorpScoreSafetyContext,
-} from "./runtime/semantic-runtime-corp-score-safety-context";
 import {
   createSemanticRuntimeScoreBreakdownContext,
 } from "./runtime/semantic-runtime-score-breakdown";
@@ -1378,7 +1367,10 @@ const {
 });
 const {
   semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-} = createSemanticRuntimeCorpAdvancementCounterContext({
+  semanticRuntimeCorpPassiveScoreLinePenalty,
+  semanticRuntimeCorpScoreNowSafetyGate,
+  semanticRuntimeCorpEvidence,
+} = createSemanticRuntimeCorpScoringEvidenceComposition({
   sourceDefinitionIdForAction,
   normalizedRulesTextForDefinition,
   actionCreditCost,
@@ -1387,20 +1379,9 @@ const {
   cardType: semanticRuntimeVisibleCardType,
   cardAdvancementRequirement: semanticRuntimeVisibleCardAdvancementRequirement,
   teamRestructuringCardId: TEAM_RESTRUCTURING_CARD_ID,
-});
-const {
-  semanticRuntimeCorpPassiveScoreLinePenalty,
-} = createSemanticRuntimeCorpPassiveScoreLineContext({
   scoreTerminalWindow: assessCorpScoreTerminalWindow,
   actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
   rolesForAction,
-});
-const {
-  semanticRuntimeCorpScoreNowSafetyGate,
-} = createSemanticRuntimeCorpScoreSafetyContext({
-  scoreTerminalWindow: assessCorpScoreTerminalWindow,
-});
-const { semanticRuntimeCorpEvidence } = createSemanticRuntimeCorpEvidenceContext({
   emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
   hasRemoteInstability: semanticRuntimeCorpHasRemoteInstability,
   hasNakedScoreLine: semanticRuntimeCorpHasNakedScoreLine,
@@ -1415,9 +1396,6 @@ const { semanticRuntimeCorpEvidence } = createSemanticRuntimeCorpEvidenceContext
   hasRemoteRezFloorFundingNeed: semanticRuntimeCorpHasRemoteRezFloorFundingNeed,
   hasCentralRezFloorFundingNeed:
     semanticRuntimeCorpHasCentralRezFloorFundingNeed,
-  advancementCounterPlacementAssessment:
-    semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-  passiveScoreLinePenalty: semanticRuntimeCorpPassiveScoreLinePenalty,
   actionServerId: semanticRuntimeCorpActionServerId,
   server: semanticRuntimeCorpServer,
   remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
