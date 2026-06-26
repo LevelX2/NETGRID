@@ -12,6 +12,11 @@ import {
   type RunnerSimpleExclusionsContextDependencies,
 } from "./runner-simple-exclusions-context";
 import {
+  createRunnerSelfDamageContext,
+  type RunnerSelfDamageContext,
+  type RunnerSelfDamageContextDependencies,
+} from "./runner-self-damage-context";
+import {
   createRunnerSourceCardAnswerRoleContext,
   type RunnerSourceCardAnswerRoleContext,
 } from "./runner-source-card-answer-role-context";
@@ -24,11 +29,13 @@ import type { SemanticRuntimeActionExclusionDependencies } from "./semantic-runt
 export type SemanticRuntimeActionExclusionCompositionDependencies =
   RunnerSourceCardAnswerRoleDependencies &
     RunnerSimpleExclusionsContextDependencies &
+    RunnerSelfDamageContextDependencies &
     Omit<RunnerBlinkBreakExclusionDependencies, "shouldAvoidRun"> &
     Omit<RunnerEncounterActionExclusionDependencies, "blinkBreakExclusion"> &
     Omit<
       SemanticRuntimeActionExclusionDependencies,
       | "runnerEncounterActionExclusion"
+      | "runnerSelfDamageSurvivalExclusion"
       | "knownCentralPayoffExclusion"
       | "runnerArchivesExclusion"
       | "runnerEmptyRemoteExclusion"
@@ -41,6 +48,7 @@ export type SemanticRuntimeActionExclusionCompositionDependencies =
 export function createSemanticRuntimeActionExclusionComposition(
   dependencies: SemanticRuntimeActionExclusionCompositionDependencies,
 ): RunnerSourceCardAnswerRoleContext &
+  RunnerSelfDamageContext &
   ReturnType<typeof createSemanticRuntimeActionExclusionContext> {
   const {
     semanticRuntimeRunnerSourceCardAnswerRole,
@@ -77,13 +85,29 @@ export function createSemanticRuntimeActionExclusionComposition(
       breakAccessPathAssessment: dependencies.breakAccessPathAssessment,
     });
 
+  const {
+    runnerSelfDamageGuardedDecision,
+    runnerSelfDamageImmediateWinSemanticChoice,
+    runnerSelfDamageSurvivalAssessment,
+    runnerSelfDamageSurvivalExclusion,
+  } = createRunnerSelfDamageContext({
+    sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
+    hintEffectsForCard: dependencies.hintEffectsForCard,
+    fakedHitCardId: dependencies.fakedHitCardId,
+    badPublicityLossThreshold: dependencies.badPublicityLossThreshold,
+    scoreRunnerActions: dependencies.scoreRunnerActions,
+    compareAction: dependencies.compareAction,
+    selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
+    scrubEvidence: dependencies.scrubEvidence,
+  });
+
   const { semanticRuntimeActionExclusion } =
     createSemanticRuntimeActionExclusionContext({
       planMemoryActionExclusion: dependencies.planMemoryActionExclusion,
       corpAdvancementCounterPlacementAssessment:
         dependencies.corpAdvancementCounterPlacementAssessment,
       runnerSelfDamageSurvivalExclusion:
-        dependencies.runnerSelfDamageSurvivalExclusion,
+        runnerSelfDamageSurvivalExclusion,
       runnerEncounterActionExclusion,
       runnerProgramSacrificeExclusion:
         dependencies.runnerProgramSacrificeExclusion,
@@ -101,6 +125,10 @@ export function createSemanticRuntimeActionExclusionComposition(
 
   return {
     semanticRuntimeRunnerSourceCardAnswerRole,
+    runnerSelfDamageGuardedDecision,
+    runnerSelfDamageImmediateWinSemanticChoice,
+    runnerSelfDamageSurvivalAssessment,
+    runnerSelfDamageSurvivalExclusion,
     semanticRuntimeActionExclusion,
   };
 }

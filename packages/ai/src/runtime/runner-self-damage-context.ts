@@ -13,7 +13,7 @@ import type {
   SemanticRuntimeExclusion,
 } from "./semantic-runtime-types";
 
-type RunnerSelfDamageContextDependencies =
+export type RunnerSelfDamageContextDependencies =
   RunnerSelfDamageSurvivalAssessmentDependencies &
     Omit<RunnerSelfDamageGuardedDecisionDependencies, "survivalAssessment">;
 

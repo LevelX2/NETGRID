@@ -169,9 +169,6 @@ import { stringRecordValue } from "./runtime/record-value";
 import {
   runnerRunActionSpendingCapAssessment,
 } from "./runtime/runner-run-only-action-adjustment";
-import {
-  createRunnerSelfDamageContext,
-} from "./runtime/runner-self-damage-context";
 import { createRunnerBlinkRiskComposition } from "./runtime/runner-blink-risk-composition";
 import { createSemanticRuntimeActionExclusionComposition } from "./runtime/semantic-runtime-action-exclusion-composition";
 import { runnerHandBufferNeedScoreComponent } from "./runtime/runner-hand-buffer-need";
@@ -1001,26 +998,6 @@ const {
   scrubEvidence,
 });
 const {
-  runnerSelfDamageGuardedDecision,
-  runnerSelfDamageImmediateWinSemanticChoice,
-  runnerSelfDamageSurvivalAssessment,
-  runnerSelfDamageSurvivalExclusion,
-} = createRunnerSelfDamageContext({
-  sourceDefinitionIdForAction,
-  hintEffectsForCard: (definitionId: string) => AI_HINTS.get(definitionId)?.effects,
-  fakedHitCardId: FAKED_HIT_CARD_ID,
-  badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
-  scoreRunnerActions: (input: AiDecisionInput) =>
-    scoreActionsForLegacy(input, "runner", {
-      extractAiFeatures,
-      scoreRunnerAction,
-      scoreCorpAction,
-    }),
-  compareAction,
-  selectedChoicesForDecision,
-  scrubEvidence,
-});
-const {
   semanticRuntimeRunnerMultiRunEventExclusion,
   runnerMultiRunEventAssessment,
   runnerMultiRunEventScoreComponent,
@@ -1282,10 +1259,15 @@ const {
 });
 const {
   semanticRuntimeRunnerSourceCardAnswerRole,
+  runnerSelfDamageGuardedDecision,
+  runnerSelfDamageImmediateWinSemanticChoice,
+  runnerSelfDamageSurvivalAssessment,
+  runnerSelfDamageSurvivalExclusion,
   semanticRuntimeActionExclusion,
 } = createSemanticRuntimeActionExclusionComposition({
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
   sourceDefinitionId: sourceDefinitionIdForAction,
+  sourceDefinitionIdForAction,
   rolesForCardId,
   sourceDefinition: (definitionId) =>
     definitionId
@@ -1300,7 +1282,18 @@ const {
   planMemoryActionExclusion: semanticRuntimePlanMemoryActionExclusion,
   corpAdvancementCounterPlacementAssessment:
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
-  runnerSelfDamageSurvivalExclusion,
+  hintEffectsForCard: (definitionId: string) => AI_HINTS.get(definitionId)?.effects,
+  fakedHitCardId: FAKED_HIT_CARD_ID,
+  badPublicityLossThreshold: BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI,
+  scoreRunnerActions: (input: AiDecisionInput) =>
+    scoreActionsForLegacy(input, "runner", {
+      extractAiFeatures,
+      scoreRunnerAction,
+      scoreCorpAction,
+    }),
+  compareAction,
+  selectedChoicesForDecision,
+  scrubEvidence,
   runnerProgramSacrificeExclusion,
   runnerMultiRunEventExclusion: semanticRuntimeRunnerMultiRunEventExclusion,
   runnerRunTargetEvaluationForAction:
