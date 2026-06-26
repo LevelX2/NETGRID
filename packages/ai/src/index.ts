@@ -678,9 +678,8 @@ import {
 } from "./simulation/runner-run-target-context";
 import {
   createRunnerCoverageRepairDiagnostic,
+  createRunnerKnownNoAccessLegalRunTargets,
   runnerKnownPathDiagnosticsForAction as runnerKnownPathDiagnosticsForActionWithDeps,
-  runnerKnownNoAccessLegalRunTargets as runnerKnownNoAccessLegalRunTargetsWithDeps,
-  type RunnerKnownNoAccessTarget,
 } from "./simulation/runner-known-no-access";
 import {
   countSameStrategicPlanRepeatsWithoutProgress,
@@ -1185,6 +1184,13 @@ const sourceDefinitionIdForSimulationAction =
 const runnerRemoteTrashAccessContext = createRunnerRemoteTrashAccessContext({
   runnerCreditReserveTargetForInput,
 });
+
+const runnerKnownNoAccessLegalRunTargets =
+  createRunnerKnownNoAccessLegalRunTargets({
+    assessKnownRezzedIcePath,
+    runnerKnownPathAssessmentIsKnownNoAccess,
+    runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
+  });
 
 const runnerCoverageRepairDiagnostic = createRunnerCoverageRepairDiagnostic({
   runnerKnownNoAccessLegalRunTargets,
@@ -17621,14 +17627,4 @@ function runnerKnownPathDiagnosticsForAction(
       runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
     },
   );
-}
-
-function runnerKnownNoAccessLegalRunTargets(
-  input: AiDecisionInput,
-): RunnerKnownNoAccessTarget[] {
-  return runnerKnownNoAccessLegalRunTargetsWithDeps(input, {
-    assessKnownRezzedIcePath,
-    runnerKnownPathAssessmentIsKnownNoAccess,
-    runnerRunTargetHasOnlyUnknownOrUnrezzedIce,
-  });
 }

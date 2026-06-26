@@ -66,6 +66,12 @@ export function runnerKnownNoAccessLegalRunTargets(
     );
 }
 
+export function createRunnerKnownNoAccessLegalRunTargets(
+  dependencies: RunnerKnownNoAccessDependencies,
+): (input: AiDecisionInput) => RunnerKnownNoAccessTarget[] {
+  return (input) => runnerKnownNoAccessLegalRunTargets(input, dependencies);
+}
+
 export type RunnerCoverageRepairDiagnostic = Partial<{
   runnerCoverageRepairIntentCandidates: boolean;
   runnerCoverageRepairIntentSearchTaken: boolean;
