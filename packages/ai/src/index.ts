@@ -88,9 +88,7 @@ import {
   runnerCardMechanicsForAi,
   visibleCardDefinition,
 } from "./runtime/card-definition-lookup";
-import {
-  createVisibleIcebreakerProgramPredicate,
-} from "./runtime/visible-icebreaker-program";
+import { createRunnerBaselineSupportComposition } from "./runtime/runner-baseline-support-composition";
 import { createAiActionEntrypoints } from "./runtime/ai-action-entrypoints";
 import { compareAction } from "./runtime/action-order";
 import {
@@ -160,7 +158,6 @@ import {
 import {
   createPracticalMicroCandidatesContext,
 } from "./runtime/practical-micro-candidates-context";
-import { createDeckCapabilitiesContext } from "./runtime/deck-capabilities-context";
 import {
   createSemanticRuntimeVisibleCardContext,
 } from "./runtime/semantic-runtime-visible-card-context";
@@ -233,15 +230,11 @@ import {
   createSemanticRuntimeActionExclusionContext,
 } from "./runtime/semantic-runtime-action-exclusion-context";
 import {
-  createRunnerRunOnlyActionContext,
   runnerRunActionSpendingCapAssessment,
 } from "./runtime/runner-run-only-action-adjustment";
 import {
   createRunnerSelfDamageContext,
 } from "./runtime/runner-self-damage-context";
-import {
-  createRunnerBaselinePlanGuardContext,
-} from "./runtime/runner-baseline-plan-guard-context";
 import {
   createRunnerBlinkRiskContext,
 } from "./runtime/runner-blink-risk-context";
@@ -343,9 +336,6 @@ import {
 import {
   createRunnerRecentHistoryContext,
 } from "./runtime/runner-recent-history-context";
-import {
-  createRunnerStrategicIntentContext,
-} from "./runtime/runner-strategic-intent-context";
 import {
   createSemanticRuntimeCorpScoreContext,
 } from "./runtime/semantic-runtime-corp-score-context";
@@ -1152,19 +1142,14 @@ const {
 const {
   runnerHasConditionalPaymentContinueDecision,
   baselineShellTradersPlanIsVisible,
-} = createRunnerBaselinePlanGuardContext({
+  deckCapabilitiesForInput,
+  runnerStrategicIntentForInput,
+  isVisibleIcebreakerProgram,
+  runnerRunOnlyActionAdjustedSemanticChoice,
+} = createRunnerBaselineSupportComposition({
   delayedInstallAbilityForAction: shellTradersAbility,
   runnerHasInstalledPrograms,
-});
-const { deckCapabilitiesForInput } = createDeckCapabilitiesContext();
-const {
-  runnerStrategicIntentForInput,
-} = createRunnerStrategicIntentContext();
-const isVisibleIcebreakerProgram =
-  createVisibleIcebreakerProgramPredicate(visibleBreakerRolesForAi);
-const {
-  runnerRunOnlyActionAdjustedSemanticChoice,
-} = createRunnerRunOnlyActionContext({
+  visibleBreakerRolesForAi,
   compareAction,
 });
 const {
