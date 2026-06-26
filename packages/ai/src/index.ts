@@ -552,6 +552,8 @@ import type {
 import type { RunnerEconomySetupActionClass } from "./simulation/runner-economy-setup-types";
 import {
   runnerMissingBreakerRolesForMetrics,
+  runnerStrategicBreakerTargetForMetrics,
+  runnerVisibleIceCreatesCoverageNeedForMetrics,
   type RunnerSetupMissingCoverageType,
 } from "./simulation/runner-setup-coverage-types";
 import type { AiSimulationActionSequenceEntry } from "./simulation/ai-simulation-action-sequence-entry";
@@ -15842,32 +15844,6 @@ function assessRunnerCoveragePressureForMetrics(
     recoveryActionIds,
     heapMatchingBreakerCount,
   };
-}
-
-function runnerStrategicBreakerTargetForMetrics(
-  server: AiDecisionInput["playerView"]["servers"][number],
-): boolean {
-  if (server.id === "rd" || server.id === "hq") return true;
-  return isRemoteServerTarget(server.id) && server.root.length > 0;
-}
-
-function runnerVisibleIceCreatesCoverageNeedForMetrics(
-  ice: Pick<VisibleCard, "definitionId" | "effectiveRunQuote">,
-): boolean {
-  if (!ice.definitionId) return false;
-  if (iceHasEndTheRun(ice.definitionId)) return true;
-  return (
-    ice.effectiveRunQuote?.subroutines.some((subroutine) => {
-      const effect = subroutine.unbrokenRunEffect;
-      return (
-        effect?.addsFutureEndTheRunSubroutines !== undefined ||
-        effect?.increasesFutureBreakCostPerSubroutine !== undefined ||
-        effect?.preventsFutureBreaking === true ||
-        effect?.causesDamageOrProgramTrash === true ||
-        effect?.createsRunLockOrActionTax !== undefined
-      );
-    }) === true
-  );
 }
 
 function runnerCoverageSearchActionForMetrics(

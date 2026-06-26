@@ -1,5 +1,7 @@
-import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
+import { isRemoteServerTarget } from "../runtime/server-target";
+import { iceHasEndTheRun } from "../visible-run-analysis";
 
 export type RunnerSetupMissingCoverageType =
   | "wall"
@@ -38,4 +40,30 @@ export function runnerSubtypeKeyForMetrics(subtype: string): string {
     .trim()
     .toLowerCase()
     .replace(/[\s-]+/g, "_");
+}
+
+export function runnerStrategicBreakerTargetForMetrics(
+  server: AiDecisionInput["playerView"]["servers"][number],
+): boolean {
+  if (server.id === "rd" || server.id === "hq") return true;
+  return isRemoteServerTarget(server.id) && server.root.length > 0;
+}
+
+export function runnerVisibleIceCreatesCoverageNeedForMetrics(
+  ice: Pick<VisibleCard, "definitionId" | "effectiveRunQuote">,
+): boolean {
+  if (!ice.definitionId) return false;
+  if (iceHasEndTheRun(ice.definitionId)) return true;
+  return (
+    ice.effectiveRunQuote?.subroutines.some((subroutine) => {
+      const effect = subroutine.unbrokenRunEffect;
+      return (
+        effect?.addsFutureEndTheRunSubroutines !== undefined ||
+        effect?.increasesFutureBreakCostPerSubroutine !== undefined ||
+        effect?.preventsFutureBreaking === true ||
+        effect?.causesDamageOrProgramTrash === true ||
+        effect?.createsRunLockOrActionTax !== undefined
+      );
+    }) === true
+  );
 }
