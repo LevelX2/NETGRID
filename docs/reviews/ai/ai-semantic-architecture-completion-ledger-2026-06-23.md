@@ -7068,6 +7068,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Produktive `serverLabel`-/`serverName`-Serverableitung ist aus `belief-state.ts`, `runtime/public-event-history.ts`, `runtime/semantic-choice-ranking.ts`, `runtime/semantic-runtime-corp-central-rez-context.ts` und `visible-run-analysis.ts` entfernt.
   - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
 
+- `AI-COMPLETE-15` dreiunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/run-target-action-alignment.ts` entfernt freie Worttreffer wie `hq`, `rd`, `rnd`, `archives` und `remote-*` aus der Evidence-Servernormalisierung.
+  - Run-Target-Alignment akzeptiert dort weiterhin klare Evidence-Werte nach Prefix wie `target:hq`, `server:rd` oder `target:remote_1`, aber keinen labelartigen Freitext wie `target:protect hq next`.
+  - `run-target-action-alignment.test.ts` schützt, dass freie Serverwörter in Evidence nicht mehr als Server-Match zählen.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/run-target-action-alignment.test.ts src/decision/semantic-shadow-decision.test.ts` grün, 2 Dateien, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

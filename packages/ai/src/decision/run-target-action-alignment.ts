@@ -99,21 +99,19 @@ function parseEvidenceServer(
 function normalizeServerId(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const normalized = value.trim().toLowerCase().replace(/^server[:.]/, "");
-  if (normalized === "hq" || /\bhq\b/.test(normalized)) return "hq";
+  if (normalized === "hq") return "hq";
   if (
     normalized === "rd" ||
     normalized === "rnd" ||
     normalized === "r&d" ||
-    normalized === "r_d" ||
-    /\brd\b/.test(normalized) ||
-    /\brnd\b/.test(normalized)
+    normalized === "r_d"
   ) {
     return "rd";
   }
-  if (normalized === "archives" || /\barchives\b/.test(normalized)) {
+  if (normalized === "archives") {
     return "archives";
   }
-  const remoteMatch = normalized.match(/\bremote[_-](\d+)\b/);
+  const remoteMatch = normalized.match(/^remote[_-](\d+)$/);
   if (remoteMatch?.[1]) return `remote_${remoteMatch[1]}`;
   return undefined;
 }

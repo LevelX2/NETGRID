@@ -119,6 +119,27 @@ describe("run target action alignment", () => {
     });
   });
 
+  it("ignores free-text server words in evidence values", () => {
+    const candidate = {
+      ...runCandidate("run-hq-free-text-evidence"),
+      evidence: ["target:protect hq next"],
+    };
+
+    expect(
+      alignRunTargetAction(candidate, {
+        targetServerId: "hq",
+        targetKind: "hq",
+      }),
+    ).toMatchObject({
+      actionId: "run-hq-free-text-evidence",
+      aligned: false,
+      evidence: expect.arrayContaining([
+        "candidate_server:none",
+        "run_target:hq",
+      ]),
+    });
+  });
+
   it("boosts HQ opportunity only for the HQ run action", () => {
     const trace = buildSemanticShadowDecision(
       frame({
