@@ -85,6 +85,7 @@ import {
   coverageAnswerRolePriority,
   coverageSearchRequiredCapability,
   isCoverageAnswerStep,
+  planRequiredBreakerCoverage,
 } from "./plans/tactical-plan-coverage-answers";
 import {
   coverageSearchActionFit,
@@ -157,7 +158,6 @@ import type {
   TacticalPlanType,
   PlanStepKind,
   PlanMappingStatus,
-  RequiredCapabilityKind,
   RequiredCapability,
   PlanBlockerKind,
   PlanBlocker,
@@ -539,16 +539,6 @@ function candidateMatchesStep(
   return actionTypeMatchesStep(step, candidate.actionType) &&
     candidateTargetMatchesPlan(plan, candidate, action) &&
     bankStepMatchesCandidate(step, candidate, action);
-}
-
-function planRequiredBreakerCoverage(
-  plan: TacticalPlan,
-  step: PlanStep,
-): RequiredCapabilityKind {
-  const capability = [...step.requiredCapabilities, ...plan.requiredCapabilities].find(
-    (candidate) => candidate.kind.startsWith("breaker_"),
-  );
-  return capability?.kind ?? "breaker_coverage";
 }
 
 function accessCommitmentPlanEvidence(

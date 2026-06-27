@@ -67,6 +67,13 @@ export function coverageSearchRequiredCapability(
   return capability?.kind;
 }
 
+export function planRequiredBreakerCoverage(
+  plan: TacticalPlan,
+  step: PlanStep,
+): RequiredCapabilityKind {
+  return coverageSearchRequiredCapability(plan, step) ?? "breaker_coverage";
+}
+
 export function coverageSearchRequiredCapabilityForStep(
   step: PlanStep,
 ): RequiredCapabilityKind | undefined {
