@@ -6654,6 +6654,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-13`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1680 Tests.
   - Status: `AI-COMPLETE-12` `VERIFIED`; `AI-COMPLETE-13` ist das nächste aktive Ziel.
 
+- `AI-COMPLETE-13` erster Overlay-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` überschreibt bei `practicalTacticOverlay.enabled` nicht mehr `actionId`, `reasonCode`, `explanation`, `selectedChoices` oder `fallbackUsed`.
+  - Der praktische Taktik-Kandidat bleibt als Compare-/Debug-Evidence sichtbar: `practical_tactic_overlay_compare:true`, `practical_tactic_overlay_actual_override:false`, `practical_tactic_overlay_candidate:<reason>`.
+  - `practical-tactic-overlay.test.ts` schützt die 40 Benchmark-Cases nun als Candidate-Coverage ohne Actual Override und prüft die `chooseAiAction`-Verdrahtung als compare-only.
+  - Status bleibt `IN_PROGRESS`, weil Practical-Micro-Apply und TacticalPlan-Mapping-Overrides noch klassifiziert oder in modellierte Outcome-/Gate-Pfade überführt werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 1 Datei, 5 Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

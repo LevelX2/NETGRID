@@ -23,19 +23,14 @@ export function applyPracticalTacticOverlay(
   if (options.practicalTacticOverlay?.enabled !== true) return runtimeDecision;
   const candidate = bestPracticalTacticCandidate(input, runtimeDecision);
   if (!candidate) return runtimeDecision;
-  const { selectedChoices: _selectedChoices, ...runtimeDecisionWithoutChoices } =
-    runtimeDecision;
   return {
-    ...runtimeDecisionWithoutChoices,
-    actionId: candidate.action.actionId,
-    reasonCode: candidate.reasonCode,
-    explanation: candidate.explanation,
-    consideredActionIds: input.legalActions.map((action) => action.actionId),
-    fallbackUsed: false,
+    ...runtimeDecision,
     evidence: [
       ...(runtimeDecision.evidence ?? []),
       ...candidate.evidence,
-      `practical_tactic_overlay_applied:${candidate.reasonCode}`,
+      "practical_tactic_overlay_compare:true",
+      "practical_tactic_overlay_actual_override:false",
+      `practical_tactic_overlay_candidate:${candidate.reasonCode}`,
       `practical_tactic_runtime_reference:${runtimeDecision.actionId}`,
     ],
     decisionDebug: {
@@ -50,9 +45,10 @@ export function applyPracticalTacticOverlay(
           id: "practical_tactic_overlay",
           title: "Practical Tactic Overlay",
           items: [
-            `selected:${candidate.action.actionId}`,
+            `candidate:${candidate.action.actionId}`,
             `priority:${candidate.priority}`,
             `runtime_reference:${runtimeDecision.actionId}`,
+            "actual_override:false",
           ],
         },
       ],
