@@ -25,32 +25,24 @@ export function candidateTargetMatchesPlan(
 export function bankStepMatchesCandidate(
   step: PlanStep,
   candidate: ActionSemanticCandidate,
-  action: LegalAction,
+  _action: LegalAction,
 ): boolean {
   if (step.kind !== "build_bank_counter" && step.kind !== "cash_out_bank") {
     return true;
   }
-  const evidence = candidate.evidence.join(" ").toLowerCase();
   const signals = [
     ...candidate.actionTacticSignals,
     ...candidate.cardContextSignals,
     candidate.semanticActionType,
   ].join(" ").toLowerCase();
-  const label = action.label.toLowerCase();
   if (step.kind === "build_bank_counter") {
     return (
-      (label.includes("legen") && label.includes("bank")) ||
-      label.includes("put") && label.includes("bank") ||
-      (evidence.includes("legen") && evidence.includes("bank")) ||
       signals.includes("bank") ||
       signals.includes("counter_bank") ||
       signals.includes("temporary_resource_bank")
     );
   }
   return (
-    (label.includes("nehmen") && label.includes("bank")) ||
-    label.includes("take") && label.includes("bank") ||
-    (evidence.includes("nehmen") && evidence.includes("bank")) ||
     signals.includes("cash") ||
     signals.includes("payout") ||
     signals.includes("bank")
