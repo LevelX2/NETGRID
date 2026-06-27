@@ -6573,6 +6573,17 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 
 Nächstes aktives Ziel: `AI-COMPLETE-11`.
 
+- `AI-COMPLETE-11` erster TargetChoice-Produktivschnitt:
+  - `packages/ai/src/decision/target-choice-shadow.ts` behält den Shadow-Report selbst report-only/no-effect, exportiert aber zusätzlich `targetChoiceRecommendationForTargetFit`.
+  - Die neue `TargetChoiceTargetFitRecommendation` ist produktiv nur für Target-Fit (`runtimeConsumerStatus: "target_fit_only"`), erzeugt weiterhin keine `selectedChoices` und keine `selectedTargets`, und setzt `noRuntimeEffect: true`.
+  - `packages/ai/src/decision/action-goal-fit.ts` kann eine solche Recommendation als Target-Fit-Bonus nutzen, ohne Hard-Gates oder fehlenden TargetContext zu umgehen.
+  - `packages/ai/src/decision/target-choice-shadow.test.ts` schützt den stabilen Shadow-Vertrag plus die neue Recommendation-Extraktion; `packages/ai/src/decision/action-goal-fit.test.ts` schützt den Target-Fit-Bonus ohne Selected-Choice-Erzeugung.
+  - Status bleibt `IN_PROGRESS`, weil die Recommendation noch in weitere produktive Frame-/Trace-/Runtime-Pfade eingebunden werden muss.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/target-choice-shadow.test.ts src/decision/action-goal-fit.test.ts` grün, 2 Dateien, 28 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1675 Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

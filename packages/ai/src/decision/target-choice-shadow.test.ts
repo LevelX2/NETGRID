@@ -5,6 +5,7 @@ import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redacti
 import {
   TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
   buildTargetChoiceShadowReport,
+  targetChoiceRecommendationForTargetFit,
   targetChoiceWouldSelectForAccessDecisionProjection,
 } from "./target-choice-shadow";
 
@@ -54,6 +55,25 @@ describe("TargetChoiceShadow", () => {
         evidence: expect.arrayContaining([
           "target_choice_access_decision_projection:dry_run",
           "target_choice_would_select:dry_run",
+        ]),
+      }),
+    );
+    expect(targetChoiceRecommendationForTargetFit(report)).toEqual(
+      expect.objectContaining({
+        scope: "target_choice_target_fit_recommendation",
+        actionId: "resolve-choice",
+        requirementId: "discard_choice",
+        optionId: "gain",
+        confidence: "medium",
+        productiveUseAllowed: true,
+        runtimeConsumerStatus: "target_fit_only",
+        noRuntimeEffect: true,
+        selectedChoicesCreated: false,
+        selectedTargetsCreated: false,
+        evidence: expect.arrayContaining([
+          "target_choice_target_fit:productive_recommendation",
+          "target_choice_target_fit_selected_choices_created:false",
+          "target_choice_target_fit_selected_targets_created:false",
         ]),
       }),
     );

@@ -5,6 +5,7 @@ import {
   type ActionGoalHardGateResult,
 } from "./hard-gates";
 import type { ScoreComponentDelta } from "./score-components";
+import type { TargetChoiceTargetFitRecommendation } from "./target-choice-shadow";
 import type { TacticalGoalUtility } from "./tactical-goal-utility";
 
 export type ActionGoalFit = {
@@ -23,6 +24,7 @@ export type ScoreActionGoalFitParams = {
   availableCredits?: number;
   creditPressure?: "low" | "medium" | "high";
   expectedActionSignals?: readonly string[];
+  targetChoiceRecommendation?: TargetChoiceTargetFitRecommendation;
 };
 
 export function scoreActionGoalFit(
@@ -49,7 +51,11 @@ export function scoreActionGoalFit(
     timingFitComponent(params.candidate, params.utility),
     riskAdjustmentComponent(params.candidate, params.utility),
     planAlignmentComponent(params.candidate, params.utility),
-    targetFitComponent(params.candidate, params.utility),
+    targetFitComponent(
+      params.candidate,
+      params.utility,
+      params.targetChoiceRecommendation,
+    ),
     fallbackSafetyComponent(params.candidate),
   ];
   const score = Math.max(
@@ -199,16 +205,41 @@ function planAlignmentComponent(
 function targetFitComponent(
   candidate: ActionSemanticCandidate,
   utility: TacticalGoalUtility,
+  targetChoiceRecommendation: TargetChoiceTargetFitRecommendation | undefined,
 ): ScoreComponentDelta {
   const hasTargetContext = Boolean(candidate.targetContext);
   const needsTarget =
     utility.family === "target_resolution" ||
     utility.family === "remote_contest" ||
     utility.family === "run_access";
+  const recommendationApplies =
+    targetChoiceRecommendation?.actionId === candidate.actionId &&
+    targetChoiceRecommendation.productiveUseAllowed === true &&
+    targetChoiceRecommendation.selectedChoicesCreated === false &&
+    targetChoiceRecommendation.selectedTargetsCreated === false;
+  const recommendationBonus =
+    needsTarget && recommendationApplies
+      ? targetChoiceRecommendation.confidence === "high"
+        ? 18
+        : targetChoiceRecommendation.confidence === "medium"
+          ? 12
+          : 6
+      : 0;
   return {
     component: "target_fit",
-    delta: needsTarget ? (hasTargetContext ? 12 : -10) : 0,
-    evidence: [`needs_target:${needsTarget}`, `has_target:${hasTargetContext}`],
+    delta: needsTarget ? (hasTargetContext ? 12 : -10) + recommendationBonus : 0,
+    evidence: [
+      `needs_target:${needsTarget}`,
+      `has_target:${hasTargetContext}`,
+      `target_choice_recommendation:${recommendationApplies}`,
+      ...(recommendationApplies
+        ? [
+            `target_choice_option:${targetChoiceRecommendation.optionId}`,
+            `target_choice_confidence:${targetChoiceRecommendation.confidence}`,
+            `target_choice_score:${targetChoiceRecommendation.score}`,
+          ]
+        : []),
+    ],
   };
 }
 

@@ -132,6 +132,74 @@ describe("ActionGoalFit", () => {
     );
   });
 
+  it("raises target fit from productive TargetChoice recommendations without selected choices", () => {
+    const base = candidateFor("run-remote", "start_run");
+    const candidate = {
+      ...base,
+      semanticActionType: "run.start",
+      targetContext: {
+        selectedTargets: [],
+        availableTargets: [
+          {
+            targetId: "remote_1",
+            targetKind: "server",
+            targetSide: "corp",
+            evidence: ["test_available_target"],
+          },
+        ],
+        targetKind: "server",
+        targetZones: [],
+        targetSide: "corp",
+        hiddenInfoPolicy: "side_safe_engine_input_only",
+        availableTargetsStatus: "engine_provided",
+        targetProfileMatches: [],
+        targetConstraintResults: [],
+      },
+    } satisfies ActionSemanticCandidate;
+
+    const withoutRecommendation = scoreActionGoalFit({
+      candidate,
+      utility: utility("runner.remote_contest", "remote_contest"),
+      legalActionIds: ["run-remote"],
+    });
+    const withRecommendation = scoreActionGoalFit({
+      candidate,
+      utility: utility("runner.remote_contest", "remote_contest"),
+      legalActionIds: ["run-remote"],
+      targetChoiceRecommendation: {
+        scope: "target_choice_target_fit_recommendation",
+        actionId: "run-remote",
+        actionType: "start_run",
+        requirementId: "server",
+        optionId: "remote_1",
+        optionKind: "target_option",
+        confidence: "high",
+        score: 152,
+        productiveUseAllowed: true,
+        runtimeConsumerStatus: "target_fit_only",
+        noRuntimeEffect: true,
+        selectedChoicesCreated: false,
+        selectedTargetsCreated: false,
+        evidence: ["target_choice_target_fit:productive_recommendation"],
+      },
+    });
+
+    expect(withRecommendation.score).toBeGreaterThan(
+      withoutRecommendation.score,
+    );
+    expect(
+      withRecommendation.components.find(
+        (component) => component.component === "target_fit",
+      )?.evidence,
+    ).toEqual(
+      expect.arrayContaining([
+        "target_choice_recommendation:true",
+        "target_choice_option:remote_1",
+        "target_choice_confidence:high",
+      ]),
+    );
+  });
+
   it("blocks target-profile goals when side-safe target constraints reject the option", () => {
     const base = candidateFor("choice-1", "resolve_choice");
     const blocked = {

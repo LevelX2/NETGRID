@@ -85,6 +85,23 @@ export type TargetChoiceShadowReport = {
   evidence: string[];
 };
 
+export type TargetChoiceTargetFitRecommendation = {
+  scope: "target_choice_target_fit_recommendation";
+  actionId: string;
+  actionType: LegalAction["type"];
+  requirementId: string;
+  optionId: string;
+  optionKind: TargetChoiceShadowOptionKind;
+  confidence: "low" | "medium" | "high";
+  score: number;
+  productiveUseAllowed: true;
+  runtimeConsumerStatus: "target_fit_only";
+  noRuntimeEffect: true;
+  selectedChoicesCreated: false;
+  selectedTargetsCreated: false;
+  evidence: string[];
+};
+
 export function targetChoiceWouldSelectForAccessDecisionProjection(
   report: Pick<TargetChoiceShadowReport, "selectionOutput">,
 ): AccessDecisionProjectionTargetChoiceWouldSelect | undefined {
@@ -100,6 +117,43 @@ export function targetChoiceWouldSelectForAccessDecisionProjection(
       "target_choice_access_decision_projection:dry_run",
       "target_choice_access_decision_projection_selected_choices_created:false",
       "target_choice_access_decision_projection_selected_targets_created:false",
+      ...wouldSelect.evidence,
+    ].map(safe),
+  };
+}
+
+export function targetChoiceRecommendationForTargetFit(
+  report: TargetChoiceShadowReport,
+): TargetChoiceTargetFitRecommendation | undefined {
+  const wouldSelect = report.selectionOutput.wouldSelect;
+  const topOption = report.scorecard.topOption;
+  if (!wouldSelect || !topOption) return undefined;
+  if (report.blockedRequirements.length > 0) return undefined;
+  if (
+    report.selectionOutput.selectedChoicesCreated ||
+    report.selectionOutput.selectedTargetsCreated
+  ) {
+    return undefined;
+  }
+  return {
+    scope: "target_choice_target_fit_recommendation",
+    actionId: safe(report.actionId),
+    actionType: report.actionType,
+    requirementId: safe(wouldSelect.requirementId),
+    optionId: safe(wouldSelect.optionId),
+    optionKind: topOption.kind,
+    confidence: wouldSelect.confidence,
+    score: topOption.score,
+    productiveUseAllowed: true,
+    runtimeConsumerStatus: "target_fit_only",
+    noRuntimeEffect: true,
+    selectedChoicesCreated: false,
+    selectedTargetsCreated: false,
+    evidence: [
+      "target_choice_target_fit:productive_recommendation",
+      "target_choice_target_fit_selected_choices_created:false",
+      "target_choice_target_fit_selected_targets_created:false",
+      `target_choice_target_fit_confidence:${wouldSelect.confidence}`,
       ...wouldSelect.evidence,
     ].map(safe),
   };
