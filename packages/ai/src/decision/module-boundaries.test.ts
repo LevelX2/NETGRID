@@ -419,6 +419,9 @@ describe("AI module boundaries", () => {
       ...(content.includes("buildDeckDoctrineV2Diagnostic")
         ? ["ai-decision-input.ts builds doctrine v2 diagnostic directly"]
         : []),
+      ...(content.includes("buildDeckDoctrineProfile")
+        ? ["ai-decision-input.ts builds doctrine v1 profile directly"]
+        : []),
       ...(!content.includes('from "../deck-doctrine-runtime-context"')
         ? ["ai-decision-input.ts misses deck doctrine runtime context"]
         : []),

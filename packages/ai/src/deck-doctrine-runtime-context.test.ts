@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { buildDeckDoctrineProfile } from "./deck-doctrine";
 import { buildDeckDoctrineRuntimeContext } from "./deck-doctrine-runtime-context";
 
 describe("buildDeckDoctrineRuntimeContext", () => {
@@ -27,5 +28,22 @@ describe("buildDeckDoctrineRuntimeContext", () => {
     expect(context.neutralDoctrine).toBe(true);
     expect(context.completenessStatus).toBe("unknown_snapshot");
     expect(context.rolesStatus).toBe("unknown_snapshot");
+  });
+
+  it("preserves explicit legacy v1 doctrine profiles for compatibility callers", () => {
+    const snapshot = {
+      deckSnapshotId: "runner-fixture",
+      side: "runner" as const,
+      cards: [{ cardId: "unknown_runner_support_only", quantity: 1 }],
+    };
+    const legacyV1Profile = buildDeckDoctrineProfile(snapshot);
+    const context = buildDeckDoctrineRuntimeContext({
+      side: "runner",
+      deckSnapshot: snapshot,
+      legacyV1Profile,
+      neutralDeckId: "runner-fixture",
+    });
+
+    expect(context.legacyV1Profile).toBe(legacyV1Profile);
   });
 });

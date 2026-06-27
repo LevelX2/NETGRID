@@ -11,10 +11,7 @@ import {
   buildDeckCapabilityProfile,
   type DeckCapabilityProfile,
 } from "../deck-capabilities";
-import {
-  buildDeckDoctrineProfile,
-  type AiDeckDoctrineDeckSnapshot,
-} from "../deck-doctrine";
+import { type AiDeckDoctrineDeckSnapshot } from "../deck-doctrine";
 import {
   type AiDeckStrategyProfile,
   type DeckDoctrineV2Diagnostic,
@@ -97,23 +94,35 @@ export function buildAiDecisionInput(
 ): AiDecisionInput {
   const playerView = getPlayerView(state, side);
   const legalActions = getLegalActions(state, side);
-  const ownDeckDoctrine =
-    options.ownDeckDoctrine ??
-    (options.ownDeckSnapshot
-      ? buildDeckDoctrineProfile(options.ownDeckSnapshot)
-      : undefined);
+  const difficulty = options.difficulty ?? "normal";
+  const decisionId =
+    options.decisionId ?? `${state.matchId}:${state.stateVersion}:${side}`;
+  const actionNumber = options.actionNumber ?? state.stateVersion;
+  const profileId = options.profileId ?? `${side}-ai-v0.9-${difficulty}`;
+  const deckSnapshotId =
+    options.ownDeckSnapshot?.deckSnapshotId ??
+    `${profileId}:missing-deck-snapshot`;
+  const deckDoctrineRuntimeContext = buildDeckDoctrineRuntimeContext({
+    side,
+    ...(options.ownDeckSnapshot
+      ? { deckSnapshot: options.ownDeckSnapshot }
+      : {}),
+    ...(options.ownDeckDoctrine
+      ? { legacyV1Profile: options.ownDeckDoctrine }
+      : {}),
+    neutralDeckId: deckSnapshotId,
+  });
+  const ownDeckDoctrine = deckDoctrineRuntimeContext.legacyV1Profile;
   const input = buildAiDecisionInputDto({
     side,
     playerView,
     eventTail: options.eventTail ?? playerView.publicEvents,
     legalActions,
-    difficulty: options.difficulty ?? "normal",
+    difficulty,
     seed: state.seed,
-    decisionId:
-      options.decisionId ?? `${state.matchId}:${state.stateVersion}:${side}`,
-    actionNumber: options.actionNumber ?? state.stateVersion,
-    profileId:
-      options.profileId ?? `${side}-ai-v0.9-${options.difficulty ?? "normal"}`,
+    decisionId,
+    actionNumber,
+    profileId,
     ...(ownDeckDoctrine ? { ownDeckDoctrine } : {}),
   });
   if (
@@ -122,9 +131,6 @@ export function buildAiDecisionInput(
   ) {
     return input;
   }
-  const deckSnapshotId =
-    options.ownDeckSnapshot?.deckSnapshotId ??
-    `${input.profileId}:missing-deck-snapshot`;
   const ownDeckCapabilities = buildDeckCapabilityProfile({
     side,
     playerView,
@@ -132,13 +138,6 @@ export function buildAiDecisionInput(
     ...(options.ownDeckSnapshot
       ? { deckSnapshot: options.ownDeckSnapshot }
       : {}),
-  });
-  const deckDoctrineRuntimeContext = buildDeckDoctrineRuntimeContext({
-    side,
-    ...(options.ownDeckSnapshot
-      ? { deckSnapshot: options.ownDeckSnapshot }
-      : {}),
-    neutralDeckId: deckSnapshotId,
   });
   const ownDeckStrategyProfile = deckDoctrineRuntimeContext.strategyProfile;
   const ownDeckDoctrineV2Diagnostic =

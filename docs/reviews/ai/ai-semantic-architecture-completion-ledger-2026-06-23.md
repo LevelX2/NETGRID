@@ -6329,6 +6329,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/deck-doctrine-runtime-context.test.ts src/index.test.ts` grün, 3 Dateien, 557 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1655 Tests.
+- `AI-COMPLETE-06` dritter Doctrine-Schnitt:
+  - `packages/ai/src/deck-doctrine-runtime-context.ts` liefert auch das optionale Legacy-v1-Doctrine-Profil, sodass `runtime/ai-decision-input.ts` keine Doctrine-v1-Profile mehr direkt baut.
+  - `runtime/ai-decision-input.ts` berechnet Profile-/Decision-Metadaten vorab und reicht das Legacy-v1-Profil aus dem Doctrine-Runtime-Kontext in den DTO-Aufbau.
+  - `packages/ai/src/deck-doctrine-runtime-context.test.ts` schützt die explizite Legacy-v1-Profil-Übergabe für Kompatibilitäts- und Fixture-Caller.
+  - `packages/ai/src/decision/module-boundaries.test.ts` verhindert direkte `buildDeckDoctrineProfile`-Aufrufe im produktiven Decision-Input.
+  - Status bleibt `IN_PROGRESS`, weil Public-Export-Grenzen und Doctrine-v1-Verbraucher noch geprüft werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/deck-doctrine-runtime-context.test.ts src/index.test.ts` grün, 3 Dateien, 558 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1656 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-06`.
 
