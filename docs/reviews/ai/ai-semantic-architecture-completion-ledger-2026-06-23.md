@@ -7152,6 +7152,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweiundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/protection-definition.ts` ersetzt die Protection-Erkennung über DefinitionId-Substrings wie `red-herrings`, `tesseract` und `namatoki` durch ein exaktes Set der aktuell freigegebenen Remote-Protection-DefinitionIds.
+  - `protection-definition.test.ts` schützt echte Treffer und Negativfälle mit protectionartigem ID-Text ohne exakten Kartenmatch.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/protection-definition.test.ts src/simulation/remote-protection-score.test.ts src/simulation/final-advance-assessment.test.ts` grün, 1 tatsächlich vorhandene Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "final advance|protect-before|Red Herrings|remote protection"` grün, 1 Datei, 5 Tests, 529 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
