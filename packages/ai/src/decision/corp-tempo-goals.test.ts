@@ -41,6 +41,25 @@ describe("corp tempo goal resolution", () => {
     );
   });
 
+  it("ignores label-only tempo text and keeps explicit evidence active", () => {
+    const labelOnly = classifyCorpTempoGoal({
+      type: "activated_card_ability",
+      label: "Protect remote scoreline",
+      sourceTitle: "Unknown visible ability",
+    });
+    const explicitEvidence = classifyCorpTempoGoal({
+      type: "activated_card_ability",
+      label: "Use ability",
+      sourceTitle: "Unknown visible ability",
+      evidence: ["protect remote scoreline"],
+    });
+
+    expect(labelOnly.fit).toBe("opaque_ability");
+    expect(labelOnly.progressRelevant).toBe(false);
+    expect(explicitEvidence.fit).toBe("protect_remote");
+    expect(explicitEvidence.progressRelevant).toBe(true);
+  });
+
   it("classifies meaningful ICE protection from visible server evidence", () => {
     const rez = classifyCorpTempoGoal({
       type: "rez_ice",

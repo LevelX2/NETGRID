@@ -125,7 +125,6 @@ export function classifyCorpTempoGoal(
 function sideSafeEvidence(action: CorpTempoAction): string[] {
   return [
     action.type,
-    action.label,
     action.sourceTitle,
     action.targetServerId,
     ...(action.evidence ?? []),

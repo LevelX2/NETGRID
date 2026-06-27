@@ -6982,6 +6982,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` vierundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/corp-tempo-goals.ts` entfernt `action.label` aus der side-safe Evidence des Corp-Tempo-Shadow-Classifiers.
+  - Corp-Tempo-Fit nutzt dort weiterhin Action-Type, Source-Titel, Target-Server, DebugFacts, ScoreKeys und explizite Evidence, aber keinen label-only Tempo-Text mehr.
+  - `corp-tempo-goals.test.ts` schützt, dass label-only `Protect remote scoreline` keinen Tempo-Fortschritt erzeugt, explizite Evidence aber weiterhin `protect_remote` liefert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/corp-tempo-goals.test.ts src/decision/corp-tactical-goals.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 3 Dateien, 18 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
