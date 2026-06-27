@@ -51,6 +51,8 @@ function costProfileForAction(action: LegalAction): ActionCostProfile {
   const temporaryCredits = temporaryCreditsForAction(action);
   const tapCost = tapCostForAction(action);
   const revealCost = revealCostForAction(action);
+  const selfDamage = selfDamageForAction(action);
+  const selfTag = selfTagForAction(action);
   const xValue = xValueForAction(action);
   const variableCost = variableCostForAction(action);
   const hasKnownCost =
@@ -61,6 +63,8 @@ function costProfileForAction(action: LegalAction): ActionCostProfile {
     temporaryCredits !== undefined ||
     tapCost ||
     revealCost ||
+    selfDamage.length > 0 ||
+    selfTag !== undefined ||
     xValue !== undefined ||
     variableCost !== undefined;
 
@@ -72,6 +76,8 @@ function costProfileForAction(action: LegalAction): ActionCostProfile {
     ...(temporaryCredits !== undefined ? { temporaryCredits } : {}),
     ...(tapCost ? { tapCost } : {}),
     ...(revealCost ? { revealCost } : {}),
+    ...(selfDamage.length > 0 ? { selfDamage } : {}),
+    ...(selfTag !== undefined ? { selfTag } : {}),
     ...(xValue !== undefined ? { xValue } : {}),
     paidBy: action.side,
     beneficiary: beneficiaryForAction(action),
@@ -140,6 +146,36 @@ function variableCostForAction(
       ? { min: variableRezAdditionalCost }
       : {}),
   };
+}
+
+function selfDamageForAction(
+  action: LegalAction,
+): NonNullable<ActionCostProfile["selfDamage"]> {
+  if (action.side !== "runner") return [];
+  const amount = numberPayload(action, "damageAmount");
+  if (amount === undefined || amount <= 0) return [];
+  return [
+    {
+      type: damageTypePayload(action),
+      amount: Math.floor(amount),
+    },
+  ];
+}
+
+function damageTypePayload(action: LegalAction): NonNullable<
+  ActionCostProfile["selfDamage"]
+>[number]["type"] {
+  const value = stringPayload(action, "damageType");
+  if (value === "net" || value === "meat" || value === "brain") return value;
+  if (value === "core") return "core";
+  return "unknown";
+}
+
+function selfTagForAction(action: LegalAction): number | undefined {
+  if (action.side !== "runner") return undefined;
+  const amount = numberPayload(action, "tagAmount");
+  if (amount === undefined || amount <= 0) return undefined;
+  return Math.floor(amount);
 }
 
 function temporaryCreditsForAction(
@@ -219,6 +255,12 @@ function additionalCostFields(action: LegalAction): string[] {
     "sourceTapped",
     "publicRevealKind",
     "revealKind",
+    "damageType",
+    "damageAmount",
+    "preventableDamage",
+    "unpreventableDamage",
+    "tagAmount",
+    "badPublicityAdded",
     "variableRezKind",
     "variableRezAdditionalCost",
     "variableRezValue",

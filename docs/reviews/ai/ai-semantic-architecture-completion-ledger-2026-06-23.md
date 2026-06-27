@@ -6509,6 +6509,17 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 152 Dateien, 1671 Tests.
 
+- `AI-COMPLETE-10` dritter Cost-Profil-Schnitt:
+  - `packages/ai/src/actions/action-cost-timing.ts` projiziert Runner-Selbstschaden aus side-sicheren `damageType`-/`damageAmount`-Payloads in `ActionCostProfile.selfDamage`.
+  - Runner-Selbsttags aus `tagAmount` werden als `selfTag` normalisiert; bekannte Zusatzkostenfelder wie `unpreventableDamage` und `badPublicityAdded` bleiben in `additionalCosts` sichtbar.
+  - Corp-Schaden-Payloads werden nicht als Selbstkosten des Handelnden eingeordnet, damit Schadenseffekte und Zahlungskosten getrennt bleiben.
+  - `packages/ai/src/action-semantic-candidate.test.ts` schützt Runner-Selbstschaden/-Tag und den Corp-Nicht-Selbstkostenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere Cost-/Timing-/BoardContext-Spezialpfade noch auditiert und angebunden werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts src/decision/action-goal-fit.test.ts -t "normalizes action cost and timing profiles|self damage"` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 152 Dateien, 1671 Tests.
+
 Nächstes aktives Ziel: `AI-COMPLETE-10`.
 
 ## Audit-Ledger

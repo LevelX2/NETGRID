@@ -689,6 +689,25 @@ describe("buildActionSemanticCandidates", () => {
             sourceTapped: true,
           },
         }),
+        legalAction("play_event", 5, {
+          side: "runner",
+          source: "runner-self-damage-event",
+          payload: {
+            damageType: "core",
+            damageAmount: 2,
+            unpreventableDamage: true,
+            tagAmount: 1,
+            badPublicityAdded: 1,
+          },
+        }),
+        legalAction("play_operation", 6, {
+          side: "corp",
+          source: "corp-damage-operation",
+          payload: {
+            damageType: "meat",
+            damageAmount: 3,
+          },
+        }),
       ],
     });
 
@@ -697,8 +716,18 @@ describe("buildActionSemanticCandidates", () => {
     const endTurn = candidates[2];
     const dataFortSequence = candidates[3];
     const revealTap = candidates[4];
-    if (!gainCredit || !rezIce || !endTurn || !dataFortSequence || !revealTap) {
-      throw new Error("Expected five AI040 candidates");
+    const runnerSelfDamage = candidates[5];
+    const corpDamage = candidates[6];
+    if (
+      !gainCredit ||
+      !rezIce ||
+      !endTurn ||
+      !dataFortSequence ||
+      !revealTap ||
+      !runnerSelfDamage ||
+      !corpDamage
+    ) {
+      throw new Error("Expected seven AI040 candidates");
     }
 
     expect(gainCredit.costProfile).toMatchObject({
@@ -785,6 +814,24 @@ describe("buildActionSemanticCandidates", () => {
       accessPhase: true,
       responseWindow: true,
     });
+
+    expect(runnerSelfDamage.costProfile).toMatchObject({
+      selfDamage: [{ type: "core", amount: 2 }],
+      selfTag: 1,
+      costKnownStatus: "known",
+    });
+    expect(runnerSelfDamage.costProfile.additionalCosts).toEqual(
+      expect.arrayContaining([
+        "damageType",
+        "damageAmount",
+        "unpreventableDamage",
+        "tagAmount",
+        "badPublicityAdded",
+      ]),
+    );
+
+    expect(corpDamage.costProfile.selfDamage).toBeUndefined();
+    expect(corpDamage.costProfile.costKnownStatus).toBe("not_applicable");
   });
 
   it("joins card semantics only when source and ability binding are side-safe", () => {
