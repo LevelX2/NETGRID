@@ -240,6 +240,90 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       ]),
     );
   });
+
+  it("penalizes rez actions with visible zero-effect defense risk", () => {
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([]),
+      corpAction("homing-x0", "rez_ice", {
+        variableRezKind: "x_strength",
+        variableRezValue: 0,
+      }),
+      "simple_rez",
+      {
+        ...testDependencies(),
+        actionCreditCost: () => 4,
+      },
+      {
+        ...semanticCandidate("homing-x0", "corp_window.rez", [
+          "role:trace_ice",
+          "corp_ice.conditional_end_run",
+          "trace.source",
+        ]),
+        actionType: "rez_ice",
+        costProfile: {
+          creditCost: 4,
+          costKnownStatus: "known",
+          variableCost: {
+            kind: "rez_cost",
+            chosen: 0,
+            min: 0,
+          },
+          additionalCosts: [],
+        },
+      },
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_effective_defense_zero_effect_risk",
+          value: -1600,
+        }),
+      ]),
+    );
+  });
+
+  it("rewards rez actions with visible effective defense value", () => {
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([]),
+      corpAction("homing-x1", "rez_ice", {
+        variableRezKind: "x_strength",
+        variableRezValue: 1,
+      }),
+      "simple_rez",
+      {
+        ...testDependencies(),
+        actionCreditCost: () => 5,
+      },
+      {
+        ...semanticCandidate("homing-x1", "corp_window.rez", [
+          "role:trace_ice",
+          "corp_ice.conditional_end_run",
+          "trace.source",
+        ]),
+        actionType: "rez_ice",
+        costProfile: {
+          creditCost: 5,
+          costKnownStatus: "known",
+          variableCost: {
+            kind: "rez_cost",
+            chosen: 1,
+            min: 1,
+          },
+          additionalCosts: [],
+        },
+      },
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_effective_defense_rez_value",
+          value: 900,
+        }),
+      ]),
+    );
+  });
 });
 
 function corpInputWithGoals(
@@ -261,12 +345,15 @@ function corpInputWithGoals(
 function corpAction(
   actionId: string,
   type: LegalAction["type"],
+  payload: LegalAction["payload"] = {},
 ): LegalAction {
   return {
     actionId,
     side: "corp",
     type,
+    label: actionId,
     costs: [],
+    payload,
   } as unknown as LegalAction;
 }
 
