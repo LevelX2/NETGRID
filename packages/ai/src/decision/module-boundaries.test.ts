@@ -539,7 +539,7 @@ describe("AI module boundaries", () => {
     const requiredImports = [
       "./plans/tactical-plan-runner-plans",
       "./plans/tactical-plan-corp-plans",
-      "./plans/tactical-plan-step-candidate-matching",
+      "./plans/tactical-plan-legal-action-mapping",
       "./plans/tactical-plan-progression",
     ];
     const violations = [
@@ -556,6 +556,7 @@ describe("AI module boundaries", () => {
     const planModuleCycles = [
       "tactical-plan-runner-plans.ts",
       "tactical-plan-corp-plans.ts",
+      "tactical-plan-legal-action-mapping.ts",
       "tactical-plan-step-candidate-matching.ts",
     ].flatMap((fileName) => {
       const file = path.join(srcDir, "plans", fileName);

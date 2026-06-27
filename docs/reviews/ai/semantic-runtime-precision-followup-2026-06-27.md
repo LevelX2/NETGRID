@@ -1,6 +1,6 @@
 # Semantic Runtime Precision Follow-up, 2026-06-27
 
-Status: `P9_done`
+Status: `complete`
 
 Prozess: `docs/architecture/ai/semantic-runtime-precision-legacy-cleanup-process-2026-06-27.md`
 
@@ -334,6 +334,25 @@ Verifikation:
 
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/diagnostics/semantic-runtime-debug.test.ts src/diagnostics/decision-debug.test.ts`: grün, 2 Dateien, 13 Tests.
 - `corepack pnpm --dir packages/shared exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts`: grün, 1 Datei, 4 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `corepack pnpm --filter @netgrid/shared typecheck`: grün.
+- `git diff --check`: grün.
+
+## P10 Ergebnis: Abschlussverify
+
+Status: `complete`
+
+Umgesetzt:
+
+- Der breite AI-Testlauf deckte nach P8 eine veraltete Architektur-Gate-Erwartung auf: `tactical-plans.ts` importiert jetzt korrekt `./plans/tactical-plan-legal-action-mapping` statt `./plans/tactical-plan-step-candidate-matching`.
+- `module-boundaries.test.ts` ist auf den neuen Fassaden-Schnitt angepasst und prüft weiterhin, dass Planmodule nicht zurück in `tactical-plans.ts` importieren.
+- Das Folgepaket ist lokal verifiziert und dokumentiert.
+
+Verifikation:
+
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts`: grün, 1 Datei, 23 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: zunächst rot wegen veralteter Boundary-Erwartung, danach grün, 162 Dateien, 1705 Tests.
+- `corepack pnpm --filter @netgrid/shared test`: grün, 1 Datei, 4 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `corepack pnpm --filter @netgrid/shared typecheck`: grün.
 - `git diff --check`: grün.
