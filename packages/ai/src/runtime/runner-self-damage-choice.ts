@@ -1,4 +1,5 @@
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { bestSemanticRuntimeChoice } from "./semantic-choice-ranking";
 import { semanticRuntimeChoiceWithEvidence } from "./semantic-runtime-score-components";
 import type {
@@ -74,6 +75,7 @@ export function runnerSelfDamageSurvivalAssessment(
   input: AiDecisionInput,
   action: LegalAction,
   dependencies: RunnerSelfDamageSurvivalAssessmentDependencies,
+  actionSemanticCandidate?: ActionSemanticCandidate,
 ): RunnerSelfDamageSurvivalAssessment | undefined {
   if (input.side !== "runner" || action.side !== "runner") return undefined;
   const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
@@ -86,6 +88,7 @@ export function runnerSelfDamageSurvivalAssessment(
     action,
     sourceDefinitionId,
     dependencies,
+    actionSemanticCandidate,
   );
   if (!selfDamage) return undefined;
 
@@ -302,7 +305,32 @@ function selfDamageEvidenceForAction(
   action: LegalAction,
   sourceDefinitionId: string,
   dependencies: RunnerSelfDamageSurvivalAssessmentDependencies,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): SelfDamageActionEvidence | undefined {
+  const costProfileDamage = actionSemanticCandidate?.costProfile.selfDamage?.[0];
+  if (
+    actionSemanticCandidate?.actionId === action.actionId &&
+    actionSemanticCandidate.actorSide === "runner" &&
+    costProfileDamage &&
+    typeof costProfileDamage.amount === "number" &&
+    costProfileDamage.amount > 0
+  ) {
+    const badPublicityAdded = nonNegativeNumberPayload(
+      action,
+      "badPublicityAdded",
+    );
+    return {
+      amount: Math.floor(costProfileDamage.amount),
+      type: costProfileDamage.type,
+      preventable: preventablePayload(action),
+      ...(badPublicityAdded !== undefined ? { badPublicityAdded } : {}),
+      evidence: [
+        "self_damage_contract:action_cost_profile",
+        `self_damage_candidate:${actionSemanticCandidate.actionId}`,
+      ],
+    };
+  }
+
   if (
     sourceDefinitionId === dependencies.fakedHitCardId &&
     action.type === "play_event"
@@ -405,6 +433,35 @@ function stringRecordValue(value: unknown, key: string): string | undefined {
 function booleanRecordValue(value: unknown, key: string): boolean | undefined {
   const record = value as Record<string, unknown>;
   return typeof record[key] === "boolean" ? record[key] : undefined;
+}
+
+function preventablePayload(
+  action: LegalAction,
+): RunnerSelfDamageSurvivalAssessment["preventable"] {
+  if (booleanActionPayload(action, "unpreventableDamage") === true) {
+    return false;
+  }
+  if (booleanActionPayload(action, "preventableDamage") === true) return true;
+  return "unknown";
+}
+
+function booleanActionPayload(
+  action: LegalAction,
+  key: string,
+): boolean | undefined {
+  const value = action.payload?.[key];
+  return typeof value === "boolean" ? value : undefined;
+}
+
+function nonNegativeNumberPayload(
+  action: LegalAction,
+  key: string,
+): number | undefined {
+  const value = action.payload?.[key];
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    return undefined;
+  }
+  return Math.floor(value);
 }
 
 function sortedUnique(values: string[]): string[] {

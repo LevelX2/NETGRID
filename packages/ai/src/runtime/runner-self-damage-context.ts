@@ -1,4 +1,5 @@
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
   runnerSelfDamageGuardedDecision,
   runnerSelfDamageImmediateWinSemanticChoice,
@@ -29,10 +30,12 @@ export type RunnerSelfDamageContext = {
   runnerSelfDamageSurvivalAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ) => RunnerSelfDamageSurvivalAssessmentResult | undefined;
   runnerSelfDamageSurvivalExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ) => SemanticRuntimeExclusion | undefined;
 };
 
@@ -42,8 +45,14 @@ export function createRunnerSelfDamageContext(
   function survivalAssessment(
     input: AiDecisionInput,
     action: LegalAction,
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ): RunnerSelfDamageSurvivalAssessmentResult | undefined {
-    return runnerSelfDamageSurvivalAssessment(input, action, dependencies);
+    return runnerSelfDamageSurvivalAssessment(
+      input,
+      action,
+      dependencies,
+      actionSemanticCandidate,
+    );
   }
 
   return {
@@ -57,7 +66,18 @@ export function createRunnerSelfDamageContext(
         survivalAssessment,
       }),
     runnerSelfDamageSurvivalAssessment: survivalAssessment,
-    runnerSelfDamageSurvivalExclusion: (input, action) =>
-      runnerSelfDamageSurvivalExclusion(input, action, { survivalAssessment }),
+    runnerSelfDamageSurvivalExclusion: (
+      input,
+      action,
+      actionSemanticCandidate,
+    ) =>
+      runnerSelfDamageSurvivalExclusion(input, action, {
+        survivalAssessment: (assessmentInput, assessmentAction) =>
+          survivalAssessment(
+            assessmentInput,
+            assessmentAction,
+            actionSemanticCandidate,
+          ),
+      }),
   };
 }

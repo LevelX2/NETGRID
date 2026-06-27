@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
   semanticRuntimeActionExclusion,
   type SemanticRuntimeActionExclusionDependencies,
@@ -9,6 +10,7 @@ export type SemanticRuntimeActionExclusionContext = {
   semanticRuntimeActionExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ) => SemanticRuntimeExclusion | undefined;
 };
 
@@ -16,7 +18,12 @@ export function createSemanticRuntimeActionExclusionContext(
   dependencies: SemanticRuntimeActionExclusionDependencies,
 ): SemanticRuntimeActionExclusionContext {
   return {
-    semanticRuntimeActionExclusion: (input, action) =>
-      semanticRuntimeActionExclusion(input, action, dependencies),
+    semanticRuntimeActionExclusion: (input, action, actionSemanticCandidate) =>
+      semanticRuntimeActionExclusion(
+        input,
+        action,
+        actionSemanticCandidate,
+        dependencies,
+      ),
   };
 }

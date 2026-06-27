@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
@@ -18,6 +19,7 @@ export type SemanticRuntimeActionExclusionDependencies = {
   runnerSelfDamageSurvivalExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
+    actionSemanticCandidate: ActionSemanticCandidate | undefined,
   ) => SemanticRuntimeExclusion | undefined;
   runnerEncounterActionExclusion: (
     input: AiDecisionInput,
@@ -60,6 +62,7 @@ export type SemanticRuntimeActionExclusionDependencies = {
 export function semanticRuntimeActionExclusion(
   input: AiDecisionInput,
   action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
   dependencies: SemanticRuntimeActionExclusionDependencies,
 ): SemanticRuntimeExclusion | undefined {
   const planMemoryExclusion = dependencies.planMemoryActionExclusion(
@@ -77,7 +80,11 @@ export function semanticRuntimeActionExclusion(
     };
   }
   const selfDamageSurvivalExclusion =
-    dependencies.runnerSelfDamageSurvivalExclusion(input, action);
+    dependencies.runnerSelfDamageSurvivalExclusion(
+      input,
+      action,
+      actionSemanticCandidate,
+    );
   if (selfDamageSurvivalExclusion) return selfDamageSurvivalExclusion;
   const encounterExclusion = dependencies.runnerEncounterActionExclusion(
     input,

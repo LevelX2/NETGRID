@@ -6520,6 +6520,17 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 152 Dateien, 1671 Tests.
 
+- `AI-COMPLETE-10` vierter Cost-Profil-Schnitt:
+  - Der Runtime-Exclusion-Pfad reicht den `ActionSemanticCandidate` jetzt bis zur Self-Damage-Survival-Prüfung durch.
+  - `runner-self-damage-choice.ts` nutzt `ActionCostProfile.selfDamage` bevorzugt vor Faked-Hit-/AI-Hint-Fallbacks und übernimmt side-sichere Payload-Indikatoren für Preventable/Unpreventable und Bad Publicity.
+  - Die bestehende Fallback-Logik bleibt erhalten, wenn kein passender Candidate oder kein Selbstschaden im CostProfile vorhanden ist.
+  - `packages/ai/src/runtime/runner-self-damage-choice.test.ts` schützt, dass Candidate-basierte Self-Damage-Evidence eine Flatline-Exclusion auslöst, ohne Hint-Fallbacks zu benötigen.
+  - Status bleibt `IN_PROGRESS`, weil weitere Cost-/Timing-/BoardContext-Spezialpfade noch auditiert und angebunden werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-self-damage-choice.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 153 Dateien, 1672 Tests.
+
 Nächstes aktives Ziel: `AI-COMPLETE-10`.
 
 ## Audit-Ledger

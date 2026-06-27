@@ -24,6 +24,7 @@ export type SemanticRuntimeChoiceBuilderDependencies = {
   actionExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
+    actionSemanticCandidate: ActionSemanticCandidate | undefined,
   ) => SemanticRuntimeExclusion | undefined;
   scoreBreakdown: (
     input: AiDecisionInput,
@@ -92,7 +93,11 @@ function scoreSemanticRuntimeAction(
     actionSemanticCandidate,
     dependencies.scope,
   );
-  const exclusion = dependencies.actionExclusion(input, action);
+  const exclusion = dependencies.actionExclusion(
+    input,
+    action,
+    actionSemanticCandidate,
+  );
   const scoreBreakdown = dependencies.scoreBreakdown(
     input,
     action,
