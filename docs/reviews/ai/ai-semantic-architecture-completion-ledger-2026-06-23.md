@@ -6964,6 +6964,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweiundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` entfernt den produktiven Search-Tool-`legalNow`-Fallback über `action.label` gegen den sichtbaren Kartentitel.
+  - Search-Tool-Legalität entsteht dort nur noch aus Source-/Payload-Zuordnung über `actionSourceMatchesRecord`, nicht aus label-only Text wie `Self-Modifying Code: search your stack for a program`.
+  - `deck-capabilities.test.ts` schützt, dass label-only Search-Text ohne passende Source nicht mehr als legal zählt, eine passende sichtbare Source aber weiterhin `canSearchProgramsNow` aktiviert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 3 Dateien, 119 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

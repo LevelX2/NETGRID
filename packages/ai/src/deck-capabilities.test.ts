@@ -164,6 +164,58 @@ describe("DeckCapabilityProfile", () => {
     });
   });
 
+  it("requires source evidence before marking search tools legal now", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard("smc-1", "onr_v1_059_self-modifying-code", "runner", "program", {
+        title: "Self-Modifying Code",
+        memoryCost: 2,
+      }),
+    ];
+
+    const labelOnly = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [
+        legalAction(
+          "label-only-search",
+          "runner",
+          "trigger_ability",
+          "other-source",
+          "Self-Modifying Code: search your stack for a program",
+        ),
+      ],
+      deckSnapshot: runnerSnapshot([["onr_v1_059_self-modifying-code", 1]]),
+    });
+
+    expect(labelOnly.runner?.searchAccess.canSearchProgramsNow).toBe(false);
+    expect(labelOnly.runner?.searchAccess.tools[0]).toMatchObject({
+      cardId: "onr_v1_059_self-modifying-code",
+      legalNow: false,
+    });
+
+    const sourced = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [
+        legalAction(
+          "sourced-search",
+          "runner",
+          "trigger_ability",
+          "smc-1",
+          "Use ability",
+        ),
+      ],
+      deckSnapshot: runnerSnapshot([["onr_v1_059_self-modifying-code", 1]]),
+    });
+
+    expect(sourced.runner?.searchAccess.canSearchProgramsNow).toBe(true);
+    expect(sourced.runner?.searchAccess.tools[0]).toMatchObject({
+      cardId: "onr_v1_059_self-modifying-code",
+      legalNow: true,
+    });
+  });
+
   it("marks missing runner coverage without guessing unavailable deck answers", () => {
     const profile = buildDeckCapabilityProfile({
       side: "runner",

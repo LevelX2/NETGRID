@@ -655,10 +655,10 @@ function searchAccessToolForRecord(
     status,
     canSearchPrograms,
     canSearchBreakers,
-    legalNow: params.legalActions?.some((action) =>
-      actionSourceMatchesRecord(action, record) ||
-      action.label.toLowerCase().includes(record.title.toLowerCase()),
-    ) ?? false,
+    legalNow:
+      params.legalActions?.some((action) =>
+        actionSourceMatchesRecord(action, record),
+      ) ?? false,
     confidence: /program_search|breaker_search|search your stack/.test(`${text} ${signals}`)
       ? "high"
       : "medium",
