@@ -70,6 +70,11 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
     scoreTerminalWindow: dependencies.scoreTerminalWindow,
     actionIsScoreLine: dependencies.corpActionIsScoreLine,
     rolesForAction: dependencies.rolesForAction,
+    scoreLineActionIsRisky: (input, action) =>
+      dependencies.corpRemoteRezFloorAssessment(input, action)
+        ?.blockedByFloor === true ||
+      dependencies.corpRemoteScoreContestabilityAssessment(input, action)
+        ?.contestable === true,
   });
 
   const {
