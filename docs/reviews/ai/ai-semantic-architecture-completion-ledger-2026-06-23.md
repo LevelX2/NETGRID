@@ -58,7 +58,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `VERIFIED` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Erfüllt: Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate, werden in Semantic Runtime und TacticalPlans diagnostisch geführt und wirken für Pressure, Remote Contest, Economy, Setup, Risk-Control und Bypass im Hauptscore. |
 | AI-COMPLETE-08 | Corp-TacticalGoals produktiv vollständig integrieren. | `VERIFIED` | Corp-Ziele wurden begonnen, müssen produktiv und diagnosefähig durchgängig wirken. | Erfüllt: Corp-Ziele wirken für Score, Advance, Remote, Zentralserver, Rez, Economy, Tag/Punish und sichtbare Ambush-Fenster im Hauptscore; tagabhängiger Damage bleibt Payoff-gated. |
 | AI-COMPLETE-09 | ActionSemanticCandidate-Befüllung vervollständigen. | `VERIFIED` | Source/Ability/Cost/Timing/Target/BoardContext-Coverage muss gemessen und geschlossen werden. | Erfüllt: Runtime-relevante Source/Ability-, Target-, Cost/Timing- und BoardContext-Felder werden side-safe befüllt; verbleibende Gaps sind echte fehlende Engine-/Target-/Profile-Evidence oder spätere TargetProfile-Arbeit. |
-| AI-COMPLETE-10 | Cost/Timing/BoardContext verallgemeinern. | `PENDING` | Score- und Planpfade enthalten verstreute Spezialbewertungen. | Gemeinsame side-safe Projektionen speisen Scoring und Debug. |
+| AI-COMPLETE-10 | Cost/Timing/BoardContext verallgemeinern. | `IN_PROGRESS` | Score- und Planpfade enthalten verstreute Spezialbewertungen. | Gemeinsame side-safe Projektionen speisen Scoring und Debug. |
 | AI-COMPLETE-11 | TargetProfile-/TargetChoice-Pipeline produktiv machen. | `PENDING` | TargetChoice ist überwiegend Shadow/Diagnose. | Konkrete legale Zieloptionen wirken im Target Fit ohne `selectedChoices`-Erzeugung oder Hidden Info. |
 | AI-COMPLETE-12 | Hard-Gate-Vertrag härten. | `PENDING` | HardGates existieren, müssen Vorrang vor allen Scorepfaden behalten. | Blockierte Kandidaten können nicht durch positive Scores gewinnen; WhyNot nennt Blocker. |
 | AI-COMPLETE-13 | Micro-/Overlay-/Override-Pfade in den Spine integrieren oder entfernen. | `PENDING` | `runtime/practical-*` und Runtime-Overlays sind aktiv. | Kein dauerhaftes Score-plus-Override-System; terminale Entscheidungen sind modellierte Gate-/Outcome-Typen. |
@@ -6488,6 +6488,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `rg -n "AI-COMPLETE-09|source_unresolved|ability_unresolved|target_context_unavailable|card_semantics_unavailable|not_projected|cardImplementationAbilityKey-derived|payload .*target|boardContext" docs/reviews/ai/ai-semantic-architecture-completion-ledger-2026-06-23.md packages/ai/src/action-semantic-candidate.ts packages/ai/src/actions packages/ai/src/action-semantic-candidate.test.ts` geprüft.
   - Verifikation: letzter vollständiger Code-Gate nach AI09-Codeänderungen grün: `corepack pnpm --filter @netgrid/ai test`, 151 Dateien, 1668 Tests.
   - Status: `VERIFIED`.
+
+- `AI-COMPLETE-10` erster Cost-Profil-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-score-breakdown.ts` nutzt für die generische `semantic_credit_cost_penalty` jetzt bevorzugt das normalisierte `ActionSemanticCandidate.costProfile`.
+  - Der bisherige Runtime-Helper bleibt Fallback, wenn kein Candidate vorhanden ist oder der Candidate-Cost-Status unbekannt bleibt.
+  - `packages/ai/src/runtime/semantic-runtime-score-breakdown.test.ts` schützt Candidate-Cost-Autorität und Fallback-Verhalten.
+  - Status bleibt `IN_PROGRESS`, weil weitere Cost-/Timing-/BoardContext-Spezialpfade noch auditiert und angebunden werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-score-breakdown.test.ts src/semantic-ai-runtime-cutover.test.ts -t "semantic runtime score breakdown|Semantic AI runtime cutover"` grün, 2 Dateien, 68 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 152 Dateien, 1670 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-10`.
 

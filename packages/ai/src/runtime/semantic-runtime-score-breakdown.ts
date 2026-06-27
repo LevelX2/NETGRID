@@ -104,7 +104,7 @@ export function buildSemanticRuntimeScoreBreakdown(params: {
   );
   const privateBonus =
     params.action.visibility === "private_to_actor" ? 25 : 0;
-  const creditCost = params.dependencies.actionCreditCost(params.action);
+  const creditCost = semanticRuntimeCreditCostForPenalty(params);
   const costPenalty = -(creditCost * 35);
   return [
     buildSemanticDecisionDebugScoreComponent({
@@ -147,4 +147,23 @@ export function buildSemanticRuntimeScoreBreakdown(params: {
       reason: String(creditCost),
     }),
   ];
+}
+
+function semanticRuntimeCreditCostForPenalty(params: {
+  action: LegalAction;
+  actionSemanticCandidate?: ActionSemanticCandidate;
+  dependencies: Pick<SemanticRuntimeScoreBreakdownDependencies, "actionCreditCost">;
+}): number {
+  const costProfile = params.actionSemanticCandidate?.costProfile;
+  if (costProfile === undefined) {
+    return params.dependencies.actionCreditCost(params.action);
+  }
+  if (typeof costProfile.creditCost === "number") return costProfile.creditCost;
+  if (
+    costProfile.costKnownStatus === "known" ||
+    costProfile.costKnownStatus === "not_applicable"
+  ) {
+    return 0;
+  }
+  return params.dependencies.actionCreditCost(params.action);
 }
