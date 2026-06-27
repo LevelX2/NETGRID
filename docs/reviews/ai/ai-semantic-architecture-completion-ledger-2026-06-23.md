@@ -7000,6 +7000,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` sechsundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/strategic-action-fit.ts` entfernt `action.label` aus dem produktiven Corp-Economy-Fit für StrategicIntent.
+  - Corp-Economy-Install-Fit nutzt dort sichtbare Source-Card-Metadaten wie Titel, DefinitionId und RulesText, aber keinen label-only Economy-/Credit-/Bank-Text der LegalAction.
+  - `strategic-action-fit.test.ts` schützt, dass label-only Economy-Install-Text keinen StrategicIntent-Fit erzeugt, eine sichtbare Economy-Source aber weiterhin Fit-Evidence liefert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/strategic-action-fit.test.ts src/runtime/semantic-choice-ranking.test.ts` grün, 2 Dateien, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

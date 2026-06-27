@@ -51,6 +51,47 @@ describe("semanticRuntimeStrategicActionFitEvidence", () => {
       ),
     ).toEqual([]);
   });
+
+  it("uses visible source economy evidence and ignores label-only economy text", () => {
+    const labelOnly = action("label-only-economy", "corp", "install_card");
+    labelOnly.label = "Install economy bank asset";
+    labelOnly.source = "missing-source";
+    const sourced = action("sourced-economy", "corp", "install_card");
+    sourced.label = "Install asset";
+    sourced.source = "economy-asset";
+    const input = corpStrategicInput([labelOnly, sourced], [
+      {
+        instanceId: "economy-asset",
+        definitionId: "custom-economy-asset",
+        title: "Neutral Asset",
+        rulesText: "Gain credits when used.",
+        type: "asset",
+        known: true,
+        owner: "corp",
+        controller: "corp",
+      },
+    ]);
+
+    expect(
+      semanticRuntimeStrategicActionFitEvidence(
+        input,
+        labelOnly,
+        "corp.semantic.install_asset",
+      ),
+    ).toEqual([]);
+    expect(
+      semanticRuntimeStrategicActionFitEvidence(
+        input,
+        sourced,
+        "corp.semantic.install_asset",
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        "semantic_strategic_action_fit:true",
+        "strategic_action_fit_family:corp_asset_economy",
+      ]),
+    );
+  });
 });
 
 function aiInput(
@@ -112,6 +153,56 @@ function strategyProfile(): AiDeckStrategyProfile {
       plannerEffect: "strategic_intent_input",
     },
   };
+}
+
+function corpStrategicInput(
+  legalActions: LegalAction[],
+  gripOrHq: PlayerView["own"]["gripOrHq"],
+): AiDecisionInputWithDeckCapabilities {
+  const baseView = playerView("corp", 7);
+  const input: AiDecisionInput = {
+    side: "corp",
+    playerView: {
+      ...baseView,
+      own: {
+        ...baseView.own,
+        gripOrHq,
+      },
+      opponent: {
+        ...baseView.opponent,
+        identity: visibleIdentity("runner"),
+      },
+      legalActions,
+    },
+    eventTail: [],
+    legalActions,
+    difficulty: "normal",
+    seed: "strategic-action-fit-test",
+    decisionId: "strategic-action-fit-test",
+    actionNumber: 1,
+    profileId: "strategic-action-fit-test",
+  };
+  return {
+    ...input,
+    ownStrategicIntentState: {
+      side: "corp",
+      stateVersion: 1,
+      primaryStrategy: {
+        strategyId: "corp.asset_economy",
+        family: "corp_asset_economy",
+      },
+      phase: "convert",
+      targetVector: {
+        kind: "economy",
+        evidence: ["test:economy"],
+      },
+      availableCredits: 7,
+      blockers: [],
+      evidence: [],
+    } as unknown as NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+    >,
+  } as AiDecisionInputWithDeckCapabilities;
 }
 
 function score(strategyId: string): DeckStrategyScore {

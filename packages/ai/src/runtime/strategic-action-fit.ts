@@ -373,7 +373,6 @@ function corpActionLooksLikeEconomy(
     source?.title,
     source?.definitionId,
     source?.rulesText,
-    action.label,
   ]
     .filter(Boolean)
     .join(" ")
