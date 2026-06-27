@@ -1,5 +1,12 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
+import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
+import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
+
+type AiCardHintWithSignals = AiCardHint & { tacticSignals?: string[] };
+
+const AI_HINTS = createAiHintsByCard();
+
 export function corpVisibleMeatDamagePayoff(
   input: AiDecisionInput,
 ): boolean {
@@ -11,31 +18,19 @@ export function corpVisibleMeatDamagePayoff(
       ...server.root,
     ]),
   ];
-  return ownVisibleCards.some((card) =>
-    [
-      "onr_v1_302_scorched-earth",
-      "onr_v1_339_schlaghund",
-      "onr_v1_307_urban-renewal",
-    ].includes(card.definitionId ?? ""),
-  );
+  return ownVisibleCards.some(visibleCardHasMeatDamagePayoff);
 }
 
 export function corpVisibleRunnerDamagePreventionEvidence(
   input: AiDecisionInput,
 ): string[] {
   const rig = input.playerView.opponent.rig ?? [];
-  const fullBodyConversion = rig.some(
-    (card) => card.definitionId === "onr_v1_127_full-body-conversion",
-  );
-  const dermatech = rig.some(
-    (card) => card.definitionId === "onr_v1_125_dermatech-bodyplating",
-  );
+  const prevention = rig.some(visibleCardPreventsDamage);
+  const meatPrevention = rig.some(visibleCardPreventsMeatDamage);
   return [
-    ...(fullBodyConversion
-      ? ["runner_full_body_conversion_visible:true"]
-      : []),
-    ...(dermatech ? ["runner_dermatech_bodyplating_visible:true"] : []),
-    ...(fullBodyConversion || dermatech ? ["prevention_pressure:true"] : []),
+    ...(prevention ? ["runner_damage_prevention_visible:true"] : []),
+    ...(meatPrevention ? ["runner_meat_damage_prevention_visible:true"] : []),
+    ...(prevention ? ["prevention_pressure:true"] : []),
   ];
 }
 
@@ -43,12 +38,12 @@ export function corpVisibleRunnerResourceTrashEvidence(
   input: AiDecisionInput,
   target: VisibleCard,
 ): { valueBonus: number; evidence: string[] } {
-  if (target.definitionId === "onr_v1_160_diplomatic-immunity") {
+  if (visibleCardPreventsMeatDamage(target)) {
     return {
       valueBonus: 700,
       evidence: [
         "corp_tagged_damage_prevention_resource_trash",
-        "runner_resource_diplomatic_immunity:true",
+        "runner_resource_damage_prevention_visible:true",
         "cancel_blocked:true",
         ...(corpVisibleMeatDamagePayoff(input)
           ? ["corp_visible_meat_damage_payoff:true"]
@@ -56,7 +51,7 @@ export function corpVisibleRunnerResourceTrashEvidence(
       ],
     };
   }
-  if (target.definitionId === "onr_v1_182_submarine-uplink") {
+  if (visibleCardProvidesTraceDefense(target)) {
     return {
       valueBonus: input.playerView.opponent.tags >= 7 ? 850 : 250,
       evidence: [
@@ -69,4 +64,82 @@ export function corpVisibleRunnerResourceTrashEvidence(
     };
   }
   return { valueBonus: 0, evidence: [] };
+}
+
+function visibleCardHasMeatDamagePayoff(card: VisibleCard): boolean {
+  const payoff = classifyTagPunishPayoffFromOntology(card.definitionId);
+  return (
+    payoff?.payoffKinds.some(
+      (kind) => kind === "damage" || kind === "scored_agenda_damage_like",
+    ) === true
+  );
+}
+
+function visibleCardPreventsDamage(card: VisibleCard): boolean {
+  const hint = hintForVisibleCard(card);
+  return (
+    hintHasRole(hint, "damage_prevention") ||
+    hintHasSignal(hint, "defense.damage_prevention") ||
+    hintHasEffectKind(hint, [
+      "damage_prevention",
+      "meat_damage_prevention",
+      "net_damage_prevention",
+      "brain_damage_prevention",
+      "flatline_prevention",
+    ])
+  );
+}
+
+function visibleCardPreventsMeatDamage(card: VisibleCard): boolean {
+  const hint = hintForVisibleCard(card);
+  return (
+    hintHasRole(hint, "meat_damage") ||
+    hintHasSignal(hint, "defense.meat_damage_prevention") ||
+    hintHasSignal(hint, "defense.all_meat_damage_prevention") ||
+    hintHasEffectKind(hint, ["meat_damage_prevention"]) ||
+    hint?.effects?.some(
+      (effect) =>
+        effect.kind === "prevention_replacement" &&
+        String((effect as Record<string, unknown>).target ?? "").includes(
+          "meat_damage",
+        ),
+    ) === true
+  );
+}
+
+function visibleCardProvidesTraceDefense(card: VisibleCard): boolean {
+  const hint = hintForVisibleCard(card);
+  return (
+    hintHasRole(hint, "trace_defense") ||
+    hintHasSignal(hint, "defense.trace_defense") ||
+    hintHasEffectKind(hint, ["trace_defense", "link"])
+  );
+}
+
+function hintForVisibleCard(card: VisibleCard): AiCardHint | undefined {
+  return card.definitionId ? AI_HINTS.get(card.definitionId) : undefined;
+}
+
+function hintHasRole(hint: AiCardHint | undefined, role: string): boolean {
+  return (
+    hint?.roles.includes(role) === true ||
+    hint?.planRoles.includes(role) === true
+  );
+}
+
+function hintHasSignal(hint: AiCardHint | undefined, signal: string): boolean {
+  return (
+    (hint as AiCardHintWithSignals | undefined)?.tacticSignals?.includes(
+      signal,
+    ) === true
+  );
+}
+
+function hintHasEffectKind(
+  hint: AiCardHint | undefined,
+  kinds: string[],
+): boolean {
+  return (
+    hint?.effects?.some((effect) => kinds.includes(effect.kind)) === true
+  );
 }

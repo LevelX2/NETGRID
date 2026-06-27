@@ -11,16 +11,6 @@ import {
 import type {
   CorpPunishKind,
 } from "../runtime/corp-tag-punish-types";
-import {
-  CLOSED_ACCOUNTS_LIKE_PUNISH_IDS,
-  CORP_TAG_SOURCE_IDS,
-  CORP_TRACE_TAG_SOURCE_IDS,
-  DATAPOOL_LIKE_PUNISH_IDS,
-  POWER_GRID_OVERLOAD_LIKE_PUNISH_IDS,
-  PUNITIVE_COUNTERSTRIKE_LIKE_PUNISH_IDS,
-  SCORCHED_EARTH_LIKE_PUNISH_IDS,
-  URBAN_RENEWAL_LIKE_PUNISH_IDS,
-} from "./tag-punish-card-sets";
 
 export type CorpTagPunishActionContextDependencies = {
   sourceDefinitionIdForAction: (
@@ -81,22 +71,6 @@ export function createCorpTagPunishActionContext(
       return "scored_agenda_damage_like";
     if (scoredAgenda?.kind === "scored_agenda_trace_tag")
       return "scored_agenda_trace_tag_like";
-    const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
-      input,
-      action,
-    );
-    if (SCORCHED_EARTH_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-      return "scorched_earth_like";
-    if (URBAN_RENEWAL_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-      return "urban_renewal_like";
-    if (PUNITIVE_COUNTERSTRIKE_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-      return "punitive_counterstrike_like";
-    if (CLOSED_ACCOUNTS_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-      return "closed_accounts_like";
-    if (POWER_GRID_OVERLOAD_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-      return "power_grid_overload_like";
-    if (DATAPOOL_LIKE_PUNISH_IDS.has(sourceDefinitionId))
-      return "datapool_like";
     const roles = dependencies.rolesForAction(input, action);
     if (roles.includes("tag_punishment")) return "unknown";
     return undefined;
@@ -110,11 +84,6 @@ export function createCorpTagPunishActionContext(
     if (ontology?.isTagSource) return true;
     const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
     if (scoredAgenda?.kind === "scored_agenda_trace_tag") return true;
-    const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
-      input,
-      action,
-    );
-    if (CORP_TAG_SOURCE_IDS.has(sourceDefinitionId)) return true;
     const roles = dependencies.rolesForAction(input, action);
     return roles.some(
       (role) =>
@@ -132,11 +101,6 @@ export function createCorpTagPunishActionContext(
     if (ontology?.isTraceTagSource) return true;
     const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
     if (scoredAgenda?.kind === "scored_agenda_trace_tag") return true;
-    const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
-      input,
-      action,
-    );
-    if (CORP_TRACE_TAG_SOURCE_IDS.has(sourceDefinitionId)) return true;
     return dependencies
       .rolesForAction(input, action)
       .some((role) => role.includes("trace"));
