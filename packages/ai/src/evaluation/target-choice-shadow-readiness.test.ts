@@ -59,6 +59,7 @@ describe("TargetChoice selectedChoices readiness", () => {
       scope: "target_choice_selectedchoices_readiness_report_only",
       scenarioCount: 1,
       actionReportCount: 3,
+      targetFitRecommendationCount: 1,
       productiveUseAllowed: false,
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
@@ -68,6 +69,21 @@ describe("TargetChoice selectedChoices readiness", () => {
     expect(report.categoryCounts.ready_for_local_dry_run).toBe(1);
     expect(report.categoryCounts.ready_for_shadow_only).toBe(1);
     expect(report.categoryCounts.blocked_engine_only).toBe(1);
+    expect(report.cases).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actionId: "choice",
+          targetFitRecommendationReady: true,
+          targetFitRecommendationOptionId: "high",
+          evidence: expect.arrayContaining([
+            "target_fit_recommendation_ready:true",
+          ]),
+        }),
+      ]),
+    );
+    expect(report.evidence).toEqual(
+      expect.arrayContaining(["target_fit_recommendation_count:1"]),
+    );
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
   });
 

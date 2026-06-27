@@ -83,6 +83,7 @@ describe("TargetChoiceShadow candidate coverage", () => {
         engineOnly: 1,
         noSideSafeOptions: 0,
       },
+      targetFitRecommendationCount: 1,
       productiveUseAllowed: false,
       noRuntimeEffect: true,
     });
@@ -91,6 +92,9 @@ describe("TargetChoiceShadow candidate coverage", () => {
       utilityLinkedOptions: 1,
       opportunityLinkedOptions: 1,
     });
+    expect(report.evidence).toEqual(
+      expect.arrayContaining(["target_fit_recommendation_count:1"]),
+    );
     expect(report.scenariosWithoutReports).toEqual(["missing_case"]);
     expect(report.scenariosWithBlockedRequirements).toEqual(["blocked_case"]);
     expect(containsForbiddenSemanticMarker(report)).toBe(false);

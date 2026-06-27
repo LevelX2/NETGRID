@@ -6606,6 +6606,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-11`.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1675 Tests.
 
+- `AI-COMPLETE-11` vierter TargetChoice-Readiness-Schnitt:
+  - `packages/ai/src/evaluation/target-choice-shadow-coverage.ts` zählt produktive Target-Fit-Recommendations zusätzlich zur Shadow-Coverage.
+  - `packages/ai/src/evaluation/target-choice-shadow-readiness.ts` weist pro Case und im Report aus, ob eine Target-Fit-Recommendation bereitsteht, ohne die SelectedChoices-Readiness-Kategorie zu vermischen.
+  - Beide Reports bleiben no-effect/report-only und erzeugen weiterhin keine `selectedChoices` oder `selectedTargets`.
+  - `target-choice-shadow-coverage.test.ts` und `target-choice-shadow-readiness.test.ts` schützen Recommendation-Zählung, Evidence und Side-Safety.
+  - Status bleibt `IN_PROGRESS`, weil produktive Runtime-Auswahl weiterhin nur Target-Fit beeinflusst und noch nicht final auditiert ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/target-choice-shadow-coverage.test.ts src/evaluation/target-choice-shadow-readiness.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1675 Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

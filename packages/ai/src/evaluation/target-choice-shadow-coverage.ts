@@ -2,6 +2,7 @@ import type {
   TargetChoiceShadowReport,
   TargetChoiceShadowScorecardV2,
 } from "../decision/target-choice-shadow";
+import { targetChoiceRecommendationForTargetFit } from "../decision/target-choice-shadow";
 import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
 
 export type TargetChoiceShadowCoverageCase = {
@@ -32,6 +33,7 @@ export type TargetChoiceShadowCandidateCoverageReport = {
     noSideSafeOptions: number;
   };
   contextSignalTotals: TargetChoiceShadowScorecardV2["contextSignalCounts"];
+  targetFitRecommendationCount: number;
   scenariosWithoutReports: string[];
   scenariosWithOnlyEmptyReports: string[];
   scenariosWithBlockedRequirements: string[];
@@ -68,6 +70,9 @@ export function buildTargetChoiceShadowCandidateCoverageReport(
     opportunityLinkedOptions: 0,
     threatLinkedOptions: 0,
   };
+  const targetFitRecommendationCount = reports.filter((report) =>
+    targetChoiceRecommendationForTargetFit(report),
+  ).length;
 
   for (const report of reports) {
     const scorecard = report.scorecard;
@@ -111,6 +116,7 @@ export function buildTargetChoiceShadowCandidateCoverageReport(
     optionTotals,
     blockedRequirementTotals,
     contextSignalTotals,
+    targetFitRecommendationCount,
     scenariosWithoutReports: sortedScenarioIds(
       cases.filter((coverageCase) => coverageCase.reports.length === 0),
     ),
@@ -138,6 +144,7 @@ export function buildTargetChoiceShadowCandidateCoverageReport(
       `action_report_count:${reports.length}`,
       `covered_report_count:${coverageStatusCounts.covered}`,
       `blocked_report_count:${coverageStatusCounts.blocked}`,
+      `target_fit_recommendation_count:${targetFitRecommendationCount}`,
     ],
   };
   assertSemanticObjectSideSafe(report, "TargetChoiceShadowCandidateCoverageReport");

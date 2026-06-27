@@ -1,4 +1,5 @@
 import type { TargetChoiceShadowReport } from "../decision/target-choice-shadow";
+import { targetChoiceRecommendationForTargetFit } from "../decision/target-choice-shadow";
 import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
 import type { TargetChoiceShadowCoverageCase } from "./target-choice-shadow-coverage";
 
@@ -17,6 +18,8 @@ export type TargetChoiceSelectedChoicesReadinessCase = {
   category: TargetChoiceSelectedChoicesReadinessCategory;
   optionCount: number;
   topOptionId?: string;
+  targetFitRecommendationReady: boolean;
+  targetFitRecommendationOptionId?: string;
   evidence: string[];
 };
 
@@ -42,6 +45,7 @@ export type TargetChoiceSelectedChoicesReadinessReport = {
   scenarioCount: number;
   actionReportCount: number;
   categoryCounts: Record<TargetChoiceSelectedChoicesReadinessCategory, number>;
+  targetFitRecommendationCount: number;
   cases: TargetChoiceSelectedChoicesReadinessCase[];
   followupCandidates: TargetChoiceFollowupCandidate[];
   productiveUseAllowed: false;
@@ -69,12 +73,16 @@ export function buildTargetChoiceSelectedChoicesReadinessReport(
   for (const readinessCase of readinessCases) {
     categoryCounts[readinessCase.category] += 1;
   }
+  const targetFitRecommendationCount = readinessCases.filter(
+    (readinessCase) => readinessCase.targetFitRecommendationReady,
+  ).length;
   const report: TargetChoiceSelectedChoicesReadinessReport = {
     version: "target-choice-selectedchoices-readiness-v1",
     scope: "target_choice_selectedchoices_readiness_report_only",
     scenarioCount: cases.length,
     actionReportCount: readinessCases.length,
     categoryCounts,
+    targetFitRecommendationCount,
     cases: readinessCases.sort(
       (left, right) =>
         left.scenarioId.localeCompare(right.scenarioId) ||
@@ -95,6 +103,7 @@ export function buildTargetChoiceSelectedChoicesReadinessReport(
       "target_choice_selectedchoices_readiness:report_only",
       `scenario_count:${cases.length}`,
       `action_report_count:${readinessCases.length}`,
+      `target_fit_recommendation_count:${targetFitRecommendationCount}`,
       `followup_candidate_count:${followupCandidates.length}`,
       "selected_choices_created:false",
       "selected_targets_created:false",
@@ -110,6 +119,7 @@ function readinessCaseForReport(
 ): TargetChoiceSelectedChoicesReadinessCase {
   const category = categoryForReport(report);
   const topOption = report.scorecard.topOption;
+  const targetFitRecommendation = targetChoiceRecommendationForTargetFit(report);
   return {
     scenarioId,
     actionId: report.actionId,
@@ -117,6 +127,10 @@ function readinessCaseForReport(
     category,
     optionCount: report.scorecard.optionCount,
     ...(topOption ? { topOptionId: topOption.optionId } : {}),
+    targetFitRecommendationReady: targetFitRecommendation !== undefined,
+    ...(targetFitRecommendation
+      ? { targetFitRecommendationOptionId: targetFitRecommendation.optionId }
+      : {}),
     evidence: [
       `scenario:${scenarioId}`,
       `action:${report.actionId}`,
@@ -125,6 +139,7 @@ function readinessCaseForReport(
       `option_count:${report.scorecard.optionCount}`,
       `engine_only_blocked:${report.scorecard.engineOnlyBlockedCount}`,
       `no_side_safe_options_blocked:${report.scorecard.noSideSafeOptionsBlockedCount}`,
+      `target_fit_recommendation_ready:${targetFitRecommendation !== undefined}`,
       "productive_use_allowed:false",
     ],
   };
