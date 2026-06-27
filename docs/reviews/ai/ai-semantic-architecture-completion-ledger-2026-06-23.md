@@ -56,7 +56,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `VERIFIED` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Erfüllt: produktiver Legacy-Zugriff läuft über `legacy-entrypoints.ts`, Public-Kompatibilität über `legacy-public-contract.ts`; Matrix klassifiziert alle Nutzungen; ersetzte Top-Level-Facades sind entfernt und per Boundary-Test blockiert. |
 | AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `VERIFIED` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Erfüllt: produktiver Decision-Input nutzt `deck-doctrine-runtime-context.ts` mit StrategyProfile, report-only Doctrine-v2-Diagnostic, NeutralDoctrine, Vollständigkeitsstatus und Rollenstatus; Doctrine-v1-PlanWeights sind Legacy-gekapselt, Public-v1-Exports laufen über den Legacy-Public-Contract. |
 | AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `VERIFIED` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Erfüllt: Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate, werden in Semantic Runtime und TacticalPlans diagnostisch geführt und wirken für Pressure, Remote Contest, Economy, Setup, Risk-Control und Bypass im Hauptscore. |
-| AI-COMPLETE-08 | Corp-TacticalGoals produktiv vollständig integrieren. | `IN_PROGRESS` | Corp-Ziele wurden begonnen, müssen produktiv und diagnosefähig durchgängig wirken. | Corp-Ziele für Score, Remote, Zentralserver, Rez, Economy, Tag/Punish und Damage/Kill wirken im Hauptscore. |
+| AI-COMPLETE-08 | Corp-TacticalGoals produktiv vollständig integrieren. | `VERIFIED` | Corp-Ziele wurden begonnen, müssen produktiv und diagnosefähig durchgängig wirken. | Erfüllt: Corp-Ziele wirken für Score, Advance, Remote, Zentralserver, Rez, Economy, Tag/Punish und sichtbare Ambush-Fenster im Hauptscore; tagabhängiger Damage bleibt Payoff-gated. |
 | AI-COMPLETE-09 | ActionSemanticCandidate-Befüllung vervollständigen. | `PENDING` | Source/Ability/Cost/Timing/Target/BoardContext-Coverage muss gemessen und geschlossen werden. | Relevanter Runtime-Scope ist ausreichend befüllt; Gaps sind echte Blocker oder repariert. |
 | AI-COMPLETE-10 | Cost/Timing/BoardContext verallgemeinern. | `PENDING` | Score- und Planpfade enthalten verstreute Spezialbewertungen. | Gemeinsame side-safe Projektionen speisen Scoring und Debug. |
 | AI-COMPLETE-11 | TargetProfile-/TargetChoice-Pipeline produktiv machen. | `PENDING` | TargetChoice ist überwiegend Shadow/Diagnose. | Konkrete legale Zieloptionen wirken im Target Fit ohne `selectedChoices`-Erzeugung oder Hidden Info. |
@@ -6409,8 +6409,6 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 150 Dateien, 1662 Tests.
   - Status: `VERIFIED`.
 
-Nächstes aktives Ziel: `AI-COMPLETE-08`.
-
 - `AI-COMPLETE-08` erster Corp-TacticalGoal-Schnitt:
   - `packages/ai/src/runtime/semantic-runtime.ts` baut CorpTacticalGoals aus dem side-sicheren SemanticDecisionFrame und reicht sie als `ownCorpTacticalGoals` in die Semantic-Choice-Bewertung, den TacticalGoal-Merge und den Debug-/Pilot-Frame.
   - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` nutzt CorpTacticalGoals als additive Hauptscore-Komponente für Score-Closeout, Advance-Scoreline, Rez-Relevant-ICE, Remote-/Central-Install und Economy-Stabilisierung.
@@ -6429,6 +6427,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-08`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts src/index.test.ts -t "Schlaghund tagged meat damage|semanticRuntimeCorpScoreComponents"` grün, 2 Dateien, 6 Tests, 532 übersprungen.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1666 Tests.
+- `AI-COMPLETE-08` Abschlussaudit:
+  - CorpTacticalGoals werden aus side-sicheren ActionSemanticCandidates gebaut, in `ownCorpTacticalGoals` an die Semantic-Choice-Bewertung übergeben und im TacticalGoal-Merge sowie Debug-/Pilot-Frame geführt.
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` mappt `corp.tactical.score_closeout`, `corp.tactical.advance_scoreline`, `corp.tactical.rez_relevant_ice`, `corp.tactical.prepare_remote`, `corp.tactical.protect_central`, `corp.tactical.stabilize_economy`, `corp.tactical.visible_tag_punish` und sichtbare `corp.tactical.visible_damage_or_ambush_window` im Hauptscore.
+  - Safety-Grenze: tagabhängiger Damage/Kill wird nicht durch das generische TacticalGoal gehoben; der Schlaghund-No-Tags-Test bleibt grün.
+  - Kein Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Randomness- oder Hidden-Info-Vertrag wurde erweitert.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts src/decision/corp-tactical-goals.test.ts src/semantic-ai-runtime-cutover.test.ts src/index.test.ts -t "Schlaghund tagged meat damage|semanticRuntimeCorpScoreComponents|corp tactical goals|Semantic AI runtime cutover"` grün, 4 Dateien, 76 Tests, 532 übersprungen.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1667 Tests.
+  - Status: `VERIFIED`.
+
+Nächstes aktives Ziel: `AI-COMPLETE-09`.
 
 ## Audit-Ledger
 

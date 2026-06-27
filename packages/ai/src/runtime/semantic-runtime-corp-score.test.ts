@@ -65,6 +65,89 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("scores advance, rez and install actions that match Corp tactical goals", () => {
+    const cases: Array<{
+      goal: TacticalGoalLike;
+      action: LegalAction;
+      scopeId: string;
+      expectedValue: number;
+    }> = [
+      {
+        goal: {
+          goalId: "corp.tactical.advance_scoreline",
+          family: "corp_scoreline",
+          priority: 820,
+          urgency: "high",
+          source: "boardstate",
+          evidence: ["test_goal"],
+        },
+        action: corpAction("advance-card", "advance_card"),
+        scopeId: "simple_score_advance",
+        expectedValue: 820,
+      },
+      {
+        goal: {
+          goalId: "corp.tactical.rez_relevant_ice",
+          family: "corp_ice_defense",
+          priority: 780,
+          urgency: "medium",
+          source: "boardstate",
+          evidence: ["test_goal"],
+        },
+        action: corpAction("rez-ice", "rez_ice"),
+        scopeId: "simple_rez",
+        expectedValue: 780,
+      },
+      {
+        goal: {
+          goalId: "corp.tactical.prepare_remote",
+          family: "setup",
+          priority: 690,
+          urgency: "medium",
+          targetServerId: "remote_1",
+          source: "boardstate",
+          evidence: ["test_goal"],
+        },
+        action: corpAction("install-remote", "install_card"),
+        scopeId: "basic_install",
+        expectedValue: 690,
+      },
+      {
+        goal: {
+          goalId: "corp.tactical.protect_central",
+          family: "corp_ice_defense",
+          priority: 720,
+          urgency: "medium",
+          targetServerId: "rd",
+          source: "boardstate",
+          evidence: ["test_goal"],
+        },
+        action: corpAction("install-central", "install_card"),
+        scopeId: "basic_install",
+        expectedValue: 720,
+      },
+    ];
+
+    for (const testCase of cases) {
+      const components = semanticRuntimeCorpScoreComponents(
+        corpInputWithGoals([testCase.goal]),
+        testCase.action,
+        testCase.scopeId,
+        testDependencies(),
+      );
+
+      expect(components).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            key: "corp_goal_fit_tactical_goal",
+            value: testCase.expectedValue,
+            reason: expect.stringContaining(`goal:${testCase.goal.goalId}`),
+          }),
+        ]),
+      );
+    }
+  });
+
   it("scores visible tag punish actions from side-safe action semantics", () => {
     const components = semanticRuntimeCorpScoreComponents(
       corpInputWithGoals([
