@@ -211,10 +211,13 @@ export function createPracticalMicroCandidatesContext(
   ): boolean {
     if (input.playerView.opponent.tags > 0) return false;
     const roles = dependencies.rolesForAction(input, action);
+    const payloadSignals = [
+      action.payload?.tagPunishAction === true ? "tag_punish" : "",
+      action.payload?.damagePunishAction === true ? "damage_punish" : "",
+    ];
     const text = [
-      action.label,
       action.type,
-      action.payload?.cardImplementationAbilityLabel,
+      ...payloadSignals,
       ...roles,
     ]
       .filter(Boolean)

@@ -6973,6 +6973,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` dreiundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-micro-candidates-context.ts` entfernt `action.label` und `cardImplementationAbilityLabel` aus der produktiven stale-Punish-Erkennung.
+  - Practical-Micro-Deactivation erkennt stale Punish dort nur noch über Action-Type, strukturierte Payloads wie `tagPunishAction`/`damagePunishAction` oder Rollen, nicht über label-only Text.
+  - `practical-micro-candidates-context.test.ts` schützt, dass label-only Punish-Text keinen Deactivation-Kandidaten mehr erzeugt, strukturierter Punish aber weiterhin auf eine Board-/Scoreline-Aktion umlenkt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-micro-candidates-context.test.ts src/runtime/practical-micro-runtime.test.ts src/runtime/practical-tactic-overlay.test.ts` grün, 3 Dateien, 16 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
