@@ -3,7 +3,6 @@ import {
   type AiDecisionInput,
   type LegalAction,
   type PlayerView,
-  type Side,
   type VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
@@ -61,6 +60,12 @@ import {
   createPlanStep,
   createTacticalPlan,
 } from "./plans/tactical-plan-builders";
+import {
+  bankToolEvidence,
+  isBankBuildAction,
+  isBankPayoutAction,
+  largestBankPayout,
+} from "./plans/tactical-plan-bank-tools";
 import {
   actionCreditCost,
   legalActionCreditGainForPlan,
@@ -3171,42 +3176,6 @@ function serverHasUnrezzedIce(playerView: PlayerView, serverId: string): boolean
   return server?.ice.some((ice) => ice.rezzed !== true) === true;
 }
 
-function bankToolEvidence(
-  context: TacticalPlanBuildContext,
-  side: Side,
-): string[] {
-  const tools = side === "runner"
-    ? context.deckCapabilities?.runner?.economyBankTools ?? []
-    : context.deckCapabilities?.corp?.economyBankTools ?? [];
-  if (tools.length === 0) return [];
-  const statuses = [...new Set(tools.map((tool) => tool.status))].sort();
-  const legalBuild = tools.some((tool) => tool.buildActionLegal);
-  const legalCashOut = tools.some((tool) => tool.cashOutActionLegal);
-  return [
-    `bank_tool_count:${tools.length}`,
-    `bank_tool_status:${statuses.join(",")}`,
-    `bank_build_legal:${legalBuild}`,
-    `bank_cashout_legal:${legalCashOut}`,
-    ...(largestBankPayout(context, side) !== undefined
-      ? [`bank_estimated_payout:${largestBankPayout(context, side)}`]
-      : []),
-  ];
-}
-
-function largestBankPayout(
-  context: TacticalPlanBuildContext,
-  side: Side,
-): number | undefined {
-  const tools = side === "runner"
-    ? context.deckCapabilities?.runner?.economyBankTools ?? []
-    : context.deckCapabilities?.corp?.economyBankTools ?? [];
-  const payouts = tools
-    .map((tool) => tool.estimatedPayout ?? tool.currentBankAmount)
-    .filter((value): value is number => typeof value === "number");
-  if (payouts.length === 0) return undefined;
-  return Math.max(...payouts);
-}
-
 function runnerBreakerCoverageStep(
   context: TacticalPlanBuildContext,
   serverId: string,
@@ -3865,24 +3834,6 @@ function cardLooksLikeUniversalBreaker(text: string): boolean {
   return (
     /break (?:an? |one |\d+ )?ice subroutine/.test(text) ||
     /break(?:s)? .*subroutine/.test(text) && !/wall|barrier|code gate|codegate|sentry/.test(text)
-  );
-}
-
-function isBankBuildAction(action: LegalAction): boolean {
-  const label = action.label.toLowerCase();
-  return (
-    label.includes("auf broker legen") ||
-    (label.includes("put") && label.includes("bank")) ||
-    (label.includes("bank") && label.includes("counter"))
-  );
-}
-
-function isBankPayoutAction(action: LegalAction): boolean {
-  const label = action.label.toLowerCase();
-  return (
-    label.includes("von broker nehmen") ||
-    (label.includes("take") && label.includes("bank")) ||
-    (label.includes("cash") && label.includes("bank"))
   );
 }
 
