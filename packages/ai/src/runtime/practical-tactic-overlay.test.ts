@@ -140,6 +140,53 @@ describe("PracticalTacticOverlay", () => {
     );
   });
 
+  it("ignores label-only corp safe-score text", () => {
+    const scoreAction = {
+      ...action({
+        actionId: "label-safe-score",
+        side: "corp",
+        type: "score_agenda",
+        label: "Safe score protected remote",
+      }),
+      costs: [],
+    };
+    const input = {
+      side: "corp",
+      legalActions: [scoreAction],
+      playerView: {
+        side: "corp",
+        own: {
+          identity: visibleCard({ instanceId: "corp-id", type: "identity" }),
+          credits: 5,
+          clicks: 3,
+          agendaPoints: 0,
+          gripOrHq: [],
+          heapOrArchives: [],
+          scoreArea: [],
+        },
+        opponent: {
+          identity: visibleCard({ instanceId: "runner-id", type: "identity" }),
+          credits: 5,
+          clicks: 3,
+          agendaPoints: 0,
+          tags: 0,
+          badPublicity: 0,
+        },
+        servers: [],
+      },
+    } as unknown as AiDecisionInput;
+
+    const decision = applyPracticalTacticOverlay(
+      input,
+      frozenDecision("label-safe-score"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+
+    expect(decision.evidence ?? []).not.toContain(
+      "practical_tactic:corp_safe_score",
+    );
+  });
+
   it("uses visible breaker source cards and ignores label-only coverage installs", () => {
     const visibleBreaker = visibleCard({
       instanceId: "visible-fracter",
