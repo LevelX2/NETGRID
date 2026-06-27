@@ -124,6 +124,35 @@ describe("SemanticRuntimeDebug", () => {
           satisfied: true,
         },
         blockers: [],
+        strategyPortfolio: {
+          activeStrategyId: "runner.rnd_pressure",
+          activeSelectionReason: "same_primary_strategy",
+          productiveCandidates: [
+            {
+              strategyId: "runner.rnd_pressure",
+              candidateRole: "primary",
+              runtimeStatus: "productive",
+              selectionScore: 96,
+              targetVector: { kind: "central" },
+              reserve: { satisfied: true },
+            },
+            {
+              strategyId: "runner.remote_contest",
+              candidateRole: "secondary",
+              runtimeStatus: "productive",
+              selectionScore: 67,
+              targetVector: { kind: "remote" },
+              reserve: { satisfied: true },
+            },
+          ],
+          blockedCandidates: [
+            {
+              strategyId: "runner.remote_trash",
+              runtimeStatus: "blocked",
+              runtimeBlockers: ["missing_payoff"],
+            },
+          ],
+        },
       },
     } as any;
 
@@ -138,6 +167,10 @@ describe("SemanticRuntimeDebug", () => {
         "strategic_intent_state:runner.rnd_pressure",
         "strategic_intent_phase:pressure",
         "strategic_intent_target_id:rd",
+        "strategy_portfolio_active:runner.rnd_pressure",
+        "strategy_portfolio_reason:same_primary_strategy",
+        "strategy_portfolio_candidate:runner.rnd_pressure:primary:productive:96:central:true",
+        "strategy_portfolio_blocked:runner.remote_trash:blocked:missing_payoff",
         "semantic_strategic_action_fit:true",
         "strategic_action_fit_target_match:exact",
       ]),

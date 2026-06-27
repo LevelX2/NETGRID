@@ -174,3 +174,22 @@ Betroffene Dateien:
 - `git diff --check`: grün vor P0-Commit.
 
 P0 hat keine Runtime-Dateien geändert.
+
+## P1 Ergebnis: Strategy-Portfolio
+
+Status: `P1_done`
+
+Umgesetzt:
+
+- `StrategicIntentState` enthält jetzt optional ein `strategyPortfolio` mit aktiver Strategie, produktiven Kandidaten, geblockten Kandidaten, Selection-Score und Switch-/Transition-Grund.
+- `buildStrategicRuntimeContext()` baut ein Runtime-Portfolio aus produktiven Primary-/Secondary-Kandidaten und bewertet sie mit finalScore/anchorScore, Role-Readiness, sichtbarer BoardOpportunity, TargetVector und Reservefähigkeit.
+- Die bisherige `primaryStrategy` bleibt für bestehende Consumer erhalten. Hysterese kann eine bisherige Strategie weiter halten; das Portfolio bleibt trotzdem sichtbar.
+- Geblockte oder nicht-produktive Strategien werden nicht als aktive Linie gewählt und bleiben als `blockedCandidates` sichtbar.
+- `buildAiDecisionInput()` reicht Portfolio, bevorzugte Runtime-Linie, TargetVector, Rollenstatus und Reserve an `buildStrategicIntentState()` weiter.
+- `semanticRuntimeDebugStrategicRuntimeItems()` berichtet aktive Strategie, Portfolio-Grund, produktive Kandidaten und geblockte Kandidaten.
+
+Verifikation:
+
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/strategic-runtime-context.test.ts src/strategic-intent-state.test.ts src/diagnostics/semantic-runtime-debug.test.ts`: grün, 3 Dateien, 17 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.

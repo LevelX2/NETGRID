@@ -2,6 +2,7 @@ import type { Side } from "@netgrid/shared";
 import type {
   AiDeckStrategyProfile,
   DeckStrategyConfidence,
+  DeckStrategyRuntimeStatus,
   DeckStrategyScore,
 } from "./deck-doctrine-strategy";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
@@ -125,6 +126,33 @@ export type StrategicCommitmentState = {
   evidence: string[];
 };
 
+export type StrategicStrategyPortfolioCandidate = {
+  strategyId: string;
+  family: StrategicIntentFamily;
+  candidateRole: "primary" | "secondary" | "blocked";
+  runtimeStatus: DeckStrategyRuntimeStatus | "legacy_unspecified" | "missing";
+  runtimeBlockers: string[];
+  confidence: DeckStrategyConfidence;
+  score: {
+    anchor: number;
+    support: number;
+    final: number;
+  };
+  selectionScore: number;
+  roleStatuses: StrategicRoleStatusSnapshot[];
+  targetVector: StrategicTargetVector;
+  reserve: StrategicReserveRequirement;
+  evidence: string[];
+};
+
+export type StrategicStrategyPortfolio = {
+  activeStrategyId?: string;
+  activeSelectionReason: string;
+  productiveCandidates: StrategicStrategyPortfolioCandidate[];
+  blockedCandidates: StrategicStrategyPortfolioCandidate[];
+  evidence: string[];
+};
+
 export type StrategicIntentState = {
   schemaVersion: typeof STRATEGIC_INTENT_STATE_SCHEMA_VERSION;
   side: Side;
@@ -145,6 +173,7 @@ export type StrategicIntentState = {
   blockers: StrategicIntentBlocker[];
   transition: StrategicIntentTransition;
   commitment: StrategicCommitmentState;
+  strategyPortfolio?: StrategicStrategyPortfolio;
   evidence: string[];
 };
 
@@ -158,6 +187,8 @@ export type BuildStrategicIntentStateParams = {
   roleStatuses?: readonly StrategicRoleStatusSnapshot[];
   targetVector?: StrategicTargetVector;
   reserveRequirement?: StrategicReserveRequirement;
+  preferredStrategyId?: string;
+  strategyPortfolio?: StrategicStrategyPortfolio;
 };
 
 const DEFAULT_SWITCH_MARGIN = 12;
@@ -201,8 +232,14 @@ export function buildStrategicIntentState(
   );
   const primaryStrategy = commitmentSelection.primaryStrategy;
   const secondaryStrategies = selectSecondaryStrategies(params, primaryStrategy);
-  const roleStatuses = sortedRoleStatuses(params.roleStatuses ?? []);
+  const portfolioCandidate = params.strategyPortfolio?.productiveCandidates.find(
+    (candidate) => candidate.strategyId === primaryStrategy.strategyId,
+  );
+  const roleStatuses = sortedRoleStatuses(
+    portfolioCandidate?.roleStatuses ?? params.roleStatuses ?? [],
+  );
   const reserve =
+    portfolioCandidate?.reserve ??
     params.reserveRequirement ??
     defaultReserveRequirement(
       primaryStrategy.family,
@@ -210,7 +247,9 @@ export function buildStrategicIntentState(
     );
   const blockers = buildBlockers(primaryStrategy, roleStatuses, reserve);
   const targetVector =
-    params.targetVector ?? defaultTargetVector(primaryStrategy, blockers);
+    portfolioCandidate?.targetVector ??
+    params.targetVector ??
+    defaultTargetVector(primaryStrategy, blockers);
   const transition = transitionFor(
     params.previousState,
     primaryStrategy,
@@ -221,6 +260,12 @@ export function buildStrategicIntentState(
   const commitment = commitmentFor(
     params.previousState,
     primaryStrategy,
+    transition,
+  );
+  const strategyPortfolio = stateStrategyPortfolio(
+    params,
+    primaryStrategy,
+    secondaryStrategies,
     transition,
   );
   const phase = phaseFor({
@@ -253,6 +298,7 @@ export function buildStrategicIntentState(
     blockers,
     transition,
     commitment,
+    strategyPortfolio,
     evidence: [
       "strategic_intent_state:player_view_only",
       `side:${params.side}`,
@@ -260,6 +306,7 @@ export function buildStrategicIntentState(
       `phase:${phase}`,
       `blocker_count:${blockers.length}`,
       `secondary_strategy_count:${secondaryStrategies.length}`,
+      `strategy_portfolio_candidate_count:${strategyPortfolio.productiveCandidates.length}`,
     ],
   };
   assertSemanticObjectSideSafe(state, "StrategicIntentState");
@@ -270,10 +317,17 @@ function selectPrimaryStrategy(
   params: BuildStrategicIntentStateParams,
 ): StrategicLineState {
   const profile = params.strategyProfile;
-  if (!profile || profile.side !== params.side || profile.primaryStrategies.length === 0) {
+  if (!profile || profile.side !== params.side) {
     return neutralLine(params.side);
   }
-  const strategyId = profile.primaryStrategies[0];
+  const eligibleStrategies = eligibleStrategyIds(profile);
+  if (eligibleStrategies.length === 0) return neutralLine(params.side);
+  const preferredStrategyId =
+    params.preferredStrategyId &&
+    eligibleStrategies.includes(params.preferredStrategyId)
+      ? params.preferredStrategyId
+      : undefined;
+  const strategyId = preferredStrategyId ?? eligibleStrategies[0];
   if (!strategyId) return neutralLine(params.side);
   return lineFromScore(strategyId, profile.strategyScores[strategyId]);
 }
@@ -284,7 +338,7 @@ function selectSecondaryStrategies(
 ): StrategicLineState[] {
   const profile = params.strategyProfile;
   if (!profile || profile.side !== params.side) return [];
-  return profile.secondaryStrategies
+  return eligibleStrategyIds(profile)
     .filter((strategyId) => strategyId !== primary.strategyId)
     .map((strategyId) => lineFromScore(strategyId, profile.strategyScores[strategyId]))
     .filter((line) => line.completeness !== "none")
@@ -293,6 +347,34 @@ function selectSecondaryStrategies(
         right.score.final - left.score.final ||
         left.strategyId.localeCompare(right.strategyId),
     );
+}
+
+function eligibleStrategyIds(profile: AiDeckStrategyProfile): string[] {
+  return uniqueStrings([...profile.primaryStrategies, ...profile.secondaryStrategies])
+    .filter((strategyId) => strategyEligibleForActiveLine(profile.strategyScores[strategyId]))
+    .sort((left, right) => {
+      const leftScore = profile.strategyScores[left];
+      const rightScore = profile.strategyScores[right];
+      return (
+        (rightScore?.finalScore ?? 0) - (leftScore?.finalScore ?? 0) ||
+        (rightScore?.anchorScore ?? 0) - (leftScore?.anchorScore ?? 0) ||
+        left.localeCompare(right)
+      );
+    });
+}
+
+function strategyEligibleForActiveLine(
+  score: DeckStrategyScore | undefined,
+): boolean {
+  if (!score) return false;
+  if (
+    score.runtimeStatus === "blocked" ||
+    score.runtimeStatus === "supporting" ||
+    score.runtimeStatus === "diagnostic_only"
+  ) {
+    return false;
+  }
+  return score.anchorScore > 0 && score.anchorEvidence.length > 0;
 }
 
 function committedPrimaryStrategy(
@@ -663,6 +745,70 @@ function commitmentFor(
   };
 }
 
+function stateStrategyPortfolio(
+  params: BuildStrategicIntentStateParams,
+  primary: StrategicLineState,
+  secondaryStrategies: readonly StrategicLineState[],
+  transition: StrategicIntentTransition,
+): StrategicStrategyPortfolio {
+  const provided = params.strategyPortfolio;
+  if (provided) {
+    return {
+      ...provided,
+      activeStrategyId: primary.strategyId,
+      activeSelectionReason: transition.reason,
+      productiveCandidates: provided.productiveCandidates.map((candidate) => ({
+        ...candidate,
+        evidence: [
+          ...candidate.evidence,
+          candidate.strategyId === primary.strategyId
+            ? "portfolio_candidate:intent_active"
+            : "portfolio_candidate:intent_alternate",
+        ],
+      })),
+      evidence: [
+        ...provided.evidence,
+        `portfolio_active:${primary.strategyId}`,
+        `portfolio_transition:${transition.reason}`,
+      ],
+    };
+  }
+
+  const synthesizedCandidates = [primary, ...secondaryStrategies].map(
+    (line, index): StrategicStrategyPortfolioCandidate => ({
+      strategyId: line.strategyId,
+      family: line.family,
+      candidateRole: index === 0 ? "primary" : "secondary",
+      runtimeStatus: "legacy_unspecified",
+      runtimeBlockers: [],
+      confidence: line.confidence,
+      score: { ...line.score },
+      selectionScore: line.score.final,
+      roleStatuses: [],
+      targetVector: defaultTargetVector(line, []),
+      reserve: defaultReserveRequirement(line.family, params.availableCredits),
+      evidence: [
+        "portfolio_source:strategic_intent_state",
+        index === 0
+          ? "portfolio_candidate:intent_active"
+          : "portfolio_candidate:intent_alternate",
+      ],
+    }),
+  );
+
+  return {
+    activeStrategyId: primary.strategyId,
+    activeSelectionReason: transition.reason,
+    productiveCandidates: synthesizedCandidates,
+    blockedCandidates: [],
+    evidence: [
+      "portfolio_source:strategic_intent_state_synthesized",
+      `portfolio_active:${primary.strategyId}`,
+      `portfolio_transition:${transition.reason}`,
+    ],
+  };
+}
+
 function phaseFor(params: {
   primaryStrategy: StrategicLineState;
   roleStatuses: readonly StrategicRoleStatusSnapshot[];
@@ -723,6 +869,10 @@ function roleEvidenceIncludes(
   evidence: string,
 ): boolean {
   return roles.some((role) => role.evidence.includes(evidence));
+}
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values.filter((value) => value.length > 0))];
 }
 
 function sortedRoleStatuses(

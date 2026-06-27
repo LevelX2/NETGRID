@@ -234,6 +234,7 @@ export function semanticRuntimeDebugStrategicRuntimeItems(
       ? [`strategic_intent_target_id:${state.targetVector.targetId}`]
       : []),
     `strategic_intent_reserve:${state.reserve.kind}:${state.reserve.required}:${state.reserve.available ?? "unknown"}:${state.reserve.satisfied}`,
+    ...semanticRuntimeDebugStrategyPortfolioItems(state),
     `strategic_intent_blocker_count:${state.blockers.length}`,
     ...state.blockers
       .slice(0, 4)
@@ -249,6 +250,38 @@ export function semanticRuntimeDebugStrategicRuntimeItems(
       )
       .slice(0, 12),
   ]);
+}
+
+function semanticRuntimeDebugStrategyPortfolioItems(
+  state: NonNullable<AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]>,
+): string[] {
+  const portfolio = state.strategyPortfolio;
+  if (!portfolio) return ["strategy_portfolio:missing"];
+  return [
+    `strategy_portfolio_active:${portfolio.activeStrategyId ?? "none"}`,
+    `strategy_portfolio_reason:${portfolio.activeSelectionReason}`,
+    `strategy_portfolio_productive_count:${portfolio.productiveCandidates.length}`,
+    `strategy_portfolio_blocked_count:${portfolio.blockedCandidates.length}`,
+    ...portfolio.productiveCandidates.slice(0, 5).map((candidate) =>
+      [
+        "strategy_portfolio_candidate",
+        candidate.strategyId,
+        candidate.candidateRole,
+        candidate.runtimeStatus,
+        roundScore(candidate.selectionScore),
+        candidate.targetVector.kind,
+        candidate.reserve.satisfied,
+      ].join(":"),
+    ),
+    ...portfolio.blockedCandidates.slice(0, 5).map((candidate) =>
+      [
+        "strategy_portfolio_blocked",
+        candidate.strategyId,
+        candidate.runtimeStatus,
+        candidate.runtimeBlockers.join(",") || "no_blocker_detail",
+      ].join(":"),
+    ),
+  ];
 }
 
 function semanticRuntimeDebugDeckStrategyItems(

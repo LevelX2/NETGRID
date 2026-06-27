@@ -162,6 +162,13 @@ export function buildAiDecisionInput(
       ? { previousState: previousStrategicIntentState }
       : {}),
     availableCredits: playerView.own.credits,
+    ...(strategicRuntimeContext.strategyPortfolio.activeStrategyId
+      ? {
+          preferredStrategyId:
+            strategicRuntimeContext.strategyPortfolio.activeStrategyId,
+        }
+      : {}),
+    strategyPortfolio: strategicRuntimeContext.strategyPortfolio,
     roleStatuses: strategicRuntimeContext.roleStatuses,
     targetVector: strategicRuntimeContext.targetVector,
     reserveRequirement: strategicRuntimeContext.reserveRequirement,
