@@ -4,6 +4,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { semanticShadowCalibrationProfileFromEnv } from "../decision/semantic-shadow-calibration";
 import { buildTargetChoiceShadowReport } from "../decision/target-choice-shadow";
 import type {
@@ -41,6 +42,14 @@ export type BuildSemanticRuntimeDebugPlanContextInput = {
   planMatchDisplayBoost?: number;
 };
 
+export type SemanticRuntimeActionPrecisionDebugItems = {
+  actionSemanticProjectionItems: string[];
+  abilitySemanticBindingItems: string[];
+  targetContextItems: string[];
+  compatibilitySignalItems: string[];
+  coverageGapItems: string[];
+};
+
 export function buildSemanticRuntimeDebugPlanContext({
   selectedActionId,
   selectedChoice,
@@ -56,7 +65,9 @@ export function buildSemanticRuntimeDebugPlanContext({
   const selectedByPlanMapping =
     mappedActionOrder.has(selectedActionId) &&
     selectedChoice?.evidence.some((entry) =>
-      entry.startsWith("tactical_plan_mapping_outcome:semantic_choice_selected"),
+      entry.startsWith(
+        "tactical_plan_mapping_outcome:semantic_choice_selected",
+      ),
     ) !== true;
   return {
     ...(selectedChoice ? { selectedChoice } : {}),
@@ -69,6 +80,258 @@ export function buildSemanticRuntimeDebugPlanContext({
     ...(selectedPlanType ? { selectedPlanType } : {}),
     mappedActionOrder,
   };
+}
+
+export function semanticRuntimeDebugActionPrecisionItems(
+  candidates: readonly ActionSemanticCandidate[],
+  selectedActionId?: string,
+): SemanticRuntimeActionPrecisionDebugItems {
+  const orderedCandidates = orderSemanticDebugCandidates(
+    candidates,
+    selectedActionId,
+  );
+  return {
+    actionSemanticProjectionItems:
+      semanticRuntimeDebugActionSemanticProjectionItems(orderedCandidates),
+    abilitySemanticBindingItems:
+      semanticRuntimeDebugAbilitySemanticBindingItems(orderedCandidates),
+    targetContextItems:
+      semanticRuntimeDebugTargetContextItems(orderedCandidates),
+    compatibilitySignalItems: semanticRuntimeDebugCompatibilitySignalItems(
+      orderedCandidates,
+      selectedActionId,
+    ),
+    coverageGapItems: semanticRuntimeDebugCoverageGapItems(orderedCandidates),
+  };
+}
+
+export function semanticRuntimeDebugStrategyPortfolioSectionItems(
+  input: AiDecisionInput,
+): string[] {
+  const state = (input as AiDecisionInputWithDeckCapabilities)
+    .ownStrategicIntentState;
+  if (!state?.strategyPortfolio) return [];
+  return scrubEvidence(semanticRuntimeDebugStrategyPortfolioItems(state));
+}
+
+function orderSemanticDebugCandidates(
+  candidates: readonly ActionSemanticCandidate[],
+  selectedActionId: string | undefined,
+): ActionSemanticCandidate[] {
+  if (!selectedActionId) return [...candidates];
+  return [
+    ...candidates.filter(
+      (candidate) => candidate.actionId === selectedActionId,
+    ),
+    ...candidates.filter(
+      (candidate) => candidate.actionId !== selectedActionId,
+    ),
+  ];
+}
+
+function semanticRuntimeDebugActionSemanticProjectionItems(
+  candidates: readonly ActionSemanticCandidate[],
+): string[] {
+  if (candidates.length === 0) return [];
+  return scrubEvidence([
+    `action_projection_candidate_count:${candidates.length}`,
+    ...candidates
+      .slice(0, 12)
+      .flatMap((candidate) => [
+        [
+          "action_projection",
+          candidate.actionId,
+          candidate.actionType,
+          candidate.semanticActionType,
+          candidate.sourceKind,
+          candidate.primaryProjectionStatus,
+          candidate.confidence,
+        ].join(":"),
+        [
+          "semantic_origin",
+          candidate.actionId,
+          semanticRuntimeDebugOrigin(candidate),
+        ].join(":"),
+        `projection_signal_count:${candidate.actionId}:${candidate.actionTacticSignals.length}`,
+        `card_context_signal_count:${candidate.actionId}:${candidate.cardContextSignals.length}`,
+      ]),
+  ]);
+}
+
+function semanticRuntimeDebugAbilitySemanticBindingItems(
+  candidates: readonly ActionSemanticCandidate[],
+): string[] {
+  const abilityCandidates = candidates.filter(
+    (candidate) =>
+      candidate.sourceKind === "card" ||
+      candidate.abilityBindingMethod !== "unresolved" ||
+      candidate.abilityId !== undefined ||
+      candidate.sourceDefinitionId !== undefined ||
+      candidate.projectionIssues.includes("ability_unresolved"),
+  );
+  if (abilityCandidates.length === 0) return [];
+  return scrubEvidence(
+    abilityCandidates
+      .slice(0, 12)
+      .flatMap((candidate) => [
+        [
+          "ability_binding",
+          candidate.actionId,
+          candidate.abilityBindingMethod,
+          candidate.abilityId ?? "none",
+          candidate.sourceDefinitionId ?? "none",
+        ].join(":"),
+        `ability_binding_status:${candidate.actionId}:${semanticRuntimeDebugAbilityBindingStatus(candidate)}`,
+        ...candidate.actionTacticSignals
+          .slice(0, 5)
+          .map(
+            (signal) => `ability_tactic_signal:${candidate.actionId}:${signal}`,
+          ),
+      ]),
+  );
+}
+
+function semanticRuntimeDebugTargetContextItems(
+  candidates: readonly ActionSemanticCandidate[],
+): string[] {
+  const targetCandidates = candidates.filter(
+    (candidate) =>
+      candidate.targetContext !== undefined ||
+      candidate.projectionIssues.includes("target_context_unavailable"),
+  );
+  if (targetCandidates.length === 0) return [];
+  return scrubEvidence(
+    targetCandidates.slice(0, 12).flatMap((candidate) => {
+      const context = candidate.targetContext;
+      if (!context) {
+        return [
+          `target_context:${candidate.actionId}:missing:unknown:unknown:target_context_unavailable`,
+        ];
+      }
+      return [
+        [
+          "target_context",
+          candidate.actionId,
+          "present",
+          context.targetKind,
+          context.targetSide,
+          context.availableTargetsStatus,
+        ].join(":"),
+        ...context.selectedTargets
+          .slice(0, 4)
+          .map((target) =>
+            [
+              "selected_target",
+              candidate.actionId,
+              target.targetKind,
+              target.targetSide,
+              target.targetZone ?? "unknown",
+              target.targetDefinitionId ?? "none",
+              (target.targetConstraints ?? []).join(",") || "none",
+            ].join(":"),
+          ),
+        ...context.targetProfileMatches
+          .slice(0, 4)
+          .map((match) =>
+            [
+              "target_profile_match",
+              candidate.actionId,
+              match.targetProfileId ?? "unknown",
+              match.status,
+              match.issues.join(",") || "none",
+            ].join(":"),
+          ),
+        ...context.targetConstraintResults
+          .slice(0, 4)
+          .map((constraint) =>
+            [
+              "target_constraint",
+              candidate.actionId,
+              constraint.constraintId ?? "unknown",
+              constraint.status,
+            ].join(":"),
+          ),
+      ];
+    }),
+  );
+}
+
+function semanticRuntimeDebugCompatibilitySignalItems(
+  candidates: readonly ActionSemanticCandidate[],
+  selectedActionId: string | undefined,
+): string[] {
+  const compatibilityCandidates = candidates.filter(
+    (candidate) => (candidate.compatibilitySignals?.length ?? 0) > 0,
+  );
+  if (compatibilityCandidates.length === 0) return [];
+  return scrubEvidence(
+    compatibilityCandidates
+      .slice(0, 12)
+      .flatMap((candidate) => [
+        `compatibility_signal_count:${candidate.actionId}:${candidate.compatibilitySignals?.length ?? 0}`,
+        `compatibility_signal_${candidate.actionId === selectedActionId ? "used" : "ignored"}:${candidate.actionId}`,
+        ...(candidate.compatibilitySignals ?? [])
+          .slice(0, 6)
+          .map(
+            (signal) => `compatibility_signal:${candidate.actionId}:${signal}`,
+          ),
+      ]),
+  );
+}
+
+function semanticRuntimeDebugCoverageGapItems(
+  candidates: readonly ActionSemanticCandidate[],
+): string[] {
+  const items = candidates.slice(0, 12).flatMap((candidate) => [
+    ...(candidate.primaryProjectionStatus === "projected"
+      ? []
+      : [
+          `projection_status:${candidate.actionId}:${candidate.primaryProjectionStatus}`,
+        ]),
+    ...candidate.projectionIssues
+      .slice(0, 6)
+      .map((issue) => `coverage_gap:${candidate.actionId}:${issue}`),
+    ...candidate.hardGates
+      .filter((gate) => gate.status === "block" || gate.status === "unknown")
+      .slice(0, 6)
+      .map((gate) =>
+        [
+          "coverage_gate",
+          candidate.actionId,
+          gate.gateId,
+          gate.status,
+          gate.reason ?? "none",
+        ].join(":"),
+      ),
+  ]);
+  return scrubEvidence(items);
+}
+
+function semanticRuntimeDebugOrigin(
+  candidate: ActionSemanticCandidate,
+): string {
+  if (candidate.sourceKind === "basic_action") return "basic_action";
+  if (candidate.actionTacticSignals.length > 0) return "ability_level";
+  if (candidate.targetContext) return "target_level";
+  if (candidate.cardContextSignals.length > 0) return "card_level";
+  if ((candidate.compatibilitySignals?.length ?? 0) > 0) {
+    return "compatibility_only";
+  }
+  if (candidate.projectionIssues.includes("ability_unresolved")) {
+    return "ability_unresolved";
+  }
+  return "fallback_coverage_candidate";
+}
+
+function semanticRuntimeDebugAbilityBindingStatus(
+  candidate: ActionSemanticCandidate,
+): "bound" | "unresolved" | "not_card_action" {
+  if (candidate.sourceKind !== "card" && candidate.abilityId === undefined) {
+    return "not_card_action";
+  }
+  return candidate.abilityBindingMethod === "unresolved"
+    ? "unresolved"
+    : "bound";
 }
 
 export function buildSemanticRuntimePlanSelectionDisplayContext(params: {
@@ -253,7 +516,9 @@ export function semanticRuntimeDebugStrategicRuntimeItems(
 }
 
 function semanticRuntimeDebugStrategyPortfolioItems(
-  state: NonNullable<AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]>,
+  state: NonNullable<
+    AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+  >,
 ): string[] {
   const portfolio = state.strategyPortfolio;
   if (!portfolio) return ["strategy_portfolio:missing"];
@@ -262,25 +527,29 @@ function semanticRuntimeDebugStrategyPortfolioItems(
     `strategy_portfolio_reason:${portfolio.activeSelectionReason}`,
     `strategy_portfolio_productive_count:${portfolio.productiveCandidates.length}`,
     `strategy_portfolio_blocked_count:${portfolio.blockedCandidates.length}`,
-    ...portfolio.productiveCandidates.slice(0, 5).map((candidate) =>
-      [
-        "strategy_portfolio_candidate",
-        candidate.strategyId,
-        candidate.candidateRole,
-        candidate.runtimeStatus,
-        roundScore(candidate.selectionScore),
-        candidate.targetVector.kind,
-        candidate.reserve.satisfied,
-      ].join(":"),
-    ),
-    ...portfolio.blockedCandidates.slice(0, 5).map((candidate) =>
-      [
-        "strategy_portfolio_blocked",
-        candidate.strategyId,
-        candidate.runtimeStatus,
-        candidate.runtimeBlockers.join(",") || "no_blocker_detail",
-      ].join(":"),
-    ),
+    ...portfolio.productiveCandidates
+      .slice(0, 5)
+      .map((candidate) =>
+        [
+          "strategy_portfolio_candidate",
+          candidate.strategyId,
+          candidate.candidateRole,
+          candidate.runtimeStatus,
+          roundScore(candidate.selectionScore),
+          candidate.targetVector.kind,
+          candidate.reserve.satisfied,
+        ].join(":"),
+      ),
+    ...portfolio.blockedCandidates
+      .slice(0, 5)
+      .map((candidate) =>
+        [
+          "strategy_portfolio_blocked",
+          candidate.strategyId,
+          candidate.runtimeStatus,
+          candidate.runtimeBlockers.join(",") || "no_blocker_detail",
+        ].join(":"),
+      ),
   ];
 }
 

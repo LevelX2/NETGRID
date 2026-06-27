@@ -1,6 +1,6 @@
 # Semantic Runtime Precision Follow-up, 2026-06-27
 
-Status: `P8_done`
+Status: `P9_done`
 
 Prozess: `docs/architecture/ai/semantic-runtime-precision-legacy-cleanup-process-2026-06-27.md`
 
@@ -316,4 +316,24 @@ Verifikation:
 
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/tactical-plans.test.ts`: grün, 1 Datei, 45 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
+
+## P9 Ergebnis: Debug/Reports für Semantikpräzision
+
+Status: `P9_done`
+
+Umgesetzt:
+
+- `DecisionDebug.detailSections` enthält jetzt optionale Sections für `action_semantic_projection`, `ability_semantic_binding`, `target_context`, `compatibility_signals` und `coverage_gaps`.
+- `strategy_portfolio` ist zusätzlich als eigene Section verfügbar; die bisherigen Portfolio-Items in `strategic_runtime` bleiben erhalten.
+- Die neuen Debug-Items werden aus bestehenden `ActionSemanticCandidate`-Feldern und side-safe `TargetContext`-Projektionen gebaut. Sie zeigen Ursprung, Ability-Binding, TargetContext-Status, Compatibility-Nutzung und unresolved Coverage-Gaps ohne neue LegalActions zu erzeugen.
+- `chooseSemanticRuntimeAction()` reicht die bereits gebauten ActionSemanticCandidates an den Runtime-Debug-Builder weiter.
+- `sanitizeAiDecisionDebug()` behält jetzt bis zu 16 DetailSections, damit Replay-/Simulation-Debug die neuen Präzisionssections nicht abschneidet.
+
+Verifikation:
+
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/diagnostics/semantic-runtime-debug.test.ts src/diagnostics/decision-debug.test.ts`: grün, 2 Dateien, 13 Tests.
+- `corepack pnpm --dir packages/shared exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts`: grün, 1 Datei, 4 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `corepack pnpm --filter @netgrid/shared typecheck`: grün.
 - `git diff --check`: grün.

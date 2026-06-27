@@ -3,6 +3,7 @@ import {
   type AiDecisionDebug,
   type AiDecisionInput,
 } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type {
   SemanticRuntimeChoice,
   SemanticRuntimeCoverageSelectionDebug,
@@ -14,12 +15,14 @@ import { semanticRuntimeMemoryDebug } from "./semantic-runtime-memory-debug";
 import {
   buildSemanticRuntimePlanSelectionDisplayContext,
   semanticRuntimeDebugActionDisplayScore,
+  semanticRuntimeDebugActionPrecisionItems,
   semanticRuntimeDebugCalibrationProfileItems,
   semanticRuntimeDebugCoverageScoreBreakdown,
   semanticRuntimeDebugMistakeSummaryItems,
   semanticRuntimeDebugPilotScopeItems,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
   semanticRuntimeDebugShadowTopItems,
+  semanticRuntimeDebugStrategyPortfolioSectionItems,
   semanticRuntimeDebugSelectionScoreItems,
   semanticRuntimeDebugStrategicRuntimeItems,
   semanticRuntimeDebugTacticalPlanItems,
@@ -29,6 +32,7 @@ import {
 export type BuildSemanticRuntimeDecisionDebugInput = {
   input: AiDecisionInput;
   selected: SemanticRuntimeChoice;
+  actionSemanticCandidates: readonly ActionSemanticCandidate[];
   planRuntime: TacticalPlanRuntimeResult;
   coverageSelection?: SemanticRuntimeCoverageSelectionDebug;
   selectedScoreBreakdown: NonNullable<AiDecisionDebug["scoreBreakdown"]>;
@@ -39,6 +43,7 @@ export type BuildSemanticRuntimeDecisionDebugInput = {
 export function buildSemanticRuntimeDecisionDebug({
   input,
   selected,
+  actionSemanticCandidates,
   planRuntime,
   coverageSelection,
   selectedScoreBreakdown,
@@ -46,14 +51,20 @@ export function buildSemanticRuntimeDecisionDebug({
   actionAlternatives,
 }: BuildSemanticRuntimeDecisionDebugInput): AiDecisionDebug {
   const memoryDebug = semanticRuntimeMemoryDebug(input);
+  const actionPrecisionDebug = semanticRuntimeDebugActionPrecisionItems(
+    actionSemanticCandidates,
+    selected.action.actionId,
+  );
   const selectedPlan = planRuntime.selectedPlan;
   const selectedStep = planRuntime.selectedStep;
-  const selectedPlanSelection = buildSemanticRuntimePlanSelectionDisplayContext({
-    planRuntime,
-    selectedActionId: selected.action.actionId,
-    selectedChoice: selected,
-    ...(coverageSelection ? { coverageSelection } : {}),
-  });
+  const selectedPlanSelection = buildSemanticRuntimePlanSelectionDisplayContext(
+    {
+      planRuntime,
+      selectedActionId: selected.action.actionId,
+      selectedChoice: selected,
+      ...(coverageSelection ? { coverageSelection } : {}),
+    },
+  );
   const selectedDisplayScore = semanticRuntimeDebugActionDisplayScore(
     selected,
     true,
@@ -62,7 +73,9 @@ export function buildSemanticRuntimeDecisionDebug({
   const debugDiagnostics = buildSemanticDecisionDebugDiagnostics({
     scopeId: selected.scopeId,
     selectedActionType: selected.action.type,
-    ...(coverageSelection ? { coverageEvidence: coverageSelection.evidence } : {}),
+    ...(coverageSelection
+      ? { coverageEvidence: coverageSelection.evidence }
+      : {}),
     selectedEvidence: scrubEvidence(selected.evidence),
     ...(selectedPlan
       ? {
@@ -77,13 +90,24 @@ export function buildSemanticRuntimeDecisionDebug({
       input,
       selected.evidence,
     ),
+    strategyPortfolioItems:
+      semanticRuntimeDebugStrategyPortfolioSectionItems(input),
     selectionScoreItems: semanticRuntimeDebugSelectionScoreItems(
       selected,
       selectedDisplayScore,
       selectedPlanSelection,
     ),
+    actionSemanticProjectionItems:
+      actionPrecisionDebug.actionSemanticProjectionItems,
+    abilitySemanticBindingItems:
+      actionPrecisionDebug.abilitySemanticBindingItems,
+    targetContextItems: actionPrecisionDebug.targetContextItems,
+    compatibilitySignalItems: actionPrecisionDebug.compatibilitySignalItems,
+    coverageGapItems: actionPrecisionDebug.coverageGapItems,
     ...(planRuntime.planAlternatives.length > 0 || planRuntime.previousPlan
-      ? { tacticalPlanItems: semanticRuntimeDebugTacticalPlanItems(planRuntime) }
+      ? {
+          tacticalPlanItems: semanticRuntimeDebugTacticalPlanItems(planRuntime),
+        }
       : {}),
     ...(memoryDebug.items.length > 0
       ? { memoryItems: memoryDebug.items, memorySectionTitle: "KI-Speicher" }

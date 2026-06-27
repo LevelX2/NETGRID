@@ -159,6 +159,7 @@ export type SemanticRuntimeDependencies = {
     selected: SemanticRuntimeChoice,
     rankedChoices: SemanticRuntimeChoice[],
     planRuntime: TacticalPlanRuntimeResult,
+    actionSemanticCandidates: readonly ActionSemanticCandidate[],
   ) => AiDecisionDebug;
 };
 
@@ -474,6 +475,7 @@ export function chooseSemanticRuntimeAction(
       selectedChoice,
       runOnlyActionAdjusted.rankedChoices,
       effectivePlanRuntime,
+      actionSemanticCandidates,
     ),
     timeoutUsed: false,
     profileId: input.profileId,

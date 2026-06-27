@@ -19,7 +19,10 @@ describe("DecisionDebug diagnostics", () => {
         "run_only_action_adjusted:true",
         "run_action_spending_cap_blocked:false",
       ],
-      selectedPlan: { planId: "runner-plan-1", type: "runner.build_credit_bank" },
+      selectedPlan: {
+        planId: "runner-plan-1",
+        type: "runner.build_credit_bank",
+      },
       selectedStepKind: "gain_credits",
       strategicRuntimeItems: ["strategic_intent_state:runner.rnd_pressure"],
       selectionScoreItems: ["runtime_raw_score:120", "display_score_only:true"],
@@ -84,7 +87,10 @@ describe("DecisionDebug diagnostics", () => {
         "run_only_action_secretGripIds:bad",
         "run_only_action_adjusted:true",
       ],
-      tacticalPlanItems: ["tokenHash:bad", "selected_step_kind:draw_for_answer"],
+      tacticalPlanItems: [
+        "tokenHash:bad",
+        "selected_step_kind:draw_for_answer",
+      ],
       memoryItems: ["fullGameState:bad", "memory_fact:visible"],
     });
 
@@ -102,6 +108,70 @@ describe("DecisionDebug diagnostics", () => {
     expect(diagnostics.detailSections[2]?.items).toEqual([
       "memory_fact:visible",
     ]);
+  });
+
+  it("adds semantic precision detail sections side-safely", () => {
+    const diagnostics = buildSemanticDecisionDebugDiagnostics({
+      scopeId: "runner_safe_access",
+      selectedActionType: "trigger_ability",
+      strategyPortfolioItems: ["strategy_portfolio_active:runner.rnd_pressure"],
+      actionSemanticProjectionItems: [
+        "action_projection:card-action:trigger_ability:hardware_trash:card:projected:high",
+      ],
+      abilitySemanticBindingItems: [
+        "ability_binding:card-action:explicit_ability_id:paid_ability:visible-program",
+      ],
+      targetContextItems: [
+        "target_context:card-action:present:hardware:runner:engine_provided",
+      ],
+      compatibilitySignalItems: [
+        "compatibility_signal:card-action:role:resource_denial",
+        "sessionToken:bad",
+      ],
+      coverageGapItems: ["coverage_gap:unresolved-action:ability_unresolved"],
+    });
+
+    expect(diagnostics.detailSections).toEqual(
+      expect.arrayContaining([
+        {
+          id: "strategy_portfolio",
+          title: "Strategy Portfolio",
+          items: ["strategy_portfolio_active:runner.rnd_pressure"],
+        },
+        {
+          id: "action_semantic_projection",
+          title: "Action Semantic Projection",
+          items: [
+            "action_projection:card-action:trigger_ability:hardware_trash:card:projected:high",
+          ],
+        },
+        {
+          id: "ability_semantic_binding",
+          title: "Ability Semantic Binding",
+          items: [
+            "ability_binding:card-action:explicit_ability_id:paid_ability:visible-program",
+          ],
+        },
+        {
+          id: "target_context",
+          title: "Target Context",
+          items: [
+            "target_context:card-action:present:hardware:runner:engine_provided",
+          ],
+        },
+        {
+          id: "compatibility_signals",
+          title: "Compatibility Signals",
+          items: ["compatibility_signal:card-action:role:resource_denial"],
+        },
+        {
+          id: "coverage_gaps",
+          title: "Coverage Gaps",
+          items: ["coverage_gap:unresolved-action:ability_unresolved"],
+        },
+      ]),
+    );
+    expect(JSON.stringify(diagnostics)).not.toMatch(/sessionToken/i);
   });
 
   it("adds side-safe decision trace diagnostic sections", () => {

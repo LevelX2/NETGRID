@@ -8,9 +8,11 @@ import {
 import { DEMO_DECKS } from "./demo-decks";
 import {
   DEMO_DECK_IDS,
+  AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
   DEMO_DECKS as INDEX_DEMO_DECKS,
   LEGACY_ABILITY_PAYLOAD_FIELDS as INDEX_LEGACY_ABILITY_PAYLOAD_FIELDS,
+  sanitizeAiDecisionDebug,
 } from "./index";
 
 describe("legacy ability payload compatibility registry", () => {
@@ -71,5 +73,24 @@ describe("rules baseline registry", () => {
     expect(CURRENT_RULES_BASELINE.cardTextSnapshotId).toBe("mvp-0.99-demo");
     expect(CURRENT_RULES_BASELINE.simulationSchemaVersion).toBe("0.99.0");
     expect(INDEX_CURRENT_RULES_BASELINE).toBe(CURRENT_RULES_BASELINE);
+  });
+});
+
+describe("AI decision debug sanitizing", () => {
+  it("keeps enough detail sections for semantic precision reports", () => {
+    const detailSections = Array.from({ length: 16 }, (_, index) => ({
+      id: `section_${index + 1}`,
+      title: `Section ${index + 1}`,
+      items: [`item_${index + 1}`],
+    }));
+
+    const sanitized = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      detailSections,
+    });
+
+    expect(sanitized?.detailSections).toHaveLength(16);
+    expect(sanitized?.detailSections?.at(-1)?.id).toBe("section_16");
   });
 });

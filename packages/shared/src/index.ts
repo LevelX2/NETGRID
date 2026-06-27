@@ -2209,7 +2209,7 @@ function sanitizeAiDecisionDetailSections(
 ): AiDecisionDetailSection[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const sections = value
-    .slice(0, 8)
+    .slice(0, 16)
     .map((entry): AiDecisionDetailSection | undefined => {
       if (!entry || typeof entry !== "object" || Array.isArray(entry))
         return undefined;

@@ -1,5 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
 import type {
   TacticalPlan,
@@ -8,6 +9,7 @@ import type {
 import {
   buildSemanticRuntimeDebugPlanContext,
   semanticRuntimeDebugActionDisplayScore,
+  semanticRuntimeDebugActionPrecisionItems,
   semanticRuntimeDebugActionWhyChosen,
   semanticRuntimeDebugActionWhyNot,
   semanticRuntimeDebugCalibrationProfileItems,
@@ -185,6 +187,123 @@ describe("SemanticRuntimeDebug", () => {
         "display_score_only:true",
         "selected_by_plan_mapping:true",
       ]),
+    );
+  });
+
+  it("formats semantic precision sections from side-safe action candidates", () => {
+    const selectedCandidate = actionSemanticCandidate({
+      actionId: "card-action",
+      actionType: "trigger_ability",
+      sourceKind: "card",
+      sourceDefinitionId: "visible-program",
+      abilityId: "paid_ability",
+      abilityBindingMethod: "explicit_ability_id",
+      semanticActionType: "hardware_trash",
+      actionTacticSignals: ["trash.hardware"],
+      cardContextSignals: ["card_context:payoff"],
+      compatibilitySignals: ["role:resource_denial"],
+      confidence: "high",
+      targetContext: {
+        selectedTargets: [
+          {
+            targetId: "runner-hardware",
+            targetKind: "hardware",
+            targetSide: "runner",
+            targetZone: "rig",
+            targetDefinitionId: "visible-hardware",
+            targetConstraints: ["not_cybernetics"],
+            visibilityScope: "public",
+            evidence: ["visible_target"],
+          },
+        ],
+        availableTargetsStatus: "engine_provided",
+        targetKind: "hardware",
+        targetSide: "runner",
+        targetZones: ["rig"],
+        hiddenInfoPolicy: "side_safe_visible_only",
+        targetProfileMatches: [
+          {
+            targetProfileId: "hardware_trash",
+            status: "matched",
+            issues: [],
+            evidence: ["target_profile"],
+          },
+        ],
+        targetConstraintResults: [
+          {
+            constraintId: "not_cybernetics",
+            status: "pass",
+            evidence: ["visible_subtypes"],
+          },
+        ],
+      },
+    });
+    const unresolvedCandidate = actionSemanticCandidate({
+      actionId: "unresolved-action",
+      actionType: "trigger_ability",
+      sourceKind: "card",
+      abilityBindingMethod: "unresolved",
+      semanticActionType: "unknown",
+      primaryProjectionStatus: "partial_projected",
+      projectionIssues: ["ability_unresolved", "target_context_unavailable"],
+      compatibilitySignals: ["strategic_role:tag_punish"],
+      hardGates: [
+        {
+          gateId: "ability_resolution",
+          status: "unknown",
+          severity: "warning",
+          reason: "engine_payload_missing",
+        },
+      ],
+    });
+
+    const items = semanticRuntimeDebugActionPrecisionItems(
+      [unresolvedCandidate, selectedCandidate],
+      "card-action",
+    );
+
+    expect(items.actionSemanticProjectionItems).toEqual(
+      expect.arrayContaining([
+        "action_projection_candidate_count:2",
+        "action_projection:card-action:trigger_ability:hardware_trash:card:projected:high",
+        "semantic_origin:card-action:ability_level",
+      ]),
+    );
+    expect(items.abilitySemanticBindingItems).toEqual(
+      expect.arrayContaining([
+        "ability_binding:card-action:explicit_ability_id:paid_ability:visible-program",
+        "ability_binding_status:card-action:bound",
+        "ability_tactic_signal:card-action:trash.hardware",
+        "ability_binding_status:unresolved-action:unresolved",
+      ]),
+    );
+    expect(items.targetContextItems).toEqual(
+      expect.arrayContaining([
+        "target_context:card-action:present:hardware:runner:engine_provided",
+        "selected_target:card-action:hardware:runner:rig:visible-hardware:not_cybernetics",
+        "target_profile_match:card-action:hardware_trash:matched:none",
+        "target_constraint:card-action:not_cybernetics:pass",
+        "target_context:unresolved-action:missing:unknown:unknown:target_context_unavailable",
+      ]),
+    );
+    expect(items.compatibilitySignalItems).toEqual(
+      expect.arrayContaining([
+        "compatibility_signal_used:card-action",
+        "compatibility_signal:card-action:role:resource_denial",
+        "compatibility_signal_ignored:unresolved-action",
+        "compatibility_signal:unresolved-action:strategic_role:tag_punish",
+      ]),
+    );
+    expect(items.coverageGapItems).toEqual(
+      expect.arrayContaining([
+        "projection_status:unresolved-action:partial_projected",
+        "coverage_gap:unresolved-action:ability_unresolved",
+        "coverage_gap:unresolved-action:target_context_unavailable",
+        "coverage_gate:unresolved-action:ability_resolution:unknown:engine_payload_missing",
+      ]),
+    );
+    expect(JSON.stringify(items)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState|secretGripIds/i,
     );
   });
 
@@ -414,6 +533,49 @@ function action(actionId: string, type: LegalAction["type"]): LegalAction {
     targetRequirements: [],
     visibility: "private_to_actor",
     expiresAtStateVersion: 1,
+  };
+}
+
+function actionSemanticCandidate(
+  overrides: Partial<ActionSemanticCandidate> &
+    Pick<ActionSemanticCandidate, "actionId" | "actionType">,
+): ActionSemanticCandidate {
+  return {
+    actorSide: "runner",
+    observerSide: "runner",
+    visibilityScope: "actor_private",
+    legalActionRef: {
+      actionId: overrides.actionId,
+      actionType: overrides.actionType,
+      originalPayloadKeys: [],
+    },
+    stateVersion: 1,
+    sourceKind: "basic_action",
+    abilityBindingMethod: "unresolved",
+    semanticActionType: overrides.actionType,
+    cardContextSignals: [],
+    actionTacticSignals: [],
+    strategySupport: [],
+    conditions: [],
+    risks: [],
+    constraints: [],
+    costProfile: {
+      costKnownStatus: "not_applicable",
+      additionalCosts: [],
+    },
+    timingProfile: {},
+    boardContext: {
+      source: "ai_decision_input",
+      sideSafe: true,
+      stateVersion: 1,
+      notes: ["test"],
+    },
+    confidence: "medium",
+    primaryProjectionStatus: "projected",
+    projectionIssues: [],
+    hardGates: [],
+    evidence: [],
+    ...overrides,
   };
 }
 
