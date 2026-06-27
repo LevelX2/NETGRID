@@ -284,9 +284,7 @@ function cardText(card: VisibleCard): string {
 }
 
 function corpActionLooksLikePunish(action: LegalAction): boolean {
-  return /punish|tag_punish|damage_punish|tag/i.test(
-    [action.label, action.type].join(" ").toLowerCase(),
-  );
+  return action.payload?.tagPunishAction === true;
 }
 
 function corpScoreLooksSafe(action: LegalAction): boolean {

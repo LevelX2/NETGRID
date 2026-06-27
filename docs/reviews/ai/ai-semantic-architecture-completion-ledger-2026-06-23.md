@@ -6879,6 +6879,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` dreizehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` entfernt im Corp-Real-/Stale-Punish-Kandidaten den Label-/Action-Type-Fallback auf `punish|tag_punish|damage_punish|tag`.
+  - Practical-Tactic-Punish-Erkennung nutzt dort nun das strukturierte Payload-Flag `tagPunishAction`.
+  - `packages/ai/src/evaluation/practical-tactic-benchmark.ts` markiert die Practical-Tactic-Punish-Fixtures mit `tagPunishAction`, damit der Compare-only-Benchmark ohne Label-Matching weiter läuft.
+  - `practical-tactic-overlay.test.ts` schützt, dass label-only Punish-Text nicht mehr zählt, `tagPunishAction: true` aber Real-Punish und Stale-Punish weiterhin triggert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts src/evaluation/practical-tactic-benchmark.test.ts` grün, 2 Dateien, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

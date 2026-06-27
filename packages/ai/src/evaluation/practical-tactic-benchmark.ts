@@ -375,7 +375,12 @@ function realPunishCases(): CaseSpec[] {
     badActionIds: [`gain-punish-${index}`],
     rationale: "Runner ist getaggt; Corp soll das echte Punish-Fenster nutzen.",
     actions: [
-      { actionId: `punish-${index}`, type: "play_operation", label: "Closed Accounts punish tag" },
+      {
+        actionId: `punish-${index}`,
+        type: "play_operation",
+        label: "Closed Accounts punish tag",
+        payload: { tagPunishAction: true },
+      },
       { actionId: `gain-punish-${index}`, type: "gain_credit", label: "Gain credit" },
     ],
   }));
@@ -392,7 +397,12 @@ function stalePunishCases(): CaseSpec[] {
     badActionIds: [`punish-stale-${index}`],
     rationale: "Ohne Tag-Fenster ist Punish stale; Scoreline-Fortschritt ist konkret.",
     actions: [
-      { actionId: `punish-stale-${index}`, type: "play_operation", label: "Closed Accounts punish tag" },
+      {
+        actionId: `punish-stale-${index}`,
+        type: "play_operation",
+        label: "Closed Accounts punish tag",
+        payload: { tagPunishAction: true },
+      },
       { actionId: `advance-${index}`, type: "advance_card", label: "Advance agenda" },
       { actionId: `score-${index}`, type: "score_agenda", label: "Score agenda" },
     ],
