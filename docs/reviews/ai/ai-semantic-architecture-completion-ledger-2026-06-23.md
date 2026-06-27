@@ -54,7 +54,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `VERIFIED` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Erfüllt: `index.ts` ist importfreie Public-Re-Export-Fassade bei 397 Zeilen; Boundary-Test verhindert lokale Imports, lokale Implementierungen und direkte Composition-Erzeugung; zwei Audits ohne neue In-Scope-Findings. |
 | AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `VERIFIED` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Erfüllt: `tactical-plans.ts` ist dünne Plan-Fassade bei 306 Zeilen; Runner-, Corp-, Mapping-, Progression-/Ranking- und Debug-/Redaction-Verantwortungen liegen in getrennten Modulen; Boundary-Test und zwei Abschluss-Audits sind grün. |
 | AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `VERIFIED` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Erfüllt: produktiver Legacy-Zugriff läuft über `legacy-entrypoints.ts`, Public-Kompatibilität über `legacy-public-contract.ts`; Matrix klassifiziert alle Nutzungen; ersetzte Top-Level-Facades sind entfernt und per Boundary-Test blockiert. |
-| AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `PENDING` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Produktiver Pfad nutzt klare Doctrine-Schnittstelle mit NeutralDoctrine, Vollständigkeit und Rollenstatus. |
+| AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `VERIFIED` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Erfüllt: produktiver Decision-Input nutzt `deck-doctrine-runtime-context.ts` mit StrategyProfile, report-only Doctrine-v2-Diagnostic, NeutralDoctrine, Vollständigkeitsstatus und Rollenstatus; Doctrine-v1-PlanWeights sind Legacy-gekapselt, Public-v1-Exports laufen über den Legacy-Public-Contract. |
 | AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `PENDING` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate und wirken im Hauptscore. |
 | AI-COMPLETE-08 | Corp-TacticalGoals produktiv vollständig integrieren. | `PENDING` | Corp-Ziele wurden begonnen, müssen produktiv und diagnosefähig durchgängig wirken. | Corp-Ziele für Score, Remote, Zentralserver, Rez, Economy, Tag/Punish und Damage/Kill wirken im Hauptscore. |
 | AI-COMPLETE-09 | ActionSemanticCandidate-Befüllung vervollständigen. | `PENDING` | Source/Ability/Cost/Timing/Target/BoardContext-Coverage muss gemessen und geschlossen werden. | Relevanter Runtime-Scope ist ausreichend befüllt; Gaps sind echte Blocker oder repariert. |
@@ -6367,8 +6367,18 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/deck-doctrine.test.ts src/index.test.ts` grün, 3 Dateien, 558 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1657 Tests.
+- `AI-COMPLETE-06` Abschlussaudit:
+  - Produktiver Doctrine-Kontext läuft über `packages/ai/src/deck-doctrine-runtime-context.ts`; `runtime/ai-decision-input.ts` baut keine Doctrine-v1-/v2-Profile direkt.
+  - `packages/ai/src/deck-doctrine.ts` ist auf Doctrine-v1-Profilbildung begrenzt; Legacy-PlanWeights/MulliganWeights liegen in `packages/ai/src/legacy/deck-doctrine-legacy-weights.ts`.
+  - `packages/ai/src/deck-opening-hand.ts` kapselt Opening-Hand-Bewertung getrennt von Doctrine-v1-Profilbildung.
+  - `packages/ai/src/index.ts` exportiert Doctrine-v1-Kompatibilität über `packages/ai/src/legacy/legacy-public-contract.ts`; direkte Public-Exports aus `deck-doctrine.ts` sind per Boundary-Test blockiert.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts` grün, 23 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1657 Tests.
+  - Status: `VERIFIED`.
 
-Nächstes aktives Ziel: `AI-COMPLETE-06`.
+Nächstes aktives Ziel: `AI-COMPLETE-07`.
 
 ## Audit-Ledger
 
