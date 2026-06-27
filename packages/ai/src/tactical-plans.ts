@@ -67,6 +67,12 @@ import {
   largestBankPayout,
 } from "./plans/tactical-plan-bank-tools";
 import {
+  actionServerId,
+  isCentralServer,
+  isRemoteServer,
+  isServerTargetPayloadKey,
+} from "./plans/tactical-plan-server-targets";
+import {
   actionCreditCost,
   legalActionCreditGainForPlan,
   legalActionCreditNetGain,
@@ -3646,32 +3652,6 @@ function missingCoverageBlockerKind(
     case "special":
       return "missing_breaker_coverage";
   }
-}
-
-function actionServerId(action: LegalAction): string | undefined {
-  const value =
-    action.payload?.serverId ??
-    action.payload?.targetServerId ??
-    action.payload?.attackedServerId ??
-    action.payload?.server;
-  return typeof value === "string" ? value : undefined;
-}
-
-function isServerTargetPayloadKey(key: string): boolean {
-  return (
-    key === "serverId" ||
-    key === "targetServerId" ||
-    key === "attackedServerId" ||
-    key === "server"
-  );
-}
-
-function isRemoteServer(serverId: string | undefined): boolean {
-  return serverId?.startsWith("remote_") === true;
-}
-
-function isCentralServer(serverId: string | undefined): boolean {
-  return serverId === "hq" || serverId === "rd";
 }
 
 function missingBreakerCoverageKind(
