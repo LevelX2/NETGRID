@@ -7113,6 +7113,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` achtunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/belief-state.ts` entfernt `cardDefinitionId.includes("expose"|"reveal")` aus der produktiven Reveal-/Expose-Klassifikation.
+  - Belief-State-Reveal-Familien entstehen dort nur noch aus exaktem strukturiertem `revealKind: "expose"` oder `revealKind: "reveal"`; andere Werte wie `breach` und DefinitionId-only Reveal-/Expose-Text bleiben `other`.
+  - `belief-state.test.ts` schützt strukturierte Expose-Erkennung sowie DefinitionId-only- und `breach`-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/belief-state.test.ts src/runner-run-target-evaluation.test.ts src/tactical-plans.test.ts` grün, 3 Dateien, 107 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

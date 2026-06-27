@@ -294,6 +294,55 @@ describe("belief-state known position memory", () => {
   });
 });
 
+describe("belief-state reveal kind classification", () => {
+  it("uses structured revealKind and ignores definition id reveal text", () => {
+    const structuredExpose = publicEvent(
+      "evt_structured_expose",
+      "resolve_choice",
+      1,
+      {
+        actor: "runner",
+        actionType: "resolve_choice",
+        revealKind: "expose",
+        cardDefinitionId: "neutral-card",
+      },
+    );
+    const idOnlyExpose = publicEvent(
+      "evt_id_only_expose",
+      "resolve_choice",
+      2,
+      {
+        actor: "runner",
+        actionType: "resolve_choice",
+        cardDefinitionId: "custom-expose-tool",
+      },
+    );
+    const breachKind = publicEvent("evt_breach_kind", "resolve_choice", 3, {
+      actor: "runner",
+      actionType: "resolve_choice",
+      revealKind: "breach",
+      cardDefinitionId: "custom-reveal-tool",
+    });
+
+    const classifications = reconstructBeliefState(
+      runnerInput([structuredExpose, idOnlyExpose, breachKind]),
+    ).eventClassifications;
+
+    expect(
+      classifications.find((entry) => entry.eventId === "evt_structured_expose")
+        ?.family,
+    ).toBe("expose");
+    expect(
+      classifications.find((entry) => entry.eventId === "evt_id_only_expose")
+        ?.family,
+    ).toBe("other");
+    expect(
+      classifications.find((entry) => entry.eventId === "evt_breach_kind")
+        ?.family,
+    ).toBe("other");
+  });
+});
+
 function runnerInput(
   events: PublicGameEvent[],
   opponentHandCount = 0,

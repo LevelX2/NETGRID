@@ -1560,12 +1560,8 @@ function canonicalStructuredServerId(serverId: string): string {
 
 function revealKind(event: PublicGameEvent): "reveal" | "expose" | undefined {
   const revealKindValue = stringValue(event.publicPayload.revealKind);
-  if (revealKindValue?.includes("expose")) return "expose";
-  if (revealKindValue) return "reveal";
-  const definitionId = stringValue(event.publicPayload.cardDefinitionId);
-  if (!definitionId) return undefined;
-  if (definitionId.includes("expose")) return "expose";
-  if (definitionId.includes("reveal")) return "reveal";
+  if (revealKindValue === "expose") return "expose";
+  if (revealKindValue === "reveal") return "reveal";
   return undefined;
 }
 
