@@ -164,6 +164,29 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideChoice).toBeUndefined();
     expect(result.overrideThreshold).toBe(480);
   });
+
+  it("uses structured history server ids and ignores label-only repeat-run history", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const labelOnly = tacticalPlanMappedChoice(
+      aiInput([runEvent({ serverLabel: "R&D" })]),
+      [choice(gain, 7125), choice(run, 7025)],
+      remoteContestMapping([run]),
+      choice(gain, 7125),
+    );
+    const structured = tacticalPlanMappedChoice(
+      aiInput([runEvent({ serverId: "rd" })]),
+      [choice(gain, 7125), choice(run, 7025)],
+      remoteContestMapping([run]),
+      choice(gain, 7125),
+    );
+
+    expect(labelOnly.outcome).toBe("semantic_choice_blocked");
+    expect(labelOnly.choice?.action.actionId).toBe("run-rd");
+    expect(structured.outcome).toBe("semantic_choice_selected");
+    expect(structured.choice?.action.actionId).toBe("gain");
+    expect(structured.overrideReason).toBe("repeated_run_mapping_yield");
+  });
 });
 
 function choice(
@@ -262,11 +285,13 @@ function legalAction(
   };
 }
 
-function aiInput(): AiDecisionInput {
+function aiInput(
+  eventTail: AiDecisionInput["eventTail"] = [],
+): AiDecisionInput {
   return {
     side: "runner",
     playerView: {
-      stateVersion: 1,
+        stateVersion: 20,
       side: "runner",
       activeSide: "runner",
       phase: "runner_action_phase",
@@ -317,7 +342,7 @@ function aiInput(): AiDecisionInput {
       winner: null,
       agendaPointsToWin: 7,
     },
-    eventTail: [],
+    eventTail,
     legalActions: [],
     difficulty: "normal",
     seed: "semantic-choice-ranking-test",
@@ -325,4 +350,21 @@ function aiInput(): AiDecisionInput {
     actionNumber: 1,
     profileId: "semantic-choice-ranking-test",
   };
+}
+
+function runEvent(
+  payload: Record<string, unknown>,
+): AiDecisionInput["eventTail"][number] {
+  return {
+    eventId: `event-${JSON.stringify(payload)}`,
+    type: "start_run",
+    stateVersionBefore: 18,
+    stateVersionAfter: 19,
+    stateHashAfter: "test-hash",
+    publicPayload: {
+      actor: "runner",
+      actionType: "start_run",
+      ...payload,
+    },
+  } as AiDecisionInput["eventTail"][number];
 }

@@ -7018,6 +7018,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` achtundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-choice-ranking.ts` entfernt `serverLabel`/`serverName` aus der produktiven Serverableitung für Recent-Repeat-Run-Ranking.
+  - Wiederholte Run-Erkennung im Tactical-Plan-Mapping nutzt dort nur noch strukturierte Serverfelder wie `serverId`, `server`, `targetServerId` oder `attackedServerId`, nicht label-only PublicEvent-Servertexte.
+  - `semantic-choice-ranking.test.ts` schützt, dass label-only `serverLabel: "R&D"` keinen Repeat-Run-Yield auslöst, strukturierte `serverId: "rd"` aber weiterhin `repeated_run_mapping_yield` erzeugt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-choice-ranking.test.ts src/tactical-plans.test.ts` grün, 2 Dateien, 53 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
