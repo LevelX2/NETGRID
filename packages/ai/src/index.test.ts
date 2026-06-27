@@ -124,14 +124,17 @@ import {
   DEMO_CARDS_BY_ID,
   sanitizeAiDecisionDebug,
 } from "@netgrid/shared";
+import { resetTacticalPlanMemory } from "./tactical-plans";
 
 const originalSemanticAiRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
 
 beforeEach(() => {
   process.env.NETGRID_SEMANTIC_AI_RUNTIME = "legacy";
+  resetTacticalPlanMemory();
 });
 
 afterEach(() => {
+  resetTacticalPlanMemory();
   if (originalSemanticAiRuntimeMode === undefined) {
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
   } else {

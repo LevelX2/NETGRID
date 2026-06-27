@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`completed`
 
 ## Quelle und Ziel
 
@@ -67,7 +67,7 @@ Ziel ist ein kompaktes, generisches KI-Fixpaket für die beobachteten Corp-Fehle
 - Advancement-Burst-Operationen als Score-Closeout-Kandidaten einbeziehen.
 - Positive Tests: `Project Venice`-Install/Advance-Konsistenz, `Corporate War`-Remote-Fälle, `Systematic Layoffs` als Closeout-Kandidat.
 - Negative Tests: Scoreline wird nicht blockiert, wenn sie geschützt oder sofort schließbar ist.
-- Commit: `fix(ai): gate remote scoreline viability`
+- Commit: `fix(ai): score remote closeout viability`
 
 ### Paket D: Central-Threat und Rez-Funding
 
@@ -93,11 +93,30 @@ Ziel ist ein kompaktes, generisches KI-Fixpaket für die beobachteten Corp-Fehle
 - `corepack pnpm --filter @netgrid/ai typecheck` ausführen.
 - `git diff --check` ausführen.
 - Final-Review aktualisieren und lokalen Merge nach `main` vorbereiten.
-- Commit: `docs(ai): finalize corp replay fixes`
+- Zusatzbefund aus dem Gate: `src/index.test.ts` teilte persistenten Tactical-Plan-Memory zwischen Tests. Die Loan-from-Chiba-Gruppe fiel dadurch order-abhängig, isoliert aber nicht. Der globale Test-Reset in `index.test.ts` isoliert den Store analog zu den spezialisierten Tactical-Plan-Tests.
+- Commits: `test(ai): isolate tactical plan memory in index tests`, `docs(ai): finalize corp replay fixes`
+
+## Umsetzung und Verifikation
+
+### Umgesetzte Commits
+
+- `596c4754` `docs(ai): record corp replay fix evidence`
+- `4390e2f5` `fix(ai): score effective corp defense`
+- `06bbc391` `fix(ai): score remote closeout viability`
+- `06386381` `fix(ai): connect central pressure to rez funding`
+- `7f57e3b1` `fix(ai): prefer targeted corp payoffs`
+
+### Verifikation 2026-06-27
+
+- Fokussierte Corp-/Cutover-Regressionen: 7 Dateien, 93 Tests, grün.
+- Loan-from-Chiba-Isolationsreproduktion nach Test-Reset: 6 Tests, grün.
+- `corepack pnpm exec vitest run src/index.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=verbose`: 534 Tests, grün.
+- `corepack pnpm --filter @netgrid/ai test`: 165 Testdateien, 1708 Tests, grün.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
 
 ## /Goal
 
 Arbeite den Prozess `AI Corp Replay Fixes 2026-06-27` vollständig und sequenziell von Paket A bis Paket F im Worktree `C:\Projekte\NETGRID_AI_CORP_REPLAY_FIXES` auf Branch `codex/ai-corp-replay-fixes` ab und merge den abgeschlossenen Arbeitsbranch lokal nach `main`.
 
 Arbeite immer nur am aktuellen Paket. Nutze den Hauptworkspace nur für finalen Git-Abgleich und lokalen Merge. Stoppe ohne Workaround, wenn eine Lösung verdeckte Informationen bräuchte, LegalActions fehlen, Tests eine Engine-/Side-Safety-/Replay-Regression zeigen oder der lokale Merge fachlich kollidiert.
-
