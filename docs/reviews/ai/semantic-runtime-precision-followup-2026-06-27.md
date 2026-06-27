@@ -353,7 +353,7 @@ Verifikation:
 
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts`: grün, 1 Datei, 23 Tests.
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-golden-deck-debug.test.ts`: grün, 1 Datei, 9 Tests.
-- `corepack pnpm --filter @netgrid/ai test`: zunächst rot wegen veralteter Boundary-Erwartung, nach Main-Merge einmal rot wegen veraltetem Broker-Testfixture, danach grün, 175 Dateien, 1734 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: zunächst rot wegen veralteter Boundary-Erwartung, nach Main-Merge einmal rot wegen veraltetem Broker-Testfixture, nach finalem Main-Abgleich grün, 178 Dateien, 1737 Tests.
 - `corepack pnpm --filter @netgrid/shared test`: grün, 1 Datei, 4 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `corepack pnpm --filter @netgrid/shared typecheck`: grün.
