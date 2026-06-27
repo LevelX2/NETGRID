@@ -39,6 +39,7 @@ import {
   buildTargetChoiceShadowReport,
   TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
   targetChoiceRecommendationForTargetFit,
+  type TargetChoiceTargetFitRecommendation,
 } from "./target-choice-shadow";
 
 export type BuildSemanticShadowDecisionOptions = {
@@ -115,7 +116,12 @@ export function buildSemanticShadowDecision(
   rejectedActions.sort((left, right) =>
     left.actionId.localeCompare(right.actionId),
   );
-  const targetChoiceShadow = targetChoiceShadowTraceSummary(frame);
+  const targetChoiceShadow = targetChoiceShadowTraceSummary(
+    frame,
+    utilities,
+    threats,
+    opportunities,
+  );
   const doctrineGoals = options.includeDoctrineGoalsInTrace
     ? doctrineGoalTraceSummary(frame)
     : undefined;
@@ -404,15 +410,41 @@ function fitStatusRank(status: ActionGoalFit["fitStatus"]): number {
 
 function targetChoiceShadowTraceSummary(
   frame: SemanticDecisionFrame,
+  utilities: readonly TacticalGoalUtility[],
+  threats: readonly AiThreatProjection[],
+  opportunities: readonly AiOpportunityProjection[],
 ): SemanticDecisionTraceTargetChoiceShadowSummary | undefined {
   const reports = frame.actionCandidates.flatMap((candidate) => {
     const action = syntheticTargetChoiceActionForCandidate(candidate, frame);
     if (!action) return [];
-    return [buildTargetChoiceShadowReport({ action, candidate })];
+    return [
+      buildTargetChoiceShadowReport({
+        action,
+        candidate,
+        utilityFamilies: utilities.map((utility) => utility.family),
+        threats,
+        opportunities,
+      }),
+    ];
   });
   if (reports.length === 0) return undefined;
+  const recommendations = reports
+    .map(targetChoiceRecommendationForTargetFit)
+    .filter(
+      (
+        recommendation,
+      ): recommendation is TargetChoiceTargetFitRecommendation =>
+        Boolean(recommendation),
+    )
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        left.actionId.localeCompare(right.actionId) ||
+        left.optionId.localeCompare(right.optionId),
+    );
   const topReport = reports[0];
   const topOption = topReport?.rankedOptions[0];
+  const topRecommendation = recommendations[0];
   const rankedOptionCount = reports.reduce(
     (sum, report) => sum + report.rankedOptions.length,
     0,
@@ -430,8 +462,15 @@ function targetChoiceShadowTraceSummary(
     actionCount: reports.length,
     rankedOptionCount,
     blockedRequirementCount,
+    targetFitRecommendationCount: recommendations.length,
     ...(topReport ? { topActionId: topReport.actionId } : {}),
     ...(topOption ? { topOptionId: topOption.optionId } : {}),
+    ...(topRecommendation
+      ? { topRecommendationActionId: topRecommendation.actionId }
+      : {}),
+    ...(topRecommendation
+      ? { topRecommendationOptionId: topRecommendation.optionId }
+      : {}),
     selectionOutput: {
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
@@ -441,6 +480,7 @@ function targetChoiceShadowTraceSummary(
       `target_choice_shadow_action_count:${reports.length}`,
       `target_choice_shadow_ranked_option_count:${rankedOptionCount}`,
       `target_choice_shadow_blocked_requirement_count:${blockedRequirementCount}`,
+      `target_choice_target_fit_recommendation_count:${recommendations.length}`,
       "selected_choices_created:false",
       "selected_targets_created:false",
     ],

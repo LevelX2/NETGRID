@@ -6595,6 +6595,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-11`.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1675 Tests.
 
+- `AI-COMPLETE-11` dritter TargetChoice-Trace-Schnitt:
+  - `packages/ai/src/decision/semantic-decision-trace.ts` erweitert die TargetChoice-Trace-Summary um `targetFitRecommendationCount` und optionale Top-Recommendation-Felder.
+  - `packages/ai/src/decision/semantic-shadow-decision.ts` baut die Trace-Summary jetzt mit Utility-/Threat-/Opportunity-Kontext und zählt produktive Target-Fit-Recommendations getrennt von report-only Shadow-Reports.
+  - Der Trace bleibt no-effect (`productiveUseAllowed:false`, `runtimeConsumerStatus:"none"`, keine Selektionen), weist aber aus, wo TargetChoice produktiv in Target-Fit wirkt.
+  - `packages/ai/src/decision/semantic-shadow-decision.test.ts` schützt Recommendation-Zählung und Evidence in der TargetChoice-Trace-Summary.
+  - Status bleibt `IN_PROGRESS`, weil Readiness-/Coverage-Auswertungen noch auf die neuen Recommendation-Felder ausgerichtet werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/semantic-shadow-decision.test.ts` grün, 1 Datei, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1675 Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

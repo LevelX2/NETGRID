@@ -35,8 +35,11 @@ export type SemanticDecisionTraceTargetChoiceShadowSummary = {
   actionCount: number;
   rankedOptionCount: number;
   blockedRequirementCount: number;
+  targetFitRecommendationCount: number;
   topActionId?: string;
   topOptionId?: string;
+  topRecommendationActionId?: string;
+  topRecommendationOptionId?: string;
   selectionOutput: {
     selectedChoicesCreated: false;
     selectedTargetsCreated: false;

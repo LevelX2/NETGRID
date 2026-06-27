@@ -175,6 +175,12 @@ describe("SemanticShadowDecision", () => {
         }),
       ]),
     );
+    expect(trace.targetChoiceShadow).toMatchObject({
+      targetFitRecommendationCount: expect.any(Number),
+      evidence: expect.arrayContaining([
+        "target_choice_target_fit_recommendation_count:2",
+      ]),
+    });
     expect(trace.rankedActions[0]?.score).toBeGreaterThan(
       trace.rankedActions.find((action) => action.actionId === "run-rd")?.score ?? 0,
     );
@@ -336,6 +342,7 @@ describe("SemanticShadowDecision", () => {
       runtimeConsumerStatus: "none",
       actionCount: 1,
       rankedOptionCount: 1,
+      targetFitRecommendationCount: 0,
       topActionId: "run-hq",
       topOptionId: "hq",
       selectionOutput: {
