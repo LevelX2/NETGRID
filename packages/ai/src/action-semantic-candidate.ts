@@ -287,6 +287,7 @@ export type ActionSemanticCandidate = {
   semanticActionType: string;
   cardContextSignals: string[];
   actionTacticSignals: string[];
+  compatibilitySignals?: string[];
   strategySupport: StrategySupportPair[];
   conditions: SemanticCondition[];
   risks: SemanticRisk[];
@@ -352,6 +353,7 @@ export type SideSafeActionAbilityBinding = {
 export type ActionCardAbilitySemanticProfile = {
   abilityId: string;
   tacticSignals: readonly string[];
+  compatibilitySignals?: readonly string[];
   strategySupport?: readonly StrategySupportPair[];
   conditions?: readonly SemanticCondition[];
   risks?: readonly SemanticRisk[];
@@ -363,6 +365,7 @@ export type ActionCardAbilitySemanticProfile = {
 export type ActionCardSemanticProfile = {
   cardId: CardDefinitionId;
   tacticSignals: readonly string[];
+  compatibilitySignals?: readonly string[];
   strategySupport?: readonly StrategySupportPair[];
   conditions?: readonly SemanticCondition[];
   risks?: readonly SemanticRisk[];

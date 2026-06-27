@@ -63,19 +63,21 @@ function actionCardSemanticProfileFromHint(
   const abilitySemantics = (DEMO_CARDS_BY_ID[cardId]?.abilities ?? []).map(
     abilitySemanticProfile,
   );
+  const compatibilitySignals = uniqueStrings([
+    ...hint.roles.map((role) => `role:${role}`),
+    ...hint.planRoles.map((role) => `plan_role:${role}`),
+    ...(hint.lineSupport ?? []).map((line) => `line_support:${line}`),
+    ...(extendedHint.strategicRole ?? []).map(
+      (role) => `strategic_role:${role}`,
+    ),
+  ]);
   return {
     cardId,
     tacticSignals: uniqueStrings([
-      ...hint.roles.map((role) => `role:${role}`),
-      ...hint.planRoles.map((role) => `plan_role:${role}`),
-      ...(hint.lineSupport ?? []).map((line) => `line_support:${line}`),
-      ...(extendedHint.strategicRole ?? []).map(
-        (role) => `strategic_role:${role}`,
-      ),
-      ...(extendedHint.riskTags ?? []).map((risk) => `risk:${risk}`),
       ...effectSignals,
       ...(hint.remoteRole ? [`remote_role:${hint.remoteRole.kind}`] : []),
     ]),
+    ...(compatibilitySignals.length > 0 ? { compatibilitySignals } : {}),
     strategySupport: strategySupportFromHint(hint),
     conditions: (hint.conditions ?? []).map(conditionFromHint),
     risks: riskTagsFromHint(hint),

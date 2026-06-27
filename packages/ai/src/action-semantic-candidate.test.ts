@@ -906,7 +906,7 @@ describe("buildActionSemanticCandidates", () => {
         },
         "multi-ability-card": {
           cardId: "multi-ability-card",
-          tacticSignals: ["card.context.multi"],
+          tacticSignals: ["card.context.multi", "access.payoff"],
           abilitySemantics: [
             { abilityId: "ability.a", tacticSignals: ["draw.card"] },
             { abilityId: "ability.b", tacticSignals: ["economy.gain"] },
@@ -914,7 +914,7 @@ describe("buildActionSemanticCandidates", () => {
         },
         "multi-ability-bound-card": {
           cardId: "multi-ability-bound-card",
-          tacticSignals: ["card.context.bound"],
+          tacticSignals: ["card.context.bound", "damage.payoff"],
           abilitySemantics: [
             { abilityId: "ability.a", tacticSignals: ["draw.card"] },
             { abilityId: "ability.b", tacticSignals: ["tag.remove"] },
@@ -945,12 +945,14 @@ describe("buildActionSemanticCandidates", () => {
     expect(unresolved.sourceDefinitionId).toBe("multi-ability-card");
     expect(unresolved.cardContextSignals).toEqual(["card.context.multi"]);
     expect(unresolved.actionTacticSignals).toEqual([]);
+    expect(unresolved.compatibilitySignals).toContain("access.payoff");
     expect(unresolved.projectionIssues).toContain("ability_unresolved");
 
     expect(explicit.sourceCardInstanceId).toBe("multi-ability-bound-instance");
     expect(explicit.sourceDefinitionId).toBe("multi-ability-bound-card");
     expect(explicit.cardContextSignals).toEqual(["card.context.bound"]);
     expect(explicit.actionTacticSignals).toEqual(["tag.remove"]);
+    expect(explicit.compatibilitySignals).toContain("damage.payoff");
     expect(explicit.projectionIssues).not.toContain("ability_unresolved");
   });
 
@@ -1002,6 +1004,41 @@ describe("buildActionSemanticCandidates", () => {
       "target_context_unavailable",
     );
     expect(JSON.stringify(candidate)).not.toContain("tp.profile_only_remote");
+  });
+
+  it("keeps compatibility-only card signals out of action tactic matching", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "compat-instance",
+          payload: { sourceDefinitionId: "compat-card" },
+        }),
+      ],
+      cardSemanticProfilesByDefinitionId: {
+        "compat-card": {
+          cardId: "compat-card",
+          tacticSignals: ["economy.card"],
+          compatibilitySignals: [
+            "role:economy",
+            "plan_role:runner_setup",
+            "line_support:runner.rig_first",
+          ],
+        },
+      },
+    });
+
+    if (!candidate) throw new Error("Expected compatibility candidate");
+    expect(candidate.actionTacticSignals).toEqual(["economy.card"]);
+    expect(candidate.cardContextSignals).toEqual([]);
+    expect(candidate.compatibilitySignals).toEqual([
+      "role:economy",
+      "plan_role:runner_setup",
+      "line_support:runner.rig_first",
+    ]);
+    expect(candidate.actionTacticSignals).not.toContain("role:economy");
+    expect(candidate.cardContextSignals).not.toContain(
+      "line_support:runner.rig_first",
+    );
   });
 
   it("prefers sourceCardInstanceId over the legacy sourceCardId binding alias", () => {

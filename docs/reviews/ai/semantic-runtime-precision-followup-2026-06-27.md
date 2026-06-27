@@ -193,3 +193,22 @@ Verifikation:
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/strategic-runtime-context.test.ts src/strategic-intent-state.test.ts src/diagnostics/semantic-runtime-debug.test.ts`: grün, 3 Dateien, 17 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `git diff --check`: grün.
+
+## P2 Ergebnis: Card-/Ability-Semantik
+
+Status: `P2_done`
+
+Umgesetzt:
+
+- `ActionSemanticCandidate` und CardSemanticProfiles tragen jetzt optionale `compatibilitySignals`.
+- Generierte CardSemanticProfiles legen Legacy-/Hint-Beschreibungen wie `role:*`, `plan_role:*`, `line_support:*` und `strategic_role:*` nicht mehr in `tacticSignals`, sondern in `compatibilitySignals`.
+- `applyCardSemanticJoin()` legt bei bekannten Multi-Ability-Karten keine breiten profile-level Effektsignale mehr auf gebundene Actions. Ability-spezifische Signale bleiben handlungswirksam.
+- Unresolved Multi-Ability-Actions behalten breite profile-level Effektsignale nur als Compatibility-Evidence und erhalten weiterhin `ability_unresolved`.
+- Profile-level StrategySupport/Conditions/Risks/Constraints werden nur noch angewandt, wenn keine Ability-Aufteilung bekannt ist; gebundene Abilities nutzen ihre eigenen spezifischen Profile.
+
+Verifikation:
+
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/action-semantic-candidate.test.ts`: grün, 20 Tests.
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-card-semantic-profiles.test.ts`: grün, 1 Test.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
