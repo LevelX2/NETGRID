@@ -1,6 +1,6 @@
 import {
+  bankBuildActions,
   bankToolEvidence,
-  isBankBuildAction,
 } from "./tactical-plan-bank-tools";
 import {
   createPlanStep,
@@ -175,11 +175,11 @@ export function buildCorpTacticalPlans(
       }),
     );
   }
-  const bankBuildActions = input.legalActions.filter(isBankBuildAction);
+  const bankBuildActionList = bankBuildActions(context, "corp", input.legalActions);
   const corpBankToolEvidence = bankToolEvidence(context, "corp");
   const economyStrategicBoost = tacticalGoalPriorityBoost(economyGoal, 100);
   if (
-    bankBuildActions.length > 0 &&
+    bankBuildActionList.length > 0 &&
     input.playerView.own.credits >= 4 &&
     context.previousPlan?.type !== "corp.build_credit_bank"
   ) {
@@ -208,7 +208,7 @@ export function buildCorpTacticalPlans(
           rationale: ["corp can bank spare credits for future score or rez windows"],
         }),
         evidence: [
-          ...bankBuildActions.map((action) => `bank_build_action:${action.actionId}`),
+          ...bankBuildActionList.map((action) => `bank_build_action:${action.actionId}`),
           ...corpBankToolEvidence,
           ...tacticalGoalEvidence(economyGoal),
         ],

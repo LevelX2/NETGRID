@@ -89,6 +89,8 @@ export type EconomyBankTool = {
   maxKnownCapacity?: number;
   buildActionLegal: boolean;
   cashOutActionLegal: boolean;
+  buildActionIds: string[];
+  cashOutActionIds: string[];
   estimatedPayout?: number;
   confidence: DeckCapabilityConfidence;
   evidence: string[];
@@ -695,12 +697,16 @@ function economyBankToolForRecord(
   ) {
     return undefined;
   }
-  const buildActionLegal = params.legalActions?.some((action) =>
-    actionMatchesBankBuild(action, record),
-  ) ?? false;
-  const cashOutActionLegal = params.legalActions?.some((action) =>
-    actionMatchesBankCashOut(action, record),
-  ) ?? false;
+  const buildActionIds = (params.legalActions ?? [])
+    .filter((action) => actionMatchesBankBuild(action, record))
+    .map((action) => action.actionId)
+    .sort();
+  const cashOutActionIds = (params.legalActions ?? [])
+    .filter((action) => actionMatchesBankCashOut(action, record))
+    .map((action) => action.actionId)
+    .sort();
+  const buildActionLegal = buildActionIds.length > 0;
+  const cashOutActionLegal = cashOutActionIds.length > 0;
   const currentBankAmount = currentVisibleBankAmount(record.visibleCards);
   const structuredBank =
     /temporary_resource_bank|counter_bank/.test(signals) ||
@@ -714,6 +720,8 @@ function economyBankToolForRecord(
     ...maxKnownBankCapacity(record.text),
     buildActionLegal,
     cashOutActionLegal,
+    buildActionIds,
+    cashOutActionIds,
     ...(cashOutActionLegal && currentBankAmount !== undefined
       ? { estimatedPayout: currentBankAmount }
       : {}),
@@ -887,8 +895,15 @@ function actionSourceMatchesRecord(
   record: CardCapabilityRecord,
 ): boolean {
   const source = String(action.source);
-  return record.visibleCards.some((card) => card.instanceId === source) ||
+  const payloadCardId =
+    typeof action.payload?.cardId === "string"
+      ? action.payload.cardId
+      : undefined;
+  return record.visibleCards.some(
+    (card) => card.instanceId === source || card.instanceId === payloadCardId,
+  ) ||
     source === record.cardId ||
+    payloadCardId === record.cardId ||
     action.payload?.sourceCardId === record.cardId;
 }
 
@@ -897,11 +912,7 @@ function actionMatchesBankBuild(
   record: CardCapabilityRecord,
 ): boolean {
   if (!actionSourceMatchesRecord(action, record)) return false;
-  const label = action.label.toLowerCase();
-  return label.includes("auf broker legen") ||
-    (label.includes("put") && label.includes("bank")) ||
-    (label.includes("bank") && label.includes("counter")) ||
-    label.includes("charge");
+  return action.payload?.cardImplementationAddsHostedCredits === true;
 }
 
 function actionMatchesBankCashOut(
@@ -909,10 +920,7 @@ function actionMatchesBankCashOut(
   record: CardCapabilityRecord,
 ): boolean {
   if (!actionSourceMatchesRecord(action, record)) return false;
-  const label = action.label.toLowerCase();
-  return label.includes("von broker nehmen") ||
-    (label.includes("take") && label.includes("bank")) ||
-    label.includes("cash");
+  return action.payload?.cardImplementationTakesHostedCredits === true;
 }
 
 function currentVisibleBankAmount(cards: readonly VisibleCard[]): number | undefined {

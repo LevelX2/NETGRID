@@ -43,8 +43,22 @@ describe("DeckCapabilityProfile", () => {
     ];
     const legalActions = [
       legalAction("smc-search", "runner", "trigger_ability", "smc-1", "Self-Modifying Code: search your stack for a program"),
-      legalAction("broker-build", "runner", "trigger_ability", "broker-1", "Auf Broker legen"),
-      legalAction("broker-cash", "runner", "trigger_ability", "broker-1", "Von Broker nehmen"),
+      legalAction(
+        "broker-build",
+        "runner",
+        "trigger_ability",
+        "broker-1",
+        "Use ability",
+        { cardImplementationAddsHostedCredits: true },
+      ),
+      legalAction(
+        "broker-cash",
+        "runner",
+        "trigger_ability",
+        "broker-1",
+        "Use ability",
+        { cardImplementationTakesHostedCredits: true },
+      ),
     ];
 
     const profile = buildDeckCapabilityProfile({
@@ -73,11 +87,80 @@ describe("DeckCapabilityProfile", () => {
       currentBankAmount: 3,
       buildActionLegal: true,
       cashOutActionLegal: true,
+      buildActionIds: ["broker-build"],
+      cashOutActionIds: ["broker-cash"],
     });
     expect(profile.runner?.memoryProfile).toMatchObject({
       memoryUsed: 3,
       memoryLimit: 4,
       memoryAvailable: 1,
+    });
+  });
+
+  it("uses structured hosted-credit payloads and ignores label-only bank actions", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard("broker-1", "onr_v1_154_broker", "runner", "resource", {
+        title: "Broker",
+        counterDisplays: [
+          {
+            id: "broker-bank",
+            amount: 3,
+            displayKind: "stored_credits",
+            label: "3",
+            ariaLabel: "3 gespeicherte Credits",
+            usageHint: "spendable",
+          },
+        ],
+      }),
+    ];
+
+    const labelOnly = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [
+        legalAction("label-build", "runner", "trigger_ability", "broker-1", "Auf Broker legen"),
+        legalAction("label-cash", "runner", "trigger_ability", "broker-1", "Von Broker nehmen"),
+      ],
+      deckSnapshot: runnerSnapshot([["onr_v1_154_broker", 1]]),
+    });
+
+    expect(labelOnly.runner?.economyBankTools[0]).toMatchObject({
+      buildActionLegal: false,
+      cashOutActionLegal: false,
+      buildActionIds: [],
+      cashOutActionIds: [],
+    });
+
+    const structured = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [
+        legalAction(
+          "structured-build",
+          "runner",
+          "trigger_ability",
+          "broker-1",
+          "Use ability",
+          { cardImplementationAddsHostedCredits: true },
+        ),
+        legalAction(
+          "structured-cash",
+          "runner",
+          "trigger_ability",
+          "broker-1",
+          "Use ability",
+          { cardImplementationTakesHostedCredits: true },
+        ),
+      ],
+      deckSnapshot: runnerSnapshot([["onr_v1_154_broker", 1]]),
+    });
+
+    expect(structured.runner?.economyBankTools[0]).toMatchObject({
+      buildActionLegal: true,
+      cashOutActionLegal: true,
+      buildActionIds: ["structured-build"],
+      cashOutActionIds: ["structured-cash"],
     });
   });
 
@@ -244,8 +327,9 @@ function legalAction(
   type: LegalAction["type"],
   source: LegalAction["source"],
   label: string,
+  payload?: LegalAction["payload"],
 ): LegalAction {
-  return {
+  const action: LegalAction = {
     actionId,
     side,
     type,
@@ -257,4 +341,6 @@ function legalAction(
     visibility: "public",
     expiresAtStateVersion: 2,
   };
+  if (payload) action.payload = payload;
+  return action;
 }

@@ -25,7 +25,7 @@ export function candidateTargetMatchesPlan(
 export function bankStepMatchesCandidate(
   step: PlanStep,
   candidate: ActionSemanticCandidate,
-  _action: LegalAction,
+  action: LegalAction,
 ): boolean {
   if (step.kind !== "build_bank_counter" && step.kind !== "cash_out_bank") {
     return true;
@@ -37,12 +37,14 @@ export function bankStepMatchesCandidate(
   ].join(" ").toLowerCase();
   if (step.kind === "build_bank_counter") {
     return (
+      action.payload?.cardImplementationAddsHostedCredits === true ||
       signals.includes("bank") ||
       signals.includes("counter_bank") ||
       signals.includes("temporary_resource_bank")
     );
   }
   return (
+    action.payload?.cardImplementationTakesHostedCredits === true ||
     signals.includes("cash") ||
     signals.includes("payout") ||
     signals.includes("bank")
