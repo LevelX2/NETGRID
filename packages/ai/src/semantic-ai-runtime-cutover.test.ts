@@ -1362,6 +1362,33 @@ describe("Semantic AI runtime cutover", () => {
     ).toBe(true);
   });
 
+  it("funds a visible tagged payoff when the payoff is one credit short", () => {
+    const closedAccounts = visibleCard("closed-accounts", "corp", "operation", {
+      definitionId: "onr_v1_285_closed-accounts",
+      title: "Closed Accounts",
+      cost: 1,
+    });
+    const input = aiInput("corp", [
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "corp", "draw_card", "Draw 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.gripOrHq = [closedAccounts];
+    input.playerView.opponent.tags = 1;
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(debugText).toContain("corp_tag_punish_payoff_funding");
+    expect(debugText).toContain("corp_tagged_payoff_targeted_funding:true");
+    expect(debugText).toContain("target_definition:onr_v1_285_closed-accounts");
+  });
+
   it("uses hardware trash payoff over basic credit while the Runner is tagged", () => {
     const powerGrid = visibleCard("power-grid", "corp", "operation", {
       definitionId: "onr_v1_299_power-grid-overload",
