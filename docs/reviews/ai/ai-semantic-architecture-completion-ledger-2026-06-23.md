@@ -6937,6 +6937,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` neunzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-recovery-history.ts` entfernt `action.label` aus der produktiven Recovery-Action-Erkennung.
+  - Runner-Recovery-Erkennung nutzt dort weiterhin Source-Card-Metadaten und Rollen wie `trash_recovery`, aber keinen label-only Text wie `Junkyard BBS recovery`.
+  - `runner-recovery-history.test.ts` schützt, dass label-only Recovery-Text nicht mehr zählt, Source-Definition und Rollen aber weiterhin Recovery-Actions erkennen.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-recovery-history.test.ts src/runtime/runner-bank-investment-context.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
