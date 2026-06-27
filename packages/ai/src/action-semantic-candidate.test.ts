@@ -73,6 +73,19 @@ describe("buildActionSemanticCandidates", () => {
       expect(candidate.cardContextSignals).toEqual([]);
       expect(candidate.actionTacticSignals).toEqual([]);
       expect(candidate.strategySupport).toEqual([]);
+      expect(candidate.boardContext).toMatchObject({
+        source: "ai_decision_input",
+        sideSafe: true,
+        stateVersion: 42,
+        timingPoint: action.timingPoint,
+      });
+      expect(candidate.boardContext.notes).toEqual(
+        expect.arrayContaining([
+          "AI036 side-safe decision context projection",
+          `action_side:${action.side}`,
+          `action_visibility:${action.visibility}`,
+        ]),
+      );
       expect(candidate.hardGates).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
@@ -112,6 +125,10 @@ describe("buildActionSemanticCandidates", () => {
       "serverId",
       "targetCardId",
     ]);
+    expect(candidate.boardContext.source).toBe("not_projected");
+    expect(candidate.boardContext.notes).toContain(
+      "payload_keys:serverId,targetCardId",
+    );
     expect(JSON.stringify(candidate)).not.toContain("secret-unseen-card");
   });
 

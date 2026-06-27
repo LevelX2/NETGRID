@@ -6449,6 +6449,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1667 Tests.
 
+- `AI-COMPLETE-09` zweiter Candidate-Befüllungsschnitt:
+  - `packages/ai/src/action-semantic-candidate.ts` befüllt `boardContext` jetzt aus side-sicherem Decision-Kontext: Quelle, StateVersion, Timingpunkt, Action-Seite, Visibility, Payload-Key-Liste sowie Target-/Choice-Requirement-Anzahlen.
+  - Payload-Werte, Board-State-Objekte und versteckte Kartendaten bleiben ausgespart; die bestehende Payload-Redaction-Prüfung bleibt grün.
+  - `packages/ai/src/action-semantic-candidate.test.ts` und `packages/ai/src/actions/action-semantic-coverage.test.ts` sichern den neuen BoardContext für neutrale und Basic-Semantics-Projektionen.
+  - Status bleibt `IN_PROGRESS`, weil weitere Source/Ability- und TargetProfile-Gaps noch auditiert werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts src/actions/action-semantic-coverage.test.ts` grün, 2 Dateien, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1667 Tests.
+
 Nächstes aktives Ziel: `AI-COMPLETE-09`.
 
 ## Audit-Ledger

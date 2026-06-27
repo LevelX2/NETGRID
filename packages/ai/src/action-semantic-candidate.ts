@@ -476,20 +476,39 @@ export function buildNeutralActionSemanticCandidate(
       additionalCosts: [],
     },
     timingProfile: {},
-    boardContext: {
-      source: "not_projected",
-      sideSafe: true,
-      ...(options.stateVersion !== undefined
-        ? { stateVersion: options.stateVersion }
-        : {}),
-      timingPoint: action.timingPoint,
-      notes: ["AI036 neutral projection only"],
-    },
+    boardContext: boardContextForAction(action, options, originalPayloadKeys),
     confidence: "none",
     primaryProjectionStatus: "neutral_projected",
     projectionIssues: [],
     hardGates: neutralHardGates(action),
     evidence: ["AI036 neutral projection", "source: LegalAction only"],
+  };
+}
+
+function boardContextForAction(
+  action: LegalAction,
+  options: BuildNeutralActionSemanticCandidateOptions,
+  originalPayloadKeys: readonly string[],
+): BoardContextSummary {
+  const hasDecisionContext =
+    options.observerSide !== undefined || options.stateVersion !== undefined;
+  return {
+    source: hasDecisionContext ? "ai_decision_input" : "not_projected",
+    sideSafe: true,
+    ...(options.stateVersion !== undefined
+      ? { stateVersion: options.stateVersion }
+      : {}),
+    timingPoint: action.timingPoint,
+    notes: [
+      hasDecisionContext
+        ? "AI036 side-safe decision context projection"
+        : "AI036 neutral projection only",
+      `action_side:${action.side}`,
+      `action_visibility:${action.visibility}`,
+      `payload_keys:${originalPayloadKeys.length > 0 ? originalPayloadKeys.join(",") : "none"}`,
+      `target_requirement_count:${action.targetRequirements.length}`,
+      `choice_requirement_count:${action.choiceRequirements?.length ?? 0}`,
+    ],
   };
 }
 

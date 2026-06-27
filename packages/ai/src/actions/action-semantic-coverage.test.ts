@@ -100,6 +100,15 @@ describe("Action semantic coverage", () => {
       );
       expect(Array.isArray(candidate.costProfile.additionalCosts)).toBe(true);
       expect(candidate.timingProfile.window).toBe(action.timingPoint);
+      expect(candidate.boardContext).toMatchObject({
+        source: "ai_decision_input",
+        sideSafe: true,
+        stateVersion: 108,
+        timingPoint: action.timingPoint,
+      });
+      expect(candidate.boardContext.notes).toContain(
+        `payload_keys:${Object.keys(action.payload ?? {}).sort().join(",") || "none"}`,
+      );
       expect(candidate.primaryProjectionStatus).toMatch(
         /^(projected|neutral_projected|partial_projected|blocked|schema_gap|hidden_info_blocked)$/,
       );
