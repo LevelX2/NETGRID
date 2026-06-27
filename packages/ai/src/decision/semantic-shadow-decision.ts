@@ -38,6 +38,7 @@ import type {
 import {
   buildTargetChoiceShadowReport,
   TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
+  targetChoiceRecommendationForTargetFit,
 } from "./target-choice-shadow";
 
 export type BuildSemanticShadowDecisionOptions = {
@@ -67,7 +68,13 @@ export function buildSemanticShadowDecision(
   const rejectedActions: SemanticRejectedAction[] = [];
 
   for (const candidate of frame.actionCandidates) {
-    const fit = bestFitForCandidate(candidate, utilities, frame);
+    const fit = bestFitForCandidate(
+      candidate,
+      utilities,
+      frame,
+      threats,
+      opportunities,
+    );
     if (!fit || fit.fitStatus === "blocked") {
       rejectedActions.push({
         actionId: candidate.actionId,
@@ -142,9 +149,18 @@ function bestFitForCandidate(
   candidate: ActionSemanticCandidate,
   utilities: readonly TacticalGoalUtility[],
   frame: SemanticDecisionFrame,
+  threats: readonly AiThreatProjection[],
+  opportunities: readonly AiOpportunityProjection[],
 ): ActionGoalFit | undefined {
   if (utilities.length === 0) return undefined;
   const economyContext = frame.economyContext;
+  const targetChoiceRecommendation = targetChoiceRecommendationForCandidate(
+    candidate,
+    utilities,
+    frame,
+    threats,
+    opportunities,
+  );
   return utilities
     .map((utility) =>
       scoreActionGoalFit({
@@ -157,6 +173,9 @@ function bestFitForCandidate(
         ...(economyContext?.creditPressure !== undefined
           ? { creditPressure: economyContext.creditPressure }
           : {}),
+        ...(targetChoiceRecommendation
+          ? { targetChoiceRecommendation }
+          : {}),
       }),
     )
     .sort(
@@ -165,6 +184,26 @@ function bestFitForCandidate(
         fitStatusRank(right.fitStatus) - fitStatusRank(left.fitStatus) ||
         left.goalId.localeCompare(right.goalId),
     )[0];
+}
+
+function targetChoiceRecommendationForCandidate(
+  candidate: ActionSemanticCandidate,
+  utilities: readonly TacticalGoalUtility[],
+  frame: SemanticDecisionFrame,
+  threats: readonly AiThreatProjection[],
+  opportunities: readonly AiOpportunityProjection[],
+) {
+  const action = syntheticTargetChoiceActionForCandidate(candidate, frame);
+  if (!action) return undefined;
+  return targetChoiceRecommendationForTargetFit(
+    buildTargetChoiceShadowReport({
+      action,
+      candidate,
+      utilityFamilies: utilities.map((utility) => utility.family),
+      threats,
+      opportunities,
+    }),
+  );
 }
 
 function contextualProjectionComponents(

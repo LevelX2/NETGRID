@@ -54,7 +54,7 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.scopeAllowedCount).toBe(45);
     expect(report.metrics.pilotWouldOverrideCount).toBe(45);
     expect(report.metrics.pilotActualOverrideCount).toBe(0);
-    expect(report.metrics.averageScoreGap).toBe(18.52);
+    expect(report.metrics.averageScoreGap).toBe(25);
     expect(report.metrics.blockedByReason).toMatchObject({
       basic_setup_action_type_blocked: 30,
       corp_score_window_wrong_side: 27,
@@ -278,7 +278,7 @@ describe("SemanticShadowLeague", () => {
       wouldOverride: true,
       actualOverride: false,
       scopes: ["runner_safe_access"],
-      scoreGap: 7,
+      scoreGap: 25,
       blockedByReason: {
         basic_setup_action_type_blocked: 1,
         corp_score_window_wrong_side: 1,
@@ -291,7 +291,7 @@ describe("SemanticShadowLeague", () => {
         "pilot_scope_allowed_count:1",
         "pilot_would_override:true",
         "pilot_actual_override:false",
-        "score_gap:7",
+        "score_gap:25",
         "pilot_eligibility:report_only",
         "productive_use_allowed:false",
         "pilot_scope:runner_safe_access:eligible",

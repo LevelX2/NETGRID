@@ -18,6 +18,10 @@ describe("SemanticShadowDecision", () => {
         legalActions: input.legalActions,
         observerSide: "runner",
         stateVersion: input.playerView.stateVersion,
+        selectedTargetsByActionId: {
+          "run-rd": { server: "rd" },
+          "run-remote": { server: "remote_1" },
+        },
       }),
       tacticalGoals: [
         {
@@ -160,6 +164,17 @@ describe("SemanticShadowDecision", () => {
       actionId: "run-remote",
       primaryGoalId: "runner.neutral.remote_contest_if_score_threat",
     });
+    expect(trace.rankedActions[0]?.components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          component: "target_fit",
+          evidence: expect.arrayContaining([
+            "target_choice_recommendation:true",
+            "target_choice_option:remote_1",
+          ]),
+        }),
+      ]),
+    );
     expect(trace.rankedActions[0]?.score).toBeGreaterThan(
       trace.rankedActions.find((action) => action.actionId === "run-rd")?.score ?? 0,
     );

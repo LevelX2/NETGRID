@@ -6584,6 +6584,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-11`.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1675 Tests.
 
+- `AI-COMPLETE-11` zweiter TargetChoice-Produktivschnitt:
+  - `packages/ai/src/decision/semantic-shadow-decision.ts` baut pro Candidate aus dem bestehenden TargetChoice-Report eine Target-Fit-Recommendation mit Utility-/Threat-/Opportunity-Kontext.
+  - `scoreActionGoalFit` erhält diese Recommendation im Shadow-Fit-Pfad und kann Target-Fit produktiv bewerten, ohne `selectedChoices` oder `selectedTargets` zu erzeugen.
+  - `packages/ai/src/decision/semantic-shadow-decision.test.ts` schützt, dass Remote-Contest-Fit die TargetChoice-Recommendation im `target_fit`-Component sieht; `semantic-shadow-league.test.ts` wurde auf die dadurch höhere stabile Score-Gap-Kalibrierung aktualisiert.
+  - Status bleibt `IN_PROGRESS`, weil weitere Runtime-/Trace-/Readiness-Pfade noch zwischen Shadow-Report und produktiver Target-Fit-Recommendation unterscheiden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/semantic-shadow-decision.test.ts src/decision/target-choice-shadow.test.ts src/decision/action-goal-fit.test.ts` grün, 3 Dateien, 39 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/semantic-shadow-league.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1675 Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
