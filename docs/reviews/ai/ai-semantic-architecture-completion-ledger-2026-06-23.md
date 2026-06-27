@@ -6815,6 +6815,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` sechster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/visible-card-lookup.ts` entfernt den Runtime-Fallback, der sichtbare Source-Cards über Kartentitel im Action-Label suchte.
+  - Runtime-Source-Card-Lookups nutzen nur noch Source-InstanceId, strukturierte Payload-DefinitionIds oder Source-DefinitionIds.
+  - `visible-card-lookup.test.ts` schützt, dass DefinitionId-Matching erhalten bleibt und label-only Titelmatching keine sichtbare Karte mehr liefert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/visible-card-lookup.test.ts src/runtime/corp-tag-punish-payoff-profiles.test.ts src/runtime/semantic-runtime-corp-central-rez-context.test.ts` grün, 3 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
