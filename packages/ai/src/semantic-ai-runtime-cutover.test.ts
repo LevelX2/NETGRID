@@ -796,6 +796,80 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.fallbackUsed).toBe(false);
   });
 
+  it("maps structured Schlaghund tag-damage actions to the corp tag punish reason", () => {
+    const schlaghund = legalAction(
+      "corp.gain_credit.asset_damage",
+      "corp",
+      "gain_credit",
+      "Schlaghund: Wuerfel gegen Tags werfen",
+      { credits: 0 },
+      {
+        source: "schlaghund_1",
+        payload: {
+          cardId: "schlaghund_1",
+          v1921AssetAbility: "schlaghund_tag_damage",
+        },
+      },
+    );
+    const input = aiInput("corp", [schlaghund]);
+    input.playerView.servers = [
+      server("remote_1", [], [
+        visibleCard("schlaghund_1", "corp", "asset", {
+          definitionId: "onr_v1_339_schlaghund",
+          title: "Schlaghund",
+          rezzed: true,
+        }),
+      ]),
+    ];
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision(schlaghund.actionId, "legacy.corp.schlaghund"),
+      {},
+      semanticRuntimeDependencies(
+        [
+          semanticRuntimeChoice(
+            schlaghund,
+            160,
+            "corp.semantic.generic_damage",
+          ),
+        ],
+        { initiallySelectedActionId: schlaghund.actionId },
+      ),
+    );
+
+    expect(decision.reasonCode).toBe("corp.semantic.corp_tag_punish");
+  });
+
+  it("does not map Schlaghund-like action ids without structured source evidence", () => {
+    const labelOnly = legalAction(
+      "corp.schlaghund_tag_damage.synthetic",
+      "corp",
+      "gain_credit",
+      "Synthetic Schlaghund text",
+      { credits: 0 },
+    );
+    const input = aiInput("corp", [labelOnly]);
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      legacyDecision(labelOnly.actionId, "legacy.corp.synthetic"),
+      {},
+      semanticRuntimeDependencies(
+        [
+          semanticRuntimeChoice(
+            labelOnly,
+            160,
+            "corp.semantic.generic_damage",
+          ),
+        ],
+        { initiallySelectedActionId: labelOnly.actionId },
+      ),
+    );
+
+    expect(decision.reasonCode).toBe("corp.semantic.generic_damage");
+  });
+
   it("allows a legal score_agenda through the local corp score-window pilot", () => {
     process.env[AI_PLAY_STRENGTH_PILOT_ENV] = CORP_SCORE_WINDOW_PILOT_MODE;
     const score = legalAction("score", "corp", "score_agenda", "Score agenda", {

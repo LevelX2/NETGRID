@@ -7161,6 +7161,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` dreiundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime.ts` ersetzt den Sonderfall `actionId.includes("schlaghund_tag_damage")` durch strukturierte Prüfung auf `payload.v1921AssetAbility === "schlaghund_tag_damage"` und sichtbare Source-Definition `onr_v1_339_schlaghund`.
+  - `semantic-ai-runtime-cutover.test.ts` schützt, dass echte strukturierte Schlaghund-Aktionen weiterhin den Corp-Tag-Punish-Reason erhalten, actionId-only Texttreffer aber nicht.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts --testNamePattern "Schlaghund|live corp decision"` grün, 1 Datei, 3 Tests, 67 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "Schlaghund tagged meat damage"` grün, 1 Datei, 2 Tests, 532 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -44,6 +44,7 @@ import type {
   SemanticRuntimeRunOnlyActionAdjustment,
   TacticalPlanMappedChoiceResult,
 } from "./semantic-runtime-types";
+import { sourceDefinitionIdForAction } from "./visible-card-lookup";
 
 export type {
   SemanticRuntimeChoice,
@@ -422,7 +423,7 @@ export function chooseSemanticRuntimeAction(
       : undefined;
   const selectedReasonCode =
     input.side === "corp" &&
-    selectedChoice.action.actionId.includes("schlaghund_tag_damage")
+    isSchlaghundTagDamageAction(input, selectedChoice.action)
       ? "corp.semantic.corp_tag_punish"
       : selectedChoice.reasonCode;
   return {
@@ -482,6 +483,16 @@ export function chooseSemanticRuntimeAction(
     difficulty: input.difficulty,
     reason: selectedReasonCode,
   };
+}
+
+function isSchlaghundTagDamageAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  return (
+    action.payload?.v1921AssetAbility === "schlaghund_tag_damage" &&
+    sourceDefinitionIdForAction(input, action) === "onr_v1_339_schlaghund"
+  );
 }
 
 function runtimeTacticalGoalsForInput(
