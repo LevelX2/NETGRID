@@ -43,6 +43,47 @@ describe("semanticRuntimeCorpPassiveScoreLinePenalty", () => {
       }),
     );
   });
+
+  it("uses structured roles for passive scoreline economy actions", () => {
+    const scoreAgenda = corpAction("score-agenda", "score_agenda");
+    const structuredEconomy = corpAction("structured-economy", "play_operation");
+    const noiseEconomy = corpAction("noise-economy", "play_operation");
+
+    expect(
+      semanticRuntimeCorpPassiveScoreLinePenalty(
+        corpInput([scoreAgenda, structuredEconomy]),
+        structuredEconomy,
+        testDependencies({
+          scoreActionIds: [scoreAgenda.actionId],
+          rolesByActionId: {
+            [structuredEconomy.actionId]: ["economy_asset"],
+          },
+        }),
+      ),
+    ).toEqual(
+      expect.objectContaining({
+        reason: "economy",
+        value: -2400,
+      }),
+    );
+    expect(
+      semanticRuntimeCorpPassiveScoreLinePenalty(
+        corpInput([scoreAgenda, noiseEconomy]),
+        noiseEconomy,
+        testDependencies({
+          scoreActionIds: [scoreAgenda.actionId],
+          rolesByActionId: {
+            [noiseEconomy.actionId]: ["microeconomy_noise"],
+          },
+        }),
+      ),
+    ).toEqual(
+      expect.objectContaining({
+        reason: "non_score_action",
+        value: -700,
+      }),
+    );
+  });
 });
 
 function corpInput(legalActions: readonly LegalAction[]): AiDecisionInput {
@@ -78,6 +119,7 @@ function testDependencies(
     advanceToScoreActionIds?: readonly string[];
     agendaInstallActionIds?: readonly string[];
     riskyActionIds?: readonly string[];
+    rolesByActionId?: Readonly<Record<string, readonly string[]>>;
   } = {},
 ) {
   return {
@@ -88,7 +130,8 @@ function testDependencies(
       agendaInstallActionIds: overrides.agendaInstallActionIds ?? [],
     }),
     actionIsScoreLine: () => false,
-    rolesForAction: () => [],
+    rolesForAction: (_input: AiDecisionInput, action: LegalAction) =>
+      [...(overrides.rolesByActionId?.[action.actionId] ?? [])],
     scoreLineActionIsRisky: (_input: AiDecisionInput, action: LegalAction) =>
       overrides.riskyActionIds?.includes(action.actionId) === true,
   };
