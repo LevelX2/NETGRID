@@ -7204,6 +7204,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` achtundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/strategic-action-fit.ts` ersetzt Scope-Substring-Prüfungen für `setup` und `tag` durch Segment-/Token-Matches auf strukturierten Scope-IDs.
+  - Runner-Setup-Fit und Corp-Tag-Source-Punish-Fit erkennen strukturierte Scope-Tokens wie `runner.semantic.setup` beziehungsweise `corp.semantic.tag`, ignorieren aber substringartige Rauschwerte wie `prepsetupflow` und `tagalong_noise`.
+  - `strategic-action-fit.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/strategic-action-fit.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/strategic-action-fit.test.ts src/runtime/semantic-runtime-choice-builder.test.ts src/semantic-ai-runtime-cutover.test.ts --testNamePattern "strategic action fit|StrategicIntent|corp tag|runner setup|live corp decision"` grün, 3 Dateien, 8 Tests, 70 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

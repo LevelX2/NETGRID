@@ -4,6 +4,7 @@ import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import { semanticRuntimeStrategicActionFitEvidence } from "./strategic-action-fit";
 import { buildStrategicIntentState } from "../strategic-intent-state";
 import type { AiDeckStrategyProfile, DeckStrategyScore } from "../deck-doctrine-strategy";
+import { buildActionSemanticCandidates } from "../action-semantic-candidate";
 
 describe("semanticRuntimeStrategicActionFitEvidence", () => {
   it("requires exact central target fit when StrategicIntent names a server", () => {
@@ -91,6 +92,76 @@ describe("semanticRuntimeStrategicActionFitEvidence", () => {
         "strategic_action_fit_family:corp_asset_economy",
       ]),
     );
+  });
+
+  it("matches runner setup scopes by token instead of substring", () => {
+    const actionWithNoIntrinsicSetupFit = action(
+      "remove-tag",
+      "runner",
+      "remove_tag",
+    );
+    const input = strategicInput(
+      "runner",
+      [actionWithNoIntrinsicSetupFit],
+      "runner_setup",
+      "runner.rig_first",
+      "none",
+      4,
+    );
+
+    expect(
+      semanticRuntimeStrategicActionFitEvidence(
+        input,
+        actionWithNoIntrinsicSetupFit,
+        "runner.semantic.setup",
+      ),
+    ).toEqual(expect.arrayContaining(["semantic_strategic_action_fit:true"]));
+    expect(
+      semanticRuntimeStrategicActionFitEvidence(
+        input,
+        actionWithNoIntrinsicSetupFit,
+        "runner.semantic.prepsetupflow",
+      ),
+    ).toEqual([]);
+  });
+
+  it("matches corp tag-source punish scopes by token instead of substring", () => {
+    const tagSource = action("tag-source", "corp", "trigger_ability");
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [tagSource],
+      observerSide: "corp",
+      stateVersion: 1,
+    });
+    if (!candidate) throw new Error("expected tag-source candidate");
+    const taggedCandidate = {
+      ...candidate,
+      actionTacticSignals: ["tag.source"],
+    };
+    const input = strategicInput(
+      "corp",
+      [tagSource],
+      "corp_tag_trace_punish",
+      "corp.tag_trace_punish",
+      "none",
+      7,
+    );
+
+    expect(
+      semanticRuntimeStrategicActionFitEvidence(
+        input,
+        tagSource,
+        "corp.semantic.tag",
+        taggedCandidate,
+      ),
+    ).toEqual(expect.arrayContaining(["semantic_strategic_action_fit:true"]));
+    expect(
+      semanticRuntimeStrategicActionFitEvidence(
+        input,
+        tagSource,
+        "corp.semantic.tagalong_noise",
+        taggedCandidate,
+      ),
+    ).toEqual([]);
   });
 });
 
@@ -197,6 +268,60 @@ function corpStrategicInput(
         evidence: ["test:economy"],
       },
       availableCredits: 7,
+      blockers: [],
+      evidence: [],
+    } as unknown as NonNullable<
+      AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+    >,
+  } as AiDecisionInputWithDeckCapabilities;
+}
+
+function strategicInput(
+  side: Side,
+  legalActions: LegalAction[],
+  family: NonNullable<
+    AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+  >["primaryStrategy"]["family"],
+  strategyId: string,
+  targetKind: NonNullable<
+    AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
+  >["targetVector"]["kind"],
+  credits: number,
+): AiDecisionInputWithDeckCapabilities {
+  const baseView = playerView(side, credits);
+  const input: AiDecisionInput = {
+    side,
+    playerView: {
+      ...baseView,
+      opponent: {
+        ...baseView.opponent,
+        tags: 0,
+      },
+      legalActions,
+    },
+    eventTail: [],
+    legalActions,
+    difficulty: "normal",
+    seed: "strategic-action-fit-test",
+    decisionId: "strategic-action-fit-test",
+    actionNumber: 1,
+    profileId: "strategic-action-fit-test",
+  };
+  return {
+    ...input,
+    ownStrategicIntentState: {
+      side,
+      stateVersion: 1,
+      primaryStrategy: {
+        strategyId,
+        family,
+      },
+      phase: "convert",
+      targetVector: {
+        kind: targetKind,
+        evidence: [`test:${targetKind}`],
+      },
+      availableCredits: credits,
       blockers: [],
       evidence: [],
     } as unknown as NonNullable<

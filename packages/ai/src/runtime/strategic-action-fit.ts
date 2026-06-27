@@ -204,7 +204,7 @@ function runnerStrategicSetupAction(
   scopeId: string,
 ): boolean {
   return (
-    scopeId.includes("setup") ||
+    scopeIdHasToken(scopeId, "setup") ||
     action.type === "install_card" ||
     action.type === "play_event" ||
     action.type === "trigger_ability" ||
@@ -249,10 +249,14 @@ function corpStrategicPunishAction(
   );
   const runnerTagged = input.playerView.opponent.tags > 0;
   if (hasPunishPayoff && (!requiresRunnerTagged || runnerTagged)) return true;
-  if (hasTagSource && (scopeId === "corp_tag_punish" || scopeId.includes("tag"))) {
+  if (hasTagSource && scopeIdHasToken(scopeId, "tag")) {
     return true;
   }
   return false;
+}
+
+function scopeIdHasToken(scopeId: string, token: string): boolean {
+  return scopeId.split(/[._:-]+/).includes(token);
 }
 
 function semanticSignals(
