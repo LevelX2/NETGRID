@@ -6668,6 +6668,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-13`.
   - Status bleibt `IN_PROGRESS`, weil TacticalPlan-Mapping-Overrides noch klassifiziert oder modelliert werden müssen.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-micro-runtime.test.ts src/runtime/practical-tactic-overlay.test.ts src/index.test.ts -t "practical micro runtime|PracticalTacticOverlay"` grün, 3 Dateien, 9 relevante Tests.
 
+- `AI-COMPLETE-13` dritter TacticalPlan-Outcome-Schnitt:
+  - `TacticalPlanMappedChoiceResult` trägt jetzt ein explizites `outcome`: `plan_mapping_selected`, `semantic_choice_selected` oder `semantic_choice_blocked`.
+  - `tacticalPlanMappedChoice` liefert bei einem semantischen Yield die finale `choice` inklusive `tactical_plan_mapping_outcome:semantic_choice_selected`; blockierte Yields und Plan-Mapping-Wahlen erhalten eigene Outcome-Evidence.
+  - `semantic-runtime.ts` entfernt den nachgelagerten `planMappingOverridden`-Zweig und richtet Plan-Memory bei `semantic_choice_selected` direkt an der modellierten Mapping-Choice aus.
+  - `semantic-choice-ranking.test.ts` schützt die neuen Outcomes für semantische Auswahl, Plan-Mapping-Schutz und blockierte Semantic-Choice-Fälle.
+  - Status bleibt `IN_PROGRESS`, weil noch ein Abschlussaudit über verbleibende `override`-Begriffe und ein voller AI-Testlauf aussteht.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-choice-ranking.test.ts src/runtime/semantic-runtime-score-breakdown.test.ts src/runtime/practical-micro-runtime.test.ts src/runtime/practical-tactic-overlay.test.ts` grün, 4 Dateien, 19 Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

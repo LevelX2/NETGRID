@@ -132,7 +132,8 @@ export function tacticalPlanMappedChoice(
       scoreGap,
     );
     if (mappedNonPositiveAgainstPositive || repeatedRunShouldYield || scoreGap > threshold.scoreGap) {
-      return {
+      const result = {
+        outcome: "semantic_choice_selected" as const,
         overrideChoice,
         overriddenMappedChoice: mappedChoice,
         overrideReason: mappedNonPositiveAgainstPositive
@@ -142,6 +143,13 @@ export function tacticalPlanMappedChoice(
             : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
+      };
+      return {
+        ...result,
+        choice: semanticRuntimeChoiceWithAddedEvidence(
+          overrideChoice,
+          tacticalPlanMappingOverrideEvidence(result),
+        ),
       };
     }
     return tacticalPlanBlockedOverrideResult({
@@ -155,7 +163,12 @@ export function tacticalPlanMappedChoice(
       threshold: threshold.scoreGap,
     });
   }
-  return { choice: mappedChoice };
+  return {
+    outcome: "plan_mapping_selected",
+    choice: semanticRuntimeChoiceWithAddedEvidence(mappedChoice, [
+      "tactical_plan_mapping_outcome:plan_mapping_selected",
+    ]),
+  };
 }
 
 function tacticalPlanHandBufferMappingBlocksProbeRunOverride(
@@ -191,6 +204,7 @@ export function tacticalPlanMappingOverrideEvidence(
   const mappedChoice = result.overriddenMappedChoice;
   if (!mappedChoice) return [];
   return [
+    "tactical_plan_mapping_outcome:semantic_choice_selected",
     "tactical_plan_override_allowed:true",
     "tactical_plan_mapping_overridden:true",
     `tactical_plan_override_reason:${result.overrideReason ?? "semantic_score_gap"}`,
@@ -343,7 +357,9 @@ function tacticalPlanBlockedOverrideResult(params: {
   threshold: number;
 }): TacticalPlanMappedChoiceResult {
   return {
+    outcome: "semantic_choice_blocked",
     choice: semanticRuntimeChoiceWithAddedEvidence(params.mappedChoice, [
+      "tactical_plan_mapping_outcome:semantic_choice_blocked",
       "tactical_plan_mapping_override_blocked:true",
       `tactical_plan_override_blocked_reason:${params.reason}`,
       `tactical_plan_mapping_score_gap:${params.scoreGap}`,

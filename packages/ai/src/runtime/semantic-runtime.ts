@@ -336,26 +336,13 @@ export function chooseSemanticRuntimeAction(
     planRuntime.selectedMapping,
     bestPlanOverrideChoice,
   );
-  const planMappingOverridden = Boolean(
-    !reactiveChoice &&
-      mappedChoice.overriddenMappedChoice &&
-      mappedChoice.overrideChoice,
-  );
   const selfDamageImmediateWinChoice =
     dependencies.runnerSelfDamageImmediateWinSemanticChoice(input, choices);
   const initialChoice =
     reactiveChoice ??
     selfDamageImmediateWinChoice ??
     mappedChoice.choice ??
-    (planMappingOverridden && mappedChoice.overrideChoice
-      ? dependencies.semanticRuntimeChoiceWithEvidence(
-          mappedChoice.overrideChoice,
-          {
-            evidence:
-              dependencies.tacticalPlanMappingOverrideEvidence(mappedChoice),
-          },
-        )
-      : bestChoice);
+    bestChoice;
   if (!initialChoice) {
     return semanticCoverageFallbackDecision(
       input,
@@ -364,10 +351,10 @@ export function chooseSemanticRuntimeAction(
       dependencies,
     );
   }
-  const effectivePlanRuntime = planMappingOverridden
+  const effectivePlanRuntime = mappedChoice.outcome === "semantic_choice_selected"
     ? dependencies.tacticalPlanRuntimeAlignedToChoice(
         planRuntime,
-        mappedChoice.overrideChoice,
+        mappedChoice.choice,
         actionSemanticCandidates,
         input,
       )

@@ -19,8 +19,16 @@ describe("tacticalPlanMappedChoice", () => {
     );
 
     expect(result.overrideChoice?.action.actionId).toBe("run-rd");
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-rd");
     expect(result.overriddenMappedChoice?.action.actionId).toBe("gain");
     expect(result.scoreGap).toBe(620);
+    expect(result.choice?.evidence).toEqual(
+      expect.arrayContaining([
+        "tactical_plan_mapping_outcome:semantic_choice_selected",
+        "tactical_plan_mapping_overridden:true",
+      ]),
+    );
   });
 
   it("keeps coverage-plan mapping for close semantic run gaps", () => {
@@ -33,8 +41,14 @@ describe("tacticalPlanMappedChoice", () => {
       choice(run, 7600),
     );
 
+    expect(result.outcome).toBe("semantic_choice_blocked");
     expect(result.choice?.action.actionId).toBe("gain");
     expect(result.overrideChoice).toBeUndefined();
+    expect(result.choice?.evidence).toEqual(
+      expect.arrayContaining([
+        "tactical_plan_mapping_outcome:semantic_choice_blocked",
+      ]),
+    );
   });
 
   it("keeps direct coverage answers even with a clear semantic run gap", () => {
@@ -47,6 +61,7 @@ describe("tacticalPlanMappedChoice", () => {
       choice(run, 8200),
     );
 
+    expect(result.outcome).toBe("semantic_choice_blocked");
     expect(result.choice?.action.actionId).toBe("prepare-shell-traders");
     expect(result.overrideChoice).toBeUndefined();
   });
@@ -62,6 +77,8 @@ describe("tacticalPlanMappedChoice", () => {
     );
 
     expect(result.overrideChoice?.action.actionId).toBe("run-rd");
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-rd");
     expect(result.overriddenMappedChoice?.action.actionId).toBe(
       "prepare-stale",
     );
@@ -82,6 +99,8 @@ describe("tacticalPlanMappedChoice", () => {
     );
 
     expect(result.overrideChoice?.action.actionId).toBe("run-rd");
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-rd");
     expect(result.overriddenMappedChoice?.action.actionId).toBe("gain");
     expect(result.overrideReason).toBe("strategic_exact_score_gap");
     expect(result.overrideThreshold).toBe(320);
@@ -109,6 +128,7 @@ describe("tacticalPlanMappedChoice", () => {
       choice(run, 7785),
     );
 
+    expect(result.outcome).toBe("semantic_choice_blocked");
     expect(result.choice?.action.actionId).toBe("run-remote");
     expect(result.overrideChoice).toBeUndefined();
     expect(result.overrideBlockedChoice?.action.actionId).toBe("run-rd");
@@ -138,6 +158,7 @@ describe("tacticalPlanMappedChoice", () => {
       choice(run, 7485, strategicEvidence("kind")),
     );
 
+    expect(result.outcome).toBe("semantic_choice_blocked");
     expect(result.choice?.action.actionId).toBe("gain");
     expect(result.overrideChoice).toBeUndefined();
     expect(result.overrideThreshold).toBe(480);

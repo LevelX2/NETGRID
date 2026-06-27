@@ -18,6 +18,10 @@ export type SemanticRuntimeChoice = {
 };
 
 export type TacticalPlanMappedChoiceResult = {
+  outcome?:
+    | "plan_mapping_selected"
+    | "semantic_choice_selected"
+    | "semantic_choice_blocked";
   choice?: SemanticRuntimeChoice;
   overrideChoice?: SemanticRuntimeChoice;
   overriddenMappedChoice?: SemanticRuntimeChoice;
