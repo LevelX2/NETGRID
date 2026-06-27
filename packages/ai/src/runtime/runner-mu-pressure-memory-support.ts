@@ -1,5 +1,7 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 
+import { rolesMatch } from "./role-match";
+
 export function isRunnerProgramInstallActionForMuPressure(
   action: LegalAction,
   source: VisibleCard | undefined,
@@ -68,23 +70,23 @@ export function isUsefulRunnerProgramInHandForMuPressure(
   );
   return (
     roles.length === 0 ||
+    rolesMatch(roles, [
+      "breaker_",
+      "setup",
+      "build_rig",
+      "memory",
+      "memory_support",
+      "draw",
+      "search",
+      "defense",
+      "protection",
+      "hosting",
+      "recovery",
+    ]) ||
     roles.some(
       (role) =>
-        role.startsWith("breaker_") ||
         dependencies.isRunnerPressureRole(role) ||
-        dependencies.isRunnerEconomyRole(role) ||
-        [
-          "setup",
-          "build_rig",
-          "memory",
-          "memory_support",
-          "draw",
-          "search",
-          "defense",
-          "protection",
-          "hosting",
-          "recovery",
-        ].some((needle) => role === needle || role.includes(needle)),
+        dependencies.isRunnerEconomyRole(role),
     ) ||
     subtypes.some((subtype) =>
       ["icebreaker", "breaker", "decoder", "fracter", "killer"].includes(
@@ -118,5 +120,5 @@ export function runnerMemorySupportSearchAction(
   ) {
     return false;
   }
-  return roles.some((role) => role.includes("search") || role.includes("memory"));
+  return rolesMatch(roles, ["search", "memory"]);
 }

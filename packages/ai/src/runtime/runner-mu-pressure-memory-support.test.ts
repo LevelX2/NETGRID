@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { LegalAction } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 
-import { runnerMemorySupportSearchAction } from "./runner-mu-pressure-memory-support";
+import {
+  isUsefulRunnerProgramInHandForMuPressure,
+  runnerMemorySupportSearchAction,
+} from "./runner-mu-pressure-memory-support";
 
 describe("runnerMemorySupportSearchAction", () => {
   it("uses structured roles and ignores label-only memory search text", () => {
@@ -17,8 +20,51 @@ describe("runnerMemorySupportSearchAction", () => {
         ["memory_search"],
       ),
     ).toBe(true);
+    expect(
+      runnerMemorySupportSearchAction(action({ label: "Use ability" }), [
+        "searchlight_noise",
+      ]),
+    ).toBe(false);
+    expect(
+      runnerMemorySupportSearchAction(action({ label: "Use ability" }), [
+        "memoryless_noise",
+      ]),
+    ).toBe(false);
+  });
+
+  it("uses structured roles for useful MU-pressure programs", () => {
+    expect(usefulProgram(["search"])).toBe(true);
+    expect(usefulProgram(["breaker_fracter"])).toBe(true);
+    expect(usefulProgram(["searchlight_noise"])).toBe(false);
+    expect(usefulProgram(["pressurewasher_noise"])).toBe(false);
   });
 });
+
+function usefulProgram(roles: readonly string[]): boolean {
+  const card: VisibleCard = {
+    instanceId: "program-instance",
+    definitionId: "program-definition",
+    title: "Program",
+    type: "program",
+    known: true,
+  } as VisibleCard;
+  return isUsefulRunnerProgramInHandForMuPressure(
+    {
+      playerView: {
+        own: {
+          rig: [],
+        },
+      },
+    } as unknown as AiDecisionInput,
+    card,
+    {
+      visibleMemoryCost: () => 1,
+      rolesForCardId: () => roles,
+      isRunnerPressureRole: (role) => role === "run_pressure",
+      isRunnerEconomyRole: (role) => role === "economy",
+    },
+  );
+}
 
 function action(overrides: Partial<LegalAction> = {}): LegalAction {
   return {

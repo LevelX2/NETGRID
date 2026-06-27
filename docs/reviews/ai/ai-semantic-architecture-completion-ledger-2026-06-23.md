@@ -7250,6 +7250,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` dreiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-mu-pressure-memory-support.ts` nutzt für MU-Pressure-Rollen wie `breaker_`, `setup`, `memory`, `search`, `defense`, `hosting` und `recovery` den gehärteten `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Die bewusst kartentextbasierte Memory-/MU-Heuristik bleibt unverändert; der Schnitt betrifft nur strukturierte Rollenfelder.
+  - `runner-mu-pressure-memory-support.test.ts` schützt strukturierte Search-/Memory-/Breaker-Treffer und Substring-Negativfälle wie `searchlight_noise`, `memoryless_noise` und `pressurewasher_noise`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-mu-pressure-memory-support.test.ts src/runtime/runner-role-classification.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "memory support|MU pressure|memory pressure"` grün, 1 Datei, 5 Tests, 529 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
