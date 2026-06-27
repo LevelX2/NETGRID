@@ -233,6 +233,46 @@ describe("PracticalTacticOverlay", () => {
     );
   });
 
+  it("uses structured access-payoff payloads and ignores label-only high-payoff run text", () => {
+    const labelOnlyRun = action({
+      actionId: "label-high-payoff-run",
+      type: "start_run",
+      label: "Run for valuable access",
+      source: "basic_action",
+    });
+    const structuredRun = action({
+      actionId: "structured-high-payoff-run",
+      type: "start_run",
+      label: "Run",
+      source: "basic_action",
+      payload: { accessPayoff: "fresh" },
+    });
+
+    const labelOnlyDecision = applyPracticalTacticOverlay(
+      runnerInput({ legalActions: [labelOnlyRun] }),
+      frozenDecision("label-high-payoff-run"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+    expect(labelOnlyDecision.evidence ?? []).not.toContain(
+      "practical_tactic:runner_high_payoff_run",
+    );
+
+    const structuredDecision = applyPracticalTacticOverlay(
+      runnerInput({ legalActions: [structuredRun] }),
+      frozenDecision("other-action"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+    expect(structuredDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "practical_tactic:runner_high_payoff_run",
+        "practical_tactic_overlay_candidate:runner.practical_tactic.high_payoff_run",
+      ]),
+    );
+    expect(structuredDecision.decisionDebug?.detailSections?.at(-1)?.items).toContain(
+      "candidate:structured-high-payoff-run",
+    );
+  });
+
   it("uses visible breaker source cards and ignores label-only coverage installs", () => {
     const visibleBreaker = visibleCard({
       instanceId: "visible-fracter",

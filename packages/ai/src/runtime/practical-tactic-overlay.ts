@@ -298,10 +298,9 @@ function corpScoreLooksSafe(action: LegalAction): boolean {
 
 function runnerRunLooksHighPayoff(action: LegalAction): boolean {
   const payloadPayoff = String(action.payload?.accessPayoff ?? "");
-  if (/agenda|score_threat|trash_affordable|fresh|access_bonus/i.test(payloadPayoff)) {
-    return true;
-  }
-  return /agenda|score threat|fresh access|multiaccess|valuable access/i.test(action.label);
+  return /agenda|score_threat|trash_affordable|fresh|access_bonus/i.test(
+    payloadPayoff,
+  );
 }
 
 function actionCreditCost(action: LegalAction): number {
