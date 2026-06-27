@@ -6834,6 +6834,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` achter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/runner-coverage-goals.ts` entfernt Action-Label-Titelgleichheit aus der sichtbaren Coverage-Card-Bindung.
+  - Coverage-Goal-Search-Erkennung nutzt dort keine Label-/SourceTitle-Regex mehr, sondern Action-Type `search_stack` oder strukturierte `actionTacticSignals` wie `program_search`, `breaker_search`, `search.stack`, `coverage_search` oder `setup.search`.
+  - `runner-coverage-goals.test.ts` schützt, dass label-only Coverage-Install- und Search-Texte nicht matchen, strukturierte SourceTitle-/Tactic-Signale aber weiterhin funktionieren.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/runner-coverage-goals.test.ts src/decision/tactical-goal-utility.test.ts src/runtime/runner-goal-fit-score.test.ts` grün, 3 Dateien, 12 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
