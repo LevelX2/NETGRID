@@ -6691,6 +6691,12 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Status bleibt `IN_PROGRESS`, weil weitere CardDefinitionId-, Titel-/Label- und payloadspezifische produktive Pfade noch auditiert und abgebaut werden müssen.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-visible-breaker-coverage.test.ts src/runtime/practical-micro-runtime.test.ts src/index.test.ts -t "visible breaker coverage|structured breaker coverage|visible wall coverage|Junkyard BBS recovery"` grün, 1 aktive Datei, 6 relevante Tests.
 
+- `AI-COMPLETE-14` zweiter DefinitionId-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/corp-tag-source-payoff-context.ts` erkennt sichtbaren economic Tag-Punish-Payoff nicht mehr über `onr_v1_285_closed-accounts`, sondern über `payoffProfileForDefinition` für bekannte HQ-Karten.
+  - `corp-tag-source-payoff-context.test.ts` schützt, dass ein beliebiger sichtbarer DefinitionId mit Payoff-Profil als economic Payoff zählt und ein unprofilierter DefinitionId nicht.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte CardDefinitionId-Treffer wie City Surveillance, Broker und spezifische Agenda-Overadvance-Schwellen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-tag-source-payoff-context.test.ts src/index.test.ts -t "immediate trace tag source|unprotected persistent tag-asset|tag source and payoff|Closed Accounts|tag-trace|tag punish"` grün, 2 Dateien, 6 relevante Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

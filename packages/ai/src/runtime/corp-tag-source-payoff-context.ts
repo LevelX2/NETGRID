@@ -62,7 +62,10 @@ export function createCorpTagSourcePayoffContext(
     if (dependencies.visibleMeatDamagePayoff(input)) return "damage";
     if (
       input.playerView.own.gripOrHq.some(
-        (card) => card.definitionId === "onr_v1_285_closed-accounts",
+        (card) =>
+          card.known &&
+          card.definitionId &&
+          dependencies.payoffProfileForDefinition(card.definitionId),
       )
     )
       return "economic";
