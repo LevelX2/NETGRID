@@ -5,6 +5,7 @@ import type {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
+import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 
 export type RunnerSourceCardAnswerRole = "search" | "draw";
 
@@ -97,6 +98,11 @@ export function runnerSemanticGoalFitScoreComponent(
     };
   }
   const evaluation = dependencies.runTargetEvaluationForAction(input, action);
+  const tacticalGoalFit = runnerTacticalGoalRunFitScoreComponent(
+    evaluation,
+    runnerTacticalGoalsForInput(input),
+  );
+  if (tacticalGoalFit) return tacticalGoalFit;
   if (
     evaluation &&
     evaluation.pathPassability === "reachable" &&
@@ -114,4 +120,41 @@ export function runnerSemanticGoalFitScoreComponent(
     };
   }
   return undefined;
+}
+
+function runnerTacticalGoalsForInput(
+  input: AiDecisionInput,
+): readonly RunnerTacticalGoal[] {
+  return (
+    input as AiDecisionInput & {
+      ownRunnerTacticalGoals?: readonly RunnerTacticalGoal[];
+    }
+  ).ownRunnerTacticalGoals ?? [];
+}
+
+function runnerTacticalGoalRunFitScoreComponent(
+  evaluation: RunnerRunTargetEvaluation | undefined,
+  goals: readonly RunnerTacticalGoal[],
+): AiDecisionScoreComponent | undefined {
+  if (!evaluation || goals.length === 0) return undefined;
+  const matchingGoal = goals
+    .filter(
+      (goal) =>
+        goal.targetServerId === evaluation.targetServerId &&
+        (goal.goalId === "runner.pressure_good_central_target" ||
+          goal.goalId === "runner.contest_remote_if_score_threat"),
+    )
+    .sort((left, right) => right.priority - left.priority)[0];
+  if (!matchingGoal) return undefined;
+  return {
+    key: "runner_goal_fit_tactical_goal_run_target",
+    label: "Runner-TacticalGoal-Ziel",
+    value: 700 + Math.min(300, Math.max(0, matchingGoal.priority - 700)),
+    reason: [
+      `goal:${matchingGoal.goalId}`,
+      `target:${evaluation.targetServerId}`,
+      `recommendation:${evaluation.recommendation}`,
+      `urgency:${matchingGoal.urgency}`,
+    ].join("|"),
+  };
 }

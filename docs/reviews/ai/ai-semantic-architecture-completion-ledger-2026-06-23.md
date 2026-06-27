@@ -55,7 +55,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `VERIFIED` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Erfüllt: `tactical-plans.ts` ist dünne Plan-Fassade bei 306 Zeilen; Runner-, Corp-, Mapping-, Progression-/Ranking- und Debug-/Redaction-Verantwortungen liegen in getrennten Modulen; Boundary-Test und zwei Abschluss-Audits sind grün. |
 | AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `VERIFIED` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Erfüllt: produktiver Legacy-Zugriff läuft über `legacy-entrypoints.ts`, Public-Kompatibilität über `legacy-public-contract.ts`; Matrix klassifiziert alle Nutzungen; ersetzte Top-Level-Facades sind entfernt und per Boundary-Test blockiert. |
 | AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `VERIFIED` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Erfüllt: produktiver Decision-Input nutzt `deck-doctrine-runtime-context.ts` mit StrategyProfile, report-only Doctrine-v2-Diagnostic, NeutralDoctrine, Vollständigkeitsstatus und Rollenstatus; Doctrine-v1-PlanWeights sind Legacy-gekapselt, Public-v1-Exports laufen über den Legacy-Public-Contract. |
-| AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `PENDING` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate und wirken im Hauptscore. |
+| AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `IN_PROGRESS` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate und wirken im Hauptscore. |
 | AI-COMPLETE-08 | Corp-TacticalGoals produktiv vollständig integrieren. | `PENDING` | Corp-Ziele wurden begonnen, müssen produktiv und diagnosefähig durchgängig wirken. | Corp-Ziele für Score, Remote, Zentralserver, Rez, Economy, Tag/Punish und Damage/Kill wirken im Hauptscore. |
 | AI-COMPLETE-09 | ActionSemanticCandidate-Befüllung vervollständigen. | `PENDING` | Source/Ability/Cost/Timing/Target/BoardContext-Coverage muss gemessen und geschlossen werden. | Relevanter Runtime-Scope ist ausreichend befüllt; Gaps sind echte Blocker oder repariert. |
 | AI-COMPLETE-10 | Cost/Timing/BoardContext verallgemeinern. | `PENDING` | Score- und Planpfade enthalten verstreute Spezialbewertungen. | Gemeinsame side-safe Projektionen speisen Scoring und Debug. |
@@ -6377,6 +6377,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1657 Tests.
   - Status: `VERIFIED`.
+
+- `AI-COMPLETE-07` erster Runner-TacticalGoal-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime.ts` baut RunnerTacticalGoals vor der Semantic-Choice-Bewertung und reicht sie als scoring-only Input-Metadaten in `semanticRuntimeChoices`.
+  - `packages/ai/src/runtime/runner-goal-fit-score.ts` erzeugt einen Hauptscore-Component `runner_goal_fit_tactical_goal_run_target`, wenn ein `start_run`-Ziel zu einem aktiven RunnerTacticalGoal wie `runner.pressure_good_central_target` oder `runner.contest_remote_if_score_threat` passt.
+  - `packages/ai/src/runtime/runner-goal-fit-score.test.ts` schützt die direkte Score-Wirkung eines RunnerTacticalGoal auf einen passenden R&D-Run.
+  - Status bleibt `IN_PROGRESS`, weil Economy-/Setup-/Risk-Control-GoalFit und Abschlussaudit noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-goal-fit-score.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 2 Dateien, 67 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 150 Dateien, 1658 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-07`.
 

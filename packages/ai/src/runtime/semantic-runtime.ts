@@ -188,22 +188,6 @@ export function chooseSemanticRuntimeAction(
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),
   });
-  const choices = dependencies.semanticRuntimeChoices(
-    input,
-    actionSemanticCandidates,
-  );
-  const reactiveChoice =
-    choices.find(
-      (candidate) =>
-        !candidate.exclusion &&
-        candidate.score > 0 &&
-        dependencies.semanticRuntimeChoiceIsReactive(candidate),
-    ) ??
-    choices.find(
-      (candidate) =>
-        !candidate.exclusion &&
-        dependencies.semanticRuntimeChoiceIsReactive(candidate),
-    );
   const previousPlan = dependencies.getTacticalPlanMemorySnapshot(input);
   const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
   const runnerStrategicIntent =
@@ -252,6 +236,29 @@ export function chooseSemanticRuntimeAction(
         deckCapabilities,
       })
     : undefined;
+  const inputForSemanticChoices =
+    runnerTacticalGoals && runnerTacticalGoals.length > 0
+      ? ({
+          ...input,
+          ownRunnerTacticalGoals: runnerTacticalGoals,
+        } as AiDecisionInput)
+      : input;
+  const choices = dependencies.semanticRuntimeChoices(
+    inputForSemanticChoices,
+    actionSemanticCandidates,
+  );
+  const reactiveChoice =
+    choices.find(
+      (candidate) =>
+        !candidate.exclusion &&
+        candidate.score > 0 &&
+        dependencies.semanticRuntimeChoiceIsReactive(candidate),
+    ) ??
+    choices.find(
+      (candidate) =>
+        !candidate.exclusion &&
+        dependencies.semanticRuntimeChoiceIsReactive(candidate),
+    );
   const inputMetadata = input as AiDecisionInputWithDeckCapabilities;
   const strategicIntentState = inputMetadata.ownStrategicIntentState;
   const corpStrategicIntent =
