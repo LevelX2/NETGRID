@@ -7223,6 +7223,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` fünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/tactical-goal-utility.ts` ersetzt freie GoalId-Substring-Kategorisierung durch strukturierte Goal-Family-Auswertung und Segment-/Compound-Boundary-Matches auf GoalIds.
+  - Goal-Familien wie `corp_scoreline`, `tag_punish` und `damage_pressure` werden explizit als strukturierte Quelle genutzt; IDs wie `corp.score_agenda` bleiben Treffer, während `outscoreboard_noise`, `microeconomy_noise` und `tagalong_punishment_noise` nicht mehr durch Substrings falsch kategorisiert werden.
+  - `tactical-goal-utility.test.ts` schützt strukturierte Familien, echte GoalId-Terms und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/tactical-goal-utility.test.ts src/decision/action-goal-fit.test.ts src/decision/semantic-shadow-decision.test.ts` grün, 3 Dateien, 34 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -90,37 +90,68 @@ function utilityFamilyForGoal(
 ): TacticalGoalUtilityFamily {
   const goalId = goal.goalId;
   const family = goal.family;
-  if (family === "economy" || goalId.includes("economy")) return "economy";
-  if (goalId.includes("tag") && goalId.includes("punish")) return "tag_punish";
-  if (goalId.includes("damage")) return "damage_pressure";
-  if (goalId.includes("score") && goalId.startsWith("corp.")) {
+  if (family === "economy" || goalIdHasTerm(goalId, "economy")) {
+    return "economy";
+  }
+  if (
+    family === "tag_punish" ||
+    (goalIdHasTerm(goalId, "tag") && goalIdHasTerm(goalId, "punish"))
+  ) {
+    return "tag_punish";
+  }
+  if (family === "damage_pressure" || goalIdHasTerm(goalId, "damage")) {
+    return "damage_pressure";
+  }
+  if (
+    family === "corp_scoreline" ||
+    (goalIdHasTerm(goalId, "score") && goalId.startsWith("corp."))
+  ) {
     return "corp_scoreline";
   }
-  if (goalId.includes("rez") || family === "corp_ice_defense") {
+  if (goalIdHasTerm(goalId, "rez") || family === "corp_ice_defense") {
     return "corp_ice_defense";
   }
-  if (family === "remote_contest" || goalId.includes("contest_remote")) {
+  if (family === "remote_contest" || goalIdHasTerm(goalId, "contest_remote")) {
     return "remote_contest";
   }
   if (
-    goalId.includes("survive") ||
-    goalId.includes("avoid") ||
-    goalId.includes("buffer") ||
+    goalIdHasTerm(goalId, "survive") ||
+    goalIdHasTerm(goalId, "avoid") ||
+    goalIdHasTerm(goalId, "buffer") ||
     family === "risk_control"
   ) {
     return "survival";
   }
   if (
-    goalId.includes("coverage") ||
-    goalId.includes("breaker") ||
+    goalIdHasTerm(goalId, "coverage") ||
+    goalIdHasTerm(goalId, "breaker") ||
     family === "coverage"
   ) {
     return "coverage";
   }
-  if (family === "pressure" || goalId.includes("access")) return "run_access";
-  if (goalId.includes("target")) return "target_resolution";
-  if (goalId.includes("cleanup") || goalId.includes("remove")) return "cleanup";
+  if (family === "pressure" || goalIdHasTerm(goalId, "access")) {
+    return "run_access";
+  }
+  if (goalIdHasTerm(goalId, "target")) return "target_resolution";
+  if (goalIdHasTerm(goalId, "cleanup") || goalIdHasTerm(goalId, "remove")) {
+    return "cleanup";
+  }
   return "setup";
+}
+
+function goalIdHasTerm(goalId: string, term: string): boolean {
+  return goalId
+    .split(/[.:-]+/)
+    .some((segment) => goalIdSegmentHasTerm(segment, term));
+}
+
+function goalIdSegmentHasTerm(segment: string, term: string): boolean {
+  return (
+    segment === term ||
+    segment.startsWith(`${term}_`) ||
+    segment.endsWith(`_${term}`) ||
+    segment.includes(`_${term}_`)
+  );
 }
 
 function normalizePriority(priority: number): number {

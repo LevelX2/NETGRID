@@ -98,6 +98,49 @@ describe("TacticalGoalUtility", () => {
     expect(utilities[1]?.requiredActionSignals).toContain("corp_window.rez");
   });
 
+  it("classifies goal ids by structured terms instead of substrings", () => {
+    expect(
+      normalizeTacticalGoalUtility(
+        goal({
+          goalId: "corp.score_agenda",
+          family: "boardstate",
+          priority: 800,
+          urgency: "medium",
+        }),
+      ).family,
+    ).toBe("corp_scoreline");
+    expect(
+      normalizeTacticalGoalUtility(
+        goal({
+          goalId: "corp.outscoreboard_noise",
+          family: "boardstate",
+          priority: 800,
+          urgency: "medium",
+        }),
+      ).family,
+    ).toBe("setup");
+    expect(
+      normalizeTacticalGoalUtility(
+        goal({
+          goalId: "runner.microeconomy_noise",
+          family: "setup",
+          priority: 800,
+          urgency: "medium",
+        }),
+      ).family,
+    ).toBe("setup");
+    expect(
+      normalizeTacticalGoalUtility(
+        goal({
+          goalId: "corp.tagalong_punishment_noise",
+          family: "boardstate",
+          priority: 800,
+          urgency: "medium",
+        }),
+      ).family,
+    ).toBe("setup");
+  });
+
   it("rejects hidden-info markers in utility evidence", () => {
     expect(() =>
       normalizeTacticalGoalUtility(
