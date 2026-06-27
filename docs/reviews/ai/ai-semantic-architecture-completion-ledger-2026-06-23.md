@@ -6824,6 +6824,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` siebter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` entfernt `action.label` aus dem produktiven Suchtext für Run-Relevanz und Run-Struktur.
+  - Run-Projektion nutzt dort nur noch Action-Type, strukturierte Payloads, Candidate-Signale und Hint-Signale.
+  - `run-action-projection.test.ts` schützt, dass label-only `make a run` nicht projiziert wird, während strukturierte `runActionSignals` weiterhin eine Run-Projektion erzeugen.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts src/runner-run-target-evaluation.test.ts src/actions/action-semantic-coverage.test.ts -t "projectRunnerRunActions|run action|Run"` grün, 2 aktive Dateien, 53 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

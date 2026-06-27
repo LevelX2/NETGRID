@@ -214,7 +214,7 @@ function runActionProjectionEvidence(
 
 function runActionRelevant(action: LegalAction, signals: readonly string[]): boolean {
   if (action.type === "start_run") return true;
-  const text = `${action.type} ${action.label} ${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
+  const text = runActionSearchText(action, signals);
   if (text.includes("path blocked")) return false;
   if (concretePayloadServerId(action) && text.includes("run")) return true;
   const explicitRunSignals = [
@@ -327,7 +327,7 @@ function runActionStructure(
   signals: readonly string[],
 ): RunnerRunActionStructure {
   if (action.type === "start_run") return "direct_start_run";
-  const text = `${action.type} ${action.label} ${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
+  const text = runActionSearchText(action, signals);
   if (text.includes("multi_run_sequence")) return "multi_run_sequence";
   if (text.includes("followup_run") || text.includes("follow-up run")) {
     return "followup_run";
@@ -345,6 +345,13 @@ function runActionStructure(
   if (action.type === "play_event") return "event_run";
   if (action.type === "resolve_choice") return "target_choice";
   return "run_enabler";
+}
+
+function runActionSearchText(
+  action: LegalAction,
+  signals: readonly string[],
+): string {
+  return `${action.type} ${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
 }
 
 function targetServerIdsForRunAction(
