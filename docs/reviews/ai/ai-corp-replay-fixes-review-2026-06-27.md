@@ -107,13 +107,14 @@ Ziel ist ein kompaktes, generisches KI-Fixpaket für die beobachteten Corp-Fehle
 - `7f57e3b1` `fix(ai): prefer targeted corp payoffs`
 - `9fe3e5f3` `test(ai): isolate tactical plan memory in index tests`
 - `docs(ai): finalize corp replay fixes`
+- `499db43d` `test(ai): reconcile tactical memory reset import`
 
 ### Verifikation 2026-06-27
 
 - Fokussierte Corp-/Cutover-Regressionen: 7 Dateien, 93 Tests, grün.
 - Loan-from-Chiba-Isolationsreproduktion nach Test-Reset: 6 Tests, grün.
 - `corepack pnpm exec vitest run src/index.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=verbose`: 534 Tests, grün.
-- `corepack pnpm --filter @netgrid/ai test`: 165 Testdateien, 1708 Tests, grün.
+- `corepack pnpm --filter @netgrid/ai test`: 165 Testdateien, 1709 Tests, grün.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `git diff --check`: grün.
 
