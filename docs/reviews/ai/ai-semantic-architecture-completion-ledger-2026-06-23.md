@@ -55,7 +55,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `VERIFIED` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Erfüllt: `tactical-plans.ts` ist dünne Plan-Fassade bei 306 Zeilen; Runner-, Corp-, Mapping-, Progression-/Ranking- und Debug-/Redaction-Verantwortungen liegen in getrennten Modulen; Boundary-Test und zwei Abschluss-Audits sind grün. |
 | AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `VERIFIED` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Erfüllt: produktiver Legacy-Zugriff läuft über `legacy-entrypoints.ts`, Public-Kompatibilität über `legacy-public-contract.ts`; Matrix klassifiziert alle Nutzungen; ersetzte Top-Level-Facades sind entfernt und per Boundary-Test blockiert. |
 | AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `VERIFIED` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Erfüllt: produktiver Decision-Input nutzt `deck-doctrine-runtime-context.ts` mit StrategyProfile, report-only Doctrine-v2-Diagnostic, NeutralDoctrine, Vollständigkeitsstatus und Rollenstatus; Doctrine-v1-PlanWeights sind Legacy-gekapselt, Public-v1-Exports laufen über den Legacy-Public-Contract. |
-| AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `IN_PROGRESS` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate und wirken im Hauptscore. |
+| AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `VERIFIED` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Erfüllt: Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate, werden in Semantic Runtime und TacticalPlans diagnostisch geführt und wirken für Pressure, Remote Contest, Economy, Setup, Risk-Control und Bypass im Hauptscore. |
 | AI-COMPLETE-08 | Corp-TacticalGoals produktiv vollständig integrieren. | `PENDING` | Corp-Ziele wurden begonnen, müssen produktiv und diagnosefähig durchgängig wirken. | Corp-Ziele für Score, Remote, Zentralserver, Rez, Economy, Tag/Punish und Damage/Kill wirken im Hauptscore. |
 | AI-COMPLETE-09 | ActionSemanticCandidate-Befüllung vervollständigen. | `PENDING` | Source/Ability/Cost/Timing/Target/BoardContext-Coverage muss gemessen und geschlossen werden. | Relevanter Runtime-Scope ist ausreichend befüllt; Gaps sind echte Blocker oder repariert. |
 | AI-COMPLETE-10 | Cost/Timing/BoardContext verallgemeinern. | `PENDING` | Score- und Planpfade enthalten verstreute Spezialbewertungen. | Gemeinsame side-safe Projektionen speisen Scoring und Debug. |
@@ -6398,7 +6398,18 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 150 Dateien, 1661 Tests.
 
-Nächstes aktives Ziel: `AI-COMPLETE-07`.
+- `AI-COMPLETE-07` Abschlussaudit:
+  - Alle acht produktiven Runner-TacticalGoal-IDs sind angebunden: `runner.pressure_good_central_target`, `runner.contest_remote_if_score_threat`, `runner.build_economy_base`, `runner.maintain_credit_and_hand_buffer`, `runner.find_or_install_primary_breaker`, `runner.draw_or_search_for_setup`, `runner.avoid_low_value_risk_runs` und `runner.use_bypass_for_high_value_access`.
+  - `packages/ai/src/runtime/runner-goal-fit-score.ts` enthält die Hauptscore-Brücke für Run-Target-, Economy-, Setup-, Risk-Control- und Bypass-Fit; `packages/ai/src/runtime/semantic-runtime.ts` reicht die RunnerTacticalGoals als scoring-only Input-Metadaten in die Choice-Bewertung.
+  - `packages/ai/src/runtime/runner-goal-fit-score.test.ts`, `packages/ai/src/runner-tactical-goals.test.ts` und `packages/ai/src/semantic-ai-runtime-cutover.test.ts` decken Goal-Erzeugung, Scorewirkung, Plan-Mapping-Schutz und Runtime-Cutover-Regression ab.
+  - Kein Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Randomness- oder Hidden-Info-Vertrag wurde erweitert.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-goal-fit-score.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 2 Dateien, 71 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 150 Dateien, 1662 Tests.
+  - Status: `VERIFIED`.
+
+Nächstes aktives Ziel: `AI-COMPLETE-08`.
 
 ## Audit-Ledger
 

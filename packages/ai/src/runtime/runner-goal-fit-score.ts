@@ -107,6 +107,13 @@ export function runnerSemanticGoalFitScoreComponent(
     };
   }
   const evaluation = dependencies.runTargetEvaluationForAction(input, action);
+  const tacticalGoalBypassFit = runnerTacticalGoalBypassRunFitScoreComponent(
+    action,
+    actionSemanticCandidate,
+    evaluation,
+    runnerTacticalGoalsForInput(input),
+  );
+  if (tacticalGoalBypassFit) return tacticalGoalBypassFit;
   const tacticalGoalRiskControl =
     runnerTacticalGoalRiskControlRunScoreComponent(
       evaluation,
@@ -193,6 +200,36 @@ function runnerTacticalGoalNonRunFitScoreComponent(
     };
   }
   return undefined;
+}
+
+function runnerTacticalGoalBypassRunFitScoreComponent(
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  evaluation: RunnerRunTargetEvaluation | undefined,
+  goals: readonly RunnerTacticalGoal[],
+): AiDecisionScoreComponent | undefined {
+  if (!evaluation || goals.length === 0) return undefined;
+  const bypassGoal = highestPriorityGoal(goals, [
+    "runner.use_bypass_for_high_value_access",
+  ]);
+  if (
+    !bypassGoal ||
+    !runnerActionHasBypassSignal(action, actionSemanticCandidate) ||
+    !runnerRunTargetHasHighValueAccess(evaluation)
+  ) {
+    return undefined;
+  }
+  return {
+    key: "runner_goal_fit_tactical_goal_bypass_access",
+    label: "Runner-TacticalGoal-Bypass-Access",
+    value: scoreValueForTacticalGoal(bypassGoal),
+    reason: runnerTacticalGoalReason(bypassGoal, [
+      `target:${evaluation.targetServerId}`,
+      `recommendation:${evaluation.recommendation}`,
+      `payoff:${evaluation.accessPayoff}`,
+      "bypass:true",
+    ]),
+  };
 }
 
 function runnerTacticalGoalRiskControlRunScoreComponent(
@@ -299,6 +336,28 @@ function runnerRunTargetIsLowValueRisk(
     evaluation.recommendation === "do_not_run_now" ||
     evaluation.recommendation === "draw_for_damage_buffer" ||
     evaluation.knownAccessState === "known_no_current_payoff"
+  );
+}
+
+function runnerActionHasBypassSignal(
+  action: LegalAction,
+  candidate: ActionSemanticCandidate | undefined,
+): boolean {
+  if (action.payload?.bypassFirstIce === true || action.payload?.bypass === true) {
+    return true;
+  }
+  return actionSemanticCandidateHasSignal(candidate, "bypass");
+}
+
+function runnerRunTargetHasHighValueAccess(
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  return (
+    evaluation.accessPayoff === "agenda" ||
+    evaluation.accessPayoff === "trash_affordable" ||
+    evaluation.accessPayoff === "score_threat" ||
+    evaluation.accessPayoff === "fresh" ||
+    evaluation.accessPayoff === "access_bonus"
   );
 }
 

@@ -116,6 +116,49 @@ describe("runnerSemanticGoalFitScoreComponent", () => {
     );
   });
 
+  it("scores bypass run actions for high-value access tactical goals", () => {
+    const action = {
+      actionId: "inside-run",
+      side: "runner",
+      type: "start_run",
+      payload: { serverId: "rd", bypassFirstIce: true },
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals([
+      {
+        schemaVersion: "runner-tactical-goal-v1",
+        goalId: "runner.use_bypass_for_high_value_access",
+        family: "pressure",
+        priority: 760,
+        urgency: "medium",
+        source: "strategic_intent",
+        evidence: ["test_goal"],
+      },
+    ]);
+    const evaluation = {
+      targetServerId: "rd",
+      recommendation: "run_now",
+      pathPassability: "reachable",
+      accessPayoff: "fresh",
+    } as unknown as RunnerRunTargetEvaluation;
+
+    const component = runnerSemanticGoalFitScoreComponent(
+      input,
+      action,
+      "simple_hq_or_rnd_pressure",
+      undefined,
+      testDependencies({ evaluation }),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_goal_fit_tactical_goal_bypass_access",
+      value: 760,
+    });
+    expect(component?.reason).toContain(
+      "goal:runner.use_bypass_for_high_value_access",
+    );
+    expect(component?.reason).toContain("bypass:true");
+  });
+
   it("penalizes low-value runs when runner risk-control tactical goals are active", () => {
     const action = {
       actionId: "run-remote",
