@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
@@ -349,14 +349,6 @@ describe("AI module boundaries", () => {
   it("marks legacy planner facades and implementations as compatibility-only", () => {
     const requiredMarkers = [
       {
-        file: path.join(srcDir, "runner-plans.ts"),
-        markers: ["Compatibility facade", "not legacy"],
-      },
-      {
-        file: path.join(srcDir, "corp-plans.ts"),
-        markers: ["Compatibility facade", "not legacy"],
-      },
-      {
         file: path.join(srcDir, "legacy", "runner-plans.ts"),
         markers: ["Legacy runner planner", "fallback", "Do not add new semantic"],
       },
@@ -378,6 +370,19 @@ describe("AI module boundaries", () => {
     });
 
     expect(missingMarkers).toEqual([]);
+  });
+
+  it("does not recreate historical plan compatibility facades", () => {
+    const forbiddenFacades = [
+      path.join(srcDir, "runner-plans.ts"),
+      path.join(srcDir, "corp-plans.ts"),
+    ];
+
+    const violations = forbiddenFacades
+      .filter((file) => existsSync(file))
+      .map((file) => `${relativeFile(file)} must stay removed`);
+
+    expect(violations).toEqual([]);
   });
 
   it("freezes legacy planner implementation imports", () => {

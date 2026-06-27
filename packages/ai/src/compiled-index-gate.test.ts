@@ -252,8 +252,8 @@ describe("compiled hint index pilot report", () => {
     expect(aiHintsSource).toContain("ai-card-hints-compiled.json");
     for (const relativePath of [
       "packages/ai/src/deck-doctrine.ts",
-      "packages/ai/src/corp-plans.ts",
-      "packages/ai/src/runner-plans.ts",
+      "packages/ai/src/legacy/corp-plans.ts",
+      "packages/ai/src/legacy/runner-plans.ts",
     ]) {
       const source = fs.readFileSync(path.join(repoRoot, relativePath), "utf8");
       expect(source).not.toContain("check-ai-hint-compiled-index");
