@@ -29,7 +29,9 @@ import {
   semanticPilotChoice,
   semanticPlayStrengthPilotEnabled,
 } from "../decision/pilot-scope-registry";
+import { buildCorpTacticalGoals } from "../decision/corp-tactical-goals";
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
+import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { buildMergedTacticalGoals } from "../decision/tactical-goal-merge";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
 import { semanticRuntimeForcedLegacy } from "../legacy/legacy-entrypoints";
@@ -236,11 +238,37 @@ export function chooseSemanticRuntimeAction(
         deckCapabilities,
       })
     : undefined;
+  const inputMetadata = input as AiDecisionInputWithDeckCapabilities;
+  const strategicIntentState = inputMetadata.ownStrategicIntentState;
+  const corpStrategicIntent =
+    input.side === "corp" ? inputMetadata.ownCorpStrategicIntent : undefined;
+  const corpTacticalGoals =
+    input.side === "corp"
+      ? buildCorpTacticalGoals(
+          buildSemanticDecisionFrame({
+            input,
+            actionCandidates: actionSemanticCandidates,
+            deckCapabilities,
+            ...(strategicIntentState ? { strategicIntentState } : {}),
+            ...(corpStrategicIntent ? { corpStrategicIntent } : {}),
+            evidence: ["semantic_runtime:corp_tactical_goal_input"],
+          }),
+        )
+      : undefined;
+  const semanticChoiceTacticalGoals = runtimeTacticalGoalsForInput(
+    runnerTacticalGoals,
+    corpTacticalGoals,
+  );
   const inputForSemanticChoices =
-    runnerTacticalGoals && runnerTacticalGoals.length > 0
+    semanticChoiceTacticalGoals.length > 0
       ? ({
           ...input,
-          ownRunnerTacticalGoals: runnerTacticalGoals,
+          ...(runnerTacticalGoals && runnerTacticalGoals.length > 0
+            ? { ownRunnerTacticalGoals: runnerTacticalGoals }
+            : {}),
+          ...(corpTacticalGoals && corpTacticalGoals.length > 0
+            ? { ownCorpTacticalGoals: corpTacticalGoals }
+            : {}),
         } as AiDecisionInput)
       : input;
   const choices = dependencies.semanticRuntimeChoices(
@@ -259,14 +287,10 @@ export function chooseSemanticRuntimeAction(
         !candidate.exclusion &&
         dependencies.semanticRuntimeChoiceIsReactive(candidate),
     );
-  const inputMetadata = input as AiDecisionInputWithDeckCapabilities;
-  const strategicIntentState = inputMetadata.ownStrategicIntentState;
-  const corpStrategicIntent =
-    input.side === "corp" ? inputMetadata.ownCorpStrategicIntent : undefined;
   const goalFrame = buildSemanticDecisionFrame({
     input,
     actionCandidates: actionSemanticCandidates,
-    tacticalGoals: runnerTacticalGoals ?? [],
+    tacticalGoals: semanticChoiceTacticalGoals,
     deckCapabilities,
     ...(strategicIntentState ? { strategicIntentState } : {}),
     ...(corpStrategicIntent ? { corpStrategicIntent } : {}),
@@ -280,7 +304,7 @@ export function chooseSemanticRuntimeAction(
   });
   const tacticalGoals = buildMergedTacticalGoals({
     frame: goalFrame,
-    tacticalGoals: runnerTacticalGoals ?? [],
+    tacticalGoals: semanticChoiceTacticalGoals,
   });
   const planRuntime = reactiveChoice
     ? emptyTacticalPlanRuntimeResult()
@@ -360,7 +384,7 @@ export function chooseSemanticRuntimeAction(
         const pilotFrame = buildSemanticDecisionFrame({
           input,
           actionCandidates: actionSemanticCandidates,
-          tacticalGoals: runnerTacticalGoals ?? [],
+          tacticalGoals: semanticChoiceTacticalGoals,
           tacticalPlan: effectivePlanRuntime,
           deckCapabilities,
           ...(strategicIntentState ? { strategicIntentState } : {}),
@@ -469,6 +493,16 @@ export function chooseSemanticRuntimeAction(
     difficulty: input.difficulty,
     reason: selectedReasonCode,
   };
+}
+
+function runtimeTacticalGoalsForInput(
+  runnerTacticalGoals: readonly RunnerTacticalGoal[] | undefined,
+  corpTacticalGoals: readonly TacticalGoalLike[] | undefined,
+): TacticalGoalLike[] {
+  return [
+    ...(runnerTacticalGoals ?? []),
+    ...(corpTacticalGoals ?? []),
+  ];
 }
 
 function semanticCoverageFallbackDecision(

@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 
 type SemanticRuntimeCorpSafetyGate = {
   allowed: boolean;
@@ -87,6 +88,12 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
+  const tacticalGoalFit = corpTacticalGoalFitScoreComponent(
+    input,
+    action,
+    scopeId,
+  );
+  if (tacticalGoalFit) components.push(tacticalGoalFit);
   if (action.type === "score_agenda") {
     components.push({
       key: "corp_score_available_agenda",
@@ -320,4 +327,78 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     });
   }
   return components;
+}
+
+function corpTacticalGoalFitScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+): AiDecisionScoreComponent | undefined {
+  const goals = corpTacticalGoalsForInput(input);
+  if (goals.length === 0) return undefined;
+  const goal = highestPriorityCorpGoalForAction(goals, action, scopeId);
+  if (!goal) return undefined;
+  return {
+    key: "corp_goal_fit_tactical_goal",
+    label: "Corp-TacticalGoal",
+    value: corpTacticalGoalScoreValue(goal),
+    reason: [
+      `goal:${goal.goalId}`,
+      `family:${goal.family}`,
+      `urgency:${goal.urgency ?? "unknown"}`,
+      `action:${action.type}`,
+      `scope:${scopeId}`,
+      ...(goal.targetServerId ? [`target:${goal.targetServerId}`] : []),
+    ].join("|"),
+  };
+}
+
+function corpTacticalGoalsForInput(
+  input: AiDecisionInput,
+): readonly TacticalGoalLike[] {
+  return (
+    input as AiDecisionInput & {
+      ownCorpTacticalGoals?: readonly TacticalGoalLike[];
+    }
+  ).ownCorpTacticalGoals ?? [];
+}
+
+function highestPriorityCorpGoalForAction(
+  goals: readonly TacticalGoalLike[],
+  action: LegalAction,
+  scopeId: string,
+): TacticalGoalLike | undefined {
+  return goals
+    .filter((goal) => corpGoalMatchesAction(goal, action, scopeId))
+    .sort((left, right) => right.priority - left.priority)[0];
+}
+
+function corpGoalMatchesAction(
+  goal: TacticalGoalLike,
+  action: LegalAction,
+  scopeId: string,
+): boolean {
+  switch (goal.goalId) {
+    case "corp.tactical.score_closeout":
+      return action.type === "score_agenda";
+    case "corp.tactical.advance_scoreline":
+      return action.type === "advance_card";
+    case "corp.tactical.rez_relevant_ice":
+      return action.type === "rez_ice";
+    case "corp.tactical.prepare_remote":
+    case "corp.tactical.protect_central":
+      return action.type === "install_card";
+    case "corp.tactical.stabilize_economy":
+      return action.type === "gain_credit" || action.type === "draw_card";
+    case "corp.tactical.visible_tag_punish":
+      return scopeId === "corp_tag_punish";
+    case "corp.tactical.visible_damage_or_ambush_window":
+      return scopeId === "corp_tag_punish" || action.type === "trigger_ability";
+    default:
+      return false;
+  }
+}
+
+function corpTacticalGoalScoreValue(goal: TacticalGoalLike): number {
+  return 500 + Math.min(500, Math.max(0, goal.priority - 500));
 }
