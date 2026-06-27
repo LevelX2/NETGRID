@@ -150,9 +150,7 @@ function visibleCoverageForAction(
   const actionCoverage = uniqueCoverage(action.targetCoverageTypes ?? []);
   const cardCoverage =
     context.visibleInstallableCoverageCards?.find(
-      (card) =>
-        card.title === action.sourceTitle ||
-        (action.label && card.title === action.label),
+      (card) => card.title === action.sourceTitle,
     )?.coverageTypes ?? [];
   const combined = uniqueCoverage([...actionCoverage, ...cardCoverage]);
   return combined.filter((coverage) =>
@@ -186,8 +184,11 @@ function matchedCoverageGoalIds(
 function isSearchAction(action: RunnerCoverageGoalAction): boolean {
   return (
     action.type === "search_stack" ||
-    action.type === "play_event" ||
-    /search|tutor|find/i.test([action.label, action.sourceTitle].join("|"))
+    action.actionTacticSignals?.some((signal) =>
+      /breaker_search|program_search|search\.stack|coverage_search|setup\.search/i.test(
+        signal,
+      ),
+    ) === true
   );
 }
 
