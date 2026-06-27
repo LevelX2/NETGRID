@@ -66,9 +66,5 @@ export function visibleCardForAction(
     );
     if (byDefinition) return byDefinition;
   }
-  return allVisibleCards.find(
-    (card) =>
-      card.title !== undefined &&
-      action.label.toLowerCase().includes(card.title.toLowerCase()),
-  );
+  return undefined;
 }

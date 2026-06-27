@@ -6806,6 +6806,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` fünfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-visible-cards.ts` entfernt den Fallback, der sichtbare Karten über Kartentitel im Action-Label suchte.
+  - Plan-Card-Lookups nutzen nur noch Source-InstanceId, strukturierte Payload-DefinitionIds oder Source-DefinitionIds.
+  - `tactical-plan-visible-cards.test.ts` schützt, dass DefinitionId-Matching erhalten bleibt und label-only Titelmatching keine sichtbare Karte mehr liefert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-visible-cards.test.ts src/plans/tactical-plan-action-values.test.ts src/plans/tactical-plan-breaker-coverage.test.ts src/tactical-plans.test.ts -t "visibleCardForAction|legalActionCreditGainForPlan|isBreakerInstallAction|breaker coverage|bank"` grün, 4 Dateien, 7 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
