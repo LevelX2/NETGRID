@@ -6955,6 +6955,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` einundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bank-investment-context.ts` entfernt `action.label` und `cardImplementationAbilityLabel` aus dem produktiven Bank-Build-/Cashout-Suchtext.
+  - Runner-Bank-Build und -Cashout nutzen dort strukturierte Hosted-Credit-Payloads wie `cardImplementationAddsHostedCredits` und `cardImplementationTakesHostedCredits` sowie explizite `resourceAbility`-Signale; generische Source-/Card-Rollen werden nicht als aktionsspezifischer Build-/Cashout-Beleg vermischt.
+  - `runner-bank-investment-context.test.ts` schützt, dass label-only Bank-Cashout-Text nicht mehr zählt, strukturierte Hosted-Credit-Payloads aber weiterhin Build und Cashout erkennen.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bank-investment-context.test.ts src/runtime/semantic-runtime-plan-memory-exclusion.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 3 Dateien, 72 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

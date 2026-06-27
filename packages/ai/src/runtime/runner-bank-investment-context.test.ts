@@ -68,22 +68,34 @@ describe("createRunnerBankInvestmentContext", () => {
       counters: { power: 3 },
     });
     const buildAction = runnerAction("activated_card_ability", {
+      actionId: "structured-build",
       source: bank.instanceId,
-      label: "3 Credits auf Quelle legen",
+      label: "Use ability",
+      cardImplementationAddsHostedCredits: true,
     });
     const cashOutAction = runnerAction("trigger_ability", {
+      actionId: "structured-cashout",
+      source: bank.instanceId,
+      label: "Use ability",
+      cardImplementationTakesHostedCredits: true,
+    });
+    const labelOnlyCashOutAction = runnerAction("trigger_ability", {
+      actionId: "label-only-cashout",
       source: bank.instanceId,
       label: "Credits aus Quelle nehmen",
     });
     const input = runnerInput({
       rig: [bank],
-      legalActions: [buildAction, cashOutAction],
+      legalActions: [buildAction, cashOutAction, labelOnlyCashOutAction],
     });
 
     expect(
       context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
     ).toContain("bankBuildLegal:true");
     expect(context.isRunnerBankCashOutAction(input, cashOutAction)).toBe(true);
+    expect(context.isRunnerBankCashOutAction(input, labelOnlyCashOutAction)).toBe(
+      false,
+    );
   });
 });
 
@@ -199,15 +211,18 @@ function visibleRunnerCard(
 
 function runnerAction(
   type: string,
-  input: Record<string, string> = {},
+  input: Record<string, unknown> = {},
 ): LegalAction {
-  const { label, source, ...payload } = input;
+  const { actionId, label, source, ...payload } = input;
   return {
-    actionId: `${type}-${payload.serverId ?? source ?? "action"}`,
+    actionId:
+      typeof actionId === "string"
+        ? actionId
+        : `${type}-${payload.serverId ?? source ?? "action"}`,
     side: "runner",
     type,
-    source,
-    label: label ?? type,
+    source: typeof source === "string" ? source : undefined,
+    label: typeof label === "string" ? label : type,
     payload,
   } as LegalAction;
 }

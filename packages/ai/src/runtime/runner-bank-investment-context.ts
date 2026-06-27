@@ -451,6 +451,12 @@ export function createRunnerBankInvestmentContext(
       input,
       action,
     );
+    if (
+      sourceIsCreditBank &&
+      action.payload?.cardImplementationAddsHostedCredits === true
+    ) {
+      return true;
+    }
     return (
       (sourceIsCreditBank &&
         /(?:legen|put|load|add|build|counter)/.test(text)) ||
@@ -475,6 +481,9 @@ export function createRunnerBankInvestmentContext(
       input,
       action,
     );
+    if (action.payload?.cardImplementationTakesHostedCredits === true) {
+      return true;
+    }
     return (
       (sourceIsCreditBank &&
         /(?:nehmen|take|cash|withdraw|payout)/.test(text)) ||
@@ -487,19 +496,21 @@ export function createRunnerBankInvestmentContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): string {
-    const sourceCard = dependencies.findVisibleCard(input, action.source);
-    const payloadLabel =
-      typeof action.payload?.cardImplementationAbilityLabel === "string"
-        ? action.payload.cardImplementationAbilityLabel
-        : "";
     const resourceAbility =
       typeof action.payload?.resourceAbility === "string"
         ? action.payload.resourceAbility
         : "";
+    const payloadSignals = [
+      action.payload?.cardImplementationAddsHostedCredits === true
+        ? "build_credit_bank"
+        : "",
+      action.payload?.cardImplementationTakesHostedCredits === true
+        ? "cash_out_credit_bank"
+        : "",
+    ];
     return [
-      action.label,
-      payloadLabel,
       resourceAbility,
+      ...payloadSignals,
     ]
       .filter(Boolean)
       .join(" ")
