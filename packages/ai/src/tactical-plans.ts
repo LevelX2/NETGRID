@@ -35,7 +35,6 @@ import {
   redactedRunnerTacticalGoalFacts,
   type RunnerTacticalGoal,
 } from "./runner-tactical-goals";
-import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { createAiHintsByCard } from "./ai-hints";
 import { getTacticalPlanMemorySnapshot } from "./plans/plan-memory";
 import {
@@ -93,10 +92,14 @@ import {
   serverHasUnrezzedIce,
 } from "./plans/tactical-plan-run-reachability";
 import {
-  coverageKindForAssessment,
   deckCoverageKindForRequiredCapability,
   missingCoverageBlockerKind,
 } from "./plans/tactical-plan-coverage-kinds";
+import {
+  isBreakerInstallAction,
+  missingBreakerCoverageKind,
+  runnerHandBreakerForCoverage,
+} from "./plans/tactical-plan-breaker-coverage";
 import {
   actionCreditCost,
   legalActionCreditGainForPlan,
@@ -3628,66 +3631,6 @@ function deckCapabilityBlockersForRequiredCoverage(
     ];
   }
   return [];
-}
-
-function missingBreakerCoverageKind(
-  playerView: PlayerView,
-  serverId: string,
-): RequiredCapabilityKind {
-  const server = playerView.servers.find((candidate) => candidate.id === serverId);
-  if (!server) return "breaker_coverage";
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    playerView.own.rig ?? [],
-    playerView.own.credits,
-    server.root,
-  );
-  const preciseMissingCoverage = coverageKindForAssessment(assessment);
-  if (preciseMissingCoverage) return preciseMissingCoverage;
-  const blockedIceIndex =
-    assessment.unbreakableIceIndex ?? assessment.unpayableIceIndex;
-  const blockedIce =
-    blockedIceIndex !== undefined ? server.ice[blockedIceIndex] : undefined;
-  const rezzedIce = blockedIce?.known && blockedIce.rezzed === true
-    ? blockedIce
-    : server.ice.find((ice) => ice.known && ice.rezzed === true);
-  if (!rezzedIce) return "breaker_coverage";
-  const text = [
-    rezzedIce.title,
-    rezzedIce.definitionId,
-    ...(rezzedIce.subtypes ?? []),
-    rezzedIce.rulesText,
-  ].filter(Boolean).join(" ").toLowerCase();
-  if (text.includes("wall") || text.includes("barrier")) return "breaker_wall";
-  if (text.includes("code gate") || text.includes("codegate")) {
-    return "breaker_code_gate";
-  }
-  if (text.includes("sentry")) return "breaker_sentry";
-  if (text.includes("ap")) return "breaker_ap";
-  if (text.includes("trace")) return "breaker_trace";
-  return "breaker_universal";
-}
-
-function isBreakerInstallAction(
-  playerView: PlayerView,
-  requiredCoverage: RequiredCapabilityKind = "breaker_coverage",
-) {
-  return (action: LegalAction): boolean => {
-    if (action.type !== "install_card") return false;
-    const sourceCard = visibleCardByInstanceId(playerView, String(action.source));
-    return sourceCard
-      ? cardProvidesBreakerCoverage(sourceCard, requiredCoverage)
-      : /breaker|fracter|decoder|killer/i.test(action.label);
-  };
-}
-
-function runnerHandBreakerForCoverage(
-  playerView: PlayerView,
-  requiredCoverage: RequiredCapabilityKind,
-): VisibleCard | undefined {
-  return playerView.own.gripOrHq.find((card) =>
-    card.known && cardProvidesBreakerCoverage(card, requiredCoverage),
-  );
 }
 
 function runnerHasConcreteFundingNeed(
