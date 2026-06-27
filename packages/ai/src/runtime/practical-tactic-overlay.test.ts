@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecision, AiDecisionInput } from "@netgrid/shared";
+import type { AiDecision, AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 import { chooseAiAction } from "../index";
 import {
   PRACTICAL_TACTIC_BENCHMARK_CASES,
@@ -139,6 +139,50 @@ describe("PracticalTacticOverlay", () => {
       "practical_tactic:corp_safe_score",
     );
   });
+
+  it("uses visible breaker source cards and ignores label-only coverage installs", () => {
+    const visibleBreaker = visibleCard({
+      instanceId: "visible-fracter",
+      definitionId: "custom-fracter",
+      title: "Neutral Tool",
+      type: "program",
+      subtypes: ["Icebreaker", "Fracter"],
+    });
+    const input = runnerInput({
+      gripOrHq: [visibleBreaker],
+      legalActions: [
+        action({
+          actionId: "label-only-fracter",
+          type: "install_card",
+          label: "Install Best Fracter",
+          source: "missing-card",
+        }),
+        action({
+          actionId: "visible-fracter-install",
+          type: "install_card",
+          label: "Install Neutral Tool",
+          source: "visible-fracter",
+        }),
+      ],
+    });
+
+    const decision = applyPracticalTacticOverlay(
+      input,
+      frozenDecision("label-only-fracter"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+
+    expect(decision.actionId).toBe("label-only-fracter");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "practical_tactic:runner_install_coverage",
+        "practical_tactic_overlay_candidate:runner.practical_tactic.install_coverage",
+      ]),
+    );
+    expect(decision.decisionDebug?.detailSections?.at(-1)?.items).toContain(
+      "candidate:visible-fracter-install",
+    );
+  });
 });
 
 function frozenLegacyDecision(input: AiDecisionInput): AiDecision {
@@ -152,9 +196,94 @@ function frozenLegacyDecision(input: AiDecisionInput): AiDecision {
   };
 }
 
+function frozenDecision(actionId: string): AiDecision {
+  return {
+    actionId,
+    reasonCode: "test.reference",
+    explanation: "Test reference.",
+    consideredActionIds: [actionId],
+    fallbackUsed: false,
+  };
+}
+
 function unmarkedScoreAction(
   action: AiDecisionInput["legalActions"][number],
 ): AiDecisionInput["legalActions"][number] {
   const { payload: _payload, ...withoutPayload } = action;
   return { ...withoutPayload, label: "Score agenda" };
+}
+
+function runnerInput(options: {
+  gripOrHq?: VisibleCard[];
+  legalActions: LegalAction[];
+}): AiDecisionInput {
+  return {
+    side: "runner",
+    legalActions: options.legalActions,
+    playerView: {
+      side: "runner",
+      own: {
+        identity: visibleCard({ instanceId: "runner-id", type: "identity" }),
+        credits: 5,
+        clicks: 3,
+        agendaPoints: 0,
+        gripOrHq: options.gripOrHq ?? [],
+        heapOrArchives: [],
+        scoreArea: [],
+        rig: [],
+      },
+      opponent: {
+        identity: visibleCard({ instanceId: "corp-id", type: "identity" }),
+        credits: 5,
+        clicks: 3,
+        agendaPoints: 0,
+        tags: 0,
+        badPublicity: 0,
+      },
+      servers: [
+        {
+          id: "remote_1",
+          root: [],
+          ice: [
+            visibleCard({
+              instanceId: "wall-ice",
+              title: "Visible Wall",
+              type: "ice",
+              subtypes: ["Barrier"],
+              rezzed: true,
+            }),
+          ],
+        },
+      ],
+    },
+  } as unknown as AiDecisionInput;
+}
+
+function action(overrides: Partial<LegalAction>): LegalAction {
+  return {
+    actionId: "action",
+    side: "runner",
+    type: "install_card",
+    label: "Action",
+    source: "source",
+    timingPoint: "runner_action.main",
+    costs: [],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 1,
+    ...overrides,
+  } as LegalAction;
+}
+
+function visibleCard(overrides: Partial<VisibleCard>): VisibleCard {
+  return {
+    instanceId: "card",
+    definitionId: "definition",
+    title: "Visible Card",
+    type: "program",
+    known: true,
+    faceup: true,
+    rezzed: true,
+    ...overrides,
+  } as VisibleCard;
 }

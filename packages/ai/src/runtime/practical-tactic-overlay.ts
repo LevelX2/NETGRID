@@ -139,7 +139,7 @@ function runnerInstallCoverageCandidate(
   const action = input.legalActions.find((candidate) => {
     if (candidate.type !== "install_card") return false;
     const source = visibleSourceCard(input, candidate);
-    return source ? looksLikeBreaker(source) : /breaker|fracter|decoder|killer/i.test(candidate.label);
+    return source ? looksLikeBreaker(source) : false;
   });
   if (!action) return undefined;
   return tacticCandidate(action, "runner.practical_tactic.install_coverage", 850, [
@@ -270,9 +270,7 @@ function visibleSourceCard(
     (card) =>
       card.known &&
       (card.instanceId === source ||
-        (card.definitionId !== undefined && card.definitionId === source) ||
-        (card.title !== undefined &&
-          action.label.toLowerCase().includes(card.title.toLowerCase()))),
+        (card.definitionId !== undefined && card.definitionId === source)),
   );
 }
 
