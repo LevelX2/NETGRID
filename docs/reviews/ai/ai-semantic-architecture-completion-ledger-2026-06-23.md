@@ -60,8 +60,8 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-09 | ActionSemanticCandidate-Befüllung vervollständigen. | `VERIFIED` | Source/Ability/Cost/Timing/Target/BoardContext-Coverage muss gemessen und geschlossen werden. | Erfüllt: Runtime-relevante Source/Ability-, Target-, Cost/Timing- und BoardContext-Felder werden side-safe befüllt; verbleibende Gaps sind echte fehlende Engine-/Target-/Profile-Evidence oder spätere TargetProfile-Arbeit. |
 | AI-COMPLETE-10 | Cost/Timing/BoardContext verallgemeinern. | `VERIFIED` | Score- und Planpfade enthalten verstreute Spezialbewertungen. | Gemeinsame side-safe Projektionen speisen Scoring und Debug. |
 | AI-COMPLETE-11 | TargetProfile-/TargetChoice-Pipeline produktiv machen. | `VERIFIED` | TargetChoice ist überwiegend Shadow/Diagnose. | Erfüllt: konkrete legale Zieloptionen wirken produktiv ausschließlich im Target-Fit-Score; Shadow-Reports, Access-Projektion, Trace, Coverage und Readiness bleiben no-effect und erzeugen keine `selectedChoices` oder `selectedTargets`. |
-| AI-COMPLETE-12 | Hard-Gate-Vertrag härten. | `IN_PROGRESS` | HardGates existieren, müssen Vorrang vor allen Scorepfaden behalten. | Blockierte Kandidaten können nicht durch positive Scores gewinnen; WhyNot nennt Blocker. |
-| AI-COMPLETE-13 | Micro-/Overlay-/Override-Pfade in den Spine integrieren oder entfernen. | `PENDING` | `runtime/practical-*` und Runtime-Overlays sind aktiv. | Kein dauerhaftes Score-plus-Override-System; terminale Entscheidungen sind modellierte Gate-/Outcome-Typen. |
+| AI-COMPLETE-12 | Hard-Gate-Vertrag härten. | `VERIFIED` | HardGates existieren, müssen Vorrang vor allen Scorepfaden behalten. | Erfüllt: blockierte Kandidaten stoppen vor positiven Score-Komponenten, erscheinen nicht in `rankedActions` und werden mit Gate-Blocker plus Evidence in `rejectedActions`/Worklist erklärt. |
+| AI-COMPLETE-13 | Micro-/Overlay-/Override-Pfade in den Spine integrieren oder entfernen. | `IN_PROGRESS` | `runtime/practical-*` und Runtime-Overlays sind aktiv. | Kein dauerhaftes Score-plus-Override-System; terminale Entscheidungen sind modellierte Gate-/Outcome-Typen. |
 | AI-COMPLETE-14 | Kartennamenspezifische und payloadspezifische KI-Logik abbauen. | `PENDING` | CardDefinitionId-, Titel- und Label-Treffer in `index.ts`, `tactical-plans.ts` und Runtimepfaden. | Produktiver Planner/Scorer/Targeter nutzt generische Semantik oder gekapselte Ability-Adapter. |
 | AI-COMPLETE-15 | Text-/Regex-/Label-Fallbacks aus produktiver Entscheidung lösen. | `PENDING` | `action.label` und Regex werden in produktiven Pfaden verwendet. | Text-/Regex-/Label-Fallbacks sind nur diagnostisch und erzeugen Coverage-Gaps. |
 | AI-COMPLETE-16 | Doppelte und widersprüchliche Bewertungslogik beseitigen. | `PENDING` | Mehrere Module bewerten Reachability, Target, Economy, Access und Planfortschritt parallel. | Ownership-Matrix: Konzept -> ein Owner -> erlaubte Consumer; konkurrierende Logik entfernt. |
@@ -6571,7 +6571,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-choice-builder.test.ts src/runtime/semantic-runtime-score-breakdown.test.ts src/runtime/semantic-runtime-corp-score.test.ts src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/runner-self-damage-choice.test.ts src/action-semantic-candidate.test.ts src/decision/action-goal-fit.test.ts` grün, 7 Dateien, 40 Tests.
   - Status: `VERIFIED`.
 
-Nächstes aktives Ziel: `AI-COMPLETE-12`.
+Nächstes aktives Ziel: `AI-COMPLETE-13`.
 
 - `AI-COMPLETE-11` erster TargetChoice-Produktivschnitt:
   - `packages/ai/src/decision/target-choice-shadow.ts` behält den Shadow-Report selbst report-only/no-effect, exportiert aber zusätzlich `targetChoiceRecommendationForTargetFit`.
@@ -6644,6 +6644,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-12`.
   - `semantic-shadow-decision.test.ts` weist Target-Context-Missing und Self-Damage-Risk end-to-end als `rejectedActions` mit Blocker- und Evidence-Pfad aus; beide Kandidaten werden nicht gerankt.
   - Status bleibt `IN_PROGRESS`, weil noch ein Abschlussaudit über alle Hard-Gate-Consumer und einen vollen AI-Testlauf aussteht.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/action-goal-fit.test.ts src/decision/semantic-shadow-decision.test.ts` grün, 2 Dateien, 27 Tests.
+
+- `AI-COMPLETE-12` Abschlussaudit:
+  - `scoreActionGoalFit` ruft `evaluateActionGoalHardGates` vor allen positiven Komponenten auf und gibt bei Blockern `fitStatus:"blocked"`, Score `0`, ausschließlich Hard-Gate-Komponenten und die Blockerliste zurück.
+  - `semantic-shadow-decision.ts` leitet geblockte Fits ausschließlich nach `rejectedActions` mit `reason:"blocked_by_action_goal_fit"` weiter; `contextualProjectionComponents`, `calibratedScore`, TargetChoice-Recommendations und `rankedActions.push` werden nur für nicht geblockte Fits erreicht.
+  - `doctrine-goal-action-fit.ts` nutzt geblockte Fits nur als Worklist-/Diagnosefälle und nicht als positives Fit-Ergebnis.
+  - Abgesicherte Gate-Typen: `not_in_legal_actions`, `hidden_info_required`, `cannot_pay`, `wrong_timing`, `target_context_missing_for_target_profile`, `target_context_blocked`, `risk_unacceptable`, `plan_step_mismatch`.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/action-goal-fit.test.ts src/decision/semantic-shadow-decision.test.ts src/decision/semantic-decision-frame.test.ts src/decision/access-decision-projection.test.ts src/evaluation/semantic-shadow-league.test.ts` grün, 5 Dateien, 47 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1680 Tests.
+  - Status: `AI-COMPLETE-12` `VERIFIED`; `AI-COMPLETE-13` ist das nächste aktive Ziel.
 
 ## Audit-Ledger
 
