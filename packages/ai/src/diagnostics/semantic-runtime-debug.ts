@@ -56,7 +56,7 @@ export function buildSemanticRuntimeDebugPlanContext({
   const selectedByPlanMapping =
     mappedActionOrder.has(selectedActionId) &&
     selectedChoice?.evidence.some((entry) =>
-      entry.startsWith("tactical_plan_mapping_overridden:true"),
+      entry.startsWith("tactical_plan_mapping_outcome:semantic_choice_selected"),
     ) !== true;
   return {
     ...(selectedChoice ? { selectedChoice } : {}),

@@ -13812,10 +13812,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
 
     expect(decision.actionId).toBe(remote3Run.actionId);
     expect(decision.evidence).toContain(
-      "tactical_plan_mapping_overridden:true",
+      "tactical_plan_mapping_outcome:semantic_choice_selected",
     );
     expect(decision.evidence).toContain(
-      "tactical_plan_override_reason:semantic_score_gap",
+      "tactical_plan_semantic_choice_reason:semantic_score_gap",
     );
     expect(decision.evidence).toContain(
       "tactical_plan:runner.contest_remote:remote_3",

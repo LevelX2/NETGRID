@@ -205,9 +205,8 @@ export function tacticalPlanMappingOverrideEvidence(
   if (!mappedChoice) return [];
   return [
     "tactical_plan_mapping_outcome:semantic_choice_selected",
-    "tactical_plan_override_allowed:true",
-    "tactical_plan_mapping_overridden:true",
-    `tactical_plan_override_reason:${result.overrideReason ?? "semantic_score_gap"}`,
+    "tactical_plan_semantic_choice_selected:true",
+    `tactical_plan_semantic_choice_reason:${result.overrideReason ?? "semantic_score_gap"}`,
     `tactical_plan_mapping_score_gap:${result.scoreGap ?? 0}`,
     ...(result.overrideThreshold !== undefined
       ? [`tactical_plan_mapping_score_gap_threshold:${result.overrideThreshold}`]

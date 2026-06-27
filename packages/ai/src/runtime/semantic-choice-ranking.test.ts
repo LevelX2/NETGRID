@@ -26,7 +26,7 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.choice?.evidence).toEqual(
       expect.arrayContaining([
         "tactical_plan_mapping_outcome:semantic_choice_selected",
-        "tactical_plan_mapping_overridden:true",
+        "tactical_plan_semantic_choice_selected:true",
       ]),
     );
   });
@@ -106,8 +106,9 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideThreshold).toBe(320);
     expect(tacticalPlanMappingOverrideEvidence(result)).toEqual(
       expect.arrayContaining([
-        "tactical_plan_override_allowed:true",
-        "tactical_plan_override_reason:strategic_exact_score_gap",
+        "tactical_plan_mapping_outcome:semantic_choice_selected",
+        "tactical_plan_semantic_choice_selected:true",
+        "tactical_plan_semantic_choice_reason:strategic_exact_score_gap",
         "tactical_plan_mapping_score_gap_threshold:320",
       ]),
     );

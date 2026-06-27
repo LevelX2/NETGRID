@@ -1454,7 +1454,7 @@ function selfplaySemanticOverrideSuspicious(
 
 function selfplayPlanMismatchHasKnownExplanation(text: string): boolean {
   return (
-    text.includes("tactical_plan_mapping_overridden:true") ||
+    text.includes("tactical_plan_mapping_outcome:semantic_choice_selected") ||
     text.includes("selected_by_plan_mapping") ||
     text.includes("runner_recent_same_server_runs") ||
     text.includes("runner_repeated_low_value_central_run") ||
