@@ -7009,6 +7009,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` siebenundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-hand-development.ts` entfernt den produktiven Hand-Card-Match über `action.label` gegen den sichtbaren Kartentitel.
+  - Runner-Hand-Development ordnet legale Install-/Play-/Ability-Aktionen dort nur noch über Source-/Payload-Identifiers oder ActionSemanticCandidate-Source zu, nicht über label-only Kartentitel.
+  - `runner-hand-development.test.ts` schützt, dass label-only `Install Useful Console` nicht mehr `legal_now` erzeugt, ein Source-Match aber weiterhin legal bleibt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-hand-development.test.ts src/runner-tactical-goals.test.ts src/runner-run-target-evaluation.test.ts` grün, 3 Dateien, 80 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

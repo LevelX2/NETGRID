@@ -1442,9 +1442,7 @@ function actionMatchesCard(action: LegalAction, card: VisibleCard): boolean {
     payload.sourceCardId === card.instanceId ||
     payload.sourceDefinitionId === card.definitionId ||
     payload.cardDefinitionId === card.definitionId ||
-    payload.targetCardDefinitionId === card.definitionId ||
-    (card.title !== undefined &&
-      action.label.toLowerCase().includes(card.title.toLowerCase()))
+    payload.targetCardDefinitionId === card.definitionId
   );
 }
 

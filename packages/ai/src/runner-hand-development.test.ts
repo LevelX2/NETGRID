@@ -138,6 +138,46 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.priority).toBeGreaterThanOrEqual(900);
   });
 
+  it("uses source identifiers and ignores label-only hand card titles", () => {
+    const console = visibleCard("console-1", {
+      definitionId: "test-console",
+      title: "Useful Console",
+      type: "hardware",
+      installCost: 0,
+      rulesText: "Gain memory for your rig.",
+    });
+    const labelOnly = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 5,
+          hand: [console],
+          legalActions: [
+            {
+              ...installAction("label-only-install", console, 0),
+              source: "missing-source",
+              label: "Install Useful Console",
+              payload: {},
+            },
+          ],
+        }),
+      }),
+      "console-1",
+    );
+    const sourced = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input: runnerInput({
+          credits: 5,
+          hand: [console],
+          legalActions: [installAction("sourced-install", console, 0)],
+        }),
+      }),
+      "console-1",
+    );
+
+    expect(labelOnly.availability).not.toBe("legal_now");
+    expect(sourced.availability).toBe("legal_now");
+  });
+
   it("keeps defense cards without visible threat low and deferred", () => {
     const shield = visibleCard("shield-1", {
       definitionId: "test-shield",
