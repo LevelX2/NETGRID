@@ -7063,6 +7063,11 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` Rest-Audit nach zweiunddreißig Schnitten:
+  - Produktive `action.label`-Treffer im auditierten `packages/ai/src`-Entscheidungs- und Runtime-Pfad sind auf Tests, Diagnose/DTO und Legacy reduziert.
+  - Produktive `serverLabel`-/`serverName`-Serverableitung ist aus `belief-state.ts`, `runtime/public-event-history.ts`, `runtime/semantic-choice-ranking.ts`, `runtime/semantic-runtime-corp-central-rez-context.ts` und `visible-run-analysis.ts` entfernt.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
