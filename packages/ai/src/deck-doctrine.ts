@@ -1,5 +1,11 @@
 import type { AiDeckDoctrineProfile, AiDecisionInput, DeckPublicMetadata, Side } from "@netgrid/shared";
-import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
+import {
+  deckDoctrineCardIsAiSupported,
+  deckDoctrineRoleIsAgenda,
+  deckDoctrineRoleIsBreaker,
+  deckDoctrineRoleIsIce,
+  rolesForDeckDoctrineCard,
+} from "./deck-doctrine-card-roles";
 import {
   legacyDeckDoctrineMulliganWeightsFor,
   legacyDeckDoctrinePlanWeightsFor,
@@ -23,8 +29,6 @@ export type OpeningHandEvaluation = {
 export type CorpOpeningHandEvaluation = OpeningHandEvaluation;
 export type RunnerOpeningHandEvaluation = OpeningHandEvaluation;
 
-const AI_HINTS = createAiHintsByCard();
-
 // Legacy Doctrine v1 feeds old baseline/plan scorers and opening-hand heuristics.
 // New semantic decisions must use DeckDoctrine v2 diagnostics, capabilities and
 // TacticalGoals; support-only or anchorless decks stay neutral here.
@@ -36,9 +40,10 @@ export function buildDeckDoctrineProfile(snapshot: AiDeckDoctrineDeckSnapshot): 
 
   for (const entry of snapshot.cards.slice().sort((left, right) => left.cardId.localeCompare(right.cardId))) {
     const quantity = Math.max(0, entry.quantity);
-    const runtimeCard = RUNTIME_CARDS[entry.cardId];
-    if (!runtimeCard?.statuses.ai_supported) unsupported.push(entry.cardId);
-    const roles = rolesForCard(entry.cardId);
+    if (!deckDoctrineCardIsAiSupported(entry.cardId)) {
+      unsupported.push(entry.cardId);
+    }
+    const roles = rolesForDeckDoctrineCard(entry.cardId);
     if (roles.length === 0) missingRoles.push(entry.cardId);
     for (const role of roles) roleCounts[role] = (roleCounts[role] ?? 0) + quantity;
   }
@@ -71,9 +76,11 @@ export function buildDeckDoctrineProfile(snapshot: AiDeckDoctrineDeckSnapshot): 
 }
 
 export function evaluateCorpOpeningHand(input: AiDecisionInput): CorpOpeningHandEvaluation {
-  const handRoles = input.playerView.own.gripOrHq.flatMap((card) => rolesForCard(card.definitionId ?? ""));
-  const agendaCount = handRoles.filter(isAgendaRole).length;
-  const iceCount = handRoles.filter(isIceRole).length;
+  const handRoles = input.playerView.own.gripOrHq.flatMap((card) =>
+    rolesForDeckDoctrineCard(card.definitionId ?? ""),
+  );
+  const agendaCount = handRoles.filter(deckDoctrineRoleIsAgenda).length;
+  const iceCount = handRoles.filter(deckDoctrineRoleIsIce).length;
   const economyCount = handRoles.filter((role) => role.includes("economy") || role.includes("draw")).length;
   const remoteRootCount = handRoles.filter((role) => role.includes("asset") || role.includes("upgrade") || role.includes("remote_support")).length;
   const semanticContext = openingSemanticContext(input);
@@ -117,8 +124,10 @@ export function evaluateCorpOpeningHand(input: AiDecisionInput): CorpOpeningHand
 }
 
 export function evaluateRunnerOpeningHand(input: AiDecisionInput): RunnerOpeningHandEvaluation {
-  const handRoles = input.playerView.own.gripOrHq.flatMap((card) => rolesForCard(card.definitionId ?? ""));
-  const breakerCount = handRoles.filter(isBreakerRole).length;
+  const handRoles = input.playerView.own.gripOrHq.flatMap((card) =>
+    rolesForDeckDoctrineCard(card.definitionId ?? ""),
+  );
+  const breakerCount = handRoles.filter(deckDoctrineRoleIsBreaker).length;
   const economyCount = handRoles.filter((role) => role.includes("economy") || role.includes("draw")).length;
   const setupCount = handRoles.filter((role) => role === "runner_program" || role === "setup_runner" || role === "setup_hardware" || role === "runner_resource" || role === "memory").length;
   const pressureCount = handRoles.filter((role) => role === "run_pressure" || role === "pressure_rnd" || role === "pressure_hq" || role === "remote_contest" || role === "multiaccess").length;
@@ -157,44 +166,6 @@ export function evaluateRunnerOpeningHand(input: AiDecisionInput): RunnerOpening
     reasons: reasons.length > 0 ? reasons : ["opening_hand_acceptable"],
     evidence
   };
-}
-
-function rolesForCard(cardId: string): string[] {
-  if (!cardId) return [];
-  const runtimeCard = RUNTIME_CARDS[cardId];
-  const roleRecord = CARD_ROLES_BY_CARD.get(cardId);
-  const hint = AI_HINTS.get(cardId);
-  const inferred = inferredRoles(runtimeCard);
-  return sortedUnique([...(roleRecord?.roles ?? []), ...(hint?.roles ?? []), ...(hint?.planRoles ?? []), ...inferred]);
-}
-
-function inferredRoles(card: { side?: Side; type?: string; subtypes?: string[]; subroutines?: Array<{ type?: string }> } | undefined): string[] {
-  if (!card) return [];
-  const roles: string[] = [];
-  if (card.side === "corp") {
-    if (card.type === "agenda") roles.push("agenda", "corp_score_agenda");
-    if (card.type === "ice") roles.push("corp_install_ice", "corp_rez_ice");
-    if (card.type === "asset") roles.push("economy_asset", "asset_trash_target");
-    if (card.type === "upgrade") roles.push("upgrade", "remote_support");
-    if (card.type === "operation") roles.push("economy_operation");
-    for (const subtype of card.subtypes ?? []) {
-      if (subtype === "barrier") roles.push("barrier_ice");
-      if (subtype === "code gate") roles.push("code_gate_ice");
-      if (subtype === "sentry") roles.push("sentry_ice");
-      if (subtype === "ambush") roles.push("ambush");
-    }
-    if (card.subroutines?.some((subroutine) => subroutine.type === "end_the_run")) roles.push("etr_ice");
-  } else if (card.side === "runner") {
-    if (card.type === "program") roles.push("runner_program", "setup_runner");
-    if (card.type === "hardware") roles.push("setup_hardware");
-    if (card.type === "resource") roles.push("runner_resource");
-    if (card.type === "event") roles.push("run_pressure");
-  }
-  return roles;
-}
-
-function isBreakerRole(role: string): boolean {
-  return role.startsWith("breaker_");
 }
 
 function corpArchetypes(roleCounts: Record<string, number>, totalCards: number): string[] {
@@ -249,14 +220,6 @@ function topArchetypes(scores: Record<string, number>): string[] {
     .slice(0, 3)
     .map(([tag]) => tag);
   return selected;
-}
-
-function isAgendaRole(role: string): boolean {
-  return role === "agenda" || role === "corp_score_agenda" || role === "score_agenda" || role.startsWith("agenda_");
-}
-
-function isIceRole(role: string): boolean {
-  return role === "corp_install_ice" || role === "corp_rez_ice" || role.endsWith("_ice") || role === "etr_ice" || role === "taxing_ice";
 }
 
 function sortedUnique(values: string[]): string[] {

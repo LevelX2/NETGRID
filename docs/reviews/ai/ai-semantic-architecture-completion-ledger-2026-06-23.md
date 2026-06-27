@@ -6348,6 +6348,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/index.test.ts src/public-export-contract.test.ts` grün, 3 Dateien, 559 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1656 Tests.
+- `AI-COMPLETE-06` fünfter Doctrine-Schnitt:
+  - `packages/ai/src/deck-doctrine-card-roles.ts` kapselt Rollen-/Planrollen-/Runtime-Inferenz sowie AI-Supported-Prüfung für Doctrine-v1-Profil und Opening-Hand-Heuristik.
+  - `packages/ai/src/deck-doctrine.ts` nutzt diese Rollen-Schnittstelle und enthält keine lokalen Rollen-Inferenzhelper mehr.
+  - Dieser Schnitt bereitet die weitere Trennung von Doctrine-v1-Profilbildung und Opening-Hand-Heuristik vor, ohne Scoringverhalten zu ändern.
+  - Status bleibt `IN_PROGRESS`, weil die Opening-Hand-Heuristik noch als eigener Runtime-/Legacy-Kontext geprüft werden muss.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-doctrine.test.ts src/index.test.ts` grün, 2 Dateien, 535 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1656 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-06`.
 
