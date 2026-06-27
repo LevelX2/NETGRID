@@ -6788,6 +6788,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` dritter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-breaker-coverage.ts` akzeptiert Runner-Breaker-Install-Aktionen nur noch, wenn die sichtbare Source-Card die benötigte Coverage liefert; Label-Fallbacks auf `breaker|fracter|decoder|killer` sind entfernt.
+  - `packages/ai/src/plans/tactical-plan-step-candidate-matching.ts` entfernt denselben Label-Fallback aus dem `install_breaker`-Step-Matching und verlangt eine sichtbare Source-Card.
+  - `tactical-plan-breaker-coverage.test.ts` schützt, dass label-only Fracter-Text ohne sichtbare Source-Card nicht als Coverage zählt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-breaker-coverage.test.ts src/tactical-plans.test.ts -t "isBreakerInstallAction|breaker coverage|install_breaker|uses bank capability evidence"` grün, 2 Dateien, 4 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

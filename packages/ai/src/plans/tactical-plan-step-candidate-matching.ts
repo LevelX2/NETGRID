@@ -109,9 +109,7 @@ export function candidateMatchesStep(
   if (step.kind === "install_breaker" && action.type === "install_card") {
     const requiredCoverage = planRequiredBreakerCoverage(plan, step);
     const sourceCard = visibleCardByInstanceId(input.playerView, String(action.source));
-    if (!sourceCard && !/breaker|icebreaker|fracter|decoder|killer/i.test(action.label)) {
-      return false;
-    }
+    if (!sourceCard) return false;
     if (
       sourceCard &&
       !cardProvidesBreakerCoverage(sourceCard, requiredCoverage)
