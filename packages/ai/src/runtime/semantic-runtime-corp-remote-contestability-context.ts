@@ -95,7 +95,19 @@ export function createSemanticRuntimeCorpRemoteContestabilityContext(
     if (!serverId || !dependencies.isRemoteServerTarget(serverId))
       return undefined;
     const server = dependencies.server(input, serverId);
-    if (!dependencies.remoteIsProtected(server)) return undefined;
+    if (!dependencies.remoteIsProtected(server)) {
+      return {
+        serverId,
+        contestable: true,
+        evidence: [
+          "corp_remote_score_line:contestable_by_runner",
+          `action_type:${action.type}`,
+          `server:${serverId}`,
+          "remote_unprotected:true",
+          `runner_credits:${input.playerView.opponent.credits}`,
+        ],
+      };
+    }
     const assessment = semanticRuntimeCorpRemoteContestabilityAssessment(
       input,
       serverId,

@@ -21,6 +21,10 @@ export type SemanticRuntimeCorpPassiveScoreLineDependencies = {
   ) => CorpScoreTerminalWindowLike;
   actionIsScoreLine: (input: AiDecisionInput, action: LegalAction) => boolean;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
+  scoreLineActionIsRisky?: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean;
 };
 
 export function semanticRuntimeCorpPassiveScoreLinePenalty(
@@ -47,6 +51,9 @@ export function semanticRuntimeCorpPassiveScoreLinePenalty(
   ) {
     return undefined;
   }
+  if (!hasSafeTerminalScoreLineAction(input, terminalActionIds, dependencies)) {
+    return undefined;
+  }
   const passiveKind = semanticRuntimeCorpPassiveScoreLineActionKind(
     input,
     action,
@@ -59,6 +66,23 @@ export function semanticRuntimeCorpPassiveScoreLinePenalty(
     value: semanticRuntimeCorpPassiveScoreLinePenaltyValue(passiveKind),
     reason: passiveKind,
   };
+}
+
+function hasSafeTerminalScoreLineAction(
+  input: AiDecisionInput,
+  terminalActionIds: ReadonlySet<string>,
+  dependencies: SemanticRuntimeCorpPassiveScoreLineDependencies,
+): boolean {
+  if (!dependencies.scoreLineActionIsRisky) return true;
+  const terminalActions = input.legalActions.filter((candidate) =>
+    terminalActionIds.has(candidate.actionId),
+  );
+  if (terminalActions.length === 0) return true;
+  return terminalActions.some(
+    (candidate) =>
+      candidate.type === "score_agenda" ||
+      !dependencies.scoreLineActionIsRisky?.(input, candidate),
+  );
 }
 
 function semanticRuntimeCorpPassiveScoreLineActionKind(

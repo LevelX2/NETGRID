@@ -35,7 +35,10 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
   const postRezCredits = input.playerView.own.credits - rezCost;
   const isRezzableNow = postRezCredits >= 0;
   const signalText = defenseSignalText(action, actionSemanticCandidate);
-  const variableRezKind = payloadString(action, "variableRezKind");
+  const variableRezKind = variableRezKindForAction(
+    action,
+    actionSemanticCandidate,
+  );
   const variableRezValue = variableRezChosenValue(
     action,
     actionSemanticCandidate,
@@ -89,10 +92,10 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
     requiresPostRezPaidAbility;
   const zeroEffectRisk =
     isRezzableNow &&
-    hasKnownDefenseSignal &&
     (zeroVariableDefense ||
-      (requiresPostRezPaidAbility && !postRezAbilityAffordable) ||
-      (!hasImmediateStopPotential && !hasMeaningfulTaxOrDamage));
+      (hasKnownDefenseSignal &&
+        ((requiresPostRezPaidAbility && !postRezAbilityAffordable) ||
+          (!hasImmediateStopPotential && !hasMeaningfulTaxOrDamage))));
 
   return {
     isRezzableNow,
@@ -159,6 +162,17 @@ function defenseSignalText(
     .toLocaleLowerCase("en-US");
 }
 
+function variableRezKindForAction(
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): string | undefined {
+  return (
+    payloadString(action, "variableRezKind") ??
+    variableRezFromActionId(action)?.kind ??
+    actionSemanticCandidate?.costProfile.variableCost?.kind
+  );
+}
+
 function variableRezChosenValue(
   action: LegalAction,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
@@ -171,7 +185,8 @@ function variableRezChosenValue(
       : undefined) ??
     (typeof actionSemanticCandidate?.costProfile.xValue === "number"
       ? actionSemanticCandidate.costProfile.xValue
-      : undefined)
+      : undefined) ??
+    variableRezFromActionId(action)?.value
   );
 }
 
@@ -182,10 +197,32 @@ function minimumUsefulVariableRezValue(
   if (
     variableRezKind?.includes("x") === true ||
     variableRezKind?.includes("trace") === true ||
+    variableRezKind?.includes("paid_end_the_run") === true ||
     signalText.includes("trace.source") ||
     signalText.includes("trace_ice")
   ) {
     return 1;
+  }
+  return undefined;
+}
+
+function variableRezFromActionId(
+  action: LegalAction,
+): { kind: string; value: number } | undefined {
+  const actionIdParts = action.actionId.split(".");
+  for (let index = 0; index < actionIdParts.length - 1; index += 1) {
+    const kind = actionIdParts[index];
+    if (
+      kind !== "x_strength" &&
+      kind !== "trace_boost" &&
+      kind !== "paid_end_the_run_subroutines"
+    ) {
+      continue;
+    }
+    const value = Number(actionIdParts[index + 1]);
+    if (Number.isFinite(value)) {
+      return { kind, value };
+    }
   }
   return undefined;
 }
