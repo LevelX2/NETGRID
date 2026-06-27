@@ -18,6 +18,13 @@ export type SemanticRuntimeCorpEffectiveDefenseDependencies = {
   actionCreditCost: (action: LegalAction) => number;
 };
 
+const VARIABLE_REZ_KINDS_REQUIRING_VALUE = new Set([
+  "paid_end_the_run",
+  "paid_end_the_run_subroutines",
+  "trace_boost",
+  "x_strength",
+]);
+
 export function semanticRuntimeCorpEffectiveDefenseContext(
   input: AiDecisionInput,
   action: LegalAction,
@@ -195,9 +202,8 @@ function minimumUsefulVariableRezValue(
   signalText: string,
 ): number | undefined {
   if (
-    variableRezKind?.includes("x") === true ||
-    variableRezKind?.includes("trace") === true ||
-    variableRezKind?.includes("paid_end_the_run") === true ||
+    (variableRezKind !== undefined &&
+      VARIABLE_REZ_KINDS_REQUIRING_VALUE.has(variableRezKind)) ||
     signalText.includes("trace.source") ||
     signalText.includes("trace_ice")
   ) {

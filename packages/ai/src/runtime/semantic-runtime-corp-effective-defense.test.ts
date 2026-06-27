@@ -55,6 +55,25 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     );
   });
 
+  it("does not treat x-like variable rez kind text as a minimum-useful X contract", () => {
+    const context = semanticRuntimeCorpEffectiveDefenseContext(
+      corpInput(6),
+      rezAction("x-like-kind", 4, {
+        variableRezKind: "xylophone_noise",
+        variableRezValue: 0,
+      }),
+      undefined,
+      { actionCreditCost },
+    );
+
+    expect(context).toMatchObject({
+      isRezzableNow: true,
+      hasImmediateStopPotential: false,
+      zeroEffectRisk: false,
+    });
+    expect(context?.minimumUsefulX).toBeUndefined();
+  });
+
   it("treats a useful variable trace rez value as effective defense", () => {
     const context = semanticRuntimeCorpEffectiveDefenseContext(
       corpInput(5),

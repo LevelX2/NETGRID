@@ -7196,6 +7196,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` siebenundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-effective-defense.ts` ersetzt `variableRezKind.includes("x"|"trace"|"paid_end_the_run")` durch eine explizite Allowlist der Variable-Rez-Kinds, die einen Mindestwert brauchen.
+  - `semantic-runtime-corp-effective-defense.test.ts` schützt, dass x-artiger Freitext wie `xylophone_noise` keinen `minimumUsefulX`-Vertrag auslöst.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-effective-defense.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 17 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
