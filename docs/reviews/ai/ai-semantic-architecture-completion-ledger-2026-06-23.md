@@ -6357,6 +6357,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-doctrine.test.ts src/index.test.ts` grün, 2 Dateien, 535 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1656 Tests.
+- `AI-COMPLETE-06` sechster Doctrine-Schnitt:
+  - `packages/ai/src/deck-opening-hand.ts` kapselt die Corp-/Runner-Opening-Hand-Heuristik samt StrategyProfile-/DeckCapability-Evidence.
+  - `packages/ai/src/deck-doctrine.ts` ist wieder auf Doctrine-v1-Profilbildung begrenzt und enthält keine `AiDecisionInput`-/Opening-Hand-Logik mehr.
+  - Runtime-Wiring, Legacy-Baseline-Scorer und Legacy-Public-Contract importieren Opening-Hand-Bewertungen aus `deck-opening-hand.ts`.
+  - `packages/ai/src/decision/module-boundaries.test.ts` verhindert erneute Opening-Hand-Logik im Doctrine-v1-Profilbuilder.
+  - Status bleibt `IN_PROGRESS`, weil der Abschlussaudit zu Doctrine-v1-Verbrauchern noch aussteht.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/deck-doctrine.test.ts src/index.test.ts` grün, 3 Dateien, 558 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1657 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-06`.
 

@@ -2,15 +2,19 @@
 // Keep runtime and simulation access on legacy-entrypoints.ts.
 export {
   buildDeckDoctrineProfile,
-  evaluateCorpOpeningHand,
-  evaluateRunnerOpeningHand,
 } from "../deck-doctrine";
 export type {
   AiDeckDoctrineDeckSnapshot,
+} from "../deck-doctrine";
+export {
+  evaluateCorpOpeningHand,
+  evaluateRunnerOpeningHand,
+} from "../deck-opening-hand";
+export type {
   CorpOpeningHandEvaluation,
   OpeningHandEvaluation,
   RunnerOpeningHandEvaluation,
-} from "../deck-doctrine";
+} from "../deck-opening-hand";
 export {
   assessCorpFutureRunIcePlacement,
   assessCorpIcePortfolioAction,

@@ -406,6 +406,24 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps opening hand evaluation outside the doctrine v1 profile builder", () => {
+    const deckDoctrine = path.join(srcDir, "deck-doctrine.ts");
+    const content = readFileSync(deckDoctrine, "utf8");
+    const violations = [
+      ...(content.includes("AiDecisionInput")
+        ? ["deck-doctrine.ts imports AiDecisionInput"]
+        : []),
+      ...(content.includes("evaluateCorpOpeningHand")
+        ? ["deck-doctrine.ts declares corp opening hand evaluation"]
+        : []),
+      ...(content.includes("evaluateRunnerOpeningHand")
+        ? ["deck-doctrine.ts declares runner opening hand evaluation"]
+        : []),
+    ];
+
+    expect(violations).toEqual([]);
+  });
+
   it("routes productive doctrine context through the runtime doctrine context", () => {
     const aiDecisionInput = path.join(srcDir, "runtime", "ai-decision-input.ts");
     const content = readFileSync(aiDecisionInput, "utf8");

@@ -1,6 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
-import { evaluateRunnerOpeningHand } from "../deck-doctrine";
+import { evaluateRunnerOpeningHand } from "../deck-opening-hand";
 import { cardDefinitionTypeForAi } from "../runtime/card-definition-lookup";
 import { selectableChoiceOptions } from "../runtime/choice-option";
 import { runnerReachedAccessMovement } from "../runtime/current-encounter";
