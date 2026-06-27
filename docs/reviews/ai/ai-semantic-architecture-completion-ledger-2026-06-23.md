@@ -7170,6 +7170,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` vierundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/visible-card-credit.ts` ersetzt die Counter-Erkennung über `counterKey.includes("credit")` durch eine explizite Allowlist der kreditartigen Counter-Verträge `bit`, `stored_credit`, `restricted_credit` und `recurring_credit`.
+  - `visible-card-credit.test.ts` schützt, dass echte Credit-Counter summiert, aber creditartige Fremd-/Noise-Keys nicht mehr als gespeicherte Credits gezählt werden.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/visible-card-credit.test.ts src/runtime/semantic-runtime-choice-builder.test.ts` grün, 2 Dateien, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
