@@ -2,8 +2,10 @@ import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import {
   assessCorpScoreTerminalWindow,
   chooseCorpPlanAction,
+  chooseRunnerPlanAction,
   hasCorpPlanAction,
-} from "./corp-plans";
+  hasRunnerPlanAction,
+} from "./legacy/legacy-planner-entrypoints";
 import {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
@@ -11,7 +13,6 @@ import {
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { buildObservedFacts } from "./observed-facts-public";
 import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
-import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import {
   assessBlinkRiskForRunAction,
   blinkRiskShouldAvoidRun,

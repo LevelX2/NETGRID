@@ -454,6 +454,24 @@ describe("AI module boundaries", () => {
 
     expect([...violations, ...planModuleCycles]).toEqual([]);
   });
+
+  it("routes productive legacy planner access through the legacy entrypoint", () => {
+    const publicEntrypoints = path.join(srcDir, "ai-runtime-public-entrypoints.ts");
+    const content = readFileSync(publicEntrypoints, "utf8");
+    const violations = [
+      ...(content.includes('from "./corp-plans"')
+        ? ["ai-runtime-public-entrypoints.ts imports corp-plans facade directly"]
+        : []),
+      ...(content.includes('from "./runner-plans"')
+        ? ["ai-runtime-public-entrypoints.ts imports runner-plans facade directly"]
+        : []),
+      ...(!content.includes('from "./legacy/legacy-planner-entrypoints"')
+        ? ["ai-runtime-public-entrypoints.ts misses legacy planner entrypoint"]
+        : []),
+    ];
+
+    expect(violations).toEqual([]);
+  });
 });
 
 function productionFiles(

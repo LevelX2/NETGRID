@@ -53,7 +53,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-02 | Semantic Runtime von Legacy-Entscheidung entkoppeln. | `VERIFIED` | Runtime-Pfade enthielten `legacyDecision` als vorab berechnete Eingabe. | Erfüllt: Runner-/Corp-Einstiege übergeben einen memoisierten Legacy-Provider; die Runtime materialisiert Legacy nur bei Forced-Legacy, No-Candidate-Fallback oder nach der semantischen Auswahl für Diagnose/Comparator. |
 | AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `VERIFIED` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Erfüllt: `index.ts` ist importfreie Public-Re-Export-Fassade bei 397 Zeilen; Boundary-Test verhindert lokale Imports, lokale Implementierungen und direkte Composition-Erzeugung; zwei Audits ohne neue In-Scope-Findings. |
 | AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `VERIFIED` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Erfüllt: `tactical-plans.ts` ist dünne Plan-Fassade bei 306 Zeilen; Runner-, Corp-, Mapping-, Progression-/Ranking- und Debug-/Redaction-Verantwortungen liegen in getrennten Modulen; Boundary-Test und zwei Abschluss-Audits sind grün. |
-| AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `PENDING` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Genau eine Legacy-Eingangsschnittstelle; Matrix klassifiziert alle Nutzungen; ersetzte/ungenutzte Bereiche entfernt. |
+| AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `IN_PROGRESS` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Genau eine Legacy-Eingangsschnittstelle; Matrix klassifiziert alle Nutzungen; ersetzte/ungenutzte Bereiche entfernt. |
 | AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `PENDING` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Produktiver Pfad nutzt klare Doctrine-Schnittstelle mit NeutralDoctrine, Vollständigkeit und Rollenstatus. |
 | AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `PENDING` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate und wirken im Hauptscore. |
 | AI-COMPLETE-08 | Corp-TacticalGoals produktiv vollständig integrieren. | `PENDING` | Corp-Ziele wurden begonnen, müssen produktiv und diagnosefähig durchgängig wirken. | Corp-Ziele für Score, Remote, Zentralserver, Rez, Economy, Tag/Punish und Damage/Kill wirken im Hauptscore. |
@@ -6237,6 +6237,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 144 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1646 Tests.
+
+- `AI-COMPLETE-05` erster Legacy-Schnitt:
+  - `packages/ai/src/legacy/legacy-planner-entrypoints.ts` bündelt den produktiven Zugriff auf Legacy-Runner-/Corp-Planfunktionen als interne Eingangsschnittstelle.
+  - `packages/ai/src/ai-runtime-public-entrypoints.ts` importiert Legacy-Planfunktionen nicht mehr direkt über die historischen `runner-plans.ts`-/`corp-plans.ts`-Kompatibilitäts-Facades.
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt diese Route gegen Rückfall auf direkte Kompatibilitäts-Facade-Imports.
+  - Status bleibt `IN_PROGRESS`, weil die Legacy-Nutzungsmatrix und weitere Entfernung/Einordnung ersetzter Legacy-Bereiche noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/semantic-ai-runtime-cutover.test.ts src/tactical-plans.test.ts` grün, 126 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1647 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-05`.
 
