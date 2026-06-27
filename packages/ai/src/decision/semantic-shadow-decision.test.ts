@@ -76,15 +76,23 @@ describe("SemanticShadowDecision", () => {
     });
 
     const trace = buildSemanticShadowDecision(frame);
+    const rejectedChoice = trace.rejectedActions.find(
+      (action) => action.actionId === "choice-1",
+    );
 
     expect(trace.rankedActions).toEqual([]);
-    expect(trace.rejectedActions).toContainEqual(
-      expect.objectContaining({
-        actionId: "choice-1",
-        blockers: expect.arrayContaining([
-          "target_context_missing_for_target_profile",
-        ]),
-      }),
+    expect(rejectedChoice).toMatchObject({
+      reason: "blocked_by_action_goal_fit",
+      blockers: expect.arrayContaining([
+        "target_context_missing_for_target_profile",
+      ]),
+    });
+    expect(rejectedChoice?.evidence).toEqual(
+      expect.arrayContaining([
+        "hard_gate:target_context_missing_for_target_profile",
+        "requires_target_context:true",
+        "has_target_context:false",
+      ]),
     );
   });
 
@@ -227,6 +235,58 @@ describe("SemanticShadowDecision", () => {
     expect(trace.rankedActions[0]?.components).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ component: "threat_response" }),
+      ]),
+    );
+  });
+
+  it("rejects unacceptable self-damage risk before survival scoring", () => {
+    const input = inputFor("runner", [
+      legalAction("damage-risk", "activated_card_ability", "runner"),
+      legalAction("draw-1", "draw_card", "runner"),
+    ]);
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    }).map((candidate) =>
+      candidate.actionId === "damage-risk"
+        ? selfDamageCandidate(candidate)
+        : candidate,
+    );
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: candidates,
+      tacticalGoals: [
+        {
+          goalId: "runner.survive_flatline_window",
+          family: "survival",
+          priority: 940,
+          urgency: "critical",
+          source: "test",
+          evidence: ["flatline_window:true"],
+        },
+      ],
+    });
+
+    const trace = buildSemanticShadowDecision(frame);
+    const rejectedRisk = trace.rejectedActions.find(
+      (action) => action.actionId === "damage-risk",
+    );
+
+    expect(trace.rankedActions.map((action) => action.actionId)).not.toContain(
+      "damage-risk",
+    );
+    expect(trace.rankedActions[0]?.actionId).toBe("draw-1");
+    expect(rejectedRisk).toMatchObject({
+      reason: "blocked_by_action_goal_fit",
+      blockers: expect.arrayContaining(["risk_unacceptable"]),
+    });
+    expect(rejectedRisk?.evidence).toEqual(
+      expect.arrayContaining([
+        "hard_gate:risk_unacceptable",
+        "high_risk:true",
+        "goal_family:survival",
+        "urgency:critical",
       ]),
     );
   });
@@ -640,6 +700,18 @@ function doctrine(
       legalActionGeneration: false,
       engineMutation: false,
       hiddenInfoProjection: false,
+    },
+  };
+}
+
+function selfDamageCandidate(
+  candidate: ActionSemanticCandidate,
+): ActionSemanticCandidate {
+  return {
+    ...candidate,
+    costProfile: {
+      ...candidate.costProfile,
+      selfDamage: [{ type: "net", amount: 2 }],
     },
   };
 }

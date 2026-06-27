@@ -6639,6 +6639,12 @@ Nächstes aktives Ziel: `AI-COMPLETE-12`.
   - Status bleibt `IN_PROGRESS`, weil Target-Context-, Risiko- und Plan-Step-Gates noch gegen den gleichen Trace-Vertrag auditiert werden müssen.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/action-goal-fit.test.ts src/decision/semantic-shadow-decision.test.ts` grün, 2 Dateien, 24 Tests.
 
+- `AI-COMPLETE-12` dritter Hard-Gate-Vertragsschnitt:
+  - `action-goal-fit.test.ts` schützt nun auch `target_context_missing_for_target_profile`, `target_context_blocked`, `risk_unacceptable`, `wrong_timing` und `plan_step_mismatch` mit dem gleichen Gate-Stop-Vertrag.
+  - `semantic-shadow-decision.test.ts` weist Target-Context-Missing und Self-Damage-Risk end-to-end als `rejectedActions` mit Blocker- und Evidence-Pfad aus; beide Kandidaten werden nicht gerankt.
+  - Status bleibt `IN_PROGRESS`, weil noch ein Abschlussaudit über alle Hard-Gate-Consumer und einen vollen AI-Testlauf aussteht.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/action-goal-fit.test.ts src/decision/semantic-shadow-decision.test.ts` grün, 2 Dateien, 27 Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

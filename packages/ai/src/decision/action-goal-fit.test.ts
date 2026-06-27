@@ -114,8 +114,12 @@ describe("ActionGoalFit", () => {
       legalActionIds: ["damage-1"],
     });
 
-    expect(fit.fitStatus).toBe("blocked");
-    expect(fit.blockers).toContain("risk_unacceptable");
+    expectHardGateOnly(fit, "risk_unacceptable", [
+      "hard_gate:risk_unacceptable",
+      "high_risk:true",
+      "goal_family:survival",
+      "urgency:critical",
+    ]);
   });
 
   it("blocks target-profile goals when target context is missing", () => {
@@ -126,10 +130,11 @@ describe("ActionGoalFit", () => {
       legalActionIds: ["choice-1"],
     });
 
-    expect(fit.fitStatus).toBe("blocked");
-    expect(fit.blockers).toContain(
-      "target_context_missing_for_target_profile",
-    );
+    expectHardGateOnly(fit, "target_context_missing_for_target_profile", [
+      "hard_gate:target_context_missing_for_target_profile",
+      "requires_target_context:true",
+      "has_target_context:false",
+    ]);
   });
 
   it("raises target fit from productive TargetChoice recommendations without selected choices", () => {
@@ -234,11 +239,40 @@ describe("ActionGoalFit", () => {
       legalActionIds: ["choice-1"],
     });
 
-    expect(fit.fitStatus).toBe("blocked");
-    expect(fit.blockers).toContain("target_context_blocked");
-    expect(
-      fit.components.flatMap((component) => component.evidence),
-    ).toEqual(expect.arrayContaining(["hard_gate:target_context_blocked"]));
+    expectHardGateOnly(fit, "target_context_blocked", [
+      "hard_gate:target_context_blocked",
+      "target_profile_blocked:true",
+      "target_constraint_blocked:true",
+    ]);
+  });
+
+  it("blocks wrong-side corp scoreline actions before positive timing score", () => {
+    const fit = scoreActionGoalFit({
+      candidate: candidateFor("score-wrong-side", "score_agenda"),
+      utility: utility("corp.score_window", "corp_scoreline"),
+      legalActionIds: ["score-wrong-side"],
+    });
+
+    expectHardGateOnly(fit, "wrong_timing", [
+      "hard_gate:wrong_timing",
+      "goal_family:corp_scoreline",
+      "actor_side:runner",
+    ]);
+  });
+
+  it("blocks plan-step mismatches before fallback family matching", () => {
+    const fit = scoreActionGoalFit({
+      candidate: candidateFor("gain-1", "gain_credit"),
+      utility: utility("runner.follow_plan_step", "economy"),
+      legalActionIds: ["gain-1"],
+      expectedActionSignals: ["run.start"],
+    });
+
+    expectHardGateOnly(fit, "plan_step_mismatch", [
+      "hard_gate:plan_step_mismatch",
+      "expected:run.start",
+      "candidate:economy.gain_credit",
+    ]);
   });
 
   it("keeps the not_in_legal_actions gate as a defensive blocker", () => {
