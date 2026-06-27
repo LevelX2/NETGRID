@@ -132,6 +132,32 @@ describe("buildActionSemanticCandidates", () => {
     expect(JSON.stringify(candidate)).not.toContain("secret-unseen-card");
   });
 
+  it("requires canonical structured server ids for run target context", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("start_run", 0, {
+          payload: { serverId: "R&D" },
+        }),
+        legalAction("start_run", 1, {
+          payload: { serverId: "rd" },
+        }),
+      ],
+    });
+
+    expect(candidates[0]?.runProjectionSummary).toBeUndefined();
+    expect(candidates[0]?.targetContext?.availableTargets).toBeUndefined();
+    expect(candidates[1]?.runProjectionSummary).toMatchObject({
+      serverId: "rd",
+      serverKind: "rd",
+    });
+    expect(candidates[1]?.targetContext?.availableTargets).toEqual([
+      expect.objectContaining({
+        targetId: "rd",
+        targetKind: "server",
+      }),
+    ]);
+  });
+
   it("adds controlled basic action semantics without card hints", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [

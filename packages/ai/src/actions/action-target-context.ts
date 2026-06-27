@@ -141,14 +141,7 @@ function normalizeServerId(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
   const normalized = value.trim().toLowerCase().replace(/^server[:.]/, "");
   if (normalized === "hq") return "hq";
-  if (
-    normalized === "rd" ||
-    normalized === "rnd" ||
-    normalized === "r&d" ||
-    normalized === "r_d"
-  ) {
-    return "rd";
-  }
+  if (normalized === "rd") return "rd";
   if (normalized === "archives") return "archives";
   if (normalized.startsWith("remote_")) return normalized;
   return undefined;

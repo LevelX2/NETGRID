@@ -7077,6 +7077,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` vierunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-target-context.ts` und `packages/ai/src/actions/run-action-projection.ts` entfernen Alias-/Labelnormalisierung wie `R&D`, `rnd` oder `r_d` aus direkter Payload-/Target-Serverprojektion.
+  - Action-TargetContext und Runner-Run-Projection akzeptieren dort nur noch kanonische strukturierte ServerIds wie `hq`, `rd`, `archives` oder `remote_1`; semantische Signale wie `server_specific_rd` bleiben als explizite Ontologie-/Hint-Signale erhalten.
+  - `action-semantic-candidate.test.ts` und `run-action-projection.test.ts` schützen, dass `serverId: "R&D"` keine konkrete `rd`-Targetprojektion mehr erzeugt, `serverId: "rd"` aber weiterhin wirkt.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts src/action-semantic-candidate.test.ts src/actions/action-semantic-coverage.test.ts` grün, 3 Dateien, 29 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

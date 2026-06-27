@@ -26,6 +26,47 @@ describe("projectRunnerRunActions", () => {
       "structured",
     ]);
   });
+
+  it("requires canonical structured server ids in payloads", () => {
+    const labelLikeServer = action({
+      actionId: "label-like-server",
+      label: "Use ability",
+      payload: {
+        runActionSignals: ["make_run"],
+        serverId: "R&D",
+      } as unknown as LegalAction["payload"],
+    });
+    const canonical = action({
+      actionId: "canonical",
+      label: "Use ability",
+      payload: {
+        runActionSignals: ["make_run"],
+        serverId: "rd",
+      } as unknown as LegalAction["payload"],
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([labelLikeServer, canonical]),
+    });
+
+    expect(projections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actionId: "label-like-server",
+          projectionStatus: "missing_target_options",
+        }),
+        expect.objectContaining({
+          actionId: "canonical",
+          projectionStatus: "concrete_target",
+          targetServerId: "rd",
+        }),
+      ]),
+    );
+    expect(
+      projections.find((projection) => projection.actionId === "label-like-server")
+        ?.targetServerId,
+    ).toBeUndefined();
+  });
 });
 
 function input(legalActions: LegalAction[]): AiDecisionInput {
