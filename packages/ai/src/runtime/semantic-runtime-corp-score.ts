@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 
 type SemanticRuntimeCorpSafetyGate = {
@@ -85,6 +86,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   action: LegalAction,
   scopeId: string,
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  actionSemanticCandidate?: ActionSemanticCandidate,
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
@@ -92,6 +94,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     input,
     action,
     scopeId,
+    actionSemanticCandidate,
   );
   if (tacticalGoalFit) components.push(tacticalGoalFit);
   if (action.type === "score_agenda") {
@@ -333,10 +336,16 @@ function corpTacticalGoalFitScoreComponent(
   input: AiDecisionInput,
   action: LegalAction,
   scopeId: string,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): AiDecisionScoreComponent | undefined {
   const goals = corpTacticalGoalsForInput(input);
   if (goals.length === 0) return undefined;
-  const goal = highestPriorityCorpGoalForAction(goals, action, scopeId);
+  const goal = highestPriorityCorpGoalForAction(
+    goals,
+    action,
+    scopeId,
+    actionSemanticCandidate,
+  );
   if (!goal) return undefined;
   return {
     key: "corp_goal_fit_tactical_goal",
@@ -367,9 +376,12 @@ function highestPriorityCorpGoalForAction(
   goals: readonly TacticalGoalLike[],
   action: LegalAction,
   scopeId: string,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): TacticalGoalLike | undefined {
   return goals
-    .filter((goal) => corpGoalMatchesAction(goal, action, scopeId))
+    .filter((goal) =>
+      corpGoalMatchesAction(goal, action, scopeId, actionSemanticCandidate),
+    )
     .sort((left, right) => right.priority - left.priority)[0];
 }
 
@@ -377,6 +389,7 @@ function corpGoalMatchesAction(
   goal: TacticalGoalLike,
   action: LegalAction,
   scopeId: string,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
   switch (goal.goalId) {
     case "corp.tactical.score_closeout":
@@ -391,9 +404,22 @@ function corpGoalMatchesAction(
     case "corp.tactical.stabilize_economy":
       return action.type === "gain_credit" || action.type === "draw_card";
     case "corp.tactical.visible_tag_punish":
-      return scopeId === "corp_tag_punish";
+      return (
+        scopeId === "corp_tag_punish" ||
+        corpActionCandidateHasVisibleSignal(actionSemanticCandidate, [
+          "tag",
+          "trace",
+          "punish",
+          "trash_runner_resource",
+        ])
+      );
     case "corp.tactical.visible_damage_or_ambush_window":
-      return scopeId === "corp_tag_punish" || action.type === "trigger_ability";
+      return (
+        scopeId === "corp_tag_punish" ||
+        corpActionCandidateHasVisibleSignal(actionSemanticCandidate, [
+          "ambush",
+        ])
+      );
     default:
       return false;
   }
@@ -401,4 +427,20 @@ function corpGoalMatchesAction(
 
 function corpTacticalGoalScoreValue(goal: TacticalGoalLike): number {
   return 500 + Math.min(500, Math.max(0, goal.priority - 500));
+}
+
+function corpActionCandidateHasVisibleSignal(
+  candidate: ActionSemanticCandidate | undefined,
+  needles: readonly string[],
+): boolean {
+  if (!candidate) return false;
+  const text = [
+    candidate.semanticActionType,
+    ...candidate.actionTacticSignals,
+    ...candidate.cardContextSignals,
+    ...candidate.evidence,
+  ]
+    .join("|")
+    .toLocaleLowerCase("en-US");
+  return needles.some((needle) => text.includes(needle));
 }

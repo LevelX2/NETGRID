@@ -15,6 +15,7 @@ export type SemanticRuntimeScoreBreakdownDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
     scopeId: string,
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ) => AiDecisionScoreComponent[];
   actionCreditCost: (action: LegalAction) => number;
 };
@@ -30,6 +31,7 @@ export type SemanticRuntimeScoreBreakdownContextDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
     scopeId: string,
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ) => AiDecisionScoreComponent[];
   actionCreditCost: (action: LegalAction) => number;
 };
@@ -73,6 +75,7 @@ export function createSemanticRuntimeScoreBreakdownContext(
                 componentInput,
                 componentAction,
                 componentScopeId,
+                actionSemanticCandidate,
               ),
         actionCreditCost: dependencies.actionCreditCost,
       },
@@ -97,6 +100,7 @@ export function buildSemanticRuntimeScoreBreakdown(params: {
     params.input,
     params.action,
     params.scopeId,
+    params.actionSemanticCandidate,
   );
   const privateBonus =
     params.action.visibility === "private_to_actor" ? 25 : 0;

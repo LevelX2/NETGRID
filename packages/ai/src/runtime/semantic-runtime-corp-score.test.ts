@@ -1,5 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { semanticRuntimeCorpScoreComponents } from "./semantic-runtime-corp-score";
 
@@ -63,6 +64,68 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       ]),
     );
   });
+
+  it("scores visible tag punish actions from side-safe action semantics", () => {
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([
+        {
+          goalId: "corp.tactical.visible_tag_punish",
+          family: "tag_punish",
+          priority: 730,
+          urgency: "medium",
+          source: "boardstate",
+          evidence: ["test_goal"],
+        },
+      ]),
+      corpAction("tag-punish", "trigger_ability"),
+      "basic_install",
+      testDependencies(),
+      semanticCandidate("tag-punish", "tag.apply", ["tag.punish"]),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_goal_fit_tactical_goal",
+          value: 730,
+          reason: expect.stringContaining(
+            "goal:corp.tactical.visible_tag_punish",
+          ),
+        }),
+      ]),
+    );
+  });
+
+  it("scores visible damage or ambush actions from side-safe action semantics", () => {
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([
+        {
+          goalId: "corp.tactical.visible_damage_or_ambush_window",
+          family: "damage_pressure",
+          priority: 700,
+          urgency: "medium",
+          source: "boardstate",
+          evidence: ["test_goal"],
+        },
+      ]),
+      corpAction("damage-window", "activated_card_ability"),
+      "basic_install",
+      testDependencies(),
+      semanticCandidate("damage-window", "damage.net", ["ambush.window"]),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_goal_fit_tactical_goal",
+          value: 700,
+          reason: expect.stringContaining(
+            "goal:corp.tactical.visible_damage_or_ambush_window",
+          ),
+        }),
+      ]),
+    );
+  });
 });
 
 function corpInputWithGoals(
@@ -111,5 +174,47 @@ function testDependencies() {
     corpTaggedRunnerPayoffPressure: () => undefined,
     corpTaggedPayoffWindowPassiveActionPenalty: () => undefined,
     corpPassiveScoreLinePenalty: () => undefined,
+  };
+}
+
+function semanticCandidate(
+  actionId: string,
+  semanticActionType: string,
+  actionTacticSignals: readonly string[],
+): ActionSemanticCandidate {
+  return {
+    actionId,
+    actionType: "trigger_ability",
+    actorSide: "corp",
+    visibilityScope: "actor_private",
+    legalActionRef: {
+      actionId,
+      actionType: "trigger_ability",
+      originalPayloadKeys: [],
+    },
+    sourceKind: "card",
+    abilityBindingMethod: "explicit_ability_id",
+    semanticActionType,
+    cardContextSignals: [],
+    actionTacticSignals: [...actionTacticSignals],
+    strategySupport: [],
+    conditions: [],
+    risks: [],
+    constraints: [],
+    costProfile: {
+      costKnownStatus: "not_applicable",
+      additionalCosts: [],
+    },
+    timingProfile: {},
+    boardContext: {
+      source: "ai_decision_input",
+      sideSafe: true,
+      notes: [],
+    },
+    confidence: "high",
+    primaryProjectionStatus: "projected",
+    projectionIssues: [],
+    hardGates: [],
+    evidence: [...actionTacticSignals],
   };
 }

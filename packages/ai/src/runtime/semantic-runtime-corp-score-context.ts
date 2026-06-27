@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
   semanticRuntimeCorpScoreComponents as buildSemanticRuntimeCorpScoreComponents,
   type SemanticRuntimeCorpScoreDependencies,
@@ -13,11 +14,13 @@ export type SemanticRuntimeCorpScoreContext = {
     input: AiDecisionInput,
     action: LegalAction,
     scopeId: string,
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ) => number;
   semanticRuntimeCorpScoreComponents: (
     input: AiDecisionInput,
     action: LegalAction,
     scopeId: string,
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ) => AiDecisionScoreComponent[];
 };
 
@@ -31,19 +34,26 @@ export function createSemanticRuntimeCorpScoreContext<
     input: AiDecisionInput,
     action: LegalAction,
     scopeId: string,
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ): AiDecisionScoreComponent[] {
     return buildSemanticRuntimeCorpScoreComponents(
       input,
       action,
       scopeId,
       dependencies,
+      actionSemanticCandidate,
     );
   }
 
   return {
-    semanticRuntimeCorpScore: (input, action, scopeId) =>
+    semanticRuntimeCorpScore: (input, action, scopeId, actionSemanticCandidate) =>
       scoreFromComponents(
-        semanticRuntimeCorpScoreComponents(input, action, scopeId),
+        semanticRuntimeCorpScoreComponents(
+          input,
+          action,
+          scopeId,
+          actionSemanticCandidate,
+        ),
       ),
     semanticRuntimeCorpScoreComponents,
   };

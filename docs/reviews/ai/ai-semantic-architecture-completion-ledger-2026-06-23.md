@@ -6420,6 +6420,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-08`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts src/decision/corp-tactical-goals.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 3 Dateien, 71 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1664 Tests.
+- `AI-COMPLETE-08` zweiter Corp-TacticalGoal-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-score-breakdown.ts` und `packages/ai/src/runtime/semantic-runtime-corp-score-context.ts` reichen den `ActionSemanticCandidate` jetzt symmetrisch auch an Corp-Score-Komponenten durch.
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` nutzt side-sichere Candidate-Signale für `corp.tactical.visible_tag_punish` und sichtbare Ambush-Fenster; tagabhängiger Damage bleibt durch bestehende Payoff-Gates geschützt.
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.test.ts` deckt Tag/Punish- und Ambush-GoalFit ab; `packages/ai/src/index.test.ts -t "Schlaghund tagged meat damage"` schützt gegen Damage-Promotion ohne Runner-Tags.
+  - Status bleibt `IN_PROGRESS`, weil Abschlussaudit und vollständige AI-COMPLETE-08-Verifikation noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts src/index.test.ts -t "Schlaghund tagged meat damage|semanticRuntimeCorpScoreComponents"` grün, 2 Dateien, 6 Tests, 532 übersprungen.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1666 Tests.
 
 ## Audit-Ledger
 
