@@ -1891,20 +1891,25 @@ describe("Semantic AI runtime cutover", () => {
   });
 
   it("uses Broker build and payout as explicit credit-bank plans", () => {
+    const bankSource = visibleCard("runner-credit-bank-source", "runner", "resource", {
+      definitionId: "onr_v1_154_broker",
+      title: "Credit Bank Source",
+    });
     const stableInput = aiInput("runner", [
       legalAction(
         "broker-load",
         "runner",
         "trigger_ability",
-        "Credits auf Broker legen",
+        "Credits auf Bank legen",
         { credits: 0 },
-        { source: "broker" },
+        { source: bankSource.instanceId },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
     ]);
     stableInput.playerView.own.credits = 6;
+    stableInput.playerView.own.rig = [bankSource];
 
     const stableDecision = chooseRunnerAction(stableInput);
 
@@ -1918,15 +1923,16 @@ describe("Semantic AI runtime cutover", () => {
         "broker-take",
         "runner",
         "trigger_ability",
-        "Credits von Broker nehmen",
+        "Credits aus Bank nehmen",
         { credits: 0 },
-        { source: "broker" },
+        { source: bankSource.instanceId },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
     ]);
     lowCreditInput.playerView.own.credits = 2;
+    lowCreditInput.playerView.own.rig = [bankSource];
 
     const lowCreditDecision = chooseRunnerAction(lowCreditInput);
 
@@ -1937,20 +1943,26 @@ describe("Semantic AI runtime cutover", () => {
   });
 
   it("does not cash out Broker immediately after a stable bank-build plan", () => {
+    const bankSource = visibleCard("runner-credit-bank-source", "runner", "resource", {
+      definitionId: "onr_v1_154_broker",
+      title: "Credit Bank Source",
+      counters: { power: 3 },
+    });
     const stableInput = aiInput("runner", [
       legalAction(
         "broker-load",
         "runner",
         "trigger_ability",
-        "Credits auf Broker legen",
+        "Credits auf Bank legen",
         { credits: 0 },
-        { source: "broker" },
+        { source: bankSource.instanceId },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
     ]);
     stableInput.playerView.own.credits = 6;
+    stableInput.playerView.own.rig = [bankSource];
 
     const buildDecision = chooseRunnerAction(stableInput);
     expect(buildDecision.actionId).toBe("broker-load");
@@ -1960,15 +1972,16 @@ describe("Semantic AI runtime cutover", () => {
         "broker-take",
         "runner",
         "trigger_ability",
-        "Credits von Broker nehmen",
+        "Credits aus Bank nehmen",
         { credits: 0 },
-        { source: "broker" },
+        { source: bankSource.instanceId },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
       }),
     ]);
     payoutInput.playerView.own.credits = 6;
+    payoutInput.playerView.own.rig = [bankSource];
 
     const payoutDecision = chooseRunnerAction(payoutInput);
 
@@ -2600,7 +2613,7 @@ describe("Semantic AI runtime cutover", () => {
           expect.objectContaining({
             key: "runner_bank_install_commitment",
             reason: expect.stringContaining(
-              "why_broker_install_deferred:no_plausible_followup_load",
+              "why_bank_install_deferred:no_plausible_followup_load",
             ),
           }),
         ]),

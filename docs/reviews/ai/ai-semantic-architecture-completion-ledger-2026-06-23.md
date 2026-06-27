@@ -6735,6 +6735,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-14` siebter Kartennamen-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bank-investment-context.ts` klassifiziert Bank-Build/-Cashout nicht mehr über Broker-Text, sondern über eine generisch erkannte sichtbare Credit-Bank-Quelle plus neutrale Build-/Cashout-Verben.
+  - `packages/ai/src/plans/tactical-plan-bank-tools.ts` und `tactical-plan-candidate-matching.ts` nutzen generische Bank-Labels mit `legen`/`nehmen` statt Broker-spezifischer deutscher Labels.
+  - `semantic-ai-runtime-cutover.test.ts` nutzt sichtbare Bank-Quellen und neutrale Bank-Labels für die Broker-Regressionen; `runner-bank-investment-context.test.ts` schützt Custom-Credit-Bank-Aktionen ohne Kartennamen-Text.
+  - Status bleibt `IN_PROGRESS`, weil noch ein finaler Audit- und Volltestlauf aussteht.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bank-investment-context.test.ts src/semantic-ai-runtime-cutover.test.ts src/index.test.ts -t "credit-bank|card-name text|Broker build|Broker cashout|empty Broker build|separates Broker pool loading|does not cash out Broker immediately|devalues Broker install"` grün, 3 Dateien, 10 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
