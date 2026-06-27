@@ -76,6 +76,13 @@ export function applyTargetContextProjection(
     hasTargetRequirement,
     hiddenTargetRequirement,
   );
+  const primaryProjectionStatus = targetProjectionStatusForAction(
+    action,
+    candidate,
+    hasProjectedTargetContext,
+    hiddenTargetRequirement,
+    projectionIssues,
+  );
   const runProjectionSummary =
     runProjectionSummaryFromAction(action, targetContext) ??
     candidate.runProjectionSummary;
@@ -84,11 +91,7 @@ export function applyTargetContextProjection(
     ...candidate,
     targetContext,
     ...(runProjectionSummary ? { runProjectionSummary } : {}),
-    primaryProjectionStatus: hiddenTargetRequirement
-      ? "hidden_info_blocked"
-      : hasProjectedTargetContext
-        ? candidate.primaryProjectionStatus
-        : candidate.primaryProjectionStatus,
+    primaryProjectionStatus,
     projectionIssues,
     hardGates: updateTargetContextGate(
       candidate.hardGates,
@@ -104,6 +107,36 @@ export function applyTargetContextProjection(
         : ["AI039 target context unavailable"]),
     ],
   };
+}
+
+function targetProjectionStatusForAction(
+  action: LegalAction,
+  candidate: ActionSemanticCandidate,
+  hasProjectedTargetContext: boolean,
+  hiddenTargetRequirement: boolean,
+  projectionIssues: readonly ActionProjectionIssue[],
+): ActionSemanticCandidate["primaryProjectionStatus"] {
+  if (hiddenTargetRequirement) return "hidden_info_blocked";
+  if (
+    candidate.primaryProjectionStatus === "partial_projected" &&
+    hasProjectedTargetContext &&
+    projectionIssues.length === 0 &&
+    targetContextCompletesPartialProjection(action)
+  ) {
+    return "projected";
+  }
+  return candidate.primaryProjectionStatus;
+}
+
+function targetContextCompletesPartialProjection(action: LegalAction): boolean {
+  return [
+    "resolve_choice",
+    "trash_accessed_card",
+    "trash_resource",
+    "rez_ice",
+    "advance_card",
+    "score_agenda",
+  ].includes(action.type);
 }
 
 function normalizeServerId(value: unknown): string | undefined {

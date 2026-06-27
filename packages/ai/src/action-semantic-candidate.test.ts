@@ -224,9 +224,9 @@ describe("buildActionSemanticCandidates", () => {
       ["draw_card", "draw.card", "projected"],
       ["start_run", "run.start", "projected"],
       ["continue_run", "run.continue", "projected"],
-      ["rez_ice", "corp_window.rez", "partial_projected"],
-      ["advance_card", "score.advance_card", "partial_projected"],
-      ["score_agenda", "score.agenda", "partial_projected"],
+      ["rez_ice", "corp_window.rez", "projected"],
+      ["advance_card", "score.advance_card", "projected"],
+      ["score_agenda", "score.agenda", "projected"],
     ]);
 
     expect(
@@ -583,6 +583,7 @@ describe("buildActionSemanticCandidates", () => {
     expect(selected.targetContext?.availableTargetsStatus).toBe(
       "not_available",
     );
+    expect(selected.primaryProjectionStatus).toBe("projected");
     expect(selected.projectionIssues).not.toContain(
       "target_context_unavailable",
     );
@@ -613,6 +614,7 @@ describe("buildActionSemanticCandidates", () => {
     expect(choiceOptions.targetContext?.availableTargetsStatus).toBe(
       "engine_provided",
     );
+    expect(choiceOptions.primaryProjectionStatus).toBe("projected");
     expect(choiceOptions.targetContext?.availableTargets).toEqual([
       {
         targetId: "choice_option_discard",

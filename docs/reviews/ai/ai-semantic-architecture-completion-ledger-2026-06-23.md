@@ -6469,6 +6469,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1668 Tests.
 
+- `AI-COMPLETE-09` vierter Candidate-Befüllungsschnitt:
+  - `packages/ai/src/actions/action-target-context.ts` finalisiert `primaryProjectionStatus` für zielabhängige Kandidaten auf `projected`, wenn ein side-sicherer TargetContext vorhanden ist und keine ProjectionIssues mehr verbleiben.
+  - Betroffen sind nur TargetContext-getriebene Aktionsfamilien wie Choice-Resolution, Trash, Rez, Advance und Score; Hidden-Info-Blocker und Kandidaten mit weiter offenen Issues bleiben unverändert.
+  - `packages/ai/src/action-semantic-candidate.test.ts` schützt den Statuswechsel für Runtime-Bridge-Ziele, ausgewählte Trash-Ziele und Choice-Optionen.
+  - Status bleibt `IN_PROGRESS`, weil weitere Source/Ability- und TargetProfile-Gaps noch auditiert werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts src/actions/action-semantic-coverage.test.ts` grün, 2 Dateien, 24 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1668 Tests.
+
 Nächstes aktives Ziel: `AI-COMPLETE-09`.
 
 ## Audit-Ledger
