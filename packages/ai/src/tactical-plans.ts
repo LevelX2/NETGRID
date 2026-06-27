@@ -89,6 +89,11 @@ import {
   cardProvidesBreakerCoverage,
 } from "./plans/tactical-plan-breaker-cards";
 import {
+  remoteRunHasNoRootValue,
+  runNeedsBreakerCoverage,
+  serverHasUnrezzedIce,
+} from "./plans/tactical-plan-run-reachability";
+import {
   actionCreditCost,
   legalActionCreditGainForPlan,
   legalActionCreditNetGain,
@@ -3193,11 +3198,6 @@ function corpScoreWindowSequence(actionId: string): PlanStep[] {
   ];
 }
 
-function serverHasUnrezzedIce(playerView: PlayerView, serverId: string): boolean {
-  const server = playerView.servers.find((candidate) => candidate.id === serverId);
-  return server?.ice.some((ice) => ice.rezzed !== true) === true;
-}
-
 function runnerBreakerCoverageStep(
   context: TacticalPlanBuildContext,
   serverId: string,
@@ -3728,31 +3728,6 @@ function coverageKindForAssessment(
     default:
       return undefined;
   }
-}
-
-function runNeedsBreakerCoverage(
-  playerView: PlayerView,
-  serverId: string | undefined,
-): boolean {
-  if (!serverId) return false;
-  const server = playerView.servers.find((candidate) => candidate.id === serverId);
-  if (!server) return false;
-  const assessment = assessKnownRezzedIcePath(
-    server.ice,
-    playerView.own.rig ?? [],
-    playerView.own.credits,
-    server.root,
-  );
-  return assessment.assessedKnownIceCount > 0 && !assessment.canReachAccess;
-}
-
-function remoteRunHasNoRootValue(
-  playerView: PlayerView,
-  serverId: string | undefined,
-): boolean {
-  if (!serverId || !isRemoteServer(serverId)) return false;
-  const server = playerView.servers.find((candidate) => candidate.id === serverId);
-  return (server?.root.length ?? 0) === 0;
 }
 
 function isBreakerInstallAction(
