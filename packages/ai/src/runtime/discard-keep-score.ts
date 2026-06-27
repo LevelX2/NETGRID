@@ -68,13 +68,10 @@ export function discardKeepScore(
     if (type === "agenda") baseValue += 330;
     if (
       type === "ice" ||
-      card.definitionId.includes("_ice") ||
       roles.some((role) => role.endsWith("_ice") || role === "etr_ice")
     )
       baseValue += 320;
-    const economyRole =
-      roles.some((role) => role.includes("economy")) ||
-      card.definitionId.includes("economy");
+    const economyRole = roles.some((role) => role.includes("economy"));
     if (type === "operation") baseValue += economyRole ? 120 : 40;
     if (economyRole) baseValue += input.playerView.own.credits < 5 ? 135 : 55;
     if (roles.some((role) => role.includes("score") || role.includes("remote")))

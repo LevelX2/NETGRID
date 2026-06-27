@@ -7095,6 +7095,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` sechsunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/discard-keep-score.ts` entfernt DefinitionId-Substring-Heuristiken wie `"_ice"` und `"economy"` aus dem produktiven Corp-Discard-Keep-Score.
+  - Corp-Discard-Wert für ICE und Economy entsteht dort nur noch aus sichtbarem Kartentyp oder strukturierten Rollen wie `corp_rez_ice` beziehungsweise `economy_asset`, nicht aus ID-Text wie `custom_remote_ice_plan`.
+  - `discard-keep-score.test.ts` schützt, dass DefinitionId-only ICE-/Economy-Text keinen Keep-Wert erzeugt, strukturierter Typ und Rollen aber weiterhin wirken.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/discard-keep-score.test.ts src/runtime/selected-choices-for-decision.test.ts` grün, 1 vorhandene Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
