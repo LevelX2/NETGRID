@@ -216,13 +216,13 @@ export {
   buildDeckDoctrineProfile,
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
-} from "./deck-doctrine";
+} from "./legacy/legacy-public-contract";
 export type {
   AiDeckDoctrineDeckSnapshot,
   CorpOpeningHandEvaluation,
   OpeningHandEvaluation,
   RunnerOpeningHandEvaluation,
-} from "./deck-doctrine";
+} from "./legacy/legacy-public-contract";
 export { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 export type {
   AiDeckStrategyProfile,

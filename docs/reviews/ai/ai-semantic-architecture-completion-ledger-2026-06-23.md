@@ -6339,6 +6339,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/deck-doctrine-runtime-context.test.ts src/index.test.ts` grün, 3 Dateien, 558 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1656 Tests.
+- `AI-COMPLETE-06` vierter Doctrine-Schnitt:
+  - `packages/ai/src/legacy/legacy-public-contract.ts` bündelt jetzt auch die öffentlichen Doctrine-v1-Kompatibilitätsexporte `buildDeckDoctrineProfile`, `evaluateCorpOpeningHand` und `evaluateRunnerOpeningHand` samt Typen.
+  - `packages/ai/src/index.ts` re-exportiert diese Doctrine-v1-APIs über den Legacy-Public-Contract statt direkt aus `deck-doctrine.ts`.
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt den Paketindex gegen erneute direkte Doctrine-v1-Exports.
+  - Status bleibt `IN_PROGRESS`, weil produktive Doctrine-v1-Verbraucher noch abschließend auditiert werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/index.test.ts src/public-export-contract.test.ts` grün, 3 Dateien, 559 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1656 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-06`.
 

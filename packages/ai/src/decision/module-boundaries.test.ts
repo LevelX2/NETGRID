@@ -581,6 +581,9 @@ describe("AI module boundaries", () => {
       ...(content.includes('from "./runner-plans"')
         ? ["index.ts exports runner-plans facade directly"]
         : []),
+      ...(content.includes('from "./deck-doctrine"')
+        ? ["index.ts exports deck-doctrine v1 directly"]
+        : []),
       ...(!content.includes('from "./legacy/legacy-public-contract"')
         ? ["index.ts misses legacy public contract"]
         : []),
