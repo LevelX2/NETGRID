@@ -6928,6 +6928,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` achtzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-mu-pressure-memory-support.ts` entfernt die produktive Search-/Memory-Erkennung über `action.label`-Regex wie `search|memory|mu|mem chip`.
+  - Runner-MU-Pressure erkennt Memory-Support-Search-Aktionen dort nur noch über strukturierte Rollen wie `search` oder `memory`.
+  - `runner-mu-pressure-memory-support.test.ts` schützt, dass label-only Memory-Search-Text nicht mehr zählt, `memory_search`-Rollen aber weiterhin erkannt werden.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-mu-pressure-memory-support.test.ts src/runtime/runner-goal-fit-score.test.ts` grün, 2 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

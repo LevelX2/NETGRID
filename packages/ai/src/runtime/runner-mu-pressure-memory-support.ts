@@ -118,9 +118,5 @@ export function runnerMemorySupportSearchAction(
   ) {
     return false;
   }
-  const label = action.label.toLowerCase();
-  return (
-    roles.some((role) => role.includes("search") || role.includes("memory")) ||
-    /search|memory|mu|mem chip/.test(label)
-  );
+  return roles.some((role) => role.includes("search") || role.includes("memory"));
 }
