@@ -58,13 +58,17 @@ export function createCorpTagPunishPayoffProfileContext(
     const storedCredits = sourceCard
       ? dependencies.visibleCardStoredCredits(sourceCard)
       : 0;
+    const immediateGain = storedCredits > 0
+      ? Math.min(creditAmount, storedCredits)
+      : creditAmount;
+    if (immediateGain <= 0) return undefined;
     return {
       kind: "installed_economy",
-      value: 1050 + creditAmount * 260 + Math.min(420, storedCredits * 18),
+      value: 1050 + immediateGain * 260 + Math.min(420, storedCredits * 18),
       evidence: [
         "installed_corp_economy:true",
         "installed_corp_economy_kind:pool_payout",
-        `installed_corp_economy_immediate_gain:${creditAmount}`,
+        `installed_corp_economy_immediate_gain:${immediateGain}`,
         `installed_corp_economy_stored_credits:${storedCredits}`,
       ],
     };

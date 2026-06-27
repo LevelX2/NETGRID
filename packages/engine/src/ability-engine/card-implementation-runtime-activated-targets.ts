@@ -27,12 +27,18 @@ export function activatedAbilityPayload(
 ): Record<string, string | number | boolean> {
   const advancementCounterCreditPayout =
     gainCreditsPerAdvancementCounterOnSourceEffect(ability);
+  const hostedCreditTakeAmount = hostedCreditTakeAmountForActivatedAbility(
+    ability,
+  );
   return {
     cardId,
     cardImplementationAbility: "activated",
     cardImplementationAbilityIndex: abilityIndex,
     cardImplementationAbilityTiming: ability.timing,
     ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
+    ...(hostedCreditTakeAmount > 0
+      ? { gainCreditsAmount: hostedCreditTakeAmount }
+      : {}),
     ...(advancementCounterCostForActivatedAbility(ability) > 0
       ? {
           cardImplementationAdvancementCounterCost:
@@ -101,6 +107,15 @@ export function gainCreditsPerAdvancementCounterOnSourceEffect(
         { kind: "gain_credits_per_advancement_counter_on_source" }
       >
     | undefined;
+}
+
+export function hostedCreditTakeAmountForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  const amount = ability.effects
+    .filter((effect) => effect.kind === "take_hosted_credits")
+    .reduce((total, effect) => total + Number(effect.amount ?? 0), 0);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
 }
 
 export function hasTrashSourceEffectForActivatedAbility(

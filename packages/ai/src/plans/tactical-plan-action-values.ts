@@ -39,7 +39,6 @@ export function legalActionCreditGainForPlan(
     legalActionNumberPayload(action, "gainCreditsAmount"),
     legalActionNumberPayload(action, "gainedCredits"),
     legalActionNumberPayload(action, "amount"),
-    legalActionCreditGainLabelAmount(legalActionCreditGainLabel(action)),
     legalActionCreditHintGain(input, action, dependencies),
   );
   if (action.type === "gain_credit") return Math.max(1, knownGain);
@@ -50,7 +49,7 @@ export function legalActionCreditGainForPlan(
   ) {
     return 0;
   }
-  return knownGain;
+  return capCreditGainByVisibleStoredCredits(input, action, dependencies, knownGain);
 }
 
 function legalActionCreditHintGain(
@@ -78,15 +77,35 @@ function legalActionCreditHintGain(
   return Math.max(...amounts);
 }
 
-function legalActionCreditGainLabel(action: LegalAction): string {
-  const abilityLabel = action.payload?.cardImplementationAbilityLabel;
-  return typeof abilityLabel === "string" ? abilityLabel : action.label;
+function capCreditGainByVisibleStoredCredits(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: TacticalPlanCreditValueDependencies,
+  gain: number,
+): number {
+  if (gain <= 0) return 0;
+  const sourceCard = dependencies.visibleCardForAction(
+    input.playerView,
+    action,
+  );
+  if (!sourceCard) return gain;
+  const storedCredits = visibleStoredCredits(sourceCard);
+  return storedCredits > 0 ? Math.min(gain, storedCredits) : gain;
 }
 
-function legalActionCreditGainLabelAmount(label: string): number {
-  const germanMatch = /(\d+)\s+Credits?\s+nehmen/i.exec(label);
-  const englishMatch = /(?:gain|take)\s+(\d+)\s+Credits?/i.exec(label);
-  const amount = Number(germanMatch?.[1] ?? englishMatch?.[1] ?? 0);
+function visibleStoredCredits(card: VisibleCard): number {
+  const counterAmount = Number(card.counters?.bit ?? 0);
+  const displayAmount = Math.max(
+    0,
+    ...(card.counterDisplays ?? [])
+      .filter(
+        (display) =>
+          display.displayKind === "stored_credits" ||
+          display.creditPool?.kind === "stored_credit",
+      )
+      .map((display) => Number(display.amount ?? 0)),
+  );
+  const amount = Math.max(counterAmount, displayAmount);
   return Number.isFinite(amount) && amount > 0 ? amount : 0;
 }
 

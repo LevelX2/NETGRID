@@ -6763,6 +6763,22 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 161 Dateien, 1691 Tests.
   - Status: `AI-COMPLETE-14` `VERIFIED`; `AI-COMPLETE-15` ist das nächste aktive Ziel.
 
+- `AI-COMPLETE-15` erster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/corp-installed-economy-credit.ts` wertet installierte Economy-Aktionen nur noch über strukturierte Payloads aus (`gainCreditsAmount`, `cardImplementationCreditAmount`) und entfernt die deutsche Label-Regex.
+  - `packages/ai/src/plans/tactical-plan-action-values.ts` entfernt die produktive Credit-Gain-Erkennung aus `action.label` und `cardImplementationAbilityLabel`; Planwerte kommen nur noch aus strukturierten Payloads oder semantischen Hints und werden bei sichtbaren Stored-Credit-Quellen am sichtbaren Counterstand gekappt.
+  - `packages/ai/src/legacy/corp-plans.ts` entfernt für installierte Corp-Economy die produktive deutsche `Credits nehmen`-Label-Regex und begrenzt strukturierte Pool-Gains ebenfalls am sichtbaren Counterstand, damit der produktiv noch erreichbare Legacy-Fallback nicht label-/maxbetraggetrieben auswählt.
+  - `packages/engine/src/ability-engine/card-implementation-runtime-activated-targets.ts` projiziert feste Hosted-Credit-Take-Effekte als `gainCreditsAmount` in `activated_card_ability`-Payloads, damit BBS-/Short-Term-ähnliche Economy-Aktionen ohne KI-Textparsing bewertbar bleiben.
+  - `packages/engine/src/index-tests/originalset/trace-prevention-assets.test.ts`, `corp-installed-economy-credit.test.ts` und `tactical-plan-action-values.test.ts` schützen, dass BBS ein strukturiertes Credit-Signal liefert und label-only Zahlen produktiv ignoriert werden.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive `action.label`-/Regex-Fallbacks noch auditiert und abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-installed-economy-credit.test.ts src/plans/tactical-plan-action-values.test.ts` grün, 2 Dateien, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/trace-prevention-assets.test.ts -t "BBS|trace prevention|source-bound"` grün, 1 Datei, 2 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts src/semantic-ai-runtime-cutover.test.ts -t "installed_economy|BBS Whispering|Newsgroup|Short-Term Contract|Credits nehmen|installed Corp economy|Corp economy payouts"` grün, 1 aktive Datei, 3 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "ignores installed Corp BBS sources with too few stored credits|installed Corp economy payouts|uses installed Corp economy payouts before the basic credit action|multiple installed Corp BBS economy"` grün, 1 Datei, 4 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/engine typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 163 Dateien, 1693 Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
