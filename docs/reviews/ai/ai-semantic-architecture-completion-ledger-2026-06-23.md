@@ -6627,6 +6627,12 @@ Nächstes aktives Ziel: `AI-COMPLETE-12`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1675 Tests.
   - Status: `AI-COMPLETE-11` `VERIFIED`; `AI-COMPLETE-12` ist das nächste aktive Ziel.
 
+- `AI-COMPLETE-12` erster Hard-Gate-Vertragsschnitt:
+  - `packages/ai/src/decision/action-goal-fit.test.ts` schützt den direkten Gate-Vertrag: `cannot_pay` setzt `fitStatus:"blocked"`, Score `0`, ausschließlich Hard-Gate-Evidence und keine positiven Score-Komponenten wie `goal_fit`, `cost_fit` oder `target_fit`.
+  - `packages/ai/src/decision/semantic-shadow-decision.test.ts` schützt den End-to-End-Trace: eine geblockte Score-Ambition erscheint nicht in `rankedActions`, sondern in `rejectedActions` mit `reason:"blocked_by_action_goal_fit"`, Blocker `cannot_pay` und Gate-Evidence.
+  - Status bleibt `IN_PROGRESS`, weil weitere globale Hard-Gates und WhyNot-/Trace-Pfade noch auditiert werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/action-goal-fit.test.ts src/decision/semantic-shadow-decision.test.ts` grün, 2 Dateien, 22 Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

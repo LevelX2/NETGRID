@@ -270,7 +270,22 @@ describe("ActionGoalFit", () => {
     });
 
     expect(fit.fitStatus).toBe("blocked");
+    expect(fit.score).toBe(0);
     expect(fit.blockers).toContain("cannot_pay");
+    expect(fit.components).toEqual([
+      expect.objectContaining({
+        component: "fallback_safety",
+        delta: -100,
+        evidence: expect.arrayContaining([
+          "hard_gate:cannot_pay",
+          "credit_cost:6",
+          "available_credits:2",
+        ]),
+      }),
+    ]);
+    expect(fit.components.map((component) => component.component)).not.toEqual(
+      expect.arrayContaining(["goal_fit", "cost_fit", "target_fit"]),
+    );
   });
 });
 

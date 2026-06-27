@@ -245,13 +245,24 @@ describe("SemanticShadowDecision", () => {
     });
 
     const trace = buildSemanticShadowDecision(frame);
+    const rejectedScore = trace.rejectedActions.find(
+      (action) => action.actionId === "score-expensive",
+    );
 
     expect(trace.rankedActions[0]?.actionId).toBe("gain-1");
-    expect(trace.rejectedActions).toContainEqual(
-      expect.objectContaining({
-        actionId: "score-expensive",
-        blockers: expect.arrayContaining(["cannot_pay"]),
-      }),
+    expect(trace.rankedActions.map((action) => action.actionId)).not.toContain(
+      "score-expensive",
+    );
+    expect(rejectedScore).toMatchObject({
+      reason: "blocked_by_action_goal_fit",
+      blockers: expect.arrayContaining(["cannot_pay"]),
+    });
+    expect(rejectedScore?.evidence).toEqual(
+      expect.arrayContaining([
+        "hard_gate:cannot_pay",
+        "credit_cost:4",
+        "available_credits:1",
+      ]),
     );
   });
 
