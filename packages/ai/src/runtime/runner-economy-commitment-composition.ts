@@ -36,6 +36,7 @@ export function createRunnerEconomyCommitmentComposition(
     sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
     rolesForCardId: dependencies.rolesForCardId,
     definitionForCardId: dependencies.definitionForCardId,
+    hintEffectsForDefinition: dependencies.hintEffectsForDefinition,
     actionCreditCost: dependencies.actionCreditCost,
     rolesForAction: dependencies.rolesForAction,
     serverId: dependencies.serverId,

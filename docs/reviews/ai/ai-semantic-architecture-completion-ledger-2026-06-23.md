@@ -6708,6 +6708,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-14` vierter DefinitionId-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bank-investment-context.ts` erkennt Runner-Credit-Bank-Karten nicht mehr über `onr_v1_154_broker`, sondern über Economy-Rollen plus strukturierte Hint-Effects wie `economy.temporary_resource_bank` und `finite_economy_pool`.
+  - Der Kontext wertet dafür `hintEffectsForDefinition` aus und vermeidet im Credit-Bank-Card-Matcher Card-Title- und DefinitionId-Text als Bank-Signal.
+  - `runner-bank-investment-context.test.ts` schützt eine generische Credit-Bank-Resource mit Custom-DefinitionId und stellt sicher, dass nicht jede Economy-Resource als Bank zählt.
+  - Status bleibt `IN_PROGRESS`, weil spezifische Agenda-Overadvance-Schwellen und weitere payload-/labelnahe Pfade noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bank-investment-context.test.ts src/semantic-ai-runtime-cutover.test.ts -t "credit-bank|Broker build|Broker cashout|empty Broker build|known agenda remotes override|devalues Broker install"` grün, 2 Dateien, 7 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "separates Broker pool loading"` grün, 1 Datei, 1 relevanter Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

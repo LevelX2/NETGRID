@@ -44,6 +44,13 @@ type RunnerBankDefinitionLike = {
   mechanics?: unknown;
 };
 
+type RunnerBankHintEffectLike = {
+  kind?: string;
+  resource?: string;
+  target?: string;
+  timing?: string;
+};
+
 export type RunnerBankInvestmentContextDependencies = {
   previousPlan: (input: AiDecisionInput) => { type?: string } | undefined;
   runnerHandFundingTarget: (input: AiDecisionInput) => unknown;
@@ -59,6 +66,9 @@ export type RunnerBankInvestmentContextDependencies = {
   definitionForCardId: (
     definitionId: string,
   ) => RunnerBankDefinitionLike | undefined;
+  hintEffectsForDefinition: (
+    definitionId: string,
+  ) => readonly RunnerBankHintEffectLike[];
   actionCreditCost: (action: LegalAction) => number;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
   serverId: (action: LegalAction) => string | undefined;
@@ -495,18 +505,23 @@ export function createRunnerBankInvestmentContext(
     card: VisibleCard | undefined,
   ): boolean {
     if (!card?.definitionId) return false;
-    if (card.definitionId === "onr_v1_154_broker") return true;
     const roles = dependencies.rolesForCardId(card.definitionId);
     const definition = dependencies.definitionForCardId(card.definitionId);
     const mechanics = Array.isArray(definition?.mechanics)
       ? definition.mechanics.join(" ")
       : "";
+    const hintEffects = dependencies
+      .hintEffectsForDefinition(card.definitionId)
+      .map((effect) =>
+        [effect.kind, effect.resource, effect.target, effect.timing]
+          .filter(Boolean)
+          .join(":"),
+      )
+      .join(" ");
     const text = [
-      card.title,
-      card.definitionId,
-      definition?.title,
       definition?.rulesText,
       mechanics,
+      hintEffects,
       ...roles,
     ]
       .filter(Boolean)
@@ -514,7 +529,7 @@ export function createRunnerBankInvestmentContext(
       .toLowerCase();
     return (
       roles.some((role) => role.includes("economy")) &&
-      (/broker|bank|stored credits|counter_bank|temporary_resource_bank/.test(
+      (/stored credits|counter_bank|temporary_resource_bank|finite_economy_pool/.test(
         text,
       ) ||
         /credit.*counter|counter.*credit/.test(text))
