@@ -61,7 +61,7 @@ export function isBreakerInstallAction(
     );
     return sourceCard
       ? cardProvidesBreakerCoverage(sourceCard, requiredCoverage)
-      : /breaker|fracter|decoder|killer/i.test(action.label);
+      : false;
   };
 }
 
