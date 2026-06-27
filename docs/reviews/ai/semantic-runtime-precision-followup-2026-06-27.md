@@ -1,6 +1,6 @@
 # Semantic Runtime Precision Follow-up, 2026-06-27
 
-Status: `P6_done`
+Status: `P7_done`
 
 Prozess: `docs/architecture/ai/semantic-runtime-precision-legacy-cleanup-process-2026-06-27.md`
 
@@ -282,5 +282,21 @@ Umgesetzt:
 Verifikation:
 
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/deck-doctrine.test.ts`: grün, 1 Datei, 2 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
+
+## P7 Ergebnis: Practical Overlay und Practical Micro
+
+Status: `P7_done`
+
+Umgesetzt:
+
+- `practical-tactic-overlay.ts` ist per Dateikommentar als opt-in Comparator-/Benchmark-Overlay markiert. Es darf Kandidaten berichten, aber die normale Semantic-Runtime-Action nicht ersetzen.
+- `practical-micro-runtime.ts` ist als opt-in Micro-Rule-Comparator markiert. Auch `mode: "apply"` dokumentiert nur den Apply-Wunsch und gibt weiter die Runtime-Action zurück.
+- `practical-tactic-overlay.test.ts` deckt jetzt explizit ab, dass ein praktischer Kandidat ungleich Runtime-Action nicht überschreibt und nur Compare-Evidence plus `actual_override:false` erzeugt.
+
+Verifikation:
+
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/practical-tactic-overlay.test.ts src/runtime/practical-micro-runtime.test.ts`: grün, 2 Dateien, 11 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `git diff --check`: grün.

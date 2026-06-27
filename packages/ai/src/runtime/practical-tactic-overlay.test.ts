@@ -53,7 +53,7 @@ describe("PracticalTacticOverlay", () => {
       legacy,
     );
     const compared = applyPracticalTacticOverlay(benchmarkCase.input, legacy, {
-        practicalTacticOverlay: { enabled: true },
+      practicalTacticOverlay: { enabled: true },
     });
 
     expect(compared.actionId).toBe(legacy.actionId);
@@ -61,6 +61,46 @@ describe("PracticalTacticOverlay", () => {
       expect.arrayContaining([
         "practical_tactic_overlay_compare:true",
         "practical_tactic_overlay_actual_override:false",
+      ]),
+    );
+  });
+
+  it("keeps the runtime action even when the practical candidate differs", () => {
+    const benchmarkCase = PRACTICAL_TACTIC_BENCHMARK_CASES.find(
+      (candidate) => candidate.category === "runner_steal_agenda",
+    );
+    expect(benchmarkCase).toBeDefined();
+    if (!benchmarkCase) throw new Error("Missing runner steal benchmark case");
+    const runtimeDecision: AiDecision = {
+      actionId: "runtime-reference-action",
+      reasonCode: "semantic_runtime",
+      explanation: "Normal Semantic Runtime reference.",
+      consideredActionIds: benchmarkCase.input.legalActions.map(
+        (action) => action.actionId,
+      ),
+      fallbackUsed: false,
+    };
+
+    const compared = applyPracticalTacticOverlay(
+      benchmarkCase.input,
+      runtimeDecision,
+      {
+        practicalTacticOverlay: { enabled: true },
+      },
+    );
+
+    expect(compared.actionId).toBe("runtime-reference-action");
+    expect(compared.evidence).toEqual(
+      expect.arrayContaining([
+        "practical_tactic_overlay_compare:true",
+        "practical_tactic_overlay_actual_override:false",
+        "practical_tactic_runtime_reference:runtime-reference-action",
+      ]),
+    );
+    expect(compared.decisionDebug?.detailSections?.at(-1)?.items).toEqual(
+      expect.arrayContaining([
+        "runtime_reference:runtime-reference-action",
+        "actual_override:false",
       ]),
     );
   });
