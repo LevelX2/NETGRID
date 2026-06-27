@@ -6870,6 +6870,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zwölfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` entfernt im Runner-High-Payoff-Run-Kandidaten den Label-Fallback auf `agenda|score threat|fresh access|multiaccess|valuable access`.
+  - High-Payoff-Run-Erkennung nutzt dort nur noch strukturierte `accessPayoff`-Payloads wie `agenda`, `score_threat`, `trash_affordable`, `fresh` oder `access_bonus`.
+  - `practical-tactic-overlay.test.ts` schützt, dass label-only High-Payoff-Text nicht mehr triggert, strukturierte `accessPayoff`-Payloads aber weiterhin den Compare-only-Kandidaten erzeugen.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
