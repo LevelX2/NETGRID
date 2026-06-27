@@ -32,7 +32,6 @@ export function runnerActionLooksLikeRecovery(
   const source = dependencies.sourceCard(input, action);
   const roles = dependencies.rolesForAction(input, action);
   const text = [
-    action.label,
     source?.title,
     source?.definitionId,
     source?.rulesText,

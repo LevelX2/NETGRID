@@ -6919,6 +6919,33 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` siebzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-source-card-answer-role.ts` entfernt `action.label` aus der produktiven Search-/Draw-Rollenerkennung für Runner-Source-Cards.
+  - Source-Card-Answer-Rollen entstehen dort nur noch aus sichtbarer Source-Card, Source-Definition, Mechanics und Rollen, nicht aus label-only Text wie `Search your stack`.
+  - `runner-source-card-answer-role.test.ts` schützt, dass label-only Answer-Text nicht mehr zählt, strukturierte Rollen und Definition-Mechanics aber weiterhin `search` bzw. `draw` liefern.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-source-card-answer-role.test.ts src/runtime/runner-goal-fit-score.test.ts -t "runnerSourceCardAnswerRole|sourceCardAnswerRole|source card"` grün, 1 aktive Datei, 1 relevanter Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` achtzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-mu-pressure-memory-support.ts` entfernt die produktive Search-/Memory-Erkennung über `action.label`-Regex wie `search|memory|mu|mem chip`.
+  - Runner-MU-Pressure erkennt Memory-Support-Search-Aktionen dort nur noch über strukturierte Rollen wie `search` oder `memory`.
+  - `runner-mu-pressure-memory-support.test.ts` schützt, dass label-only Memory-Search-Text nicht mehr zählt, `memory_search`-Rollen aber weiterhin erkannt werden.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-mu-pressure-memory-support.test.ts src/runtime/runner-goal-fit-score.test.ts` grün, 2 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` neunzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-recovery-history.ts` entfernt `action.label` aus der produktiven Recovery-Action-Erkennung.
+  - Runner-Recovery-Erkennung nutzt dort weiterhin Source-Card-Metadaten und Rollen wie `trash_recovery`, aber keinen label-only Text wie `Junkyard BBS recovery`.
+  - `runner-recovery-history.test.ts` schützt, dass label-only Recovery-Text nicht mehr zählt, Source-Definition und Rollen aber weiterhin Recovery-Actions erkennen.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-recovery-history.test.ts src/runtime/runner-bank-investment-context.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
