@@ -7279,6 +7279,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` sechsundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-program-install-trash-policy.ts` nutzt für Program-Sacrifice-Breaker- und Setup-/Support-Rollen den gehärteten `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `setup`, `stack_search` und `breaker_fracter` bleiben wertend; substringartiges Rauschen wie `setupsomething_noise`, `searchlight_noise` und `breakerish_noise` löst keine Sacrifice-Reason mehr aus.
+  - `runner-program-install-trash-policy.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-program-install-trash-policy.test.ts src/runtime/role-match.test.ts src/runtime/runner-role-classification.test.ts` grün, 3 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "program install trash|program_sacrifice|critical sacrifice"` grün, 1 Datei, 3 Tests, 531 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

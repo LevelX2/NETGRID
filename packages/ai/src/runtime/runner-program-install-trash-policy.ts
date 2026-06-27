@@ -1,5 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
+import { rolesMatch } from "./role-match";
+
 export type ProgramSacrificeCategory = "critical" | "high" | "medium" | "low";
 
 export type ProgramSacrificeCandidate = {
@@ -218,7 +220,7 @@ export function programSacrificeCandidate(
     reasonCategories.push("unique_breaker_coverage");
   } else if (
     breakerRoles.length > 0 ||
-    roles.some((role) => role.startsWith("breaker_"))
+    rolesMatch(roles, ["breaker_"])
   ) {
     sacrificePenalty += 420;
     reasonCategories.push("breaker_coverage");
@@ -233,20 +235,18 @@ export function programSacrificeCandidate(
     reasonCategories.push("economy_engine");
   }
   if (
-    roles.some((role) =>
-      [
-        "draw",
-        "setup",
-        "build_rig",
-        "memory",
-        "memory_support",
-        "defense",
-        "protection",
-        "hosting",
-        "recovery",
-        "search",
-      ].some((needle) => role === needle || role.includes(needle)),
-    )
+    rolesMatch(roles, [
+      "draw",
+      "setup",
+      "build_rig",
+      "memory",
+      "memory_support",
+      "defense",
+      "protection",
+      "hosting",
+      "recovery",
+      "search",
+    ])
   ) {
     sacrificePenalty += 210;
     reasonCategories.push("setup_or_support_role");
