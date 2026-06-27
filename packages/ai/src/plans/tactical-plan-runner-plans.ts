@@ -3,9 +3,9 @@ import { accessOutcomeMemoryPlanEvidence } from "../access/access-outcome-memory
 import { evaluateKnownCentralAccessPayoff } from "../known-central-access-payoff";
 import { evaluateKnownRemoteAccessPayoff } from "../known-remote-access-payoff";
 import {
+  bankBuildActions,
+  bankPayoutActions,
   bankToolEvidence,
-  isBankBuildAction,
-  isBankPayoutAction,
   largestBankPayout,
 } from "./tactical-plan-bank-tools";
 import { accessCommitmentPlanEvidence } from "./tactical-plan-access-commitment";
@@ -576,7 +576,7 @@ export function buildRunnerTacticalPlans(
       dependencies,
     ),
   );
-  const bankBuildActions = input.legalActions.filter(isBankBuildAction);
+  const bankBuildActionList = bankBuildActions(context, "runner", input.legalActions);
   const runnerBankToolEvidence = bankToolEvidence(context, "runner");
   const runnerBankPayout = largestBankPayout(context, "runner");
   const runnerFundingNeed = runnerHasConcreteFundingNeed(input, [
@@ -584,7 +584,7 @@ export function buildRunnerTacticalPlans(
     ...blockedCentralRuns,
   ]);
   if (
-    bankBuildActions.length > 0 &&
+    bankBuildActionList.length > 0 &&
     input.playerView.own.credits >= 4 &&
     !runnerFundingNeed
   ) {
@@ -613,7 +613,7 @@ export function buildRunnerTacticalPlans(
           rationale: ["credits are stable enough to bank for later plan execution"],
         }),
         evidence: [
-          ...bankBuildActions.map((action) => `bank_build_action:${action.actionId}`),
+          ...bankBuildActionList.map((action) => `bank_build_action:${action.actionId}`),
           ...runnerBankToolEvidence,
           ...runnerGoalEvidence,
         ],
@@ -621,9 +621,9 @@ export function buildRunnerTacticalPlans(
       }),
     );
   }
-  const bankPayoutActions = input.legalActions.filter(isBankPayoutAction);
+  const bankPayoutActionList = bankPayoutActions(context, "runner", input.legalActions);
   const mayCashOutBank =
-    bankPayoutActions.length > 0 &&
+    bankPayoutActionList.length > 0 &&
     (input.playerView.own.credits <= 3 || runnerFundingNeed) &&
     !(
       previousPlan?.type === "runner.build_credit_bank" &&
@@ -668,7 +668,7 @@ export function buildRunnerTacticalPlans(
           ],
         }),
         evidence: [
-          ...bankPayoutActions.map((action) => `bank_payout_action:${action.actionId}`),
+          ...bankPayoutActionList.map((action) => `bank_payout_action:${action.actionId}`),
           ...runnerBankToolEvidence,
           ...runnerGoalEvidence,
         ],

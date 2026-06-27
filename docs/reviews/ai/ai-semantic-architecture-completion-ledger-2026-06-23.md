@@ -6889,6 +6889,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` vierzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/engine/src/ability-engine/card-implementation-runtime-activated-targets.ts` projiziert `add_hosted_credits`-/`take_hosted_credits`-Abilities als strukturierte LegalAction-Payloads `cardImplementationAddsHostedCredits` und `cardImplementationTakesHostedCredits`.
+  - `packages/ai/src/deck-capabilities.ts` erkennt Bank-Build-/Cashout-Legalität nicht mehr über Labels wie `Auf Broker legen` oder `Von Broker nehmen`, sondern über diese Hosted-Credit-Payloads plus Source-Bindung.
+  - `packages/ai/src/plans/tactical-plan-bank-tools.ts`, Runner-/Corp-Planbau und Bank-Step-Matching nutzen konkrete Bank-ActionIds und Payload-Flags statt produktiver `action.label`-Bank-Textsuche.
+  - Tests schützen label-only Bank-Actions als nicht legal für Bank-Pläne, strukturierte Hosted-Credit-Payloads als weiter planbar und Engine-Broker-Actions als korrekt markiert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind, insbesondere Bank-Fallbacks außerhalb des Tactical-Plan-Pfads.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/plans/tactical-plan-candidate-matching.test.ts src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts -t "bank|Broker|DeckCapabilityProfile|tactical plan"` grün, 4 Dateien, 61 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/runner-events-hardware-programs-resources.test.ts -t "Broker load|Broker"` grün, 1 Datei, 1 relevanter Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/engine typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -1977,7 +1977,10 @@ describe("Semantic AI runtime cutover", () => {
         "trigger_ability",
         "Credits auf Bank legen",
         { credits: 0 },
-        { source: bankSource.instanceId },
+        {
+          source: bankSource.instanceId,
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -2000,7 +2003,10 @@ describe("Semantic AI runtime cutover", () => {
         "trigger_ability",
         "Credits aus Bank nehmen",
         { credits: 0 },
-        { source: bankSource.instanceId },
+        {
+          source: bankSource.instanceId,
+          payload: { cardImplementationTakesHostedCredits: true },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -2030,7 +2036,10 @@ describe("Semantic AI runtime cutover", () => {
         "trigger_ability",
         "Credits auf Bank legen",
         { credits: 0 },
-        { source: bankSource.instanceId },
+        {
+          source: bankSource.instanceId,
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -2049,7 +2058,10 @@ describe("Semantic AI runtime cutover", () => {
         "trigger_ability",
         "Credits aus Bank nehmen",
         { credits: 0 },
-        { source: bankSource.instanceId },
+        {
+          source: bankSource.instanceId,
+          payload: { cardImplementationTakesHostedCredits: true },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -2081,7 +2093,10 @@ describe("Semantic AI runtime cutover", () => {
         "activated_card_ability",
         "3 Credits auf Broker legen",
         { credits: 0 },
-        { source: "onr_v1_154_broker" },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
       ),
       legalAction(
         "run-rd",
@@ -2138,7 +2153,10 @@ describe("Semantic AI runtime cutover", () => {
         "activated_card_ability",
         "3 Credits auf Broker legen",
         { credits: 0 },
-        { source: "onr_v1_154_broker" },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
       ),
       legalAction(
         "run-remote",
@@ -2183,7 +2201,10 @@ describe("Semantic AI runtime cutover", () => {
         "activated_card_ability",
         "Credits von Broker nehmen",
         { credits: 0 },
-        { source: "onr_v1_154_broker" },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationTakesHostedCredits: true },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -2231,7 +2252,10 @@ describe("Semantic AI runtime cutover", () => {
         "activated_card_ability",
         "Broker: 3 Credits auf Broker legen",
         { credits: 0 },
-        { source: "onr_v1_154_broker" },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
       ),
       legalAction(
         "broker-take",
@@ -2239,7 +2263,10 @@ describe("Semantic AI runtime cutover", () => {
         "activated_card_ability",
         "Broker: Credits von Broker nehmen",
         { credits: 0 },
-        { source: "onr_v1_154_broker" },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationTakesHostedCredits: true },
+        },
       ),
       legalAction(
         "install-short-circuit",
