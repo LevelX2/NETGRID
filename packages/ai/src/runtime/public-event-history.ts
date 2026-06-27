@@ -97,17 +97,6 @@ export function serverIdFromEvent(
   if (typeof payload.targetServerId === "string") return payload.targetServerId;
   if (typeof payload.attackedServerId === "string")
     return payload.attackedServerId;
-  const label =
-    typeof payload.serverLabel === "string"
-      ? payload.serverLabel
-      : typeof payload.serverName === "string"
-        ? payload.serverName
-        : undefined;
-  if (!label) return undefined;
-  const normalized = label.toLowerCase();
-  if (normalized === "r&d" || normalized === "rd") return "rd";
-  if (normalized === "hq" || normalized === "headquarters") return "hq";
-  if (normalized === "archives" || normalized === "archive") return "archives";
   return undefined;
 }
 

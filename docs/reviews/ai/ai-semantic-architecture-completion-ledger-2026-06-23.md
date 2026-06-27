@@ -7027,6 +7027,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` neunundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/public-event-history.ts` entfernt `serverLabel`/`serverName` aus der zentralen produktiven Serverableitung für PublicEvents.
+  - PublicEvent-History-Verbraucher nutzen dort nur noch strukturierte Serverfelder wie `serverId`, `server`, `targetServerId` oder `attackedServerId`, nicht label-only Servertexte.
+  - `public-event-history.test.ts` schützt, dass label-only `serverLabel: "R&D"` und `serverName: "HQ"` nicht mehr zu ServerIds normalisiert werden, strukturierte ServerIds aber weiterhin durchgereicht werden.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/public-event-history.test.ts src/runner-run-target-evaluation.test.ts src/tactical-plans.test.ts src/runtime/runner-remote-repeat-run-score.test.ts` grün, 3 Dateien, 99 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
