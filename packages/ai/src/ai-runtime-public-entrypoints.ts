@@ -171,7 +171,10 @@ import {
   getTacticalPlanMemorySnapshot,
   rememberTacticalPlanRuntime,
 } from "./tactical-plans";
-import { classifyTagPunishPayoffFromOntology } from "./tag-punish-ontology-consumer";
+import {
+  classifyTagPunishPayoffFromOntology,
+  classifyTagSourceFromOntology,
+} from "./tag-punish-ontology-consumer";
 import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
@@ -275,6 +278,7 @@ const {
   runnerRigTrashTarget: corpVisibleRunnerRigTrashTarget,
   runnerResourceTrashEvidence: corpVisibleRunnerResourceTrashEvidence,
   payoffProfileForDefinition: classifyTagPunishPayoffFromOntology,
+  tagSourceProfileForDefinition: classifyTagSourceFromOntology,
   runnerDamagePreventionEvidence: corpVisibleRunnerDamagePreventionEvidence,
   runnerHardwareTrashTarget: corpVisibleRunnerHardwareTrashTarget,
   runnerHardwarePayoffEvidence: corpVisibleRunnerHardwarePayoffEvidence,

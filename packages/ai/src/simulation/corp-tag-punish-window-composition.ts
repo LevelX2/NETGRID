@@ -58,6 +58,8 @@ export function createCorpTagPunishWindowComposition(
       dependencies.tagPunishAssessmentForAction,
     payoffProfileForDefinition:
       dependencies.payoffProfileForDefinition,
+    tagSourceProfileForDefinition:
+      dependencies.tagSourceProfileForDefinition,
   });
 
   const { tagPunishWindowDiagnosticsForSimulationAction } =

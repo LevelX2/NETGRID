@@ -4,6 +4,7 @@ import type { CorpTaggedRunnerPayoffActionProfile } from "./corp-scoring-assessm
 
 type CorpTagPunishAssessment = {
   isPunishPayoff: boolean;
+  isTagSource?: boolean;
 };
 
 export type CorpTagSourcePayoffContextDependencies = {
@@ -16,6 +17,9 @@ export type CorpTagSourcePayoffContextDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => CorpTagPunishAssessment | undefined;
+  tagSourceProfileForDefinition: (
+    definitionId: string | undefined,
+  ) => unknown | undefined;
   payoffProfileForDefinition: (definitionId: string) => unknown | undefined;
 };
 
@@ -49,12 +53,18 @@ export function createCorpTagSourcePayoffContext(
   const corpImmediateTagSourceAction = (
     input: AiDecisionInput,
     action: LegalAction,
-  ): boolean =>
-    input.side === "corp" &&
-    action.side === "corp" &&
-    action.type === "play_operation" &&
-    dependencies.sourceDefinitionIdForAction(input, action) ===
-      "onr_v1_284_chance-observation";
+  ): boolean => {
+    if (
+      input.side !== "corp" ||
+      action.side !== "corp" ||
+      action.type !== "play_operation"
+    )
+      return false;
+    return (
+      dependencies.tagPunishAssessmentForAction(input, action)
+        ?.isTagSource === true
+    );
+  };
 
   const corpVisibleTagPunishPayoffKind = (
     input: AiDecisionInput,
@@ -104,12 +114,15 @@ export function createCorpTagSourcePayoffContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): boolean => {
+    if (action.type !== "install_card" && action.type !== "rez_ice")
+      return false;
     const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
       input,
       action,
     );
-    if (sourceDefinitionId !== "onr_v1_313_city-surveillance") return false;
-    return action.type === "install_card" || action.type === "rez_ice";
+    return Boolean(
+      dependencies.tagSourceProfileForDefinition(sourceDefinitionId),
+    );
   };
 
   const corpOntologyPayoffAvailableForTagSource = (

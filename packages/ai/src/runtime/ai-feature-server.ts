@@ -1,4 +1,5 @@
 import { type AiDecisionInput } from "@netgrid/shared";
+import { classifyTagSourceFromOntology } from "../tag-punish-ontology-consumer";
 
 export type ServerFeatures = {
   iceCount: number;
@@ -37,7 +38,7 @@ export function visibleCitySurveillanceSourceCount(
         (card) =>
           card.known &&
           card.rezzed === true &&
-          card.definitionId === "onr_v1_313_city-surveillance",
+          Boolean(classifyTagSourceFromOntology(card.definitionId)),
       ).length,
     0,
   );

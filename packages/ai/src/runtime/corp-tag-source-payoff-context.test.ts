@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { createCorpTagSourcePayoffContext } from "./corp-tag-source-payoff-context";
 
 describe("createCorpTagSourcePayoffContext", () => {
@@ -8,6 +12,7 @@ describe("createCorpTagSourcePayoffContext", () => {
       sourceDefinitionIdForAction: () => undefined,
       visibleMeatDamagePayoff: () => false,
       tagPunishAssessmentForAction: () => undefined,
+      tagSourceProfileForDefinition: () => undefined,
       payoffProfileForDefinition: (definitionId) =>
         definitionId === "custom-economic-punish" ? { kind: "economic" } : undefined,
     });
@@ -22,6 +27,73 @@ describe("createCorpTagSourcePayoffContext", () => {
         inputWithHqCard(visibleCard("unprofiled-punish-card")),
       ),
     ).toBeUndefined();
+  });
+
+  it("derives immediate operation tag sources from action ontology", () => {
+    const context = createCorpTagSourcePayoffContext({
+      sourceDefinitionIdForAction: () => "custom-trace-operation",
+      visibleMeatDamagePayoff: () => false,
+      tagPunishAssessmentForAction: () => ({
+        isPunishPayoff: false,
+        isTagSource: true,
+      }),
+      tagSourceProfileForDefinition: () => undefined,
+      payoffProfileForDefinition: () => undefined,
+    });
+
+    expect(
+      context.corpImmediateTagSourceAction(
+        inputWithHqCard(visibleCard("corp-card")),
+        corpAction("play_operation"),
+      ),
+    ).toBe(true);
+    expect(
+      context.corpImmediateTagSourceAction(
+        inputWithHqCard(visibleCard("corp-card")),
+        corpAction("install_card"),
+      ),
+    ).toBe(false);
+  });
+
+  it("derives persistent tag asset setup from source tag-source profiles", () => {
+    const context = createCorpTagSourcePayoffContext({
+      sourceDefinitionIdForAction: (_input, action) => {
+        const cardId = action.payload?.cardId;
+        return typeof cardId === "string" ? cardId : undefined;
+      },
+      visibleMeatDamagePayoff: () => false,
+      tagPunishAssessmentForAction: () => undefined,
+      tagSourceProfileForDefinition: (definitionId) =>
+        definitionId === "custom-persistent-tag-asset"
+          ? { tagSource: true }
+          : undefined,
+      payoffProfileForDefinition: () => undefined,
+    });
+
+    expect(
+      context.corpUnprotectedPersistentTagAssetSetup(
+        inputWithHqCard(visibleCard("corp-card")),
+        corpAction("install_card", {
+          cardId: "custom-persistent-tag-asset",
+        }),
+      ),
+    ).toBe(true);
+    expect(
+      context.corpUnprotectedPersistentTagAssetSetup(
+        inputWithHqCard(visibleCard("corp-card")),
+        corpAction("install_card", {
+          cardId: "custom-blank-asset",
+        }),
+      ),
+    ).toBe(false);
+    expect(
+      context.corpUnprotectedPersistentTagAssetSetup(
+        inputWithHqCard(visibleCard("corp-card")),
+        corpAction("play_operation", {
+          cardId: "custom-persistent-tag-asset",
+        }),
+      ),
+    ).toBe(false);
   });
 });
 
@@ -84,4 +156,16 @@ function visibleCard(definitionId: string): VisibleCard {
     owner: "corp",
     controller: "corp",
   };
+}
+
+function corpAction(
+  type: string,
+  payload: Record<string, string> = {},
+): LegalAction {
+  return {
+    actionId: `${type}-${payload.cardId ?? "action"}`,
+    side: "corp",
+    type,
+    payload,
+  } as LegalAction;
 }

@@ -6697,6 +6697,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Status bleibt `IN_PROGRESS`, weil weitere direkte CardDefinitionId-Treffer wie City Surveillance, Broker und spezifische Agenda-Overadvance-Schwellen noch offen sind.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-tag-source-payoff-context.test.ts src/index.test.ts -t "immediate trace tag source|unprotected persistent tag-asset|tag source and payoff|Closed Accounts|tag-trace|tag punish"` grün, 2 Dateien, 6 relevante Tests.
 
+- `AI-COMPLETE-14` dritter DefinitionId-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/corp-tag-source-payoff-context.ts` erkennt unmittelbare Operation-Tag-Quellen nicht mehr über `onr_v1_284_chance-observation`, sondern über `tagPunishAssessmentForAction(...).isTagSource`.
+  - Der ungeschützte persistente Tag-Asset-Setup-Pfad nutzt `tagSourceProfileForDefinition` statt `onr_v1_313_city-surveillance`; die Runtime-Composition reicht dafür `classifyTagSourceFromOntology` durch.
+  - `packages/ai/src/runtime/ai-feature-server.ts` zählt bekannte gerezzte Root-Tag-Quellen über `classifyTagSourceFromOntology` statt direkt über City Surveillance.
+  - `corp-tag-source-payoff-context.test.ts` und `ai-feature-server.test.ts` schützen generische Tag-Source-Erkennung mit nicht City-/Chance-spezifischen DefinitionIds.
+  - Status bleibt `IN_PROGRESS`, weil Broker- und Agenda-Overadvance-spezifische produktive DefinitionId-Pfade noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-tag-source-payoff-context.test.ts src/runtime/ai-feature-server.test.ts` grün, 2 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "immediate trace tag source|visible-payoff tag-source|persistent tag-asset"` grün, 1 Datei, 3 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
