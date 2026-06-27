@@ -187,6 +187,52 @@ describe("PracticalTacticOverlay", () => {
     );
   });
 
+  it("uses structured stale-run payloads and ignores label-only no-payoff text", () => {
+    const draw = action({
+      actionId: "draw-card",
+      type: "draw_card",
+      label: "Draw",
+      source: "basic_action",
+    });
+    const labelOnlyRun = action({
+      actionId: "label-stale-run",
+      type: "start_run",
+      label: "Run with no current payoff",
+      source: "basic_action",
+    });
+    const structuredRun = action({
+      actionId: "structured-stale-run",
+      type: "start_run",
+      label: "Run",
+      source: "basic_action",
+      payload: { knownNoCurrentPayoff: true },
+    });
+
+    const labelOnlyDecision = applyPracticalTacticOverlay(
+      runnerInput({ legalActions: [labelOnlyRun, draw] }),
+      frozenDecision("label-stale-run"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+    expect(labelOnlyDecision.evidence ?? []).not.toContain(
+      "practical_tactic:runner_avoid_stale_run",
+    );
+
+    const structuredDecision = applyPracticalTacticOverlay(
+      runnerInput({ legalActions: [structuredRun, draw] }),
+      frozenDecision("structured-stale-run"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+    expect(structuredDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "practical_tactic:runner_avoid_stale_run",
+        "practical_tactic_overlay_candidate:runner.practical_tactic.avoid_stale_run",
+      ]),
+    );
+    expect(structuredDecision.decisionDebug?.detailSections?.at(-1)?.items).toContain(
+      "candidate:draw-card",
+    );
+  });
+
   it("uses visible breaker source cards and ignores label-only coverage installs", () => {
     const visibleBreaker = visibleCard({
       instanceId: "visible-fracter",
