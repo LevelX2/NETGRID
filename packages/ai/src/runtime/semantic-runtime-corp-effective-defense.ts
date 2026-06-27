@@ -147,7 +147,6 @@ function defenseSignalText(
 ): string {
   return [
     action.type,
-    action.label,
     actionSemanticCandidate?.semanticActionType,
     ...(actionSemanticCandidate?.actionTacticSignals ?? []),
     ...(actionSemanticCandidate?.cardContextSignals ?? []),
@@ -200,4 +199,3 @@ function payloadNumber(action: LegalAction, key: string): number | undefined {
   const value = action.payload?.[key];
   return typeof value === "number" ? value : undefined;
 }
-

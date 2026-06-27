@@ -60,6 +60,30 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     });
   });
 
+  it("ignores label-only trace and end-the-run defense text", () => {
+    const context = semanticRuntimeCorpEffectiveDefenseContext(
+      corpInput(5),
+      rezAction(
+        "label-only-trace",
+        4,
+        {
+          variableRezValue: 1,
+        },
+        "Trace ICE with end the run",
+      ),
+      undefined,
+      { actionCreditCost },
+    );
+
+    expect(context).toMatchObject({
+      isRezzableNow: true,
+      hasImmediateStopPotential: false,
+      hasMeaningfulTaxOrDamage: false,
+      zeroEffectRisk: false,
+    });
+    expect(context?.minimumUsefulX).toBeUndefined();
+  });
+
   it("requires post-rez budget for paid encounter subroutine defense", () => {
     const context = semanticRuntimeCorpEffectiveDefenseContext(
       corpInput(3),
@@ -118,12 +142,13 @@ function rezAction(
   actionId: string,
   creditCost: number,
   payload: LegalAction["payload"] = {},
+  label = "ICE rezzen",
 ): LegalAction {
   return {
     actionId,
     side: "corp",
     type: "rez_ice",
-    label: "ICE rezzen",
+    label,
     source: "game_rule",
     timingPoint: "run.encounter_ice",
     costs: [{ credits: creditCost }],
@@ -189,4 +214,3 @@ function rezCandidate(
 function actionCreditCost(action: LegalAction): number {
   return action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0);
 }
-

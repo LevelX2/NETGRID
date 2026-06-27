@@ -6991,6 +6991,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` fünfundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-effective-defense.ts` entfernt `action.label` aus dem produktiven Effective-Defense-Signaltext für Corp-Rez-Bewertungen.
+  - Effective-Defense erkennt Trace, End-the-run, Tax, Damage und Paid-Subroutine-Wirkung dort nur noch aus `ActionSemanticCandidate`-Signalen oder strukturierten Payloads, nicht aus label-only Rez-Text.
+  - `semantic-runtime-corp-effective-defense.test.ts` schützt, dass label-only Trace-/End-the-run-Text keine variable Trace-/Stop-Wirkung mehr erzeugt, semantische Candidate-Signale aber weiterhin wirken.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-effective-defense.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
