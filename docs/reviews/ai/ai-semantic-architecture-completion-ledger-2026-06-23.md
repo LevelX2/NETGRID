@@ -6552,6 +6552,17 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 154 Dateien, 1673 Tests.
 
+- `AI-COMPLETE-10` siebter Cost-Profil-Schnitt:
+  - `semantic-runtime-corp-score.ts` reicht den `ActionSemanticCandidate` an den Corp-Remote-Score-Pfad für Install-Aktionen weiter.
+  - `semantic-runtime-corp-remote-score.ts` nutzt in `semanticRuntimeCorpShouldBuildProtectedScoreRemote` bevorzugt `ActionSemanticCandidate.costProfile.creditCost` für die Credit-Reserve-Prüfung.
+  - Der alte `actionCreditCost`-Helper bleibt Fallback, wenn kein Candidate vorhanden ist oder die Candidate-Cost-Projection unbekannt bleibt.
+  - `packages/ai/src/runtime/semantic-runtime-corp-remote-score.test.ts` schützt, dass ein Candidate-Cost von 3 bei 5 Credits die geschützte Remote-Scoreline erlaubt, obwohl der Runtime-Helper 99 melden würde.
+  - Status bleibt `IN_PROGRESS`, weil weitere Cost-/Timing-/BoardContext-Spezialpfade noch auditiert und angebunden werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1674 Tests.
+
 Nächstes aktives Ziel: `AI-COMPLETE-10`.
 
 ## Audit-Ledger

@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 
 type CorpServerLike = {
   id: string;
@@ -44,6 +45,7 @@ export function semanticRuntimeCorpInstallRemoteScore<
   action: LegalAction,
   roles: string[],
   dependencies: SemanticRuntimeCorpRemoteScoreDependencies<TServer>,
+  actionSemanticCandidate?: ActionSemanticCandidate,
 ): number {
   const serverId = dependencies.actionServerId(input, action);
   const server = dependencies.server(input, serverId);
@@ -75,7 +77,12 @@ export function semanticRuntimeCorpInstallRemoteScore<
     }
     if (
       !hasRoot &&
-      semanticRuntimeCorpShouldBuildProtectedScoreRemote(input, action, dependencies)
+      semanticRuntimeCorpShouldBuildProtectedScoreRemote(
+        input,
+        action,
+        dependencies,
+        actionSemanticCandidate,
+      )
     ) {
       return serverId === "new_remote" ? 1050 : 900;
     }
@@ -102,6 +109,7 @@ export function semanticRuntimeCorpShouldBuildProtectedScoreRemote<
   input: AiDecisionInput,
   action: LegalAction,
   dependencies: SemanticRuntimeCorpRemoteScoreDependencies<TServer>,
+  actionSemanticCandidate?: ActionSemanticCandidate,
 ): boolean {
   if (input.side !== "corp") return false;
   if (action.type !== "install_card" || action.payload?.placement !== "ice") {
@@ -109,13 +117,38 @@ export function semanticRuntimeCorpShouldBuildProtectedScoreRemote<
   }
   const serverId = dependencies.actionServerId(input, action);
   if (!dependencies.isRemoteServerTarget(serverId)) return false;
-  if (input.playerView.own.credits < dependencies.actionCreditCost(action) + 2) {
+  if (
+    input.playerView.own.credits <
+    semanticRuntimeCorpRemoteActionCreditCost(
+      dependencies,
+      action,
+      actionSemanticCandidate,
+    ) +
+      2
+  ) {
     return false;
   }
   return (
     semanticRuntimeCorpHasAgendaInHq(input) &&
     !semanticRuntimeCorpHasProtectedRemoteCapacity(input, dependencies)
   );
+}
+
+function semanticRuntimeCorpRemoteActionCreditCost<TServer extends CorpServerLike>(
+  dependencies: SemanticRuntimeCorpRemoteScoreDependencies<TServer>,
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): number {
+  const costProfile = actionSemanticCandidate?.costProfile;
+  if (costProfile === undefined) return dependencies.actionCreditCost(action);
+  if (typeof costProfile.creditCost === "number") return costProfile.creditCost;
+  if (
+    costProfile.costKnownStatus === "known" ||
+    costProfile.costKnownStatus === "not_applicable"
+  ) {
+    return 0;
+  }
+  return dependencies.actionCreditCost(action);
 }
 
 export function semanticRuntimeCorpAdvanceRemoteScore<

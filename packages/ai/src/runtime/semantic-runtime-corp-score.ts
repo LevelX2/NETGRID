@@ -59,6 +59,7 @@ export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
     input: AiDecisionInput,
     action: LegalAction,
     roles: string[],
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ) => number;
   corpAdvancementCounterPlacementAssessment: (
     input: AiDecisionInput,
@@ -186,6 +187,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       input,
       action,
       roles,
+      actionSemanticCandidate,
     );
     if (remoteScore !== 0) {
       components.push({
