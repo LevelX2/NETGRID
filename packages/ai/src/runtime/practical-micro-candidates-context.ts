@@ -7,6 +7,7 @@ import type {
 
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { PracticalMicroCandidate } from "./practical-micro-runtime";
+import { rolesMatch } from "./role-match";
 
 type KnownPathAssessment = {
   assessedKnownIceCount: number;
@@ -211,19 +212,11 @@ export function createPracticalMicroCandidatesContext(
   ): boolean {
     if (input.playerView.opponent.tags > 0) return false;
     const roles = dependencies.rolesForAction(input, action);
-    const payloadSignals = [
-      action.payload?.tagPunishAction === true ? "tag_punish" : "",
-      action.payload?.damagePunishAction === true ? "damage_punish" : "",
-    ];
-    const text = [
-      action.type,
-      ...payloadSignals,
-      ...roles,
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
-    return /punish|tag_punish|damage_punish|tag_punishment/.test(text);
+    return (
+      action.payload?.tagPunishAction === true ||
+      action.payload?.damagePunishAction === true ||
+      rolesMatch(roles, ["punish", "tag_punish", "damage_punish"])
+    );
   }
 
   function corpSafeScorelineCandidate(

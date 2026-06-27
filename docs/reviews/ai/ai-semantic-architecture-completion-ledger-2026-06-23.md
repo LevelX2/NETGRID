@@ -7298,6 +7298,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` achtundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-micro-candidates-context.ts` entfernt die Stale-Punish-Erkennung über zusammengesetzten Regex-Text aus Action-Typ, Payload und Rollen.
+  - Corp-Stale-Punish-Deactivation wird dort nur noch über strukturierte Payload-Flags `tagPunishAction`/`damagePunishAction` oder strukturierte Rollen wie `tag_punish` erkannt; Labeltext und Rollenrauschen wie `tagalong_punishment_noise` bleiben inert.
+  - `practical-micro-candidates-context.test.ts` schützt Payload-, strukturierte Rollen-, Label-only- und Rollenrauschfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-micro-candidates-context.test.ts src/runtime/practical-tactic-overlay.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -5,7 +5,10 @@ import { createPracticalMicroCandidatesContext } from "./practical-micro-candida
 
 describe("createPracticalMicroCandidatesContext", () => {
   it("uses structured stale-punish signals and ignores label-only punish text", () => {
-    const context = createContext();
+    const context = createContext({
+      "role-punish": ["tag_punish"],
+      "role-noise": ["tagalong_punishment_noise"],
+    });
     const labelOnlyPunish = corpAction({
       actionId: "label-only-punish",
       type: "play_operation",
@@ -16,6 +19,16 @@ describe("createPracticalMicroCandidatesContext", () => {
       type: "play_operation",
       label: "Use ability",
       payload: { tagPunishAction: true },
+    });
+    const rolePunish = corpAction({
+      actionId: "role-punish",
+      type: "play_operation",
+      label: "Use ability",
+    });
+    const roleNoise = corpAction({
+      actionId: "role-noise",
+      type: "play_operation",
+      label: "Use ability",
     });
     const advance = corpAction({
       actionId: "advance",
@@ -32,8 +45,27 @@ describe("createPracticalMicroCandidatesContext", () => {
 
     expect(
       context.practicalMicroRuntimeCandidates(
+        corpInput([roleNoise, advance]),
+        decision("role-noise"),
+      ),
+    ).toEqual([]);
+
+    expect(
+      context.practicalMicroRuntimeCandidates(
         corpInput([structuredPunish, advance]),
         decision("structured-punish"),
+      ),
+    ).toEqual([
+      expect.objectContaining({
+        ruleId: "corp_stale_punish_deactivation",
+        actionId: "advance",
+      }),
+    ]);
+
+    expect(
+      context.practicalMicroRuntimeCandidates(
+        corpInput([rolePunish, advance]),
+        decision("role-punish"),
       ),
     ).toEqual([
       expect.objectContaining({
@@ -44,7 +76,7 @@ describe("createPracticalMicroCandidatesContext", () => {
   });
 });
 
-function createContext() {
+function createContext(rolesByActionId: Record<string, string[]> = {}) {
   return createPracticalMicroCandidatesContext({
     visibleSourceCard: () => undefined,
     isVisibleIcebreakerProgram: () => false,
@@ -54,7 +86,7 @@ function createContext() {
       assessedKnownIceCount: 0,
       canReachAccess: false,
     }),
-    rolesForAction: () => [],
+    rolesForAction: (_input, action) => rolesByActionId[action.actionId] ?? [],
     scoreTerminalWindow: () => ({
       terminalWindow: false,
       blockedByCheapContest: false,
