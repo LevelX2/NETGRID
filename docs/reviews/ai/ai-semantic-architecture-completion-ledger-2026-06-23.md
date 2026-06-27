@@ -6220,6 +6220,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
+- `AI-COMPLETE-04` neununddreißigster Struktur-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-runner-plans.ts` kapselt den Runner-Top-Level-Planbuilder inklusive Remote-/Central-Run-, Breaker-Coverage-, Hand-/Credit-Base- und Runner-Bank-Plänen.
+  - `packages/ai/src/tactical-plans.ts` ruft Runner- und Corp-Builder als externe Planbau-Module auf und hält nur noch Facade, Runtime-Evaluation und Step-Mapping.
+  - `packages/ai/src/tactical-plans.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 306 Zeilen; das neue Runner-Plans-Modul liegt bei 680 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil die neuen Runner-/Corp-Planbau-Module noch auf weitere interne Unterteilung geprüft werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-04`.
 
