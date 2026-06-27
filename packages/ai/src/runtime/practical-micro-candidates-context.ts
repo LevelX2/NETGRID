@@ -220,9 +220,7 @@ export function createPracticalMicroCandidatesContext(
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
-    return /punish|tag_punish|damage_punish|scorched|closed accounts|power grid overload/.test(
-      text,
-    );
+    return /punish|tag_punish|damage_punish|tag_punishment/.test(text);
   }
 
   function corpSafeScorelineCandidate(

@@ -56,6 +56,35 @@ describe("createRunnerBankInvestmentContext", () => {
       ),
     ).toContain("bankStoredCredits:0");
   });
+
+  it("classifies credit-bank build and cashout actions without card-name text", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 3 },
+    });
+    const buildAction = runnerAction("activated_card_ability", {
+      source: bank.instanceId,
+      label: "3 Credits auf Quelle legen",
+    });
+    const cashOutAction = runnerAction("trigger_ability", {
+      source: bank.instanceId,
+      label: "Credits aus Quelle nehmen",
+    });
+    const input = runnerInput({
+      rig: [bank],
+      legalActions: [buildAction, cashOutAction],
+    });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
+    ).toContain("bankBuildLegal:true");
+    expect(context.isRunnerBankCashOutAction(input, cashOutAction)).toBe(true);
+  });
 });
 
 function createContext(
@@ -170,12 +199,15 @@ function visibleRunnerCard(
 
 function runnerAction(
   type: string,
-  payload: Record<string, string> = {},
+  input: Record<string, string> = {},
 ): LegalAction {
+  const { label, source, ...payload } = input;
   return {
-    actionId: `${type}-${payload.serverId ?? "action"}`,
+    actionId: `${type}-${payload.serverId ?? source ?? "action"}`,
     side: "runner",
     type,
+    source,
+    label: label ?? type,
     payload,
   } as LegalAction;
 }

@@ -102,6 +102,7 @@ import {
   endTheRunSubroutineCount,
   minimumCreditsToBreakEndTheRunSubroutines,
 } from "./visible-run-analysis";
+import { resetTacticalPlanMemory } from "./plans/plan-memory";
 import type {
   AiDeckDoctrineProfile,
   AiDecisionDebug,
@@ -3539,7 +3540,7 @@ describe("MVP 0.3 AI controller contract", () => {
 
     expect(decision.actionId).toBe(diplomaticTrash.actionId);
     expect(debugText).toContain("corp_tagged_damage_prevention_resource_trash");
-    expect(debugText).toContain("runner_resource_diplomatic_immunity:true");
+    expect(debugText).toContain("runner_resource_damage_prevention_visible:true");
     expect(debugText).toContain("cancel_blocked:true");
     expect(debugText).toContain("corp_visible_meat_damage_payoff:true");
     expect(assertAiInputIsSideSafe(input)).toBe(true);
@@ -3627,8 +3628,8 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(debugText).toContain("corp_tagged_meat_damage_payoff:true");
     expect(debugText).toContain("source_definition:onr_v1_339_schlaghund");
     expect(debugText).toContain("runner_tags:7");
-    expect(debugText).toContain("runner_full_body_conversion_visible:true");
-    expect(debugText).toContain("runner_dermatech_bodyplating_visible:true");
+    expect(debugText).toContain("runner_damage_prevention_visible:true");
+    expect(debugText).toContain("runner_meat_damage_prevention_visible:true");
     expect(debugText).toContain("prevention_pressure:true");
     expect(debugText).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,

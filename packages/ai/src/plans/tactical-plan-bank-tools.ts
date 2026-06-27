@@ -43,7 +43,7 @@ export function largestBankPayout(
 export function isBankBuildAction(action: LegalAction): boolean {
   const label = action.label.toLowerCase();
   return (
-    label.includes("auf broker legen") ||
+    (label.includes("legen") && label.includes("bank")) ||
     (label.includes("put") && label.includes("bank")) ||
     (label.includes("bank") && label.includes("counter"))
   );
@@ -52,7 +52,7 @@ export function isBankBuildAction(action: LegalAction): boolean {
 export function isBankPayoutAction(action: LegalAction): boolean {
   const label = action.label.toLowerCase();
   return (
-    label.includes("von broker nehmen") ||
+    (label.includes("nehmen") && label.includes("bank")) ||
     (label.includes("take") && label.includes("bank")) ||
     (label.includes("cash") && label.includes("bank"))
   );

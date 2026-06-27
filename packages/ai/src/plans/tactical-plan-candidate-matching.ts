@@ -39,18 +39,18 @@ export function bankStepMatchesCandidate(
   const label = action.label.toLowerCase();
   if (step.kind === "build_bank_counter") {
     return (
-      label.includes("auf broker legen") ||
+      (label.includes("legen") && label.includes("bank")) ||
       label.includes("put") && label.includes("bank") ||
-      evidence.includes("auf broker legen") ||
+      (evidence.includes("legen") && evidence.includes("bank")) ||
       signals.includes("bank") ||
       signals.includes("counter_bank") ||
       signals.includes("temporary_resource_bank")
     );
   }
   return (
-    label.includes("von broker nehmen") ||
+    (label.includes("nehmen") && label.includes("bank")) ||
     label.includes("take") && label.includes("bank") ||
-    evidence.includes("von broker nehmen") ||
+    (evidence.includes("nehmen") && evidence.includes("bank")) ||
     signals.includes("cash") ||
     signals.includes("payout") ||
     signals.includes("bank")

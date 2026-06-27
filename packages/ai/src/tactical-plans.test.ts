@@ -1437,7 +1437,7 @@ describe("tactical plan model", () => {
     const input = aiInput("runner", [
       legalAction("broker-cash", "runner", "trigger_ability", {}, {
         source: "onr_v1_154_broker",
-        label: "Von Broker nehmen",
+        label: "Credits aus Bank nehmen",
       }),
     ]);
     input.playerView.own.credits = 2;

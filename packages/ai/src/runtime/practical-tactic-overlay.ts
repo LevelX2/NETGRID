@@ -287,7 +287,7 @@ function cardText(card: VisibleCard): string {
 }
 
 function corpActionLooksLikePunish(action: LegalAction): boolean {
-  return /punish|closed accounts|scorched|tag/i.test(
+  return /punish|tag_punish|damage_punish|tag/i.test(
     [action.label, action.type].join(" ").toLowerCase(),
   );
 }

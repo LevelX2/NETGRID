@@ -167,7 +167,7 @@ export function createRunnerBankInvestmentContext(
           : []),
       ...(isRunnerBankInstallAction(input, action) &&
       assessment.status === "install_deferred"
-        ? ["why_broker_install_deferred:no_plausible_followup_load"]
+        ? ["why_bank_install_deferred:no_plausible_followup_load"]
         : []),
       ...(isRunnerBankCashOutAction(input, action)
         ? [
@@ -447,11 +447,15 @@ export function createRunnerBankInvestmentContext(
     )
       return false;
     const text = runnerBankActionText(input, action);
+    const sourceIsCreditBank = runnerActionSourceLooksLikeCreditBank(
+      input,
+      action,
+    );
     return (
-      /auf broker legen/.test(text) ||
-      /broker_load_credits/.test(text) ||
-      /(?:put|load|add|build).*(?:bank|broker)/.test(text) ||
-      /(?:bank|broker).*(?:counter|load|build)/.test(text)
+      (sourceIsCreditBank &&
+        /(?:legen|put|load|add|build|counter)/.test(text)) ||
+      /(?:put|load|add|build).*(?:bank|credit_bank)/.test(text) ||
+      /(?:bank|credit_bank).*(?:counter|load|build)/.test(text)
     );
   }
 
@@ -467,11 +471,15 @@ export function createRunnerBankInvestmentContext(
     )
       return false;
     const text = runnerBankActionText(input, action);
+    const sourceIsCreditBank = runnerActionSourceLooksLikeCreditBank(
+      input,
+      action,
+    );
     return (
-      /von broker nehmen/.test(text) ||
-      /broker_take_credits/.test(text) ||
-      /(?:take|cash|withdraw|payout).*(?:bank|broker)/.test(text) ||
-      /(?:bank|broker).*(?:take|cash|withdraw|payout)/.test(text)
+      (sourceIsCreditBank &&
+        /(?:nehmen|take|cash|withdraw|payout)/.test(text)) ||
+      /(?:take|cash|withdraw|payout).*(?:bank|credit_bank)/.test(text) ||
+      /(?:bank|credit_bank).*(?:take|cash|withdraw|payout)/.test(text)
     );
   }
 
@@ -492,12 +500,20 @@ export function createRunnerBankInvestmentContext(
       action.label,
       payloadLabel,
       resourceAbility,
-      sourceCard?.title,
-      sourceCard?.definitionId,
     ]
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
+  }
+
+  function runnerActionSourceLooksLikeCreditBank(
+    input: AiDecisionInput,
+    action: LegalAction,
+  ): boolean {
+    return runnerCardLooksLikeCreditBank(
+      input,
+      dependencies.findVisibleCard(input, action.source),
+    );
   }
 
   function runnerCardLooksLikeCreditBank(
@@ -588,7 +604,6 @@ export function createRunnerBankInvestmentContext(
     if (definitionId) return definitionId;
     const sourceCard = dependencies.findVisibleCard(input, action.source);
     if (sourceCard?.definitionId) return sourceCard.definitionId;
-    if (/broker/i.test(action.label)) return "broker";
     return "credit_bank";
   }
 
