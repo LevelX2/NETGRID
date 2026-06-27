@@ -16,9 +16,11 @@ export type AiDeckDoctrineDeckSnapshot = {
   cards: Array<{ cardId: string; quantity: number }>;
 };
 
-// Legacy Doctrine v1 feeds old baseline/plan scorers and opening-hand heuristics.
-// New semantic decisions must use DeckDoctrine v2 diagnostics, capabilities and
-// TacticalGoals; support-only or anchorless decks stay neutral here.
+// @legacyDoctrineV1
+// Retained for legacy public contracts, benchmark fixtures and old baseline
+// heuristics only. Normal Semantic Runtime strategy selection must use
+// DeckDoctrine v2 diagnostics, capabilities and TacticalGoals instead of these
+// v1 archetype tags, planWeights or mulliganWeights.
 export function buildDeckDoctrineProfile(snapshot: AiDeckDoctrineDeckSnapshot): AiDeckDoctrineProfile {
   const totalCards = snapshot.cards.reduce((sum, entry) => sum + Math.max(0, entry.quantity), 0) || 1;
   const roleCounts: Record<string, number> = {};

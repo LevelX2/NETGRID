@@ -1,6 +1,6 @@
 # Semantic Runtime Precision Follow-up, 2026-06-27
 
-Status: `P5_done`
+Status: `P6_done`
 
 Prozess: `docs/architecture/ai/semantic-runtime-precision-legacy-cleanup-process-2026-06-27.md`
 
@@ -266,5 +266,21 @@ Verifikation:
 
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/action-semantic-candidate.test.ts`: grün, 1 Datei, 21 Tests.
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-semantic-coverage.test.ts src/decision/target-choice-shadow.test.ts src/decision/action-goal-fit.test.ts src/action-semantic-candidate.test.ts`: grün, 4 Dateien, 57 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
+
+## P6 Ergebnis: Doctrine-v1-Reste
+
+Status: `P6_done`
+
+Umgesetzt:
+
+- `deck-doctrine.ts` markiert `buildDeckDoctrineProfile()` jetzt explizit als `@legacyDoctrineV1`.
+- Der Kommentar trennt Legacy Public Contracts, Benchmark Fixtures und alte Baseline-Heuristiken klar vom normalen Semantic-Runtime-Strategiepfad.
+- Der Test `deck-doctrine.test.ts` hält fest, dass Doctrine v1 nicht als Semantic-Runtime-Wahrheit formuliert werden darf.
+
+Verifikation:
+
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/deck-doctrine.test.ts`: grün, 1 Datei, 2 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `git diff --check`: grün.
