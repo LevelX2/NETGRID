@@ -6211,6 +6211,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
+- `AI-COMPLETE-04` achtunddreißigster Struktur-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-step-candidate-matching.ts` kapselt Step-Candidate-Matching und Candidate-Priority inklusive Coverage-Answer-, Credit-, Breaker-, Run- und Bank-Step-Spezialfällen.
+  - `packages/ai/src/tactical-plans.ts` übergibt die bestehende Credit-Value-Dependency explizit an das ausgelagerte Matching und hält lokal keine Step-Candidate-Matching-Funktionen mehr.
+  - `packages/ai/src/tactical-plans.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 997 Zeilen; das neue Step-Candidate-Matching-Modul liegt bei 142 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil der Runner-Top-Level-Planbuilder in `tactical-plans.ts` noch weiter getrennt werden muss.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-04`.
 

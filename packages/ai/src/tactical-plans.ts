@@ -45,13 +45,8 @@ import {
   isRemoteServer,
 } from "./plans/tactical-plan-server-targets";
 import {
-  visibleCardByInstanceId,
   visibleCardForAction,
 } from "./plans/tactical-plan-visible-cards";
-import {
-  cardLooksLikeBreaker,
-  cardProvidesBreakerCoverage,
-} from "./plans/tactical-plan-breaker-cards";
 import {
   remoteRunHasNoRootValue,
   runNeedsBreakerCoverage,
@@ -63,18 +58,9 @@ import {
   deckCapabilityEvidenceForRequiredCoverage,
 } from "./plans/tactical-plan-deck-coverage";
 import {
-  bankStepMatchesCandidate,
-  candidateTargetMatchesPlan,
-} from "./plans/tactical-plan-candidate-matching";
-import {
-  coverageAnswerRoleMatchesStep,
-  coverageAnswerRolePriority,
   coverageSearchRequiredCapability,
-  isCoverageAnswerStep,
-  planRequiredBreakerCoverage,
 } from "./plans/tactical-plan-coverage-answers";
 import {
-  coverageSearchActionFit,
   matchedCoverageSearchRationales,
   rejectedCoverageSearchFalseMatches,
 } from "./plans/tactical-plan-coverage-search-fit";
@@ -87,17 +73,12 @@ import {
   tacticalGoalPriorityBoost,
   tacticalGoalScoreBreakdown,
 } from "./plans/tactical-plan-goal-evidence";
-import { developmentCardStepMatchesAction } from "./plans/tactical-plan-development-card-matching";
 import {
   applyRunnerDrawOverflowAdjustments,
   runnerHandBufferPlans,
 } from "./plans/tactical-plan-runner-hand-buffer";
 import { runnerCreditBasePlans } from "./plans/tactical-plan-runner-credit-base";
 import { runnerBreakerCoverageStep } from "./plans/tactical-plan-runner-breaker-coverage-step";
-import {
-  isRunPlanStep,
-  runPlanStepMatchesAction,
-} from "./plans/tactical-plan-run-action-matching";
 import {
   assessRunnerPressureBudget,
   runnerAdjustedPlanPriority,
@@ -116,14 +97,10 @@ import {
   mappingStatusForStep,
 } from "./plans/tactical-plan-mapping-helpers";
 import {
-  actionTypeMatchesStep,
-  candidateSemanticsMatchStep,
-} from "./plans/tactical-plan-step-semantics";
-import {
-  legalActionCreditGainForPlan,
-  legalActionCreditNetGain,
-  type TacticalPlanCreditValueDependencies,
-} from "./plans/tactical-plan-action-values";
+  candidateMatchesStep,
+  planStepCandidatePriority,
+} from "./plans/tactical-plan-step-candidate-matching";
+import type { TacticalPlanCreditValueDependencies } from "./plans/tactical-plan-action-values";
 import { runnerHasConcreteFundingNeed } from "./plans/tactical-plan-runner-funding-need";
 import {
   planCanMapToCurrentAction,
@@ -336,6 +313,7 @@ export function mapPlanStepToLegalActions(
         candidate,
         legalActionsById.get(candidate.actionId),
         input,
+        TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
       ),
     )
     .sort((left, right) =>
@@ -345,6 +323,7 @@ export function mapPlanStepToLegalActions(
         right,
         legalActionsById.get(right.actionId),
         input,
+        TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
       ) -
         planStepCandidatePriority(
           plan,
@@ -352,6 +331,7 @@ export function mapPlanStepToLegalActions(
           left,
           legalActionsById.get(left.actionId),
           input,
+          TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
         ) ||
       left.actionId.localeCompare(right.actionId),
     );
@@ -400,122 +380,6 @@ export function mapPlanStepToLegalActions(
       ...matchedCandidates.slice(0, 4).map(candidateMappingRationale),
     ],
   };
-}
-
-function planStepCandidatePriority(
-  plan: TacticalPlan,
-  step: PlanStep,
-  candidate: ActionSemanticCandidate,
-  action: LegalAction | undefined,
-  input: AiDecisionInput,
-): number {
-  if (!action) return 0;
-  if (isCoverageAnswerStep(step)) {
-    const fit = coverageSearchActionFit(
-      plan,
-      step,
-      candidate,
-      action,
-      input,
-      runnerHasConcreteFundingNeed(input, []),
-    );
-    if (!fit?.supportsActiveCapabilityNeed) return 0;
-    return coverageAnswerRolePriority(fit.answerRole);
-  }
-  if (step.kind === "gain_credits") {
-    return (
-      legalActionCreditNetGain(
-        input,
-        action,
-        TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
-      ) * 100
-    );
-  }
-  return 0;
-}
-
-function candidateMatchesStep(
-  plan: TacticalPlan,
-  step: PlanStep,
-  candidate: ActionSemanticCandidate,
-  action: LegalAction | undefined,
-  input: AiDecisionInput,
-): boolean {
-  if (!action) return false;
-  if (candidate.actorSide !== plan.side) return false;
-  if (
-    candidate.primaryProjectionStatus === "blocked" ||
-    candidate.primaryProjectionStatus === "hidden_info_blocked"
-  ) {
-    return false;
-  }
-  if (isCoverageAnswerStep(step)) {
-    const fit = coverageSearchActionFit(
-      plan,
-      step,
-      candidate,
-      action,
-      input,
-      runnerHasConcreteFundingNeed(input, []),
-    );
-    if (fit !== undefined) {
-      return fit.supportsActiveCapabilityNeed &&
-        coverageAnswerRoleMatchesStep(step, fit.answerRole) &&
-        candidateTargetMatchesPlan(plan, candidate, action);
-    }
-  }
-  if (step.kind === "install_development_card") {
-    return developmentCardStepMatchesAction(plan, action);
-  }
-  if (step.kind === "gain_credits") {
-    const creditGain = legalActionCreditGainForPlan(
-      input,
-      action,
-      TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
-    );
-    if (creditGain > 0) {
-      return candidateTargetMatchesPlan(plan, candidate, action);
-    }
-  }
-  if (step.kind === "draw_hand_buffer") {
-    return (
-      action.type === "draw_card" &&
-      candidateTargetMatchesPlan(plan, candidate, action)
-    );
-  }
-  if (step.kind === "install_breaker" && action.type === "install_card") {
-    const requiredCoverage = planRequiredBreakerCoverage(plan, step);
-    const sourceCard = visibleCardByInstanceId(input.playerView, String(action.source));
-    if (!sourceCard && !/breaker|icebreaker|fracter|decoder|killer/i.test(action.label)) {
-      return false;
-    }
-    if (
-      sourceCard &&
-      !cardProvidesBreakerCoverage(sourceCard, requiredCoverage)
-    ) {
-      return false;
-    }
-  }
-  if (isRunPlanStep(step)) {
-    return runPlanStepMatchesAction(step, candidate, action, actionTypeMatchesStep) &&
-      candidateTargetMatchesPlan(plan, candidate, action);
-  }
-  if (candidateSemanticsMatchStep(step, candidate)) {
-    return candidateTargetMatchesPlan(plan, candidate, action) &&
-      bankStepMatchesCandidate(step, candidate, action);
-  }
-  if (step.desiredActionSemantics.includes(candidate.semanticActionType)) {
-    return candidateTargetMatchesPlan(plan, candidate, action);
-  }
-  if (candidate.actionTacticSignals.some((signal) => step.desiredActionSemantics.includes(signal))) {
-    return candidateTargetMatchesPlan(plan, candidate, action);
-  }
-  if (candidate.cardContextSignals.some((signal) => step.desiredActionSemantics.includes(signal))) {
-    return candidateTargetMatchesPlan(plan, candidate, action);
-  }
-  return actionTypeMatchesStep(step, candidate.actionType) &&
-    candidateTargetMatchesPlan(plan, candidate, action) &&
-    bankStepMatchesCandidate(step, candidate, action);
 }
 
 function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan[] {
