@@ -6247,6 +6247,14 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/semantic-ai-runtime-cutover.test.ts src/tactical-plans.test.ts` grün, 126 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1647 Tests.
+- `AI-COMPLETE-05` zweiter Legacy-Schnitt:
+  - `docs/reviews/ai/ai-complete-05-legacy-usage-matrix-2026-06-27.md` klassifiziert produktive Legacy-Planer-Einstiege, Runtime-/Scoring-Adapter, Legacy-Implementierungen sowie Diagnose-/Simulation-Nutzungen.
+  - Die Matrix benennt `legacy-planner-entrypoints.ts` als erlaubte interne Legacy-Planfunktionsschnittstelle und markiert historische Facades, Simulation-/Diagnoseimporte und Scoring-Adapter als getrennte Migrationsklassen.
+  - Status bleibt `IN_PROGRESS`, weil direkte Diagnose-/Simulation-Importe aus Legacy-Kompatibilitätsfacades und Legacy-Scoring-Adapter noch weiter abgebaut oder eingefroren werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts` grün, 15 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1647 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-05`.
 
