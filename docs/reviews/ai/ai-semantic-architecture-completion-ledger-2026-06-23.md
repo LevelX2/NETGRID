@@ -6946,6 +6946,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-legal-coverage-answers.ts` und `packages/ai/src/plans/tactical-plan-coverage-search-fit.ts` entfernen `action.label` aus der produktiven Recovery-Erkennung für Coverage-Antworten und Coverage-Search-Fits.
+  - Coverage-Recovery zählt dort nur noch über Source-Card-Metadaten oder strukturierte Recovery-Targets wie `targetCardDefinitionId`, nicht über label-only Text wie `Junkyard BBS recovery from heap`.
+  - `tactical-plan-legal-coverage-answers.test.ts` und `tactical-plan-coverage-search-fit.test.ts` schützen, dass label-only Recovery-Text nicht mehr als Coverage-Antwort zählt, strukturierte Recovery-Targets aber weiterhin `recovery_answer` beziehungsweise High-Fit liefern.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-legal-coverage-answers.test.ts src/plans/tactical-plan-coverage-search-fit.test.ts src/tactical-plans.test.ts` grün, 3 Dateien, 47 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

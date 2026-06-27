@@ -66,7 +66,6 @@ function coverageAnswerRoleForLegalAction(
       sourceCard?.title,
       sourceCard?.definitionId,
       sourceCard?.rulesText,
-      action.label,
     ].filter(Boolean).join(" ").toLowerCase();
     if (
       /recovery|trash|heap|junkyard|bbs/.test(sourceText) ||

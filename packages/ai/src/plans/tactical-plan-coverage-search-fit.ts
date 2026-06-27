@@ -308,7 +308,6 @@ function recoveryTargetEvaluation(
     sourceCard?.title,
     sourceCard?.definitionId,
     sourceCard?.rulesText,
-    action.label,
   ].filter(Boolean).join(" ").toLowerCase();
   const targetDefinitionId = recoveryTargetDefinitionId(input, action);
   const isRecovery =
