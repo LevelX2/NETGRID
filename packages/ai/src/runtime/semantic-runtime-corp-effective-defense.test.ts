@@ -32,6 +32,29 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     });
   });
 
+  it("flags zero-effect X-strength rez actions encoded in the legal action id", () => {
+    const context = semanticRuntimeCorpEffectiveDefenseContext(
+      corpInput(6),
+      rezAction("corp.rez_ice.test_ice.test_ice.x_strength.0.0", 6),
+      undefined,
+      { actionCreditCost },
+    );
+
+    expect(context).toMatchObject({
+      isRezzableNow: true,
+      postRezCredits: 0,
+      minimumUsefulX: 1,
+      hasImmediateStopPotential: false,
+      zeroEffectRisk: true,
+    });
+    expect(context?.evidence).toEqual(
+      expect.arrayContaining([
+        "effective_defense_variable_kind:x_strength",
+        "effective_defense_variable_value:0",
+      ]),
+    );
+  });
+
   it("treats a useful variable trace rez value as effective defense", () => {
     const context = semanticRuntimeCorpEffectiveDefenseContext(
       corpInput(5),

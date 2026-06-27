@@ -327,6 +327,39 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("penalizes action-id encoded zero-effect X rez actions without extra defense semantics", () => {
+    const actionId = "corp.rez_ice.test_ice.test_ice.x_strength.0.0";
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([]),
+      corpAction(actionId, "rez_ice"),
+      "simple_rez",
+      {
+        ...testDependencies(),
+        actionCreditCost: () => 4,
+      },
+      {
+        ...semanticCandidate(actionId, "corp_window.rez", [], "rez_ice"),
+        costProfile: {
+          creditCost: 4,
+          costKnownStatus: "known",
+          additionalCosts: [],
+        },
+      },
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_effective_defense_zero_effect_risk",
+          value: -1600,
+          reason: expect.stringContaining(
+            "effective_defense_variable_kind:x_strength",
+          ),
+        }),
+      ]),
+    );
+  });
+
   it("rewards rez actions with visible effective defense value", () => {
     const components = semanticRuntimeCorpScoreComponents(
       corpInputWithGoals([]),
