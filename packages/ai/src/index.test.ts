@@ -8310,7 +8310,7 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     );
   });
 
-  it("marks safe scoreline through the practical micro runtime", () => {
+  it("reports safe scoreline candidates through the practical micro runtime", () => {
     const input = corpActionPhaseInput(
       "ai-corp-practical-micro-scoreline",
       (state) => {
@@ -8343,16 +8343,27 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       },
     );
 
-    expect(decision.actionId).toBe(score.actionId);
     expect(decision.evidence).toContain(
-      "practical_micro_runtime_applied:corp_safe_scoreline",
+      "practical_micro_runtime_apply_requested:true",
+    );
+    expect(decision.evidence).toContain(
+      "practical_micro_runtime_actual_override:false",
+    );
+    expect(decision.evidence).toContain(
+      "practical_micro_candidate:corp_safe_scoreline",
     );
     expect(decision.evidence).toContain(
       "practical_micro_corp_safe_scoreline:true",
     );
+    expect(decision.evidence).toContain(
+      `practical_micro_runtime_reference:${decision.actionId}`,
+    );
+    expect(decision.evidence).not.toContain(
+      "practical_micro_runtime_applied:corp_safe_scoreline",
+    );
   });
 
-  it("installs visible breaker coverage through the practical micro runtime", () => {
+  it("reports visible breaker coverage candidates through the practical micro runtime", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-practical-micro-coverage-install",
       (state) => {
@@ -8395,16 +8406,27 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       },
     );
 
-    expect(decision.actionId).toBe(install.actionId);
     expect(decision.evidence).toContain(
-      "practical_micro_runtime_applied:runner_visible_coverage_install",
+      "practical_micro_runtime_apply_requested:true",
+    );
+    expect(decision.evidence).toContain(
+      "practical_micro_runtime_actual_override:false",
+    );
+    expect(decision.evidence).toContain(
+      "practical_micro_candidate:runner_visible_coverage_install",
     );
     expect(decision.evidence).toContain(
       "practical_micro_runner_visible_coverage_install:true",
     );
+    expect(decision.evidence).toContain(
+      `practical_micro_runtime_reference:${decision.actionId}`,
+    );
+    expect(decision.evidence).not.toContain(
+      "practical_micro_runtime_applied:runner_visible_coverage_install",
+    );
   });
 
-  it("completes visible run payoff through the practical micro runtime", () => {
+  it("reports visible run payoff candidates through the practical micro runtime", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-practical-micro-run-payoff",
       (state) => {
@@ -8450,12 +8472,23 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       },
     );
 
-    expect(decision.actionId).toBe(runRemote.actionId);
     expect(decision.evidence).toContain(
-      "practical_micro_runtime_applied:runner_run_payoff_completion",
+      "practical_micro_runtime_apply_requested:true",
+    );
+    expect(decision.evidence).toContain(
+      "practical_micro_runtime_actual_override:false",
+    );
+    expect(decision.evidence).toContain(
+      "practical_micro_candidate:runner_run_payoff_completion",
     );
     expect(decision.evidence).toContain(
       "practical_micro_runner_run_payoff_completion:true",
+    );
+    expect(decision.evidence).toContain(
+      `practical_micro_runtime_reference:${decision.actionId}`,
+    );
+    expect(decision.evidence).not.toContain(
+      "practical_micro_runtime_applied:runner_run_payoff_completion",
     );
   });
 

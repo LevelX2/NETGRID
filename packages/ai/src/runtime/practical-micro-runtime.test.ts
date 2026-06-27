@@ -158,7 +158,7 @@ describe("applyPracticalMicroRuntimeComparator", () => {
     );
   });
 
-  it("applies enabled candidates only when they are present in legalActions", () => {
+  it("keeps apply-mode candidates compare-only when they are present in legalActions", () => {
     const actual = applyPracticalMicroRuntimeComparator(
       input([legalAction("runtime-action"), legalAction("candidate-action")]),
       legacyDecision,
@@ -172,18 +172,26 @@ describe("applyPracticalMicroRuntimeComparator", () => {
       [candidate],
     );
 
-    expect(actual.actionId).toBe("candidate-action");
-    expect(actual.selectedChoices).toBeUndefined();
-    expect(actual.reasonCode).toBe(
-      "practical_micro_runner_visible_coverage_install",
-    );
-    expect(actual.consideredActionIds).toEqual(["runtime-action", "candidate-action"]);
+    expect(actual.actionId).toBe("runtime-action");
+    expect(actual.selectedChoices).toEqual({ targetId: "stale-choice" });
+    expect(actual.reasonCode).toBe("runtime");
+    expect(actual.consideredActionIds).toEqual(["runtime-action"]);
     expect(actual.evidence).toEqual(
       expect.arrayContaining([
         "candidate_evidence",
-        "practical_micro_runtime_applied:runner_visible_coverage_install",
+        "practical_micro_runtime_compare:true",
+        "practical_micro_runtime_apply_requested:true",
+        "practical_micro_runtime_actual_override:false",
+        "practical_micro_candidate:runner_visible_coverage_install",
         "practical_micro_legacy_action:legacy-action",
         "practical_micro_runtime_reference:runtime-action",
+      ]),
+    );
+    expect(actual.decisionDebug?.detailSections?.at(-1)?.items).toEqual(
+      expect.arrayContaining([
+        "micro_candidate:runner_visible_coverage_install:candidate-action",
+        "apply_requested:true",
+        "actual_override:false",
       ]),
     );
   });

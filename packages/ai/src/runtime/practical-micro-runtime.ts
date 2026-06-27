@@ -36,13 +36,20 @@ export function applyPracticalMicroRuntimeComparator(
   );
   const selectedCandidate = allowedCandidates[0];
   if (mode === "apply" && selectedCandidate) {
-    return practicalMicroDecision(input, runtimeDecision, selectedCandidate, legacyDecision);
+    return practicalMicroCompareDecision(
+      runtimeDecision,
+      legacyDecision,
+      selectedCandidate,
+      [selectedCandidate],
+      true,
+    );
   }
-  return practicalMicroDebugDecision(
+  return practicalMicroCompareDecision(
     runtimeDecision,
     legacyDecision,
     selectedCandidate,
     candidates,
+    false,
   );
 }
 
@@ -52,51 +59,27 @@ export function practicalMicroRuntimeMode(
   return options.practicalMicroRuntime?.mode ?? "off";
 }
 
-function practicalMicroDecision(
-  input: AiDecisionInput,
-  runtimeDecision: AiDecision,
-  candidate: PracticalMicroCandidate,
-  legacyDecision: AiDecision,
-): AiDecision {
-  const { selectedChoices: _selectedChoices, ...runtimeDecisionWithoutChoices } =
-    runtimeDecision;
-  return {
-    ...runtimeDecisionWithoutChoices,
-    actionId: candidate.actionId,
-    reasonCode: candidate.reasonCode,
-    explanation: candidate.explanation,
-    consideredActionIds: input.legalActions.map((action) => action.actionId),
-    fallbackUsed: false,
-    evidence: [
-      ...(runtimeDecision.evidence ?? []),
-      ...candidate.evidence,
-      `practical_micro_runtime_applied:${candidate.ruleId}`,
-      `practical_micro_legacy_action:${legacyDecision.actionId}`,
-      `practical_micro_runtime_reference:${runtimeDecision.actionId}`,
-    ],
-    decisionDebug: practicalMicroDecisionDebug(
-      runtimeDecision,
-      legacyDecision,
-      candidate,
-      [candidate],
-    ),
-  };
-}
-
-function practicalMicroDebugDecision(
+function practicalMicroCompareDecision(
   runtimeDecision: AiDecision,
   legacyDecision: AiDecision,
   selectedCandidate: PracticalMicroCandidate | undefined,
   candidates: readonly PracticalMicroCandidate[],
+  applyRequested: boolean,
 ): AiDecision {
   return {
     ...runtimeDecision,
     evidence: [
       ...(runtimeDecision.evidence ?? []),
       "practical_micro_runtime_compare:true",
+      `practical_micro_runtime_apply_requested:${applyRequested}`,
+      "practical_micro_runtime_actual_override:false",
       `practical_micro_legacy_action:${legacyDecision.actionId}`,
+      `practical_micro_runtime_reference:${runtimeDecision.actionId}`,
       ...(selectedCandidate
-        ? [`practical_micro_candidate:${selectedCandidate.ruleId}`]
+        ? [
+            ...selectedCandidate.evidence,
+            `practical_micro_candidate:${selectedCandidate.ruleId}`,
+          ]
         : ["practical_micro_candidate:none"]),
     ],
     decisionDebug: practicalMicroDecisionDebug(
@@ -104,6 +87,7 @@ function practicalMicroDebugDecision(
       legacyDecision,
       selectedCandidate,
       candidates,
+      applyRequested,
     ),
   };
 }
@@ -113,6 +97,7 @@ function practicalMicroDecisionDebug(
   legacyDecision: AiDecision,
   selectedCandidate: PracticalMicroCandidate | undefined,
   candidates: readonly PracticalMicroCandidate[],
+  applyRequested: boolean,
 ): NonNullable<AiDecision["decisionDebug"]> {
   const base =
     runtimeDecision.decisionDebug ?? {
@@ -134,6 +119,8 @@ function practicalMicroDecisionDebug(
             ? `micro_candidate:${selectedCandidate.ruleId}:${selectedCandidate.actionId}`
             : "micro_candidate:none",
           `micro_candidate_count:${candidates.length}`,
+          `apply_requested:${applyRequested}`,
+          "actual_override:false",
         ],
       },
     ],

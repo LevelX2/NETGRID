@@ -6661,6 +6661,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-13`.
   - Status bleibt `IN_PROGRESS`, weil Practical-Micro-Apply und TacticalPlan-Mapping-Overrides noch klassifiziert oder in modellierte Outcome-/Gate-Pfade überführt werden müssen.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 1 Datei, 5 Tests.
 
+- `AI-COMPLETE-13` zweiter Practical-Micro-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-micro-runtime.ts` ersetzt `mode:"apply"` durch Compare-only-Verhalten: die Runtime-Action, `selectedChoices`, `reasonCode`, `explanation`, `consideredActionIds` und `fallbackUsed` bleiben unverändert.
+  - Apply-Anforderung und Kandidat bleiben in Evidence/Debug sichtbar: `practical_micro_runtime_apply_requested:true`, `practical_micro_runtime_actual_override:false`, `practical_micro_candidate:<rule>`.
+  - `practical-micro-runtime.test.ts` und die drei `index.test.ts`-Integrationsfälle schützen, dass Practical-Micro-Kandidaten gemeldet, aber nicht mehr als eigenes Action-Override-System angewendet werden.
+  - Status bleibt `IN_PROGRESS`, weil TacticalPlan-Mapping-Overrides noch klassifiziert oder modelliert werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-micro-runtime.test.ts src/runtime/practical-tactic-overlay.test.ts src/index.test.ts -t "practical micro runtime|PracticalTacticOverlay"` grün, 3 Dateien, 9 relevante Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
