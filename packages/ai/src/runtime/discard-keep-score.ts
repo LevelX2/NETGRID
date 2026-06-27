@@ -6,6 +6,7 @@ import {
 } from "./discard-fit-bonus";
 import { discardCurrentPlanKind } from "./discard-plan";
 import { sortedUnique } from "./collection";
+import { rolesMatch } from "./role-match";
 
 export type DiscardCandidateScore = {
   total: number;
@@ -71,13 +72,13 @@ export function discardKeepScore(
       roles.some((role) => role.endsWith("_ice") || role === "etr_ice")
     )
       baseValue += 320;
-    const economyRole = roles.some((role) => role.includes("economy"));
+    const economyRole = rolesMatch(roles, ["economy"]);
     if (type === "operation") baseValue += economyRole ? 120 : 40;
     if (economyRole) baseValue += input.playerView.own.credits < 5 ? 135 : 55;
-    if (roles.some((role) => role.includes("score") || role.includes("remote")))
+    if (rolesMatch(roles, ["score", "remote"]))
       baseValue += 70;
   } else {
-    if (roles.some((role) => role.startsWith("breaker_"))) {
+    if (rolesMatch(roles, ["breaker_"])) {
       const installedSameBreakerRole = roles.some(
         (role) =>
           role.startsWith("breaker_") &&
@@ -87,7 +88,7 @@ export function discardKeepScore(
       );
       baseValue += installedSameBreakerRole ? 95 : 210;
     }
-    if (roles.some((role) => role.includes("economy") || role === "tempo"))
+    if (rolesMatch(roles, ["economy", "tempo"]))
       baseValue += input.playerView.own.credits < 4 ? 170 : 65;
     if (
       roles.includes("memory") ||

@@ -21,6 +21,22 @@ describe("discard keep score", () => {
         .baseValue,
     ).toBeGreaterThan(score(corpCard("neutral-operation", "operation")).baseValue);
   });
+
+  it("ignores substring-only Corp discard role noise", () => {
+    const benignRole = score(corpCard("benign-role", "operation"), [
+      "neutral_support",
+    ]).baseValue;
+
+    expect(
+      score(corpCard("microeconomy-role", "operation"), ["microeconomy"])
+        .baseValue,
+    ).toBe(benignRole);
+    expect(
+      score(corpCard("remotecontrol-role", "operation"), [
+        "remotecontrol_noise",
+      ]).baseValue,
+    ).toBe(benignRole);
+  });
 });
 
 function score(card: VisibleCard, roles: readonly string[] = []) {

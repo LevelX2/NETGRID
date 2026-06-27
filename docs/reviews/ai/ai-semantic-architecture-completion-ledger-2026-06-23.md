@@ -7232,6 +7232,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` einundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/discard-keep-score.ts` nutzt für interne Economy-, Score-, Remote-, Breaker- und Tempo-Rollenprüfungen den gehärteten `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Corp-Discard-Keep-Score wertet strukturierte Rollen wie `economy_asset` weiter, ignoriert aber substringartiges Rollenrauschen wie `microeconomy` und `remotecontrol_noise`.
+  - `discard-keep-score.test.ts` schützt strukturierte Rollentreffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/discard-keep-score.test.ts src/runtime/role-match.test.ts src/runtime/discard-plan.test.ts` grün, 3 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
