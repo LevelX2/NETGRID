@@ -115,6 +115,10 @@ import {
   runPlanStepMatchesAction,
 } from "./plans/tactical-plan-run-action-matching";
 import {
+  candidateMappingRationale,
+  mappingStatusForStep,
+} from "./plans/tactical-plan-mapping-helpers";
+import {
   actionTypeMatchesStep,
   candidateSemanticsMatchStep,
 } from "./plans/tactical-plan-step-semantics";
@@ -399,24 +403,6 @@ export function mapPlanStepToLegalActions(
   };
 }
 
-function mappingStatusForStep(
-  step: PlanStep,
-  legalActions: readonly LegalAction[],
-): PlanMappingStatus {
-  if (legalActions.length > 0) return "matched";
-  if (
-    step.requiredCapabilities.some(
-      (capability) =>
-        capability.kind.startsWith("breaker_") ||
-        capability.kind === "remote_protection" ||
-        capability.kind === "bank_payout",
-    )
-  ) {
-    return "blocked_missing_capability";
-  }
-  return "blocked_no_legal_action";
-}
-
 function planStepCandidatePriority(
   plan: TacticalPlan,
   step: PlanStep,
@@ -536,18 +522,6 @@ function candidateMatchesStep(
   return actionTypeMatchesStep(step, candidate.actionType) &&
     candidateTargetMatchesPlan(plan, candidate, action) &&
     bankStepMatchesCandidate(step, candidate, action);
-}
-
-function candidateMappingRationale(candidate: ActionSemanticCandidate): string {
-  return [
-    `candidate_match:${candidate.actionId}`,
-    `semantic:${candidate.semanticActionType}`,
-    ...(candidate.sourceCardId ? [`source:${candidate.sourceCardId}`] : []),
-    ...(candidate.abilityId ? [`ability:${candidate.abilityId}`] : []),
-    ...(candidate.actionTacticSignals.length > 0
-      ? [`tactics:${candidate.actionTacticSignals.slice(0, 4).join(",")}`]
-      : []),
-  ].join("|");
 }
 
 function isCoverageAnswerStep(step: PlanStep): boolean {
