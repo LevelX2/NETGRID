@@ -1,5 +1,9 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import {
+  semanticRuntimeCorpScoringWindowAssessment,
+  type CorpScoringWindowAssessment,
+} from "./semantic-runtime-corp-scoring-window";
 
 type CorpServerLike = {
   id: string;
@@ -36,6 +40,11 @@ export type SemanticRuntimeCorpRemoteScoreDependencies<
     input: AiDecisionInput,
     action: LegalAction,
   ) => boolean;
+  visibleIceRezCost: (card: VisibleCard) => number | undefined;
+  actionSourceCard: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => VisibleCard | undefined;
 };
 
 export function semanticRuntimeCorpInstallRemoteScore<
@@ -70,10 +79,20 @@ export function semanticRuntimeCorpInstallRemoteScore<
     action,
     roles,
   );
+  const scoringWindow = semanticRuntimeCorpScoringWindowAssessment(
+    input,
+    action,
+    dependencies,
+    roles,
+  );
 
   if (installsIce) {
+    if (scoringWindow?.recommendedNextStep === "build_remote_ice") {
+      if (scoringWindow.windowKind === "durable") return 1350;
+      if (scoringWindow.windowKind === "temporary_safe") return 1150;
+    }
     if (dependencies.remoteHasScoreLine(server)) {
-      return protectedRemote ? 650 : 950;
+      return protectedRemote ? 950 : 1150;
     }
     if (
       !hasRoot &&
@@ -93,6 +112,10 @@ export function semanticRuntimeCorpInstallRemoteScore<
   }
 
   if (targetIsScoreLine) {
+    const scoreWindowValue = semanticRuntimeCorpScoreLineWindowValue(
+      scoringWindow,
+    );
+    if (scoreWindowValue !== 0) return scoreWindowValue;
     if (protectedRemote) return 950;
     return hasStabilizingAlternative ? -2700 : -1700;
   }
@@ -161,9 +184,33 @@ export function semanticRuntimeCorpAdvanceRemoteScore<
   const serverId = dependencies.actionServerId(input, action);
   if (!dependencies.isRemoteServerTarget(serverId)) return 0;
   const server = dependencies.server(input, serverId);
-  if (dependencies.advanceCompletesScore(input, action)) return 1100;
+  if (dependencies.advanceCompletesScore(input, action)) return 1250;
+  const scoringWindow = semanticRuntimeCorpScoringWindowAssessment(
+    input,
+    action,
+    dependencies,
+  );
+  const scoreWindowValue = semanticRuntimeCorpScoreLineWindowValue(
+    scoringWindow,
+  );
+  if (scoreWindowValue !== 0) return scoreWindowValue;
   if (dependencies.remoteIsProtected(server)) return 900;
   return dependencies.hasStabilizingAlternative(input, action) ? -2700 : -1700;
+}
+
+function semanticRuntimeCorpScoreLineWindowValue(
+  assessment: CorpScoringWindowAssessment | undefined,
+): number {
+  switch (assessment?.windowKind) {
+    case "durable":
+      return 1450;
+    case "temporary_safe":
+      return 1250;
+    case "unsafe":
+      return -2200;
+    default:
+      return 0;
+  }
 }
 
 function semanticRuntimeCorpHasAgendaInHq(input: AiDecisionInput): boolean {

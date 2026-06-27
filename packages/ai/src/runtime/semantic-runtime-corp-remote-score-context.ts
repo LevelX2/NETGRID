@@ -6,6 +6,10 @@ import {
   semanticRuntimeCorpShouldBuildProtectedScoreRemote,
   type SemanticRuntimeCorpRemoteScoreDependencies,
 } from "./semantic-runtime-corp-remote-score";
+import {
+  semanticRuntimeCorpScoringWindowAssessment,
+  type CorpScoringWindowAssessment,
+} from "./semantic-runtime-corp-scoring-window";
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
@@ -25,6 +29,11 @@ export type SemanticRuntimeCorpRemoteScoreContext = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => number;
+  semanticRuntimeCorpScoringWindowAssessment: (
+    input: AiDecisionInput,
+    action: LegalAction,
+    roles?: string[],
+  ) => CorpScoringWindowAssessment | undefined;
 };
 
 export function createSemanticRuntimeCorpRemoteScoreContext(
@@ -57,5 +66,12 @@ export function createSemanticRuntimeCorpRemoteScoreContext(
       ),
     semanticRuntimeCorpAdvanceRemoteScore: (input, action) =>
       semanticRuntimeCorpAdvanceRemoteScore(input, action, dependencies),
+    semanticRuntimeCorpScoringWindowAssessment: (input, action, roles) =>
+      semanticRuntimeCorpScoringWindowAssessment(
+        input,
+        action,
+        dependencies,
+        roles,
+      ),
   };
 }

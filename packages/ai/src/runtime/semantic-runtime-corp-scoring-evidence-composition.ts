@@ -1,4 +1,4 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   createSemanticRuntimeCorpAdvancementCounterContext,
 } from "./semantic-runtime-corp-advancement-counter-context";
@@ -19,6 +19,7 @@ import {
   createSemanticRuntimeCorpScoreComposition,
   type SemanticRuntimeCorpScoreCompositionDependencies,
 } from "./semantic-runtime-corp-score-composition";
+import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
@@ -43,7 +44,13 @@ export type SemanticRuntimeCorpScoringEvidenceCompositionDependencies<
       | "hasRemoteRezFloorFundingNeed"
       | "hasCentralRezFloorFundingNeed"
       | "remoteRezFloorAssessment"
-    >;
+    > & {
+      corpScoringWindowAssessment: (
+        input: AiDecisionInput,
+        action: LegalAction,
+        roles?: string[],
+      ) => CorpScoringWindowAssessment | undefined;
+    };
 
 export function createSemanticRuntimeCorpScoringEvidenceComposition<
   TConsumer extends string,
@@ -74,7 +81,10 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
       dependencies.corpRemoteRezFloorAssessment(input, action)
         ?.blockedByFloor === true ||
       dependencies.corpRemoteScoreContestabilityAssessment(input, action)
-        ?.contestable === true,
+        ?.contestable === true ||
+      !scoringWindowIsSafe(
+        dependencies.corpScoringWindowAssessment(input, action),
+      ),
   });
 
   const {
@@ -152,4 +162,13 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
     semanticRuntimeCorpEvidence,
     semanticRuntimeCorpScoreComponents,
   };
+}
+
+function scoringWindowIsSafe(
+  assessment: CorpScoringWindowAssessment | undefined,
+): boolean {
+  return (
+    assessment?.windowKind === "temporary_safe" ||
+    assessment?.windowKind === "durable"
+  );
 }
