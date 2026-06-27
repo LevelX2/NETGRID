@@ -1683,6 +1683,111 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(items)).not.toContain("runner_card_");
   });
 
+  it("explains prevented subroutine damage with original, prevented and final amounts", () => {
+    const preventedItems = formatChronicleEffectItems(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_061_shield",
+        title: "Shield",
+        eventModificationDecision: "apply",
+        eventModificationOutcome: "prevented",
+        originalAmount: 2,
+        preventedAmount: 2,
+        finalAmount: 0,
+        damageResolved: true,
+        damageType: "net",
+        damageAmount: 0,
+        cardsTrashed: 0,
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_proteus_012_bug-zapper",
+            sourceTitle: "Bug Zapper",
+            subroutineIndex: 0,
+            subroutineType: "do_damage",
+            damageType: "net",
+            amount: 0,
+            cardsTrashed: 0,
+          },
+          {
+            effectId: "subroutine_2",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_proteus_012_bug-zapper",
+            sourceTitle: "Bug Zapper",
+            subroutineIndex: 1,
+            subroutineType: "end_the_run",
+            endedRun: true,
+          },
+        ],
+      }),
+      "runner",
+    );
+
+    expect(preventedItems.map((item) => item.title)).toEqual([
+      "Bug Zapper: Subroutine 1 macht 2 Net Damage; 2 durch Shield verhindert, Ergebnis 0 Net Damage.",
+      "Bug Zapper: Subroutine 2 beendet den Run.",
+    ]);
+    expect(preventedItems[0]?.description).toBe(
+      "Kein Net Damage bleibt übrig.",
+    );
+    expect(preventedItems[0]?.chips).toEqual(
+      expect.arrayContaining([
+        "Subroutine 1",
+        "2 Net Damage",
+        "2 verhindert",
+        "0 Net Damage",
+        "Shield",
+        "Bug Zapper",
+      ]),
+    );
+    expect(JSON.stringify(preventedItems)).not.toContain("runner_card_");
+
+    const partialItem = formatChronicleEffectItems(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_061_shield",
+        title: "Shield",
+        eventModificationDecision: "apply",
+        eventModificationOutcome: "partially_prevented",
+        originalAmount: 3,
+        preventedAmount: 2,
+        finalAmount: 1,
+        damageResolved: true,
+        damageType: "net",
+        damageAmount: 1,
+        cardsTrashed: 1,
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_proteus_012_bug-zapper",
+            sourceTitle: "Bug Zapper",
+            subroutineIndex: 0,
+            subroutineType: "do_damage",
+            damageType: "net",
+            amount: 1,
+            cardsTrashed: 1,
+          },
+        ],
+      }),
+      "runner",
+    )[0];
+
+    expect(partialItem?.title).toBe(
+      "Bug Zapper: Subroutine 1 macht 3 Net Damage; 2 durch Shield verhindert, Ergebnis 1 Net Damage.",
+    );
+    expect(partialItem?.description).toBe(
+      "eine Karte wurde in den Heap bewegt.",
+    );
+  });
+
   it("names the program trashed by Banpei's trash-a-program subroutine", () => {
     const items = formatChronicleEffectItems(
       makeEvent("continue_run", {
