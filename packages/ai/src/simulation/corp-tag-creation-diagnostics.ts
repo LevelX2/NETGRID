@@ -7,7 +7,7 @@ import type {
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 
 import { RUNTIME_CARDS } from "../ai-hints";
-import { classifyCorpScoredAgendaAbility } from "../corp-plans";
+import { classifyCorpScoredAgendaAbility } from "../legacy/legacy-planner-entrypoints";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 export type CorpTagCreationDiagnosticsDependencies = {

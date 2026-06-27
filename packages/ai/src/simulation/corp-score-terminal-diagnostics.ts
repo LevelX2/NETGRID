@@ -1,6 +1,6 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
-import { assessCorpScoreTerminalWindow } from "../corp-plans";
+import { assessCorpScoreTerminalWindow } from "../legacy/legacy-planner-entrypoints";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 export type CorpScoreTerminalChosenFamily =

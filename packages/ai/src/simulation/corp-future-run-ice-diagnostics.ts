@@ -3,7 +3,7 @@ import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import {
   assessCorpFutureRunIcePlacement,
   classifyCorpFutureRunIceDefinitionId,
-} from "../corp-plans";
+} from "../legacy/legacy-planner-entrypoints";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 export type SourceDefinitionIdForSimulationAction = (

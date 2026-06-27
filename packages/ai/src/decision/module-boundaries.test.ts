@@ -472,6 +472,31 @@ describe("AI module boundaries", () => {
 
     expect(violations).toEqual([]);
   });
+
+  it("keeps runtime, simulation and diagnostics off legacy planner compatibility facades", () => {
+    const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
+    const violations = checkedAreas.flatMap((area) =>
+      productionFiles(area as Parameters<typeof productionFiles>[0])
+        .flatMap((file) =>
+          importsFrom(file)
+            .filter((reference) =>
+              reference.importSource === "../corp-plans" ||
+              reference.importSource === "../runner-plans" ||
+              reference.importSource === "./corp-plans" ||
+              reference.importSource === "./runner-plans",
+            )
+            .map((reference) =>
+              violation(
+                file,
+                reference,
+                "use legacy/legacy-planner-entrypoints or a focused non-legacy module",
+              ),
+            ),
+        ),
+    );
+
+    expect(violations).toEqual([]);
+  });
 });
 
 function productionFiles(
@@ -482,7 +507,8 @@ function productionFiles(
     | "diagnostics"
     | "evaluation"
     | "reports"
-    | "runtime",
+    | "runtime"
+    | "simulation",
 ): string[] {
   const root = path.join(srcDir, area);
   return collectSourceFiles(root).filter((file) => !file.endsWith(".test.ts"));

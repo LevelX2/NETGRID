@@ -1,7 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
 import { evaluateCorpOpeningHand } from "../deck-doctrine";
-import { classifyCorpScoredAgendaAbility } from "../corp-plans";
+import { classifyCorpScoredAgendaAbility } from "./corp-plans";
 import { cardDefinitionTypeForAi } from "../runtime/card-definition-lookup";
 import {
   corpSourceAdvancementCounterCreditPayoutAssessment,

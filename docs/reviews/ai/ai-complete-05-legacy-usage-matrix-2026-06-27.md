@@ -46,11 +46,11 @@ Fuehrend ist der Code-Stand nach `refactor(ai): add legacy planner entrypoint`.
 | --- | --- | --- | --- | --- |
 | Shadow-/Comparison-Diagnostik | `packages/ai/src/controlled-shadow-mode.ts`, `packages/ai/src/shadow-scoring-diagnostics.ts` | Vergleicht Legacy-Referenzen mit semantischen Entscheidungen. | Diagnose-only, kein produktiver Selector. | Behalten, solange Cutover-Vergleich gebraucht wird; nicht als produktive Entscheidung verwenden. |
 | Simulation Decision Context | `packages/ai/src/simulation/simulation-decision-context.ts` und Simulation Compositions | Nutzt Baseline-Entscheider als Vergleichs-/Harness-Abhaengigkeit. | Simulation/Benchmark. | Behalten, aber als explizite Baseline-Abhaengigkeit dokumentieren. |
-| Corp Simulation Diagnostics | `packages/ai/src/simulation/corp-*-diagnostics.ts` und verwandte Dateien | Importieren teils historische `corp-plans.ts`-Facade fuer Diagnosehelfer. | Diagnose-/Metriknutzung mit Migrationsbedarf. | Auf dedizierte Diagnose-/Ontology-Module oder `legacy-planner-entrypoints` umstellen. |
+| Corp Simulation Diagnostics | `packages/ai/src/simulation/corp-*-diagnostics.ts` und verwandte Dateien | Nutzen Corp-Legacy-Diagnosehelfer ueber `legacy-planner-entrypoints.ts`. | Diagnose-/Metriknutzung mit Migrationsbedarf, aber ohne direkte Kompatibilitaets-Facade-Imports. | Auf dedizierte Diagnose-/Ontology-Module umstellen, wenn die jeweiligen Helper aus Legacy herausgeloest sind. |
 
 ## Naechste Schnitte
 
-1. Produktive Direktimporte auf Legacy-Kompatibilitaetsfacades weiter reduzieren.
-2. Simulation-/Diagnoseimporte aus `corp-plans.ts` fachlich klassifizieren und auf dedizierte Diagnosemodule umstellen.
+1. Verbleibende Public-Contract-Exports der Legacy-Kompatibilitaetsfacades pruefen.
+2. Simulation-/Diagnoseimporte ueber `legacy-planner-entrypoints.ts` fachlich auf dedizierte Diagnosemodule umstellen.
 3. Legacy-Scoring-Adapterverbraucher nach Semantic-Scoring-Ownern aufteilen.
 4. Legacy-Planer-Dateien einfrieren: Boundary-Test soll neue produktive Importe oder neue Semantik in `legacy/runner-plans.ts` und `legacy/corp-plans.ts` verhindern.

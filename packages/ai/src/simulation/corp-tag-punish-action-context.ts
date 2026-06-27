@@ -1,6 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
-import { classifyCorpScoredAgendaAbility } from "../corp-plans";
+import { classifyCorpScoredAgendaAbility } from "../legacy/legacy-planner-entrypoints";
 import {
   classifyTagPunishLegalActionFromOntology,
   type StructuredTagPunishLegalActionAssessment,

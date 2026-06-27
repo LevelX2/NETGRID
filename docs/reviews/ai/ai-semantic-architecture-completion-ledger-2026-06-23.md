@@ -6255,6 +6255,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts` grün, 15 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1647 Tests.
+- `AI-COMPLETE-05` dritter Legacy-Schnitt:
+  - Corp-bezogene Simulation-/Diagnosemodule importieren Legacy-Helfer nicht mehr direkt über die historische `corp-plans.ts`-Kompatibilitäts-Fassade, sondern über `packages/ai/src/legacy/legacy-planner-entrypoints.ts`.
+  - Legacy-interne Scoring-Helfer importieren `classifyCorpScoredAgendaAbility` direkt aus `legacy/corp-plans.ts` statt über die öffentliche Kompatibilitäts-Fassade.
+  - `packages/ai/src/decision/module-boundaries.test.ts` verhindert neue direkte Plan-Facade-Imports aus Runtime, Simulation, Diagnostics und Evaluation.
+  - Status bleibt `IN_PROGRESS`, weil die Legacy-Scoring-Adapter und die Public-Contract-Facades noch weiter klassifiziert beziehungsweise abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 82 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1648 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-05`.
 

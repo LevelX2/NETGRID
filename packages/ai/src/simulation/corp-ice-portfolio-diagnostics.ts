@@ -1,6 +1,6 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
-import { assessCorpIcePortfolioAction } from "../corp-plans";
+import { assessCorpIcePortfolioAction } from "../legacy/legacy-planner-entrypoints";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
