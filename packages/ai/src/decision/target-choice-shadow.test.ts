@@ -391,6 +391,15 @@ describe("TargetChoiceShadow", () => {
         target: ["remote_2_asset", "remote_1_agenda"],
       },
       utilityFamilies: ["corp_scoreline"],
+      opportunities: [
+        {
+          opportunity: "score_window",
+          priority: "high",
+          side: "corp",
+          targetId: "remote_1_agenda",
+          evidence: ["test:structured_score_window"],
+        },
+      ],
     });
 
     expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
@@ -400,6 +409,35 @@ describe("TargetChoiceShadow", () => {
     expect(report.rankedOptions[0]?.evidence).toEqual(
       expect.arrayContaining(["utility_family:corp_scoreline"]),
     );
+  });
+
+  it("does not treat score-like target option ids as scoreline targets", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "corp-target",
+        side: "corp",
+        type: "activated_card_ability",
+        targetRequirements: [
+          {
+            id: "target",
+            kind: "card",
+            side: "corp",
+            zoneScope: ["remote"],
+            visibility: "known_to_actor",
+          },
+        ],
+      }),
+      sideSafeTargetIdsByRequirementId: {
+        target: ["remote_1_scoreline_text", "remote_2_asset"],
+      },
+      utilityFamilies: ["corp_scoreline"],
+    });
+
+    expect(
+      report.rankedOptions.find(
+        (option) => option.optionId === "remote_1_scoreline_text",
+      )?.evidence,
+    ).not.toContain("utility_family:corp_scoreline");
   });
 
   it("ranks side-safe target options from semantic candidate target context", () => {

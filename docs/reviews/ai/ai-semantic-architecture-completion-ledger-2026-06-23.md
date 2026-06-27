@@ -7143,6 +7143,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck`, `corepack pnpm --filter @netgrid/engine typecheck` und `corepack pnpm --filter @netgrid/shared typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` einundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/target-choice-shadow.ts` entfernt die Scoreline-Zielerkennung über `optionId.includes("agenda"|"score")`.
+  - Corp-Scoreline-Utility für TargetChoiceShadow-Ziele entsteht dort nur noch aus strukturierten Score-/Advance-Action-Typen, zielgebundener `score_window`-Opportunity oder targetloser Score-Window-Opportunity.
+  - `target-choice-shadow.test.ts` schützt den strukturierten `score_window`-Pfad und den Negativfall, dass scoreartige OptionIds ohne strukturierte Scoreline-Evidence keinen Scoreline-Bonus erhalten.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/target-choice-shadow.test.ts src/decision/semantic-shadow-decision.test.ts` grün, 2 Dateien, 31 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

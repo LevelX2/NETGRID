@@ -560,7 +560,7 @@ function targetContextScore(
 
   if (
     utilityFamilies.has("corp_scoreline") &&
-    (isScorelineTarget(params.action, safeOptionId) ||
+    (isScorelineTarget(params.action, matchingOpportunities) ||
       hasTargetlessScoreWindow(params.opportunities ?? []))
   ) {
     scoreDelta += 22;
@@ -606,12 +606,16 @@ function isRemoteTarget(optionId: string): boolean {
   return optionId.startsWith("remote_");
 }
 
-function isScorelineTarget(action: LegalAction, optionId: string): boolean {
+function isScorelineTarget(
+  action: LegalAction,
+  matchingOpportunities: readonly AiOpportunityProjection[],
+): boolean {
   return (
     action.type === "advance_card" ||
     action.type === "score_agenda" ||
-    optionId.includes("agenda") ||
-    optionId.includes("score")
+    matchingOpportunities.some(
+      (opportunity) => opportunity.opportunity === "score_window",
+    )
   );
 }
 
