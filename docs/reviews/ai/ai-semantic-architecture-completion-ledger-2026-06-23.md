@@ -6685,6 +6685,12 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1680 Tests.
   - Status: `AI-COMPLETE-13` `VERIFIED`; `AI-COMPLETE-14` ist das nächste aktive Ziel.
 
+- `AI-COMPLETE-14` erster DefinitionId-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-visible-breaker-coverage.ts` leitet Fracter-/Decoder-/Killer-Rollen nur noch aus sichtbaren Subtypes ab und entfernt die Demo-DefinitionId-Fallbacks `simple_fracter`, `simple_decoder` und `simple_killer`.
+  - `runner-visible-breaker-coverage.test.ts` schützt, dass ein generischer sichtbarer Fracter-Subtype erkannt wird, ein nackter `simple_fracter`-DefinitionId aber keine Rolle erzeugt.
+  - Status bleibt `IN_PROGRESS`, weil weitere CardDefinitionId-, Titel-/Label- und payloadspezifische produktive Pfade noch auditiert und abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-visible-breaker-coverage.test.ts src/runtime/practical-micro-runtime.test.ts src/index.test.ts -t "visible breaker coverage|structured breaker coverage|visible wall coverage|Junkyard BBS recovery"` grün, 1 aktive Datei, 6 relevante Tests.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

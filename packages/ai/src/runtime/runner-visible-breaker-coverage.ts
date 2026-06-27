@@ -96,13 +96,13 @@ export function visibleBreakerRoles(card: VisibleCard): string[] {
     subtype.toLowerCase(),
   );
   const roles = new Set<string>();
-  if (subtypes.includes("fracter") || card.definitionId === "simple_fracter") {
+  if (subtypes.includes("fracter")) {
     roles.add("fracter");
   }
-  if (subtypes.includes("decoder") || card.definitionId === "simple_decoder") {
+  if (subtypes.includes("decoder")) {
     roles.add("decoder");
   }
-  if (subtypes.includes("killer") || card.definitionId === "simple_killer") {
+  if (subtypes.includes("killer")) {
     roles.add("killer");
   }
   if (subtypes.includes("icebreaker") && roles.size === 0) {
