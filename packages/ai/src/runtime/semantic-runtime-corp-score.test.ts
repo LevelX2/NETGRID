@@ -148,6 +148,24 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     }
   });
 
+  it("scores structured Corp install roles and ignores substring-only role noise", () => {
+    const structuredKeys = componentKeysForInstallRoles([
+      "ice_tax",
+      "remote_protect",
+      "economy_asset",
+    ]);
+    expect(structuredKeys).toContain("corp_install_protection");
+    expect(structuredKeys).toContain("corp_install_economy");
+
+    const noiseKeys = componentKeysForInstallRoles([
+      "nice_noise",
+      "protectorate_noise",
+      "microeconomy_noise",
+    ]);
+    expect(noiseKeys).not.toContain("corp_install_protection");
+    expect(noiseKeys).not.toContain("corp_install_economy");
+  });
+
   it("scores visible tag punish actions from side-safe action semantics", () => {
     const components = semanticRuntimeCorpScoreComponents(
       corpInputWithGoals([
@@ -457,6 +475,18 @@ function testDependencies() {
     corpTaggedPayoffWindowPassiveActionPenalty: () => undefined,
     corpPassiveScoreLinePenalty: () => undefined,
   };
+}
+
+function componentKeysForInstallRoles(roles: string[]): string[] {
+  return semanticRuntimeCorpScoreComponents(
+    corpInputWithGoals([]),
+    corpAction("install-card", "install_card"),
+    "basic_install",
+    {
+      ...testDependencies(),
+      rolesForAction: () => roles,
+    },
+  ).map((component) => component.key);
 }
 
 function semanticCandidate(

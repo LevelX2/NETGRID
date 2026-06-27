@@ -8,6 +8,7 @@ import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import {
   semanticRuntimeCorpEffectiveDefenseContext,
 } from "./semantic-runtime-corp-effective-defense";
+import { rolesMatch } from "./role-match";
 
 type SemanticRuntimeCorpSafetyGate = {
   allowed: boolean;
@@ -202,7 +203,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     }
     if (
       action.payload?.placement === "ice" ||
-      roles.some((role) => role.includes("ice") || role.includes("protect"))
+      rolesMatch(roles, ["ice", "protect"])
     ) {
       components.push({
         key: "corp_install_protection",
@@ -211,7 +212,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: "protect_role",
       });
     }
-    if (roles.some((role) => role.includes("economy"))) {
+    if (rolesMatch(roles, ["economy"])) {
       components.push({
         key: "corp_install_economy",
         label: "Economy-Aufbau",
