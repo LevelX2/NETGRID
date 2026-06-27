@@ -6861,6 +6861,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` elfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` entfernt im Runner-Stale-Run-Kandidaten den Label-Fallback auf `stale|no current payoff|no_current_payoff`.
+  - Stale-Run-Erkennung benötigt dort nun das strukturierte Payload-Flag `knownNoCurrentPayoff`.
+  - `practical-tactic-overlay.test.ts` schützt, dass label-only No-Payoff-Text nicht als stale Run zählt, das strukturierte Payload-Flag aber weiterhin den Compare-only-Ausweichkandidaten erzeugt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

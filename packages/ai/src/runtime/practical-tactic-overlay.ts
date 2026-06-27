@@ -215,8 +215,7 @@ function runnerAvoidStaleRunCandidate(
   const staleRun = input.legalActions.find(
     (action) =>
       action.type === "start_run" &&
-      (action.payload?.knownNoCurrentPayoff === true ||
-        /stale|no current payoff|no_current_payoff/i.test(action.label)),
+      action.payload?.knownNoCurrentPayoff === true,
   );
   if (!staleRun || runtimeAction?.actionId !== staleRun.actionId) return undefined;
   const action = input.legalActions.find(
