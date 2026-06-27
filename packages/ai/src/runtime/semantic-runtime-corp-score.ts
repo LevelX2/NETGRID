@@ -279,6 +279,26 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       reason: advancementPlacement.evidence.join("|"),
     });
   }
+  if (
+    action.type !== "score_agenda" &&
+    corpActionCandidateHasScoreCloseoutSignal(actionSemanticCandidate)
+  ) {
+    const hasScoreCloseoutBasis =
+      corpInputHasScoreCloseoutBasis(input) ||
+      corpActionCandidateTargetsCorpScoreline(actionSemanticCandidate);
+    if (hasScoreCloseoutBasis) {
+      components.push({
+        key: "corp_score_closeout_semantic_candidate",
+        label: "Score-Closeout-Semantik",
+        value: 1050,
+        reason: [
+          "score_closeout_signal:true",
+          `score_closeout_basis:${hasScoreCloseoutBasis}`,
+          `action:${action.type}`,
+        ].join("|"),
+      });
+    }
+  }
   if (action.type === "gain_credit" && credits < 6) {
     components.push({
       key: "corp_low_credits",
@@ -453,7 +473,10 @@ function corpGoalMatchesAction(
 ): boolean {
   switch (goal.goalId) {
     case "corp.tactical.score_closeout":
-      return action.type === "score_agenda";
+      return (
+        action.type === "score_agenda" ||
+        corpActionCandidateHasScoreCloseoutSignal(actionSemanticCandidate)
+      );
     case "corp.tactical.advance_scoreline":
       return action.type === "advance_card";
     case "corp.tactical.rez_relevant_ice":
@@ -503,4 +526,58 @@ function corpActionCandidateHasVisibleSignal(
     .join("|")
     .toLocaleLowerCase("en-US");
   return needles.some((needle) => text.includes(needle));
+}
+
+function corpActionCandidateHasScoreCloseoutSignal(
+  candidate: ActionSemanticCandidate | undefined,
+): boolean {
+  return corpActionCandidateHasVisibleSignal(candidate, [
+    "corp.score_closeout",
+    "closeout.agenda_score",
+    "advance_burst",
+    "advance.counter_cashout",
+    "score.advance_burst",
+  ]);
+}
+
+function corpInputHasScoreCloseoutBasis(input: AiDecisionInput): boolean {
+  const legalActions =
+    input.legalActions ?? input.playerView.legalActions ?? [];
+  if (
+    legalActions.some(
+      (candidate) =>
+        candidate.side === "corp" &&
+        (candidate.type === "score_agenda" ||
+          candidate.type === "advance_card"),
+    )
+  ) {
+    return true;
+  }
+  return (input.playerView.servers ?? []).some((server) =>
+    (server.root ?? []).some(
+      (card) =>
+        card.known !== false &&
+        (card.type === "agenda" ||
+          typeof card.advancementRequirement === "number"),
+    ),
+  );
+}
+
+function corpActionCandidateTargetsCorpScoreline(
+  candidate: ActionSemanticCandidate | undefined,
+): boolean {
+  if (!candidate?.targetContext) return false;
+  const targets = [
+    ...candidate.targetContext.selectedTargets,
+    ...(candidate.targetContext.availableTargets ?? []),
+  ];
+  return targets.some((target) => {
+    const evidence = target.evidence.join("|").toLocaleLowerCase("en-US");
+    return (
+      target.targetSide !== "runner" &&
+      (target.targetKind === "agenda" ||
+        evidence.includes("agenda") ||
+        evidence.includes("scoreline"))
+    );
+  });
 }

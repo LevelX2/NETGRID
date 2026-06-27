@@ -9,6 +9,7 @@ type CorpServerLike = {
 export type CorpRemoteRezFloorAssessment = {
   serverId: string;
   rezFloor: number;
+  requiredCreditsAfterAction: number;
   creditsAfterAction: number;
   blockedByFloor: boolean;
   evidence: string[];
@@ -47,10 +48,12 @@ export function semanticRuntimeCorpRemoteRezFloorAssessment<
   if (action.type !== "advance_card" && action.type !== "install_card") {
     return undefined;
   }
+  const scoreLineInstall =
+    action.type === "install_card" &&
+    dependencies.actionIsScoreLine(input, action);
   if (
     action.type === "install_card" &&
-    (action.payload?.placement === "ice" ||
-      !dependencies.actionIsScoreLine(input, action))
+    (action.payload?.placement === "ice" || !scoreLineInstall)
   ) {
     return undefined;
   }
@@ -63,18 +66,27 @@ export function semanticRuntimeCorpRemoteRezFloorAssessment<
   const creditsAfterAction =
     input.playerView.own.credits - dependencies.actionCreditCost(action);
   const completesScore = dependencies.advanceCompletesScore(input, action);
+  const requiredCreditsAfterAction =
+    scoreLineInstall && !completesScore ? rezFloor + 1 : rezFloor;
   const blockedByFloor =
-    !completesScore && rezFloor > 0 && creditsAfterAction < rezFloor;
+    !completesScore &&
+    rezFloor > 0 &&
+    creditsAfterAction < requiredCreditsAfterAction;
   return {
     serverId,
     rezFloor,
+    requiredCreditsAfterAction,
     creditsAfterAction,
     blockedByFloor,
     evidence: [
       `remote_rez_floor_server:${serverId}`,
       `remote_rez_floor:${rezFloor}`,
+      `remote_rez_floor_required_after_action:${requiredCreditsAfterAction}`,
       `credits_after_action:${creditsAfterAction}`,
       `low_rez_reserve:${blockedByFloor}`,
+      ...(scoreLineInstall && !completesScore
+        ? ["scoreline_install_next_advance_reserve:1"]
+        : []),
       ...(blockedByFloor
         ? ["agenda_development_risk:below_remote_rez_floor"]
         : ["agenda_development_risk:remote_rez_floor_met"]),

@@ -35,15 +35,22 @@ function goalSpecsForCandidate(candidate: ActionSemanticCandidate): CorpGoalSpec
   const targetServerId = targetServerForCandidate(candidate);
   const hasRemoteTarget = targetServerId?.startsWith("remote_") === true;
   const hasCentralTarget = targetServerId === "hq" || targetServerId === "rd";
+  const hasScoreCloseoutSignal = hasVisibleScoreCloseoutBasis(candidate);
   const specs: CorpGoalSpec[] = [];
 
-  if (semantic === "score.agenda") {
+  if (semantic === "score.agenda" || hasScoreCloseoutSignal) {
     specs.push({
       goalId: "corp.tactical.score_closeout",
       family: "corp_scoreline",
-      priority: 900,
+      priority: semantic === "score.agenda" ? 900 : 860,
       urgency: "high",
-      evidence: [...evidence, "corp_goal:score_closeout"],
+      evidence: [
+        ...evidence,
+        "corp_goal:score_closeout",
+        ...(hasScoreCloseoutSignal
+          ? ["corp_goal:score_closeout_semantic_signal"]
+          : []),
+      ],
     });
   }
   if (semantic === "score.advance_card") {
@@ -170,6 +177,15 @@ function hasVisiblePunishBasis(candidate: ActionSemanticCandidate): boolean {
 function hasVisibleDamageOrAmbushBasis(candidate: ActionSemanticCandidate): boolean {
   const text = visibleSignalText(candidate);
   return /damage|ambush|flatline/.test(text);
+}
+
+function hasVisibleScoreCloseoutBasis(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const text = visibleSignalText(candidate);
+  return /corp\.score_closeout|closeout\.agenda_score|advance_burst|advance\.counter_cashout|score\.advance_burst/.test(
+    text,
+  );
 }
 
 function visibleSignalText(candidate: ActionSemanticCandidate): string {

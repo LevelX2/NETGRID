@@ -210,6 +210,50 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("scores advancement-burst operations as score closeout candidates", () => {
+    const closeoutAction = corpAction("advancement-burst", "play_operation");
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals(
+        [
+          {
+            goalId: "corp.tactical.score_closeout",
+            family: "corp_scoreline",
+            priority: 860,
+            urgency: "high",
+            source: "boardstate",
+            evidence: ["test_goal"],
+          },
+        ],
+        [closeoutAction, corpAction("advance-scoreline", "advance_card")],
+      ),
+      closeoutAction,
+      "basic_install",
+      testDependencies(),
+      semanticCandidate(
+        "advancement-burst",
+        "play.corp_operation",
+        ["corp.score_closeout", "advance.counter_cashout"],
+        "play_operation",
+      ),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_goal_fit_tactical_goal",
+          value: 860,
+          reason: expect.stringContaining(
+            "goal:corp.tactical.score_closeout",
+          ),
+        }),
+        expect.objectContaining({
+          key: "corp_score_closeout_semantic_candidate",
+          value: 1050,
+        }),
+      ]),
+    );
+  });
+
   it("uses ActionSemanticCandidate cost profile for rez affordability", () => {
     const candidate = {
       ...semanticCandidate("rez-ice", "corp_window.rez", []),
@@ -328,15 +372,19 @@ describe("semanticRuntimeCorpScoreComponents", () => {
 
 function corpInputWithGoals(
   goals: readonly TacticalGoalLike[],
+  legalActions: LegalAction[] = [],
 ): AiDecisionInput {
   return {
     side: "corp",
+    legalActions,
     playerView: {
       own: {
         credits: 5,
         clicks: 3,
         gripOrHq: [],
       },
+      servers: [],
+      legalActions,
     },
     ownCorpTacticalGoals: goals,
   } as unknown as AiDecisionInput;
@@ -382,15 +430,16 @@ function semanticCandidate(
   actionId: string,
   semanticActionType: string,
   actionTacticSignals: readonly string[],
+  actionType: LegalAction["type"] = "trigger_ability",
 ): ActionSemanticCandidate {
   return {
     actionId,
-    actionType: "trigger_ability",
+    actionType,
     actorSide: "corp",
     visibilityScope: "actor_private",
     legalActionRef: {
       actionId,
-      actionType: "trigger_ability",
+      actionType,
       originalPayloadKeys: [],
     },
     sourceKind: "card",
