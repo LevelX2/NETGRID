@@ -406,6 +406,27 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("routes productive doctrine context through the runtime doctrine context", () => {
+    const aiDecisionInput = path.join(srcDir, "runtime", "ai-decision-input.ts");
+    const content = readFileSync(aiDecisionInput, "utf8");
+    const violations = [
+      ...(content.includes("buildDeckStrategyProfile")
+        ? ["ai-decision-input.ts builds deck strategy profile directly"]
+        : []),
+      ...(content.includes("buildNeutralDeckStrategyProfile")
+        ? ["ai-decision-input.ts builds neutral strategy profile directly"]
+        : []),
+      ...(content.includes("buildDeckDoctrineV2Diagnostic")
+        ? ["ai-decision-input.ts builds doctrine v2 diagnostic directly"]
+        : []),
+      ...(!content.includes('from "../deck-doctrine-runtime-context"')
+        ? ["ai-decision-input.ts misses deck doctrine runtime context"]
+        : []),
+    ];
+
+    expect(violations).toEqual([]);
+  });
+
   it("freezes legacy planner implementation imports", () => {
     const expectedImportsByFile = new Map<string, string[]>([
       [

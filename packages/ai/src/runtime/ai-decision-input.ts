@@ -16,12 +16,10 @@ import {
   type AiDeckDoctrineDeckSnapshot,
 } from "../deck-doctrine";
 import {
-  buildDeckDoctrineV2Diagnostic,
-  buildNeutralDeckStrategyProfile,
-  buildDeckStrategyProfile,
   type AiDeckStrategyProfile,
   type DeckDoctrineV2Diagnostic,
 } from "../deck-doctrine-strategy";
+import { buildDeckDoctrineRuntimeContext } from "../deck-doctrine-runtime-context";
 import {
   buildCorpStrategicIntentProfile,
   type CorpStrategicIntentProfile,
@@ -135,11 +133,16 @@ export function buildAiDecisionInput(
       ? { deckSnapshot: options.ownDeckSnapshot }
       : {}),
   });
-  const ownDeckStrategyProfile = options.ownDeckSnapshot
-    ? buildDeckStrategyProfile(options.ownDeckSnapshot)
-    : buildNeutralDeckStrategyProfile(side, deckSnapshotId);
+  const deckDoctrineRuntimeContext = buildDeckDoctrineRuntimeContext({
+    side,
+    ...(options.ownDeckSnapshot
+      ? { deckSnapshot: options.ownDeckSnapshot }
+      : {}),
+    neutralDeckId: deckSnapshotId,
+  });
+  const ownDeckStrategyProfile = deckDoctrineRuntimeContext.strategyProfile;
   const ownDeckDoctrineV2Diagnostic =
-    buildDeckDoctrineV2Diagnostic(options.ownDeckSnapshot);
+    deckDoctrineRuntimeContext.v2Diagnostic;
   const previousStrategicIntentState = options.ownDeckSnapshot
     ? getStrategicIntentMemorySnapshot(input, options.ownDeckSnapshot.deckSnapshotId)
         ?.state

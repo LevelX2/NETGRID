@@ -6319,6 +6319,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/deck-doctrine.test.ts src/index.test.ts` grün, 3 Dateien, 556 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1653 Tests.
+- `AI-COMPLETE-06` zweiter Doctrine-Schnitt:
+  - `packages/ai/src/deck-doctrine-runtime-context.ts` bündelt produktives StrategyProfile, report-only Doctrine-v2-Diagnostic, `neutralDoctrine`, Vollständigkeitsstatus und Rollenstatus in einer klaren Runtime-Schnittstelle.
+  - `packages/ai/src/runtime/ai-decision-input.ts` baut StrategyProfile und Doctrine-v2-Diagnostic über diese Schnittstelle statt über getrennte Builder-Aufrufe.
+  - `packages/ai/src/deck-doctrine-runtime-context.test.ts` schützt den Missing-Snapshot-Fall als explizite NeutralDoctrine mit No-Effect-Diagnostic.
+  - `packages/ai/src/decision/module-boundaries.test.ts` verhindert direkte Doctrine-Builder-Aufrufe im produktiven Decision-Input.
+  - Status bleibt `IN_PROGRESS`, weil weitere Doctrine-v1-Produktivimporte und Public-Export-Grenzen noch geprüft werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/deck-doctrine-runtime-context.test.ts src/index.test.ts` grün, 3 Dateien, 557 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 149 Dateien, 1655 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-06`.
 
