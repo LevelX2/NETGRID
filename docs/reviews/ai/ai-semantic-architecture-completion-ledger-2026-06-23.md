@@ -6779,6 +6779,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 163 Dateien, 1693 Tests.
 
+- `AI-COMPLETE-15` zweiter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/choice-option.ts` entfernt den produktiven `take_credits`-Fallback, der Credit-Mengen aus deutschen Choice-Labels wie `3 Credits nehmen` las.
+  - `playfulAiGainValue` nutzt weiter strukturierte numerische `option.value`-Angaben und die bereits strukturelle Playful-AI-OptionId `gain_<credits>_set_aside_<dice>`; label-only `take_credits` liefert nun 0 statt eine aus Text geparste Menge.
+  - `choice-option.test.ts` schützt numerische Values, strukturelle Playful-AI-IDs und die neue label-only-Nullwertung.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/choice-option.test.ts src/index.test.ts -t "playfulAiGainValue|chooses the conservative gain-all Playful AI split"` grün, 2 Dateien, 2 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
