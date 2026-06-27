@@ -7178,6 +7178,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` fünfundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/discard-plan.ts` ersetzt freie Rollen-Substring-Prüfungen wie `role.includes("remote"|"ice"|"economy")` durch Segment-/Token-Matches auf strukturierten Rollen.
+  - Corp-Discard-Plan-Support erkennt Rollen wie `corp.remote_support`, ignoriert aber zusammengesetztes Substring-Rauschen wie `remotecontrol_noise`.
+  - `discard-plan.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/discard-plan.test.ts src/runtime/discard-keep-score.test.ts src/runtime/selected-choices-for-decision.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

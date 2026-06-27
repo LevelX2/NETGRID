@@ -41,11 +41,8 @@ export function discardCurrentPlanKind(
       const type = visibleCardType(card, dependencies);
       return (
         type === "ice" ||
-        roles.some(
-          (role) =>
-            role.includes("remote") ||
-            role.includes("ice") ||
-            role.includes("economy"),
+        roles.some((role) =>
+          roleHasAnyToken(role, ["remote", "ice", "economy"]),
         )
       );
     });
@@ -120,4 +117,14 @@ function visibleCardType(
       ? dependencies.definitionTypeForCardId(card.definitionId)
       : undefined)
   );
+}
+
+function roleHasAnyToken(role: string, tokens: readonly string[]): boolean {
+  const roleTokens = new Set(
+    role
+      .toLocaleLowerCase("en-US")
+      .split(/[._:-]+/)
+      .filter(Boolean),
+  );
+  return tokens.some((token) => roleTokens.has(token));
 }
