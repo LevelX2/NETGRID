@@ -878,6 +878,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         action.payload?.cardImplementationAbility === "activated" &&
         action.payload?.cardId === bbsId,
     );
+    expect(bbsAction.payload?.gainCreditsAmount).toBe(2);
     const removedSource = structuredClone(assetState);
     removeEverywhere(removedSource, bbsId);
     removedSource.corp.archives.push(bbsId);
