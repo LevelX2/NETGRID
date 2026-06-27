@@ -7086,6 +7086,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` fünfunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/opportunity-projection.ts` entfernt die produktive Score-Window-Erkennung über `legalActionIds` und `/score/i`.
+  - Corp-Score-Window-Opportunities entstehen dort nur noch aus `ActionSemanticCandidate.timingProfile.scoreWindow` oder bereits strukturierter Frame-Evidence, nicht aus actionId-Text wie `score-looking-credit-action`.
+  - `threat-opportunity.test.ts` schützt, dass actionId-only Score-Text keine `score_window`-Opportunity erzeugt, echte Score-Timing-Semantik aber weiterhin wirkt.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/threat-opportunity.test.ts src/decision/semantic-shadow-decision.test.ts` grün, 2 Dateien, 20 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

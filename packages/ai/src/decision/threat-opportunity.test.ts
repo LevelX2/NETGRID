@@ -68,7 +68,7 @@ describe("Threat and Opportunity projections", () => {
     expect(threats[0]?.severity).toBe("critical");
   });
 
-  it("projects corp score window from corp frame evidence and legal actions", () => {
+  it("projects corp score window from corp frame evidence and candidate timing", () => {
     const frame = buildSemanticDecisionFrame({
       input: inputFor("corp", [legalAction("score-1", "score_agenda", "corp")]),
       actionCandidates: buildActionSemanticCandidates({
@@ -83,6 +83,28 @@ describe("Threat and Opportunity projections", () => {
 
     expect(opportunities[0]?.opportunity).toBe("score_window");
     expect(opportunities[0]?.side).toBe("corp");
+  });
+
+  it("does not project corp score window from action id text alone", () => {
+    const action = legalAction(
+      "score-looking-credit-action",
+      "gain_credit",
+      "corp",
+    );
+    const frame = buildSemanticDecisionFrame({
+      input: inputFor("corp", [action]),
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: [action],
+        observerSide: "corp",
+        stateVersion: 3,
+      }),
+    });
+
+    expect(
+      buildAiOpportunityProjections(frame).some(
+        (projection) => projection.opportunity === "score_window",
+      ),
+    ).toBe(false);
   });
 
   it("projects corp low rez reserve from side-safe frame evidence", () => {

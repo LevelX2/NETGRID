@@ -45,7 +45,9 @@ export function buildAiOpportunityProjections(
 
   if (frame.side === "corp") {
     if (
-      frame.legalActionIds.some((actionId) => /score/i.test(actionId)) ||
+      frame.actionCandidates.some(
+        (candidate) => candidate.timingProfile.scoreWindow === true,
+      ) ||
       frame.evidence.some((entry) => entry.includes("score_window"))
     ) {
       projections.push({
