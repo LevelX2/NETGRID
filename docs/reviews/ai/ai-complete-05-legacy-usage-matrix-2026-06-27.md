@@ -31,8 +31,8 @@ Fuehrend ist der Code-Stand nach dem Schnitt auf `packages/ai/src/legacy/legacy-
 
 | Bereich | Datei | Nutzung | Klassifikation | Zielzustand |
 | --- | --- | --- | --- | --- |
-| Runner Legacy Planner | `packages/ai/src/legacy/runner-plans.ts` | Voller historischer Runner-Planer, 8796 Zeilen. | Eingefrorene Fallback-/Regression-Implementierung. | Keine neue Semantik; schrittweise ersetzen und geloeschte Bereiche entfernen. |
-| Corp Legacy Planner | `packages/ai/src/legacy/corp-plans.ts` | Voller historischer Corp-Planer, 9793 Zeilen. | Eingefrorene Fallback-/Regression-Implementierung. | Keine neue Semantik; schrittweise ersetzen und geloeschte Bereiche entfernen. |
+| Runner Legacy Planner | `packages/ai/src/legacy/runner-plans.ts` | Voller historischer Runner-Planer, 8796 Zeilen; Importflaeche durch Boundary-Test eingefroren. | Eingefrorene Fallback-/Regression-Implementierung. | Keine neue Semantik; schrittweise ersetzen und geloeschte Bereiche entfernen. |
+| Corp Legacy Planner | `packages/ai/src/legacy/corp-plans.ts` | Voller historischer Corp-Planer, 9793 Zeilen; Importflaeche durch Boundary-Test eingefroren. | Eingefrorene Fallback-/Regression-Implementierung. | Keine neue Semantik; schrittweise ersetzen und geloeschte Bereiche entfernen. |
 | Runner Legacy Action Scorer | `packages/ai/src/legacy/runner-baseline-action-score.ts` | Runner-Baseline-Action-Scoring, 632 Zeilen. | Legacy-Scoring-Implementierung. | Durch semantische Scoring-Consumers ersetzen. |
 | Corp Legacy Action Scorer | `packages/ai/src/legacy/corp-baseline-action-score.ts` | Corp-Baseline-Action-Scoring, 394 Zeilen. | Legacy-Scoring-Implementierung. | Durch semantische Scoring-Consumers ersetzen. |
 | Legacy Action Dispatcher | `packages/ai/src/legacy/legacy-action-scorer.ts` | Side-spezifischer Dispatcher fuer Legacy-Scorer. | Erlaubter Legacy-Scoring-Adapter. | Entfernen, wenn Runtime keine Legacy-Scorer mehr braucht. |
@@ -54,4 +54,4 @@ Fuehrend ist der Code-Stand nach dem Schnitt auf `packages/ai/src/legacy/legacy-
 1. Verbleibende Public-Contract-Exports in `legacy-public-contract.ts` pruefen.
 2. Simulation-/Diagnoseimporte ueber `legacy-entrypoints.ts` fachlich auf dedizierte Diagnosemodule umstellen.
 3. Legacy-Scoring-Adapterverbraucher nach Semantic-Scoring-Ownern aufteilen.
-4. Legacy-Planer-Dateien einfrieren: Boundary-Test soll neue produktive Importe oder neue Semantik in `legacy/runner-plans.ts` und `legacy/corp-plans.ts` verhindern.
+4. Legacy-Planer-Inhalte weiter abbauen, sobald semantische Ersatzmodule die jeweilige Funktion voll uebernehmen.

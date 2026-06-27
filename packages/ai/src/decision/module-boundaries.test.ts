@@ -380,6 +380,54 @@ describe("AI module boundaries", () => {
     expect(missingMarkers).toEqual([]);
   });
 
+  it("freezes legacy planner implementation imports", () => {
+    const expectedImportsByFile = new Map<string, string[]>([
+      [
+        path.join(srcDir, "legacy", "runner-plans.ts"),
+        [
+          "../../../../data/ai/runner-plan-profiles-1.4.1.json",
+          "@netgrid/shared",
+          "../ai-hints",
+          "../belief-state",
+          "../breaker-ontology-consumer",
+          "../known-remote-access-payoff",
+          "../visible-run-analysis",
+          "./runner-plan-metadata",
+        ],
+      ],
+      [
+        path.join(srcDir, "legacy", "corp-plans.ts"),
+        [
+          "../../../../data/ai/corp-plan-profiles-1.4.0.json",
+          "@netgrid/shared",
+          "../ai-hints",
+          "../belief-state",
+          "../breaker-ontology-consumer",
+          "../hint-ontology",
+          "../remote-role-ontology-consumer",
+          "../tag-punish-ontology-consumer",
+          "../visible-run-analysis",
+        ],
+      ],
+    ]);
+
+    const violations = [...expectedImportsByFile.entries()].flatMap(
+      ([file, expectedImports]) => {
+        const actualImports = [...new Set(importsFrom(file).map(
+          (reference) => reference.importSource,
+        ))].sort();
+        const expected = [...expectedImports].sort();
+        return JSON.stringify(actualImports) === JSON.stringify(expected)
+          ? []
+          : [
+              `${relativeFile(file)} imports ${JSON.stringify(actualImports)}; expected ${JSON.stringify(expected)}`,
+            ];
+      },
+    );
+
+    expect(violations).toEqual([]);
+  });
+
   it("keeps the public package facade re-export only", () => {
     const publicFacade = path.join(srcDir, "index.ts");
     const content = readFileSync(publicFacade, "utf8");

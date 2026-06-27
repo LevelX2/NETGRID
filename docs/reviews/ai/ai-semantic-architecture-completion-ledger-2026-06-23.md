@@ -6282,6 +6282,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/index.test.ts` grün, 2 Dateien, 552 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1650 Tests.
+- `AI-COMPLETE-05` sechster Legacy-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` friert die Importflächen von `legacy/runner-plans.ts` und `legacy/corp-plans.ts` als explizite Allowlist ein.
+  - Neue produktive Semantik-, Target-Choice- oder Card-Semantics-Imports in den großen Legacy-Planern werden dadurch testpflichtig sichtbar statt unbemerkt eingebaut.
+  - `docs/reviews/ai/ai-complete-05-legacy-usage-matrix-2026-06-27.md` markiert die Legacy-Planer entsprechend als importseitig eingefroren.
+  - Status bleibt `IN_PROGRESS`, weil Legacy-Adapterverbraucher und Public-Contract-Ausdünnung weiter offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts` grün, 19 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1651 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-05`.
 
