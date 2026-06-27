@@ -11,7 +11,6 @@ import type {
 import { redactedDeckCapabilityFacts } from "./deck-capabilities";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
-import type { KnownRemoteAccessCommitment } from "./decision/known-remote-access-commitment";
 import { redactedMergedTacticalGoalFacts } from "./decision/tactical-goal-merge";
 import type { RunnerEconomyPosture } from "./runner-run-target-evaluation";
 import { redactedRunnerHandDevelopmentFacts } from "./runner-hand-development";
@@ -21,6 +20,7 @@ import {
 } from "./runner-tactical-goals";
 import { createAiHintsByCard } from "./ai-hints";
 import { getTacticalPlanMemorySnapshot } from "./plans/plan-memory";
+import { accessCommitmentPlanEvidence } from "./plans/tactical-plan-access-commitment";
 import {
   assessRunnerDrawOverflow,
   runnerDrawOverflowCreditPriorityBoost,
@@ -539,19 +539,6 @@ function candidateMatchesStep(
   return actionTypeMatchesStep(step, candidate.actionType) &&
     candidateTargetMatchesPlan(plan, candidate, action) &&
     bankStepMatchesCandidate(step, candidate, action);
-}
-
-function accessCommitmentPlanEvidence(
-  commitment: KnownRemoteAccessCommitment | undefined,
-  serverId: string,
-): string[] {
-  if (!commitment || commitment.serverId !== serverId) return [];
-  return [
-    `structured_access_commitment_server:${commitment.serverId}`,
-    `structured_access_commitment_state:${commitment.knownAccessState}`,
-    `structured_access_commitment_intended_action:${commitment.intendedAccessAction}`,
-    `structured_access_commitment_reason:${commitment.reason}`,
-  ];
 }
 
 function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan[] {
