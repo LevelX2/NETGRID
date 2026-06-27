@@ -6727,6 +6727,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-14` sechster DefinitionId-/Kartennamen-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-plan-memory-exclusion.ts` nutzt für die Cashout-Sperre nach `runner.build_credit_bank` nicht mehr Broker-Label-Text, sondern die bestehende generische `isRunnerBankCashOutAction`-Dependency.
+  - `semantic-runtime-plan-memory-exclusion.test.ts` schützt, dass eine neutral benannte Cashout-Aktion über die generische Klassifikation gesperrt wird.
+  - Status bleibt `IN_PROGRESS`, weil ein Abschlussaudit über verbleibende Plan-Label- und Simulation-Fallback-Konstanten noch offen ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-plan-memory-exclusion.test.ts src/semantic-ai-runtime-cutover.test.ts -t "generic bank cashout|does not cash out Broker immediately"` grün, 2 Dateien, 2 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

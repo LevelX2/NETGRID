@@ -54,7 +54,7 @@ export function semanticRuntimePlanMemoryActionExclusion(
     previousPlan?.type === "runner.build_credit_bank" &&
     input.playerView.own.credits > 3 &&
     action.type === "trigger_ability" &&
-    /von broker nehmen|take.*bank|cash.*bank/i.test(action.label)
+    dependencies.isRunnerBankCashOutAction(input, action)
   ) {
     return {
       key: "bank_cashout_deferred_after_build",
