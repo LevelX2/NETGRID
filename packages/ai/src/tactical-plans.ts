@@ -109,6 +109,13 @@ import {
   candidateTargetMatchesPlan,
 } from "./plans/tactical-plan-candidate-matching";
 import { candidateSemanticText } from "./plans/tactical-plan-candidate-text";
+import {
+  coverageAnswerRoleMatchesStep,
+  coverageAnswerRolePriority,
+  coverageSearchRequiredCapability,
+  type CoverageAnswerRole,
+  isCoverageAnswerStep,
+} from "./plans/tactical-plan-coverage-answers";
 import { developmentCardStepMatchesAction } from "./plans/tactical-plan-development-card-matching";
 import {
   isRunPlanStep,
@@ -428,25 +435,6 @@ function planStepCandidatePriority(
   return 0;
 }
 
-function coverageAnswerRolePriority(role: CoverageAnswerRole): number {
-  switch (role) {
-    case "direct_breaker_install":
-      return 1000;
-    case "program_search":
-      return 900;
-    case "recovery_answer":
-      return 850;
-    case "search_engine_setup":
-      return 760;
-    case "draw_for_answer":
-      return 650;
-    case "basic_draw_fallback":
-      return 500;
-    case "not_coverage_answer":
-      return 0;
-  }
-}
-
 function candidateMatchesStep(
   plan: TacticalPlan,
   step: PlanStep,
@@ -524,40 +512,7 @@ function candidateMatchesStep(
     bankStepMatchesCandidate(step, candidate, action);
 }
 
-function isCoverageAnswerStep(step: PlanStep): boolean {
-  return (
-    step.kind === "search_for_answer" ||
-    step.kind === "setup_search_engine" ||
-    step.kind === "draw_for_answer"
-  ) && coverageSearchRequiredCapabilityForStep(step) !== undefined;
-}
-
-function coverageAnswerRoleMatchesStep(
-  step: PlanStep,
-  role: CoverageAnswerRole,
-): boolean {
-  switch (step.kind) {
-    case "search_for_answer":
-      return role === "program_search" || role === "recovery_answer";
-    case "setup_search_engine":
-      return role === "search_engine_setup";
-    case "draw_for_answer":
-      return role === "draw_for_answer" || role === "basic_draw_fallback";
-    default:
-      return false;
-  }
-}
-
 type RecoveryTargetPlanFit = "none" | "low" | "medium" | "high";
-
-type CoverageAnswerRole =
-  | "direct_breaker_install"
-  | "program_search"
-  | "search_engine_setup"
-  | "draw_for_answer"
-  | "basic_draw_fallback"
-  | "recovery_answer"
-  | "not_coverage_answer";
 
 type RecoveryLoopPenalties = {
   repeatedRecoverySameCardPenalty: number;
@@ -805,26 +760,6 @@ function matchedCoverageSearchRationales(
       ].join("|");
     })
     .filter((entry): entry is string => Boolean(entry));
-}
-
-function coverageSearchRequiredCapability(
-  plan: TacticalPlan,
-  step: PlanStep,
-): RequiredCapabilityKind | undefined {
-  const capability = [
-    ...step.requiredCapabilities,
-    ...plan.requiredCapabilities,
-  ].find((candidate) => candidate.kind.startsWith("breaker_"));
-  return capability?.kind;
-}
-
-function coverageSearchRequiredCapabilityForStep(
-  step: PlanStep,
-): RequiredCapabilityKind | undefined {
-  const capability = step.requiredCapabilities.find((candidate) =>
-    candidate.kind.startsWith("breaker_"),
-  );
-  return capability?.kind;
 }
 
 function recoveryTargetEvaluation(
