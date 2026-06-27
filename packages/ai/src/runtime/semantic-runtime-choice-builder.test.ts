@@ -24,12 +24,19 @@ describe("buildSemanticRuntimeChoices", () => {
       actionExclusion: () => undefined,
       scoreBreakdown: () => [],
       actionCreditCost: () => 0,
-      evidence: () => [],
+      evidence: (_input, _action, _scopeId, actionSemanticCandidate) => [
+        `evidence_candidate_cost:${actionSemanticCandidate?.costProfile.creditCost ?? "none"}`,
+      ],
       explanation: () => "test choice",
       compareAction: () => 0,
     });
 
-    expect(choice?.evidence).toEqual(expect.arrayContaining(["credit_cost:4"]));
+    expect(choice?.evidence).toEqual(
+      expect.arrayContaining([
+        "credit_cost:4",
+        "evidence_candidate_cost:4",
+      ]),
+    );
   });
 });
 

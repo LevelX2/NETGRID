@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { RunnerProgramInstallTrashAssessment } from "./runner-program-install-trash-policy";
 
 type EvidenceAssessment = {
@@ -28,6 +29,7 @@ export type SemanticRuntimeRunnerEvidenceDependencies = {
   selfDamageSurvivalAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
+    actionSemanticCandidate: ActionSemanticCandidate | undefined,
   ) => EvidenceAssessment | undefined;
   blinkRiskEvidenceForAction: (
     input: AiDecisionInput,
@@ -50,6 +52,7 @@ export type SemanticRuntimeRunnerEvidenceDependencies = {
 export function semanticRuntimeRunnerEvidence(
   input: AiDecisionInput,
   action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
   dependencies: SemanticRuntimeRunnerEvidenceDependencies,
 ): string[] {
   if (input.side !== "runner") return [];
@@ -64,7 +67,11 @@ export function semanticRuntimeRunnerEvidence(
   const noRunEconomyCommitmentEvidence =
     dependencies.noRunEconomyCommitmentEvidence(input, action);
   const selfDamageSurvivalEvidence =
-    dependencies.selfDamageSurvivalAssessment(input, action)?.evidence ?? [];
+    dependencies.selfDamageSurvivalAssessment(
+      input,
+      action,
+      actionSemanticCandidate,
+    )?.evidence ?? [];
   const blinkRiskEvidence = dependencies.blinkRiskEvidenceForAction(
     input,
     action,

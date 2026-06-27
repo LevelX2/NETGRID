@@ -38,6 +38,7 @@ export type SemanticRuntimeChoiceBuilderDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
     scopeId: string,
+    actionSemanticCandidate: ActionSemanticCandidate | undefined,
   ) => string[];
   explanation: (side: Side, scopeId: string) => string;
   compareAction: (left: LegalAction, right: LegalAction) => number;
@@ -150,7 +151,12 @@ function scoreSemanticRuntimeAction(
         scopeId,
         actionSemanticCandidate,
       ),
-      ...dependencies.evidence(input, action, scopeId),
+      ...dependencies.evidence(
+        input,
+        action,
+        scopeId,
+        actionSemanticCandidate,
+      ),
     ],
     confidence: semanticRuntimeConfidence(scopeId, score),
   };

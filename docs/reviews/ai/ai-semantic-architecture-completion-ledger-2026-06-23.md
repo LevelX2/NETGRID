@@ -6541,6 +6541,17 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 154 Dateien, 1673 Tests.
 
+- `AI-COMPLETE-10` sechster Cost-/Evidence-Schnitt:
+  - Der Runtime-Choice-Builder reicht den `ActionSemanticCandidate` jetzt auch an die Evidence-Funktion durch.
+  - `semantic-runtime-evidence.ts` und `semantic-runtime-runner-evidence.ts` transportieren den Candidate optional bis zu `selfDamageSurvivalAssessment`.
+  - Dadurch können Runner-Evidence-Pfade denselben normalisierten `ActionCostProfile.selfDamage` nutzen wie die Exclusion-Pfade; bestehende Evidence-Callbacks bleiben kompatibel, weil der Parameter optional ist.
+  - `packages/ai/src/runtime/semantic-runtime-choice-builder.test.ts` schützt, dass die Evidence-Schicht den Candidate sieht.
+  - Status bleibt `IN_PROGRESS`, weil weitere Cost-/Timing-/BoardContext-Spezialpfade noch auditiert und angebunden werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-choice-builder.test.ts src/runtime/runner-self-damage-choice.test.ts` grün, 2 Dateien, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 154 Dateien, 1673 Tests.
+
 Nächstes aktives Ziel: `AI-COMPLETE-10`.
 
 ## Audit-Ledger
