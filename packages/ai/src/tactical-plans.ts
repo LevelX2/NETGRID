@@ -12,7 +12,6 @@ import { redactedDeckCapabilityFacts } from "./deck-capabilities";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
 import { redactedMergedTacticalGoalFacts } from "./decision/tactical-goal-merge";
-import type { RunnerEconomyPosture } from "./runner-run-target-evaluation";
 import { redactedRunnerHandDevelopmentFacts } from "./runner-hand-development";
 import {
   redactedRunnerTacticalGoalFacts,
@@ -143,11 +142,11 @@ import {
   candidateSemanticsMatchStep,
 } from "./plans/tactical-plan-step-semantics";
 import {
-  actionCreditCost,
   legalActionCreditGainForPlan,
   legalActionCreditNetGain,
   type TacticalPlanCreditValueDependencies,
 } from "./plans/tactical-plan-action-values";
+import { runnerHasConcreteFundingNeed } from "./plans/tactical-plan-runner-funding-need";
 import {
   planCanMapToCurrentAction,
   progressTacticalPlans,
@@ -1571,18 +1570,4 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
     );
   }
   return plans;
-}
-
-function runnerHasConcreteFundingNeed(
-  input: AiDecisionInput,
-  blockedRemoteRuns: readonly LegalAction[],
-): boolean {
-  if (input.playerView.own.credits <= 3) return true;
-  return blockedRemoteRuns.length === 0 &&
-    input.legalActions.some(
-      (action) =>
-        action.type === "start_run" &&
-        isRemoteServer(actionServerId(action)) &&
-        actionCreditCost(action) >= input.playerView.own.credits,
-    );
 }

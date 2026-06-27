@@ -6157,6 +6157,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
+- `AI-COMPLETE-04` zweiunddreißigster Struktur-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-runner-funding-need.ts` kapselt die konkrete Runner-Funding-Need-Erkennung für Coverage-Suche und Runner-Planbau.
+  - `packages/ai/src/tactical-plans.ts` nutzt den ausgelagerten Helper und hält Run-Kosten-/Remote-Server-Funding-Need-Logik nicht mehr lokal.
+  - `packages/ai/src/tactical-plans.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 1.573 Zeilen; das neue Runner-Funding-Need-Modul liegt bei 20 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil Runner-, Corp-, Mapping- und Debug-Verantwortungen in `tactical-plans.ts` noch weiter getrennt werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-04`.
 
