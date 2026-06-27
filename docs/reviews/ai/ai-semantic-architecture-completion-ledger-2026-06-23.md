@@ -53,7 +53,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-02 | Semantic Runtime von Legacy-Entscheidung entkoppeln. | `VERIFIED` | Runtime-Pfade enthielten `legacyDecision` als vorab berechnete Eingabe. | Erfüllt: Runner-/Corp-Einstiege übergeben einen memoisierten Legacy-Provider; die Runtime materialisiert Legacy nur bei Forced-Legacy, No-Candidate-Fallback oder nach der semantischen Auswahl für Diagnose/Comparator. |
 | AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `VERIFIED` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Erfüllt: `index.ts` ist importfreie Public-Re-Export-Fassade bei 397 Zeilen; Boundary-Test verhindert lokale Imports, lokale Implementierungen und direkte Composition-Erzeugung; zwei Audits ohne neue In-Scope-Findings. |
 | AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `VERIFIED` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Erfüllt: `tactical-plans.ts` ist dünne Plan-Fassade bei 306 Zeilen; Runner-, Corp-, Mapping-, Progression-/Ranking- und Debug-/Redaction-Verantwortungen liegen in getrennten Modulen; Boundary-Test und zwei Abschluss-Audits sind grün. |
-| AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `IN_PROGRESS` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Genau eine Legacy-Eingangsschnittstelle; Matrix klassifiziert alle Nutzungen; ersetzte/ungenutzte Bereiche entfernt. |
+| AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `VERIFIED` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Erfüllt: produktiver Legacy-Zugriff läuft über `legacy-entrypoints.ts`, Public-Kompatibilität über `legacy-public-contract.ts`; Matrix klassifiziert alle Nutzungen; ersetzte Top-Level-Facades sind entfernt und per Boundary-Test blockiert. |
 | AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `PENDING` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Produktiver Pfad nutzt klare Doctrine-Schnittstelle mit NeutralDoctrine, Vollständigkeit und Rollenstatus. |
 | AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `PENDING` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate und wirken im Hauptscore. |
 | AI-COMPLETE-08 | Corp-TacticalGoals produktiv vollständig integrieren. | `PENDING` | Corp-Ziele wurden begonnen, müssen produktiv und diagnosefähig durchgängig wirken. | Corp-Ziele für Score, Remote, Zentralserver, Rez, Economy, Tag/Punish und Damage/Kill wirken im Hauptscore. |
@@ -6286,7 +6286,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - `packages/ai/src/decision/module-boundaries.test.ts` friert die Importflächen von `legacy/runner-plans.ts` und `legacy/corp-plans.ts` als explizite Allowlist ein.
   - Neue produktive Semantik-, Target-Choice- oder Card-Semantics-Imports in den großen Legacy-Planern werden dadurch testpflichtig sichtbar statt unbemerkt eingebaut.
   - `docs/reviews/ai/ai-complete-05-legacy-usage-matrix-2026-06-27.md` markiert die Legacy-Planer entsprechend als importseitig eingefroren.
-  - Status bleibt `IN_PROGRESS`, weil Legacy-Adapterverbraucher und Public-Contract-Ausdünnung weiter offen sind.
+  - Status bleibt bis zum Abschlussaudit `IN_PROGRESS`; Legacy-Adapterverbraucher und Public-Contract-Ausdünnung sind klassifizierte Folgemigrationen.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts` grün, 19 Tests.
   - Verifikation: `git diff --check` grün.
@@ -6300,8 +6300,18 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/compiled-index-gate.test.ts src/index.test.ts` grün, 3 Dateien, 564 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1652 Tests.
+- `AI-COMPLETE-05` Abschlussaudit:
+  - Produktiver Legacy-Zugriff ist auf `packages/ai/src/legacy/legacy-entrypoints.ts` begrenzt; Runtime, Simulation, Diagnostics und Evaluation werden per Boundary-Test gegen direkte Legacy-Adapterimporte geschützt.
+  - Public-Kompatibilität ist auf `packages/ai/src/legacy/legacy-public-contract.ts` begrenzt; `packages/ai/src/index.ts` bleibt importfreie Public-Fassade.
+  - Die alten Top-Level-Facades `packages/ai/src/runner-plans.ts` und `packages/ai/src/corp-plans.ts` existieren nicht mehr und werden per Boundary-Test gegen Wiederanlage geschützt.
+  - Die großen Legacy-Planer unter `packages/ai/src/legacy/` sind marker- und importseitig eingefroren; weitere inhaltliche Entfernung läuft als spätere Folgemigration, sobald semantische Ersatzmodule die jeweilige Funktion übernehmen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts` grün, 20 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1652 Tests.
+  - Status: `VERIFIED`.
 
-Nächstes aktives Ziel: `AI-COMPLETE-05`.
+Nächstes aktives Ziel: `AI-COMPLETE-06`.
 
 ## Audit-Ledger
 

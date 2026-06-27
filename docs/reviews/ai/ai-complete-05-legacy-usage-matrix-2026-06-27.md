@@ -48,7 +48,7 @@ Fuehrend ist der Code-Stand nach dem Schnitt auf `packages/ai/src/legacy/legacy-
 | Simulation Decision Context | `packages/ai/src/simulation/simulation-decision-context.ts` und Simulation Compositions | Nutzt Baseline-Entscheider als Vergleichs-/Harness-Abhaengigkeit. | Simulation/Benchmark. | Behalten, aber als explizite Baseline-Abhaengigkeit dokumentieren. |
 | Corp Simulation Diagnostics | `packages/ai/src/simulation/corp-*-diagnostics.ts` und verwandte Dateien | Nutzen Corp-Legacy-Diagnosehelfer ueber `legacy-entrypoints.ts`. | Diagnose-/Metriknutzung mit Migrationsbedarf, aber ohne direkte Kompatibilitaets-Facade-Imports. | Auf dedizierte Diagnose-/Ontology-Module umstellen, wenn die jeweiligen Helper aus Legacy herausgeloest sind. |
 
-## Naechste Schnitte
+## Folgemigrationen nach AI-COMPLETE-05
 
 1. Verbleibende Public-Contract-Exports in `legacy-public-contract.ts` pruefen.
 2. Simulation-/Diagnoseimporte ueber `legacy-entrypoints.ts` fachlich auf dedizierte Diagnosemodule umstellen.
