@@ -346,12 +346,14 @@ Umgesetzt:
 
 - Der breite AI-Testlauf deckte nach P8 eine veraltete Architektur-Gate-Erwartung auf: `tactical-plans.ts` importiert jetzt korrekt `./plans/tactical-plan-legal-action-mapping` statt `./plans/tactical-plan-step-candidate-matching`.
 - `module-boundaries.test.ts` ist auf den neuen Fassaden-Schnitt angepasst und prüft weiterhin, dass Planmodule nicht zurück in `tactical-plans.ts` importieren.
+- Nach dem Merge des aktuellen `main` in den Arbeitsbranch wurde ein Broker-Cashout-Testfixture auf den dort gültigen strukturierten Hosted-Credit-Payload-Vertrag angepasst; Label-only Cashout bleibt dadurch weiterhin kein gültiger Erkennungspfad.
 - Das Folgepaket ist lokal verifiziert und dokumentiert.
 
 Verifikation:
 
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts`: grün, 1 Datei, 23 Tests.
-- `corepack pnpm --filter @netgrid/ai test`: zunächst rot wegen veralteter Boundary-Erwartung, danach grün, 162 Dateien, 1705 Tests.
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-golden-deck-debug.test.ts`: grün, 1 Datei, 9 Tests.
+- `corepack pnpm --filter @netgrid/ai test`: zunächst rot wegen veralteter Boundary-Erwartung, nach Main-Merge einmal rot wegen veraltetem Broker-Testfixture, danach grün, 175 Dateien, 1734 Tests.
 - `corepack pnpm --filter @netgrid/shared test`: grün, 1 Datei, 4 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `corepack pnpm --filter @netgrid/shared typecheck`: grün.

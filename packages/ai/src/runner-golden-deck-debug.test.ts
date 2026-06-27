@@ -384,7 +384,10 @@ describe("Runner Golden Deck strategy and debug", () => {
       legalActions: [
         legalAction("broker-cashout", "trigger_ability", "Von Broker nehmen", {
           source: "broker-installed",
-          payload: { source: "broker-installed" },
+          payload: {
+            source: "broker-installed",
+            cardImplementationTakesHostedCredits: true,
+          },
         }),
       ],
     });
