@@ -2184,8 +2184,8 @@ describe("tactical plan model", () => {
     expect(result.selectedPlan?.evidence).toEqual(
       expect.arrayContaining([
         "strategic_plan_goal:corp.intent.punish",
-        "punish_card_signal:tag.source",
-        "punish_card_signal:tag.payoff",
+        "punish_tactic:tag.source",
+        "punish_tactic:tag.payoff",
       ]),
     );
   });

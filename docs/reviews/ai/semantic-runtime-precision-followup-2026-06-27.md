@@ -1,6 +1,6 @@
 # Semantic Runtime Precision Follow-up, 2026-06-27
 
-Status: `P7_done`
+Status: `P8_done`
 
 Prozess: `docs/architecture/ai/semantic-runtime-precision-legacy-cleanup-process-2026-06-27.md`
 
@@ -298,5 +298,22 @@ Umgesetzt:
 Verifikation:
 
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/practical-tactic-overlay.test.ts src/runtime/practical-micro-runtime.test.ts`: grün, 2 Dateien, 11 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
+
+## P8 Ergebnis: TacticalPlans-Modulschnitt
+
+Status: `P8_done`
+
+Umgesetzt:
+
+- Das Mapping von `PlanStep` zu `LegalAction`s ist aus `tactical-plans.ts` in `plans/tactical-plan-legal-action-mapping.ts` verschoben.
+- Die öffentliche Funktion `mapPlanStepToLegalActions()` bleibt erhalten und delegiert mit den bestehenden Dependency-Instanzen an das neue Modul.
+- `tactical-plans.ts` bleibt damit stärker Fassade für Build, Progression und Runtime-Ergebnis statt Besitzer der Mapping-Details.
+- Der Corp-Punish-Plan-Test wurde auf die aktuelle action-level Evidence `punish_tactic:*` statt alter card-level `punish_card_signal:*` geschärft.
+
+Verifikation:
+
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/tactical-plans.test.ts`: grün, 1 Datei, 45 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `git diff --check`: grün.
