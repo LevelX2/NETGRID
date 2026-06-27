@@ -1,15 +1,17 @@
+import { rolesMatch } from "./role-match";
+
 export function isRunnerEconomyRole(role: string): boolean {
-  return role === "economy" || role === "tempo" || role.includes("economy");
+  return rolesMatch([role], ["economy", "tempo"]);
 }
 
 export function isRunnerPressureRole(role: string): boolean {
-  return (
-    role === "run_pressure" ||
-    role === "access" ||
-    role.includes("pressure") ||
-    role.includes("interface") ||
-    role.includes("multiaccess")
-  );
+  return rolesMatch([role], [
+    "run_pressure",
+    "access",
+    "pressure",
+    "interface",
+    "multiaccess",
+  ]);
 }
 
 export function isRunnerNonAdditiveUtilityRole(role: string): boolean {
@@ -18,7 +20,11 @@ export function isRunnerNonAdditiveUtilityRole(role: string): boolean {
     role === "stack_search" ||
     role === "trash_recovery" ||
     role === "search_trash" ||
-    role.includes("setup.recovery") ||
-    role.includes("setup.stack_filter")
+    roleHasStructuredPath(role, "setup.recovery") ||
+    roleHasStructuredPath(role, "setup.stack_filter")
   );
+}
+
+function roleHasStructuredPath(role: string, path: string): boolean {
+  return role === path || role.startsWith(`${path}.`);
 }

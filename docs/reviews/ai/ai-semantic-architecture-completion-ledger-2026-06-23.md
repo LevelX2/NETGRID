@@ -7241,6 +7241,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-role-classification.ts` nutzt für Runner-Economy- und Runner-Pressure-Rollen den gehärteten `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Non-Additive-Utility-Rollen für `setup.recovery` und `setup.stack_filter` werden als strukturierte Pfade beziehungsweise Unterpfade erkannt, nicht mehr als beliebige Substrings.
+  - `runner-role-classification.test.ts` schützt strukturierte Economy-/Pressure-/Setup-Pfad-Treffer und Substring-Negativfälle wie `microeconomy`, `pressurewasher`, `accessory_noise` und `pre_setup.recovery_noise`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-role-classification.test.ts src/runtime/role-match.test.ts src/runtime/runner-goal-fit-score.test.ts src/runtime/discard-keep-score.test.ts src/simulation/runner-install-classification.test.ts` grün, 4 tatsächlich vorhandene Dateien, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
