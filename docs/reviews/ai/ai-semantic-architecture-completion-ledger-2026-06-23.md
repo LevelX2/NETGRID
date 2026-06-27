@@ -6718,6 +6718,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-14` fünfter DefinitionId-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` entfernt die harten Overadvance-Schwellen für `Project Babylon`, `Project Zurich` und `Project Venice`.
+  - Overadvance-Thresholds werden jetzt ausschließlich aus generischem Rules-Text wie `for every two/three advancement counters over ...` abgeleitet.
+  - `semantic-runtime-corp-advancement-counter.test.ts` schützt eine Custom-Agenda und Custom-Advancement-Operation, die ohne konkrete Projekt-ID einen exakten Overadvance-Threshold trifft.
+  - Status bleibt `IN_PROGRESS`, weil ein Abschlussaudit über weitere produktive CardDefinitionId-/Payload-/Label-Spezialpfade noch offen ist.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-advancement-counter.test.ts src/index.test.ts -t "overadvance thresholds|exact overadvance threshold"` grün, 2 Dateien, 7 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

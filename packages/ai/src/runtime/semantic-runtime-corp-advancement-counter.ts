@@ -304,7 +304,6 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
   const protectedBonus = Math.min(server.ice.length, 2) * 12;
   const text = dependencies.normalizedRulesTextForDefinition(definitionId);
   const overadvanceThreshold = corpAgendaOveradvanceThresholdAssessment(
-    definitionId,
     text,
     requirement,
     counters,
@@ -435,7 +434,6 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
 }
 
 function corpAgendaOveradvanceThresholdAssessment(
-  definitionId: string,
   text: string,
   requirement: number | undefined,
   counters: number,
@@ -449,7 +447,7 @@ function corpAgendaOveradvanceThresholdAssessment(
       evidence: string[];
     }
   | undefined {
-  const thresholdSize = corpAgendaOveradvanceThresholdSize(definitionId, text);
+  const thresholdSize = corpAgendaOveradvanceThresholdSize(text);
   if (!thresholdSize || typeof requirement !== "number") return undefined;
   const currentOver = Math.max(0, counters - requirement);
   const afterActionOver = Math.max(0, counters + 1 - requirement);
@@ -476,17 +474,7 @@ function corpAgendaOveradvanceThresholdAssessment(
   };
 }
 
-function corpAgendaOveradvanceThresholdSize(
-  definitionId: string,
-  text: string,
-): number | undefined {
-  if (
-    definitionId === "onr_v1_214_project-babylon" ||
-    definitionId === "onr_proteus_008_project-zurich"
-  ) {
-    return 2;
-  }
-  if (definitionId === "onr_proteus_007_project-venice") return 3;
+function corpAgendaOveradvanceThresholdSize(text: string): number | undefined {
   const overMatch =
     /for every (one|two|three|four|\d+) advancement counters? over/.exec(text);
   if (overMatch?.[1]) return corpNumberWordToNumber(overMatch[1]);
