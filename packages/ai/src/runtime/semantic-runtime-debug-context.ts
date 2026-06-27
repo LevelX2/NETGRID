@@ -4,6 +4,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { semanticRuntimeCoverageSelectionDebug as buildSemanticRuntimeCoverageSelectionDebug } from "../diagnostics/coverage-selection-debug";
 import { buildSemanticRuntimeActionAlternatives } from "../diagnostics/semantic-runtime-action-alternatives";
 import { buildSemanticRuntimeDecisionDebug } from "../diagnostics/semantic-runtime-decision-debug";
@@ -34,6 +35,7 @@ export type SemanticRuntimeDebugContext = {
     selected: SemanticRuntimeChoice,
     rankedChoices: SemanticRuntimeChoice[],
     planRuntime: TacticalPlanRuntimeResult,
+    actionSemanticCandidates: readonly ActionSemanticCandidate[],
   ) => AiDecisionDebug;
   semanticRuntimeCoverageSelectionDebug: (
     input: AiDecisionInput,
@@ -113,6 +115,7 @@ export function createSemanticRuntimeDebugContext(
       selected,
       rankedChoices,
       planRuntime,
+      actionSemanticCandidates,
     ) => {
       const coverageSelection = coverageSelectionDebug(
         input,
@@ -127,6 +130,7 @@ export function createSemanticRuntimeDebugContext(
       return buildSemanticRuntimeDecisionDebug({
         input,
         selected,
+        actionSemanticCandidates,
         planRuntime,
         ...(coverageSelection ? { coverageSelection } : {}),
         selectedScoreBreakdown,

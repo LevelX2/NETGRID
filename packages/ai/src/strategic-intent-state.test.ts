@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDeckStrategyProfile, DeckStrategyScore } from "./deck-doctrine-strategy";
+import type {
+  AiDeckStrategyProfile,
+  DeckStrategyRuntimeStatus,
+  DeckStrategyScore,
+} from "./deck-doctrine-strategy";
 import {
   buildStrategicIntentState,
   type StrategicRoleStatusSnapshot,
@@ -126,6 +130,12 @@ describe("StrategicIntentState contract", () => {
     expect(first.secondaryStrategies.map((line) => line.strategyId)).toEqual([
       "corp.ice_tax_glacier",
     ]);
+    expect(
+      first.strategyPortfolio?.productiveCandidates.map(
+        (candidate) => candidate.strategyId,
+      ),
+    ).toEqual(["corp.remote_scoring", "corp.ice_tax_glacier"]);
+    expect(first.strategyPortfolio?.activeStrategyId).toBe("corp.remote_scoring");
     expect(continued.transition).toMatchObject({
       status: "continued",
       reason: "same_primary_strategy",
@@ -190,6 +200,46 @@ describe("StrategicIntentState contract", () => {
     expect(held.transition.evidence).toContain(
       "held_candidate:runner.hq_pressure",
     );
+    expect(held.strategyPortfolio?.activeStrategyId).toBe("runner.rnd_pressure");
+    expect(
+      held.strategyPortfolio?.productiveCandidates.map(
+        (candidate) => candidate.strategyId,
+      ),
+    ).toEqual(["runner.rnd_pressure", "runner.hq_pressure"]);
+  });
+
+  it("does not promote blocked strategy scores into the active line", () => {
+    const state = buildStrategicIntentState({
+      side: "runner",
+      stateVersion: 35,
+      strategyProfile: profile("runner", {
+        primary: ["runner.hq_pressure", "runner.rnd_pressure"],
+        scores: {
+          "runner.hq_pressure": score({
+            anchor: 95,
+            support: 95,
+            final: 95,
+            confidence: "high",
+            runtimeStatus: "blocked",
+            runtimeBlockers: ["missing_hq_payoff"],
+          }),
+          "runner.rnd_pressure": score({
+            anchor: 70,
+            support: 70,
+            final: 70,
+            confidence: "high",
+          }),
+        },
+      }),
+      availableCredits: 8,
+    });
+
+    expect(state.primaryStrategy.strategyId).toBe("runner.rnd_pressure");
+    expect(
+      state.strategyPortfolio?.productiveCandidates.map(
+        (candidate) => candidate.strategyId,
+      ),
+    ).toEqual(["runner.rnd_pressure"]);
   });
 
   it("switches strategy after commitment when the score margin is high enough", () => {
@@ -328,12 +378,16 @@ function score(params: {
   final: number;
   confidence: "low" | "medium" | "high";
   gaps?: string[];
+  runtimeStatus?: DeckStrategyRuntimeStatus;
+  runtimeBlockers?: string[];
 }): DeckStrategyScore {
   return {
     anchorScore: params.anchor,
     supportScore: params.support,
     finalScore: params.final,
     confidence: params.confidence,
+    runtimeStatus: params.runtimeStatus ?? "productive",
+    runtimeBlockers: params.runtimeBlockers ?? [],
     supportGaps: params.gaps ?? [],
     anchorEvidence: params.anchor > 0
       ? [

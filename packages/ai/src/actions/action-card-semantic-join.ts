@@ -57,24 +57,46 @@ export function applyCardSemanticJoin(
       : undefined);
   const abilityUnresolved =
     abilitySemantics.length > 1 && actionAbility === undefined;
+  const profileLevelApplies = abilitySemantics.length === 0;
+  const cardLevelContextSignals = cardContextSignalsFromProfile(
+    profile.tacticSignals,
+  );
+  const profileActionTacticSignals =
+    profileLevelApplies || abilitySemantics.length === 1
+      ? profile.tacticSignals.filter(
+          (signal) => !cardLevelContextSignals.includes(signal),
+        )
+      : [];
   const cardContextSignals = uniqueStrings([
     ...candidate.cardContextSignals,
-    ...profile.tacticSignals,
+    ...cardLevelContextSignals,
   ]);
   const actionTacticSignals =
-    actionAbility !== undefined
+    actionAbility !== undefined || profileActionTacticSignals.length > 0
       ? uniqueStrings([
           ...candidate.actionTacticSignals,
-          ...actionAbility.tacticSignals,
+          ...profileActionTacticSignals,
+          ...(actionAbility?.tacticSignals ?? []),
         ])
       : candidate.actionTacticSignals;
+  const compatibilitySignals = uniqueStrings([
+    ...(candidate.compatibilitySignals ?? []),
+    ...(profile.compatibilitySignals ?? []),
+    ...(actionAbility?.compatibilitySignals ?? []),
+    ...profile.tacticSignals.filter(
+      (signal) =>
+        !cardLevelContextSignals.includes(signal) &&
+        !profileActionTacticSignals.includes(signal),
+    ),
+  ]);
   const projectionIssues = new Set(candidate.projectionIssues);
   projectionIssues.delete("card_semantics_unavailable");
   if (abilityUnresolved) projectionIssues.add("ability_unresolved");
   if (actionAbility !== undefined) projectionIssues.delete("ability_unresolved");
   const joinedTargetContext = targetContextWithSemanticMatches(
     candidate.targetContext,
-    actionAbility?.targetProfileMatches ?? profile.targetProfileMatches,
+    actionAbility?.targetProfileMatches ??
+      (profileLevelApplies ? profile.targetProfileMatches : undefined),
   );
   const costProfile =
     actionAbility !== undefined && actionAbility.additionalCosts !== undefined
@@ -92,24 +114,25 @@ export function applyCardSemanticJoin(
     costProfile,
     cardContextSignals,
     actionTacticSignals,
+    ...(compatibilitySignals.length > 0 ? { compatibilitySignals } : {}),
     strategySupport: [
       ...candidate.strategySupport,
-      ...(profile.strategySupport ?? []),
+      ...(profileLevelApplies ? (profile.strategySupport ?? []) : []),
       ...(actionAbility?.strategySupport ?? []),
     ],
     conditions: [
       ...candidate.conditions,
-      ...(profile.conditions ?? []),
+      ...(profileLevelApplies ? (profile.conditions ?? []) : []),
       ...(actionAbility?.conditions ?? []),
     ],
     risks: [
       ...candidate.risks,
-      ...(profile.risks ?? []),
+      ...(profileLevelApplies ? (profile.risks ?? []) : []),
       ...(actionAbility?.risks ?? []),
     ],
     constraints: [
       ...candidate.constraints,
-      ...(profile.constraints ?? []),
+      ...(profileLevelApplies ? (profile.constraints ?? []) : []),
       ...(actionAbility?.constraints ?? []),
     ],
     ...(joinedTargetContext !== undefined
@@ -122,8 +145,18 @@ export function applyCardSemanticJoin(
       ...(actionAbility !== undefined
         ? [`AI041 ability semantic joined: ${actionAbility.abilityId}`]
         : []),
+      ...(compatibilitySignals.length > 0
+        ? ["AI041 compatibility signals retained outside action scoring"]
+        : []),
     ],
   };
+}
+
+function cardContextSignalsFromProfile(signals: readonly string[]): string[] {
+  return signals.filter(
+    (signal) =>
+      signal.startsWith("card.context.") || signal.startsWith("remote_role:"),
+  );
 }
 
 function targetContextWithSemanticMatches(

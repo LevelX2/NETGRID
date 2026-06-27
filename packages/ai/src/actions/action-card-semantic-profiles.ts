@@ -3,6 +3,7 @@ import {
   type AbilityDefinition,
   type CardDefinitionId,
 } from "@netgrid/shared";
+import tacticSignalCatalogData from "../../../../data/ai/tactic-signals-v1.json";
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
 import type {
   ActionCardAbilitySemanticProfile,
@@ -29,6 +30,27 @@ type ExtendedAiCardHint = AiCardHint & {
   strategicRole?: string[];
   riskTags?: string[];
 };
+
+type TacticSignalCatalogEntry = {
+  signalId: string;
+  supportOnly?: boolean;
+  mayAnchorStrategy?: boolean;
+  allowedStrategyAnchors?: string[];
+};
+
+const TACTIC_SIGNAL_CATALOG_BY_ID = new Map(
+  (
+    tacticSignalCatalogData as { signals: TacticSignalCatalogEntry[] }
+  ).signals.map((signal) => [signal.signalId, signal]),
+);
+
+const BROAD_SUPPORT_ONLY_ACTION_ANCHOR_SIGNALS = new Set([
+  "access.payoff",
+  "draw.card",
+  "economy.card",
+  "setup.search",
+  "survival.defense",
+]);
 
 export function buildActionCardSemanticProfilesByDefinitionId(): Readonly<
   Record<CardDefinitionId, ActionCardSemanticProfile>
@@ -63,19 +85,21 @@ function actionCardSemanticProfileFromHint(
   const abilitySemantics = (DEMO_CARDS_BY_ID[cardId]?.abilities ?? []).map(
     abilitySemanticProfile,
   );
+  const compatibilitySignals = uniqueStrings([
+    ...hint.roles.map((role) => `role:${role}`),
+    ...hint.planRoles.map((role) => `plan_role:${role}`),
+    ...(hint.lineSupport ?? []).map((line) => `line_support:${line}`),
+    ...(extendedHint.strategicRole ?? []).map(
+      (role) => `strategic_role:${role}`,
+    ),
+  ]);
   return {
     cardId,
     tacticSignals: uniqueStrings([
-      ...hint.roles.map((role) => `role:${role}`),
-      ...hint.planRoles.map((role) => `plan_role:${role}`),
-      ...(hint.lineSupport ?? []).map((line) => `line_support:${line}`),
-      ...(extendedHint.strategicRole ?? []).map(
-        (role) => `strategic_role:${role}`,
-      ),
-      ...(extendedHint.riskTags ?? []).map((risk) => `risk:${risk}`),
       ...effectSignals,
       ...(hint.remoteRole ? [`remote_role:${hint.remoteRole.kind}`] : []),
     ]),
+    ...(compatibilitySignals.length > 0 ? { compatibilitySignals } : {}),
     strategySupport: strategySupportFromHint(hint),
     conditions: (hint.conditions ?? []).map(conditionFromHint),
     risks: riskTagsFromHint(hint),
@@ -86,16 +110,46 @@ function actionCardSemanticProfileFromHint(
 }
 
 function strategySupportFromHint(hint: AiCardHint): StrategySupportPair[] {
-  const extendedHint = hint as ExtendedAiCardHint;
-  return uniqueStrings([
-    ...(hint.lineSupport ?? []),
-    ...(extendedHint.strategicRole ?? []),
-  ]).map((strategyId) => ({
+  const pairs = (hint.effects ?? []).flatMap((effect) =>
+    effectTacticSignals(effect).flatMap((signal) =>
+      strategySupportFromTacticSignal(signal, hint),
+    ),
+  );
+  return uniqueStrategySupportPairs(pairs);
+}
+
+function strategySupportFromTacticSignal(
+  signal: string,
+  hint: AiCardHint,
+): StrategySupportPair[] {
+  if (BROAD_SUPPORT_ONLY_ACTION_ANCHOR_SIGNALS.has(signal)) {
+    return [];
+  }
+  const catalogEntry = TACTIC_SIGNAL_CATALOG_BY_ID.get(signal);
+  if (
+    catalogEntry === undefined ||
+    catalogEntry.supportOnly === true ||
+    catalogEntry.mayAnchorStrategy !== true ||
+    (catalogEntry.allowedStrategyAnchors?.length ?? 0) === 0
+  ) {
+    return [];
+  }
+  return (catalogEntry.allowedStrategyAnchors ?? []).map((strategyId) => ({
     strategyId,
-    role: hint.roles[0] ?? hint.planRoles[0] ?? "support",
-    confidence: "medium",
-    evidence: "ai_hint_semantic_profile",
+    role: strategySupportRoleForSignal(signal),
+    confidence: hint.quality?.confidence ?? "medium",
+    evidence: `tactic_signal_anchor:${signal}`,
   }));
+}
+
+function strategySupportRoleForSignal(signal: string): string {
+  if (signal.includes("multiaccess") || signal.includes("payoff")) {
+    return "payoff_anchor";
+  }
+  if (signal.startsWith("corp.score_")) {
+    return "win_condition_anchor";
+  }
+  return "anchor_evidence";
 }
 
 function conditionFromHint(condition: AiHintCondition): SemanticCondition {
@@ -224,6 +278,7 @@ function effectTacticSignals(effect: AiHintStructuredEffect): string[] {
     case "run_tax":
       return [...base, "corp.ice_protection"];
     case "multiaccess":
+      return [...base, "access.payoff", ...multiaccessSignals(effect)];
     case "topdeck_info":
     case "hq_info":
       return [...base, "access.payoff"];
@@ -240,4 +295,29 @@ function effectTacticSignals(effect: AiHintStructuredEffect): string[] {
 
 function uniqueStrings(values: readonly string[]): string[] {
   return [...new Set(values.filter((value) => value.length > 0))];
+}
+
+function uniqueStrategySupportPairs(
+  pairs: readonly StrategySupportPair[],
+): StrategySupportPair[] {
+  const seen = new Set<string>();
+  const result: StrategySupportPair[] = [];
+  for (const pair of pairs) {
+    const key = `${pair.strategyId}:${pair.role}:${pair.evidence}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    result.push(pair);
+  }
+  return result;
+}
+
+function multiaccessSignals(effect: AiHintStructuredEffect): string[] {
+  switch (effect.scope) {
+    case "hq":
+      return ["access.hq_multiaccess"];
+    case "rnd":
+      return ["access.rnd_multiaccess"];
+    default:
+      return [];
+  }
 }

@@ -12,13 +12,14 @@ import type {
 } from "../deck-capabilities";
 import type {
   AiDeckStrategyProfile,
-  DeckStrategyScore,
 } from "../deck-doctrine-strategy";
 import type {
   StrategicIntentFamily,
   StrategicReserveRequirement,
   StrategicRoleStatus,
   StrategicRoleStatusSnapshot,
+  StrategicStrategyPortfolio,
+  StrategicStrategyPortfolioCandidate,
   StrategicTargetVector,
 } from "../strategic-intent-state";
 import {
@@ -30,6 +31,7 @@ export type StrategicRuntimeContext = {
   roleStatuses: StrategicRoleStatusSnapshot[];
   targetVector: StrategicTargetVector;
   reserveRequirement: StrategicReserveRequirement;
+  strategyPortfolio: StrategicStrategyPortfolio;
 };
 
 export type BuildStrategicRuntimeContextParams = {
@@ -43,32 +45,222 @@ export type BuildStrategicRuntimeContextParams = {
 export function buildStrategicRuntimeContext(
   params: BuildStrategicRuntimeContextParams,
 ): StrategicRuntimeContext {
-  const strategyId = productivePrimaryStrategyId(params.strategyProfile);
+  const strategyPortfolio = buildRuntimeStrategyPortfolio(params);
+  const strategyId = strategyPortfolio.activeStrategyId;
   const family = strategyId ? strategicFamilyForStrategy(strategyId) : "neutral";
-  const roleStatuses = roleStatusesForFamily(params, family);
+  const activeCandidate = strategyPortfolio.productiveCandidates.find(
+    (candidate) => candidate.strategyId === strategyId,
+  );
+  const roleStatuses =
+    activeCandidate?.roleStatuses ?? roleStatusesForFamily(params, family);
   return {
     roleStatuses,
-    targetVector: targetVectorForFamily(params, family, strategyId),
-    reserveRequirement: reserveRequirementForFamily(params, family),
+    targetVector:
+      activeCandidate?.targetVector ??
+      targetVectorForFamily(params, family, strategyId),
+    reserveRequirement:
+      activeCandidate?.reserve ?? reserveRequirementForFamily(params, family),
+    strategyPortfolio,
   };
 }
 
-function productivePrimaryStrategyId(
-  profile: AiDeckStrategyProfile | undefined,
-): string | undefined {
-  if (!profile) return undefined;
-  return profile.primaryStrategies.find((strategyId) =>
-    scoreHasProductiveAnchor(profile.strategyScores[strategyId]),
-  );
+function buildRuntimeStrategyPortfolio(
+  params: BuildStrategicRuntimeContextParams,
+): StrategicStrategyPortfolio {
+  const profile = params.strategyProfile;
+  if (!profile || profile.side !== params.side) {
+    return {
+      activeSelectionReason: "no_strategy_profile",
+      productiveCandidates: [],
+      blockedCandidates: [],
+      evidence: ["strategy_portfolio:no_strategy_profile"],
+    };
+  }
+  const candidateIds = uniqueStrings([
+    ...profile.primaryStrategies,
+    ...profile.secondaryStrategies,
+  ]);
+  const profileCandidates = candidateIds
+    .map((strategyId) => runtimePortfolioCandidate(params, strategyId))
+    .filter(
+      (
+        candidate,
+      ): candidate is StrategicStrategyPortfolioCandidate =>
+        candidate !== undefined,
+    );
+  const productiveCandidates = profileCandidates
+    .filter(
+      (
+        candidate,
+      ): candidate is StrategicStrategyPortfolioCandidate =>
+        candidate.runtimeStatus === "productive",
+    )
+    .sort(
+      (left, right) =>
+        right.selectionScore - left.selectionScore ||
+        right.score.final - left.score.final ||
+        right.score.anchor - left.score.anchor ||
+        left.strategyId.localeCompare(right.strategyId),
+    );
+  const blockedCandidates = [
+    ...profileCandidates.filter(
+      (candidate) => candidate.runtimeStatus !== "productive",
+    ),
+    ...Object.keys(profile.strategyScores)
+    .filter((strategyId) => !candidateIds.includes(strategyId))
+    .map((strategyId) =>
+      runtimePortfolioCandidate(params, strategyId, "blocked"),
+    )
+    .filter(
+      (
+        candidate,
+      ): candidate is StrategicStrategyPortfolioCandidate =>
+        candidate !== undefined &&
+        candidate.runtimeStatus !== "productive",
+    ),
+  ]
+    .sort(
+      (left, right) =>
+        right.score.final - left.score.final ||
+        left.strategyId.localeCompare(right.strategyId),
+    )
+    .slice(0, 8);
+  const active = productiveCandidates[0];
+  return {
+    ...(active ? { activeStrategyId: active.strategyId } : {}),
+    activeSelectionReason: active
+      ? "highest_runtime_portfolio_score"
+      : "no_productive_strategy_candidate",
+    productiveCandidates,
+    blockedCandidates,
+    evidence: [
+      "strategy_portfolio:runtime_context",
+      `strategy_portfolio_productive_count:${productiveCandidates.length}`,
+      `strategy_portfolio_blocked_count:${blockedCandidates.length}`,
+      ...(active ? [`strategy_portfolio_active:${active.strategyId}`] : []),
+    ],
+  };
 }
 
-function scoreHasProductiveAnchor(score: DeckStrategyScore | undefined): boolean {
-  return Boolean(
-    score &&
-      score.runtimeStatus === "productive" &&
-      score.anchorScore > 0 &&
-      score.anchorEvidence.length > 0,
-  );
+function runtimePortfolioCandidate(
+  params: BuildStrategicRuntimeContextParams,
+  strategyId: string,
+  forcedRole?: StrategicStrategyPortfolioCandidate["candidateRole"],
+): StrategicStrategyPortfolioCandidate | undefined {
+  const profile = params.strategyProfile;
+  const score = profile?.strategyScores[strategyId];
+  if (!profile || !score) return undefined;
+  const family = strategicFamilyForStrategy(strategyId);
+  const roleStatuses = roleStatusesForFamily(params, family);
+  const targetVector = targetVectorForFamily(params, family, strategyId);
+  const reserve = reserveRequirementForFamily(params, family);
+  const runtimeStatus = score.runtimeStatus ?? "legacy_unspecified";
+  const selectionScore =
+    score.finalScore +
+    roleReadinessBonus(roleStatuses) +
+    targetOpportunityBonus(targetVector) +
+    reserveReadinessBonus(reserve) +
+    candidateRoleBonus(profile, strategyId);
+  return {
+    strategyId,
+    family,
+    candidateRole:
+      forcedRole ??
+      (profile.primaryStrategies.includes(strategyId) ? "primary" : "secondary"),
+    runtimeStatus,
+    runtimeBlockers: [...(score.runtimeBlockers ?? [])].sort(),
+    confidence: score.confidence,
+    score: {
+      anchor: score.anchorScore,
+      support: score.supportScore,
+      final: score.finalScore,
+    },
+    selectionScore,
+    roleStatuses,
+    targetVector,
+    reserve,
+    evidence: [
+      "portfolio_candidate:runtime_context",
+      `strategy:${strategyId}`,
+      `runtime_status:${runtimeStatus}`,
+      `final:${score.finalScore}`,
+      `anchor:${score.anchorScore}`,
+      `selection_score:${roundScore(selectionScore)}`,
+      `role_bonus:${roleReadinessBonus(roleStatuses)}`,
+      `target_bonus:${targetOpportunityBonus(targetVector)}`,
+      `reserve_bonus:${reserveReadinessBonus(reserve)}`,
+    ],
+  };
+}
+
+function roleReadinessBonus(
+  roleStatuses: readonly StrategicRoleStatusSnapshot[],
+): number {
+  if (roleStatuses.length === 0) return 0;
+  return roleStatuses.reduce((sum, role) => {
+    switch (role.status) {
+      case "active":
+        return sum + 18;
+      case "visible":
+        return sum + 12;
+      case "installable":
+        return sum + 8;
+      case "in_deck_unseen":
+        return sum + 2;
+      case "temporarily_unavailable":
+        return sum - 8;
+      case "absent":
+        return sum - 25;
+      default:
+        return sum;
+    }
+  }, 0);
+}
+
+function targetOpportunityBonus(targetVector: StrategicTargetVector): number {
+  const evidence = targetVector.evidence.join("|");
+  if (targetVector.kind === "scoreline" && evidence.includes("legal_score:true")) {
+    return 30;
+  }
+  if (targetVector.kind === "scoreline" && evidence.includes("legal_advance:true")) {
+    return 14;
+  }
+  if (
+    (targetVector.kind === "tag" || targetVector.kind === "damage") &&
+    !evidence.includes("target_reason:no_visible_semantic")
+  ) {
+    return 18;
+  }
+  if (
+    (targetVector.kind === "central" || targetVector.kind === "remote") &&
+    !evidence.includes("target_legal_run:none")
+  ) {
+    return 10;
+  }
+  if (targetVector.kind === "coverage" || targetVector.kind === "economy") {
+    return 4;
+  }
+  return 0;
+}
+
+function reserveReadinessBonus(reserve: StrategicReserveRequirement): number {
+  if (reserve.kind === "none") return 0;
+  return reserve.satisfied ? 4 : -10;
+}
+
+function candidateRoleBonus(
+  profile: AiDeckStrategyProfile,
+  strategyId: string,
+): number {
+  return profile.primaryStrategies.includes(strategyId) ? 2 : 0;
+}
+
+function roundScore(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values.filter((value) => value.length > 0))];
 }
 
 function strategicFamilyForStrategy(strategyId: string): StrategicIntentFamily {

@@ -9,6 +9,8 @@ import type {
   PracticalMicroRuntimeRuleId,
 } from "./choose-ai-action";
 
+// Opt-in comparator for micro-rule experiments. Even mode "apply" records that
+// an apply was requested, but still returns the normal runtime action.
 export type PracticalMicroCandidate = {
   ruleId: PracticalMicroRuntimeRuleId;
   actionId: string;

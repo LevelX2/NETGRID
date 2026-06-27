@@ -41,7 +41,7 @@ import {
   usePreferredCardImageSource
 } from "./card-display-settings";
 import { cardDetailLines, cardWithoutDevelopmentCounters } from "./card-detail-lines";
-import type { DisplayVisibleCard } from "./card-view-model";
+import { iceStrengthBadgeValue, type DisplayVisibleCard } from "./card-view-model";
 import { CardActionsPopover } from "./CardActionsPopover";
 import { AdvancementGems, CounterDisplayBadge, IceModifierBadges, IceStrengthBadge, StrengthBoostBadge } from "./CardBadges";
 import { ScoreCardStateBadges, scoreCardStateBadges, type ScoredAgendaStateLine } from "./ScoredAgendaState";
@@ -191,7 +191,7 @@ export function CardView({
   const advancementCount = advancementDisplay?.amount ?? 0;
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
-  const iceStrength = card.known && card.type === "ice" && card.strength !== undefined && !preview && !forceCardBack ? Math.max(0, Math.floor(card.strength)) : null;
+  const iceStrength = iceStrengthBadgeValue(card, { preview, forceCardBack: Boolean(forceCardBack) });
   const tapped = card.known && card.tapped === true && !preview && !forceCardBack;
   const scoreStateBadges = explicitScoreStateBadges.length > 0 ? explicitScoreStateBadges : showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const renderedCounterDisplays = preview ? [] : counterDisplaysForRendering(card);

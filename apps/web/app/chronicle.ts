@@ -3716,6 +3716,13 @@ function formatChronicleEffect(
       const subroutineType = stringValue(effect.subroutineType);
       const damageType = stringValue(effect.damageType);
       const cardsTrashed = numberValue(effect.cardsTrashed) ?? 0;
+      const damageLabel = damageTypeLabel(damageType);
+      const preventionSummary = subroutineDamagePreventionSummary(
+        event.publicPayload ?? {},
+        amount,
+        damageType,
+        source,
+      );
       const trashedProgramTitle =
         subroutineType === "trash_installed_program" && cardsTrashed > 0
           ? (titleForDefinitionId(cardDefinitionId) ??
@@ -3728,21 +3735,39 @@ function formatChronicleEffect(
           ? "critical"
           : "important";
       title =
-        subroutineType === "do_damage"
-          ? `${source}: ${subroutineChip} macht ${amount} ${damageTypeLabel(damageType)}`
-          : trashedProgramTitle
-            ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
-            : effect.endedRun === true
-              ? `${source}: ${subroutineChip} beendet den Run`
-              : `${source}: ${subroutineChip} aufgelöst`;
-      if (subroutineType === "do_damage")
-        description = `${cardCountText(cardsTrashed)} wurden in den Heap bewegt.`;
+        subroutineType === "do_damage" && preventionSummary
+          ? `${source}: ${subroutineChip} macht ${preventionSummary.originalAmount} ${damageLabel}; ${preventionSummary.preventedAmount} durch ${preventionSummary.sourceTitle} verhindert, Ergebnis ${preventionSummary.finalAmount} ${damageLabel}`
+          : subroutineType === "do_damage"
+            ? `${source}: ${subroutineChip} macht ${amount} ${damageLabel}`
+            : trashedProgramTitle
+              ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
+              : effect.endedRun === true
+                ? `${source}: ${subroutineChip} beendet den Run`
+                : `${source}: ${subroutineChip} aufgelöst`;
+      if (subroutineType === "do_damage" && cardsTrashed > 0)
+        description = `${cardCountText(cardsTrashed)} ${cardsTrashed === 1 ? "wurde" : "wurden"} in den Heap bewegt.`;
+      if (
+        subroutineType === "do_damage" &&
+        preventionSummary &&
+        preventionSummary.finalAmount === 0
+      )
+        description = `Kein ${damageLabel} bleibt übrig.`;
       if (trashedProgramTitle)
         description = `${trashedProgramTitle} wurde in den Heap bewegt.`;
       chips.push(
         subroutineChip,
         ...(subroutineType === "do_damage"
-          ? [`${amount} ${damageTypeLabel(damageType)}`, `${cardsTrashed} Heap`]
+          ? [
+              ...(preventionSummary
+                ? [
+                    `${preventionSummary.originalAmount} ${damageLabel}`,
+                    `${preventionSummary.preventedAmount} verhindert`,
+                    `${preventionSummary.finalAmount} ${damageLabel}`,
+                    preventionSummary.sourceTitle,
+                  ]
+                : [`${amount} ${damageLabel}`]),
+              ...(cardsTrashed > 0 ? [`${cardsTrashed} Heap`] : []),
+            ]
           : []),
         ...(trashedProgramTitle
           ? [trashedProgramTitle, "Programm getrasht"]
@@ -4805,6 +4830,48 @@ function privateLookChips(payload: Record<string, unknown>): string[] {
 
 function tagCountText(amount: number): string {
   return `${amount} Tag${amount === 1 ? "" : "s"}`;
+}
+
+function subroutineDamagePreventionSummary(
+  payload: Record<string, unknown>,
+  effectAmount: number,
+  damageType: string | undefined,
+  subroutineSource: string,
+):
+  | {
+      originalAmount: number;
+      preventedAmount: number;
+      finalAmount: number;
+      sourceTitle: string;
+    }
+  | undefined {
+  const preventedAmount = numberValue(payload.preventedAmount);
+  if (preventedAmount === undefined || preventedAmount <= 0) return undefined;
+  const payloadDamageType = stringValue(payload.damageType);
+  if (payloadDamageType && damageType && payloadDamageType !== damageType)
+    return undefined;
+  const finalAmount =
+    numberValue(payload.damageAmount) ??
+    numberValue(payload.finalAmount) ??
+    effectAmount;
+  if (finalAmount !== effectAmount) return undefined;
+  const originalAmount =
+    numberValue(payload.originalAmount) ?? finalAmount + preventedAmount;
+  if (originalAmount <= finalAmount) return undefined;
+  const preventionSourceDefinitionId =
+    stringValue(payload.sourceDefinitionId) ??
+    stringValue(payload.cardDefinitionId);
+  const sourceTitle =
+    titleForDefinitionId(preventionSourceDefinitionId) ??
+    stringValue(payload.title) ??
+    stringValue(payload.sourceTitle);
+  if (!sourceTitle || sourceTitle === subroutineSource) return undefined;
+  return {
+    originalAmount,
+    preventedAmount,
+    finalAmount,
+    sourceTitle,
+  };
 }
 
 function openArchivesCardCountText(amount: number): string {

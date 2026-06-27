@@ -7,6 +7,7 @@ import type {
 } from "../deck-capabilities";
 import type {
   AiDeckStrategyProfile,
+  DeckStrategyRuntimeStatus,
   DeckStrategyScore,
 } from "../deck-doctrine-strategy";
 import { buildStrategicRuntimeContext } from "./strategic-runtime-context";
@@ -105,11 +106,114 @@ describe("strategic runtime context", () => {
       ]),
     );
   });
+
+  it("selects a concrete board opportunity while retaining the strategy portfolio", () => {
+    const context = buildStrategicRuntimeContext({
+      side: "corp",
+      playerView: playerView("corp", {
+        credits: 8,
+        servers: [
+          server("hq"),
+          server("rd"),
+          server("archives"),
+          server("remote_1", [], [
+            visibleCard("agenda-remote", "corp", "agenda", {
+              advancementRequirement: 3,
+            }),
+          ]),
+        ],
+      }),
+      legalActions: [
+        action("score", "corp", "score_agenda", 1),
+        action("install-ice", "corp", "install_card", 3, { placement: "ice" }),
+      ],
+      strategyProfile: multiStrategyProfile("corp", {
+        primary: ["corp.ice_tax_glacier", "corp.remote_scoring"],
+        scores: {
+          "corp.ice_tax_glacier": score("corp.ice_tax_glacier", {
+            final: 88,
+            anchor: 85,
+            support: 80,
+          }),
+          "corp.remote_scoring": score("corp.remote_scoring", {
+            final: 78,
+            anchor: 78,
+            support: 80,
+          }),
+        },
+      }),
+      deckCapabilities: corpCapabilities(),
+    });
+
+    expect(context.strategyPortfolio.activeStrategyId).toBe(
+      "corp.remote_scoring",
+    );
+    expect(context.targetVector.kind).toBe("scoreline");
+    expect(
+      context.strategyPortfolio.productiveCandidates.map(
+        (candidate) => candidate.strategyId,
+      ),
+    ).toEqual(["corp.remote_scoring", "corp.ice_tax_glacier"]);
+  });
+
+  it("keeps blocked strategy candidates out of active selection", () => {
+    const context = buildStrategicRuntimeContext({
+      side: "corp",
+      playerView: playerView("corp", {
+        credits: 8,
+        servers: [server("hq"), server("rd"), server("archives")],
+      }),
+      legalActions: [action("score", "corp", "score_agenda", 1)],
+      strategyProfile: multiStrategyProfile("corp", {
+        primary: ["corp.tag_trace_punish", "corp.remote_scoring"],
+        scores: {
+          "corp.tag_trace_punish": score("corp.tag_trace_punish", {
+            final: 99,
+            anchor: 99,
+            support: 99,
+            runtimeStatus: "blocked",
+            runtimeBlockers: ["missing_tag_payoff"],
+          }),
+          "corp.remote_scoring": score("corp.remote_scoring", {
+            final: 62,
+            anchor: 62,
+            support: 70,
+          }),
+        },
+      }),
+      deckCapabilities: corpCapabilities(),
+    });
+
+    expect(context.strategyPortfolio.activeStrategyId).toBe(
+      "corp.remote_scoring",
+    );
+    expect(
+      context.strategyPortfolio.blockedCandidates.map(
+        (candidate) => candidate.strategyId,
+      ),
+    ).toContain("corp.tag_trace_punish");
+  });
 });
 
 function strategyProfile(
   side: Side,
   strategyId: "runner.rnd_pressure" | "corp.remote_scoring",
+): AiDeckStrategyProfile {
+  return multiStrategyProfile(side, {
+    primary: [strategyId],
+    scores: {
+      [strategyId]: score(strategyId),
+    },
+  });
+}
+
+function multiStrategyProfile(
+  side: Side,
+  params: {
+    primary: string[];
+    secondary?: string[];
+    scores: Record<string, DeckStrategyScore>;
+  },
 ): AiDeckStrategyProfile {
   return {
     schemaVersion: "ai-deck-strategy-profile-v1",
@@ -117,11 +221,9 @@ function strategyProfile(
     deckId: `${side}-runtime-context`,
     side,
     cardCount: 8,
-    strategyScores: {
-      [strategyId]: score(strategyId),
-    },
-    primaryStrategies: [strategyId],
-    secondaryStrategies: [],
+    strategyScores: params.scores,
+    primaryStrategies: params.primary,
+    secondaryStrategies: params.secondary ?? [],
     functionSignalCounts: {},
     legacySignalCounts: {},
     warnings: [],
@@ -135,14 +237,26 @@ function strategyProfile(
   };
 }
 
-function score(strategyId: string): DeckStrategyScore {
+function score(
+  strategyId: string,
+  params: {
+    anchor?: number;
+    support?: number;
+    final?: number;
+    runtimeStatus?: DeckStrategyRuntimeStatus;
+    runtimeBlockers?: string[];
+  } = {},
+): DeckStrategyScore {
+  const anchor = params.anchor ?? 80;
+  const support = params.support ?? 80;
+  const final = params.final ?? 80;
   return {
-    anchorScore: 80,
-    supportScore: 80,
-    finalScore: 80,
+    anchorScore: anchor,
+    supportScore: support,
+    finalScore: final,
     confidence: "high",
-    runtimeStatus: "productive",
-    runtimeBlockers: [],
+    runtimeStatus: params.runtimeStatus ?? "productive",
+    runtimeBlockers: params.runtimeBlockers ?? [],
     supportGaps: [],
     anchorEvidence: [
       {

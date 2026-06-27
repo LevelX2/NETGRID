@@ -1,4 +1,7 @@
-import type { AiDecisionDebug, AiDecisionScoreComponent } from "@netgrid/shared";
+import type {
+  AiDecisionDebug,
+  AiDecisionScoreComponent,
+} from "@netgrid/shared";
 import type {
   SemanticDecisionTraceDiagnosticSection,
   SemanticDecisionTraceDiagnosticSectionId,
@@ -33,7 +36,13 @@ export type SemanticDecisionDebugDiagnosticsInput = {
   selectedPlan?: SemanticDecisionDebugPlanReference;
   selectedStepKind?: string;
   strategicRuntimeItems?: readonly string[];
+  strategyPortfolioItems?: readonly string[];
   selectionScoreItems?: readonly string[];
+  actionSemanticProjectionItems?: readonly string[];
+  abilitySemanticBindingItems?: readonly string[];
+  targetContextItems?: readonly string[];
+  compatibilitySignalItems?: readonly string[];
+  coverageGapItems?: readonly string[];
   tacticalPlanItems?: readonly string[];
   memoryItems?: readonly string[];
   memorySectionTitle?: string;
@@ -169,12 +178,69 @@ export function buildSemanticDecisionDebugDiagnostics(
           },
         ]
       : []),
+    ...(input.strategyPortfolioItems && input.strategyPortfolioItems.length > 0
+      ? [
+          {
+            id: "strategy_portfolio",
+            title: "Strategy Portfolio",
+            items: sideSafeDebugItems(input.strategyPortfolioItems),
+          },
+        ]
+      : []),
     ...(input.selectionScoreItems && input.selectionScoreItems.length > 0
       ? [
           {
             id: "selection_score",
             title: "Selection Score",
             items: sideSafeDebugItems(input.selectionScoreItems),
+          },
+        ]
+      : []),
+    ...(input.actionSemanticProjectionItems &&
+    input.actionSemanticProjectionItems.length > 0
+      ? [
+          {
+            id: "action_semantic_projection",
+            title: "Action Semantic Projection",
+            items: sideSafeDebugItems(input.actionSemanticProjectionItems),
+          },
+        ]
+      : []),
+    ...(input.abilitySemanticBindingItems &&
+    input.abilitySemanticBindingItems.length > 0
+      ? [
+          {
+            id: "ability_semantic_binding",
+            title: "Ability Semantic Binding",
+            items: sideSafeDebugItems(input.abilitySemanticBindingItems),
+          },
+        ]
+      : []),
+    ...(input.targetContextItems && input.targetContextItems.length > 0
+      ? [
+          {
+            id: "target_context",
+            title: "Target Context",
+            items: sideSafeDebugItems(input.targetContextItems),
+          },
+        ]
+      : []),
+    ...(input.compatibilitySignalItems &&
+    input.compatibilitySignalItems.length > 0
+      ? [
+          {
+            id: "compatibility_signals",
+            title: "Compatibility Signals",
+            items: sideSafeDebugItems(input.compatibilitySignalItems),
+          },
+        ]
+      : []),
+    ...(input.coverageGapItems && input.coverageGapItems.length > 0
+      ? [
+          {
+            id: "coverage_gaps",
+            title: "Coverage Gaps",
+            items: sideSafeDebugItems(input.coverageGapItems),
           },
         ]
       : []),

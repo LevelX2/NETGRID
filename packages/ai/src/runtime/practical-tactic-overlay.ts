@@ -7,6 +7,8 @@ import {
 } from "@netgrid/shared";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
 
+// Opt-in comparator/benchmark overlay only. It may report a practical tactic
+// candidate, but it must not replace the normal Semantic Runtime action.
 type PracticalTacticCandidate = {
   action: LegalAction;
   reasonCode: string;
