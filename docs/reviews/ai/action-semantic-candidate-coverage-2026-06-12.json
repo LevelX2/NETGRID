@@ -148,11 +148,11 @@
       "engineBackedCandidates": 33,
       "sourceResolvedRate": 1,
       "abilityResolvedRate": 0.0455,
-      "targetContextRate": 0.0682,
+      "targetContextRate": 0.4091,
       "costKnownRate": 1,
       "timingKnownRate": 1,
       "hiddenInfoBlockedCount": 1,
-      "schemaGapCount": 18,
+      "schemaGapCount": 12,
       "hiddenInfoLeaks": 0,
       "legalActionGenerationChanges": 0
     }

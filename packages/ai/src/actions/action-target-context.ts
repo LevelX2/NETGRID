@@ -21,8 +21,15 @@ export function applyTargetContextProjection(
   const hiddenTargetRequirement = action.targetRequirements.some(
     (requirement) => requirement.visibility === "engine_only",
   );
+  const payloadTargets = hiddenTargetRequirement
+    ? []
+    : payloadTargetsForAction(action);
 
-  if (!hasTargetRequirement && availableTargets === undefined) {
+  if (
+    !hasTargetRequirement &&
+    availableTargets === undefined &&
+    payloadTargets.length === 0
+  ) {
     const runProjectionSummary = runProjectionSummaryFromAction(action);
     return {
       ...candidate,
@@ -42,15 +49,17 @@ export function applyTargetContextProjection(
   const sideSafeAvailableTargets =
     availableTargets !== undefined ||
     requirementTargets.length > 0 ||
-    choiceOptionTargets.length > 0
-      ? [
+    choiceOptionTargets.length > 0 ||
+    payloadTargets.length > 0
+      ? uniqueLegalTargetSummaries([
           ...(availableTargets?.map((target) => ({
             ...target,
             evidence: [...target.evidence],
           })) ?? []),
           ...requirementTargets,
           ...choiceOptionTargets,
-        ]
+          ...payloadTargets,
+        ])
       : undefined;
   const targetContext = targetContextForAction(
     action,
@@ -112,6 +121,16 @@ function normalizeServerId(value: unknown): string | undefined {
   if (normalized === "archives") return "archives";
   if (normalized.startsWith("remote_")) return normalized;
   return undefined;
+}
+
+function stringPayload(action: LegalAction, key: string): string | undefined {
+  const value = action.payload?.[key];
+  return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function numberPayload(action: LegalAction, key: string): number | undefined {
+  const value = action.payload?.[key];
+  return typeof value === "number" ? value : undefined;
 }
 
 function serverKindForId(
@@ -231,6 +250,134 @@ function requirementTargetsForAction(action: LegalAction): LegalTargetSummary[] 
     }
     return [];
   });
+}
+
+function payloadTargetsForAction(action: LegalAction): LegalTargetSummary[] {
+  const targets: LegalTargetSummary[] = [];
+  const serverId = normalizeServerId(action.payload?.serverId);
+  if (serverId !== undefined) {
+    targets.push({
+      targetId: serverId,
+      targetKind: "server",
+      targetSide: "corp",
+      targetZone: serverId,
+      evidence: [`AI039 legal action payload server target: ${serverId}`],
+    });
+  }
+
+  const cardTarget = cardPayloadTargetForAction(
+    action,
+    stringPayload(action, "cardId"),
+  );
+  if (cardTarget !== undefined) targets.push(cardTarget);
+
+  const iceTarget = icePayloadTargetForAction(
+    action,
+    stringPayload(action, "iceId"),
+  );
+  if (iceTarget !== undefined) targets.push(iceTarget);
+
+  return targets;
+}
+
+function cardPayloadTargetForAction(
+  action: LegalAction,
+  cardId: string | undefined,
+): LegalTargetSummary | undefined {
+  if (cardId === undefined) return undefined;
+  if (action.type === "score_agenda") {
+    return {
+      targetId: cardId,
+      targetKind: "agenda",
+      targetSide: "corp",
+      evidence: [`AI039 legal action payload agenda target: ${cardId}`],
+    };
+  }
+  if (
+    action.type === "advance_card" ||
+    action.type === "trash_accessed_card"
+  ) {
+    return {
+      targetId: cardId,
+      targetKind: "card",
+      targetSide: "corp",
+      evidence: [`AI039 legal action payload card target: ${cardId}`],
+    };
+  }
+  if (action.type === "trash_resource") {
+    return {
+      targetId: cardId,
+      targetKind: "resource",
+      targetSide: "runner",
+      evidence: [`AI039 legal action payload resource target: ${cardId}`],
+    };
+  }
+  if (action.type === "rez_ice") {
+    return {
+      targetId: cardId,
+      targetKind: "ice",
+      targetSide: "corp",
+      evidence: [`AI039 legal action payload ice target: ${cardId}`],
+    };
+  }
+  return undefined;
+}
+
+function icePayloadTargetForAction(
+  action: LegalAction,
+  iceId: string | undefined,
+): LegalTargetSummary | undefined {
+  if (iceId === undefined) return undefined;
+  if (action.type === "break_subroutine") {
+    const subroutineIndex = numberPayload(action, "subroutineIndex");
+    return {
+      targetId:
+        subroutineIndex !== undefined
+          ? `${iceId}:subroutine:${subroutineIndex}`
+          : iceId,
+      targetKind: "subroutine",
+      targetSide: "corp",
+      evidence: [
+        subroutineIndex !== undefined
+          ? `AI039 legal action payload subroutine target: ${iceId}:${subroutineIndex}`
+          : `AI039 legal action payload subroutine target ice: ${iceId}`,
+      ],
+    };
+  }
+  if (action.type === "rez_ice") {
+    return {
+      targetId: iceId,
+      targetKind: "ice",
+      targetSide: "corp",
+      evidence: [`AI039 legal action payload ice target: ${iceId}`],
+    };
+  }
+  return undefined;
+}
+
+function uniqueLegalTargetSummaries(
+  targets: readonly LegalTargetSummary[],
+): LegalTargetSummary[] {
+  const byKey = new Map<string, LegalTargetSummary>();
+  for (const target of targets) {
+    const key = [
+      target.targetId,
+      target.targetKind,
+      target.targetSide,
+      target.targetZone ?? "",
+    ].join("|");
+    const existing = byKey.get(key);
+    byKey.set(
+      key,
+      existing === undefined
+        ? { ...target, evidence: [...target.evidence] }
+        : {
+            ...existing,
+            evidence: [...new Set([...existing.evidence, ...target.evidence])],
+          },
+    );
+  }
+  return [...byKey.values()];
 }
 
 function targetContextForAction(

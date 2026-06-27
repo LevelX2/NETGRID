@@ -158,10 +158,14 @@ describe("buildActionSemanticCandidates", () => {
     expect(breakSubroutine.semanticActionType).toBe("breaker.break_subroutine");
     expect(breakSubroutine.sourceKind).toBe("card");
     expect(breakSubroutine.sourceCardId).toBe("breaker-source");
-    expect(breakSubroutine.projectionIssues).toEqual([
-      "ability_unresolved",
-      "target_context_unavailable",
+    expect(breakSubroutine.targetContext?.targetKind).toBe("subroutine");
+    expect(breakSubroutine.targetContext?.availableTargets).toEqual([
+      expect.objectContaining({
+        targetId: "ice-1:subroutine:0",
+        targetKind: "subroutine",
+      }),
     ]);
+    expect(breakSubroutine.projectionIssues).toEqual(["ability_unresolved"]);
   });
 
   it("covers the minimal runtime bridge action families", () => {
@@ -207,6 +211,33 @@ describe("buildActionSemanticCandidates", () => {
       ["advance_card", "score.advance_card", "partial_projected"],
       ["score_agenda", "score.agenda", "partial_projected"],
     ]);
+
+    expect(
+      candidates.find((candidate) => candidate.actionType === "start_run")
+        ?.targetContext?.availableTargets,
+    ).toEqual([expect.objectContaining({ targetId: "rd" })]);
+    expect(
+      candidates.find((candidate) => candidate.actionType === "rez_ice")
+        ?.targetContext?.availableTargets,
+    ).toEqual([expect.objectContaining({ targetId: "rd" })]);
+    expect(
+      candidates.find((candidate) => candidate.actionType === "advance_card")
+        ?.targetContext?.availableTargets,
+    ).toEqual([expect.objectContaining({ targetId: "installed-agenda" })]);
+    expect(
+      candidates.find((candidate) => candidate.actionType === "score_agenda")
+        ?.targetContext?.availableTargets,
+    ).toEqual([
+      expect.objectContaining({
+        targetId: "installed-agenda",
+        targetKind: "agenda",
+      }),
+    ]);
+    for (const candidate of candidates.slice(2)) {
+      expect(candidate.projectionIssues).not.toContain(
+        "target_context_unavailable",
+      );
+    }
   });
 
   it("classifies every current LegalAction type without strategy or scoring anchors", () => {
