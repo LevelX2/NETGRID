@@ -160,17 +160,7 @@ export function serverIdFromEvent(event: PublicGameEvent): string | undefined {
     event.publicPayload.server ??
     event.publicPayload.targetServerId;
   if (typeof candidate === "string") return candidate;
-  const label =
-    typeof event.publicPayload.serverLabel === "string"
-      ? event.publicPayload.serverLabel
-      : undefined;
-  if (!label) return undefined;
-  if (label === "HQ") return "hq";
-  if (label === "R&D" || label === "F&E (R&D)" || label === "F&E") return "rd";
-  if (label === "Archives" || label === "Archive") return "archives";
-  const remoteMatch = /^Remote\s+(\d+)$/i.exec(label);
-  if (!remoteMatch) return undefined;
-  return `remote_${remoteMatch[1]}`;
+  return undefined;
 }
 
 export function assessKnownRezzedIcePath(

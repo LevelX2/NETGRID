@@ -7054,6 +7054,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweiunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/visible-run-analysis.ts` entfernt `serverLabel`-Parsing aus der produktiven PublicEvent-Serverableitung für sichtbare Run-Analyse.
+  - Visible-Run-Analysis nutzt dort nur noch strukturierte Event-Serverfelder wie `serverId`, `attackedServerId`, `server` oder `targetServerId`, nicht label-only Texte wie `Remote 1` oder `R&D`.
+  - `visible-run-analysis.test.ts` schützt, dass label-only Servertexte nicht mehr normalisiert werden, strukturierte ServerIds aber weiterhin durchgereicht werden.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/visible-run-analysis.test.ts src/runner-run-target-evaluation.test.ts` grün, 2 Dateien, 67 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

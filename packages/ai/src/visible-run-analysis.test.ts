@@ -4,9 +4,10 @@ import {
   runnerKnownPathAssessmentIsCostNoAccess,
   runnerKnownPathAssessmentIsKnownNoAccess,
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
+  serverIdFromEvent,
   type KnownRezzedIcePathAssessment,
 } from "./visible-run-analysis";
-import type { VisibleCard } from "@netgrid/shared";
+import type { PublicGameEvent, VisibleCard } from "@netgrid/shared";
 
 function knownPathAssessment(
   overrides: Partial<KnownRezzedIcePathAssessment> = {},
@@ -23,6 +24,17 @@ function knownPathAssessment(
     creditsSpentBeforeUnpayableIce: 0,
     assessedKnownIceCount: 0,
     ...overrides,
+  };
+}
+
+function event(publicPayload: Record<string, unknown>): PublicGameEvent {
+  return {
+    eventId: `event-${JSON.stringify(publicPayload)}`,
+    type: "start_run",
+    stateVersionBefore: 1,
+    stateVersionAfter: 2,
+    stateHashAfter: "test-hash",
+    publicPayload,
   };
 }
 
@@ -84,6 +96,15 @@ describe("visible run analysis known-path classification", () => {
     expect(
       runnerKnownPathAssessmentIsKnownNoAccess(knownPathAssessment()),
     ).toBe(false);
+  });
+});
+
+describe("visible run analysis server ids", () => {
+  it("uses structured event server ids and ignores label-only server text", () => {
+    expect(serverIdFromEvent(event({ serverLabel: "Remote 1" }))).toBeUndefined();
+    expect(serverIdFromEvent(event({ serverLabel: "R&D" }))).toBeUndefined();
+    expect(serverIdFromEvent(event({ serverId: "remote_1" }))).toBe("remote_1");
+    expect(serverIdFromEvent(event({ attackedServerId: "rd" }))).toBe("rd");
   });
 });
 
