@@ -6901,6 +6901,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/engine typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` fünfzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-economy-posture.ts` und `packages/ai/src/runner-run-target-evaluation.ts` entfernen die produktive Cashout-Erkennung über `action.label`-/`payload.source`-Text wie `cash`, `payout`, `auszahlen` oder `nehmen`.
+  - Runner-Economy-Posture und RunTarget-Evaluation erkennen Bank-Cashout-Actions dort nur noch über das strukturierte LegalAction-Payload-Flag `cardImplementationTakesHostedCredits`.
+  - `runner-run-target-evaluation.test.ts` schützt, dass label-only Bank-Cashout-Text keine `cash_out_bank`-Empfehlung mehr erzeugt, strukturierte Hosted-Credit-Payloads aber weiterhin Cashout-Funding empfehlen.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts -t "bank cashout|economy|creditbase|cash_out_bank"` grün, 1 Datei, 4 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

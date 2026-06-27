@@ -1856,6 +1856,37 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("uses structured hosted-credit payloads and ignores label-only bank cashout text", () => {
+    const labelOnlyInput = aiInput({
+      credits: 0,
+      servers: [server("hq")],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        bankPayoutAction("label-cashout", "Credits aus Bank nehmen"),
+      ],
+    });
+
+    const structuredInput = aiInput({
+      credits: 0,
+      servers: [server("hq")],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        bankPayoutAction("structured-cashout", "Use ability", {
+          cardImplementationTakesHostedCredits: true,
+        }),
+      ],
+    });
+
+    expect(buildRunnerEconomyPosture({ input: labelOnlyInput })).toMatchObject({
+      fundingNeed: true,
+      recommendation: "build_economy",
+    });
+    expect(buildRunnerEconomyPosture({ input: structuredInput })).toMatchObject({
+      fundingNeed: true,
+      recommendation: "cash_out_bank",
+    });
+  });
+
   it("builds a creditbase funding need for useful hand cards blocked by credits", () => {
     const input = aiInput({
       credits: 0,
@@ -2233,6 +2264,26 @@ function gainCreditAction(actionId: string): LegalAction {
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 2,
+  };
+}
+
+function bankPayoutAction(
+  actionId: string,
+  label: string,
+  payload: LegalAction["payload"] = {},
+): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "activated_card_ability",
+    label,
+    source: "runner-bank-source",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    ...(Object.keys(payload).length > 0 ? { payload } : {}),
   };
 }
 

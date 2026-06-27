@@ -525,13 +525,9 @@ function actionServerId(action: LegalAction): string | undefined {
 }
 
 function isBankPayoutAction(action: LegalAction): boolean {
-  const text = `${action.label} ${action.payload?.source ?? ""}`.toLowerCase();
   return (
-    action.type === "trigger_ability" &&
-    (text.includes("cash") ||
-      text.includes("payout") ||
-      text.includes("auszahlen") ||
-      text.includes("nehmen"))
+    (action.type === "trigger_ability" ||
+      action.type === "activated_card_ability") &&
+    action.payload?.cardImplementationTakesHostedCredits === true
   );
 }
-
