@@ -6797,6 +6797,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` vierter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-candidate-matching.ts` entfernt Action-Label- und Evidence-Text-Fallbacks aus dem Bank-Step-Matching.
+  - Bank-Build-/Cashout-Steps matchen dort nur noch über strukturierte Candidate-Signale wie `temporary_resource_bank`, `counter_bank`, `cash_out_credit_bank`, `payout` oder Bank-Semantik.
+  - `tactical-plan-candidate-matching.test.ts` schützt, dass label-only Banktext ohne semantische Candidate-Signale nicht als Cashout-Match zählt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-candidate-matching.test.ts src/tactical-plans.test.ts -t "bankStepMatchesCandidate|maps bank steps from candidate bank semantics without label hints|uses bank capability evidence"` grün, 2 Dateien, 3 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
