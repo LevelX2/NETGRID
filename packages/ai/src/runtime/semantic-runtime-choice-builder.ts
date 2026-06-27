@@ -126,7 +126,11 @@ function scoreSemanticRuntimeAction(
       `action_type:${action.type}`,
       `semantic_scope:${scopeId}`,
       `semantic_score:${score}`,
-      `credit_cost:${dependencies.actionCreditCost(action)}`,
+      `credit_cost:${semanticRuntimeChoiceCreditCostEvidence({
+        action,
+        actionSemanticCandidate,
+        dependencies,
+      })}`,
       ...(actionSemanticCandidate
         ? [
             `action_semantic_candidate:${actionSemanticCandidate.semanticActionType}`,
@@ -150,4 +154,23 @@ function scoreSemanticRuntimeAction(
     ],
     confidence: semanticRuntimeConfidence(scopeId, score),
   };
+}
+
+function semanticRuntimeChoiceCreditCostEvidence(params: {
+  action: LegalAction;
+  actionSemanticCandidate: ActionSemanticCandidate | undefined;
+  dependencies: Pick<SemanticRuntimeChoiceBuilderDependencies, "actionCreditCost">;
+}): number {
+  const costProfile = params.actionSemanticCandidate?.costProfile;
+  if (costProfile === undefined) {
+    return params.dependencies.actionCreditCost(params.action);
+  }
+  if (typeof costProfile.creditCost === "number") return costProfile.creditCost;
+  if (
+    costProfile.costKnownStatus === "known" ||
+    costProfile.costKnownStatus === "not_applicable"
+  ) {
+    return 0;
+  }
+  return params.dependencies.actionCreditCost(params.action);
 }

@@ -6531,6 +6531,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 153 Dateien, 1672 Tests.
 
+- `AI-COMPLETE-10` fünfter Cost-Profil-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-choice-builder.ts` nutzt für die `credit_cost`-Evidence jetzt bevorzugt `ActionSemanticCandidate.costProfile.creditCost`.
+  - Bei known/not_applicable Candidate-Cost ohne Credit-Wert wird `0` berichtet; der alte `actionCreditCost`-Helper bleibt Fallback, wenn kein Candidate oder nur unbekannte Cost-Projection vorliegt.
+  - `packages/ai/src/runtime/semantic-runtime-choice-builder.test.ts` schützt, dass Choice-Evidence nicht mehr von einem billigeren Runtime-Helper überstimmt wird.
+  - Status bleibt `IN_PROGRESS`, weil weitere Cost-/Timing-/BoardContext-Spezialpfade noch auditiert und angebunden werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-choice-builder.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 154 Dateien, 1673 Tests.
+
 Nächstes aktives Ziel: `AI-COMPLETE-10`.
 
 ## Audit-Ledger
