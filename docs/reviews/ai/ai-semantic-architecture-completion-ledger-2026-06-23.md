@@ -6843,6 +6843,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` neunter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` entfernt im Runner-Coverage-Install-Kandidaten den Fallback auf `breaker|fracter|decoder|killer` im Install-Label.
+  - Der lokale Practical-Tactic-Source-Card-Lookup bindet sichtbare Karten nicht mehr über Kartentitel im Action-Label, sondern nur über Source-InstanceId oder Source-DefinitionId.
+  - `practical-tactic-overlay.test.ts` schützt, dass label-only Fracter-Text nicht als Coverage-Install-Kandidat zählt, eine sichtbare Fracter-Source-Card aber weiterhin als Compare-only-Kandidat gemeldet wird.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
