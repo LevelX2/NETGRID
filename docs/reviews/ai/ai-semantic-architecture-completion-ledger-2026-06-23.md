@@ -57,7 +57,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `VERIFIED` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Erfüllt: produktiver Decision-Input nutzt `deck-doctrine-runtime-context.ts` mit StrategyProfile, report-only Doctrine-v2-Diagnostic, NeutralDoctrine, Vollständigkeitsstatus und Rollenstatus; Doctrine-v1-PlanWeights sind Legacy-gekapselt, Public-v1-Exports laufen über den Legacy-Public-Contract. |
 | AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `VERIFIED` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Erfüllt: Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate, werden in Semantic Runtime und TacticalPlans diagnostisch geführt und wirken für Pressure, Remote Contest, Economy, Setup, Risk-Control und Bypass im Hauptscore. |
 | AI-COMPLETE-08 | Corp-TacticalGoals produktiv vollständig integrieren. | `VERIFIED` | Corp-Ziele wurden begonnen, müssen produktiv und diagnosefähig durchgängig wirken. | Erfüllt: Corp-Ziele wirken für Score, Advance, Remote, Zentralserver, Rez, Economy, Tag/Punish und sichtbare Ambush-Fenster im Hauptscore; tagabhängiger Damage bleibt Payoff-gated. |
-| AI-COMPLETE-09 | ActionSemanticCandidate-Befüllung vervollständigen. | `IN_PROGRESS` | Source/Ability/Cost/Timing/Target/BoardContext-Coverage muss gemessen und geschlossen werden. | Relevanter Runtime-Scope ist ausreichend befüllt; Gaps sind echte Blocker oder repariert. |
+| AI-COMPLETE-09 | ActionSemanticCandidate-Befüllung vervollständigen. | `VERIFIED` | Source/Ability/Cost/Timing/Target/BoardContext-Coverage muss gemessen und geschlossen werden. | Erfüllt: Runtime-relevante Source/Ability-, Target-, Cost/Timing- und BoardContext-Felder werden side-safe befüllt; verbleibende Gaps sind echte fehlende Engine-/Target-/Profile-Evidence oder spätere TargetProfile-Arbeit. |
 | AI-COMPLETE-10 | Cost/Timing/BoardContext verallgemeinern. | `PENDING` | Score- und Planpfade enthalten verstreute Spezialbewertungen. | Gemeinsame side-safe Projektionen speisen Scoring und Debug. |
 | AI-COMPLETE-11 | TargetProfile-/TargetChoice-Pipeline produktiv machen. | `PENDING` | TargetChoice ist überwiegend Shadow/Diagnose. | Konkrete legale Zieloptionen wirken im Target Fit ohne `selectedChoices`-Erzeugung oder Hidden Info. |
 | AI-COMPLETE-12 | Hard-Gate-Vertrag härten. | `PENDING` | HardGates existieren, müssen Vorrang vor allen Scorepfaden behalten. | Blockierte Kandidaten können nicht durch positive Scores gewinnen; WhyNot nennt Blocker. |
@@ -6479,7 +6479,17 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1668 Tests.
 
-Nächstes aktives Ziel: `AI-COMPLETE-09`.
+- `AI-COMPLETE-09` Abschlussaudit:
+  - Source/Ability: `action-source-binding.ts` bindet source card instance, source definition, explicit abilityRef, payload ability ids, CardImplementation-AbilityIds/-Keys und sichtbar eindeutig inferierbare Runtime-Card-Abilities.
+  - Target: `action-target-context.ts` deckt selectedTargets, engine-provided targets, TargetRequirements, ChoiceRequirements und LegalAction-Payload-Ziele ab; Engine-only Targets bleiben blocked und side-safe.
+  - Cost/Timing: `action-cost-timing.ts` normalisiert vorhandene Cost-/Timing-Payloads; weitergehende Board-/Score-Kontextverallgemeinerung bleibt bewusst `AI-COMPLETE-10`.
+  - BoardContext: `ActionSemanticCandidate.boardContext` enthält side-sicheren Decision-Kontext ohne Payload-Werte, Board-State-Objekte oder versteckte Kartendaten.
+  - Verbleibende `target_context_unavailable`-, `ability_unresolved`- und `card_semantics_unavailable`-Fälle sind echte fehlende Engine-/Target-/Profile-Evidence, diagnostische Worklist-Fixtures oder gehören zur TargetProfile-Pipeline in `AI-COMPLETE-11`.
+  - Verifikation: `rg -n "AI-COMPLETE-09|source_unresolved|ability_unresolved|target_context_unavailable|card_semantics_unavailable|not_projected|cardImplementationAbilityKey-derived|payload .*target|boardContext" docs/reviews/ai/ai-semantic-architecture-completion-ledger-2026-06-23.md packages/ai/src/action-semantic-candidate.ts packages/ai/src/actions packages/ai/src/action-semantic-candidate.test.ts` geprüft.
+  - Verifikation: letzter vollständiger Code-Gate nach AI09-Codeänderungen grün: `corepack pnpm --filter @netgrid/ai test`, 151 Dateien, 1668 Tests.
+  - Status: `VERIFIED`.
+
+Nächstes aktives Ziel: `AI-COMPLETE-10`.
 
 ## Audit-Ledger
 
