@@ -127,6 +127,12 @@ import {
   runPlanStepMatchesAction,
 } from "./plans/tactical-plan-run-action-matching";
 import {
+  economyFalseMatchLoopPenalties,
+  noRecoveryLoopPenalties,
+  recoveryLoopPenaltiesForCoverageSearch,
+  recoveryLoopPenaltyEvidence,
+} from "./plans/tactical-plan-recovery-loop-penalties";
+import {
   candidateMappingRationale,
   mappingStatusForStep,
 } from "./plans/tactical-plan-mapping-helpers";
@@ -519,13 +525,6 @@ function candidateMatchesStep(
 
 type RecoveryTargetPlanFit = "none" | "low" | "medium" | "high";
 
-type RecoveryLoopPenalties = {
-  repeatedRecoverySameCardPenalty: number;
-  repeatedEconomyRecoveryLoopPenalty: number;
-  noProgressOnRequiredCapabilityPenalty: number;
-  fundingNeedReducesRecoveryLoopPenalty: boolean;
-};
-
 type CoverageSearchActionFit = {
   supportsActiveCapabilityNeed: boolean;
   answerRole: CoverageAnswerRole;
@@ -695,7 +694,10 @@ function coverageSearchActionFit(
     : action.type;
   const supportsCreditNeed =
     actionCreditCost(action) < 0 || matchedActionRole.includes("economy");
-  const penalties = economyFalseMatchLoopPenalties(input, supportsCreditNeed);
+  const penalties = economyFalseMatchLoopPenalties(
+    runnerHasConcreteFundingNeed(input, []),
+    supportsCreditNeed,
+  );
   return {
     supportsActiveCapabilityNeed: false,
     answerRole: "not_coverage_answer",
@@ -821,7 +823,7 @@ function recoveryTargetEvaluation(
         ? "high"
         : "medium";
   const penalties = recoveryLoopPenaltiesForCoverageSearch(
-    input,
+    runnerHasConcreteFundingNeed(input, []),
     supportsActiveCapabilityNeed,
     supportsCreditNeed,
   );
@@ -858,63 +860,6 @@ function recoveryTargetEvaluation(
         : "why_junkyard_recovery_allowed_or_rejected:rejected_no_plan_fit",
     ],
   };
-}
-
-function noRecoveryLoopPenalties(): RecoveryLoopPenalties {
-  return {
-    repeatedRecoverySameCardPenalty: 0,
-    repeatedEconomyRecoveryLoopPenalty: 0,
-    noProgressOnRequiredCapabilityPenalty: 0,
-    fundingNeedReducesRecoveryLoopPenalty: false,
-  };
-}
-
-function recoveryLoopPenaltiesForCoverageSearch(
-  input: AiDecisionInput,
-  supportsActiveCapabilityNeed: boolean,
-  supportsCreditNeed: boolean,
-): RecoveryLoopPenalties {
-  if (supportsActiveCapabilityNeed) return noRecoveryLoopPenalties();
-  const fundingNeed = runnerHasConcreteFundingNeed(input, []);
-  if (supportsCreditNeed) {
-    return {
-      repeatedRecoverySameCardPenalty: fundingNeed ? 20 : 80,
-      repeatedEconomyRecoveryLoopPenalty: fundingNeed ? 60 : 220,
-      noProgressOnRequiredCapabilityPenalty: fundingNeed ? 90 : 180,
-      fundingNeedReducesRecoveryLoopPenalty: fundingNeed,
-    };
-  }
-  return {
-    repeatedRecoverySameCardPenalty: 50,
-    repeatedEconomyRecoveryLoopPenalty: 0,
-    noProgressOnRequiredCapabilityPenalty: 160,
-    fundingNeedReducesRecoveryLoopPenalty: false,
-  };
-}
-
-function economyFalseMatchLoopPenalties(
-  input: AiDecisionInput,
-  supportsCreditNeed: boolean,
-): RecoveryLoopPenalties {
-  if (!supportsCreditNeed) return noRecoveryLoopPenalties();
-  const fundingNeed = runnerHasConcreteFundingNeed(input, []);
-  return {
-    repeatedRecoverySameCardPenalty: 0,
-    repeatedEconomyRecoveryLoopPenalty: fundingNeed ? 40 : 120,
-    noProgressOnRequiredCapabilityPenalty: fundingNeed ? 80 : 160,
-    fundingNeedReducesRecoveryLoopPenalty: fundingNeed,
-  };
-}
-
-function recoveryLoopPenaltyEvidence(
-  penalties: RecoveryLoopPenalties,
-): string[] {
-  return [
-    `repeatedRecoverySameCardPenalty:${penalties.repeatedRecoverySameCardPenalty}`,
-    `repeatedEconomyRecoveryLoopPenalty:${penalties.repeatedEconomyRecoveryLoopPenalty}`,
-    `noProgressOnRequiredCapabilityPenalty:${penalties.noProgressOnRequiredCapabilityPenalty}`,
-    `fundingNeedReducesRecoveryLoopPenalty:${penalties.fundingNeedReducesRecoveryLoopPenalty}`,
-  ];
 }
 
 function planRequiredBreakerCoverage(
