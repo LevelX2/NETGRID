@@ -141,11 +141,16 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     }
   }
   if (action.type === "rez_ice") {
+    const rezCost = semanticRuntimeCorpActionCreditCost(
+      dependencies,
+      action,
+      actionSemanticCandidate,
+    );
     components.push({
       key: "corp_rez_affordability",
       label: "Rez-Kosten zahlbar",
-      value: credits >= dependencies.actionCreditCost(action) ? 750 : -1200,
-      reason: `credits:${credits};cost:${dependencies.actionCreditCost(action)}`,
+      value: credits >= rezCost ? 750 : -1200,
+      reason: `credits:${credits};cost:${rezCost}`,
     });
   }
   if (action.type === "install_card") {
@@ -370,6 +375,23 @@ function corpTacticalGoalsForInput(
       ownCorpTacticalGoals?: readonly TacticalGoalLike[];
     }
   ).ownCorpTacticalGoals ?? [];
+}
+
+function semanticRuntimeCorpActionCreditCost<TConsumer extends string>(
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): number {
+  const costProfile = actionSemanticCandidate?.costProfile;
+  if (costProfile === undefined) return dependencies.actionCreditCost(action);
+  if (typeof costProfile.creditCost === "number") return costProfile.creditCost;
+  if (
+    costProfile.costKnownStatus === "known" ||
+    costProfile.costKnownStatus === "not_applicable"
+  ) {
+    return 0;
+  }
+  return dependencies.actionCreditCost(action);
 }
 
 function highestPriorityCorpGoalForAction(

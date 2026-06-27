@@ -6499,6 +6499,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 152 Dateien, 1670 Tests.
 
+- `AI-COMPLETE-10` zweiter Cost-Profil-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` nutzt für `corp_rez_affordability` jetzt bevorzugt das normalisierte `ActionSemanticCandidate.costProfile`.
+  - Der bisherige `actionCreditCost`-Callback bleibt Fallback, wenn kein Candidate oder nur unbekannte Cost-Projection verfügbar ist.
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.test.ts` schützt, dass ein Candidate-RezCost von 6 bei 5 Credits nicht durch einen billigeren Helper-Fallback überstimmt wird.
+  - Status bleibt `IN_PROGRESS`, weil weitere Cost-/Timing-/BoardContext-Spezialpfade noch auditiert und angebunden werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts src/semantic-ai-runtime-cutover.test.ts -t "semanticRuntimeCorpScoreComponents|Semantic AI runtime cutover"` grün, 2 Dateien, 72 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 152 Dateien, 1671 Tests.
+
 Nächstes aktives Ziel: `AI-COMPLETE-10`.
 
 ## Audit-Ledger

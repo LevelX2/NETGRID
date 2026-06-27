@@ -209,6 +209,37 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       ]),
     );
   });
+
+  it("uses ActionSemanticCandidate cost profile for rez affordability", () => {
+    const candidate = {
+      ...semanticCandidate("rez-ice", "corp_window.rez", []),
+      costProfile: {
+        creditCost: 6,
+        costKnownStatus: "known" as const,
+        additionalCosts: [],
+      },
+    };
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([]),
+      corpAction("rez-ice", "rez_ice"),
+      "simple_rez",
+      {
+        ...testDependencies(),
+        actionCreditCost: () => 0,
+      },
+      candidate,
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_rez_affordability",
+          value: -1200,
+          reason: "credits:5;cost:6",
+        }),
+      ]),
+    );
+  });
 });
 
 function corpInputWithGoals(
