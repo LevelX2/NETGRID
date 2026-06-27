@@ -6,6 +6,10 @@ import {
   runnerDrawOverflowRationale,
 } from "./runner-draw-overflow";
 import {
+  legalActionCreditGainForPlan,
+  type TacticalPlanCreditValueDependencies,
+} from "./tactical-plan-action-values";
+import {
   actionServerId,
   isRemoteServer,
 } from "./tactical-plan-server-targets";
@@ -103,6 +107,16 @@ export function runnerHandBufferAssessment(input: AiDecisionInput): {
       `runner_hand_buffer_reason:${reason}`,
     ],
   };
+}
+
+export function runnerEconomyActionPreferredOverHandBuffer(
+  context: TacticalPlanBuildContext,
+  dependencies: TacticalPlanCreditValueDependencies,
+): boolean {
+  return context.input.legalActions.some(
+    (action) =>
+      legalActionCreditGainForPlan(context.input, action, dependencies) > 0,
+  );
 }
 
 export function runnerHighPayoffRunAvailable(

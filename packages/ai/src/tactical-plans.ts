@@ -109,6 +109,7 @@ import {
 import { developmentCardStepMatchesAction } from "./plans/tactical-plan-development-card-matching";
 import {
   applyRunnerDrawOverflowAdjustments,
+  runnerEconomyActionPreferredOverHandBuffer,
   runnerHandBufferAssessment,
   runnerHasNonBasicHandBufferAlternative,
   runnerHighPayoffRunAvailable,
@@ -1157,7 +1158,10 @@ function runnerHandBufferPlans(
   if (!assessment.active) return [];
   if (
     !assessment.damagePressure &&
-    runnerEconomyActionPreferredOverHandBuffer(context)
+    runnerEconomyActionPreferredOverHandBuffer(
+      context,
+      TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
+    )
   ) {
     return [];
   }
@@ -1210,20 +1214,6 @@ function runnerHandBufferPlans(
       stateVersion,
     }),
   ];
-}
-
-function runnerEconomyActionPreferredOverHandBuffer(
-  context: TacticalPlanBuildContext,
-): boolean {
-  const legalCreditGainAvailable = context.input.legalActions.some(
-    (action) =>
-      legalActionCreditGainForPlan(
-        context.input,
-        action,
-        TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
-      ) > 0,
-  );
-  return legalCreditGainAvailable;
 }
 
 function runnerHandDevelopmentPlans(
