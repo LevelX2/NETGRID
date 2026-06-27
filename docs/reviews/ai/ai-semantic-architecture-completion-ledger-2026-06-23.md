@@ -6459,6 +6459,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1667 Tests.
 
+- `AI-COMPLETE-09` dritter Candidate-Befüllungsschnitt:
+  - `packages/ai/src/actions/action-source-binding.ts` leitet ein CardImplementation-Ability-Binding aus `sourceDefinitionId` plus `cardImplementationAbilityKey` ab, wenn die Engine kein fertiges `cardImplementationAbilityId` in der LegalAction-Payload liefert.
+  - Dadurch können `ActionCardSemanticProfile`-AbilitySemantics für diese Primitive über die stabile zusammengesetzte AbilityId joinen; die Ableitung bleibt side-safe und liest keine versteckten Karten- oder Boarddaten.
+  - `packages/ai/src/action-semantic-candidate.test.ts` schützt den Join-Pfad inklusive CardContextSignals, ActionTacticSignals und Evidence.
+  - Status bleibt `IN_PROGRESS`, weil weitere Source/Ability- und TargetProfile-Gaps noch auditiert werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts` grün, 1 Datei, 19 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 151 Dateien, 1668 Tests.
+
 Nächstes aktives Ziel: `AI-COMPLETE-09`.
 
 ## Audit-Ledger

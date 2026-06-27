@@ -431,6 +431,57 @@ describe("buildActionSemanticCandidates", () => {
     expect(serialized).not.toContain("scoringWeight");
   });
 
+  it("derives card implementation ability binding from source definition and ability key", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("resolve_choice", 0, {
+          source: "game_rule",
+          payload: {
+            sourceCardId: "runner-resource-1",
+            sourceDefinitionId: "onr_proteus_136_credit-subversion",
+            cardImplementationAbilityKey: "successful_run_before_access:0",
+            cardImplementationPrimitiveKind:
+              "successful_run_before_access_effect",
+            cardImplementationEffectKind: "corp_lose_credits",
+          },
+        }),
+      ],
+      cardSemanticProfilesByDefinitionId: {
+        "onr_proteus_136_credit-subversion": {
+          cardId: "onr_proteus_136_credit-subversion",
+          tacticSignals: ["card.context.credit_subversion"],
+          abilitySemantics: [
+            {
+              abilityId:
+                "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+              tacticSignals: ["economy.corp_credit_denial"],
+            },
+          ],
+        },
+      },
+    });
+    if (!candidate) throw new Error("Expected key-derived ability candidate");
+
+    expect(candidate.sourceKind).toBe("card");
+    expect(candidate.sourceDefinitionId).toBe(
+      "onr_proteus_136_credit-subversion",
+    );
+    expect(candidate.abilityId).toBe(
+      "onr_proteus_136_credit-subversion:successful_run_before_access:0",
+    );
+    expect(candidate.abilityKey).toBe("successful_run_before_access:0");
+    expect(candidate.abilityBindingMethod).toBe("engine_payload");
+    expect(candidate.cardContextSignals).toEqual([
+      "card.context.credit_subversion",
+    ]);
+    expect(candidate.actionTacticSignals).toContain(
+      "economy.corp_credit_denial",
+    );
+    expect(candidate.evidence).toContain(
+      "AI038 payload cardImplementationAbilityKey-derived abilityId: onr_proteus_136_credit-subversion:successful_run_before_access:0",
+    );
+  });
+
   it("projects target context only from selected or engine-provided targets", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [

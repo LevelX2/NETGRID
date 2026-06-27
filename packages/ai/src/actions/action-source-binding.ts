@@ -167,6 +167,25 @@ function abilityBindingForAction(
     };
   }
 
+  const cardImplementationAbilityKey = stringPayload(
+    action,
+    "cardImplementationAbilityKey",
+  );
+  const sourceDefinitionId = sourceDefinitionIdForAction(action);
+  if (
+    sourceDefinitionId !== undefined &&
+    cardImplementationAbilityKey !== undefined
+  ) {
+    return {
+      abilityId: `${sourceDefinitionId}:${cardImplementationAbilityKey}`,
+      method: "engine_payload",
+      sourceDefinitionId,
+      evidence: [
+        `AI038 payload cardImplementationAbilityKey-derived abilityId: ${sourceDefinitionId}:${cardImplementationAbilityKey}`,
+      ],
+    };
+  }
+
   if (sourceCardInstanceId === undefined) return undefined;
   const matchingBindings = sideSafeAbilityBindings.filter(
     (binding) =>
