@@ -125,7 +125,6 @@ import {
   DEMO_CARDS_BY_ID,
   sanitizeAiDecisionDebug,
 } from "@netgrid/shared";
-import { resetTacticalPlanMemory } from "./tactical-plans";
 
 const originalSemanticAiRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
 
