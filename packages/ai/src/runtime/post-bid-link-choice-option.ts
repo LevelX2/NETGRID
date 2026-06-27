@@ -13,10 +13,10 @@ export function selectedPostBidLinkChoiceOptionId(
     choice.options
       .filter((option) => option.id.startsWith("trace_link_"))
       .sort((left, right) => {
-        const leftDelta = Number(/\+(\d+)\s+Link/.exec(left.label)?.[1] ?? 0);
-        const rightDelta = Number(/\+(\d+)\s+Link/.exec(right.label)?.[1] ?? 0);
+        const leftDelta = postBidTraceLinkDelta(left);
+        const rightDelta = postBidTraceLinkDelta(right);
         return (
-          rightDelta - leftDelta ||
+          (rightDelta ?? 0) - (leftDelta ?? 0) ||
           left.label.localeCompare(right.label, "de")
         );
       })[0] ??
@@ -27,6 +27,7 @@ export function selectedPostBidLinkChoiceOptionId(
       options: choice.options.map((option) => ({
         id: option.id,
         label: option.label,
+        ...postBidTraceLinkOptionDelta(option),
       })),
       ...(strongestLinkOption
         ? { fallbackOptionId: strongestLinkOption.id }
@@ -34,4 +35,20 @@ export function selectedPostBidLinkChoiceOptionId(
       ...traceContext,
     }).option ?? strongestLinkOption;
   return selected?.id;
+}
+
+function postBidTraceLinkDelta(
+  option: PendingChoice["options"][number],
+): number | undefined {
+  const delta = option.metadata?.postBidTraceLinkDelta;
+  return typeof delta === "number" && Number.isInteger(delta) && delta > 0
+    ? delta
+    : undefined;
+}
+
+function postBidTraceLinkOptionDelta(
+  option: PendingChoice["options"][number],
+): { linkDelta: number } | Record<string, never> {
+  const delta = postBidTraceLinkDelta(option);
+  return delta !== undefined ? { linkDelta: delta } : {};
 }

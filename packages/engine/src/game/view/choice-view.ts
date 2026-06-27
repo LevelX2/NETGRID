@@ -37,6 +37,7 @@ export function visibleChoice(
           ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
           ...(option.selectable === false ? { selectable: false } : {}),
           ...(value !== undefined ? { value } : {}),
+          ...(option.metadata ? { metadata: { ...option.metadata } } : {}),
           ...(card ? { card } : {}),
         };
       }),

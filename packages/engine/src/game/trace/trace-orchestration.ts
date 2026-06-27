@@ -797,6 +797,9 @@ function startTracePostBidLinkChoice(
         label: `${candidate.label}: +${candidate.linkDelta} Link`,
         publicLabel: "Trace Link",
         value: candidate.cardId,
+        metadata: {
+          postBidTraceLinkDelta: candidate.linkDelta,
+        },
       })),
     ],
     minSelections: 1,

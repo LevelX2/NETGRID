@@ -28,6 +28,7 @@ export type TraceBidEfficiencySelection = {
 export type PostBidTraceLinkOption = {
   id: string;
   label: string;
+  linkDelta?: number;
 };
 
 export type PostBidTraceLinkEfficiencyReason =
@@ -141,7 +142,7 @@ export function selectEfficientPostBidLinkOption(
   const improvingOptions = input.options
     .flatMap((option) => {
       if (!option.id.startsWith("trace_link_")) return [];
-      const delta = parseTraceLinkDelta(option.label);
+      const delta = option.linkDelta;
       return Number.isInteger(delta) && typeof delta === "number" && delta > 0
         ? [{ option, delta }]
         : [];
@@ -217,12 +218,6 @@ function currentRunnerTraceStrength(
     );
   }
   return undefined;
-}
-
-function parseTraceLinkDelta(label: string): number | undefined {
-  const match = /\+(\d+)\s+Link/.exec(label);
-  if (!match) return undefined;
-  return Number(match[1]);
 }
 
 function postBidTraceLinkSelection(

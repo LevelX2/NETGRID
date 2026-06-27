@@ -649,6 +649,9 @@ export type ChoiceOption = {
   publicLabel?: string;
   value?: string | number | boolean;
   selectable?: boolean;
+  metadata?: {
+    postBidTraceLinkDelta?: number;
+  };
 };
 
 export type StackSearchResolution = {

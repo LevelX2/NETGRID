@@ -648,12 +648,14 @@ function sanitizeVisibleChoiceRequest(choice: VisibleChoiceRequest): VisibleChoi
     kind: choice.kind,
     options: choice.options.map((option) => {
       const value = sanitizePrimitive(option.value);
+      const metadata = sanitizeChoiceOptionMetadata(option.metadata);
       return {
         id: option.id,
         label: option.label,
         ...(option.publicLabel !== undefined ? { publicLabel: option.publicLabel } : {}),
         ...(value !== undefined ? { value } : {}),
         ...(option.selectable !== undefined ? { selectable: option.selectable } : {}),
+        ...(metadata ? { metadata } : {}),
         ...(option.card ? { card: sanitizeVisibleCard(option.card) } : {}),
       };
     }),
@@ -796,6 +798,21 @@ function sanitizePrimitive(value: unknown): string | number | boolean | undefine
   if (typeof value === "string" || typeof value === "boolean") return value;
   if (typeof value === "number" && Number.isFinite(value)) return value;
   return undefined;
+}
+
+function sanitizeChoiceOptionMetadata(
+  value: unknown,
+): NonNullable<VisibleChoiceRequest["options"][number]["metadata"]> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const metadata = value as Record<string, unknown>;
+  const postBidTraceLinkDelta = metadata.postBidTraceLinkDelta;
+  if (
+    typeof postBidTraceLinkDelta !== "number" ||
+    !Number.isInteger(postBidTraceLinkDelta) ||
+    postBidTraceLinkDelta <= 0
+  )
+    return undefined;
+  return { postBidTraceLinkDelta };
 }
 
 function sanitizeStringArray(value: unknown): string[] | undefined {

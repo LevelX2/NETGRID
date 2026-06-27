@@ -148,6 +148,57 @@ describe("trace orchestration", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
+  it("opens post-bid link choices with structured link metadata", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const programId = "program_1" as CardInstanceId;
+    const programDefinition = definition("pvr", "program");
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [programId]: instance(programId, programDefinition.id, "runner"),
+      },
+      runnerPrograms: [programId],
+    });
+    state.run = { runId: "run_1", attackedServerId: "rd" } as any;
+    state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
+      corpBid: 0,
+      traceStrength: 3,
+      runnerLink: 0,
+    });
+    state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
+    const action = actionFor("runner", "resolve_choice");
+
+    resolveTraceChoice(
+      testHost(
+        state,
+        {
+          [sourceDefinition.id]: sourceDefinition,
+          [programDefinition.id]: programDefinition,
+        },
+        testCalls(),
+        { postBidLinkSourceId: programId, postBidLinkAmount: 2 },
+      ),
+      action,
+      playerChoice("bid_0"),
+    );
+
+    expect(state.pendingChoice).toMatchObject({
+      source: "trace_post_bid_link:trace_1",
+      side: "runner",
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      state.pendingChoice?.options.find(
+        (option) => option.id === `trace_link_${programId}`,
+      )?.metadata,
+    ).toEqual({ postBidTraceLinkDelta: 2 });
+    expect(action.payload).toMatchObject({
+      traceStep: "runner_bid",
+      postBidTraceLinkChoiceOpened: true,
+    });
+  });
+
   it("lets the Runner choose trace-link credit allocation before paying a trace bid", () => {
     const sourceId = "source_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");

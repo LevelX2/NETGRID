@@ -7131,6 +7131,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` vierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/engine/src/game/trace/trace-orchestration.ts`, `packages/engine/src/game/view/choice-view.ts` und `packages/shared/src/index.ts` führen `postBidTraceLinkDelta` als strukturierte ChoiceOption-Metadaten vom Engine-Choice bis zur sichtbaren PlayerView.
+  - `packages/ai/src/input-dto.ts` übernimmt aus ChoiceOption-Metadaten nur positive ganzzahlige `postBidTraceLinkDelta`-Werte; andere freie oder unstrukturierte Metadaten werden nicht in den AI-DTO-Vertrag übernommen.
+  - `packages/ai/src/trace-bid-efficiency.ts` und `packages/ai/src/runtime/post-bid-link-choice-option.ts` entfernen die produktive Post-Bid-Link-Delta-Erkennung aus Labels wie `+2 Link` und nutzen nur noch strukturierte Link-Delta-Metadaten.
+  - `trace-bid-efficiency.test.ts`, `runtime/post-bid-link-choice-option.test.ts`, `index.test.ts` und `trace-orchestration.test.ts` schützen die strukturierte Durchreichung sowie Label-only-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/trace-bid-efficiency.test.ts src/runtime/post-bid-link-choice-option.test.ts` grün, 2 Dateien, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/trace/trace-orchestration.test.ts` grün, 1 Datei, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/trace-bid-efficiency.test.ts src/runtime/post-bid-link-choice-option.test.ts src/index.test.ts --testNamePattern "post-bid Trace Link|Trace bid efficiency|post-bid link choice option"` grün, 3 Dateien, 15 Tests, 530 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck`, `corepack pnpm --filter @netgrid/engine typecheck` und `corepack pnpm --filter @netgrid/shared typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

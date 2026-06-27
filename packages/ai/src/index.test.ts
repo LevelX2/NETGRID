@@ -4184,6 +4184,11 @@ describe("MVP 0.3 AI controller contract", () => {
         `trace_link_${springboardId}`,
       ]),
     );
+    expect(
+      input.playerView.pendingChoice?.options.find(
+        (option) => option.id === `trace_link_${signpostId}`,
+      )?.metadata,
+    ).toEqual({ postBidTraceLinkDelta: 2 });
     expect(decision.reasonCode).toBe("runner.trace.post_bid_link");
     expect(decision.selectedChoices).toEqual({
       choiceId: state.pendingChoice?.choiceId,
@@ -4248,6 +4253,7 @@ describe("MVP 0.3 AI controller contract", () => {
         label: "Submarine Uplink: +1 Link",
         publicLabel: "Trace Link",
         value: "runner_onr_v1_182_submarine-uplink_1",
+        metadata: { postBidTraceLinkDelta: 1 },
       },
     ]);
     const contextualInput = withSyntheticPostBidTraceContext(submarineInput, {

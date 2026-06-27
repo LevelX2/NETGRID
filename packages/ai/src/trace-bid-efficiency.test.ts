@@ -89,7 +89,11 @@ describe("Trace bid efficiency", () => {
     const selection = selectEfficientPostBidLinkOption({
       options: [
         { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
-        { id: "trace_link_signpost", label: "Signpost: +2 Link" },
+        {
+          id: "trace_link_signpost",
+          label: "Signpost: +2 Link",
+          linkDelta: 2,
+        },
       ],
       fallbackOptionId: "trace_link_signpost",
       traceStrength: 5,
@@ -106,8 +110,16 @@ describe("Trace bid efficiency", () => {
     const selection = selectEfficientPostBidLinkOption({
       options: [
         { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
-        { id: "trace_link_signpost", label: "Signpost: +2 Link" },
-        { id: "trace_link_springboard", label: "The Springboard: +1 Link" },
+        {
+          id: "trace_link_signpost",
+          label: "Signpost: +2 Link",
+          linkDelta: 2,
+        },
+        {
+          id: "trace_link_springboard",
+          label: "The Springboard: +1 Link",
+          linkDelta: 1,
+        },
       ],
       fallbackOptionId: "trace_link_signpost",
       traceStrength: 1,
@@ -119,8 +131,27 @@ describe("Trace bid efficiency", () => {
       option: {
         id: "trace_link_springboard",
         label: "The Springboard: +1 Link",
+        linkDelta: 1,
       },
       reason: "post_bid_link_minimal_outcome_delta",
+    });
+  });
+
+  it("ignores label-only post-bid Link numbers", () => {
+    const selection = selectEfficientPostBidLinkOption({
+      options: [
+        { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
+        { id: "trace_link_signpost", label: "Signpost: +2 Link" },
+      ],
+      fallbackOptionId: "trace_link_signpost",
+      traceStrength: 2,
+      runnerLink: 0,
+      runnerBid: 0,
+    });
+
+    expect(selection).toEqual({
+      option: { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
+      reason: "post_bid_link_no_outcome_delta",
     });
   });
 
@@ -128,7 +159,11 @@ describe("Trace bid efficiency", () => {
     const selection = selectEfficientPostBidLinkOption({
       options: [
         { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
-        { id: "trace_link_springboard", label: "The Springboard: +1 Link" },
+        {
+          id: "trace_link_springboard",
+          label: "The Springboard: +1 Link",
+          linkDelta: 1,
+        },
       ],
       fallbackOptionId: "trace_link_springboard",
       traceStrength: 5,
@@ -146,14 +181,22 @@ describe("Trace bid efficiency", () => {
     const selection = selectEfficientPostBidLinkOption({
       options: [
         { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
-        { id: "trace_link_signpost", label: "Signpost: +2 Link" },
+        {
+          id: "trace_link_signpost",
+          label: "Signpost: +2 Link",
+          linkDelta: 2,
+        },
       ],
       fallbackOptionId: "trace_link_signpost",
       traceStrength: 5,
     });
 
     expect(selection).toEqual({
-      option: { id: "trace_link_signpost", label: "Signpost: +2 Link" },
+      option: {
+        id: "trace_link_signpost",
+        label: "Signpost: +2 Link",
+        linkDelta: 2,
+      },
       reason: "post_bid_link_unknown_context",
     });
   });
