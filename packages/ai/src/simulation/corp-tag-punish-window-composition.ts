@@ -44,6 +44,7 @@ export function createCorpTagPunishWindowComposition(
     actionSourceCard: dependencies.actionSourceCard,
     visibleCardStoredCredits: dependencies.visibleCardStoredCredits,
     visibleMeatDamagePayoff: dependencies.visibleMeatDamagePayoff,
+    payoffProfileForDefinition: dependencies.payoffProfileForDefinition,
   });
 
   const {

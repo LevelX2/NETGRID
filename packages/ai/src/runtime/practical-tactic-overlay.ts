@@ -141,7 +141,7 @@ function runnerInstallCoverageCandidate(
   const action = input.legalActions.find((candidate) => {
     if (candidate.type !== "install_card") return false;
     const source = visibleSourceCard(input, candidate);
-    return source ? looksLikeBreaker(source) : /breaker|fracter|decoder|killer/i.test(candidate.label);
+    return source ? looksLikeBreaker(source) : false;
   });
   if (!action) return undefined;
   return tacticCandidate(action, "runner.practical_tactic.install_coverage", 850, [
@@ -217,8 +217,7 @@ function runnerAvoidStaleRunCandidate(
   const staleRun = input.legalActions.find(
     (action) =>
       action.type === "start_run" &&
-      (action.payload?.knownNoCurrentPayoff === true ||
-        /stale|no current payoff|no_current_payoff/i.test(action.label)),
+      action.payload?.knownNoCurrentPayoff === true,
   );
   if (!staleRun || runtimeAction?.actionId !== staleRun.actionId) return undefined;
   const action = input.legalActions.find(
@@ -272,9 +271,7 @@ function visibleSourceCard(
     (card) =>
       card.known &&
       (card.instanceId === source ||
-        (card.definitionId !== undefined && card.definitionId === source) ||
-        (card.title !== undefined &&
-          action.label.toLowerCase().includes(card.title.toLowerCase()))),
+        (card.definitionId !== undefined && card.definitionId === source)),
   );
 }
 
@@ -289,25 +286,21 @@ function cardText(card: VisibleCard): string {
 }
 
 function corpActionLooksLikePunish(action: LegalAction): boolean {
-  return /punish|tag_punish|damage_punish|tag/i.test(
-    [action.label, action.type].join(" ").toLowerCase(),
-  );
+  return action.payload?.tagPunishAction === true;
 }
 
 function corpScoreLooksSafe(action: LegalAction): boolean {
   return (
     action.payload?.safeScoreWindow === true ||
-    action.payload?.protectedRemoteReady === true ||
-    /safe score|protected score|score protected/i.test(action.label)
+    action.payload?.protectedRemoteReady === true
   );
 }
 
 function runnerRunLooksHighPayoff(action: LegalAction): boolean {
   const payloadPayoff = String(action.payload?.accessPayoff ?? "");
-  if (/agenda|score_threat|trash_affordable|fresh|access_bonus/i.test(payloadPayoff)) {
-    return true;
-  }
-  return /agenda|score threat|fresh access|multiaccess|valuable access/i.test(action.label);
+  return /agenda|score_threat|trash_affordable|fresh|access_bonus/i.test(
+    payloadPayoff,
+  );
 }
 
 function actionCreditCost(action: LegalAction): number {

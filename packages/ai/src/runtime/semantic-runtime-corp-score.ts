@@ -5,6 +5,9 @@ import type {
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
+import {
+  semanticRuntimeCorpEffectiveDefenseContext,
+} from "./semantic-runtime-corp-effective-defense";
 
 type SemanticRuntimeCorpSafetyGate = {
   allowed: boolean;
@@ -153,6 +156,39 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       value: credits >= rezCost ? 750 : -1200,
       reason: `credits:${credits};cost:${rezCost}`,
     });
+    const effectiveDefense = semanticRuntimeCorpEffectiveDefenseContext(
+      input,
+      action,
+      actionSemanticCandidate,
+      { actionCreditCost: dependencies.actionCreditCost },
+    );
+    if (
+      effectiveDefense?.hasImmediateStopPotential ||
+      effectiveDefense?.hasMeaningfulTaxOrDamage
+    ) {
+      components.push({
+        key: "corp_effective_defense_rez_value",
+        label: "Wirksame Rez-Verteidigung",
+        value: effectiveDefense.hasImmediateStopPotential ? 900 : 450,
+        reason: effectiveDefense.evidence.join("|"),
+      });
+    }
+    if (effectiveDefense?.postRezAbilityAffordable === true) {
+      components.push({
+        key: "corp_effective_defense_post_rez_budget",
+        label: "Post-Rez-Fähigkeitsbudget",
+        value: effectiveDefense.requiresPostRezPaidAbility ? 350 : 0,
+        reason: effectiveDefense.evidence.join("|"),
+      });
+    }
+    if (effectiveDefense?.zeroEffectRisk) {
+      components.push({
+        key: "corp_effective_defense_zero_effect_risk",
+        label: "Rez ohne wirksame Verteidigung",
+        value: -1600,
+        reason: effectiveDefense.evidence.join("|"),
+      });
+    }
   }
   if (action.type === "install_card") {
     const roles = dependencies.rolesForAction(input, action);
@@ -242,6 +278,26 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       value: advancementPlacement.scoreValue,
       reason: advancementPlacement.evidence.join("|"),
     });
+  }
+  if (
+    action.type !== "score_agenda" &&
+    corpActionCandidateHasScoreCloseoutSignal(actionSemanticCandidate)
+  ) {
+    const hasScoreCloseoutBasis =
+      corpInputHasScoreCloseoutBasis(input) ||
+      corpActionCandidateTargetsCorpScoreline(actionSemanticCandidate);
+    if (hasScoreCloseoutBasis) {
+      components.push({
+        key: "corp_score_closeout_semantic_candidate",
+        label: "Score-Closeout-Semantik",
+        value: 1050,
+        reason: [
+          "score_closeout_signal:true",
+          `score_closeout_basis:${hasScoreCloseoutBasis}`,
+          `action:${action.type}`,
+        ].join("|"),
+      });
+    }
   }
   if (action.type === "gain_credit" && credits < 6) {
     components.push({
@@ -417,7 +473,10 @@ function corpGoalMatchesAction(
 ): boolean {
   switch (goal.goalId) {
     case "corp.tactical.score_closeout":
-      return action.type === "score_agenda";
+      return (
+        action.type === "score_agenda" ||
+        corpActionCandidateHasScoreCloseoutSignal(actionSemanticCandidate)
+      );
     case "corp.tactical.advance_scoreline":
       return action.type === "advance_card";
     case "corp.tactical.rez_relevant_ice":
@@ -467,4 +526,58 @@ function corpActionCandidateHasVisibleSignal(
     .join("|")
     .toLocaleLowerCase("en-US");
   return needles.some((needle) => text.includes(needle));
+}
+
+function corpActionCandidateHasScoreCloseoutSignal(
+  candidate: ActionSemanticCandidate | undefined,
+): boolean {
+  return corpActionCandidateHasVisibleSignal(candidate, [
+    "corp.score_closeout",
+    "closeout.agenda_score",
+    "advance_burst",
+    "advance.counter_cashout",
+    "score.advance_burst",
+  ]);
+}
+
+function corpInputHasScoreCloseoutBasis(input: AiDecisionInput): boolean {
+  const legalActions =
+    input.legalActions ?? input.playerView.legalActions ?? [];
+  if (
+    legalActions.some(
+      (candidate) =>
+        candidate.side === "corp" &&
+        (candidate.type === "score_agenda" ||
+          candidate.type === "advance_card"),
+    )
+  ) {
+    return true;
+  }
+  return (input.playerView.servers ?? []).some((server) =>
+    (server.root ?? []).some(
+      (card) =>
+        card.known !== false &&
+        (card.type === "agenda" ||
+          typeof card.advancementRequirement === "number"),
+    ),
+  );
+}
+
+function corpActionCandidateTargetsCorpScoreline(
+  candidate: ActionSemanticCandidate | undefined,
+): boolean {
+  if (!candidate?.targetContext) return false;
+  const targets = [
+    ...candidate.targetContext.selectedTargets,
+    ...(candidate.targetContext.availableTargets ?? []),
+  ];
+  return targets.some((target) => {
+    const evidence = target.evidence.join("|").toLocaleLowerCase("en-US");
+    return (
+      target.targetSide !== "runner" &&
+      (target.targetKind === "agenda" ||
+        evidence.includes("agenda") ||
+        evidence.includes("scoreline"))
+    );
+  });
 }

@@ -6763,6 +6763,162 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 161 Dateien, 1691 Tests.
   - Status: `AI-COMPLETE-14` `VERIFIED`; `AI-COMPLETE-15` ist das nächste aktive Ziel.
 
+- `AI-COMPLETE-15` erster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/corp-installed-economy-credit.ts` wertet installierte Economy-Aktionen nur noch über strukturierte Payloads aus (`gainCreditsAmount`, `cardImplementationCreditAmount`) und entfernt die deutsche Label-Regex.
+  - `packages/ai/src/plans/tactical-plan-action-values.ts` entfernt die produktive Credit-Gain-Erkennung aus `action.label` und `cardImplementationAbilityLabel`; Planwerte kommen nur noch aus strukturierten Payloads oder semantischen Hints und werden bei sichtbaren Stored-Credit-Quellen am sichtbaren Counterstand gekappt.
+  - `packages/ai/src/legacy/corp-plans.ts` entfernt für installierte Corp-Economy die produktive deutsche `Credits nehmen`-Label-Regex und begrenzt strukturierte Pool-Gains ebenfalls am sichtbaren Counterstand, damit der produktiv noch erreichbare Legacy-Fallback nicht label-/maxbetraggetrieben auswählt.
+  - `packages/engine/src/ability-engine/card-implementation-runtime-activated-targets.ts` projiziert feste Hosted-Credit-Take-Effekte als `gainCreditsAmount` in `activated_card_ability`-Payloads, damit BBS-/Short-Term-ähnliche Economy-Aktionen ohne KI-Textparsing bewertbar bleiben.
+  - `packages/engine/src/index-tests/originalset/trace-prevention-assets.test.ts`, `corp-installed-economy-credit.test.ts` und `tactical-plan-action-values.test.ts` schützen, dass BBS ein strukturiertes Credit-Signal liefert und label-only Zahlen produktiv ignoriert werden.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive `action.label`-/Regex-Fallbacks noch auditiert und abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-installed-economy-credit.test.ts src/plans/tactical-plan-action-values.test.ts` grün, 2 Dateien, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/trace-prevention-assets.test.ts -t "BBS|trace prevention|source-bound"` grün, 1 Datei, 2 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts src/semantic-ai-runtime-cutover.test.ts -t "installed_economy|BBS Whispering|Newsgroup|Short-Term Contract|Credits nehmen|installed Corp economy|Corp economy payouts"` grün, 1 aktive Datei, 3 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "ignores installed Corp BBS sources with too few stored credits|installed Corp economy payouts|uses installed Corp economy payouts before the basic credit action|multiple installed Corp BBS economy"` grün, 1 Datei, 4 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/engine typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 163 Dateien, 1693 Tests.
+
+- `AI-COMPLETE-15` zweiter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/choice-option.ts` entfernt den produktiven `take_credits`-Fallback, der Credit-Mengen aus deutschen Choice-Labels wie `3 Credits nehmen` las.
+  - `playfulAiGainValue` nutzt weiter strukturierte numerische `option.value`-Angaben und die bereits strukturelle Playful-AI-OptionId `gain_<credits>_set_aside_<dice>`; label-only `take_credits` liefert nun 0 statt eine aus Text geparste Menge.
+  - `choice-option.test.ts` schützt numerische Values, strukturelle Playful-AI-IDs und die neue label-only-Nullwertung.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/choice-option.test.ts src/index.test.ts -t "playfulAiGainValue|chooses the conservative gain-all Playful AI split"` grün, 2 Dateien, 2 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` dritter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-breaker-coverage.ts` akzeptiert Runner-Breaker-Install-Aktionen nur noch, wenn die sichtbare Source-Card die benötigte Coverage liefert; Label-Fallbacks auf `breaker|fracter|decoder|killer` sind entfernt.
+  - `packages/ai/src/plans/tactical-plan-step-candidate-matching.ts` entfernt denselben Label-Fallback aus dem `install_breaker`-Step-Matching und verlangt eine sichtbare Source-Card.
+  - `tactical-plan-breaker-coverage.test.ts` schützt, dass label-only Fracter-Text ohne sichtbare Source-Card nicht als Coverage zählt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-breaker-coverage.test.ts src/tactical-plans.test.ts -t "isBreakerInstallAction|breaker coverage|install_breaker|uses bank capability evidence"` grün, 2 Dateien, 4 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` vierter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-candidate-matching.ts` entfernt Action-Label- und Evidence-Text-Fallbacks aus dem Bank-Step-Matching.
+  - Bank-Build-/Cashout-Steps matchen dort nur noch über strukturierte Candidate-Signale wie `temporary_resource_bank`, `counter_bank`, `cash_out_credit_bank`, `payout` oder Bank-Semantik.
+  - `tactical-plan-candidate-matching.test.ts` schützt, dass label-only Banktext ohne semantische Candidate-Signale nicht als Cashout-Match zählt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-candidate-matching.test.ts src/tactical-plans.test.ts -t "bankStepMatchesCandidate|maps bank steps from candidate bank semantics without label hints|uses bank capability evidence"` grün, 2 Dateien, 3 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` fünfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-visible-cards.ts` entfernt den Fallback, der sichtbare Karten über Kartentitel im Action-Label suchte.
+  - Plan-Card-Lookups nutzen nur noch Source-InstanceId, strukturierte Payload-DefinitionIds oder Source-DefinitionIds.
+  - `tactical-plan-visible-cards.test.ts` schützt, dass DefinitionId-Matching erhalten bleibt und label-only Titelmatching keine sichtbare Karte mehr liefert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-visible-cards.test.ts src/plans/tactical-plan-action-values.test.ts src/plans/tactical-plan-breaker-coverage.test.ts src/tactical-plans.test.ts -t "visibleCardForAction|legalActionCreditGainForPlan|isBreakerInstallAction|breaker coverage|bank"` grün, 4 Dateien, 7 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` sechster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/visible-card-lookup.ts` entfernt den Runtime-Fallback, der sichtbare Source-Cards über Kartentitel im Action-Label suchte.
+  - Runtime-Source-Card-Lookups nutzen nur noch Source-InstanceId, strukturierte Payload-DefinitionIds oder Source-DefinitionIds.
+  - `visible-card-lookup.test.ts` schützt, dass DefinitionId-Matching erhalten bleibt und label-only Titelmatching keine sichtbare Karte mehr liefert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/visible-card-lookup.test.ts src/runtime/corp-tag-punish-payoff-profiles.test.ts src/runtime/semantic-runtime-corp-central-rez-context.test.ts` grün, 3 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` siebter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` entfernt `action.label` aus dem produktiven Suchtext für Run-Relevanz und Run-Struktur.
+  - Run-Projektion nutzt dort nur noch Action-Type, strukturierte Payloads, Candidate-Signale und Hint-Signale.
+  - `run-action-projection.test.ts` schützt, dass label-only `make a run` nicht projiziert wird, während strukturierte `runActionSignals` weiterhin eine Run-Projektion erzeugen.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts src/runner-run-target-evaluation.test.ts src/actions/action-semantic-coverage.test.ts -t "projectRunnerRunActions|run action|Run"` grün, 2 aktive Dateien, 53 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` achter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/runner-coverage-goals.ts` entfernt Action-Label-Titelgleichheit aus der sichtbaren Coverage-Card-Bindung.
+  - Coverage-Goal-Search-Erkennung nutzt dort keine Label-/SourceTitle-Regex mehr, sondern Action-Type `search_stack` oder strukturierte `actionTacticSignals` wie `program_search`, `breaker_search`, `search.stack`, `coverage_search` oder `setup.search`.
+  - `runner-coverage-goals.test.ts` schützt, dass label-only Coverage-Install- und Search-Texte nicht matchen, strukturierte SourceTitle-/Tactic-Signale aber weiterhin funktionieren.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/runner-coverage-goals.test.ts src/decision/tactical-goal-utility.test.ts src/runtime/runner-goal-fit-score.test.ts` grün, 3 Dateien, 12 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` neunter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` entfernt im Runner-Coverage-Install-Kandidaten den Fallback auf `breaker|fracter|decoder|killer` im Install-Label.
+  - Der lokale Practical-Tactic-Source-Card-Lookup bindet sichtbare Karten nicht mehr über Kartentitel im Action-Label, sondern nur über Source-InstanceId oder Source-DefinitionId.
+  - `practical-tactic-overlay.test.ts` schützt, dass label-only Fracter-Text nicht als Coverage-Install-Kandidat zählt, eine sichtbare Fracter-Source-Card aber weiterhin als Compare-only-Kandidat gemeldet wird.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` entfernt im Corp-Safe-Score-Kandidaten den Label-Fallback auf `safe score|protected score|score protected`.
+  - Safe-Score-Overlay-Kandidaten benötigen dort nun strukturierte Payload-Flags `safeScoreWindow` oder `protectedRemoteReady`.
+  - `practical-tactic-overlay.test.ts` schützt, dass label-only Safe-Score-Text ohne Payload-Flag keinen Compare-only-Safe-Score-Kandidaten mehr erzeugt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` elfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` entfernt im Runner-Stale-Run-Kandidaten den Label-Fallback auf `stale|no current payoff|no_current_payoff`.
+  - Stale-Run-Erkennung benötigt dort nun das strukturierte Payload-Flag `knownNoCurrentPayoff`.
+  - `practical-tactic-overlay.test.ts` schützt, dass label-only No-Payoff-Text nicht als stale Run zählt, das strukturierte Payload-Flag aber weiterhin den Compare-only-Ausweichkandidaten erzeugt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zwölfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` entfernt im Runner-High-Payoff-Run-Kandidaten den Label-Fallback auf `agenda|score threat|fresh access|multiaccess|valuable access`.
+  - High-Payoff-Run-Erkennung nutzt dort nur noch strukturierte `accessPayoff`-Payloads wie `agenda`, `score_threat`, `trash_affordable`, `fresh` oder `access_bonus`.
+  - `practical-tactic-overlay.test.ts` schützt, dass label-only High-Payoff-Text nicht mehr triggert, strukturierte `accessPayoff`-Payloads aber weiterhin den Compare-only-Kandidaten erzeugen.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` dreizehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` entfernt im Corp-Real-/Stale-Punish-Kandidaten den Label-/Action-Type-Fallback auf `punish|tag_punish|damage_punish|tag`.
+  - Practical-Tactic-Punish-Erkennung nutzt dort nun das strukturierte Payload-Flag `tagPunishAction`.
+  - `packages/ai/src/evaluation/practical-tactic-benchmark.ts` markiert die Practical-Tactic-Punish-Fixtures mit `tagPunishAction`, damit der Compare-only-Benchmark ohne Label-Matching weiter läuft.
+  - `practical-tactic-overlay.test.ts` schützt, dass label-only Punish-Text nicht mehr zählt, `tagPunishAction: true` aber Real-Punish und Stale-Punish weiterhin triggert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts src/evaluation/practical-tactic-benchmark.test.ts` grün, 2 Dateien, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` vierzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/engine/src/ability-engine/card-implementation-runtime-activated-targets.ts` projiziert `add_hosted_credits`-/`take_hosted_credits`-Abilities als strukturierte LegalAction-Payloads `cardImplementationAddsHostedCredits` und `cardImplementationTakesHostedCredits`.
+  - `packages/ai/src/deck-capabilities.ts` erkennt Bank-Build-/Cashout-Legalität nicht mehr über Labels wie `Auf Broker legen` oder `Von Broker nehmen`, sondern über diese Hosted-Credit-Payloads plus Source-Bindung.
+  - `packages/ai/src/plans/tactical-plan-bank-tools.ts`, Runner-/Corp-Planbau und Bank-Step-Matching nutzen konkrete Bank-ActionIds und Payload-Flags statt produktiver `action.label`-Bank-Textsuche.
+  - Tests schützen label-only Bank-Actions als nicht legal für Bank-Pläne, strukturierte Hosted-Credit-Payloads als weiter planbar und Engine-Broker-Actions als korrekt markiert.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind, insbesondere Bank-Fallbacks außerhalb des Tactical-Plan-Pfads.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/plans/tactical-plan-candidate-matching.test.ts src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts -t "bank|Broker|DeckCapabilityProfile|tactical plan"` grün, 4 Dateien, 61 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/runner-events-hardware-programs-resources.test.ts -t "Broker load|Broker"` grün, 1 Datei, 1 relevanter Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/engine typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` fünfzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-economy-posture.ts` und `packages/ai/src/runner-run-target-evaluation.ts` entfernen die produktive Cashout-Erkennung über `action.label`-/`payload.source`-Text wie `cash`, `payout`, `auszahlen` oder `nehmen`.
+  - Runner-Economy-Posture und RunTarget-Evaluation erkennen Bank-Cashout-Actions dort nur noch über das strukturierte LegalAction-Payload-Flag `cardImplementationTakesHostedCredits`.
+  - `runner-run-target-evaluation.test.ts` schützt, dass label-only Bank-Cashout-Text keine `cash_out_bank`-Empfehlung mehr erzeugt, strukturierte Hosted-Credit-Payloads aber weiterhin Cashout-Funding empfehlen.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts -t "bank cashout|economy|creditbase|cash_out_bank"` grün, 1 Datei, 4 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` sechzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-run-action-matching.ts` entfernt `action.label` aus dem produktiven Run-Action-Suchtext für Run-Plan-Step-Matching.
+  - Run-Plan-Matching akzeptiert dort weiter direkte `start_run`-Actions, strukturierte Payload-Signale wie `runActionSignals` und vorhandene Candidate-Semantik, aber keinen label-only Text wie `Make a run`.
+  - `tactical-plan-run-action-matching.test.ts` schützt, dass label-only Run-Text nicht mehr matcht, ein strukturiertes `runActionSignals: "make_run"` aber weiterhin den Run-Plan-Step erfüllt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-run-action-matching.test.ts src/tactical-plans.test.ts -t "runPlanStepMatchesAction|run action|run target"` grün, 1 aktive Datei, 1 relevanter Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

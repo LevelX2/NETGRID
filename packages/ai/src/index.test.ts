@@ -134,6 +134,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  resetTacticalPlanMemory();
   if (originalSemanticAiRuntimeMode === undefined) {
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
   } else {

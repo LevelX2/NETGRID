@@ -1,0 +1,203 @@
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+
+export type EffectiveDefenseContext = {
+  isRezzableNow: boolean;
+  rezCost: number;
+  postRezCredits: number;
+  hasImmediateStopPotential: boolean;
+  hasMeaningfulTaxOrDamage: boolean;
+  requiresPostRezPaidAbility: boolean;
+  postRezAbilityAffordable: boolean;
+  minimumUsefulX?: number;
+  zeroEffectRisk: boolean;
+  evidence: string[];
+};
+
+export type SemanticRuntimeCorpEffectiveDefenseDependencies = {
+  actionCreditCost: (action: LegalAction) => number;
+};
+
+export function semanticRuntimeCorpEffectiveDefenseContext(
+  input: AiDecisionInput,
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  dependencies: SemanticRuntimeCorpEffectiveDefenseDependencies,
+): EffectiveDefenseContext | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  if (action.type !== "rez_ice") return undefined;
+
+  const rezCost = actionCreditCost(
+    action,
+    actionSemanticCandidate,
+    dependencies,
+  );
+  const postRezCredits = input.playerView.own.credits - rezCost;
+  const isRezzableNow = postRezCredits >= 0;
+  const signalText = defenseSignalText(action, actionSemanticCandidate);
+  const variableRezKind = payloadString(action, "variableRezKind");
+  const variableRezValue = variableRezChosenValue(
+    action,
+    actionSemanticCandidate,
+  );
+  const minimumUsefulX = minimumUsefulVariableRezValue(
+    variableRezKind,
+    signalText,
+  );
+  const zeroVariableDefense =
+    minimumUsefulX !== undefined &&
+    variableRezValue !== undefined &&
+    variableRezValue < minimumUsefulX;
+  const requiresPostRezPaidAbility =
+    signalText.includes("encounter_paid_subroutine_add") ||
+    signalText.includes("paid_subroutine");
+  const postRezAbilityMinimumCost = requiresPostRezPaidAbility ? 2 : 0;
+  const postRezAbilityAffordable =
+    !requiresPostRezPaidAbility ||
+    postRezCredits >= postRezAbilityMinimumCost;
+  const hasEtrSignal =
+    signalText.includes("etr_ice") ||
+    signalText.includes("end_the_run") ||
+    signalText.includes("end_run") ||
+    signalText.includes("conditional_end_run") ||
+    signalText.includes("corp.ice_protection");
+  const hasTraceSignal =
+    signalText.includes("trace.source") ||
+    signalText.includes("trace_ice") ||
+    signalText.includes("trace");
+  const hasTaxOrDamageSignal =
+    signalText.includes("tax") ||
+    signalText.includes("damage") ||
+    hasTraceSignal;
+  const hasImmediateStopPotential =
+    isRezzableNow &&
+    !zeroVariableDefense &&
+    ((hasEtrSignal &&
+      (!requiresPostRezPaidAbility || postRezAbilityAffordable)) ||
+      (hasTraceSignal &&
+        variableRezValue !== undefined &&
+        variableRezValue >= (minimumUsefulX ?? 1)));
+  const hasMeaningfulTaxOrDamage =
+    isRezzableNow &&
+    !zeroVariableDefense &&
+    hasTaxOrDamageSignal &&
+    (!requiresPostRezPaidAbility || postRezAbilityAffordable);
+  const hasKnownDefenseSignal =
+    hasEtrSignal ||
+    hasTraceSignal ||
+    hasTaxOrDamageSignal ||
+    requiresPostRezPaidAbility;
+  const zeroEffectRisk =
+    isRezzableNow &&
+    hasKnownDefenseSignal &&
+    (zeroVariableDefense ||
+      (requiresPostRezPaidAbility && !postRezAbilityAffordable) ||
+      (!hasImmediateStopPotential && !hasMeaningfulTaxOrDamage));
+
+  return {
+    isRezzableNow,
+    rezCost,
+    postRezCredits,
+    hasImmediateStopPotential,
+    hasMeaningfulTaxOrDamage,
+    requiresPostRezPaidAbility,
+    postRezAbilityAffordable,
+    ...(minimumUsefulX !== undefined ? { minimumUsefulX } : {}),
+    zeroEffectRisk,
+    evidence: [
+      `effective_defense_rezzable:${isRezzableNow}`,
+      `effective_defense_rez_cost:${rezCost}`,
+      `effective_defense_post_rez_credits:${postRezCredits}`,
+      `effective_defense_stop:${hasImmediateStopPotential}`,
+      `effective_defense_tax_or_damage:${hasMeaningfulTaxOrDamage}`,
+      `effective_defense_post_rez_paid_ability:${requiresPostRezPaidAbility}`,
+      `effective_defense_post_rez_ability_affordable:${postRezAbilityAffordable}`,
+      `effective_defense_zero_effect:${zeroEffectRisk}`,
+      ...(variableRezKind ? [`effective_defense_variable_kind:${variableRezKind}`] : []),
+      ...(variableRezValue !== undefined
+        ? [`effective_defense_variable_value:${variableRezValue}`]
+        : []),
+      ...(minimumUsefulX !== undefined
+        ? [`effective_defense_minimum_useful_x:${minimumUsefulX}`]
+        : []),
+    ],
+  };
+}
+
+function actionCreditCost(
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  dependencies: SemanticRuntimeCorpEffectiveDefenseDependencies,
+): number {
+  const costProfile = actionSemanticCandidate?.costProfile;
+  if (costProfile === undefined) return dependencies.actionCreditCost(action);
+  if (typeof costProfile.creditCost === "number") return costProfile.creditCost;
+  if (
+    costProfile.costKnownStatus === "known" ||
+    costProfile.costKnownStatus === "not_applicable"
+  ) {
+    return 0;
+  }
+  return dependencies.actionCreditCost(action);
+}
+
+function defenseSignalText(
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): string {
+  return [
+    action.type,
+    action.label,
+    actionSemanticCandidate?.semanticActionType,
+    ...(actionSemanticCandidate?.actionTacticSignals ?? []),
+    ...(actionSemanticCandidate?.cardContextSignals ?? []),
+    ...(actionSemanticCandidate?.strategySupport.map((support) => support.strategyId) ??
+      []),
+    ...(actionSemanticCandidate?.evidence ?? []),
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join("|")
+    .toLocaleLowerCase("en-US");
+}
+
+function variableRezChosenValue(
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): number | undefined {
+  return (
+    payloadNumber(action, "variableRezValue") ??
+    (typeof actionSemanticCandidate?.costProfile.variableCost?.chosen ===
+    "number"
+      ? actionSemanticCandidate.costProfile.variableCost.chosen
+      : undefined) ??
+    (typeof actionSemanticCandidate?.costProfile.xValue === "number"
+      ? actionSemanticCandidate.costProfile.xValue
+      : undefined)
+  );
+}
+
+function minimumUsefulVariableRezValue(
+  variableRezKind: string | undefined,
+  signalText: string,
+): number | undefined {
+  if (
+    variableRezKind?.includes("x") === true ||
+    variableRezKind?.includes("trace") === true ||
+    signalText.includes("trace.source") ||
+    signalText.includes("trace_ice")
+  ) {
+    return 1;
+  }
+  return undefined;
+}
+
+function payloadString(action: LegalAction, key: string): string | undefined {
+  const value = action.payload?.[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+function payloadNumber(action: LegalAction, key: string): number | undefined {
+  const value = action.payload?.[key];
+  return typeof value === "number" ? value : undefined;
+}
+

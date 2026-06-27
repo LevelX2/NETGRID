@@ -4910,19 +4910,20 @@ function classifyCorpInstalledEconomyAction(
       sourceCard.counters?.recurring_credit ??
       0,
   );
-  const activatedGain = activatedCardAbilityCreditGain(action, storedCredits);
-  const immediateGain = Math.max(
+  const structuredGain = Math.max(
     0,
-    activatedGain,
     numberPayload(action, "gainCreditsAmount"),
     numberPayload(action, "gainedCredits"),
     numberPayload(action, "amount"),
     numberPayload(action, "removeCounterAmount"),
     numberPayload(action, "removePowerCounterAmount"),
   );
+  const immediateGain = storedCredits > 0
+    ? Math.min(structuredGain, storedCredits)
+    : structuredGain;
   const removedCounters = Math.max(
     0,
-    activatedGain,
+    storedCredits > 0 ? Math.min(structuredGain, storedCredits) : 0,
     numberPayload(action, "removeCounterAmount"),
     numberPayload(action, "removePowerCounterAmount"),
     numberPayload(action, "removedCounterAmount"),
@@ -5243,23 +5244,6 @@ function scoredAgendaOntologyEvidence(
         ]
       : []),
   ];
-}
-
-function activatedCardAbilityCreditGain(
-  action: LegalAction,
-  storedCredits: number,
-): number {
-  if (action.type !== "activated_card_ability") return 0;
-  const label =
-    typeof action.payload?.cardImplementationAbilityLabel === "string"
-      ? action.payload.cardImplementationAbilityLabel
-      : action.label;
-  const match = /(\d+)\s+Credits?\s+nehmen/i.exec(label);
-  if (!match) return 0;
-  const amount = Number(match[1]);
-  if (!Number.isFinite(amount) || amount <= 0 || storedCredits < amount)
-    return 0;
-  return amount;
 }
 
 function scoredAgendaAbilityText(

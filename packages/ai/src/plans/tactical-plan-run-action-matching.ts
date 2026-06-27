@@ -29,7 +29,6 @@ function actionCandidateCanStartRun(
   const text = [
     candidateSemanticText(candidate),
     action.type,
-    action.label,
     JSON.stringify(action.payload ?? {}),
   ].join(" ").toLowerCase();
   if (text.includes("path blocked")) return false;

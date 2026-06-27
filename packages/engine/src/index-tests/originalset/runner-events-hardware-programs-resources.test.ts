@@ -995,6 +995,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
         action.type === "activated_card_ability" &&
         action.payload?.cardImplementationAbilityIndex === 0,
     );
+    expect(load.payload).toMatchObject({
+      cardImplementationAddsHostedCredits: true,
+      hostedCreditAddAmount: 3,
+    });
     const removed = structuredClone(state);
     removeEverywhere(removed, brokerId);
     const drift = applyAction(removed, {
@@ -1021,7 +1025,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "end_turn");
     const creditsBefore = state.runner.credits;
-    state = apply(
+    const take = mustAction(
       state,
       "runner",
       (action) =>
@@ -1029,6 +1033,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
         action.payload?.cardImplementationAbilityIndex === 1 &&
         action.payload?.cardId === brokerId,
     );
+    expect(take.payload).toMatchObject({
+      cardImplementationTakesHostedCredits: true,
+      hostedCreditTakeMode: "all",
+    });
+    state = apply(state, "runner", (action) => action.actionId === take.actionId);
     expect(state.runner.credits).toBe(creditsBefore + 3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_154_broker",

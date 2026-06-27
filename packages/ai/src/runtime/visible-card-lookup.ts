@@ -56,12 +56,7 @@ export function semanticRuntimeVisibleSourceCard(
     );
     if (byDefinition) return byDefinition;
   }
-  return allVisibleCards.find(
-    (card) =>
-      card.known &&
-      card.title !== undefined &&
-      action.label.toLowerCase().includes(card.title.toLowerCase()),
-  );
+  return undefined;
 }
 
 export function findVisibleCorpServerCard(

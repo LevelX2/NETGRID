@@ -70,6 +70,33 @@ describe("corp tactical goals", () => {
     expect(goals.some((goal) => goal.family === "damage_pressure")).toBe(false);
   });
 
+  it("builds score closeout goals from advancement-burst action semantics", () => {
+    const frame = frameFor([legalAction("advance-burst", "play_operation")]);
+    frame.actionCandidates = frame.actionCandidates.map((candidate) => ({
+      ...candidate,
+      actionTacticSignals: [
+        ...candidate.actionTacticSignals,
+        "corp.score_closeout",
+        "advance.counter_cashout",
+      ],
+      evidence: [...candidate.evidence, "advance.counter_cashout"],
+    }));
+
+    const goals = buildCorpTacticalGoals(frame);
+
+    expect(goals[0]).toEqual(
+      expect.objectContaining({
+        goalId: "corp.tactical.score_closeout",
+        family: "corp_scoreline",
+        priority: 860,
+        evidence: expect.arrayContaining([
+          "corp_goal:score_closeout",
+          "corp_goal:score_closeout_semantic_signal",
+        ]),
+      }),
+    );
+  });
+
   it("feeds neutral goal synthesis with the explicit Corp goal module", () => {
     const goals = synthesizeNeutralTacticalGoals(
       frameFor([legalAction("score-1", "score_agenda")]),

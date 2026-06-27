@@ -5,7 +5,7 @@ export type CorpRemoteContestabilityAssessment = {
 };
 
 export type CorpCentralRezReserveAssessment = {
-  serverId: "hq";
+  serverId: "hq" | "rd";
   sourceDefinitionId: string;
   rezFloor: number;
   creditsAfterAction: number;

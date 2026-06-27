@@ -1435,10 +1435,16 @@ describe("tactical plan model", () => {
 
   it("uses bank capability evidence for runner cashout plans", () => {
     const input = aiInput("runner", [
-      legalAction("broker-cash", "runner", "trigger_ability", {}, {
-        source: "onr_v1_154_broker",
-        label: "Credits aus Bank nehmen",
-      }),
+      legalAction(
+        "broker-cash",
+        "runner",
+        "trigger_ability",
+        { cardImplementationTakesHostedCredits: true },
+        {
+          source: "onr_v1_154_broker",
+          label: "Use ability",
+        },
+      ),
     ]);
     input.playerView.own.credits = 2;
     input.playerView.own.rig = [

@@ -1252,6 +1252,54 @@ describe("Semantic AI runtime cutover", () => {
     expect(debugText).toContain("central_rez_reserve_below_floor:true");
   });
 
+  it("funds R&D rez reserve when visible R&D pressure meets unrezzed ICE", () => {
+    const rdIce = visibleCard("rd-unrezzed-ice", "corp", "ice", {
+      rezzed: false,
+      rezCost: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "corp", "draw_card", "Draw 1", {
+        credits: 0,
+      }),
+    ]);
+    const rdPressureEvents = [
+      publicEvent("rd-run-pressure", "start_run", 10, {
+        actor: "runner",
+        actionType: "start_run",
+        serverId: "rd",
+      }),
+      publicEvent("rd-access-pressure", "access_card", 11, {
+        actor: "runner",
+        actionType: "access_card",
+        serverId: "rd",
+      }),
+    ];
+    input.eventTail = rdPressureEvents;
+    input.playerView.publicEvents = rdPressureEvents;
+    input.playerView.own.credits = 2;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [rdIce]),
+      server("archives"),
+    ];
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "central_rez_floor_funding_need:true",
+        "corp_safe_alternative:economy",
+      ]),
+    );
+    expect(debugText).toContain("corp_central_rez_floor_credit_reserve");
+    expect(debugText).toContain("central_rez_reserve_needed");
+  });
+
   it("uses Closed Accounts before BBS economy in an open tag-payoff window", () => {
     const closedAccounts = visibleCard("closed-accounts", "corp", "operation", {
       definitionId: "onr_v1_285_closed-accounts",
@@ -1312,6 +1360,33 @@ describe("Semantic AI runtime cutover", () => {
           component.key === "corp_tagged_payoff_window_passive_penalty",
       ),
     ).toBe(true);
+  });
+
+  it("funds a visible tagged payoff when the payoff is one credit short", () => {
+    const closedAccounts = visibleCard("closed-accounts", "corp", "operation", {
+      definitionId: "onr_v1_285_closed-accounts",
+      title: "Closed Accounts",
+      cost: 1,
+    });
+    const input = aiInput("corp", [
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "corp", "draw_card", "Draw 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.gripOrHq = [closedAccounts];
+    input.playerView.opponent.tags = 1;
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(debugText).toContain("corp_tag_punish_payoff_funding");
+    expect(debugText).toContain("corp_tagged_payoff_targeted_funding:true");
+    expect(debugText).toContain("target_definition:onr_v1_285_closed-accounts");
   });
 
   it("uses hardware trash payoff over basic credit while the Runner is tagged", () => {
@@ -1902,7 +1977,10 @@ describe("Semantic AI runtime cutover", () => {
         "trigger_ability",
         "Credits auf Bank legen",
         { credits: 0 },
-        { source: bankSource.instanceId },
+        {
+          source: bankSource.instanceId,
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -1925,7 +2003,10 @@ describe("Semantic AI runtime cutover", () => {
         "trigger_ability",
         "Credits aus Bank nehmen",
         { credits: 0 },
-        { source: bankSource.instanceId },
+        {
+          source: bankSource.instanceId,
+          payload: { cardImplementationTakesHostedCredits: true },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -1955,7 +2036,10 @@ describe("Semantic AI runtime cutover", () => {
         "trigger_ability",
         "Credits auf Bank legen",
         { credits: 0 },
-        { source: bankSource.instanceId },
+        {
+          source: bankSource.instanceId,
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -1974,7 +2058,10 @@ describe("Semantic AI runtime cutover", () => {
         "trigger_ability",
         "Credits aus Bank nehmen",
         { credits: 0 },
-        { source: bankSource.instanceId },
+        {
+          source: bankSource.instanceId,
+          payload: { cardImplementationTakesHostedCredits: true },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -2006,7 +2093,10 @@ describe("Semantic AI runtime cutover", () => {
         "activated_card_ability",
         "3 Credits auf Broker legen",
         { credits: 0 },
-        { source: "onr_v1_154_broker" },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
       ),
       legalAction(
         "run-rd",
@@ -2063,7 +2153,10 @@ describe("Semantic AI runtime cutover", () => {
         "activated_card_ability",
         "3 Credits auf Broker legen",
         { credits: 0 },
-        { source: "onr_v1_154_broker" },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
       ),
       legalAction(
         "run-remote",
@@ -2108,7 +2201,10 @@ describe("Semantic AI runtime cutover", () => {
         "activated_card_ability",
         "Credits von Broker nehmen",
         { credits: 0 },
-        { source: "onr_v1_154_broker" },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationTakesHostedCredits: true },
+        },
       ),
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
         credits: 0,
@@ -2156,7 +2252,10 @@ describe("Semantic AI runtime cutover", () => {
         "activated_card_ability",
         "Broker: 3 Credits auf Broker legen",
         { credits: 0 },
-        { source: "onr_v1_154_broker" },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
       ),
       legalAction(
         "broker-take",
@@ -2164,7 +2263,10 @@ describe("Semantic AI runtime cutover", () => {
         "activated_card_ability",
         "Broker: Credits von Broker nehmen",
         { credits: 0 },
-        { source: "onr_v1_154_broker" },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationTakesHostedCredits: true },
+        },
       ),
       legalAction(
         "install-short-circuit",

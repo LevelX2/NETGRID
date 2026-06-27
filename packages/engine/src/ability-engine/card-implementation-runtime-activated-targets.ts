@@ -27,12 +27,41 @@ export function activatedAbilityPayload(
 ): Record<string, string | number | boolean> {
   const advancementCounterCreditPayout =
     gainCreditsPerAdvancementCounterOnSourceEffect(ability);
+  const hostedCreditAddAmount = hostedCreditAddAmountForActivatedAbility(
+    ability,
+  );
+  const hostedCreditTakeEffect = hostedCreditTakeEffectForActivatedAbility(
+    ability,
+  );
+  const hostedCreditTakeAmount = hostedCreditTakeAmountForActivatedAbility(
+    ability,
+  );
   return {
     cardId,
     cardImplementationAbility: "activated",
     cardImplementationAbilityIndex: abilityIndex,
     cardImplementationAbilityTiming: ability.timing,
     ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
+    ...(hostedCreditTakeAmount > 0
+      ? { gainCreditsAmount: hostedCreditTakeAmount }
+      : {}),
+    ...(hostedCreditAddAmount > 0
+      ? {
+          cardImplementationAddsHostedCredits: true,
+          hostedCreditAddAmount: hostedCreditAddAmount,
+        }
+      : {}),
+    ...(hostedCreditTakeEffect
+      ? {
+          cardImplementationTakesHostedCredits: true,
+          ...(hostedCreditTakeEffect.amount !== undefined
+            ? { hostedCreditTakeAmount: hostedCreditTakeEffect.amount }
+            : {}),
+          ...(hostedCreditTakeEffect.mode !== undefined
+            ? { hostedCreditTakeMode: hostedCreditTakeEffect.mode }
+            : {}),
+        }
+      : {}),
     ...(advancementCounterCostForActivatedAbility(ability) > 0
       ? {
           cardImplementationAdvancementCounterCost:
@@ -100,6 +129,36 @@ export function gainCreditsPerAdvancementCounterOnSourceEffect(
         CardEffectImplementation,
         { kind: "gain_credits_per_advancement_counter_on_source" }
       >
+    | undefined;
+}
+
+export function hostedCreditTakeAmountForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  const amount = ability.effects
+    .filter((effect) => effect.kind === "take_hosted_credits")
+    .reduce((total, effect) => total + Number(effect.amount ?? 0), 0);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+export function hostedCreditAddAmountForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  const amount = ability.effects
+    .filter((effect) => effect.kind === "add_hosted_credits")
+    .reduce((total, effect) => total + effect.amount, 0);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+export function hostedCreditTakeEffectForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<CardEffectImplementation, { kind: "take_hosted_credits" }>
+  | undefined {
+  return ability.effects.find(
+    (effect) => effect.kind === "take_hosted_credits",
+  ) as
+    | Extract<CardEffectImplementation, { kind: "take_hosted_credits" }>
     | undefined;
 }
 
