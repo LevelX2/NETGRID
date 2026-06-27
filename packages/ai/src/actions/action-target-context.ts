@@ -46,16 +46,14 @@ export function applyTargetContextProjection(
     ? []
     : requirementTargetsForAction(action);
   const choiceOptionTargets = choiceOptionTargetsForAction(action);
-  const sideSafeAvailableTargets =
-    availableTargets !== undefined ||
-    requirementTargets.length > 0 ||
-    choiceOptionTargets.length > 0 ||
-    payloadTargets.length > 0
+  const sideSafeAvailableTargets = hiddenTargetRequirement
+    ? undefined
+    : availableTargets !== undefined ||
+        requirementTargets.length > 0 ||
+        choiceOptionTargets.length > 0 ||
+        payloadTargets.length > 0
       ? uniqueLegalTargetSummaries([
-          ...(availableTargets?.map((target) => ({
-            ...target,
-            evidence: [...target.evidence],
-          })) ?? []),
+          ...(availableTargets?.map(cloneLegalTargetSummary) ?? []),
           ...requirementTargets,
           ...choiceOptionTargets,
           ...payloadTargets,
@@ -164,6 +162,13 @@ function stringPayload(action: LegalAction, key: string): string | undefined {
 function numberPayload(action: LegalAction, key: string): number | undefined {
   const value = action.payload?.[key];
   return typeof value === "number" ? value : undefined;
+}
+
+function hardwareTrashByCounterAction(action: LegalAction): boolean {
+  return (
+    action.type === "play_operation" &&
+    numberPayload(action, "hardwareTrashByCounterTrashCount") !== undefined
+  );
 }
 
 function serverKindForId(
@@ -402,15 +407,59 @@ function uniqueLegalTargetSummaries(
     const existing = byKey.get(key);
     byKey.set(
       key,
-      existing === undefined
-        ? { ...target, evidence: [...target.evidence] }
-        : {
-            ...existing,
-            evidence: [...new Set([...existing.evidence, ...target.evidence])],
-          },
+      existing === undefined ? cloneLegalTargetSummary(target) : mergeTargets(existing, target),
     );
   }
   return [...byKey.values()];
+}
+
+function cloneLegalTargetSummary(
+  target: LegalTargetSummary,
+): LegalTargetSummary {
+  return {
+    ...target,
+    ...(target.targetSubtypes !== undefined
+      ? { targetSubtypes: [...target.targetSubtypes] }
+      : {}),
+    ...(target.targetConstraints !== undefined
+      ? { targetConstraints: [...target.targetConstraints] }
+      : {}),
+    evidence: [...target.evidence],
+  };
+}
+
+function mergeTargets(
+  existing: LegalTargetSummary,
+  next: LegalTargetSummary,
+): LegalTargetSummary {
+  const targetSubtypes = uniqueOptionalStrings([
+    ...(existing.targetSubtypes ?? []),
+    ...(next.targetSubtypes ?? []),
+  ]);
+  const targetConstraints = uniqueOptionalStrings([
+    ...(existing.targetConstraints ?? []),
+    ...(next.targetConstraints ?? []),
+  ]);
+  return {
+    ...existing,
+    ...(existing.targetDefinitionId ?? next.targetDefinitionId
+      ? {
+          targetDefinitionId:
+            existing.targetDefinitionId ?? next.targetDefinitionId,
+        }
+      : {}),
+    ...(existing.targetTitle ?? next.targetTitle
+      ? { targetTitle: existing.targetTitle ?? next.targetTitle }
+      : {}),
+    ...(targetSubtypes !== undefined ? { targetSubtypes } : {}),
+    ...(targetConstraints !== undefined ? { targetConstraints } : {}),
+    evidence: [...new Set([...existing.evidence, ...next.evidence])],
+  };
+}
+
+function uniqueOptionalStrings(values: readonly string[]): string[] | undefined {
+  const unique = [...new Set(values.filter((value) => value.length > 0))];
+  return unique.length > 0 ? unique : undefined;
 }
 
 function targetContextForAction(
@@ -452,8 +501,82 @@ function targetContextForAction(
           ? "not_available"
           : "target_context_unavailable",
     targetProfileMatches: [],
-    targetConstraintResults: [],
+    targetConstraintResults: targetConstraintResultsForAction(
+      action,
+      selectedTargets,
+      availableTargets,
+      hiddenTargetRequirement,
+    ),
   };
+}
+
+function targetConstraintResultsForAction(
+  action: LegalAction,
+  selectedTargets: readonly LegalTarget[],
+  availableTargets: readonly LegalTargetSummary[] | undefined,
+  hiddenTargetRequirement: boolean,
+): ActionTargetContext["targetConstraintResults"] {
+  if (hiddenTargetRequirement) {
+    return [
+      {
+        constraintId: "engine_only_target_blocked",
+        status: "block",
+        reason: "Engine-only target requirements are not projected into TargetContext.",
+        evidence: ["target_context_constraint:engine_only_target_blocked"],
+      },
+    ];
+  }
+  if (!hardwareTrashByCounterAction(action)) {
+    return [];
+  }
+  const targets = [...selectedTargets, ...(availableTargets ?? [])];
+  const cyberneticsTargets = targets.filter((target) =>
+    targetHasSubtype(target, "cybernetics"),
+  );
+  if (cyberneticsTargets.length > 0) {
+    return [
+      {
+        constraintId: "not_cybernetics",
+        status: "block",
+        reason: "Cybernetics hardware is excluded from this legal target set.",
+        evidence: cyberneticsTargets.map(
+          (target) => `target_constraint:not_cybernetics_block:${target.targetId}`,
+        ),
+      },
+    ];
+  }
+  if (targets.length === 0) {
+    return [
+      {
+        constraintId: "not_cybernetics",
+        status: "unknown",
+        reason: "No side-safe hardware targets were projected for the subtype constraint.",
+        evidence: ["target_constraint:not_cybernetics:available_targets_missing"],
+      },
+    ];
+  }
+  return [
+    {
+      constraintId: "not_cybernetics",
+      status: "pass",
+      reason: "Projected hardware targets are side-safe and exclude Cybernetics.",
+      evidence: [
+        "target_constraint:not_cybernetics:side_safe_target_set",
+        ...targets.map((target) => `target_constraint_target:${target.targetId}`),
+      ],
+    },
+  ];
+}
+
+function targetHasSubtype(
+  target: Pick<LegalTargetSummary, "targetSubtypes">,
+  subtype: string,
+): boolean {
+  return (
+    target.targetSubtypes?.some(
+      (candidate) => candidate.toLowerCase() === subtype,
+    ) === true
+  );
 }
 
 function targetKindFromRequirement(

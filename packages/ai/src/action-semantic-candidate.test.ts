@@ -555,6 +555,15 @@ describe("buildActionSemanticCandidates", () => {
             evidence: ["AI039 test engine-provided legal server"],
           },
         ],
+        "ai036-3-trash_resource": [
+          {
+            targetId: "hidden-resource-card",
+            targetKind: "resource",
+            targetSide: "runner",
+            targetTitle: "Hidden Resource",
+            evidence: ["AI039 test hidden engine-only target"],
+          },
+        ],
       },
     });
 
@@ -608,7 +617,9 @@ describe("buildActionSemanticCandidates", () => {
     );
     expect(hiddenBlocked.primaryProjectionStatus).toBe("hidden_info_blocked");
     expect(hiddenBlocked.projectionIssues).toContain("hidden_info_blocked");
+    expect(hiddenBlocked.targetContext?.availableTargets).toBeUndefined();
     expect(JSON.stringify(hiddenBlocked)).not.toContain("hidden-resource-card");
+    expect(JSON.stringify(hiddenBlocked)).not.toContain("Hidden Resource");
 
     expect(choiceOptions.targetContext?.targetKind).toBe("choice");
     expect(choiceOptions.targetContext?.availableTargetsStatus).toBe(
@@ -635,6 +646,112 @@ describe("buildActionSemanticCandidates", () => {
     expect(JSON.stringify(choiceOptions)).not.toContain(
       "unprojected private option label",
     );
+  });
+
+  it("projects side-safe target metadata and target constraints for trash targets", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("play_operation", 0, {
+          side: "corp",
+          source: "power-grid-overload-instance",
+          payload: {
+            hardwareTrashByCounterTrashCount: 1,
+            eligibleHardwareCount: 2,
+          },
+          targetRequirements: [
+            {
+              id: "hardware",
+              kind: "card",
+              side: "runner",
+              visibility: "public",
+            },
+          ],
+        }),
+        legalAction("trash_resource", 1, {
+          side: "corp",
+          payload: { cardId: "runner-resource-1" },
+        }),
+        legalAction("activated_card_ability", 2, {
+          side: "runner",
+          source: "program-search-instance",
+          targetRequirements: [
+            {
+              id: "program",
+              kind: "card",
+              side: "runner",
+              visibility: "known_to_actor",
+            },
+          ],
+        }),
+      ],
+      availableTargetsByActionId: {
+        "ai036-0-play_operation": [
+          {
+            targetId: "rd-interface-1",
+            targetKind: "hardware",
+            targetSide: "runner",
+            targetDefinitionId: "onr_v1_139_r-and-d-interface",
+            targetTitle: "R&D Interface",
+            targetSubtypes: ["interface"],
+            targetConstraints: ["not_cybernetics"],
+            evidence: ["P5 side-safe visible hardware target"],
+          },
+        ],
+        "ai036-2-activated_card_ability": [
+          {
+            targetId: "decoder-1",
+            targetKind: "program",
+            targetSide: "runner",
+            targetDefinitionId: "simple_decoder",
+            targetTitle: "Simple Decoder",
+            targetSubtypes: ["icebreaker", "decoder"],
+            evidence: ["P5 side-safe visible program target"],
+          },
+        ],
+      },
+    });
+
+    const hardwareTrash = candidates[0];
+    const resourceTrash = candidates[1];
+    const programTarget = candidates[2];
+    if (!hardwareTrash || !resourceTrash || !programTarget) {
+      throw new Error("Expected three P5 target-context candidates");
+    }
+
+    expect(hardwareTrash.targetContext?.availableTargets).toEqual([
+      expect.objectContaining({
+        targetId: "rd-interface-1",
+        targetKind: "hardware",
+        targetDefinitionId: "onr_v1_139_r-and-d-interface",
+        targetTitle: "R&D Interface",
+        targetSubtypes: ["interface"],
+        targetConstraints: ["not_cybernetics"],
+      }),
+    ]);
+    expect(hardwareTrash.targetContext?.targetConstraintResults).toEqual([
+      expect.objectContaining({
+        constraintId: "not_cybernetics",
+        status: "pass",
+      }),
+    ]);
+    expect(hardwareTrash.projectionIssues).not.toContain(
+      "target_context_unavailable",
+    );
+
+    expect(resourceTrash.targetContext?.availableTargets).toEqual([
+      expect.objectContaining({
+        targetId: "runner-resource-1",
+        targetKind: "resource",
+        targetSide: "runner",
+      }),
+    ]);
+    expect(programTarget.targetContext?.availableTargets).toEqual([
+      expect.objectContaining({
+        targetId: "decoder-1",
+        targetKind: "program",
+        targetDefinitionId: "simple_decoder",
+      }),
+    ]);
   });
 
   it("normalizes action cost and timing profiles without scoring", () => {

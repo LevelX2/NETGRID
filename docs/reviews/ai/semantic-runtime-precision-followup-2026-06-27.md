@@ -1,6 +1,6 @@
 # Semantic Runtime Precision Follow-up, 2026-06-27
 
-Status: `P4_done`
+Status: `P5_done`
 
 Prozess: `docs/architecture/ai/semantic-runtime-precision-legacy-cleanup-process-2026-06-27.md`
 
@@ -247,5 +247,24 @@ Umgesetzt:
 Verifikation:
 
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-semantic-invariants.test.ts src/actions/action-card-semantic-profiles.test.ts src/action-semantic-candidate.test.ts`: grün, 3 Dateien, 41 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
+
+## P5 Ergebnis: TargetProfile- und TargetContext-Qualität
+
+Status: `P5_done`
+
+Umgesetzt:
+
+- `LegalTarget` und `LegalTargetSummary` tragen jetzt optionale side-safe Zielmetadaten: `targetDefinitionId`, `targetTitle`, `targetSubtypes` und `targetConstraints`.
+- `applyTargetContextProjection()` übernimmt und dedupliziert diese Metadaten aus `availableTargetsByActionId`, ohne Hidden-Info zu rekonstruieren.
+- Engine-only TargetRequirements blockieren jetzt auch versehentlich übergebene `availableTargets`; sie werden nicht in `TargetContext`, Debug-JSON oder Evidence projiziert.
+- Hardware-Trash-by-Counter-Actions erhalten einen `not_cybernetics`-Constraint im TargetContext. Side-safe nicht-Cybernetics-Ziele bestehen, Cybernetics-Ziele würden blocken, fehlende Zieloptionen bleiben `unknown`.
+- Resource-, Hardware- und Program-Ziele behalten konkrete side-safe Zielart und sichtbare Metadaten, wenn die Engine sie bereitstellt.
+
+Verifikation:
+
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/action-semantic-candidate.test.ts`: grün, 1 Datei, 21 Tests.
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-semantic-coverage.test.ts src/decision/target-choice-shadow.test.ts src/decision/action-goal-fit.test.ts src/action-semantic-candidate.test.ts`: grün, 4 Dateien, 57 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `git diff --check`: grün.
