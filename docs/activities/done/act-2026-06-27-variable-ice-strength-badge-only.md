@@ -1,19 +1,25 @@
 ---
 activityId: act-2026-06-27-variable-ice-strength-badge-only
-status: inbox
+status: done
 kind: fix
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-06-27
-startedAt:
-completedAt:
+startedAt: 2026-06-27
+completedAt: 2026-06-27
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/features/cards/card-view-model.ts
+  - apps/web/features/cards/CardView.tsx
+  - apps/web/app/card-view-model.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/card-view-model.test.ts
+  - git diff --check
+  - corepack pnpm --filter @netgrid/web typecheck (scheitert an bestehenden strategy-profile-Typfehlern außerhalb dieses Pakets)
 ---
 
 # ICE-Stärke-Badge nur für variable X-Stärke anzeigen
@@ -50,11 +56,11 @@ Der zusätzliche Gesamtstärke-Badge auf installierten ICE soll nur dort erschei
 
 ## Akzeptanzkriterien
 
-- [ ] Ein bekanntes, geresstes ICE mit gedruckter numerischer Stärke zeigt keinen zusätzlichen `IceStrengthBadge`, auch wenn seine aktuelle Stärke im View als Zahl vorhanden ist.
-- [ ] Ein ICE mit gedrucktem `X` beziehungsweise ohne feste numerische Druckstärke zeigt den berechneten aktuellen Stärke-Badge weiterhin, sobald der Wert öffentlich bekannt ist.
-- [ ] Stärke-Modifikatoren auf numerischen ICE werden weiterhin über die bestehenden Modifier-Badges angezeigt, ohne die gedruckte Stärke zu überdecken.
-- [ ] Verdeckte oder unbekannte ICE erhalten dadurch keine zusätzlichen sichtbaren Informationen.
-- [ ] Fokussierte Web-Checks decken mindestens den numerischen Standardfall und den variablen `X`-Fall ab.
+- [x] Ein bekanntes, geresstes ICE mit gedruckter numerischer Stärke zeigt keinen zusätzlichen `IceStrengthBadge`, auch wenn seine aktuelle Stärke im View als Zahl vorhanden ist.
+- [x] Ein ICE mit gedrucktem `X` beziehungsweise ohne feste numerische Druckstärke zeigt den berechneten aktuellen Stärke-Badge weiterhin, sobald der Wert öffentlich bekannt ist.
+- [x] Stärke-Modifikatoren auf numerischen ICE werden weiterhin über die bestehenden Modifier-Badges angezeigt, ohne die gedruckte Stärke zu überdecken.
+- [x] Verdeckte oder unbekannte ICE erhalten dadurch keine zusätzlichen sichtbaren Informationen.
+- [x] Fokussierte Web-Checks decken mindestens den numerischen Standardfall und den variablen `X`-Fall ab.
 
 ## Umsetzungshinweise
 
@@ -64,4 +70,6 @@ Der zusätzliche Gesamtstärke-Badge auf installierten ICE soll nur dort erschei
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt am 2026-06-27. `card-view-model.ts` übernimmt aus den strukturierten Katalogdaten die gedruckte Stärke als `printedStrength`; numerische Druckstärken bleiben Zahlen, variable beziehungsweise nicht numerische Druckstärken bleiben `null`. `CardView.tsx` rendert den zusätzlichen `IceStrengthBadge` nur noch, wenn ein bekanntes ICE eine aktuelle öffentliche Stärke hat und die gedruckte Katalogstärke nicht numerisch ist. Numerisch gedruckte ICE behalten ihre gedruckte Stärke frei; positive Abweichungen bleiben über den bestehenden `StrengthBoostBadge` sichtbar.
+
+Der fokussierte Web-Test `apps/web/app/card-view-model.test.ts` deckt numerische ICE mit Stärke-Modifier, variable `X`-ICE und verdeckte ICE ab. `corepack pnpm --filter @netgrid/web exec vitest run app/card-view-model.test.ts` ist grün. `git diff --check` ist grün. `corepack pnpm --filter @netgrid/web typecheck` scheitert weiterhin an bereits vorhandenen `strategy-profile`-Typfehlern außerhalb dieses Pakets; im neuen Testlauf wurden keine paketbezogenen Typecheck-Fehler sichtbar.

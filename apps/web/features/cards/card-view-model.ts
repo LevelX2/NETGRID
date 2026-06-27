@@ -20,6 +20,7 @@ type CardViewCatalogDetail = {
 export type DisplayVisibleCard = VisibleCard & {
   imageUrl?: string;
   strengthModifier?: number;
+  printedStrength?: number | null;
   setId?: string;
   setName?: string;
   collectorNumber?: string;
@@ -62,6 +63,7 @@ export function enrichVisibleCard(card: VisibleCard, detailsById: Record<string,
   addNumeric(enriched, "installCost", card.installCost, detail.numeric.installCost);
   addNumeric(enriched, "memoryCost", card.memoryCost, detail.numeric.memoryCost);
   addNumeric(enriched, "strength", card.strength, detail.numeric.strength);
+  addPrintedStrength(enriched, detail.numeric.strength);
   addNumeric(enriched, "rezCost", card.rezCost, detail.numeric.rezCost);
   addNumeric(enriched, "trashCost", card.trashCost, detail.numeric.trashCost);
   addNumeric(enriched, "advancementRequirement", card.advancementRequirement, detail.numeric.advancementRequirement);
@@ -89,6 +91,7 @@ export function visibleCardFromCatalogDetail(card: CardViewCatalogDetail): Displ
   addNumeric(visible, "installCost", undefined, card.numeric.installCost);
   addNumeric(visible, "memoryCost", undefined, card.numeric.memoryCost);
   addNumeric(visible, "strength", undefined, card.numeric.strength);
+  addPrintedStrength(visible, card.numeric.strength);
   addNumeric(visible, "rezCost", undefined, card.numeric.rezCost);
   addNumeric(visible, "trashCost", undefined, card.numeric.trashCost);
   addNumeric(visible, "advancementRequirement", undefined, card.numeric.advancementRequirement);
@@ -108,6 +111,23 @@ export function visibleCardFromPublicEvent(event: PublicGameEvent, cardId: strin
   return card;
 }
 
+export function iceStrengthBadgeValue(
+  card: DisplayVisibleCard,
+  options: { preview?: boolean; forceCardBack?: boolean } = {},
+): number | null {
+  if (
+    !card.known ||
+    card.type !== "ice" ||
+    typeof card.strength !== "number" ||
+    options.preview ||
+    options.forceCardBack ||
+    card.printedStrength !== null
+  ) {
+    return null;
+  }
+  return Math.max(0, Math.floor(card.strength));
+}
+
 function addCatalogSetDisplay(target: DisplayVisibleCard, detail: Pick<CardViewCatalogDetail, "setId" | "setName" | "collectorNumber">): void {
   const shortLabel = catalogSetShortLabelForSetId(detail.setId);
   const detailLabel = catalogSetDetailLabel(detail);
@@ -116,6 +136,12 @@ function addCatalogSetDisplay(target: DisplayVisibleCard, detail: Pick<CardViewC
   if (detail.collectorNumber) target.collectorNumber = detail.collectorNumber;
   if (shortLabel) target.setShortLabel = shortLabel;
   if (detailLabel) target.setDetailLabel = detailLabel;
+}
+
+function addPrintedStrength(target: DisplayVisibleCard, printedStrength: number | null | undefined): void {
+  if (typeof printedStrength === "number" || printedStrength === null) {
+    target.printedStrength = printedStrength;
+  }
 }
 
 function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "installCost" | "memoryCost" | "strength" | "rezCost" | "trashCost" | "advancementRequirement" | "agendaPoints">, current: number | undefined, fallback: number | null | undefined): void {
