@@ -6910,6 +6910,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` sechzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-run-action-matching.ts` entfernt `action.label` aus dem produktiven Run-Action-Suchtext für Run-Plan-Step-Matching.
+  - Run-Plan-Matching akzeptiert dort weiter direkte `start_run`-Actions, strukturierte Payload-Signale wie `runActionSignals` und vorhandene Candidate-Semantik, aber keinen label-only Text wie `Make a run`.
+  - `tactical-plan-run-action-matching.test.ts` schützt, dass label-only Run-Text nicht mehr matcht, ein strukturiertes `runActionSignals: "make_run"` aber weiterhin den Run-Plan-Step erfüllt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-run-action-matching.test.ts src/tactical-plans.test.ts -t "runPlanStepMatchesAction|run action|run target"` grün, 1 aktive Datei, 1 relevanter Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
