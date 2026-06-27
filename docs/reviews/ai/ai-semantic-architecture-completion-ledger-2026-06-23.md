@@ -59,8 +59,8 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-08 | Corp-TacticalGoals produktiv vollständig integrieren. | `VERIFIED` | Corp-Ziele wurden begonnen, müssen produktiv und diagnosefähig durchgängig wirken. | Erfüllt: Corp-Ziele wirken für Score, Advance, Remote, Zentralserver, Rez, Economy, Tag/Punish und sichtbare Ambush-Fenster im Hauptscore; tagabhängiger Damage bleibt Payoff-gated. |
 | AI-COMPLETE-09 | ActionSemanticCandidate-Befüllung vervollständigen. | `VERIFIED` | Source/Ability/Cost/Timing/Target/BoardContext-Coverage muss gemessen und geschlossen werden. | Erfüllt: Runtime-relevante Source/Ability-, Target-, Cost/Timing- und BoardContext-Felder werden side-safe befüllt; verbleibende Gaps sind echte fehlende Engine-/Target-/Profile-Evidence oder spätere TargetProfile-Arbeit. |
 | AI-COMPLETE-10 | Cost/Timing/BoardContext verallgemeinern. | `VERIFIED` | Score- und Planpfade enthalten verstreute Spezialbewertungen. | Gemeinsame side-safe Projektionen speisen Scoring und Debug. |
-| AI-COMPLETE-11 | TargetProfile-/TargetChoice-Pipeline produktiv machen. | `IN_PROGRESS` | TargetChoice ist überwiegend Shadow/Diagnose. | Konkrete legale Zieloptionen wirken im Target Fit ohne `selectedChoices`-Erzeugung oder Hidden Info. |
-| AI-COMPLETE-12 | Hard-Gate-Vertrag härten. | `PENDING` | HardGates existieren, müssen Vorrang vor allen Scorepfaden behalten. | Blockierte Kandidaten können nicht durch positive Scores gewinnen; WhyNot nennt Blocker. |
+| AI-COMPLETE-11 | TargetProfile-/TargetChoice-Pipeline produktiv machen. | `VERIFIED` | TargetChoice ist überwiegend Shadow/Diagnose. | Erfüllt: konkrete legale Zieloptionen wirken produktiv ausschließlich im Target-Fit-Score; Shadow-Reports, Access-Projektion, Trace, Coverage und Readiness bleiben no-effect und erzeugen keine `selectedChoices` oder `selectedTargets`. |
+| AI-COMPLETE-12 | Hard-Gate-Vertrag härten. | `IN_PROGRESS` | HardGates existieren, müssen Vorrang vor allen Scorepfaden behalten. | Blockierte Kandidaten können nicht durch positive Scores gewinnen; WhyNot nennt Blocker. |
 | AI-COMPLETE-13 | Micro-/Overlay-/Override-Pfade in den Spine integrieren oder entfernen. | `PENDING` | `runtime/practical-*` und Runtime-Overlays sind aktiv. | Kein dauerhaftes Score-plus-Override-System; terminale Entscheidungen sind modellierte Gate-/Outcome-Typen. |
 | AI-COMPLETE-14 | Kartennamenspezifische und payloadspezifische KI-Logik abbauen. | `PENDING` | CardDefinitionId-, Titel- und Label-Treffer in `index.ts`, `tactical-plans.ts` und Runtimepfaden. | Produktiver Planner/Scorer/Targeter nutzt generische Semantik oder gekapselte Ability-Adapter. |
 | AI-COMPLETE-15 | Text-/Regex-/Label-Fallbacks aus produktiver Entscheidung lösen. | `PENDING` | `action.label` und Regex werden in produktiven Pfaden verwendet. | Text-/Regex-/Label-Fallbacks sind nur diagnostisch und erzeugen Coverage-Gaps. |
@@ -6571,7 +6571,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-choice-builder.test.ts src/runtime/semantic-runtime-score-breakdown.test.ts src/runtime/semantic-runtime-corp-score.test.ts src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/runner-self-damage-choice.test.ts src/action-semantic-candidate.test.ts src/decision/action-goal-fit.test.ts` grün, 7 Dateien, 40 Tests.
   - Status: `VERIFIED`.
 
-Nächstes aktives Ziel: `AI-COMPLETE-11`.
+Nächstes aktives Ziel: `AI-COMPLETE-12`.
 
 - `AI-COMPLETE-11` erster TargetChoice-Produktivschnitt:
   - `packages/ai/src/decision/target-choice-shadow.ts` behält den Shadow-Report selbst report-only/no-effect, exportiert aber zusätzlich `targetChoiceRecommendationForTargetFit`.
@@ -6616,6 +6616,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-11`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1675 Tests.
+
+- `AI-COMPLETE-11` Abschlussaudit:
+  - `targetChoiceRecommendationForTargetFit` ist der einzige produktive TargetChoice-Ausgang und deklariert `runtimeConsumerStatus:"target_fit_only"`, `noRuntimeEffect:true`, `selectedChoicesCreated:false` und `selectedTargetsCreated:false`.
+  - `scoreActionGoalFit` nutzt die Recommendation nur als Target-Fit-Bonus für targetabhängige Utility-Familien; fehlender `targetContext` und Hard-Gates werden dadurch nicht ersetzt.
+  - `semantic-shadow-decision.ts` baut die Recommendation pro Kandidat aus legalen Target-Kontextdaten und reicht sie ausschließlich in `scoreActionGoalFit` weiter.
+  - Trace-, Coverage- und Readiness-Reports weisen Recommendation-Zählung und Evidence aus, bleiben aber report-only/no-effect.
+  - `access-decision-projection.ts` bleibt eine Dry-Run-Projektion ohne `selectedChoices` oder `selectedTargets`.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/target-choice-shadow.test.ts src/decision/action-goal-fit.test.ts src/decision/semantic-shadow-decision.test.ts src/evaluation/target-choice-shadow-coverage.test.ts src/evaluation/target-choice-shadow-readiness.test.ts src/evaluation/semantic-shadow-league.test.ts src/decision/access-decision-projection.test.ts` grün, 7 Dateien, 55 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 155 Dateien, 1675 Tests.
+  - Status: `AI-COMPLETE-11` `VERIFIED`; `AI-COMPLETE-12` ist das nächste aktive Ziel.
 
 ## Audit-Ledger
 
