@@ -6229,6 +6229,14 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
+- `AI-COMPLETE-04` vierzigster Struktur-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt `packages/ai/src/tactical-plans.ts` als dünne Plan-Fassade mit Linecount-Grenze, Top-Level-Builder-Imports und Zyklusverbot für ausgelagerte Planmodule.
+  - `packages/ai/src/tactical-plans.ts` bleibt bei 306 Zeilen und enthält nur noch Facade, Runtime-Evaluation und Step-Mapping.
+  - Status bleibt `IN_PROGRESS`, bis die zwei geforderten Abschluss-Audits ohne neue In-Scope-Findings dokumentiert sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 144 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1646 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-04`.
 

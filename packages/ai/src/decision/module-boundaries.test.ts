@@ -404,6 +404,56 @@ describe("AI module boundaries", () => {
 
     expect(violations).toEqual([]);
   });
+
+  it("keeps tactical plans as a thin plan facade", () => {
+    const tacticalPlans = path.join(srcDir, "tactical-plans.ts");
+    const content = readFileSync(tacticalPlans, "utf8");
+    const lineCount = content.split(/\r?\n/).length;
+    const forbiddenPatterns = [
+      {
+        pattern: /^\s*function\s/m,
+        reason: "declares local helper functions",
+      },
+      {
+        pattern:
+          /from\s+["']\.\/plans\/tactical-plan-(?:runner-run-targets|runner-hand-buffer|runner-hand-development|runner-credit-base|runner-breaker-coverage-step|corp-helpers|corp-score-window|deck-coverage|bank-tools|run-reachability)["']/,
+        reason: "imports split plan implementation modules directly",
+      },
+    ];
+    const requiredImports = [
+      "./plans/tactical-plan-runner-plans",
+      "./plans/tactical-plan-corp-plans",
+      "./plans/tactical-plan-step-candidate-matching",
+      "./plans/tactical-plan-progression",
+    ];
+    const violations = [
+      ...(lineCount > 450
+        ? [`tactical-plans.ts has ${lineCount} lines; expected <= 450`]
+        : []),
+      ...forbiddenPatterns
+        .filter(({ pattern }) => pattern.test(content))
+        .map(({ reason }) => `tactical-plans.ts ${reason}`),
+      ...requiredImports
+        .filter((importSource) => !content.includes(`from "${importSource}"`))
+        .map((importSource) => `tactical-plans.ts misses ${importSource}`),
+    ];
+    const planModuleCycles = [
+      "tactical-plan-runner-plans.ts",
+      "tactical-plan-corp-plans.ts",
+      "tactical-plan-step-candidate-matching.ts",
+    ].flatMap((fileName) => {
+      const file = path.join(srcDir, "plans", fileName);
+      return importsFrom(file)
+        .filter((reference) =>
+          resolvesToSrcEntry(file, reference.importSource, "tactical-plans"),
+        )
+        .map((reference) =>
+          violation(file, reference, "plan modules must not import tactical-plans.ts"),
+        );
+    });
+
+    expect([...violations, ...planModuleCycles]).toEqual([]);
+  });
 });
 
 function productionFiles(
