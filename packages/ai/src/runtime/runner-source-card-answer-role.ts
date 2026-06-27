@@ -52,7 +52,6 @@ export function runnerSourceCardAnswerRole(
     definitionDisplay?.rulesText,
     ...(definitionDisplay?.mechanics ?? []),
     ...roles,
-    action.label,
   ]
     .filter(Boolean)
     .join(" ")
