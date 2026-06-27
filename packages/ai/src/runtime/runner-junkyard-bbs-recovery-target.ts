@@ -1,5 +1,7 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 
+import { rolesMatch } from "./role-match";
+
 export type RunnerJunkyardBbsRecoveryActionDependencies = {
   junkyardBbsDefinitionId: string;
   returnTopHeapAbility: string;
@@ -83,15 +85,13 @@ export function runnerJunkyardBbsRecoveryTargetAssessment(
       value: 1350,
       evidence: "target_class:missing_breaker_coverage",
     });
-  } else if (targetRoles.some((role) => role.startsWith("breaker_"))) {
+  } else if (rolesMatch(targetRoles, ["breaker_"])) {
     values.push({
       value: 80,
       evidence: "target_class:breaker_no_visible_need",
     });
   }
-  if (
-    targetRoles.some((role) => role === "memory" || role === "memory_support")
-  ) {
+  if (rolesMatch(targetRoles, ["memory", "memory_support"])) {
     const memoryRemaining =
       (input.playerView.own.memoryLimit ?? 0) -
       (input.playerView.own.memoryUsed ?? 0);
@@ -114,12 +114,7 @@ export function runnerJunkyardBbsRecoveryTargetAssessment(
       evidence: `target_class:economy:funding_need:${fundingNeed.active}:${fundingNeed.reason}`,
     });
   }
-  if (
-    targetRoles.some(
-      (role) =>
-        role === "setup" || role === "build_rig" || role.includes("setup"),
-    )
-  ) {
+  if (rolesMatch(targetRoles, ["setup", "build_rig"])) {
     const rigSize = input.playerView.own.rig?.length ?? 0;
     values.push({
       value: rigSize <= 1 ? 180 : 80,
