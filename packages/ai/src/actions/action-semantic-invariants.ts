@@ -10,6 +10,9 @@ export const ACTION_SEMANTIC_INVARIANT_REPORT_SCHEMA_VERSION =
 
 export type ActionSemanticInvariantIssueId =
   | "pure_type_subtype_name_signal"
+  | "forbidden_static_signal"
+  | "broad_primary_signal_without_precise_peer"
+  | "broad_primary_signal_strategy_anchor"
   | "strategy_support_pair_incomplete"
   | "support_only_strategy_id"
   | "target_profile_hidden_info"
@@ -93,6 +96,11 @@ function profileInvariantIssues(
       `${basePath}.strategySupport`,
       profile.strategySupport ?? [],
     ),
+    ...broadSignalStrategySupportIssues(
+      `${basePath}.strategySupport`,
+      profile.tacticSignals,
+      profile.strategySupport ?? [],
+    ),
     ...supportOnlyStrategyIssues(
       `${basePath}.strategySupport`,
       profile.tacticSignals,
@@ -114,6 +122,11 @@ function profileInvariantIssues(
         `${abilityPath}.strategySupport`,
         ability.strategySupport ?? [],
       ),
+      ...broadSignalStrategySupportIssues(
+        `${abilityPath}.strategySupport`,
+        ability.tacticSignals,
+        ability.strategySupport ?? [],
+      ),
       ...supportOnlyStrategyIssues(
         `${abilityPath}.strategySupport`,
         ability.tacticSignals,
@@ -133,19 +146,46 @@ function signalIssues(
   pathPrefix: string,
   signals: readonly string[],
 ): ActionSemanticInvariantIssue[] {
-  return signals.flatMap((signal, signalIndex) =>
-    pureStructuralSignal(signal)
-      ? [
-          issue(
-            "pure_type_subtype_name_signal",
-            "error",
-            `${pathPrefix}[${signalIndex}]`,
-            "Semantic signals must describe behavior or tactical function, not only type, subtype or card name.",
-            [signal],
-          ),
-        ]
-      : [],
+  const hasPrecisePrimarySignal = signals.some((signal) =>
+    precisePrimarySignal(signal),
   );
+  return signals.flatMap((signal, signalIndex) => {
+    const path = `${pathPrefix}[${signalIndex}]`;
+    if (pureStructuralSignal(signal)) {
+      return [
+        issue(
+          "pure_type_subtype_name_signal",
+          "error",
+          path,
+          "Semantic signals must describe behavior or tactical function, not only type, subtype or card name.",
+          [signal],
+        ),
+      ];
+    }
+    if (forbiddenStaticSignal(signal)) {
+      return [
+        issue(
+          "forbidden_static_signal",
+          "error",
+          path,
+          "Static card-theme, type or faction labels must stay in card data or compatibility evidence, not tacticSignals.",
+          [signal],
+        ),
+      ];
+    }
+    if (broadPrimarySignal(signal) && !hasPrecisePrimarySignal) {
+      return [
+        issue(
+          "broad_primary_signal_without_precise_peer",
+          "error",
+          path,
+          "Broad aggregation or legacy semantic signals require a precise primary signal peer before they can appear in tacticSignals.",
+          [signal],
+        ),
+      ];
+    }
+    return [];
+  });
 }
 
 function strategySupportIssues(
@@ -185,6 +225,42 @@ function supportOnlyStrategyIssues(
       [...signals, ...pairs.map((pair) => pair.strategyId ?? "")].filter(
         (value) => value.length > 0,
       ),
+    ),
+  ];
+}
+
+function broadSignalStrategySupportIssues(
+  pathPrefix: string,
+  signals: readonly string[],
+  pairs: readonly StrategySupportPair[],
+): ActionSemanticInvariantIssue[] {
+  if (pairs.length === 0) {
+    return [];
+  }
+  const broadSignals = signals.filter((signal) => broadPrimarySignal(signal));
+  if (broadSignals.length === 0) {
+    return [];
+  }
+  const broadEvidence = pairs.flatMap((pair) =>
+    broadSignals.filter(
+      (signal) =>
+        pair.evidence === signal || pair.evidence.includes(`:${signal}`),
+    ),
+  );
+  if (
+    broadEvidence.length === 0 &&
+    signals.some((signal) => precisePrimarySignal(signal))
+  ) {
+    return [];
+  }
+
+  return [
+    issue(
+      "broad_primary_signal_strategy_anchor",
+      "error",
+      pathPrefix,
+      "Broad aggregation or legacy signals must not be used as StrategySupport anchors.",
+      uniqueStrings([...broadSignals, ...broadEvidence]),
     ),
   ];
 }
@@ -246,6 +322,38 @@ function supportOnlySignal(signal: string): boolean {
   );
 }
 
+function broadPrimarySignal(signal: string): boolean {
+  return BROAD_PRIMARY_SIGNALS.has(signal.trim().toLowerCase());
+}
+
+function forbiddenStaticSignal(signal: string): boolean {
+  return FORBIDDEN_STATIC_SIGNALS.has(signal.trim().toLowerCase());
+}
+
+function precisePrimarySignal(signal: string): boolean {
+  const normalized = signal.trim().toLowerCase();
+  return (
+    normalized.length > 0 &&
+    !broadPrimarySignal(normalized) &&
+    !forbiddenStaticSignal(normalized) &&
+    !pureStructuralSignal(normalized) &&
+    !compatibilityOrContextOnlySignal(normalized)
+  );
+}
+
+function compatibilityOrContextOnlySignal(signal: string): boolean {
+  return (
+    signal.startsWith("card.context.") ||
+    signal.startsWith("effect:") ||
+    signal.startsWith("effect_timing:") ||
+    signal.startsWith("effect_scope:") ||
+    signal.startsWith("role:") ||
+    signal.startsWith("plan_role:") ||
+    signal.startsWith("line_support:") ||
+    signal.startsWith("strategic_role:")
+  );
+}
+
 function hiddenInfoText(value: string): boolean {
   return /\b(hidden|private|secret|engine_only|cardinstances|privatepayload|fullgamestate|decklist|sessiontoken|reconnecttoken)\b/i.test(
     value,
@@ -258,6 +366,10 @@ function fixtureLikeCardId(cardId: string): boolean {
 
 function nonEmptyString(value: unknown): value is string {
   return typeof value === "string" && value.trim().length > 0;
+}
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values.filter((value) => value.length > 0))];
 }
 
 function issue(
@@ -275,6 +387,9 @@ function summarizeIssues(
 ): ActionSemanticInvariantReport["summary"] {
   const byIssueId: Record<ActionSemanticInvariantIssueId, number> = {
     pure_type_subtype_name_signal: 0,
+    forbidden_static_signal: 0,
+    broad_primary_signal_without_precise_peer: 0,
+    broad_primary_signal_strategy_anchor: 0,
     strategy_support_pair_incomplete: 0,
     support_only_strategy_id: 0,
     target_profile_hidden_info: 0,
@@ -294,3 +409,26 @@ function summarizeIssues(
     byIssueId,
   };
 }
+
+const BROAD_PRIMARY_SIGNALS = new Set([
+  "access.payoff",
+  "access.punish",
+  "damage.payoff",
+  "defense.damage_prevention",
+  "draw.card",
+  "economy.card",
+  "economy.generic",
+  "economy.recurring",
+  "run.make_run",
+  "setup.draw",
+  "setup.recovery",
+  "setup.search",
+  "survival.defense",
+]);
+
+const FORBIDDEN_STATIC_SIGNALS = new Set([
+  "corp.operation",
+  "hardware.chip",
+  "operation.black_ops",
+  "setup.vehicle",
+]);

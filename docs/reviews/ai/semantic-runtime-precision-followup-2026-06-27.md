@@ -1,6 +1,6 @@
 # Semantic Runtime Precision Follow-up, 2026-06-27
 
-Status: `P3_done`
+Status: `P4_done`
 
 Prozess: `docs/architecture/ai/semantic-runtime-precision-legacy-cleanup-process-2026-06-27.md`
 
@@ -229,5 +229,23 @@ Verifikation:
 
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-card-semantic-profiles.test.ts`: grün, 1 Datei, 3 Tests.
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/action-semantic-candidate.test.ts src/actions/action-semantic-invariants.test.ts src/deck-doctrine-strategy.test.ts src/actions/action-card-semantic-profiles.test.ts`: grün, 4 Dateien, 55 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
+
+## P4 Ergebnis: Signal-Katalog und Invariant-Checks
+
+Status: `P4_done`
+
+Umgesetzt:
+
+- `ActionSemanticInvariantReport` meldet jetzt verbotene statische Signale als `forbidden_static_signal`, z. B. `hardware.chip`, `setup.vehicle`, `operation.black_ops` und `corp.operation`.
+- Breite Aggregations- oder Legacy-Signale wie `access.payoff`, `damage.payoff`, `economy.generic`, `setup.search`, `setup.recovery`, `setup.draw`, `defense.damage_prevention` und `run.make_run` schlagen als `broad_primary_signal_without_precise_peer` an, wenn sie ohne präzisen Primärsignal-Peer in `tacticSignals` stehen.
+- Broad-/Legacy-Signale dürfen weiterhin als Aggregation neben einem präzisen Peer laufen, z. B. `access.payoff` neben `access.hq_multiaccess`; `compatibilitySignals` bleiben dafür getrennte Compatibility-Evidence.
+- StrategySupport-Anker auf Broad-/Legacy-Signalen schlagen als `broad_primary_signal_strategy_anchor` an.
+- Die Signalklassen und ihre Runtime-Grenzen sind in `docs/architecture/ai/action-semantic-signal-invariant-classes-2026-06-27.md` dokumentiert.
+
+Verifikation:
+
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-semantic-invariants.test.ts src/actions/action-card-semantic-profiles.test.ts src/action-semantic-candidate.test.ts`: grün, 3 Dateien, 41 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `git diff --check`: grün.

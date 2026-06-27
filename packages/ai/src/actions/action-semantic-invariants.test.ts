@@ -113,6 +113,86 @@ describe("Action semantic invariants", () => {
     expect(JSON.stringify(report)).not.toContain("rankedAlternatives");
   });
 
+  it("reports forbidden static signals and broad primary signals without precise peers", () => {
+    const report = buildActionSemanticInvariantReport([
+      {
+        cardId: "onr_v1_static_signal_misuse",
+        tacticSignals: [
+          "hardware.chip",
+          "setup.vehicle",
+          "operation.black_ops",
+          "corp.operation",
+        ],
+      },
+      {
+        cardId: "onr_v1_broad_damage_anchor",
+        tacticSignals: ["damage.payoff"],
+        strategySupport: [
+          {
+            strategyId: "corp.damage_kill",
+            role: "payoff_anchor",
+            confidence: "medium",
+            evidence: "tactic_signal_anchor:damage.payoff",
+          },
+        ],
+      },
+      {
+        cardId: "onr_v1_broad_search_only",
+        tacticSignals: ["setup.search"],
+      },
+      {
+        cardId: "onr_v1_broad_access_punish_only",
+        tacticSignals: ["access.punish"],
+      },
+    ]);
+    const issueIds = report.issues.map((issue) => issue.issueId);
+
+    expect(report.valid).toBe(false);
+    expect(issueIds).toEqual(
+      expect.arrayContaining([
+        "forbidden_static_signal",
+        "broad_primary_signal_without_precise_peer",
+        "broad_primary_signal_strategy_anchor",
+      ]),
+    );
+    expect(report.summary.byIssueId.forbidden_static_signal).toBe(4);
+    expect(
+      report.summary.byIssueId.broad_primary_signal_without_precise_peer,
+    ).toBe(3);
+    expect(report.summary.byIssueId.broad_primary_signal_strategy_anchor).toBe(
+      1,
+    );
+  });
+
+  it("allows broad aggregation signals when precise primary signals carry the semantics", () => {
+    const report = buildActionSemanticInvariantReport([
+      {
+        cardId: "onr_v1_precise_multiaccess_profile",
+        tacticSignals: ["access.payoff", "access.hq_multiaccess"],
+        compatibilitySignals: [
+          "setup.search",
+          "hardware.chip",
+          "operation.black_ops",
+        ],
+        strategySupport: [
+          {
+            strategyId: "runner.hq_pressure",
+            role: "payoff_anchor",
+            confidence: "high",
+            evidence: "tactic_signal_anchor:access.hq_multiaccess",
+          },
+        ],
+      },
+      {
+        cardId: "onr_v1_precise_damage_profile",
+        tacticSignals: ["damage.payoff", "damage.corp_tagged_meat_payoff"],
+      },
+    ]);
+
+    expect(report.valid).toBe(true);
+    expect(report.issues).toEqual([]);
+  });
+
   it("stays out of runtime selection modules", () => {
     for (const sourcePath of [
       "packages/ai/src/index.ts",
