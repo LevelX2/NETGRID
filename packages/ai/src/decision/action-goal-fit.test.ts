@@ -248,8 +248,30 @@ describe("ActionGoalFit", () => {
       legalActionIds: ["other-action"],
     });
 
-    expect(fit.fitStatus).toBe("blocked");
-    expect(fit.blockers).toContain("not_in_legal_actions");
+    expectHardGateOnly(fit, "not_in_legal_actions", [
+      "hard_gate:not_in_legal_actions",
+      "action_id:gain-1",
+      "legal:false",
+    ]);
+  });
+
+  it("blocks hidden-info candidates before positive scoring components", () => {
+    const base = candidateFor("gain-1", "gain_credit");
+    const hiddenInfoBlocked = {
+      ...base,
+      projectionIssues: [...base.projectionIssues, "hidden_info_blocked"],
+    } satisfies ActionSemanticCandidate;
+
+    const fit = scoreActionGoalFit({
+      candidate: hiddenInfoBlocked,
+      utility: utility("runner.build_economy_base", "economy"),
+      legalActionIds: ["gain-1"],
+    });
+
+    expectHardGateOnly(fit, "hidden_info_required", [
+      "hard_gate:hidden_info_required",
+      "hidden_info_blocked:true",
+    ]);
   });
 
   it("blocks actions that cost more credits than the side-safe economy context can pay", () => {
@@ -269,25 +291,33 @@ describe("ActionGoalFit", () => {
       availableCredits: 2,
     });
 
-    expect(fit.fitStatus).toBe("blocked");
-    expect(fit.score).toBe(0);
-    expect(fit.blockers).toContain("cannot_pay");
-    expect(fit.components).toEqual([
-      expect.objectContaining({
-        component: "fallback_safety",
-        delta: -100,
-        evidence: expect.arrayContaining([
-          "hard_gate:cannot_pay",
-          "credit_cost:6",
-          "available_credits:2",
-        ]),
-      }),
+    expectHardGateOnly(fit, "cannot_pay", [
+      "hard_gate:cannot_pay",
+      "credit_cost:6",
+      "available_credits:2",
     ]);
-    expect(fit.components.map((component) => component.component)).not.toEqual(
-      expect.arrayContaining(["goal_fit", "cost_fit", "target_fit"]),
-    );
   });
 });
+
+function expectHardGateOnly(
+  fit: ReturnType<typeof scoreActionGoalFit>,
+  blocker: string,
+  evidence: string[],
+): void {
+  expect(fit.fitStatus).toBe("blocked");
+  expect(fit.score).toBe(0);
+  expect(fit.blockers).toContain(blocker);
+  expect(fit.components).toEqual([
+    expect.objectContaining({
+      component: "fallback_safety",
+      delta: -100,
+      evidence: expect.arrayContaining(evidence),
+    }),
+  ]);
+  expect(fit.components.map((component) => component.component)).not.toEqual(
+    expect.arrayContaining(["goal_fit", "cost_fit", "target_fit"]),
+  );
+}
 
 function candidateFor(
   actionId: string,

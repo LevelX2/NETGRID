@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
-import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import {
+  buildActionSemanticCandidates,
+  type ActionSemanticCandidate,
+} from "../action-semantic-candidate";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import { buildSemanticDecisionFrame } from "./semantic-decision-frame";
 import { buildSemanticShadowDecision } from "./semantic-shadow-decision";
@@ -262,6 +265,60 @@ describe("SemanticShadowDecision", () => {
         "hard_gate:cannot_pay",
         "credit_cost:4",
         "available_credits:1",
+      ]),
+    );
+  });
+
+  it("rejects hidden-info blocked candidates before run payoff scoring", () => {
+    const input = inputFor("runner", [
+      legalAction("run-hq", "start_run", "runner", 0, {
+        payload: { serverId: "hq" },
+      }),
+      legalAction("draw-1", "draw_card", "runner"),
+    ]);
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+      selectedTargetsByActionId: {
+        "run-hq": { server: "hq" },
+      },
+    }).map((candidate) =>
+      candidate.actionId === "run-hq"
+        ? hiddenInfoBlockedCandidate(candidate)
+        : candidate,
+    );
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: candidates,
+      tacticalGoals: [
+        {
+          goalId: "runner.pressure_good_central_target",
+          family: "run_access",
+          priority: 940,
+          urgency: "high",
+          source: "test",
+          evidence: ["access_payoff:true"],
+        },
+      ],
+    });
+
+    const trace = buildSemanticShadowDecision(frame);
+    const rejectedRun = trace.rejectedActions.find(
+      (action) => action.actionId === "run-hq",
+    );
+
+    expect(trace.rankedActions.map((action) => action.actionId)).not.toContain(
+      "run-hq",
+    );
+    expect(rejectedRun).toMatchObject({
+      reason: "blocked_by_action_goal_fit",
+      blockers: expect.arrayContaining(["hidden_info_required"]),
+    });
+    expect(rejectedRun?.evidence).toEqual(
+      expect.arrayContaining([
+        "hard_gate:hidden_info_required",
+        "hidden_info_blocked:true",
       ]),
     );
   });
@@ -584,6 +641,28 @@ function doctrine(
       engineMutation: false,
       hiddenInfoProjection: false,
     },
+  };
+}
+
+function hiddenInfoBlockedCandidate(
+  candidate: ActionSemanticCandidate,
+): ActionSemanticCandidate {
+  const baseGate = candidate.hardGates[0];
+  if (!baseGate) throw new Error("candidate fixture missing base gate");
+  return {
+    ...candidate,
+    projectionIssues: [...candidate.projectionIssues, "hidden_info_blocked"],
+    hardGates: [
+      ...candidate.hardGates,
+      {
+        ...baseGate,
+        gateId: "hidden_info",
+        status: "block",
+        severity: "error",
+        reason: "test_hidden_info_blocked",
+        evidence: ["hidden_info_blocked:test"],
+      },
+    ],
   };
 }
 
