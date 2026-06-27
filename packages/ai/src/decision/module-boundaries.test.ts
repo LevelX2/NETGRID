@@ -473,6 +473,24 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps historical public plan exports behind the legacy public contract", () => {
+    const publicIndex = path.join(srcDir, "index.ts");
+    const content = readFileSync(publicIndex, "utf8");
+    const violations = [
+      ...(content.includes('from "./corp-plans"')
+        ? ["index.ts exports corp-plans facade directly"]
+        : []),
+      ...(content.includes('from "./runner-plans"')
+        ? ["index.ts exports runner-plans facade directly"]
+        : []),
+      ...(!content.includes('from "./legacy/legacy-public-contract"')
+        ? ["index.ts misses legacy public contract"]
+        : []),
+    ];
+
+    expect(violations).toEqual([]);
+  });
+
   it("keeps runtime, simulation and diagnostics off legacy planner compatibility facades", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>

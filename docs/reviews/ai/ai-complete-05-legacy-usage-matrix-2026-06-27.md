@@ -12,8 +12,9 @@ Fuehrend ist der Code-Stand nach dem Schnitt auf `packages/ai/src/legacy/legacy-
 | Produktiver Legacy-Zugriff | `packages/ai/src/legacy/legacy-entrypoints.ts` | Buendelt Legacy-Planfunktionen, Baseline-Entscheider, Legacy-Scoring-Adapter, Legacy-Decision-Context und Forced-Legacy-Fallback. | Erlaubte interne Legacy-Eingangsschnittstelle fuer Runtime, Simulation und Diagnose. | Bleibt einziger produktiver Importpfad zu Legacy-Modulen, bis die Funktionen ersetzt oder entfernt sind. |
 | Historische Facade | `packages/ai/src/runner-plans.ts` | Re-exportiert `legacy/runner-plans.ts`. | Kompatibilitaets-Fassade fuer historische Importe und Public Contract. | Keine neue produktive Callsite; spaeter entfernen oder auf explizite Legacy-Kompatibilitaet begrenzen. |
 | Historische Facade | `packages/ai/src/corp-plans.ts` | Re-exportiert `legacy/corp-plans.ts`. | Kompatibilitaets-Fassade fuer historische Importe und Public Contract. | Keine neue produktive Callsite; spaeter entfernen oder auf explizite Legacy-Kompatibilitaet begrenzen. |
+| Public Legacy Contract | `packages/ai/src/legacy/legacy-public-contract.ts` | Buendelt historische Runner-/Corp-Plan-Exports fuer `index.ts`. | Erlaubte Public-Contract-Ausnahme, kein produktiver Runtime-/Simulation-Zugang. | Entfernen oder ausduennen, sobald der Public Contract keine Legacy-Plan-APIs mehr braucht. |
 | Public Runtime Wiring | `packages/ai/src/ai-runtime-public-entrypoints.ts` | Verwendet Legacy-Planfunktionen ueber `legacy-entrypoints`. | Produktiver Legacy-Fallback-/Override-Verbraucher. | Nach semantischer Migration nur noch Sicherheits-Fallback oder entfernen. |
-| Public Exports | `packages/ai/src/index.ts` | Exportiert historische Runner-/Corp-Planfacades weiter. | Public-Contract-Kompatibilitaet, nicht neue Semantik. | Separat pruefen, ob Public Contract diese Legacy-Exports weiter braucht. |
+| Public Exports | `packages/ai/src/index.ts` | Exportiert historische Runner-/Corp-Plan-APIs ueber `legacy-public-contract.ts`. | Public-Contract-Kompatibilitaet, nicht neue Semantik. | Separat pruefen, ob Public Contract diese Legacy-Exports weiter braucht. |
 
 ## Runtime- und Scoring-Nutzungen
 
@@ -50,7 +51,7 @@ Fuehrend ist der Code-Stand nach dem Schnitt auf `packages/ai/src/legacy/legacy-
 
 ## Naechste Schnitte
 
-1. Verbleibende Public-Contract-Exports der Legacy-Kompatibilitaetsfacades pruefen.
+1. Verbleibende Public-Contract-Exports in `legacy-public-contract.ts` pruefen.
 2. Simulation-/Diagnoseimporte ueber `legacy-entrypoints.ts` fachlich auf dedizierte Diagnosemodule umstellen.
 3. Legacy-Scoring-Adapterverbraucher nach Semantic-Scoring-Ownern aufteilen.
 4. Legacy-Planer-Dateien einfrieren: Boundary-Test soll neue produktive Importe oder neue Semantik in `legacy/runner-plans.ts` und `legacy/corp-plans.ts` verhindern.

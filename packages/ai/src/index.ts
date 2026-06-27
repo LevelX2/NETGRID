@@ -181,7 +181,7 @@ export {
   evaluateServerThreat,
   generateCorpPlanCandidates,
   hasCorpPlanAction,
-} from "./corp-plans";
+} from "./legacy/legacy-public-contract";
 export type {
   CorpIcePortfolioActionAssessment,
   CorpPlanCandidate,
@@ -193,7 +193,7 @@ export type {
   CorpPlanStep,
   RemoteScoreHorizon,
   RunnerContestCapacity,
-} from "./corp-plans";
+} from "./legacy/legacy-public-contract";
 export {
   buildDeckCapabilityProfile,
   buildDeckCapabilityProfileFromInput,
@@ -295,7 +295,7 @@ export {
   generateRunnerPlanCandidates,
   hasRunnerPlanAction,
   runnerPlanUsesOnlyAiSupportedCards,
-} from "./runner-plans";
+} from "./legacy/legacy-public-contract";
 export type {
   RunnerPlanCandidate,
   RunnerPlanDebug,
@@ -304,7 +304,7 @@ export type {
   RunnerPlanKind,
   RunnerPlanScore,
   RunnerPlanStep,
-} from "./runner-plans";
+} from "./legacy/legacy-public-contract";
 export {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,

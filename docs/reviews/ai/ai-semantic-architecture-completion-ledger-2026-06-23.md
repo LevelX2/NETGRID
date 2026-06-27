@@ -6273,6 +6273,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 83 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1649 Tests.
+- `AI-COMPLETE-05` fünfter Legacy-Schnitt:
+  - `packages/ai/src/legacy/legacy-public-contract.ts` bündelt die historischen Runner-/Corp-Plan-Exports für den öffentlichen Paketindex als explizite Kompatibilitätsfläche.
+  - `packages/ai/src/index.ts` exportiert die bisherigen Plan-APIs über diesen Public-Contract statt direkt über `corp-plans.ts` und `runner-plans.ts`.
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt den Paketindex gegen erneute direkte Plan-Facade-Exports.
+  - Status bleibt `IN_PROGRESS`, weil Legacy-Implementierungen noch eingefroren und der Public Contract später ausgedünnt werden muss.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/index.test.ts` grün, 2 Dateien, 552 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1650 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-05`.
 
