@@ -111,20 +111,14 @@ import {
   coverageAnswerRoleMatchesStep,
   coverageAnswerRolePriority,
   coverageSearchRequiredCapability,
-  type CoverageAnswerRole,
   isCoverageAnswerStep,
 } from "./plans/tactical-plan-coverage-answers";
-import {
-  cardDefinitionPlanRoleForCoverageSearch,
-  cardDefinitionProvidesBreakerCoverage,
-  cardPlanRoleForCoverageSearch,
-  recoveryTargetDefinitionId,
-} from "./plans/tactical-plan-coverage-card-roles";
 import {
   coverageSearchActionFit,
   matchedCoverageSearchRationales,
   rejectedCoverageSearchFalseMatches,
 } from "./plans/tactical-plan-coverage-search-fit";
+import { bestLegalCoverageAnswerRole } from "./plans/tactical-plan-legal-coverage-answers";
 import { developmentCardStepMatchesAction } from "./plans/tactical-plan-development-card-matching";
 import {
   isRunPlanStep,
@@ -2657,81 +2651,6 @@ function runnerBreakerCoverageStep(
       `no ${missingCoverage} answer action is visible; credits preserve future options`,
     ],
   });
-}
-
-function bestLegalCoverageAnswerRole(
-  input: AiDecisionInput,
-  requiredCoverage: RequiredCapabilityKind,
-): CoverageAnswerRole | undefined {
-  const roles = input.legalActions
-    .map((action) =>
-      coverageAnswerRoleForLegalAction(input, action, requiredCoverage),
-    )
-    .filter(
-      (role): role is CoverageAnswerRole =>
-        role !== undefined && role !== "not_coverage_answer",
-    )
-    .sort(
-      (left, right) =>
-        coverageAnswerRolePriority(right) - coverageAnswerRolePriority(left),
-    );
-  return roles[0];
-}
-
-function coverageAnswerRoleForLegalAction(
-  input: AiDecisionInput,
-  action: LegalAction,
-  requiredCoverage: RequiredCapabilityKind,
-): CoverageAnswerRole | undefined {
-  if (action.side !== "runner") return undefined;
-  const sourceCard = visibleCardForAction(input.playerView, action);
-  if (
-    action.type === "install_card" &&
-    sourceCard &&
-    cardProvidesBreakerCoverage(sourceCard, requiredCoverage)
-  ) {
-    return "direct_breaker_install";
-  }
-  const sourceRole = sourceCard
-    ? cardPlanRoleForCoverageSearch(sourceCard)
-    : undefined;
-  if (sourceRole?.includes("search")) {
-    return action.type === "install_card"
-      ? "search_engine_setup"
-      : "program_search";
-  }
-  if (sourceRole?.includes("draw") && action.type !== "install_card") {
-    return "draw_for_answer";
-  }
-  if (
-    action.type === "trigger_ability" ||
-    action.type === "activated_card_ability"
-  ) {
-    const targetDefinitionId = recoveryTargetDefinitionId(input, action);
-    const sourceText = [
-      sourceCard?.title,
-      sourceCard?.definitionId,
-      sourceCard?.rulesText,
-      action.label,
-    ].filter(Boolean).join(" ").toLowerCase();
-    if (
-      /recovery|trash|heap|junkyard|bbs/.test(sourceText) ||
-      targetDefinitionId !== undefined
-    ) {
-      const targetRole = targetDefinitionId
-        ? cardDefinitionPlanRoleForCoverageSearch(targetDefinitionId)
-        : "unknown";
-      if (
-        targetDefinitionId !== undefined &&
-        cardDefinitionProvidesBreakerCoverage(targetDefinitionId, requiredCoverage)
-      ) return "recovery_answer";
-      if (targetRole.includes("search") || targetRole.includes("draw")) {
-        return "recovery_answer";
-      }
-    }
-  }
-  if (action.type === "draw_card") return "basic_draw_fallback";
-  return undefined;
 }
 
 function runnerHasConcreteFundingNeed(
