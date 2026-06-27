@@ -10,6 +10,10 @@ import {
   type TacticalPlanCreditValueDependencies,
 } from "./tactical-plan-action-values";
 import {
+  createPlanStep,
+  createTacticalPlan,
+} from "./tactical-plan-builders";
+import {
   actionServerId,
   isRemoteServer,
 } from "./tactical-plan-server-targets";
@@ -117,6 +121,75 @@ export function runnerEconomyActionPreferredOverHandBuffer(
     (action) =>
       legalActionCreditGainForPlan(context.input, action, dependencies) > 0,
   );
+}
+
+export function runnerHandBufferPlans(
+  context: TacticalPlanBuildContext,
+  stateVersion: number,
+  runnerGoalEvidence: readonly string[],
+  dependencies: TacticalPlanCreditValueDependencies,
+): TacticalPlan[] {
+  if (!context.input.legalActions.some((action) => action.type === "draw_card")) {
+    return [];
+  }
+  if (runnerHasNonBasicHandBufferAlternative(context.input)) return [];
+  const assessment = runnerHandBufferAssessment(context.input);
+  if (!assessment.active) return [];
+  if (
+    !assessment.damagePressure &&
+    runnerEconomyActionPreferredOverHandBuffer(context, dependencies)
+  ) {
+    return [];
+  }
+  if (runnerHighPayoffRunAvailable(context)) return [];
+  return [
+    createTacticalPlan({
+      planId: "runner.restore_hand_buffer",
+      side: "runner",
+      type: "runner.restore_hand_buffer",
+      status: "active",
+      priority: assessment.planPriority,
+      horizonTurns: 1,
+      target: { kind: "capability", id: "runner_hand_buffer" },
+      requiredCapabilities: [
+        {
+          capabilityId: "runner.hand_buffer",
+          kind: "hand_buffer",
+          side: "runner",
+          target: { kind: "capability", id: "runner_hand_buffer" },
+          evidence: assessment.evidence,
+        },
+      ],
+      currentStep: createPlanStep({
+        stepId: "draw_for_hand_buffer",
+        kind: "draw_hand_buffer",
+        desiredActionSemantics: ["draw.card"],
+        requiredCapabilities: [
+          {
+            capabilityId: "runner.hand_buffer",
+            kind: "hand_buffer",
+            side: "runner",
+            target: { kind: "capability", id: "runner_hand_buffer" },
+            evidence: assessment.evidence,
+          },
+        ],
+        rationale: [
+          "runner hand buffer is too low for safe pressure",
+          ...assessment.evidence,
+        ],
+      }),
+      evidence: [...assessment.evidence, ...runnerGoalEvidence],
+      scoreBreakdown: [
+        {
+          key: "runner_restore_hand_buffer",
+          label: "Runner hand buffer",
+          value: assessment.planPriority,
+          reason: assessment.reason,
+        },
+      ],
+      stateVersion,
+    }),
+  ];
 }
 
 export function runnerHighPayoffRunAvailable(

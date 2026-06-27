@@ -102,10 +102,7 @@ import {
 import { developmentCardStepMatchesAction } from "./plans/tactical-plan-development-card-matching";
 import {
   applyRunnerDrawOverflowAdjustments,
-  runnerEconomyActionPreferredOverHandBuffer,
-  runnerHandBufferAssessment,
-  runnerHasNonBasicHandBufferAlternative,
-  runnerHighPayoffRunAvailable,
+  runnerHandBufferPlans,
 } from "./plans/tactical-plan-runner-hand-buffer";
 import { runnerCreditBasePlans } from "./plans/tactical-plan-runner-credit-base";
 import { runnerBreakerCoverageStep } from "./plans/tactical-plan-runner-breaker-coverage-step";
@@ -1026,7 +1023,12 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     );
   }
   plans.push(
-    ...runnerHandBufferPlans(context, stateVersion, runnerGoalEvidence),
+    ...runnerHandBufferPlans(
+      context,
+      stateVersion,
+      runnerGoalEvidence,
+      TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
+    ),
   );
   plans.push(
     ...runnerHandDevelopmentPlans(context, stateVersion, runnerGoalEvidence),
@@ -1140,77 +1142,6 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     );
   }
   return applyRunnerDrawOverflowAdjustments(context, plans);
-}
-
-function runnerHandBufferPlans(
-  context: TacticalPlanBuildContext,
-  stateVersion: number,
-  runnerGoalEvidence: readonly string[],
-): TacticalPlan[] {
-  if (!context.input.legalActions.some((action) => action.type === "draw_card")) {
-    return [];
-  }
-  if (runnerHasNonBasicHandBufferAlternative(context.input)) return [];
-  const assessment = runnerHandBufferAssessment(context.input);
-  if (!assessment.active) return [];
-  if (
-    !assessment.damagePressure &&
-    runnerEconomyActionPreferredOverHandBuffer(
-      context,
-      TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
-    )
-  ) {
-    return [];
-  }
-  if (runnerHighPayoffRunAvailable(context)) return [];
-  return [
-    createTacticalPlan({
-      planId: "runner.restore_hand_buffer",
-      side: "runner",
-      type: "runner.restore_hand_buffer",
-      status: "active",
-      priority: assessment.planPriority,
-      horizonTurns: 1,
-      target: { kind: "capability", id: "runner_hand_buffer" },
-      requiredCapabilities: [
-        {
-          capabilityId: "runner.hand_buffer",
-          kind: "hand_buffer",
-          side: "runner",
-          target: { kind: "capability", id: "runner_hand_buffer" },
-          evidence: assessment.evidence,
-        },
-      ],
-      currentStep: createPlanStep({
-        stepId: "draw_for_hand_buffer",
-        kind: "draw_hand_buffer",
-        desiredActionSemantics: ["draw.card"],
-        requiredCapabilities: [
-          {
-            capabilityId: "runner.hand_buffer",
-            kind: "hand_buffer",
-            side: "runner",
-            target: { kind: "capability", id: "runner_hand_buffer" },
-            evidence: assessment.evidence,
-          },
-        ],
-        rationale: [
-          "runner hand buffer is too low for safe pressure",
-          ...assessment.evidence,
-        ],
-      }),
-      evidence: [...assessment.evidence, ...runnerGoalEvidence],
-      scoreBreakdown: [
-        {
-          key: "runner_restore_hand_buffer",
-          label: "Runner hand buffer",
-          value: assessment.planPriority,
-          reason: assessment.reason,
-        },
-      ],
-      stateVersion,
-    }),
-  ];
 }
 
 function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan[] {

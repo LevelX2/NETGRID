@@ -6193,6 +6193,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
+- `AI-COMPLETE-04` sechsunddreißigster Struktur-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-runner-hand-buffer.ts` kapselt nun auch den Runner-Hand-Buffer-Planbau inklusive Draw-Step, RequiredCapabilities, Evidence und ScoreBreakdown.
+  - `packages/ai/src/tactical-plans.ts` ruft den ausgelagerten Planbuilder mit der bestehenden Credit-Value-Dependency auf und hält keine lokalen Hand-Buffer-Detailhelfer mehr.
+  - `packages/ai/src/tactical-plans.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 1.336 Zeilen; das Runner-Hand-Buffer-Modul liegt bei 272 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil Runner-, Corp-, Mapping- und Debug-Verantwortungen in `tactical-plans.ts` noch weiter getrennt werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-04`.
 
