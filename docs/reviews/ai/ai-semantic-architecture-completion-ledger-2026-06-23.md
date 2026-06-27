@@ -7045,6 +7045,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` einunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-central-rez-context.ts` entfernt `serverLabel` und `R&D`-/`rnd`-Textnormalisierung aus der produktiven zentralen Pressure-Erkennung für Corp-Rez-Reserve.
+  - Corp-Central-Rez-Funding-Need zählt dort Runner-Run-/Access-Events nur noch mit strukturiertem `serverId` `hq` oder `rd`, nicht über label-only Central-Servertext.
+  - `semantic-runtime-corp-central-rez-context.test.ts` schützt, dass label-only `serverLabel: "R&D"` keinen zentralen Rez-Funding-Bias mehr erzeugt, strukturierte `serverId: "rd"` aber weiterhin wirkt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-central-rez-context.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

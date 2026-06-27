@@ -45,6 +45,29 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
     );
   });
 
+  it("ignores label-only central pressure events", () => {
+    const context = testContext();
+    const input = corpInput({
+      credits: 2,
+      events: [
+        publicEvent("label-rd-run", "start_run", 1, {
+          actor: "runner",
+          actionType: "start_run",
+          serverLabel: "R&D",
+        }),
+      ],
+      servers: [
+        server("hq"),
+        server("rd", [corpCard("rd-ice", "ice", { rezzed: false, rezCost: 3 })]),
+        server("archives"),
+      ],
+    });
+
+    expect(context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)).toBe(
+      false,
+    );
+  });
+
   it("penalizes R&D ICE installs that cannot be rezzed under R&D pressure", () => {
     const ice = corpCard("new-rd-ice", "ice", { rezCost: 4 });
     const action = installIceAction(ice, "rd");

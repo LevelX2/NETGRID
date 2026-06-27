@@ -244,11 +244,7 @@ function semanticRuntimeCorpCentralRunOrAccessEventCount(
       actor === "runner" &&
       (actionType === "start_run" || actionType === "access_card") &&
       semanticRuntimeCorpNormalizeCentralServerId(
-        typeof payload.serverId === "string"
-          ? payload.serverId
-          : typeof payload.serverLabel === "string"
-            ? payload.serverLabel
-            : undefined,
+        typeof payload.serverId === "string" ? payload.serverId : undefined,
       ) === serverId
     );
   }).length;
@@ -260,9 +256,7 @@ function semanticRuntimeCorpNormalizeCentralServerId(
   if (!value) return undefined;
   const normalized = value.toLocaleLowerCase("en-US");
   if (normalized === "hq") return "hq";
-  if (normalized === "rd" || normalized === "r&d" || normalized === "rnd") {
-    return "rd";
-  }
+  if (normalized === "rd") return "rd";
   return undefined;
 }
 
