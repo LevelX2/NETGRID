@@ -21,13 +21,6 @@ import { createAiHintsByCard } from "./ai-hints";
 import { getTacticalPlanMemorySnapshot } from "./plans/plan-memory";
 import { accessCommitmentPlanEvidence } from "./plans/tactical-plan-access-commitment";
 import {
-  assessRunnerDrawOverflow,
-  runnerDrawOverflowCreditPriorityBoost,
-  runnerDrawOverflowEvidence,
-  runnerDrawOverflowRationale,
-  runnerDrawOverflowSupportsCreditPlan,
-} from "./plans/runner-draw-overflow";
-import {
   redactedAccessCommitmentFacts,
   redactedAccessOutcomeMemoryFacts,
   redactedCorpStrategicIntentFacts,
@@ -114,6 +107,7 @@ import {
   runnerHasNonBasicHandBufferAlternative,
   runnerHighPayoffRunAvailable,
 } from "./plans/tactical-plan-runner-hand-buffer";
+import { runnerCreditBasePlans } from "./plans/tactical-plan-runner-credit-base";
 import { runnerBreakerCoverageStep } from "./plans/tactical-plan-runner-breaker-coverage-step";
 import {
   isRunPlanStep,
@@ -1038,7 +1032,12 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     ...runnerHandDevelopmentPlans(context, stateVersion, runnerGoalEvidence),
   );
   plans.push(
-    ...runnerCreditBasePlans(context, stateVersion, runnerGoalEvidence),
+    ...runnerCreditBasePlans(
+      context,
+      stateVersion,
+      runnerGoalEvidence,
+      TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
+    ),
   );
   const bankBuildActions = input.legalActions.filter(isBankBuildAction);
   const runnerBankToolEvidence = bankToolEvidence(context, "runner");
@@ -1207,98 +1206,6 @@ function runnerHandBufferPlans(
           label: "Runner hand buffer",
           value: assessment.planPriority,
           reason: assessment.reason,
-        },
-      ],
-      stateVersion,
-    }),
-  ];
-}
-
-function runnerCreditBasePlans(
-  context: TacticalPlanBuildContext,
-  stateVersion: number,
-  runnerGoalEvidence: readonly string[],
-): TacticalPlan[] {
-  const creditBase = context.runnerEconomyPosture?.creditBasePlan;
-  if (
-    !context.input.legalActions.some(
-      (action) =>
-        legalActionCreditGainForPlan(
-          context.input,
-          action,
-          TACTICAL_PLAN_CREDIT_VALUE_DEPENDENCIES,
-        ) > 0,
-    )
-  ) {
-    return [];
-  }
-  const drawOverflow = assessRunnerDrawOverflow(context);
-  const drawOverflowCreditPressure =
-    drawOverflow && runnerDrawOverflowSupportsCreditPlan(drawOverflow);
-  if (
-    (!creditBase || creditBase.economyPriority === "low") &&
-    !drawOverflowCreditPressure
-  ) {
-    return [];
-  }
-  const basePriority = creditBase
-    ? creditBase.economyPriority === "high" ? 930 :
-      creditBase.economyPriority === "medium" ? 820 :
-      650
-    : 650;
-  const overflowBoost = drawOverflowCreditPressure
-    ? runnerDrawOverflowCreditPriorityBoost(drawOverflow)
-    : 0;
-  const priority = Math.min(940, basePriority + overflowBoost);
-  return [
-    createTacticalPlan({
-      planId: "runner.build_credit_base",
-      side: "runner",
-      type: "runner.build_credit_base",
-      status: "active",
-      priority,
-      horizonTurns: 1,
-      target: { kind: "capability", id: "runner_credit_base" },
-      currentStep: createPlanStep({
-        stepId: "gain_credits:runner_credit_base",
-        kind: "gain_credits",
-        desiredActionSemantics: ["economy.gain_credit"],
-        rationale: [
-          creditBase
-            ? `creditbase recommends ${creditBase.recommendation}`
-            : "hand limit pressure makes credits safer than another draw",
-          creditBase
-            ? `desired reserve ${creditBase.desiredCreditReserve}`
-            : "draw overflow pressure is high",
-          ...(drawOverflowCreditPressure
-            ? runnerDrawOverflowRationale(drawOverflow)
-            : []),
-        ],
-      }),
-      evidence: [
-        ...(creditBase
-          ? [
-              `credit_base_recommendation:${creditBase.recommendation}`,
-              `credit_base_priority:${creditBase.economyPriority}`,
-              `credit_base_funding_need:${creditBase.fundingNeed}`,
-              `credit_base_desired_reserve:${creditBase.desiredCreditReserve}`,
-              `credit_reserve_remote_score_threat:${creditBase.creditReservePolicy.remoteScoreThreat}`,
-              `credit_reserve_contest:${creditBase.creditReservePolicy.contestReserve}`,
-              `credit_reserve_below_now:${creditBase.creditReservePolicy.belowReserveNow}`,
-              `credit_base_blocked_hand_cards:${creditBase.usefulHandCardsBlockedByCredits}`,
-            ]
-          : ["credit_base_recommendation:avoid_overdraw"]),
-        ...(drawOverflowCreditPressure
-          ? runnerDrawOverflowEvidence(drawOverflow)
-          : []),
-        ...runnerGoalEvidence,
-      ],
-      scoreBreakdown: [
-        {
-          key: "runner_credit_base",
-          label: "Runner creditbase",
-          value: priority,
-          reason: creditBase?.recommendation ?? "avoid_overdraw",
         },
       ],
       stateVersion,
