@@ -7036,6 +7036,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` dreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/belief-state.ts` entfernt `serverLabel` aus der produktiven Serverableitung des Belief-State und normalisiert nicht-kanonische Serverwerte nicht mehr über Labeltext.
+  - Belief-State-Memory nutzt dort strukturierte Serverfelder wie `serverId`, `server`, `targetServerId`, `attackedServerId` oder `exposedServerId`; label-only `R&D`-Servertext erzeugt keine R&D-Top-Freshness mehr.
+  - `belief-state.test.ts` schützt, dass strukturierte `serverId: "rd"` die R&D-Top-Invalidierung weiter auslöst, label-only `serverLabel: "R&D"` aber nicht mehr.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/belief-state.test.ts src/runner-run-target-evaluation.test.ts src/tactical-plans.test.ts` grün, 3 Dateien, 106 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

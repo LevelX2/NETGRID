@@ -12,14 +12,14 @@ describe("belief-state R&D top freshness", () => {
     const accessEvent = publicEvent("evt_1", "access_card", 1, {
       actor: "runner",
       actionType: "access_card",
-      serverLabel: "R&D",
+      serverId: "rd",
       cardDefinitionId: "onr_v1_343_south-african-mining-corp",
       title: "South African Mining Corp",
     });
     const trashEvent = publicEvent("evt_2", "trash_accessed_card", 2, {
       actor: "runner",
       actionType: "trash_accessed_card",
-      serverLabel: "R&D",
+      serverId: "rd",
       cardDefinitionId: "onr_v1_343_south-african-mining-corp",
       title: "South African Mining Corp",
     });
@@ -39,6 +39,29 @@ describe("belief-state R&D top freshness", () => {
     expect(freshness?.invalidationReasons).toContain(
       "rd_access_removed_top_card:evt_2",
     );
+  });
+
+  it("ignores label-only R&D server text for top-card freshness", () => {
+    const accessEvent = publicEvent("evt_label_1", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverLabel: "R&D",
+      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+    });
+    const trashEvent = publicEvent("evt_label_2", "trash_accessed_card", 2, {
+      actor: "runner",
+      actionType: "trash_accessed_card",
+      serverLabel: "R&D",
+      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([accessEvent, trashEvent]),
+    );
+
+    expect(
+      belief.runnerOpponentModel?.rndTopFreshness?.invalidationReasons ?? [],
+    ).not.toContain("rd_access_removed_top_card:evt_label_2");
   });
 });
 

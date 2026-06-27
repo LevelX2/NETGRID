@@ -1546,28 +1546,16 @@ function publicServerId(event: PublicGameEvent): string | undefined {
     stringValue(event.publicPayload.attackedServerId) ??
     stringValue(event.publicPayload.targetServerId) ??
     stringValue(event.publicPayload.server);
-  if (raw) return normalizeServerId(raw);
+  if (raw) return canonicalStructuredServerId(raw);
   const exposedServerId = stringValue(event.publicPayload.exposedServerId);
-  if (exposedServerId) return normalizeServerId(exposedServerId);
-  const label = stringValue(event.publicPayload.serverLabel);
-  if (!label) return undefined;
-  return serverIdFromLabel(label);
+  if (exposedServerId) return canonicalStructuredServerId(exposedServerId);
+  return undefined;
 }
 
-function normalizeServerId(serverId: string): string {
+function canonicalStructuredServerId(serverId: string): string {
   if (serverId === "hq" || serverId === "rd" || serverId === "archives") return serverId;
   if (serverId.startsWith("remote_")) return serverId;
-  return serverIdFromLabel(serverId) ?? serverId;
-}
-
-function serverIdFromLabel(label: string): string | undefined {
-  const normalized = label.toLowerCase();
-  if (normalized === "hq") return "hq";
-  if (normalized === "r&d" || normalized === "f&e (r&d)" || normalized === "f&e") return "rd";
-  if (normalized === "archives" || normalized === "archive") return "archives";
-  const remoteMatch = /^remote\s+(\d+)$/i.exec(label.trim());
-  if (remoteMatch) return `remote_${remoteMatch[1]}`;
-  return undefined;
+  return serverId;
 }
 
 function revealKind(event: PublicGameEvent): "reveal" | "expose" | undefined {
