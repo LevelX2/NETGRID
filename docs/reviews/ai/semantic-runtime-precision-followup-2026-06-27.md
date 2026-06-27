@@ -1,6 +1,6 @@
 # Semantic Runtime Precision Follow-up, 2026-06-27
 
-Status: `P0_inventory_done`
+Status: `P3_done`
 
 Prozess: `docs/architecture/ai/semantic-runtime-precision-legacy-cleanup-process-2026-06-27.md`
 
@@ -210,5 +210,24 @@ Verifikation:
 
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/action-semantic-candidate.test.ts`: grün, 20 Tests.
 - `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-card-semantic-profiles.test.ts`: grün, 1 Test.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
+
+## P3 Ergebnis: StrategySupport-Ableitung
+
+Status: `P3_done`
+
+Umgesetzt:
+
+- Generierte CardSemanticProfiles erzeugen keine `StrategySupportPair`s mehr pauschal aus `lineSupport` oder losen `strategicRole`-Feldern.
+- `lineSupport`, `roles`, `planRoles` und `strategicRole` bleiben bei generierten Profilen Compatibility-Evidence und tragen keine Action-Strategie.
+- `StrategySupportPair`s entstehen in der CardSemanticProfile-Brücke nur noch aus qualifizierten Tactic-Signal-Ankern: katalogisiert, nicht `supportOnly`, `mayAnchorStrategy: true`, mit erlaubten Strategy-IDs und expliziter Evidence.
+- Breite Support-/Aggregationssignale wie `economy.card`, `draw.card`, `setup.search`, `survival.defense` und `access.payoff` bleiben in dieser Action-Brücke support-only und erzeugen keine Strategie.
+- `multiaccess`-Effekte werden zusätzlich präzise als `access.hq_multiaccess` oder `access.rnd_multiaccess` signalisiert. R&D Interface und HQ Interface erzeugen dadurch qualifizierte `payoff_anchor`-Paare für ihre erlaubten Multiaccess-Strategien.
+
+Verifikation:
+
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-card-semantic-profiles.test.ts`: grün, 1 Datei, 3 Tests.
+- `corepack pnpm --dir packages/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/action-semantic-candidate.test.ts src/actions/action-semantic-invariants.test.ts src/deck-doctrine-strategy.test.ts src/actions/action-card-semantic-profiles.test.ts`: grün, 4 Dateien, 55 Tests.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `git diff --check`: grün.
