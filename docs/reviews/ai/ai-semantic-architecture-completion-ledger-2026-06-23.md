@@ -6852,6 +6852,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` entfernt im Corp-Safe-Score-Kandidaten den Label-Fallback auf `safe score|protected score|score protected`.
+  - Safe-Score-Overlay-Kandidaten benötigen dort nun strukturierte Payload-Flags `safeScoreWindow` oder `protectedRemoteReady`.
+  - `practical-tactic-overlay.test.ts` schützt, dass label-only Safe-Score-Text ohne Payload-Flag keinen Compare-only-Safe-Score-Kandidaten mehr erzeugt.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive Label-/Regex-Nutzungen noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

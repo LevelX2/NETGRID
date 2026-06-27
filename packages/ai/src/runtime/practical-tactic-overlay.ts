@@ -293,8 +293,7 @@ function corpActionLooksLikePunish(action: LegalAction): boolean {
 function corpScoreLooksSafe(action: LegalAction): boolean {
   return (
     action.payload?.safeScoreWindow === true ||
-    action.payload?.protectedRemoteReady === true ||
-    /safe score|protected score|score protected/i.test(action.label)
+    action.payload?.protectedRemoteReady === true
   );
 }
 
