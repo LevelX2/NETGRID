@@ -273,6 +273,67 @@ describe("PracticalTacticOverlay", () => {
     );
   });
 
+  it("uses structured tag-punish payloads and ignores label-only punish text", () => {
+    const labelOnlyPunish = action({
+      actionId: "label-punish",
+      side: "corp",
+      type: "play_operation",
+      label: "Closed Accounts punish tag",
+    });
+    const structuredPunish = action({
+      actionId: "structured-punish",
+      side: "corp",
+      type: "play_operation",
+      label: "Closed Accounts",
+      payload: { tagPunishAction: true },
+    });
+    const gain = action({
+      actionId: "gain",
+      side: "corp",
+      type: "gain_credit",
+      label: "Gain credit",
+    });
+    const advance = action({
+      actionId: "advance",
+      side: "corp",
+      type: "advance_card",
+      label: "Advance",
+    });
+
+    const labelOnlyDecision = applyPracticalTacticOverlay(
+      corpInput({ tags: 1, legalActions: [labelOnlyPunish, gain] }),
+      frozenDecision("gain"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+    expect(labelOnlyDecision.evidence ?? []).not.toContain(
+      "practical_tactic:corp_real_punish",
+    );
+
+    const structuredDecision = applyPracticalTacticOverlay(
+      corpInput({ tags: 1, legalActions: [structuredPunish, gain] }),
+      frozenDecision("gain"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+    expect(structuredDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "practical_tactic:corp_real_punish",
+        "practical_tactic_overlay_candidate:corp.practical_tactic.real_punish",
+      ]),
+    );
+
+    const staleDecision = applyPracticalTacticOverlay(
+      corpInput({ tags: 0, legalActions: [structuredPunish, advance] }),
+      frozenDecision("structured-punish"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+    expect(staleDecision.evidence).toEqual(
+      expect.arrayContaining([
+        "practical_tactic:corp_abandon_stale_punish",
+        "practical_tactic_overlay_candidate:corp.practical_tactic.abandon_stale_punish",
+      ]),
+    );
+  });
+
   it("uses visible breaker source cards and ignores label-only coverage installs", () => {
     const visibleBreaker = visibleCard({
       instanceId: "visible-fracter",
@@ -388,6 +449,37 @@ function runnerInput(options: {
           ],
         },
       ],
+    },
+  } as unknown as AiDecisionInput;
+}
+
+function corpInput(options: {
+  tags: number;
+  legalActions: LegalAction[];
+}): AiDecisionInput {
+  return {
+    side: "corp",
+    legalActions: options.legalActions,
+    playerView: {
+      side: "corp",
+      own: {
+        identity: visibleCard({ instanceId: "corp-id", type: "identity" }),
+        credits: 5,
+        clicks: 3,
+        agendaPoints: 0,
+        gripOrHq: [],
+        heapOrArchives: [],
+        scoreArea: [],
+      },
+      opponent: {
+        identity: visibleCard({ instanceId: "runner-id", type: "identity" }),
+        credits: 5,
+        clicks: 3,
+        agendaPoints: 0,
+        tags: options.tags,
+        badPublicity: 0,
+      },
+      servers: [],
     },
   } as unknown as AiDecisionInput;
 }
