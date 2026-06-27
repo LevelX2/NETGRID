@@ -92,6 +92,23 @@ export function tacticalPlanMappedChoice(
       });
     }
     if (
+      tacticalPlanCoverageMappingBlocksEconomyOverride(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+        threshold.scoreGap,
+      )
+    ) {
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "coverage_plan_mapping",
+        scoreGap,
+        threshold: Math.max(threshold.scoreGap, 900),
+      });
+    }
+    if (
       tacticalPlanHandBufferMappingBlocksProbeRunOverride(
         mapping,
         overrideChoice,
@@ -246,6 +263,21 @@ function tacticalPlanCoverageMappingBlocksRunOverride(
     overrideChoice.action.type === "start_run" &&
     !mappedActionIds.has(overrideChoice.action.actionId) &&
     scoreGap <= threshold
+  );
+}
+
+function tacticalPlanCoverageMappingBlocksEconomyOverride(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+  threshold: number,
+): boolean {
+  return (
+    mapping.plan.type === "runner.obtain_breaker_coverage" &&
+    mappedChoice.action.type === "draw_card" &&
+    overrideChoice.action.type === "gain_credit" &&
+    scoreGap <= Math.max(threshold, 900)
   );
 }
 

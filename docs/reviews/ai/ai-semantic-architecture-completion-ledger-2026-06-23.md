@@ -6388,6 +6388,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 150 Dateien, 1658 Tests.
 
+- `AI-COMPLETE-07` zweiter Runner-TacticalGoal-Schnitt:
+  - `packages/ai/src/runtime/runner-goal-fit-score.ts` bewertet Runner-TacticalGoals für Economy, Setup und Risk-Control im Hauptscore: Economy-/Buffer-Ziele bevorzugen passende Economy-Actions, Setup-/Breaker-Ziele bevorzugen Draw-/Search-Actions, und Low-Value-/Risk-Run-Ziele blocken konkret niedrigwertige Runs.
+  - `packages/ai/src/runtime/semantic-choice-ranking.ts` schützt Coverage-Plan-Mappings vor einem zu breiten Economy-Override, wenn der aktive Coverage-Schritt `draw_card` ist.
+  - `packages/ai/src/runtime/runner-goal-fit-score.test.ts` deckt Economy-, Setup-, Run-Target- und Risk-Control-TacticalGoal-Score-Komponenten ab.
+  - Status bleibt `IN_PROGRESS`, weil Abschlussaudit, Debug-/Evidence-Prüfung und vollständige AI-COMPLETE-07-Verifikation noch offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-goal-fit-score.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 2 Dateien, 70 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 150 Dateien, 1661 Tests.
+
 Nächstes aktives Ziel: `AI-COMPLETE-07`.
 
 ## Audit-Ledger
