@@ -7122,6 +7122,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` neununddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-step-semantics.ts` ersetzt Regex-Matches auf zusammengeführtem Candidate-Semantic-Text durch ein strukturiertes Token-Set aus `semanticActionType`, Card-/Tactic-Signalen, StrategySupport, Conditions, Risks, Constraints, Cost- und Target-Evidence.
+  - Tactical-Plan-Step-Semantik zerlegt strukturierte Tokens wie `setup.program_search` oder `breaker_fracter`, aber keine freien Evidence-Sätze mit Leerzeichen wie `protect remote scoreline`.
+  - `tactical-plan-step-semantics.test.ts` schützt strukturierte Treffer und labelartige Free-Text-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-step-semantics.test.ts src/plans/tactical-plan-candidate-matching.test.ts src/tactical-plans.test.ts` grün, 3 Dateien, 49 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

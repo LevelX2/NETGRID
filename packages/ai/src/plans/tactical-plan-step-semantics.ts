@@ -1,38 +1,141 @@
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import { candidateSemanticText } from "./tactical-plan-candidate-text";
 import type { PlanStep } from "./tactical-plan-types";
 
 export function candidateSemanticsMatchStep(
   step: PlanStep,
   candidate: ActionSemanticCandidate,
 ): boolean {
-  const signalText = candidateSemanticText(candidate);
+  const tokens = candidateSemanticTokens(candidate);
   switch (step.kind) {
     case "install_breaker":
-      return /install\.card/.test(signalText) &&
-        /breaker|icebreaker|program/.test(signalText);
+      return hasToken(tokens, "install.card") &&
+        hasAnyToken(tokens, ["breaker", "icebreaker", "program"]);
     case "search_for_answer":
-      return /program_search|breaker_search|search\.stack|search_for_answer|setup\.program_search/.test(signalText);
+      return hasAnyToken(tokens, [
+        "program_search",
+        "breaker_search",
+        "search.stack",
+        "search_for_answer",
+        "setup.program_search",
+      ]);
     case "setup_search_engine":
-      return /install\.card/.test(signalText) &&
-        /program_search|breaker_search|search\.stack|search_for_answer|setup\.program_search|search/.test(signalText);
+      return hasToken(tokens, "install.card") &&
+        hasAnyToken(tokens, [
+          "program_search",
+          "breaker_search",
+          "search.stack",
+          "search_for_answer",
+          "setup.program_search",
+          "search",
+        ]);
     case "build_bank_counter":
-      return /temporary_resource_bank|counter_bank|charge_bank|build_credit_bank|finite_economy_pool/.test(signalText);
+      return hasAnyToken(tokens, [
+        "temporary_resource_bank",
+        "counter_bank",
+        "charge_bank",
+        "build_credit_bank",
+        "finite_economy_pool",
+      ]);
     case "cash_out_bank":
-      return /temporary_resource_bank|counter_bank|cash_out|payout|take_bank|finite_economy_pool/.test(signalText);
+      return hasAnyToken(tokens, [
+        "temporary_resource_bank",
+        "counter_bank",
+        "cash_out",
+        "payout",
+        "take_bank",
+        "finite_economy_pool",
+      ]);
     case "build_rez_reserve":
-      return /economy\.gain_credit|rez_reserve|corp_economy|operation_economy/.test(signalText);
+      return hasAnyToken(tokens, [
+        "economy.gain_credit",
+        "rez_reserve",
+        "corp_economy",
+        "operation_economy",
+      ]);
     case "protect_remote":
-      return /corp_window\.rez|install\.card|remote_protection|corp_rez_ice/.test(signalText);
+      return hasAnyToken(tokens, [
+        "corp_window.rez",
+        "install.card",
+        "remote_protection",
+        "corp_rez_ice",
+      ]);
     case "advance_score_card":
-      return /score\.advance_card|advance\.corp_counter_bank/.test(signalText);
+      return hasAnyToken(tokens, [
+        "score.advance_card",
+        "advance.corp_counter_bank",
+      ]);
     case "score_agenda":
-      return /score\.agenda|score\.action_counter_bank/.test(signalText);
+      return hasAnyToken(tokens, ["score.agenda", "score.action_counter_bank"]);
     case "rez_outer_ice":
-      return /corp_window\.rez|corp_rez_ice/.test(signalText);
+      return hasAnyToken(tokens, ["corp_window.rez", "corp_rez_ice"]);
     default:
       return false;
   }
+}
+
+function candidateSemanticTokens(
+  candidate: ActionSemanticCandidate,
+): ReadonlySet<string> {
+  const tokens = new Set<string>();
+  addToken(tokens, candidate.semanticActionType);
+  addToken(tokens, candidate.sourceCardId);
+  addToken(tokens, candidate.abilityId);
+  for (const signal of candidate.cardContextSignals) addToken(tokens, signal);
+  for (const signal of candidate.actionTacticSignals) addToken(tokens, signal);
+  for (const support of candidate.strategySupport) {
+    addToken(tokens, support.strategyId);
+    addToken(tokens, support.role);
+    addToken(tokens, `${support.strategyId}:${support.role}`);
+  }
+  for (const condition of candidate.conditions) addToken(tokens, condition.kind);
+  for (const risk of candidate.risks) addToken(tokens, risk.kind);
+  for (const constraint of candidate.constraints) {
+    addToken(tokens, constraint.kind);
+  }
+  for (const cost of candidate.costProfile.additionalCosts) {
+    addToken(tokens, cost);
+  }
+  for (const evidence of candidate.targetContext?.targetProfileMatches.flatMap(
+    (entry) => entry.evidence,
+  ) ?? []) {
+    addToken(tokens, evidence);
+  }
+  for (const evidence of candidate.evidence) addToken(tokens, evidence);
+  return tokens;
+}
+
+function hasToken(tokens: ReadonlySet<string>, token: string): boolean {
+  return tokens.has(token.toLocaleLowerCase("en-US"));
+}
+
+function hasAnyToken(
+  tokens: ReadonlySet<string>,
+  options: readonly string[],
+): boolean {
+  return options.some((option) => hasToken(tokens, option));
+}
+
+function addToken(tokens: Set<string>, value: string | undefined): void {
+  if (!value) return;
+  const normalized = value.toLocaleLowerCase("en-US");
+  if (!normalized) return;
+  tokens.add(normalized);
+  for (const dotPart of normalized.split(".")) {
+    addTokenPart(tokens, dotPart);
+    for (const colonPart of dotPart.split(":")) {
+      addTokenPart(tokens, colonPart);
+      for (const underscorePart of colonPart.split("_")) {
+        addTokenPart(tokens, underscorePart);
+        for (const dashPart of underscorePart.split("-")) {
+          addTokenPart(tokens, dashPart);
+        }
+      }
+    }
+  }
+}
+
+function addTokenPart(tokens: Set<string>, value: string): void {
+  if (value.length > 0) tokens.add(value);
 }
 
 export function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
