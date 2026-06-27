@@ -6310,6 +6310,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1652 Tests.
   - Status: `VERIFIED`.
+- `AI-COMPLETE-06` erster Doctrine-Schnitt:
+  - `packages/ai/src/legacy/deck-doctrine-legacy-weights.ts` kapselt die alten Doctrine-v1-PlanWeights und MulliganWeights als klar benannte Legacy-Gewichte.
+  - `packages/ai/src/deck-doctrine.ts` baut das Doctrine-v1-Profil weiter kompatibel, enthält aber keine lokalen PlanWeight-/MulliganWeight-Konstanten mehr.
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt diese Trennung gegen Rückfall in lokale Doctrine-v1-Gewichte im Builder.
+  - Status bleibt `IN_PROGRESS`, weil NeutralDoctrine-/Vollständigkeits-/Rollenstatus-Grenzen und produktive Doctrine-Schnittstellen noch weiter vereinheitlicht werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/deck-doctrine.test.ts src/index.test.ts` grün, 3 Dateien, 556 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1653 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-06`.
 

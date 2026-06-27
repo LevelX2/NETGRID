@@ -1,5 +1,9 @@
 import type { AiDeckDoctrineProfile, AiDecisionInput, DeckPublicMetadata, Side } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
+import {
+  legacyDeckDoctrineMulliganWeightsFor,
+  legacyDeckDoctrinePlanWeightsFor,
+} from "./legacy/deck-doctrine-legacy-weights";
 
 export type AiDeckDoctrineDeckSnapshot = {
   deckSnapshotId: string;
@@ -24,44 +28,6 @@ const AI_HINTS = createAiHintsByCard();
 // Legacy Doctrine v1 feeds old baseline/plan scorers and opening-hand heuristics.
 // New semantic decisions must use DeckDoctrine v2 diagnostics, capabilities and
 // TacticalGoals; support-only or anchorless decks stay neutral here.
-// Legacy fallback weights for the old baseline/plan scorers. The newer
-// Semantic Runtime/TacticalGoal layer uses DeckCapability-derived facts instead.
-const CORP_DOCTRINE_PLAN_WEIGHTS: Record<string, Record<string, number>> = {
-  rush: { score_now: 18, score_next_turn: 22, build_scoring_remote: 10, protect_hq: 4, protect_rnd: 4, recover_economy: 6, bait_runner: -4 },
-  glacier: { score_now: 4, score_next_turn: 12, build_scoring_remote: 24, protect_hq: 10, protect_rnd: 10, recover_economy: 12, bait_runner: 2 },
-  tag_pressure: { score_now: 6, score_next_turn: 8, build_scoring_remote: 8, protect_hq: 8, protect_rnd: 6, recover_economy: 8, bait_runner: 10 },
-  asset_remote: { score_now: -2, score_next_turn: 2, build_scoring_remote: 10, protect_hq: 4, protect_rnd: 4, recover_economy: 10, bait_runner: 22 },
-  operation_economy: { score_now: 2, score_next_turn: 4, build_scoring_remote: 4, protect_hq: 4, protect_rnd: 4, recover_economy: 22, bait_runner: 2 },
-  central_defense: { score_now: 0, score_next_turn: 4, build_scoring_remote: 4, protect_hq: 18, protect_rnd: 18, recover_economy: 8, bait_runner: 0 }
-};
-
-const RUNNER_DOCTRINE_PLAN_WEIGHTS: Record<string, Record<string, number>> = {
-  rig_builder: { pressure_rnd: -4, pressure_hq: -4, contest_remote: -2, build_rig: 24, recover_economy: 10, draw_for_answers: 14, trash_asset: 0, safe_probe_run: 8 },
-  rnd_pressure: { pressure_rnd: 24, pressure_hq: 4, contest_remote: 4, build_rig: 6, recover_economy: 6, draw_for_answers: 8, trash_asset: 0, safe_probe_run: 8 },
-  hq_pressure: { pressure_rnd: 4, pressure_hq: 24, contest_remote: 4, build_rig: 6, recover_economy: 6, draw_for_answers: 8, trash_asset: 0, safe_probe_run: 8 },
-  remote_contest: { pressure_rnd: 4, pressure_hq: 4, contest_remote: 24, build_rig: 8, recover_economy: 10, draw_for_answers: 4, trash_asset: 8, safe_probe_run: 4 },
-  tag_resilient: { pressure_rnd: 6, pressure_hq: 6, contest_remote: 8, build_rig: 8, recover_economy: 8, draw_for_answers: 6, trash_asset: 4, safe_probe_run: 4 },
-  economy_dense: { pressure_rnd: 4, pressure_hq: 4, contest_remote: 6, build_rig: 8, recover_economy: 22, draw_for_answers: 10, trash_asset: 4, safe_probe_run: 4 }
-};
-
-const CORP_MULLIGAN_WEIGHTS: Record<string, number> = {
-  iceStart: 25,
-  economy: 20,
-  agendaLoad: 20,
-  remotePlan: 15,
-  operationTempo: 10,
-  doctrineFit: 10
-};
-
-const RUNNER_MULLIGAN_WEIGHTS: Record<string, number> = {
-  breakerAccess: 24,
-  economy: 22,
-  setup: 16,
-  pressure: 12,
-  handBalance: 14,
-  doctrineFit: 12
-};
-
 export function buildDeckDoctrineProfile(snapshot: AiDeckDoctrineDeckSnapshot): AiDeckDoctrineProfile {
   const totalCards = snapshot.cards.reduce((sum, entry) => sum + Math.max(0, entry.quantity), 0) || 1;
   const roleCounts: Record<string, number> = {};
@@ -79,7 +45,7 @@ export function buildDeckDoctrineProfile(snapshot: AiDeckDoctrineDeckSnapshot): 
 
   const roleDensity = Object.fromEntries(Object.entries(roleCounts).map(([role, count]) => [role, round(count / totalCards)]));
   const archetypeTags = snapshot.side === "corp" ? corpArchetypes(roleCounts, totalCards) : runnerArchetypes(roleCounts, totalCards);
-  const planWeights = planWeightsFor(snapshot.side, archetypeTags);
+  const planWeights = legacyDeckDoctrinePlanWeightsFor(snapshot.side, archetypeTags);
   const formatProfileId = snapshot.formatProfileId ?? snapshot.publicMetadata?.formatProfileId;
   const riskFlags = sortedUnique([
     ...(unsupported.length > 0 ? ["contains_non_ai_supported_cards"] : []),
@@ -98,7 +64,7 @@ export function buildDeckDoctrineProfile(snapshot: AiDeckDoctrineDeckSnapshot): 
     roleCounts: Object.fromEntries(Object.entries(roleCounts).sort(([left], [right]) => left.localeCompare(right))),
     roleDensity: Object.fromEntries(Object.entries(roleDensity).sort(([left], [right]) => left.localeCompare(right))),
     planWeights,
-    mulliganWeights: snapshot.side === "corp" ? { ...CORP_MULLIGAN_WEIGHTS } : { ...RUNNER_MULLIGAN_WEIGHTS },
+    mulliganWeights: legacyDeckDoctrineMulliganWeightsFor(snapshot.side),
     riskFlags,
     evidence: doctrineEvidence(snapshot.side, roleCounts, totalCards, missingRoles.length)
   };
@@ -253,17 +219,6 @@ function runnerArchetypes(roleCounts: Record<string, number>, totalCards: number
     economy_dense: density(roleCounts, totalCards, ["economy", "draw"]) * 45
   };
   return topArchetypes(scores);
-}
-
-function planWeightsFor(side: Side, archetypeTags: string[]): Record<string, number> {
-  const weights: Record<string, number> = {};
-  const source = side === "corp" ? CORP_DOCTRINE_PLAN_WEIGHTS : RUNNER_DOCTRINE_PLAN_WEIGHTS;
-  for (const tag of archetypeTags) {
-    const contribution = source[tag];
-    if (!contribution) continue;
-    for (const [plan, value] of Object.entries(contribution)) weights[plan] = (weights[plan] ?? 0) + value;
-  }
-  return Object.fromEntries(Object.entries(weights).map(([key, value]) => [key, Math.round(value / Math.max(1, archetypeTags.length))]));
 }
 
 function doctrineEvidence(side: Side, roleCounts: Record<string, number>, totalCards: number, missingRoleCount: number): AiDeckDoctrineProfile["evidence"] {

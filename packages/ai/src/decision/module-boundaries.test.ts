@@ -385,6 +385,27 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps legacy doctrine v1 weights outside the deck doctrine builder", () => {
+    const deckDoctrine = path.join(srcDir, "deck-doctrine.ts");
+    const content = readFileSync(deckDoctrine, "utf8");
+    const violations = [
+      ...(content.includes("DOCTRINE_PLAN_WEIGHTS")
+        ? ["deck-doctrine.ts declares doctrine plan weight constants"]
+        : []),
+      ...(content.includes("MULLIGAN_WEIGHTS")
+        ? ["deck-doctrine.ts declares mulligan weight constants"]
+        : []),
+      ...(content.includes("function planWeightsFor")
+        ? ["deck-doctrine.ts declares local planWeightsFor"]
+        : []),
+      ...(!content.includes('from "./legacy/deck-doctrine-legacy-weights"')
+        ? ["deck-doctrine.ts misses legacy doctrine weights module"]
+        : []),
+    ];
+
+    expect(violations).toEqual([]);
+  });
+
   it("freezes legacy planner implementation imports", () => {
     const expectedImportsByFile = new Map<string, string[]>([
       [
