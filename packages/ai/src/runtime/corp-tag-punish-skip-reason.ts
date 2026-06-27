@@ -7,37 +7,57 @@ export function corpTagPunishSkipReason(
   decision: AiDecision,
 ): CorpTagPunishSkipReason {
   const reason = decision.reasonCode;
+  const reasonParts = structuredReasonParts(reason);
   if (
     action.type === "gain_credit" ||
-    reason.includes("recover_economy") ||
-    reason.includes("economy")
+    reasonParts.has("recover_economy") ||
+    reasonParts.has("economy")
   )
     return "economy";
   if (
     action.type === "rez_ice" ||
     (action.type === "install_card" && action.payload?.placement === "ice") ||
-    reason.includes("protect")
+    reasonParts.has("protect")
   ) {
-    if (reason.includes("remote") || reason.includes("scoring"))
+    if (reasonParts.has("remote") || reasonParts.has("scoring"))
       return "remote_protection";
     if (
-      reason.includes("central") ||
-      reason.includes("hq") ||
-      reason.includes("rd") ||
-      reason.includes("archives")
+      reasonParts.has("central") ||
+      reasonParts.has("hq") ||
+      reasonParts.has("rd") ||
+      reasonParts.has("rnd") ||
+      reasonParts.has("archives")
     )
       return "central_protection";
     return "protection";
   }
-  if (action.type === "score_agenda" || reason.includes("score"))
+  if (action.type === "score_agenda" || reasonParts.has("score"))
     return "score";
-  if (action.type === "advance_card" || reason.includes("advance"))
+  if (action.type === "advance_card" || reasonParts.has("advance"))
     return "advance";
-  if (reason.includes("remote_safety") || reason.includes("unsafe_remote"))
+  if (reasonParts.has("remote_safety") || reasonParts.has("unsafe_remote"))
     return "remote_protection";
-  if (action.type === "draw_card" || reason.includes("draw")) return "draw";
-  if (action.type === "install_card" || reason.includes("install"))
+  if (action.type === "draw_card" || reasonParts.has("draw")) return "draw";
+  if (action.type === "install_card" || reasonParts.has("install"))
     return "install";
   if (action.type === "end_turn") return "end_turn";
   return "unknown_higher_priority";
+}
+
+function structuredReasonParts(reasonCode: string): ReadonlySet<string> {
+  const parts = new Set<string>();
+  for (const dotPart of reasonCode.toLocaleLowerCase("en-US").split(".")) {
+    addReasonPart(parts, dotPart);
+    for (const underscorePart of dotPart.split("_")) {
+      addReasonPart(parts, underscorePart);
+      for (const dashPart of underscorePart.split("-")) {
+        addReasonPart(parts, dashPart);
+      }
+    }
+  }
+  return parts;
+}
+
+function addReasonPart(parts: Set<string>, part: string): void {
+  if (part.length > 0) parts.add(part);
 }

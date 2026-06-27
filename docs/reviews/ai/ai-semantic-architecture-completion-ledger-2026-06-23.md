@@ -7104,6 +7104,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` siebenunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/corp-tag-punish-skip-reason.ts` ersetzt freie `reasonCode.includes(...)`-Prüfungen durch Segment-/Token-Matches auf strukturierten Reason-Codes.
+  - Tag-Punish-Skip-Klassifikation erkennt weiterhin `corp.plan.recover_economy`, `corp.plan.protect_rnd` und `unsafe_remote`, aber kein Substring-Rauschen wie `unprotected_remote_guess` oder `prescoreboard_setup`.
+  - `corp-tag-punish-skip-reason.test.ts` schützt strukturierte Klassifikation und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-tag-punish-skip-reason.test.ts src/simulation/tag-punish-window-diagnostics-context.test.ts src/simulation/corp-visible-tag-punish-taken-diagnostics.test.ts` grün, 1 vorhandene Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
