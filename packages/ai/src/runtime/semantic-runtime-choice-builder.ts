@@ -110,9 +110,7 @@ function scoreSemanticRuntimeAction(
   const reasonCode =
     input.side === "corp" &&
     scoreBreakdown.some(
-      (component) =>
-        component.key === "corp_tagged_meat_damage_payoff_pressure" ||
-        component.reason?.includes("corp_tagged_meat_damage_payoff:true"),
+      (component) => component.key === "corp_tagged_meat_damage_payoff_pressure",
     )
       ? "corp.semantic.corp_tag_punish"
       : `${input.side}.semantic.${scopeId}`;

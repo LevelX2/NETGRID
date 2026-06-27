@@ -38,6 +38,39 @@ describe("buildSemanticRuntimeChoices", () => {
       ]),
     );
   });
+
+  it("uses structured score component keys for corp tag punish reasons", () => {
+    const action = corpAction("corp-tag-punish");
+    const [choice] = buildSemanticRuntimeChoices(corpInput(action), [], {
+      ...dependencies(),
+      scoreBreakdown: () => [
+        {
+          key: "corp_tagged_meat_damage_payoff_pressure",
+          label: "Tagged payoff",
+          value: 80,
+        },
+      ],
+    });
+
+    expect(choice?.reasonCode).toBe("corp.semantic.corp_tag_punish");
+  });
+
+  it("ignores tag punish text in score component reasons without the structured key", () => {
+    const action = corpAction("corp-tag-punish-text");
+    const [choice] = buildSemanticRuntimeChoices(corpInput(action), [], {
+      ...dependencies(),
+      scoreBreakdown: () => [
+        {
+          key: "generic_damage_text",
+          label: "Generic damage",
+          value: 80,
+          reason: "corp_tagged_meat_damage_payoff:true",
+        },
+      ],
+    });
+
+    expect(choice?.reasonCode).toBe("corp.semantic.basic_economy_draw");
+  });
 });
 
 function paidAction(): LegalAction {
@@ -55,6 +88,47 @@ function paidAction(): LegalAction {
     choiceRequirements: [],
     payload: {},
   } as unknown as LegalAction;
+}
+
+function corpAction(actionId: string): LegalAction {
+  return {
+    actionId,
+    label: "Corp action",
+    type: "gain_credit",
+    side: "corp",
+    source: "basic_action",
+    costs: [{ credits: 0 }],
+    timingPoint: "corp_action.main",
+    visibility: "public",
+    expiresAtStateVersion: 12,
+    targetRequirements: [],
+    choiceRequirements: [],
+    payload: {},
+  } as unknown as LegalAction;
+}
+
+function dependencies() {
+  return {
+    scope: {
+      isRemoteServerTarget: () => false,
+      runnerSourceCardAnswerRole: () => undefined,
+    },
+    actionExclusion: () => undefined,
+    scoreBreakdown: () => [],
+    actionCreditCost: () => 0,
+    evidence: () => [],
+    explanation: () => "test choice",
+    compareAction: () => 0,
+  };
+}
+
+function corpInput(action: LegalAction): AiDecisionInput {
+  return {
+    ...runnerInput(action),
+    side: "corp",
+    profileId: "test-corp",
+    decisionId: "semantic-runtime-choice-builder-corp-test.1",
+  } as unknown as AiDecisionInput;
 }
 
 function runnerInput(action: LegalAction): AiDecisionInput {

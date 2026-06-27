@@ -7187,6 +7187,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` sechsundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-choice-builder.ts` entfernt den Corp-Tag-Punish-Reason-Fallback über `component.reason?.includes("corp_tagged_meat_damage_payoff:true")`.
+  - SemanticRuntimeChoices erhalten `corp.semantic.corp_tag_punish` dort nur noch über den strukturierten Score-Komponenten-Key `corp_tagged_meat_damage_payoff_pressure`.
+  - `semantic-runtime-choice-builder.test.ts` schützt den Key-basierten Treffer und den Reason-only-Negativfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-choice-builder.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 2 Dateien, 73 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
