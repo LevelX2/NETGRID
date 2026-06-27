@@ -105,7 +105,12 @@ import {
   deckCapabilityHasDeckSnapshot,
   deckCoverageStateForRequiredCoverage,
 } from "./plans/tactical-plan-deck-coverage";
+import { candidateSemanticText } from "./plans/tactical-plan-candidate-text";
 import { developmentCardStepMatchesAction } from "./plans/tactical-plan-development-card-matching";
+import {
+  isRunPlanStep,
+  runPlanStepMatchesAction,
+} from "./plans/tactical-plan-run-action-matching";
 import {
   actionCreditCost,
   legalActionCreditGainForPlan,
@@ -505,7 +510,7 @@ function candidateMatchesStep(
     }
   }
   if (isRunPlanStep(step)) {
-    return runPlanStepMatchesAction(step, candidate, action) &&
+    return runPlanStepMatchesAction(step, candidate, action, actionTypeMatchesStep) &&
       candidateTargetMatchesPlan(plan, candidate, action);
   }
   if (candidateSemanticsMatchStep(step, candidate)) {
@@ -524,37 +529,6 @@ function candidateMatchesStep(
   return actionTypeMatchesStep(step, candidate.actionType) &&
     candidateTargetMatchesPlan(plan, candidate, action) &&
     bankStepMatchesCandidate(step, candidate, action);
-}
-
-function isRunPlanStep(step: PlanStep): boolean {
-  return step.kind === "run_target" || step.kind === "probe_central";
-}
-
-function runPlanStepMatchesAction(
-  step: PlanStep,
-  candidate: ActionSemanticCandidate,
-  action: LegalAction,
-): boolean {
-  if (!actionTypeMatchesStep(step, candidate.actionType)) return false;
-  if (action.type === "start_run") return true;
-  if (!actionServerId(action)) return false;
-  return actionCandidateCanStartRun(candidate, action);
-}
-
-function actionCandidateCanStartRun(
-  candidate: ActionSemanticCandidate,
-  action: LegalAction,
-): boolean {
-  const text = [
-    candidateSemanticText(candidate),
-    action.type,
-    action.label,
-    JSON.stringify(action.payload ?? {}),
-  ].join(" ").toLowerCase();
-  if (text.includes("path blocked")) return false;
-  return /start_run|make_run|make a run|bonus_run|followup_run|run_event|run_action|extra_run|run_bypass|bypass_first_ice|server_specific_|future_run_effect|run_pressure/.test(
-    text,
-  );
 }
 
 function candidateMappingRationale(candidate: ActionSemanticCandidate): string {
@@ -624,26 +598,6 @@ function coverageAnswerRoleMatchesStep(
     default:
       return false;
   }
-}
-
-function candidateSemanticText(candidate: ActionSemanticCandidate): string {
-  return [
-    candidate.semanticActionType,
-    candidate.sourceCardId,
-    candidate.abilityId,
-    ...candidate.cardContextSignals,
-    ...candidate.actionTacticSignals,
-    ...candidate.strategySupport.map((entry) => `${entry.strategyId}:${entry.role}`),
-    ...candidate.conditions.map((entry) => entry.kind),
-    ...candidate.risks.map((entry) => entry.kind),
-    ...candidate.constraints.map((entry) => entry.kind),
-    ...candidate.costProfile.additionalCosts,
-    ...(candidate.targetContext?.targetProfileMatches.flatMap((entry) => entry.evidence) ?? []),
-    ...candidate.evidence,
-  ]
-    .filter((entry): entry is string => typeof entry === "string")
-    .join(" ")
-    .toLowerCase();
 }
 
 type RecoveryTargetPlanFit = "none" | "low" | "medium" | "high";

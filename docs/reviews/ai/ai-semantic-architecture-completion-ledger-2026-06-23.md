@@ -6003,6 +6003,16 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
+- `AI-COMPLETE-04` fünfzehnter Struktur-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-candidate-text.ts` kapselt die gemeinsame ActionSemanticCandidate-Textprojektion für semantische Matching-Heuristiken.
+  - `packages/ai/src/plans/tactical-plan-run-action-matching.ts` kapselt Run-Step-Erkennung und Run-Action-Matching inklusive Bonus-/Follow-up-Run-Erkennung.
+  - `packages/ai/src/tactical-plans.ts` nutzt diese Helper weiter in der Candidate-Step-Zuordnung und in den übrigen semantischen Matching-Pfaden.
+  - `packages/ai/src/tactical-plans.ts` liegt nach aktueller Arbeitsbaum-Zählung bei 3.434 Zeilen; die neuen Candidate-Text- und Run-Action-Matching-Module liegen bei 21 und 39 Zeilen.
+  - Status bleibt `IN_PROGRESS`, weil Runner-, Corp-, Mapping- und Debug-Verantwortungen in `tactical-plans.ts` noch weiter getrennt werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-tactical-goals.test.ts src/strategic-vertical-slices.test.ts` grün, 130 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1645 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-04`.
 
