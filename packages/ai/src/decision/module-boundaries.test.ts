@@ -465,8 +465,8 @@ describe("AI module boundaries", () => {
       ...(content.includes('from "./runner-plans"')
         ? ["ai-runtime-public-entrypoints.ts imports runner-plans facade directly"]
         : []),
-      ...(!content.includes('from "./legacy/legacy-planner-entrypoints"')
-        ? ["ai-runtime-public-entrypoints.ts misses legacy planner entrypoint"]
+      ...(!content.includes('from "./legacy/legacy-entrypoints"')
+        ? ["ai-runtime-public-entrypoints.ts misses legacy entrypoint"]
         : []),
     ];
 
@@ -489,7 +489,31 @@ describe("AI module boundaries", () => {
               violation(
                 file,
                 reference,
-                "use legacy/legacy-planner-entrypoints or a focused non-legacy module",
+                "use legacy/legacy-entrypoints or a focused non-legacy module",
+              ),
+            ),
+        ),
+    );
+
+    expect(violations).toEqual([]);
+  });
+
+  it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
+    const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
+    const violations = checkedAreas.flatMap((area) =>
+      productionFiles(area as Parameters<typeof productionFiles>[0])
+        .flatMap((file) =>
+          importsFrom(file)
+            .filter((reference) =>
+              resolvesToSrcArea(file, reference.importSource, "legacy") &&
+              resolvedImportBasename(file, reference.importSource) !==
+                "legacy-entrypoints",
+            )
+            .map((reference) =>
+              violation(
+                file,
+                reference,
+                "runtime/simulation/diagnostics/evaluation must use legacy-entrypoints",
               ),
             ),
         ),

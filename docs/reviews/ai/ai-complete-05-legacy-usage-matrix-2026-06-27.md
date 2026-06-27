@@ -3,16 +3,16 @@
 ## Zweck
 
 Diese Matrix klassifiziert die aktuellen Legacy-Nutzungen im AI-Paket fuer `AI-COMPLETE-05`.
-Fuehrend ist der Code-Stand nach `refactor(ai): add legacy planner entrypoint`.
+Fuehrend ist der Code-Stand nach dem Schnitt auf `packages/ai/src/legacy/legacy-entrypoints.ts`.
 
 ## Einstiegspunkte
 
 | Bereich | Datei | Nutzung | Klassifikation | Zielzustand |
 | --- | --- | --- | --- | --- |
-| Produktiver Planner-Zugriff | `packages/ai/src/legacy/legacy-planner-entrypoints.ts` | Buendelt `chooseCorpPlanAction`, `hasCorpPlanAction`, `assessCorpScoreTerminalWindow`, `chooseRunnerPlanAction` und `hasRunnerPlanAction`. | Erlaubte interne Legacy-Eingangsschnittstelle fuer Legacy-Planfunktionen. | Bleibt einziger produktiver Importpfad zu Legacy-Planfunktionen, bis die Funktionen ersetzt oder entfernt sind. |
+| Produktiver Legacy-Zugriff | `packages/ai/src/legacy/legacy-entrypoints.ts` | Buendelt Legacy-Planfunktionen, Baseline-Entscheider, Legacy-Scoring-Adapter, Legacy-Decision-Context und Forced-Legacy-Fallback. | Erlaubte interne Legacy-Eingangsschnittstelle fuer Runtime, Simulation und Diagnose. | Bleibt einziger produktiver Importpfad zu Legacy-Modulen, bis die Funktionen ersetzt oder entfernt sind. |
 | Historische Facade | `packages/ai/src/runner-plans.ts` | Re-exportiert `legacy/runner-plans.ts`. | Kompatibilitaets-Fassade fuer historische Importe und Public Contract. | Keine neue produktive Callsite; spaeter entfernen oder auf explizite Legacy-Kompatibilitaet begrenzen. |
 | Historische Facade | `packages/ai/src/corp-plans.ts` | Re-exportiert `legacy/corp-plans.ts`. | Kompatibilitaets-Fassade fuer historische Importe und Public Contract. | Keine neue produktive Callsite; spaeter entfernen oder auf explizite Legacy-Kompatibilitaet begrenzen. |
-| Public Runtime Wiring | `packages/ai/src/ai-runtime-public-entrypoints.ts` | Verwendet Legacy-Planfunktionen ueber `legacy-planner-entrypoints`. | Produktiver Legacy-Fallback-/Override-Verbraucher. | Nach semantischer Migration nur noch Sicherheits-Fallback oder entfernen. |
+| Public Runtime Wiring | `packages/ai/src/ai-runtime-public-entrypoints.ts` | Verwendet Legacy-Planfunktionen ueber `legacy-entrypoints`. | Produktiver Legacy-Fallback-/Override-Verbraucher. | Nach semantischer Migration nur noch Sicherheits-Fallback oder entfernen. |
 | Public Exports | `packages/ai/src/index.ts` | Exportiert historische Runner-/Corp-Planfacades weiter. | Public-Contract-Kompatibilitaet, nicht neue Semantik. | Separat pruefen, ob Public Contract diese Legacy-Exports weiter braucht. |
 
 ## Runtime- und Scoring-Nutzungen
@@ -46,11 +46,11 @@ Fuehrend ist der Code-Stand nach `refactor(ai): add legacy planner entrypoint`.
 | --- | --- | --- | --- | --- |
 | Shadow-/Comparison-Diagnostik | `packages/ai/src/controlled-shadow-mode.ts`, `packages/ai/src/shadow-scoring-diagnostics.ts` | Vergleicht Legacy-Referenzen mit semantischen Entscheidungen. | Diagnose-only, kein produktiver Selector. | Behalten, solange Cutover-Vergleich gebraucht wird; nicht als produktive Entscheidung verwenden. |
 | Simulation Decision Context | `packages/ai/src/simulation/simulation-decision-context.ts` und Simulation Compositions | Nutzt Baseline-Entscheider als Vergleichs-/Harness-Abhaengigkeit. | Simulation/Benchmark. | Behalten, aber als explizite Baseline-Abhaengigkeit dokumentieren. |
-| Corp Simulation Diagnostics | `packages/ai/src/simulation/corp-*-diagnostics.ts` und verwandte Dateien | Nutzen Corp-Legacy-Diagnosehelfer ueber `legacy-planner-entrypoints.ts`. | Diagnose-/Metriknutzung mit Migrationsbedarf, aber ohne direkte Kompatibilitaets-Facade-Imports. | Auf dedizierte Diagnose-/Ontology-Module umstellen, wenn die jeweiligen Helper aus Legacy herausgeloest sind. |
+| Corp Simulation Diagnostics | `packages/ai/src/simulation/corp-*-diagnostics.ts` und verwandte Dateien | Nutzen Corp-Legacy-Diagnosehelfer ueber `legacy-entrypoints.ts`. | Diagnose-/Metriknutzung mit Migrationsbedarf, aber ohne direkte Kompatibilitaets-Facade-Imports. | Auf dedizierte Diagnose-/Ontology-Module umstellen, wenn die jeweiligen Helper aus Legacy herausgeloest sind. |
 
 ## Naechste Schnitte
 
 1. Verbleibende Public-Contract-Exports der Legacy-Kompatibilitaetsfacades pruefen.
-2. Simulation-/Diagnoseimporte ueber `legacy-planner-entrypoints.ts` fachlich auf dedizierte Diagnosemodule umstellen.
+2. Simulation-/Diagnoseimporte ueber `legacy-entrypoints.ts` fachlich auf dedizierte Diagnosemodule umstellen.
 3. Legacy-Scoring-Adapterverbraucher nach Semantic-Scoring-Ownern aufteilen.
 4. Legacy-Planer-Dateien einfrieren: Boundary-Test soll neue produktive Importe oder neue Semantik in `legacy/runner-plans.ts` und `legacy/corp-plans.ts` verhindern.

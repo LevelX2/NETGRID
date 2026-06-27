@@ -1,6 +1,6 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
-import { assessCorpScoreTerminalWindow } from "../legacy/legacy-planner-entrypoints";
+import { assessCorpScoreTerminalWindow } from "../legacy/legacy-entrypoints";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import type { CorpScoreTerminalChosenFamily } from "./corp-score-terminal-diagnostics";
 

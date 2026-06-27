@@ -32,7 +32,7 @@ import {
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import { buildMergedTacticalGoals } from "../decision/tactical-goal-merge";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
-import { semanticRuntimeForcedLegacy } from "../legacy/legacy-runtime-fallback";
+import { semanticRuntimeForcedLegacy } from "../legacy/legacy-entrypoints";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";

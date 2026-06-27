@@ -5,7 +5,7 @@ import {
   chooseRunnerPlanAction,
   hasCorpPlanAction,
   hasRunnerPlanAction,
-} from "./legacy/legacy-planner-entrypoints";
+} from "./legacy/legacy-entrypoints";
 import {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,

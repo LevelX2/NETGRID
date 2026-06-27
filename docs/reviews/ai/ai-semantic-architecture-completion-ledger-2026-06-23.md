@@ -6239,7 +6239,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1646 Tests.
 
 - `AI-COMPLETE-05` erster Legacy-Schnitt:
-  - `packages/ai/src/legacy/legacy-planner-entrypoints.ts` bündelt den produktiven Zugriff auf Legacy-Runner-/Corp-Planfunktionen als interne Eingangsschnittstelle.
+  - `packages/ai/src/legacy/legacy-planner-entrypoints.ts` bündelt zunächst den produktiven Zugriff auf Legacy-Runner-/Corp-Planfunktionen als interne Eingangsschnittstelle; späterer Schnitt hebt dies in `legacy-entrypoints.ts` als allgemeinen Legacy-Zugang.
   - `packages/ai/src/ai-runtime-public-entrypoints.ts` importiert Legacy-Planfunktionen nicht mehr direkt über die historischen `runner-plans.ts`-/`corp-plans.ts`-Kompatibilitäts-Facades.
   - `packages/ai/src/decision/module-boundaries.test.ts` schützt diese Route gegen Rückfall auf direkte Kompatibilitäts-Facade-Imports.
   - Status bleibt `IN_PROGRESS`, weil die Legacy-Nutzungsmatrix und weitere Entfernung/Einordnung ersetzter Legacy-Bereiche noch offen sind.
@@ -6249,14 +6249,14 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1647 Tests.
 - `AI-COMPLETE-05` zweiter Legacy-Schnitt:
   - `docs/reviews/ai/ai-complete-05-legacy-usage-matrix-2026-06-27.md` klassifiziert produktive Legacy-Planer-Einstiege, Runtime-/Scoring-Adapter, Legacy-Implementierungen sowie Diagnose-/Simulation-Nutzungen.
-  - Die Matrix benennt `legacy-planner-entrypoints.ts` als erlaubte interne Legacy-Planfunktionsschnittstelle und markiert historische Facades, Simulation-/Diagnoseimporte und Scoring-Adapter als getrennte Migrationsklassen.
+  - Die Matrix benennt `legacy-entrypoints.ts` als erlaubte interne Legacy-Schnittstelle und markiert historische Facades, Simulation-/Diagnoseimporte und Scoring-Adapter als getrennte Migrationsklassen.
   - Status bleibt `IN_PROGRESS`, weil direkte Diagnose-/Simulation-Importe aus Legacy-Kompatibilitätsfacades und Legacy-Scoring-Adapter noch weiter abgebaut oder eingefroren werden müssen.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts` grün, 15 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1647 Tests.
 - `AI-COMPLETE-05` dritter Legacy-Schnitt:
-  - Corp-bezogene Simulation-/Diagnosemodule importieren Legacy-Helfer nicht mehr direkt über die historische `corp-plans.ts`-Kompatibilitäts-Fassade, sondern über `packages/ai/src/legacy/legacy-planner-entrypoints.ts`.
+  - Corp-bezogene Simulation-/Diagnosemodule importieren Legacy-Helfer nicht mehr direkt über die historische `corp-plans.ts`-Kompatibilitäts-Fassade, sondern über die interne Legacy-Eingangsschnittstelle.
   - Legacy-interne Scoring-Helfer importieren `classifyCorpScoredAgendaAbility` direkt aus `legacy/corp-plans.ts` statt über die öffentliche Kompatibilitäts-Fassade.
   - `packages/ai/src/decision/module-boundaries.test.ts` verhindert neue direkte Plan-Facade-Imports aus Runtime, Simulation, Diagnostics und Evaluation.
   - Status bleibt `IN_PROGRESS`, weil die Legacy-Scoring-Adapter und die Public-Contract-Facades noch weiter klassifiziert beziehungsweise abgebaut werden müssen.
@@ -6264,6 +6264,15 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 82 Tests.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1648 Tests.
+- `AI-COMPLETE-05` vierter Legacy-Schnitt:
+  - `packages/ai/src/legacy/legacy-entrypoints.ts` wird allgemeine interne Legacy-Eingangsschnittstelle für Planfunktionen, Baseline-Entscheider, Legacy-Scoring-Adapter, Legacy-Decision-Context und Forced-Legacy-Fallback.
+  - Runtime-, Simulation- und Public-Wiring-Module importieren Legacy-Funktionen über `legacy-entrypoints.ts` statt einzelne Legacy-Adapterdateien.
+  - `packages/ai/src/decision/module-boundaries.test.ts` verhindert neue direkte Legacy-Adapterimports aus Runtime, Simulation, Diagnostics und Evaluation.
+  - Status bleibt `IN_PROGRESS`, weil Legacy-Implementierungen noch eingefroren und weitere Public-Contract-Facade-Fragen geklärt werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/module-boundaries.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 83 Tests.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün mit längerem Timeout, 148 Dateien, 1649 Tests.
 
 Nächstes aktives Ziel: `AI-COMPLETE-05`.
 

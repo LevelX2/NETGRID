@@ -8,7 +8,7 @@ import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
   type LegacyBaselineChoice,
-} from "../legacy/legacy-baseline";
+} from "../legacy/legacy-entrypoints";
 
 export type AiActionEntrypointDependencies = {
   chooseSemanticRuntimeAction: (

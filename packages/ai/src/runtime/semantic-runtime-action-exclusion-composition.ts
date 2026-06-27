@@ -2,11 +2,11 @@ import type { BlinkRiskAssessment } from "../runner-run-target-evaluation";
 import {
   scoreActionsForLegacy,
   type LegacyActionScorerDependencies,
-} from "../legacy/legacy-action-scorer";
+} from "../legacy/legacy-entrypoints";
 import {
   createLegacyActionScoringComposition,
   type LegacyActionScoringCompositionDependencies,
-} from "../legacy/legacy-action-scoring-composition";
+} from "../legacy/legacy-entrypoints";
 import {
   createRunnerBlinkBreakExclusionContext,
   type RunnerBlinkBreakExclusionDependencies,

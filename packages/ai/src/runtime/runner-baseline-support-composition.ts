@@ -3,7 +3,7 @@ import type { VisibleCard } from "@netgrid/shared";
 import {
   createLegacyDecisionContext,
   type LegacyDecisionContextDependencies,
-} from "../legacy/legacy-decision-context";
+} from "../legacy/legacy-entrypoints";
 import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
 import {
   createRunnerBaselinePlanGuardContext,

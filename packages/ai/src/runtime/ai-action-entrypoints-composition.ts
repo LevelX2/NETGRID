@@ -1,7 +1,7 @@
 import {
   scoreActionsForLegacy,
   type LegacyActionScorerDependencies,
-} from "../legacy/legacy-action-scorer";
+} from "../legacy/legacy-entrypoints";
 import {
   createAiActionEntrypoints,
   type AiActionEntrypointDependencies,
