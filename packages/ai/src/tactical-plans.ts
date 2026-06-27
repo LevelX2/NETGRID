@@ -1,5 +1,4 @@
 import {
-  DEMO_CARDS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type PlayerView,
@@ -81,7 +80,6 @@ import {
   remoteIsProtected,
 } from "./plans/tactical-plan-corp-score-window";
 import {
-  cardCoverageSearchText,
   cardLooksLikeBreaker,
   cardProvidesBreakerCoverage,
 } from "./plans/tactical-plan-breaker-cards";
@@ -116,6 +114,13 @@ import {
   type CoverageAnswerRole,
   isCoverageAnswerStep,
 } from "./plans/tactical-plan-coverage-answers";
+import {
+  cardDefinitionPlanRoleForCoverageSearch,
+  cardDefinitionProvidesBreakerCoverage,
+  cardPlanRoleForCoverageSearch,
+  recoveryTargetDefinitionId,
+  recoveryTargetVisibleCard,
+} from "./plans/tactical-plan-coverage-card-roles";
 import { developmentCardStepMatchesAction } from "./plans/tactical-plan-development-card-matching";
 import {
   isRunPlanStep,
@@ -910,83 +915,6 @@ function recoveryLoopPenaltyEvidence(
     `noProgressOnRequiredCapabilityPenalty:${penalties.noProgressOnRequiredCapabilityPenalty}`,
     `fundingNeedReducesRecoveryLoopPenalty:${penalties.fundingNeedReducesRecoveryLoopPenalty}`,
   ];
-}
-
-function recoveryTargetDefinitionId(
-  input: AiDecisionInput,
-  action: LegalAction,
-): string | undefined {
-  const payload = action.payload ?? {};
-  const direct =
-    payload.targetCardDefinitionId ??
-    payload.returnedCardDefinitionId ??
-    payload.cardDefinitionId ??
-    payload.targetDefinitionId;
-  if (typeof direct === "string") return direct;
-  const targetCard = recoveryTargetVisibleCard(input, action);
-  return targetCard?.definitionId;
-}
-
-function recoveryTargetVisibleCard(
-  input: AiDecisionInput,
-  action: LegalAction,
-): VisibleCard | undefined {
-  const payload = action.payload ?? {};
-  const targetId =
-    payload.targetCardId ??
-    payload.cardImplementationTopTrashTargetId ??
-    payload.returnedCardId;
-  return typeof targetId === "string"
-    ? visibleCardByInstanceId(input.playerView, targetId)
-    : undefined;
-}
-
-function cardPlanRoleForCoverageSearch(card: VisibleCard): string {
-  if (cardProvidesBreakerCoverage(card, "breaker_coverage")) return "breaker";
-  const text = cardCoverageSearchText(card);
-  if (/search|tutor/.test(text)) return "search";
-  if (/draw/.test(text)) return "draw";
-  if (/credit|economy|gain\s+\d+/.test(text)) return "economy";
-  return card.type ?? "unknown";
-}
-
-function cardDefinitionPlanRoleForCoverageSearch(definitionId: string): string {
-  if (cardDefinitionProvidesBreakerCoverage(definitionId, "breaker_coverage"))
-    return "breaker";
-  const definition = DEMO_CARDS_BY_ID[definitionId];
-  const text = [
-    definition?.title,
-    definition?.type,
-    ...(definition?.subtypes ?? []),
-    definition?.rulesText,
-    ...(definition?.mechanics ?? []),
-  ].filter(Boolean).join(" ").toLowerCase();
-  if (/search|tutor/.test(text)) return "search";
-  if (/draw/.test(text)) return "draw";
-  if (/credit|economy|gain_credits|gain\s+\d+/.test(text)) return "economy";
-  return definition?.type ?? "unknown";
-}
-
-function cardDefinitionProvidesBreakerCoverage(
-  definitionId: string,
-  requiredCoverage: RequiredCapabilityKind,
-): boolean {
-  const definition = DEMO_CARDS_BY_ID[definitionId];
-  if (!definition) return false;
-  return cardProvidesBreakerCoverage(
-    {
-      instanceId: definitionId,
-      definitionId,
-      title: definition.title,
-      owner: "runner",
-      controller: "runner",
-      type: definition.type,
-      known: true,
-      subtypes: definition.subtypes,
-      rulesText: definition.rulesText,
-    },
-    requiredCoverage,
-  );
 }
 
 function planRequiredBreakerCoverage(
