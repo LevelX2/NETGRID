@@ -105,6 +105,8 @@ Ziel ist ein kompaktes, generisches KI-Fixpaket für die beobachteten Corp-Fehle
 - `06bbc391` `fix(ai): score remote closeout viability`
 - `06386381` `fix(ai): connect central pressure to rez funding`
 - `7f57e3b1` `fix(ai): prefer targeted corp payoffs`
+- `9fe3e5f3` `test(ai): isolate tactical plan memory in index tests`
+- `docs(ai): finalize corp replay fixes`
 
 ### Verifikation 2026-06-27
 
