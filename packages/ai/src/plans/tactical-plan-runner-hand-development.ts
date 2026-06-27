@@ -3,7 +3,14 @@ import {
   assessRunnerDrawOverflow,
   runnerHandDevelopmentOverflowBonus,
 } from "./runner-draw-overflow";
-import type { TacticalPlanBuildContext } from "./tactical-plan-types";
+import {
+  createPlanStep,
+  createTacticalPlan,
+} from "./tactical-plan-builders";
+import type {
+  TacticalPlan,
+  TacticalPlanBuildContext,
+} from "./tactical-plan-types";
 
 export function runnerHandDevelopmentTargetLabel(
   evaluation: RunnerHandDevelopmentEvaluation,
@@ -75,6 +82,69 @@ export function runnerHandDevelopmentPlanPriority(
         drawOverflowScore,
     ),
   );
+}
+
+export function runnerHandDevelopmentPlans(
+  context: TacticalPlanBuildContext,
+  stateVersion: number,
+  runnerGoalEvidence: readonly string[],
+): TacticalPlan[] {
+  return (context.runnerHandDevelopmentEvaluations ?? [])
+    .filter(usefulLegalRunnerHandDevelopment)
+    .slice(0, 6)
+    .map((evaluation) =>
+      createTacticalPlan({
+        planId: `runner.develop_hand_card:${evaluation.cardInstanceId}`,
+        side: "runner",
+        type: "runner.develop_hand_card",
+        status: "active",
+        priority: runnerHandDevelopmentPlanPriority(context, evaluation),
+        horizonTurns: 1,
+        target: {
+          kind: "card",
+          id: evaluation.cardInstanceId,
+          label: runnerHandDevelopmentTargetLabel(evaluation),
+        },
+        currentStep: createPlanStep({
+          stepId: `install_development_card:${evaluation.cardInstanceId}`,
+          kind: "install_development_card",
+          desiredActionSemantics: [
+            "install.card",
+            "play.runner_event",
+            `runner_hand_development.${evaluation.developmentRole}`,
+          ],
+          rationale: [
+            `hand development role ${evaluation.developmentRole} is ${evaluation.currentNeed}`,
+            `hand development priority ${evaluation.priority}`,
+          ],
+        }),
+        evidence: [
+          `hand_development_role:${evaluation.developmentRole}`,
+          `hand_development_need:${evaluation.currentNeed}`,
+          `hand_development_fit:${evaluation.strategicFit}`,
+          `hand_development_priority:${evaluation.priority}`,
+          ...(evaluation.persistentInstallEvaluation
+            ? [
+                `persistent_install_stackability:${evaluation.persistentInstallEvaluation.stackabilityClass}`,
+                `persistent_install_delta:${evaluation.persistentInstallEvaluation.capabilityDelta}`,
+                `persistent_install_duplicate:${evaluation.persistentInstallEvaluation.duplicateRole}`,
+                `persistent_install_fit:${evaluation.persistentInstallEvaluation.finalInstallFit}`,
+              ]
+            : []),
+          ...evaluation.evidence.slice(0, 6),
+          ...runnerGoalEvidence,
+        ],
+        scoreBreakdown: [
+          {
+            key: "runner_hand_development",
+            label: "Runner hand development",
+            value: runnerHandDevelopmentPlanPriority(context, evaluation),
+            reason: evaluation.developmentRole,
+          },
+        ],
+        stateVersion,
+      }),
+    );
 }
 
 function runnerHandDevelopmentRolePriority(
