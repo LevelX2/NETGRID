@@ -185,7 +185,28 @@ function cardHasBadPublicitySupport(
     hintEffects?.some((effect) =>
       effectMentionsBadPublicity(effect, dependencies),
     ) === true ||
-    /bad publicity|bad_publicity/i.test(rulesText ?? "")
+    rulesTextMentionsBadPublicity(rulesText)
+  );
+}
+
+function rulesTextMentionsBadPublicity(rulesText: string | undefined): boolean {
+  const tokens = badPublicityTextTokens(rulesText);
+  return badPublicityTextTokensIncludePhrase(tokens, ["bad", "publicity"]);
+}
+
+function badPublicityTextTokens(text: string | undefined): string[] {
+  return (text ?? "")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function badPublicityTextTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
   );
 }
 

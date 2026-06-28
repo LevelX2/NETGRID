@@ -23,10 +23,28 @@ describe("runnerBadPublicityRelevanceAssessment", () => {
     );
   });
 
+  it("uses bounded rules-text tokens for bad-publicity support", () => {
+    expect(assessment({ rulesText: "Prevent bad publicity." })).toEqual(
+      expect.objectContaining({
+        badPublicityGainFromAction: 1,
+        badPublicitySupportCount: 1,
+      }),
+    );
+    expect(assessment({ rulesText: "Prevent bad_publicity." })).toEqual(
+      expect.objectContaining({
+        badPublicityGainFromAction: 1,
+        badPublicitySupportCount: 1,
+      }),
+    );
+  });
+
   it("ignores substring-only bad-publicity support noise", () => {
     expect(assessment({ roles: ["bad_publicityish_noise"] })).toBeUndefined();
     expect(
       assessment({ effectTargets: ["runner.bad_publicityish_noise"] }),
+    ).toBeUndefined();
+    expect(
+      assessment({ rulesText: "Badly publicized bad_publicityish support." }),
     ).toBeUndefined();
   });
 });
@@ -34,6 +52,7 @@ describe("runnerBadPublicityRelevanceAssessment", () => {
 function assessment(params: {
   roles?: readonly string[];
   effectTargets?: readonly string[];
+  rulesText?: string;
 }) {
   const definitionId = "custom-bad-publicity-support";
   const card = visibleCard(definitionId);
@@ -46,7 +65,7 @@ function assessment(params: {
       rolesForCardId: () => [...(params.roles ?? [])],
       hintEffectsForCard: () =>
         (params.effectTargets ?? []).map((target) => ({ target })),
-      rulesTextForCard: () => "",
+      rulesTextForCard: () => params.rulesText ?? "",
       effectTarget: (effect) =>
         typeof (effect as { target?: unknown }).target === "string"
           ? (effect as { target: string }).target

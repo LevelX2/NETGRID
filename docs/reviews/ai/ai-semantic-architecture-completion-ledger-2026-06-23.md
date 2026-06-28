@@ -8661,6 +8661,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertachter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bad-publicity-relevance-assessment.ts` erkennt Bad-Publicity-Support im RulesText über gebundene Tokens und die Phrase `bad publicity` statt über Regex `bad publicity|bad_publicity`.
+  - Strukturierte Rollen und Effect-Targets bleiben unverändert wirksam; sichtbarer Text wie `bad publicity` und `bad_publicity` bleibt wirksam; Rauschen wie `Badly publicized bad_publicityish support` bleibt wirkungslos.
+  - `runner-bad-publicity-relevance-assessment.test.ts` schützt positive RulesText-Fälle und negative Substring-Grenzfälle neben den bestehenden strukturierten Rollen-/Target-Fällen.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bad-publicity-relevance-assessment.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
