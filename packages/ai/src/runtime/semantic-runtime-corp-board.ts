@@ -2,6 +2,14 @@ import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared"
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
+const SEMANTIC_RUNTIME_AGENDA_ROLE_NEEDLES = [
+  "agenda_asset",
+  "agenda_support",
+  "agenda_protection",
+  "agenda_score",
+  "agenda_fast_advance",
+] as const;
+
 export type SemanticRuntimeCorpBoardDependencies = {
   serverId: (action: LegalAction) => string | undefined;
   findVisibleCard: (
@@ -147,6 +155,8 @@ function semanticRuntimeRoleIsAgenda(role: string): boolean {
     role === "agenda" ||
     role === "corp_score_agenda" ||
     role === "score_agenda" ||
-    role.startsWith("agenda_")
+    SEMANTIC_RUNTIME_AGENDA_ROLE_NEEDLES.includes(
+      role as (typeof SEMANTIC_RUNTIME_AGENDA_ROLE_NEEDLES)[number],
+    )
   );
 }

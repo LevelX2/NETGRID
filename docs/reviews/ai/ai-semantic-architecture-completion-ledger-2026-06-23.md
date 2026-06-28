@@ -8184,6 +8184,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertfünfundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-board.ts` erkennt Agenda-Rollen für Corp-Scoreline-Board-Kontext über konkrete gebundene Agenda-Rollensegmente statt direktem `role.startsWith("agenda_")`.
+  - Exakte Rollen wie `agenda`, `corp_score_agenda`, `score_agenda` und strukturierte Segmente wie `agenda_protection` bleiben wirksam; Rauschen wie `agendaish_asset` und `agenda_like_noise` bleibt wirkungslos.
+  - `semantic-runtime-corp-board.test.ts` schützt positive Agenda-Rollen und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-board.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
