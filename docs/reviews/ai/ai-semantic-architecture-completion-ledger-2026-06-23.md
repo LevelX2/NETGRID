@@ -9399,6 +9399,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneunundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-coverage-card-roles.ts` ersetzt die lokale Coverage-Plan-Role-Segment-Prüfung per `segment.includes(...)` durch gebundene `_`-Token- und Tokenfolgenprüfung.
+  - Exakte Rollen, Präfix-Needles wie `breaker_`, Einzelterm-Matches wie `economy` in `remote_economy_asset_support` und zusammengesetzte Needles wie `pressure_hq` bleiben wirksam; Suffix-Rauschen wie `microeconomy`, `economyish_support` und `breakerish_fracter` erzeugt keinen Coverage-Role-Match.
+  - Die Änderung bleibt auf TacticalPlan-Coverage-Answer-/Recovery-Matching gegen bereits sichtbare oder strukturierte Rollensignale beschränkt und erzeugt keine LegalAction-Projektion.
+  - `tactical-plan-coverage-card-roles.test.ts` schützt positive Exact-/Prefix-/Compound-Role-Fälle und negative Suffix-Noise-Fälle; `tactical-plan-coverage-search-fit.test.ts` und `tactical-plan-legal-coverage-answers.test.ts` sichern die Plan-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/plans/tactical-plan-coverage-card-roles.test.ts src/plans/tactical-plan-coverage-search-fit.test.ts src/plans/tactical-plan-legal-coverage-answers.test.ts` grün, 3 Dateien, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
