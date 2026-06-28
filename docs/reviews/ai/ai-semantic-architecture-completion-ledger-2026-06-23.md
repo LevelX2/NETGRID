@@ -9164,6 +9164,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsechsundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-hand-development.ts` ersetzt die späteren `looksLike*`-Role-Heuristiken für Breaker, Memory, Bank, Economy, Draw/Search, Defense, Access Payoff, Run Events, Repeat-Utility und Playability durch gebundene Runner-Hand-Texttokens.
+  - Exakte Begriffe und Phrasen wie `breaker`, `memory_support`, `bank_tool`, `gain ... credit`, `draw_or_search`, `prevent ... damage`, `access_payoff`, `remote_contest`, `jack out`, `install`, `play`, `trigger` und `action` bleiben wirksam; Suffix-Rauschen wie `bankish`, `drawish`, `searchlight`, `accessory`, `installment`, `triggerish` und `actionish` erzeugt keine Rolle mehr.
+  - Die Erkennung bleibt reine Runner-Hand-Development-Diagnostik über sichtbare Handkartendaten und erzeugt keine LegalAction-Projektion.
+  - `runner-hand-development.test.ts` schützt positive bestehende Rollen und einen negativen Role-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-hand-development.test.ts` grün, 1 Datei, 16 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

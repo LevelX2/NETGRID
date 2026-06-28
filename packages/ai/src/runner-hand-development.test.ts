@@ -239,6 +239,29 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evidence).not.toContain("absolute_link");
   });
 
+  it("bounds hand-development role text signals to exact tokens", () => {
+    const noisy = visibleCard("role-noise-1", {
+      definitionId: "test-role-noise",
+      title: "Role Noise",
+      type: "resource",
+      installCost: 0,
+      rulesText:
+        "Bankish drawish searchlight accessory installment triggerish actionish.",
+    });
+    const input = runnerInput({
+      credits: 4,
+      hand: [noisy],
+      legalActions: [installAction("install-role-noise", noisy, 0)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "role-noise-1",
+    );
+
+    expect(evaluation.developmentRole).toBe("unknown");
+  });
+
   it("keeps duplicate or low-value hand cards conservative", () => {
     const duplicate = visibleCard("spare-resource-1", {
       definitionId: "test-spare-resource",

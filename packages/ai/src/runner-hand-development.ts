@@ -904,6 +904,131 @@ function runnerHandTextHasTemporaryCounterSignal(text: string): boolean {
   ]);
 }
 
+function runnerHandTextHasBreakerSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, [
+      "breaker",
+      "icebreaker",
+      "fracter",
+      "decoder",
+      "killer",
+    ]) || runnerHandTokensIncludeInOrder(tokens, "break", "subroutine")
+  );
+}
+
+function runnerHandTextHasMemorySupportSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, ["memory", "mu"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["memory", "support"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["mem", "chip"])
+  );
+}
+
+function runnerHandTextHasBankToolSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, ["broker", "bank"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["bank", "tool"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["stored", "credits"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["counter", "bank"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["temporary", "resource", "bank"])
+  );
+}
+
+function runnerHandTextHasEconomyToolSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, [
+      "economy",
+      "credit",
+      "credits",
+      "bits",
+      "loan",
+      "savings",
+    ]) || runnerHandTokensIncludeInOrder(tokens, "gain", "credit")
+  );
+}
+
+function runnerHandTextHasDrawOrSearchSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, ["search", "draw", "tutor"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["draw", "or", "search"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["setup", "draw"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["setup", "search"])
+  );
+}
+
+function runnerHandTextHasDefenseSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, ["defense", "tag", "link"]) ||
+    runnerHandTokensIncludeInOrder(tokens, "prevent", "damage") ||
+    runnerHandTokensIncludePhrase(tokens, ["damage", "prevention"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["net", "damage"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["meat", "damage"]) ||
+    runnerHandTokensIncludeInOrder(tokens, "remove", "tag") ||
+    runnerHandTokensIncludePhrase(tokens, ["hand", "size"])
+  );
+}
+
+function runnerHandTextHasAccessPayoffSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, [
+      "multiaccess",
+      "interface",
+      "access",
+    ]) ||
+    runnerHandTokensIncludePhrase(tokens, ["access", "payoff"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["r", "d"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["rd", "pressure"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["hq", "pressure"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["trash", "support"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["remote", "contest"])
+  );
+}
+
+function runnerHandTextHasRunEventSignal(text: string): boolean {
+  return runnerHandTokensIncludeAny(runnerHandTextTokens(text), [
+    "run",
+    "bypass",
+    "access",
+    "approach",
+  ]) || runnerHandTokensIncludePhrase(runnerHandTextTokens(text), ["jack", "out"]);
+}
+
+function runnerHandTextHasRepeatUsefulSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, [
+      "counter",
+      "temporary",
+      "virus",
+      "recurring",
+      "multiaccess",
+      "memory",
+      "broker",
+      "bank",
+    ]) ||
+    runnerHandTokensIncludePhrase(tokens, ["stored", "credits"]) ||
+    runnerHandTokensIncludeInOrder(tokens, "prevent", "damage") ||
+    runnerHandTokensIncludePhrase(tokens, ["damage", "prevention"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["hand", "size"])
+  );
+}
+
+function runnerHandTextHasPlayableSignal(text: string): boolean {
+  return runnerHandTokensIncludeAny(runnerHandTextTokens(text), [
+    "install",
+    "play",
+    "trigger",
+    "action",
+  ]);
+}
+
 function runnerHandTextTokens(text: string): string[] {
   return text
     .toLocaleLowerCase("en-US")
@@ -1614,51 +1739,51 @@ function looksLikeBreaker(card: VisibleCard, text: string): boolean {
   return (
     card.type === "program" &&
     ((card.subtypes ?? []).some((subtype) =>
-      /breaker|icebreaker|fracter|decoder|killer/i.test(subtype),
+      runnerHandTokensIncludeAny(runnerHandTextTokens(subtype), [
+        "breaker",
+        "icebreaker",
+        "fracter",
+        "decoder",
+        "killer",
+      ]),
     ) ||
-      /breaker|icebreaker|fracter|decoder|killer|break .*subroutine/.test(text))
+      runnerHandTextHasBreakerSignal(text))
   );
 }
 
 function looksLikeMemorySupport(card: VisibleCard, text: string): boolean {
   return (
     card.memoryLimitBonus !== undefined ||
-    /memory_support|memory|mem chip|\bmu\b/.test(text)
+    runnerHandTextHasMemorySupportSignal(text)
   );
 }
 
 function looksLikeBankTool(text: string): boolean {
-  return /bank_tool|broker|bank|stored credits|counter_bank|temporary_resource_bank/.test(
-    text,
-  );
+  return runnerHandTextHasBankToolSignal(text);
 }
 
 function looksLikeEconomyTool(text: string): boolean {
-  return /economy|gain .*credit|gain credits|credit|bits|loan|savings/.test(text);
+  return runnerHandTextHasEconomyToolSignal(text);
 }
 
 function looksLikeDrawOrSearch(text: string): boolean {
-  return /draw_or_search|setup\.draw|setup\.search|search|draw|tutor/.test(text);
+  return runnerHandTextHasDrawOrSearchSignal(text);
 }
 
 function looksLikeDefense(text: string): boolean {
-  return /defense|prevent .*damage|damage prevention|net damage|meat damage|tag|remove .*tag|link|hand size/.test(
-    text,
-  );
+  return runnerHandTextHasDefenseSignal(text);
 }
 
 function looksLikeAccessPayoff(text: string): boolean {
-  return /access_payoff|multiaccess|interface|access|r&d|rd pressure|hq pressure|trash support|remote_contest/.test(
-    text,
-  );
+  return runnerHandTextHasAccessPayoffSignal(text);
 }
 
 function looksLikeRunEvent(card: VisibleCard, text: string): boolean {
-  return card.type === "event" && /run|bypass|access|jack out|approach/.test(text);
+  return card.type === "event" && runnerHandTextHasRunEventSignal(text);
 }
 
 function looksRepeatUseful(text: string): boolean {
-  return /counter|temporary|virus|recurring|multiaccess|memory|broker|bank|stored credits|prevent .*damage|damage prevention|hand size/.test(text);
+  return runnerHandTextHasRepeatUsefulSignal(text);
 }
 
 function looksPotentiallyPlayable(card: VisibleCard, text: string): boolean {
@@ -1667,7 +1792,7 @@ function looksPotentiallyPlayable(card: VisibleCard, text: string): boolean {
     card.type === "hardware" ||
     card.type === "resource" ||
     card.type === "event" ||
-    /install|play|trigger|action/.test(text)
+    runnerHandTextHasPlayableSignal(text)
   );
 }
 
