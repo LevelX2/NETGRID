@@ -9339,6 +9339,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertdreiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/role-match.ts` ersetzt die generische Role-Segment-Prüfung per manuellem `segment.includes(...)` durch gebundene `_`-Token- und Tokenfolgenprüfung.
+  - Exakte Rollen, Präfix-Needles wie `breaker_`, Einzelterm-Matches wie `economy` in `pre_economy_support` und zusammengesetzte Needles wie `economy_asset` bleiben wirksam; Suffix-Rauschen wie `economyish` und `breakerish_...` erzeugt keinen Match.
+  - Die Änderung bleibt ein generischer Runtime-Role-Matcher und erzeugt keine LegalAction-Projektion.
+  - `role-match.test.ts` schützt positive Exact-/Prefix-/Compound-Role-Fälle und negative Suffix-Noise-Fälle; abhängige Deck-/Remote-Trash-Tests sichern bestehende Consumer-Semantik.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/role-match.test.ts src/deck-capabilities.test.ts src/simulation/remote-trash-role.test.ts` grün, 3 Dateien, 20 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
