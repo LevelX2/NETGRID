@@ -9359,6 +9359,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertfünfundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/corp-tactical-goals.ts` ersetzt die lokale sichtbare Signal-Term-Prüfung per `segment.includes(...)` durch gebundene `_`-Tokenprüfung.
+  - Exakte und zusammengesetzte sichtbare Signale wie `corp_tag_punish` und `visible_punish_payoff` bleiben wirksam; Suffix-Rauschen wie `tagalong_punishment_noise` oder `ambushment_noise` erzeugt keine Korp-Punish-/Damage-Goals.
+  - Die Änderung bleibt auf die Corp-TacticalGoal-Synthese aus side-sicheren ActionSemanticCandidate-Signalen beschränkt und erzeugt keine LegalAction-Projektion.
+  - `corp-tactical-goals.test.ts` schützt positive zusammengesetzte Punish-Signale und negative Substring-Noise-Fälle; `doctrine-goal-synthesis.test.ts` sichert einen Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/corp-tactical-goals.test.ts src/decision/doctrine-goal-synthesis.test.ts` grün, 2 Dateien, 21 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
