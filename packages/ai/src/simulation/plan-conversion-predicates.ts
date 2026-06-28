@@ -277,13 +277,13 @@ export function corpRemoteCreatedConvertsTo<
       }
       if (target === "bait") {
         return (
-          entry.reasonCode?.includes("bait") === true ||
+          reasonCodeMatchesTerm(entry.reasonCode, "bait") ||
           hasPlanConversionEvidenceFlag(entry, "plan:bait_runner")
         );
       }
       return (
         entry.actionType === "install_card" &&
-        (entry.reasonCode?.includes("asset") === true ||
+        (reasonCodeMatchesTerm(entry.reasonCode, "asset") ||
           rolesMatch(entry.evidence ?? [], [
             "remote_support",
             "economy_asset",
@@ -820,4 +820,11 @@ function planKindMatchesTerm(
   term: string,
 ): boolean {
   return planKind !== undefined && rolesMatch([planKind], [term]);
+}
+
+function reasonCodeMatchesTerm(
+  reasonCode: string | undefined,
+  term: string,
+): boolean {
+  return reasonCode !== undefined && rolesMatch([reasonCode], [term]);
 }

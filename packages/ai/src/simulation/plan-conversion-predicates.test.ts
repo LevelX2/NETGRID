@@ -53,6 +53,69 @@ describe("planIntentConvertedWithin", () => {
         "asset",
       ),
     ).toBe(false);
+    expect(
+      corpRemoteCreatedConvertsTo(
+        [
+          { side: "corp", actionType: "install_card" },
+          {
+            side: "corp",
+            actionType: "install_card",
+            reasonCode: "corp.plan.remote_asset",
+          },
+        ],
+        0,
+        2,
+        "asset",
+      ),
+    ).toBe(true);
+    expect(
+      corpRemoteCreatedConvertsTo(
+        [
+          { side: "corp", actionType: "install_card" },
+          {
+            side: "corp",
+            actionType: "install_card",
+            reasonCode: "corp.plan.assetish_noise",
+          },
+        ],
+        0,
+        2,
+        "asset",
+      ),
+    ).toBe(false);
+  });
+
+  it("matches Corp remote bait reason codes by bounded terms", () => {
+    expect(
+      corpRemoteCreatedConvertsTo(
+        [
+          { side: "corp", actionType: "install_card" },
+          {
+            side: "corp",
+            actionType: "install_card",
+            reasonCode: "corp.plan.bait_runner",
+          },
+        ],
+        0,
+        2,
+        "bait",
+      ),
+    ).toBe(true);
+    expect(
+      corpRemoteCreatedConvertsTo(
+        [
+          { side: "corp", actionType: "install_card" },
+          {
+            side: "corp",
+            actionType: "install_card",
+            reasonCode: "corp.plan.baitish_noise",
+          },
+        ],
+        0,
+        2,
+        "bait",
+      ),
+    ).toBe(false);
   });
 
   it("matches runner setup reason codes by bounded terms", () => {
