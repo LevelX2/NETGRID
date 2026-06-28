@@ -8786,6 +8786,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihunderteinundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-invariants.ts` ersetzt die Fixture-/Harness-CardId-Regex durch segmentbasierte Identifier-Prüfung.
+  - Fixture-Profile werden nur noch über gebundene Segmente wie `test`, `fixture` oder `harness` erkannt, nicht über freie Substrings.
+  - Rauschen wie `onr_v1_nonfixture_name` erzeugt kein `fixture_profile_in_production_scope`-Finding mehr; `onr_v1_fixture_profile` bleibt wirksam.
+  - `action-semantic-invariants.test.ts` schützt den neuen Segment-Grenzfall zusätzlich zu den bestehenden Invariant-Prüfungen.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-invariants.test.ts` grün, 1 Datei, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -473,7 +473,33 @@ function tokensIncludePhrase(
 }
 
 function fixtureLikeCardId(cardId: string): boolean {
-  return /(^test[_-]|^fixture[_-]|fixture|harness)/i.test(cardId);
+  const segments = splitIdentifierSegments(cardId.toLocaleLowerCase("en-US"));
+  return (
+    segments[0] === "test" ||
+    segments[0] === "fixture" ||
+    segments.includes("fixture") ||
+    segments.includes("harness")
+  );
+}
+
+function splitIdentifierSegments(value: string): string[] {
+  const segments: string[] = [];
+  let current = "";
+  for (const character of value) {
+    if (
+      character === "_" ||
+      character === "-" ||
+      character === "." ||
+      character === ":"
+    ) {
+      if (current.length > 0) segments.push(current);
+      current = "";
+      continue;
+    }
+    current += character;
+  }
+  if (current.length > 0) segments.push(current);
+  return segments;
 }
 
 function nonEmptyString(value: unknown): value is string {

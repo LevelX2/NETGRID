@@ -198,6 +198,27 @@ describe("Action semantic invariants", () => {
     expect(JSON.stringify(structuralIssues)).not.toContain("subtype_onlyish");
   });
 
+  it("bounds fixture-like card ids by identifier segments", () => {
+    const report = buildActionSemanticInvariantReport([
+      {
+        cardId: "onr_v1_nonfixture_name",
+        tacticSignals: ["economy.burst"],
+      },
+      {
+        cardId: "onr_v1_fixture_profile",
+        tacticSignals: ["economy.burst"],
+      },
+    ]);
+
+    const fixtureIssues = report.issues.filter(
+      (issue) => issue.issueId === "fixture_profile_in_production_scope",
+    );
+
+    expect(fixtureIssues).toHaveLength(1);
+    expect(fixtureIssues[0]?.path).toBe("profiles[1].cardId");
+    expect(JSON.stringify(fixtureIssues)).not.toContain("nonfixture");
+  });
+
   it("reports forbidden static signals and broad primary signals without precise peers", () => {
     const report = buildActionSemanticInvariantReport([
       {
