@@ -8652,6 +8652,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsiebter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/tactical-goal-utility.ts` leitet Tactical-Goal-Blocker über gebundene Evidence-Tokens und die Phrase `too expensive` ab statt über die freie Regex `blocked|missing|cannot|unavailable|unreachable|too_expensive`.
+  - Strukturierte Evidence wie `cannot_afford`, `too_expensive` und `missing_breaker_coverage` bleibt wirksam; Rauschen wie `unreachableish_label` und `cannotary_marker` bleibt wirkungslos.
+  - `tactical-goal-utility.test.ts` schützt positive Blocker-Evidence und negative Substring-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/tactical-goal-utility.test.ts` grün, 1 Datei, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -47,6 +47,29 @@ describe("TacticalGoalUtility", () => {
     );
   });
 
+  it("extracts blockers from bounded evidence tokens", () => {
+    const utility = normalizeTacticalGoalUtility(
+      goal({
+        goalId: "corp.low_rez_reserve",
+        family: "corp_ice_defense",
+        priority: 760,
+        urgency: "medium",
+        source: "boardstate",
+        evidence: [
+          "cannot_afford:rez_outer_ice",
+          "too_expensive:rez_outer_ice",
+          "unreachableish_label:noise",
+          "cannotary_marker:noise",
+        ],
+      }),
+    );
+
+    expect(utility.blockers).toEqual([
+      "evidence:cannot_afford:rez_outer_ice",
+      "evidence:too_expensive:rez_outer_ice",
+    ]);
+  });
+
   it("keeps critical survival goals above normal setup goals", () => {
     const utilities = buildTacticalGoalUtilities([
       goal({

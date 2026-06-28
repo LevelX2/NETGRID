@@ -193,11 +193,41 @@ function normalizeSource(
 
 function blockersFromEvidence(evidence: readonly string[]): string[] {
   return evidence
-    .filter((entry) =>
-      /blocked|missing|cannot|unavailable|unreachable|too_expensive/i.test(entry),
-    )
+    .filter(evidenceEntryHasBlockerToken)
     .map((entry) => `evidence:${entry}`)
     .sort();
+}
+
+const BLOCKER_EVIDENCE_TOKENS = new Set([
+  "blocked",
+  "missing",
+  "cannot",
+  "unavailable",
+  "unreachable",
+]);
+
+function evidenceEntryHasBlockerToken(entry: string): boolean {
+  const tokens = evidenceEntryTokens(entry);
+  return (
+    tokens.some((token) => BLOCKER_EVIDENCE_TOKENS.has(token)) ||
+    evidenceTokensIncludePhrase(tokens, ["too", "expensive"])
+  );
+}
+
+function evidenceEntryTokens(entry: string): string[] {
+  return entry
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function evidenceTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
 }
 
 function requiredActionSignalsForFamily(
