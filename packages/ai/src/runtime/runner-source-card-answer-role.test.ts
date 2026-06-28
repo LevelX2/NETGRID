@@ -19,6 +19,11 @@ describe("runnerSourceCardAnswerRole", () => {
       label: "Use ability",
       payload: { sourceDefinitionId: "draw-source" },
     });
+    const textBacked = action({
+      actionId: "text-backed-search",
+      label: "Use ability",
+      payload: { sourceDefinitionId: "text-search-source" },
+    });
 
     expect(runnerSourceCardAnswerRole(input(), labelOnly, dependencies())).toBeUndefined();
     expect(runnerSourceCardAnswerRole(input(), roleBacked, dependencies())).toBe(
@@ -27,6 +32,9 @@ describe("runnerSourceCardAnswerRole", () => {
     expect(
       runnerSourceCardAnswerRole(input(), definitionBacked, dependencies()),
     ).toBe("draw");
+    expect(runnerSourceCardAnswerRole(input(), textBacked, dependencies())).toBe(
+      "search",
+    );
   });
 
   it("ignores substring-only source roles and mechanics", () => {
@@ -40,10 +48,17 @@ describe("runnerSourceCardAnswerRole", () => {
       label: "Use ability",
       payload: { sourceDefinitionId: "mechanic-noise-source" },
     });
+    const textNoise = action({
+      actionId: "text-noise",
+      label: "Use ability",
+      payload: { sourceDefinitionId: "text-noise-source" },
+    });
 
     expect(runnerSourceCardAnswerRole(input(), roleNoise, dependencies()))
       .toBeUndefined();
     expect(runnerSourceCardAnswerRole(input(), mechanicNoise, dependencies()))
+      .toBeUndefined();
+    expect(runnerSourceCardAnswerRole(input(), textNoise, dependencies()))
       .toBeUndefined();
   });
 });
@@ -64,8 +79,12 @@ function dependencies() {
     sourceDefinition: (definitionId: string | undefined) =>
       definitionId === "draw-source"
         ? { mechanics: ["draw_card"] }
+        : definitionId === "text-search-source"
+          ? { rulesText: "Search your stack for a program." }
         : definitionId === "mechanic-noise-source"
           ? { mechanics: ["withdraw_card"] }
+          : definitionId === "text-noise-source"
+            ? { rulesText: "Searchlight drawish tutorish." }
         : undefined,
   };
 }

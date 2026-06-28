@@ -32,6 +32,15 @@ export type RunnerSourceCardAnswerRoleDependencies = {
   ) => RunnerSourceDefinitionMetadata | undefined;
 };
 
+const SOURCE_SEARCH_TOKENS = [
+  "runner.search.breaker",
+  "program_search",
+  "search_stack",
+  "stack_search",
+  "search",
+  "tutor",
+];
+
 export function runnerSourceCardAnswerRole(
   input: AiDecisionInput,
   action: LegalAction,
@@ -47,7 +56,7 @@ export function runnerSourceCardAnswerRole(
   if (rolesMatch(mechanics, ["search", "tutor"])) return "search";
   if (rolesMatch(roles, ["draw"])) return "draw";
   if (rolesMatch(mechanics, ["draw"])) return "draw";
-  const text = [
+  const tokens = sourceAnswerTokens([
     sourceCard?.title,
     sourceCard?.type,
     ...(sourceCard?.subtypes ?? []),
@@ -56,17 +65,29 @@ export function runnerSourceCardAnswerRole(
     definitionDisplay?.type,
     ...(definitionDisplay?.subtypes ?? []),
     definitionDisplay?.rulesText,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-  if (
-    /runner\.search\.breaker|program_search|search_stack|stack_search|search|tutor/.test(
-      text,
-    )
-  ) {
+  ]);
+  if (sourceAnswerTokensIncludeAny(tokens, SOURCE_SEARCH_TOKENS)) {
     return "search";
   }
-  if (/draw|draw_card/.test(text)) return "draw";
+  if (sourceAnswerTokensIncludeAny(tokens, ["draw", "draw_card"])) return "draw";
   return undefined;
+}
+
+function sourceAnswerTokens(values: readonly (string | undefined)[]): string[] {
+  return values
+    .filter((value): value is string => typeof value === "string")
+    .flatMap((value) =>
+      value
+        .toLocaleLowerCase("en-US")
+        .split(/[^a-z0-9_.]+/)
+        .filter((token) => token.length > 0),
+    );
+}
+
+function sourceAnswerTokensIncludeAny(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
 }
