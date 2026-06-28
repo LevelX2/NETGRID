@@ -8382,6 +8382,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsiebenundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/semantic-shadow-league.ts` klassifiziert Runner-Safe-Access-Dry-Run-Remote-, Risk- und Structured-Alignment-Textmarker über gebundene Segmentterme statt freier `includes("remote"|"risk"|"structured_alignment_required")`-Substring-Prüfungen.
+  - Strukturierte Marker wie `remote_run`, `runner_safe_access_risk_gate` und `runner_safe_access_structured_alignment_required` bleiben wirksam; Rauschen wie `notremote-run`, `brisk_gate` und `structured_alignment_requiredish` bleibt wirkungslos.
+  - `semantic-shadow-league.test.ts` schützt die Boundary-Fälle über ein schmales Runner-Safe-Access-Dry-Run-Fixture.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/semantic-shadow-league.test.ts -t "bounds runner safe access dry-run text classifiers"` grün, 1 Datei, 1 Test, 6 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

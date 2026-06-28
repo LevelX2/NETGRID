@@ -345,16 +345,16 @@ export function buildLocalDefaultPilotDryRunReport(
   const centralOnlyCases = scopedScenarios.filter(
     (scenario) =>
       scenario.topActionType === "start_run" &&
-      !String(scenario.topActionId ?? "").includes("remote"),
+      !textHasBoundedTerm(String(scenario.topActionId ?? ""), "remote"),
   ).length;
   const riskBlockedCases = runnerScenarios.filter((scenario) =>
     Object.keys(scenario.pilotEligibility.blockedByReason).some((reason) =>
-      reason.includes("risk"),
+      textHasBoundedTerm(reason, "risk"),
     ),
   ).length;
   const evidenceOnlyBlockedCases = runnerScenarios.filter((scenario) =>
     Object.keys(scenario.pilotEligibility.blockedByReason).some((reason) =>
-      reason.includes("structured_alignment_required"),
+      textHasBoundedTerm(reason, "structured_alignment_required"),
     ),
   ).length;
   const structuredAlignmentCases = scopedScenarios.length;
@@ -374,6 +374,22 @@ export function buildLocalDefaultPilotDryRunReport(
       `false_positive_candidates:${badOverrideRiskScenarios.length}`,
     ],
   };
+}
+
+function textHasBoundedTerm(text: string, term: string): boolean {
+  return text
+    .toLowerCase()
+    .split(/[.:-]+/)
+    .some((segment) => segmentHasBoundedTerm(segment, term));
+}
+
+function segmentHasBoundedTerm(segment: string, term: string): boolean {
+  return (
+    segment === term ||
+    segment.startsWith(`${term}_`) ||
+    segment.endsWith(`_${term}`) ||
+    segment.includes(`_${term}_`)
+  );
 }
 
 function buildScenarioReport(
