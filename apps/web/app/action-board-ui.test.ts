@@ -1675,6 +1675,25 @@ describe("V1.0.6 resource and card-display helpers", () => {
     });
   });
 
+  it("keeps variable paid subroutine markers visible as non-credit status chips", () => {
+    const variableSubroutines: NonNullable<VisibleCard["counterDisplays"]>[number] = {
+      id: "variable_paid_etr_subroutines",
+      amount: 2,
+      displayKind: "generic_counter",
+      label: "End-the-run-Subroutinen",
+      ariaLabel:
+        "Gatekeeper: 2 End-the-run-Subroutinen; 4 zusätzliche Credits beim Rezzen, 7 Credits insgesamt",
+      usageHint: "status_marker"
+    };
+
+    expect(
+      counterDisplaysForRendering({ counterDisplays: [variableSubroutines] })
+    ).toEqual([variableSubroutines]);
+    expect(counterDisplayTooltipText(variableSubroutines)).toBe(variableSubroutines.ariaLabel);
+    expect(counterDisplayUsesCreditBadge(variableSubroutines)).toBe(false);
+    expect(counterDisplayUsesRefreshingCreditBadge(variableSubroutines)).toBe(false);
+  });
+
   it("distinguishes stored and refreshing credit pool badges", () => {
     const brokerCredits: NonNullable<VisibleCard["counterDisplays"]>[number] = {
       id: "stored_credits",
