@@ -28,6 +28,12 @@ export function deckCoverageKindForRequiredCapability(
   }
 }
 
+export function isBreakerRequiredCapabilityKind(
+  requiredCoverage: RequiredCapabilityKind,
+): boolean {
+  return deckCoverageKindForRequiredCapability(requiredCoverage) !== undefined;
+}
+
 export function missingCoverageBlockerKind(
   coverage: BreakerCoverageKind,
 ): PlanBlockerKind {

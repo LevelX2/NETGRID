@@ -8111,6 +8111,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsiebenundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-coverage-kinds.ts` stellt `isBreakerRequiredCapabilityKind` als typed Predicate für die geschlossene `RequiredCapabilityKind`-Menge bereit.
+  - `tactical-plan-coverage-answers.ts` und `tactical-plan-mapping-helpers.ts` nutzen den Predicate statt roher `kind.startsWith("breaker_")`-Prüfungen.
+  - Echte Capability-Kinds wie `breaker_wall` bleiben wirksam; gecastetes Rauschen wie `breaker_wallish_noise` wird nicht mehr als fehlende Breaker-Coverage behandelt.
+  - `tactical-plan-coverage-kinds.test.ts` und `tactical-plan-coverage-answers.test.ts` schützen typed Treffer und Noise-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-coverage-kinds.test.ts src/plans/tactical-plan-coverage-answers.test.ts src/plans/tactical-plan-coverage-search-fit.test.ts` grün, 3 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
