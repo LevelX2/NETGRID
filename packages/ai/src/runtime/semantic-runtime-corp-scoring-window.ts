@@ -843,25 +843,53 @@ function visibleRunnerCentralMultiaccess(
 ): boolean {
   return (input.playerView.opponent.rig ?? []).some((card) => {
     if (card.known === false) return false;
-    const normalizedText = `${card.title ?? ""} ${card.rulesText ?? ""} ${
-      card.definitionId ?? ""
-    }`.toLocaleLowerCase("en-US");
-    if (
-      !(
-        normalizedText.includes("multiaccess") ||
-        normalizedText.includes("additional card") ||
-        normalizedText.includes("access 1 additional")
-      )
-    ) {
+    const tokens = visibleRunnerCentralMultiaccessTokens(card);
+    const hasCentralMultiaccess =
+      tokens.includes("multiaccess") ||
+      tokensIncludePhrase(tokens, ["additional", "card"]) ||
+      tokensIncludePhrase(tokens, ["access", "1", "additional"]);
+    if (!hasCentralMultiaccess) {
       return false;
     }
-    if (serverId === "hq") return normalizedText.includes("hq");
-    return (
-      normalizedText.includes("r&d") ||
-      normalizedText.includes("rnd") ||
-      normalizedText.includes("rd")
-    );
+    if (serverId === "hq") return tokens.includes("hq");
+    return tokens.includes("rnd") || tokens.includes("rd");
   });
+}
+
+function visibleRunnerCentralMultiaccessTokens(card: VisibleCard): string[] {
+  const text = `${card.title ?? ""} ${card.rulesText ?? ""} ${
+    card.definitionId ?? ""
+  }`.replace(/r&d/gi, "rnd");
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of text) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character.toLocaleLowerCase("en-US");
+    } else {
+      if (current.length > 0) tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function tokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    token === phrase[0] &&
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "A" && character <= "Z") ||
+    (character >= "0" && character <= "9")
+  );
 }
 
 function visibleRunnerRunCreditPool(rig: readonly VisibleCard[]): number {

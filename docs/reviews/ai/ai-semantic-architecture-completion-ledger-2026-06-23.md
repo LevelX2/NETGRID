@@ -9309,6 +9309,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ersetzt die sichtbare Runner-Central-Multiaccess-Erkennung per `normalizedText.includes(...)` durch gebundene Texttokens.
+  - Exakte Signale wie `multiaccess`, `additional card`, `access 1 additional`, `HQ`, `R&D`, `rnd` und `rd` bleiben wirksam; Suffix-Rauschen wie `multiaccessory` oder `R&Dish` erzeugt keine akute Central-Pressure-Übersteuerung mehr.
+  - Die Erkennung bleibt auf sichtbare Runner-Rig-Karten beschränkt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-scoring-window.test.ts` schützt positive R&D-Multiaccess-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-scoring-window.test.ts` grün, 1 Datei, 20 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
