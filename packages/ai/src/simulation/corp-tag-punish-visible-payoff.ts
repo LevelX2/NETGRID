@@ -101,9 +101,7 @@ function visibleCardPreventsMeatDamage(card: VisibleCard): boolean {
     hint?.effects?.some(
       (effect) =>
         effect.kind === "prevention_replacement" &&
-        String((effect as Record<string, unknown>).target ?? "").includes(
-          "meat_damage",
-        ),
+        effectTargetMatchesTerm(effect, "meat_damage"),
     ) === true
   );
 }
@@ -123,6 +121,11 @@ function hintForVisibleCard(card: VisibleCard): AiCardHint | undefined {
 
 function hintHasRole(hint: AiCardHint | undefined, role: string): boolean {
   return rolesMatch([...(hint?.roles ?? []), ...(hint?.planRoles ?? [])], [role]);
+}
+
+function effectTargetMatchesTerm(effect: unknown, term: string): boolean {
+  const target = String((effect as Record<string, unknown>).target ?? "");
+  return rolesMatch([target], [term]);
 }
 
 function hintHasSignal(hint: AiCardHint | undefined, signal: string): boolean {

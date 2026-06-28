@@ -21,6 +21,18 @@ const mockedHints = vi.hoisted(
         hint([], ["survive_meat_damageish_noise"]),
       ],
       [
+        "meat-effect-support",
+        hint([], [], [
+          { kind: "prevention_replacement", target: "prevention.meat_damage" },
+        ]),
+      ],
+      [
+        "meat-effect-noise",
+        hint([], [], [
+          { kind: "prevention_replacement", target: "meat_damageish_noise" },
+        ]),
+      ],
+      [
         "trace-support",
         hint([], ["support_trace_defense"]),
       ],
@@ -55,6 +67,16 @@ describe("corp tag punish visible payoff", () => {
     expect(
       corpVisibleRunnerDamagePreventionEvidence(inputWithRig("meat-noise")),
     ).toEqual([]);
+    expect(
+      corpVisibleRunnerDamagePreventionEvidence(
+        inputWithRig("meat-effect-support"),
+      ),
+    ).toContain("runner_meat_damage_prevention_visible:true");
+    expect(
+      corpVisibleRunnerDamagePreventionEvidence(
+        inputWithRig("meat-effect-noise"),
+      ),
+    ).toEqual([]);
 
     expect(
       corpVisibleRunnerResourceTrashEvidence(
@@ -71,14 +93,18 @@ describe("corp tag punish visible payoff", () => {
   });
 });
 
-function hint(roles: string[], planRoles: string[]) {
+function hint(
+  roles: string[],
+  planRoles: string[],
+  effects: Array<Record<string, unknown>> = [],
+) {
   return {
     cardId: "test-card",
     side: "runner",
     roles,
     planRoles,
     aiSupportStatus: "hinted_only",
-    effects: [],
+    effects,
   };
 }
 

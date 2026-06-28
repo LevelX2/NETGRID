@@ -8409,6 +8409,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-tag-punish-visible-payoff.ts` erkennt Meat-Damage-Prevention-Replacement-Targets über gebundene `rolesMatch`-Terme statt freier `String(target).includes("meat_damage")`-Substring-Prüfung.
+  - Strukturierte Targets wie `prevention.meat_damage` bleiben wirksam; Rauschen wie `meat_damageish_noise` bleibt wirkungslos.
+  - `corp-tag-punish-visible-payoff.test.ts` schützt positive und negative Effect-Target-Fälle über sichtbare Runner-Defense-Evidence.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/corp-tag-punish-visible-payoff.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
