@@ -8445,6 +8445,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertvierundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/known-central-access-payoff.ts` klassifiziert HQ-Memory-Invalidation-Reasons über den exakten Reason-Code vor dem `:`-Suffix statt freier `startsWith(...)`-Prefix-Prüfungen.
+  - Strukturierte Gründe wie `corp_draw_added_unknown_hq_card:evt_1` und `shuffle_changed_hq_hand` bleiben wirksam; Rauschen wie `corp_draw_added_unknown_hq_cardish_noise:evt_1`, `not_corp_installed_hidden_hq_card_noise` und `shuffle_changed_hq_handish_noise` bleibt wirkungslos.
+  - `known-central-access-payoff.test.ts` schützt positive und negative HQ-Memory-Reason-Code-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/known-central-access-payoff.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

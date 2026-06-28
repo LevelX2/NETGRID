@@ -54,6 +54,16 @@ export type HqKnownnessAssessment = {
 };
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
+const HQ_DRAW_DEPARTURE_INVALIDATION_REASONS = [
+  "corp_draw_added_unknown_hq_card",
+  "corp_installed_hidden_hq_card",
+  "corp_played_unknown_hq_card",
+] as const;
+const HQ_REORDER_INVALIDATION_REASONS = [
+  "shuffle_changed_hq_hand",
+  "arrange_changed_hq_hand",
+  "swap_changed_hq_hand",
+] as const;
 
 export function evaluateKnownCentralAccessPayoff(
   input: AiDecisionInput,
@@ -618,11 +628,11 @@ function hqMemoryRetainedAfterDrawDeparture(
 ): boolean {
   return (
     assessment.safeKnownCount > 0 &&
-    memory.invalidationReasons.some(
-      (reason) =>
-        reason.startsWith("corp_draw_added_unknown_hq_card") ||
-        reason.startsWith("corp_installed_hidden_hq_card") ||
-        reason.startsWith("corp_played_unknown_hq_card"),
+    memory.invalidationReasons.some((reason) =>
+      hqMemoryInvalidationReasonMatches(
+        reason,
+        HQ_DRAW_DEPARTURE_INVALIDATION_REASONS,
+      ),
     )
   );
 }
@@ -632,11 +642,19 @@ function hqMemoryInvalidatedReason(
 ): string {
   const reason = memory.invalidationReasons.find(
     (candidate) =>
-      candidate.startsWith("shuffle_changed_hq_hand") ||
-      candidate.startsWith("arrange_changed_hq_hand") ||
-      candidate.startsWith("swap_changed_hq_hand"),
+      hqMemoryInvalidationReasonMatches(
+        candidate,
+        HQ_REORDER_INVALIDATION_REASONS,
+      ),
   );
   return reason?.split(":")[0] ?? "none";
+}
+
+export function hqMemoryInvalidationReasonMatches(
+  reason: string,
+  reasonCodes: readonly string[],
+): boolean {
+  return reasonCodes.includes(reason.split(":")[0] ?? reason);
 }
 
 function knownCentralPathCost(

@@ -6,7 +6,10 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { BeliefState, RunnerOpponentModel } from "./belief-state";
-import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
+import {
+  evaluateKnownCentralAccessPayoff,
+  hqMemoryInvalidationReasonMatches,
+} from "./known-central-access-payoff";
 
 describe("known central access payoff HQ knownness", () => {
   it("does not treat ledger-only hidden install candidates as missing HQ memory", () => {
@@ -117,6 +120,33 @@ describe("known central access payoff HQ knownness", () => {
     expect(payoff.evidence).toContain(
       "hq_knownness_payoff:candidate_possible_payoff",
     );
+  });
+
+  it("matches HQ memory invalidation reasons by exact reason code", () => {
+    expect(
+      hqMemoryInvalidationReasonMatches(
+        "corp_draw_added_unknown_hq_card:evt_1",
+        ["corp_draw_added_unknown_hq_card"],
+      ),
+    ).toBe(true);
+    expect(
+      hqMemoryInvalidationReasonMatches("shuffle_changed_hq_hand", [
+        "shuffle_changed_hq_hand",
+      ]),
+    ).toBe(true);
+    expect(
+      [
+        "corp_draw_added_unknown_hq_cardish_noise:evt_1",
+        "not_corp_installed_hidden_hq_card_noise",
+        "shuffle_changed_hq_handish_noise",
+      ].some((reason) =>
+        hqMemoryInvalidationReasonMatches(reason, [
+          "corp_draw_added_unknown_hq_card",
+          "corp_installed_hidden_hq_card",
+          "shuffle_changed_hq_hand",
+        ]),
+      ),
+    ).toBe(false);
   });
 });
 
