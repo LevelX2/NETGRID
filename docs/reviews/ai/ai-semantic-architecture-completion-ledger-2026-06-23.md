@@ -8283,6 +8283,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsechsundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-known-card-position-diagnostics.ts` ermittelt Known-Position-Invalidation-Flags über exakte Reason-Array-Treffer statt über zusammengefügten Text mit freier Substring-Suche.
+  - Strukturierte Reasons wie `known_rnd_top_moved_to_hq`, `corp_draw_from_rd`, `remote_state_changed` und `conceal` bleiben wirksam; Rauschen wie `known_rnd_top_moved_to_hqish_noise`, `remote_state_changedish_noise`, `concealment_noise` und `reorderish_noise` bleibt wirkungslos.
+  - `runner-known-card-position-diagnostics.test.ts` schützt positive Known-Position-Flags und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-known-card-position-diagnostics.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
