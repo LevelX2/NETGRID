@@ -80,14 +80,18 @@ export function runnerMissingCoverageTypesForInput(
       if (
         ice.effectiveRunQuote?.subroutines.some(
           (subroutine) =>
-            String(subroutine.type).includes("trace") ||
-            String(subroutine.type).includes("damage"),
+            subroutineTypeMatchesTerm(subroutine.type, "trace") ||
+            subroutineTypeMatchesTerm(subroutine.type, "damage"),
         ) === true
       )
         missing.add("special");
     }
   }
   return [...missing].sort();
+}
+
+function subroutineTypeMatchesTerm(type: unknown, term: string): boolean {
+  return rolesMatch([String(type)], [term]);
 }
 
 export function runnerHasKnownBlockedPathByCoverage(

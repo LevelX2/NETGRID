@@ -3,6 +3,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
   runnerCoverageRecoveryActionForMetrics,
   runnerCoverageSearchActionForMetrics,
+  runnerMissingCoverageTypesForInput,
 } from "./runner-setup-coverage-types";
 
 describe("runner coverage action metrics", () => {
@@ -11,6 +12,17 @@ describe("runner coverage action metrics", () => {
     expect(searchForRoles(["research_noise"])).toBe(false);
     expect(recoveryForRoles(["trash_recovery"])).toBe(true);
     expect(recoveryForRoles(["recoveryish_noise"])).toBe(false);
+  });
+
+  it("matches special subroutine coverage needs by bounded terms", () => {
+    expect(missingCoverageForSubroutineType("trace")).toContain("special");
+    expect(missingCoverageForSubroutineType("net_damage")).toContain("special");
+    expect(missingCoverageForSubroutineType("traceish_noise")).not.toContain(
+      "special",
+    );
+    expect(missingCoverageForSubroutineType("damageish_noise")).not.toContain(
+      "special",
+    );
   });
 });
 
@@ -26,6 +38,38 @@ function recoveryForRoles(roles: string[]): boolean {
     rolesForAction: () => roles,
     findVisibleCard: () => undefined,
   });
+}
+
+function missingCoverageForSubroutineType(type: string) {
+  return runnerMissingCoverageTypesForInput(
+    {
+      side: "runner",
+      playerView: {
+        own: {
+          rig: [],
+        },
+        servers: [
+          {
+            id: "rd",
+            ice: [
+              {
+                known: true,
+                definitionId: "synthetic_ice",
+                effectiveRunQuote: {
+                  subroutines: [{ type }],
+                },
+              },
+            ],
+            root: [],
+          },
+        ],
+      },
+    } as unknown as AiDecisionInput,
+    {
+      rolesForCardId: () => [],
+      assessKnownRezzedIcePath: () => ({ blocked: false }) as never,
+    },
+  );
 }
 
 function input(): AiDecisionInput {
