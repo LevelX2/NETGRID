@@ -9020,6 +9020,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n "\.test\(" packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertvierundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt die Late-Run-Step-Erkennung für Breach-/Access-Queue- und Simple-Run-Pressure-Signale durch gebundene Selfplay-Text-Tokens.
+  - `breach`, `remainingCount`, `access_queue`, `simple_run_choice`, `simple_hq_or_rnd_pressure`, `opportunistic_central_run` und `remote_contest` bleiben wirksam, aber nur als exakte Tokens/Phrasen.
+  - Suffix-Rauschen wie `simple_run_choiceish` und `access_queueish` fällt wieder in `mixed_unknown` beziehungsweise `access_pending` zurück.
+  - Die Erkennung bleibt reine Selfplay-Trace-Diagnostik über redaction-safe Action-Text und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative Run-Step-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 21 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "breach\|remainingcount\|access_queue|simple_run_choice\|simple_hq_or_rnd_pressure\|opportunistic_central_run\|remote_contest" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

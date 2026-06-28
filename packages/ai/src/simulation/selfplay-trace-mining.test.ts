@@ -543,6 +543,50 @@ describe("SelfplayTraceMining", () => {
     });
   });
 
+  it("bounds late run-step pressure signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-step-positive",
+        reasonCode: "runner.simple_run_choice",
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-step-noise",
+        reasonCode: "runner.simple_run_choiceish",
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      run_microstep_required: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      mixed_unknown: 1,
+    });
+  });
+
+  it("bounds breach pending run-step signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "access_card", {
+        selectedActionId: "breach-positive",
+        debugFacts: ["access_queue"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "access_card", {
+        selectedActionId: "breach-noise",
+        debugFacts: ["access_queueish"],
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      breach_pending: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      access_pending: 1,
+    });
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),

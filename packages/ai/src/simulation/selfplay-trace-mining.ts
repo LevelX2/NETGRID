@@ -550,7 +550,7 @@ function classifyLateRunStepSubclusterEntry(
     return "jackout_loop";
   }
   if (entry.actionType === "access_card") {
-    return /breach|remainingcount|access_queue/.test(text)
+    return selfplayEntryTextHasBreachPendingSignal(text)
       ? "breach_pending"
       : "access_pending";
   }
@@ -558,19 +558,13 @@ function classifyLateRunStepSubclusterEntry(
     if (runWindowHasAccessOrBreachAfter(window, windowIndex)) {
       return "continue_chain_to_access";
     }
-    if (
-      /simple_run_choice|simple_hq_or_rnd_pressure|opportunistic_central_run|remote_contest/.test(
-        text,
-      )
-    ) {
+    if (selfplayEntryTextHasSimpleRunPressureSignal(text)) {
       return "continue_without_progress";
     }
   }
   if (
     entry.actionType === "start_run" &&
-    /simple_hq_or_rnd_pressure|opportunistic_central_run|remote_contest|simple_run_choice/.test(
-      text,
-    )
+    selfplayEntryTextHasSimpleRunPressureSignal(text)
   ) {
     return "run_microstep_required";
   }
@@ -590,7 +584,7 @@ function runWindowHasAccessOrBreachAfter(
         entry.actionType === "steal_agenda" ||
         entry.actionType === "trash_accessed_card" ||
         entry.actionType === "decline_trash" ||
-        /breach/.test(selfplayEntryText(entry))),
+        selfplayEntryTextHasBreachPendingSignal(selfplayEntryText(entry))),
   );
 }
 
@@ -930,10 +924,40 @@ function selfplayErrorShowsNoLegalAction(error: string): boolean {
 }
 
 function selfplayErrorTokens(error: string): string[] {
-  return error
+  return selfplayTextTokens(error);
+}
+
+function selfplayEntryTextHasBreachPendingSignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    selfplayTokensIncludeAny(tokens, ["breach", "remainingcount"]) ||
+    tokensIncludePhrase(tokens, ["access", "queue"])
+  );
+}
+
+function selfplayEntryTextHasSimpleRunPressureSignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    tokensIncludePhrase(tokens, ["simple", "run", "choice"]) ||
+    tokensIncludePhrase(tokens, ["simple", "hq", "or", "rnd", "pressure"]) ||
+    tokensIncludePhrase(tokens, ["opportunistic", "central", "run"]) ||
+    tokensIncludePhrase(tokens, ["remote", "contest"])
+  );
+}
+
+function selfplayTextTokens(text: string): string[] {
+  return text
     .toLocaleLowerCase("en-US")
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
+}
+
+function selfplayTokensIncludeAny(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
 }
 
 function tokensIncludePhrase(
