@@ -513,20 +513,25 @@ function corpTacticalGoalScoreValue(goal: TacticalGoalLike): number {
   return 500 + Math.min(500, Math.max(0, goal.priority - 500));
 }
 
-function corpActionCandidateHasVisibleSignal(
+export function corpActionCandidateHasVisibleSignal(
   candidate: ActionSemanticCandidate | undefined,
   needles: readonly string[],
 ): boolean {
   if (!candidate) return false;
-  const text = [
+  const signals = [
     candidate.semanticActionType,
     ...candidate.actionTacticSignals,
     ...candidate.cardContextSignals,
     ...candidate.evidence,
   ]
-    .join("|")
-    .toLocaleLowerCase("en-US");
-  return needles.some((needle) => text.includes(needle));
+    .map((signal) => signal.toLocaleLowerCase("en-US"));
+  return needles.some((needle) => {
+    const normalizedNeedle = needle.toLocaleLowerCase("en-US");
+    return (
+      signals.includes(normalizedNeedle) ||
+      rolesMatch(signals, [normalizedNeedle])
+    );
+  });
 }
 
 function corpActionCandidateHasScoreCloseoutSignal(

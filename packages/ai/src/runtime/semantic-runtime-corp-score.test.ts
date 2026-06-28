@@ -2,9 +2,33 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
-import { semanticRuntimeCorpScoreComponents } from "./semantic-runtime-corp-score";
+import {
+  corpActionCandidateHasVisibleSignal,
+  semanticRuntimeCorpScoreComponents,
+} from "./semantic-runtime-corp-score";
 
 describe("semanticRuntimeCorpScoreComponents", () => {
+  it("matches corp action candidate visible signals by bounded terms", () => {
+    expect(
+      corpActionCandidateHasVisibleSignal(
+        candidate({ cardContextSignals: ["access_ambush"] }),
+        ["ambush"],
+      ),
+    ).toBe(true);
+    expect(
+      corpActionCandidateHasVisibleSignal(
+        candidate({ cardContextSignals: ["ambusher_noise"] }),
+        ["ambush"],
+      ),
+    ).toBe(false);
+    expect(
+      corpActionCandidateHasVisibleSignal(
+        candidate({ actionTacticSignals: ["corp.score_closeout"] }),
+        ["corp.score_closeout"],
+      ),
+    ).toBe(true);
+  });
+
   it("scores agenda closeout actions that match Corp tactical goals", () => {
     const components = semanticRuntimeCorpScoreComponents(
       corpInputWithGoals([
@@ -439,6 +463,44 @@ function corpInputWithGoals(
     },
     ownCorpTacticalGoals: goals,
   } as unknown as AiDecisionInput;
+}
+
+function candidate(
+  overrides: Partial<ActionSemanticCandidate> = {},
+): ActionSemanticCandidate {
+  return {
+    actionId: "candidate",
+    actionType: "trigger_ability",
+    actorSide: "corp",
+    visibilityScope: "public",
+    legalActionRef: {
+      actionId: "candidate",
+      actionType: "trigger_ability",
+      originalPayloadKeys: [],
+    },
+    sourceKind: "asset",
+    abilityBindingMethod: "bound",
+    semanticActionType: "corp.ability",
+    cardContextSignals: [],
+    actionTacticSignals: [],
+    strategySupport: [],
+    conditions: [],
+    risks: [],
+    constraints: [],
+    costProfile: { clickCost: 1, creditCost: 0, additionalCosts: [] },
+    timingProfile: { timingPoint: "corp_action.main", window: "main_action" },
+    boardContext: {
+      source: "ai_decision_input",
+      sideSafe: true,
+      notes: [],
+    },
+    confidence: "medium",
+    primaryProjectionStatus: "complete",
+    projectionIssues: [],
+    hardGates: [],
+    evidence: [],
+    ...overrides,
+  } as ActionSemanticCandidate;
 }
 
 function corpAction(

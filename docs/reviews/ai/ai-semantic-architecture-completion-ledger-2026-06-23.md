@@ -7660,6 +7660,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` siebenundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` kapselt sichtbare Corp-Action-Candidate-Signale in `corpActionCandidateHasVisibleSignal` und nutzt exakte Signalvergleiche plus gebundenes `rolesMatch` statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `access_ambush` und `corp.score_closeout` bleiben wirksam; substringartiges Rauschen wie `ambusher_noise` erzeugt kein sichtbares Corp-Signal mehr.
+  - `semantic-runtime-corp-score.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
