@@ -189,9 +189,7 @@ function isServerProtection(action: ProgressDeltaAction): boolean {
   if (!["install_card", "rez_ice", "advance_card"].includes(action.actionType)) {
     return false;
   }
-  return /protect|protection|remote|central|ice|rez|score_remote/.test(
-    actionText(action),
-  );
+  return actionTextHasServerProtectionSignal(actionText(action));
 }
 
 function hasFutureProgress(
@@ -339,6 +337,20 @@ function actionTextHasReachabilitySignal(text: string): boolean {
     progressTokensIncludePhrase(tokens, ["known", "path"]) ||
     progressTokensIncludePhrase(tokens, ["access", "path"]) ||
     progressTokensIncludePhrase(tokens, ["continue", "chain"])
+  );
+}
+
+function actionTextHasServerProtectionSignal(text: string): boolean {
+  const tokens = progressActionTextTokens(text);
+  return (
+    progressTokensIncludeAny(tokens, [
+      "protect",
+      "protection",
+      "remote",
+      "central",
+      "ice",
+      "rez",
+    ]) || progressTokensIncludePhrase(tokens, ["score", "remote"])
   );
 }
 

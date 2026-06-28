@@ -8976,6 +8976,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-delta-labeler.ts` ersetzt die Server-Protection-Progress-Erkennung für `protect`, `protection`, `remote`, `central`, `ice`, `rez` und `score_remote` durch gebundene Action-Text-Tokens.
+  - Exakte Tokens und die Phrase `score remote` bleiben wirksam; Suffix-Rauschen wie `protective_noise` erzeugt kein direktes `progress_server_protected` mehr.
+  - Die Erkennung bleibt reine Simulations-/Progress-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `progress-delta-labeler.test.ts` schützt positive und negative Server-Protection-Tokenfälle; spätere Plausible-No-Progress-Heuristik bleibt separater Fallback.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/progress-delta-labeler.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

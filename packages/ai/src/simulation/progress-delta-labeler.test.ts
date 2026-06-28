@@ -84,6 +84,22 @@ describe("progress delta labeler", () => {
     ).toBe("no_progress_stale");
   });
 
+  it("bounds server protection signals to exact text tokens", () => {
+    expect(
+      actionLabel({
+        side: "corp",
+        actionType: "install_card",
+        reasonCode: "corp.score_remote",
+      }),
+    ).toBe("progress_server_protected");
+    const noisy = actionLabel({
+      side: "corp",
+      actionType: "install_card",
+      reasonCode: "corp.protective_noise",
+    });
+    expect(noisy).not.toBe("progress_server_protected");
+  });
+
   it("labels economy as converted only when follow-up progress appears", () => {
     const labels = labelProgressDeltaWindow([
       { index: 10, side: "runner", actionType: "gain_credit" },
