@@ -1,3 +1,5 @@
+import { rolesMatch } from "../runtime/role-match";
+
 export type RunnerCoverageType = "barrier" | "code_gate" | "sentry" | "unknown";
 
 export type RunnerCoverageGoalContext = {
@@ -41,6 +43,14 @@ export type RunnerCoverageGoalResolution = {
   sideSafe: boolean;
   rationale: string;
 };
+
+const SEARCH_SIGNAL_NEEDLES = [
+  "breaker_search",
+  "program_search",
+  "search.stack",
+  "coverage_search",
+  "setup.search",
+] as const;
 
 export function resolveRunnerCoverageGoalForAction(
   context: RunnerCoverageGoalContext,
@@ -170,12 +180,14 @@ function matchedCoverageGoalIds(
   if (explicitMatches.length > 0) return explicitMatches;
   if (
     action.actionTacticSignals?.some((signal) =>
-      /breaker_search|program_search|search\.stack|coverage/i.test(signal),
+      semanticValueMatches(signal, SEARCH_SIGNAL_NEEDLES),
     ) &&
-    [...activeGoalIds].some((goalId) => goalId.includes("breaker_search"))
+    [...activeGoalIds].some((goalId) =>
+      semanticValueMatches(goalId, ["breaker_search"]),
+    )
   ) {
     return [...activeGoalIds].filter((goalId) =>
-      goalId.includes("breaker_search"),
+      semanticValueMatches(goalId, ["breaker_search"]),
     );
   }
   return [];
@@ -185,10 +197,18 @@ function isSearchAction(action: RunnerCoverageGoalAction): boolean {
   return (
     action.type === "search_stack" ||
     action.actionTacticSignals?.some((signal) =>
-      /breaker_search|program_search|search\.stack|coverage_search|setup\.search/i.test(
-        signal,
-      ),
+      semanticValueMatches(signal, SEARCH_SIGNAL_NEEDLES),
     ) === true
+  );
+}
+
+function semanticValueMatches(
+  value: string,
+  needles: readonly string[],
+): boolean {
+  return (
+    needles.some((needle) => value === needle) ||
+    rolesMatch([value], needles)
   );
 }
 

@@ -7939,6 +7939,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertachtundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/runner-coverage-goals.ts` nutzt für Coverage-Search-Signale und aktive `breaker_search`-Goal-IDs gebundene semantische Wertvergleiche statt freier Regex-/Substring-Erkennung.
+  - Strukturierte Signale wie `setup.program_search` und Goal-IDs wie `runner.doctrine.breaker_search` bleiben wirksam; substringartiges Rauschen wie `setup.program_searchish_noise` und `runner.doctrine.breaker_searchish_noise` erzeugt keine Search-Find-Garantie mehr.
+  - `runner-coverage-goals.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/runner-coverage-goals.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
