@@ -3,6 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import { rolesHaveBreakerRole } from "./breaker-role-match";
 
 type RunnerBlinkRecoveryScoreAssessment = {
   active: boolean;
@@ -43,7 +44,7 @@ export function runnerBlinkRecoveryScoreComponent(
 
   if (action.type === "install_card") {
     const roles = dependencies.rolesForAction(input, action);
-    if (roles.some((role) => role.startsWith("breaker_"))) {
+    if (rolesHaveBreakerRole(roles)) {
       return {
         key: "runner_blink_stable_coverage_recovery",
         label: "Stabile Breaker-Abdeckung",

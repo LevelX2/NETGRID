@@ -8075,6 +8075,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertdreiundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-blink-recovery-score.ts` nutzt den gemeinsamen Breaker-Role-Helper statt direkter `startsWith("breaker_")`-Prüfung für stabile Breaker-Recovery-Installationen.
+  - Strukturierte Rollen wie `support_breaker_fracter` bleiben für Blink-Recovery-Setup wirksam; substringartiges Rauschen wie `breaker_fracterish_noise` erzeugt keinen Stable-Coverage-Recovery-Score.
+  - `runner-blink-recovery-score.test.ts` schützt positive Breaker-Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-blink-recovery-score.test.ts src/runtime/runner-install-score.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
