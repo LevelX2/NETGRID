@@ -8806,6 +8806,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertdreiundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/access/remote-root-value-projection.ts` klassifiziert Remote-Root-Value-Rollen über gebundene Rollentokens und Phrasen statt über Regexe wie `campaign|finite|economy_pool|counter_bank`.
+  - Strukturierte Rollen wie `agenda_protection`, `campaign`, `counter_bank`, `ambush` und `persistent_engine` bleiben wirksam; Rauschen wie `campaigner_noise`, `engineer_noise`, `ambusher_noise` und `scoring_protectionish_noise` bleibt wirkungslos.
+  - Finite Pool-, Campaign-Drip-, Scoring-Protection-, Ambush- und Persistent-Engine-Erkennung nutzen dieselbe Tokenbasis.
+  - `remote-root-value-projection.test.ts` schützt die bestehenden positiven Rollenfälle und ergänzt negative Substring-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/access/remote-root-value-projection.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

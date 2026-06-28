@@ -102,4 +102,29 @@ describe("remote root value projection", () => {
       finitePoolDepleted: false,
     });
   });
+
+  it("bounds role text classification by role tokens", () => {
+    expect(
+      projectRemoteRootValue({
+        definitionId: "remote-role-noise",
+        roles: [
+          "campaigner_noise",
+          "engineer_noise",
+          "ambusher_noise",
+          "scoring_protectionish_noise",
+        ],
+      }),
+    ).toMatchObject({
+      kind: "unknown",
+    });
+
+    expect(
+      projectRemoteRootValue({
+        definitionId: "remote-role-structured",
+        roles: ["agenda_protection"],
+      }),
+    ).toMatchObject({
+      kind: "scoring_protection",
+    });
+  });
 });

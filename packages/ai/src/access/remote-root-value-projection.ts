@@ -97,22 +97,55 @@ function remoteRootValueKind(params: {
   hasRecurringEconomyEffect: boolean;
   roleText: string;
 }): RemoteRootValueKind {
+  const roleTokens = tokensForRoleText(params.roleText);
   if (
     params.hasBitCounter &&
     (params.hasFiniteEconomyEffect ||
-      /campaign|finite|economy_pool|counter_bank/.test(params.roleText))
+      tokensIncludeAny(roleTokens, ["campaign", "finite"]) ||
+      tokensIncludePhrase(roleTokens, ["economy", "pool"]) ||
+      tokensIncludePhrase(roleTokens, ["counter", "bank"]))
   ) {
     return "finite_economy_pool";
   }
   if (params.hasRecurringCreditCounter || params.hasRecurringEconomyEffect) {
     return "recurring_economy";
   }
-  if (/campaign|drip/.test(params.roleText)) return "campaign_drip";
-  if (/scoring_protection|agenda_protection/.test(params.roleText)) {
+  if (tokensIncludeAny(roleTokens, ["campaign", "drip"])) {
+    return "campaign_drip";
+  }
+  if (
+    tokensIncludePhrase(roleTokens, ["scoring", "protection"]) ||
+    tokensIncludePhrase(roleTokens, ["agenda", "protection"])
+  ) {
     return "scoring_protection";
   }
-  if (/ambush/.test(params.roleText)) return "ambush";
-  if (/engine|persistent/.test(params.roleText)) return "persistent_engine";
+  if (tokensIncludeAny(roleTokens, ["ambush"])) return "ambush";
+  if (tokensIncludeAny(roleTokens, ["engine", "persistent"])) {
+    return "persistent_engine";
+  }
   if (params.hasBitCounter) return "non_economy_counter";
   return "unknown";
+}
+
+function tokensForRoleText(value: string): string[] {
+  return value
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function tokensIncludeAny(
+  tokens: readonly string[],
+  accepted: readonly string[],
+): boolean {
+  return tokens.some((token) => accepted.includes(token));
+}
+
+function tokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
 }
