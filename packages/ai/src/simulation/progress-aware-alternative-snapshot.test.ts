@@ -42,4 +42,16 @@ describe("progress-aware alternative snapshots", () => {
     expect(snapshot.expectedProgressLabel).toBe("progress_coverage_install");
     expect(snapshot.similarLaterProgress).toBe("unknown_shadow_only");
   });
+
+  it("bounds hard-gate snapshot markers to structured tokens", () => {
+    const snapshot = progressAwareAlternativeSnapshot({
+      actionType: "draw_card",
+      scoreBreakdown: [{ key: "hardly_gateish_noise" }],
+      whyNot: ["suppressedish_noise"],
+    });
+
+    expect(snapshot.hardGates).toEqual([]);
+    expect(snapshot.blockedReason).toBeUndefined();
+    expect(snapshot.targetContextStatus).toBe("opaque");
+  });
 });

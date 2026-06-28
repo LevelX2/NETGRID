@@ -8698,6 +8698,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertzwölfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-aware-alternative-snapshot.ts` klassifiziert Hard-Gates, semantische Alternative-Typen, Target-Kontext und Side über gebundene Tokens und Phrasen statt über zusammengefügte Text-Regexes.
+  - Echte Signale wie `hard_gate`, `gate_block`, `unsafe`, `scoreline`, `coverage`, `run`, `access`, `economy` und `reserve` bleiben wirksam; Rauschen wie `hardly_gateish_noise` und `suppressedish_noise` bleibt wirkungslos.
+  - `progress-aware-alternative-snapshot.test.ts` schützt den bestehenden Score-/Coverage-Snapshot und ergänzt einen Substring-Negativfall für Hard-Gate-Marker.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/progress-aware-alternative-snapshot.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

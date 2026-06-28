@@ -42,7 +42,7 @@ export function progressAwareAlternativeSnapshot(
     (component) => component.key,
   );
   const hardGates = [...scoreKeys, ...(alternative.whyNot ?? [])].filter(
-    (entry) => /hard|gate|unsafe|illegal|excluded|blocked|suppressed/i.test(entry),
+    alternativeEntryShowsHardGate,
   );
   const blockedReason =
     alternative.excluded || hardGates.length > 0
@@ -90,13 +90,23 @@ function semanticActionTypeForAlternative(
   actionType: string,
   scoreKeys: readonly string[],
 ): string {
-  const text = [actionType, ...scoreKeys].join("|").toLocaleLowerCase("en-US");
-  if (/score|advance/.test(text)) return "scoreline";
-  if (/coverage|install|breaker|icebreaker/.test(text)) return "coverage_setup";
-  if (/\brun\b|access|trash|steal|break|pump/.test(text)) return "run_progress";
-  if (/protect|rez|ice|remote|central/.test(text)) return "server_protection";
-  if (/credit|economy/.test(text)) return "economy";
-  if (/draw|search/.test(text)) return "search_or_draw";
+  const tokens = alternativeTokens([actionType, ...scoreKeys]);
+  if (tokensIncludeAny(tokens, ["score", "scoreline", "advance"])) {
+    return "scoreline";
+  }
+  if (
+    tokensIncludeAny(tokens, ["coverage", "install", "breaker", "icebreaker"])
+  ) {
+    return "coverage_setup";
+  }
+  if (tokensIncludeAny(tokens, ["run", "access", "trash", "steal", "break", "pump"])) {
+    return "run_progress";
+  }
+  if (tokensIncludeAny(tokens, ["protect", "rez", "ice", "remote", "central"])) {
+    return "server_protection";
+  }
+  if (tokensIncludeAny(tokens, ["credit", "economy"])) return "economy";
+  if (tokensIncludeAny(tokens, ["draw", "search"])) return "search_or_draw";
   return "opaque_or_basic";
 }
 
@@ -106,35 +116,45 @@ function targetContextStatusForAlternative(
   whyChosen: readonly string[],
   whyNot: readonly string[],
 ): string {
-  const text = [actionType, ...scoreKeys, ...whyChosen, ...whyNot]
-    .join("|")
-    .toLocaleLowerCase("en-US");
-  if (/unsafe|hard_gate|gate_block|illegal|excluded/.test(text)) {
+  const tokens = alternativeTokens([actionType, ...scoreKeys, ...whyChosen, ...whyNot]);
+  if (
+    tokensIncludeAny(tokens, ["unsafe", "illegal", "excluded"]) ||
+    tokensIncludePhrase(tokens, ["hard", "gate"]) ||
+    tokensIncludePhrase(tokens, ["gate", "block"])
+  ) {
     return "blocked_by_hard_gate";
   }
-  if (/score|advance/.test(text)) return "scoreline_relevant";
-  if (/coverage|breaker|icebreaker/.test(text)) return "coverage_relevant";
-  if (/protect|rez|ice|remote|central/.test(text)) {
+  if (tokensIncludeAny(tokens, ["score", "scoreline", "advance"])) {
+    return "scoreline_relevant";
+  }
+  if (tokensIncludeAny(tokens, ["coverage", "breaker", "icebreaker"])) {
+    return "coverage_relevant";
+  }
+  if (tokensIncludeAny(tokens, ["protect", "rez", "ice", "remote", "central"])) {
     return "protection_relevant";
   }
-  if (/run|access|trash|steal/.test(text)) return "reachability_relevant";
-  if (/credit|economy|reserve/.test(text)) return "economy_or_reserve";
+  if (tokensIncludeAny(tokens, ["run", "access", "trash", "steal"])) {
+    return "reachability_relevant";
+  }
+  if (tokensIncludeAny(tokens, ["credit", "economy", "reserve"])) {
+    return "economy_or_reserve";
+  }
   return "opaque";
 }
 
 function sideForAlternative(
   alternative: ProgressAwareAlternativeInput,
 ): "runner" | "corp" | undefined {
-  const text = [
+  const tokens = alternativeTokens([
     alternative.actionType,
     ...(alternative.scoreBreakdown ?? []).map((entry) => entry.key),
     ...(alternative.whyChosen ?? []),
     ...(alternative.whyNot ?? []),
-  ]
-    .join("|")
-    .toLocaleLowerCase("en-US");
-  if (/corp|score|advance|rez|protect/.test(text)) return "corp";
-  if (/runner|run|access|trash|steal|breaker|coverage/.test(text)) {
+  ]);
+  if (tokensIncludeAny(tokens, ["corp", "score", "scoreline", "advance", "rez", "protect"])) {
+    return "corp";
+  }
+  if (tokensIncludeAny(tokens, ["runner", "run", "access", "trash", "steal", "breaker", "coverage"])) {
     return "runner";
   }
   return undefined;
@@ -144,4 +164,44 @@ function alternativeSourceKind(source: string | undefined): string | undefined {
   if (!source) return undefined;
   if (source === "basic_action" || source === "game_rule") return source;
   return "visible_card_or_ability";
+}
+
+function alternativeEntryShowsHardGate(entry: string): boolean {
+  const tokens = alternativeTokens([entry]);
+  return (
+    tokensIncludeAny(tokens, [
+      "unsafe",
+      "illegal",
+      "excluded",
+      "blocked",
+      "suppressed",
+    ]) ||
+    tokensIncludePhrase(tokens, ["hard", "gate"]) ||
+    tokens.includes("gate")
+  );
+}
+
+function alternativeTokens(values: readonly string[]): string[] {
+  return values.flatMap((value) =>
+    value
+      .toLocaleLowerCase("en-US")
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean),
+  );
+}
+
+function tokensIncludeAny(
+  tokens: readonly string[],
+  accepted: readonly string[],
+): boolean {
+  return tokens.some((token) => accepted.includes(token));
+}
+
+function tokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
 }
