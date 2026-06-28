@@ -113,6 +113,26 @@ describe("Action semantic invariants", () => {
     expect(JSON.stringify(report)).not.toContain("rankedAlternatives");
   });
 
+  it("bounds hidden-info TargetProfile evidence markers by tokens", () => {
+    const report = buildActionSemanticInvariantReport([
+      sideSafeProfile("onr_v1_marker_noise", [
+        "hiddenish privateer evidence stays public.",
+      ]),
+      sideSafeProfile("onr_v1_marker_token", [
+        "hidden_info_projection would be required.",
+      ]),
+    ]);
+
+    const hiddenIssues = report.issues.filter(
+      (issue) => issue.issueId === "target_profile_hidden_info",
+    );
+
+    expect(hiddenIssues).toHaveLength(1);
+    expect(hiddenIssues[0]?.evidence).toContain(
+      "hidden_info_projection would be required.",
+    );
+  });
+
   it("matches support-only signals by bounded marker segments", () => {
     const report = buildActionSemanticInvariantReport([
       {
@@ -956,6 +976,38 @@ function runnerRiskProfile(
             status: "not_available",
             issues: ["card_semantics_unavailable"],
             evidence: ["Damage prevention precision remains diagnostic."],
+          },
+        ],
+      },
+    ],
+  };
+}
+
+function sideSafeProfile(
+  cardId: string,
+  targetEvidence: readonly string[],
+): ActionCardSemanticProfile {
+  return {
+    cardId,
+    tacticSignals: ["card.context.economy"],
+    abilitySemantics: [
+      {
+        abilityId: `${cardId}.ability`,
+        tacticSignals: ["economy.burst"],
+        strategySupport: [
+          {
+            strategyId: "runner.rig_setup",
+            role: "economy_enabler",
+            confidence: "medium",
+            evidence: "Visible legal action creates usable credits.",
+          },
+        ],
+        targetProfileMatches: [
+          {
+            targetProfileId: `${cardId}.target_profile`,
+            status: "matched",
+            issues: [],
+            evidence: [...targetEvidence],
           },
         ],
       },

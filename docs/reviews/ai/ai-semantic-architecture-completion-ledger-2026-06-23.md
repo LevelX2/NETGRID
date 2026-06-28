@@ -8707,6 +8707,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertdreizehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-invariants.ts` scannt TargetProfile-Hidden-Info-Evidence über gebundene Tokens und Phrasen statt über eine Wortgrenzen-Regex.
+  - Echte Marker wie `hidden`, `hidden_info`, `private_payload`, `full_game_state`, `session_token` und `reconnect_token` werden erkannt; Rauschen wie `hiddenish privateer` bleibt wirkungslos.
+  - `action-semantic-invariants.test.ts` schützt die Token-Grenze und bestätigt zugleich, dass `hidden_info_projection` als Hidden-Info-Marker reportet wird.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-invariants.test.ts` grün, 1 Datei, 21 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

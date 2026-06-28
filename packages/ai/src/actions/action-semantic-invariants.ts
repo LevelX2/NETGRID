@@ -356,8 +356,49 @@ function compatibilityOrContextOnlySignal(signal: string): boolean {
 }
 
 function hiddenInfoText(value: string): boolean {
-  return /\b(hidden|private|secret|engine_only|cardinstances|privatepayload|fullgamestate|decklist|sessiontoken|reconnecttoken)\b/i.test(
-    value,
+  const tokens = hiddenInfoTokens(value);
+  return (
+    tokensIncludeAny(tokens, [
+      "hidden",
+      "private",
+      "secret",
+      "cardinstances",
+      "privatepayload",
+      "fullgamestate",
+      "decklist",
+      "sessiontoken",
+      "reconnecttoken",
+    ]) ||
+    tokensIncludePhrase(tokens, ["engine", "only"]) ||
+    tokensIncludePhrase(tokens, ["card", "instances"]) ||
+    tokensIncludePhrase(tokens, ["private", "payload"]) ||
+    tokensIncludePhrase(tokens, ["full", "game", "state"]) ||
+    tokensIncludePhrase(tokens, ["deck", "list"]) ||
+    tokensIncludePhrase(tokens, ["session", "token"]) ||
+    tokensIncludePhrase(tokens, ["reconnect", "token"])
+  );
+}
+
+function hiddenInfoTokens(value: string): string[] {
+  return value
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function tokensIncludeAny(
+  tokens: readonly string[],
+  accepted: readonly string[],
+): boolean {
+  return tokens.some((token) => accepted.includes(token));
+}
+
+function tokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
   );
 }
 
