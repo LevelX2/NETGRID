@@ -1,5 +1,6 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 
+import { rolesHaveBreakerRole } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 
 export type RunnerJunkyardBbsRecoveryActionDependencies = {
@@ -85,7 +86,7 @@ export function runnerJunkyardBbsRecoveryTargetAssessment(
       value: 1350,
       evidence: "target_class:missing_breaker_coverage",
     });
-  } else if (rolesMatch(targetRoles, ["breaker_"])) {
+  } else if (rolesHaveBreakerRole(targetRoles)) {
     values.push({
       value: 80,
       evidence: "target_class:breaker_no_visible_need",
