@@ -81,9 +81,11 @@ export function discardKeepScore(
     if (rolesMatch(roles, ["breaker_"])) {
       const installedSameBreakerRole = roles.some(
         (role) =>
-          role.startsWith("breaker_") &&
+          rolesMatch([role], ["breaker_"]) &&
           (input.playerView.own.rig ?? []).some((rigCard) =>
-            dependencies.rolesForCardId(rigCard.definitionId).includes(role),
+            rolesMatch(dependencies.rolesForCardId(rigCard.definitionId), [
+              role,
+            ]),
           ),
       );
       baseValue += installedSameBreakerRole ? 95 : 210;

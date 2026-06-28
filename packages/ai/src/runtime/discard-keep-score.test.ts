@@ -65,15 +65,48 @@ describe("discard keep score", () => {
       ).baseValue,
     ).toBe(neutral);
   });
+
+  it("matches installed duplicate breaker roles by bounded role terms", () => {
+    const freshBreaker = score(
+      runnerCard("fresh-breaker", "program"),
+      ["breaker_fracter"],
+      "runner",
+      [],
+    ).baseValue;
+    const installedSameBreaker = score(
+      runnerCard("duplicate-breaker", "program"),
+      ["breaker_fracter"],
+      "runner",
+      [runnerCard("installed-fracter", "program")],
+      {
+        "installed-fracter": ["support_breaker_fracter"],
+      },
+    ).baseValue;
+    const installedNoise = score(
+      runnerCard("noise-breaker", "program"),
+      ["breaker_fracter"],
+      "runner",
+      [runnerCard("installed-noise", "program")],
+      {
+        "installed-noise": ["breaker_fracterish_noise"],
+      },
+    ).baseValue;
+
+    expect(installedSameBreaker).toBeLessThan(freshBreaker);
+    expect(installedNoise).toBe(freshBreaker);
+  });
 });
 
 function score(
   card: VisibleCard,
   roles: readonly string[] = [],
   side: "corp" | "runner" = "corp",
+  rig: readonly VisibleCard[] = [],
+  rolesByCardId: Record<string, readonly string[]> = {},
 ) {
-  return discardKeepScore(input(card, side), card, {
-    rolesForCardId: () => roles,
+  return discardKeepScore(input(card, side, rig), card, {
+    rolesForCardId: (cardId) =>
+      cardId === card.definitionId ? roles : rolesByCardId[cardId ?? ""] ?? [],
     definitionTypeForCardId: () => card.type,
     visibleCardPlayOrInstallCost: () => 0,
     runnerCardAddressesVisibleBreakerNeed: () => false,
@@ -83,7 +116,11 @@ function score(
   });
 }
 
-function input(card: VisibleCard, side: "corp" | "runner"): AiDecisionInput {
+function input(
+  card: VisibleCard,
+  side: "corp" | "runner",
+  rig: readonly VisibleCard[] = [],
+): AiDecisionInput {
   return {
     side,
     playerView: {
@@ -101,6 +138,7 @@ function input(card: VisibleCard, side: "corp" | "runner"): AiDecisionInput {
         clicks: 0,
         agendaPoints: 0,
         gripOrHq: [card],
+        rig: [...rig],
         stackOrRdCount: 20,
         heapOrArchives: [],
         scoreArea: [],

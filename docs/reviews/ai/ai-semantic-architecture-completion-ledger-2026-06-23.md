@@ -8011,6 +8011,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsechsunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/discard-keep-score.ts` nutzt für Runner-Breaker-Duplikaterkennung den gebundenen `rolesMatch`-Helper statt direkter `startsWith("breaker_")`- und Rollen-`includes`-Prüfungen gegen installierte Karten.
+  - Strukturierte Rollen wie `breaker_fracter` und installierte `support_breaker_fracter` werden als gleiches Breaker-Segment erkannt; substringartiges Rauschen wie `breaker_fracterish_noise` schwächt den Discard-Keep-Wert nicht mehr.
+  - `discard-keep-score.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/discard-keep-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
