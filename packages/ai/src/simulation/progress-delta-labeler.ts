@@ -213,7 +213,7 @@ function hasFutureProgress(
 function isEconomyAction(action: ProgressDeltaAction): boolean {
   return (
     action.actionType === "gain_credit" ||
-    /economy|credit|funding/.test(actionText(action))
+    actionTextHasEconomySignal(actionText(action))
   );
 }
 
@@ -352,6 +352,16 @@ function actionTextHasServerProtectionSignal(text: string): boolean {
       "rez",
     ]) || progressTokensIncludePhrase(tokens, ["score", "remote"])
   );
+}
+
+function actionTextHasEconomySignal(text: string): boolean {
+  const tokens = progressActionTextTokens(text);
+  return progressTokensIncludeAny(tokens, [
+    "economy",
+    "credit",
+    "credits",
+    "funding",
+  ]);
 }
 
 function progressActionTextTokens(text: string): string[] {

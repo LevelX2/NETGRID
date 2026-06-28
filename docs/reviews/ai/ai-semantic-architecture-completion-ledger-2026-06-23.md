@@ -8986,6 +8986,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihunderteinundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-delta-labeler.ts` ersetzt die Economy-Conversion-Erkennung für `economy`, `credit`, `credits` und `funding` durch gebundene Action-Text-Tokens.
+  - Direkte `gain_credit`-Actions bleiben unverändert Economy-Actions; der Rückbau begrenzt nur freie Textsignale aus `planKind`, `reasonCode`, `evidence`, `debugFacts` und `qualityTags`.
+  - Suffix-Rauschen wie `creditor_noise` löst trotz späterem Access keine `progress_economy_converted`-Klassifikation mehr aus.
+  - Die Erkennung bleibt reine Simulations-/Progress-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `progress-delta-labeler.test.ts` schützt positive und negative Economy-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/progress-delta-labeler.test.ts` grün, 1 Datei, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

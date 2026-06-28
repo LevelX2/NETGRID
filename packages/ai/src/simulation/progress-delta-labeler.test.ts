@@ -111,6 +111,30 @@ describe("progress delta labeler", () => {
     expect(labels[0]?.followUp.within5).toContain("progress_access");
   });
 
+  it("bounds economy conversion text signals to exact tokens", () => {
+    const funded = labelProgressDeltaWindow([
+      {
+        index: 10,
+        side: "runner",
+        actionType: "draw_card",
+        reasonCode: "runner.funding",
+      },
+      { index: 11, side: "runner", actionType: "access_card" },
+    ]);
+    expect(funded[0]?.label).toBe("progress_economy_converted");
+
+    const noisy = labelProgressDeltaWindow([
+      {
+        index: 10,
+        side: "runner",
+        actionType: "draw_card",
+        reasonCode: "runner.creditor_noise",
+      },
+      { index: 11, side: "runner", actionType: "access_card" },
+    ]);
+    expect(noisy[0]?.label).not.toBe("progress_economy_converted");
+  });
+
   it("keeps reserve economy plausible without treating it as progress", () => {
     const result = labelProgressDeltaAction({
       side: "runner",
