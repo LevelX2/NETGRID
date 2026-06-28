@@ -2764,25 +2764,69 @@ function expansionStep(
 function detectTraceScrubberViolations(
   text: string,
 ): TraceScrubberForbiddenSignal[] {
-  const lower = text.toLowerCase();
+  const tokens = metaTraceTextTokens(text);
   return META6_TRACE_SCRUBBER_FORBIDDEN_SIGNALS.filter((signal) => {
-    if (signal === "opponent_hand") return /opponent hand|gegnerhand/.test(lower);
+    if (signal === "opponent_hand") {
+      return (
+        metaTraceTokensIncludePhrase(tokens, ["opponent", "hand"]) ||
+        tokens.includes("gegnerhand")
+      );
+    }
     if (signal === "hq_or_rd_wrong_side_detail") {
-      return /hq detail|r&d detail|rd detail|hq\/r&d/.test(lower);
+      return (
+        metaTraceTokensIncludePhrase(tokens, ["hq", "detail"]) ||
+        metaTraceTokensIncludePhrase(tokens, ["r", "d", "detail"]) ||
+        metaTraceTokensIncludePhrase(tokens, ["rd", "detail"]) ||
+        metaTraceTokensIncludePhrase(tokens, ["hq", "r", "d"])
+      );
     }
     if (signal === "unrezzed_ice_detail_for_runner") {
-      return /unrezzed ice detail|unrezzed ice identity|unrezzed ice subtype/.test(
-        lower,
+      return (
+        metaTraceTokensIncludePhrase(tokens, ["unrezzed", "ice", "detail"]) ||
+        metaTraceTokensIncludePhrase(tokens, ["unrezzed", "ice", "identity"]) ||
+        metaTraceTokensIncludePhrase(tokens, ["unrezzed", "ice", "subtype"])
       );
     }
     if (signal === "facedown_remote_content") {
-      return /facedown remote content|verdeckte remote/.test(lower);
+      return (
+        metaTraceTokensIncludePhrase(tokens, ["facedown", "remote", "content"]) ||
+        metaTraceTokensIncludePhrase(tokens, ["verdeckte", "remote"])
+      );
     }
-    if (signal === "full_state_fragment") return /fullstate|full state/.test(lower);
-    if (signal === "choice_option_leak") return /choice options|choice-option/.test(lower);
-    if (signal === "private_debug_data") return /private debug|decisiondebug/.test(lower);
+    if (signal === "full_state_fragment") {
+      return tokens.includes("fullstate") ||
+        metaTraceTokensIncludePhrase(tokens, ["full", "state"]);
+    }
+    if (signal === "choice_option_leak") {
+      return (
+        metaTraceTokensIncludePhrase(tokens, ["choice", "options"]) ||
+        metaTraceTokensIncludePhrase(tokens, ["choice", "option"])
+      );
+    }
+    if (signal === "private_debug_data") {
+      return (
+        metaTraceTokensIncludePhrase(tokens, ["private", "debug"]) ||
+        tokens.includes("decisiondebug")
+      );
+    }
     return false;
   });
+}
+
+function metaTraceTextTokens(text: string): string[] {
+  return text
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function metaTraceTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    phrase.every((token, offset) => tokens[index + offset] === token),
+  );
 }
 
 function redactViolation(

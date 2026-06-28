@@ -253,6 +253,10 @@ describe("META6 Stabilization + Limited Rollout / Legacy-Freeze Prep", () => {
       "safe",
       "candidateEvidence: gain_credit; goalMatches: basic_economy_draw",
     );
+    const noisy = scrubTraceForProduction(
+      "noisy",
+      "FullStatement references opponent handler, HQ detailing and decisiondebugish notes.",
+    );
 
     expect(META6_TRACE_SCRUBBER_FORBIDDEN_SIGNALS).toEqual(
       expect.arrayContaining([
@@ -272,6 +276,8 @@ describe("META6 Stabilization + Limited Rollout / Legacy-Freeze Prep", () => {
     expect(unsafe.redactedText).toContain("[redacted:full_state_fragment]");
     expect(safe.safe).toBe(true);
     expect(safe.violations).toEqual([]);
+    expect(noisy.safe).toBe(true);
+    expect(noisy.violations).toEqual([]);
   });
 
   it("keeps legacy freeze criteria strict and does not allow legacy removal", () => {

@@ -9205,6 +9205,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n "\.test\(|match\(" packages/ai/src/runner-hand-development.ts` ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/semantic-ai-core-meta.ts` ersetzt die Trace-Scrubber-Detektion für Hidden-/Wrong-Side-/Private-Debug-Signale durch gebundene Meta-Trace-Tokens.
+  - Exakte Begriffe und Phrasen wie `opponent hand`, `HQ detail`, `R&D detail`, `unrezzed ice detail`, `facedown remote content`, `full state`, `choice option` und `private debug` bleiben wirksam; Suffix-Rauschen wie `FullStatement`, `opponent handler`, `HQ detailing` und `decisiondebugish` erzeugt keine Violation mehr.
+  - Die Redaction-Ersetzung bleibt unverändert regexbasiert, weil sie nach der Detektion gezielt Originaltext ersetzt.
+  - Die Erkennung bleibt reine Meta-/Trace-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `semantic-ai-core-meta.test.ts` schützt positive und negative Trace-Scrubber-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-core-meta.test.ts` grün, 1 Datei, 25 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
