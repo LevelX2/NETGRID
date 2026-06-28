@@ -1236,7 +1236,12 @@ function hqHandMemoryAdjustment(
 }
 
 function beliefRemoteServerId(serverId: string): boolean {
-  return /^remote_\d+$/.test(serverId);
+  if (!serverId.startsWith("remote_")) return false;
+  const suffix = serverId.slice("remote_".length);
+  return (
+    suffix.length > 0 &&
+    [...suffix].every((character) => character >= "0" && character <= "9")
+  );
 }
 
 function beliefDefinitionType(definitionId: string): string | undefined {

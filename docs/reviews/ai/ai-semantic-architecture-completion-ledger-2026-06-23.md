@@ -8796,6 +8796,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertzweiundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/belief-state.ts` ersetzt den Remote-Server-ID-Regex für Hidden-Remote-Candidate-Memory durch explizite `remote_`-Prefix- und ASCII-Ziffernprüfung.
+  - Gültige IDs wie `remote_1` bleiben wirksam; malformed IDs wie `remote_1_noise` werden nicht als Hidden-Remote-Candidate-Memory-Remote akzeptiert.
+  - Die allgemeine HQ-Ledger-Kandidatengruppe dokumentiert malformed Server-IDs weiterhin als sichtbaren Ursprung, ohne daraus Remote-Hypothesen-Memory abzuleiten.
+  - `belief-state.test.ts` schützt diesen malformed-Remote-Grenzfall zusätzlich zum bestehenden Remote-Invalidation-Grenztest.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/belief-state.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

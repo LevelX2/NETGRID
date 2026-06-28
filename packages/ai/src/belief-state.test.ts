@@ -174,6 +174,32 @@ describe("belief-state HQ hand memory retention", () => {
     });
   });
 
+  it("ignores malformed remote ids for hidden install candidate groups", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "onr_v1_230_cortical-scanner",
+      "onr_v1_237_data-wall",
+    ]);
+    const unknownDraw = publicEvent("evt_draw", "mandatory_draw", 2, {
+      actor: "corp",
+      actionType: "mandatory_draw",
+    });
+    const malformedRemoteInstall = publicEvent("evt_install", "install_card", 3, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1_noise",
+      installPlacement: "ice",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([hqLook, unknownDraw, malformedRemoteInstall], 2),
+    );
+
+    expect(
+      belief.runnerOpponentModel?.hqHandMemory?.ledger.candidateGroups[0],
+    ).toMatchObject({ serverId: "remote_1_noise" });
+    expect(belief.runnerOpponentModel?.hiddenRemoteCandidateMemory).toEqual([]);
+  });
+
   it("does not count accessed HQ root upgrades as HQ hand cards", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
       "simple_economy_operation",
