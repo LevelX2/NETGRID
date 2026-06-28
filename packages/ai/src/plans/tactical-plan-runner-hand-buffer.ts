@@ -1,4 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { runnerVisibleDamagePressure } from "../runner-visible-damage-pressure";
 import { runnerRunTargetHighPayoff } from "../runner-run-target-guidance";
 import {
   assessRunnerDrawOverflow,
@@ -233,40 +234,4 @@ function remoteRootTrashCostForPlan(card: VisibleCard): number {
   return typeof card.trashCost === "number"
     ? card.trashCost
     : Number.POSITIVE_INFINITY;
-}
-
-function runnerVisibleDamagePressure(input: AiDecisionInput): boolean {
-  if (input.playerView.own.tags > 0) return true;
-  const visibleCards = [
-    ...input.playerView.own.heapOrArchives,
-    ...(input.playerView.own.rig ?? []),
-    ...input.playerView.own.scoreArea,
-    ...input.playerView.servers.flatMap((server) => [
-      ...server.ice,
-      ...server.root,
-    ]),
-  ];
-  if (
-    visibleCards.some((card) =>
-      card.known !== false &&
-      /damage|flatline|net damage|meat damage|brain damage|tag/i.test(
-        [card.title, card.rulesText, card.definitionId]
-          .filter(Boolean)
-          .join(" "),
-      ),
-    )
-  ) {
-    return true;
-  }
-  return [...input.playerView.publicEvents, ...input.eventTail].some((event) =>
-    /damage|flatline|tag|trace/i.test(
-      [
-        event.type,
-        String(event.publicPayload.actionType ?? ""),
-        String(event.publicPayload.damageType ?? ""),
-        String(event.publicPayload.sourceTitle ?? ""),
-        String(event.publicPayload.sourceDefinitionId ?? ""),
-      ].join(" "),
-    ),
-  );
 }

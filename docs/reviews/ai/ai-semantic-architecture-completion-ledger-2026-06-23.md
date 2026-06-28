@@ -8670,6 +8670,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneunter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-visible-damage-pressure.ts` kapselt die Runner-Damage-Pressure-Erkennung für Handpuffer-Pfade über gebundene Tokens statt über lokale Regexes auf zusammengebautem Karten- und Event-Text.
+  - `packages/ai/src/runtime/runner-hand-buffer-need.ts` und `packages/ai/src/plans/tactical-plan-runner-hand-buffer.ts` nutzen denselben Helfer und entfernen ihre doppelten lokalen Regex-Funktionen.
+  - Echte Signale wie Tags, `net damage`, `deal_damage`, `flatline`, `tag` und `trace` bleiben wirksam; Rauschen wie `Damageful tagger` und `traceroute_noise` bleibt wirkungslos.
+  - `runner-visible-damage-pressure.test.ts` schützt Tag-, sichtbare Karten- und PublicEvent-Fälle; der bestehende Runtime-Cutover-Handpuffer-Test bleibt grün.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-visible-damage-pressure.test.ts src/semantic-ai-runtime-cutover.test.ts -t "runnerVisibleDamagePressure|restores an empty runner hand buffer"` grün, 2 Dateien, 4 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
