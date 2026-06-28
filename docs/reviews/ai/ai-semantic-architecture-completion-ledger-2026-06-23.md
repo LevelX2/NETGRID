@@ -8220,6 +8220,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertneunundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-opening-hand.ts` zählt Opening-Hand-Economy- und Corp-Remote-Root-Rollen über gebundene `rolesMatch`-Terme statt freier `role.includes(...)`-Substring-Prüfungen.
+  - Strukturierte Rollen wie `economy_asset`, `draw_event` und `remote_support` bleiben wirksam; Rauschen wie `uneconomy_noise`, `drawish_noise`, `remote_supportish_noise`, `classet_noise` und `upgradeish_noise` bleibt wirkungslos.
+  - `deck-opening-hand.test.ts` schützt positive Economy-/Remote-Root-Rollen und Substring-Negativfälle über öffentliche Opening-Hand-Evaluatoren.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-opening-hand.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
