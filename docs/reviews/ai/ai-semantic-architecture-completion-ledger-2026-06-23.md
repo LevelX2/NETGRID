@@ -8202,6 +8202,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsiebenundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-doctrine-card-roles.ts` klassifiziert Agenda-, Breaker- und ICE-Rollen über den gebundenen `rolesMatch`-Matcher statt direkter Prefix-/Suffix-Prüfungen.
+  - Strukturierte Rollen wie `agenda_2pt`, `breaker_fracter`, `corp_install_ice`, `barrier_ice`, `etr_ice` und `taxing_ice` bleiben wirksam; Rauschen wie `agendaish_asset`, `breakerish_fracter`, `icebreaker` und `nice_noise` bleibt wirkungslos.
+  - `deck-doctrine-card-roles.test.ts` schützt positive Rollenklassifikation und Substring-/Prefix-/Suffix-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-doctrine-card-roles.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
