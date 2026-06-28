@@ -53,31 +53,81 @@ export function visibleBreakerCardCanAddressIce(
   dependencies: VisibleBreakerCardCanAddressIceDependencies,
 ): boolean {
   const roles = dependencies.visibleBreakerRoles(breaker);
-  const breakerText = dependencies.visibleCardText(breaker).toLowerCase();
+  const breakerTokens = visibleBreakerTextTokens(
+    dependencies.visibleCardText(breaker),
+  );
   if (
     rolesMatch(roles, ["icebreaker"]) &&
-    /break (?:an? |one |\d+ )?ice subroutine|breaks? .*subroutine/.test(
-      breakerText,
-    )
+    visibleBreakerTokensIncludeUniversalBreak(breakerTokens)
   ) {
     return true;
   }
-  const iceText = dependencies.visibleCardText(ice).toLowerCase();
-  if (/wall|barrier/.test(iceText)) {
+  const iceTokens = visibleBreakerTextTokens(dependencies.visibleCardText(ice));
+  if (visibleBreakerTokensIncludeAny(iceTokens, ["wall", "barrier"])) {
     return (
-      rolesMatch(roles, ["fracter"]) || /fracter|wall|barrier/.test(breakerText)
+      rolesMatch(roles, ["fracter"]) ||
+      visibleBreakerTokensIncludeAny(breakerTokens, [
+        "fracter",
+        "wall",
+        "barrier",
+      ])
     );
   }
-  if (/code gate|codegate/.test(iceText)) {
+  if (
+    visibleBreakerTokensIncludeAny(iceTokens, ["codegate"]) ||
+    visibleBreakerTokensIncludePhrase(iceTokens, ["code", "gate"])
+  ) {
     return (
       rolesMatch(roles, ["decoder"]) ||
-      /decoder|code gate|codegate/.test(breakerText)
+      visibleBreakerTokensIncludeAny(breakerTokens, ["decoder", "codegate"]) ||
+      visibleBreakerTokensIncludePhrase(breakerTokens, ["code", "gate"])
     );
   }
-  if (/sentry/.test(iceText)) {
-    return rolesMatch(roles, ["killer"]) || /killer|sentry/.test(breakerText);
+  if (visibleBreakerTokensIncludeAny(iceTokens, ["sentry"])) {
+    return (
+      rolesMatch(roles, ["killer"]) ||
+      visibleBreakerTokensIncludeAny(breakerTokens, ["killer", "sentry"])
+    );
   }
-  return roles.length > 0 && /break/.test(breakerText);
+  return (
+    roles.length > 0 &&
+    visibleBreakerTokensIncludeAny(breakerTokens, ["break", "breaks"])
+  );
+}
+
+function visibleBreakerTextTokens(text: string): string[] {
+  return text
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 0);
+}
+
+function visibleBreakerTokensIncludeAny(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
+}
+
+function visibleBreakerTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    phrase.every((word, offset) => tokens[index + offset] === word),
+  );
+}
+
+function visibleBreakerTokensIncludeUniversalBreak(
+  tokens: readonly string[],
+): boolean {
+  return tokens.some((token, index) => {
+    if (token !== "break" && token !== "breaks") return false;
+    const nextTokens = tokens.slice(index + 1, index + 5);
+    const iceIndex = nextTokens.findIndex((next) => next === "ice");
+    return iceIndex >= 0 && nextTokens[iceIndex + 1] === "subroutine";
+  });
 }
 
 export function visibleBreakerRoleCounts(

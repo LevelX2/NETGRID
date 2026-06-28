@@ -24,6 +24,9 @@ describe("visibleBreakerCardCanAddressIce", () => {
 
     expect(canAddress(["support_fracter"], "Barrier")).toBe(true);
     expect(canAddress(["fracterish_noise"], "Barrier")).toBe(false);
+    expect(canAddress(["support_fracter"], "Firewall", "Fracter support.")).toBe(
+      false,
+    );
 
     expect(canAddress(["support_decoder"], "Code Gate")).toBe(true);
     expect(canAddress(["decoderish_noise"], "Code Gate")).toBe(false);
@@ -49,7 +52,11 @@ function visibleProgram(
   };
 }
 
-function canAddress(roles: readonly string[], iceText: string): boolean {
+function canAddress(
+  roles: readonly string[],
+  iceText: string,
+  breakerText = "Break one ice subroutine.",
+): boolean {
   return visibleBreakerCardCanAddressIce(
     visibleProgram("semantic-breaker", ["Icebreaker"]),
     visibleProgram("visible-ice", []),
@@ -58,7 +65,7 @@ function canAddress(roles: readonly string[], iceText: string): boolean {
       visibleCardText: (card) =>
         card.definitionId === "visible-ice"
           ? `${iceText}. End the run.`
-          : "Break one ice subroutine.",
+          : breakerText,
     },
   );
 }
