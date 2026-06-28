@@ -491,6 +491,32 @@ describe("SelfplayTraceMining", () => {
     });
   });
 
+  it("bounds late-credit funding-need signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "gain_credit", {
+        selectedActionId: "funding-need-positive",
+        debugFacts: ["funding_need:true"],
+        runnerPressureReadyTrue: true,
+        runnerPressureReadyByTargetRemote: true,
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "gain_credit", {
+        selectedActionId: "funding-need-noise",
+        debugFacts: ["funding_need:trueish_noise"],
+        runnerPressureReadyTrue: true,
+        runnerPressureReadyByTargetRemote: true,
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      mixed_unknown: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      runner_late_gain_credit_without_funding_need: 1,
+    });
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),

@@ -8499,6 +8499,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` erkennt Late-Credit-Funding-Need-Signale über strukturierte Entry-Facts statt Regex auf dem aggregierten Selfplay-Gesamttext.
+  - Strukturierte Facts wie `funding_need:true` bleiben wirksam und verhindern Late-Gain-No-Funding-Subcluster; Rauschen wie `funding_need:trueish_noise` bleibt wirkungslos.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative Funding-Need-Subcluster-Grenzfälle über `summarizeSelfplayActionLimitSubclusters`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 18 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

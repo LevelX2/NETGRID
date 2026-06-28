@@ -504,7 +504,7 @@ function classifySelfplayActionLimitSubclusterEntry(
   windowIndex: number,
 ): AiSelfplayActionLimitSubclusterId | undefined {
   const text = selfplayEntryText(entry);
-  if (entry.actionType === "gain_credit" && !entryHasFundingNeedSignal(text)) {
+  if (entry.actionType === "gain_credit" && !entryHasFundingNeedSignal(entry)) {
     return classifyLateGainCreditSubclusterEntry(entry, text);
   }
   if (entry.actionType === "draw_card") {
@@ -685,10 +685,16 @@ function corpLateGainCreditHasSafeProgressAlternative(
   );
 }
 
-function entryHasFundingNeedSignal(text: string): boolean {
-  return /activefundingneed:true|funding_need:true|fundingneed:true|credit_base_funding_need:true|runner_economy_funding_need:true/.test(
-    text,
-  );
+function entryHasFundingNeedSignal(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  return selfplayEntryHasStructuredSignal(entry, [
+    "activeFundingNeed:true",
+    "funding_need:true",
+    "fundingNeed:true",
+    "credit_base_funding_need:true",
+    "runner_economy_funding_need:true",
+  ]);
 }
 
 function entryHasDrawOrCoverageNeed(
