@@ -231,9 +231,7 @@ function corpAdvancementCounterPlacementProfileForAction(
   const text = dependencies.normalizedRulesTextForDefinition(sourceDefinitionId);
   if (
     sourceDefinitionId === dependencies.teamRestructuringCardId ||
-    /\badd one advancement counter to each of up to two installed cards that can be advanced\b/.test(
-      text,
-    )
+    corpAdvancementTextAddsOneCounterToUpToTwoCards(text)
   ) {
     return {
       maxTargets: 2,
@@ -243,6 +241,29 @@ function corpAdvancementCounterPlacementProfileForAction(
     };
   }
   return undefined;
+}
+
+function corpAdvancementTextAddsOneCounterToUpToTwoCards(
+  text: string,
+): boolean {
+  return corpTokensIncludePhrase(corpRulesTextTokens(text), [
+    "add",
+    "one",
+    "advancement",
+    "counter",
+    "to",
+    "each",
+    "of",
+    "up",
+    "to",
+    "two",
+    "installed",
+    "cards",
+    "that",
+    "can",
+    "be",
+    "advanced",
+  ]);
 }
 
 function semanticRuntimeCorpBasicAdvanceEquivalentTargets(

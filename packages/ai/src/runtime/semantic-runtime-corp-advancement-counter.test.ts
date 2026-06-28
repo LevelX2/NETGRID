@@ -113,6 +113,15 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
       "advancement_target_class:counter_bank_only",
     );
   });
+
+  it("bounds advancement placement operation profile rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText(
+      "This card can be advanced.",
+      "add one advancement counterproductive to each of up to two installed cards that can be advanced",
+    );
+
+    expect(assessment).toBeUndefined();
+  });
 });
 
 function assessmentForAgendaRulesText(agendaRulesText: string) {
@@ -123,16 +132,25 @@ function assessmentForAgendaRulesText(agendaRulesText: string) {
   });
 }
 
-function assessmentForAssetRulesText(assetRulesText: string) {
-  return assessmentForTargetRulesText(assetRulesText, {
-    advancementCounters: 2,
-    type: "asset",
-  });
+function assessmentForAssetRulesText(
+  assetRulesText: string,
+  sourceRulesText?: string,
+) {
+  return assessmentForTargetRulesText(
+    assetRulesText,
+    {
+      advancementCounters: 2,
+      type: "asset",
+    },
+    sourceRulesText,
+  );
 }
 
 function assessmentForTargetRulesText(
   targetRulesText: string,
   targetOverrides: Partial<VisibleCard>,
+  sourceRulesText =
+    "add one advancement counter to each of up to two installed cards that can be advanced",
 ) {
   const target = corpCard("custom-advance-target", targetOverrides);
   const advanceAction = corpAction("advance_card", {
@@ -156,7 +174,7 @@ function assessmentForTargetRulesText(
           : undefined,
       normalizedRulesTextForDefinition: (definitionId) =>
         definitionId === "custom-advancement-distribution"
-          ? "add one advancement counter to each of up to two installed cards that can be advanced"
+          ? sourceRulesText
           : targetRulesText,
       actionCreditCost: () => 0,
       actionSourceCard: (_input, action) =>

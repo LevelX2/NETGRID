@@ -8886,6 +8886,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihunderteinunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ersetzt die Operation-Profil-Erkennung für `add one advancement counter to each of up to two installed cards that can be advanced` durch gebundene Tokens.
+  - Der bekannte Team-Restructuring-DefinitionId-Pfad bleibt unverändert; Rules-Text-Rauschen wie `counterproductive` aktiviert das Placement-Profil nicht mehr.
+  - Die Erkennung bleibt auf sichtbaren normalisierten Rules-Text begrenzt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-advancement-counter.test.ts` schützt den negativen Operation-Source-Text-Grenzfall zusätzlich zu den Zielklassifizierungsfällen.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-advancement-counter.test.ts` grün, 1 Datei, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
