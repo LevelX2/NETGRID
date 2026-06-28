@@ -713,12 +713,11 @@ function noNoisyBreakersForRunAction(
   signals: readonly string[],
 ): boolean {
   if (booleanPayloadValue(action, "noNoisyBreakers")) return true;
-  const text = `${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
-  return (
-    text.includes("no_noisy") ||
-    text.includes("no noisy") ||
-    text.includes("noisy_breaker_restriction")
-  );
+  return runActionHasStructuredSignal(signals, [
+    "no_noisy",
+    "no noisy",
+    "noisy_breaker_restriction",
+  ]);
 }
 
 function bypassFirstIceForRunAction(
@@ -726,12 +725,11 @@ function bypassFirstIceForRunAction(
   signals: readonly string[],
 ): boolean {
   if (booleanPayloadValue(action, "bypassFirstIce")) return true;
-  const text = `${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
-  return (
-    text.includes("bypass_first_ice") ||
-    text.includes("bypass first ice") ||
-    text.includes("inside_job")
-  );
+  return runActionHasStructuredSignal(signals, [
+    "bypass_first_ice",
+    "bypass first ice",
+    "inside_job",
+  ]);
 }
 
 

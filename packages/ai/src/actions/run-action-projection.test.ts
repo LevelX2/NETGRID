@@ -205,6 +205,50 @@ describe("projectRunnerRunActions", () => {
     expect(noiseProjection?.accessServerId).toBeUndefined();
   });
 
+  it("bounds run projection constraint signals to structured entries", () => {
+    const constrained = action({
+      actionId: "constrained-run",
+      payload: {
+        runActionSignals: [
+          "make_run",
+          "scope:hq",
+          "no_noisy",
+          "bypass_first_ice",
+        ],
+      } as unknown as LegalAction["payload"],
+    });
+    const noise = action({
+      actionId: "constraint-noise",
+      payload: {
+        runActionSignals: [
+          "make_run",
+          "scope:hq",
+          "no_noisyish",
+          "inside_jobber",
+        ],
+      } as unknown as LegalAction["payload"],
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([constrained, noise]),
+    });
+    const constrainedProjection = projections.find(
+      (projection) => projection.actionId === "constrained-run",
+    );
+    const noiseProjection = projections.find(
+      (projection) => projection.actionId === "constraint-noise",
+    );
+
+    expect(constrainedProjection).toMatchObject({
+      noNoisyBreakers: true,
+      bypassFirstIce: true,
+    });
+    expect(noiseProjection).toMatchObject({
+      noNoisyBreakers: false,
+      bypassFirstIce: false,
+    });
+  });
+
   it("requires canonical structured server ids in payloads", () => {
     const labelLikeServer = action({
       actionId: "label-like-server",
