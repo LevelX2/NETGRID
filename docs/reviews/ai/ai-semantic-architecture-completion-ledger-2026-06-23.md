@@ -9237,6 +9237,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertdreiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/semantic-action-signature.ts` ersetzt den Hidden-Info-Guard für Signature-Inputs durch gebundene Hidden-Info-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `sessionToken`, `fullGameState`, `AIInput`, `DecisionDebug`, `deckTop`, `decklist` und `deckOrder` bleiben blockiert; Suffix-Rauschen wie `privatePayloadish_cost` löst keine Hidden-Redaction mehr aus.
+  - Die Erkennung bleibt reine Semantic-Action-Signature-Redaction-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `semantic-action-signature.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-action-signature.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
