@@ -820,7 +820,7 @@ function collectSelfplayFindingsForSummary(
     );
   }
   for (const error of summary.errors) {
-    const noLegal = /no legal action|no legal actions|no_legal/i.test(error);
+    const noLegal = selfplayErrorShowsNoLegalAction(error);
     if (enabled.has("no_legal_action_failure") && noLegal) {
       findings.push(
         selfplaySummaryFinding(
@@ -918,6 +918,31 @@ function collectSelfplayFindingsForSummary(
     );
   }
   return findings;
+}
+
+function selfplayErrorShowsNoLegalAction(error: string): boolean {
+  const tokens = selfplayErrorTokens(error);
+  return (
+    tokensIncludePhrase(tokens, ["no", "legal"]) ||
+    tokensIncludePhrase(tokens, ["no", "legal", "action"]) ||
+    tokensIncludePhrase(tokens, ["no", "legal", "actions"])
+  );
+}
+
+function selfplayErrorTokens(error: string): string[] {
+  return error
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function tokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
 }
 
 function selfplayEntryDetectorFindings(

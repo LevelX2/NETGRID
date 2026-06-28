@@ -133,6 +133,32 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("run-remote-positive");
   });
 
+  it("bounds no-legal-action failure errors to structured tokens", () => {
+    const positive = {
+      ...selfplaySummary([
+        selfplayAction("runner", 1, "draw_card", {
+          selectedActionId: "draw-positive",
+        }),
+      ]),
+      errors: ["No legal action available for runner."],
+    };
+    const noise = {
+      ...selfplaySummary([
+        selfplayAction("runner", 1, "draw_card", {
+          selectedActionId: "draw-noise",
+        }),
+      ]),
+      errors: ["No legalistic actioneer marker."],
+    };
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["no_legal_action_failure"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("draw-positive");
+  });
+
   it("bounds low-value archives signals to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "start_run", {

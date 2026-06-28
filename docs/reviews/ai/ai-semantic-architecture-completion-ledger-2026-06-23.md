@@ -8716,6 +8716,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertvierzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` erkennt No-Legal-Action-Simulationsfehler über gebundene Tokens und Phrasen statt über Regex `no legal action|no legal actions|no_legal`.
+  - Echte Meldungen wie `No legal action available` und `no_legal` bleiben wirksam; Rauschen wie `No legalistic actioneer marker` bleibt wirkungslos.
+  - `selfplay-trace-mining.test.ts` schützt den neuen No-Legal-Fehlergrenzfall neben den bestehenden Selfplay-Trace-Detektorgrenzen.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 19 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
