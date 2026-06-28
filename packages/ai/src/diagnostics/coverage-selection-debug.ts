@@ -81,15 +81,9 @@ function sourceIdentityHasMantisToken(sourceIdentity: string): boolean {
 function semanticRuntimeCoverageAnswerRoleFromMapping(
   rationale: readonly string[],
 ): string | undefined {
-  const joined = rationale.join("|");
-  const roles = [
-    ...[...joined.matchAll(/coverageAnswerRole:([a-z_]+)/g)].map(
-      (match) => match[1],
-    ),
-    ...[...joined.matchAll(/coverage_answer_role:([a-z_]+)/g)].map(
-      (match) => match[1],
-    ),
-  ].filter((role): role is string => Boolean(role));
+  const roles = rationale
+    .map(semanticRuntimeCoverageAnswerRoleFromEntry)
+    .filter((role): role is string => Boolean(role));
   const priority = [
     "direct_breaker_install",
     "program_search",
@@ -100,6 +94,17 @@ function semanticRuntimeCoverageAnswerRoleFromMapping(
     "not_coverage_answer",
   ];
   return priority.find((role) => roles.includes(role)) ?? roles[0];
+}
+
+function semanticRuntimeCoverageAnswerRoleFromEntry(
+  entry: string,
+): string | undefined {
+  const [key, value, extra] = entry.trim().split(":");
+  if (extra !== undefined) return undefined;
+  if (key !== "coverageAnswerRole" && key !== "coverage_answer_role") {
+    return undefined;
+  }
+  return value && /^[a-z_]+$/.test(value) ? value : undefined;
 }
 
 function semanticRuntimeCoverageAnswerFit(

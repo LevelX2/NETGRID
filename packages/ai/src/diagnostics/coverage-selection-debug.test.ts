@@ -21,9 +21,33 @@ describe("semanticRuntimeCoverageSelectionDebug", () => {
       "why_mantis_selected:searches_for_required_breaker_coverage",
     );
   });
+
+  it("reads coverage answer roles from exact rationale entries", () => {
+    const searchDebug = debugForSource("search-card", [
+      "coverageAnswerRoleish:direct_breaker_install",
+      "coverageAnswerRole:program_search",
+    ]);
+    const snakeDebug = debugForSource("draw-card", [
+      "coverage_answer_role:draw_for_answer",
+    ]);
+    const noiseDebug = debugForSource("noise-card", [
+      "coverageAnswerRoleish:program_search",
+      "coverage_answer_role_suffix:draw_for_answer",
+    ]);
+
+    expect(searchDebug?.answerFit).toBe("direct_card_search");
+    expect(searchDebug?.evidence).toContain("coverageAnswerRole:program_search");
+    expect(snakeDebug?.answerFit).toBe("draw_for_answer");
+    expect(snakeDebug?.evidence).toContain("coverageAnswerRole:draw_for_answer");
+    expect(noiseDebug?.answerFit).toBe("direct_card_search");
+    expect(noiseDebug?.evidence).toContain("coverageAnswerRole:unknown");
+  });
 });
 
-function debugForSource(source: string) {
+function debugForSource(
+  source: string,
+  rationale: readonly string[] = ["coverageAnswerRole:program_search"],
+) {
   const action: LegalAction = {
     actionId: "search",
     side: "runner",
@@ -47,7 +71,7 @@ function debugForSource(source: string) {
       },
       selectedMapping: {
         legalActions: [action],
-        rationale: ["coverageAnswerRole:program_search"],
+        rationale,
       },
     } as unknown as TacticalPlanRuntimeResult,
     {

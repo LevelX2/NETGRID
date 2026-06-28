@@ -9329,6 +9329,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertzweiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/diagnostics/coverage-selection-debug.ts` ersetzt die Coverage-Answer-Role-Extraktion aus zusammengeklebtem Debugtext per `matchAll` durch einen Parser für exakt benannte Rationale-Einträge.
+  - Exakte Einträge wie `coverageAnswerRole:program_search` und `coverage_answer_role:draw_for_answer` bleiben wirksam; ähnliche Schlüssel wie `coverageAnswerRoleish:...` oder `coverage_answer_role_suffix:...` erzeugen keine Answer-Role mehr.
+  - Die Erkennung bleibt reine Coverage-Selection-Debug-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `coverage-selection-debug.test.ts` schützt positive Camel-/Snake-Case-Rollen und negative ähnlich benannte Debugkeys.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/diagnostics/coverage-selection-debug.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
