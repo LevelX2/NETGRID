@@ -5,6 +5,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { rolesMatch } from "./role-match";
 import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
 import {
   semanticRuntimeCorpScoringWindowAssessment,
@@ -311,14 +312,7 @@ function semanticRuntimeCorpNormalizedCentralServerId(
 }
 
 function roleMatchesAny(role: string, options: readonly string[]): boolean {
-  const normalized = role.toLocaleLowerCase("en-US");
-  return options.some(
-    (option) =>
-      normalized === option ||
-      normalized.startsWith(`${option}_`) ||
-      normalized.endsWith(`_${option}`) ||
-      normalized.includes(`_${option}_`),
-  );
+  return rolesMatch([role.toLocaleLowerCase("en-US")], options);
 }
 
 export function semanticRuntimeCorpShouldBuildProtectedScoreRemote<

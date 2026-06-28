@@ -9429,6 +9429,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertzweiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` ersetzt die lokale Hint-Role-Prüfung per `normalized.includes(...)` durch den gemeinsamen gebundenen `rolesMatch`-Matcher.
+  - Exakte Hint-Rollen, Präfix-Rollen wie `breaker_` und zusammengesetzte Rollen wie `pressure_hq` bleiben über den Runtime-Role-Matcher wirksam; Suffix-Rauschen wie `microeconomy`, `tagalong` oder `breakerish_fracter` bleibt durch `role-match.test.ts` ausgeschlossen.
+  - Die Änderung bleibt auf zentrale ICE-Profilbewertung aus bekannten Hint-Rollen beschränkt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-remote-score.test.ts` schützt die zentralen ICE-Scoring-Consumer; `role-match.test.ts` schützt die Exact-/Prefix-/Compound- und negativen Substring-Fälle; `semantic-runtime-corp-score.test.ts` sichert den Runtime-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/role-match.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 3 Dateien, 19 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
