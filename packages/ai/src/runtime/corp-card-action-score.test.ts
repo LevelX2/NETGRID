@@ -15,12 +15,20 @@ describe("corp-card-action-score", () => {
 
     expect(
       scoreCorpRootInstall(
-        ["agendalike_asset", "remote_economy_assetish_noise"],
+        ["agendaish_asset", "agendalike_asset", "remote_economy_assetish_noise"],
         installAction(),
         { credits: 3, handCount: 5, opponentTags: 0 },
         { remote: 1, score: 1 },
       ),
     ).toBe(545);
+    expect(
+      scoreCorpRootInstall(
+        ["remote_agenda_protection"],
+        installAction(),
+        { credits: 3, handCount: 5, opponentTags: 0 },
+        { remote: 1, score: 1 },
+      ),
+    ).toBe(690);
   });
 
   it("matches corp operation roles by bounded role terms", () => {

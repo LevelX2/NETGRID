@@ -8175,6 +8175,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertvierundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/corp-card-action-score.ts` bewertet Corp-Root-Agenda-Installationen über konkrete gebundene Agenda-Rollensegmente statt über den breiten `agenda_`-Prefix-Needle.
+  - Strukturierte Rollen wie `agenda_asset` und `remote_agenda_protection` bleiben wirksam; Rauschen wie `agendaish_asset` und `agendalike_asset` erzeugt keinen Agenda-Install-Bonus.
+  - `corp-card-action-score.test.ts` schützt positive Agenda-Rollen und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-card-action-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

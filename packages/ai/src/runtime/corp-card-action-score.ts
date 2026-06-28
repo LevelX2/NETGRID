@@ -7,6 +7,14 @@ type CorpCardActionScoreFeatures = {
   opponentTags: number;
 };
 
+const CORP_AGENDA_ROOT_ROLE_NEEDLES = [
+  "agenda_asset",
+  "agenda_support",
+  "agenda_protection",
+  "agenda_score",
+  "agenda_fast_advance",
+] as const;
+
 export function scoreCorpRootInstall(
   roles: string[],
   action: LegalAction,
@@ -14,7 +22,7 @@ export function scoreCorpRootInstall(
   profile: Record<string, number>,
 ): number {
   let score = 500 + (profile.remote ?? 1) * 45;
-  if (rolesMatch(roles, ["agenda_"]))
+  if (rolesMatch(roles, CORP_AGENDA_ROOT_ROLE_NEEDLES))
     score += 110 + (profile.score ?? 1) * 35;
   if (rolesMatch(roles, ["economy_asset"]))
     score += features.credits < 5 ? 90 : 30;
