@@ -1018,10 +1018,12 @@ function selfplayEntryDetectorFindings(
   if (
     enabled.has("bank_over_target_without_funding_need") &&
     entry.side === "runner" &&
-    (text.includes("bankovertarget:true") ||
-      text.includes("bankoverdesiredtarget:true") ||
-      text.includes("bankconcretefundingneed:false") ||
-      text.includes("bank_cashout_without_funding_need") ||
+    (selfplayEntryHasStructuredSignal(entry, [
+      "bankovertarget:true",
+      "bankoverdesiredtarget:true",
+      "bankconcretefundingneed:false",
+      "bank_cashout_without_funding_need",
+    ]) ||
       entry.runnerDebtEconomyTakenWithoutNeed === true)
   ) {
     findings.push(

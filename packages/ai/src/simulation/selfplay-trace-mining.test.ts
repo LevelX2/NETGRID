@@ -132,6 +132,28 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("run-remote-positive");
   });
 
+  it("bounds bank over-target signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "gain_credit", {
+        selectedActionId: "bank-positive",
+        debugFacts: ["bankOverTarget:true"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "gain_credit", {
+        selectedActionId: "bank-noise",
+        debugFacts: ["bankOverTarget:trueish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["bank_over_target_without_funding_need"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("bank-positive");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),
