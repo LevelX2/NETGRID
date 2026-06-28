@@ -8,6 +8,7 @@ import {
   chronicleActionUseByEventId,
   chronicleGroupLabel,
   chronicleRunGroupLabelFromEvent,
+  chronicleStartTurnEffectGroupFromEvent,
   chronicleTurnGroupLabel,
   chronicleTurnNumberByEventId,
   chronicleTurnSideByEventId,
@@ -326,7 +327,7 @@ function chronicleEntriesWithRunGroups(
     const eventGroupInstanceKey = eventGroupLabel ? activeRunGroupKey : null;
     for (const item of items) {
       const card = item.cardDefinitionId ? (cardDetailsById[item.cardDefinitionId] ?? null) : eventCardDetail(event, cardDetailsById);
-      const startTurnEffectGroup = chronicleStartTurnEffectGroup(actionType, actor, turnNumber, item);
+      const startTurnEffectGroup = chronicleStartTurnEffectGroupFromEvent(event, turnNumber, item);
       const groupLabel = eventGroupLabel ?? startTurnEffectGroup?.label ?? turnGroup?.label ?? chronicleGroupLabel(item);
       const groupKind = eventGroupLabel ? "run" : startTurnEffectGroup?.kind ?? turnGroup?.kind ?? chronicleGroupKindFromItem(item);
       entries.push({ card, item, groupLabel, groupKind, turnGroupLabel: startTurnEffectGroup?.label ?? turnGroup?.label ?? null, groupInstanceKey: eventGroupInstanceKey });
@@ -336,18 +337,6 @@ function chronicleEntriesWithRunGroups(
   }
 
   return entries;
-}
-
-function chronicleStartTurnEffectGroup(
-  actionType: string,
-  eventActor: Side | null,
-  eventTurnNumber: number | null,
-  item: ChronicleItem
-): { label: string; kind: ChronicleGroupKind } | null {
-  if (actionType !== "end_turn" || !eventActor || !item.actor || item.actor === eventActor) return null;
-  if (!item.chips.includes("Automatisch")) return null;
-  const label = chronicleTurnGroupLabel(item.actor, eventTurnNumber ? eventTurnNumber + 1 : null);
-  return { label, kind: item.actor };
 }
 
 function chronicleGroupKindFromItem(item: ChronicleItem): ChronicleGroupKind {

@@ -4230,6 +4230,36 @@ export function chronicleGroupLabel(item: ChronicleItem): string {
   return item.groupLabel;
 }
 
+export function chronicleStartTurnEffectGroupFromEvent(
+  event: PublicGameEvent,
+  eventTurnNumber: number | null | undefined,
+  item: ChronicleItem,
+): { label: string; kind: Side } | null {
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  const eventActor = sideValue(payload.actor);
+  if (
+    !chronicleEventCanCarryNextTurnStartEffects(event, actionType) ||
+    !eventActor ||
+    !item.actor ||
+    item.actor === eventActor
+  )
+    return null;
+  if (!item.chips.includes("Automatisch")) return null;
+  const label = chronicleTurnGroupLabel(
+    item.actor,
+    eventTurnNumber ? eventTurnNumber + 1 : null,
+  );
+  return { label, kind: item.actor };
+}
+
+function chronicleEventCanCarryNextTurnStartEffects(
+  event: PublicGameEvent,
+  actionType: string,
+): boolean {
+  return actionType === "end_turn" || isDiscardPhaseResolution(event);
+}
+
 function categoryFor(actionType: string): ChronicleCategory {
   if (["mandatory_draw", "end_turn"].includes(actionType)) return "turn";
   if (["gain_credit"].includes(actionType)) return "economy";

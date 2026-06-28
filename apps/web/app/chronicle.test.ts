@@ -3,6 +3,7 @@ import type { PublicGameEvent, Side } from "@netgrid/shared";
 import {
   chronicleActionUseByEventId,
   chronicleRunGroupLabelFromEvent,
+  chronicleStartTurnEffectGroupFromEvent,
   chronicleTurnNumberByEventId,
   chronicleTurnSideByEventId,
   formatChronicleEffectItems,
@@ -4944,6 +4945,43 @@ describe("formatChronicleEvent", () => {
     expect(turnSides.evt_corp_forged_response).toBe("runner");
 
     expect(turnSides.evt_runner_end_1).toBe("runner");
+  });
+
+  it("groups start-turn effects carried by discard resolution under the next turn", () => {
+    const discardEvent = makeEvent("resolve_choice", {
+      actor: "runner",
+      discardResolved: true,
+      hiddenZoneAction: "discard_phase",
+      resolvedEffects: [
+        {
+          effectId: "corp.start.skivviss",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 3,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_v1_064_skivviss",
+          sourceTitle: "Skivviss",
+        },
+      ],
+    });
+    const skivvissItem = formatChronicleEffectItems(
+      discardEvent,
+      "runner",
+    )[0];
+
+    expect(skivvissItem?.title).toBe(
+      "Skivviss: Die Korp zieht zu Beginn ihres Zugs 3 zusätzliche Karten.",
+    );
+    expect(
+      skivvissItem
+        ? chronicleStartTurnEffectGroupFromEvent(
+            discardEvent,
+            30,
+            skivvissItem,
+          )
+        : null,
+    ).toEqual({ label: "Zug 31 - Korp", kind: "corp" });
   });
 
   it("formats resolved automatic effects as separate chronicle items", () => {
