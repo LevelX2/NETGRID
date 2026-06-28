@@ -8,6 +8,7 @@ import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import { classifyCorpScoredAgendaAbility } from "../legacy/legacy-entrypoints";
+import { rolesMatch } from "../runtime/role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 export type CorpTagCreationDiagnosticsDependencies = {
@@ -70,7 +71,7 @@ export function createCorpTagCreationDiagnosticsContext(
       if (
         stateBeforeAction.run ||
         action.type === "resolve_choice" ||
-        decision.reasonCode.includes("trace")
+        rolesMatch([decision.reasonCode], ["trace"])
       ) {
         diagnostics.corpTagCreatedDuringEncounter = true;
         diagnostics.corpTagCreatedByTraceSuccess = true;

@@ -7561,6 +7561,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` sechsundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-tag-creation-diagnostics.ts` nutzt für Trace-ReasonCodes den gebundenen `rolesMatch`-Helper statt freier `reasonCode`-Substring-Prüfung.
+  - Strukturierte ReasonCodes wie `corp.trace.bid_visible_amount` bleiben Trace-Signale; substringartiges Rauschen wie `traceroute_noise` erzeugt keine `corpTagCreatedByTraceSuccess`-Diagnostik mehr.
+  - `corp-tag-creation-diagnostics.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/corp-tag-creation-diagnostics.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
