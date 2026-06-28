@@ -147,6 +147,23 @@ describe("progress delta labeler", () => {
     expect(result.primaryProgress).toBe(false);
   });
 
+  it("bounds plausible no-progress text signals to exact tokens", () => {
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "draw_card",
+        reasonCode: "runner.known_unaffordable_path",
+      }),
+    ).toBe("no_progress_plausible");
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "draw_card",
+        reasonCode: "runner.known_unaffordable_pathish",
+      }),
+    ).toBe("no_progress_stale");
+  });
+
   it("labels unsupported filler actions as stale no-progress", () => {
     const result = labelProgressDeltaAction({
       side: "runner",

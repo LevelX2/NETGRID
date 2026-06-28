@@ -234,9 +234,7 @@ function isPlausibleNoProgress(action: ProgressDeltaAction): boolean {
   ) {
     return true;
   }
-  return /reserve|coverage|afford|protect|rez|scoreline|funding_need|known_unaffordable_path/.test(
-    actionText(action),
-  );
+  return actionTextHasPlausibleNoProgressSignal(actionText(action));
 }
 
 function directLabelsInWindow(
@@ -362,6 +360,22 @@ function actionTextHasEconomySignal(text: string): boolean {
     "credits",
     "funding",
   ]);
+}
+
+function actionTextHasPlausibleNoProgressSignal(text: string): boolean {
+  const tokens = progressActionTextTokens(text);
+  return (
+    progressTokensIncludeAny(tokens, [
+      "reserve",
+      "coverage",
+      "afford",
+      "protect",
+      "rez",
+      "scoreline",
+    ]) ||
+    progressTokensIncludePhrase(tokens, ["funding", "need"]) ||
+    progressTokensIncludePhrase(tokens, ["known", "unaffordable", "path"])
+  );
 }
 
 function progressActionTextTokens(text: string): string[] {
