@@ -250,9 +250,7 @@ export function runnerNoFreshCentralContext(
     input.legalActions.some(
       (action) =>
         action.type === "install_card" &&
-        dependencies
-          .rolesForAction(input, action)
-          .some((role) => role.startsWith("breaker_")),
+        rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"]),
     )
   )
     better.add("rig_unlock");
@@ -394,9 +392,7 @@ export function noFreshCentralSubstitutionTypeForAction(
     if (isCentralPressureCardForMetrics(definitionId, true))
       return "pressure_install";
     if (
-      dependencies
-        .rolesForAction(input, action)
-        .some((role) => role.startsWith("breaker_"))
+      rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"])
     )
       return "rig_unlock";
   }

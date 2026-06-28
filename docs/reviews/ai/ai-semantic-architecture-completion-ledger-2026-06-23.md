@@ -8247,6 +8247,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertzweiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/no-fresh-central.ts` erkennt `rig_unlock`-Alternativen und -Substitutionen über gebundene `rolesMatch(["breaker_"])`-Prefixrollen statt direkter `role.startsWith("breaker_")`-Prüfungen.
+  - Strukturierte Rollen wie `breaker_decoder` und `breaker_fracter` bleiben wirksam; Rauschen wie `breakerish_decoder`, `breakerish_fracter` sowie nicht vorher erfasste `support_breaker_*`-Rollen bleibt wirkungslos.
+  - `no-fresh-central.test.ts` schützt `rig_unlock`-Substitution und `betterAlternatives`-Kontext gegen Prefix-Noise.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/no-fresh-central.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
