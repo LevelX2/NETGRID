@@ -7316,6 +7316,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` sechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bank-investment-context.ts` nutzt für Runner-Credit-Bank-Erkennung und konkrete Funding-Need-Rollen den gehärteten `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Economy-/Memory-/Pressure-/Setup-/Breaker-Rollen bleiben wirksam; substringartiges Rauschen wie `microeconomy` und `pressurewasher_noise` löst keine Credit-Bank- oder Funding-Need-Klassifikation mehr aus.
+  - `runner-bank-investment-context.test.ts` schützt strukturierte Credit-Bank-Hints, Bank-Build-/Cashout-Payloads und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bank-investment-context.test.ts src/runtime/semantic-runtime-plan-memory-exclusion.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts --testNamePattern "Broker|bank|credit-bank"` grün, 1 Datei, 2 Tests, 43 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts --testNamePattern 'bank'` grün, 1 Datei, 2 Tests, 43 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

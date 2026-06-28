@@ -6,6 +6,7 @@ import type {
 } from "@netgrid/shared";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import { runnerBankInvestmentCommitmentScoreComponents as buildRunnerBankInvestmentCommitmentScoreComponents } from "./runner-economy-commitment-score";
+import { rolesMatch } from "./role-match";
 
 type RunnerBankInvestmentCommitmentStatus =
   | "inactive"
@@ -555,7 +556,7 @@ export function createRunnerBankInvestmentContext(
       .join(" ")
       .toLowerCase();
     return (
-      roles.some((role) => role.includes("economy")) &&
+      rolesMatch(roles, ["economy"]) &&
       (/stored credits|counter_bank|temporary_resource_bank|finite_economy_pool/.test(
         text,
       ) ||
@@ -628,14 +629,13 @@ export function createRunnerBankInvestmentContext(
         return false;
       if (dependencies.actionCreditCost(action) <= credits) return false;
       const roles = dependencies.rolesForAction(input, action);
-      return roles.some(
-        (role) =>
-          role.startsWith("breaker_") ||
-          role.includes("memory") ||
-          role.includes("economy") ||
-          role.includes("pressure") ||
-          role.includes("setup"),
-      );
+      return rolesMatch(roles, [
+        "breaker_",
+        "memory",
+        "economy",
+        "pressure",
+        "setup",
+      ]);
     });
   }
 
