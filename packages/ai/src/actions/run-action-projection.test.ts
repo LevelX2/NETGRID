@@ -135,6 +135,38 @@ describe("projectRunnerRunActions", () => {
     ]);
   });
 
+  it("bounds run action structure signals to structured entries", () => {
+    const multiRun = action({
+      actionId: "multi-run",
+      payload: {
+        runActionSignals: ["make_run", "multi_run_sequence", "scope:hq"],
+      } as unknown as LegalAction["payload"],
+    });
+    const noise = action({
+      actionId: "multi-run-noise",
+      payload: {
+        runActionSignals: ["make_run", "multi_run_sequenceish", "scope:hq"],
+      } as unknown as LegalAction["payload"],
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([multiRun, noise]),
+    });
+
+    expect(projections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          actionId: "multi-run",
+          structure: "multi_run_sequence",
+        }),
+        expect.objectContaining({
+          actionId: "multi-run-noise",
+          structure: "run_enabler",
+        }),
+      ]),
+    );
+  });
+
   it("requires canonical structured server ids in payloads", () => {
     const labelLikeServer = action({
       actionId: "label-like-server",

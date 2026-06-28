@@ -345,18 +345,25 @@ function runActionStructure(
   signals: readonly string[],
 ): RunnerRunActionStructure {
   if (action.type === "start_run") return "direct_start_run";
-  const text = runActionSearchText(action, signals);
-  if (text.includes("multi_run_sequence")) return "multi_run_sequence";
-  if (text.includes("followup_run") || text.includes("follow-up run")) {
+  if (runActionHasStructuredSignal(signals, ["multi_run_sequence"]))
+    return "multi_run_sequence";
+  if (
+    runActionHasStructuredSignal(signals, ["followup_run", "follow-up run"])
+  ) {
     return "followup_run";
   }
-  if (booleanPayloadValue(action, "bonusRunNoClick") || text.includes("bonus_run")) {
+  if (
+    booleanPayloadValue(action, "bonusRunNoClick") ||
+    runActionHasStructuredSignal(signals, ["bonus_run"])
+  ) {
     return "bonus_run";
   }
   if (
-    text.includes("gain_run_only_action") ||
-    text.includes("extra_run") ||
-    text.includes("extra action")
+    runActionHasStructuredSignal(signals, [
+      "gain_run_only_action",
+      "extra_run",
+      "extra action",
+    ])
   ) {
     return "extra_run";
   }
