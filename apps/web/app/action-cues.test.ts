@@ -252,6 +252,38 @@ describe("deriveOpponentActionCues", () => {
     });
   });
 
+  it("does not show zero damage as prevented unless damage was actually prevented", () => {
+    const cues = deriveDamageImpactCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_no_damage", "continue_run", {
+          damageResolved: true,
+          damageType: "net",
+          damageAmount: 0,
+          cardsTrashed: 0,
+          flatline: false,
+          sourceDefinitionId: "onr_proteus_021_dog-pile"
+        }),
+        event("evt_prevented", "resolve_choice", {
+          damageResolved: true,
+          damageType: "net",
+          damageAmount: 0,
+          cardsTrashed: 0,
+          preventedAmount: 1,
+          flatline: false
+        })
+      ]
+    });
+
+    expect(cues.map((cue) => cue.eventId)).toEqual(["evt_prevented"]);
+    expect(cues[0]).toMatchObject({
+      damageType: "net",
+      amount: 0,
+      flatline: false
+    });
+  });
+
   it("falls back to public PlayerView max hand size for damage impact grip labels", () => {
     const cues = deriveDamageImpactCues({
       viewerSide: "corp",
