@@ -26,21 +26,47 @@ export function isRunnerMemorySupportCard(
   safeNonNegativeInteger: (value: number | undefined) => number,
 ): boolean {
   if (!card || card.known === false) return false;
-  const text = [
+  const tokens = memorySupportTokens([
     card.title,
     card.definitionId,
     card.type,
     ...(card.subtypes ?? []),
     card.rulesText,
     ...roles,
-  ]
-    .filter((entry): entry is string => typeof entry === "string")
-    .join(" ")
-    .toLowerCase();
+  ]);
   return (
     safeNonNegativeInteger(card.memoryLimitBonus) > 0 ||
     rolesMatch(roles, ["memory", "memory_support"]) ||
-    /\b(memory|mu)\b|mem chip/.test(text)
+    memorySupportTokensIncludeAny(tokens, ["memory", "mu"]) ||
+    memorySupportTokensIncludePhrase(tokens, ["mem", "chip"])
+  );
+}
+
+function memorySupportTokens(values: readonly (string | undefined)[]): string[] {
+  return values
+    .filter((entry): entry is string => typeof entry === "string")
+    .flatMap((entry) =>
+      entry
+        .toLocaleLowerCase("en-US")
+        .split(/[^a-z0-9]+/)
+        .filter((token) => token.length > 0),
+    );
+}
+
+function memorySupportTokensIncludeAny(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
+}
+
+function memorySupportTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    phrase.every((word, offset) => tokens[index + offset] === word),
   );
 }
 

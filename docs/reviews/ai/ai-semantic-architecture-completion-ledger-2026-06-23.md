@@ -8580,6 +8580,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertneunundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-mu-pressure-memory-support.ts` erkennt Memory-Support-Karten über strukturierte Rollen, Memory-Bonus und gebundene Kartentext-Tokens/Phrasen statt Regex auf zusammengefügtem Kartentext.
+  - Echte Tokens und Phrasen wie `memory`, `mu` und `mem chip` bleiben wirksam; Rauschen wie `Memoryless Muzzled` und `Mem chipper` bleibt wirkungslos.
+  - `runner-mu-pressure-memory-support.test.ts` schützt positive Rollen-/Kartentext-Fälle und negative Role-/Text-Substring-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-mu-pressure-memory-support.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

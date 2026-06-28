@@ -13,6 +13,13 @@ describe("runnerMemorySupportSearchAction", () => {
     expect(isMemorySupport(["rig_memory_support"])).toBe(true);
     expect(isMemorySupport(["memoryish_noise"])).toBe(false);
     expect(isMemorySupport(["support_memoryish_noise"])).toBe(false);
+    expect(isMemorySupport([], { title: "Memory Chip" })).toBe(true);
+    expect(
+      isMemorySupport([], {
+        title: "Memoryless Muzzled",
+        rulesText: "Mem chipper support.",
+      }),
+    ).toBe(false);
   });
 
   it("uses structured roles and ignores label-only memory search text", () => {
@@ -48,7 +55,10 @@ describe("runnerMemorySupportSearchAction", () => {
   });
 });
 
-function isMemorySupport(roles: readonly string[]): boolean {
+function isMemorySupport(
+  roles: readonly string[],
+  cardOverrides: Partial<VisibleCard> = {},
+): boolean {
   return isRunnerMemorySupportCard(
     {
       instanceId: "support-instance",
@@ -56,6 +66,7 @@ function isMemorySupport(roles: readonly string[]): boolean {
       title: "Support Card",
       type: "hardware",
       known: true,
+      ...cardOverrides,
     } as VisibleCard,
     roles,
     (value) => value ?? 0,
