@@ -7777,6 +7777,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-self-damage-choice.ts` nutzt für strukturierte Self-Damage-Hint-Targets exakte normalisierte Zielvergleiche statt freier Target-Substring-Prüfung.
+  - Strukturierte Targets wie `self` und `self_inflicted` bleiben wirksam; substringartiges Rauschen wie `selfish` erzeugt keine Self-Damage-Hint-Erkennung mehr.
+  - `runner-self-damage-choice.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-self-damage-choice.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

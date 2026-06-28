@@ -356,8 +356,7 @@ function selfDamageEvidenceForAction(
         record.scope === "runner" &&
         record.timing === "action" &&
         typeof record.amount === "number" &&
-        (target?.includes("self") === true ||
-          target?.includes("self_inflicted") === true)
+        selfDamageHintTargetsRunner(target)
       );
     },
   );
@@ -375,6 +374,11 @@ function selfDamageEvidenceForAction(
       `self_damage_hint_card:${sourceDefinitionId}`,
     ],
   };
+}
+
+function selfDamageHintTargetsRunner(target: string | undefined): boolean {
+  const normalizedTarget = target?.toLocaleLowerCase("en-US");
+  return normalizedTarget === "self" || normalizedTarget === "self_inflicted";
 }
 
 function actionConsumesOwnRunnerHandCard(
