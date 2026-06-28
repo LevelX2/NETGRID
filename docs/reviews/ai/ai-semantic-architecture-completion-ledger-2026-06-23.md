@@ -7597,6 +7597,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` neunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-endgame-closeout.ts` nutzt für Endgame-PlanKind-Kategorien den gebundenen `rolesMatch`-Helper statt freier PlanKind-Substring-Prüfungen.
+  - Strukturierte PlanKinds wie `economy_plan`, `protect_remote` und `remote_build` bleiben wirksam; substringartiges Rauschen wie `microeconomy_noise`, `protector_noise` und `remote_builder_noise` erzeugt keine Endgame-Setup-/Protection-/Corp-Stall-Kategorie mehr.
+  - `runner-endgame-closeout.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-endgame-closeout.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
