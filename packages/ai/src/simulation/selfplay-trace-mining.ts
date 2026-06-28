@@ -599,7 +599,7 @@ function classifyLateGainCreditSubclusterEntry(
   text: string,
 ): AiSelfplayActionLimitSubclusterId {
   if (entry.side === "runner") {
-    if (runnerLateGainCreditHasReserveOrSafetyNeed(entry, text)) {
+    if (runnerLateGainCreditHasReserveOrSafetyNeed(entry)) {
       return "runner_late_gain_credit_real_reserve";
     }
     if (!runnerLateGainCreditHasSafeProgressAlternative(entry)) {
@@ -621,7 +621,6 @@ function classifyLateGainCreditSubclusterEntry(
 
 function runnerLateGainCreditHasReserveOrSafetyNeed(
   entry: AiSimulationSummary["actionSequence"][number],
-  text: string,
 ): boolean {
   // These trace-only flags preserve legitimate reserve and safety credits from
   // being collapsed into the "no funding need" residual bucket.
@@ -631,9 +630,12 @@ function runnerLateGainCreditHasReserveOrSafetyNeed(
     entry.runnerBelowReserveBefore === true ||
     entry.runnerCreditStarvedWithLegalEconomy === true ||
     (entry.runnerSetupMissingCoverageTypes?.length ?? 0) > 0 ||
-    /known_unaffordable_path:true|missing_breaker_coverage:true|debtrepaymentrisk:high|encounter_survival/.test(
-      text,
-    )
+    selfplayEntryHasStructuredSignal(entry, [
+      "known_unaffordable_path:true",
+      "missing_breaker_coverage:true",
+      "debtRepaymentRisk:high",
+      "encounter_survival",
+    ])
   );
 }
 

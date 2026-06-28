@@ -8481,6 +8481,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertachtundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` klassifiziert Runner-Late-Credit-Reserve-/Safety-Gründe über strukturierte Entry-Signale statt breiter Gesamttext-Regex `known_unaffordable_path:true|missing_breaker_coverage:true|debtrepaymentrisk:high|encounter_survival`.
+  - Strukturierte Facts wie `known_unaffordable_path:true` und `encounter_survival:damage` bleiben wirksam; Rauschen wie `known_unaffordable_path:trueish_noise` und `encounter_survivalist_noise` bleibt wirkungslos.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative Runner-Late-Credit-Reserve-Subcluster-Grenzfälle über `summarizeSelfplayActionLimitSubclusters`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 17 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -459,6 +459,38 @@ describe("SelfplayTraceMining", () => {
     });
   });
 
+  it("bounds Runner late-credit reserve and safety explanations to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "gain_credit", {
+        selectedActionId: "runner-reserve-positive",
+        debugFacts: [
+          "known_unaffordable_path:true",
+          "encounter_survival:damage",
+        ],
+        runnerPressureReadyTrue: true,
+        runnerPressureReadyByTargetRemote: true,
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "gain_credit", {
+        selectedActionId: "runner-reserve-noise",
+        debugFacts: [
+          "known_unaffordable_path:trueish_noise",
+          "encounter_survivalist_noise",
+        ],
+        runnerPressureReadyTrue: true,
+        runnerPressureReadyByTargetRemote: true,
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      runner_late_gain_credit_real_reserve: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      runner_late_gain_credit_without_funding_need: 1,
+    });
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),
