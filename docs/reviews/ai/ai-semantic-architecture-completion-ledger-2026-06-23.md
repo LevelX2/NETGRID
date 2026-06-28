@@ -9459,6 +9459,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertfünfundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-run-target-evaluation.ts` ersetzt die lokale RunAction-Payoff-Signalprüfung per freien `signal.includes(...)`-Prüfungen durch gebundene Signal-Token- und Tokenfolgenprüfung.
+  - Strukturierte Projection-Signale wie `access.hq_multiaccess`, `access.rnd_multiaccess`, `access.hq_info`, `access.rnd_topdeck_info`, `access.free_trash` und `access_trash` bleiben wirksam; Suffix-Rauschen wie `multiaccessory`, `R&Dish`, `tagalong` oder `damaged_goods` erzeugt keine RunAction-Payoff- oder Risk-Penalty-Matches.
+  - Die Änderung bleibt auf bereits erzeugte RunActionProjection-Signale beschränkt und erzeugt keine LegalAction-Projektion.
+  - `run-action-projection.test.ts` schützt die strukturierten Projection-Bounds; `runner-run-target-evaluation.test.ts` sichert Shredder, All-Hands, Rush Hour, blocked Multiaccess und die bestehenden Access-Payoff-Evaluations.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/run-action-projection.test.ts src/runner-run-target-evaluation.test.ts` grün, 2 Dateien, 63 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

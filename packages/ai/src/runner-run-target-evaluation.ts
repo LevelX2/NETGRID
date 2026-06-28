@@ -589,7 +589,9 @@ function runActionPayoffForTarget(
   }
   if (
     projection.riskSignals.some(
-      (signal) => signal.includes("tag") || signal.includes("damage"),
+      (signal) =>
+        projectionSignalHasToken(signal, "tag") ||
+        projectionSignalHasToken(signal, "damage"),
     )
   ) {
     values.riskPenalty += 25;
@@ -613,25 +615,31 @@ function projectionHasAccessSignal(
   );
   if (kind === "multiaccess") {
     return signals.some((signal) => {
-      if (!signal.includes("multiaccess")) return false;
-      if (signal.includes("hq") || signal.includes("hand"))
-        return targetKind === "hq";
+      if (!projectionSignalHasToken(signal, "multiaccess")) return false;
       if (
-        signal.includes("rnd") ||
-        signal.includes("rd") ||
-        signal.includes("topdeck")
+        projectionSignalHasToken(signal, "hq") ||
+        projectionSignalHasToken(signal, "hand")
+      ) {
+        return targetKind === "hq";
+      }
+      if (
+        projectionSignalHasToken(signal, "rnd") ||
+        projectionSignalHasToken(signal, "rd") ||
+        projectionSignalHasToken(signal, "topdeck")
       ) {
         return targetKind === "rd";
       }
-      if (signal.includes("archives")) return targetKind === "archives";
-      if (signal.includes("remote")) return targetKind === "remote";
+      if (projectionSignalHasToken(signal, "archives"))
+        return targetKind === "archives";
+      if (projectionSignalHasToken(signal, "remote"))
+        return targetKind === "remote";
       return true;
     });
   }
   if (kind === "hq_info") {
     return (
       targetKind === "hq" &&
-      signals.some((signal) => signal.includes("hq_info"))
+      signals.some((signal) => projectionSignalHasPhrase(signal, ["hq", "info"]))
     );
   }
   if (kind === "topdeck_info") {
@@ -639,14 +647,38 @@ function projectionHasAccessSignal(
       targetKind === "rd" &&
       signals.some(
         (signal) =>
-          signal.includes("topdeck") || signal.includes("rnd_topdeck"),
+          projectionSignalHasToken(signal, "topdeck") ||
+          projectionSignalHasPhrase(signal, ["rnd", "topdeck"]),
       )
     );
   }
   return signals.some(
     (signal) =>
-      signal.includes("free_trash") || signal.includes("access_trash"),
+      projectionSignalHasPhrase(signal, ["free", "trash"]) ||
+      projectionSignalHasPhrase(signal, ["access", "trash"]),
   );
+}
+
+function projectionSignalHasToken(signal: string, token: string): boolean {
+  return projectionSignalTokens(signal).includes(token);
+}
+
+function projectionSignalHasPhrase(
+  signal: string,
+  phrase: readonly string[],
+): boolean {
+  const tokens = projectionSignalTokens(signal);
+  return tokens.some((entry, index) =>
+    entry === phrase[0] &&
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
+}
+
+function projectionSignalTokens(signal: string): string[] {
+  return signal
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
 }
 
 function combineRunPayoffs(
