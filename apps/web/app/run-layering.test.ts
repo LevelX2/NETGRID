@@ -41,7 +41,11 @@ describe("run window layering", () => {
 
   it("keeps stack-search card choices readable instead of overlapped", () => {
     expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("display: grid");
-    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("minmax(190px, 1fr)");
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("minmax(184px, 1fr)");
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("grid-auto-rows: auto");
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("align-items: flex-start");
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot")).toContain("flex: 1 1 auto");
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot")).toContain("min-width: 0");
     expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot + .cardChoiceOptionSlot")).toContain("margin-left: 0");
     expect(selectorBlock(".cardChoiceOrderBadge")).toContain("position: absolute");
     expect(selectorBlock(".cardChoiceOrderBadge")).toContain("pointer-events: none");

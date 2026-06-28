@@ -64,7 +64,8 @@ export function CardChoicePanel({
     : showOnlySelectable
       ? choice.options.filter(cardChoiceOptionSelectable)
       : choice.options;
-  const rows = cardChoiceRows(visibleOptions);
+  const readableCards = cardChoiceUsesReadableCards(choice);
+  const rows = readableCards && visibleOptions.length > 0 ? [visibleOptions] : cardChoiceRows(visibleOptions);
   const selectedOptions = selected
     .map((optionId) => choice.options.find((option) => option.id === optionId))
     .filter((option): option is VisibleChoiceOption => Boolean(option));
@@ -79,7 +80,6 @@ export function CardChoicePanel({
   const title = programInstallTrashInfo?.title ?? cardChoiceReadonlyPrivateLookTitle(choice, view) ?? cardChoiceTitle(choice);
   const prompt = choice.prompt.trim();
   const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
-  const readableCards = cardChoiceUsesReadableCards(choice);
   const orderedSelection = cardChoiceUsesOrderedSelection(choice);
 
   useEffect(() => {
@@ -144,6 +144,7 @@ export function CardChoicePanel({
                         card={card}
                         displayMode={cardChoiceDisplayMode}
                         choiceSelected={active}
+                        allowTooltipPinOnSelect
                         {...(selectable ? { onSelect: () => toggleOption(option.id) } : {})}
                       />
                     ) : (
