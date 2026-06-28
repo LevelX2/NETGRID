@@ -8607,6 +8607,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertzweiter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/visible-card-heuristics.ts` erkennt Runner-Bad-Publicity-/Trace-Tech-Kartentext über gebundene Tokens und `bad publicity`-Phrase statt Regex-Substring-Suche auf sichtbarem Kartentext.
+  - Strukturierte Rollen wie `bad_publicity` und `trace_support` bleiben wirksam; sichtbare Texte wie `bad publicity` und `Trace support` bleiben wirksam; Rauschen wie `Badly publicized traceroute` bleibt wirkungslos.
+  - `visible-card-heuristics.test.ts` schützt positive Rollen-/Text-Fälle und negative Rollen-/Text-Substring-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/visible-card-heuristics.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

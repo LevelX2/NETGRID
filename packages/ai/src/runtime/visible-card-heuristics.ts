@@ -138,10 +138,28 @@ export function runnerBadPublicityOrTraceTechCard(
   roles: readonly string[] = [],
   definition: VisibleCardHeuristicDefinition | undefined,
 ): boolean {
-  const text = card ? visibleCardText(card, definition) : "";
+  const tokens = card ? visibleTextTokens(visibleCardText(card, definition)) : [];
   return (
     rolesMatch(roles, ["bad_publicity", "trace", "bad-publicity"]) ||
-    /bad publicity|bad_publicity|trace/i.test(text)
+    visibleTokensIncludePhrase(tokens, ["bad", "publicity"]) ||
+    visibleTokensIncludeAny(tokens, ["trace"])
+  );
+}
+
+function visibleTokensIncludeAny(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
+}
+
+function visibleTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    phrase.every((word, offset) => tokens[index + offset] === word),
   );
 }
 

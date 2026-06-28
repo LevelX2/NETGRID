@@ -29,6 +29,30 @@ describe("visible card heuristics", () => {
     ).toBe(false);
   });
 
+  it("matches bad-publicity and trace card text by bounded tokens", () => {
+    expect(
+      runnerBadPublicityOrTraceTechCard(
+        card({ rulesText: "Prevent bad publicity." }),
+        [],
+        undefined,
+      ),
+    ).toBe(true);
+    expect(
+      runnerBadPublicityOrTraceTechCard(
+        card({ rulesText: "Trace support." }),
+        [],
+        undefined,
+      ),
+    ).toBe(true);
+    expect(
+      runnerBadPublicityOrTraceTechCard(
+        card({ rulesText: "Badly publicized traceroute support." }),
+        [],
+        undefined,
+      ),
+    ).toBe(false);
+  });
+
   it("matches credit payout mechanics by bounded terms", () => {
     expect(
       runnerCardLooksLikeCreditPayout(card(), {
