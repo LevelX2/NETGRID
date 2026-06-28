@@ -849,11 +849,11 @@ function buildCorpScorePlanProfile(
 ): CorpScorePlanProfile {
   const agendaToolsKnown = records.filter((record) => record.type === "agenda").length;
   const advanceToolsKnown = records.filter((record) =>
-    /advance|advancement/.test(normalizedRecordText(record)),
+    deckCapabilityTextHasCorpAdvanceSignal(normalizedRecordText(record)),
   ).length;
   const scoreSupportToolsKnown = records.filter((record) =>
     rolesMatch(record.roles, ["score"]) ||
-    /score|agenda/.test(normalizedRecordTextWithoutRoles(record)),
+    deckCapabilityTextHasCorpScoreSignal(normalizedRecordTextWithoutRoles(record)),
   ).length;
   return {
     agendaToolsKnown,
@@ -872,7 +872,7 @@ function buildCorpRezReserveProfile(
 ): CorpRezReserveProfile {
   const iceKnownInDeck = records.filter((record) => record.type === "ice").length;
   const rezEconomyToolsKnown = records.filter((record) =>
-    /rez|economy|credits/.test(normalizedRecordText(record)) &&
+    deckCapabilityTextHasCorpRezEconomySignal(normalizedRecordText(record)) &&
     (record.type === "operation" || record.type === "asset"),
   ).length;
   return {
@@ -893,7 +893,9 @@ function buildCorpIceTaxProfile(
     barrierIceKnown: iceRecords.filter((record) => subtypeOrText(record, "wall", "barrier")).length,
     codeGateIceKnown: iceRecords.filter((record) => subtypeOrText(record, "code_gate", "code gate")).length,
     sentryIceKnown: iceRecords.filter((record) => subtypeOrText(record, "sentry")).length,
-    taxingIceKnown: iceRecords.filter((record) => /tax|trace|pay|lose/.test(normalizedRecordText(record))).length,
+    taxingIceKnown: iceRecords.filter((record) =>
+      deckCapabilityTextHasCorpTaxingIceSignal(normalizedRecordText(record)),
+    ).length,
     evidence: [`ice_records:${iceRecords.length}`],
   };
 }
@@ -908,7 +910,10 @@ function buildCorpRemotePlanProfile(
     ).length,
     remoteEconomyToolsKnown: records.filter((record) =>
       rolesMatch(record.roles, ["economy_asset"]) ||
-      /asset.*credit|campaign|bank/.test(normalizedRecordTextWithoutRoles(record)),
+      deckCapabilityTextHasCorpRemoteEconomySignal(
+        normalizedRecordTextWithoutRoles(record),
+        record.type,
+      ),
     ).length,
     ambushToolsKnown: records.filter((record) =>
       rolesMatch(record.roles, ["ambush"]) || record.subtypes.includes("ambush"),
@@ -1051,6 +1056,49 @@ function deckCapabilityTextHasMemoryToolSignal(text: string): boolean {
     "memory",
     "mu",
   ]);
+}
+
+function deckCapabilityTextHasCorpAdvanceSignal(text: string): boolean {
+  return deckCapabilityTokensIncludeAny(deckCapabilityTextTokens(text), [
+    "advance",
+    "advancement",
+  ]);
+}
+
+function deckCapabilityTextHasCorpScoreSignal(text: string): boolean {
+  return deckCapabilityTokensIncludeAny(deckCapabilityTextTokens(text), [
+    "score",
+    "agenda",
+  ]);
+}
+
+function deckCapabilityTextHasCorpRezEconomySignal(text: string): boolean {
+  return deckCapabilityTokensIncludeAny(deckCapabilityTextTokens(text), [
+    "rez",
+    "economy",
+    "credits",
+  ]);
+}
+
+function deckCapabilityTextHasCorpTaxingIceSignal(text: string): boolean {
+  return deckCapabilityTokensIncludeAny(deckCapabilityTextTokens(text), [
+    "tax",
+    "trace",
+    "pay",
+    "lose",
+  ]);
+}
+
+function deckCapabilityTextHasCorpRemoteEconomySignal(
+  text: string,
+  cardType: string | undefined,
+): boolean {
+  const tokens = deckCapabilityTextTokens(text);
+  return (
+    (cardType === "asset" &&
+      deckCapabilityTokensIncludeAny(tokens, ["credit", "credits"])) ||
+    deckCapabilityTokensIncludeAny(tokens, ["campaign", "bank"])
+  );
 }
 
 function deckCapabilityTokensIncludeInOrder(

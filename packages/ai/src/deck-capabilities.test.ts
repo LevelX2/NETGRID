@@ -489,6 +489,52 @@ describe("DeckCapabilityProfile", () => {
     }
   });
 
+  it("bounds corp profile text signals to exact tokens", () => {
+    const inputView = playerView("corp");
+    inputView.servers = [
+      server("remote_1", [
+        visibleCard("corp-advance", "local_alpha_advance", "corp", "operation", {
+          title: "Advance Tool",
+        }),
+        visibleCard("corp-score", "local_alpha_score", "corp", "operation", {
+          title: "Score Support",
+        }),
+        visibleCard("corp-rez", "local_alpha_rez", "corp", "asset", {
+          title: "Rez Credits",
+        }),
+        visibleCard("corp-tax", "local_alpha_tax", "corp", "ice", {
+          title: "Tax ICE",
+        }),
+        visibleCard("corp-campaign", "local_alpha_campaign", "corp", "asset", {
+          title: "Campaign",
+        }),
+        visibleCard("corp-noise", "local_alpha_noise", "corp", "operation", {
+          title: "Advanceish Scoreish Rezish Creditsish",
+        }),
+        visibleCard("corp-tax-noise", "local_alpha_noise_ice", "corp", "ice", {
+          title: "Taxi Traceish Payee Loser",
+        }),
+        visibleCard("corp-remote-noise", "local_alpha_remote_noise", "corp", "asset", {
+          title: "Campaignish Bankish Creditsish",
+        }),
+      ]),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "corp",
+      playerView: inputView,
+      legalActions: [],
+    });
+
+    expect(profile.corp?.scorePlanProfile).toMatchObject({
+      advanceToolsKnown: 1,
+      scoreSupportToolsKnown: 1,
+    });
+    expect(profile.corp?.rezReserveProfile.rezEconomyToolsKnown).toBe(1);
+    expect(profile.corp?.iceTaxProfile.taxingIceKnown).toBe(1);
+    expect(profile.corp?.remotePlanProfile.remoteEconomyToolsKnown).toBe(2);
+  });
+
   it("matches runner attack plan roles by bounded role terms", () => {
     CARD_ROLES_BY_CARD.set("local_runner_attack_a", {
       cardId: "local_runner_attack_a",

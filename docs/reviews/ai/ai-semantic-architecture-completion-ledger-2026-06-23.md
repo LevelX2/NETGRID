@@ -9130,6 +9130,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: spezifischer `rg`-Restcheck auf den ersetzten Memory-Regex ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertdreiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` ersetzt die textbasierten Corp-Deck-Profilzähler für Advance-/Score-, Rez-/Economy-, Taxing-ICE- und Remote-Economy-Signale durch gebundene Deck-Capability-Tokens.
+  - Exakte Begriffe und Phrasen wie `advance`, `advancement`, `score`, `agenda`, `rez`, `economy`, `credits`, `tax`, `trace`, `pay`, `lose`, `campaign` und `bank` bleiben wirksam; Suffix-Rauschen wie `scoreish`, `creditsish`, `traceish`, `payee`, `loser`, `campaignish` und `bankish` erzeugt keinen Profilzähler mehr.
+  - Strukturierte Rollen über `rolesMatch` bleiben weiterhin die bevorzugte Begründungsquelle vor sichtbarem Textfallback.
+  - Die Erkennung bleibt reine Deck-/Capability-Diagnostik über sichtbare Kartendaten und erzeugt keine LegalAction-Projektion.
+  - `deck-capabilities.test.ts` schützt positive und negative Corp-Profil-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts` grün, 1 Datei, 15 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: spezifischer `rg`-Restcheck auf die ersetzten Corp-Profil-Regexmuster ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
