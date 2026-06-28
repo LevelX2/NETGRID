@@ -7795,6 +7795,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertzwölfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` nutzt für explizite Run-Signale und konkrete Server-Payloads exakte strukturierte Signalvergleiche statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `make_run` bleiben projektionswirksam; substringartiges Rauschen wie `make_runaway` erzeugt trotz Server-ID keine Run-Action-Projection mehr.
+  - `run-action-projection.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

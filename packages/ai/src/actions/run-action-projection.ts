@@ -216,8 +216,7 @@ function runActionRelevant(action: LegalAction, signals: readonly string[]): boo
   if (action.type === "start_run") return true;
   const text = runActionSearchText(action, signals);
   if (text.includes("path blocked")) return false;
-  if (concretePayloadServerId(action) && text.includes("run")) return true;
-  const explicitRunSignals = [
+  const explicitRunSignals = runActionHasStructuredSignal(signals, [
     "start_run",
     "make_run",
     "make a run",
@@ -235,7 +234,8 @@ function runActionRelevant(action: LegalAction, signals: readonly string[]): boo
     "server_specific_archives",
     "server_specific_remote",
     "future_run_effect",
-  ].some((needle) => text.includes(needle));
+  ]);
+  if (concretePayloadServerId(action) && explicitRunSignals) return true;
   if (explicitRunSignals) return true;
   if (
     text.includes("run") &&
@@ -252,6 +252,18 @@ function runActionRelevant(action: LegalAction, signals: readonly string[]): boo
     action.type === "play_event" &&
     text.includes("run_pressure") &&
     (text.includes("multiaccess") || text.includes("access_replacement"))
+  );
+}
+
+function runActionHasStructuredSignal(
+  signals: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const normalizedNeedles = new Set(
+    needles.map((needle) => needle.toLocaleLowerCase("en-US")),
+  );
+  return signals.some((signal) =>
+    normalizedNeedles.has(signal.toLocaleLowerCase("en-US")),
   );
 }
 

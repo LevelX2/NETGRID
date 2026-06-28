@@ -27,6 +27,33 @@ describe("projectRunnerRunActions", () => {
     ]);
   });
 
+  it("bounds structured run signals before projecting concrete server payloads", () => {
+    const structured = action({
+      actionId: "structured-run",
+      label: "Use ability",
+      payload: {
+        runActionSignals: ["make_run"],
+        serverId: "hq",
+      } as unknown as LegalAction["payload"],
+    });
+    const noise = action({
+      actionId: "structured-noise",
+      label: "Use ability",
+      payload: {
+        runActionSignals: ["make_runaway"],
+        serverId: "hq",
+      } as unknown as LegalAction["payload"],
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([structured, noise]),
+    });
+
+    expect(projections.map((projection) => projection.actionId)).toEqual([
+      "structured-run",
+    ]);
+  });
+
   it("requires canonical structured server ids in payloads", () => {
     const labelLikeServer = action({
       actionId: "label-like-server",
