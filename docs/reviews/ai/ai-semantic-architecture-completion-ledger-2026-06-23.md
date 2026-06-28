@@ -7750,6 +7750,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsiebter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für bekannte `semantic_override_suspicious`-/Plan-Mismatch-Entlastungsgründe strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `selected_by_plan_mapping` bleiben wirksam; substringartiges Rauschen wie `selected_by_plan_mappingish` entlastet keinen Semantic-Override-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

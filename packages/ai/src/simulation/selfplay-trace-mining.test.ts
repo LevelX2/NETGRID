@@ -358,6 +358,34 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("override-positive");
   });
 
+  it("bounds semantic override explanations to structured entries", () => {
+    const explained = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "override-explained",
+        debugFacts: [
+          "semantic_runtime_actual_differs_from_legacy_debug",
+          "selected_by_plan_mapping",
+        ],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "override-explanation-noise",
+        debugFacts: [
+          "semantic_runtime_actual_differs_from_legacy_debug",
+          "selected_by_plan_mappingish",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([explained, noise], {
+      detectorIds: ["semantic_override_suspicious"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("override-explanation-noise");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),

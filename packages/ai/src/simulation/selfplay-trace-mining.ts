@@ -1454,7 +1454,7 @@ function selfplayPlanActionMismatch(
     entry.actionType !== "steal_agenda" &&
     !text.includes("funding_need:true") &&
     !text.includes("reserve") &&
-    !selfplayPlanMismatchHasKnownExplanation(text)
+    !selfplayPlanMismatchHasKnownExplanation(entry)
   )
     return true;
   if (
@@ -1485,24 +1485,26 @@ function selfplaySemanticOverrideSuspicious(
     ])
   )
     return false;
-  if (selfplayPlanMismatchHasKnownExplanation(text)) return false;
+  if (selfplayPlanMismatchHasKnownExplanation(entry)) return false;
   if (selfplayReactiveSemanticOverride(entry.actionType)) return false;
   return true;
 }
 
-function selfplayPlanMismatchHasKnownExplanation(text: string): boolean {
-  return (
-    text.includes("tactical_plan_mapping_outcome:semantic_choice_selected") ||
-    text.includes("selected_by_plan_mapping") ||
-    text.includes("runner_recent_same_server_runs") ||
-    text.includes("runner_repeated_low_value_central_run") ||
-    text.includes("runner_pressure_ready_false_positive:true") ||
-    text.includes("runner_phase_exit_blocked_by_cost:true") ||
-    text.includes("runner_phase_exit_blocked_by_target_value:true") ||
-    text.includes("self_damage_guard") ||
-    text.includes("program_sacrifice_penalty") ||
-    text.includes("runner_loan_liability")
-  );
+function selfplayPlanMismatchHasKnownExplanation(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  return selfplayEntryHasStructuredSignal(entry, [
+    "tactical_plan_mapping_outcome:semantic_choice_selected",
+    "selected_by_plan_mapping",
+    "runner_recent_same_server_runs",
+    "runner_repeated_low_value_central_run",
+    "runner_pressure_ready_false_positive:true",
+    "runner_phase_exit_blocked_by_cost:true",
+    "runner_phase_exit_blocked_by_target_value:true",
+    "self_damage_guard",
+    "program_sacrifice_penalty",
+    "runner_loan_liability",
+  ]);
 }
 
 function selfplayReactiveSemanticOverride(
