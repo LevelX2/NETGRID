@@ -296,6 +296,84 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("matches score closeout target evidence by bounded terms", () => {
+    const closeoutAction = corpAction("targeted-closeout", "play_operation");
+    const input = corpInputWithGoals(
+      [],
+      [closeoutAction],
+    );
+    const baseCandidate = semanticCandidate(
+      "targeted-closeout",
+      "play.corp_operation",
+      ["corp.score_closeout"],
+      "play_operation",
+    );
+    const agendaTarget = {
+      ...baseCandidate,
+      targetContext: {
+        selectedTargets: [
+          {
+            targetId: "remote_1_agenda",
+            targetKind: "card",
+            targetSide: "corp",
+            visibilityScope: "actor_private",
+            evidence: ["target_role:agenda"],
+          },
+        ],
+        targetKind: "card",
+        targetZones: ["remote"],
+        targetSide: "corp",
+        hiddenInfoPolicy: "side_safe_engine_input_only",
+        availableTargetsStatus: "engine_provided",
+        targetProfileMatches: [],
+        targetConstraintResults: [],
+      },
+    } satisfies ActionSemanticCandidate;
+    const noiseTarget = {
+      ...baseCandidate,
+      targetContext: {
+        selectedTargets: [
+          {
+            targetId: "remote_1_asset",
+            targetKind: "card",
+            targetSide: "corp",
+            visibilityScope: "actor_private",
+            evidence: ["target_role:agendaish_noise"],
+          },
+        ],
+        targetKind: "card",
+        targetZones: ["remote"],
+        targetSide: "corp",
+        hiddenInfoPolicy: "side_safe_engine_input_only",
+        availableTargetsStatus: "engine_provided",
+        targetProfileMatches: [],
+        targetConstraintResults: [],
+      },
+    } satisfies ActionSemanticCandidate;
+
+    const agendaComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      closeoutAction,
+      "basic_install",
+      testDependencies(),
+      agendaTarget,
+    );
+    const noiseComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      closeoutAction,
+      "basic_install",
+      testDependencies(),
+      noiseTarget,
+    );
+
+    expect(agendaComponents.map((component) => component.key)).toContain(
+      "corp_score_closeout_semantic_candidate",
+    );
+    expect(noiseComponents.map((component) => component.key)).not.toContain(
+      "corp_score_closeout_semantic_candidate",
+    );
+  });
+
   it("uses ActionSemanticCandidate cost profile for rez affordability", () => {
     const candidate = {
       ...semanticCandidate("rez-ice", "corp_window.rez", []),

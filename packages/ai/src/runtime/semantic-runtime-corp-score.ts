@@ -578,12 +578,18 @@ function corpActionCandidateTargetsCorpScoreline(
     ...(candidate.targetContext.availableTargets ?? []),
   ];
   return targets.some((target) => {
-    const evidence = target.evidence.join("|").toLocaleLowerCase("en-US");
     return (
       target.targetSide !== "runner" &&
       (target.targetKind === "agenda" ||
-        evidence.includes("agenda") ||
-        evidence.includes("scoreline"))
+        target.evidence.some((entry) => evidenceHasTerm(entry, "agenda")) ||
+        target.evidence.some((entry) => evidenceHasTerm(entry, "scoreline")))
     );
   });
+}
+
+function evidenceHasTerm(entry: string, term: string): boolean {
+  return entry
+    .toLocaleLowerCase("en-US")
+    .split(/[._:-]+/)
+    .includes(term);
 }

@@ -8157,6 +8157,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertzweiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` prüft Corp-Scoreline-Target-Evidence über gebundene Evidence-Tokens statt freier `agenda`-/`scoreline`-Substring-Suche.
+  - Strukturierte Target-Evidence wie `target_role:agenda` bleibt Score-Closeout-Basis; Rauschen wie `target_role:agendaish_noise` erzeugt keinen `corp_score_closeout_semantic_candidate`-Bonus.
+  - `semantic-runtime-corp-score.test.ts` schützt positive Target-Evidence und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
