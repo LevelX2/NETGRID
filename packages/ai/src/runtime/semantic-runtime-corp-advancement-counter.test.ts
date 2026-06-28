@@ -71,6 +71,28 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
       "advancement_target_class:access_net_damage_ambush",
     );
   });
+
+  it("derives advancement-counter action cashout from bounded rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText(
+      "Spend 1 advancement counter to draw a card.",
+    );
+
+    expect(assessment?.advancementWitness).toBe("counter_cashout_action");
+    expect(assessment?.evidence).toContain(
+      "advancement_target_class:counter_cashout_action",
+    );
+  });
+
+  it("ignores action cashout substring noise in rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText(
+      "Counteraction protocol stores one advancement counter.",
+    );
+
+    expect(assessment?.advancementWitness).toBe("counter_bank_only");
+    expect(assessment?.evidence).not.toContain(
+      "advancement_target_class:counter_cashout_action",
+    );
+  });
 });
 
 function assessmentForAgendaRulesText(agendaRulesText: string) {

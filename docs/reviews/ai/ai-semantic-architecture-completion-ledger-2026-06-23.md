@@ -8866,6 +8866,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneunundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ersetzt die Action-Cashout-Erkennung für Advancement-Ziele durch gebundene Tokens.
+  - Echte `spend/remove ... advancement counter(s)`-Texte und `counter action` bleiben wirksam; Substring-Rauschen wie `counteraction` erzeugt keinen Action-Cashout mehr.
+  - Die Erkennung bleibt auf sichtbaren normalisierten Rules-Text begrenzt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-advancement-counter.test.ts` schützt positiven Spend-Counter-Cashout und den negativen `counteraction`-Grenzfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-advancement-counter.test.ts` grün, 1 Datei, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

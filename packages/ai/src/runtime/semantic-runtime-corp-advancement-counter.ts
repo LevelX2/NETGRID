@@ -685,8 +685,38 @@ function corpAdvancementTokensStartCounterScale(
 }
 
 function corpAdvancementLooksLikeActionCashout(text: string): boolean {
-  return /advancement counter.*:\s*|counter.*action|spend .*advancement counter|remove .*advancement counter/.test(
-    text,
+  const tokens = corpRulesTextTokens(text);
+  return (
+    corpTokensIncludePhrase(tokens, ["counter", "action"]) ||
+    corpTokensIncludeCounterSpendCommand(tokens, "spend") ||
+    corpTokensIncludeCounterSpendCommand(tokens, "remove")
+  );
+}
+
+function corpTokensIncludeCounterSpendCommand(
+  tokens: readonly string[],
+  command: "spend" | "remove",
+): boolean {
+  for (const [index, token] of tokens.entries()) {
+    if (token !== command) continue;
+    for (
+      let cursor = index + 1;
+      cursor < Math.min(tokens.length, index + 6);
+      cursor += 1
+    ) {
+      if (corpAdvancementCounterPhraseAt(tokens, cursor)) return true;
+    }
+  }
+  return false;
+}
+
+function corpAdvancementCounterPhraseAt(
+  tokens: readonly string[],
+  index: number,
+): boolean {
+  return (
+    tokens[index] === "advancement" &&
+    (tokens[index + 1] === "counter" || tokens[index + 1] === "counters")
   );
 }
 
