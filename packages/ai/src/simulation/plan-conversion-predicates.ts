@@ -674,7 +674,7 @@ export function runnerProbeConvertsToUsefulInfoOrPivot<
       isMeaningfulProgress(later) ||
       later.targetServerId !== target ||
       ["recover_economy", "rig", "remote_contest"].some((needle) =>
-        planKindForConversion(later)?.includes(needle),
+        planKindMatchesTerm(planKindForConversion(later), needle),
       ),
   );
 }
@@ -780,7 +780,7 @@ export function corpProtectionConvertsToScoreSafety<
         later.actionType === "advance_card" ||
         later.protectedFinalAdvance === true ||
         later.protectBeforeAdvance === true ||
-        planKindForConversion(later)?.includes("remote_build") === true),
+        planKindMatchesTerm(planKindForConversion(later), "remote_build")),
   );
 }
 
@@ -813,4 +813,11 @@ function hasPlanConversionEvidenceFlag(
   flag: string,
 ): boolean {
   return (entry.evidence ?? []).includes(flag);
+}
+
+function planKindMatchesTerm(
+  planKind: string | undefined,
+  term: string,
+): boolean {
+  return planKind !== undefined && rolesMatch([planKind], [term]);
 }

@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  corpProtectionConvertsToScoreSafety,
   corpRemoteCreatedConvertsTo,
   isRunnerSetupAction,
   planIntentConvertedWithin,
+  runnerProbeConvertsToUsefulInfoOrPivot,
 } from "./plan-conversion-predicates";
 
 describe("planIntentConvertedWithin", () => {
@@ -68,6 +70,68 @@ describe("planIntentConvertedWithin", () => {
     ).toBe(false);
     expect(
       isRunnerSetupAction({ side: "runner", reasonCode: "research_noise" }),
+    ).toBe(false);
+  });
+
+  it("matches runner probe pivot plan kinds by bounded terms", () => {
+    expect(
+      runnerProbeConvertsToUsefulInfoOrPivot(
+        [
+          { side: "runner", actionType: "start_run", targetServerId: "rd" },
+          {
+            side: "runner",
+            actionType: "gain_credit",
+            targetServerId: "rd",
+            reasonCode: "runner.plan.recover_economy",
+          },
+        ],
+        0,
+        () => false,
+      ),
+    ).toBe(true);
+    expect(
+      runnerProbeConvertsToUsefulInfoOrPivot(
+        [
+          { side: "runner", actionType: "start_run", targetServerId: "rd" },
+          {
+            side: "runner",
+            actionType: "gain_credit",
+            targetServerId: "rd",
+            reasonCode: "runner.plan.recover_economyish_noise",
+          },
+        ],
+        0,
+        () => false,
+      ),
+    ).toBe(false);
+  });
+
+  it("matches Corp protection remote-build followups by bounded terms", () => {
+    expect(
+      corpProtectionConvertsToScoreSafety(
+        [
+          { side: "corp", reasonCode: "corp.plan.protect_remote" },
+          {
+            side: "corp",
+            actionType: "install_card",
+            reasonCode: "corp.plan.remote_build",
+          },
+        ],
+        0,
+      ),
+    ).toBe(true);
+    expect(
+      corpProtectionConvertsToScoreSafety(
+        [
+          { side: "corp", reasonCode: "corp.plan.protect_remote" },
+          {
+            side: "corp",
+            actionType: "install_card",
+            reasonCode: "corp.plan.remote_builder_noise",
+          },
+        ],
+        0,
+      ),
     ).toBe(false);
   });
 });
