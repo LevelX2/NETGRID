@@ -3005,6 +3005,210 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(validateGameState(state).ok).toBe(true);
   });
 
+  it("lets Runner choose how many Zetatech bits pay for a program install", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-zetatech-program-install-payment-choice",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "onr_v1_runner_v1922_zetatech_payment_choice",
+          name: "O:NR V1.9.22 Zetatech Payment Choice",
+          cards: [
+            { id: "onr_v1_075_zetatech-software-installer", quantity: 1 },
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 0;
+    state.runner.memoryLimit = 4;
+    const installerId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_075_zetatech-software-installer",
+    );
+    const hammerId = moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_075_zetatech-software-installer",
+    );
+    state.runner.credits = 2;
+
+    const installActions = getLegalActions(state, "runner").filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.source === hammerId &&
+        action.payload?.hostOnCardId === undefined &&
+        action.payload?.runnerProgramTrashBeforeInstall !== true,
+    );
+    const byAmount = new Map(
+      installActions.map((action) => [
+        String(action.payload?.runnerInstallPaymentSourceAmounts),
+        action,
+      ]),
+    );
+    expect([...byAmount.keys()].sort()).toEqual(["0", "1", "2"]);
+    expect(
+      installActions.map((action) => action.payload?.runnerInstallPaymentLabel),
+    ).toEqual(["Ohne Zeta-Bits", "Mit 1 Zeta-Bit", "Mit 2 Zeta-Bits"]);
+
+    const zeroBitState = apply(
+      structuredClone(state),
+      "runner",
+      (action) => action.actionId === byAmount.get("0")?.actionId,
+    );
+    expect(zeroBitState.runner.credits).toBe(0);
+    expect(cardCounterAmount(zeroBitState, installerId, "bit")).toBe(2);
+
+    const oneBitState = apply(
+      structuredClone(state),
+      "runner",
+      (action) => action.actionId === byAmount.get("1")?.actionId,
+    );
+    expect(oneBitState.runner.credits).toBe(1);
+    expect(cardCounterAmount(oneBitState, installerId, "bit")).toBe(1);
+    expect(oneBitState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      installCostPaid: 2,
+      runnerInstallNormalCreditsPaid: 1,
+      runnerInstallHostedCreditsPaid: 1,
+      runnerInstallPaymentSourceDefinitionIds:
+        "onr_v1_075_zetatech-software-installer",
+    });
+    expect(JSON.stringify(oneBitState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+    );
+
+    const twoBitState = apply(
+      structuredClone(state),
+      "runner",
+      (action) => action.actionId === byAmount.get("2")?.actionId,
+    );
+    expect(twoBitState.runner.credits).toBe(2);
+    expect(cardCounterAmount(twoBitState, installerId, "bit")).toBe(0);
+    const replay = replayEvents(
+      state,
+      twoBitState.eventLog.slice(state.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(twoBitState));
+  });
+
+  it("keeps multiple Zetatech payment sources distinct for program installs", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1922-zetatech-program-install-multiple-payment-sources",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "onr_v1_runner_v1922_zetatech_multiple_sources",
+          name: "O:NR V1.9.22 Zetatech Multiple Sources",
+          cards: [
+            { id: "onr_v1_075_zetatech-software-installer", quantity: 2 },
+            { id: "onr_v1_031_hammer", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 0;
+    state.runner.memoryLimit = 6;
+    const firstInstallerId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_075_zetatech-software-installer",
+    );
+    const secondInstallerId = Object.entries(state.cardInstances).find(
+      ([cardId, instance]) =>
+        cardId !== firstInstallerId &&
+        instance.definitionId ===
+          "onr_v1_075_zetatech-software-installer",
+    )?.[0] as CardInstanceId | undefined;
+    if (!secondInstallerId) throw new Error("Missing second Zetatech instance");
+    state.runner.stack = state.runner.stack.filter(
+      (cardId) => cardId !== secondInstallerId,
+    );
+    state.runner.grip.unshift(secondInstallerId);
+    state.cardInstances[secondInstallerId] = {
+      ...state.cardInstances[secondInstallerId]!,
+      zone: { side: "runner", zone: "grip" },
+      faceup: true,
+      rezzed: true,
+    };
+    const hammerId = moveRunnerCardToGrip(state, "onr_v1_031_hammer");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_075_zetatech-software-installer",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_075_zetatech-software-installer",
+    );
+    state.runner.credits = 1;
+
+    const installerIds = state.runner.rig.programs
+      .filter(
+        (cardId) =>
+          state.cardInstances[cardId]?.definitionId ===
+          "onr_v1_075_zetatech-software-installer",
+      )
+      .sort();
+    expect(installerIds).toHaveLength(2);
+
+    const installActions = getLegalActions(state, "runner").filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.source === hammerId &&
+        action.payload?.hostOnCardId === undefined &&
+        action.payload?.runnerProgramTrashBeforeInstall !== true,
+    );
+    const byAmounts = new Map(
+      installActions.map((action) => [
+        String(action.payload?.runnerInstallPaymentSourceAmounts),
+        action,
+      ]),
+    );
+    expect(byAmounts.has("1,0")).toBe(true);
+    expect(byAmounts.has("0,1")).toBe(true);
+    expect(byAmounts.has("0,0")).toBe(false);
+    expect(new Set(installActions.map((action) => action.actionId)).size).toBe(
+      installActions.length,
+    );
+    expect(
+      installActions.map((action) => action.payload?.runnerInstallPaymentLabel),
+    ).toContain("Mit Zetatech Software Installer #1: 1 Bit");
+    expect(
+      installActions.map((action) => action.payload?.runnerInstallPaymentLabel),
+    ).toContain("Mit Zetatech Software Installer #2: 1 Bit");
+
+    const firstSourceState = apply(
+      state,
+      "runner",
+      (action) => action.actionId === byAmounts.get("1,0")?.actionId,
+    );
+    expect(firstSourceState.runner.credits).toBe(0);
+    expect(cardCounterAmount(firstSourceState, installerIds[0]!, "bit")).toBe(1);
+    expect(cardCounterAmount(firstSourceState, installerIds[1]!, "bit")).toBe(2);
+    expect(firstSourceState.runner.rig.programs).toContain(hammerId);
+  });
+
   it("installs a program by overwriting Zetatech Software Installer", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

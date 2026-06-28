@@ -5,6 +5,7 @@ import {
   type LegalAction,
   type MultiServerSuccessSequenceState,
 } from "@netgrid/shared";
+import { expandRunnerProgramInstallPaymentActions } from "../install/runner-program-install-payment";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -282,6 +283,19 @@ export function buildRunnerMainActions(
   const ALL_NIGHTER_ID = host.constants.ALL_NIGHTER_ID;
 
   const actions: LegalAction[] = [];
+  const pushRunnerProgramInstallAction = (
+    installAction: LegalAction,
+    definition: { installCost?: number },
+  ) => {
+    actions.push(
+      ...expandRunnerProgramInstallPaymentActions(state, installAction, {
+        installCost: definition.installCost ?? 0,
+        availableProgramInstallCredits: availableRunnerProgramInstallCredits(
+          state,
+        ),
+      }),
+    );
+  };
   const flags = ensureRunnerTurnFlags(state);
   const hasClicks = state.runner.clicks > 0;
   const unusedRunOnlyActionSourceIds = activeRunActionSpendingCapSourceIds(
@@ -335,11 +349,12 @@ export function buildRunnerMainActions(
   if (valuPakProgramInstallActionsRemaining(state) > 0) {
     for (const id of runnerInstallableProgramIdsForValuPak(state)) {
       const definition = definitionFor(state, id);
-      actions.push(
+      pushRunnerProgramInstallAction(
         buildRunnerValuPakInstallAction(state, {
           cardId: id,
           definition,
         }),
+        definition,
       );
     }
     pushCardImplementationEndOfRunnerTurnActions(
@@ -470,7 +485,7 @@ export function buildRunnerMainActions(
       )?.installTargetBinding;
       if (installBinding?.kind === "choose_installed_ice_on_install") {
         for (const targetIceId of installedCorpIceTargetIds(state)) {
-          actions.push(
+          pushRunnerProgramInstallAction(
             action(
               state,
               "runner",
@@ -491,6 +506,7 @@ export function buildRunnerMainActions(
                 ],
               },
             ),
+            definition,
           );
         }
       } else if (
@@ -501,7 +517,7 @@ export function buildRunnerMainActions(
           "sentry",
           "wall",
         ]) {
-          actions.push(
+          pushRunnerProgramInstallAction(
             action(
               state,
               "runner",
@@ -511,10 +527,14 @@ export function buildRunnerMainActions(
               [{ clicks: 1, credits: definition.installCost ?? 0 }],
               { cardId: id, selectedSubtype: subtype },
             ),
+            definition,
           );
         }
       } else {
-        actions.push(buildRunnerProgramInstallAction(state, id, definition));
+        pushRunnerProgramInstallAction(
+          buildRunnerProgramInstallAction(state, id, definition),
+          definition,
+        );
       }
     }
     if (
@@ -525,8 +545,9 @@ export function buildRunnerMainActions(
         (definition.installCost ?? 0) &&
       shouldOfferRunnerProgramTrashBeforeInstall(state, definition)
     ) {
-      actions.push(
+      pushRunnerProgramInstallAction(
         buildRunnerProgramTrashBeforeInstallAction(state, id, definition),
+        definition,
       );
     }
     if (
@@ -542,13 +563,14 @@ export function buildRunnerMainActions(
       ]) {
         if (!canHostProgramOnDaemon(state, hostId, definition)) continue;
         const hostDefinition = definitionFor(state, hostId);
-        actions.push(
+        pushRunnerProgramInstallAction(
           buildRunnerHostedProgramInstallAction(state, {
             cardId: id,
             definition,
             hostCardId: hostId,
             hostTitle: hostDefinition.title,
           }),
+          definition,
         );
       }
     }

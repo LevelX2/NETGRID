@@ -24,6 +24,10 @@ import {
   purgeableRunnerVirusCounterAmount,
   setPurgeableRunnerVirusCounterAmount,
 } from "../turn/turn-basic-execution";
+import {
+  runnerInstallPaymentPublicPayload,
+  type RunnerInstallCreditSpendResult,
+} from "./runner-program-install-payment";
 
 export type InstallCardHost = {
   state: GameState;
@@ -86,6 +90,7 @@ export type InstallCardHost = {
     requiresDataFortInstallTarget: (definition: CardDefinition) => boolean;
     startRunnerProgramTrashBeforeInstallChoice: (
       cardId: CardInstanceId,
+      legalAction: LegalAction,
     ) => void;
     forfeitRunnerAgendaForPointCost: (cardId: CardInstanceId) => void;
     consumeValuPakProgramInstallAction: (legalAction: LegalAction) => void;
@@ -119,7 +124,8 @@ export type InstallCardHost = {
     spendRunnerInstallCredits: (
       amount: number,
       cardType: CardDefinition["type"],
-    ) => void;
+      paymentPayload?: LegalAction["payload"],
+    ) => RunnerInstallCreditSpendResult;
     runnerCanPayInstallCost: (
       amount: number,
       cardType: CardDefinition["type"],
@@ -184,7 +190,7 @@ export function installCard(host: InstallCardHost, legalAction: LegalAction): vo
     legalAction.payload?.runnerProgramTrashBeforeInstall === true &&
     legalAction.payload?.runnerProgramTrashBeforeInstallResolved !== true
   ) {
-    host.runner.startRunnerProgramTrashBeforeInstallChoice(cardId);
+    host.runner.startRunnerProgramTrashBeforeInstallChoice(cardId, legalAction);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       runnerProgramTrashChoiceOpened: true,
@@ -341,11 +347,17 @@ function installRunnerCard(
       specialZoneReason: "agenda_point_cost_card_implementation_install",
     };
   }
-  if (legalAction.payload?.runnerProgramTrashBeforeInstallCostsPrepaid !== true)
-    host.payment.spendRunnerInstallCredits(
+  if (legalAction.payload?.runnerProgramTrashBeforeInstallCostsPrepaid !== true) {
+    const paymentResult = host.payment.spendRunnerInstallCredits(
       definition.installCost ?? 0,
       definition.type,
+      legalAction.payload,
     );
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...runnerInstallPaymentPublicPayload(paymentResult),
+    };
+  }
   host.zones.removeFromAllZones(cardId);
   if (definition.type === "hardware") {
     installRunnerHardware(host, legalAction, cardId, definition);

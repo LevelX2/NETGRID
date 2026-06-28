@@ -2960,6 +2960,16 @@ export function formatChronicleEvent(
   }
   if (actionType === "install_card") {
     const recurringCreditsLoaded = numberValue(payload.recurringCreditsLoaded);
+    const installCostPaid = numberValue(payload.installCostPaid);
+    const normalCreditsPaid =
+      numberValue(payload.runnerInstallNormalCreditsPaid) ?? 0;
+    const hostedCreditsPaid =
+      numberValue(payload.runnerInstallHostedCreditsPaid) ?? 0;
+    const temporaryCreditsPaid =
+      numberValue(payload.runnerInstallTemporaryCreditsPaid) ?? 0;
+    const paymentSourceTitles = titlesForDefinitionIds(
+      stringValue(payload.runnerInstallPaymentSourceDefinitionIds),
+    );
     const iceInstallAdditionalCost =
       numberValue(payload.iceInstallAdditionalCost) ?? 0;
     const iceInstallTotalCost = numberValue(payload.iceInstallTotalCost);
@@ -2974,6 +2984,29 @@ export function formatChronicleEvent(
         ...(iceInstallTotalCost !== undefined
           ? [`${iceInstallTotalCost} gesamt`]
           : []),
+      );
+    }
+    if (installCostPaid !== undefined && installCostPaid > 0) {
+      const paymentParts = [
+        normalCreditsPaid > 0
+          ? `${creditText(normalCreditsPaid)} aus dem Creditpool`
+          : undefined,
+        hostedCreditsPaid > 0
+          ? `${creditText(hostedCreditsPaid)} aus Installationsquellen`
+          : undefined,
+        temporaryCreditsPaid > 0
+          ? `${creditText(temporaryCreditsPaid)} temporär`
+          : undefined,
+      ].filter(Boolean);
+      description =
+        paymentParts.length > 0
+          ? `Installationskosten: ${paymentParts.join(", ")}.`
+          : `Installationskosten: ${creditText(installCostPaid)}.`;
+      chips.push(
+        `${installCostPaid} ${creditLabel(installCostPaid)} bezahlt`,
+        ...(normalCreditsPaid > 0 ? [`${normalCreditsPaid} Pool`] : []),
+        ...(hostedCreditsPaid > 0 ? [`${hostedCreditsPaid} Quelle`] : []),
+        ...paymentSourceTitles,
       );
     }
   }

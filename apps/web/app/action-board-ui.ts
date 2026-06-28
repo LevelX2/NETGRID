@@ -749,9 +749,19 @@ function breakerNameFromActionLabel(label: string | undefined, actionSuffixPatte
 function installContextLabel(action: LegalAction): string {
   const serverId = typeof action.payload?.serverId === "string" ? action.payload.serverId : null;
   const selectedServerId = typeof action.payload?.selectedServerId === "string" ? action.payload.selectedServerId : null;
-  if (action.payload?.runnerProgramTrashBeforeInstall === true) return "Mit Programmtrash installieren";
+  const runnerInstallPaymentLabel =
+    typeof action.payload?.runnerInstallPaymentLabel === "string"
+      ? action.payload.runnerInstallPaymentLabel
+      : null;
+  if (action.payload?.runnerProgramTrashBeforeInstall === true)
+    return runnerInstallPaymentLabel
+      ? `Mit Programmtrash und ${runnerInstallPaymentLabel.replace(/^Mit\s+/u, "").replace(/^Ohne\s+/u, "ohne ")} installieren`
+      : "Mit Programmtrash installieren";
   if (!serverId && selectedServerId) return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
-  if (!serverId) return "Installieren";
+  if (!serverId)
+    return runnerInstallPaymentLabel
+      ? `${runnerInstallPaymentLabel} installieren`
+      : "Installieren";
   if (isNewRemoteInstallAction(action)) return "Neues Remote erstellen";
   const serverLabel = serverDisplayLabel(serverId);
   if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;

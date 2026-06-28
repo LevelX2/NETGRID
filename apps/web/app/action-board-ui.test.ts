@@ -1804,6 +1804,23 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe("Mit Programmtrash installieren");
     expect(
       contextualCardActionLabel(
+        legalAction("runner", "install_card", "program_1", "Programm installieren", {
+          cardId: "program_1",
+          runnerInstallPaymentLabel: "Mit 2 Zeta-Bits",
+        }),
+      ),
+    ).toBe("Mit 2 Zeta-Bits installieren");
+    expect(
+      contextualCardActionLabel(
+        legalAction("runner", "install_card", "program_1", "Programm mit Programmtrash installieren", {
+          cardId: "program_1",
+          runnerProgramTrashBeforeInstall: true,
+          runnerInstallPaymentLabel: "Mit 1 Zeta-Bit",
+        }),
+      ),
+    ).toBe("Mit Programmtrash und 1 Zeta-Bit installieren");
+    expect(
+      contextualCardActionLabel(
         legalAction(
           "runner",
           "install_card",

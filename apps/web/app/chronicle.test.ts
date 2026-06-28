@@ -2150,6 +2150,20 @@ describe("formatChronicleEvent", () => {
       "corp",
       { cardTitle: "Wall of Static" },
     );
+    const paidProgram = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "runner",
+        title: "Hammer",
+        zoneLabel: "Rig",
+        installCostPaid: 2,
+        runnerInstallNormalCreditsPaid: 1,
+        runnerInstallHostedCreditsPaid: 1,
+        runnerInstallPaymentSourceDefinitionIds:
+          "onr_v1_075_zetatech-software-installer",
+      }),
+      "runner",
+      { cardTitle: "Hammer" },
+    );
 
     expect(invisibility.description).toBe(
       "9 Recurring Credits wurden auf die Karte gelegt.",
@@ -2160,6 +2174,17 @@ describe("formatChronicleEvent", () => {
     );
     expect(taxedIce.chips).toEqual(
       expect.arrayContaining(["+2 Installkosten", "5 gesamt"]),
+    );
+    expect(paidProgram.description).toBe(
+      "Installationskosten: 1 Credit aus dem Creditpool, 1 Credit aus Installationsquellen.",
+    );
+    expect(paidProgram.chips).toEqual(
+      expect.arrayContaining([
+        "2 Credits bezahlt",
+        "1 Pool",
+        "1 Quelle",
+        "Zetatech Software Installer",
+      ]),
     );
   });
 
