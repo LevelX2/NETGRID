@@ -5,6 +5,7 @@ import {
   extractAiSelfplayDecisionPoints,
   isSelfplayTraceRedactionSafe,
   safeSelfplayFacts,
+  summarizeSelfplayActionLimitClusters,
   summarizeSelfplayActionLimitSubclusters,
 } from "./selfplay-trace-mining";
 
@@ -628,6 +629,66 @@ describe("SelfplayTraceMining", () => {
     });
     expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
       mixed_unknown: 1,
+    });
+  });
+
+  it("bounds setup economy cluster signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "setup-economy-positive",
+        reasonCode: "runner.draw_for_answers.one",
+      }),
+      selfplayAction("runner", 2, "draw_card", {
+        selectedActionId: "setup-economy-positive-2",
+        reasonCode: "runner.draw_for_answers.two",
+      }),
+      selfplayAction("runner", 3, "draw_card", {
+        selectedActionId: "setup-economy-positive-3",
+        reasonCode: "runner.draw_for_answers.three",
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "setup-economy-noise",
+        reasonCode: "runner.draw_for_answersish",
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitClusters([positive])).toMatchObject({
+      action_limit_setup_economy_loop: 1,
+    });
+    expect(summarizeSelfplayActionLimitClusters([noise])).toMatchObject({
+      action_limit_mixed_or_unknown: 1,
+    });
+  });
+
+  it("bounds low-value repeat cluster signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "low-value-positive",
+        evidence: ["known_low_value"],
+      }),
+      selfplayAction("runner", 2, "start_run", {
+        selectedActionId: "low-value-positive-2",
+        evidence: ["known_low_value"],
+      }),
+      selfplayAction("runner", 3, "start_run", {
+        selectedActionId: "low-value-positive-3",
+        evidence: ["known_low_value"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "low-value-noise",
+        evidence: ["known_low_valueish"],
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitClusters([positive])).toMatchObject({
+      action_limit_low_value_repeat: 1,
+    });
+    expect(summarizeSelfplayActionLimitClusters([noise])).toMatchObject({
+      action_limit_mixed_or_unknown: 1,
     });
   });
 

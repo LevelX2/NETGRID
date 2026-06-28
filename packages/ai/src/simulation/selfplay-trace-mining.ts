@@ -738,7 +738,7 @@ function actionLimitSetupOrEconomyEntry(
     return true;
   }
   const text = selfplayEntryText(entry);
-  return /economy|recover|setup|draw_for_answers|search|coverage/.test(text);
+  return selfplayEntryTextHasSetupOrEconomySignal(text);
 }
 
 function actionLimitLowValueRepeatEntry(
@@ -755,7 +755,7 @@ function actionLimitLowValueRepeatEntry(
     return true;
   }
   const text = selfplayEntryText(entry);
-  return /known_low_value|no_current_payoff|low_value|stale/.test(text);
+  return selfplayEntryTextHasLowValueRepeatSignal(text);
 }
 
 function countRepeatedActionReasonsWithoutProgress(
@@ -963,6 +963,29 @@ function selfplayEntryTextHasLowDeltaSignal(text: string): boolean {
     tokensIncludePhrase(tokens, ["low", "value"]) ||
     tokensIncludePhrase(tokens, ["low", "delta"]) ||
     tokensIncludePhrase(tokens, ["no", "current", "payoff"])
+  );
+}
+
+function selfplayEntryTextHasSetupOrEconomySignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    selfplayTokensIncludeAny(tokens, [
+      "economy",
+      "recover",
+      "setup",
+      "search",
+      "coverage",
+    ]) || tokensIncludePhrase(tokens, ["draw", "for", "answers"])
+  );
+}
+
+function selfplayEntryTextHasLowValueRepeatSignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    selfplayTokensIncludeAny(tokens, ["stale"]) ||
+    tokensIncludePhrase(tokens, ["known", "low", "value"]) ||
+    tokensIncludePhrase(tokens, ["no", "current", "payoff"]) ||
+    tokensIncludePhrase(tokens, ["low", "value"])
   );
 }
 

@@ -9045,6 +9045,19 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n "coverage\|hand_goal\|draw_for_answer\|search_or_draw\|supportsdraworsearchneed:true\|answer|known_low_value\|low_value\|low_delta\|no_current_payoff\|stale\|repeat" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsechsundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt die Action-Limit-Cluster-Erkennung für Setup-/Economy- und Low-Value-Repeat-Entries durch gebundene Selfplay-Text-Tokens.
+  - `economy`, `recover`, `setup`, `draw_for_answers`, `search`, `coverage`, `known_low_value`, `no_current_payoff`, `low_value` und `stale` bleiben wirksam, aber nur als exakte Tokens/Phrasen.
+  - Suffix-Rauschen wie `draw_for_answersish` und `known_low_valueish` erzeugt keinen Setup-/Low-Value-Clusterbeitrag mehr.
+  - Strukturierte Trace-Booleans bleiben vor Textsignalen die bevorzugte Begründungsquelle.
+  - Die Erkennung bleibt reine Selfplay-Trace-Diagnostik über redaction-safe Action-Text und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative Cluster-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 25 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "economy\|recover\|setup\|draw_for_answers\|search\|coverage|known_low_value\|no_current_payoff\|low_value\|stale" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
