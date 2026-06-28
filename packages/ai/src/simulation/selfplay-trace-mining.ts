@@ -1346,8 +1346,10 @@ function recoveryLowValueLoopContext(
 ): { category: string; facts: string[] } {
   const coverageRecovery =
     entry.runnerRecoveryTakenForBreakerCoverage === true ||
-    text.includes("supportsactivecapabilityneed:true") ||
-    text.includes("coverageanswerrole:recovery_answer");
+    selfplayEntryHasStructuredSignal(entry, [
+      "supportsactivecapabilityneed:true",
+      "coverageanswerrole:recovery_answer",
+    ]);
   const fundingNeed =
     text.includes("fundingneedreducesrecoverylooppenalty:true") ||
     text.includes("runner_economy_funding_need:true") ||

@@ -210,6 +210,38 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("blink-positive");
   });
 
+  it("bounds recovery coverage signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "recovery-positive-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "recovery-positive-2",
+        reasonCode: "runner.recovery",
+        debugFacts: ["coverageAnswerRole:recovery_answer"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "recovery-noise-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "recovery-noise-2",
+        reasonCode: "runner.recovery",
+        debugFacts: ["coverageAnswerRole:recovery_answerish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["recovery_low_value_loop"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("recovery-noise-2");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),
