@@ -5,7 +5,13 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
-const RECOVERY_TEXT_PATTERN = /recovery|trash_recovery|junkyard|heap|trash|bbs/;
+const RECOVERY_TOKENS = new Set([
+  "recovery",
+  "junkyard",
+  "heap",
+  "trash",
+  "bbs",
+]);
 
 export type RunnerRecoveryActionPatternDependencies = {
   sourceCard: (
@@ -31,16 +37,12 @@ export function runnerActionLooksLikeRecovery(
   }
   const source = dependencies.sourceCard(input, action);
   const roles = dependencies.rolesForAction(input, action);
-  const text = [
+  return recoveryValuesLookLikeRecovery([
     source?.title,
     source?.definitionId,
     source?.rulesText,
     ...roles,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLocaleLowerCase("en-US");
-  return RECOVERY_TEXT_PATTERN.test(text);
+  ]);
 }
 
 export type RunnerRecentRecoveryActionsDependencies = {
@@ -109,14 +111,25 @@ function publicEventLooksLikeRecovery(
     payload.definitionId,
   ].find((value): value is string => typeof value === "string");
   if (source && currentSource && source === currentSource) return true;
-  const text = Object.values(payload)
+  return recoveryValuesLookLikeRecovery(Object.values(payload));
+}
+
+function recoveryValuesLookLikeRecovery(values: readonly unknown[]): boolean {
+  return recoveryTokens(values).some((token) => RECOVERY_TOKENS.has(token));
+}
+
+function recoveryTokens(values: readonly unknown[]): string[] {
+  return values
     .filter(
       (value): value is string | number | boolean =>
         typeof value === "string" ||
         typeof value === "number" ||
         typeof value === "boolean",
     )
-    .join(" ")
-    .toLocaleLowerCase("en-US");
-  return RECOVERY_TEXT_PATTERN.test(text);
+    .flatMap((value) =>
+      String(value)
+        .toLocaleLowerCase("en-US")
+        .split(/[^a-z0-9]+/)
+        .filter((token) => token.length > 0),
+    );
 }

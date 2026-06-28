@@ -8589,6 +8589,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-recovery-history.ts` erkennt Recovery-Actions und Recent-Recovery-PublicEvents über gebundene Source-/Role-/Payload-Tokens statt globalem Regex `recovery|trash_recovery|junkyard|heap|trash|bbs` auf zusammengefügtem Text.
+  - Echte Tokens wie `recovery`, `junkyard`, `heap`, `trash` und `bbs` bleiben wirksam; Rauschen wie `junkyardish-bbsish` und `trashcan_recoveryish` bleibt wirkungslos.
+  - `runner-recovery-history.test.ts` schützt positive Source-/Role-/PublicEvent-Fälle und negative Label-/Source-/Role-/Payload-Substring-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-recovery-history.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PublicGameEvent,
+  VisibleCard,
+} from "@netgrid/shared";
 
-import { runnerActionLooksLikeRecovery } from "./runner-recovery-history";
+import {
+  runnerActionLooksLikeRecovery,
+  runnerRecentRecoveryActions,
+} from "./runner-recovery-history";
 
 describe("runnerActionLooksLikeRecovery", () => {
   it("uses source metadata and roles but ignores label-only recovery text", () => {
@@ -38,6 +46,32 @@ describe("runnerActionLooksLikeRecovery", () => {
         dependencies({ roles: ["trash_recovery"] }),
       ),
     ).toBe(true);
+    expect(
+      runnerActionLooksLikeRecovery(
+        input,
+        roleBacked,
+        dependencies({
+          sourceCard: { definitionId: "junkyardish-bbsish" },
+          roles: ["trashcan_recoveryish"],
+        }),
+      ),
+    ).toBe(false);
+  });
+
+  it("counts recent recovery events by bounded payload tokens", () => {
+    const input = {
+      playerView: { stateVersion: 20 },
+    } as AiDecisionInput;
+    const count = runnerRecentRecoveryActions(input, undefined, {
+      publicHistory: () => [
+        event({ actor: "runner", note: "junkyard bbs" }, 18),
+        event({ actor: "runner", note: "junkyardish trashcan" }, 19),
+      ],
+      eventVersion: (entry) => Number(entry.publicPayload.version),
+      sourceDefinitionIdForAction: () => undefined,
+    });
+
+    expect(count).toBe(1);
   });
 });
 
@@ -65,4 +99,17 @@ function action(overrides: Partial<LegalAction> = {}): LegalAction {
     expiresAtStateVersion: 1,
     ...overrides,
   };
+}
+
+function event(
+  publicPayload: Record<string, string | number | boolean>,
+  version: number,
+): PublicGameEvent {
+  return {
+    type: "trigger_ability",
+    publicPayload: {
+      ...publicPayload,
+      version,
+    },
+  } as unknown as PublicGameEvent;
 }
