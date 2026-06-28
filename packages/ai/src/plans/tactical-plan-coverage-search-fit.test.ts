@@ -181,6 +181,39 @@ describe("coverageSearchActionFit", () => {
     });
   });
 
+  it("ignores recovery source text without a structured target", () => {
+    const plan = coveragePlan("breaker_wall");
+    const sourceOnlyRecovery = action({
+      actionId: "source-only-recovery",
+      source: "recovery-source",
+    });
+
+    expect(
+      coverageSearchActionFit(
+        plan,
+        plan.currentStep,
+        candidate(sourceOnlyRecovery),
+        sourceOnlyRecovery,
+        input(
+          [sourceOnlyRecovery],
+          [
+            visibleCard({
+              instanceId: "recovery-source",
+              definitionId: "junkyard_source",
+              title: "Junkyard BBS",
+              type: "resource",
+            }),
+          ],
+        ),
+        false,
+      ),
+    ).toMatchObject({
+      answerRole: "not_coverage_answer",
+      supportsActiveCapabilityNeed: false,
+      recoveredCardPlanFit: "none",
+    });
+  });
+
   it("matches explicit program search candidate signals by bounded terms", () => {
     const plan = coveragePlan("breaker_wall");
     const searchAction = action({ actionId: "program-search" });

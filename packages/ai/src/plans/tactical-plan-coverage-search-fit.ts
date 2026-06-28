@@ -328,17 +328,8 @@ function recoveryTargetEvaluation(
   ) {
     return undefined;
   }
-  const sourceCard = visibleCardForAction(input.playerView, action);
-  const sourceText = [
-    sourceCard?.title,
-    sourceCard?.definitionId,
-    sourceCard?.rulesText,
-  ].filter(Boolean).join(" ").toLowerCase();
   const targetDefinitionId = recoveryTargetDefinitionId(input, action);
-  const isRecovery =
-    /recovery|trash|heap|junkyard|bbs/.test(sourceText) ||
-    targetDefinitionId !== undefined;
-  if (!isRecovery) return undefined;
+  if (targetDefinitionId === undefined) return undefined;
   const targetCard = recoveryTargetVisibleCard(input, action);
   const targetRole =
     targetCard

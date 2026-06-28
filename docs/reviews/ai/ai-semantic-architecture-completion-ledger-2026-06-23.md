@@ -8625,6 +8625,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertvierter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-coverage-search-fit.ts` wertet Recovery-Coverage-Antworten nur noch über strukturierte Recovery-Target-Definitionen oder sichtbare Target-Karten aus statt über Source-Text-Regex `recovery|trash|heap|junkyard|bbs`.
+  - Strukturierte Targets wie `targetCardDefinitionId` und sichtbare `targetCardId`-Karten bleiben wirksam; Source-Text-only-Hinweise wie `Junkyard BBS` ohne Ziel bleiben wirkungslos.
+  - `tactical-plan-coverage-search-fit.test.ts` schützt strukturierte Recovery-Ziele, Source-Text-only-Rauschen und bestehende Program-Search-Signalgrenzen.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-coverage-search-fit.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
