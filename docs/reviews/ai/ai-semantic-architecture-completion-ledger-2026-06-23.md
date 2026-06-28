@@ -8634,6 +8634,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertfünfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/search-choice-option.ts` erkennt Search-Choices über strukturierte Choice-Felder oder gebundene `source`-Tokens statt Regex-Substring-Suche `/search|stack/`.
+  - Strukturierte `cardSearchPresentation`-/`stackSearchResolution`-Choices und Source-Tokens wie `stack search` bleiben wirksam; Rauschen wie `searchlight stackish` bleibt wirkungslos.
+  - `search-choice-option.test.ts` schützt positive Source-Token-Erkennung und negative Source-Substring-Grenzfälle neben bestehender Optionswertung.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/search-choice-option.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

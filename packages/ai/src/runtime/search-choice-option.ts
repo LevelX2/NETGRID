@@ -51,8 +51,17 @@ export function isSearchChoice(choice: PendingChoice): boolean {
   return Boolean(
     choice.cardSearchPresentation ||
       choice.stackSearchResolution ||
-      /search|stack/i.test(choice.source),
+      choiceSourceHasSearchToken(choice.source),
   );
+}
+
+function choiceSourceHasSearchToken(source: string | undefined): boolean {
+  if (!source) return false;
+  const tokens = source
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 0);
+  return tokens.includes("search") || tokens.includes("stack");
 }
 
 function scoreSearchChoiceOption(

@@ -1,10 +1,18 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import { selectedSearchChoiceOptionIds } from "./search-choice-option";
+import {
+  isSearchChoice,
+  selectedSearchChoiceOptionIds,
+} from "./search-choice-option";
 
 type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
 
 describe("selectedSearchChoiceOptionIds", () => {
+  it("matches search choices by bounded source tokens", () => {
+    expect(isSearchChoice(sourceOnlyChoice("stack search"))).toBe(true);
+    expect(isSearchChoice(sourceOnlyChoice("searchlight stackish"))).toBe(false);
+  });
+
   it("matches search option roles by bounded role terms", () => {
     const choice = searchChoice([
       option("memory", "Memory card"),
@@ -63,6 +71,17 @@ function searchChoice(options: PendingChoice["options"]): PendingChoice {
       destination: "grip",
     },
   } as unknown as PendingChoice;
+}
+
+function sourceOnlyChoice(source: string): PendingChoice {
+  const { cardSearchPresentation, stackSearchResolution, ...choice } =
+    searchChoice([]);
+  void cardSearchPresentation;
+  void stackSearchResolution;
+  return {
+    ...choice,
+    source,
+  } as PendingChoice;
 }
 
 function option(
