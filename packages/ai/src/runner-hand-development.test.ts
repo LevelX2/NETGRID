@@ -213,6 +213,49 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.priority).toBeLessThan(500);
   });
 
+  it("bounds visible remote threat text to exact tokens", () => {
+    const shield = visibleCard("shield-noise-1", {
+      definitionId: "test-shield-noise",
+      title: "Shield",
+      type: "program",
+      installCost: 0,
+      memoryCost: 1,
+      rulesText: "Prevent 2 net damage.",
+    });
+    const input = runnerInput({
+      credits: 4,
+      hand: [shield],
+      memoryUsed: 1,
+      memoryLimit: 4,
+      legalActions: [installAction("install-shield-noise", shield, 0)],
+    });
+    input.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [
+          visibleCard("remote-noise", {
+            definitionId: "test-threat-noise",
+            title: "Damageish Tagish Traceish",
+            type: "asset",
+          }),
+        ],
+      },
+    ];
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "shield-noise-1",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "defense_support",
+      currentNeed: "none",
+      deferReason: "no_current_need",
+    });
+  });
+
   it("bounds persistent utility text signals to exact tokens", () => {
     const noisy = visibleCard("utility-noise-1", {
       definitionId: "test-utility-noise",

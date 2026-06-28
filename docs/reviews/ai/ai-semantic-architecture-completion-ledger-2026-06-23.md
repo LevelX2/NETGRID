@@ -9194,6 +9194,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneunundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-hand-development.ts` ersetzt die sichtbare Remote-Threat-Erkennung für `damage`, `tag`, `flatline` und `trace` durch gebundene Runner-Hand-Texttokens.
+  - Exakte Threat-Tokens bleiben wirksam; Suffix-Rauschen wie `Damageish`, `Tagish` und `Traceish` erzeugt keine Defense-Dringlichkeit mehr.
+  - Die Erkennung bleibt reine Runner-Hand-Development-Diagnostik über sichtbare Remote-Root-Daten und erzeugt keine LegalAction-Projektion.
+  - `runner-hand-development.test.ts` schützt positive bestehende Defense-Fälle und einen negativen Remote-Threat-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-hand-development.test.ts` grün, 1 Datei, 19 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "\.test\(|match\(" packages/ai/src/runner-hand-development.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
