@@ -7453,6 +7453,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` vierundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-setup-coverage-types.ts` nutzt für Runner-Coverage-Search-/Recovery-Metrikrollen und strukturierte Mechaniken den gebundenen `rolesMatch`-Helper statt freier Substring-Prüfungen.
+  - Strukturierte Rollen wie `program_search` und `trash_recovery` bleiben wirksam; substringartiges Rauschen wie `research_noise` und `recoveryish_noise` erzeugt keine Coverage-Search-/Recovery-Klassifikation mehr.
+  - `runner-setup-coverage-types.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-setup-coverage-types.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

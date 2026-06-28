@@ -5,6 +5,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
+import { rolesMatch } from "../runtime/role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import { iceHasEndTheRun } from "../visible-run-analysis";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
@@ -152,24 +153,8 @@ export function runnerCoverageSearchActionForMetrics(
       ? sourceDefinition.mechanics
       : [];
   return (
-    roles.some(
-      (role) =>
-        role.includes("search") ||
-        role.includes("tutor") ||
-        role === "program_search" ||
-        role === "stack_search" ||
-        role === "search_stack" ||
-        role === "search_trash" ||
-        role === "setup_search" ||
-        role.includes("recovery") ||
-        role.includes("trash_recovery"),
-    ) ||
-    mechanics.some(
-      (mechanic: string) =>
-        mechanic.includes("search") ||
-        mechanic.includes("tutor") ||
-        mechanic.includes("hidden_zone_tool"),
-    )
+    rolesMatch(roles, ["search", "tutor", "recovery", "trash_recovery"]) ||
+    rolesMatch(mechanics, ["search", "tutor", "hidden_zone_tool"])
   );
 }
 
@@ -179,12 +164,7 @@ export function runnerCoverageRecoveryActionForMetrics(
   dependencies: RunnerCoverageActionDependencies,
 ): boolean {
   const roles = dependencies.rolesForAction(input, action);
-  return roles.some(
-    (role) =>
-      role.includes("recovery") ||
-      role.includes("trash_recovery") ||
-      role === "search_trash",
-  );
+  return rolesMatch(roles, ["recovery", "trash_recovery", "search_trash"]);
 }
 
 export function createRunnerCoverageActionContext(
