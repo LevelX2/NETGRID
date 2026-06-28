@@ -8,6 +8,8 @@ import type {
 export const ACTION_SEMANTIC_INVARIANT_REPORT_SCHEMA_VERSION =
   "action-semantic-invariants-v1" as const;
 
+const SUPPORT_ONLY_SIGNAL_RE = /(^|[.:-])support[_-]only($|[.:-])/;
+
 export type ActionSemanticInvariantIssueId =
   | "pure_type_subtype_name_signal"
   | "forbidden_static_signal"
@@ -315,11 +317,7 @@ function pureStructuralSignal(signal: string): boolean {
 
 function supportOnlySignal(signal: string): boolean {
   const normalized = signal.trim().toLowerCase();
-  return (
-    normalized.includes("support_only") ||
-    normalized.includes("support-only") ||
-    normalized.endsWith(".support_only")
-  );
+  return SUPPORT_ONLY_SIGNAL_RE.test(normalized);
 }
 
 function broadPrimarySignal(signal: string): boolean {
