@@ -20069,7 +20069,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["damage_ice", "etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20105,7 +20105,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["barrier_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20186,7 +20186,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20247,7 +20247,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20296,7 +20296,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["barrier_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20345,7 +20345,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["damage_ice", "etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20379,7 +20379,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["damage_ice", "etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20413,12 +20413,12 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["damage_ice", "etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
       },
-      "riskTags": ["damage_window", "hidden_ice"],
+      "riskTags": ["damage_window", "hidden_ice", "position_dependent_ice"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -20442,14 +20442,17 @@
         "ice.strength_modifier"
       ],
       "lineSupport": ["corp.ice_tax_glacier"],
-      "strategicRole": ["tax_tool"]
+      "strategicRole": ["tax_tool"],
+      "manualNotes": [
+        "Dog Pile needs outside rezzed ICE for durable remote protection; solo Dog Pile is only a temporary coverage window."
+      ]
     },
     {
       "cardId": "onr_proteus_022_food-fight",
       "side": "corp",
       "cardType": "ice",
       "roles": ["etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20477,7 +20480,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["barrier_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20525,7 +20528,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["code_gate_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20553,7 +20556,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["etr_ice", "ice", "sentry_ice", "trace_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20621,7 +20624,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["barrier_ice", "damage_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20654,7 +20657,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20702,7 +20705,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20732,7 +20735,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["damage_ice", "etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20768,7 +20771,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20801,7 +20804,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["code_gate_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20833,7 +20836,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["barrier_ice", "damage_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20881,12 +20884,12 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["code_gate_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
       },
-      "riskTags": ["hidden_ice"],
+      "riskTags": ["hidden_ice", "paid_etr_requires_corp_credits"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
@@ -20902,14 +20905,17 @@
       },
       "tacticSignals": ["corp_ice.encounter_paid_subroutine_add"],
       "lineSupport": ["corp.ice_tax_glacier"],
-      "strategicRole": ["tax_tool"]
+      "strategicRole": ["tax_tool"],
+      "manualNotes": [
+        "Riddler end-the-run protection is encounter-paid; value it only when Corp can pay during the encounter."
+      ]
     },
     {
       "cardId": "onr_proteus_035_roadblock",
       "side": "corp",
       "cardType": "ice",
       "roles": ["code_gate_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20955,7 +20961,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["barrier_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -20983,7 +20989,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["barrier_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -21032,7 +21038,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["barrier_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -21064,7 +21070,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["code_gate_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -21112,7 +21118,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["etr_ice", "ice", "sentry_ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -21160,7 +21166,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["barrier_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -21186,7 +21192,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["code_gate_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -21235,7 +21241,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["code_gate_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2
@@ -21284,7 +21290,7 @@
       "side": "corp",
       "cardType": "ice",
       "roles": ["barrier_ice", "etr_ice", "ice"],
-      "planRoles": ["protect_hq", "protect_rnd"],
+      "planRoles": ["protect_hq", "protect_rnd", "protect_remote"],
       "requiredMechanics": [],
       "valueHints": {
         "defense": 2

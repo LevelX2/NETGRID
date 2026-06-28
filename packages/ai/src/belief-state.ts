@@ -37,6 +37,7 @@ export type BeliefEventClassification = {
   family: BeliefEventFamily;
   actor: Side | "system";
   serverId?: string;
+  runTargetServerId?: string;
   accessedCardPositionKey?: string;
   accessedArea?: string;
   installPlacement?: HqInstallPlacementMemory;
@@ -303,6 +304,7 @@ function beliefHistory(input: AiDecisionInput): PublicGameEvent[] {
 function classifyBeliefEvent(event: PublicGameEvent): BeliefEventClassification {
   const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
   const serverId = publicServerId(event);
+  const runTargetServerId = publicRunTargetServerId(event, actionType);
   const actor = parseActor(event.publicPayload.actor);
   const family = eventFamily(actionType, event);
   const installPlacement = installPlacementFromEvent(event);
@@ -315,6 +317,7 @@ function classifyBeliefEvent(event: PublicGameEvent): BeliefEventClassification 
     family,
     actor,
     ...(serverId ? { serverId } : {}),
+    ...(runTargetServerId ? { runTargetServerId } : {}),
     ...(accessedCardPositionKey ? { accessedCardPositionKey } : {}),
     ...(accessedArea ? { accessedArea } : {}),
     ...(installPlacement ? { installPlacement } : {}),
@@ -1335,9 +1338,9 @@ function deriveRunnerOpponentModel(
 
 function deriveCorpOpponentModel(input: AiDecisionInput, classifications: BeliefEventClassification[]): CorpOpponentModel {
   const runnerRuns = classifications.filter((event) => event.actor === "runner" && (event.actionType === "start_run" || event.actionType === "access_card"));
-  const hqRuns = runnerRuns.filter((event) => event.serverId === "hq").length;
-  const rndRuns = runnerRuns.filter((event) => event.serverId === "rd").length;
-  const remoteRuns = runnerRuns.filter((event) => event.serverId?.startsWith("remote_")).length;
+  const hqRuns = runnerRuns.filter((event) => runPressureServerId(event) === "hq").length;
+  const rndRuns = runnerRuns.filter((event) => runPressureServerId(event) === "rd").length;
+  const remoteRuns = runnerRuns.filter((event) => runPressureServerId(event)?.startsWith("remote_")).length;
   const runEvents = runnerRuns.length;
   const centralRuns = hqRuns + rndRuns;
   const remoteContestProbability = runEvents > 0 ? remoteRuns / runEvents : 0;
@@ -1364,6 +1367,10 @@ function deriveCorpOpponentModel(input: AiDecisionInput, classifications: Belief
     hqPressureEstimate,
     rndPressureEstimate
   };
+}
+
+function runPressureServerId(event: BeliefEventClassification): string | undefined {
+  return event.runTargetServerId ?? event.serverId;
 }
 
 function deriveRndTopFreshness(
@@ -1576,6 +1583,31 @@ function publicServerId(event: PublicGameEvent): string | undefined {
   if (raw) return canonicalStructuredServerId(raw);
   const exposedServerId = stringValue(event.publicPayload.exposedServerId);
   if (exposedServerId) return canonicalStructuredServerId(exposedServerId);
+  return undefined;
+}
+
+function publicRunTargetServerId(
+  event: PublicGameEvent,
+  actionType: string,
+): string | undefined {
+  if (actionType !== "start_run" && actionType !== "access_card")
+    return undefined;
+  return (
+    publicServerId(event) ??
+    visibleServerLabelId(stringValue(event.publicPayload.serverLabel)) ??
+    visibleServerLabelId(stringValue(event.publicPayload.serverName))
+  );
+}
+
+function visibleServerLabelId(label: string | undefined): string | undefined {
+  const normalized = label?.trim().toLowerCase();
+  if (!normalized) return undefined;
+  if (normalized === "hq") return "hq";
+  if (normalized === "r&d" || normalized === "rd") return "rd";
+  if (normalized === "archives") return "archives";
+  const remoteMatch = /^remote[\s_-]+(\d+)$/.exec(normalized);
+  const remoteIndex = remoteMatch?.[1];
+  if (remoteIndex) return `remote_${Number.parseInt(remoteIndex, 10)}`;
   return undefined;
 }
 

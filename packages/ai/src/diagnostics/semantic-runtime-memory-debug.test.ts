@@ -4,6 +4,7 @@ import {
   type AiDifficulty,
   type LegalAction,
   type PlayerView,
+  type PublicGameEvent,
   type Side,
   type VisibleCard,
 } from "@netgrid/shared";
@@ -55,13 +56,54 @@ describe("semanticRuntimeMemoryDebug", () => {
       }),
     );
   });
+
+  it("counts visible runner run labels for corp pressure memory", () => {
+    const debug = semanticRuntimeMemoryDebug(
+      aiInput("corp", [], [
+        publicEvent("evt_hq_run", "start_run", 1, {
+          actor: "runner",
+          actionType: "start_run",
+          serverLabel: "HQ",
+        }),
+        publicEvent("evt_rd_access", "access_card", 2, {
+          actor: "runner",
+          actionType: "access_card",
+          serverLabel: "R&D",
+        }),
+        publicEvent("evt_remote_run", "start_run", 3, {
+          actor: "runner",
+          actionType: "start_run",
+          serverLabel: "Remote 1",
+        }),
+      ]),
+    );
+
+    expect(debug.items).toContain("runner_runs:3");
+    expect(debug.items).toContain("runner_remote_runs:1");
+    expect(debug.items).toContain("runner_central_runs:2");
+    expect(debug.items).toContain("runner_remote_pressure:0.25");
+    expect(debug.opponentModel).toEqual(
+      expect.objectContaining({
+        remoteContestProbability: 0.33,
+        runnerAggressionMemory: expect.objectContaining({
+          runEvents: 3,
+          remoteRuns: 1,
+          centralRuns: 2,
+        }),
+      }),
+    );
+  });
 });
 
-function aiInput(side: Side, legalActions: LegalAction[]): AiDecisionInput {
+function aiInput(
+  side: Side,
+  legalActions: LegalAction[],
+  publicEvents: PublicGameEvent[] = [],
+): AiDecisionInput {
   return {
     side,
-    playerView: playerView(side, legalActions),
-    eventTail: [],
+    playerView: playerView(side, legalActions, publicEvents),
+    eventTail: publicEvents,
     legalActions,
     difficulty: "normal" satisfies AiDifficulty,
     seed: "semantic-runtime-memory-debug-test",
@@ -71,7 +113,11 @@ function aiInput(side: Side, legalActions: LegalAction[]): AiDecisionInput {
   };
 }
 
-function playerView(side: Side, legalActions: LegalAction[]): PlayerView {
+function playerView(
+  side: Side,
+  legalActions: LegalAction[],
+  publicEvents: PublicGameEvent[],
+): PlayerView {
   const ownSide = side;
   const opponentSide = side === "runner" ? "corp" : "runner";
   return {
@@ -110,11 +156,28 @@ function playerView(side: Side, legalActions: LegalAction[]): PlayerView {
       scoreArea: [],
     },
     servers: [],
-    publicEvents: [],
+    publicEvents,
     legalActions,
     winner: null,
     agendaPointsToWin: 7,
   };
+}
+
+function publicEvent(
+  eventId: string,
+  type: string,
+  stateVersionBefore: number,
+  publicPayload: Record<string, unknown>,
+): PublicGameEvent {
+  return {
+    eventId,
+    type,
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `hash_${eventId}`,
+    visibilityClass: "public",
+    publicPayload,
+  } as PublicGameEvent;
 }
 
 function legalAction(
