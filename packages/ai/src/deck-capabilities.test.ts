@@ -256,6 +256,80 @@ describe("DeckCapabilityProfile", () => {
     }
   });
 
+  it("matches corp plan roles by bounded role terms", () => {
+    CARD_ROLES_BY_CARD.set("local_plan_a", {
+      cardId: "local_plan_a",
+      side: "corp",
+      roles: ["remote_score_support"],
+    });
+    CARD_ROLES_BY_CARD.set("local_plan_b", {
+      cardId: "local_plan_b",
+      side: "corp",
+      roles: ["protect_remote"],
+    });
+    CARD_ROLES_BY_CARD.set("local_plan_c", {
+      cardId: "local_plan_c",
+      side: "corp",
+      roles: ["remote_economy_asset"],
+    });
+    CARD_ROLES_BY_CARD.set("local_plan_d", {
+      cardId: "local_plan_d",
+      side: "corp",
+      roles: ["remote_ambush"],
+    });
+    CARD_ROLES_BY_CARD.set("local_plan_e", {
+      cardId: "local_plan_e",
+      side: "corp",
+      roles: [
+        "scoreish_noise",
+        "remoteish_noise",
+        "economy_assetish_noise",
+        "ambushish_noise",
+      ],
+    });
+    try {
+      const inputView = playerView("corp");
+      inputView.servers = [
+        server("remote_1", [
+          visibleCard("plan-a", "local_plan_a", "corp", "operation", {
+            title: "Structured Plan A",
+          }),
+          visibleCard("plan-b", "local_plan_b", "corp", "upgrade", {
+            title: "Structured Plan B",
+          }),
+          visibleCard("plan-c", "local_plan_c", "corp", "asset", {
+            title: "Structured Plan C",
+          }),
+          visibleCard("plan-d", "local_plan_d", "corp", "asset", {
+            title: "Structured Plan D",
+          }),
+          visibleCard("plan-e", "local_plan_e", "corp", "asset", {
+            title: "Role Noise",
+          }),
+        ]),
+      ];
+
+      const profile = buildDeckCapabilityProfile({
+        side: "corp",
+        playerView: inputView,
+        legalActions: [],
+      });
+
+      expect(profile.corp?.scorePlanProfile.scoreSupportToolsKnown).toBe(1);
+      expect(profile.corp?.remotePlanProfile).toMatchObject({
+        remoteProtectionToolsKnown: 4,
+        remoteEconomyToolsKnown: 1,
+        ambushToolsKnown: 1,
+      });
+    } finally {
+      CARD_ROLES_BY_CARD.delete("local_plan_a");
+      CARD_ROLES_BY_CARD.delete("local_plan_b");
+      CARD_ROLES_BY_CARD.delete("local_plan_c");
+      CARD_ROLES_BY_CARD.delete("local_plan_d");
+      CARD_ROLES_BY_CARD.delete("local_plan_e");
+    }
+  });
+
   it("marks missing runner coverage without guessing unavailable deck answers", () => {
     const profile = buildDeckCapabilityProfile({
       side: "runner",
@@ -388,6 +462,18 @@ function visibleIdentity(side: Side): PlayerView["own"]["identity"] {
     controller: side,
     type: "identity",
     known: true,
+  };
+}
+
+function server(
+  id: PlayerView["servers"][number]["id"],
+  root: VisibleCard[],
+): PlayerView["servers"][number] {
+  return {
+    id,
+    label: id,
+    ice: [],
+    root,
   };
 }
 

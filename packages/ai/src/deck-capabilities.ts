@@ -815,8 +815,8 @@ function buildCorpScorePlanProfile(
     /advance|advancement/.test(normalizedRecordText(record)),
   ).length;
   const scoreSupportToolsKnown = records.filter((record) =>
-    record.roles.some((role) => role.includes("score")) ||
-    /score|agenda/.test(normalizedRecordText(record)),
+    rolesMatch(record.roles, ["score"]) ||
+    /score|agenda/.test(normalizedRecordTextWithoutRoles(record)),
   ).length;
   return {
     agendaToolsKnown,
@@ -866,15 +866,15 @@ function buildCorpRemotePlanProfile(
 ): CorpRemotePlanProfile {
   return {
     remoteProtectionToolsKnown: records.filter((record) =>
-      record.roles.some((role) => role.includes("remote") || role.includes("ice")) ||
+      rolesMatch(record.roles, ["remote", "ice"]) ||
       record.type === "ice",
     ).length,
     remoteEconomyToolsKnown: records.filter((record) =>
-      record.roles.some((role) => role.includes("economy_asset")) ||
-      /asset.*credit|campaign|bank/.test(normalizedRecordText(record)),
+      rolesMatch(record.roles, ["economy_asset"]) ||
+      /asset.*credit|campaign|bank/.test(normalizedRecordTextWithoutRoles(record)),
     ).length,
     ambushToolsKnown: records.filter((record) =>
-      record.roles.includes("ambush") || record.subtypes.includes("ambush"),
+      rolesMatch(record.roles, ["ambush"]) || record.subtypes.includes("ambush"),
     ).length,
     evidence: ["corp_remote_profile:conservative"],
   };
