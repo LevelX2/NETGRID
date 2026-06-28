@@ -54,6 +54,33 @@ describe("projectRunnerRunActions", () => {
     ]);
   });
 
+  it("bounds path-blocked run signals to structured entries", () => {
+    const blocked = action({
+      actionId: "blocked",
+      label: "Use ability",
+      payload: {
+        runActionSignals: ["make_run", "path blocked"],
+        serverId: "hq",
+      } as unknown as LegalAction["payload"],
+    });
+    const noise = action({
+      actionId: "blocked-noise",
+      label: "Use ability",
+      payload: {
+        runActionSignals: ["make_run", "path blockedness"],
+        serverId: "hq",
+      } as unknown as LegalAction["payload"],
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([blocked, noise]),
+    });
+
+    expect(projections.map((projection) => projection.actionId)).toEqual([
+      "blocked-noise",
+    ]);
+  });
+
   it("requires canonical structured server ids in payloads", () => {
     const labelLikeServer = action({
       actionId: "label-like-server",

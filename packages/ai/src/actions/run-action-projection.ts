@@ -215,7 +215,8 @@ function runActionProjectionEvidence(
 function runActionRelevant(action: LegalAction, signals: readonly string[]): boolean {
   if (action.type === "start_run") return true;
   const text = runActionSearchText(action, signals);
-  if (text.includes("path blocked")) return false;
+  if (runActionHasStructuredSignal(signals, ["path blocked", "path_blocked"]))
+    return false;
   const explicitRunSignals = runActionHasStructuredSignal(signals, [
     "start_run",
     "make_run",
