@@ -316,7 +316,7 @@ function goalSourceFromExisting(
   }
   if (goal.source && frame.side === "runner") return "runner_tactical_goal";
   if (goal.source && frame.side === "corp") return "corp_tactical_goal";
-  if (goal.goalId.includes(".neutral.")) return "neutral";
+  if (goalIdHasSegment(goal.goalId, "neutral")) return "neutral";
   if (frame.side === "corp" || goal.goalId.startsWith("corp.")) {
     return "corp_tactical_goal";
   }
@@ -326,9 +326,13 @@ function goalSourceFromExisting(
 function isReportOnlyDoctrineGoal(goal: TacticalGoalLike): boolean {
   return (
     goal.source === "deck" ||
-    goal.goalId.includes(".doctrine.") ||
+    goalIdHasSegment(goal.goalId, "doctrine") ||
     (goal.evidence ?? []).some((entry) => entry.startsWith("doctrine_v2:"))
   );
+}
+
+function goalIdHasSegment(goalId: string, segment: string): boolean {
+  return goalId.split(/[.:-]+/).includes(segment);
 }
 
 function dedupeGoals(inputs: readonly GoalInput[]): TacticalGoalLike[] {

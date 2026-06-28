@@ -8166,6 +8166,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertdreiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/tactical-goal-merge.ts` klassifiziert `neutral`- und `doctrine`-Goal-IDs über gebundene Goal-ID-Segmente statt freier `.includes(".neutral.")`-/`.includes(".doctrine.")`-Suche.
+  - Strukturierte IDs mit Segment `neutral` oder `doctrine` bleiben wirksam; Rauschen wie `runner.neutralish.economy` und `runner.doctrineish.report` wird nicht als Neutral-/Doctrine-Report-Ziel aussortiert.
+  - `tactical-goal-merge.test.ts` schützt die Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/tactical-goal-merge.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

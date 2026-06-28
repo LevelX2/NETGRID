@@ -111,6 +111,29 @@ describe("tactical goal merge", () => {
       ]),
     );
   });
+
+  it("does not classify goal id substring noise as doctrine or neutral", () => {
+    const input = inputFor("runner", [
+      legalAction("gain-1", "gain_credit", "runner"),
+    ]);
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: candidatesFor(input),
+      tacticalGoals: [
+        goal("runner.doctrineish.report", "pressure", 850, "runner_tactical"),
+        goal("runner.neutralish.economy", "economy", 830, "runner_tactical"),
+      ],
+    });
+
+    const goals = buildMergedTacticalGoals({ frame });
+
+    expect(goals.map((candidate) => candidate.goalId)).toEqual(
+      expect.arrayContaining([
+        "runner.doctrineish.report",
+        "runner.neutralish.economy",
+      ]),
+    );
+  });
 });
 
 function strategicState(side: "runner" | "corp"): StrategicIntentState {
