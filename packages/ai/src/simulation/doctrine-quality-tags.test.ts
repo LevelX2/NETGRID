@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import {
+  type AiDoctrineQualityCaseAnalysis,
+  isRedactionSafeCaseAnalysis,
   qualityTagsForActionWithDependencies,
   repeatedLowValueCentralRunTags,
 } from "./doctrine-quality-tags";
@@ -40,6 +42,24 @@ describe("repeatedLowValueCentralRunTags", () => {
         centralRun("trashcan_noise"),
       ]),
     ).toEqual(["repeated_low_value_central_run"]);
+  });
+});
+
+describe("isRedactionSafeCaseAnalysis", () => {
+  it("rejects exact forbidden hidden-input field tokens", () => {
+    expect(
+      isRedactionSafeCaseAnalysis(
+        caseAnalysisWithReasonCode("privatePayload"),
+      ),
+    ).toBe(false);
+  });
+
+  it("bounds forbidden field detection to exact tokens", () => {
+    expect(
+      isRedactionSafeCaseAnalysis(
+        caseAnalysisWithReasonCode("privatePayloadish"),
+      ),
+    ).toBe(true);
   });
 });
 
@@ -104,4 +124,45 @@ function centralRun(reasonCode: string) {
     targetServerId: "rd",
     reasonCode,
   } as const;
+}
+
+function caseAnalysisWithReasonCode(
+  reasonCode: string,
+): AiDoctrineQualityCaseAnalysis {
+  return {
+    version: "ai-deck-doctrine-case-analysis-v1",
+    maxExamplesPerMetric: 1,
+    totals: {
+      nakedAgendaInstalls: 0,
+      agendaFloodExposure: 0,
+      scoreWindowMissed: 0,
+      remoteOverbuild: 0,
+      economyStall: 0,
+      repeatedLowValueCentralRun: 0,
+      rigStall: 0,
+      assetTrashNeglect: 0,
+    },
+    examples: {
+      nakedAgendaInstalls: [
+        {
+          metric: "nakedAgendaInstalls",
+          seed: "seed",
+          actionIndex: 0,
+          stateVersionBefore: 1,
+          side: "runner",
+          actionType: "start_run",
+          reasonCode,
+          qualityTags: [],
+        },
+      ],
+      agendaFloodExposure: [],
+      scoreWindowMissed: [],
+      remoteOverbuild: [],
+      economyStall: [],
+      repeatedLowValueCentralRun: [],
+      rigStall: [],
+      assetTrashNeglect: [],
+    },
+    redactionSafe: true,
+  };
 }

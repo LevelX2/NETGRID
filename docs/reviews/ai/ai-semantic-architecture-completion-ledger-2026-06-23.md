@@ -9278,6 +9278,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsiebenundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/doctrine-quality-tags.ts` ersetzt die Case-Analysis-Redaction-Safety-Substring-Prüfung auf `FORBIDDEN_AI_INPUT_FIELDS` durch gebundene Hidden-Input-Feldtokens.
+  - Exakte Feldmarker wie `cardInstances`, `privatePayload`, `sessionToken`, `reconnectToken`, `joinToken`, `tokenHash` und `fullGameState` bleiben blockiert; Suffix-Rauschen wie `privatePayloadish` bleibt redaction-safe.
+  - Die Erkennung bleibt reine Doctrine-Quality-Case-Analysis-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `doctrine-quality-tags.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/doctrine-quality-tags.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
