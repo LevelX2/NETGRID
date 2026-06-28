@@ -1,6 +1,7 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
 import { reconstructBeliefState } from "../belief-state";
+import { rolesMatch } from "../runtime/role-match";
 import { isLowValueKnownAccessCard } from "../runtime/runner-low-value-known-access-card";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import {
@@ -178,7 +179,7 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
     ...(invalidationFlags.remoteMemoryInvalidatedByInstallOrMove ||
     memory.some((entry) =>
       entry.invalidatedBy.some(
-        (reason) => reason.includes("install") || reason.includes("move"),
+        knownPositionInvalidationReferencesInstallOrMove,
       ),
     )
       ? { remoteMemoryInvalidatedByInstallOrMove: true }
@@ -247,4 +248,10 @@ export function runnerKnownCardPositionInvalidationFlags(
       ? { knownUnrezzedIceInvalidated: true }
       : {}),
   };
+}
+
+export function knownPositionInvalidationReferencesInstallOrMove(
+  reason: string,
+): boolean {
+  return rolesMatch([reason], ["installed", "move", "moved"]);
 }

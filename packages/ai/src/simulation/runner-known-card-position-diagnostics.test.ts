@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { runnerKnownCardPositionInvalidationFlags } from "./runner-known-card-position-diagnostics";
+import {
+  knownPositionInvalidationReferencesInstallOrMove,
+  runnerKnownCardPositionInvalidationFlags,
+} from "./runner-known-card-position-diagnostics";
 
 describe("runner known card position invalidation diagnostics", () => {
   it("matches known-position invalidation reasons exactly", () => {
@@ -30,5 +33,24 @@ describe("runner known card position invalidation diagnostics", () => {
         "reorderish_noise",
       ]),
     ).toEqual({});
+  });
+
+  it("matches remote memory install-or-move invalidation by bounded terms", () => {
+    expect(
+      [
+        "known_hq_card_installed",
+        "corp_installed_hidden_hq_card",
+        "known_hq_card_moved",
+        "hidden_zone_move_changed_hq",
+      ].every(knownPositionInvalidationReferencesInstallOrMove),
+    ).toBe(true);
+    expect(
+      [
+        "rd_access_removed_top_card",
+        "reinstall_noise",
+        "movementish_noise",
+        "movie_noise",
+      ].some(knownPositionInvalidationReferencesInstallOrMove),
+    ).toBe(false);
   });
 });

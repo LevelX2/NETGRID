@@ -8427,6 +8427,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertzwoundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-known-card-position-diagnostics.ts` erkennt Remote-Memory-Invalidierungen durch Install-/Move-Gründe über gebundene `rolesMatch`-Terme statt freier `reason.includes("install"|"move")`-Substring-Prüfungen.
+  - Strukturierte Gründe wie `known_hq_card_installed`, `corp_installed_hidden_hq_card`, `known_hq_card_moved` und `hidden_zone_move_changed_hq` bleiben wirksam; Rauschen wie `rd_access_removed_top_card`, `reinstall_noise`, `movementish_noise` und `movie_noise` bleibt wirkungslos.
+  - `runner-known-card-position-diagnostics.test.ts` schützt positive und negative Install-/Move-Markergrenzen.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-known-card-position-diagnostics.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
