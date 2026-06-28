@@ -14,11 +14,38 @@ describe("isBreakerInstallAction", () => {
       title: "Custom Tool",
       subtypes: ["Icebreaker", "Fracter"],
     });
-    const playerView = playerViewWithGrip([breaker]);
+    const noisyBreaker = visibleCard({
+      instanceId: "runner-breaker-noise",
+      definitionId: "custom-breaker",
+      title: "Fracterish Tool",
+      subtypes: ["Icebreaker"],
+    });
+    const universalBreaker = visibleCard({
+      instanceId: "runner-breaker-universal",
+      definitionId: "custom-breaker",
+      title: "Universal Tool",
+      subtypes: ["Icebreaker"],
+      rulesText: "Break one ice subroutine.",
+    });
+    const playerView = playerViewWithGrip([
+      breaker,
+      noisyBreaker,
+      universalBreaker,
+    ]);
     const matchesBreaker = isBreakerInstallAction(playerView, "breaker_wall");
 
     expect(
       matchesBreaker(installAction("runner-breaker-1", "Install Custom Tool")),
+    ).toBe(true);
+    expect(
+      matchesBreaker(
+        installAction("runner-breaker-noise", "Install Fracterish Tool"),
+      ),
+    ).toBe(false);
+    expect(
+      matchesBreaker(
+        installAction("runner-breaker-universal", "Install Universal Tool"),
+      ),
     ).toBe(true);
     expect(
       matchesBreaker(installAction("missing-card", "Install Best Fracter")),
