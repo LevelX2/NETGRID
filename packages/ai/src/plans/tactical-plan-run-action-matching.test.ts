@@ -19,6 +19,11 @@ describe("runPlanStepMatchesAction", () => {
       label: "Use ability",
       payload: { serverId: "hq", runActionSignals: "make_run" },
     });
+    const noisyStructured = legalAction({
+      actionId: "noisy-structured-run",
+      label: "Use ability",
+      payload: { serverId: "hq", runActionSignals: "make_running_noise" },
+    });
 
     expect(
       runPlanStepMatchesAction(
@@ -36,6 +41,14 @@ describe("runPlanStepMatchesAction", () => {
         actionTypeMatchesStep,
       ),
     ).toBe(true);
+    expect(
+      runPlanStepMatchesAction(
+        step,
+        candidate({ actionId: noisyStructured.actionId }),
+        noisyStructured,
+        actionTypeMatchesStep,
+      ),
+    ).toBe(false);
   });
 
   it("matches path blocked markers by bounded phrase", () => {

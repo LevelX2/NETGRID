@@ -1,6 +1,5 @@
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import { candidateSemanticText } from "./tactical-plan-candidate-text";
 import { actionServerId } from "./tactical-plan-server-targets";
 import type { PlanStep } from "./tactical-plan-types";
 
@@ -26,13 +25,82 @@ function actionCandidateCanStartRun(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): boolean {
-  const text = [
-    candidateSemanticText(candidate),
+  const signals = runStartSignals(candidate, action);
+  if (signals.some((signal) => signalHasBoundedPhrase(signal, ["path", "blocked"]))) {
+    return false;
+  }
+  return signals.some(signalMatchesRunStart);
+}
+
+const RUN_START_SIGNAL_CODES = new Set([
+  "start_run",
+  "make_run",
+  "bonus_run",
+  "followup_run",
+  "run_event",
+  "run_action",
+  "extra_run",
+  "run_bypass",
+  "bypass_first_ice",
+  "future_run_effect",
+  "run_pressure",
+]);
+
+function runStartSignals(
+  candidate: ActionSemanticCandidate,
+  action: LegalAction,
+): string[] {
+  return [
     action.type,
-    JSON.stringify(action.payload ?? {}),
-  ].join(" ").toLowerCase();
-  if (/\bpath\s+blocked\b/.test(text)) return false;
-  return /start_run|make_run|make a run|bonus_run|followup_run|run_event|run_action|extra_run|run_bypass|bypass_first_ice|server_specific_|future_run_effect|run_pressure/.test(
-    text,
+    candidate.semanticActionType,
+    candidate.sourceCardId,
+    candidate.abilityId,
+    ...candidate.cardContextSignals,
+    ...candidate.actionTacticSignals,
+    ...candidate.strategySupport.map((entry) => `${entry.strategyId}:${entry.role}`),
+    ...candidate.conditions.map((entry) => entry.kind),
+    ...candidate.risks.map((entry) => entry.kind),
+    ...candidate.constraints.map((entry) => entry.kind),
+    ...candidate.costProfile.additionalCosts,
+    ...(candidate.targetContext?.targetProfileMatches.flatMap((entry) => entry.evidence) ?? []),
+    ...candidate.evidence,
+    ...payloadRunSignals(action),
+  ].filter((entry): entry is string => typeof entry === "string");
+}
+
+function payloadRunSignals(action: LegalAction): string[] {
+  const signals = action.payload?.runActionSignals;
+  if (typeof signals === "string") return [signals];
+  if (Array.isArray(signals)) {
+    return signals.filter((signal): signal is string => typeof signal === "string");
+  }
+  return [];
+}
+
+function signalMatchesRunStart(signal: string): boolean {
+  return (
+    signalSegments(signal).some(
+      (segment) =>
+        RUN_START_SIGNAL_CODES.has(segment) ||
+        (segment.startsWith("server_specific_") &&
+          segment.length > "server_specific_".length),
+    ) || signalHasBoundedPhrase(signal, ["make", "a", "run"])
+  );
+}
+
+function signalSegments(signal: string): string[] {
+  return signal
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9_]+/)
+    .filter((segment) => segment.length > 0);
+}
+
+function signalHasBoundedPhrase(signal: string, phrase: readonly string[]): boolean {
+  const words = signal
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter((word) => word.length > 0);
+  return words.some((_, index) =>
+    phrase.every((word, offset) => words[index + offset] === word),
   );
 }

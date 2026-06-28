@@ -8517,6 +8517,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertzweiundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-run-action-matching.ts` erkennt Nicht-`start_run`-Run-Start-Kandidaten über strukturierte Candidate- und `runActionSignals`-Payload-Signale statt Regex auf `candidateSemanticText` plus serialisiertem Payload-JSON.
+  - Strukturierte Codes wie `make_run`, `run_pressure`, `future_run_effect`, `bypass_first_ice` und `server_specific_*` bleiben wirksam; Rauschen wie `make_running_noise` bleibt wirkungslos.
+  - `tactical-plan-run-action-matching.test.ts` schützt positive Run-Signale sowie negative Label-/Substring- und `path blockedness`-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-run-action-matching.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
