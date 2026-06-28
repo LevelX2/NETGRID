@@ -9389,6 +9389,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertachtundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-candidate-matching.ts` ersetzt die lokale Bank-Step-Signal-Term-Prüfung per `segment.includes(...)` durch gebundene `_`-Tokenprüfung.
+  - Exakte Bank-/Cash-/Payout-Signale wie `cash_out_credit_bank` bleiben wirksam; Suffix-Rauschen wie `bankroll_noise`, `cashier_noise` und `payoutish_noise` erzeugt keine Plan-Step-Zuordnung.
+  - Die Änderung bleibt auf TacticalPlan-Candidate-Matching gegen vorhandene ActionSemanticCandidate-Signale beschränkt und erzeugt keine LegalAction-Projektion.
+  - `tactical-plan-candidate-matching.test.ts` schützt positive Bank-Signale und negative Substring-Noise-Fälle; `tactical-plans.test.ts` sichert die Plan-Mapping-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-candidate-matching.test.ts src/tactical-plans.test.ts` grün, 2 Dateien, 49 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
