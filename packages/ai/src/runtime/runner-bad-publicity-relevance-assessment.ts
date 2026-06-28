@@ -1,5 +1,7 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
+import { rolesMatch } from "./role-match";
+
 export type RunnerBadPublicityRelevanceAssessment = {
   sourceDefinitionId: string;
   currentCorpBadPublicity: number;
@@ -179,7 +181,7 @@ function cardHasBadPublicitySupport(
   const hintEffects = dependencies.hintEffectsForCard(definitionId);
   const rulesText = dependencies.rulesTextForCard(definitionId);
   return (
-    roles.some((role) => role.includes("bad_publicity")) ||
+    rolesMatch(roles, ["bad_publicity"]) ||
     hintEffects?.some((effect) =>
       effectMentionsBadPublicity(effect, dependencies),
     ) === true ||
@@ -192,7 +194,7 @@ function effectMentionsBadPublicity(
   dependencies: RunnerBadPublicityCardSupportDependencies,
 ): boolean {
   const target = dependencies.effectTarget(effect);
-  return target?.includes("bad_publicity") === true;
+  return target !== undefined && rolesMatch([target], ["bad_publicity"]);
 }
 
 function visibleCorpBadPublicity(input: AiDecisionInput): number {

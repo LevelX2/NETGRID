@@ -7337,6 +7337,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bad-publicity-relevance-assessment.ts` nutzt für Bad-Publicity-Support-Rollen und Hint-Effect-Targets den gehärteten `rolesMatch`-Helper statt freier Substring-Prüfungen.
+  - Sichtbarer Kartentext bleibt bewusst weiter textbasiert; der Schnitt betrifft nur strukturierte Rollen- und Effect-Target-Felder.
+  - `runner-bad-publicity-relevance-assessment.test.ts` schützt strukturierte Rollen/Targets wie `bad_publicity_support` und `runner.bad_publicity` sowie Substring-Negativfälle wie `bad_publicityish_noise`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bad-publicity-relevance-assessment.test.ts src/runtime/visible-card-heuristics.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "Bad-Publicity trace tech"` grün, 1 Datei, 1 Test, 533 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "support-only Bad Publicity"` grün, 1 Datei, 1 Test, 533 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "Bad Publicity 7"` grün, 1 Datei, 1 Test, 533 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
