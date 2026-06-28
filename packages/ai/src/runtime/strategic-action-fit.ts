@@ -373,15 +373,38 @@ function corpActionLooksLikeEconomy(
   action: LegalAction,
 ): boolean {
   const source = visibleSourceCard(input, action);
-  const text = [
-    source?.title,
-    source?.definitionId,
-    source?.rulesText,
+  if (!source) return false;
+  if (source.type === "asset") return true;
+  return visibleCardHasAnyToken(source, [
+    "economy",
+    "credit",
+    "credits",
+    "bit",
+    "bits",
+    "gain",
+    "bank",
+  ]);
+}
+
+function visibleCardHasAnyToken(
+  card: VisibleCard,
+  terms: readonly string[],
+): boolean {
+  const termSet = new Set(terms);
+  return [
+    card.title,
+    card.definitionId,
+    card.rulesText,
   ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-  return /economy|credit|bit|gain|bank|asset/.test(text);
+    .flatMap((entry) => visibleCardTokens(entry))
+    .some((token) => termSet.has(token));
+}
+
+function visibleCardTokens(value: string | undefined): string[] {
+  return (value ?? "")
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 0);
 }
 
 function visibleSourceCard(

@@ -8526,6 +8526,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertdreiundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/strategic-action-fit.ts` erkennt sichtbare Corp-Economy-Install-Quellen über den strukturierten Kartentyp `asset` oder gebundene Kartentext-Tokens statt Regex-Substring-Suche über zusammengefügten Source-Text.
+  - Strukturierte Asset-Quellen und echte Tokens wie `gain`/`credits` bleiben wirksam; Rauschen wie `Creditor Bankish` und `Gainish creditsish` bleibt wirkungslos.
+  - `strategic-action-fit.test.ts` schützt positive sichtbare Economy-Source-Evidence sowie negative Label- und Source-Substring-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/strategic-action-fit.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

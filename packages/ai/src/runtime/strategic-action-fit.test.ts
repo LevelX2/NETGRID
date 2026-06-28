@@ -60,13 +60,26 @@ describe("semanticRuntimeStrategicActionFitEvidence", () => {
     const sourced = action("sourced-economy", "corp", "install_card");
     sourced.label = "Install asset";
     sourced.source = "economy-asset";
-    const input = corpStrategicInput([labelOnly, sourced], [
+    const noisySource = action("noisy-economy", "corp", "install_card");
+    noisySource.label = "Install upgrade";
+    noisySource.source = "creditor-bankish";
+    const input = corpStrategicInput([labelOnly, sourced, noisySource], [
       {
         instanceId: "economy-asset",
         definitionId: "custom-economy-asset",
         title: "Neutral Asset",
         rulesText: "Gain credits when used.",
         type: "asset",
+        known: true,
+        owner: "corp",
+        controller: "corp",
+      },
+      {
+        instanceId: "creditor-bankish",
+        definitionId: "custom-creditor-bankish",
+        title: "Creditor Bankish",
+        rulesText: "Gainish creditsish when used.",
+        type: "upgrade",
         known: true,
         owner: "corp",
         controller: "corp",
@@ -92,6 +105,13 @@ describe("semanticRuntimeStrategicActionFitEvidence", () => {
         "strategic_action_fit_family:corp_asset_economy",
       ]),
     );
+    expect(
+      semanticRuntimeStrategicActionFitEvidence(
+        input,
+        noisySource,
+        "corp.semantic.install_asset",
+      ),
+    ).toEqual([]);
   });
 
   it("matches runner setup scopes by token instead of substring", () => {
