@@ -10,6 +10,7 @@ import type {
   Side,
   SpecialZoneState,
 } from "@netgrid/shared";
+import { completeRunnerProgramRigInstall } from "../install/runner-rig-install-finalization";
 
 export type RunnerSpecialTriggerExecutionHost = {
   state: GameState;
@@ -197,7 +198,8 @@ export function applyDelayedInstallStartOfTurn(
     startOfTurnFloatingCreditsApplied: false,
     bonusRunPending: false,
   } as NonNullable<GameState["runnerTurnFlags"]>);
-  const resolvedSourceIds = (flags.delayedInstallStartTurnResolvedSourceIds ??= []);
+  const resolvedSourceIds = (flags.delayedInstallStartTurnResolvedSourceIds ??=
+    []);
   for (const sourceCardId of state.runner.rig.resources.slice().sort()) {
     if (
       host.cards.definitionFor(state, sourceCardId).id !==
@@ -344,7 +346,12 @@ function resolveDelayedInstallSetAside(
       returnZone: { side: "runner", zone: "rig" },
     },
   };
-  host.counters.setCardCounter(state, targetCardId, "shell", shellCounterAmount);
+  host.counters.setCardCounter(
+    state,
+    targetCardId,
+    "shell",
+    shellCounterAmount,
+  );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
@@ -420,8 +427,7 @@ function removeShellCounterAndMaybeInstall(
     targetCardId,
     "shell",
   );
-  if (remainingCounters > 0)
-    return { remainingCounters, installed: false };
+  if (remainingCounters > 0) return { remainingCounters, installed: false };
   installDelayedPreparedCardForFree(host, targetCardId);
   return { remainingCounters, installed: true };
 }
@@ -438,14 +444,20 @@ function installDelayedPreparedCardForFree(
     instance.zone.side !== "special" ||
     instance.zone.zone !== "set_aside"
   )
-    throw new Error("The Shell Traders kann nur vorbereitete Runner-Karten installieren.");
+    throw new Error(
+      "The Shell Traders kann nur vorbereitete Runner-Karten installieren.",
+    );
   if (definition.type !== "program" && definition.type !== "hardware")
-    throw new Error("The Shell Traders installiert nur Programme oder Hardware.");
+    throw new Error(
+      "The Shell Traders installiert nur Programme oder Hardware.",
+    );
   if (
     host.cards.isUniqueCard(definition) &&
     host.cards.hasInstalledUniqueCardDefinition(state, "runner", definition.id)
   )
-    throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
+    throw new Error(
+      "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
+    );
   if (
     definition.type === "program" &&
     !delayedInstallCanInstallPreparedCardForFree(host, cardId, definition)
@@ -454,8 +466,20 @@ function installDelayedPreparedCardForFree(
 
   host.zones.removeFromAllZones(state, cardId);
   if (definition.type === "program") {
-    state.runner.rig.programs.push(cardId);
-    state.runner.memoryUsed += definition.memoryCost ?? 0;
+    completeRunnerProgramRigInstall({
+      state,
+      cardId,
+      definition,
+      usesMemory: true,
+      mustInstance: (targetCardId) =>
+        host.cards.mustInstance(state.cardInstances, targetCardId),
+      setCardCounter: (targetCardId, counterType, amount) =>
+        host.counters.setCardCounter(state, targetCardId, counterType, amount),
+      addCardCounter: (targetCardId, counterType, amount) =>
+        host.counters.addCardCounter(state, targetCardId, counterType, amount),
+      shouldLoadLegacyRecurringCredits:
+        host.cards.shouldLoadLegacyRecurringCredits,
+    });
   } else {
     state.runner.rig.hardware.push(cardId);
     if (!host.cards.hasCardImplementationMemoryUnitModifier(definition)) {
@@ -464,28 +488,24 @@ function installDelayedPreparedCardForFree(
       else if ((definition.memoryLimitBonus ?? 0) > 0)
         state.runner.memoryLimit += definition.memoryLimitBonus ?? 0;
     }
+    state.cardInstances[cardId] = {
+      ...host.cards.mustInstance(state.cardInstances, cardId),
+      faceup: true,
+      rezzed: true,
+      zone: { side: "runner", zone: "rig" },
+    };
   }
-  state.cardInstances[cardId] = {
-    ...host.cards.mustInstance(state.cardInstances, cardId),
-    faceup: true,
-    rezzed: true,
-    zone: { side: "runner", zone: "rig" },
-  };
   host.counters.setCardCounter(state, cardId, "shell", 0);
-  if (host.cards.shouldLoadLegacyRecurringCredits(definition))
+  if (
+    definition.type === "hardware" &&
+    host.cards.shouldLoadLegacyRecurringCredits(definition)
+  )
     host.counters.setCardCounter(
       state,
       cardId,
       "recurring_credit",
       definition.recurringCredits ?? 0,
     );
-  if (
-    definition.type === "program" &&
-    definition.mechanics.includes("virus") &&
-    definition.id !== host.constants.BUTCHER_BOY_ID &&
-    definition.id !== host.constants.SKIVVISS_ID
-  )
-    host.counters.addCardCounter(state, cardId, "virus", 1);
 }
 
 function delayedInstallCanInstallPreparedCardForFree(
@@ -524,7 +544,9 @@ function resolveHiddenStackProgramInstallAbility(
   if (legalAction.side !== "runner")
     throw new Error("Nur der Runner darf Self-Modifying Code nutzen.");
   if (state.timingPoint !== "run.encounter_ice" || !state.run?.encounteredIceId)
-    throw new Error("Self-Modifying Code ist nur während eines ICE-Encounters legal.");
+    throw new Error(
+      "Self-Modifying Code ist nur während eines ICE-Encounters legal.",
+    );
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   if (!state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Self-Modifying Code ist nicht installiert.");

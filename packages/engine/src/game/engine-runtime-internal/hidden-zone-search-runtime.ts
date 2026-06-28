@@ -19,6 +19,7 @@ import type {
   Side,
 } from "./runtime-shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
+import { completeRunnerProgramRigInstall } from "../install/runner-rig-install-finalization";
 
 export function createHiddenZoneSearchRuntime(
   deps: RuntimeDeps,
@@ -26,7 +27,6 @@ export function createHiddenZoneSearchRuntime(
 ) {
   const {
     DAILY_CREDIT_RESOURCE_SOURCE,
-    BUTCHER_BOY_ID,
     COCKROACH_ID,
     ARCHIVES_TO_HQ_OPERATION_SOURCE,
     HQ_AGENDA_REVEAL_ASSET_SOURCE,
@@ -40,7 +40,6 @@ export function createHiddenZoneSearchRuntime(
     SELF_MODIFYING_CODE_ID,
     SERVER_EXPOSE_PROGRAM_SOURCES,
     PAID_STACK_SEARCH_RESOURCE_SOURCE,
-    SKIVVISS_ID,
     SNEAK_PREVIEW_ID,
     STACK_SEARCH_PROGRAM_SOURCES,
     STACK_TOP_REORDER_RESOURCE_SOURCE,
@@ -379,6 +378,26 @@ export function createHiddenZoneSearchRuntime(
     return hiddenZoneSearchHandlerHostBase(state, legalAction);
   }
 
+  function completeHiddenZoneRunnerProgramInstall(
+    state: GameState,
+    cardId: CardInstanceId,
+    definition: CardDefinition,
+  ): void {
+    completeRunnerProgramRigInstall({
+      state,
+      cardId,
+      definition,
+      usesMemory: true,
+      mustInstance: (targetCardId) =>
+        mustInstance(state.cardInstances, targetCardId),
+      setCardCounter: (targetCardId, counterType, amount) =>
+        setCardCounter(state, targetCardId, counterType, amount),
+      addCardCounter: (targetCardId, counterType, amount) =>
+        addCardCounter(state, targetCardId, counterType, amount),
+      shouldLoadLegacyRecurringCredits,
+    });
+  }
+
   function installRunnerProgramFromStackWithoutClick(
     state: GameState,
     cardId: CardInstanceId,
@@ -405,27 +424,7 @@ export function createHiddenZoneSearchRuntime(
 
     spendRunnerInstallCredits(state, definition.installCost ?? 0, "program");
     removeFromAllZones(state, cardId);
-    state.runner.rig.programs.push(cardId);
-    state.runner.memoryUsed += definition.memoryCost ?? 0;
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      rezzed: true,
-      zone: { side: "runner", zone: "rig" },
-    };
-    if (shouldLoadLegacyRecurringCredits(definition))
-      setCardCounter(
-        state,
-        cardId,
-        "recurring_credit",
-        definition.recurringCredits ?? 0,
-      );
-    if (
-      definition.mechanics.includes("virus") &&
-      definition.id !== BUTCHER_BOY_ID &&
-      definition.id !== SKIVVISS_ID
-    )
-      addCardCounter(state, cardId, "virus", 1);
+    completeHiddenZoneRunnerProgramInstall(state, cardId, definition);
     executeCardImplementationLifecycleEffects(
       cardImplementationRuntimeDeps,
       state,
@@ -483,27 +482,7 @@ export function createHiddenZoneSearchRuntime(
     if (installCost === "normal")
       spendRunnerInstallCredits(state, definition.installCost ?? 0, "program");
     removeFromAllZones(state, cardId);
-    state.runner.rig.programs.push(cardId);
-    state.runner.memoryUsed += definition.memoryCost ?? 0;
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      rezzed: true,
-      zone: { side: "runner", zone: "rig" },
-    };
-    if (shouldLoadLegacyRecurringCredits(definition))
-      setCardCounter(
-        state,
-        cardId,
-        "recurring_credit",
-        definition.recurringCredits ?? 0,
-      );
-    if (
-      definition.mechanics.includes("virus") &&
-      definition.id !== BUTCHER_BOY_ID &&
-      definition.id !== SKIVVISS_ID
-    )
-      addCardCounter(state, cardId, "virus", 1);
+    completeHiddenZoneRunnerProgramInstall(state, cardId, definition);
     executeCardImplementationLifecycleEffects(
       cardImplementationRuntimeDeps,
       state,
@@ -564,7 +543,8 @@ export function createHiddenZoneSearchRuntime(
     const definition = definitionFor(state, cardId);
     if (definition.type !== "program")
       throw new Error(
-        options.typeError ?? "Die temporaere Programminstallation darf nur Programme installieren.",
+        options.typeError ??
+          "Die temporaere Programminstallation darf nur Programme installieren.",
       );
     if (
       (options.checkUnique ?? true) &&
@@ -579,30 +559,11 @@ export function createHiddenZoneSearchRuntime(
       runnerMemoryLimit(state)
     )
       throw new Error(
-        options.memoryError ?? "Nicht genug Memory fuer die temporaere Programminstallation.",
+        options.memoryError ??
+          "Nicht genug Memory fuer die temporaere Programminstallation.",
       );
     removeFromAllZones(state, cardId);
-    state.runner.rig.programs.push(cardId);
-    state.runner.memoryUsed += definition.memoryCost ?? 0;
-    state.cardInstances[cardId] = {
-      ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      rezzed: true,
-      zone: { side: "runner", zone: "rig" },
-    };
-    if (shouldLoadLegacyRecurringCredits(definition))
-      setCardCounter(
-        state,
-        cardId,
-        "recurring_credit",
-        definition.recurringCredits ?? 0,
-      );
-    if (
-      definition.mechanics.includes("virus") &&
-      definition.id !== BUTCHER_BOY_ID &&
-      definition.id !== SKIVVISS_ID
-    )
-      addCardCounter(state, cardId, "virus", 1);
+    completeHiddenZoneRunnerProgramInstall(state, cardId, definition);
     executeCardImplementationLifecycleEffects(
       cardImplementationRuntimeDeps,
       state,

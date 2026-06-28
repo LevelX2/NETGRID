@@ -11,10 +11,6 @@ import {
   type Side,
 } from "@netgrid/shared";
 import {
-  BUTCHER_BOY_ID,
-  SKIVVISS_ID,
-} from "../../compatibility/runtime-compatibility";
-import {
   ABLATIVE_COUNTER_HARDWARE_SOURCE,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
 } from "../../mechanics/damage-prevention";
@@ -28,6 +24,10 @@ import {
   runnerInstallPaymentPublicPayload,
   type RunnerInstallCreditSpendResult,
 } from "./runner-program-install-payment";
+import {
+  completeRunnerProgramRigInstall,
+  type RunnerProgramInstallInstancePatch,
+} from "./runner-rig-install-finalization";
 
 export type InstallCardHost = {
   state: GameState;
@@ -167,7 +167,10 @@ export type InstallCardHost = {
   };
 };
 
-export function installCard(host: InstallCardHost, legalAction: LegalAction): void {
+export function installCard(
+  host: InstallCardHost,
+  legalAction: LegalAction,
+): void {
   const { state } = host;
   const cardId = String(legalAction.payload?.cardId) as CardInstanceId;
   const definition = host.cards.definitionFor(cardId);
@@ -216,7 +219,9 @@ export function installCard(host: InstallCardHost, legalAction: LegalAction): vo
         )
       )
         return;
-      throw new Error("Der Runner kann die Installationskosten nicht bezahlen.");
+      throw new Error(
+        "Der Runner kann die Installationskosten nicht bezahlen.",
+      );
     }
     host.payment.closeRunnerCostPenaltySupportWindowForPayment(
       legalAction,
@@ -256,8 +261,9 @@ function installRunnerCard(
     typeof legalAction.payload?.selectedSubtype === "string"
       ? String(legalAction.payload.selectedSubtype)
       : undefined;
-  const installTargetBinding =
-    cardImplementationForDefinitionId(definition.id)?.installTargetBinding;
+  const installTargetBinding = cardImplementationForDefinitionId(
+    definition.id,
+  )?.installTargetBinding;
   if (definition.type !== "program" && hostOnCardId) {
     throw new Error("Nur Programme koennen gehostet installiert werden.");
   }
@@ -286,7 +292,8 @@ function installRunnerCard(
     );
   }
   if (installTargetBinding?.kind === "choose_installed_ice_on_install") {
-    if (!selectedCardId) throw new Error("Die Installation benötigt ein ICE-Ziel.");
+    if (!selectedCardId)
+      throw new Error("Die Installation benötigt ein ICE-Ziel.");
     const targetInstance = state.cardInstances[selectedCardId];
     if (
       !targetInstance ||
@@ -302,7 +309,9 @@ function installRunnerCard(
       "wall",
     ];
     if (!selectedSubtype || !allowed.includes(selectedSubtype))
-      throw new Error("Die Installation benötigt einen gültigen Icebreaker-Typ.");
+      throw new Error(
+        "Die Installation benötigt einen gültigen Icebreaker-Typ.",
+      );
   }
   validateRunnerInstallCapabilities(host, definition);
   const restrictiveTargetServerId =
@@ -316,8 +325,9 @@ function installRunnerCard(
     host.servers.mustServer(restrictiveTargetServerId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      selectedServerLabel:
-        host.servers.serverChoiceDisplayLabel(restrictiveTargetServerId),
+      selectedServerLabel: host.servers.serverChoiceDisplayLabel(
+        restrictiveTargetServerId,
+      ),
     };
   }
   const concealedHiddenRunnerResource =
@@ -347,7 +357,9 @@ function installRunnerCard(
       specialZoneReason: "agenda_point_cost_card_implementation_install",
     };
   }
-  if (legalAction.payload?.runnerProgramTrashBeforeInstallCostsPrepaid !== true) {
+  if (
+    legalAction.payload?.runnerProgramTrashBeforeInstallCostsPrepaid !== true
+  ) {
     const paymentResult = host.payment.spendRunnerInstallCredits(
       definition.installCost ?? 0,
       definition.type,
@@ -359,10 +371,22 @@ function installRunnerCard(
     };
   }
   host.zones.removeFromAllZones(cardId);
+  let runnerRigInstallFinalized = false;
   if (definition.type === "hardware") {
     installRunnerHardware(host, legalAction, cardId, definition);
   } else if (definition.type === "program") {
-    installRunnerProgram(host, cardId, definition, hostOnCardId);
+    installRunnerProgram(host, cardId, definition, hostOnCardId, {
+      ...(hostOnCardId ? { hostedOn: hostOnCardId } : {}),
+      ...(installTargetBinding?.kind === "choose_installed_ice_on_install" &&
+      selectedCardId
+        ? { selectedCardId }
+        : {}),
+      ...(installTargetBinding?.kind ===
+        "choose_icebreaker_subtype_on_install" && selectedSubtype
+        ? { selectedSubtype }
+        : {}),
+    });
+    runnerRigInstallFinalized = true;
   } else if (definition.type === "resource") {
     installRunnerResource(
       host,
@@ -381,25 +405,17 @@ function installRunnerCard(
       "Nur Programme, Hardware und Resources koennen vom Runner installiert werden.",
     );
   }
-  state.cardInstances[cardId] = {
-    ...host.cards.mustInstance(cardId),
-    faceup: !concealedHiddenRunnerResource,
-    rezzed: !concealedHiddenRunnerResource,
-    zone: { side: "runner", zone: "rig" },
-    ...(hostOnCardId ? { hostedOn: hostOnCardId } : {}),
-    ...(host.runner.requiresDataFortInstallTarget(definition) &&
-    restrictiveTargetServerId
-      ? { selectedServerId: restrictiveTargetServerId }
-      : {}),
-    ...(installTargetBinding?.kind === "choose_installed_ice_on_install" &&
-    selectedCardId
-      ? { selectedCardId }
-      : {}),
-    ...(installTargetBinding?.kind === "choose_icebreaker_subtype_on_install" &&
-    selectedSubtype
-      ? { selectedSubtype }
-      : {}),
-  };
+  if (!runnerRigInstallFinalized)
+    state.cardInstances[cardId] = {
+      ...host.cards.mustInstance(cardId),
+      faceup: !concealedHiddenRunnerResource,
+      rezzed: !concealedHiddenRunnerResource,
+      zone: { side: "runner", zone: "rig" },
+      ...(host.runner.requiresDataFortInstallTarget(definition) &&
+      restrictiveTargetServerId
+        ? { selectedServerId: restrictiveTargetServerId }
+        : {}),
+    };
   host.runner.consumeValuPakProgramInstallAction(legalAction);
   if (host.cards.shouldLoadLegacyRecurringCredits(definition)) {
     legalAction.payload = {
@@ -497,23 +513,20 @@ function installRunnerProgram(
   cardId: CardInstanceId,
   definition: CardDefinition,
   hostOnCardId: CardInstanceId | undefined,
+  instancePatch: RunnerProgramInstallInstancePatch,
 ): void {
-  const { state } = host;
-  state.runner.rig.programs.push(cardId);
-  if (!hostOnCardId) state.runner.memoryUsed += definition.memoryCost ?? 0;
-  if (host.cards.shouldLoadLegacyRecurringCredits(definition))
-    host.counters.setCardCounter(
-      cardId,
-      "recurring_credit",
-      definition.recurringCredits ?? 0,
-    );
-  if (
-    definition.mechanics.includes("virus") &&
-    !cardImplementationForDefinitionId(definition.id)?.virusCounter &&
-    definition.id !== BUTCHER_BOY_ID &&
-    definition.id !== SKIVVISS_ID
-  )
-    host.counters.addCardCounter(cardId, "virus", 1);
+  completeRunnerProgramRigInstall({
+    state: host.state,
+    cardId,
+    definition,
+    usesMemory: !hostOnCardId,
+    mustInstance: host.cards.mustInstance,
+    setCardCounter: host.counters.setCardCounter,
+    addCardCounter: host.counters.addCardCounter,
+    shouldLoadLegacyRecurringCredits:
+      host.cards.shouldLoadLegacyRecurringCredits,
+    instancePatch,
+  });
 }
 
 function installRunnerResource(
@@ -590,7 +603,8 @@ function installCorpCard(
       "In diesem Server darf diese Karte nicht im Root installiert sein.",
     );
   }
-  const rootCapacity = host.servers.corpRootAgendaOrNodeCapacityInServer(server);
+  const rootCapacity =
+    host.servers.corpRootAgendaOrNodeCapacityInServer(server);
   const replacedRootAssetIds =
     definition.type === "agenda" &&
     host.servers.corpRootMainCardIdsInServer(server).length >= rootCapacity
@@ -670,7 +684,10 @@ function appendRootRezOnInstallEffect(
     serverId: server.id,
     serverLabel: server.label,
   };
-  legalAction.resolvedEffects = [...(legalAction.resolvedEffects ?? []), effect];
+  legalAction.resolvedEffects = [
+    ...(legalAction.resolvedEffects ?? []),
+    effect,
+  ];
 }
 
 function applyArmageddonDoomCounterInstallRolls(
