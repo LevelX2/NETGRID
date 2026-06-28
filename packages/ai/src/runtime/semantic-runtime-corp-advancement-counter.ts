@@ -607,16 +607,51 @@ function corpAdvancementLooksLikeTransferSource(text: string): boolean {
 }
 
 function corpAdvancementCreditCashoutValue(text: string): number {
-  const match =
-    /\bgain\s+\[?(\d+)\]?\s+(?:credits?\s+)?(?:for each|per|for every)?/.exec(
-      text,
-    );
-  return match?.[1] ? Number.parseInt(match[1], 10) : 0;
+  const tokens = corpRulesTextTokens(text);
+  for (const [index, token] of tokens.entries()) {
+    if (token !== "gain") continue;
+    const amount = positiveIntegerTokenValue(tokens[index + 1]);
+    if (amount === undefined) continue;
+    const nextToken = tokens[index + 2];
+    if (
+      nextToken === "credit" ||
+      nextToken === "credits" ||
+      corpAdvancementTokensStartCounterScale(tokens, index + 2)
+    ) {
+      return amount;
+    }
+  }
+  return 0;
 }
 
 function corpAdvancementCashoutScalesPerCounter(text: string): boolean {
-  return /for each advancement counter|per advancement counter|for every advancement counter/.test(
-    text,
+  return corpAdvancementTokensIncludeCounterScale(corpRulesTextTokens(text));
+}
+
+function corpAdvancementTokensIncludeCounterScale(
+  tokens: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    corpAdvancementTokensStartCounterScale(tokens, index),
+  );
+}
+
+function corpAdvancementTokensStartCounterScale(
+  tokens: readonly string[],
+  index: number,
+): boolean {
+  const first = tokens[index];
+  const second = tokens[index + 1];
+  const third = tokens[index + 2];
+  const fourth = tokens[index + 3];
+  return (
+    (first === "for" &&
+      (second === "each" || second === "every") &&
+      third === "advancement" &&
+      (fourth === "counter" || fourth === "counters")) ||
+    (first === "per" &&
+      second === "advancement" &&
+      (third === "counter" || third === "counters"))
   );
 }
 

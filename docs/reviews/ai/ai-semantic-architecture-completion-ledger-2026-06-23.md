@@ -8846,6 +8846,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsiebenundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ersetzt den Rules-Text-RegEx für Advancement-Counter-Credit-Cashout durch gebundene Tokens.
+  - Credit-Cashout bleibt für `Gain [4] credits for each advancement counter` wirksam; Suffix-Rauschen wie `creditsish` wird nicht mehr als Credit-Cashout gelesen.
+  - Die Per-Counter-Skalierung nutzt denselben Tokenpfad für `for each`, `for every` und `per advancement counter(s)`.
+  - `semantic-runtime-corp-advancement-counter.test.ts` schützt positive und negative Cashout-Tokenfälle zusätzlich zu den Overadvance-Threshold-Tests.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-advancement-counter.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

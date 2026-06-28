@@ -27,22 +27,58 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
     );
     expect(assessment?.evidence).not.toContain("overadvance_threshold_size:2");
   });
+
+  it("derives advancement-counter credit cashout from bounded rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText(
+      "Gain [4] credits for each advancement counter on this asset.",
+    );
+
+    expect(assessment?.advancementWitness).toBe("counter_cashout_credit");
+    expect(assessment?.evidence).toContain(
+      "advancement_target_class:counter_cashout_credit",
+    );
+  });
+
+  it("ignores credit cashout suffix noise in rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText(
+      "Gain [4] creditsish for each advancement counter on this asset.",
+    );
+
+    expect(assessment?.advancementWitness).toBe("counter_bank_only");
+    expect(assessment?.evidence).not.toContain(
+      "advancement_target_class:counter_cashout_credit",
+    );
+  });
 });
 
 function assessmentForAgendaRulesText(agendaRulesText: string) {
-  const agenda = corpCard("custom-overadvance-agenda", {
+  return assessmentForTargetRulesText(agendaRulesText, {
     advancementCounters: 4,
     advancementRequirement: 3,
     type: "agenda",
   });
+}
+
+function assessmentForAssetRulesText(assetRulesText: string) {
+  return assessmentForTargetRulesText(assetRulesText, {
+    advancementCounters: 2,
+    type: "asset",
+  });
+}
+
+function assessmentForTargetRulesText(
+  targetRulesText: string,
+  targetOverrides: Partial<VisibleCard>,
+) {
+  const target = corpCard("custom-advance-target", targetOverrides);
   const advanceAction = corpAction("advance_card", {
-    cardId: agenda.instanceId,
+    cardId: target.instanceId,
   });
   const placementAction = corpAction("play_operation", {
     cardId: "custom-advancement-distribution",
   });
   const input = corpInput({
-    root: [agenda],
+    root: [target],
     legalActions: [advanceAction],
   });
 
@@ -57,19 +93,19 @@ function assessmentForAgendaRulesText(agendaRulesText: string) {
       normalizedRulesTextForDefinition: (definitionId) =>
         definitionId === "custom-advancement-distribution"
           ? "add one advancement counter to each of up to two installed cards that can be advanced"
-          : agendaRulesText,
+          : targetRulesText,
       actionCreditCost: () => 0,
       actionSourceCard: (_input, action) =>
-        action.actionId === advanceAction.actionId ? agenda : undefined,
+        action.actionId === advanceAction.actionId ? target : undefined,
       visibleServerCard: (_input, cardId) =>
-        cardId === agenda.instanceId
+        cardId === target.instanceId
           ? {
-              card: agenda,
+              card: target,
               server: {
                 id: "remote_1",
                 label: "Remote 1",
                 ice: [],
-                root: [agenda],
+                root: [target],
               },
             }
           : undefined,
