@@ -1,5 +1,6 @@
 import { createAiHintsByCard } from "../ai-hints";
 import { cardRolesForId } from "../runtime/card-role-lookup";
+import { rolesMatch } from "../runtime/role-match";
 import { isRunnerPressureRole } from "../runtime/runner-role-classification";
 import type { CentralServerId } from "../runtime/server-target";
 import { sortedUnique } from "../runtime/collection";
@@ -42,7 +43,7 @@ export function centralPressureTargetsForCard(
   if (roles.includes("archives_pressure")) targets.push("archives");
   if (
     targets.length === 0 &&
-    roles.some((role) => role.includes("multiaccess")) &&
+    rolesMatch(roles, ["multiaccess"]) &&
     [
       "onr_v1_024_expert-schedule-analyzer",
       "onr_v1_041_microtech-ai-interface",

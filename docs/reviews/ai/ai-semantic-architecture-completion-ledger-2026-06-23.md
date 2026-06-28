@@ -7498,6 +7498,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` neunundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/central-pressure-card.ts`, `central-run-pressure-justification.ts`, `no-fresh-central.ts` und `runner-central-pressure-diagnostics.ts` nutzen für zentrale Runner-Pressure-/Multiaccess- und Setup-Search-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `interface_multiaccess` und `program_search` bleiben wirksam; substringartiges Rauschen wie `multiaccessory_noise` und `research_noise` erzeugt keine Multiaccess-/Setup-Search-Diagnostik mehr.
+  - `central-pressure-card.test.ts`, `central-run-pressure-justification.test.ts`, `no-fresh-central.test.ts` und `runner-central-pressure-diagnostics.test.ts` schützen strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/central-pressure-card.test.ts src/simulation/central-run-pressure-justification.test.ts src/simulation/no-fresh-central.test.ts src/simulation/runner-central-pressure-diagnostics.test.ts src/runtime/role-match.test.ts` grün, 5 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
