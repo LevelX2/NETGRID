@@ -207,6 +207,36 @@ describe("DeckCapabilityProfile", () => {
       .toEqual(["local_stored_credits_tool"]);
   });
 
+  it("bounds bank capacity put amounts to exact tokens", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard("capacity-1", "local_capacity_tool", "runner", "resource", {
+        title: "Bank",
+        rulesText: "Put [3] credits on this card.",
+      }),
+      visibleCard("capacity-noise-1", "local_capacity_noise", "runner", "resource", {
+        title: "Bank",
+        rulesText: "Putty [3] credits on this card.",
+      }),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+    });
+
+    const tools = profile.runner?.economyBankTools ?? [];
+    expect(
+      tools.find((tool) => tool.cardId === "local_capacity_tool")
+        ?.maxKnownCapacity,
+    ).toBe(3);
+    expect(
+      tools.find((tool) => tool.cardId === "local_capacity_noise")
+        ?.maxKnownCapacity,
+    ).toBeUndefined();
+  });
+
   it("requires source evidence before marking search tools legal now", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [

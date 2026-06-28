@@ -1171,9 +1171,26 @@ function currentVisibleBankAmount(cards: readonly VisibleCard[]): number | undef
 }
 
 function maxKnownBankCapacity(text: string): Pick<EconomyBankTool, "maxKnownCapacity"> {
-  const match = text.match(/put\s+(?:\[(\d+)\]|(\d+))/i);
-  const value = Number(match?.[1] ?? match?.[2] ?? NaN);
-  return Number.isFinite(value) ? { maxKnownCapacity: value } : {};
+  const tokens = deckCapabilityTextTokens(text);
+  for (const [index, token] of tokens.entries()) {
+    if (token !== "put") continue;
+    const value = positiveIntegerTokenValue(tokens[index + 1]);
+    if (value !== undefined) return { maxKnownCapacity: value };
+  }
+  return {};
+}
+
+function positiveIntegerTokenValue(token: string | undefined): number | undefined {
+  if (!token || !deckCapabilityTokenIsDigits(token)) return undefined;
+  const value = Number.parseInt(token, 10);
+  return value > 0 ? value : undefined;
+}
+
+function deckCapabilityTokenIsDigits(token: string): boolean {
+  for (const character of token) {
+    if (character < "0" || character > "9") return false;
+  }
+  return token.length > 0;
 }
 
 function runtimeNumber(

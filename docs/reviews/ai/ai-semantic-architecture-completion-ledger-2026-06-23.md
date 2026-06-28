@@ -9142,6 +9142,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: spezifischer `rg`-Restcheck auf die ersetzten Corp-Profil-Regexmuster ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertvierundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` ersetzt den Bank-Kapazitätsparser für `put [N]`/`put N` durch gebundene Deck-Capability-Tokens und positive Integer-Prüfung.
+  - Exakte `put`-Tokens bleiben wirksam; Suffix-Rauschen wie `putty [3]` erzeugt keine `maxKnownCapacity` mehr.
+  - Der Parser bleibt reine Deck-/Capability-Diagnostik über sichtbaren Kartentext und erzeugt keine LegalAction-Projektion.
+  - `deck-capabilities.test.ts` schützt positive und negative Kapazitäts-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts` grün, 1 Datei, 16 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "\.test\(|match\(" packages/ai/src/deck-capabilities.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
