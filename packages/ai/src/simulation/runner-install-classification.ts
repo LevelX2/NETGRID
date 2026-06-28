@@ -4,6 +4,7 @@ import {
   isRunnerNonAdditiveUtilityRole,
   isRunnerPressureRole,
 } from "../runtime/runner-role-classification";
+import { rolesMatch } from "../runtime/role-match";
 
 type RunnerInstallClassificationDependencies = {
   sourceDefinitionIdForAction: (
@@ -35,9 +36,7 @@ export function runnerDrawKindForSimulationAction(
     (action.type === "play_event" ||
       action.type === "trigger_ability" ||
       action.type === "activated_card_ability") &&
-    roles.some(
-      (role) => role === "draw" || role === "setup" || role.includes("search"),
-    );
+    rolesMatch(roles, ["draw", "setup", "search"]);
   const searchChoice =
     action.type === "resolve_choice" &&
     input.playerView.pendingChoice !== undefined &&
