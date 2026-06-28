@@ -11,6 +11,7 @@ import {
 import type {
   CorpPunishKind,
 } from "../runtime/corp-tag-punish-types";
+import { rolesMatch } from "../runtime/role-match";
 
 export type CorpTagPunishActionContextDependencies = {
   sourceDefinitionIdForAction: (
@@ -72,7 +73,7 @@ export function createCorpTagPunishActionContext(
     if (scoredAgenda?.kind === "scored_agenda_trace_tag")
       return "scored_agenda_trace_tag_like";
     const roles = dependencies.rolesForAction(input, action);
-    if (roles.includes("tag_punishment")) return "unknown";
+    if (rolesMatch(roles, ["tag_punishment"])) return "unknown";
     return undefined;
   }
 
@@ -85,12 +86,7 @@ export function createCorpTagPunishActionContext(
     const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
     if (scoredAgenda?.kind === "scored_agenda_trace_tag") return true;
     const roles = dependencies.rolesForAction(input, action);
-    return roles.some(
-      (role) =>
-        role.includes("tag_source") ||
-        role.includes("tag_enabler") ||
-        role.includes("trace_tag"),
-    );
+    return rolesMatch(roles, ["tag_source", "tag_enabler", "trace_tag"]);
   }
 
   function isCorpTraceTagSourceAction(
@@ -101,9 +97,7 @@ export function createCorpTagPunishActionContext(
     if (ontology?.isTraceTagSource) return true;
     const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
     if (scoredAgenda?.kind === "scored_agenda_trace_tag") return true;
-    return dependencies
-      .rolesForAction(input, action)
-      .some((role) => role.includes("trace"));
+    return rolesMatch(dependencies.rolesForAction(input, action), ["trace"]);
   }
 
   function corpTagPunishOntologyAssessmentForAction(

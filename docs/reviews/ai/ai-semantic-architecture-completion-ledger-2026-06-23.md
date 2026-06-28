@@ -7435,6 +7435,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-tag-punish-action-context.ts` nutzt für Corp-Tag-/Trace-Source- und Tag-Punishment-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `tag_source`, `trace_tag` und `tag_punishment` bleiben wirksam; substringartiges Rauschen wie `tagalong_source`, `tag_sourceish_noise`, `traceroute_noise` und `tag_punishmentish_noise` erzeugt keine Tag-/Trace-/Punish-Klassifikation mehr.
+  - `corp-tag-punish-action-context.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/corp-tag-punish-action-context.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
