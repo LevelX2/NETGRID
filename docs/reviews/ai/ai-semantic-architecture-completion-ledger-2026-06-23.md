@@ -9118,6 +9118,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: spezifischer `rg`-Restcheck auf die ersetzten Bank-Tool-Regexmuster ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertzweiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` ersetzt die textbasierte Memory-Tool-Erkennung für `memory` und `mu` durch gebundene Deck-Capability-Tokens.
+  - Exakte Memory-Tokens bleiben wirksam; Suffix-Rauschen wie `memoryish` oder `MUish` erzeugt keinen Memory-Tooltreffer mehr.
+  - Die Runtime-Zahlenquelle wird weiterhin berücksichtigt, prüft aber nun das konkrete Feld `memoryLimitBonus` statt das immer vorhandene Rückgabeobjekt.
+  - Die Erkennung bleibt reine Deck-/Capability-Diagnostik über sichtbare Kartendaten und erzeugt keine LegalAction-Projektion.
+  - `deck-capabilities.test.ts` schützt positive und negative Memory-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts` grün, 1 Datei, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: spezifischer `rg`-Restcheck auf den ersetzten Memory-Regex ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

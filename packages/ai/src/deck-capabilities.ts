@@ -788,11 +788,17 @@ function buildMemoryCapabilityProfile(
     memoryUsed !== undefined && memoryLimit !== undefined
       ? Math.max(0, memoryLimit - memoryUsed)
       : undefined;
-  const memoryToolsKnown = records.filter((record) =>
-    record.type === "hardware" &&
-    (/memory|\bmu\b/.test(normalizedRecordText(record)) ||
-      runtimeNumber(record.cardId, "memoryLimitBonus") !== undefined),
-  ).length;
+  const memoryToolsKnown = records.filter((record) => {
+    const runtimeMemoryLimitBonus = runtimeNumber(
+      record.cardId,
+      "memoryLimitBonus",
+    ).memoryLimitBonus;
+    return (
+      record.type === "hardware" &&
+      (deckCapabilityTextHasMemoryToolSignal(normalizedRecordText(record)) ||
+        runtimeMemoryLimitBonus !== undefined)
+    );
+  }).length;
   return {
     ...(memoryUsed !== undefined ? { memoryUsed } : {}),
     ...(memoryLimit !== undefined ? { memoryLimit } : {}),
@@ -1038,6 +1044,13 @@ function deckCapabilityTextHasHighConfidenceBankSignal(text: string): boolean {
     ]) ||
     deckCapabilityTokensIncludePhrase(tokens, ["counter", "bank"])
   );
+}
+
+function deckCapabilityTextHasMemoryToolSignal(text: string): boolean {
+  return deckCapabilityTokensIncludeAny(deckCapabilityTextTokens(text), [
+    "memory",
+    "mu",
+  ]);
 }
 
 function deckCapabilityTokensIncludeInOrder(

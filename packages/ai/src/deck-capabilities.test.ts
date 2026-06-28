@@ -98,6 +98,27 @@ describe("DeckCapabilityProfile", () => {
     });
   });
 
+  it("bounds memory tool text signals to exact tokens", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard("memory-1", "local_memory_tool", "runner", "hardware", {
+        title: "Memory Tool",
+      }),
+      visibleCard("municipal-1", "local_municipal_noise", "runner", "hardware", {
+        title: "Municipal Tool",
+        rulesText: "MUish support.",
+      }),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+    });
+
+    expect(profile.runner?.memoryProfile.memoryToolsKnown).toBe(1);
+  });
+
   it("uses structured hosted-credit payloads and ignores label-only bank actions", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [
