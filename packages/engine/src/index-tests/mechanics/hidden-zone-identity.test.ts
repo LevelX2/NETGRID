@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -525,10 +521,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         expect(definition?.mechanics).toContain("hidden_zone_tool");
       }
     }
-    expect(
-      DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
-        ?.implementationStatus,
-    ).toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]?.implementationStatus).toBe(
+      "playable_mvp",
+    );
   });
 
   it("resolves Forgotten Backup Chip trash search through a private PendingChoice and replay-safe StateHash", () => {
@@ -731,7 +726,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("uses Aujourd'Oui to take paid shown programs from the stack top", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-aujourdhui"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("v1911-aujourdhui"),
+    );
     state.runner.credits = 20;
     installRunnerResourceForTest(state, "onr_v1_151_aujourdoui");
     const eventId = putRunnerCardOnTopOfStack(state, "simple_economy_event");
@@ -751,11 +748,13 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
     expect(
-      runnerChoice?.options.find((option) => option.value === eventId)?.selectable,
+      runnerChoice?.options.find((option) => option.value === eventId)
+        ?.selectable,
     ).toBe(false);
     const selectedOptionIds = [decoderId, fracterId].map(
       (cardId) =>
-        runnerChoice?.options.find((option) => option.value === cardId)?.id ?? "",
+        runnerChoice?.options.find((option) => option.value === cardId)?.id ??
+        "",
     );
     expect(selectedOptionIds.every(Boolean)).toBe(true);
     state = applyChoices(state, "runner", selectedOptionIds);
@@ -788,7 +787,10 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     state.runner.credits = 20;
     installRunnerResourceForTest(state, "onr_v1_169_n-e-t-o");
     const programId = putRunnerCardOnTopOfStack(state, "simple_decoder");
-    const resourceId = putRunnerCardOnTopOfStack(state, "onr_v1_178_short-term-contract");
+    const resourceId = putRunnerCardOnTopOfStack(
+      state,
+      "onr_v1_178_short-term-contract",
+    );
     const prepId = putRunnerCardOnTopOfStack(state, "simple_economy_event");
 
     state = apply(
@@ -800,11 +802,13 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
     expect(
-      runnerChoice?.options.find((option) => option.value === programId)?.selectable,
+      runnerChoice?.options.find((option) => option.value === programId)
+        ?.selectable,
     ).toBe(false);
     const selectedOptionIds = [prepId, resourceId].map(
       (cardId) =>
-        runnerChoice?.options.find((option) => option.value === cardId)?.id ?? "",
+        runnerChoice?.options.find((option) => option.value === cardId)?.id ??
+        "",
     );
     expect(selectedOptionIds.every(Boolean)).toBe(true);
     state = applyChoices(state, "runner", selectedOptionIds);
@@ -843,12 +847,16 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.pendingChoice?.source).toContain(
       "p3_38.stack_or_trash_program_install",
     );
-    expect(getPlayerView(state, "runner").pendingChoice?.stackSearchResolution).toMatchObject({
+    expect(
+      getPlayerView(state, "runner").pendingChoice?.stackSearchResolution,
+    ).toMatchObject({
       reveal: "public",
       destination: "install_program",
       shuffleAfter: true,
     });
-    expect(getPlayerView(state, "runner").pendingChoice?.cardSearchPresentation).toMatchObject({
+    expect(
+      getPlayerView(state, "runner").pendingChoice?.cardSearchPresentation,
+    ).toMatchObject({
       sourceZone: "stack",
       selectableFilter: "program",
       destination: "install_program",
@@ -936,7 +944,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("reorders the last successful fort with Fortress Respecification without exposing concealed ICE", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-fortress-reorder"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("v1911-fortress-reorder"),
+    );
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(
       state,
@@ -949,8 +959,16 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       ice: [],
       root: [],
     });
-    const firstIceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
-    const secondIceId = putCorpIceOnServer(state, "remote_1", "simple_code_gate_ice");
+    const firstIceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "simple_barrier_ice",
+    );
+    const secondIceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "simple_code_gate_ice",
+    );
     state.cardInstances[firstIceId] = {
       ...state.cardInstances[firstIceId]!,
       faceup: false,
@@ -974,18 +992,23 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         action.type === "play_event" &&
         String(action.payload?.cardId) === eventId,
     );
-    expect(state.pendingChoice?.source).toContain("hidden_zone.successful_run_fort_ice_reorder");
+    expect(state.pendingChoice?.source).toContain(
+      "hidden_zone.successful_run_fort_ice_reorder",
+    );
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
-    expect(getPlayerView(state, "runner").pendingChoice?.options.map((option) => option.label)).toEqual([
-      "ICE Position 1",
-      "ICE Position 2",
-    ]);
+    expect(
+      getPlayerView(state, "runner").pendingChoice?.options.map(
+        (option) => option.label,
+      ),
+    ).toEqual(["ICE Position 1", "ICE Position 2"]);
 
-    state = applyChoices(state, "runner", [`card_${secondIceId}`, `card_${firstIceId}`]);
-    expect(state.corp.servers.find((server) => server.id === "remote_1")?.ice).toEqual([
-      secondIceId,
-      firstIceId,
+    state = applyChoices(state, "runner", [
+      `card_${secondIceId}`,
+      `card_${firstIceId}`,
     ]);
+    expect(
+      state.corp.servers.find((server) => server.id === "remote_1")?.ice,
+    ).toEqual([secondIceId, firstIceId]);
     expect(state.cardInstances[firstIceId]?.faceup).toBe(false);
     expect(state.cardInstances[secondIceId]?.faceup).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1000,11 +1023,16 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-installed-helpers"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("v1911-installed-helpers"),
+    );
     state.runner.credits = 20;
     installRunnerResourceForTest(state, "onr_v1_169_n-e-t-o");
     installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
-    const targetEventId = putRunnerCardOnTopOfStack(state, "simple_economy_event");
+    const targetEventId = putRunnerCardOnTopOfStack(
+      state,
+      "simple_economy_event",
+    );
     const searchAction = mustAction(
       state,
       "runner",
@@ -1056,7 +1084,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("uses Aujourd'Oui as a paid top-five program choice and removes the separate top-card reveal action", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-aujourdoui-top5"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("v1911-aujourdoui-top5"),
+    );
     state.runner.credits = 2;
     const aujourdOuiId = installRunnerResourceForTest(
       state,
@@ -1093,9 +1123,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       (action) => action.source === aujourdOuiId,
     );
     expect(aujourdOuiActions).toHaveLength(1);
-    expect(new Set(aujourdOuiActions.map((action) => action.actionId)).size).toBe(
-      aujourdOuiActions.length,
-    );
+    expect(
+      new Set(aujourdOuiActions.map((action) => action.actionId)).size,
+    ).toBe(aujourdOuiActions.length);
     expect(aujourdOuiActions[0]?.type).toBe("activated_card_ability");
     expect(aujourdOuiActions[0]?.payload).toMatchObject({
       cardImplementationAbility: "activated",
@@ -1103,7 +1133,8 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(aujourdOuiActions[0]?.label).toContain("Top 5");
     expect(
       aujourdOuiActions.some(
-        (action) => action.payload?.v1911HiddenZoneAbility === "reveal_stack_top",
+        (action) =>
+          action.payload?.v1911HiddenZoneAbility === "reveal_stack_top",
       ),
     ).toBe(false);
 
@@ -1115,14 +1146,19 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         action.type === "activated_card_ability",
     );
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
-    expect(runnerChoice?.source).toContain("p3_37.look_top_stack_take_matching");
+    expect(runnerChoice?.source).toContain(
+      "p3_37.look_top_stack_take_matching",
+    );
     expect(runnerChoice?.options).toHaveLength(5);
     expect(
-      runnerChoice?.options.some((option) => option.value === outOfRangeProgramId),
+      runnerChoice?.options.some(
+        (option) => option.value === outOfRangeProgramId,
+      ),
     ).toBe(false);
     expect(
-      runnerChoice?.options.find((option) => option.value === displayOnlyEventId)
-        ?.selectable,
+      runnerChoice?.options.find(
+        (option) => option.value === displayOnlyEventId,
+      )?.selectable,
     ).toBe(false);
     expect(runnerChoice?.minSelections).toBe(0);
     expect(runnerChoice?.maxSelections).toBe(2);
@@ -1191,7 +1227,8 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -1204,8 +1241,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       getLegalActions(state, "runner").some(
         (action) =>
           action.type === "activated_card_ability" &&
-          sourceDefinition(state, action) ===
-            "onr_v1_059_self-modifying-code",
+          sourceDefinition(state, action) === "onr_v1_059_self-modifying-code",
       ),
     ).toBe(true);
 
@@ -1222,20 +1258,23 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("resolves Self-Modifying Code as a public reveal, source trash, paid install and deterministic shuffle", () => {
-    let state = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.hiddenZone("v1911-smc-install"),
-    );
+    let state = toRunnerTurn(v181CardReleaseGame("v1911-smc-install-pattel"));
     state.runner.credits = 20;
-    const smcId = installRunnerProgramForTest(
+    const smcId = addInstalledRunnerProgramForTest(
       state,
       "onr_v1_059_self-modifying-code",
+      "smc_install_pattel",
     );
-    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const targetProgramId = putRunnerCardOnTopOfStack(
+      state,
+      "onr_v1_046_pattels-virus",
+    );
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     state = apply(
       state,
@@ -1252,13 +1291,10 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       "runner",
       (action) =>
         action.type === "activated_card_ability" &&
-        sourceDefinition(state, action) ===
-          "onr_v1_059_self-modifying-code",
+        sourceDefinition(state, action) === "onr_v1_059_self-modifying-code",
     );
     expect(state.runner.heap).toContain(smcId);
-    expect(state.pendingChoice?.source).toContain(
-      "p3_38.search_stack_install",
-    );
+    expect(state.pendingChoice?.source).toContain("p3_38.search_stack_install");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(
       getPlayerView(state, "runner").pendingChoice?.stackSearchResolution,
@@ -1275,12 +1311,13 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     state = applyChoice(state, "runner", String(optionId));
     expect(state.runner.rig.programs).toContain(targetProgramId);
     expect(state.runner.stack).not.toContain(targetProgramId);
+    expect(cardCounterAmount(state, targetProgramId, "virus")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       sourceDefinitionId: "onr_v1_059_self-modifying-code",
       hiddenZoneAction: "p3_38_search_stack_install",
-      publicRevealDefinitionId: "simple_decoder",
-      installedProgramDefinitionId: "simple_decoder",
+      publicRevealDefinitionId: "onr_v1_046_pattels-virus",
+      installedProgramDefinitionId: "onr_v1_046_pattels-virus",
       searchDestination: "runner_rig",
       installed: true,
     });
@@ -1313,7 +1350,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       (action) =>
         action.type === "score_agenda" && action.payload?.cardId === agendaId,
     );
-    expect(state.pendingChoice?.source).toContain("scored_agenda.hq_agenda_shuffle_credits");
+    expect(state.pendingChoice?.source).toContain(
+      "scored_agenda.hq_agenda_shuffle_credits",
+    );
     state = applyChoices(state, "corp", [`card_${shownAgendaId}`]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
@@ -1327,11 +1366,15 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.corp.credits).toBe(creditsBefore + 4);
     expect(state.corp.hq).not.toContain(shownAgendaId);
     expect(state.corp.rd).toContain(shownAgendaId);
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(`${shownAgendaId}`);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      `${shownAgendaId}`,
+    );
   });
 
   it("resolves Ice Pick Willie as program trash plus end-the-run without R&D reveal", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-ice-pick-willie"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("v1911-ice-pick-willie"),
+    );
     state.runner.credits = 20;
     state.corp.credits = 20;
     putCorpIceOnServer(state, "rd", "onr_v1_250_ice-pick-willie");
@@ -1380,7 +1423,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("keeps Ice Pick Willie end-the-run stable when no runner program is installed", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ice-pick-willie-no-program"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ice-pick-willie-no-program"),
+    );
     state.runner.credits = 20;
     state.corp.credits = 20;
     for (const programId of state.runner.rig.programs.slice())
@@ -1427,7 +1472,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("opens Secret Spend Compare secret spend privately and resolves replay-safe", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-too-many-doors"));
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("v1911-too-many-doors"),
+    );
     state.runner.credits = 20;
     state.corp.credits = 20;
     putCorpIceOnServer(state, "rd", "onr_v1_272_too-many-doors");
@@ -1462,7 +1509,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
 
     state = applyChoice(state, "corp", "bid_1");
     expect(state.pendingChoice?.side).toBe("runner");
-    expect(getPlayerView(state, "runner").pendingChoice?.options).toHaveLength(3);
+    expect(getPlayerView(state, "runner").pendingChoice?.options).toHaveLength(
+      3,
+    );
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "secretSpendCorp",
     );
