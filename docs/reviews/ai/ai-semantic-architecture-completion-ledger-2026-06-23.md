@@ -7507,6 +7507,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` achtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/remote-trash-role.ts` nutzt für Remote-Trash-Kategorien und finite Pool-Mechaniken den gebundenen `rolesMatch`-Helper statt freier Rollen-/Mechanik-Substring-Prüfungen.
+  - Strukturierte Rollen wie `remote_agenda_protection`, `ice_tax`, `economy_asset`, `tag_punishment`, `access_ambush` und `low_value` bleiben wirksam; substringartiges Rauschen wie `remote_agenda_protectionish_noise`, `nice_tax_noise`, `microeconomy_noise`, `tagalong_noise`, `ambusher_noise` und `slow_value_noise` erzeugt keine Remote-Trash-Kategorie mehr.
+  - `remote-trash-role.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/remote-trash-role.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
