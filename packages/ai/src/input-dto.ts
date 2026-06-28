@@ -805,14 +805,24 @@ function sanitizeChoiceOptionMetadata(
 ): NonNullable<VisibleChoiceRequest["options"][number]["metadata"]> | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
   const metadata = value as Record<string, unknown>;
+  const result: NonNullable<
+    VisibleChoiceRequest["options"][number]["metadata"]
+  > = {};
   const postBidTraceLinkDelta = metadata.postBidTraceLinkDelta;
   if (
-    typeof postBidTraceLinkDelta !== "number" ||
-    !Number.isInteger(postBidTraceLinkDelta) ||
-    postBidTraceLinkDelta <= 0
+    typeof postBidTraceLinkDelta === "number" &&
+    Number.isInteger(postBidTraceLinkDelta) &&
+    postBidTraceLinkDelta > 0
   )
-    return undefined;
-  return { postBidTraceLinkDelta };
+    result.postBidTraceLinkDelta = postBidTraceLinkDelta;
+  const shellTradersRemainingCounters = metadata.shellTradersRemainingCounters;
+  if (
+    typeof shellTradersRemainingCounters === "number" &&
+    Number.isInteger(shellTradersRemainingCounters) &&
+    shellTradersRemainingCounters >= 0
+  )
+    result.shellTradersRemainingCounters = shellTradersRemainingCounters;
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 function sanitizeStringArray(value: unknown): string[] | undefined {

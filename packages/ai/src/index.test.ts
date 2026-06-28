@@ -2660,8 +2660,18 @@ describe("MVP 0.3 AI controller contract", () => {
       prompt: "The Shell Traders: 1 Shell-Counter entfernen",
       kind: "select_cards",
       options: [
-        { id: "card_decoder", label: "Simple Decoder (3)", value: "decoder_1" },
-        { id: "card_fracter", label: "Simple Fracter (1)", value: "fracter_1" },
+        {
+          id: "card_decoder",
+          label: "Simple Decoder (3)",
+          value: "decoder_1",
+          metadata: { shellTradersRemainingCounters: 3 },
+        },
+        {
+          id: "card_fracter",
+          label: "Simple Fracter (1)",
+          value: "fracter_1",
+          metadata: { shellTradersRemainingCounters: 1 },
+        },
       ],
       minSelections: 1,
       maxSelections: 1,

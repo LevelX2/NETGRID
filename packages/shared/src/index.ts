@@ -651,6 +651,7 @@ export type ChoiceOption = {
   selectable?: boolean;
   metadata?: {
     postBidTraceLinkDelta?: number;
+    shellTradersRemainingCounters?: number;
   };
 };
 

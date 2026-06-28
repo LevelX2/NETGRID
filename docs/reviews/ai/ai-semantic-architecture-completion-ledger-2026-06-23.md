@@ -8725,6 +8725,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertfünfzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/shell-traders-choice-option.ts` wählt verpflichtende Shell-Traders-Startzug-Choices über `metadata.shellTradersRemainingCounters` statt über einen Label-Suffix wie `(1)`.
+  - `packages/shared/src/index.ts` und `packages/ai/src/input-dto.ts` führen die neue Choice-Metadaten-Property typisiert und sanitisiert bis in den AI-Input.
+  - Label-Text bleibt reine Darstellung: irreführende Counter-Suffixe werden ignoriert, während strukturierte Counter-Metadaten und der bestehende Program-Bias wirksam bleiben.
+  - `shell-traders-choice-option.test.ts` schützt strukturierte Counter-Auswahl und den negativen Label-only-Grenzfall; die bestehende Shell-Traders-Integration nutzt die neuen Metadaten explizit.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/shell-traders-choice-option.test.ts src/index.test.ts -t "Shell Traders|shell traders choice option"` grün, 2 Dateien, 7 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/shared typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
