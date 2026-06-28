@@ -9419,6 +9419,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihunderteinundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-effective-defense.ts` ersetzt die lokale Effective-Defense-Signal-Term-Prüfung per `segment.includes(...)` durch gebundene `_`-Token- und Tokenfolgenprüfung.
+  - Exakte Signale und zusammengesetzte Defense-Terme wie `trace_ice`, `conditional_end_run`, `encounter_paid_subroutine_add` und `paid_subroutine` bleiben wirksam; Suffix-Rauschen wie `traceroute_noise`, `damaged_goods`, `paid_subroutineish_noise` und `encounter_paid_subroutineish_add` erzeugt keine Stop-/Tax-/Paid-Ability-Defense.
+  - Die Änderung bleibt auf Runtime-Corp-Effective-Defense-Bewertung aus side-sicheren ActionSemanticCandidate-Signalen beschränkt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-effective-defense.test.ts` schützt positive Trace-/Paid-Subroutine-Defense-Fälle und negative Substring-Noise-Fälle; `semantic-runtime-corp-score.test.ts` sichert den Corp-Score-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-effective-defense.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 22 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -136,6 +136,7 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         "taxable_noise",
         "end_runner_noise",
         "paid_subroutineish_noise",
+        "encounter_paid_subroutineish_add",
       ]),
       { actionCreditCost },
     );

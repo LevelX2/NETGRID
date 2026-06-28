@@ -256,10 +256,14 @@ function signalHasTerm(signal: string, term: string): boolean {
 }
 
 function signalSegmentHasTerm(segment: string, term: string): boolean {
-  return (
-    segment === term ||
-    segment.startsWith(`${term}_`) ||
-    segment.endsWith(`_${term}`) ||
-    segment.includes(`_${term}_`)
+  if (segment === term) return true;
+  const tokens = segment.split("_").filter(Boolean);
+  const termTokens = term.split("_").filter(Boolean);
+  if (termTokens.length <= 1) return tokens.includes(term);
+  return tokens.some((token, index) =>
+    token === termTokens[0] &&
+    termTokens.every(
+      (termToken, offset) => tokens[index + offset] === termToken,
+    ),
   );
 }
