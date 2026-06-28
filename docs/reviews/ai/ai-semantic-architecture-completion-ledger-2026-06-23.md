@@ -7480,6 +7480,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` siebenundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-credit-reserve.ts` nutzt für sichtbare Remote-Steal-/Tax-/Protection-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `access_tax` und `scoring_protection` erhöhen weiterhin die Runner-Reserve; substringartiges Rauschen wie `access_taxish_noise` und `scoring_protectionish_noise` hebt den Reserve-Floor nicht mehr an.
+  - `runner-credit-reserve.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-credit-reserve.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
