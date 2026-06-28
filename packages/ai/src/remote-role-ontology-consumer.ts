@@ -5,6 +5,7 @@ import type {
   AiHintStructuredEffect,
   KnownHintRemoteRoleKind,
 } from "./hint-ontology";
+import { rolesMatch } from "./runtime/role-match";
 
 const AI_HINTS = createAiHintsByCard();
 
@@ -128,22 +129,19 @@ export function structuredRemoteRoleConflictWithLegacy(
   legacyRoles: string[],
 ): boolean {
   if (!role) return false;
-  const legacyClaimsScoringProtection = legacyRoles.some(
-    (legacy) =>
-      legacy.includes("scoring") ||
-      legacy.includes("protect_remote") ||
-      legacy.includes("remote_agenda_protection") ||
-      legacy.includes("agenda_steal_tax") ||
-      legacy.includes("remote_upgrade_tax"),
-  );
+  const legacyClaimsScoringProtection = rolesMatch(legacyRoles, [
+    "scoring",
+    "protect_remote",
+    "remote_agenda_protection",
+    "agenda_steal_tax",
+    "remote_upgrade_tax",
+  ]);
   if (
     remoteRoleIsNonScoringProtectionKind(role.kind) &&
     legacyClaimsScoringProtection
   )
     return true;
-  const legacyClaimsEconomy = legacyRoles.some((legacy) =>
-    legacy.includes("economy"),
-  );
+  const legacyClaimsEconomy = rolesMatch(legacyRoles, ["economy"]);
   return role.kind === "run_tax" && legacyClaimsEconomy;
 }
 

@@ -8265,6 +8265,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertvierundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/remote-role-ontology-consumer.ts` erkennt Legacy-Konflikte für Remote-Scoring-Protection- und Economy-Rollen über gebundene `rolesMatch`-Terme statt freier `legacy.includes(...)`-Substring-Prüfungen.
+  - Strukturierte Rollen wie `remote_agenda_protection`, `remote_economy_asset`, `protect_remote` und `agenda_steal_tax` bleiben wirksam; Rauschen wie `scoringish_noise`, `protect_remoteish_noise`, `remote_agenda_protectionish_noise`, `uneconomy_noise` und `economyish_noise` bleibt wirkungslos.
+  - `remote-role-ontology-consumer.test.ts` schützt positive Legacy-Konflikte und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/remote-role-ontology-consumer.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
