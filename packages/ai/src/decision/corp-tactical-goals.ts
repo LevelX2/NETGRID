@@ -229,13 +229,36 @@ function signalSegmentHasTerm(segment: string, term: string): boolean {
 
 function normalizeServerId(value: string | undefined): string | undefined {
   if (!value) return undefined;
-  const normalized = value.toLocaleLowerCase("en-US");
+  const normalized = stripServerPrefix(value.trim().toLocaleLowerCase("en-US"));
   if (normalized === "rnd" || normalized === "r&d") return "rd";
   if (normalized === "archives") return "archives";
   if (normalized === "hq" || normalized === "rd") return normalized;
-  const remoteMatch = /remote[_\s-]*(\d+)/.exec(normalized);
-  if (remoteMatch?.[1]) return `remote_${remoteMatch[1]}`;
+  const remoteId = normalizeRemoteServerId(normalized);
+  if (remoteId) return remoteId;
   return undefined;
+}
+
+function stripServerPrefix(value: string): string {
+  if (value.startsWith("server:")) return value.slice("server:".length);
+  if (value.startsWith("server.")) return value.slice("server.".length);
+  return value;
+}
+
+function normalizeRemoteServerId(value: string): string | undefined {
+  const prefix =
+    value.startsWith("remote_")
+      ? "remote_"
+      : value.startsWith("remote-")
+        ? "remote-"
+        : undefined;
+  if (!prefix) return undefined;
+  const suffix = value.slice(prefix.length);
+  if (suffix.length === 0 || !onlyAsciiDigits(suffix)) return undefined;
+  return `remote_${suffix}`;
+}
+
+function onlyAsciiDigits(value: string): boolean {
+  return [...value].every((character) => character >= "0" && character <= "9");
 }
 
 function dedupeGoals(goals: readonly TacticalGoalLike[]): TacticalGoalLike[] {

@@ -150,6 +150,55 @@ describe("corp tactical goals", () => {
     );
   });
 
+  it("uses exact remote server identifiers without reading free-text remote labels", () => {
+    const frame = frameFor([legalAction("install-remote", "install_card")]);
+    frame.actionCandidates = frame.actionCandidates.map((candidate) => ({
+      ...candidate,
+      semanticActionType: "install.card",
+      targetContext: {
+        selectedTargets: [
+          {
+            targetId: "server:remote-1",
+            targetKind: "server",
+            targetSide: "corp",
+            visibilityScope: "public",
+            evidence: ["server:remote-1"],
+          },
+        ],
+        targetKind: "server",
+        targetZones: ["remote_1"],
+        targetSide: "corp",
+        hiddenInfoPolicy: "engine_provided_targets_only",
+        availableTargetsStatus: "engine_provided",
+        targetProfileMatches: [],
+        targetConstraintResults: [],
+      },
+    }));
+
+    expect(buildCorpTacticalGoals(frame)[0]).toMatchObject({
+      goalId: "corp.tactical.prepare_remote",
+      targetServerId: "remote_1",
+    });
+
+    frame.actionCandidates = frame.actionCandidates.map((candidate) => ({
+      ...candidate,
+      targetContext: {
+        ...candidate.targetContext!,
+        selectedTargets: [
+          {
+            ...candidate.targetContext!.selectedTargets[0]!,
+            targetId: "remote 1",
+            evidence: ["server:remote 1"],
+          },
+        ],
+      },
+    }));
+
+    expect(buildCorpTacticalGoals(frame).map((goal) => goal.goalId)).toEqual([
+      "corp.tactical.turn_flow",
+    ]);
+  });
+
   it("feeds neutral goal synthesis with the explicit Corp goal module", () => {
     const goals = synthesizeNeutralTacticalGoals(
       frameFor([legalAction("score-1", "score_agenda")]),

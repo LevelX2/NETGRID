@@ -8746,6 +8746,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsiebzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/corp-tactical-goals.ts` normalisiert Corp-Tactical-Goal-Serverziele ohne Regex und akzeptiert Remote-IDs nur bei exakter `remote_`- oder `remote-`-Form mit reinen ASCII-Ziffern.
+  - Der frühere Regex `remote[_\s-]*(\d+)` ist entfernt; freie Zieltexte wie `remote 1` erzeugen keine Remote-Preparation-Ziele mehr.
+  - Strukturierte Targets wie `server:remote-1` werden weiterhin zu `remote_1` normalisiert und können Remote-Setup-Ziele erzeugen.
+  - `corp-tactical-goals.test.ts` schützt den positiven exakten Remote-Identifier und den negativen Free-Text-Grenzfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/corp-tactical-goals.test.ts` grün, 1 Datei, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
