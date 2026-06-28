@@ -287,6 +287,13 @@ describe("PracticalTacticOverlay", () => {
       source: "basic_action",
       payload: { accessPayoff: "fresh" },
     });
+    const noisyStructuredRun = action({
+      actionId: "noisy-structured-high-payoff-run",
+      type: "start_run",
+      label: "Run",
+      source: "basic_action",
+      payload: { accessPayoff: "freshness_noise" },
+    });
 
     const labelOnlyDecision = applyPracticalTacticOverlay(
       runnerInput({ legalActions: [labelOnlyRun] }),
@@ -294,6 +301,14 @@ describe("PracticalTacticOverlay", () => {
       { practicalTacticOverlay: { enabled: true } },
     );
     expect(labelOnlyDecision.evidence ?? []).not.toContain(
+      "practical_tactic:runner_high_payoff_run",
+    );
+    const noisyStructuredDecision = applyPracticalTacticOverlay(
+      runnerInput({ legalActions: [noisyStructuredRun] }),
+      frozenDecision("noisy-structured-high-payoff-run"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+    expect(noisyStructuredDecision.evidence ?? []).not.toContain(
       "practical_tactic:runner_high_payoff_run",
     );
 
@@ -382,6 +397,32 @@ describe("PracticalTacticOverlay", () => {
       type: "program",
       subtypes: ["Icebreaker", "Fracter"],
     });
+    const noisyBreaker = visibleCard({
+      instanceId: "visible-fracterish",
+      definitionId: "custom-fracterish",
+      title: "Neutral Tool",
+      type: "program",
+      subtypes: ["Fracterish"],
+    });
+    const noisyDecision = applyPracticalTacticOverlay(
+      runnerInput({
+        gripOrHq: [noisyBreaker],
+        legalActions: [
+          action({
+            actionId: "visible-fracterish-install",
+            type: "install_card",
+            label: "Install Neutral Tool",
+            source: "visible-fracterish",
+          }),
+        ],
+      }),
+      frozenDecision("visible-fracterish-install"),
+      { practicalTacticOverlay: { enabled: true } },
+    );
+    expect(noisyDecision.evidence ?? []).not.toContain(
+      "practical_tactic:runner_install_coverage",
+    );
+
     const input = runnerInput({
       gripOrHq: [visibleBreaker],
       legalActions: [

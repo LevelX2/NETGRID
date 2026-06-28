@@ -253,7 +253,7 @@ function hasBlockedVisibleIcePath(input: AiDecisionInput): boolean {
       (ice) =>
         ice.known &&
         ice.rezzed === true &&
-        /barrier|wall|code gate|codegate|sentry/i.test(cardText(ice)),
+        visibleIceTokensShowBlocker(cardTokens(ice)),
     ),
   );
 }
@@ -276,13 +276,7 @@ function visibleSourceCard(
 }
 
 function looksLikeBreaker(card: VisibleCard): boolean {
-  return /breaker|icebreaker|fracter|decoder|killer/i.test(cardText(card));
-}
-
-function cardText(card: VisibleCard): string {
-  return [card.title, card.definitionId, ...(card.subtypes ?? []), card.rulesText]
-    .filter(Boolean)
-    .join(" ");
+  return cardTokensShowBreaker(cardTokens(card));
 }
 
 function corpActionLooksLikePunish(action: LegalAction): boolean {
@@ -297,12 +291,75 @@ function corpScoreLooksSafe(action: LegalAction): boolean {
 }
 
 function runnerRunLooksHighPayoff(action: LegalAction): boolean {
-  const payloadPayoff = String(action.payload?.accessPayoff ?? "");
-  return /agenda|score_threat|trash_affordable|fresh|access_bonus/i.test(
-    payloadPayoff,
+  return payoffTokensShowHighValue(
+    textTokens([action.payload?.accessPayoff]),
   );
 }
 
 function actionCreditCost(action: LegalAction): number {
   return action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0);
+}
+
+function cardTokens(card: VisibleCard): string[] {
+  return textTokens([
+    card.title,
+    card.definitionId,
+    ...(card.subtypes ?? []),
+    card.rulesText,
+  ]);
+}
+
+function textTokens(values: readonly unknown[]): string[] {
+  return values
+    .filter((value): value is string => typeof value === "string")
+    .flatMap((value) =>
+      value
+        .toLowerCase()
+        .split(/[^a-z0-9]+/)
+        .filter(Boolean),
+    );
+}
+
+function visibleIceTokensShowBlocker(tokens: readonly string[]): boolean {
+  return (
+    tokensIncludeAny(tokens, ["barrier", "wall", "codegate", "sentry"]) ||
+    tokensIncludePhrase(tokens, ["code", "gate"])
+  );
+}
+
+function cardTokensShowBreaker(tokens: readonly string[]): boolean {
+  return (
+    tokensIncludeAny(tokens, [
+      "breaker",
+      "icebreaker",
+      "fracter",
+      "decoder",
+      "killer",
+    ]) || tokensIncludePhrase(tokens, ["ice", "breaker"])
+  );
+}
+
+function payoffTokensShowHighValue(tokens: readonly string[]): boolean {
+  return (
+    tokensIncludeAny(tokens, ["agenda", "fresh"]) ||
+    tokensIncludePhrase(tokens, ["score", "threat"]) ||
+    tokensIncludePhrase(tokens, ["trash", "affordable"]) ||
+    tokensIncludePhrase(tokens, ["access", "bonus"])
+  );
+}
+
+function tokensIncludeAny(
+  tokens: readonly string[],
+  accepted: readonly string[],
+): boolean {
+  return tokens.some((token) => accepted.includes(token));
+}
+
+function tokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
 }

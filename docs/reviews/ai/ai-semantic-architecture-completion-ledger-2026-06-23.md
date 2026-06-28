@@ -8680,6 +8680,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` prüft Practical-Overlay-ICE-Blocker, Runner-Breaker-Source-Cards und High-Payoff-Run-Payloads über gebundene Tokens und Phrasen statt über Regexes auf CardText oder Payload-Strings.
+  - Echte Signale wie `Barrier`, `Code Gate`, `Fracter`, `Icebreaker`, `fresh`, `score_threat`, `trash_affordable` und `access_bonus` bleiben wirksam; Rauschen wie `Fracterish` und `freshness_noise` bleibt wirkungslos.
+  - `practical-tactic-overlay.test.ts` schützt die bestehenden positiven Overlay-Fälle und ergänzt negative Substring-Fälle für High-Payoff-Runs und Coverage-Installs.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-tactic-overlay.test.ts` grün, 1 Datei, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
