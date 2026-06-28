@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import { rolesHaveBreakerRole } from "./breaker-role-match";
 
 export type RunnerLoanFundingNeedDependencies = {
   rolesForCardId: (definitionId: string | undefined) => readonly string[];
@@ -25,7 +26,7 @@ export function runnerLoanCriticalBreakerFundingNeed(
     if (card.known === false || !card.definitionId) return false;
     const roles = dependencies.rolesForCardId(card.definitionId);
     return (
-      roles.some((role) => role.startsWith("breaker_")) &&
+      rolesHaveBreakerRole(roles) &&
       dependencies.cardAddressesVisibleBreakerNeed(input, card) &&
       dependencies.visibleCardPlayOrInstallCost(card) <= creditsAfterLoan
     );

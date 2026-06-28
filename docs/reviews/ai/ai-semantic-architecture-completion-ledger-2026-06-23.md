@@ -8066,6 +8066,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertzweiundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-loan-funding-need.ts` und `runner-loan-spend-candidate.ts` nutzen den gemeinsamen Breaker-Role-Helper statt breiter `startsWith("breaker_")`-/`rolesMatch(..., ["breaker_"])`-Prüfungen.
+  - Strukturierte Rollen wie `support_breaker_fracter` bleiben für Critical-Breaker-Funding und Loan-Spend-Klassifizierung wirksam; substringartiges Rauschen wie `breaker_fracterish_noise` bleibt wirkungslos.
+  - `runner-loan-funding-need.test.ts` und `runner-loan-spend-candidate.test.ts` schützen positive Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-loan-spend-candidate.test.ts src/runtime/runner-loan-funding-need.test.ts src/runtime/runner-install-score.test.ts src/runtime/role-match.test.ts` grün, 4 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
