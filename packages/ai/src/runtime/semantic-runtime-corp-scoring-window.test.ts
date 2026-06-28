@@ -1,9 +1,11 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import {
-  semanticRuntimeCorpScoringWindowAssessment,
-} from "./semantic-runtime-corp-scoring-window";
+import { semanticRuntimeCorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 
 describe("semanticRuntimeCorpScoringWindowAssessment", () => {
   it("allows an unprotected remote scoreline when the score completes before runner exposure", () => {
@@ -11,9 +13,14 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       advancementCounters: 2,
       advancementRequirement: 3,
     });
-    const action = corpAction("advance-score-now", "advance_card", {
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "advance-score-now",
+      "advance_card",
+      {
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -36,11 +43,16 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("treats a one-ice remote as temporarily safe when no installed visible coverage can break it", () => {
     const agenda = agendaCard("agenda-in-hq");
-    const action = corpAction("install-agenda", "install_card", {
-      cardType: "agenda",
-      placement: "root",
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -64,18 +76,25 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("treats unmodeled generic remote ice as temporary only when no breaker is installed", () => {
     const agenda = agendaCard("agenda-in-hq");
-    const action = corpAction("advance-generic-protected-agenda", "advance_card", {
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "advance-generic-protected-agenda",
+      "advance_card",
+      {
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
         ownCredits: 5,
         hq: [agenda],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [genericIce("remote-protection-ice")], [
-            agenda,
-          ]),
+          remoteServer(
+            "remote_1",
+            [genericIce("remote-protection-ice")],
+            [agenda],
+          ),
         ]),
       }),
       action,
@@ -93,11 +112,16 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("marks the same one-ice remote unsafe when visible coverage and credits can access it", () => {
     const agenda = agendaCard("agenda-in-hq");
-    const action = corpAction("install-agenda", "install_card", {
-      cardType: "agenda",
-      placement: "root",
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -122,11 +146,16 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("counts visible recurring run credits as runner contest resources", () => {
     const agenda = agendaCard("agenda-in-hq");
-    const action = corpAction("install-agenda", "install_card", {
-      cardType: "agenda",
-      placement: "root",
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -145,9 +174,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       windowKind: "unsafe",
       runnerCanContestNow: true,
     });
-    expect(assessment?.evidence).toContain(
-      "visible_runner_contest_credits:5",
-    );
+    expect(assessment?.evidence).toContain("visible_runner_contest_credits:5");
   });
 
   it("marks non-immediate scorelines unsafe when runner can fund access before the next score chance", () => {
@@ -155,9 +182,14 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       advancementCounters: 1,
       advancementRequirement: 4,
     });
-    const action = corpAction("advance-remote-agenda", "advance_card", {
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "advance-remote-agenda",
+      "advance_card",
+      {
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -165,9 +197,11 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         runnerCredits: 2,
         runnerRig: [simpleFracter("runner-fracter")],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [
-            wallIce("remote-wall", { rezzed: true, rezCost: 0 }),
-          ], [agenda]),
+          remoteServer(
+            "remote_1",
+            [wallIce("remote-wall", { rezzed: true, rezCost: 0 })],
+            [agenda],
+          ),
         ]),
       }),
       action,
@@ -197,10 +231,15 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       advancementRequirement: 4,
     });
     const iceToInstall = wallIce("second-remote-wall", { rezCost: 2 });
-    const action = corpAction("install-second-remote-ice", "install_card", {
-      placement: "ice",
-      serverId: "remote_1",
-    }, iceToInstall.instanceId);
+    const action = corpAction(
+      "install-second-remote-ice",
+      "install_card",
+      {
+        placement: "ice",
+        serverId: "remote_1",
+      },
+      iceToInstall.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -209,9 +248,11 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         runnerRig: [simpleFracter("runner-fracter")],
         hq: [iceToInstall],
         servers: protectedCentralServers([
-          remoteServer("remote_1", [
-            wallIce("remote-wall", { rezzed: true, rezCost: 0 }),
-          ], [agenda]),
+          remoteServer(
+            "remote_1",
+            [wallIce("remote-wall", { rezzed: true, rezCost: 0 })],
+            [agenda],
+          ),
         ]),
       }),
       action,
@@ -226,11 +267,16 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("lets acute HQ pressure override a temporary remote score window", () => {
     const agenda = agendaCard("agenda-in-hq");
-    const action = corpAction("install-agenda", "install_card", {
-      cardType: "agenda",
-      placement: "root",
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -254,11 +300,16 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("lets acute R&D run history override a temporary remote score window", () => {
     const agenda = agendaCard("agenda-in-hq");
-    const action = corpAction("install-agenda", "install_card", {
-      cardType: "agenda",
-      placement: "root",
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -284,13 +335,55 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment?.evidence).toContain("central_pressure:true");
   });
 
+  it("counts label-only R&D run history as acute central pressure", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        hq: [agenda],
+        eventTail: [
+          publicLabelEvent("rd-label-run-1", "start_run", "R&D"),
+          publicLabelEvent("rd-label-access-1", "access_card", "R&D"),
+        ],
+        servers: [
+          centralServer("hq", [centralIce("hq-ice")]),
+          centralServer("rd", []),
+          remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 3 })]),
+        ],
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      missingVisibleBreakerCoverage: true,
+    });
+    expect(assessment?.evidence).toContain("central_pressure:true");
+  });
+
   it("does not treat an empty R&D with credits alone as acute central pressure", () => {
     const agenda = agendaCard("agenda-in-hq");
-    const action = corpAction("install-agenda", "install_card", {
-      cardType: "agenda",
-      placement: "root",
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -315,11 +408,16 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("classifies multiple affordable relevant ice as a durable scoring remote", () => {
     const agenda = agendaCard("agenda-in-hq");
-    const action = corpAction("install-agenda", "install_card", {
-      cardType: "agenda",
-      placement: "root",
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -344,11 +442,16 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("prefers funding when the Corp cannot pay the relevant remote rez", () => {
     const agenda = agendaCard("agenda-in-hq");
-    const action = corpAction("install-agenda", "install_card", {
-      cardType: "agenda",
-      placement: "root",
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -370,11 +473,16 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("does not call multiple unaffordable ice durable", () => {
     const agenda = agendaCard("agenda-in-hq");
-    const action = corpAction("install-agenda", "install_card", {
-      cardType: "agenda",
-      placement: "root",
-      serverId: "remote_1",
-    }, agenda.instanceId);
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -397,13 +505,131 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     });
   });
 
+  it("does not use cheap irrelevant ice as the remote rez floor", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 2,
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            blankIce("blank-remote-ice", { rezCost: 0 }),
+            wallIce("relevant-remote-wall", { rezCost: 5 }),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      corpCanRezRelevantIce: false,
+      recommendedNextStep: "gain_credit",
+    });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_relevant_ice_count:1",
+        "remote_affordable_relevant_ice_count:0",
+        "remote_rez_budget:min_relevant_rez_cost:5",
+      ]),
+    );
+  });
+
+  it("does not promote solo position-scaling ICE to durable protection", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [dogPileIce("solo-dog-pile")]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "temporary_safe",
+      corpCanRezRelevantIce: true,
+    });
+    expect(assessment?.windowKind).not.toBe("durable");
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_relevant_ice_count:1",
+        "remote_durable_relevant_ice_count:0",
+        "remote_weak_position_scaling_ice_count:1",
+      ]),
+    );
+  });
+
+  it("marks solo Dog Pile unsafe when visible killer coverage and credits can access", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 6,
+        runnerRig: [simpleKiller("runner-killer")],
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [dogPileIce("solo-dog-pile")]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      runnerCanReachAccessNow: true,
+      agendaStealRelevantNow: true,
+      runnerCanContestNow: true,
+    });
+  });
+
   it("does not give generic remote-ice build value when a scoring remote already works", () => {
     const agenda = agendaCard("agenda-in-hq");
     const iceToInstall = wallIce("new-remote-wall", { rezCost: 2 });
-    const action = corpAction("install-remote-2-ice", "install_card", {
-      placement: "ice",
-      serverId: "remote_2",
-    }, iceToInstall.instanceId);
+    const action = corpAction(
+      "install-remote-2-ice",
+      "install_card",
+      {
+        placement: "ice",
+        serverId: "remote_2",
+      },
+      iceToInstall.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -425,10 +651,15 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
 
   it("does not create remote-ice spam without agenda pressure or a scoreline", () => {
     const iceToInstall = wallIce("new-remote-wall", { rezCost: 2 });
-    const action = corpAction("install-remote-ice", "install_card", {
-      placement: "ice",
-      serverId: "remote_1",
-    }, iceToInstall.instanceId);
+    const action = corpAction(
+      "install-remote-ice",
+      "install_card",
+      {
+        placement: "ice",
+        serverId: "remote_1",
+      },
+      iceToInstall.instanceId,
+    );
 
     const assessment = assess(
       corpInput({
@@ -498,6 +729,26 @@ function publicEvent(
       actor: "runner",
       actionType,
       serverId,
+    },
+  };
+}
+
+function publicLabelEvent(
+  eventId: string,
+  actionType: "start_run" | "access_card",
+  serverLabel: "HQ" | "R&D",
+): AiDecisionInput["eventTail"][number] {
+  return {
+    eventId,
+    type: actionType,
+    stateVersionBefore: 1,
+    stateVersionAfter: 2,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload: {
+      actor: "runner",
+      actionType,
+      serverLabel,
     },
   };
 }
@@ -589,7 +840,45 @@ function genericIce(instanceId: string): VisibleCard {
   } as VisibleCard;
 }
 
-function simpleFracter(instanceId: string, recurringRunCredits = 0): VisibleCard {
+function blankIce(
+  instanceId: string,
+  overrides: Partial<VisibleCard> = {},
+): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "ice",
+    definitionId: "blank_remote_ice",
+    rezzed: false,
+    rezCost: 0,
+    owner: "corp",
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "blank_remote_ice",
+      effectiveStrength: 0,
+      subroutines: [],
+    },
+    ...overrides,
+  } as unknown as VisibleCard;
+}
+
+function dogPileIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "ice",
+    definitionId: "onr_proteus_021_dog-pile",
+    subtypes: ["Sentry"],
+    rezzed: false,
+    rezCost: 2,
+    owner: "corp",
+  } as VisibleCard;
+}
+
+function simpleFracter(
+  instanceId: string,
+  recurringRunCredits = 0,
+): VisibleCard {
   return {
     instanceId,
     known: true,
@@ -615,6 +904,17 @@ function simpleFracter(instanceId: string, recurringRunCredits = 0): VisibleCard
           ],
         }
       : {}),
+  } as VisibleCard;
+}
+
+function simpleKiller(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "program",
+    definitionId: "simple_killer",
+    subtypes: ["Icebreaker", "Killer"],
+    owner: "runner",
   } as VisibleCard;
 }
 
@@ -654,8 +954,7 @@ function testDependencies() {
       return (
         source?.type === "agenda" &&
         typeof source.advancementRequirement === "number" &&
-        (source.advancementCounters ?? 0) + 1 >=
-          source.advancementRequirement
+        (source.advancementCounters ?? 0) + 1 >= source.advancementRequirement
       );
     },
     remoteHasScoreLine: (

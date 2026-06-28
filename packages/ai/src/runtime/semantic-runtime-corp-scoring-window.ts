@@ -4,14 +4,19 @@ import {
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
-import { RUNTIME_CARDS } from "../ai-hints";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
+import {
+  assessKnownRezzedIcePath,
+  endTheRunSubroutineCount,
+} from "../visible-run-analysis";
 
 type CorpServerLike = {
   id: string;
   ice: readonly VisibleCard[];
   root: readonly VisibleCard[];
 };
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type CorpScoringWindowKind =
   | "none"
@@ -108,11 +113,7 @@ export function semanticRuntimeCorpScoringWindowAssessment<
     server,
     dependencies,
   );
-  const scoreHorizon = scoringWindowHorizon(
-    input,
-    action,
-    dependencies,
-  );
+  const scoreHorizon = scoringWindowHorizon(input, action, dependencies);
   const creditsAfterAction =
     input.playerView.own.credits - dependencies.actionCreditCost(action);
   const rezBudget = scoringWindowRezBudget(
@@ -206,6 +207,10 @@ export function semanticRuntimeCorpScoringWindowAssessment<
       `corp_can_rez_full_path:${rezBudget.corpCanRezFullPath}`,
       `remote_effective_ice_count:${access.effectiveIceCount}`,
       `remote_affordable_ice_count:${rezBudget.affordableIceCount}`,
+      `remote_relevant_ice_count:${rezBudget.relevantIceCount}`,
+      `remote_affordable_relevant_ice_count:${rezBudget.affordableRelevantIceCount}`,
+      `remote_durable_relevant_ice_count:${rezBudget.durableRelevantIceCount}`,
+      `remote_weak_position_scaling_ice_count:${rezBudget.weakPositionScalingIceCount}`,
       `visible_runner_contest_credits:${access.visibleRunnerContestCredits}`,
       `visible_runner_exposure_contest_credits:${exposureAccess.visibleRunnerContestCredits}`,
       `central_pressure:${centralPressure}`,
@@ -272,10 +277,7 @@ function scoringWindowAccessAssessment(
   const visibleRunnerBaseContestCredits =
     input.playerView.opponent.credits +
     visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? []);
-  const visibleRunnerExtraCredits = Math.max(
-    0,
-    Math.floor(extraRunnerCredits),
-  );
+  const visibleRunnerExtraCredits = Math.max(0, Math.floor(extraRunnerCredits));
   const visibleRunnerContestCredits =
     visibleRunnerBaseContestCredits + visibleRunnerExtraCredits;
   const visibleRunnerIcebreakerCount = visibleRunnerInstalledIcebreakerCount(
@@ -379,6 +381,11 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
   corpCanRezRelevantIce: boolean;
   corpCanRezFullPath: boolean;
   affordableIceCount: number;
+  relevantIceCount: number;
+  affordableRelevantIceCount: number;
+  durableRelevantIceCount: number;
+  affordableDurableRelevantIceCount: number;
+  weakPositionScalingIceCount: number;
   evidence: string[];
 } {
   if (!server || server.ice.length === 0) {
@@ -386,6 +393,11 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
       corpCanRezRelevantIce: false,
       corpCanRezFullPath: false,
       affordableIceCount: 0,
+      relevantIceCount: 0,
+      affordableRelevantIceCount: 0,
+      durableRelevantIceCount: 0,
+      affordableDurableRelevantIceCount: 0,
+      weakPositionScalingIceCount: 0,
       evidence: ["remote_rez_budget:no_ice"],
     };
   }
@@ -394,21 +406,160 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
       ? 0
       : Math.max(0, dependencies.visibleIceRezCost(ice) ?? 2),
   );
+  const qualities = server.ice.map((ice, iceIndex) =>
+    scoringWindowIceQuality(server, ice, iceIndex),
+  );
+  const relevantRezCosts = rezCosts.filter(
+    (_cost, index) => qualities[index]?.relevant === true,
+  );
+  const durableRelevantRezCosts = rezCosts.filter(
+    (_cost, index) => qualities[index]?.durableRelevant === true,
+  );
+  const relevantIceCount = relevantRezCosts.length;
+  const durableRelevantIceCount = durableRelevantRezCosts.length;
   const affordableIceCount = rezCosts.filter(
     (cost) => cost <= Math.max(0, creditsAfterAction),
   ).length;
-  const minimumRezCost = Math.min(...rezCosts);
-  const totalRezCost = rezCosts.reduce((sum, cost) => sum + cost, 0);
+  const affordableRelevantIceCount = relevantRezCosts.filter(
+    (cost) => cost <= Math.max(0, creditsAfterAction),
+  ).length;
+  const affordableDurableRelevantIceCount = durableRelevantRezCosts.filter(
+    (cost) => cost <= Math.max(0, creditsAfterAction),
+  ).length;
+  const weakPositionScalingIceCount = qualities.filter(
+    (quality) => quality.weakPositionScaling,
+  ).length;
+  const minimumRezCost =
+    relevantRezCosts.length > 0 ? Math.min(...relevantRezCosts) : Infinity;
+  const totalRezCost = relevantRezCosts.reduce((sum, cost) => sum + cost, 0);
   return {
-    corpCanRezRelevantIce: creditsAfterAction >= minimumRezCost,
-    corpCanRezFullPath: creditsAfterAction >= totalRezCost,
+    corpCanRezRelevantIce:
+      relevantRezCosts.length > 0 && creditsAfterAction >= minimumRezCost,
+    corpCanRezFullPath:
+      relevantRezCosts.length > 0 && creditsAfterAction >= totalRezCost,
     affordableIceCount,
+    relevantIceCount,
+    affordableRelevantIceCount,
+    durableRelevantIceCount,
+    affordableDurableRelevantIceCount,
+    weakPositionScalingIceCount,
     evidence: [
       `remote_rez_budget:credits_after_action:${creditsAfterAction}`,
-      `remote_rez_budget:min_rez_cost:${minimumRezCost}`,
-      `remote_rez_budget:full_path_rez_cost:${totalRezCost}`,
+      `remote_rez_budget:min_relevant_rez_cost:${Number.isFinite(minimumRezCost) ? minimumRezCost : "none"}`,
+      `remote_rez_budget:full_relevant_path_rez_cost:${totalRezCost}`,
+      `remote_rez_budget:relevant_ice_count:${relevantIceCount}`,
+      `remote_rez_budget:affordable_relevant_ice_count:${affordableRelevantIceCount}`,
+      `remote_rez_budget:durable_relevant_ice_count:${durableRelevantIceCount}`,
+      `remote_rez_budget:weak_position_scaling_ice_count:${weakPositionScalingIceCount}`,
     ],
   };
+}
+
+function scoringWindowIceQuality(
+  server: CorpServerLike,
+  ice: VisibleCard,
+  iceIndex: number,
+): {
+  relevant: boolean;
+  durableRelevant: boolean;
+  weakPositionScaling: boolean;
+} {
+  const relevant = iceHasPotentialScoringProtection(ice);
+  const weakPositionScaling =
+    relevant && iceHasUnsupportedPositionScaling(server, ice, iceIndex);
+  return {
+    relevant,
+    durableRelevant: relevant && !weakPositionScaling,
+    weakPositionScaling,
+  };
+}
+
+function iceHasPotentialScoringProtection(ice: VisibleCard): boolean {
+  const quoteSubroutines = ice.effectiveRunQuote?.subroutines ?? [];
+  if (
+    quoteSubroutines.some((subroutine) =>
+      [
+        "end_the_run",
+        "end_the_run_unless_runner_pays",
+        "set_run_future_end_the_run_subroutine",
+        "set_runner_run_lock_actions",
+        "do_damage",
+        "trash_installed_program",
+        "trash_installed_program_unless_runner_pays",
+        "initiate_trace",
+      ].includes(subroutine.type),
+    )
+  ) {
+    return true;
+  }
+  if (ice.definitionId && endTheRunSubroutineCount(ice.definitionId) > 0) {
+    return true;
+  }
+  const signals = scoringWindowCardSignals(ice);
+  if (
+    signals.some((signal) =>
+      scoringWindowSignalMatches(signal, [
+        "etr_ice",
+        "end_run",
+        "run_lock",
+        "tax",
+        "damage_ice",
+        "trace",
+        "program_trash",
+        "hardware_trash",
+      ]),
+    )
+  ) {
+    return true;
+  }
+  return !iceHasModeledRunImpact(ice);
+}
+
+function iceHasUnsupportedPositionScaling(
+  server: CorpServerLike,
+  ice: VisibleCard,
+  iceIndex: number,
+): boolean {
+  const signals = scoringWindowCardSignals(ice);
+  const positionScaling = signals.some((signal) =>
+    scoringWindowSignalMatches(signal, [
+      "corp_ice.outer_ice_scaling",
+      "corp_ice.position_scaling",
+    ]),
+  );
+  if (!positionScaling) return false;
+  return server.ice.slice(iceIndex + 1).length === 0;
+}
+
+function scoringWindowCardSignals(card: VisibleCard): string[] {
+  const hint = card.definitionId
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
+    : undefined;
+  return [
+    ...(hint?.roles ?? []),
+    ...(hint?.planRoles ?? []),
+    ...((hint as { tacticSignals?: readonly string[] } | undefined)
+      ?.tacticSignals ?? []),
+  ];
+}
+
+function scoringWindowSignalMatches(
+  signal: string,
+  needles: readonly string[],
+): boolean {
+  const normalized = signal.toLocaleLowerCase("en-US");
+  return needles.some((needle) => {
+    const normalizedNeedle = needle.toLocaleLowerCase("en-US");
+    return (
+      normalized === normalizedNeedle ||
+      normalized.startsWith(`${normalizedNeedle}_`) ||
+      normalized.endsWith(`_${normalizedNeedle}`) ||
+      normalized.includes(`_${normalizedNeedle}_`) ||
+      normalized.startsWith(`${normalizedNeedle}.`) ||
+      normalized.endsWith(`.${normalizedNeedle}`) ||
+      normalized.includes(`.${normalizedNeedle}.`)
+    );
+  });
 }
 
 function scoringWindowKind(params: {
@@ -449,6 +600,8 @@ function scoringWindowKind(params: {
   if (
     params.projectedServer.ice.length >= 2 &&
     params.access.unmodeledIceCount === 0 &&
+    params.rezBudget.durableRelevantIceCount >= 2 &&
+    params.rezBudget.affordableDurableRelevantIceCount >= 2 &&
     params.rezBudget.corpCanRezFullPath &&
     !params.exposureAccess.runnerCanReachAccessNow
   ) {
@@ -483,6 +636,7 @@ function scoringWindowKind(params: {
     params.action.type === "install_card" &&
     params.action.payload?.placement === "ice" &&
     params.hasScorePressure &&
+    params.rezBudget.affordableRelevantIceCount > 0 &&
     params.existingWindow !== "durable" &&
     params.existingWindow !== "temporary_safe"
   ) {
@@ -510,7 +664,10 @@ function scoringWindowRecommendedNextStep(params: {
   runnerCanContestBeforeScore: boolean;
   centralPressure: boolean;
 }): CorpScoringWindowNextStep {
-  if (params.windowKind === "durable" && params.action.type === "score_agenda") {
+  if (
+    params.windowKind === "durable" &&
+    params.action.type === "score_agenda"
+  ) {
     return "score";
   }
   if (
@@ -629,7 +786,8 @@ function semanticRuntimeCorpCentralPressure(input: AiDecisionInput): boolean {
         visibleRunnerCentralMultiaccess(input, "hq"))) ||
     (rdInsufficientlyProtected &&
       runnerCredits >= 4 &&
-      (rdRunOrAccessEvents >= 2 || visibleRunnerCentralMultiaccess(input, "rd")))
+      (rdRunOrAccessEvents >= 2 ||
+        visibleRunnerCentralMultiaccess(input, "rd")))
   );
 }
 
@@ -644,25 +802,38 @@ function centralRunOrAccessEventCount(
   );
   return [...eventsById.values()].filter((event) => {
     const payload = event.publicPayload;
-    const actor =
-      typeof payload.actor === "string" ? payload.actor : undefined;
+    const actor = typeof payload.actor === "string" ? payload.actor : undefined;
     const actionType =
       typeof payload.actionType === "string" ? payload.actionType : event.type;
     return (
       actor === "runner" &&
       (actionType === "start_run" || actionType === "access_card") &&
-      normalizedCentralServerId(
-        typeof payload.serverId === "string" ? payload.serverId : undefined,
-      ) === serverId
+      normalizedCentralServerIdFromPayload(payload) === serverId
     );
   }).length;
 }
 
-function normalizedCentralServerId(value: string | undefined): "hq" | "rd" | undefined {
+function normalizedCentralServerIdFromPayload(
+  payload: Record<string, unknown>,
+): "hq" | "rd" | undefined {
+  return normalizedCentralServerId(
+    typeof payload.serverId === "string"
+      ? payload.serverId
+      : typeof payload.serverLabel === "string"
+        ? payload.serverLabel
+        : typeof payload.serverName === "string"
+          ? payload.serverName
+          : undefined,
+  );
+}
+
+function normalizedCentralServerId(
+  value: string | undefined,
+): "hq" | "rd" | undefined {
   if (!value) return undefined;
   const normalized = value.toLocaleLowerCase("en-US");
   if (normalized === "hq") return "hq";
-  if (normalized === "rd") return "rd";
+  if (normalized === "rd" || normalized === "r&d") return "rd";
   return undefined;
 }
 

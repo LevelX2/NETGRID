@@ -126,9 +126,8 @@ export function semanticRuntimeCorpInstallRemoteScore<
   }
 
   if (targetIsScoreLine) {
-    const scoreWindowValue = semanticRuntimeCorpScoreLineWindowValue(
-      scoringWindow,
-    );
+    const scoreWindowValue =
+      semanticRuntimeCorpScoreLineWindowValue(scoringWindow);
     if (scoreWindowValue !== 0) return scoreWindowValue;
     if (protectedRemote) return 950;
     return hasStabilizingAlternative ? -2700 : -1700;
@@ -152,7 +151,10 @@ function semanticRuntimeCorpCentralIceInstallScore<
   const sourceCard = dependencies.actionSourceCard(input, action);
   const profile = semanticRuntimeCorpCentralIceProfile(sourceCard);
   const firstCentralIce = (server?.ice.length ?? 0) === 0;
-  const centralThreat = semanticRuntimeCorpCentralInstallThreat(input, serverId);
+  const centralThreat = semanticRuntimeCorpCentralInstallThreat(
+    input,
+    serverId,
+  );
 
   if (profile.hasAccessStop) {
     if (centralThreat) return firstCentralIce ? 1350 : 950;
@@ -166,18 +168,20 @@ function semanticRuntimeCorpCentralIceInstallScore<
   return firstCentralIce ? 450 : 250;
 }
 
-function semanticRuntimeCorpCentralIceProfile(
-  card: VisibleCard | undefined,
-): { hasAccessStop: boolean; hasTaxOrDamage: boolean } {
+function semanticRuntimeCorpCentralIceProfile(card: VisibleCard | undefined): {
+  hasAccessStop: boolean;
+  hasTaxOrDamage: boolean;
+} {
   const definitionId = card?.definitionId;
-  const runtimeDefinition = definitionId ? RUNTIME_CARDS[definitionId] : undefined;
-  const demoDefinition =
-    definitionId
-      ? (DEMO_CARDS_BY_ID[definitionId] ??
-        (runtimeDefinition?.engineCardId
-          ? DEMO_CARDS_BY_ID[runtimeDefinition.engineCardId]
-          : undefined))
-      : undefined;
+  const runtimeDefinition = definitionId
+    ? RUNTIME_CARDS[definitionId]
+    : undefined;
+  const demoDefinition = definitionId
+    ? (DEMO_CARDS_BY_ID[definitionId] ??
+      (runtimeDefinition?.engineCardId
+        ? DEMO_CARDS_BY_ID[runtimeDefinition.engineCardId]
+        : undefined))
+    : undefined;
   const hint = definitionId ? AI_HINTS_BY_CARD.get(definitionId) : undefined;
   const visibleSubroutines = [
     ...(card?.effectiveRunQuote?.subroutines ?? []),
@@ -203,8 +207,8 @@ function semanticRuntimeCorpCentralIceProfile(
     hint?.roles.some((role) =>
       roleMatchesAny(role, ["etr_ice", "end_run", "run_lock"]),
     ) === true ||
-    hint?.effects?.some((effect) =>
-      effect.kind === "etr" || effect.kind === "run_lock",
+    hint?.effects?.some(
+      (effect) => effect.kind === "etr" || effect.kind === "run_lock",
     ) === true;
   const hasStructuredTaxOrDamage = visibleSubroutines.some((subroutine) =>
     [
@@ -270,18 +274,30 @@ function semanticRuntimeCorpCentralRunOrAccessEventCount(
   );
   return [...eventsById.values()].filter((event) => {
     const payload = event.publicPayload;
-    const actor =
-      typeof payload.actor === "string" ? payload.actor : undefined;
+    const actor = typeof payload.actor === "string" ? payload.actor : undefined;
     const actionType =
       typeof payload.actionType === "string" ? payload.actionType : event.type;
     return (
       actor === "runner" &&
       (actionType === "start_run" || actionType === "access_card") &&
-      semanticRuntimeCorpNormalizedCentralServerId(
-        typeof payload.serverId === "string" ? payload.serverId : undefined,
-      ) === serverId
+      semanticRuntimeCorpNormalizedCentralServerIdFromPayload(payload) ===
+        serverId
     );
   }).length;
+}
+
+function semanticRuntimeCorpNormalizedCentralServerIdFromPayload(
+  payload: Record<string, unknown>,
+): "hq" | "rd" | undefined {
+  return semanticRuntimeCorpNormalizedCentralServerId(
+    typeof payload.serverId === "string"
+      ? payload.serverId
+      : typeof payload.serverLabel === "string"
+        ? payload.serverLabel
+        : typeof payload.serverName === "string"
+          ? payload.serverName
+          : undefined,
+  );
 }
 
 function semanticRuntimeCorpNormalizedCentralServerId(
@@ -290,7 +306,7 @@ function semanticRuntimeCorpNormalizedCentralServerId(
   if (!value) return undefined;
   const normalized = value.toLocaleLowerCase("en-US");
   if (normalized === "hq") return "hq";
-  if (normalized === "rd") return "rd";
+  if (normalized === "rd" || normalized === "r&d") return "rd";
   return undefined;
 }
 
@@ -336,7 +352,9 @@ export function semanticRuntimeCorpShouldBuildProtectedScoreRemote<
   );
 }
 
-function semanticRuntimeCorpRemoteActionCreditCost<TServer extends CorpServerLike>(
+function semanticRuntimeCorpRemoteActionCreditCost<
+  TServer extends CorpServerLike,
+>(
   dependencies: SemanticRuntimeCorpRemoteScoreDependencies<TServer>,
   action: LegalAction,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
@@ -369,9 +387,8 @@ export function semanticRuntimeCorpAdvanceRemoteScore<
     action,
     dependencies,
   );
-  const scoreWindowValue = semanticRuntimeCorpScoreLineWindowValue(
-    scoringWindow,
-  );
+  const scoreWindowValue =
+    semanticRuntimeCorpScoreLineWindowValue(scoringWindow);
   if (scoreWindowValue !== 0) return scoreWindowValue;
   if (dependencies.remoteIsProtected(server)) return 900;
   return dependencies.hasStabilizingAlternative(input, action) ? -2700 : -1700;
