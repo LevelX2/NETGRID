@@ -8238,6 +8238,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hunderteinundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-install-classification.ts` erkennt Runner-Breaker-Installationsrollen über gebundene `rolesMatch(["breaker_"])`-Prefixrollen statt direkter `role.startsWith("breaker_")`-Prüfungen.
+  - Strukturierte Rollen wie `breaker_fracter`, `breaker_decoder` und `breaker_killer` bleiben wirksam; Rauschen wie `breakerish_fracter`, `breakerish_decoder`, `breakerish_killer` sowie nicht vorher erfasste `support_breaker_*`-Rollen bleiben wirkungslos.
+  - `runner-install-classification.test.ts` schützt Rig-Install-, installierbare-Breaker- und Low-Value-Duplicate-Klassifikation gegen Prefix-Noise.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-install-classification.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
