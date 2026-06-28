@@ -17,6 +17,8 @@ describe("shell traders role scoring", () => {
         2,
       ),
     ).toBe(20);
+    expect(shellTradersTargetValue(["support_breaker_fracter"], 0)).toBe(105);
+    expect(shellTradersTargetValue(["breaker_fracterish_noise"], 0)).toBe(0);
   });
 
   it("matches direct install urgency roles by bounded role terms", () => {
@@ -32,6 +34,30 @@ describe("shell traders role scoring", () => {
       shellTradersDirectInstallUrgency(
         input(),
         ["memoryish_noise", "build_rigish_noise", "tempoish_noise"],
+        action(),
+        new Set(),
+      ),
+    ).toBe(45);
+    expect(
+      shellTradersDirectInstallUrgency(
+        input(),
+        ["support_breaker_fracter"],
+        action(),
+        new Set(),
+      ),
+    ).toBe(190);
+    expect(
+      shellTradersDirectInstallUrgency(
+        input(),
+        ["support_breaker_fracter"],
+        action(),
+        new Set(["breaker_fracter"]),
+      ),
+    ).toBe(45);
+    expect(
+      shellTradersDirectInstallUrgency(
+        input(),
+        ["breaker_fracterish_noise"],
         action(),
         new Set(),
       ),

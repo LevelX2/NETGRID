@@ -1,5 +1,6 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 import { actionCreditCost } from "./action-cost";
+import { rolesHaveUnmatchedBreakerRole } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 
 export function shellTradersDirectInstallUrgency(
@@ -11,11 +12,7 @@ export function shellTradersDirectInstallUrgency(
   const remainingCredits =
     input.playerView.own.credits - actionCreditCost(directInstall);
   let urgency = 0;
-  if (
-    roles.some(
-      (role) => role.startsWith("breaker_") && !installedRigRoles.has(role),
-    )
-  )
+  if (rolesHaveUnmatchedBreakerRole(roles, installedRigRoles))
     urgency += 145;
   const memoryRemaining =
     (input.playerView.own.memoryLimit ?? 0) -

@@ -1,4 +1,5 @@
 import { type LegalAction } from "@netgrid/shared";
+import { rolesHaveBreakerRole } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 
 export function shellTradersTargetValue(
@@ -6,7 +7,7 @@ export function shellTradersTargetValue(
   shellCounters: number,
 ): number {
   let value = 0;
-  if (roles.some((role) => role.startsWith("breaker_"))) value += 105;
+  if (rolesHaveBreakerRole(roles)) value += 105;
   if (rolesMatch(roles, ["memory", "memory_support"])) value += 55;
   if (rolesMatch(roles, ["setup", "build_rig"])) value += 45;
   if (rolesMatch(roles, ["economy", "tempo"])) value += 20;
