@@ -8562,6 +8562,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsiebenundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-legal-coverage-answers.ts` klassifiziert Recovery-Antworten ausschließlich über strukturierte Recovery-Target-Definitionen statt über Regex auf Source-Kartentext wie `recovery|trash|heap|junkyard|bbs`.
+  - Strukturierte Target-Definitionen wie `targetCardDefinitionId` und sichtbare Recovery-Target-Karten bleiben wirksam; label- oder source-text-only Recovery-Rauschen bleibt wirkungslos.
+  - `tactical-plan-legal-coverage-answers.test.ts` schützt strukturierte Recovery-Ziele und negative Label-/Substring-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-legal-coverage-answers.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

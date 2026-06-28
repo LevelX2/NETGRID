@@ -66,20 +66,10 @@ function coverageAnswerRoleForLegalAction(
     action.type === "activated_card_ability"
   ) {
     const targetDefinitionId = recoveryTargetDefinitionId(input, action);
-    const sourceText = [
-      sourceCard?.title,
-      sourceCard?.definitionId,
-      sourceCard?.rulesText,
-    ].filter(Boolean).join(" ").toLowerCase();
-    if (
-      /recovery|trash|heap|junkyard|bbs/.test(sourceText) ||
-      targetDefinitionId !== undefined
-    ) {
-      const targetRole = targetDefinitionId
-        ? cardDefinitionPlanRoleForCoverageSearch(targetDefinitionId)
-        : "unknown";
+    if (targetDefinitionId !== undefined) {
+      const targetRole =
+        cardDefinitionPlanRoleForCoverageSearch(targetDefinitionId);
       if (
-        targetDefinitionId !== undefined &&
         cardDefinitionProvidesBreakerCoverage(targetDefinitionId, requiredCoverage)
       ) return "recovery_answer";
       if (coveragePlanRoleMatches(targetRole, ["search", "draw"])) {
