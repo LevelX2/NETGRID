@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { rolesMatch } from "../runtime/role-match";
 
 const SHORT_TERM_CONTRACT_CARD_ID = "onr_v1_178_short-term-contract";
 const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
@@ -188,22 +189,13 @@ export function runnerEconomySetupActionClass(
   );
   const handSizeSupport =
     isMramHandSize ||
-    roles.some(
-      (role) =>
-        role.includes("hand_size") ||
-        role.includes("damage_resilience") ||
-        role.includes("damage_prevention"),
-    ) ||
-    mechanics.some(
-      (mechanic: string) =>
-        mechanic.includes("hand") || mechanic.includes("damage_prevention"),
-    );
+    rolesMatch(roles, ["hand_size", "damage_resilience", "damage_prevention"]) ||
+    rolesMatch(mechanics, ["hand", "damage_prevention"]);
   const memoryHardware =
     !handSizeSupport &&
     action.type === "install_card" &&
-    (roles.includes("memory") ||
-      roles.includes("memory_support") ||
-      mechanics.some((mechanic: string) => mechanic.includes("memory")));
+    (rolesMatch(roles, ["memory", "memory_support"]) ||
+      rolesMatch(mechanics, ["memory"]));
   return {
     economy,
     burstEconomy: economy && action.type === "play_event",
@@ -215,21 +207,15 @@ export function runnerEconomySetupActionClass(
     finitePoolEconomy:
       economy &&
       (isShortTermContract ||
-        roles.some(
-          (role) => role.includes("finite") || role.includes("pool"),
-        ) ||
-        mechanics.some(
-          (mechanic: string) =>
-            mechanic.includes("counter") ||
-            mechanic.includes("resource_action"),
-        )),
+        rolesMatch(roles, ["finite", "pool"]) ||
+        rolesMatch(mechanics, ["counter", "resource_action"])),
     loanDebtEconomy:
       economy &&
       (isLoanFromChiba ||
-        roles.some((role) => role.includes("loan") || role.includes("debt"))),
+        rolesMatch(roles, ["loan", "debt"])),
     recurringEconomy:
       economy &&
-      roles.some((role) => role.includes("recurring") || role.includes("drip")),
+      rolesMatch(roles, ["recurring", "drip"]),
     resourceEconomy: economy && definition?.type === "resource",
     hardwareEconomy: economy && definition?.type === "hardware",
     memoryHardware,
@@ -239,19 +225,11 @@ export function runnerEconomySetupActionClass(
     downsideEconomy:
       economy &&
       (isLoanFromChiba ||
-        roles.some(
-          (role) =>
-            role.includes("risk") ||
-            role.includes("downside") ||
-            role.includes("penalty") ||
-            role.includes("tag"),
-        )),
+        rolesMatch(roles, ["risk", "downside", "penalty", "tag"])),
     delayedPenaltyEconomy:
       economy &&
       (isLoanFromChiba ||
-        roles.some(
-          (role) => role.includes("delayed") || role.includes("penalty"),
-        )),
+        rolesMatch(roles, ["delayed", "penalty"])),
   };
 }
 

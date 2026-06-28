@@ -7471,6 +7471,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` sechsundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-economy-setup-types.ts` nutzt für Runner-Economy-Setup-Unterklassen den gebundenen `rolesMatch`-Helper statt freier Rollen-/Mechanik-Substring-Prüfungen.
+  - Strukturierte Rollen wie `finite_economy_pool`, `loan_debt` und `tag_risk` bleiben wirksam; substringartiges Rauschen wie `infinite_noise`, `poolish_noise`, `loaner_noise`, `tagalong_noise` und `damaged_goods` erzeugt keine Finite-/Loan-/Downside-/Handsize-Klassifikation mehr.
+  - `runner-economy-setup-types.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-economy-setup-types.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
