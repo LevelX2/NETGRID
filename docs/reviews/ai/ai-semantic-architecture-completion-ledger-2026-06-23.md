@@ -7669,6 +7669,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` achtundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für `repeated_known_no_payoff_remote` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `remote_memory_payoff:known_low_value` bleiben wirksam; substringartiges Rauschen wie `known_low_valueish` erzeugt keinen No-Payoff-Remote-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

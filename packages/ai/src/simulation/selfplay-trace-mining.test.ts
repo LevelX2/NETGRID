@@ -108,6 +108,30 @@ describe("SelfplayTraceMining", () => {
     expect(isSelfplayTraceRedactionSafe(findings)).toBe(true);
   });
 
+  it("bounds repeated no-payoff remote signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-remote-positive",
+        targetServerId: "remote_1",
+        evidence: ["remote_memory_payoff:known_low_value"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-remote-noise",
+        targetServerId: "remote_1",
+        evidence: ["remote_memory_payoff:known_low_valueish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["repeated_known_no_payoff_remote"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("run-remote-positive");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),

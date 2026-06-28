@@ -703,6 +703,25 @@ function entryHasLowDeltaSignal(text: string): boolean {
   );
 }
 
+function selfplayEntryHasStructuredSignal(
+  entry: AiSimulationSummary["actionSequence"][number],
+  needles: readonly string[],
+): boolean {
+  const normalizedNeedles = new Set(
+    needles.map((needle) => needle.toLocaleLowerCase("en-US")),
+  );
+  return [
+    entry.reasonCode,
+    ...(entry.evidence ?? []),
+    ...(entry.debugFacts ?? []),
+    ...(entry.qualityTags ?? []),
+  ].some((rawValue) => {
+    const value = rawValue.toLocaleLowerCase("en-US");
+    if (normalizedNeedles.has(value)) return true;
+    return value.split(":").some((segment) => normalizedNeedles.has(segment));
+  });
+}
+
 function actionLimitSetupOrEconomyEntry(
   entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
@@ -935,8 +954,10 @@ function selfplayEntryDetectorFindings(
     (entry.runnerRepeatRunOnKnownUnpayableRemotePath === true ||
       entry.runnerRunPenalizedAsKnownNoAccess === true ||
       entry.remoteRunSuppressedByKnownLowValueRemote === true ||
-      text.includes("known_no_current_payoff") ||
-      text.includes("known_low_value"))
+      selfplayEntryHasStructuredSignal(entry, [
+        "known_no_current_payoff",
+        "known_low_value",
+      ]))
   ) {
     findings.push(
       selfplayEntryFinding(
