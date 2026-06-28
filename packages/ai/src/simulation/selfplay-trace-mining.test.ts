@@ -410,6 +410,30 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("setup-mismatch-positive");
   });
 
+  it("bounds run plan-mismatch funding and reserve explanations to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "gain_credit", {
+        selectedActionId: "run-mismatch-positive",
+        planKind: "runner.run_pressure",
+        debugFacts: ["funding_need:true", "reserve:run_cost"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "gain_credit", {
+        selectedActionId: "run-mismatch-noise",
+        planKind: "runner.run_pressure",
+        debugFacts: ["funding_need:trueish_noise", "reserve_noise"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["plan_step_action_mismatch"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("run-mismatch-noise");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),

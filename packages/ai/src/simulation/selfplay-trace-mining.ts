@@ -1452,8 +1452,7 @@ function selfplayPlanActionMismatch(
     entry.actionType !== "access_card" &&
     entry.actionType !== "trash_accessed_card" &&
     entry.actionType !== "steal_agenda" &&
-    !text.includes("funding_need:true") &&
-    !text.includes("reserve") &&
+    !selfplayEntryHasFundingOrReserveExplanation(entry) &&
     !selfplayPlanMismatchHasKnownExplanation(entry)
   )
     return true;
@@ -1473,6 +1472,19 @@ function selfplayPlanActionMismatch(
   )
     return true;
   return false;
+}
+
+function selfplayEntryHasFundingOrReserveExplanation(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  return selfplayEntryHasStructuredSignal(entry, [
+    "activeFundingNeed:true",
+    "funding_need:true",
+    "fundingNeed:true",
+    "credit_base_funding_need:true",
+    "runner_economy_funding_need:true",
+    "reserve",
+  ]);
 }
 
 function selfplaySemanticOverrideSuspicious(
