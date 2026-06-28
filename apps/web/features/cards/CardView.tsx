@@ -79,6 +79,7 @@ export function CardView({
   inactiveZone,
   forceCardBack,
   choiceSelected = false,
+  allowTooltipPinOnSelect = false,
   choiceShortcut,
   discardShortcut,
   onFocus,
@@ -109,6 +110,7 @@ export function CardView({
   inactiveZone?: InactiveCardZone;
   forceCardBack?: Side;
   choiceSelected?: boolean;
+  allowTooltipPinOnSelect?: boolean;
   choiceShortcut?: CardChoiceShortcut;
   discardShortcut?: { selected: boolean; disabled: boolean; onToggle(): void };
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
@@ -160,7 +162,7 @@ export function CardView({
   const showImageTooltip = tooltipMode === "image" && Boolean(tooltipImageUrl);
   const hasTooltipTextContent = Boolean(card.title) || detailLines.length > 0 || hasRulesLines;
   const tooltipAvailable = card.known && !showCardActions && (showImageTooltip || hasTooltipTextContent);
-  const canPinTooltip = tooltipAvailable && !onSelect;
+  const canPinTooltip = tooltipAvailable && (!onSelect || allowTooltipPinOnSelect);
   const tooltipEnabled = tooltipAvailable && (!suppressCardTooltip || tooltipPinnedVisible);
   const showTooltip = tooltipEnabled && (tooltipHoverVisible || tooltipFocusVisible || tooltipPinnedVisible);
   const tooltipDomId = `${card.instanceId}-${tooltipViewId}`.replace(/[^A-Za-z0-9_-]/g, "-");
