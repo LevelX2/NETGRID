@@ -1,6 +1,6 @@
 # Runner-Install-Finalizer-Prozess
 
-Status: in Umsetzung
+Status: verifiziert vor lokaler Integration
 Quelle/Vorgabe: Nutzerfreigabe vom 2026-06-28 nach Architekturreview zur redundanten Runner-Programminstallation, insbesondere `The Shell Traders` plus `Pattel's Virus`.
 
 ## Zielprüfung
@@ -16,6 +16,14 @@ Die Vorgabe ist ausreichend präzise für automatische Umsetzung.
 ## Gesamtziel
 
 Der Prozess führt einen gemeinsamen Runner-Rig-Install-Abschlussbaustein ein und stellt alle relevanten Spezialpfade darauf um. Der konkrete Screenshot-Bug muss danach unmöglich sein: `Pattel's Virus` darf beim Installieren über `The Shell Traders` keinen generischen `virus`-Counter auf sich selbst erhalten. Gleichzeitig müssen echte Install-Virus-Karten wie `v099_virus_program` ihren Install-Counter behalten.
+
+## Ergebnisstand
+
+- RIF-00: Prozessartefakt angelegt und committed mit `1295ea6d docs(engine): plan runner install finalizer process`.
+- RIF-01/RIF-02: Regression für `The Shell Traders` plus `Pattel's Virus`, gemeinsames Predicate `shouldAddGenericInstallVirusCounter`, gemeinsamer Finalizer `completeRunnerProgramRigInstall` und Normalinstall-Umstellung committed mit `2c3ec142 refactor(engine): centralize runner program install finalization`.
+- RIF-03: Hidden-Zone-Search-, Hidden-Zone-Nonsearch-, Hosting- und Temporary-Credit-Programminstallpfade auf den gemeinsamen Finalizer umgestellt und SMC/Pattel-Regression ergänzt mit `e0811a16 refactor(engine): reuse runner install finalizer in hidden paths`.
+- Lifecycle-Grenze: Der neue Helper finalisiert Runner-Programm-State in der Rig inklusive MU, CardInstance-Zone, Recurring Credits und generischem Install-Virus-Counter. `on_install`-Lifecycle-Aufrufe bleiben in den Pfaden, die sie vorher bereits explizit ausgeführt haben; `The Shell Traders` erhält in diesem Paket keine neue Lifecycle-/Timing-Erweiterung.
+- Abschlusschecks vor diesem RIF-04-Dokumentationscommit: `corepack pnpm --filter @netgrid/engine typecheck`, `corepack pnpm --filter @netgrid/engine test -- runner-special-trigger-execution`, `corepack pnpm --filter @netgrid/engine test -- hidden-zone-identity`, `corepack pnpm --filter @netgrid/engine test -- install-card`, `corepack pnpm format:changed`, `git diff --check`.
 
 ## Annahmen
 
