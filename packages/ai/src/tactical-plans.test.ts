@@ -2020,6 +2020,81 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("maps remote hardening into the score-window plan when runner can fund access before score", () => {
+    const advance = legalAction(
+      "advance-agenda",
+      "corp",
+      "advance_card",
+      { serverId: "remote_1" },
+      { source: "agenda-1" },
+    );
+    const installIce = legalAction(
+      "install-remote-ice",
+      "corp",
+      "install_card",
+      { placement: "ice", serverId: "remote_1" },
+      { source: "remote-ice-2" },
+    );
+    const input = aiInput("corp", [advance, installIce]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.gripOrHq = [
+      visibleCard("remote-ice-2", "corp", "ice", {
+        definitionId: "simple_barrier_ice",
+        subtypes: ["Barrier"],
+      }),
+    ];
+    input.playerView.opponent.credits = 2;
+    input.playerView.opponent.rig = [
+      visibleCard("runner-fracter", "runner", "program", {
+        definitionId: "simple_fracter",
+        subtypes: ["Icebreaker", "Fracter"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-ice-1", "corp", "ice", {
+          definitionId: "simple_barrier_ice",
+          rezzed: true,
+          subtypes: ["Barrier"],
+        }),
+      ], [
+        visibleCard("agenda-1", "corp", "agenda", {
+          advancementCounters: 1,
+          advancementRequirement: 4,
+        }),
+      ]),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const scorePlan = plans.find(
+      (plan) => plan.type === "corp.create_score_window",
+    );
+    const mapping =
+      scorePlan &&
+      mapPlanStepToLegalActions(
+        scorePlan,
+        scorePlan.currentStep,
+        [candidateForAction(advance), candidateForAction(installIce)],
+        input,
+      );
+
+    expect(scorePlan?.status).toBe("blocked");
+    expect(scorePlan?.currentStep.kind).toBe("protect_remote");
+    expect(scorePlan?.blockers.map((blocker) => blocker.kind)).toEqual(
+      expect.arrayContaining(["score_window_contestable"]),
+    );
+    expect(JSON.stringify(scorePlan)).toContain(
+      "runner_visible_exposure_contest_credits:5",
+    );
+    expect(mapping && mapping.status).toBe("matched");
+    expect(mapping && mapping.legalActions.map((action) => action.actionId)).toEqual([
+      "install-remote-ice",
+    ]);
+  });
+
   it("isolates tactical plan memory by decision context", () => {
     resetTacticalPlanMemory();
     const draw = legalAction("draw", "runner", "draw_card");
