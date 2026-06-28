@@ -139,6 +139,19 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
       />
     );
   }
+  if (display.id === "variable_paid_etr_subroutines") {
+    return (
+      <CounterHelpTooltipTrigger
+        className="variableSubroutineBadge"
+        ariaLabel={display.ariaLabel}
+        data-testid="variable-subroutine-badge"
+        tooltip={counterDisplayTooltipText(display)}
+      >
+        <SubroutineIcon />
+        <span>{amount}</span>
+      </CounterHelpTooltipTrigger>
+    );
+  }
   const className =
     display.displayKind === "shell"
       ? "shellCounterBadge"

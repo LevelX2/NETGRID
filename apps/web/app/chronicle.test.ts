@@ -224,7 +224,38 @@ describe("formatChronicleEvent", () => {
           secretGuessAmount: 4,
         },
         targets: {
-          socialEngineeringGuessCorrect: false,
+          secretSpendGuessRunGuessCorrect: false,
+        },
+      }),
+      "corp",
+    );
+    const correctGuess = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_111_social-engineering",
+        hiddenZoneBarrier: true,
+        amounts: {
+          secretHiddenAmountRevealed: 3,
+          secretGuessAmount: 3,
+        },
+        targets: {
+          secretSpendGuessRunGuessCorrect: true,
+        },
+      }),
+      "corp",
+    );
+    const noIceTarget = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_111_social-engineering",
+        hiddenZoneBarrier: true,
+        amounts: {
+          secretHiddenAmountRevealed: 2,
+          secretGuessAmount: 4,
+        },
+        targets: {
+          secretSpendGuessRunGuessCorrect: false,
+          secretSpendGuessRunNoIceTarget: true,
         },
       }),
       "corp",
@@ -241,7 +272,7 @@ describe("formatChronicleEvent", () => {
         chosenIcePosition: 0,
       },
       targets: {
-        socialEngineeringGuessCorrect: false,
+        secretSpendGuessRunGuessCorrect: false,
         autoPassChosenIce: true,
       },
     });
@@ -269,6 +300,36 @@ describe("formatChronicleEvent", () => {
         "Runner 3",
         "Korp 4",
         "Zielwahl",
+      ]),
+    );
+    expect(correctGuess.title).toBe(
+      "Social Engineering: Korp hat richtig geraten; Runner verliert 3 Credits.",
+    );
+    expect(correctGuess.description).toBe(
+      "Runner versteckte 3 Credits; die Korp riet 3 Credits.",
+    );
+    expect(correctGuess.chips).toEqual(
+      expect.arrayContaining([
+        "Social Engineering",
+        "Guess richtig",
+        "Runner 3",
+        "Korp 3",
+        "-3 Credits",
+      ]),
+    );
+    expect(noIceTarget.title).toBe(
+      "Social Engineering: Korp hat falsch geraten; kein ICE-Ziel verfügbar.",
+    );
+    expect(noIceTarget.description).toBe(
+      "Runner versteckte 2 Credits; die Korp riet 4 Credits. Es gibt kein installiertes ICE, das für den Auto-Pass gewählt werden kann.",
+    );
+    expect(noIceTarget.chips).toEqual(
+      expect.arrayContaining([
+        "Social Engineering",
+        "Guess falsch",
+        "Runner 2",
+        "Korp 4",
+        "Kein ICE",
       ]),
     );
     expect(targetChoice.title).toBe(

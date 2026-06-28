@@ -352,6 +352,9 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
         (action) =>
           action.type === "start_run" && action.payload?.serverId === "rd",
       );
+      expect(
+        JSON.stringify(getPlayerView(state, "runner")),
+      ).not.toContain("variable_paid_etr_subroutines");
       const rezAction = mustAction(
         state,
         "corp",
@@ -633,6 +636,30 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
         variableRezAdditionalCost: 4,
         effectiveSubroutineCountAfterRez: 2,
       });
+      const runnerIceView = getPlayerView(state, "runner")
+        .servers.flatMap((server) => server.ice)
+        .find((card) => card.instanceId === iceId);
+      const variableSubroutineDisplay = runnerIceView?.counterDisplays?.find(
+        (display) => display.id === "variable_paid_etr_subroutines",
+      );
+      expect(variableSubroutineDisplay).toMatchObject({
+        id: "variable_paid_etr_subroutines",
+        amount: 2,
+        displayKind: "generic_counter",
+        label: "End-the-run-Subroutinen",
+        usageHint: "status_marker",
+      });
+      expect(variableSubroutineDisplay?.ariaLabel).toContain(
+        "2 End-the-run-Subroutinen",
+      );
+      expect(variableSubroutineDisplay?.ariaLabel).toContain(
+        "4 zusätzliche Credits beim Rezzen",
+      );
+      expect(variableSubroutineDisplay?.ariaLabel).toContain(
+        iceDefinitionId === "onr_proteus_024_gatekeeper"
+          ? "7 Credits insgesamt"
+          : "8 Credits insgesamt",
+      );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
