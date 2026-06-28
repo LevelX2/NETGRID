@@ -1,4 +1,5 @@
 import { type LegalAction } from "@netgrid/shared";
+import { rolesMatch } from "./role-match";
 
 export function shellTradersTargetValue(
   roles: string[],
@@ -6,9 +7,9 @@ export function shellTradersTargetValue(
 ): number {
   let value = 0;
   if (roles.some((role) => role.startsWith("breaker_"))) value += 105;
-  if (roles.includes("memory") || roles.includes("memory_support")) value += 55;
-  if (roles.includes("setup") || roles.includes("build_rig")) value += 45;
-  if (roles.includes("economy") || roles.includes("tempo")) value += 20;
+  if (rolesMatch(roles, ["memory", "memory_support"])) value += 55;
+  if (rolesMatch(roles, ["setup", "build_rig"])) value += 45;
+  if (rolesMatch(roles, ["economy", "tempo"])) value += 20;
   value += Math.min(60, Math.max(0, shellCounters) * 10);
   return value;
 }

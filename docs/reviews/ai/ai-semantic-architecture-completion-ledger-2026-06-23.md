@@ -7885,6 +7885,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertzweiundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/shell-traders-action.ts` und `packages/ai/src/runtime/shell-traders-urgency.ts` nutzen für Shell-Traders-Zielwert- und Direktinstallationsrollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-Prüfungen.
+  - Strukturierte Rollen wie `support_memory`, `build_rig`, `runner_economy` und `tempo` bleiben wirksam; substringartiges Rauschen wie `memoryish_noise`, `build_rigish_noise` und `tempoish_noise` beeinflusst die Shell-Traders-Bewertung nicht mehr.
+  - `shell-traders-action.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/shell-traders-action.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
