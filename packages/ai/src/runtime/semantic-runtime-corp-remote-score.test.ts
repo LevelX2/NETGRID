@@ -26,6 +26,8 @@ describe("semanticRuntimeCorpShouldBuildProtectedScoreRemote", () => {
         remoteHasScoreLine: () => false,
         actionCreditCost: () => 99,
         advanceCompletesScore: () => false,
+        visibleIceRezCost: (card) => card.rezCost,
+        actionSourceCard: () => undefined,
       },
       candidate,
     );

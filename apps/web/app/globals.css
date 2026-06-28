@@ -5408,8 +5408,8 @@ select {
 }
 
 .corpHqServer {
-  flex: 1 1 760px;
-  width: auto;
+  flex: 0 1 auto;
+  width: fit-content;
   min-width: 0;
   max-width: 100%;
 }
@@ -5424,7 +5424,15 @@ select {
 .corpHqServer .serverLayout,
 .corpHqServer .serverBody {
   min-width: 0;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.server[data-server-id="archives"]:has(.archivesDualStack) .serverLayout,
+.server[data-server-id="archives"]:has(.archivesDualStack) .serverBody {
+  min-width: 0;
+  width: fit-content;
+  max-width: 100%;
 }
 
 .serverCounterStrip {
@@ -5485,13 +5493,14 @@ select {
   align-items: flex-start;
   gap: 6px;
   min-width: 0;
-  width: 100%;
+  width: fit-content;
   max-width: 100%;
 }
 
 .corpHqHandPanel {
   box-sizing: border-box;
-  flex: 1 1 0;
+  flex: 0 1 auto;
+  width: fit-content;
   min-width: 0;
   max-width: 100%;
   padding: 6px;
@@ -5501,7 +5510,7 @@ select {
 }
 
 .fixedZoneCards.corpHqHandCards {
-  width: 100%;
+  width: fit-content;
   max-width: 100%;
   min-height: calc(var(--cards-min-width, 108px) * 1.4);
   overflow: visible;
@@ -5854,6 +5863,17 @@ select {
   width: fit-content;
   max-width: 100%;
   min-width: calc(108px * var(--lane-card-scale, 1) + 12px);
+}
+
+.server[data-server-id="archives"]:has(.archivesDualStack) .pairedServerLanes {
+  grid-template-columns: minmax(0, 1fr) max-content;
+  width: 100%;
+}
+
+.server[data-server-id="archives"]:has(.archivesDualStack) .pairedServerLane:first-child,
+.server[data-server-id="archives"]:has(.archivesDualStack) .pairedServerLane:first-child .lane {
+  min-width: 0;
+  width: 100%;
 }
 
 .laneEmptyPlaceholder {

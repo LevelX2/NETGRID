@@ -62,24 +62,6 @@ export function createSemanticRuntimeCorpBoardScoreComposition(
   });
 
   const {
-    semanticRuntimeCorpInstallRemoteScore,
-    semanticRuntimeCorpShouldBuildProtectedScoreRemote,
-    semanticRuntimeCorpAdvanceRemoteScore,
-  } = createSemanticRuntimeCorpRemoteScoreContext({
-    actionServerId: semanticRuntimeCorpActionServerId,
-    server: semanticRuntimeCorpServer,
-    hasStabilizingAlternative:
-      semanticRuntimeCorpHasStabilizingAlternative,
-    isRemoteServerTarget: dependencies.isRemoteServerTarget,
-    emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
-    remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
-    actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
-    remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
-    actionCreditCost: dependencies.actionCreditCost,
-    advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
-  });
-
-  const {
     normalizedRulesTextForDefinition,
     semanticRuntimeVisibleCardType,
     semanticRuntimeVisibleCardAdvancementRequirement,
@@ -104,6 +86,27 @@ export function createSemanticRuntimeCorpBoardScoreComposition(
     isRemoteServerTarget: dependencies.isRemoteServerTarget,
   });
 
+  const {
+    semanticRuntimeCorpInstallRemoteScore,
+    semanticRuntimeCorpShouldBuildProtectedScoreRemote,
+    semanticRuntimeCorpAdvanceRemoteScore,
+    semanticRuntimeCorpScoringWindowAssessment,
+  } = createSemanticRuntimeCorpRemoteScoreContext({
+    actionServerId: semanticRuntimeCorpActionServerId,
+    server: semanticRuntimeCorpServer,
+    hasStabilizingAlternative:
+      semanticRuntimeCorpHasStabilizingAlternative,
+    isRemoteServerTarget: dependencies.isRemoteServerTarget,
+    emptyRemoteCount: semanticRuntimeCorpEmptyRemoteCount,
+    remoteIsProtected: semanticRuntimeCorpRemoteIsProtected,
+    actionIsScoreLine: semanticRuntimeCorpActionIsScoreLine,
+    remoteHasScoreLine: semanticRuntimeCorpRemoteHasScoreLine,
+    actionCreditCost: dependencies.actionCreditCost,
+    advanceCompletesScore: semanticRuntimeCorpAdvanceCompletesScore,
+    visibleIceRezCost: semanticRuntimeVisibleIceRezCost,
+    actionSourceCard: semanticRuntimeCorpActionSourceCard,
+  });
+
   return {
     semanticRuntimeCorpActionServerId,
     semanticRuntimeCorpServer,
@@ -119,6 +122,7 @@ export function createSemanticRuntimeCorpBoardScoreComposition(
     semanticRuntimeCorpInstallRemoteScore,
     semanticRuntimeCorpShouldBuildProtectedScoreRemote,
     semanticRuntimeCorpAdvanceRemoteScore,
+    semanticRuntimeCorpScoringWindowAssessment,
     normalizedRulesTextForDefinition,
     semanticRuntimeVisibleCardType,
     semanticRuntimeVisibleCardAdvancementRequirement,

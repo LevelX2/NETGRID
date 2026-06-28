@@ -46,6 +46,7 @@ export type SemanticRuntimeCorpScoringCompositionDependencies<
       | "corpAdvanceRemoteScore"
       | "corpTaggedRunnerPayoffPressure"
       | "corpTaggedPayoffWindowPassiveActionPenalty"
+      | "corpScoringWindowAssessment"
     >;
 
 export function createSemanticRuntimeCorpScoringComposition<
@@ -107,6 +108,8 @@ export function createSemanticRuntimeCorpScoringComposition<
     corpHasRemoteInstability:
       board.semanticRuntimeCorpHasRemoteInstability,
     corpAdvanceRemoteScore: board.semanticRuntimeCorpAdvanceRemoteScore,
+    corpScoringWindowAssessment:
+      board.semanticRuntimeCorpScoringWindowAssessment,
     corpTaggedRunnerPayoffPressure,
     corpTaggedPayoffWindowPassiveActionPenalty,
   });
