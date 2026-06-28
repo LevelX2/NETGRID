@@ -468,6 +468,28 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("setup-mismatch-positive");
   });
 
+  it("bounds plan-mismatch plan-kind signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "plan-kind-positive",
+        planKind: "runner.run_pressure",
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "plan-kind-noise",
+        planKind: "runner.runny_pressureish",
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["plan_step_action_mismatch"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("plan-kind-positive");
+  });
+
   it("bounds run plan-mismatch funding and reserve explanations to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "gain_credit", {

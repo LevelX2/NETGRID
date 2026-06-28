@@ -998,6 +998,13 @@ function selfplayEntryTextHasRecoveryLoopSignal(text: string): boolean {
   ]);
 }
 
+function selfplayPlanKindHasAnySignal(
+  planKind: string,
+  signals: readonly string[],
+): boolean {
+  return selfplayTokensIncludeAny(selfplayTextTokens(planKind), signals);
+}
+
 function selfplayTextTokens(text: string): string[] {
   return text
     .toLocaleLowerCase("en-US")
@@ -1558,10 +1565,15 @@ function selfplayPlanActionMismatch(
   entry: AiSimulationSummary["actionSequence"][number],
   text: string,
 ): boolean {
-  const planKind = entry.planKind?.toLocaleLowerCase("en-US");
+  const planKind = entry.planKind;
   if (!planKind) return false;
   if (
-    /(run|pressure|contest|access)/.test(planKind) &&
+    selfplayPlanKindHasAnySignal(planKind, [
+      "run",
+      "pressure",
+      "contest",
+      "access",
+    ]) &&
     entry.actionType !== "start_run" &&
     entry.actionType !== "access_card" &&
     entry.actionType !== "trash_accessed_card" &&
@@ -1571,7 +1583,7 @@ function selfplayPlanActionMismatch(
   )
     return true;
   if (
-    /(score|advance)/.test(planKind) &&
+    selfplayPlanKindHasAnySignal(planKind, ["score", "advance"]) &&
     entry.side === "corp" &&
     entry.scoreActionsAvailable &&
     entry.actionType !== "score_agenda" &&
@@ -1579,7 +1591,7 @@ function selfplayPlanActionMismatch(
   )
     return true;
   if (
-    /(install|rig|setup)/.test(planKind) &&
+    selfplayPlanKindHasAnySignal(planKind, ["install", "rig", "setup"]) &&
     entry.side === "runner" &&
     entry.actionType === "start_run" &&
     selfplayEntryHasStructuredSignal(entry, ["runnerpressureready:false"])

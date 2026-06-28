@@ -9070,6 +9070,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n "recover\|recovery\|junkyard\|heap" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertachtundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt die Plan-Step-Mismatch-PlanKind-Erkennung für Run-/Pressure-/Contest-/Access-, Score-/Advance- und Install-/Rig-/Setup-Familien durch gebundene Selfplay-Text-Tokens.
+  - Exakte PlanKind-Tokens wie `run_pressure` bleiben wirksam; Suffix-Rauschen wie `runny_pressureish` löst keinen Plan-Step-Mismatch mehr aus.
+  - Die bestehenden Funding-/Reserve- und Known-Explanation-Ausnahmen bleiben unverändert nachgelagert.
+  - Die Erkennung bleibt reine Selfplay-Trace-Diagnostik über redaction-safe Action-Text und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative PlanKind-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 27 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "run\|pressure\|contest\|access|score\|advance|install\|rig\|setup" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
