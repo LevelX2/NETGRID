@@ -3,6 +3,7 @@ import {
   corpProtectionConvertsToScoreSafety,
   corpRemoteCreatedConvertsTo,
   isRunnerSetupAction,
+  planKindForConversion,
   planIntentConvertedWithin,
   runnerProbeConvertsToUsefulInfoOrPivot,
 } from "./plan-conversion-predicates";
@@ -167,6 +168,33 @@ describe("planIntentConvertedWithin", () => {
         () => false,
       ),
     ).toBe(false);
+  });
+
+  it("extracts explicit plan kinds only from exact reason-code segments", () => {
+    expect(
+      planKindForConversion({
+        side: "runner",
+        reasonCode: "runner.plan.recover_economy",
+      }),
+    ).toBe("recover_economy");
+    expect(
+      planKindForConversion({
+        side: "corp",
+        reasonCode: "corp.plan.remote_build",
+      }),
+    ).toBe("remote_build");
+    expect(
+      planKindForConversion({
+        side: "runner",
+        reasonCode: "runner.planish.recover_economy",
+      }),
+    ).toBeUndefined();
+    expect(
+      planKindForConversion({
+        side: "runner",
+        reasonCode: "runner.plan.recover-economy",
+      }),
+    ).toBeUndefined();
   });
 
   it("matches Corp protection remote-build followups by bounded terms", () => {

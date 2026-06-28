@@ -406,9 +406,7 @@ export function isRunnerCentralPressureAction(
 export function planKindForConversion(
   entry: PlanConversionDecisionEntry,
 ): string | undefined {
-  const explicitPlan = entry.reasonCode?.match(
-    /^(?:runner|corp)\.plan\.([a-z0-9_]+)/i,
-  )?.[1];
+  const explicitPlan = explicitPlanKindFromReasonCode(entry.reasonCode);
   if (explicitPlan) return explicitPlan;
   if (isRunnerSetupAction(entry)) return "setup";
   if (isRunnerEconomyProgressAction(entry)) return "economy";
@@ -418,6 +416,28 @@ export function planKindForConversion(
   if (isRunnerRemoteContestRun(entry)) return "remote_contest";
   if (isRunnerCentralPressureAction(entry)) return "central_pressure";
   return undefined;
+}
+
+function explicitPlanKindFromReasonCode(
+  reasonCode: string | undefined,
+): string | undefined {
+  if (!reasonCode) return undefined;
+  const parts = reasonCode.toLocaleLowerCase("en-US").split(".");
+  if (parts.length !== 3) return undefined;
+  const [side, namespace, planKind] = parts;
+  if (side !== "runner" && side !== "corp") return undefined;
+  if (namespace !== "plan") return undefined;
+  if (!planKind || !safePlanKind(planKind)) return undefined;
+  return planKind;
+}
+
+function safePlanKind(value: string): boolean {
+  return [...value].every(
+    (character) =>
+      (character >= "a" && character <= "z") ||
+      (character >= "0" && character <= "9") ||
+      character === "_",
+  );
 }
 
 export function remoteTargetsMatch(

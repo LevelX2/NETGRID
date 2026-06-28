@@ -8776,6 +8776,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/plan-conversion-predicates.ts` extrahiert explizite Plan-Kinds aus ReasonCodes ohne Regex und nur noch bei exakt drei Segmenten `runner.plan.<kind>` oder `corp.plan.<kind>`.
+  - Der Plan-Kind darf nur ASCII-Kleinbuchstaben, Ziffern und `_` enthalten; Varianten wie `runner.planish.recover_economy` oder `runner.plan.recover-economy` werden nicht als expliziter Plan gelesen.
+  - Die übrigen strukturierten Conversion-Prädikate bleiben unverändert und greifen weiter als Fallback nach der exakten ReasonCode-Prüfung.
+  - `plan-conversion-predicates.test.ts` schützt positive Runner-/Corp-Plan-Kinds und negative Segment-/Zeichen-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/plan-conversion-predicates.test.ts` grün, 1 Datei, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
