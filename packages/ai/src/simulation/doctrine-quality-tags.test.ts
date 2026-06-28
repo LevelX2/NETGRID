@@ -1,11 +1,43 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { qualityTagsForActionWithDependencies } from "./doctrine-quality-tags";
+import {
+  qualityTagsForActionWithDependencies,
+  repeatedLowValueCentralRunTags,
+} from "./doctrine-quality-tags";
 
 describe("qualityTagsForActionWithDependencies", () => {
   it("matches economy action roles by bounded role terms", () => {
     expect(tagsForRoles(["economy_operation"])).not.toContain("economy_stall");
     expect(tagsForRoles(["microeconomy_noise"])).toContain("economy_stall");
+  });
+});
+
+describe("repeatedLowValueCentralRunTags", () => {
+  it("matches contest and trash reason codes by bounded terms", () => {
+    expect(
+      repeatedLowValueCentralRunTags([
+        centralRun("runner.low_value"),
+        centralRun("runner.remote_contest"),
+      ]),
+    ).toEqual([]);
+    expect(
+      repeatedLowValueCentralRunTags([
+        centralRun("runner.low_value"),
+        centralRun("contestable_noise"),
+      ]),
+    ).toEqual(["repeated_low_value_central_run"]);
+    expect(
+      repeatedLowValueCentralRunTags([
+        centralRun("runner.low_value"),
+        centralRun("trash_remote"),
+      ]),
+    ).toEqual([]);
+    expect(
+      repeatedLowValueCentralRunTags([
+        centralRun("runner.low_value"),
+        centralRun("trashcan_noise"),
+      ]),
+    ).toEqual(["repeated_low_value_central_run"]);
   });
 });
 
@@ -61,4 +93,13 @@ function decision(): AiDecision {
     fallbackUsed: false,
     timeoutUsed: false,
   } as AiDecision;
+}
+
+function centralRun(reasonCode: string) {
+  return {
+    side: "runner",
+    actionType: "start_run",
+    targetServerId: "rd",
+    reasonCode,
+  } as const;
 }

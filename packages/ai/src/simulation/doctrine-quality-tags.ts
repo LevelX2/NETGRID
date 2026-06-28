@@ -261,8 +261,7 @@ export function repeatedLowValueCentralRunTags(
     if (
       previous !== undefined &&
       index - previous <= 4 &&
-      !entry.reasonCode.includes("contest") &&
-      !entry.reasonCode.includes("trash")
+      !reasonCodeMatchesAny(entry.reasonCode, ["contest", "trash"])
     )
       tags.push("repeated_low_value_central_run");
     lastCentralRunByServer.set(entry.targetServerId, index);
@@ -350,8 +349,7 @@ export function collectRepeatedLowValueCentralRunExamples(
     if (
       previous !== undefined &&
       actionIndex - previous <= 4 &&
-      !entry.reasonCode.includes("contest") &&
-      !entry.reasonCode.includes("trash") &&
+      !reasonCodeMatchesAny(entry.reasonCode, ["contest", "trash"]) &&
       examples[metric].length < maxExamplesPerMetric
     ) {
       examples[metric].push(
@@ -360,6 +358,13 @@ export function collectRepeatedLowValueCentralRunExamples(
     }
     lastCentralRunByServer.set(entry.targetServerId, actionIndex);
   }
+}
+
+function reasonCodeMatchesAny(
+  reasonCode: string,
+  needles: readonly string[],
+): boolean {
+  return rolesMatch([reasonCode], needles);
 }
 
 export function doctrineCaseExample(

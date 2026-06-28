@@ -7579,6 +7579,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` achtundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/doctrine-quality-tags.ts` nutzt für Central-Run-Contest-/Trash-ReasonCodes den gebundenen `rolesMatch`-Helper statt freier `reasonCode`-Substring-Prüfungen.
+  - Strukturierte ReasonCodes wie `runner.remote_contest` und `trash_remote` verhindern weiterhin die Low-Value-Repeat-Markierung; substringartiges Rauschen wie `contestable_noise` und `trashcan_noise` verhindert sie nicht mehr.
+  - `doctrine-quality-tags.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/doctrine-quality-tags.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
