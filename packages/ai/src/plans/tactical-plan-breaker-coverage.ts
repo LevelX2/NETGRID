@@ -39,14 +39,28 @@ export function missingBreakerCoverageKind(
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
-  if (text.includes("wall") || text.includes("barrier")) return "breaker_wall";
-  if (text.includes("code gate") || text.includes("codegate")) {
+  if (breakerCoverageTextMatches(text, ["wall", "barrier"]))
+    return "breaker_wall";
+  if (/\bcode\s*gate\b/.test(text)) {
     return "breaker_code_gate";
   }
-  if (text.includes("sentry")) return "breaker_sentry";
-  if (text.includes("ap")) return "breaker_ap";
-  if (text.includes("trace")) return "breaker_trace";
+  if (breakerCoverageTextMatches(text, ["sentry"])) return "breaker_sentry";
+  if (breakerCoverageTextMatches(text, ["ap"])) return "breaker_ap";
+  if (breakerCoverageTextMatches(text, ["trace"])) return "breaker_trace";
   return "breaker_universal";
+}
+
+function breakerCoverageTextMatches(
+  text: string,
+  needles: readonly string[],
+): boolean {
+  return needles.some((needle) =>
+    new RegExp(`\\b${escapeRegExp(needle)}\\b`).test(text),
+  );
+}
+
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 export function isBreakerInstallAction(

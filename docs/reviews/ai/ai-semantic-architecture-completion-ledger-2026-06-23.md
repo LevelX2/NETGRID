@@ -7624,6 +7624,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` dreiundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-breaker-coverage.ts` nutzt für textbasierte ICE-Coverage-Fallbacks gebundene Wort-/Phrasenmatches statt freier Text-Substring-Prüfungen.
+  - Strukturierte Treffer wie `AP`, `trace`, `sentry` und `codegate` bleiben wirksam; substringartiges Rauschen wie `appliance` erzeugt keine `breaker_ap`-Coverage mehr.
+  - `tactical-plan-breaker-coverage.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-breaker-coverage.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
