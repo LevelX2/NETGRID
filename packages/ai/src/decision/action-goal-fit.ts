@@ -193,7 +193,7 @@ function planAlignmentComponent(
   utility: TacticalGoalUtility,
 ): ScoreComponentDelta {
   const aligned = utility.evidence.some((entry) =>
-    candidate.evidence.some((candidateEntry) => candidateEntry.includes(entry)),
+    candidate.evidence.includes(entry),
   );
   return {
     component: "plan_alignment",

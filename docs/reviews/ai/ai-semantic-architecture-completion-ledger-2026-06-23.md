@@ -8130,6 +8130,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertneunundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/action-goal-fit.ts` gleicht Plan-Alignment-Evidence nur noch als exakten Evidence-Eintrag ab statt per Substring-Suche in Candidate-Evidence.
+  - Strukturierte Evidence wie `plan_alignment:runner.build_economy_base` bleibt wirksam; Rauschen wie `not_plan_alignment:runner.build_economy_base_noise` erzeugt keinen Plan-Alignment-Bonus.
+  - `action-goal-fit.test.ts` schützt positive Evidence-Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/action-goal-fit.test.ts` grün, 1 Datei, 17 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

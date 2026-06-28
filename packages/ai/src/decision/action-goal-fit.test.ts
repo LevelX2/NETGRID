@@ -166,6 +166,42 @@ describe("ActionGoalFit", () => {
     ]);
   });
 
+  it("matches plan alignment evidence exactly", () => {
+    const aligned = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("gain-1", "gain_credit"),
+        evidence: ["plan_alignment:runner.build_economy_base"],
+      },
+      utility: {
+        ...utility("runner.build_economy_base", "economy"),
+        evidence: ["plan_alignment:runner.build_economy_base"],
+      },
+      legalActionIds: ["gain-1"],
+    });
+    const noise = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("gain-noise", "gain_credit"),
+        evidence: ["not_plan_alignment:runner.build_economy_base_noise"],
+      },
+      utility: {
+        ...utility("runner.build_economy_base", "economy"),
+        evidence: ["plan_alignment:runner.build_economy_base"],
+      },
+      legalActionIds: ["gain-noise"],
+    });
+
+    expect(
+      aligned.components.find(
+        (component) => component.component === "plan_alignment",
+      )?.delta,
+    ).toBe(8);
+    expect(
+      noise.components.find(
+        (component) => component.component === "plan_alignment",
+      )?.delta,
+    ).toBe(0);
+  });
+
   it("blocks target-profile goals when target context is missing", () => {
     const candidate = candidateFor("choice-1", "resolve_choice");
     const fit = scoreActionGoalFit({
