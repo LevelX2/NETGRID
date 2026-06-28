@@ -475,15 +475,34 @@ describe("DeckCapabilityProfile", () => {
       ]),
     });
 
-    const facts = redactedDeckCapabilityFacts(profile);
+    const facts = redactedDeckCapabilityFacts({
+      ...profile,
+      missingCapabilities: [
+        ...profile.missingCapabilities,
+        {
+          capabilityId: "runner.synthetic_coverage",
+          kind: "synthetic_coverage",
+          severity: "hard",
+          evidence: ["test"],
+        },
+        {
+          capabilityId: "runner.coverageish_noise",
+          kind: "coverageish_noise",
+          severity: "hard",
+          evidence: ["test"],
+        },
+      ],
+    });
 
     expect(facts).toEqual(
       expect.arrayContaining([
         "breaker.wall=in_deck/draw_only",
         "breaker.code_gate=in_deck/draw_only",
         "bank_tool_count:1",
+        "missing:synthetic_coverage",
       ]),
     );
+    expect(facts).not.toContain("missing:coverageish_noise");
     expect(facts.join("\n")).not.toMatch(/onr_v1_|Codecracker|Dwarf|Broker/);
   });
 

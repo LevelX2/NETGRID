@@ -255,7 +255,9 @@ export function redactedDeckCapabilityFacts(
       ...breakerFacts,
       ...bankFacts,
       ...profile.missingCapabilities
-        .filter((capability) => capability.kind.includes("coverage"))
+        .filter((capability) =>
+          missingCapabilityKindHasCoverageSegment(capability.kind),
+        )
         .map((capability) => `missing:${capability.kind}`),
       `deck_capability_confidence:${profile.confidence}`,
     ];
@@ -269,6 +271,10 @@ export function redactedDeckCapabilityFacts(
     ];
   }
   return [`deck_capability_confidence:${profile.confidence}`];
+}
+
+function missingCapabilityKindHasCoverageSegment(kind: string): boolean {
+  return rolesMatch([kind], ["coverage"]);
 }
 
 function buildRunnerDeckCapabilityProfile(
