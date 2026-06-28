@@ -1,6 +1,7 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
 import { assessCorpScoreTerminalWindow } from "../legacy/legacy-entrypoints";
+import { rolesMatch } from "../runtime/role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 export type CorpScoreTerminalChosenFamily =
@@ -29,7 +30,7 @@ export function createCorpScoreTerminalChosenFamily(
     if (action.type === "draw_card") return "draw";
     if (action.type === "gain_credit") return "economy";
     const roles = rolesForAction(input, action);
-    if (roles.some((role) => role.includes("economy"))) return "economy";
+    if (rolesMatch(roles, ["economy"])) return "economy";
     if (
       action.type === "install_card" &&
       action.payload?.placement === "ice" &&
@@ -66,9 +67,7 @@ export function createCorpScoreTerminalChosenFamily(
       action.type === "trigger_ability" ||
       action.type === "activated_card_ability"
     )
-      return roles.some((role) => role.includes("economy"))
-        ? "economy"
-        : "unknown";
+      return rolesMatch(roles, ["economy"]) ? "economy" : "unknown";
     return "unknown";
   };
 }
