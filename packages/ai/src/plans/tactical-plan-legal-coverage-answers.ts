@@ -7,6 +7,7 @@ import {
   cardDefinitionPlanRoleForCoverageSearch,
   cardDefinitionProvidesBreakerCoverage,
   cardPlanRoleForCoverageSearch,
+  coveragePlanRoleMatches,
   recoveryTargetDefinitionId,
 } from "./tactical-plan-coverage-card-roles";
 import { cardProvidesBreakerCoverage } from "./tactical-plan-breaker-cards";
@@ -49,12 +50,15 @@ function coverageAnswerRoleForLegalAction(
   const sourceRole = sourceCard
     ? cardPlanRoleForCoverageSearch(sourceCard)
     : undefined;
-  if (sourceRole?.includes("search")) {
+  if (coveragePlanRoleMatches(sourceRole, ["search"])) {
     return action.type === "install_card"
       ? "search_engine_setup"
       : "program_search";
   }
-  if (sourceRole?.includes("draw") && action.type !== "install_card") {
+  if (
+    coveragePlanRoleMatches(sourceRole, ["draw"]) &&
+    action.type !== "install_card"
+  ) {
     return "draw_for_answer";
   }
   if (
@@ -78,7 +82,7 @@ function coverageAnswerRoleForLegalAction(
         targetDefinitionId !== undefined &&
         cardDefinitionProvidesBreakerCoverage(targetDefinitionId, requiredCoverage)
       ) return "recovery_answer";
-      if (targetRole.includes("search") || targetRole.includes("draw")) {
+      if (coveragePlanRoleMatches(targetRole, ["search", "draw"])) {
         return "recovery_answer";
       }
     }

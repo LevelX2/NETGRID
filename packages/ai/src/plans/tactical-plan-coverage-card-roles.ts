@@ -66,6 +66,27 @@ export function cardDefinitionPlanRoleForCoverageSearch(definitionId: string): s
   return definition?.type ?? "unknown";
 }
 
+export function coveragePlanRoleMatches(
+  role: string | undefined,
+  needles: readonly string[],
+): boolean {
+  if (!role) return false;
+  return needles.some((needle) =>
+    role
+      .split(/[.:-]+/)
+      .some((segment) => coveragePlanRoleSegmentMatches(segment, needle)),
+  );
+}
+
+function coveragePlanRoleSegmentMatches(segment: string, needle: string): boolean {
+  return (
+    segment === needle ||
+    segment.startsWith(`${needle}_`) ||
+    segment.endsWith(`_${needle}`) ||
+    segment.includes(`_${needle}_`)
+  );
+}
+
 export function cardDefinitionProvidesBreakerCoverage(
   definitionId: string,
   requiredCoverage: RequiredCapabilityKind,

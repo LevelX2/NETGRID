@@ -1,9 +1,18 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, PlayerView } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+  VisibleCard,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import { coverageSearchActionFit } from "./tactical-plan-coverage-search-fit";
+
+type TestVisibleCardOverrides = Omit<Partial<VisibleCard>, "type"> & {
+  type?: string;
+};
 
 describe("coverageSearchActionFit", () => {
   it("uses structured recovery targets and ignores label-only recovery text", () => {
@@ -68,12 +77,143 @@ describe("coverageSearchActionFit", () => {
       recoveredCardPlanFit: "high",
     });
   });
+
+  it("ignores substring-only coverage roles from visible source cards", () => {
+    const plan = coveragePlan("breaker_wall");
+    const researchAction = action({
+      actionId: "research-action",
+      source: "research-source",
+    });
+    const microEconomyAction = action({
+      actionId: "microeconomy-action",
+      source: "microeconomy-source",
+    });
+
+    expect(
+      coverageSearchActionFit(
+        plan,
+        plan.currentStep,
+        candidate(researchAction),
+        researchAction,
+        input(
+          [researchAction],
+          [
+            visibleCard({
+              instanceId: "research-source",
+              definitionId: "test_lab",
+              type: "research",
+            }),
+          ],
+        ),
+        false,
+      ),
+    ).toMatchObject({
+      answerRole: "not_coverage_answer",
+      supportsActiveCapabilityNeed: false,
+      supportsDrawOrSearchNeed: false,
+      recoveredCardRole: "research",
+    });
+    expect(
+      coverageSearchActionFit(
+        plan,
+        plan.currentStep,
+        candidate(microEconomyAction),
+        microEconomyAction,
+        input(
+          [microEconomyAction],
+          [
+            visibleCard({
+              instanceId: "microeconomy-source",
+              definitionId: "test_market",
+              type: "microeconomy",
+            }),
+          ],
+        ),
+        false,
+      ),
+    ).toMatchObject({
+      answerRole: "not_coverage_answer",
+      supportsCreditNeed: false,
+      recoveryLoopRisk: "low",
+      recoveredCardRole: "microeconomy",
+    });
+  });
+
+  it("ignores substring-only coverage roles from structured recovery targets", () => {
+    const plan = coveragePlan("breaker_wall");
+    const recoveryAction = action({
+      actionId: "recover-research",
+      source: "recovery-source",
+      payload: { targetCardId: "research-target" },
+    });
+
+    expect(
+      coverageSearchActionFit(
+        plan,
+        plan.currentStep,
+        candidate(recoveryAction),
+        recoveryAction,
+        input(
+          [recoveryAction],
+          [
+            visibleCard({
+              instanceId: "recovery-source",
+              definitionId: "junkyard_source",
+              title: "Junkyard BBS",
+              type: "resource",
+            }),
+            visibleCard({
+              instanceId: "research-target",
+              definitionId: "test_lab_target",
+              type: "research",
+              known: true,
+            }),
+          ],
+        ),
+        false,
+      ),
+    ).toMatchObject({
+      answerRole: "not_coverage_answer",
+      supportsActiveCapabilityNeed: false,
+      supportsDrawOrSearchNeed: false,
+      recoveredCardRole: "research",
+      recoveredCardPlanFit: "none",
+    });
+  });
 });
 
-function input(legalActions: LegalAction[]): AiDecisionInput {
+function coveragePlan(requiredCoverage: "breaker_wall") {
+  return createTacticalPlan({
+    planId: "runner.obtain_breaker_coverage:remote_1",
+    side: "runner",
+    type: "runner.obtain_breaker_coverage",
+    status: "active",
+    priority: 900,
+    horizonTurns: 1,
+    currentStep: createPlanStep({
+      stepId: "search_for_answer:remote_1",
+      kind: "search_for_answer",
+      desiredActionSemantics: ["search_for_answer"],
+      requiredCapabilities: [
+        {
+          capabilityId: `coverage:${requiredCoverage}`,
+          kind: requiredCoverage,
+          side: "runner",
+          evidence: ["test"],
+        },
+      ],
+    }),
+    stateVersion: 1,
+  });
+}
+
+function input(
+  legalActions: LegalAction[],
+  visibleCards: VisibleCard[] = [],
+): AiDecisionInput {
   const playerView = {
     side: "runner",
-    own: { rig: [], gripOrHq: [], heapOrArchives: [], scoreArea: [] },
+    own: { rig: visibleCards, gripOrHq: [], heapOrArchives: [], scoreArea: [] },
     servers: [],
   } as unknown as PlayerView;
   return {
@@ -81,6 +221,20 @@ function input(legalActions: LegalAction[]): AiDecisionInput {
     legalActions,
     playerView,
   } as unknown as AiDecisionInput;
+}
+
+function visibleCard(overrides: TestVisibleCardOverrides): VisibleCard {
+  return {
+    instanceId: "card",
+    definitionId: "card",
+    title: "Card",
+    owner: "runner",
+    controller: "runner",
+    type: "resource",
+    known: true,
+    subtypes: [],
+    ...overrides,
+  } as unknown as VisibleCard;
 }
 
 function action(overrides: Partial<LegalAction>): LegalAction {

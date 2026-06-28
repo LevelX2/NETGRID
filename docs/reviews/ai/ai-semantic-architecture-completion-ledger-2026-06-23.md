@@ -7367,6 +7367,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` fünfundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-coverage-card-roles.ts` stellt einen strukturierten Coverage-Planrollen-Term-Helper bereit, der `search`, `draw` und `economy` nur als gebundene Rollenbestandteile wertet.
+  - `packages/ai/src/plans/tactical-plan-coverage-search-fit.ts` und `packages/ai/src/plans/tactical-plan-legal-coverage-answers.ts` nutzen diesen Helper statt freier Rollen-Substring-Prüfungen für Source- und Recovery-Target-Rollen.
+  - Strukturierte Rollen wie `search` und `draw` bleiben Coverage-Antworten; substringartiges Rauschen wie `research` und `microeconomy` erzeugt keine Search-/Draw-/Economy-Coverage-Antwort mehr.
+  - `tactical-plan-coverage-search-fit.test.ts` und `tactical-plan-legal-coverage-answers.test.ts` schützen Source- und Recovery-Target-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-coverage-search-fit.test.ts src/plans/tactical-plan-legal-coverage-answers.test.ts` grün, 2 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
