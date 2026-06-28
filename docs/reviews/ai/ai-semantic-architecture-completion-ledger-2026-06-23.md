@@ -7516,6 +7516,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` einundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-known-no-access.ts` nutzt für positive Bypass-/Probe-/Expose-/Inside-Job-Followups den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `run_probe` bleiben positive Probe-Signale; substringartiges Rauschen wie `probescape_noise` erzeugt keinen `probeRunWithPositiveInfoValue`-Pfad mehr.
+  - `runner-known-no-access.test.ts` schützt strukturierte Treffer und Substring-Negativfälle zusätzlich zum Coverage-Repair-Schutz.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-known-no-access.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

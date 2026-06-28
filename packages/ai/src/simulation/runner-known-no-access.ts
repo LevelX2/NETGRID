@@ -363,13 +363,12 @@ export function runnerKnownPathDiagnosticsForAction(
   const positiveProbe =
     !remoteThreat &&
     (action.payload?.bypass === true ||
-      dependencies.rolesForAction(input, action).some(
-        (role) =>
-          role.includes("bypass") ||
-          role.includes("probe") ||
-          role.includes("expose") ||
-          role.includes("inside_job"),
-      ));
+      rolesMatch(dependencies.rolesForAction(input, action), [
+        "bypass",
+        "probe",
+        "expose",
+        "inside_job",
+      ]));
   const insufficientPath = assessment.blocked || creditsMissing > 0;
   const knownNoAccess =
     assessment.canReachAccess === false &&
