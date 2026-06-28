@@ -191,15 +191,96 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
       zeroEffectRisk: false,
     });
   });
+
+  it("does not treat Credit Blocks sentry mode as a stop against visible Killer coverage", () => {
+    const context = semanticRuntimeCorpEffectiveDefenseContext(
+      corpInput(5, {
+        runnerRig: [killerBreaker()],
+        servers: [
+          server("rd", [
+            corpIce("credit-blocks", {
+              definitionId: "onr_proteus_017_credit-blocks",
+              title: "Credit Blocks",
+              subtypes: ["sentry"],
+            }),
+          ]),
+        ],
+      }),
+      rezAction("credit-blocks-sentry", 3, {
+        variableRezKind: "alternate_subtype",
+        selectedSubtypesAfterRez: "sentry",
+      }, "Credit Blocks rezzen", "credit-blocks"),
+      rezCandidate("credit-blocks-sentry", 3, [
+        "role:etr_ice",
+        "corp_ice.end_run",
+      ]),
+      { actionCreditCost },
+    );
+
+    expect(context).toMatchObject({
+      isRezzableNow: true,
+      hasImmediateStopPotential: false,
+      zeroEffectRisk: true,
+    });
+    expect(context?.evidence).toContain(
+      "effective_defense_visible_breaker_coverage:true",
+    );
+  });
+
+  it("treats Credit Blocks wall mode as a stop when only visible Killer coverage exists", () => {
+    const context = semanticRuntimeCorpEffectiveDefenseContext(
+      corpInput(5, {
+        runnerRig: [killerBreaker()],
+        servers: [
+          server("rd", [
+            corpIce("credit-blocks", {
+              definitionId: "onr_proteus_017_credit-blocks",
+              title: "Credit Blocks",
+              subtypes: ["sentry"],
+            }),
+          ]),
+        ],
+      }),
+      rezAction("credit-blocks-wall", 4, {
+        variableRezKind: "alternate_subtype",
+        selectedSubtypesAfterRez: "wall",
+      }, "Credit Blocks als Wall rezzen", "credit-blocks"),
+      rezCandidate("credit-blocks-wall", 4, [
+        "role:etr_ice",
+        "corp_ice.end_run",
+      ]),
+      { actionCreditCost },
+    );
+
+    expect(context).toMatchObject({
+      isRezzableNow: true,
+      hasImmediateStopPotential: true,
+      zeroEffectRisk: false,
+    });
+    expect(context?.evidence).toContain(
+      "effective_defense_visible_breaker_coverage:false",
+    );
+  });
 });
 
-function corpInput(credits: number): AiDecisionInput {
+function corpInput(
+  credits: number,
+  overrides: {
+    runnerRig?: NonNullable<AiDecisionInput["playerView"]["opponent"]["rig"]>;
+    servers?: AiDecisionInput["playerView"]["servers"];
+  } = {},
+): AiDecisionInput {
   return {
     side: "corp",
     playerView: {
       own: {
         credits,
+        gripOrHq: [],
       },
+      opponent: {
+        rig: overrides.runnerRig ?? [],
+      },
+      servers: overrides.servers ?? [],
     },
   } as unknown as AiDecisionInput;
 }
@@ -209,13 +290,14 @@ function rezAction(
   creditCost: number,
   payload: LegalAction["payload"] = {},
   label = "ICE rezzen",
+  source = "game_rule",
 ): LegalAction {
   return {
     actionId,
     side: "corp",
     type: "rez_ice",
     label,
-    source: "game_rule",
+    source,
     timingPoint: "run.encounter_ice",
     costs: [{ credits: creditCost }],
     targetRequirements: [],
@@ -279,4 +361,48 @@ function rezCandidate(
 
 function actionCreditCost(action: LegalAction): number {
   return action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0);
+}
+
+function server(
+  id: AiDecisionInput["playerView"]["servers"][number]["id"],
+  ice: AiDecisionInput["playerView"]["servers"][number]["ice"] = [],
+): AiDecisionInput["playerView"]["servers"][number] {
+  return {
+    id,
+    label: id,
+    ice,
+    root: [],
+  };
+}
+
+function corpIce(
+  instanceId: string,
+  overrides: Partial<AiDecisionInput["playerView"]["servers"][number]["ice"][number]> = {},
+): AiDecisionInput["playerView"]["servers"][number]["ice"][number] {
+  return {
+    instanceId,
+    definitionId: instanceId,
+    title: instanceId,
+    known: true,
+    type: "ice",
+    owner: "corp",
+    controller: "corp",
+    ...overrides,
+  };
+}
+
+function killerBreaker(): NonNullable<
+  AiDecisionInput["playerView"]["opponent"]["rig"]
+>[number] {
+  return {
+    instanceId: "loony-goon",
+    definitionId: "loony-goon",
+    title: "Loony Goon",
+    known: true,
+    type: "program",
+    owner: "runner",
+    controller: "runner",
+    subtypes: ["Icebreaker", "Killer"],
+    rulesText: "Break sentry subroutines.",
+  };
 }

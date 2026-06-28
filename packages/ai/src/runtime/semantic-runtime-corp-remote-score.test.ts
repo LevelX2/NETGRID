@@ -87,6 +87,73 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     expect(rdScore).toBe(1350);
     expect(rdScore).toBeGreaterThan(hqScore);
   });
+
+  it("does not treat unaffordable central ICE as real R&D protection", () => {
+    const etrIce = corpCard("expensive-barrier", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 6,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      credits: 2,
+      runnerRig: [rdInterface()],
+    });
+
+    expect(centralInstallScore(etrIce, "rd", input)).toBe(250);
+  });
+
+  it("downgrades solo Dog Pile when visible Killer coverage can break it", () => {
+    const dogPile = corpCard("dog-pile", "ice", {
+      definitionId: "onr_proteus_021_dog-pile",
+      title: "Dog Pile",
+      rezCost: 3,
+    });
+    const input = corpInputForCentralInstall(dogPile, {
+      agendaInHq: false,
+      runnerRig: [rdInterface(), killerBreaker()],
+    });
+
+    expect(centralInstallScore(dogPile, "rd", input)).toBe(250);
+  });
+
+  it("does not overvalue solo Hunting Pack before outside ICE creates subroutines", () => {
+    const huntingPack = corpCard("hunting-pack", "ice", {
+      definitionId: "onr_proteus_026_hunting-pack",
+      title: "Hunting Pack",
+      rezCost: 4,
+    });
+    const input = corpInputForCentralInstall(huntingPack, {
+      agendaInHq: false,
+      runnerRig: [rdInterface()],
+    });
+
+    expect(centralInstallScore(huntingPack, "rd", input)).toBe(200);
+  });
+
+  it("keeps Credit Blocks strong only when the wall mode is fundable against visible Killer coverage", () => {
+    const creditBlocks = corpCard("credit-blocks", "ice", {
+      definitionId: "onr_proteus_017_credit-blocks",
+      title: "Credit Blocks",
+      rezCost: 3,
+    });
+    const fundableWallModeInput = corpInputForCentralInstall(creditBlocks, {
+      agendaInHq: false,
+      credits: 5,
+      runnerRig: [rdInterface(), killerBreaker()],
+    });
+    const unfundableWallModeInput = corpInputForCentralInstall(creditBlocks, {
+      agendaInHq: false,
+      credits: 3,
+      runnerRig: [rdInterface(), killerBreaker()],
+    });
+
+    expect(centralInstallScore(creditBlocks, "rd", fundableWallModeInput)).toBe(
+      1350,
+    );
+    expect(
+      centralInstallScore(creditBlocks, "rd", unfundableWallModeInput),
+    ).toBe(650);
+  });
 });
 
 function centralInstallScore(
@@ -186,6 +253,7 @@ function corpInputForCentralInstall(
   ice: VisibleCard,
   options: {
     agendaInHq?: boolean;
+    credits?: number;
     runnerRig?: VisibleCard[];
   } = {},
 ): AiDecisionInput {
@@ -202,7 +270,7 @@ function corpInputForCentralInstall(
     playerView: {
       stateVersion: 11,
       own: {
-        credits: 5,
+        credits: options.credits ?? 5,
         clicks: 3,
         gripOrHq: [
           ice,
@@ -244,6 +312,21 @@ function corpInputForCentralInstall(
       ],
     },
   } as unknown as AiDecisionInput;
+}
+
+function rdInterface(): VisibleCard {
+  return runnerCard("rd-interface", "hardware", {
+    definitionId: "onr_v1_139_r-and-d-interface",
+    title: "R&D Interface",
+  });
+}
+
+function killerBreaker(): VisibleCard {
+  return runnerCard("loony-goon", "program", {
+    title: "Loony Goon",
+    subtypes: ["Icebreaker", "Killer"],
+    rulesText: "Break sentry subroutines.",
+  });
 }
 
 function runnerCard(

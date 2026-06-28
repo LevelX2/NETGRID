@@ -13,6 +13,10 @@ import {
 import {
   semanticRuntimeCorpCentralPressureAssessment,
 } from "./semantic-runtime-corp-central-pressure";
+import {
+  visibleBreakerCardCanAddressIce,
+  visibleBreakerRoles,
+} from "./runner-visible-breaker-coverage";
 
 type CorpServerLike = {
   id: string;
@@ -158,10 +162,43 @@ function semanticRuntimeCorpCentralIceInstallScore<
     input,
     serverId,
   );
+  const rezCost = sourceCard
+    ? (dependencies.visibleIceRezCost(sourceCard) ?? sourceCard.rezCost ?? 0)
+    : 0;
+  const creditsAfterInstall =
+    input.playerView.own.credits - dependencies.actionCreditCost(action);
+  const canRez = rezCost <= creditsAfterInstall;
+  const visibleCoverage = sourceCard
+    ? semanticRuntimeCorpVisibleRunnerCoverageCanBreakIce(
+        input,
+        sourceCard,
+        profile,
+        creditsAfterInstall,
+        rezCost,
+      )
+    : false;
+  const positionDependentWeakSolo =
+    profile.positionDependent && firstCentralIce;
 
-  if (profile.hasAccessStop) {
+  if (!canRez) {
+    if (centralThreat) return firstCentralIce ? 250 : 150;
+    return firstCentralIce ? 100 : 50;
+  }
+  if (profile.hasAccessStop && !visibleCoverage) {
     if (centralThreat) return firstCentralIce ? 1350 : 950;
     return firstCentralIce ? 1050 : 750;
+  }
+  if (profile.hasAccessStop && visibleCoverage) {
+    if (positionDependentWeakSolo) {
+      if (centralThreat) return firstCentralIce ? 250 : 150;
+      return firstCentralIce ? 150 : 100;
+    }
+    if (centralThreat) return firstCentralIce ? 650 : 450;
+    return firstCentralIce ? 500 : 350;
+  }
+  if (positionDependentWeakSolo) {
+    if (centralThreat) return firstCentralIce ? 200 : 125;
+    return firstCentralIce ? 100 : 75;
   }
   if (profile.hasTaxOrDamage) {
     if (centralThreat) return firstCentralIce ? 450 : 250;
@@ -174,6 +211,9 @@ function semanticRuntimeCorpCentralIceInstallScore<
 function semanticRuntimeCorpCentralIceProfile(card: VisibleCard | undefined): {
   hasAccessStop: boolean;
   hasTaxOrDamage: boolean;
+  positionDependent: boolean;
+  modeChoice: boolean;
+  definitionId?: string;
 } {
   const definitionId = card?.definitionId;
   const runtimeDefinition = definitionId
@@ -244,10 +284,105 @@ function semanticRuntimeCorpCentralIceProfile(card: VisibleCard | undefined): {
         "tag",
       ].includes(effect.kind),
     ) === true;
+  const hintTacticSignals = semanticRuntimeCorpHintTacticSignals(hint);
+  const positionDependent =
+    hint?.riskTags?.includes("position_dependent_ice") === true ||
+    hintTacticSignals.some((signal) =>
+      roleMatchesAny(signal, ["position_scaling", "outer_ice_scaling"]),
+    ) ||
+    visibleSubroutines.some((subroutine) =>
+      JSON.stringify(subroutine)
+        .toLocaleLowerCase("en-US")
+        .includes("outside"),
+    );
+  const modeChoice =
+    hintTacticSignals.some((signal) =>
+      roleMatchesAny(signal, ["type_choice_or_mode_choice"]),
+    ) ||
+    semanticRuntimeCorpHintTargetProfiles(hint).some(
+      (profile) => profile.kind === "mode_choice",
+    );
   return {
     hasAccessStop: hasStructuredStop || hasHintStop,
     hasTaxOrDamage: hasStructuredTaxOrDamage || hasHintTaxOrDamage,
+    positionDependent,
+    modeChoice,
+    ...(definitionId ? { definitionId } : {}),
   };
+}
+
+function semanticRuntimeCorpVisibleRunnerCoverageCanBreakIce(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+  profile: ReturnType<typeof semanticRuntimeCorpCentralIceProfile>,
+  creditsAfterInstall: number,
+  rezCost: number,
+): boolean {
+  const rawCoverage = (input.playerView.opponent.rig ?? []).some(
+    (card) =>
+      card.known !== false &&
+      card.type === "program" &&
+      visibleBreakerCardCanAddressIce(card, ice, {
+        visibleBreakerRoles,
+        visibleCardText: semanticRuntimeCorpVisibleCardCoverageText,
+      }),
+  );
+  if (!rawCoverage) return false;
+  if (
+    profile.definitionId === "onr_proteus_017_credit-blocks" &&
+    profile.modeChoice &&
+    creditsAfterInstall >= rezCost + 1 &&
+    !semanticRuntimeCorpVisibleRunnerHasBreakerRole(input, "fracter")
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function semanticRuntimeCorpVisibleRunnerHasBreakerRole(
+  input: AiDecisionInput,
+  role: "fracter" | "decoder" | "killer",
+): boolean {
+  return (input.playerView.opponent.rig ?? []).some(
+    (card) => card.known !== false && visibleBreakerRoles(card).includes(role),
+  );
+}
+
+function semanticRuntimeCorpVisibleCardCoverageText(card: VisibleCard): string {
+  const hint = card.definitionId ? AI_HINTS_BY_CARD.get(card.definitionId) : undefined;
+  return [
+    card.title,
+    card.rulesText,
+    card.definitionId,
+    ...(card.subtypes ?? []),
+    ...(hint?.roles ?? []),
+    ...(hint?.planRoles ?? []),
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
+}
+
+function semanticRuntimeCorpHintTacticSignals(
+  hint: ReturnType<typeof AI_HINTS_BY_CARD.get>,
+): string[] {
+  const value = (hint as { tacticSignals?: unknown } | undefined)
+    ?.tacticSignals;
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+function semanticRuntimeCorpHintTargetProfiles(
+  hint: ReturnType<typeof AI_HINTS_BY_CARD.get>,
+): Array<{ kind?: string }> {
+  const value = (hint as { targetProfiles?: unknown } | undefined)
+    ?.targetProfiles;
+  return Array.isArray(value)
+    ? value.filter(
+        (entry): entry is { kind?: string } =>
+          typeof entry === "object" && entry !== null,
+      )
+    : [];
 }
 
 function semanticRuntimeCorpCentralInstallThreat(
@@ -262,9 +397,15 @@ function roleMatchesAny(role: string, options: readonly string[]): boolean {
   return options.some(
     (option) =>
       normalized === option ||
-      normalized.startsWith(`${option}_`) ||
-      normalized.endsWith(`_${option}`) ||
-      normalized.includes(`_${option}_`),
+      normalized
+        .split(/[.:-]+/)
+        .some(
+          (segment) =>
+            segment === option ||
+            segment.startsWith(`${option}_`) ||
+            segment.endsWith(`_${option}`) ||
+            segment.includes(`_${option}_`),
+        ),
   );
 }
 

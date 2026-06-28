@@ -1,5 +1,9 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import {
+  visibleBreakerCardCanAddressIce,
+  visibleBreakerRoles,
+} from "./runner-visible-breaker-coverage";
 
 export type EffectiveDefenseContext = {
   isRezzableNow: boolean;
@@ -84,7 +88,11 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
       (signal) => signalHasTerm(signal, "tax") || signalHasTerm(signal, "damage"),
     ) ||
     hasTraceSignal;
-  const hasImmediateStopPotential =
+  const visibleBreakerCoverage = visibleRunnerCoverageCanBreakRezzedIce(
+    input,
+    action,
+  );
+  const rawImmediateStopPotential =
     isRezzableNow &&
     !zeroVariableDefense &&
     ((hasEtrSignal &&
@@ -92,6 +100,8 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
       (hasTraceSignal &&
         variableRezValue !== undefined &&
         variableRezValue >= (minimumUsefulX ?? 1)));
+  const hasImmediateStopPotential =
+    rawImmediateStopPotential && !visibleBreakerCoverage;
   const hasMeaningfulTaxOrDamage =
     isRezzableNow &&
     !zeroVariableDefense &&
@@ -105,6 +115,7 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
   const zeroEffectRisk =
     isRezzableNow &&
     (zeroVariableDefense ||
+      (visibleBreakerCoverage && !hasMeaningfulTaxOrDamage) ||
       (hasKnownDefenseSignal &&
         ((requiresPostRezPaidAbility && !postRezAbilityAffordable) ||
           (!hasImmediateStopPotential && !hasMeaningfulTaxOrDamage))));
@@ -127,6 +138,7 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
       `effective_defense_tax_or_damage:${hasMeaningfulTaxOrDamage}`,
       `effective_defense_post_rez_paid_ability:${requiresPostRezPaidAbility}`,
       `effective_defense_post_rez_ability_affordable:${postRezAbilityAffordable}`,
+      `effective_defense_visible_breaker_coverage:${visibleBreakerCoverage}`,
       `effective_defense_zero_effect:${zeroEffectRisk}`,
       ...(variableRezKind ? [`effective_defense_variable_kind:${variableRezKind}`] : []),
       ...(variableRezValue !== undefined
@@ -137,6 +149,72 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
         : []),
     ],
   };
+}
+
+function visibleRunnerCoverageCanBreakRezzedIce(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const sourceCard = visibleActionSourceCard(input, action);
+  if (!sourceCard) return false;
+  const selectedSubtypes = selectedSubtypesAfterRez(action);
+  const assessedIce =
+    selectedSubtypes.length > 0
+      ? {
+          ...sourceCard,
+          subtypes: selectedSubtypes,
+        }
+      : sourceCard;
+  return (input.playerView.opponent.rig ?? []).some(
+    (card) =>
+      card.known !== false &&
+      card.type === "program" &&
+      visibleBreakerCardCanAddressIce(card, assessedIce, {
+        visibleBreakerRoles,
+        visibleCardText,
+      }),
+  );
+}
+
+function visibleActionSourceCard(
+  input: AiDecisionInput,
+  action: LegalAction,
+) {
+  const sourceId = action.source;
+  if (!sourceId || sourceId === "basic_action" || sourceId === "game_rule") {
+    return undefined;
+  }
+  const visibleCards = [
+    ...(input.playerView.own.gripOrHq ?? []),
+    ...(input.playerView.own.rig ?? []),
+    ...(input.playerView.own.scoreArea ?? []),
+    ...(input.playerView.servers ?? []).flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ];
+  return visibleCards.find((card) => card.instanceId === sourceId);
+}
+
+function selectedSubtypesAfterRez(action: LegalAction): string[] {
+  const value = payloadString(action, "selectedSubtypesAfterRez");
+  return value
+    ? value
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter((entry) => entry.length > 0)
+    : [];
+}
+
+function visibleCardText(card: { title?: string; rulesText?: string; definitionId?: string; subtypes?: readonly string[] }): string {
+  return [
+    card.title,
+    card.rulesText,
+    card.definitionId,
+    ...(card.subtypes ?? []),
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
 }
 
 function actionCreditCost(
