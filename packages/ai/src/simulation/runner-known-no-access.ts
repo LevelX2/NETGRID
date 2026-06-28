@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { rolesMatch } from "../runtime/role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
@@ -586,16 +587,9 @@ export function runnerCoverageRepairDiagnostic(
   const roles = definitionId ? dependencies.rolesForCardId(definitionId) : [];
   const actionKind = action.type;
   const isSearchOrRecovery =
-    roles.some(
-      (role) =>
-        role.includes("search") ||
-        role.includes("tutor") ||
-        role.includes("recovery") ||
-        role.includes("trash_recovery"),
-    ) || actionKind === "resolve_choice";
-  const isRecovery = roles.some(
-    (role) => role.includes("recovery") || role.includes("trash_recovery"),
-  );
+    rolesMatch(roles, ["search", "tutor", "recovery", "trash_recovery"]) ||
+    actionKind === "resolve_choice";
+  const isRecovery = rolesMatch(roles, ["recovery", "trash_recovery"]);
   const isInstall = actionKind === "install_card";
   const isDrawOrEconomy =
     actionKind === "draw_card" ||
