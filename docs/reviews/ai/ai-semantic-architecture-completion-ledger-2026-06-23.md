@@ -9106,6 +9106,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: spezifischer `rg`-Restcheck auf die ersetzten Search-Access-Regexmuster ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihunderteinundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` ersetzt die textbasierte Economy-Bank-Tool-Erkennung und Bank-Confidence-Heuristik durch gebundene Deck-Capability-Tokens.
+  - Exakte Begriffe und Phrasen wie `broker`, `bank`, `stored credits`, `temporary_resource_bank` und `counter_bank` bleiben wirksam; Suffix-Rauschen wie `stored creditsish` erzeugt keinen Economy-Bank-Tooltreffer mehr.
+  - Sichtbare CounterDisplays und strukturierte Rollen bleiben weiterhin die bevorzugte Begründungsquelle vor sichtbarem Textfallback.
+  - Die Erkennung bleibt reine Deck-/Capability-Diagnostik über sichtbare Kartendaten und erzeugt keine LegalAction-Projektion.
+  - `deck-capabilities.test.ts` schützt positive und negative Bank-Tool-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: spezifischer `rg`-Restcheck auf die ersetzten Bank-Tool-Regexmuster ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

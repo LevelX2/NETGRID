@@ -165,6 +165,27 @@ describe("DeckCapabilityProfile", () => {
     });
   });
 
+  it("bounds text-only bank tool signals to exact tokens", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard("stored-credits-1", "local_stored_credits_tool", "runner", "resource", {
+        title: "Stored Credits Tool",
+      }),
+      visibleCard("stored-noise-1", "local_stored_noise_tool", "runner", "resource", {
+        title: "Stored Creditsish Tool",
+      }),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+    });
+
+    expect(profile.runner?.economyBankTools.map((tool) => tool.cardId))
+      .toEqual(["local_stored_credits_tool"]);
+  });
+
   it("requires source evidence before marking search tools legal now", () => {
     const inputView = playerView("runner");
     inputView.own.rig = [

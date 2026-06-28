@@ -732,11 +732,7 @@ function economyBankToolForRecord(
 ): EconomyBankTool | undefined {
   const text = normalizedRecordText(record);
   const signals = [...record.roles, ...record.planRoles].join(" ").toLowerCase();
-  if (
-    !/broker|bank|stored credits|temporary_resource_bank|counter_bank/.test(
-      `${text} ${signals}`,
-    )
-  ) {
+  if (!deckCapabilityTextHasBankToolSignal(`${text} ${signals}`)) {
     return undefined;
   }
   const buildActionIds = (params.legalActions ?? [])
@@ -751,7 +747,7 @@ function economyBankToolForRecord(
   const cashOutActionLegal = cashOutActionIds.length > 0;
   const currentBankAmount = currentVisibleBankAmount(record.visibleCards);
   const structuredBank =
-    /temporary_resource_bank|counter_bank/.test(signals) ||
+    deckCapabilityTextHasStructuredBankRoleSignal(signals) ||
     currentBankAmount !== undefined;
   return {
     cardId: record.cardId,
@@ -767,7 +763,7 @@ function economyBankToolForRecord(
     ...(cashOutActionLegal && currentBankAmount !== undefined
       ? { estimatedPayout: currentBankAmount }
       : {}),
-    confidence: /temporary_resource_bank|counter_bank|broker/.test(`${text} ${signals}`)
+    confidence: deckCapabilityTextHasHighConfidenceBankSignal(`${text} ${signals}`)
       ? "high"
       : "medium",
     evidence: [
@@ -1003,6 +999,44 @@ function deckCapabilityTextHasHighConfidenceSearchSignal(text: string): boolean 
     deckCapabilityTokensIncludePhrase(tokens, ["program", "search"]) ||
     deckCapabilityTokensIncludePhrase(tokens, ["breaker", "search"]) ||
     deckCapabilityTokensIncludePhrase(tokens, ["search", "your", "stack"])
+  );
+}
+
+function deckCapabilityTextHasBankToolSignal(text: string): boolean {
+  const tokens = deckCapabilityTextTokens(text);
+  return (
+    deckCapabilityTokensIncludeAny(tokens, ["broker", "bank"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["stored", "credits"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, [
+      "temporary",
+      "resource",
+      "bank",
+    ]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["counter", "bank"])
+  );
+}
+
+function deckCapabilityTextHasStructuredBankRoleSignal(text: string): boolean {
+  const tokens = deckCapabilityTextTokens(text);
+  return (
+    deckCapabilityTokensIncludePhrase(tokens, [
+      "temporary",
+      "resource",
+      "bank",
+    ]) || deckCapabilityTokensIncludePhrase(tokens, ["counter", "bank"])
+  );
+}
+
+function deckCapabilityTextHasHighConfidenceBankSignal(text: string): boolean {
+  const tokens = deckCapabilityTextTokens(text);
+  return (
+    deckCapabilityTokensIncludeAny(tokens, ["broker"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, [
+      "temporary",
+      "resource",
+      "bank",
+    ]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["counter", "bank"])
   );
 }
 
