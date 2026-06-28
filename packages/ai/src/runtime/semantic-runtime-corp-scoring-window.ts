@@ -550,14 +550,15 @@ function scoringWindowSignalMatches(
   const normalized = signal.toLocaleLowerCase("en-US");
   return needles.some((needle) => {
     const normalizedNeedle = needle.toLocaleLowerCase("en-US");
-    return (
-      normalized === normalizedNeedle ||
-      normalized.startsWith(`${normalizedNeedle}_`) ||
-      normalized.endsWith(`_${normalizedNeedle}`) ||
-      normalized.includes(`_${normalizedNeedle}_`) ||
-      normalized.startsWith(`${normalizedNeedle}.`) ||
-      normalized.endsWith(`.${normalizedNeedle}`) ||
-      normalized.includes(`.${normalizedNeedle}.`)
+    if (normalized === normalizedNeedle) return true;
+    const tokens = normalized.split(/[._:-]+/).filter(Boolean);
+    const needleTokens = normalizedNeedle.split(/[._:-]+/).filter(Boolean);
+    if (needleTokens.length <= 1) return tokens.includes(normalizedNeedle);
+    return tokens.some((token, index) =>
+      token === needleTokens[0] &&
+      needleTokens.every(
+        (needleToken, offset) => tokens[index + offset] === needleToken,
+      ),
     );
   });
 }

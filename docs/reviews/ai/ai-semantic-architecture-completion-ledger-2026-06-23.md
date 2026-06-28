@@ -9439,6 +9439,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertdreiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ersetzt den lokalen Scoring-Window-Signalvergleich per manuellen `_`-/`.`-Delimiter-`includes(...)`-Prüfungen durch eine gebundene Delimiter-Tokenfolgenprüfung.
+  - Exakte und zusammengesetzte Signals wie `corp_ice.outer_ice_scaling`, `corp_ice.position_scaling`, `etr_ice`, `end_run`, `damage_ice` und `program_trash` bleiben wirksam; Suffix-Rauschen bleibt durch Delimiter-Tokenfolgen statt freier Teilstrings ausgeschlossen.
+  - Die Änderung bleibt auf Corp-Scoring-Window-ICE-Qualitätsbewertung aus bekannten Hint-Rollen, Planrollen und Tactic-Signals beschränkt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-scoring-window.test.ts` schützt die Score-Window-ICE-Qualität inklusive Position-Scaling-Evidence und Central-Pressure-Bounds; `semantic-runtime-corp-score.test.ts` sichert den Runtime-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-scoring-window.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 34 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
