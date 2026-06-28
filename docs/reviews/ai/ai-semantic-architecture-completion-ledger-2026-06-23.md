@@ -7534,6 +7534,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` dreiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/remote-trash-cost.ts` nutzt für dedizierte Remote-Trash-Credit-Mechaniken den gebundenen `rolesMatch`-Helper statt freier Mechanik-Substring-Prüfungen.
+  - Strukturierte Mechaniken wie `upgrade_trash_payment` und `node_trash_recurring_credit` bleiben wirksam; substringartiges Rauschen wie `upgrade_trash_paymentish_noise` und `node_trash_recurring_credited_noise` liefert keine dedizierten Trash-Credits mehr.
+  - `remote-trash-cost.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/remote-trash-cost.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

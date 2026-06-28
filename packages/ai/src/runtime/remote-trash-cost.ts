@@ -2,6 +2,7 @@ import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared"
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 import { actionCreditCost } from "./action-cost";
+import { rolesMatch } from "./role-match";
 
 export type RemoteTrashCostBucket = "0_1" | "2_3" | "4_5" | "6_plus";
 
@@ -52,14 +53,10 @@ export function remoteTrashDedicatedCreditsForMetrics(
       ];
       const supportsUpgradeTrash =
         accessed.type === "upgrade" &&
-        mechanics.some((mechanic: string) =>
-          mechanic.includes("upgrade_trash_payment"),
-        );
+        rolesMatch(mechanics, ["upgrade_trash_payment"]);
       const supportsAssetTrash =
         accessed.type === "asset" &&
-        mechanics.some((mechanic: string) =>
-          mechanic.includes("node_trash_recurring_credit"),
-        );
+        rolesMatch(mechanics, ["node_trash_recurring_credit"]);
       if (!supportsUpgradeTrash && !supportsAssetTrash) return sum;
       return (
         sum + (card.counters?.recurring_credit ?? 0) + (card.counters?.bit ?? 0)
