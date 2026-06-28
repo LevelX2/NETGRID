@@ -81,6 +81,31 @@ describe("projectRunnerRunActions", () => {
     ]);
   });
 
+  it("bounds scoped run signals to structured entries", () => {
+    const scoped = action({
+      actionId: "scoped-run",
+      label: "Use ability",
+      payload: {
+        runActionSignals: ["run", "scope:hq"],
+      } as unknown as LegalAction["payload"],
+    });
+    const noise = action({
+      actionId: "scoped-noise",
+      label: "Use ability",
+      payload: {
+        runActionSignals: ["runway", "scope:hq"],
+      } as unknown as LegalAction["payload"],
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([scoped, noise]),
+    });
+
+    expect(projections.map((projection) => projection.actionId)).toEqual([
+      "scoped-run",
+    ]);
+  });
+
   it("requires canonical structured server ids in payloads", () => {
     const labelLikeServer = action({
       actionId: "label-like-server",

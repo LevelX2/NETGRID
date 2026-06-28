@@ -239,13 +239,15 @@ function runActionRelevant(action: LegalAction, signals: readonly string[]): boo
   if (concretePayloadServerId(action) && explicitRunSignals) return true;
   if (explicitRunSignals) return true;
   if (
-    text.includes("run") &&
-    (text.includes("scope:archives") ||
-      text.includes("scope:hq") ||
-      text.includes("scope:rd") ||
-      text.includes("scope:rnd") ||
-      text.includes("scope:remote") ||
-      text.includes("target:hq_via_archives"))
+    runActionHasStructuredSignal(signals, ["run"]) &&
+    runActionHasStructuredSignal(signals, [
+      "scope:archives",
+      "scope:hq",
+      "scope:rd",
+      "scope:rnd",
+      "scope:remote",
+      "target:hq_via_archives",
+    ])
   ) {
     return true;
   }
