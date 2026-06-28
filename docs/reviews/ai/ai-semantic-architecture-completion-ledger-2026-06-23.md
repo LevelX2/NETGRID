@@ -7858,6 +7858,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertneunzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/central-pressure-card.ts` nutzt für R&D-, HQ- und Archives-Druckrollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-Prüfung.
+  - Strukturierte Rollen wie `pressure_rnd`, `support_hq_pressure` und `archives_pressure` bleiben wirksam; substringartiges Rauschen wie `pressure_rndish_noise` erzeugt keine Central-Pressure-Ziele mehr.
+  - `central-pressure-card.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/central-pressure-card.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
