@@ -217,23 +217,28 @@ function roleReadinessBonus(
   }, 0);
 }
 
-function targetOpportunityBonus(targetVector: StrategicTargetVector): number {
-  const evidence = targetVector.evidence.join("|");
-  if (targetVector.kind === "scoreline" && evidence.includes("legal_score:true")) {
+export function targetOpportunityBonus(targetVector: StrategicTargetVector): number {
+  if (
+    targetVector.kind === "scoreline" &&
+    targetVectorEvidenceHasFlag(targetVector, "legal_score:true")
+  ) {
     return 30;
   }
-  if (targetVector.kind === "scoreline" && evidence.includes("legal_advance:true")) {
+  if (
+    targetVector.kind === "scoreline" &&
+    targetVectorEvidenceHasFlag(targetVector, "legal_advance:true")
+  ) {
     return 14;
   }
   if (
     (targetVector.kind === "tag" || targetVector.kind === "damage") &&
-    !evidence.includes("target_reason:no_visible_semantic")
+    !targetVectorEvidenceHasFlag(targetVector, "target_reason:no_visible_semantic")
   ) {
     return 18;
   }
   if (
     (targetVector.kind === "central" || targetVector.kind === "remote") &&
-    !evidence.includes("target_legal_run:none")
+    !targetVectorEvidenceHasFlag(targetVector, "target_legal_run:none")
   ) {
     return 10;
   }
@@ -241,6 +246,13 @@ function targetOpportunityBonus(targetVector: StrategicTargetVector): number {
     return 4;
   }
   return 0;
+}
+
+function targetVectorEvidenceHasFlag(
+  targetVector: StrategicTargetVector,
+  flag: string,
+): boolean {
+  return targetVector.evidence.includes(flag);
 }
 
 function reserveReadinessBonus(reserve: StrategicReserveRequirement): number {

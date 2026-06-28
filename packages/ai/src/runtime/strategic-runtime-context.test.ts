@@ -10,7 +10,10 @@ import type {
   DeckStrategyRuntimeStatus,
   DeckStrategyScore,
 } from "../deck-doctrine-strategy";
-import { buildStrategicRuntimeContext } from "./strategic-runtime-context";
+import {
+  buildStrategicRuntimeContext,
+  targetOpportunityBonus,
+} from "./strategic-runtime-context";
 
 describe("strategic runtime context", () => {
   it("derives Runner roles, central target and reserve from runtime facts", () => {
@@ -192,6 +195,45 @@ describe("strategic runtime context", () => {
         (candidate) => candidate.strategyId,
       ),
     ).toContain("corp.tag_trace_punish");
+  });
+
+  it("scores target opportunity evidence by exact flags", () => {
+    expect(
+      targetOpportunityBonus({
+        kind: "scoreline",
+        evidence: ["legal_score:true"],
+      }),
+    ).toBe(30);
+    expect(
+      targetOpportunityBonus({
+        kind: "scoreline",
+        evidence: ["not_legal_score:true_noise", "legal_advance:trueish_noise"],
+      }),
+    ).toBe(0);
+    expect(
+      targetOpportunityBonus({
+        kind: "damage",
+        evidence: ["not_target_reason:no_visible_semantic_noise"],
+      }),
+    ).toBe(18);
+    expect(
+      targetOpportunityBonus({
+        kind: "damage",
+        evidence: ["target_reason:no_visible_semantic"],
+      }),
+    ).toBe(0);
+    expect(
+      targetOpportunityBonus({
+        kind: "remote",
+        evidence: ["not_target_legal_run:none_noise"],
+      }),
+    ).toBe(10);
+    expect(
+      targetOpportunityBonus({
+        kind: "remote",
+        evidence: ["target_legal_run:none"],
+      }),
+    ).toBe(0);
   });
 });
 

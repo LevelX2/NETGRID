@@ -8436,6 +8436,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertdreiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/strategic-runtime-context.ts` bewertet Strategic-Target-Evidence über exakte Evidence-Flags statt `targetVector.evidence.join("|").includes(...)`-Substring-Prüfungen.
+  - Strukturierte Flags wie `legal_score:true`, `target_reason:no_visible_semantic` und `target_legal_run:none` bleiben wirksam; Rauschen wie `not_legal_score:true_noise`, `legal_advance:trueish_noise` und `not_target_legal_run:none_noise` bleibt wirkungslos.
+  - `strategic-runtime-context.test.ts` schützt positive und negative Target-Opportunity-Bonus-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/strategic-runtime-context.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
