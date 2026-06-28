@@ -102,8 +102,6 @@ export function projectInternalRunnerRunActions(
       if (!targetKind) continue;
       const accessServerId = accessServerIdForRunAction(
         action,
-        candidate,
-        hint,
         signals,
         targetServerId,
       );
@@ -405,7 +403,11 @@ function targetServerIdsForRunAction(
   if (
     targetIds.length === 0 &&
     resolvedTargets.includes("archives") &&
-    signals.some((signal) => signal.toLowerCase().includes("hq_via_archives"))
+    runActionHasStructuredSignal(signals, [
+      "target:hq_via_archives",
+      "access.hq_via_archives",
+      "hq_via_archives",
+    ])
   ) {
     resolvedTargets = resolvedTargets.filter((targetId) => targetId !== "hq");
   }
@@ -416,8 +418,6 @@ function targetServerIdsForRunAction(
 
 function accessServerIdForRunAction(
   action: LegalAction,
-  candidate: ActionSemanticCandidate | undefined,
-  hint: AiCardHint | undefined,
   signals: readonly string[],
   targetServerId: string,
 ): string | undefined {
@@ -431,19 +431,13 @@ function accessServerIdForRunAction(
     .find((value): value is string => value !== undefined);
   if (direct) return direct;
 
-  const text = [
-    payloadSearchText(action),
-    signals.join(" "),
-    hint?.cardId ?? "",
-    candidate?.semanticActionType ?? "",
-  ]
-    .join(" ")
-    .toLowerCase();
   if (
     targetServerId === "archives" &&
-    (text.includes("target:hq_via_archives") ||
-      text.includes("access.hq_via_archives") ||
-      text.includes("hq_via_archives"))
+    runActionHasStructuredSignal(signals, [
+      "target:hq_via_archives",
+      "access.hq_via_archives",
+      "hq_via_archives",
+    ])
   ) {
     return "hq";
   }

@@ -167,6 +167,44 @@ describe("projectRunnerRunActions", () => {
     );
   });
 
+  it("bounds hq-via-archives override signals to structured entries", () => {
+    const hqViaArchives = action({
+      actionId: "hq-via-archives",
+      payload: {
+        runActionSignals: ["run", "scope:archives", "target:hq_via_archives"],
+      } as unknown as LegalAction["payload"],
+    });
+    const noise = action({
+      actionId: "hq-via-archives-noise",
+      payload: {
+        runActionSignals: [
+          "run",
+          "scope:archives",
+          "target:hq_via_archivesish",
+        ],
+      } as unknown as LegalAction["payload"],
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([hqViaArchives, noise]),
+    });
+    const hqViaArchivesProjection = projections.find(
+      (projection) => projection.actionId === "hq-via-archives",
+    );
+    const noiseProjection = projections.find(
+      (projection) => projection.actionId === "hq-via-archives-noise",
+    );
+
+    expect(hqViaArchivesProjection).toMatchObject({
+      targetServerId: "archives",
+      accessServerId: "hq",
+    });
+    expect(noiseProjection).toMatchObject({
+      targetServerId: "archives",
+    });
+    expect(noiseProjection?.accessServerId).toBeUndefined();
+  });
+
   it("requires canonical structured server ids in payloads", () => {
     const labelLikeServer = action({
       actionId: "label-like-server",

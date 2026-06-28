@@ -7840,6 +7840,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsiebzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` nutzt für HQ-via-Archives-Target- und Access-Override-Signale exakte strukturierte Signalvergleiche statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `target:hq_via_archives` bleiben wirksam; substringartiges Rauschen wie `target:hq_via_archivesish` erzeugt keinen HQ-Access-Override mehr.
+  - `run-action-projection.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Datei, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
