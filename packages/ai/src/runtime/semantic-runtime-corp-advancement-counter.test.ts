@@ -49,6 +49,28 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
       "advancement_target_class:counter_cashout_credit",
     );
   });
+
+  it("derives access net-damage ambushes from bounded rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText(
+      "Do 2 net damage when accessed.",
+    );
+
+    expect(assessment?.advancementWitness).toBe("access_net_damage_ambush");
+    expect(assessment?.evidence).toContain(
+      "advancement_target_class:access_net_damage_ambush",
+    );
+  });
+
+  it("ignores net-damage ambush substring noise in rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText(
+      "Do 2 internet damage when accessed.",
+    );
+
+    expect(assessment?.advancementWitness).toBe("none");
+    expect(assessment?.evidence).not.toContain(
+      "advancement_target_class:access_net_damage_ambush",
+    );
+  });
 });
 
 function assessmentForAgendaRulesText(agendaRulesText: string) {

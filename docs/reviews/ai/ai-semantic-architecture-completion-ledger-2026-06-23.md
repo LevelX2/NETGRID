@@ -8856,6 +8856,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertachtundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ersetzt die Ambush-Klassifizierung für Advancement-Ziele durch gebundene Rules-Text-Tokens.
+  - `net damage`, `brain damage`, `core damage`, Programm-Trash und Hardware-Trash bleiben als Ambush-Signale wirksam; Substring-Rauschen wie `internet damage` wird nicht mehr als Net-Damage-Ambush gelesen.
+  - Die Klassifizierung bleibt auf sichtbaren normalisierten Rules-Text begrenzt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-advancement-counter.test.ts` schützt positive Net-Damage-Ambush-Erkennung und den negativen `internet damage`-Grenzfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-advancement-counter.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
