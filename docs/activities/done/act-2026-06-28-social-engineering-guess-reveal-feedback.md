@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-06-28-social-engineering-guess-reveal-feedback
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: normal
@@ -8,12 +8,16 @@ primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-28
 startedAt:
-completedAt:
+completedAt: 2026-06-28
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/releases/card-release-smokes.test.ts -t "Social Engineering"
 ---
 
 # Social Engineering Guess-Auflösung sichtbar machen
@@ -50,12 +54,12 @@ Nach dem Korp-Guess bei `Social Engineering` soll die Oberfläche den aufgedeckt
 
 ## Akzeptanzkriterien
 
-- [ ] Vor dem Korp-Guess bleibt der vom Runner verdeckt gesetzte Betrag für die Korp verborgen.
-- [ ] Nach dem Korp-Guess ist im Spiel-UI sichtbar, welchen Betrag der Runner versteckt hat und welchen Betrag die Korp geraten hat.
-- [ ] Correct-Guess-Fall: UI/Chronik nennt, dass die Korp richtig geraten hat und der Runner den versteckten Betrag verliert.
-- [ ] Wrong-Guess-Fall: UI/Chronik nennt, dass die Korp falsch geraten hat und der Runner Server plus ICE für den Auto-Pass-Run wählen darf.
-- [ ] Nach der Zielwahl bleibt sichtbar, welcher Datafort und welches ICE gewählt wurden und dass dieses ICE automatisch passiert wurde.
-- [ ] Mindestens ein fokussierter Test deckt die sichtbare Darstellung und die Hidden-Info-Grenze ab; wenn bestehende Tests bereits genügen, wird das im Ergebnis notiert.
+- [x] Vor dem Korp-Guess bleibt der vom Runner verdeckt gesetzte Betrag für die Korp verborgen.
+- [x] Nach dem Korp-Guess ist im Spiel-UI sichtbar, welchen Betrag der Runner versteckt hat und welchen Betrag die Korp geraten hat.
+- [x] Correct-Guess-Fall: UI/Chronik nennt, dass die Korp richtig geraten hat und der Runner den versteckten Betrag verliert.
+- [x] Wrong-Guess-Fall: UI/Chronik nennt, dass die Korp falsch geraten hat und der Runner Server plus ICE für den Auto-Pass-Run wählen darf.
+- [x] Nach der Zielwahl bleibt sichtbar, welcher Datafort und welches ICE gewählt wurden und dass dieses ICE automatisch passiert wurde.
+- [x] Mindestens ein fokussierter Test deckt die sichtbare Darstellung und die Hidden-Info-Grenze ab; wenn bestehende Tests bereits genügen, wird das im Ergebnis notiert.
 
 ## Umsetzungshinweise
 
@@ -66,4 +70,4 @@ Nach dem Korp-Guess bei `Social Engineering` soll die Oberfläche den aufgedeckt
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. `apps/web/app/chronicle.ts` liest neben den alten Social-Engineering-Aliasnamen jetzt die echten Engine-/PublicPayload-Felder `secretSpendGuessRunGuessCorrect` und `secretSpendGuessRunNoIceTarget`. `apps/web/app/chronicle.test.ts` deckt die realistischen Payloads für Wrong Guess, Correct Guess, No-ICE und Zielwahl ab. Die bestehende Engine-Smoke-Abdeckung für Hidden-Choice, Correct-Guess-Creditverlust und Wrong-Guess-Auto-Pass blieb grün.

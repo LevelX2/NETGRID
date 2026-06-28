@@ -339,19 +339,23 @@ export function formatChronicleEvent(
         payload.socialEngineeringRun === true ||
         payloadBooleanValue(payload, "socialEngineeringGuessCorrect") !==
           undefined ||
+        payloadBooleanValue(payload, "secretSpendGuessRunGuessCorrect") !==
+          undefined ||
         payloadBooleanValue(payload, "autoPassChosenIce") === true ||
-        payloadBooleanValue(payload, "socialEngineeringNoIceTarget") === true
+        payloadBooleanValue(payload, "socialEngineeringNoIceTarget") === true ||
+        payloadBooleanValue(payload, "secretSpendGuessRunNoIceTarget") === true
       ) {
         const hiddenAmount = payloadNumberValue(
           payload,
           "secretHiddenAmountRevealed",
         );
         const guessAmount = payloadNumberValue(payload, "secretGuessAmount");
-        const guessCorrect = payloadBooleanValue(
-          payload,
-          "socialEngineeringGuessCorrect",
-        );
+        const guessCorrect =
+          payloadBooleanValue(payload, "secretSpendGuessRunGuessCorrect") ??
+          payloadBooleanValue(payload, "socialEngineeringGuessCorrect");
         const noIceTarget =
+          payloadBooleanValue(payload, "secretSpendGuessRunNoIceTarget") ===
+            true ||
           payloadBooleanValue(payload, "socialEngineeringNoIceTarget") === true;
         const autoPassChosenIce =
           payloadBooleanValue(payload, "autoPassChosenIce") === true ||
