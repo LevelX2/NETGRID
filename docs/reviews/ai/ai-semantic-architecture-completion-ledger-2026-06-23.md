@@ -7642,6 +7642,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` fünfundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-run-action-matching.ts` nutzt für `path blocked`-Run-Blocker eine gebundene Phrase-Regex statt freier Text-Substring-Prüfung.
+  - Das strukturierte Signal `path blocked` blockiert weiterhin Run-Action-Matching; substringartiges Rauschen wie `path blockedness noise` blockiert strukturierte Run-Aktionen nicht mehr.
+  - `tactical-plan-run-action-matching.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-run-action-matching.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

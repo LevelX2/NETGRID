@@ -37,6 +37,38 @@ describe("runPlanStepMatchesAction", () => {
       ),
     ).toBe(true);
   });
+
+  it("matches path blocked markers by bounded phrase", () => {
+    const step = { kind: "run_target" } as PlanStep;
+    const actionTypeMatchesStep = () => true;
+    const action = legalAction({
+      actionId: "structured-run",
+      payload: { serverId: "hq", runActionSignals: "make_run" },
+    });
+
+    expect(
+      runPlanStepMatchesAction(
+        step,
+        candidate({
+          actionId: action.actionId,
+          evidence: ["path blocked"],
+        }),
+        action,
+        actionTypeMatchesStep,
+      ),
+    ).toBe(false);
+    expect(
+      runPlanStepMatchesAction(
+        step,
+        candidate({
+          actionId: action.actionId,
+          evidence: ["path blockedness noise"],
+        }),
+        action,
+        actionTypeMatchesStep,
+      ),
+    ).toBe(true);
+  });
 });
 
 function legalAction(overrides: Partial<LegalAction>): LegalAction {

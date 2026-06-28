@@ -31,7 +31,7 @@ function actionCandidateCanStartRun(
     action.type,
     JSON.stringify(action.payload ?? {}),
   ].join(" ").toLowerCase();
-  if (text.includes("path blocked")) return false;
+  if (/\bpath\s+blocked\b/.test(text)) return false;
   return /start_run|make_run|make a run|bonus_run|followup_run|run_event|run_action|extra_run|run_bypass|bypass_first_ice|server_specific_|future_run_effect|run_pressure/.test(
     text,
   );
