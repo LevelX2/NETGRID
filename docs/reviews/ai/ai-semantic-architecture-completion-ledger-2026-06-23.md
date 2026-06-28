@@ -9379,6 +9379,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsiebenundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/semantic-shadow-league.ts` ersetzt den Shadow-League-Dry-Run-Textklassifizierer per `segment.includes(...)` durch gebundene `_`-Token- und Tokenfolgenprüfung.
+  - Exakte Tokens und Phrasen wie `remote` in `remote_run` und `structured_alignment_required` bleiben wirksam; Suffix-Rauschen wie `notremote` oder `structured_alignment_requiredish` wird nicht gezählt.
+  - Die Änderung bleibt report-only Shadow-League-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `semantic-shadow-league.test.ts` schützt die bestehenden Runner-Safe-Access-Dry-Run-Klassifizierer inklusive positiver und negativer Textfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/semantic-shadow-league.test.ts -t "bounds runner safe access dry-run text classifiers"` grün, 1 Datei, 1 Test, 6 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
