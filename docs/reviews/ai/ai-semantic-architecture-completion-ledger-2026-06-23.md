@@ -7397,6 +7397,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` achtundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-candidate-matching.ts` bewertet Bank-Step-Kandidaten nicht mehr über zusammengefügten Signaltext mit freien `includes`-Treffern.
+  - Build-/Cashout-Bank-Schritte prüfen strukturierte Candidate-Signale einzeln auf gebundene `bank`-, `cash`- und `payout`-Terme; Payload-Flags für hosted-credit Add/Take bleiben unverändert wirksam.
+  - Strukturierte Signale wie `cash_out_credit_bank` bleiben passend; substringartiges Rauschen wie `bankroll_noise`, `cashier_noise` und `payoutish_noise` erzeugt keinen Bank-Step-Match mehr.
+  - `tactical-plan-candidate-matching.test.ts` schützt strukturierte Treffer, Label-only-Text, Payload-Fälle und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-candidate-matching.test.ts src/plans/tactical-plan-runner-plans.test.ts src/plans/tactical-plan-bank-tools.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
