@@ -72,7 +72,10 @@ export function semanticRuntimeCoverageSelectionDebug(
 }
 
 function sourceIdentityHasMantisToken(sourceIdentity: string): boolean {
-  return /(^|[^a-z0-9])mantis([^a-z0-9]|$)/.test(sourceIdentity);
+  return sourceIdentity
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean)
+    .includes("mantis");
 }
 
 function semanticRuntimeCoverageAnswerRoleFromMapping(

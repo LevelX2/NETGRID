@@ -8816,6 +8816,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertvierundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/diagnostics/coverage-selection-debug.ts` erkennt Mantis-Coverage-Diagnostik über alphanumerische Tokens statt über eine Boundary-Regex.
+  - `mantis-card` und Definition-IDs mit eigenem `mantis`-Token bleiben wirksam; Rauschen wie `romantis-card` und `mantisish-card` bleibt wirkungslos.
+  - Der Pfad bleibt diagnostisch und erzeugt keine Action-Auswahl oder LegalAction-Projektion.
+  - `coverage-selection-debug.test.ts` schützt die positive Mantis-Evidence und negative Substring-/Suffix-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/diagnostics/coverage-selection-debug.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

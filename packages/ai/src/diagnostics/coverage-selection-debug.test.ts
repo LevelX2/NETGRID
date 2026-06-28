@@ -7,6 +7,7 @@ describe("semanticRuntimeCoverageSelectionDebug", () => {
   it("matches Mantis source identities by bounded token", () => {
     const mantisDebug = debugForSource("mantis-card");
     const noiseDebug = debugForSource("romantis-card");
+    const suffixNoiseDebug = debugForSource("mantisish-card");
 
     expect(mantisDebug?.evidence).toEqual(
       expect.arrayContaining([
@@ -14,6 +15,9 @@ describe("semanticRuntimeCoverageSelectionDebug", () => {
       ]),
     );
     expect(noiseDebug?.evidence).not.toContain(
+      "why_mantis_selected:searches_for_required_breaker_coverage",
+    );
+    expect(suffixNoiseDebug?.evidence).not.toContain(
       "why_mantis_selected:searches_for_required_breaker_coverage",
     );
   });
