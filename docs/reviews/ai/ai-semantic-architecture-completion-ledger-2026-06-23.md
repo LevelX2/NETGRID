@@ -8553,6 +8553,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsechsundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-coverage-card-roles.ts` klassifiziert Coverage-Search-Rollen für sichtbare Karten und Demo-Definitionen über gebundene Tokens und `gain <Zahl>`-Prüfung statt Regex-Substring-Suche auf zusammengefügtem Kartentext.
+  - Echte Rollen-Tokens wie `search`, `tutor`, `draw`, `credit`, `credits`, `economy`, `gain_credits` und `gain 3` bleiben wirksam; Rauschen wie `Searching drawish creditor gainish 3` bleibt wirkungslos.
+  - `tactical-plan-coverage-card-roles.test.ts` schützt positive Such-/Draw-/Economy-Rollen und negative Substring-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-coverage-card-roles.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
