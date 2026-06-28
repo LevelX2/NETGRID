@@ -8139,6 +8139,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/target-choice-shadow.ts` kapselt Hidden-Info-Evidence-Erkennung in `targetChoiceEvidenceHasHiddenInfoMarker` statt freier `includes("hidden_info")`-Suche.
+  - Strukturierte Marker wie `hidden_info` und `target_context:hidden_info_blocked` bleiben wirksam; Rauschen wie `not_hidden_info_noise` und `hidden_information_noise` blockiert keine Dry-Run-Auswahl.
+  - `target-choice-shadow.test.ts` schützt positive Hidden-Info-Marker und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/target-choice-shadow.test.ts` grün, 1 Datei, 19 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -5,6 +5,7 @@ import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redacti
 import {
   TARGET_CHOICE_SHADOW_SCHEMA_VERSION,
   buildTargetChoiceShadowReport,
+  targetChoiceEvidenceHasHiddenInfoMarker,
   targetChoiceRecommendationForTargetFit,
   targetChoiceWouldSelectForAccessDecisionProjection,
 } from "./target-choice-shadow";
@@ -537,6 +538,21 @@ describe("TargetChoiceShadow", () => {
       topOption: undefined,
     });
     expect(report.selectionOutput.wouldSelect).toBeUndefined();
+  });
+
+  it("matches hidden-info evidence by bounded marker terms", () => {
+    expect(targetChoiceEvidenceHasHiddenInfoMarker("hidden_info")).toBe(true);
+    expect(
+      targetChoiceEvidenceHasHiddenInfoMarker(
+        "target_context:hidden_info_blocked",
+      ),
+    ).toBe(true);
+    expect(
+      targetChoiceEvidenceHasHiddenInfoMarker("not_hidden_info_noise"),
+    ).toBe(false);
+    expect(
+      targetChoiceEvidenceHasHiddenInfoMarker("hidden_information_noise"),
+    ).toBe(false);
   });
 
   it("does not emit wouldSelect for ambiguous top options", () => {
