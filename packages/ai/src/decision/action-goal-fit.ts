@@ -301,12 +301,8 @@ function semanticHasTerm(semantic: string, term: string): boolean {
 }
 
 function semanticSegmentHasTerm(segment: string, term: string): boolean {
-  return (
-    segment === term ||
-    segment.startsWith(`${term}_`) ||
-    segment.endsWith(`_${term}`) ||
-    segment.includes(`_${term}_`)
-  );
+  if (segment === term) return true;
+  return segment.split("_").filter(Boolean).includes(term);
 }
 
 function fitStatusForScore(
