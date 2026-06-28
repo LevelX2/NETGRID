@@ -45,13 +45,26 @@ describe("visible card heuristics", () => {
         mechanics: ["again_credits_noise"],
       }),
     ).toBe(false);
+    expect(
+      runnerCardLooksLikeCreditPayout(
+        card({ rulesText: "Gain [3] credits." }),
+        undefined,
+      ),
+    ).toBe(true);
+    expect(
+      runnerCardLooksLikeCreditPayout(
+        card({ rulesText: "Regain [3] creditsish." }),
+        undefined,
+      ),
+    ).toBe(false);
   });
 });
 
-function card(): VisibleCard {
+function card(overrides: Partial<VisibleCard> = {}): VisibleCard {
   return {
     instanceId: "card",
     known: true,
     rulesText: "",
+    ...overrides,
   } as VisibleCard;
 }

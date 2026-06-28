@@ -105,8 +105,31 @@ export function runnerCardLooksLikeCreditPayout(
   if (rolesMatch(mechanics, ["gain_credits"])) {
     return true;
   }
-  return /gain\s+\[?\d+\]?\s+credits/i.test(
-    visibleCardText(card, definition),
+  return visibleTextIncludesGainCredits(visibleCardText(card, definition));
+}
+
+function visibleTextIncludesGainCredits(text: string): boolean {
+  const tokens = visibleTextTokens(text);
+  return tokens.some(
+    (token, index) =>
+      token === "gain" &&
+      tokenIsDigits(tokens[index + 1]) &&
+      tokens[index + 2] === "credits",
+  );
+}
+
+function visibleTextTokens(text: string): string[] {
+  return text
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 0);
+}
+
+function tokenIsDigits(token: string | undefined): boolean {
+  return (
+    token !== undefined &&
+    token.length > 0 &&
+    [...token].every((character) => character >= "0" && character <= "9")
   );
 }
 

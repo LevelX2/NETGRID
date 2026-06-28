@@ -8598,6 +8598,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihunderterster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/visible-card-heuristics.ts` erkennt Runner-Credit-Payout-RulesText über gebundene `gain <Zahl> credits`-Tokens statt Regex auf sichtbarem Kartentext.
+  - Strukturierte Mechanics wie `gain_credits` bleiben wirksam; sichtbarer Text wie `Gain [3] credits` bleibt wirksam; Rauschen wie `Regain [3] creditsish` bleibt wirkungslos.
+  - `visible-card-heuristics.test.ts` schützt positive Mechanics-/RulesText-Fälle und negative Mechanics-/Text-Substring-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/visible-card-heuristics.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
