@@ -237,6 +237,16 @@ const SELFPLAY_SEVERITY_RANK: Record<AiSelfplaySuspicionSeverity, number> = {
   low: 3,
 };
 
+const SELFPLAY_HIDDEN_INFO_MARKERS = [
+  ...FORBIDDEN_AI_INPUT_FIELDS.map((field) => field.toLocaleLowerCase("en-US")),
+  "aiinput",
+  "decisiondebug",
+  "aidecisiondebug",
+  "fullstate",
+  "decklist",
+  "deckorder",
+] as const;
+
 export function detectAiSelfplaySuspiciousDecisions(
   summaries: AiSimulationSummary[],
   options: AiSelfplayTraceMiningDetectorOptions = {},
@@ -1731,17 +1741,7 @@ function sanitizeSelfplayText(value: unknown): string | undefined {
 export function isSelfplayTraceRedactionSafe(value: unknown): boolean {
   const serialized = JSON.stringify(value);
   if (!serialized) return true;
-  if (
-    FORBIDDEN_AI_INPUT_FIELDS.some((needle) =>
-      serialized
-        .toLocaleLowerCase("en-US")
-        .includes(needle.toLocaleLowerCase("en-US")),
-    )
-  )
-    return false;
-  return !/\b(?:AIInput|DecisionDebug|aiDecisionDebug|decisionDebug|privatePayload|cardInstances|fullGameState|FullState|sessionToken|reconnectToken|joinToken|tokenHash|decklist|deckOrder)\b/i.test(
-    serialized,
-  );
+  return !selfplayTraceContainsHiddenInfoMarker(serialized);
 }
 
 function selfplayFixtureName(
@@ -1758,6 +1758,34 @@ function isRemoteServerTarget(serverId: string | undefined): boolean {
 
 function sortedUnique(values: string[]): string[] {
   return [...new Set(values)].sort();
+}
+
+function selfplayTraceContainsHiddenInfoMarker(value: string): boolean {
+  const tokenSet = new Set(selfplayTraceHiddenInfoTokens(value));
+  return SELFPLAY_HIDDEN_INFO_MARKERS.some((marker) => tokenSet.has(marker));
+}
+
+function selfplayTraceHiddenInfoTokens(value: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of value) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character.toLocaleLowerCase("en-US");
+    } else {
+      if (current.length > 0) tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "A" && character <= "Z") ||
+    (character >= "0" && character <= "9")
+  );
 }
 
 function fnv1a(value: string): string {

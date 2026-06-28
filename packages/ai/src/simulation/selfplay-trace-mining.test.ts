@@ -750,6 +750,13 @@ describe("SelfplayTraceMining", () => {
     ).toEqual(["safe_fact"]);
     expect(isSelfplayTraceRedactionSafe({ cardInstances: [] })).toBe(false);
   });
+
+  it("bounds redaction markers to exact selfplay trace tokens", () => {
+    expect(
+      safeSelfplayFacts(["privatePayloadish:ok", "deckOrderish:ok"]),
+    ).toEqual(["deckOrderish:ok", "privatePayloadish:ok"]);
+    expect(isSelfplayTraceRedactionSafe({ cardInstancesish: [] })).toBe(true);
+  });
 });
 
 function selfplaySummary(

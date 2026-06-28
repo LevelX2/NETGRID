@@ -9258,6 +9258,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertfünfundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt den Selfplay-Trace-Redaction-Safety-Regex und die breite `FORBIDDEN_AI_INPUT_FIELDS`-Substring-Prüfung durch gebundene Hidden-Info-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `sessionToken`, `fullGameState`, `AIInput`, `DecisionDebug`, `tokenHash`, `decklist` und `deckOrder` bleiben blockiert; Suffix-Rauschen wie `cardInstancesish`, `privatePayloadish:ok` oder `deckOrderish:ok` bleibt redaction-safe.
+  - Die Erkennung bleibt reine Selfplay-Trace-Mining-Redaction-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 28 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
