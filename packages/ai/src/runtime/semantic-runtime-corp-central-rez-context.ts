@@ -146,7 +146,7 @@ export function createSemanticRuntimeCorpCentralRezContext(
 
   const semanticRuntimeCorpExistingCentralRezFloorAssessment = (
     input: AiDecisionInput,
-    serverId: CentralServerId,
+    serverId: CorpCentralServerId,
   ): {
     rezFloor: number;
     blockedByFloor: boolean;

@@ -89,8 +89,10 @@ export function createCorpTaggedPayoffWindowContext(
       input,
       action.actionId,
     );
-    const visibleMeatPayoff = dependencies.visibleMeatDamagePayoff(input);
-    if (!availablePayoff && !visibleMeatPayoff) return undefined;
+    if (!availablePayoff) return undefined;
+    const availableDamagePayoff =
+      availablePayoff.kind === "damage" ||
+      availablePayoff.evidence.includes("corp_tagged_meat_damage_payoff:true");
     let passiveKind: string | undefined;
     let value = 0;
     let key = "corp_tagged_payoff_window_passive_penalty";
@@ -111,7 +113,7 @@ export function createCorpTaggedPayoffWindowContext(
       passiveKind = "install_setup";
       value = input.playerView.opponent.tags >= 7 ? -1800 : -800;
       key =
-        input.playerView.opponent.tags >= 7 || visibleMeatPayoff
+        input.playerView.opponent.tags >= 7 || availableDamagePayoff
           ? "corp_tag_punish_endgame_slow_setup_penalty"
           : key;
     } else if (action.type === "rez_ice") {
@@ -138,7 +140,6 @@ export function createCorpTaggedPayoffWindowContext(
               ...availablePayoff.evidence,
             ]
           : []),
-        ...(visibleMeatPayoff ? ["corp_visible_meat_damage_payoff:true"] : []),
         ...(tagSourceAvailable
           ? ["immediate_operation_tag_source_available:true"]
           : []),

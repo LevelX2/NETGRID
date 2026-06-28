@@ -24,11 +24,12 @@ export type CorpCentralPressureAssessment = {
 
 type AiCardHintWithSignals = AiCardHint & {
   tacticSignals?: readonly string[];
-  effects?: ReadonlyArray<{
-    kind?: string;
-    scope?: string;
-    target?: string;
-  }>;
+};
+
+type HintEffectWithTarget = {
+  kind?: string;
+  scope?: string;
+  target?: string;
 };
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
@@ -217,11 +218,11 @@ function visibleCardProvidesCentralMultiaccess(
     return true;
   }
   if (
-    hint?.effects?.some(
+    hintEffectsWithTarget(hint).some(
       (effect) =>
         effect.kind === "multiaccess" &&
         (effect.scope === serverId || effect.target === serverId),
-    ) === true
+    )
   ) {
     return true;
   }
@@ -244,6 +245,18 @@ function visibleCardProvidesCentralMultiaccess(
     visibleTextHasToken(text, "rd") ||
     visibleTextHasToken(text, "rnd")
   );
+}
+
+function hintEffectsWithTarget(
+  hint: AiCardHintWithSignals | undefined,
+): HintEffectWithTarget[] {
+  const effects = (hint as { effects?: unknown } | undefined)?.effects;
+  return Array.isArray(effects)
+    ? effects.filter(
+        (effect): effect is HintEffectWithTarget =>
+          typeof effect === "object" && effect !== null,
+      )
+    : [];
 }
 
 function visibleRunnerRunCreditPool(rig: readonly VisibleCard[]): number {

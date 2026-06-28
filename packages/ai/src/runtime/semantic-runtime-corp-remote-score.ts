@@ -286,7 +286,9 @@ function semanticRuntimeCorpCentralIceProfile(card: VisibleCard | undefined): {
     ) === true;
   const hintTacticSignals = semanticRuntimeCorpHintTacticSignals(hint);
   const positionDependent =
-    hint?.riskTags?.includes("position_dependent_ice") === true ||
+    semanticRuntimeCorpHintRiskTags(hint).includes(
+      "position_dependent_ice",
+    ) ||
     hintTacticSignals.some((signal) =>
       roleMatchesAny(signal, ["position_scaling", "outer_ice_scaling"]),
     ) ||
@@ -367,6 +369,15 @@ function semanticRuntimeCorpHintTacticSignals(
 ): string[] {
   const value = (hint as { tacticSignals?: unknown } | undefined)
     ?.tacticSignals;
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+function semanticRuntimeCorpHintRiskTags(
+  hint: ReturnType<typeof AI_HINTS_BY_CARD.get>,
+): string[] {
+  const value = (hint as { riskTags?: unknown } | undefined)?.riskTags;
   return Array.isArray(value)
     ? value.filter((entry): entry is string => typeof entry === "string")
     : [];

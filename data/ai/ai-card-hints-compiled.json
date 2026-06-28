@@ -29088,7 +29088,8 @@
       },
       "riskTags": [
         "damage_window",
-        "hidden_ice"
+        "hidden_ice",
+        "position_dependent_ice"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29117,6 +29118,9 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "manualNotes": [
+        "Bug Zapper's damage scales with rezzed outside ICE; solo Bug Zapper should not be treated as durable central or remote tax when visible Killer coverage can break it."
       ]
     },
     {
@@ -29406,7 +29410,8 @@
         "defense": 2
       },
       "riskTags": [
-        "hidden_ice"
+        "hidden_ice",
+        "credit_reserve"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -29444,6 +29449,9 @@
             "option_with_no_visible_current_payoff"
           ]
         }
+      ],
+      "manualNotes": [
+        "Credit Blocks needs the extra-credit wall mode to dodge visible Killer-only coverage; if Corp cannot pay base rez plus 1, sentry mode remains contestable."
       ]
     },
     {
@@ -29906,6 +29914,7 @@
       },
       "riskTags": [
         "hidden_ice",
+        "position_dependent_ice",
         "tag_window",
         "trace_window"
       ],
@@ -29934,6 +29943,9 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "manualNotes": [
+        "Hunting Pack needs rezzed outside ICE before its trace subroutines exist; solo Hunting Pack is setup, not durable protection."
       ]
     },
     {
@@ -30338,7 +30350,8 @@
       },
       "riskTags": [
         "damage_window",
-        "hidden_ice"
+        "hidden_ice",
+        "same_fort_reposition"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -30378,6 +30391,9 @@
             "hidden_info_dependent_choice"
           ]
         }
+      ],
+      "manualNotes": [
+        "Mobile Barricade only repositions within the same data fort; do not count it as fixing an unrelated weak server or empty remote."
       ],
       "effects": [
         {
