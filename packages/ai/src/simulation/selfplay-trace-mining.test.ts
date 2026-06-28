@@ -5,6 +5,7 @@ import {
   extractAiSelfplayDecisionPoints,
   isSelfplayTraceRedactionSafe,
   safeSelfplayFacts,
+  summarizeSelfplayActionLimitSubclusters,
 } from "./selfplay-trace-mining";
 
 describe("SelfplayTraceMining", () => {
@@ -432,6 +433,30 @@ describe("SelfplayTraceMining", () => {
 
     expect(findings).toHaveLength(1);
     expect(findings[0]?.selectedActionId).toBe("run-mismatch-noise");
+  });
+
+  it("bounds Corp late-credit reserve explanations to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("corp", 1, "gain_credit", {
+        selectedActionId: "corp-reserve-positive",
+        debugFacts: ["corpRezReserve:true", "protection:central"],
+        corpScoreTerminalWindowScoreLegal: true,
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("corp", 1, "gain_credit", {
+        selectedActionId: "corp-reserve-noise",
+        debugFacts: ["corpRezReserveish:true", "protectionist_noise"],
+        corpScoreTerminalWindowScoreLegal: true,
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      corp_late_gain_credit_real_rez_or_protection_reserve: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      corp_late_gain_credit_without_rez_score_protection_need: 1,
+    });
   });
 
   it("drops forbidden debug facts during redaction", () => {

@@ -608,7 +608,7 @@ function classifyLateGainCreditSubclusterEntry(
     return "runner_late_gain_credit_without_funding_need";
   }
   if (entry.side === "corp") {
-    if (corpLateGainCreditHasRezScoreOrProtectionNeed(entry, text)) {
+    if (corpLateGainCreditHasRezScoreOrProtectionNeed(entry)) {
       return "corp_late_gain_credit_real_rez_or_protection_reserve";
     }
     if (!corpLateGainCreditHasSafeProgressAlternative(entry)) {
@@ -651,7 +651,6 @@ function runnerLateGainCreditHasSafeProgressAlternative(
 
 function corpLateGainCreditHasRezScoreOrProtectionNeed(
   entry: AiSimulationSummary["actionSequence"][number],
-  text: string,
 ): boolean {
   // Corp credit gains remain plausible when public diagnostics show rez,
   // score-conversion, or protection reserve pressure.
@@ -661,9 +660,14 @@ function corpLateGainCreditHasRezScoreOrProtectionNeed(
     entry.corpCannotRezAnyNewlyInstalledIce === true ||
     entry.corpScoreConversionFixGateBlockedByCredits === true ||
     entry.corpEconomyBeforeScorePlausibleRezOrAdvanceReserve === true ||
-    /rez_reserve|corperezreserve|creditsbelow|blockedbycredits|protection|install_ice/.test(
-      text,
-    )
+    selfplayEntryHasStructuredSignal(entry, [
+      "rez_reserve",
+      "corpRezReserve",
+      "creditsBelow",
+      "blockedByCredits",
+      "protection",
+      "install_ice",
+    ])
   );
 }
 
