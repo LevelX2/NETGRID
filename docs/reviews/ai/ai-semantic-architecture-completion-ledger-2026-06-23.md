@@ -7966,6 +7966,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hunderteinunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-goal-evidence.ts` nutzt für Runner-Pressure- und Remote-Goal-IDs gebundene semantische Vergleiche statt freier `goalId.includes`-Prüfungen.
+  - Strukturierte Goal-IDs wie `runner.strategic.hq_pressure_followup` und `runner.remote_followup` bleiben wirksam; substringartiges Rauschen wie `runner.strategic.hq_pressureish_noise` und `runner.remoteish_noise` wird nicht mehr als Ziel-Fit erkannt.
+  - `tactical-plan-goal-evidence.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-goal-evidence.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
