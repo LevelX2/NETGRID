@@ -1,5 +1,6 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 
+import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { boundedSelectionCount } from "./choice-option";
 import { rolesMatch } from "./role-match";
 
@@ -17,17 +18,6 @@ export type SearchChoiceScoringContext = {
   readonly features: SearchChoiceFeatureSnapshot;
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
 };
-
-const BREAKER_ROLE_NEEDLES = [
-  "breaker_fracter",
-  "breaker_decoder",
-  "breaker_killer",
-  "breaker_wall",
-  "breaker_code_gate",
-  "breaker_sentry",
-  "breaker_universal",
-  "breaker_end_run",
-] as const;
 
 export function selectedSearchChoiceOptionIds(
   choice: PendingChoice,
@@ -124,8 +114,4 @@ function scoreSearchChoiceOption(
   score -= Math.max(0, card.memoryCost ?? 0) * 5;
   score -= Math.max(0, card.installCost ?? card.cost ?? 0) * 2;
   return score;
-}
-
-function matchingBreakerRoleNeedles(roles: readonly string[]): string[] {
-  return BREAKER_ROLE_NEEDLES.filter((needle) => rolesMatch(roles, [needle]));
 }

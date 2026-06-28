@@ -8047,6 +8047,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/breaker-role-match.ts` bündelt die konkrete Breaker-Segmentliste und den Vergleich gegen installierte Rig-Rollen.
+  - `runner-card-action-score.ts`, `runner-install-score.ts` und `search-choice-option.ts` nutzen den gemeinsamen Helper statt direkter `startsWith("breaker_")`-Prüfungen oder lokaler Breaker-Segmentlisten.
+  - Strukturierte Rollen wie `support_breaker_fracter` und `breaker_fracter` bleiben wirksam; substringartiges Rauschen wie `breaker_fracterish_noise` erzeugt keinen Runner-Install-Breaker-Score mehr.
+  - `runner-card-action-score.test.ts`, `runner-install-score.test.ts`, `search-choice-option.test.ts` und `role-match.test.ts` schützen die Runtime-Pfade.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-card-action-score.test.ts src/runtime/runner-install-score.test.ts src/runtime/search-choice-option.test.ts src/runtime/role-match.test.ts` grün, 4 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

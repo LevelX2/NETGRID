@@ -1,3 +1,4 @@
+import { rolesHaveUnmatchedBreakerRole } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 
 type RunnerCardActionScoreFeatures = {
@@ -13,11 +14,7 @@ export function scoreRunnerInstall(
   profile: Record<string, number>,
 ): number {
   let score = 430 + (profile.setup ?? 1) * 40;
-  if (
-    roles.some(
-      (role) => role.startsWith("breaker_") && !features.rigRoles.has(role),
-    )
-  )
+  if (rolesHaveUnmatchedBreakerRole(roles, features.rigRoles))
     score += 190;
   if (rolesMatch(roles, ["memory"]) && features.memoryRemaining <= 1)
     score += 160;

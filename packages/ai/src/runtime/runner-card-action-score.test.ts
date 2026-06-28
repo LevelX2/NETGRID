@@ -28,6 +28,45 @@ describe("runner-card-action-score", () => {
         { setup: 1 },
       ),
     ).toBe(470);
+
+    expect(
+      scoreRunnerInstall(
+        ["support_breaker_fracter"],
+        {
+          credits: 3,
+          handCount: 5,
+          memoryRemaining: 3,
+          rigRoles: new Set(),
+        },
+        { setup: 1 },
+      ),
+    ).toBe(660);
+
+    expect(
+      scoreRunnerInstall(
+        ["support_breaker_fracter"],
+        {
+          credits: 3,
+          handCount: 5,
+          memoryRemaining: 3,
+          rigRoles: new Set(["breaker_fracter"]),
+        },
+        { setup: 1 },
+      ),
+    ).toBe(470);
+
+    expect(
+      scoreRunnerInstall(
+        ["breaker_fracterish_noise"],
+        {
+          credits: 3,
+          handCount: 5,
+          memoryRemaining: 3,
+          rigRoles: new Set(),
+        },
+        { setup: 1 },
+      ),
+    ).toBe(470);
   });
 
   it("matches runner event roles by bounded role terms", () => {
