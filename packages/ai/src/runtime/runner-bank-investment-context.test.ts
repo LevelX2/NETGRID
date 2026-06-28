@@ -145,6 +145,32 @@ describe("createRunnerBankInvestmentContext", () => {
       false,
     );
   });
+
+  it("ignores build-action substring noise in credit-bank action text", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 0 },
+    });
+    const noisyBuildAction = runnerAction("trigger_ability", {
+      actionId: "substring-build-noise",
+      source: bank.instanceId,
+      resourceAbility: "bankroll counterfeiting",
+    });
+    const runAction = runnerAction("start_run", { serverId: "hq" });
+    const input = runnerInput({
+      rig: [bank],
+      legalActions: [noisyBuildAction, runAction],
+    });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, runAction),
+    ).toContain("bankBuildLegal:false");
+  });
 });
 
 function createContext(

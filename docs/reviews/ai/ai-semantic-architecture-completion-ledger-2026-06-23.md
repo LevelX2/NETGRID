@@ -8896,6 +8896,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertzweiunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bank-investment-context.ts` ersetzt die Runner-Bank-Build-Action-Erkennung aus freiem `resourceAbility`-Text durch gebundene Tokens und geordnete Bank-Signale.
+  - Strukturierte `cardImplementationAddsHostedCredits`-Payloads bleiben Primärquelle; echte `put/load/add/build ... bank`- und Bank-Counter-Signale bleiben wirksam.
+  - Substring-Rauschen wie `bankroll counterfeiting` erzeugt keine Build-Action-Erkennung mehr.
+  - `runner-bank-investment-context.test.ts` schützt den negativen Build-Substring-Grenzfall über sichtbare Assessment-Evidence.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bank-investment-context.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -458,11 +458,35 @@ export function createRunnerBankInvestmentContext(
     ) {
       return true;
     }
+    return runnerBankTokensIndicateBuildAction(text, sourceIsCreditBank);
+  }
+
+  function runnerBankTokensIndicateBuildAction(
+    text: string,
+    sourceIsCreditBank: boolean,
+  ): boolean {
+    const tokens = runnerBankTextTokens(text);
+    if (
+      sourceIsCreditBank &&
+      runnerBankTokensIncludeAny(tokens, [
+        "legen",
+        "put",
+        "load",
+        "add",
+        "build",
+        "counter",
+      ])
+    ) {
+      return true;
+    }
     return (
-      (sourceIsCreditBank &&
-        /(?:legen|put|load|add|build|counter)/.test(text)) ||
-      /(?:put|load|add|build).*(?:bank|credit_bank)/.test(text) ||
-      /(?:bank|credit_bank).*(?:counter|load|build)/.test(text)
+      runnerBankTokensIncludeOrdered(tokens, ["put", "bank"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["load", "bank"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["add", "bank"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["build", "bank"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["bank", "counter"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["bank", "load"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["bank", "build"])
     );
   }
 
@@ -708,4 +732,43 @@ export function createRunnerBankInvestmentContext(
     runnerBankHasConcreteFundingNeed,
     runnerBankCommitmentRunOverride,
   };
+}
+
+function runnerBankTextTokens(text: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of text.toLocaleLowerCase("en-US")) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character;
+    } else if (current.length > 0) {
+      tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "0" && character <= "9")
+  );
+}
+
+function runnerBankTokensIncludeAny(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
+}
+
+function runnerBankTokensIncludeOrdered(
+  tokens: readonly string[],
+  orderedTokens: readonly [string, string],
+): boolean {
+  const firstIndex = tokens.indexOf(orderedTokens[0]);
+  if (firstIndex < 0) return false;
+  return tokens.slice(firstIndex + 1).includes(orderedTokens[1]);
 }
