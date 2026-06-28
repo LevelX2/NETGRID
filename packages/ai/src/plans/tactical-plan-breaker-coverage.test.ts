@@ -33,6 +33,9 @@ describe("missingBreakerCoverageKind", () => {
     expect(missingCoverageForIceText("appliance trace")).toBe("breaker_trace");
     expect(missingCoverageForIceText("appliance")).toBe("breaker_universal");
     expect(missingCoverageForIceText("codegate")).toBe("breaker_code_gate");
+    expect(missingCoverageForIceText("barrierish traceable")).toBe(
+      "breaker_universal",
+    );
   });
 });
 

@@ -30,37 +30,53 @@ export function missingBreakerCoverageKind(
       ? blockedIce
       : server.ice.find((ice) => ice.known && ice.rezzed === true);
   if (!rezzedIce) return "breaker_coverage";
-  const text = [
-    rezzedIce.title,
-    rezzedIce.definitionId,
-    ...(rezzedIce.subtypes ?? []),
-    rezzedIce.rulesText,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
-  if (breakerCoverageTextMatches(text, ["wall", "barrier"]))
-    return "breaker_wall";
-  if (/\bcode\s*gate\b/.test(text)) {
+  const tokens = visibleCardCoverageTokens(rezzedIce);
+  if (coverageTokensInclude(tokens, ["wall", "barrier"])) return "breaker_wall";
+  if (
+    coverageTokensInclude(tokens, ["codegate"]) ||
+    coverageTokensIncludePhrase(tokens, ["code", "gate"])
+  ) {
     return "breaker_code_gate";
   }
-  if (breakerCoverageTextMatches(text, ["sentry"])) return "breaker_sentry";
-  if (breakerCoverageTextMatches(text, ["ap"])) return "breaker_ap";
-  if (breakerCoverageTextMatches(text, ["trace"])) return "breaker_trace";
+  if (coverageTokensInclude(tokens, ["sentry"])) return "breaker_sentry";
+  if (coverageTokensInclude(tokens, ["ap"])) return "breaker_ap";
+  if (coverageTokensInclude(tokens, ["trace"])) return "breaker_trace";
   return "breaker_universal";
 }
 
-function breakerCoverageTextMatches(
-  text: string,
-  needles: readonly string[],
-): boolean {
-  return needles.some((needle) =>
-    new RegExp(`\\b${escapeRegExp(needle)}\\b`).test(text),
-  );
+function visibleCardCoverageTokens(card: VisibleCard): string[] {
+  return [
+    card.title,
+    card.definitionId,
+    ...(card.subtypes ?? []),
+    card.rulesText,
+  ]
+    .flatMap((entry) => coverageTokens(entry))
+    .filter((token) => token.length > 0);
 }
 
-function escapeRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function coverageTokens(value: string | undefined): string[] {
+  return (value ?? "")
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length > 0);
+}
+
+function coverageTokensInclude(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
+}
+
+function coverageTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    phrase.every((word, offset) => tokens[index + offset] === word),
+  );
 }
 
 export function isBreakerInstallAction(
