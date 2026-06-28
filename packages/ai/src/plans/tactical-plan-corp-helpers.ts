@@ -6,7 +6,6 @@ import {
   corpRemoteContestabilityAssessment,
   remoteIsProtected,
 } from "./tactical-plan-corp-score-window";
-import { candidateSemanticText } from "./tactical-plan-candidate-text";
 import { createPlanStep } from "./tactical-plan-builders";
 import { isRemoteServer } from "./tactical-plan-server-targets";
 import { serverHasUnrezzedIce } from "./tactical-plan-run-reachability";
@@ -15,6 +14,16 @@ import type {
   PlanStep,
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
+
+const CORP_PUNISH_EXACT_SIGNALS = new Set([
+  "tag.source",
+  "trace.source",
+  "tag.payoff",
+  "damage.payoff",
+  "trash_runner_resource",
+  "net_damage",
+  "meat_damage",
+]);
 
 export function corpPunishCandidates(
   context: TacticalPlanBuildContext,
@@ -29,9 +38,55 @@ export function corpPunishCandidates(
     ) {
       return false;
     }
-    const text = candidateSemanticText(candidate);
-    return /tag\.source|trace\.source|tag\.payoff|damage\.payoff|punish|trash_runner_resource|flatline|net_damage|meat_damage/.test(text);
+    return candidatePunishSignals(candidate).some(signalMatchesCorpPunish);
   });
+}
+
+function candidatePunishSignals(candidate: ActionSemanticCandidate): string[] {
+  return [
+    candidate.semanticActionType,
+    candidate.sourceCardId,
+    candidate.abilityId,
+    ...candidate.cardContextSignals,
+    ...candidate.actionTacticSignals,
+    ...candidate.strategySupport.flatMap((entry) => [
+      entry.strategyId,
+      entry.role,
+    ]),
+    ...candidate.conditions.map((entry) => entry.kind),
+    ...candidate.risks.map((entry) => entry.kind),
+    ...candidate.constraints.map((entry) => entry.kind),
+    ...candidate.costProfile.additionalCosts,
+    ...(candidate.targetContext?.targetProfileMatches.flatMap(
+      (entry) => entry.evidence,
+    ) ?? []),
+    ...candidate.evidence,
+  ]
+    .filter((entry): entry is string => typeof entry === "string")
+    .map((entry) => entry.toLocaleLowerCase("en-US"));
+}
+
+function signalMatchesCorpPunish(signal: string): boolean {
+  return (
+    CORP_PUNISH_EXACT_SIGNALS.has(signal) ||
+    signalHasTerm(signal, "punish") ||
+    signalHasTerm(signal, "flatline")
+  );
+}
+
+function signalHasTerm(signal: string, term: string): boolean {
+  return signal
+    .split(/[.:-]+/)
+    .some((segment) => signalSegmentHasTerm(segment, term));
+}
+
+function signalSegmentHasTerm(segment: string, term: string): boolean {
+  return (
+    segment === term ||
+    segment.startsWith(`${term}_`) ||
+    segment.endsWith(`_${term}`) ||
+    segment.includes(`_${term}_`)
+  );
 }
 
 export function corpScoreWindowBlockers(

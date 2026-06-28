@@ -7377,6 +7377,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` sechsundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-corp-helpers.ts` bewertet Corp-Punish-Candidates nicht mehr über zusammengesetzten Candidate-Semantiktext mit freier Regex.
+  - Punish-Kandidaten werden aus strukturierten Candidate-Signalfeldern einzeln geprüft; exakte Signale wie `tag.source`, `trace.source`, `tag.payoff`, `damage.payoff`, `trash_runner_resource`, `net_damage` und `meat_damage` sowie gebundene `punish`-/`flatline`-Terme bleiben wirksam.
+  - Substringartiges Rauschen wie `punishment_noise` und `flatliner` erzeugt keine Corp-Punish-Kandidaten mehr.
+  - `tactical-plan-corp-helpers.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-corp-helpers.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
