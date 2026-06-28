@@ -142,14 +142,24 @@ function strategySupportFromTacticSignal(
   }));
 }
 
-function strategySupportRoleForSignal(signal: string): string {
-  if (signal.includes("multiaccess") || signal.includes("payoff")) {
+export function strategySupportRoleForSignal(signal: string): string {
+  if (
+    tacticSignalHasSegment(signal, "multiaccess") ||
+    tacticSignalHasSegment(signal, "payoff")
+  ) {
     return "payoff_anchor";
   }
   if (signal.startsWith("corp.score_")) {
     return "win_condition_anchor";
   }
   return "anchor_evidence";
+}
+
+function tacticSignalHasSegment(signal: string, expected: string): boolean {
+  return signal
+    .toLocaleLowerCase("en-US")
+    .split(/[._:-]+/)
+    .includes(expected);
 }
 
 function conditionFromHint(condition: AiHintCondition): SemanticCondition {

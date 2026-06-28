@@ -7786,6 +7786,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertelfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-card-semantic-profiles.ts` nutzt für StrategySupport-Payoff-Rollen gebundene Tactic-Signal-Segmente statt freier Signal-Substring-Prüfung.
+  - Strukturierte Signale wie `access.hq_multiaccess` bleiben Payoff-Anker; substringartiges Rauschen wie `access.hq_multiaccessory_noise` erzeugt keine `payoff_anchor`-Rolle mehr.
+  - `action-card-semantic-profiles.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-card-semantic-profiles.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
