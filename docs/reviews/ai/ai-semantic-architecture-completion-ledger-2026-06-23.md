@@ -9319,6 +9319,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihunderteinundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` ersetzt den `subtypeOrText`-Fallback per `text.includes(needle)` durch gebundene Deck-Capability-Texttokens und Phrase-Matches.
+  - Exakte Signale wie `wall`, `barrier`, `code gate`, `code_gate` und `sentry` bleiben wirksam; Suffix-Rauschen wie `barrierish`, `code gateish` und `sentryish` erzeugt keine ICE-Typ-Coverage mehr.
+  - Die Erkennung bleibt reine sichtbare Deck-Capability-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `deck-capabilities.test.ts` schützt positive ICE-Typ-Fälle und negative Suffix-Textfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts` grün, 1 Datei, 16 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

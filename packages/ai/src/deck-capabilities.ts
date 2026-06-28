@@ -1214,10 +1214,13 @@ function primaryStatus(locations: readonly CapabilityCardStatus[]): CapabilityCa
 }
 
 function subtypeOrText(record: CardCapabilityRecord, ...needles: string[]): boolean {
-  const text = normalizedRecordText(record);
+  const textTokens = deckCapabilityTextTokens(normalizedRecordText(record));
   return needles.some((needle) =>
     record.subtypes.some((subtype) => subtype.toLowerCase() === needle) ||
-    text.includes(needle),
+    deckCapabilityTokensIncludePhrase(
+      textTokens,
+      deckCapabilityTextTokens(needle),
+    ),
   );
 }
 
