@@ -7975,6 +7975,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertzweiunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/semantic-shadow-decision.ts` nutzt für Flatline-Survival-Goal-IDs den gebundenen `rolesMatch`-Helper statt freier `fit.goalId.includes("survive")`-Prüfung.
+  - Strukturierte Goal-IDs wie `runner.survive_flatline_window` bleiben als Survival-Threat-Fit wirksam; substringartiges Rauschen wie `runner.surviveish_noise` erzeugt keinen Threat-Response-Fit mehr.
+  - `semantic-shadow-decision.test.ts` schützt strukturierte Treffer und Substring-Negativfälle über einen Nicht-Draw-Install-Fall mit Blink-Flatline-Risiko.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/semantic-shadow-decision.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 16 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

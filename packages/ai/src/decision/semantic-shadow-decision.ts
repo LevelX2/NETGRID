@@ -1,5 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { rolesMatch } from "../runtime/role-match";
 import { scoreActionGoalFit, type ActionGoalFit } from "./action-goal-fit";
 import { synthesizeDoctrineTacticalGoals } from "./doctrine-goal-synthesis";
 import { buildAiOpportunityProjections } from "./opportunity-projection";
@@ -329,7 +330,7 @@ function threatMatchesFit(
   }
   if (threat.threat === "runner_flatline_risk") {
     return (
-      fit.goalId.includes("survive") ||
+      rolesMatch([fit.goalId], ["survive"]) ||
       candidate.semanticActionType === "draw.card" ||
       candidate.semanticActionType === "run.jack_out"
     );

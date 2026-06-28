@@ -239,6 +239,24 @@ describe("SemanticShadowDecision", () => {
     );
   });
 
+  it("matches flatline survival goal ids by bounded semantic terms", () => {
+    const matchingTrace = flatlineSurvivalInstallTrace(
+      "runner.survive_flatline_window",
+    );
+    const noisyTrace = flatlineSurvivalInstallTrace("runner.surviveish_noise");
+
+    expect(
+      matchingTrace.rankedActions
+        .find((action) => action.actionId === "install-survival")
+        ?.components.some((component) => component.component === "threat_response"),
+    ).toBe(true);
+    expect(
+      noisyTrace.rankedActions
+        .find((action) => action.actionId === "install-survival")
+        ?.components.some((component) => component.component === "threat_response"),
+    ).not.toBe(true);
+  });
+
   it("rejects unacceptable self-damage risk before survival scoring", () => {
     const input = inputFor("runner", [
       legalAction("damage-risk", "activated_card_ability", "runner"),
@@ -529,6 +547,44 @@ describe("SemanticShadowDecision", () => {
     expect(trace.noRuntimeEffect).toBe(true);
   });
 });
+
+function flatlineSurvivalInstallTrace(goalId: string) {
+  const input = inputFor("runner", [
+    legalAction("install-survival", "install_card", "runner"),
+  ]);
+  return buildSemanticShadowDecision(
+    buildSemanticDecisionFrame({
+      input,
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+      tacticalGoals: [
+        {
+          goalId,
+          family: "survival",
+          priority: 940,
+          urgency: "critical",
+          source: "test",
+          evidence: ["flatline_window:true"],
+        },
+      ],
+      runner: {
+        runTargets: [
+          runTarget({
+            actionId: "run-hq",
+            targetServerId: "hq",
+            targetKind: "hq",
+            recommendation: "draw_for_damage_buffer",
+            accessPayoff: "agenda",
+            blinkRiskSeverity: "high",
+          }),
+        ],
+      },
+    }),
+  );
+}
 
 function frameForEconomyChoice() {
   const input = inputFor("runner", [
