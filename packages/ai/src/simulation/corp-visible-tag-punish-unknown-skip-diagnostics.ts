@@ -9,6 +9,7 @@ import type {
   CorpTagPunishUnknownSkipPlausibility,
   CorpVisibleTagPayoffCategory,
 } from "../runtime/corp-tag-punish-types";
+import { rolesMatch } from "../runtime/role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 import type { CorpVisibleTagPunishOpportunity } from "./corp-visible-tag-punish-taken-diagnostics";
 
@@ -128,39 +129,47 @@ function corpUnknownSkipAttribution(
   chosenFamily: CorpTagPunishUnknownChosenFamily,
   survivalContext: RunnerSurvivalCounterContext,
 ): CorpTagPunishUnknownSkipAttribution {
-  const text = `${decision.reasonCode} ${(decision.evidence ?? []).join(" ")}`;
-  if (chosenFamily === "score" || text.includes("score_now"))
+  const signals = corpUnknownSkipTextSignals(decision);
+  if (
+    chosenFamily === "score" ||
+    unknownSkipSignalsMatch(signals, ["score_now"])
+  )
     return "unknown_skip_plausible_score_window";
   if (
     chosenFamily === "advance" ||
-    text.includes("advance_to_score") ||
-    text.includes("score_window")
+    unknownSkipSignalsMatch(signals, ["advance_to_score", "score_window"])
   )
     return "unknown_skip_plausible_advance_to_score";
   if (
-    text.includes("remote_safety") ||
-    text.includes("unsafe_remote") ||
-    text.includes("scoring_remote")
+    unknownSkipSignalsMatch(signals, [
+      "remote_safety",
+      "unsafe_remote",
+      "scoring_remote",
+    ])
   )
     return "unknown_skip_plausible_remote_safety";
   if (
-    text.includes("central") ||
-    text.includes("protect_hq") ||
-    text.includes("protect_rd") ||
-    text.includes("hq_protection") ||
-    text.includes("rnd_protection")
+    unknownSkipSignalsMatch(signals, [
+      "central",
+      "protect_hq",
+      "protect_rd",
+      "hq_protection",
+      "rnd_protection",
+    ])
   )
     return "unknown_skip_plausible_hq_or_rnd_safety";
   if (
-    text.includes("unaffordable") ||
-    text.includes("cannot_afford") ||
-    text.includes("insufficient_credits")
+    unknownSkipSignalsMatch(signals, [
+      "unaffordable",
+      "cannot_afford",
+      "insufficient_credits",
+    ])
   )
     return "unknown_skip_plausible_payoff_unaffordable";
   if (survivalContext.damage || survivalContext.flatline)
     return "unknown_skip_plausible_survival_countercontext";
   if (
-    text.includes("low_impact") ||
+    unknownSkipSignalsMatch(signals, ["low_impact"]) ||
     opportunities.every((opportunity) =>
       ["unknown", "run_lock", "ambush"].includes(opportunity.category),
     )
@@ -177,10 +186,24 @@ function corpUnknownSkipAttribution(
     return "unknown_skip_suspicious_low_value_install";
   if (
     chosenFamily === "operation" &&
-    (text.includes("economy") || text.includes("setup"))
+    unknownSkipSignalsMatch(signals, ["economy", "setup"])
   )
     return "unknown_skip_suspicious_economy_or_setup";
   return "unknown_skip_unclassified_missing_evidence";
+}
+
+function corpUnknownSkipTextSignals(decision: AiDecision): string[] {
+  return [decision.reasonCode, ...(decision.evidence ?? [])]
+    .flatMap((entry) => entry.split(/\s+/))
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+}
+
+function unknownSkipSignalsMatch(
+  signals: readonly string[],
+  needles: readonly string[],
+): boolean {
+  return rolesMatch(signals, needles);
 }
 
 function corpUnknownSkipPlausibility(
