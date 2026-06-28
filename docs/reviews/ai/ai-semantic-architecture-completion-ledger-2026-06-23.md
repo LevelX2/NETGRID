@@ -8229,6 +8229,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/tag-punish-ontology-consumer.ts` erkennt Legacy-Tag-/Punish-Rollenkonflikte über gebundene `rolesMatch`-Terme statt freier `role.includes(...)`-Substring-Prüfungen; die Einzelrolle `trace` bleibt bewusst exakt.
+  - Strukturierte Rollen wie `tag_punishment`, `trace_tag`, `tag_source`, `trace_ice` und `tag_ice` bleiben wirksam; Rauschen wie `tag_punishmentish_noise`, `damage_operational_noise`, `tag_sourceish_noise` und `trace_tagish_noise` bleibt wirkungslos.
+  - `tag-punish-ontology-consumer.test.ts` schützt positive Legacy-Konflikte und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tag-punish-ontology-consumer.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

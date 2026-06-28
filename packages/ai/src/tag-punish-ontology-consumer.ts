@@ -6,6 +6,7 @@ import type {
   KnownHintConditionKind,
   KnownHintEffectKind,
 } from "./hint-ontology";
+import { rolesMatch } from "./runtime/role-match";
 
 const AI_HINTS = createAiHintsByCard();
 
@@ -147,23 +148,20 @@ export function tagPunishOntologyConflictWithLegacy(
   legacyRoles: string[],
 ): boolean {
   if (!profile) return false;
-  const legacyClaimsTag = legacyRoles.some(
-    (role) =>
-      role.includes("tag_source") ||
-      role.includes("tag_enabler") ||
-      role.includes("trace_tag") ||
-      role === "trace" ||
-      role === "trace_ice" ||
-      role === "tag_ice",
-  );
-  const legacyClaimsPayoff = legacyRoles.some(
-    (role) =>
-      role.includes("tag_punishment") ||
-      role.includes("damage_operation") ||
-      role.includes("black_ops") ||
-      role.includes("resource_trash") ||
-      role.includes("hardware_trash"),
-  );
+  const legacyClaimsTag = rolesMatch(legacyRoles, [
+    "tag_source",
+    "tag_enabler",
+    "trace_tag",
+    "trace_ice",
+    "tag_ice",
+  ]) || legacyRoles.includes("trace");
+  const legacyClaimsPayoff = rolesMatch(legacyRoles, [
+    "tag_punishment",
+    "damage_operation",
+    "black_ops",
+    "resource_trash",
+    "hardware_trash",
+  ]);
   return (
     (profile.tagSource && legacyClaimsPayoff && !legacyClaimsTag) ||
     (profile.payoff && legacyClaimsTag && !legacyClaimsPayoff)
