@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-06-28-skivviss-corp-start-draw-chronicle-followup
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: critical
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-28
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-28
+completedAt: 2026-06-28
+branch: codex/skivviss-draw-chronicle-followup
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+  - packages/engine/src/index-tests/originalset/per-card-followups.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/per-card-followups.test.ts -t "adds Skivviss counters on successful R&D runs and converts them into Corp start-turn draws"
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts -t "names Skivviss as the reason for automatic Corp extra draws"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck (fehlgeschlagen wegen bestehender, paketfremder strategy-profile-Typfehler)
+  - git diff --check
 ---
 
 # Skivviss-Korp-Startdraw in Live-Flow und Chronik nachprüfen
@@ -49,13 +57,13 @@ Der Korp-Start-of-turn-Draw durch `Skivviss` soll im aktuellen Human-vs-KI-Flow 
 
 ## Akzeptanzkriterien
 
-- [ ] Das Paket dokumentiert nach Reproduktion, ob der aktuelle Fehler ein Engine-Draw-Problem, ein PublicEvent-/Chronik-Problem oder nur ein Anzeige-/Erwartungsproblem ist.
-- [ ] Bei mindestens einem Skivviss-Counter zieht die Korp zu Beginn ihres Zuges automatisch die normale Pflichtkarte plus eine Zusatzkarte pro Skivviss-Counter, ohne dafür einen Korp-Action-Slot auszugeben.
-- [ ] Die Spielchronik zeigt einen klaren Eintrag wie sinngemäß `Skivviss: Korp zieht 1 zusätzliche Karte` und nennt bei mehreren Countern die Anzahl.
-- [ ] Der sichtbare Chronikeintrag enthält keine Namen oder IDs verdeckter gezogener Karten.
-- [ ] Bestehende Skivviss-Counter-Ownership-/Anzeige-Tests bleiben grün oder werden gezielt an den aktuellen UI-Vertrag angepasst.
-- [ ] Replay, StateHash und Hidden-Info-Gates bleiben unverändert stabil.
-- [ ] Checks: fokussierter Engine-Test für Skivviss-Startdraw, fokussierter Web-Chronik-Test, relevante Typechecks oder begründete Eingrenzung.
+- [x] Das Paket dokumentiert nach Reproduktion, ob der aktuelle Fehler ein Engine-Draw-Problem, ein PublicEvent-/Chronik-Problem oder nur ein Anzeige-/Erwartungsproblem ist.
+- [x] Bei mindestens einem Skivviss-Counter zieht die Korp zu Beginn ihres Zuges automatisch die normale Pflichtkarte plus eine Zusatzkarte pro Skivviss-Counter, ohne dafür einen Korp-Action-Slot auszugeben.
+- [x] Die Spielchronik zeigt einen klaren Eintrag wie sinngemäß `Skivviss: Korp zieht 1 zusätzliche Karte` und nennt bei mehreren Countern die Anzahl.
+- [x] Der sichtbare Chronikeintrag enthält keine Namen oder IDs verdeckter gezogener Karten.
+- [x] Bestehende Skivviss-Counter-Ownership-/Anzeige-Tests bleiben grün oder werden gezielt an den aktuellen UI-Vertrag angepasst.
+- [x] Replay, StateHash und Hidden-Info-Gates bleiben unverändert stabil.
+- [x] Checks: fokussierter Engine-Test für Skivviss-Startdraw, fokussierter Web-Chronik-Test, relevante Typechecks oder begründete Eingrenzung.
 
 ## Umsetzungshinweise
 
@@ -65,4 +73,4 @@ Der Korp-Start-of-turn-Draw durch `Skivviss` soll im aktuellen Human-vs-KI-Flow 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-06-28. Die Reproduktion ergab kein Engine-Draw-Problem: Der Skivviss-Zusatzdraw wird beim Wechsel in den Korp-Zug automatisch ausgeführt, als `resolvedEffects` am Runner-`end_turn`-Event veröffentlicht und die normale Korp-Pflichtkarte folgt anschließend separat ohne Verbrauch eines Korp-Action-Slots. Die sichtbare Lücke lag im Web-Chronik-Gruppierungsmarker: Der Skivviss-Sondereintrag hatte keinen `Automatisch`-Chip und blieb dadurch beim Runner-Zugende statt im Korp-Zugstart-Kontext hängen. Der Chroniktext lautet jetzt klar `Skivviss: Die Korp zieht zu Beginn ihres Zugs ... zusätzliche Karte(n).`, enthält `Automatisch` und `Korp-Zugstart` als Chips und leakt keine gezogenen Karten. Fokussierte Engine- und Web-Tests sowie Engine-Typecheck und `git diff --check` sind grün; der Web-Typecheck bleibt wegen bereits vorhandener, paketfremder `strategy-profile`-Typfehler rot.

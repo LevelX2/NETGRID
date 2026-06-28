@@ -202,6 +202,12 @@ export function publicContextForAction(
       "iceInstallReduction",
       "iceInstallReductionSourceDefinitionIds",
       "iceInstallTotalCost",
+      "installCostPaid",
+      "runnerInstallNormalCreditsPaid",
+      "runnerInstallHostedCreditsPaid",
+      "runnerInstallRecurringCreditsPaid",
+      "runnerInstallTemporaryCreditsPaid",
+      "runnerInstallPaymentSourceDefinitionIds",
       "recurringCreditsLoaded",
       "rootReplacement",
       "replacedRootCardType",
@@ -982,6 +988,10 @@ export function publicContextForAction(
       context.installBlockedReason = legalAction.payload.installBlockedReason;
     for (const key of [
       "installCostPaid",
+      "runnerInstallNormalCreditsPaid",
+      "runnerInstallHostedCreditsPaid",
+      "runnerInstallRecurringCreditsPaid",
+      "runnerInstallTemporaryCreditsPaid",
       "runnerMemoryUsedAfter",
       "muShortfall",
       "trashedForMemoryCount",
@@ -992,6 +1002,12 @@ export function publicContextForAction(
     if (typeof legalAction.payload.trashedForMemoryDefinitionIds === "string")
       context.trashedForMemoryDefinitionIds =
         legalAction.payload.trashedForMemoryDefinitionIds;
+    if (
+      typeof legalAction.payload.runnerInstallPaymentSourceDefinitionIds ===
+      "string"
+    )
+      context.runnerInstallPaymentSourceDefinitionIds =
+        legalAction.payload.runnerInstallPaymentSourceDefinitionIds;
     if (typeof legalAction.payload.trashedCardDefinitionIds === "string")
       context.trashedCardDefinitionIds =
         legalAction.payload.trashedCardDefinitionIds;

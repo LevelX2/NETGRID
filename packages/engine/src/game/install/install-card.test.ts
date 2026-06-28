@@ -485,6 +485,15 @@ function testHost(
       },
       spendRunnerInstallCredits: (amount) => {
         state.runner.credits -= amount;
+        return {
+          amount,
+          normalCreditsSpent: amount,
+          hostedCreditsSpent: 0,
+          recurringCreditsSpent: 0,
+          temporaryCreditsSpent: 0,
+          sourceDefinitionIds: [],
+          runnerCreditsAfter: state.runner.credits,
+        };
       },
       runnerCanPayInstallCost: (amount) => state.runner.credits >= amount,
       openRunnerCostPenaltySupportWindow: () => false,

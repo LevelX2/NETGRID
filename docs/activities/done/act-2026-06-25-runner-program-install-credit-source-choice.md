@@ -1,19 +1,36 @@
 ---
 activityId: act-2026-06-25-runner-program-install-credit-source-choice
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-25
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-28
+completedAt: 2026-06-28
+branch: codex/skivviss-draw-chronicle-followup
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/install/runner-program-install-payment.ts
+  - packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts
+  - packages/engine/src/game/turn/runner-main-actions.ts
+  - packages/engine/src/game/install/install-card.ts
+  - packages/engine/src/game/engine-runtime-internal/card-lifecycle-runtime-hosts.ts
+  - packages/engine/src/game/turn/action-builders.ts
+  - packages/engine/src/public-context.ts
+  - packages/engine/src/index-tests/mechanics/per-card-longtail.test.ts
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/action-board-ui.test.ts
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+checks:
+  - "PASS: corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/per-card-longtail.test.ts"
+  - "PASS: corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts app/chronicle.test.ts"
+  - "PASS: corepack pnpm --filter @netgrid/engine typecheck"
+  - "PASS: git diff --check"
+  - "KNOWN-FAIL unrelated: corepack pnpm --filter @netgrid/web typecheck (strategy-profile-data*.ts literal type mismatches)"
 ---
 
 # Runner-Programminstallation: Creditquellen gezielt aufteilen
@@ -64,15 +81,15 @@ Beim Installieren von Runner-Programmen soll der Spieler optional steuerbare Ins
 
 ## Akzeptanzkriterien
 
-- [ ] Bei installiertem `Zetatech Software Installer`, 2 verfügbaren Zeta-Bits und genug normalen Credits kann der Runner beim Installieren eines Programms legal `0`, `1` oder `2` Zeta-Bits verwenden, sofern Kosten und verfügbare Credits das erlauben.
-- [ ] Bei zwei passenden installierten Quellen kann der Runner die Beträge pro Quelle unterscheiden, z. B. Quelle A 1 Bit, Quelle B 0 Bits, Rest normale Credits.
-- [ ] Wenn normale Credits nicht ausreichen, aber optionale Installationsquellen ausreichen, erzwingt die Engine keine bestimmte Quelle, sondern verlangt eine gültige Aufteilung, deren Summe die Kosten deckt.
-- [ ] Nach erfolgreicher Installation sind normale Credits, Zeta-/Recurring-/Hosted-Counter, installierte Karte, MU, Host/Overlay und Heap/Rig-Zustand korrekt.
-- [ ] Ungültige Aufteilungen werden abgelehnt: zu viel aus einer Quelle, negative Beträge, nicht passende Quelle, entfernte Quelle, stale state, falsche Seite, falscher Kartentyp, Timing-Drift und nicht gedeckte Gesamtkosten.
-- [ ] Die UI zeigt keine zwei identischen `Installieren`-Buttons für regeltechnisch verschiedene Installationspfade; Zahlungswahl und Programmtrash-/Overlay-Kontext sind unterscheidbar.
-- [ ] PublicPayload/Chronik bleiben side-sicher und enthalten keine privaten Karteninstanzen, Grip-/Stack-/HQ-/R&D-Inhalte oder private Payloads.
-- [ ] Replay und StateHash bleiben deterministisch.
-- [ ] Bestehende Tests für Programmtrash vor Installation, Zeta-Overlay-Install, Hosted-/Daemon-Install, `Self-Modifying Code`, `The Shell Traders` und `Valu-Pak Software Bundle` bleiben grün oder werden bewusst mit dokumentierter Regelbegründung angepasst.
+- [x] Bei installiertem `Zetatech Software Installer`, 2 verfügbaren Zeta-Bits und genug normalen Credits kann der Runner beim Installieren eines Programms legal `0`, `1` oder `2` Zeta-Bits verwenden, sofern Kosten und verfügbare Credits das erlauben.
+- [x] Bei zwei passenden installierten Quellen kann der Runner die Beträge pro Quelle unterscheiden, z. B. Quelle A 1 Bit, Quelle B 0 Bits, Rest normale Credits.
+- [x] Wenn normale Credits nicht ausreichen, aber optionale Installationsquellen ausreichen, erzwingt die Engine keine bestimmte Quelle, sondern verlangt eine gültige Aufteilung, deren Summe die Kosten deckt.
+- [x] Nach erfolgreicher Installation sind normale Credits, Zeta-/Recurring-/Hosted-Counter, installierte Karte, MU, Host/Overlay und Heap/Rig-Zustand korrekt.
+- [x] Ungültige Aufteilungen werden abgelehnt: zu viel aus einer Quelle, negative Beträge, nicht passende Quelle, entfernte Quelle, stale state, falsche Seite, falscher Kartentyp, Timing-Drift und nicht gedeckte Gesamtkosten.
+- [x] Die UI zeigt keine zwei identischen `Installieren`-Buttons für regeltechnisch verschiedene Installationspfade; Zahlungswahl und Programmtrash-/Overlay-Kontext sind unterscheidbar.
+- [x] PublicPayload/Chronik bleiben side-sicher und enthalten keine privaten Karteninstanzen, Grip-/Stack-/HQ-/R&D-Inhalte oder private Payloads.
+- [x] Replay und StateHash bleiben deterministisch.
+- [x] Bestehende Tests für Programmtrash vor Installation, Zeta-Overlay-Install, Hosted-/Daemon-Install, `Self-Modifying Code`, `The Shell Traders` und `Valu-Pak Software Bundle` bleiben grün oder werden bewusst mit dokumentierter Regelbegründung angepasst.
 
 ## Umsetzungshinweise
 
@@ -85,4 +102,6 @@ Beim Installieren von Runner-Programmen soll der Spieler optional steuerbare Ins
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt als source-stabile, engine-validierte Zahlungsvarianten auf den vorhandenen Programminstallations-`LegalActions`. Optionale `install_programs`-Quellen wie `Zetatech Software Installer` werden nicht mehr automatisch vor normalen Credits leergezogen, sobald eine Payment-Aufteilung vorhanden ist. Normale Grip-Installationen, Hosted-/Daemon-Installationen, Valu-Pak-Installaktionen und Programmtrash-vor-Installation nutzen denselben Payment-Variant-Helper; Programmtrash übernimmt die zuerst gewählte Zahlungsaufteilung über die MU-Choice hinweg. `applyAction` validiert die gewählten Source-IDs, Beträge, Verfügbarkeit und Restdeckung erneut über den regenerierten `actionId` und den Zahlungsresolver.
+
+PublicEvents/Chronik enthalten nur öffentliche Zahlungssummen und Source-Definitionen, keine privaten Karteninstanzen oder Hand-/Deckdaten. Die Web-UI benennt Zahlungsvarianten wie `Mit 2 Zeta-Bits installieren` und kombiniert sie mit Programmtrash-Kontext. Der bevorzugte Stepper-/PendingChoice-Schnitt wurde nicht als neue UI-Architektur eingeführt; die kleinere LegalAction-Variante erfüllt die Akzeptanzkriterien und bleibt replay-deterministisch.
