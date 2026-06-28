@@ -27,6 +27,29 @@ describe("selectedSearchChoiceOptionIds", () => {
 
     expect(selected).toEqual(["memory", "economy"]);
   });
+
+  it("matches breaker option and rig roles by bounded role terms", () => {
+    const choice = searchChoice([
+      option("duplicate", "Duplicate breaker", "program"),
+      option("fresh", "Fresh breaker", "program"),
+      option("noise", "Noise breaker", "program"),
+    ]);
+    const selected = selectedSearchChoiceOptionIds(choice, choice.options, {
+      features: {
+        credits: 5,
+        memoryRemaining: 4,
+        rigRoles: new Set(["breaker_fracter"]),
+        rigDefinitionIds: new Set(),
+      },
+      rolesForCardId: (cardId) => {
+        if (cardId === "duplicate") return ["support_breaker_fracter"];
+        if (cardId === "fresh") return ["breaker_decoder"];
+        return ["breaker_fracterish_noise"];
+      },
+    });
+
+    expect(selected).toEqual(["fresh", "duplicate"]);
+  });
 });
 
 function searchChoice(options: PendingChoice["options"]): PendingChoice {
@@ -42,14 +65,18 @@ function searchChoice(options: PendingChoice["options"]): PendingChoice {
   } as unknown as PendingChoice;
 }
 
-function option(id: string, label: string): PendingChoice["options"][number] {
+function option(
+  id: string,
+  label: string,
+  type: string = "event",
+): PendingChoice["options"][number] {
   return {
     id,
     label,
     card: {
       definitionId: id,
       title: label,
-      type: "event",
+      type,
       known: true,
     },
   } as unknown as PendingChoice["options"][number];

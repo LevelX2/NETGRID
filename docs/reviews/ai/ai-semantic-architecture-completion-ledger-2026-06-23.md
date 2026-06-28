@@ -8020,6 +8020,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsiebenunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/search-choice-option.ts` nutzt für Search-Choice-Breaker-Rollen konkrete gebundene Breaker-Segmente statt des breiten `breaker_`-Prefix-Fallbacks und vergleicht installierte Rig-Rollen über dieselben Segmente.
+  - Strukturierte Rollen wie `support_breaker_fracter`, `breaker_fracter` und `breaker_decoder` bleiben wirksam; substringartiges Rauschen wie `breaker_fracterish_noise` erzeugt keinen Breaker-Search-Score mehr.
+  - `search-choice-option.test.ts` schützt strukturierte Treffer, installierte Duplikat-Erkennung und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/search-choice-option.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

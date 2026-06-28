@@ -18,6 +18,17 @@ export type SearchChoiceScoringContext = {
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
 };
 
+const BREAKER_ROLE_NEEDLES = [
+  "breaker_fracter",
+  "breaker_decoder",
+  "breaker_killer",
+  "breaker_wall",
+  "breaker_code_gate",
+  "breaker_sentry",
+  "breaker_universal",
+  "breaker_end_run",
+] as const;
+
 export function selectedSearchChoiceOptionIds(
   choice: PendingChoice,
   selectableOptions: readonly PendingChoiceOption[],
@@ -88,9 +99,9 @@ function scoreSearchChoiceOption(
         : -160 - (installCost - features.credits) * 30;
   }
 
-  const breakerRoles = roles.filter((role) => role.startsWith("breaker_"));
+  const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
   if (
-    breakerRoles.length > 0 ||
+    breakerRoleNeedles.length > 0 ||
     subtypes.some((subtype) =>
       ["icebreaker", "breaker", "decoder", "fracter", "killer"].includes(
         subtype,
@@ -98,8 +109,9 @@ function scoreSearchChoiceOption(
     )
   ) {
     score += 220;
-    for (const role of breakerRoles)
-      score += features.rigRoles.has(role) ? 40 : 180;
+    const rigRoles = [...features.rigRoles];
+    for (const roleNeedle of breakerRoleNeedles)
+      score += rolesMatch(rigRoles, [roleNeedle]) ? 40 : 180;
     if (features.rigRoles.size === 0) score += 120;
   }
 
@@ -112,4 +124,8 @@ function scoreSearchChoiceOption(
   score -= Math.max(0, card.memoryCost ?? 0) * 5;
   score -= Math.max(0, card.installCost ?? card.cost ?? 0) * 2;
   return score;
+}
+
+function matchingBreakerRoleNeedles(roles: readonly string[]): string[] {
+  return BREAKER_ROLE_NEEDLES.filter((needle) => rolesMatch(roles, [needle]));
 }
