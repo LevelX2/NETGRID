@@ -1,6 +1,7 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 
 import { boundedSelectionCount } from "./choice-option";
+import { rolesMatch } from "./role-match";
 
 type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
 type PendingChoiceOption = PendingChoice["options"][number];
@@ -102,9 +103,10 @@ function scoreSearchChoiceOption(
     if (features.rigRoles.size === 0) score += 120;
   }
 
-  if (roles.includes("memory") || (card.memoryLimitBonus ?? 0) > 0)
+  if (rolesMatch(roles, ["memory"]) || (card.memoryLimitBonus ?? 0) > 0)
     score += features.memoryRemaining <= 1 ? 170 : 60;
-  if (roles.includes("economy")) score += features.credits < 4 ? 90 : 25;
+  if (rolesMatch(roles, ["economy"]))
+    score += features.credits < 4 ? 90 : 25;
   if (card.definitionId && features.rigDefinitionIds.has(card.definitionId))
     score -= 90;
   score -= Math.max(0, card.memoryCost ?? 0) * 5;
