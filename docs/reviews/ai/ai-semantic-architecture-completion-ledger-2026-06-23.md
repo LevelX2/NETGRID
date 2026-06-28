@@ -8148,6 +8148,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hunderteinundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/doctrine-goal-synthesis.ts` prüft Support-Gaps für blockierte Payoffs exakt und zentrale Server-Gaps über gebundene Gap-Tokens statt freier Substring-Suche.
+  - Strukturierte Gaps wie `weak_hq_defense`, `weak_rnd_defense` und `low_punish_payoff_density` bleiben wirksam; Rauschen wie `weak_hqish_defense` und `low_punish_payoff_densityish_noise` erzeugt keine falschen Blocker mehr.
+  - `doctrine-goal-synthesis.test.ts` schützt zentrale Gap-Erkennung und Payoff-Blocker-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/doctrine-goal-synthesis.test.ts` grün, 1 Datei, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

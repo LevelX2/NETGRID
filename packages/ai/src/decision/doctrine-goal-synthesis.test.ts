@@ -280,6 +280,31 @@ describe("doctrine goal synthesis", () => {
     expect(goals.some((goal) => goal.family === "tag_punish")).toBe(false);
     expect(goals.some((goal) => goal.family === "damage_pressure")).toBe(false);
   });
+
+  it("ignores substring-only doctrine support gap noise", () => {
+    const corpCentralGoals = synthesizeDoctrineTacticalGoals(
+      diagnostic("corp", "partial", false, [
+        strategy("corp.central_stabilize", "partial", [
+          "weak_hqish_defense",
+          "weak_rndish_defense",
+        ]),
+      ]),
+    );
+    const punishGoals = synthesizeDoctrineTacticalGoals(
+      diagnostic("corp", "complete", false, [
+        strategy("corp.tag_trace_punish", "complete", [
+          "low_punish_payoff_densityish_noise",
+        ]),
+      ]),
+    );
+
+    expect(corpCentralGoals.map((goal) => goal.goalId)).toEqual([
+      "corp.doctrine.central_defense_setup",
+    ]);
+    expect(punishGoals.map((goal) => goal.goalId)).toEqual([
+      "corp.doctrine.tag_trace_punish",
+    ]);
+  });
 });
 
 function diagnostic(
