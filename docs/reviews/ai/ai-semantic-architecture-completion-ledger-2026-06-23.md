@@ -8756,6 +8756,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertachtzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/choice-option.ts` entfernt den Regex-Fallback für Playful-AI-Gain-Option-IDs und parst nur noch exakt segmentierte IDs der Form `gain_<zahl>_set_aside_<zahl>`.
+  - Strukturierte numerische `option.value` bleibt die Primärquelle; der ID-Fallback ist nur noch ein enger Engine-ID-Kompatibilitätspfad.
+  - Rauschen wie `gain_2_set_aside_1_noise` und `prefix_gain_2_set_aside_1` liefert keinen Gain-Wert mehr.
+  - `choice-option.test.ts` schützt strukturierte Werte, Label-only-Ignorieren, den gültigen Engine-ID-Fallback und die neuen negativen Suffix-/Prefix-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/choice-option.test.ts src/index.test.ts -t "playfulAiGainValue|Playful AI"` grün, 2 Dateien, 2 relevante Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

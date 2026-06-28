@@ -10,9 +10,29 @@ export function playfulAiGainValue(option: {
   label: string;
 }): number {
   if (typeof option.value === "number") return option.value;
-  const splitMatch = /^gain_(\d+)_set_aside_\d+$/.exec(option.id);
-  if (splitMatch) return Number(splitMatch[1]);
-  return 0;
+  return playfulAiGainValueFromOptionId(option.id);
+}
+
+function playfulAiGainValueFromOptionId(optionId: string): number {
+  const parts = optionId.split("_");
+  if (
+    parts.length !== 5 ||
+    parts[0] !== "gain" ||
+    parts[2] !== "set" ||
+    parts[3] !== "aside" ||
+    !onlyAsciiDigits(parts[1] ?? "") ||
+    !onlyAsciiDigits(parts[4] ?? "")
+  ) {
+    return 0;
+  }
+  return Number(parts[1]);
+}
+
+function onlyAsciiDigits(value: string): boolean {
+  return (
+    value.length > 0 &&
+    [...value].every((character) => character >= "0" && character <= "9")
+  );
 }
 
 export function boundedSelectionCount(

@@ -23,5 +23,17 @@ describe("playfulAiGainValue", () => {
         label: "label without amount",
       }),
     ).toBe(2);
+    expect(
+      playfulAiGainValue({
+        id: "gain_2_set_aside_1_noise",
+        label: "label without amount",
+      }),
+    ).toBe(0);
+    expect(
+      playfulAiGainValue({
+        id: "prefix_gain_2_set_aside_1",
+        label: "label without amount",
+      }),
+    ).toBe(0);
   });
 });
