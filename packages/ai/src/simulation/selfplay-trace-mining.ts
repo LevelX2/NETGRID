@@ -1040,8 +1040,10 @@ function selfplayEntryDetectorFindings(
   if (
     enabled.has("risky_self_damage_action") &&
     entry.side === "runner" &&
-    text.includes("self_damage_survives:false") &&
-    !text.includes("runner.self_damage.safe_alternative")
+    selfplayEntryHasStructuredSignal(entry, ["self_damage_survives:false"]) &&
+    !selfplayEntryHasStructuredSignal(entry, [
+      "runner.self_damage.safe_alternative",
+    ])
   ) {
     findings.push(
       selfplayEntryFinding(

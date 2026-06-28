@@ -154,6 +154,40 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("bank-positive");
   });
 
+  it("bounds risky self-damage signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "self-damage-positive",
+        debugFacts: ["self_damage_survives:false"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "self-damage-noise",
+        debugFacts: ["self_damage_survives:falseish"],
+      }),
+    ]);
+    const safeAlternative = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "self-damage-safe",
+        debugFacts: [
+          "self_damage_survives:false",
+          "runner.self_damage.safe_alternative",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions(
+      [positive, noise, safeAlternative],
+      {
+        detectorIds: ["risky_self_damage_action"],
+      },
+    );
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("self-damage-positive");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),
