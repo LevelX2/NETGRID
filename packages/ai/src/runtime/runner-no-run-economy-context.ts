@@ -5,6 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { runnerNoRunEconomyCommitmentScoreComponents as buildRunnerNoRunEconomyCommitmentScoreComponents } from "./runner-economy-commitment-score";
+import { rolesMatch } from "./role-match";
 
 type RunnerNoRunEconomyCommitmentStatus =
   | "inactive"
@@ -214,15 +215,11 @@ export function createRunnerNoRunEconomyContext(
       .filter(Boolean);
     const mechanics = dependencies.mechanicsForDefinition(definitionId);
     const hasTurnStartEconomy =
-      effectTargets.some((target) =>
-        target.includes("economy.turn_start_credit"),
-      ) ||
-      mechanics.some((mechanic) =>
-        mechanic.includes("start_of_turn_credit_gain"),
-      );
+      effectTargets.includes("economy.turn_start_credit") ||
+      rolesMatch(mechanics, ["start_of_turn_credit_gain"]);
     const hasRunDrawback =
-      effectTargets.some((target) => target.includes("risk.ends_on_run")) ||
-      mechanics.some((mechanic) => mechanic.includes("trash_on_run"));
+      effectTargets.includes("risk.ends_on_run") ||
+      rolesMatch(mechanics, ["trash_on_run"]);
     return hasTurnStartEconomy && hasRunDrawback;
   }
 
