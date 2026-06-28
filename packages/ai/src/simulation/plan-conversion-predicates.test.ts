@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { planIntentConvertedWithin } from "./plan-conversion-predicates";
+import {
+  corpRemoteCreatedConvertsTo,
+  planIntentConvertedWithin,
+} from "./plan-conversion-predicates";
 
 describe("planIntentConvertedWithin", () => {
   it("matches plan kinds by bounded terms", () => {
@@ -10,6 +13,43 @@ describe("planIntentConvertedWithin", () => {
     ];
     expect(converted(sequence, "setup_plan")).toBe(true);
     expect(converted(sequence, "setupish_noise")).toBe(false);
+  });
+
+  it("matches Corp remote asset conversion evidence by bounded role terms", () => {
+    expect(
+      corpRemoteCreatedConvertsTo(
+        [
+          { side: "corp", actionType: "install_card" },
+          {
+            side: "corp",
+            actionType: "install_card",
+            evidence: ["corp.remote_support"],
+          },
+        ],
+        0,
+        2,
+        "asset",
+      ),
+    ).toBe(true);
+    expect(
+      corpRemoteCreatedConvertsTo(
+        [
+          { side: "corp", actionType: "install_card" },
+          {
+            side: "corp",
+            actionType: "install_card",
+            evidence: [
+              "remote_supportish_noise",
+              "economy_assetish_noise",
+              "asset_trash_targetish_noise",
+            ],
+          },
+        ],
+        0,
+        2,
+        "asset",
+      ),
+    ).toBe(false);
   });
 });
 

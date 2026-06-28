@@ -8292,6 +8292,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsiebenundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/plan-conversion-predicates.ts` erkennt Corp-Remote-Asset-Conversion-Evidence über gebundene `rolesMatch`-Terme statt freier `item.includes(...)`-Substring-Prüfungen.
+  - Strukturierte Evidence wie `corp.remote_support`, `economy_asset` und `asset_trash_target` bleibt wirksam; Rauschen wie `remote_supportish_noise`, `economy_assetish_noise` und `asset_trash_targetish_noise` bleibt wirkungslos.
+  - `plan-conversion-predicates.test.ts` schützt positive Corp-Remote-Asset-Conversion und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/plan-conversion-predicates.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

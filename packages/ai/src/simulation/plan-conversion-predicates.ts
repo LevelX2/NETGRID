@@ -284,12 +284,11 @@ export function corpRemoteCreatedConvertsTo<
       return (
         entry.actionType === "install_card" &&
         (entry.reasonCode?.includes("asset") === true ||
-          (entry.evidence ?? []).some(
-            (item) =>
-              item.includes("remote_support") ||
-              item.includes("economy_asset") ||
-              item.includes("asset_trash_target"),
-          ))
+          rolesMatch(entry.evidence ?? [], [
+            "remote_support",
+            "economy_asset",
+            "asset_trash_target",
+          ]))
       );
     });
 }
