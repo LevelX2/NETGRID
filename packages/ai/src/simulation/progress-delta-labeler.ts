@@ -164,7 +164,7 @@ function isCoverageInstall(action: ProgressDeltaAction): boolean {
   const text = actionText(action);
   return (
     (action.runnerSetupMissingCoverageTypes?.length ?? 0) > 0 ||
-    /coverage|breaker|decoder|fracter|killer|icebreaker/.test(text)
+    actionTextHasCoverageInstallSignal(text)
   );
 }
 
@@ -320,6 +320,18 @@ function actionTextHasFlatlineSignal(text: string): boolean {
   );
 }
 
+function actionTextHasCoverageInstallSignal(text: string): boolean {
+  const tokens = progressActionTextTokens(text);
+  return progressTokensIncludeAny(tokens, [
+    "coverage",
+    "breaker",
+    "decoder",
+    "fracter",
+    "killer",
+    "icebreaker",
+  ]);
+}
+
 function progressActionTextTokens(text: string): string[] {
   const tokens: string[] = [];
   let current = "";
@@ -349,4 +361,12 @@ function progressTokensIncludePhrase(
   return tokens.some((_, index) =>
     phrase.every((token, offset) => tokens[index + offset] === token),
   );
+}
+
+function progressTokensIncludeAny(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
 }

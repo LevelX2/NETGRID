@@ -50,6 +50,23 @@ describe("progress delta labeler", () => {
     );
   });
 
+  it("bounds coverage install signals to exact text tokens", () => {
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "install_card",
+        reasonCode: "runner.install.decoder",
+      }),
+    ).toBe("progress_coverage_install");
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "install_card",
+        reasonCode: "runner.install.codebreakerish",
+      }),
+    ).toBe("no_progress_stale");
+  });
+
   it("labels economy as converted only when follow-up progress appears", () => {
     const labels = labelProgressDeltaWindow([
       { index: 10, side: "runner", actionType: "gain_credit" },
