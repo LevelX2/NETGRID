@@ -8400,6 +8400,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertneunundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/belief-state.ts` hängt Remote-Hypothesen-Invalidationen über gebundene Server-ID-Segmente statt freier `entry.includes(server.id)`-Substring-Prüfung an.
+  - Strukturierte Invalidation-Zeilen wie `remote_state_changed:...:remote_1` bleiben wirksam; Rauschen wie `remote_state_changed:...:remote_10` invalidiert `remote_1` nicht mehr.
+  - `belief-state.test.ts` schützt den `remote_1`/`remote_10`-Grenzfall über rekonstruierte Remote-Root-Hypothesen.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/belief-state.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

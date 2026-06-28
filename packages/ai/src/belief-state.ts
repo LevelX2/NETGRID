@@ -440,7 +440,9 @@ function hypothesisEntries(input: AiDecisionInput, classifications: BeliefEventC
         subject: `remote_card_hypothesis:${server.id}:unknown_root`,
         confidence: 0.42,
         sourceEventIds: [],
-        invalidatedBy: invalidationLog.filter((entry) => entry.includes(server.id)).slice(0, 3)
+        invalidatedBy: invalidationLog
+          .filter((entry) => invalidationEntryReferencesServer(entry, server.id))
+          .slice(0, 3)
       });
     }
     const unknownUnrezzedIce = server.ice.filter((card) => card.rezzed !== true && !card.known).length;
@@ -452,7 +454,9 @@ function hypothesisEntries(input: AiDecisionInput, classifications: BeliefEventC
         subject: `unrezzed_ice_risk:${server.id}:${unknownUnrezzedIce}`,
         confidence: clamp01(0.35 + unknownUnrezzedIce * 0.17),
         sourceEventIds: [],
-        invalidatedBy: invalidationLog.filter((entry) => entry.includes(server.id)).slice(0, 3)
+        invalidatedBy: invalidationLog
+          .filter((entry) => invalidationEntryReferencesServer(entry, server.id))
+          .slice(0, 3)
       });
     }
   }
@@ -1492,6 +1496,13 @@ function deriveInvalidationLog(classifications: BeliefEventClassification[]): st
   return classifications
     .filter((event) => event.invalidationReason)
     .map((event) => `${event.invalidationReason}:${event.eventId}${event.serverId ? `:${event.serverId}` : ""}`);
+}
+
+function invalidationEntryReferencesServer(entry: string, serverId: string): boolean {
+  return entry
+    .toLowerCase()
+    .split(/[.:-]+/)
+    .some((segment) => segment === serverId);
 }
 
 function invalidationReasonForEvent(

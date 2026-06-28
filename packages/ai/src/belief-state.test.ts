@@ -313,6 +313,35 @@ describe("belief-state known position memory", () => {
   });
 });
 
+describe("belief-state remote hypothesis invalidations", () => {
+  it("matches invalidation entries by bounded remote server id", () => {
+    const remote10Advance = publicEvent("evt_remote_10_advance", "advance_card", 1, {
+      actor: "corp",
+      actionType: "advance_card",
+      serverId: "remote_10",
+    });
+    const input = runnerInput([remote10Advance]);
+    input.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [],
+        root: [{ known: false }],
+      },
+    ] as unknown as PlayerView["servers"];
+
+    const belief = reconstructBeliefState(input);
+    const remoteRootHypothesis = belief.entries.find(
+      (entry) => entry.subject === "remote_card_hypothesis:remote_1:unknown_root",
+    );
+
+    expect(belief.invalidationLog).toContain(
+      "remote_state_changed:evt_remote_10_advance:remote_10",
+    );
+    expect(remoteRootHypothesis?.invalidatedBy).toEqual([]);
+  });
+});
+
 describe("belief-state reveal kind classification", () => {
   it("uses structured revealKind and ignores definition id reveal text", () => {
     const structuredExpose = publicEvent(
