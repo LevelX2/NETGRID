@@ -51,6 +51,22 @@ describe("TargetRef v1", () => {
     expect(JSON.stringify(ref)).not.toContain("cardInstances");
   });
 
+  it("bounds hidden-info marker detection to exact tokens", () => {
+    const ref = buildTargetRef({
+      kind: "ownInstalled",
+      actorSafeRef: "cardInstancesish.runner.stack.0",
+      evidence: ["privatePayloadish_evidence"],
+    });
+
+    expect(ref).toMatchObject({
+      kind: "ownInstalled",
+      identity: "ownInstalled:cardInstancesish.runner.stack.0",
+      sideSafe: true,
+      snapshotStable: true,
+    });
+    expect(targetRefIsRedactionSafe({ evidence: ["privatePayloadish_evidence"] })).toBe(true);
+  });
+
   it("maps ability source identities as actor-private side-safe refs", () => {
     const ref = targetRefFromIdentity("ability:self_modifying_code:search_install");
 
