@@ -2,7 +2,7 @@
 
 ## Status
 
-`implementing`
+`verified_pending_local_main_merge`
 
 ## Quelle/Vorgabe
 
@@ -82,7 +82,7 @@ Checks:
 - `git diff --check`
 
 Commit:
-- `fix(ai): count runner remote pressure for corp memory`
+- `fix(ai): count labeled runner runs in corp memory`
 
 ### Paket 3: Remote-Scoring-Window und effektive ICE-Kontextbewertung
 
@@ -99,7 +99,7 @@ Checks:
 - `git diff --check`
 
 Commit:
-- `fix(ai): penalize contestable corp remote scorelines`
+- `fix(ai): refine corp remote scoring windows`
 
 ### Paket 4: AI-Hints für Proteus-Remote-Schutz
 
@@ -108,15 +108,15 @@ Ziel: Hints sollen Remote-Schutz und Solo-/Scaling-Risiken ausdrücken, ohne gen
 Arbeit:
 - ETR-ICE im Proteus-Deck um `protect_remote` oder remote-scoring-relevante Signale ergänzen, wo die Karte tatsächlich Remote schützen kann.
 - Dog Pile um Solo-/Scaling-Risikowörter ergänzen.
-- 4-Advancement-Agendas um Score-Horizon-/contestable-Risiko-Hints ergänzen.
-- Rent-to-Own/Emergency-Rig-Hints als Score-Remote-Rez-Unterstützung präzisieren.
+- Riddler um Paid-ETR-Risikohinweis ergänzen.
+- Generated Hint-Indizes neu bauen und Inspector-Regressionen ergänzen.
 
 Checks:
 - AI-Hint-/Ontology-Gate, soweit passend
 - `git diff --check`
 
 Commit:
-- `fix(ai): refine corp remote protection hints`
+- `fix(ai): mark Proteus ICE remote scoring roles`
 
 ### Paket 5: Review, Verifikation und lokale Integration
 
@@ -135,7 +135,8 @@ Checks:
 - `git diff --check`
 
 Commit:
-- `docs(ai): review corp remote refinement followup`
+- `fix(ai): type remote label parsing`
+- `docs(ai): record corp remote verification`
 
 ## Abschlusskriterien
 
@@ -143,3 +144,34 @@ Commit:
 - Hints und Runtime-Evidence benennen die neuen Gründe side-safe.
 - Arbeitsbranch ist lokal nach `main` gemergt.
 - Kein Push und keine PR.
+
+## Verifizierter Umsetzungsstand
+
+Commits:
+
+- `d6f7d9cc4 docs(ai): record corp remote refinement process`
+- `3eabd737d fix(ai): count labeled runner runs in corp memory`
+- `8aea81760 fix(ai): refine corp remote scoring windows`
+- `5ed998506 fix(ai): mark Proteus ICE remote scoring roles`
+- `5e0bf1bb1 fix(ai): type remote label parsing`
+
+Umgesetzte Kernpunkte:
+
+- Corp-Run-Memory klassifiziert label-only PublicEvents fuer HQ, R&D und Remotes side-safe, ohne verdeckte Runner-Zonen zu verwenden.
+- Scoring-Window-Assessment unterscheidet jetzt relevante, bezahlbare und durable relevante Remote-ICE statt reiner ICE-Anzahl.
+- Cheap irrelevant ICE erfuellt den Rez-Floor nicht mehr; Economy kann dadurch vor Scoreline gewinnen, wenn Finanzierung die konkrete Schwachstelle ist.
+- Solo-Position-Scaling-ICE wie `Dog Pile` kann ein temporaeres Fenster erzeugen, aber keine durable Remote-Sicherheit.
+- Sichtbare Runner-Coverage plus Credits macht Solo-Dog-Pile-Scorelines unsafe.
+- Central-Pressure kann label-only HQ/R&D-Runs erkennen und weiterhin Remote-Plaene ueberstimmen, wenn Zentralserver akut bedroht sind.
+- Proteus-ETR-/Tax-ICE mit Remote-Schutzwert tragen `protect_remote`; `Dog Pile` und `Riddler` haben zusaetzliche Risiko-Hinweise.
+
+Bestandene Gates:
+
+- `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/diagnostics/semantic-runtime-memory-debug.test.ts src/belief-state.test.ts src/runtime/semantic-runtime-corp-scoring-window.test.ts src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/semantic-runtime-corp-passive-scoreline.test.ts src/ai-hint-inspector-index.test.ts`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm check:ai`
+- `git diff --check`
+
+Nicht als Gate genutzt:
+
+- Ein versehentlicher breiter `@netgrid/ai`-Testlauf zeigte bestehende, fachlich nicht zu diesem Paket gehoerende Alt-Failures in Shadow-League-, Module-Boundary- und Runner-Run-Target-Suiten. Die fokussierten neuen Regressionen, Typecheck und AI-Gates sind gruen.

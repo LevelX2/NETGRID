@@ -106,3 +106,26 @@ Erwartung:
 - Engine-Verhalten von `Dog Pile` ändern: Die Replay-Daten passen zum CardImplementation-Vertrag.
 - Hidden Runner-Hand/Stack für Breaker-Coverage verwenden.
 - Generisches Remote-ICE-Spam-Verhalten erzeugen.
+
+## Umsetzungsmatrix
+
+| Finding | Umsetzung |
+| --- | --- |
+| Remote-/Central-Run-Memory blieb trotz sichtbarer Runs auf 0. | Corp-Memory nutzt fuer Runner-Pressure jetzt auch side-safe `serverLabel`/`serverName` aus PublicEvents und klassifiziert HQ, R&D und Remote-Familien. |
+| Solo-`Dog Pile` wurde als Remote-Schutz ueberschaetzt. | Scoring-Window bewertet Position-/Outer-ICE-Scaling solo nicht als durable und macht Solo-Dog-Pile bei sichtbarer Killer-Coverage plus Credits unsafe. |
+| 4-Advancement-Agendas wurden in contestable Remote gelegt. | Nicht-immediate Scorelines muessen die Runner-Exposure-Window und effektive Contestierbarkeit beruecksichtigen; unsafe Scorelines verlieren gegen Haertung oder Funding. |
+| Proteus-ICE-Hints waren zu zentralserverlastig. | Remote-taugliche Proteus-ETR-/Tax-ICE tragen `protect_remote`; Schein- oder rein bedingte Schutzrollen bleiben ausgeschlossen. |
+| Deferred-/Free-Rez-Operationen waren als Remote-Support zu schwach. | Rez-Floor und Remote-ICE-Build-Bewertung unterscheiden relevante/bezahlbare ICE; Economy gewinnt, wenn die konkrete Remote-Schwachstelle Finanzierung ist. |
+
+## Verifikation
+
+Bestanden:
+
+- Fokussierte AI-Regressionen fuer Memory, Scoring-Window, Remote-Score, passive Scoreline und Hint-Inspector.
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm check:ai`
+- `git diff --check`
+
+Bekannte Nicht-Gate-Beobachtung:
+
+- Ein versehentlich breiter AI-Testlauf traf bestehende Alt-Failures ausserhalb dieses Pakets. Diese wurden nicht als Abschluss-Gate verwendet, weil die paketbezogenen Regressionen und AI-Gates gruen sind.
