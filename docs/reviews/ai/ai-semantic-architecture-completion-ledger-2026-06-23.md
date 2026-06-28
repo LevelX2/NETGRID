@@ -8121,6 +8121,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertachtundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/known-remote-access-commitment.ts` erkennt Free-Trash-Support über `trashSupportEffectTargetHasFreeTrash` als gebundenes Effect-Target-Segment statt per freier `includes("free_trash")`-Suche.
+  - Free-Trash-Targets werden vor der Root-Target-Prüfung behandelt, sodass strukturierte Hints wie `free_trash` und `access.free_trash` als kostenloser Trash-Support wirken; Rauschen wie `not_free_trash_noise` bleibt wirkungslos.
+  - `known-remote-access-commitment.test.ts` schützt echte installierte Free-Trash-Unterstützung und Marker-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/known-remote-access-commitment.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -298,12 +298,12 @@ function knownRemoteTrashCreditSupport(
         | undefined
     )?.effects ?? [];
     for (const effect of effects) {
-      if (!trashSupportEffectMatchesRoot(effect.target, rootType)) continue;
-      if (effect.target?.includes("free_trash")) {
+      if (trashSupportEffectTargetHasFreeTrash(effect.target)) {
         freeTrash = true;
         sources.push(card.definitionId);
         continue;
       }
+      if (!trashSupportEffectMatchesRoot(effect.target, rootType)) continue;
       if (effect.kind === "trash_credit") {
         const amount = Math.max(0, Math.floor(effect.amount ?? 0));
         if (amount <= 0) continue;
@@ -323,6 +323,16 @@ function knownRemoteTrashCreditSupport(
         .map((source) => `known_remote_root_trash_support_source:${source}`),
     ],
   };
+}
+
+export function trashSupportEffectTargetHasFreeTrash(
+  target: string | undefined,
+): boolean {
+  if (!target) return false;
+  return target
+    .toLowerCase()
+    .split(/[.:-]+/)
+    .includes("free_trash");
 }
 
 function trashSupportEffectMatchesRoot(
