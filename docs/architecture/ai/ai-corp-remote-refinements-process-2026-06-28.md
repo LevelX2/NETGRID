@@ -2,7 +2,7 @@
 
 ## Status
 
-`verified_pending_local_main_merge`
+`merged_to_main`
 
 ## Quelle/Vorgabe
 
