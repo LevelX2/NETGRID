@@ -308,6 +308,43 @@ describe("DeckCapabilityProfile", () => {
     }
   });
 
+  it("bounds text-only breaker coverage terms to exact tokens", () => {
+    const inputView = playerView("runner");
+    inputView.own.rig = [
+      visibleCard("text-fracter-1", "local_text_fracter", "runner", "program", {
+        title: "Local Text Fracter",
+        rulesText: "Break one ice subroutine.",
+      }),
+      visibleCard("fracteroid-1", "local_fracteroid_noise", "runner", "program", {
+        title: "Local Fracteroid",
+        rulesText: "Fracteroid barrierish helper.",
+      }),
+      visibleCard(
+        "icebreakerish-1",
+        "local_icebreakerish_noise",
+        "runner",
+        "program",
+        {
+          title: "Icebreakerish Tool",
+          subtypes: ["icebreakerish"],
+        },
+      ),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+    });
+
+    expect(profile.runner?.breakerInventory.map((entry) => entry.cardId))
+      .toEqual(["local_text_fracter"]);
+    expect(profile.runner?.breakerInventory[0]?.coverage).toEqual([
+      "subtype_limited",
+      "wall",
+    ]);
+  });
+
   it("matches corp plan roles by bounded role terms", () => {
     CARD_ROLES_BY_CARD.set("local_plan_a", {
       cardId: "local_plan_a",

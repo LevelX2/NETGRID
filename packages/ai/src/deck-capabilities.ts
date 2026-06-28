@@ -462,7 +462,14 @@ function breakerCapabilityFromRecord(
   const visible = record.visibleCards[0];
   const roleBasedBreaker =
     rolesMatch(record.roles, ["breaker_"]) ||
-    record.subtypes.some((subtype) => /icebreaker|fracter|decoder|killer/i.test(subtype));
+    record.subtypes.some((subtype) =>
+      deckCapabilityTokensIncludeAny(deckCapabilityTextTokens(subtype), [
+        "icebreaker",
+        "fracter",
+        "decoder",
+        "killer",
+      ]),
+    );
   const confidence: DeckCapabilityConfidence = breakerProfile
     ? "high"
     : roleBasedBreaker
@@ -514,23 +521,41 @@ function breakerCoverageForRecord(record: CardCapabilityRecord): BreakerCoverage
     hintCoverage.map(mapHintCoverage).filter((entry): entry is BreakerCoverageKind => Boolean(entry)),
   );
   const haystack = normalizedRecordText(record);
+  const tokens = deckCapabilityTextTokens(haystack);
   for (const role of [...record.roles, ...record.planRoles]) {
     if (role === "breaker_fracter") coverage.add("wall");
     if (role === "breaker_decoder") coverage.add("code_gate");
     if (role === "breaker_killer") coverage.add("sentry");
   }
-  if (/fracter|wall|barrier/.test(haystack)) coverage.add("wall");
-  if (/decoder|code gate|code_gate|codegate/.test(haystack)) coverage.add("code_gate");
-  if (/killer|sentry/.test(haystack)) coverage.add("sentry");
-  if (/\bap\b|anti-personnel|net damage|meat damage/.test(haystack)) coverage.add("ap");
-  if (/\btrace\b|traces/.test(haystack)) coverage.add("trace");
-  if (/break (?:an? |one |\d+ )?ice subroutine|breaks? .*subroutine/.test(haystack)) {
+  if (deckCapabilityTokensIncludeAny(tokens, ["fracter", "wall", "barrier"]))
+    coverage.add("wall");
+  if (
+    deckCapabilityTokensIncludeAny(tokens, ["decoder", "codegate"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["code", "gate"])
+  )
+    coverage.add("code_gate");
+  if (deckCapabilityTokensIncludeAny(tokens, ["killer", "sentry"]))
+    coverage.add("sentry");
+  if (
+    deckCapabilityTokensIncludeAny(tokens, ["ap"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["anti", "personnel"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["net", "damage"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["meat", "damage"])
+  )
+    coverage.add("ap");
+  if (deckCapabilityTokensIncludeAny(tokens, ["trace", "traces"]))
+    coverage.add("trace");
+  if (deckCapabilityTokensLookLikeBreakSubroutine(tokens)) {
     coverage.add(coverage.size > 0 ? "subtype_limited" : "special");
   }
   if (
     coverage.size === 0 &&
-    (record.subtypes.some((subtype) => /icebreaker/i.test(subtype)) ||
-      /icebreaker|breaker/.test(haystack))
+    (record.subtypes.some((subtype) =>
+      deckCapabilityTokensIncludeAny(deckCapabilityTextTokens(subtype), [
+        "icebreaker",
+      ]),
+    ) ||
+      deckCapabilityTokensIncludeAny(tokens, ["icebreaker", "breaker"]))
   ) {
     coverage.add("special");
   }
@@ -900,6 +925,46 @@ function normalizedRecordText(record: CardCapabilityRecord): string {
     ...record.roles,
     ...record.planRoles,
   ].join(" ").toLowerCase();
+}
+
+function deckCapabilityTextTokens(text: string): string[] {
+  return text
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function deckCapabilityTokensIncludeAny(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
+}
+
+function deckCapabilityTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    phrase.every((token, offset) => tokens[index + offset] === token),
+  );
+}
+
+function deckCapabilityTokensLookLikeBreakSubroutine(
+  tokens: readonly string[],
+): boolean {
+  for (const [index, token] of tokens.entries()) {
+    if (token !== "break" && token !== "breaks") continue;
+    for (
+      let cursor = index + 1;
+      cursor < Math.min(tokens.length, index + 9);
+      cursor += 1
+    ) {
+      if (tokens[cursor] === "subroutine") return true;
+    }
+  }
+  return false;
 }
 
 function capabilitySourceEvidence(input: {

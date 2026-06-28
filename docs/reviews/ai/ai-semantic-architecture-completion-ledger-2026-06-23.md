@@ -9082,6 +9082,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n "run\|pressure\|contest\|access|score\|advance|install\|rig\|setup" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneunundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` ersetzt die textbasierte Breaker-Coverage-Erkennung für Subtypes, Coverage-Familien, AP/Trace und Break-Subroutine-Signale durch gebundene Deck-Capability-Tokens.
+  - Exakte Begriffe und Phrasen wie `fracter`, `code gate`, `net damage`, `trace` und `break ... subroutine` bleiben wirksam; Suffix-Rauschen wie `fracteroid`, `barrierish` und `icebreakerish` erzeugt keine Breaker-Coverage mehr.
+  - Strukturierte Breaker-Profile und Rollen bleiben weiterhin die bevorzugte Begründungsquelle vor sichtbarem Textfallback.
+  - Die Erkennung bleibt reine Deck-/Capability-Diagnostik über sichtbare Kartendaten und erzeugt keine LegalAction-Projektion.
+  - `deck-capabilities.test.ts` schützt positive und negative Text-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts` grün, 1 Datei, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: spezifischer `rg`-Restcheck auf die ersetzten Breaker-Coverage-Regexmuster ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
