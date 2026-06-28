@@ -102,7 +102,7 @@ export function runnerCardLooksLikeCreditPayout(
   definition: VisibleCardHeuristicDefinition | undefined,
 ): boolean {
   const mechanics = definition?.mechanics ?? [];
-  if (mechanics.some((mechanic) => mechanic.includes("gain_credits"))) {
+  if (rolesMatch(mechanics, ["gain_credits"])) {
     return true;
   }
   return /gain\s+\[?\d+\]?\s+credits/i.test(
