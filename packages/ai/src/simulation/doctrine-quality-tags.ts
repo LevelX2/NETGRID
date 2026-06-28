@@ -11,6 +11,7 @@ import type {
 } from "../index";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
 import { countValue as countTag, sortedUnique } from "../runtime/collection";
+import { rolesMatch } from "../runtime/role-match";
 import {
   DOCTRINE_QUALITY_METRIC_NAMES,
   sumDoctrineMetrics,
@@ -128,9 +129,7 @@ export function qualityTagsForActionWithDependencies(
   const economyAction =
     action.type === "gain_credit" ||
     ((action.type === "play_event" || action.type === "play_operation") &&
-      dependencies
-        .rolesForAction(input, action)
-        .some((role) => role.includes("economy") || role === "tempo"));
+      roleListHasEconomyOrTempo(dependencies.rolesForAction(input, action)));
   const economyStallExempt = isEconomyStallExemptAction(
     input,
     action,
@@ -188,6 +187,10 @@ export function qualityTagsForActionWithDependencies(
   if (decision.timeoutUsed) tags.push("timeout");
   if (decision.fallbackUsed) tags.push("fallback");
   return sortedUnique(tags);
+}
+
+function roleListHasEconomyOrTempo(roles: readonly string[]): boolean {
+  return rolesMatch(roles, ["economy"]) || roles.includes("tempo");
 }
 
 export function isEconomyStallExemptAction(
