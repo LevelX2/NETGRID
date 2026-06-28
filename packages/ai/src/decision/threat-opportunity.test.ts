@@ -107,6 +107,53 @@ describe("Threat and Opportunity projections", () => {
     ).toBe(false);
   });
 
+  it("projects corp opportunity evidence only from bounded frame markers", () => {
+    const action = legalAction("gain-1", "gain_credit", "corp");
+    const frame = buildSemanticDecisionFrame({
+      input: inputFor("corp", [action]),
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: [action],
+        observerSide: "corp",
+        stateVersion: 3,
+      }),
+      evidence: [
+        "noise_score_windowish",
+        "score_window:agenda_ready",
+        "rez_value_window:protect_scoring_remote",
+      ],
+    });
+
+    const opportunities = buildAiOpportunityProjections(frame).map(
+      (projection) => projection.opportunity,
+    );
+
+    expect(opportunities).toContain("score_window");
+    expect(opportunities).toContain("rez_value_window");
+  });
+
+  it("does not project corp opportunity evidence from substring noise", () => {
+    const action = legalAction("gain-1", "gain_credit", "corp");
+    const frame = buildSemanticDecisionFrame({
+      input: inputFor("corp", [action]),
+      actionCandidates: buildActionSemanticCandidates({
+        legalActions: [action],
+        observerSide: "corp",
+        stateVersion: 3,
+      }),
+      evidence: [
+        "corp_score_windowish_noise",
+        "not_rez_value_window_noise",
+      ],
+    });
+
+    const opportunities = buildAiOpportunityProjections(frame).map(
+      (projection) => projection.opportunity,
+    );
+
+    expect(opportunities).not.toContain("score_window");
+    expect(opportunities).not.toContain("rez_value_window");
+  });
+
   it("projects corp low rez reserve from side-safe frame evidence", () => {
     const frame = buildSemanticDecisionFrame({
       input: inputFor("corp", [legalAction("gain-1", "gain_credit", "corp")]),

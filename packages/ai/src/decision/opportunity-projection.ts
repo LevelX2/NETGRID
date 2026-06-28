@@ -48,7 +48,7 @@ export function buildAiOpportunityProjections(
       frame.actionCandidates.some(
         (candidate) => candidate.timingProfile.scoreWindow === true,
       ) ||
-      frame.evidence.some((entry) => entry.includes("score_window"))
+      hasEvidenceMarker(frame.evidence, "score_window")
     ) {
       projections.push({
         opportunity: "score_window",
@@ -57,7 +57,7 @@ export function buildAiOpportunityProjections(
         evidence: ["frame:score_window"],
       });
     }
-    if (frame.evidence.some((entry) => entry.includes("rez_value_window"))) {
+    if (hasEvidenceMarker(frame.evidence, "rez_value_window")) {
       projections.push({
         opportunity: "rez_value_window",
         priority: "high",
@@ -94,6 +94,15 @@ export function buildAiOpportunityProjections(
   }
 
   return dedupeOpportunities(projections);
+}
+
+function hasEvidenceMarker(
+  evidence: readonly string[],
+  marker: "score_window" | "rez_value_window",
+): boolean {
+  return evidence.some(
+    (entry) => entry === marker || entry.startsWith(`${marker}:`),
+  );
 }
 
 function runTargetOpportunity(

@@ -8029,6 +8029,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertachtunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/opportunity-projection.ts` erkennt Corp-Opportunity-Evidence für `score_window` und `rez_value_window` nur noch als exakten Marker oder als gebundenen `marker:`-Präfix statt über freie `includes`-Substring-Suche.
+  - Strukturierte Evidence wie `score_window:agenda_ready` und `rez_value_window:protect_scoring_remote` bleibt wirksam; substringartiges Rauschen wie `corp_score_windowish_noise` und `not_rez_value_window_noise` erzeugt keine Opportunity-Projektion mehr.
+  - `threat-opportunity.test.ts` schützt positive Marker und Substring-Negativfälle im bestehenden Projection-Harness.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/threat-opportunity.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
