@@ -782,18 +782,22 @@ function buildMemoryCapabilityProfile(
 function buildRunnerAttackPlanProfile(
   records: readonly CardCapabilityRecord[],
 ): RunnerAttackPlanProfile {
-  const roleText = records.map((record) => record.roles.join(" ")).join(" ");
-  const centralPressureToolsKnown = countRoleMatches(roleText, [
+  const centralPressureToolsKnown = records.filter((record) =>
+    rolesMatch(record.roles, [
     "pressure_rnd",
     "pressure_hq",
     "multiaccess",
-  ]);
-  const remoteContestToolsKnown = countRoleMatches(roleText, [
+    ]),
+  ).length;
+  const remoteContestToolsKnown = records.filter((record) =>
+    rolesMatch(record.roles, [
     "remote_contest",
     "trash_support",
-  ]);
+    ]),
+  ).length;
   const setupToolsKnown = records.filter((record) =>
-    record.roles.some((role) => role.startsWith("setup") || role === "runner_program"),
+    rolesMatch(record.roles, ["setup"]) ||
+    record.roles.some((role) => role === "runner_program"),
   ).length;
   return {
     centralPressureToolsKnown,
@@ -984,10 +988,6 @@ function subtypeOrText(record: CardCapabilityRecord, ...needles: string[]): bool
     record.subtypes.some((subtype) => subtype.toLowerCase() === needle) ||
     text.includes(needle),
   );
-}
-
-function countRoleMatches(roleText: string, roles: readonly string[]): number {
-  return roles.reduce((sum, role) => sum + (roleText.includes(role) ? 1 : 0), 0);
 }
 
 function compareBreakerCapabilities(

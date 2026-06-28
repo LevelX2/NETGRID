@@ -8002,6 +8002,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertfünfunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` zählt Runner-Angriffsplan-Tools kartenweise mit dem gebundenen `rolesMatch`-Helper statt über freie Substring-Suche in einem zusammengeklebten Rollentext.
+  - Strukturierte Rollen wie `interface_multiaccess`, `remote_contest_tool` und `early_setup` bleiben wirksam; substringartiges Rauschen wie `multiaccessory_noise`, `remote_contestish_noise` und `setupish_noise` erhöht keine Runner-Angriffsplan-Zähler mehr.
+  - `deck-capabilities.test.ts` schützt strukturierte Treffer und Substring-Negativfälle über kontrollierte Runner-`CARD_ROLES_BY_CARD`-Einträge.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -330,6 +330,67 @@ describe("DeckCapabilityProfile", () => {
     }
   });
 
+  it("matches runner attack plan roles by bounded role terms", () => {
+    CARD_ROLES_BY_CARD.set("local_runner_attack_a", {
+      cardId: "local_runner_attack_a",
+      side: "runner",
+      roles: ["interface_multiaccess"],
+    });
+    CARD_ROLES_BY_CARD.set("local_runner_attack_b", {
+      cardId: "local_runner_attack_b",
+      side: "runner",
+      roles: ["remote_contest_tool"],
+    });
+    CARD_ROLES_BY_CARD.set("local_runner_attack_c", {
+      cardId: "local_runner_attack_c",
+      side: "runner",
+      roles: ["early_setup"],
+    });
+    CARD_ROLES_BY_CARD.set("local_runner_attack_noise", {
+      cardId: "local_runner_attack_noise",
+      side: "runner",
+      roles: [
+        "multiaccessory_noise",
+        "remote_contestish_noise",
+        "setupish_noise",
+      ],
+    });
+    try {
+      const inputView = playerView("runner");
+      inputView.own.gripOrHq = [
+        visibleCard("attack-a", "local_runner_attack_a", "runner", "event", {
+          title: "Attack Plan A",
+        }),
+        visibleCard("attack-b", "local_runner_attack_b", "runner", "event", {
+          title: "Attack Plan B",
+        }),
+        visibleCard("attack-c", "local_runner_attack_c", "runner", "hardware", {
+          title: "Attack Plan C",
+        }),
+        visibleCard("attack-noise", "local_runner_attack_noise", "runner", "event", {
+          title: "Attack Noise",
+        }),
+      ];
+
+      const profile = buildDeckCapabilityProfile({
+        side: "runner",
+        playerView: inputView,
+        legalActions: [],
+      });
+
+      expect(profile.runner?.attackPlanProfile).toMatchObject({
+        centralPressureToolsKnown: 1,
+        remoteContestToolsKnown: 1,
+        setupToolsKnown: 1,
+      });
+    } finally {
+      CARD_ROLES_BY_CARD.delete("local_runner_attack_a");
+      CARD_ROLES_BY_CARD.delete("local_runner_attack_b");
+      CARD_ROLES_BY_CARD.delete("local_runner_attack_c");
+      CARD_ROLES_BY_CARD.delete("local_runner_attack_noise");
+    }
+  });
+
   it("marks missing runner coverage without guessing unavailable deck answers", () => {
     const profile = buildDeckCapabilityProfile({
       side: "runner",
