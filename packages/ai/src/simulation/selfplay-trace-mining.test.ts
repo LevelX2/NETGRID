@@ -242,6 +242,42 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("recovery-noise-2");
   });
 
+  it("bounds recovery funding signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "funding-positive-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "funding-positive-2",
+        reasonCode: "runner.recovery",
+        debugFacts: [
+          "runner_credit_base_recommendation:fund_useful_hand_card",
+        ],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "funding-noise-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "funding-noise-2",
+        reasonCode: "runner.recovery",
+        debugFacts: [
+          "runner_credit_base_recommendation:fund_useful_hand_cardish",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["recovery_low_value_loop"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("funding-noise-2");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),

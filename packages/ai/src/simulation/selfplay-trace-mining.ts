@@ -1351,10 +1351,12 @@ function recoveryLowValueLoopContext(
       "coverageanswerrole:recovery_answer",
     ]);
   const fundingNeed =
-    text.includes("fundingneedreducesrecoverylooppenalty:true") ||
-    text.includes("runner_economy_funding_need:true") ||
-    text.includes("credit_base_funding_need:true") ||
-    text.includes("runner_credit_base_recommendation:fund_useful_hand_card") ||
+    selfplayEntryHasStructuredSignal(entry, [
+      "fundingneedreducesrecoverylooppenalty:true",
+      "runner_economy_funding_need:true",
+      "credit_base_funding_need:true",
+      "runner_credit_base_recommendation:fund_useful_hand_card",
+    ]) ||
     entry.runnerEconomyTakenToReachRunReserve === true ||
     entry.runnerEconomyChoicePlausible === true;
   const searchOrDrawNeed =
