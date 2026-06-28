@@ -17,6 +17,10 @@ describe("discard keep score", () => {
       score(corpCard("neutral-operation", "operation")).baseValue,
     );
     expect(
+      score(corpCard("role-ice-operation", "operation"), ["remote_ice"])
+        .baseValue,
+    ).toBeGreaterThan(score(corpCard("neutral-operation", "operation")).baseValue);
+    expect(
       score(corpCard("role-economy-operation", "operation"), ["economy_asset"])
         .baseValue,
     ).toBeGreaterThan(score(corpCard("neutral-operation", "operation")).baseValue);
@@ -35,6 +39,9 @@ describe("discard keep score", () => {
       score(corpCard("remotecontrol-role", "operation"), [
         "remotecontrol_noise",
       ]).baseValue,
+    ).toBe(benignRole);
+    expect(
+      score(corpCard("icecream-role", "operation"), ["nice_noise"]).baseValue,
     ).toBe(benignRole);
   });
 

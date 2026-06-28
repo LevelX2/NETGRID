@@ -70,7 +70,7 @@ export function discardKeepScore(
     if (type === "agenda") baseValue += 330;
     if (
       type === "ice" ||
-      roles.some((role) => role.endsWith("_ice") || role === "etr_ice")
+      rolesMatch(roles, ["ice", "etr_ice"])
     )
       baseValue += 320;
     const economyRole = rolesMatch(roles, ["economy"]);
