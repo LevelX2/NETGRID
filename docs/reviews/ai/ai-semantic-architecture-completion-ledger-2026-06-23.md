@@ -9008,6 +9008,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertdreiundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ersetzt die restlichen freien Advancement-Counter-Regex-Fallbacks für Low-Value-Decoys und Transfer-Source-Erkennung durch gebundene Rules-Text-Tokens.
+  - Transferquellen erkennen weiter `move any number of advancement counters` sowie geordnete `move ... advancement counters ... another installed card`-Signale, aber nur mit exakten Tokens.
+  - Low-Value-Decoys erkennen weiter gebundene `access`-/`accessed`-, `trash`-/`trashed`- und `damage`-Tokens ohne Suffix-Treffer.
+  - Die Erkennung bleibt reine Runtime-Heuristik über sichtbaren normalisierten Rules-Text und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-advancement-counter.test.ts` schützt positive Transfer-Source-Erkennung und Suffix-Rauschen wie `countersink`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-advancement-counter.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "\.test\(" packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
