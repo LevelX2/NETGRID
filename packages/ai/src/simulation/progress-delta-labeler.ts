@@ -180,7 +180,7 @@ function isReachabilityImprovement(action: ProgressDeltaAction): boolean {
   ) {
     return action.actionType !== "jack_out";
   }
-  return /reachability|known_path|access_path|continue_chain/.test(actionText(action));
+  return actionTextHasReachabilitySignal(actionText(action));
 }
 
 function isServerProtection(action: ProgressDeltaAction): boolean {
@@ -330,6 +330,16 @@ function actionTextHasCoverageInstallSignal(text: string): boolean {
     "killer",
     "icebreaker",
   ]);
+}
+
+function actionTextHasReachabilitySignal(text: string): boolean {
+  const tokens = progressActionTextTokens(text);
+  return (
+    tokens.includes("reachability") ||
+    progressTokensIncludePhrase(tokens, ["known", "path"]) ||
+    progressTokensIncludePhrase(tokens, ["access", "path"]) ||
+    progressTokensIncludePhrase(tokens, ["continue", "chain"])
+  );
 }
 
 function progressActionTextTokens(text: string): string[] {

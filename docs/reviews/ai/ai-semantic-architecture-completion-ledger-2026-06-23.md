@@ -8966,6 +8966,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneununddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-delta-labeler.ts` ersetzt die Reachability-Progress-Erkennung für `reachability`, `known_path`, `access_path` und `continue_chain` durch gebundene Action-Text-Tokens.
+  - Exakte Tokens und Phrasen bleiben wirksam; Suffix-Rauschen wie `unknown_pathish` erzeugt kein `progress_reachability_improved` mehr.
+  - Die Erkennung bleibt reine Simulations-/Progress-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `progress-delta-labeler.test.ts` schützt positive und negative Reachability-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/progress-delta-labeler.test.ts` grün, 1 Datei, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

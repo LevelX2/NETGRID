@@ -67,6 +67,23 @@ describe("progress delta labeler", () => {
     ).toBe("no_progress_stale");
   });
 
+  it("bounds reachability progress signals to exact text tokens", () => {
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "trigger_ability",
+        reasonCode: "runner.known_path",
+      }),
+    ).toBe("progress_reachability_improved");
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "trigger_ability",
+        reasonCode: "runner.unknown_pathish",
+      }),
+    ).toBe("no_progress_stale");
+  });
+
   it("labels economy as converted only when follow-up progress appears", () => {
     const labels = labelProgressDeltaWindow([
       { index: 10, side: "runner", actionType: "gain_credit" },
