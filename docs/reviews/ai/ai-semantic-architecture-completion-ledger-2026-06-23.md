@@ -9094,6 +9094,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: spezifischer `rg`-Restcheck auf die ersetzten Breaker-Coverage-Regexmuster ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` ersetzt die textbasierte Search-Access-Erkennung für Programm-/Breaker-Suche und Search-Confidence durch gebundene Deck-Capability-Tokens.
+  - Exakte Begriffe und Phrasen wie `program_search`, `breaker_search`, `search ... program`, `search ... breaker` und `search your stack` bleiben wirksam; Suffix-Rauschen wie `searchlight` und `programmer` erzeugt keinen Search-Access-Tooltreffer mehr.
+  - Strukturierte Rollen über `rolesMatch` bleiben weiterhin die bevorzugte Begründungsquelle vor sichtbarem Textfallback.
+  - Die Erkennung bleibt reine Deck-/Capability-Diagnostik über sichtbare Kartendaten und erzeugt keine LegalAction-Projektion.
+  - `deck-capabilities.test.ts` schützt positive und negative Search-Access-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts` grün, 1 Datei, 12 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: spezifischer `rg`-Restcheck auf die ersetzten Search-Access-Regexmuster ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -669,13 +669,12 @@ function searchAccessToolForRecord(
 ): SearchAccessTool | undefined {
   const text = normalizedRecordTextWithoutRoles(record);
   const roleSignals = [...record.roles, ...record.planRoles];
-  const signals = roleSignals.join(" ").toLowerCase();
   const canSearchPrograms =
-    /program_search|setup\.program_search|search.*program|search your stack for a program/.test(text) ||
+    deckCapabilityTextHasProgramSearchSignal(text) ||
     rolesMatch(roleSignals, ["program_search", "breaker_search"]);
   const canSearchBreakers =
     canSearchPrograms ||
-    /breaker_search|search.*breaker|icebreaker/.test(text) ||
+    deckCapabilityTextHasBreakerSearchSignal(text) ||
     rolesMatch(roleSignals, ["breaker_search"]);
   if (!canSearchPrograms && !canSearchBreakers) return undefined;
   const status = primaryStatus(record.locations);
@@ -691,7 +690,8 @@ function searchAccessToolForRecord(
       params.legalActions?.some((action) =>
         actionSourceMatchesRecord(action, record),
       ) ?? false,
-    confidence: /program_search|breaker_search|search your stack/.test(`${text} ${signals}`)
+    confidence: deckCapabilityTextHasHighConfidenceSearchSignal(text) ||
+      structuredSearch
       ? "high"
       : "medium",
     evidence: [
@@ -965,6 +965,54 @@ function deckCapabilityTokensLookLikeBreakSubroutine(
     }
   }
   return false;
+}
+
+function deckCapabilityTextHasProgramSearchSignal(text: string): boolean {
+  const tokens = deckCapabilityTextTokens(text);
+  return (
+    deckCapabilityTokensIncludePhrase(tokens, ["program", "search"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, [
+      "setup",
+      "program",
+      "search",
+    ]) ||
+    deckCapabilityTokensIncludeInOrder(tokens, "search", "program") ||
+    deckCapabilityTokensIncludePhrase(tokens, [
+      "search",
+      "your",
+      "stack",
+      "for",
+      "a",
+      "program",
+    ])
+  );
+}
+
+function deckCapabilityTextHasBreakerSearchSignal(text: string): boolean {
+  const tokens = deckCapabilityTextTokens(text);
+  return (
+    deckCapabilityTokensIncludePhrase(tokens, ["breaker", "search"]) ||
+    deckCapabilityTokensIncludeInOrder(tokens, "search", "breaker") ||
+    deckCapabilityTokensIncludeAny(tokens, ["icebreaker"])
+  );
+}
+
+function deckCapabilityTextHasHighConfidenceSearchSignal(text: string): boolean {
+  const tokens = deckCapabilityTextTokens(text);
+  return (
+    deckCapabilityTokensIncludePhrase(tokens, ["program", "search"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["breaker", "search"]) ||
+    deckCapabilityTokensIncludePhrase(tokens, ["search", "your", "stack"])
+  );
+}
+
+function deckCapabilityTokensIncludeInOrder(
+  tokens: readonly string[],
+  first: string,
+  second: string,
+): boolean {
+  const firstIndex = tokens.indexOf(first);
+  return firstIndex >= 0 && tokens.indexOf(second, firstIndex + 1) >= 0;
 }
 
 function capabilitySourceEvidence(input: {

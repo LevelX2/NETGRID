@@ -256,6 +256,34 @@ describe("DeckCapabilityProfile", () => {
     }
   });
 
+  it("bounds text-only search access terms to exact tokens", () => {
+    const inputView = playerView("runner");
+    inputView.own.gripOrHq = [
+      visibleCard("text-search-1", "local_text_search", "runner", "program", {
+        title: "Local Text Search",
+        rulesText: "Search your stack for a program.",
+      }),
+      visibleCard("searchlight-1", "local_searchlight_noise", "runner", "program", {
+        title: "Searchlight Noise",
+        rulesText: "Searchlight your stack for a programmer.",
+      }),
+    ];
+
+    const profile = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: inputView,
+      legalActions: [],
+    });
+
+    expect(profile.runner?.searchAccess.tools.map((tool) => tool.cardId))
+      .toEqual(["local_text_search"]);
+    expect(profile.runner?.searchAccess.tools[0]).toMatchObject({
+      canSearchPrograms: true,
+      canSearchBreakers: true,
+      confidence: "high",
+    });
+  });
+
   it("matches breaker capability roles by bounded role prefixes", () => {
     CARD_ROLES_BY_CARD.set("local_structured_breaker", {
       cardId: "local_structured_breaker",
