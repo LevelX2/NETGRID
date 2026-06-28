@@ -9299,6 +9299,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneunundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/diagnostics/semantic-redaction.ts` ersetzt die zentrale Semantic-Redaction-Marker-Erkennung per `normalized.includes(marker)` durch gebundene Hidden-Info-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `sessionToken`, `fullGameState`, `secretGripIds`, `deckOrder` und `hiddenRemoteIdentity` bleiben blockiert; Suffix-Rauschen wie `privatePayloadish_bad_reason` oder Objektkeys wie `privatePayloadish` bleibt side-safe.
+  - Die Erkennung bleibt reine Diagnostic-/Report-Redaction-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `semantic-redaction.test.ts` schützt positive Forbidden-Marker-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/diagnostics/semantic-redaction.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

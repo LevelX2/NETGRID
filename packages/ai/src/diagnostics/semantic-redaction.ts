@@ -60,8 +60,29 @@ export function assertSemanticObjectSideSafe(
 }
 
 function containsForbiddenMarkerText(value: string): boolean {
-  const normalized = value.toLowerCase();
-  return FORBIDDEN_SEMANTIC_MARKERS.some((marker) =>
-    normalized.includes(marker),
+  const tokenSet = new Set(semanticRedactionTokens(value));
+  return FORBIDDEN_SEMANTIC_MARKERS.some((marker) => tokenSet.has(marker));
+}
+
+function semanticRedactionTokens(value: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of value) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character.toLocaleLowerCase("en-US");
+    } else {
+      if (current.length > 0) tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "A" && character <= "Z") ||
+    (character >= "0" && character <= "9")
   );
 }
