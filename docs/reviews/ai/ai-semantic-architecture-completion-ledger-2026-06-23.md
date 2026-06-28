@@ -8328,6 +8328,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hunderteinundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/target-choice-shadow-readiness.ts` erkennt Hidden-Info-Blocker in Target-Choice-Readiness über den gebundenen `targetChoiceEvidenceHasHiddenInfoMarker` statt freier `entry.includes("hidden_info")`-Substring-Prüfungen.
+  - Strukturierte Evidence wie `hidden_info_blocked` bleibt wirksam; Rauschen wie `not_hidden_info_noise` bleibt wirkungslos und fällt auf den passenden Side-Safe-Followup zurück.
+  - `target-choice-shadow-readiness.test.ts` schützt positive Hidden-Info-Blocker und Substring-Negativfälle über die Readiness-Followup-Auswertung.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/target-choice-shadow-readiness.test.ts src/decision/target-choice-shadow.test.ts` grün, 2 Dateien, 21 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
