@@ -1479,7 +1479,11 @@ function selfplaySemanticOverrideSuspicious(
   entry: AiSimulationSummary["actionSequence"][number],
   text: string,
 ): boolean {
-  if (!text.includes("semantic_runtime_actual_differs_from_legacy_debug"))
+  if (
+    !selfplayEntryHasStructuredSignal(entry, [
+      "semantic_runtime_actual_differs_from_legacy_debug",
+    ])
+  )
     return false;
   if (selfplayPlanMismatchHasKnownExplanation(text)) return false;
   if (selfplayReactiveSemanticOverride(entry.actionType)) return false;
