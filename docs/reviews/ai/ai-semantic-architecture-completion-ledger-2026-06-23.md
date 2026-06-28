@@ -7606,6 +7606,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` einundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/strategic-plan-conversion-metrics.ts` nutzt für Strategic-Plan-Conversion-Metric-PlanKinds den gebundenen `rolesMatch`-Helper statt freier PlanKind-Substring-Prüfungen.
+  - Strukturierte PlanKinds wie `recover_economy_plan` und `protect_hq` bleiben wirksam; substringartiges Rauschen wie `recover_economyish_noise` und `protector_hq_noise` erzeugt keine Conversion-Metric-Kategorie mehr.
+  - `strategic-plan-conversion-metrics.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/strategic-plan-conversion-metrics.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
