@@ -99,7 +99,7 @@ function goalSpecsForCandidate(candidate: ActionSemanticCandidate): CorpGoalSpec
       evidence: [...evidence, "corp_goal:economy_stabilize"],
     });
   }
-  if (semantic.includes("tag.") && hasVisiblePunishBasis(candidate)) {
+  if (signalHasTerm(semantic, "tag") && hasVisiblePunishBasis(candidate)) {
     specs.push({
       goalId: "corp.tactical.visible_tag_punish",
       family: "tag_punish",
@@ -170,34 +170,61 @@ function targetServerForCandidate(
 }
 
 function hasVisiblePunishBasis(candidate: ActionSemanticCandidate): boolean {
-  const text = visibleSignalText(candidate);
-  return /tag|trace|punish|trash_runner_resource/.test(text);
+  return visibleSignals(candidate).some(
+    (signal) =>
+      signalHasTerm(signal, "tag") ||
+      signalHasTerm(signal, "trace") ||
+      signalHasTerm(signal, "punish") ||
+      signalHasTerm(signal, "trash_runner_resource"),
+  );
 }
 
 function hasVisibleDamageOrAmbushBasis(candidate: ActionSemanticCandidate): boolean {
-  const text = visibleSignalText(candidate);
-  return /damage|ambush|flatline/.test(text);
+  return visibleSignals(candidate).some(
+    (signal) =>
+      signalHasTerm(signal, "damage") ||
+      signalHasTerm(signal, "ambush") ||
+      signalHasTerm(signal, "flatline"),
+  );
 }
 
 function hasVisibleScoreCloseoutBasis(
   candidate: ActionSemanticCandidate,
 ): boolean {
-  const text = visibleSignalText(candidate);
-  return /corp\.score_closeout|closeout\.agenda_score|advance_burst|advance\.counter_cashout|score\.advance_burst/.test(
-    text,
+  return visibleSignals(candidate).some((signal) =>
+    [
+      "corp.score_closeout",
+      "closeout.agenda_score",
+      "advance_burst",
+      "advance.counter_cashout",
+      "score.advance_burst",
+    ].includes(signal),
   );
 }
 
-function visibleSignalText(candidate: ActionSemanticCandidate): string {
+function visibleSignals(candidate: ActionSemanticCandidate): string[] {
   return [
     candidate.semanticActionType,
     ...candidate.actionTacticSignals,
     ...candidate.cardContextSignals,
     ...candidate.evidence,
     ...(candidate.targetContext?.selectedTargets.flatMap((target) => target.evidence) ?? []),
-  ]
-    .join("|")
-    .toLocaleLowerCase("en-US");
+  ].map((signal) => signal.toLocaleLowerCase("en-US"));
+}
+
+function signalHasTerm(signal: string, term: string): boolean {
+  return signal
+    .split(/[.:-]+/)
+    .some((segment) => signalSegmentHasTerm(segment, term));
+}
+
+function signalSegmentHasTerm(segment: string, term: string): boolean {
+  return (
+    segment === term ||
+    segment.startsWith(`${term}_`) ||
+    segment.endsWith(`_${term}`) ||
+    segment.includes(`_${term}_`)
+  );
 }
 
 function normalizeServerId(value: string | undefined): string | undefined {

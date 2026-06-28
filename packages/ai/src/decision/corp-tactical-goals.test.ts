@@ -70,6 +70,59 @@ describe("corp tactical goals", () => {
     expect(goals.some((goal) => goal.family === "damage_pressure")).toBe(false);
   });
 
+  it("builds punish and damage goals from structured signals only", () => {
+    const frame = frameFor([
+      legalAction("tag-punish", "trigger_ability"),
+      legalAction("damage-window", "trigger_ability"),
+    ]);
+    frame.actionCandidates = frame.actionCandidates.map((candidate) => {
+      if (candidate.actionId === "tag-punish") {
+        return {
+          ...candidate,
+          semanticActionType: "tag.apply",
+          actionTacticSignals: ["punish.payoff"],
+        };
+      }
+      return {
+        ...candidate,
+        semanticActionType: "damage.net",
+        actionTacticSignals: ["ambush.window"],
+      };
+    });
+
+    const goals = buildCorpTacticalGoals(frame);
+
+    expect(goals.map((goal) => goal.goalId)).toEqual([
+      "corp.tactical.visible_tag_punish",
+      "corp.tactical.visible_damage_or_ambush_window",
+    ]);
+  });
+
+  it("ignores substring-only punish and damage signal noise", () => {
+    const frame = frameFor([
+      legalAction("tag-noise", "trigger_ability"),
+      legalAction("damage-noise", "trigger_ability"),
+    ]);
+    frame.actionCandidates = frame.actionCandidates.map((candidate) =>
+      candidate.actionId === "tag-noise"
+        ? {
+            ...candidate,
+            semanticActionType: "tagalong.apply",
+            actionTacticSignals: ["tagalong_punishment_noise"],
+          }
+        : {
+            ...candidate,
+            semanticActionType: "damaged_goods",
+            actionTacticSignals: ["ambushment_noise"],
+          },
+    );
+
+    const goals = buildCorpTacticalGoals(frame);
+
+    expect(goals.some((goal) => goal.family === "tag_punish")).toBe(false);
+    expect(goals.some((goal) => goal.family === "damage_pressure")).toBe(false);
+  });
+
   it("builds score closeout goals from advancement-burst action semantics", () => {
     const frame = frameFor([legalAction("advance-burst", "play_operation")]);
     frame.actionCandidates = frame.actionCandidates.map((candidate) => ({
