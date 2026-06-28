@@ -126,6 +126,30 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     expect(context?.minimumUsefulX).toBeUndefined();
   });
 
+  it("ignores substring-only structured defense signal noise", () => {
+    const context = semanticRuntimeCorpEffectiveDefenseContext(
+      corpInput(5),
+      rezAction("signal-noise", 4),
+      rezCandidate("signal-noise", 4, [
+        "traceroute_noise",
+        "damaged_goods",
+        "taxable_noise",
+        "end_runner_noise",
+        "paid_subroutineish_noise",
+      ]),
+      { actionCreditCost },
+    );
+
+    expect(context).toMatchObject({
+      isRezzableNow: true,
+      hasImmediateStopPotential: false,
+      hasMeaningfulTaxOrDamage: false,
+      requiresPostRezPaidAbility: false,
+      zeroEffectRisk: false,
+    });
+    expect(context?.minimumUsefulX).toBeUndefined();
+  });
+
   it("requires post-rez budget for paid encounter subroutine defense", () => {
     const context = semanticRuntimeCorpEffectiveDefenseContext(
       corpInput(3),

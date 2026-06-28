@@ -7407,6 +7407,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` neunundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-effective-defense.ts` bewertet Corp-Effective-Defense-Signale nicht mehr über zusammengefügten Signaltext mit freien `includes`-Treffern.
+  - Relevante Signale für ETR, Trace, Tax/Damage und post-rez paid subroutines werden als einzelne strukturierte Signal-Terme geprüft; die `minimumUsefulX`-Grenze bleibt auf `trace.source`, `trace_ice` und bekannte variable Rez-Kinds beschränkt.
+  - Strukturierte Signale wie `trace.source`, `trace_ice`, `corp_ice.conditional_end_run` und `corp_ice.encounter_paid_subroutine_add` bleiben wirksam; substringartiges Rauschen wie `traceroute_noise`, `damaged_goods`, `taxable_noise`, `end_runner_noise` und `paid_subroutineish_noise` erzeugt keine Effective-Defense-Wertung mehr.
+  - `semantic-runtime-corp-effective-defense.test.ts` schützt strukturierte Treffer, Label-only-Text und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-effective-defense.test.ts src/runtime/semantic-runtime-corp-score.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 21 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

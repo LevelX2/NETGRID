@@ -41,7 +41,7 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
   );
   const postRezCredits = input.playerView.own.credits - rezCost;
   const isRezzableNow = postRezCredits >= 0;
-  const signalText = defenseSignalText(action, actionSemanticCandidate);
+  const defenseSignals = defenseSignalEntries(action, actionSemanticCandidate);
   const variableRezKind = variableRezKindForAction(
     action,
     actionSemanticCandidate,
@@ -52,32 +52,37 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
   );
   const minimumUsefulX = minimumUsefulVariableRezValue(
     variableRezKind,
-    signalText,
+    defenseSignals,
   );
   const zeroVariableDefense =
     minimumUsefulX !== undefined &&
     variableRezValue !== undefined &&
     variableRezValue < minimumUsefulX;
   const requiresPostRezPaidAbility =
-    signalText.includes("encounter_paid_subroutine_add") ||
-    signalText.includes("paid_subroutine");
+    defenseSignals.some(
+      (signal) =>
+        signalHasTerm(signal, "encounter_paid_subroutine_add") ||
+        signalHasTerm(signal, "paid_subroutine"),
+    );
   const postRezAbilityMinimumCost = requiresPostRezPaidAbility ? 2 : 0;
   const postRezAbilityAffordable =
     !requiresPostRezPaidAbility ||
     postRezCredits >= postRezAbilityMinimumCost;
   const hasEtrSignal =
-    signalText.includes("etr_ice") ||
-    signalText.includes("end_the_run") ||
-    signalText.includes("end_run") ||
-    signalText.includes("conditional_end_run") ||
-    signalText.includes("corp.ice_protection");
+    defenseSignals.some(
+      (signal) =>
+        signalHasTerm(signal, "etr_ice") ||
+        signalHasTerm(signal, "end_the_run") ||
+        signalHasTerm(signal, "end_run") ||
+        signalHasTerm(signal, "conditional_end_run") ||
+        signalHasTerm(signal, "ice_protection"),
+    );
   const hasTraceSignal =
-    signalText.includes("trace.source") ||
-    signalText.includes("trace_ice") ||
-    signalText.includes("trace");
+    defenseSignals.some((signal) => signalHasTerm(signal, "trace"));
   const hasTaxOrDamageSignal =
-    signalText.includes("tax") ||
-    signalText.includes("damage") ||
+    defenseSignals.some(
+      (signal) => signalHasTerm(signal, "tax") || signalHasTerm(signal, "damage"),
+    ) ||
     hasTraceSignal;
   const hasImmediateStopPotential =
     isRezzableNow &&
@@ -151,10 +156,10 @@ function actionCreditCost(
   return dependencies.actionCreditCost(action);
 }
 
-function defenseSignalText(
+function defenseSignalEntries(
   action: LegalAction,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
-): string {
+): string[] {
   return [
     action.type,
     actionSemanticCandidate?.semanticActionType,
@@ -165,8 +170,7 @@ function defenseSignalText(
     ...(actionSemanticCandidate?.evidence ?? []),
   ]
     .filter((value): value is string => typeof value === "string")
-    .join("|")
-    .toLocaleLowerCase("en-US");
+    .map((value) => value.toLocaleLowerCase("en-US"));
 }
 
 function variableRezKindForAction(
@@ -199,13 +203,15 @@ function variableRezChosenValue(
 
 function minimumUsefulVariableRezValue(
   variableRezKind: string | undefined,
-  signalText: string,
+  defenseSignals: readonly string[],
 ): number | undefined {
   if (
     (variableRezKind !== undefined &&
       VARIABLE_REZ_KINDS_REQUIRING_VALUE.has(variableRezKind)) ||
-    signalText.includes("trace.source") ||
-    signalText.includes("trace_ice")
+    defenseSignals.some(
+      (signal) =>
+        signal === "trace.source" || signalHasTerm(signal, "trace_ice"),
+    )
   ) {
     return 1;
   }
@@ -241,4 +247,19 @@ function payloadString(action: LegalAction, key: string): string | undefined {
 function payloadNumber(action: LegalAction, key: string): number | undefined {
   const value = action.payload?.[key];
   return typeof value === "number" ? value : undefined;
+}
+
+function signalHasTerm(signal: string, term: string): boolean {
+  return signal
+    .split(/[.:-]+/)
+    .some((segment) => signalSegmentHasTerm(segment, term));
+}
+
+function signalSegmentHasTerm(segment: string, term: string): boolean {
+  return (
+    segment === term ||
+    segment.startsWith(`${term}_`) ||
+    segment.endsWith(`_${term}`) ||
+    segment.includes(`_${term}_`)
+  );
 }
