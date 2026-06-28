@@ -587,6 +587,50 @@ describe("SelfplayTraceMining", () => {
     });
   });
 
+  it("bounds late draw coverage-need signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "draw-coverage-positive",
+        debugFacts: ["hand_goal"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "draw-coverage-noise",
+        debugFacts: ["hand_goalish"],
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      late_draw_for_coverage_or_hand_goal: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      late_draw_without_coverage_or_hand_goal: 1,
+    });
+  });
+
+  it("bounds late low-delta action signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "activated_card_ability", {
+        selectedActionId: "low-delta-positive",
+        debugFacts: ["known_low_value"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "activated_card_ability", {
+        selectedActionId: "low-delta-noise",
+        debugFacts: ["known_low_valueish"],
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      late_ability_reuse_low_delta: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      mixed_unknown: 1,
+    });
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),

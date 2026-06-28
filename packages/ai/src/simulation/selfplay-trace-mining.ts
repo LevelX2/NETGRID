@@ -697,16 +697,12 @@ function entryHasDrawOrCoverageNeed(
 ): boolean {
   return (
     (entry.runnerSetupMissingCoverageTypes?.length ?? 0) > 0 ||
-    /coverage|hand_goal|draw_for_answer|search_or_draw|supportsdraworsearchneed:true|answer/.test(
-      text,
-    )
+    selfplayEntryTextHasDrawOrCoverageNeedSignal(text)
   );
 }
 
 function entryHasLowDeltaSignal(text: string): boolean {
-  return /known_low_value|low_value|low_delta|no_current_payoff|stale|repeat/.test(
-    text,
-  );
+  return selfplayEntryTextHasLowDeltaSignal(text);
 }
 
 function selfplayEntryHasStructuredSignal(
@@ -942,6 +938,31 @@ function selfplayEntryTextHasSimpleRunPressureSignal(text: string): boolean {
     tokensIncludePhrase(tokens, ["simple", "hq", "or", "rnd", "pressure"]) ||
     tokensIncludePhrase(tokens, ["opportunistic", "central", "run"]) ||
     tokensIncludePhrase(tokens, ["remote", "contest"])
+  );
+}
+
+function selfplayEntryTextHasDrawOrCoverageNeedSignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    selfplayTokensIncludeAny(tokens, ["coverage", "answer"]) ||
+    tokensIncludePhrase(tokens, ["hand", "goal"]) ||
+    tokensIncludePhrase(tokens, ["draw", "for", "answer"]) ||
+    tokensIncludePhrase(tokens, ["search", "or", "draw"]) ||
+    tokensIncludePhrase(tokens, [
+      "supportsdraworsearchneed",
+      "true",
+    ])
+  );
+}
+
+function selfplayEntryTextHasLowDeltaSignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    selfplayTokensIncludeAny(tokens, ["stale", "repeat"]) ||
+    tokensIncludePhrase(tokens, ["known", "low", "value"]) ||
+    tokensIncludePhrase(tokens, ["low", "value"]) ||
+    tokensIncludePhrase(tokens, ["low", "delta"]) ||
+    tokensIncludePhrase(tokens, ["no", "current", "payoff"])
   );
 }
 

@@ -9032,6 +9032,19 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n "breach\|remainingcount\|access_queue|simple_run_choice\|simple_hq_or_rnd_pressure\|opportunistic_central_run\|remote_contest" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertfünfundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt die Late-Draw-Coverage-/Hand-Goal- und Low-Delta-Erkennung durch gebundene Selfplay-Text-Tokens.
+  - `coverage`, `hand_goal`, `draw_for_answer`, `search_or_draw`, `supportsDrawOrSearchNeed:true`, `answer`, `known_low_value`, `low_value`, `low_delta`, `no_current_payoff`, `stale` und `repeat` bleiben wirksam, aber nur als exakte Tokens/Phrasen.
+  - Suffix-Rauschen wie `hand_goalish` fällt wieder in `late_draw_without_coverage_or_hand_goal`; `known_low_valueish` bleibt `mixed_unknown`.
+  - Strukturierte Trace-Felder wie `runnerSetupMissingCoverageTypes` bleiben vor Textsignalen die bevorzugte Begründungsquelle.
+  - Die Erkennung bleibt reine Selfplay-Trace-Diagnostik über redaction-safe Action-Text und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative Draw-/Low-Delta-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "coverage\|hand_goal\|draw_for_answer\|search_or_draw\|supportsdraworsearchneed:true\|answer|known_low_value\|low_value\|low_delta\|no_current_payoff\|stale\|repeat" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
