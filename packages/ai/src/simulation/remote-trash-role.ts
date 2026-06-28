@@ -179,9 +179,15 @@ export function remoteTrashCardLooksLikeFinitePoolForMetrics(
       "hosted_credits",
       "bit_counter",
     ]) ||
-    (rulesText.includes("put") &&
-      rulesText.includes("from the bank") &&
-      rulesText.includes("take") &&
-      rulesText.includes("bits"))
+    finitePoolRulesTextMatches(rulesText)
+  );
+}
+
+function finitePoolRulesTextMatches(rulesText: string): boolean {
+  return (
+    /\bput\b/.test(rulesText) &&
+    /\bfrom the bank\b/.test(rulesText) &&
+    /\btake\b/.test(rulesText) &&
+    /\bbits\b/.test(rulesText)
   );
 }

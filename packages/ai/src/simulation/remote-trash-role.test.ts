@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
-import { remoteTrashRoleForVisibleCard } from "./remote-trash-role";
+import {
+  remoteTrashCardLooksLikeFinitePoolForMetrics,
+  remoteTrashRoleForVisibleCard,
+} from "./remote-trash-role";
 
 const cardRoleMock = vi.hoisted(() => ({
   roles: [] as string[],
@@ -36,6 +39,23 @@ describe("remoteTrashRoleForVisibleCard", () => {
   });
 });
 
+describe("remoteTrashCardLooksLikeFinitePoolForMetrics", () => {
+  it("matches finite-pool rules text by bounded phrases", () => {
+    expect(
+      remoteTrashCardLooksLikeFinitePoolForMetrics(
+        cardWithRulesText("Put 8 bits from the bank on this card. Take bits."),
+      ),
+    ).toBe(true);
+    expect(
+      remoteTrashCardLooksLikeFinitePoolForMetrics(
+        cardWithRulesText(
+          "Output a token from the banker, intake orbitals and bitsy markers.",
+        ),
+      ),
+    ).toBe(false);
+  });
+});
+
 function roleForRoles(roles: string[]) {
   cardRoleMock.roles = roles;
   return remoteTrashRoleForVisibleCard(card());
@@ -48,4 +68,11 @@ function card(): VisibleCard {
     known: true,
     type: "asset",
   } as VisibleCard;
+}
+
+function cardWithRulesText(rulesText: string): VisibleCard {
+  return {
+    ...card(),
+    rulesText,
+  };
 }
