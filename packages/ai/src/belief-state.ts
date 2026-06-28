@@ -1606,7 +1606,8 @@ function visibleServerLabelId(label: string | undefined): string | undefined {
   if (normalized === "r&d" || normalized === "rd") return "rd";
   if (normalized === "archives") return "archives";
   const remoteMatch = /^remote[\s_-]+(\d+)$/.exec(normalized);
-  if (remoteMatch) return `remote_${Number.parseInt(remoteMatch[1], 10)}`;
+  const remoteIndex = remoteMatch?.[1];
+  if (remoteIndex) return `remote_${Number.parseInt(remoteIndex, 10)}`;
   return undefined;
 }
 
