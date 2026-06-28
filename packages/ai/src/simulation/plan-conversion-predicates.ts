@@ -1,4 +1,5 @@
 import { centralServerId, isRemoteServerTarget } from "../runtime/server-target";
+import { rolesMatch } from "../runtime/role-match";
 
 export type PlanConversionDecisionEntry = {
   side?: string;
@@ -586,30 +587,30 @@ export function planIntentConvertedWithin<
   isMeaningfulProgress: (entry: T) => boolean,
   isCorpRemoteAdvancementProgress: (entry: T) => boolean,
 ): boolean {
-  if (planKind.includes("setup") || planKind.includes("draw"))
+  if (planKindMatches(planKind, ["setup", "draw"]))
     return setupActionConvertsToRun(sequence, index, isMeaningfulProgress);
-  if (planKind.includes("economy"))
+  if (planKindMatches(planKind, ["economy"]))
     return economyActionConvertsToRun(sequence, index, isMeaningfulProgress);
-  if (planKind.includes("rig") || planKind.includes("breaker"))
+  if (planKindMatches(planKind, ["rig", "breaker"]))
     return (
       rigActionConvertsToRun(sequence, index, isMeaningfulProgress) ||
       isMeaningfulProgress(sequence[index]!)
     );
-  if (planKind.includes("remote_build") || planKind.includes("protect"))
+  if (planKindMatches(planKind, ["remote_build", "protect"]))
     return remoteBuildConvertsToAdvanceOrScore(
       sequence,
       index,
       isCorpRemoteAdvancementProgress,
     );
-  if (planKind.includes("advance"))
+  if (planKindMatches(planKind, ["advance"]))
     return advanceConvertsToScore(
       sequence,
       index,
       isCorpRemoteAdvancementProgress,
     );
-  if (planKind.includes("remote_contest"))
+  if (planKindMatches(planKind, ["remote_contest"]))
     return remoteContestConvertsToStealOrTrash(sequence, index);
-  if (planKind.includes("central") || planKind.includes("pressure"))
+  if (planKindMatches(planKind, ["central", "pressure"]))
     return centralPressureConvertsToSteal(sequence, index);
   return hasMeaningfulProgressWithin(
     sequence,
@@ -617,6 +618,10 @@ export function planIntentConvertedWithin<
     3,
     isMeaningfulProgress,
   );
+}
+
+function planKindMatches(planKind: string, needles: readonly string[]): boolean {
+  return rolesMatch([planKind], needles);
 }
 
 export function runnerEconomyConvertsToRunOrRig<
