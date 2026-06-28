@@ -190,7 +190,7 @@ export function qualityTagsForActionWithDependencies(
 }
 
 function roleListHasEconomyOrTempo(roles: readonly string[]): boolean {
-  return rolesMatch(roles, ["economy"]) || roles.includes("tempo");
+  return rolesMatch(roles, ["economy", "tempo"]);
 }
 
 export function isEconomyStallExemptAction(

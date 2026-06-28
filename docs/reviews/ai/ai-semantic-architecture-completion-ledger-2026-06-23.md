@@ -7912,6 +7912,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertfünfundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/doctrine-quality-tags.ts` nutzt für Economy-/Tempo-Aktionsrollen den gebundenen `rolesMatch`-Helper statt gemischter `rolesMatch`- und direkter Rollen-`includes`-Prüfung.
+  - Strukturierte Rollen wie `economy_operation` und `burst_tempo` bleiben Economy-Stall-entlastend; substringartiges Rauschen wie `microeconomy_noise` und `tempoish_noise` entlastet keinen Economy-Stall mehr.
+  - `doctrine-quality-tags.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/doctrine-quality-tags.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

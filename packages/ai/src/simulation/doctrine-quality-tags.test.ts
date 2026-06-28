@@ -8,7 +8,9 @@ import {
 describe("qualityTagsForActionWithDependencies", () => {
   it("matches economy action roles by bounded role terms", () => {
     expect(tagsForRoles(["economy_operation"])).not.toContain("economy_stall");
+    expect(tagsForRoles(["burst_tempo"])).not.toContain("economy_stall");
     expect(tagsForRoles(["microeconomy_noise"])).toContain("economy_stall");
+    expect(tagsForRoles(["tempoish_noise"])).toContain("economy_stall");
   });
 });
 
