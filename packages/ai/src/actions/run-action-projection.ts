@@ -253,8 +253,11 @@ function runActionRelevant(action: LegalAction, signals: readonly string[]): boo
   }
   return (
     action.type === "play_event" &&
-    text.includes("run_pressure") &&
-    (text.includes("multiaccess") || text.includes("access_replacement"))
+    runActionHasStructuredSignal(signals, ["run_pressure"]) &&
+    runActionHasStructuredSignal(signals, [
+      "multiaccess",
+      "access_replacement",
+    ])
   );
 }
 

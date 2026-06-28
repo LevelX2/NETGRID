@@ -106,6 +106,35 @@ describe("projectRunnerRunActions", () => {
     ]);
   });
 
+  it("bounds run-pressure payoff event signals to structured entries", () => {
+    const pressure = action({
+      actionId: "pressure-run",
+      type: "play_event",
+      payload: {
+        runActionSignals: ["run_pressure", "multiaccess", "scope:hq"],
+      } as unknown as LegalAction["payload"],
+    });
+    const noise = action({
+      actionId: "pressure-noise",
+      type: "play_event",
+      payload: {
+        runActionSignals: [
+          "run_pressure",
+          "multiaccessory_noise",
+          "scope:hq",
+        ],
+      } as unknown as LegalAction["payload"],
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([pressure, noise]),
+    });
+
+    expect(projections.map((projection) => projection.actionId)).toEqual([
+      "pressure-run",
+    ]);
+  });
+
   it("requires canonical structured server ids in payloads", () => {
     const labelLikeServer = action({
       actionId: "label-like-server",
