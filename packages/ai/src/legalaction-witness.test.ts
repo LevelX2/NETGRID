@@ -64,6 +64,22 @@ describe("LegalActionWitness v1", () => {
     expect(witness.blockers).toContain("source_ref_hidden_blocked");
   });
 
+  it("bounds hidden-info marker detection to exact tokens", () => {
+    const witness = buildLegalActionWitness({
+      legalAction: action("trigger_ability", {
+        source: "cardInstancesish.corp.visible.0",
+        targetRequirements: [{ id: "target", kind: "card", visibility: "public" }],
+      }),
+      stateVersion: 4,
+      selectedTargets: { target: "privatePayloadish.runner.stack.0" },
+    });
+
+    expect(witness.sourceRef.kind).toBe("actor_known_card");
+    expect(witness.targetRef.kind).toBe("ownInstalled");
+    expect(witness.blockers).not.toContain("source_ref_hidden_blocked");
+    expect(witness.blockers).not.toContain("target_ref_hidden_blocked");
+  });
+
   it("does not mutate the original LegalAction", () => {
     const legalAction = action("start_run", {
       payload: { serverId: "hq" },

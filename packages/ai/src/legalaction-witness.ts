@@ -70,8 +70,19 @@ export type BuildLegalActionWitnessInput = {
   selectedChoices?: Readonly<Record<string, unknown>>;
 };
 
-const HIDDEN_INFO_PATTERNS =
-  /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug|deckTop|decklist|deckOrder/i;
+const HIDDEN_INFO_MARKERS = [
+  "cardinstances",
+  "privatepayload",
+  "sessiontoken",
+  "reconnecttoken",
+  "jointoken",
+  "fullgamestate",
+  "aiinput",
+  "decisiondebug",
+  "decktop",
+  "decklist",
+  "deckorder",
+] as const;
 
 export function buildLegalActionWitness(
   input: BuildLegalActionWitnessInput,
@@ -145,7 +156,7 @@ export function buildLegalActionWitness(
 }
 
 export function legalActionWitnessIsRedactionSafe(value: unknown): boolean {
-  return !HIDDEN_INFO_PATTERNS.test(JSON.stringify(value));
+  return !legalActionWitnessContainsHiddenInfoMarker(JSON.stringify(value));
 }
 
 function sourceRefForAction(action: LegalAction): LegalActionWitnessSourceRef {
@@ -155,7 +166,7 @@ function sourceRefForAction(action: LegalAction): LegalActionWitnessSourceRef {
   if (action.source === "game_rule") {
     return { kind: "game_rule", ref: "game_rule", redactionPolicy: "public" };
   }
-  if (HIDDEN_INFO_PATTERNS.test(action.source)) {
+  if (legalActionWitnessContainsHiddenInfoMarker(action.source)) {
     return { kind: "hidden_blocked", ref: "hidden_blocked", redactionPolicy: "hidden_blocked" };
   }
   return {
@@ -191,7 +202,7 @@ function targetRefForAction(
   }
   const selectedTarget = firstRecordValue(selectedTargets);
   if (selectedTarget) {
-    if (HIDDEN_INFO_PATTERNS.test(selectedTarget)) {
+    if (legalActionWitnessContainsHiddenInfoMarker(selectedTarget)) {
       return {
         ...buildTargetRef({ kind: "hidden_blocked", blocker: "hidden_target_blocked" }),
       };
@@ -290,12 +301,41 @@ function combineRedactionPolicies(
 }
 
 function safeId(value: string): string {
-  if (HIDDEN_INFO_PATTERNS.test(value)) return "hidden_blocked";
+  if (legalActionWitnessContainsHiddenInfoMarker(value)) return "hidden_blocked";
   return value
     .trim()
     .replace(/[^a-zA-Z0-9_.:-]+/g, "_")
     .replace(/^_+|_+$/g, "")
     .slice(0, 120);
+}
+
+function legalActionWitnessContainsHiddenInfoMarker(value: string): boolean {
+  const normalizedTokens = legalActionWitnessHiddenInfoTokens(value);
+  const tokenSet = new Set(normalizedTokens);
+  return HIDDEN_INFO_MARKERS.some((marker) => tokenSet.has(marker));
+}
+
+function legalActionWitnessHiddenInfoTokens(value: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of value) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character.toLocaleLowerCase("en-US");
+    } else {
+      if (current.length > 0) tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "A" && character <= "Z") ||
+    (character >= "0" && character <= "9")
+  );
 }
 
 function stableHash(value: string): string {
