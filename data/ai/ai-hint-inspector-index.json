@@ -1333,6 +1333,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -1425,6 +1432,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -1625,6 +1639,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -1837,6 +1858,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -1932,6 +1960,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -2062,6 +2097,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -2187,6 +2229,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -2308,6 +2357,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -2420,6 +2476,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -2512,6 +2575,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -2622,6 +2692,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -2745,6 +2822,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -2992,6 +3076,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -3090,6 +3181,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -3185,6 +3283,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -3325,6 +3430,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -3442,6 +3554,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -3562,6 +3681,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -3672,6 +3798,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -3785,6 +3918,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -3882,6 +4022,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -3996,6 +4143,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -4093,6 +4247,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -4209,6 +4370,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -4307,6 +4475,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -4397,6 +4572,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -4492,6 +4674,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
@@ -4593,6 +4782,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -4692,6 +4888,13 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "protect_rnd",
           "category": "alias_to_strategy_goal",
           "triageCategory": "strategy_alias",
@@ -4789,6 +4992,13 @@
             "corp.central_stabilize"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_remote",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "protect_rnd",
