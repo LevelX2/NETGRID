@@ -989,6 +989,15 @@ function selfplayEntryTextHasLowValueRepeatSignal(text: string): boolean {
   );
 }
 
+function selfplayEntryTextHasRecoveryLoopSignal(text: string): boolean {
+  return selfplayTokensIncludeAny(selfplayTextTokens(text), [
+    "recover",
+    "recovery",
+    "junkyard",
+    "heap",
+  ]);
+}
+
 function selfplayTextTokens(text: string): string[] {
   return text
     .toLocaleLowerCase("en-US")
@@ -1097,7 +1106,7 @@ function selfplayEntryDetectorFindings(
   if (
     enabled.has("recovery_low_value_loop") &&
     entry.side === "runner" &&
-    /recover|recovery|junkyard|heap/.test(text) &&
+    selfplayEntryTextHasRecoveryLoopSignal(text) &&
     repeatedReasonWithoutProgress(summary.actionSequence, actionIndex, entry)
   ) {
     const recoveryContext = recoveryLowValueLoopContext(entry, text);

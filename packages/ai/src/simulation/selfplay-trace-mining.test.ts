@@ -262,6 +262,36 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("blink-positive");
   });
 
+  it("bounds recovery loop entry signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "recovery-entry-positive-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "recovery-entry-positive-2",
+        reasonCode: "runner.recovery",
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "recovery-entry-noise-1",
+        reasonCode: "runner.recoveryish",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "recovery-entry-noise-2",
+        reasonCode: "runner.recoveryish",
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["recovery_low_value_loop"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("recovery-entry-positive-2");
+  });
+
   it("bounds recovery coverage signals to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "trigger_ability", {

@@ -9058,6 +9058,18 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n "economy\|recover\|setup\|draw_for_answers\|search\|coverage|known_low_value\|no_current_payoff\|low_value\|stale" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsiebenundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt die Recovery-Low-Value-Loop-Einstiegserkennung für `recover`, `recovery`, `junkyard` und `heap` durch gebundene Selfplay-Text-Tokens.
+  - Exakte Recovery-Tokens bleiben wirksam; Suffix-Rauschen wie `recoveryish` löst keinen `recovery_low_value_loop`-Finding-Einstieg mehr aus.
+  - Die bestehenden Recovery-Kontextprüfungen für Funding-, Coverage- und Search-/Draw-Bedarf bleiben unverändert nachgelagert.
+  - Die Erkennung bleibt reine Selfplay-Trace-Diagnostik über redaction-safe Action-Text und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative Recovery-Entry-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 26 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "recover\|recovery\|junkyard\|heap" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
