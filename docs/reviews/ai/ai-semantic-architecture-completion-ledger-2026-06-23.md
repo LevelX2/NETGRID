@@ -7525,6 +7525,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/known-remote-access-commitment.ts` kapselt High-Impact-Remote-Root-Rollen in `knownRemoteRootHasHighImpactRole` und nutzt dort den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `asset_economy`, `holovid_campaign` und `access_tax` bleiben High-Impact-Signale; substringartiges Rauschen wie `access_taxish_noise`, `microeconomy_noise` und `campaigner_noise` erzeugt kein Reserve-Break-High-Impact-Signal mehr.
+  - `known-remote-access-commitment.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/known-remote-access-commitment.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

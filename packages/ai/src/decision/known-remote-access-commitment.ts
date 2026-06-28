@@ -9,6 +9,7 @@ import {
 } from "../access/access-reserve-adapter";
 import type { AccessDecisionReason, AccessIntent } from "../access/access-decision-types";
 import { projectRemoteRootValue } from "../access/remote-root-value-projection";
+import { rolesMatch } from "../runtime/role-match";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
@@ -369,19 +370,7 @@ function knownRemoteTrashTargetProfile(
     finitePoolEconomy &&
     corpValueRemaining >= Math.max(trashCost + 2, 8) &&
     trashCost > 0;
-  const highImpactRole = roles.some((role) =>
-    [
-      "economy",
-      "campaign",
-      "scoring_protection",
-      "agenda_protection",
-      "remote_upgrade_tax",
-      "access_tax",
-      "run_tax",
-      "tag_punish",
-      "ambush",
-    ].some((token) => role.includes(token)),
-  );
+  const highImpactRole = knownRemoteRootHasHighImpactRole(roles);
   const reserveBreakAllowed =
     highImpactRole &&
     value >= 2 &&
@@ -404,6 +393,22 @@ function knownRemoteTrashTargetProfile(
       ...roles.slice(0, 6).map((role) => `known_remote_root_role:${role}`),
     ],
   };
+}
+
+export function knownRemoteRootHasHighImpactRole(
+  roles: readonly string[],
+): boolean {
+  return rolesMatch(roles, [
+    "economy",
+    "campaign",
+    "scoring_protection",
+    "agenda_protection",
+    "remote_upgrade_tax",
+    "access_tax",
+    "run_tax",
+    "tag_punish",
+    "ambush",
+  ]);
 }
 
 function knownRemoteTrashCreditReserve(input: AiDecisionInput): number {

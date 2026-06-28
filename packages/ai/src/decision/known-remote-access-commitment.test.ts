@@ -7,10 +7,24 @@ import type {
 } from "@netgrid/shared";
 import {
   knownRemoteAgendaAccessCommitment,
+  knownRemoteRootHasHighImpactRole,
   projectKnownRemoteTrashCommitment,
 } from "./known-remote-access-commitment";
 
 describe("known remote access commitment", () => {
+  it("matches high-impact remote root roles by bounded role terms", () => {
+    expect(knownRemoteRootHasHighImpactRole(["asset_economy"])).toBe(true);
+    expect(knownRemoteRootHasHighImpactRole(["holovid_campaign"])).toBe(true);
+    expect(knownRemoteRootHasHighImpactRole(["access_tax"])).toBe(true);
+    expect(knownRemoteRootHasHighImpactRole(["access_taxish_noise"])).toBe(
+      false,
+    );
+    expect(knownRemoteRootHasHighImpactRole(["microeconomy_noise"])).toBe(
+      false,
+    );
+    expect(knownRemoteRootHasHighImpactRole(["campaigner_noise"])).toBe(false);
+  });
+
   it("models agenda access as a steal commitment", () => {
     expect(
       knownRemoteAgendaAccessCommitment("remote_1", [
