@@ -1,4 +1,9 @@
-import type { AiDecisionInput, LegalAction, PlayerView } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+  VisibleCard,
+} from "@netgrid/shared";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { visibleCardByInstanceId } from "./tactical-plan-visible-cards";
 
@@ -21,10 +26,18 @@ export function corpRemoteContestabilityAssessment(
   );
   if (!server || server.ice.length === 0) return undefined;
   const runnerRig = playerView.opponent.rig ?? [];
+  const visibleRunnerContestCredits =
+    playerView.opponent.credits + visibleRunnerRunCreditPool(runnerRig);
+  const runnerExposureCreditActions = Math.max(
+    3,
+    Math.floor((playerView.opponent.clicks ?? 4) - 1),
+  );
+  const visibleRunnerExposureContestCredits =
+    visibleRunnerContestCredits + runnerExposureCreditActions;
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     runnerRig,
-    playerView.opponent.credits,
+    visibleRunnerExposureContestCredits,
     server.root,
   );
   if (assessment.assessedKnownIceCount <= 0) return undefined;
@@ -35,6 +48,9 @@ export function corpRemoteContestabilityAssessment(
     evidence: [
       `remote_contestable_by_runner:${contestable}`,
       `runner_credits:${playerView.opponent.credits}`,
+      `runner_visible_contest_credits:${visibleRunnerContestCredits}`,
+      `runner_exposure_credit_actions:${runnerExposureCreditActions}`,
+      `runner_visible_exposure_contest_credits:${visibleRunnerExposureContestCredits}`,
       `runner_visible_rig_count:${runnerRig.length}`,
       `assessed_known_ice_count:${assessment.assessedKnownIceCount}`,
       `can_reach_access:${assessment.canReachAccess}`,
@@ -47,6 +63,26 @@ export function corpRemoteContestabilityAssessment(
         : []),
     ],
   };
+}
+
+function visibleRunnerRunCreditPool(rig: readonly VisibleCard[]): number {
+  return rig.reduce((sum, card) => {
+    if (card.known === false) return sum;
+    return (
+      sum +
+      (card.counterDisplays ?? []).reduce((cardSum, display) => {
+        const uses = display.creditPool?.uses ?? [];
+        if (
+          uses.includes("using_icebreaker_during_run") ||
+          uses.includes("using_icebreaker_during_run_non_noisy") ||
+          uses.includes("using_killer_during_run")
+        ) {
+          return cardSum + Math.max(0, Math.floor(display.amount));
+        }
+        return cardSum;
+      }, 0)
+    );
+  }, 0);
 }
 
 export function advanceCompletesScore(

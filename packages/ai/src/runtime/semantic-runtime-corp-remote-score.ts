@@ -1,5 +1,11 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import {
+  DEMO_CARDS_BY_ID,
+  type AiDecisionInput,
+  type LegalAction,
+  type VisibleCard,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
 import {
   semanticRuntimeCorpScoringWindowAssessment,
   type CorpScoringWindowAssessment,
@@ -10,6 +16,8 @@ type CorpServerLike = {
   ice: readonly VisibleCard[];
   root: readonly VisibleCard[];
 };
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type SemanticRuntimeCorpRemoteScoreDependencies<
   TServer extends CorpServerLike = CorpServerLike,
@@ -66,7 +74,13 @@ export function semanticRuntimeCorpInstallRemoteScore<
   );
 
   if (installsIce && (serverId === "hq" || serverId === "rd")) {
-    return (server?.ice.length ?? 0) === 0 ? 1200 : 850;
+    return semanticRuntimeCorpCentralIceInstallScore(
+      input,
+      action,
+      serverId,
+      server,
+      dependencies,
+    );
   }
   if (installsIce && serverId === "archives") return 350;
   if (!dependencies.isRemoteServerTarget(serverId)) return 0;
@@ -124,6 +138,171 @@ export function semanticRuntimeCorpInstallRemoteScore<
     return hasStabilizingAlternative ? -900 : -350;
   }
   return protectedRemote ? 250 : -150;
+}
+
+function semanticRuntimeCorpCentralIceInstallScore<
+  TServer extends CorpServerLike,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  serverId: "hq" | "rd",
+  server: TServer | undefined,
+  dependencies: SemanticRuntimeCorpRemoteScoreDependencies<TServer>,
+): number {
+  const sourceCard = dependencies.actionSourceCard(input, action);
+  const profile = semanticRuntimeCorpCentralIceProfile(sourceCard);
+  const firstCentralIce = (server?.ice.length ?? 0) === 0;
+  const centralThreat = semanticRuntimeCorpCentralInstallThreat(input, serverId);
+
+  if (profile.hasAccessStop) {
+    if (centralThreat) return firstCentralIce ? 1350 : 950;
+    return firstCentralIce ? 1050 : 750;
+  }
+  if (profile.hasTaxOrDamage) {
+    if (centralThreat) return firstCentralIce ? 450 : 250;
+    return firstCentralIce ? 250 : 150;
+  }
+  if (centralThreat) return firstCentralIce ? 700 : 450;
+  return firstCentralIce ? 450 : 250;
+}
+
+function semanticRuntimeCorpCentralIceProfile(
+  card: VisibleCard | undefined,
+): { hasAccessStop: boolean; hasTaxOrDamage: boolean } {
+  const definitionId = card?.definitionId;
+  const runtimeDefinition = definitionId ? RUNTIME_CARDS[definitionId] : undefined;
+  const demoDefinition =
+    definitionId
+      ? (DEMO_CARDS_BY_ID[definitionId] ??
+        (runtimeDefinition?.engineCardId
+          ? DEMO_CARDS_BY_ID[runtimeDefinition.engineCardId]
+          : undefined))
+      : undefined;
+  const hint = definitionId ? AI_HINTS_BY_CARD.get(definitionId) : undefined;
+  const visibleSubroutines = [
+    ...(card?.effectiveRunQuote?.subroutines ?? []),
+    ...(demoDefinition?.subroutines ?? []),
+  ];
+  const hasStructuredStop = visibleSubroutines.some((subroutine) => {
+    if (
+      subroutine.type === "end_the_run" ||
+      subroutine.type === "end_the_run_unless_runner_pays" ||
+      subroutine.type === "set_run_future_end_the_run_subroutine" ||
+      subroutine.type === "set_runner_run_lock_actions"
+    ) {
+      return true;
+    }
+    return (
+      subroutine.type === "initiate_trace" &&
+      (subroutine.traceSuccessEffect?.type === "end_run_and_run_lock" ||
+        subroutine.traceSuccessEffect?.type ===
+          "end_run_trash_program_and_run_lock")
+    );
+  });
+  const hasHintStop =
+    hint?.roles.some((role) =>
+      roleMatchesAny(role, ["etr_ice", "end_run", "run_lock"]),
+    ) === true ||
+    hint?.effects?.some((effect) =>
+      effect.kind === "etr" || effect.kind === "run_lock",
+    ) === true;
+  const hasStructuredTaxOrDamage = visibleSubroutines.some((subroutine) =>
+    [
+      "do_damage",
+      "trash_installed_program",
+      "trash_installed_program_unless_runner_pays",
+      "initiate_trace",
+      "corp_gain_credit",
+      "set_run_break_subroutine_cost_modifier",
+      "set_run_encounter_tax",
+    ].includes(subroutine.type),
+  );
+  const hasHintTaxOrDamage =
+    hint?.roles.some((role) =>
+      roleMatchesAny(role, [
+        "damage_ice",
+        "trace",
+        "tax",
+        "program_trash",
+        "hardware_trash",
+      ]),
+    ) === true ||
+    hint?.effects?.some((effect) =>
+      [
+        "damage",
+        "trace",
+        "run_tax",
+        "program_trash",
+        "hardware_trash",
+        "tag",
+      ].includes(effect.kind),
+    ) === true;
+  return {
+    hasAccessStop: hasStructuredStop || hasHintStop,
+    hasTaxOrDamage: hasStructuredTaxOrDamage || hasHintTaxOrDamage,
+  };
+}
+
+function semanticRuntimeCorpCentralInstallThreat(
+  input: AiDecisionInput,
+  serverId: "hq" | "rd",
+): boolean {
+  const runOrAccessEvents = semanticRuntimeCorpCentralRunOrAccessEventCount(
+    input,
+    serverId,
+  );
+  const runnerCredits = input.playerView.opponent.credits;
+  return (
+    (serverId === "hq" && semanticRuntimeCorpHasAgendaInHq(input)) ||
+    runOrAccessEvents >= (serverId === "rd" ? 2 : 3) ||
+    (runOrAccessEvents > 0 && runnerCredits >= (serverId === "rd" ? 4 : 3))
+  );
+}
+
+function semanticRuntimeCorpCentralRunOrAccessEventCount(
+  input: AiDecisionInput,
+  serverId: "hq" | "rd",
+): number {
+  const eventsById = new Map(
+    [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])].map(
+      (event) => [event.eventId, event],
+    ),
+  );
+  return [...eventsById.values()].filter((event) => {
+    const payload = event.publicPayload;
+    const actor =
+      typeof payload.actor === "string" ? payload.actor : undefined;
+    const actionType =
+      typeof payload.actionType === "string" ? payload.actionType : event.type;
+    return (
+      actor === "runner" &&
+      (actionType === "start_run" || actionType === "access_card") &&
+      semanticRuntimeCorpNormalizedCentralServerId(
+        typeof payload.serverId === "string" ? payload.serverId : undefined,
+      ) === serverId
+    );
+  }).length;
+}
+
+function semanticRuntimeCorpNormalizedCentralServerId(
+  value: string | undefined,
+): "hq" | "rd" | undefined {
+  if (!value) return undefined;
+  const normalized = value.toLocaleLowerCase("en-US");
+  if (normalized === "hq") return "hq";
+  if (normalized === "rd") return "rd";
+  return undefined;
+}
+
+function roleMatchesAny(role: string, options: readonly string[]): boolean {
+  const normalized = role.toLocaleLowerCase("en-US");
+  return options.some(
+    (option) =>
+      normalized === option ||
+      normalized.startsWith(`${option}_`) ||
+      normalized.endsWith(`_${option}`) ||
+      normalized.includes(`_${option}_`),
+  );
 }
 
 export function semanticRuntimeCorpShouldBuildProtectedScoreRemote<

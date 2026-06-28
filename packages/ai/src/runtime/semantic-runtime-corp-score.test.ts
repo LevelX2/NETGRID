@@ -190,6 +190,50 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     expect(noiseKeys).not.toContain("corp_install_economy");
   });
 
+  it("surfaces Corp scoring-window assessment evidence in score components", () => {
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([]),
+      corpAction("install-agenda", "install_card", {
+        placement: "root",
+        serverId: "remote_1",
+      }),
+      "basic_install",
+      {
+        ...testDependencies(),
+        corpActionIsScoreLine: () => true,
+        corpScoringWindowAssessment: () => ({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          runnerCanContestNow: true,
+          runnerCanReachAccessNow: true,
+          agendaStealRelevantNow: true,
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealRelevantBeforeScore: true,
+          missingVisibleBreakerCoverage: false,
+          corpCanRezRelevantIce: true,
+          scoreHorizon: "next_turn",
+          runnerExposureCreditActions: 3,
+          recommendedNextStep: "build_remote_ice",
+          evidence: [
+            "corp_scoring_window:assessed",
+            "runner_can_contest_before_score:true",
+          ],
+        }),
+      },
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_scoring_window_assessment",
+          value: 0,
+          reason: expect.stringContaining("corp_scoring_window:assessed"),
+        }),
+      ]),
+    );
+  });
+
   it("scores visible tag punish actions from side-safe action semantics", () => {
     const components = semanticRuntimeCorpScoreComponents(
       corpInputWithGoals([
