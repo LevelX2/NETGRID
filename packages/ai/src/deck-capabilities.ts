@@ -455,7 +455,7 @@ function breakerCapabilityFromRecord(
   if (coverage.length === 0) return undefined;
   const visible = record.visibleCards[0];
   const roleBasedBreaker =
-    record.roles.some((role) => role.startsWith("breaker_")) ||
+    rolesMatch(record.roles, ["breaker_"]) ||
     record.subtypes.some((subtype) => /icebreaker|fracter|decoder|killer/i.test(subtype));
   const confidence: DeckCapabilityConfidence = breakerProfile
     ? "high"

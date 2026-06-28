@@ -256,6 +256,58 @@ describe("DeckCapabilityProfile", () => {
     }
   });
 
+  it("matches breaker capability roles by bounded role prefixes", () => {
+    CARD_ROLES_BY_CARD.set("local_structured_breaker", {
+      cardId: "local_structured_breaker",
+      side: "runner",
+      roles: ["breaker_fracter"],
+    });
+    CARD_ROLES_BY_CARD.set("local_noise_breaker", {
+      cardId: "local_noise_breaker",
+      side: "runner",
+      roles: ["breakerish_fracter"],
+    });
+    try {
+      const inputView = playerView("runner");
+      inputView.own.gripOrHq = [
+        visibleCard("structured-breaker-1", "local_structured_breaker", "runner", "program", {
+          title: "Structured Breaker",
+        }),
+        visibleCard("noise-breaker-1", "local_noise_breaker", "runner", "program", {
+          title: "Noise Breaker",
+          rulesText: "Break one ice subroutine.",
+        }),
+      ];
+
+      const profile = buildDeckCapabilityProfile({
+        side: "runner",
+        playerView: inputView,
+        legalActions: [],
+      });
+
+      expect(profile.runner?.breakerInventory).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            cardId: "local_structured_breaker",
+            confidence: "medium",
+            evidence: expect.arrayContaining(["capability_source:role_or_subtype"]),
+          }),
+          expect.objectContaining({
+            cardId: "local_noise_breaker",
+            confidence: "low",
+            evidence: expect.arrayContaining([
+              "capability_source:text_fallback",
+              "text_fallback:transition_only",
+            ]),
+          }),
+        ]),
+      );
+    } finally {
+      CARD_ROLES_BY_CARD.delete("local_structured_breaker");
+      CARD_ROLES_BY_CARD.delete("local_noise_breaker");
+    }
+  });
+
   it("matches corp plan roles by bounded role terms", () => {
     CARD_ROLES_BY_CARD.set("local_plan_a", {
       cardId: "local_plan_a",

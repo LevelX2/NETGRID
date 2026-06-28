@@ -8211,6 +8211,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertachtundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` stuft Runner-Breaker-Capability-Confidence über gebundene `rolesMatch`-Prefixrollen statt direktem `role.startsWith("breaker_")` ein.
+  - Strukturierte Rollen wie `breaker_fracter` bleiben als rollenbasierte Breaker-Evidence wirksam; Rauschen wie `breakerish_fracter` hebt Text-Fallback-Breaker nicht auf rollenbasierte Confidence an.
+  - `deck-capabilities.test.ts` schützt positive Breaker-Rollen und Prefix-Noise-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 12 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
