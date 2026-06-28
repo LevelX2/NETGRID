@@ -93,4 +93,25 @@ describe("candidate path bindings", () => {
     expect(JSON.stringify(binding)).not.toContain("cardInstances");
     expect(binding.blockers).toContain("hidden_target_identity_blocked");
   });
+
+  it("bounds hidden-info marker detection to exact tokens", () => {
+    const binding = buildCandidatePathBinding({
+      signature: buildSemanticActionSignature({
+        actionType: "trigger_ability",
+        semanticActionType: "unknown",
+        sourceKind: "card",
+        targetIdentity: "server:hq",
+        costClass: "known:unknown",
+      }),
+      redactedActionRef: "redacted:visible",
+      stateVersion: 1,
+      side: "corp",
+      intentContractId: "test.visible",
+      evidence: ["cardInstancesish-visible"],
+    });
+
+    expect(binding.targetIdentity).toBe("server:hq");
+    expect(binding.redactedActionRef).toBe("redacted:visible");
+    expect(binding.blockers).not.toContain("hidden_info_marker_detected");
+  });
 });

@@ -9226,6 +9226,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertzweiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/candidate-path-binding.ts` ersetzt den Hidden-Info-Guard im Candidate-Path-Binding-Safety-Scan durch gebundene Hidden-Info-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `sessionToken`, `fullGameState`, `AIInput`, `DecisionDebug`, `deckTop`, `decklist` und `deckOrder` bleiben blockiert; Suffix-Rauschen in Binding-Evidence wie `cardInstancesish` löst keine Redaction mehr aus.
+  - Der vorgelagerte Semantic-Action-Signature-Guard bleibt bewusst ein Folgepaket.
+  - Die Erkennung bleibt reine Candidate-Path-Binding-Redaction-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `candidate-path-binding.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/candidate-path-binding.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
