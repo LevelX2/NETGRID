@@ -8274,6 +8274,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertfünfundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-hq-memory-diagnostics.ts` ermittelt HQ-Memory-Invalidation-Flags über exakte `invalidationReasons.includes(...)`-Array-Treffer statt über zusammengefügten Text mit freier Substring-Suche.
+  - Strukturierte Reasons wie `corp_draw_added_unknown_hq_card`, `known_hq_card_installed`, `known_hq_card_played`, `corp_discarded_hq_card` und `shuffle_changed_hq_hand` bleiben wirksam; Rauschen wie `known_hq_card_installedish_noise` und `shuffle_changed_hq_handish_noise` bleibt wirkungslos.
+  - `runner-hq-memory-diagnostics.test.ts` schützt positive Reason-Flags und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-hq-memory-diagnostics.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
