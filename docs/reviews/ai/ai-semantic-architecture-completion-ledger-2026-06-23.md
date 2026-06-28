@@ -8391,6 +8391,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertachtundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/known-remote-access-payoff.ts` filtert Remote-Invalidation-Evidence über gebundene Server-ID-Segmente statt freier `entry.includes(serverId)`-Substring-Prüfung.
+  - Strukturierte Invalidation-Zeilen wie `server:remote_1:root_changed` bleiben wirksam; Rauschen wie `server:remote_10:root_changed` triggert `remote_1` nicht mehr.
+  - `known-remote-access-payoff.test.ts` schützt positive und negative Remote-ID-Grenzfälle über `evaluateKnownRemoteAccessPayoff`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/known-remote-access-payoff.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
