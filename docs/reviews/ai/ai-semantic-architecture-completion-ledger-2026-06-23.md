@@ -7768,6 +7768,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertneunter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` nutzt für Central-Run-Justification-Reasons exakte normalisierte Labelvergleiche statt freier Reason-Substring-Prüfung.
+  - Strukturierte Reasons wie `multiaccess` bleiben wirksam; substringartiges Rauschen wie `multiaccessory_noise` zählt nicht mehr als Central-Run-Multiaccess-Justification.
+  - `central-closeout-repeat-metrics.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/central-closeout-repeat-metrics.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
