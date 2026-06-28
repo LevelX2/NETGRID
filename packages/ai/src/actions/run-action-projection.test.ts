@@ -249,6 +249,48 @@ describe("projectRunnerRunActions", () => {
     });
   });
 
+  it("bounds access payoff projection signals to structured tokens", () => {
+    const accessPayoff = action({
+      actionId: "access-payoff-run",
+      payload: {
+        runActionSignals: [
+          "make_run",
+          "scope:hq",
+          "access",
+          "free_trash",
+          "bypass",
+        ],
+      } as unknown as LegalAction["payload"],
+    });
+    const noise = action({
+      actionId: "access-payoff-noise",
+      payload: {
+        runActionSignals: [
+          "make_run",
+          "scope:hq",
+          "accessory",
+          "free_trashcan",
+          "bypasser",
+        ],
+      } as unknown as LegalAction["payload"],
+    });
+
+    const projections = projectRunnerRunActions({
+      input: input([accessPayoff, noise]),
+    });
+    const accessProjection = projections.find(
+      (projection) => projection.actionId === "access-payoff-run",
+    );
+    const noiseProjection = projections.find(
+      (projection) => projection.actionId === "access-payoff-noise",
+    );
+
+    expect(accessProjection?.accessPayoffSignals).toEqual(
+      expect.arrayContaining(["access", "free_trash", "bypass"]),
+    );
+    expect(noiseProjection?.accessPayoffSignals).toEqual([]);
+  });
+
   it("requires canonical structured server ids in payloads", () => {
     const labelLikeServer = action({
       actionId: "label-like-server",

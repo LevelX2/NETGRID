@@ -8689,6 +8689,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertelfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` sammelt Access-/Trash-/Bypass-Payoff-Signale aus RunAction-Signalen und Candidate-Signalen über gebundene Tokens und Phrasen statt über Regexes wie `access|multiaccess|trash|bypass`.
+  - Echte Signale wie `access`, `multiaccess`, `hq_info`, `topdeck`, `free_trash`, `trash` und `bypass` bleiben wirksam; Rauschen wie `accessory`, `free_trashcan` und `bypasser` bleibt wirkungslos.
+  - `run-action-projection.test.ts` schützt die neuen Access-Payoff-Signalgrenzen zusätzlich zu den bestehenden strukturierten Run-/Constraint-Grenzen.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Datei, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

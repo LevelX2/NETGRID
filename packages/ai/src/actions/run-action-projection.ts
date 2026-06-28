@@ -625,13 +625,11 @@ function accessPayoffSignalsForRunAction(
     "runPayoffSignals",
     "payoffSignals",
   ]);
-  const semanticSignals = signals.filter((signal) =>
-    /access|multiaccess|hq_info|topdeck|free_trash|trash|bypass/i.test(signal),
-  );
+  const semanticSignals = signals.filter(signalShowsRunAccessPayoff);
   const candidateSignals = [
     ...(candidate?.cardContextSignals ?? []),
     ...(candidate?.actionTacticSignals ?? []),
-  ].filter((signal) => /access|multiaccess|trash|bypass/i.test(signal));
+  ].filter(signalShowsRunAccessPayoff);
   const effectSignals = (hint?.effects ?? []).flatMap(accessSignalsForHintEffect);
   return uniqueStrings([
     ...directSignals,
@@ -686,6 +684,44 @@ function constraintSignalsForRunAction(
       (constraint) => `${constraint.kind}:${constraint.status}`,
     ),
   ]);
+}
+
+function signalShowsRunAccessPayoff(signal: string): boolean {
+  const tokens = signalTokens(signal);
+  return (
+    tokensIncludeAny(tokens, [
+      "access",
+      "multiaccess",
+      "topdeck",
+      "trash",
+      "bypass",
+    ]) ||
+    tokensIncludePhrase(tokens, ["hq", "info"]) ||
+    tokensIncludePhrase(tokens, ["free", "trash"])
+  );
+}
+
+function signalTokens(signal: string): string[] {
+  return signal
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function tokensIncludeAny(
+  tokens: readonly string[],
+  accepted: readonly string[],
+): boolean {
+  return tokens.some((token) => accepted.includes(token));
+}
+
+function tokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
 }
 
 function riskSignalsForRunAction(
