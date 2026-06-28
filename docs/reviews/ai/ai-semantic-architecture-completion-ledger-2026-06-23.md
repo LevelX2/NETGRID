@@ -8373,6 +8373,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsechsundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/semantic-ai-core-meta.ts` leitet StrategyPlan-GoalFamilies über gebundene `rolesMatch`-Terme statt freier `strategyId.includes("rnd"|"hq"|"tag"|"remote")`-Substring-Prüfungen ab.
+  - Strukturierte Strategy-IDs wie `runner.hq_pressure` und `corp.remote_scoring` bleiben wirksam; Rauschen wie `runner.hqish_noise` und `corp.remoteish_noise` fällt auf die Default-GoalFamilies zurück.
+  - `semantic-ai-core-meta.test.ts` schützt positive Runner-/Corp-Strategy-IDs und Substring-Negativfälle über die öffentliche Doctrine-Ableitung.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-core-meta.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 27 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
