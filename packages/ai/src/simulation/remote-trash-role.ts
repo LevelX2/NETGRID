@@ -184,10 +184,42 @@ export function remoteTrashCardLooksLikeFinitePoolForMetrics(
 }
 
 function finitePoolRulesTextMatches(rulesText: string): boolean {
+  const tokens = remoteTrashRulesTextTokens(rulesText);
   return (
-    /\bput\b/.test(rulesText) &&
-    /\bfrom the bank\b/.test(rulesText) &&
-    /\btake\b/.test(rulesText) &&
-    /\bbits\b/.test(rulesText)
+    tokens.includes("put") &&
+    remoteTrashTokensIncludePhrase(tokens, ["from", "the", "bank"]) &&
+    tokens.includes("take") &&
+    tokens.includes("bits")
+  );
+}
+
+function remoteTrashRulesTextTokens(text: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of text.toLocaleLowerCase("en-US")) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character;
+    } else if (current.length > 0) {
+      tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "0" && character <= "9")
+  );
+}
+
+function remoteTrashTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    phrase.every((token, offset) => tokens[index + offset] === token),
   );
 }

@@ -8936,6 +8936,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsechsunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/remote-trash-role.ts` ersetzt die Finite-Pool-Rules-Text-Erkennung für Remote-Trash-Metriken durch gebundene Tokens und die Phrase `from the bank`.
+  - Echte Texte wie `Put 8 bits from the bank ... Take bits` bleiben wirksam; Substring-Rauschen wie `banker`, `intake` und `bitsy` bleibt wirkungslos.
+  - Die Erkennung bleibt reine Simulations-/Metrikklassifizierung und erzeugt keine LegalAction-Projektion.
+  - `remote-trash-role.test.ts` schützt den bestehenden positiven Finite-Pool-Fall und den negativen Substring-Rauschfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/remote-trash-role.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
