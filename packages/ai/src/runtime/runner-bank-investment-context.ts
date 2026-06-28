@@ -603,12 +603,18 @@ export function createRunnerBankInvestmentContext(
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
+    return rolesMatch(roles, ["economy"]) && runnerTextLooksLikeCreditBank(text);
+  }
+
+  function runnerTextLooksLikeCreditBank(text: string): boolean {
+    const tokens = runnerBankTextTokens(text);
     return (
-      rolesMatch(roles, ["economy"]) &&
-      (/stored credits|counter_bank|temporary_resource_bank|finite_economy_pool/.test(
-        text,
-      ) ||
-        /credit.*counter|counter.*credit/.test(text))
+      runnerBankTokensIncludePhrase(tokens, ["stored", "credit"]) ||
+      runnerBankTokensIncludePhrase(tokens, ["stored", "credits"]) ||
+      runnerBankTokensIncludePhrase(tokens, ["counter", "bank"]) ||
+      runnerBankTokensIncludePhrase(tokens, ["temporary", "resource", "bank"]) ||
+      runnerBankTokensIncludePhrase(tokens, ["finite", "economy", "pool"]) ||
+      runnerBankTokensIncludeCreditCounterPair(tokens)
     );
   }
 
@@ -795,4 +801,24 @@ function runnerBankTokensIncludeOrdered(
   const firstIndex = tokens.indexOf(orderedTokens[0]);
   if (firstIndex < 0) return false;
   return tokens.slice(firstIndex + 1).includes(orderedTokens[1]);
+}
+
+function runnerBankTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    phrase.every((token, offset) => tokens[index + offset] === token),
+  );
+}
+
+function runnerBankTokensIncludeCreditCounterPair(
+  tokens: readonly string[],
+): boolean {
+  return (
+    runnerBankTokensIncludeOrdered(tokens, ["credit", "counter"]) ||
+    runnerBankTokensIncludeOrdered(tokens, ["credits", "counter"]) ||
+    runnerBankTokensIncludeOrdered(tokens, ["counter", "credit"]) ||
+    runnerBankTokensIncludeOrdered(tokens, ["counter", "credits"])
+  );
 }

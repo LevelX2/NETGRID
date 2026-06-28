@@ -85,6 +85,33 @@ describe("createRunnerBankInvestmentContext", () => {
     ).toContain("bankStoredCredits:0");
   });
 
+  it("ignores substring-only credit-counter text for credit-bank detection", () => {
+    const context = createContext({
+      definitionForCardId: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? {
+              rulesText: "Creditor counterparty.",
+              mechanics: [],
+            }
+          : { rulesText: "", mechanics: [] },
+    });
+    const action = runnerAction("start_run", { serverId: "hq" });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(
+        runnerInput({
+          rig: [
+            visibleRunnerCard("custom-runner-credit-bank", {
+              counters: { power: 4 },
+            }),
+          ],
+          legalActions: [action],
+        }),
+        action,
+      ),
+    ).toContain("bankStoredCredits:0");
+  });
+
   it("ignores substring-only funding-need role noise", () => {
     const action = runnerAction("install_card", {
       actionId: "expensive-noise",
