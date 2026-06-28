@@ -1,5 +1,6 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
+import { rolesHaveBreakerRole } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 
 export type ProgramSacrificeCategory = "critical" | "high" | "medium" | "low";
@@ -220,7 +221,7 @@ export function programSacrificeCandidate(
     reasonCategories.push("unique_breaker_coverage");
   } else if (
     breakerRoles.length > 0 ||
-    rolesMatch(roles, ["breaker_"])
+    rolesHaveBreakerRole(roles)
   ) {
     sacrificePenalty += 420;
     reasonCategories.push("breaker_coverage");
