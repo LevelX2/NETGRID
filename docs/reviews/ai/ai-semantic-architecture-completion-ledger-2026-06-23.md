@@ -9174,6 +9174,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsiebenundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-hand-development.ts` ersetzt die non-additive Utility-Familienerkennung für Trash Recovery, Program Search, Stack Search und Hidden-Zone Search durch gebundene Runner-Hand-Texttokens.
+  - Exakte Begriffe und Phrasen wie `trash_recovery`, `setup.recovery`, `search_trash`, `top card from your trash`, `program_search`, `search your stack for a program`, `stack_search`, `top four cards of your stack` und `hidden_zone_tool` bleiben wirksam; Suffix-Rauschen wie `program_searchish`, `hidden_zone_toolish` und `searchlight` erzeugt keine Utility-Familie mehr.
+  - Die Erkennung bleibt reine Runner-Hand-Development-Diagnostik über sichtbare Handkartendaten und erzeugt keine LegalAction-Projektion.
+  - `runner-hand-development.test.ts` schützt positive und negative non-additive Search-Utility-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-hand-development.test.ts` grün, 1 Datei, 17 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

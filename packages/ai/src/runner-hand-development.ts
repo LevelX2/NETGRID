@@ -1029,6 +1029,68 @@ function runnerHandTextHasPlayableSignal(text: string): boolean {
   ]);
 }
 
+function runnerHandTextHasRecoveryUtilitySignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludePhrase(tokens, ["trash", "recovery"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["setup", "recovery"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["setup", "top", "trash", "recovery"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["search", "trash"]) ||
+    runnerHandTokensIncludePhrase(tokens, [
+      "top",
+      "card",
+      "from",
+      "your",
+      "trash",
+    ]) ||
+    runnerHandTokensIncludePhrase(tokens, ["trash", "into", "your", "hand"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["heap", "recovery"])
+  );
+}
+
+function runnerHandTextHasProgramSearchUtilitySignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludePhrase(tokens, ["program", "search"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["setup", "program", "search"]) ||
+    runnerHandTokensIncludePhrase(tokens, [
+      "search",
+      "your",
+      "stack",
+      "for",
+      "a",
+      "program",
+    ]) ||
+    runnerHandTokensIncludePhrase(tokens, ["program", "cards"])
+  );
+}
+
+function runnerHandTextHasStackSearchUtilitySignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludePhrase(tokens, ["stack", "search"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["search", "stack"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["setup", "stack", "filter"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["setup", "card", "search"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["setup", "prep", "resource", "search"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["setup", "hardware", "search"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["top", "four", "cards", "of", "your", "stack"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["top", "five", "cards", "of", "your", "stack"])
+  );
+}
+
+function runnerHandTextHasHiddenZoneSearchSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  const hiddenZone =
+    runnerHandTokensIncludePhrase(tokens, ["hidden", "zone", "tool"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["hidden", "runner", "resource"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["resource", "hidden"]);
+  return (
+    hiddenZone &&
+    runnerHandTokensIncludeAny(tokens, ["search", "recovery", "stack", "trash"])
+  );
+}
+
 function runnerHandTextTokens(text: string): string[] {
   return text
     .toLocaleLowerCase("en-US")
@@ -1115,21 +1177,10 @@ function nonAdditiveUtilityFamiliesForPersistentCard(
 ): string[] {
   if (card.type !== "resource") return [];
   const families = new Set<string>();
-  const recovery =
-    /trash_recovery|setup\.recovery|setup\.top_trash_recovery|search_trash|top card from your trash|trash into your hand|heap recovery/.test(
-      text,
-    );
-  const programSearch =
-    /program_search|setup\.program_search|search your stack for a program|program cards/.test(
-      text,
-    );
-  const stackSearch =
-    /stack_search|search_stack|setup\.stack_filter|setup\.card_search|setup\.prep_resource_search|setup\.hardware_search|top (?:four|five) cards of your stack/.test(
-      text,
-    );
-  const hiddenZoneSearch =
-    /hidden_zone_tool|hidden\.runner_resource|resource\.hidden/.test(text) &&
-    /search|recovery|stack|trash/.test(text);
+  const recovery = runnerHandTextHasRecoveryUtilitySignal(text);
+  const programSearch = runnerHandTextHasProgramSearchUtilitySignal(text);
+  const stackSearch = runnerHandTextHasStackSearchUtilitySignal(text);
+  const hiddenZoneSearch = runnerHandTextHasHiddenZoneSearchSignal(text);
 
   if (recovery) families.add("non_additive_utility:recovery");
   if (programSearch) families.add("non_additive_utility:program_search");

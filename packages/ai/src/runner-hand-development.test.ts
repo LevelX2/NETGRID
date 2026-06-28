@@ -500,6 +500,48 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     );
   });
 
+  it("bounds non-additive search utility signals to exact tokens", () => {
+    const searchResource = visibleCard("search-resource-1", {
+      definitionId: "test-search-resource",
+      title: "Search Resource",
+      type: "resource",
+      installCost: 0,
+      rulesText: "program_search hidden_zone_tool search",
+    });
+    const noisyResource = visibleCard("search-resource-noise", {
+      definitionId: "test-search-resource-noise",
+      title: "Search Resource Noise",
+      type: "resource",
+      installCost: 0,
+      rulesText: "program_searchish hidden_zone_toolish searchlight",
+    });
+    const input = runnerInput({
+      credits: 5,
+      hand: [searchResource, noisyResource],
+      legalActions: [
+        installAction("install-search-resource", searchResource, 0),
+        installAction("install-search-resource-noise", noisyResource, 0),
+      ],
+    });
+
+    const evaluations = evaluateRunnerHandDevelopment({ input });
+    const positive = findByInstance(evaluations, "search-resource-1");
+    const noise = findByInstance(evaluations, "search-resource-noise");
+
+    expect(positive.persistentInstallEvaluation?.newFunctionalCoverage).toEqual(
+      expect.arrayContaining([
+        "non_additive_utility:program_search",
+        "non_additive_utility:hidden_zone_search",
+      ]),
+    );
+    expect(noise.persistentInstallEvaluation?.newFunctionalCoverage).not.toEqual(
+      expect.arrayContaining([
+        "non_additive_utility:program_search",
+        "non_additive_utility:hidden_zone_search",
+      ]),
+    );
+  });
+
   it("allows recovery utility replacement when no copy remains installed", () => {
     const replacementJunkyard = visibleCard("junkyard-replacement", {
       definitionId: "onr_v1_165_junkyard-bbs",
