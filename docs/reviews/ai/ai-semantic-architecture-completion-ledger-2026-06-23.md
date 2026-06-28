@@ -9288,6 +9288,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertachtundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-coverage.ts` ersetzt die Coverage-Report-Forbidden-Marker-Prüfung per `serialized.includes(marker)` durch gebundene Report-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `fullGameState`, `AIInput`, `DecisionDebug`, `hiddenZone`, `hidden zone`, `sourceCardInstanceId` und `CardInstance` bleiben blockiert; Suffix-Rauschen wie `privatePayloadish` erzeugt keinen Report-Leak mehr.
+  - Mehrwort-Marker wie `hidden zone` werden als zusammenhängende Tokenfolge geprüft.
+  - Die Erkennung bleibt reine Action-Semantic-Coverage-Report-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `action-semantic-coverage.test.ts` schützt positive Forbidden-Marker-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

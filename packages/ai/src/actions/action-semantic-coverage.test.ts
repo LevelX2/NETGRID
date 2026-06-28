@@ -391,6 +391,20 @@ describe("Action semantic coverage", () => {
     expect(report).not.toContain("fullGameState");
   });
 
+  it("bounds forbidden coverage report markers to exact tokens", () => {
+    const cleanSummary = summarizeActionSemanticCandidateCoverage([
+      coverageCandidateWithSemanticActionType("privatePayloadish"),
+    ]);
+    const unsafeSummary = summarizeActionSemanticCandidateCoverage([
+      coverageCandidateWithSemanticActionType("privatePayload"),
+    ]);
+
+    expect(cleanSummary.redactionSafe).toBe(true);
+    expect(cleanSummary.forbiddenMarkers).toEqual([]);
+    expect(unsafeSummary.redactionSafe).toBe(false);
+    expect(unsafeSummary.forbiddenMarkers).toEqual(["privatePayload"]);
+  });
+
   it("matches the checked-in ActionSemanticCandidate coverage report", () => {
     const candidates = coverageReportFixtureCandidates();
     const engineBackedCandidates = buildActionSemanticCandidates({
@@ -455,6 +469,40 @@ function legalAction(
     expiresAtStateVersion: 109,
     ...overrides,
   };
+}
+
+function coverageCandidateWithSemanticActionType(
+  semanticActionType: string,
+): ActionSemanticCandidate {
+  return {
+    actionId: `coverage-${semanticActionType}`,
+    actionType: "gain_credit",
+    actorSide: "runner",
+    observerSide: "system",
+    visibilityScope: "public",
+    legalActionRef: {
+      actionId: `coverage-${semanticActionType}`,
+      actionType: "gain_credit",
+      originalPayloadKeys: [],
+    },
+    sourceKind: "basic_action",
+    abilityBindingMethod: "none",
+    semanticActionType,
+    cardContextSignals: [],
+    actionTacticSignals: [],
+    strategySupport: [],
+    conditions: [],
+    risks: [],
+    constraints: [],
+    costProfile: { costKnownStatus: "known" },
+    timingProfile: { window: "runner_action.main" },
+    boardContext: { knownRelevantCards: [] },
+    confidence: "medium",
+    primaryProjectionStatus: "projected",
+    projectionIssues: [],
+    hardGates: [],
+    evidence: [],
+  } as unknown as ActionSemanticCandidate;
 }
 
 function defaultSourceFor(type: LegalAction["type"]): LegalAction["source"] {
