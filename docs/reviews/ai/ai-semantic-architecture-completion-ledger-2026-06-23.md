@@ -9153,6 +9153,17 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n "\.test\(|match\(" packages/ai/src/deck-capabilities.ts` ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertfünfundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-hand-development.ts` ersetzt im Persistent-Functional-Profile die textbasierten Signale für risky Breaker, Damage Prevention, Hand Size und absolute Link durch gebundene Runner-Hand-Texttokens.
+  - Exakte Begriffe und Phrasen wie `self damage`, `prevent ... damage`, `damage prevention`, `hand size`, `base link`, `gain ... link` und `2 link` bleiben wirksam; Suffix-Rauschen wie `damageish`, `hand_sizeish` und `base_linkish` erzeugt keine Functional-Coverage-Evidence mehr.
+  - Spätere Runner-Hand-Role-Heuristiken bleiben bewusst als Folgepakete offen; dieser Schnitt begrenzt nur das Persistent-Functional-Profile.
+  - Die Erkennung bleibt reine Runner-Hand-Development-Diagnostik über sichtbare Handkartendaten und erzeugt keine LegalAction-Projektion.
+  - `runner-hand-development.test.ts` schützt positive und negative Persistent-Utility-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-hand-development.test.ts` grün, 1 Datei, 15 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

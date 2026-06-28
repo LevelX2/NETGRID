@@ -808,11 +808,11 @@ function persistentFunctionalProfileForCard(
   const breakerCoverage = breakerCoverageForPersistentCard(card, text);
   const riskyBreaker =
     breakerCoverage.length > 0 &&
-    /blink|random|roll|self[- ]?damage|suffer .*damage|take .*damage|do .*damage/.test(text);
+    runnerHandTextHasRiskyBreakerSignal(text);
   const damagePrevention =
-    /prevent .*damage|damage prevention|avoid .*damage|damage_prevention/.test(text);
+    runnerHandTextHasDamagePreventionSignal(text);
   const handSizeSupport =
-    /hand size|max hand|maximum hand|hand limit|grip size|hand_size/.test(text);
+    runnerHandTextHasHandSizeSignal(text);
   const memorySupport = looksLikeMemorySupport(card, text);
   const bankTool = looksLikeBankTool(text);
   const accessSupport = looksLikeAccessPayoff(text);
@@ -821,8 +821,8 @@ function persistentFunctionalProfileForCard(
     nonAdditiveUtilityFamiliesForPersistentCard(card, text);
   const actionGatedUtility = nonAdditiveUtilityFamilies.length > 0;
   const absoluteNonStackable =
-    /\bbase link\b|base_link|link strength|gain .*link|\+\d+\s+link/.test(text) &&
-    !/counter|temporary|recurring|stored/.test(text);
+    runnerHandTextHasAbsoluteLinkSignal(text) &&
+    !runnerHandTextHasTemporaryCounterSignal(text);
   const functionalCoverage = sortedUnique([
     ...breakerCoverage.map((coverage) => `breaker:${coverage}`),
     ...nonAdditiveUtilityFamilies,
@@ -852,6 +852,106 @@ function persistentFunctionalProfileForCard(
     actionGatedUtility,
     absoluteNonStackable,
   };
+}
+
+function runnerHandTextHasRiskyBreakerSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, ["blink", "random", "roll"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["self", "damage"]) ||
+    runnerHandTokensIncludeInOrder(tokens, "suffer", "damage") ||
+    runnerHandTokensIncludeInOrder(tokens, "take", "damage") ||
+    runnerHandTokensIncludeInOrder(tokens, "do", "damage")
+  );
+}
+
+function runnerHandTextHasDamagePreventionSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeInOrder(tokens, "prevent", "damage") ||
+    runnerHandTokensIncludePhrase(tokens, ["damage", "prevention"]) ||
+    runnerHandTokensIncludeInOrder(tokens, "avoid", "damage")
+  );
+}
+
+function runnerHandTextHasHandSizeSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludePhrase(tokens, ["hand", "size"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["max", "hand"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["maximum", "hand"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["hand", "limit"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["grip", "size"])
+  );
+}
+
+function runnerHandTextHasAbsoluteLinkSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludePhrase(tokens, ["base", "link"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["link", "strength"]) ||
+    runnerHandTokensIncludeInOrder(tokens, "gain", "link") ||
+    runnerHandTokensIncludeNumberBefore(tokens, "link")
+  );
+}
+
+function runnerHandTextHasTemporaryCounterSignal(text: string): boolean {
+  return runnerHandTokensIncludeAny(runnerHandTextTokens(text), [
+    "counter",
+    "temporary",
+    "recurring",
+    "stored",
+  ]);
+}
+
+function runnerHandTextTokens(text: string): string[] {
+  return text
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function runnerHandTokensIncludeAny(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
+}
+
+function runnerHandTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    phrase.every((token, offset) => tokens[index + offset] === token),
+  );
+}
+
+function runnerHandTokensIncludeInOrder(
+  tokens: readonly string[],
+  first: string,
+  second: string,
+): boolean {
+  const firstIndex = tokens.indexOf(first);
+  return firstIndex >= 0 && tokens.indexOf(second, firstIndex + 1) >= 0;
+}
+
+function runnerHandTokensIncludeNumberBefore(
+  tokens: readonly string[],
+  tokenAfterNumber: string,
+): boolean {
+  return tokens.some(
+    (token, index) =>
+      runnerHandTokenIsDigits(token) && tokens[index + 1] === tokenAfterNumber,
+  );
+}
+
+function runnerHandTokenIsDigits(token: string): boolean {
+  for (const character of token) {
+    if (character < "0" || character > "9") return false;
+  }
+  return token.length > 0;
 }
 
 function structuredHintSignals(hint: {

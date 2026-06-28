@@ -207,7 +207,36 @@ describe("RunnerHandDevelopmentEvaluation", () => {
       strategicFit: "weak",
       deferReason: "no_current_need",
     });
+    expect(evaluation.evidence).toContain(
+      "persistent_functional_coverage:damage_prevention",
+    );
     expect(evaluation.priority).toBeLessThan(500);
+  });
+
+  it("bounds persistent utility text signals to exact tokens", () => {
+    const noisy = visibleCard("utility-noise-1", {
+      definitionId: "test-utility-noise",
+      title: "Utility Noise",
+      type: "resource",
+      installCost: 0,
+      rulesText:
+        "Preventish damageish. Hand_sizeish support. Base_linkish gainish 2 linkish.",
+    });
+    const input = runnerInput({
+      credits: 4,
+      hand: [noisy],
+      legalActions: [installAction("install-utility-noise", noisy, 0)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "utility-noise-1",
+    );
+    const evidence = evaluation.evidence.join("|");
+
+    expect(evidence).not.toContain("damage_prevention");
+    expect(evidence).not.toContain("hand_size");
+    expect(evidence).not.toContain("absolute_link");
   });
 
   it("keeps duplicate or low-value hand cards conservative", () => {
