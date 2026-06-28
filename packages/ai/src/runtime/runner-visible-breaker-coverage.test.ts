@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
-import { visibleBreakerRoles } from "./runner-visible-breaker-coverage";
+import {
+  visibleBreakerCardCanAddressIce,
+  visibleBreakerRoles,
+} from "./runner-visible-breaker-coverage";
 
 describe("visibleBreakerRoles", () => {
   it("derives breaker roles from visible subtypes instead of demo definition ids", () => {
@@ -11,6 +14,22 @@ describe("visibleBreakerRoles", () => {
     expect(visibleBreakerRoles(visibleProgram("generic-breaker", ["Icebreaker"]))).toEqual([
       "icebreaker",
     ]);
+  });
+});
+
+describe("visibleBreakerCardCanAddressIce", () => {
+  it("matches structured breaker roles without accepting substring noise", () => {
+    expect(canAddress(["support_icebreaker"], "Wall")).toBe(true);
+    expect(canAddress(["icebreakerish_noise"], "Wall")).toBe(false);
+
+    expect(canAddress(["support_fracter"], "Barrier")).toBe(true);
+    expect(canAddress(["fracterish_noise"], "Barrier")).toBe(false);
+
+    expect(canAddress(["support_decoder"], "Code Gate")).toBe(true);
+    expect(canAddress(["decoderish_noise"], "Code Gate")).toBe(false);
+
+    expect(canAddress(["support_killer"], "Sentry")).toBe(true);
+    expect(canAddress(["killerish_noise"], "Sentry")).toBe(false);
   });
 });
 
@@ -28,4 +47,18 @@ function visibleProgram(
     controller: "runner",
     subtypes,
   };
+}
+
+function canAddress(roles: readonly string[], iceText: string): boolean {
+  return visibleBreakerCardCanAddressIce(
+    visibleProgram("semantic-breaker", ["Icebreaker"]),
+    visibleProgram("visible-ice", []),
+    {
+      visibleBreakerRoles: () => roles,
+      visibleCardText: (card) =>
+        card.definitionId === "visible-ice"
+          ? `${iceText}. End the run.`
+          : "Break one ice subroutine.",
+    },
+  );
 }

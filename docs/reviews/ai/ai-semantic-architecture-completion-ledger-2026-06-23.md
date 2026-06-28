@@ -7921,6 +7921,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertsechsundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-visible-breaker-coverage.ts` nutzt für sichtbare Icebreaker-, Fracter-, Decoder- und Killer-Rollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-Prüfungen.
+  - Strukturierte Rollen wie `support_icebreaker`, `support_fracter`, `support_decoder` und `support_killer` bleiben wirksam; substringartiges Rauschen wie `icebreakerish_noise`, `fracterish_noise`, `decoderish_noise` und `killerish_noise` erzeugt keine sichtbare Breaker-Coverage mehr.
+  - `runner-visible-breaker-coverage.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-visible-breaker-coverage.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
