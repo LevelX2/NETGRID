@@ -1361,9 +1361,11 @@ function recoveryLowValueLoopContext(
     entry.runnerEconomyChoicePlausible === true;
   const searchOrDrawNeed =
     entry.runnerSearchTakenForBreakerCoverage === true ||
-    text.includes("supportsdraworsearchneed:true") ||
-    text.includes("coverageanswerrole:program_search") ||
-    text.includes("coverageanswerrole:draw_for_answer");
+    selfplayEntryHasStructuredSignal(entry, [
+      "supportsdraworsearchneed:true",
+      "coverageanswerrole:program_search",
+      "coverageanswerrole:draw_for_answer",
+    ]);
   const pressureSkipped =
     entry.runnerSearchRecoveryChosenOverPressure === true ||
     entry.runnerEconomyChosenWhilePressureReady === true;

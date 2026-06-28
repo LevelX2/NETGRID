@@ -278,6 +278,38 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("funding-noise-2");
   });
 
+  it("bounds recovery search signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "search-positive-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "search-positive-2",
+        reasonCode: "runner.recovery",
+        debugFacts: ["coverageAnswerRole:program_search"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "search-noise-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "search-noise-2",
+        reasonCode: "runner.recovery",
+        debugFacts: ["coverageAnswerRole:program_searchish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["recovery_low_value_loop"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("search-noise-2");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),
