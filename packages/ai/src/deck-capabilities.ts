@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import { rolesMatch } from "./runtime/role-match";
 import {
   estimateBreakerCostProfileFromOntology,
   getStructuredBreakerProfileForCard,
@@ -635,20 +636,20 @@ function searchAccessToolForRecord(
   params: BuildDeckCapabilityProfileParams,
   record: CardCapabilityRecord,
 ): SearchAccessTool | undefined {
-  const text = normalizedRecordText(record);
-  const signals = [...record.roles, ...record.planRoles].join(" ").toLowerCase();
+  const text = normalizedRecordTextWithoutRoles(record);
+  const roleSignals = [...record.roles, ...record.planRoles];
+  const signals = roleSignals.join(" ").toLowerCase();
   const canSearchPrograms =
     /program_search|setup\.program_search|search.*program|search your stack for a program/.test(text) ||
-    /program_search|breaker_search/.test(signals);
+    rolesMatch(roleSignals, ["program_search", "breaker_search"]);
   const canSearchBreakers =
     canSearchPrograms ||
     /breaker_search|search.*breaker|icebreaker/.test(text) ||
-    /breaker_search/.test(signals);
+    rolesMatch(roleSignals, ["breaker_search"]);
   if (!canSearchPrograms && !canSearchBreakers) return undefined;
   const status = primaryStatus(record.locations);
   const structuredSearch =
-    /program_search|breaker_search/.test(signals) ||
-    record.roles.some((role) => role.includes("search"));
+    rolesMatch(roleSignals, ["program_search", "breaker_search", "search"]);
   return {
     cardId: record.cardId,
     title: record.title,
@@ -672,6 +673,16 @@ function searchAccessToolForRecord(
       `status:${status}`,
     ],
   };
+}
+
+function normalizedRecordTextWithoutRoles(record: CardCapabilityRecord): string {
+  return [
+    record.cardId,
+    record.title,
+    record.type,
+    ...record.subtypes,
+    record.text,
+  ].join(" ").toLowerCase();
 }
 
 function buildEconomyBankTools(

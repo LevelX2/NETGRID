@@ -4,6 +4,7 @@ import {
   buildDeckCapabilityProfile,
   redactedDeckCapabilityFacts,
 } from "./deck-capabilities";
+import { CARD_ROLES_BY_CARD } from "./ai-hints";
 import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
 import type {
   LegalAction,
@@ -214,6 +215,45 @@ describe("DeckCapabilityProfile", () => {
       cardId: "onr_v1_059_self-modifying-code",
       legalNow: true,
     });
+  });
+
+  it("matches search access roles by bounded role terms", () => {
+    CARD_ROLES_BY_CARD.set("local_structured_search", {
+      cardId: "local_structured_search",
+      side: "runner",
+      roles: ["setup_program_search"],
+    });
+    CARD_ROLES_BY_CARD.set("local_noise_tool", {
+      cardId: "local_noise_tool",
+      side: "runner",
+      roles: ["program_searchish_noise", "searchlight_noise"],
+    });
+    try {
+      const inputView = playerView("runner");
+      inputView.own.gripOrHq = [
+        visibleCard("search-1", "local_structured_search", "runner", "program", {
+          title: "Structured Search",
+        }),
+        visibleCard("noise-1", "local_noise_tool", "runner", "program", {
+          title: "Noise Tool",
+        }),
+      ];
+
+      const profile = buildDeckCapabilityProfile({
+        side: "runner",
+        playerView: inputView,
+        legalActions: [],
+      });
+
+      expect(profile.runner?.searchAccess.tools.map((tool) => tool.cardId))
+        .toEqual(["local_structured_search"]);
+      expect(profile.runner?.searchAccess.tools[0]?.evidence).toContain(
+        "capability_source:structured",
+      );
+    } finally {
+      CARD_ROLES_BY_CARD.delete("local_structured_search");
+      CARD_ROLES_BY_CARD.delete("local_noise_tool");
+    }
   });
 
   it("marks missing runner coverage without guessing unavailable deck answers", () => {

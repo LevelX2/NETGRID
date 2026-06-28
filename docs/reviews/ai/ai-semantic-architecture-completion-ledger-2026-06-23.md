@@ -7984,6 +7984,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertdreiunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` trennt Search-Tool-Text-Fallbacks von Rollen-/Planrollen-Signalen und nutzt für strukturierte Search-Rollen den gebundenen `rolesMatch`-Helper.
+  - Strukturierte Rollen wie `setup_program_search` bleiben als Search-Tool-Evidence wirksam; substringartiges Rauschen wie `program_searchish_noise` und `searchlight_noise` erzeugt kein Search-Access-Tool mehr.
+  - `deck-capabilities.test.ts` schützt strukturierte Treffer und Substring-Negativfälle über kontrollierte `CARD_ROLES_BY_CARD`-Einträge.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
