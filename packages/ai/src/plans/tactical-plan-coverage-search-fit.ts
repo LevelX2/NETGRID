@@ -1,5 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { rolesMatch } from "../runtime/role-match";
 import { actionCreditCost } from "./tactical-plan-action-values";
 import {
   coverageSearchRequiredCapability,
@@ -14,7 +15,6 @@ import {
   recoveryTargetVisibleCard,
 } from "./tactical-plan-coverage-card-roles";
 import { cardProvidesBreakerCoverage } from "./tactical-plan-breaker-cards";
-import { candidateSemanticText } from "./tactical-plan-candidate-text";
 import {
   economyFalseMatchLoopPenalties,
   noRecoveryLoopPenalties,
@@ -82,7 +82,6 @@ export function coverageSearchActionFit(
     };
   }
 
-  const signalText = candidateSemanticText(candidate);
   const recoveryTarget = recoveryTargetEvaluation(
     input,
     action,
@@ -177,11 +176,7 @@ export function coverageSearchActionFit(
     };
   }
 
-  const explicitProgramSearch =
-    /program_search|breaker_search|search\.stack|search_for_answer|setup\.program_search/.test(
-      signalText,
-    );
-  if (explicitProgramSearch) {
+  if (candidateHasProgramSearchSignal(candidate)) {
     return {
       supportsActiveCapabilityNeed: true,
       answerRole: "program_search",
@@ -235,6 +230,26 @@ export function coverageSearchActionFit(
       ...recoveryLoopPenaltyEvidence(penalties),
     ],
   };
+}
+
+function candidateHasProgramSearchSignal(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  return rolesMatch(candidateCoverageSignals(candidate), [
+    "program_search",
+    "breaker_search",
+    "search.stack",
+    "search_for_answer",
+  ]);
+}
+
+function candidateCoverageSignals(candidate: ActionSemanticCandidate): string[] {
+  return [
+    candidate.semanticActionType,
+    ...candidate.actionTacticSignals,
+    ...candidate.cardContextSignals,
+    ...candidate.evidence,
+  ].map((signal) => signal.toLocaleLowerCase("en-US"));
 }
 
 export function rejectedCoverageSearchFalseMatches(

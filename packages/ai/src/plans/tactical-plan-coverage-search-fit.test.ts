@@ -180,6 +180,44 @@ describe("coverageSearchActionFit", () => {
       recoveredCardPlanFit: "none",
     });
   });
+
+  it("matches explicit program search candidate signals by bounded terms", () => {
+    const plan = coveragePlan("breaker_wall");
+    const searchAction = action({ actionId: "program-search" });
+    const noiseAction = action({ actionId: "program-search-noise" });
+
+    expect(
+      coverageSearchActionFit(
+        plan,
+        plan.currentStep,
+        candidate(searchAction, {
+          actionTacticSignals: ["setup.program_search"],
+        }),
+        searchAction,
+        input([searchAction]),
+        false,
+      ),
+    ).toMatchObject({
+      answerRole: "program_search",
+      supportsActiveCapabilityNeed: true,
+      supportsDrawOrSearchNeed: true,
+    });
+    expect(
+      coverageSearchActionFit(
+        plan,
+        plan.currentStep,
+        candidate(noiseAction, {
+          actionTacticSignals: ["setup.program_searchish_noise"],
+        }),
+        noiseAction,
+        input([noiseAction]),
+        false,
+      ),
+    ).toMatchObject({
+      answerRole: "not_coverage_answer",
+      supportsActiveCapabilityNeed: false,
+    });
+  });
 });
 
 function coveragePlan(requiredCoverage: "breaker_wall") {
@@ -253,7 +291,10 @@ function action(overrides: Partial<LegalAction>): LegalAction {
   };
 }
 
-function candidate(action: LegalAction): ActionSemanticCandidate {
+function candidate(
+  action: LegalAction,
+  overrides: Partial<ActionSemanticCandidate> = {},
+): ActionSemanticCandidate {
   return {
     actionId: action.actionId,
     actionType: action.type,
@@ -285,5 +326,6 @@ function candidate(action: LegalAction): ActionSemanticCandidate {
     projectionIssues: [],
     hardGates: [],
     evidence: [],
+    ...overrides,
   } as unknown as ActionSemanticCandidate;
 }
