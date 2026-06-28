@@ -8301,6 +8301,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertachtundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/plan-conversion-predicates.ts` erkennt Runner-Setup-ReasonCodes über gebundene `rolesMatch`-Terme statt freier `reasonCode.includes("setup"|"search")`-Substring-Prüfungen.
+  - Strukturierte ReasonCodes wie `runner.setup.draw` und `runner.search.breaker` bleiben wirksam; Rauschen wie `setupish_noise` und `research_noise` bleibt wirkungslos.
+  - `plan-conversion-predicates.test.ts` schützt positive Runner-Setup-ReasonCodes und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/plan-conversion-predicates.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

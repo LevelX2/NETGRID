@@ -353,8 +353,7 @@ export function isRunnerSetupAction(
   return (
     entry.runnerDrawAction === true ||
     entry.actionType === "draw_card" ||
-    entry.reasonCode?.includes("setup") === true ||
-    entry.reasonCode?.includes("search") === true
+    rolesMatch(entry.reasonCode ? [entry.reasonCode] : [], ["setup", "search"])
   );
 }
 

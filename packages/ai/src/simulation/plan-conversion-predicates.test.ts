@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   corpRemoteCreatedConvertsTo,
+  isRunnerSetupAction,
   planIntentConvertedWithin,
 } from "./plan-conversion-predicates";
 
@@ -49,6 +50,24 @@ describe("planIntentConvertedWithin", () => {
         2,
         "asset",
       ),
+    ).toBe(false);
+  });
+
+  it("matches runner setup reason codes by bounded terms", () => {
+    expect(
+      isRunnerSetupAction({ side: "runner", reasonCode: "runner.setup.draw" }),
+    ).toBe(true);
+    expect(
+      isRunnerSetupAction({
+        side: "runner",
+        reasonCode: "runner.search.breaker",
+      }),
+    ).toBe(true);
+    expect(
+      isRunnerSetupAction({ side: "runner", reasonCode: "setupish_noise" }),
+    ).toBe(false);
+    expect(
+      isRunnerSetupAction({ side: "runner", reasonCode: "research_noise" }),
     ).toBe(false);
   });
 });
