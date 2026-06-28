@@ -333,6 +333,45 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
   });
 
+  it("bounds persistent breaker coverage terms to exact tokens", () => {
+    const fracter = visibleCard("fracter-1", {
+      definitionId: "test-text-fracter",
+      title: "Text Fracter",
+      type: "program",
+      installCost: 0,
+      memoryCost: 1,
+      rulesText: "Fracter. Break one ice subroutine.",
+    });
+    const noise = visibleCard("fracteroid-1", {
+      definitionId: "test-fracteroid-noise",
+      title: "Fracteroid",
+      type: "program",
+      installCost: 0,
+      memoryCost: 1,
+      rulesText: "Fracteroid barrierish traceish breakish subroutineish.",
+    });
+    const input = runnerInput({
+      credits: 5,
+      hand: [fracter, noise],
+      memoryUsed: 0,
+      memoryLimit: 4,
+      legalActions: [
+        installAction("install-fracter", fracter, 0),
+        installAction("install-fracteroid", noise, 0),
+      ],
+    });
+
+    const evaluations = evaluateRunnerHandDevelopment({ input });
+    const positiveEvidence = findByInstance(evaluations, "fracter-1")
+      .evidence.join("|");
+    const noiseEvidence = findByInstance(evaluations, "fracteroid-1")
+      .evidence.join("|");
+
+    expect(positiveEvidence).toContain("breaker:wall");
+    expect(positiveEvidence).toContain("breaker:subtype_limited");
+    expect(noiseEvidence).not.toContain("breaker:");
+  });
+
   it("devalues a second risky universal breaker when it adds no capability and reduces buffer", () => {
     const secondBlink = visibleCard("blink-2", {
       definitionId: "test-risky-universal-breaker",

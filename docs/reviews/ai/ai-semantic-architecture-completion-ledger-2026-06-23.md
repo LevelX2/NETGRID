@@ -9184,6 +9184,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertachtundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-hand-development.ts` ersetzt die Persistent-Breaker-Coverage-Erkennung für Wall/Barrier, Code Gate, Sentry, AP, Trace und Ice-Subroutine-Break durch gebundene Runner-Hand-Texttokens.
+  - Exakte Begriffe und Phrasen wie `fracter`, `code gate`, `killer`, `anti personnel`, `trace` und `break ... subroutine` bleiben wirksam; Suffix-Rauschen wie `fracteroid`, `barrierish`, `traceish`, `breakish` und `subroutineish` erzeugt keine Breaker-Coverage mehr.
+  - Die Erkennung bleibt reine Runner-Hand-Development-Diagnostik über sichtbare Handkartendaten und erzeugt keine LegalAction-Projektion.
+  - `runner-hand-development.test.ts` schützt positive und negative Breaker-Coverage-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-hand-development.test.ts` grün, 1 Datei, 18 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

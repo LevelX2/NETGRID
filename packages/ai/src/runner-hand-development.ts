@@ -1091,6 +1091,52 @@ function runnerHandTextHasHiddenZoneSearchSignal(text: string): boolean {
   );
 }
 
+function runnerHandTextHasWallCoverageSignal(text: string): boolean {
+  return runnerHandTokensIncludeAny(runnerHandTextTokens(text), [
+    "fracter",
+    "wall",
+    "barrier",
+  ]);
+}
+
+function runnerHandTextHasCodeGateCoverageSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, ["decoder", "codegate"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["code", "gate"])
+  );
+}
+
+function runnerHandTextHasSentryCoverageSignal(text: string): boolean {
+  return runnerHandTokensIncludeAny(runnerHandTextTokens(text), [
+    "killer",
+    "sentry",
+  ]);
+}
+
+function runnerHandTextHasApCoverageSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeAny(tokens, ["ap"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["anti", "personnel"])
+  );
+}
+
+function runnerHandTextHasTraceCoverageSignal(text: string): boolean {
+  return runnerHandTokensIncludeAny(runnerHandTextTokens(text), [
+    "trace",
+    "traces",
+  ]);
+}
+
+function runnerHandTextHasIceSubroutineBreakSignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludeInOrder(tokens, "break", "subroutine") ||
+    runnerHandTokensIncludeInOrder(tokens, "breaks", "subroutine")
+  );
+}
+
 function runnerHandTextTokens(text: string): string[] {
   return text
     .toLocaleLowerCase("en-US")
@@ -1196,12 +1242,12 @@ function breakerCoverageForPersistentCard(
 ): BreakerCoverageKind[] {
   if (!looksLikeBreaker(card, text)) return [];
   const coverage = new Set<BreakerCoverageKind>();
-  if (/fracter|wall|barrier/.test(text)) coverage.add("wall");
-  if (/decoder|code gate|codegate|code_gate/.test(text)) coverage.add("code_gate");
-  if (/killer|sentry/.test(text)) coverage.add("sentry");
-  if (/\bap\b|anti-personnel/.test(text)) coverage.add("ap");
-  if (/\btrace\b|traces/.test(text)) coverage.add("trace");
-  if (/break (?:any|an?|\d+|one)?\s*ice subroutine|breaks? .*ice subroutine/.test(text)) {
+  if (runnerHandTextHasWallCoverageSignal(text)) coverage.add("wall");
+  if (runnerHandTextHasCodeGateCoverageSignal(text)) coverage.add("code_gate");
+  if (runnerHandTextHasSentryCoverageSignal(text)) coverage.add("sentry");
+  if (runnerHandTextHasApCoverageSignal(text)) coverage.add("ap");
+  if (runnerHandTextHasTraceCoverageSignal(text)) coverage.add("trace");
+  if (runnerHandTextHasIceSubroutineBreakSignal(text)) {
     coverage.add(coverage.size > 0 ? "subtype_limited" : "universal");
   }
   if (coverage.size === 0) coverage.add("special");
