@@ -653,13 +653,23 @@ export function createRunnerBankInvestmentContext(
             .filter(Boolean)
             .join(" ")
             .toLowerCase();
-          return /stored|credit|spendable|bank/.test(text);
+          return runnerBankDisplayTextLooksStoredCredit(text);
         })
         .map((display) => display.amount),
     ]
       .filter((value): value is number => typeof value === "number")
       .map((value) => Math.max(0, Math.floor(value)));
     return counterValues.length > 0 ? Math.max(...counterValues) : 0;
+  }
+
+  function runnerBankDisplayTextLooksStoredCredit(text: string): boolean {
+    return runnerBankTokensIncludeAny(runnerBankTextTokens(text), [
+      "stored",
+      "credit",
+      "credits",
+      "spendable",
+      "bank",
+    ]);
   }
 
   function runnerBankSourceLabel(

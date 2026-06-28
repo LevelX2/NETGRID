@@ -112,6 +112,38 @@ describe("createRunnerBankInvestmentContext", () => {
     ).toContain("bankStoredCredits:0");
   });
 
+  it("ignores substring-only stored-credit display text", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const action = runnerAction("start_run", { serverId: "hq" });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(
+        runnerInput({
+          rig: [
+            visibleRunnerCard("custom-runner-credit-bank", {
+              counterDisplays: [
+                {
+                  id: "creditor-bankrupt-display",
+                  amount: 9,
+                  displayKind: "generic_counter",
+                  label: "creditor bankrupt",
+                  ariaLabel: "generic marker",
+                },
+              ],
+            }),
+          ],
+          legalActions: [action],
+        }),
+        action,
+      ),
+    ).toContain("bankStoredCredits:0");
+  });
+
   it("ignores substring-only funding-need role noise", () => {
     const action = runnerAction("install_card", {
       actionId: "expensive-noise",

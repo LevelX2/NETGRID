@@ -8926,6 +8926,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertfünfunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bank-investment-context.ts` ersetzt die Stored-Credit-Display-Erkennung für Runner-Bank-Karten durch gebundene Display-Tokens.
+  - Exakte Tokens `stored`, `credit`, `credits`, `spendable` und `bank` bleiben wirksam; Substring-Rauschen wie `creditor bankrupt` zählt nicht mehr als gespeicherter Credit-Display.
+  - Die Erkennung bleibt auf sichtbare `counterDisplays` begrenzt und erzeugt keine LegalAction-Projektion.
+  - `runner-bank-investment-context.test.ts` schützt den negativen Display-Substring-Grenzfall über sichtbare `bankStoredCredits`-Evidence.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bank-investment-context.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
