@@ -34,18 +34,35 @@ describe("runner no-run economy context", () => {
       }),
     ).toEqual([]);
   });
+
+  it("parses start-of-turn credit value from bounded rules text tokens", () => {
+    expect(
+      evidenceFor({
+        effectTargets: ["economy.turn_start_credit", "risk.ends_on_run"],
+        rulesText: "Gain [5] credits at the start of your turn.",
+      }),
+    ).toContain("expectedFutureValue:5");
+    expect(
+      evidenceFor({
+        effectTargets: ["economy.turn_start_credit", "risk.ends_on_run"],
+        rulesText: "Gain 7 creditsish at the start of your turn.",
+      }),
+    ).toContain("expectedFutureValue:2");
+  });
 });
 
 function evidenceFor(params: {
   effectTargets?: string[];
   mechanics?: string[];
+  rulesText?: string;
 }): string[] {
   const context = createRunnerNoRunEconomyContext({
     findVisibleCard: () => undefined,
     hintEffectsForDefinition: () =>
       (params.effectTargets ?? []).map((target) => ({ target })),
     mechanicsForDefinition: () => params.mechanics ?? [],
-    rulesTextForDefinition: () => "Gain 2 credits at the start of your turn.",
+    rulesTextForDefinition: () =>
+      params.rulesText ?? "Gain 2 credits at the start of your turn.",
     runnerBankCommitmentRunOverride: () => undefined,
     isRunnerRigInstallAction: () => false,
   });

@@ -228,8 +228,7 @@ export function createRunnerNoRunEconomyContext(
   ): number {
     if (!definitionId) return 0;
     const text = dependencies.rulesTextForDefinition(definitionId) ?? "";
-    const match = /gain\s+\[?(\d+)\]?\s+credits?.*start of/i.exec(text);
-    const parsed = Number(match?.[1] ?? 0);
+    const parsed = expectedStartOfTurnCreditGain(text);
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 2;
   }
 
@@ -308,4 +307,74 @@ function stringRecordValue(value: unknown, key: string): string | undefined {
 function numberRecordValue(value: unknown, key: string): number | undefined {
   const record = value as Record<string, unknown>;
   return typeof record[key] === "number" ? record[key] : undefined;
+}
+
+function expectedStartOfTurnCreditGain(text: string): number {
+  const tokens = rulesTextTokens(text);
+  for (const [index, token] of tokens.entries()) {
+    if (token !== "gain") continue;
+    const amount = positiveIntegerTokenValue(tokens[index + 1]);
+    const creditToken = tokens[index + 2];
+    if (
+      amount !== undefined &&
+      (creditToken === "credit" || creditToken === "credits") &&
+      tokensIncludePhraseAfter(tokens, index + 3, ["start", "of"])
+    ) {
+      return amount;
+    }
+  }
+  return 0;
+}
+
+function rulesTextTokens(text: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of text.toLocaleLowerCase("en-US")) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character;
+    } else if (current.length > 0) {
+      tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "0" && character <= "9")
+  );
+}
+
+function positiveIntegerTokenValue(
+  token: string | undefined,
+): number | undefined {
+  if (
+    token === undefined ||
+    token.length === 0 ||
+    ![...token].every((character) => character >= "0" && character <= "9")
+  ) {
+    return undefined;
+  }
+  const parsed = Number(token);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
+}
+
+function tokensIncludePhraseAfter(
+  tokens: readonly string[],
+  startIndex: number,
+  phrase: readonly string[],
+): boolean {
+  for (
+    let index = startIndex;
+    index <= tokens.length - phrase.length;
+    index += 1
+  ) {
+    if (phrase.every((token, offset) => tokens[index + offset] === token)) {
+      return true;
+    }
+  }
+  return false;
 }

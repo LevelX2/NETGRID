@@ -8826,6 +8826,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertfünfundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-no-run-economy-context.ts` ersetzt den Rules-Text-RegEx für erwartete No-Run-Economy-Startcredits durch gebundene alphanumerische Tokens.
+  - Gültige Texte wie `Gain [5] credits at the start of your turn.` bleiben wirksam; Suffix-Rauschen wie `creditsish` fällt auf den defensiven Defaultwert zurück.
+  - Der Pfad bleibt ein nachrangiger Rules-Text-Fallback hinter strukturierten Effekt-Targets und Mechanikrollen und erzeugt keine LegalAction-Projektion.
+  - `runner-no-run-economy-context.test.ts` schützt die bestehende Effekt-/Mechanikbindung und ergänzt positive Klammerzahl- sowie negative Suffix-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-no-run-economy-context.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
