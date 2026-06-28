@@ -7,6 +7,7 @@ import {
   type VisibleCard,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
+import { rolesMatch } from "./runtime/role-match";
 
 export type BeliefKnowledgeKind = "public_fact" | "own_private_fact" | "revealed_opponent_fact" | "hypothesis" | "unknown";
 
@@ -1514,9 +1515,8 @@ function invalidationReasonForEvent(
 
 function eventFamily(actionType: string, event: PublicGameEvent): BeliefEventFamily {
   const hiddenZoneAction = stringValue(event.publicPayload.hiddenZoneAction);
-  if (hiddenZoneAction?.includes("shuffle")) return "shuffle";
-  if (hiddenZoneAction?.includes("arrange") || hiddenZoneAction?.includes("reorder") || hiddenZoneAction?.includes("conceal")) return "arrange";
-  if (hiddenZoneAction?.includes("private_look")) return "reveal";
+  const hiddenZoneFamily = hiddenZoneActionEventFamily(hiddenZoneAction);
+  if (hiddenZoneFamily) return hiddenZoneFamily;
   if (actionType === "install_card") return "install";
   if (actionType === "rez_ice") return "rez";
   if (actionType === "advance_card") return "advance";
@@ -1538,6 +1538,17 @@ function eventFamily(actionType: string, event: PublicGameEvent): BeliefEventFam
   if (revealKind(event) === "reveal") return "reveal";
   if (revealKind(event) === "expose") return "expose";
   return "other";
+}
+
+export function hiddenZoneActionEventFamily(
+  hiddenZoneAction: string | undefined,
+): BeliefEventFamily | undefined {
+  if (!hiddenZoneAction) return undefined;
+  if (rolesMatch([hiddenZoneAction], ["shuffle"])) return "shuffle";
+  if (rolesMatch([hiddenZoneAction], ["arrange", "reorder", "conceal"]))
+    return "arrange";
+  if (rolesMatch([hiddenZoneAction], ["private_look"])) return "reveal";
+  return undefined;
 }
 
 function publicServerId(event: PublicGameEvent): string | undefined {

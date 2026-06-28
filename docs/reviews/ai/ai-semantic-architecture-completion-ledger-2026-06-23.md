@@ -8310,6 +8310,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertneunundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/belief-state.ts` klassifiziert Hidden-Zone-Actions über gebundene `rolesMatch`-Terme statt freier `hiddenZoneAction.includes(...)`-Substring-Prüfungen.
+  - Strukturierte Marker wie `corp_rd_shuffle`, `new_blood_conceal_reorder_installed_ice` und `p3_33_private_look` bleiben wirksam; Rauschen wie `reshuffleish_noise`, `concealment_noise` und `private_lookish_noise` bleibt wirkungslos.
+  - `belief-state.test.ts` schützt positive Hidden-Zone-Action-Familien und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/belief-state.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

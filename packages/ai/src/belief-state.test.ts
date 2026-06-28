@@ -5,7 +5,26 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
-import { reconstructBeliefState } from "./belief-state";
+import {
+  hiddenZoneActionEventFamily,
+  reconstructBeliefState,
+} from "./belief-state";
+
+describe("belief-state hidden zone action classification", () => {
+  it("matches hidden-zone action markers by bounded terms", () => {
+    expect(hiddenZoneActionEventFamily("corp_rd_shuffle")).toBe("shuffle");
+    expect(hiddenZoneActionEventFamily("new_blood_conceal_reorder_installed_ice")).toBe(
+      "arrange",
+    );
+    expect(hiddenZoneActionEventFamily("p3_33_private_look")).toBe("reveal");
+  });
+
+  it("ignores hidden-zone action substring noise", () => {
+    expect(hiddenZoneActionEventFamily("reshuffleish_noise")).toBeUndefined();
+    expect(hiddenZoneActionEventFamily("concealment_noise")).toBeUndefined();
+    expect(hiddenZoneActionEventFamily("private_lookish_noise")).toBeUndefined();
+  });
+});
 
 describe("belief-state R&D top freshness", () => {
   it("forgets a single known R&D top card after the Runner trashes it with public origin context", () => {
