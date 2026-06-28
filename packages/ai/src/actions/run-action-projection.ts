@@ -250,9 +250,8 @@ function runActionRelevant(action: LegalAction, signals: readonly string[]): boo
     return true;
   }
   return (
-    action.type === "play_event" &&
     runActionHasStructuredSignal(signals, ["run_pressure"]) &&
-    runActionHasStructuredSignal(signals, [
+    runActionHasBoundedSignalTerm(signals, [
       "multiaccess",
       "access_replacement",
     ])
@@ -268,6 +267,33 @@ function runActionHasStructuredSignal(
   );
   return signals.some((signal) =>
     normalizedNeedles.has(signal.toLocaleLowerCase("en-US")),
+  );
+}
+
+function runActionHasBoundedSignalTerm(
+  signals: readonly string[],
+  terms: readonly string[],
+): boolean {
+  return signals.some((signal) =>
+    terms.some((term) => runActionSignalHasTerm(signal, term)),
+  );
+}
+
+function runActionSignalHasTerm(signal: string, term: string): boolean {
+  const normalizedTerm = term.toLocaleLowerCase("en-US");
+  const tokens = signal
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+  const termTokens = normalizedTerm
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+  if (termTokens.length <= 1) return tokens.includes(normalizedTerm);
+  return tokens.some((token, index) =>
+    token === termTokens[0] &&
+    termTokens.every(
+      (termToken, offset) => tokens[index + offset] === termToken,
+    ),
   );
 }
 
@@ -749,7 +775,7 @@ function noNoisyBreakersForRunAction(
   signals: readonly string[],
 ): boolean {
   if (booleanPayloadValue(action, "noNoisyBreakers")) return true;
-  return runActionHasStructuredSignal(signals, [
+  return runActionHasBoundedSignalTerm(signals, [
     "no_noisy",
     "no noisy",
     "noisy_breaker_restriction",

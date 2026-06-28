@@ -9449,6 +9449,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertvierundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` ersetzt die Event-only-RunAction-Relevanzprüfung auf exakte Bare-Signale wie `multiaccess` und `access_replacement` durch eine gebundene Signal-Tokenfolgenprüfung gegen strukturierte Hint-Signale.
+  - Strukturierte Signale wie `effect:multiaccess`, `access.hq_multiaccess`, `effect:access_replacement`, `access.replacement`, `access.hq_via_archives` und `target:noisy_breaker_restriction` werden wieder erkannt; Suffix-Rauschen wie `multiaccessory_noise` bleibt durch Tokenbindung ausgeschlossen.
+  - Die Relevanzregel gilt nun für side-sichere Run-Pressure-Aktionen unabhängig davon, ob sie aus Event oder Program-Ability stammen, und erzeugt Projektionen weiterhin nur aus LegalActions und strukturierten Hint-/Payload-Signalen.
+  - `run-action-projection.test.ts` schützt die strukturierten Projection-Bounds; `runner-run-target-evaluation.test.ts` sichert Shredder, All-Hands, Rush Hour und den geblockten Multiaccess-Pfad wieder grün.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/run-action-projection.test.ts src/runner-run-target-evaluation.test.ts` grün, 2 Dateien, 63 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
