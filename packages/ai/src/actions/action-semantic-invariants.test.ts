@@ -203,6 +203,31 @@ describe("Action semantic invariants", () => {
     );
   });
 
+  it("does not treat substring-only broad signal evidence as strategy anchor evidence", () => {
+    const report = buildActionSemanticInvariantReport([
+      {
+        cardId: "onr_v1_broad_damage_anchor_noise",
+        tacticSignals: ["damage.payoff", "damage.corp_tagged_meat_payoff"],
+        strategySupport: [
+          {
+            strategyId: "corp.damage_kill",
+            role: "payoff_anchor",
+            confidence: "medium",
+            evidence: "tactic_signal_anchor:damage.payoffish_noise",
+          },
+        ],
+      },
+    ]);
+
+    expect(report.valid).toBe(true);
+    expect(
+      report.summary.byIssueId.broad_primary_signal_without_precise_peer,
+    ).toBe(0);
+    expect(report.summary.byIssueId.broad_primary_signal_strategy_anchor).toBe(
+      0,
+    );
+  });
+
   it("allows broad aggregation signals when precise primary signals carry the semantics", () => {
     const report = buildActionSemanticInvariantReport([
       {

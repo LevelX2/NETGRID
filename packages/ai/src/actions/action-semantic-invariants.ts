@@ -245,8 +245,7 @@ function broadSignalStrategySupportIssues(
   }
   const broadEvidence = pairs.flatMap((pair) =>
     broadSignals.filter(
-      (signal) =>
-        pair.evidence === signal || pair.evidence.includes(`:${signal}`),
+      (signal) => evidenceReferencesSignal(pair.evidence, signal),
     ),
   );
   if (
@@ -265,6 +264,10 @@ function broadSignalStrategySupportIssues(
       uniqueStrings([...broadSignals, ...broadEvidence]),
     ),
   ];
+}
+
+function evidenceReferencesSignal(evidence: string, signal: string): boolean {
+  return evidence.split(":").includes(signal);
 }
 
 function targetProfileIssues(

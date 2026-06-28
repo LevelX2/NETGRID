@@ -8454,6 +8454,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertfünfundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-invariants.ts` erkennt StrategySupportPair-Evidence für Broad-Signal-Anker über gebundene `:`-Segmente statt freier `pair.evidence.includes(:signal)`-Substring-Prüfung.
+  - Strukturierte Evidence wie `tactic_signal_anchor:damage.payoff` bleibt wirksam; Rauschen wie `tactic_signal_anchor:damage.payoffish_noise` zählt nicht als Evidence für `damage.payoff`.
+  - `action-semantic-invariants.test.ts` schützt den Substring-Negativfall mit vorhandenem präzisem Peer, sodass nur echte Broad-Anchor-Evidence beanstandet wird.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-invariants.test.ts` grün, 1 Datei, 20 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
