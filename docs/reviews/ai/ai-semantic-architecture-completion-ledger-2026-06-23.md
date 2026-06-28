@@ -8038,6 +8038,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertneununddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/threat-projection.ts` erkennt `corp_low_rez_reserve` nur noch über den exakten `low_rez_reserve`-Evidence-Marker oder den gebundenen `low_rez_reserve:`-Präfix statt über freie Substring-Suche.
+  - Strukturierte Evidence wie `low_rez_reserve:credits_below_outer_ice_cost` bleibt wirksam; substringartiges Rauschen wie `corp_low_rez_reserveish_noise` erzeugt keine Threat-Projektion mehr.
+  - `threat-opportunity.test.ts` schützt den Low-Rez-Reserve-Negativfall im bestehenden Projection-Harness.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/threat-opportunity.test.ts` grün, 1 Datei, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

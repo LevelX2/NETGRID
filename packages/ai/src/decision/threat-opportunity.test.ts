@@ -170,6 +170,19 @@ describe("Threat and Opportunity projections", () => {
     );
   });
 
+  it("does not project corp low rez reserve from substring noise", () => {
+    const frame = buildSemanticDecisionFrame({
+      input: inputFor("corp", [legalAction("gain-1", "gain_credit", "corp")]),
+      evidence: ["corp_low_rez_reserveish_noise"],
+    });
+
+    expect(
+      buildAiThreatProjections(frame).some(
+        (projection) => projection.threat === "corp_low_rez_reserve",
+      ),
+    ).toBe(false);
+  });
+
   it("projects runner economy starvation from economy posture", () => {
     const frame = buildSemanticDecisionFrame({
       input: inputFor("runner", [legalAction("gain-1", "gain_credit", "runner")]),
