@@ -550,7 +550,7 @@ function classifyLateRunStepSubclusterEntry(
     return "jackout_loop";
   }
   if (entry.actionType === "access_card") {
-    return /breach|remainingcount|access_queue/.test(text)
+    return selfplayEntryTextHasBreachPendingSignal(text)
       ? "breach_pending"
       : "access_pending";
   }
@@ -558,19 +558,13 @@ function classifyLateRunStepSubclusterEntry(
     if (runWindowHasAccessOrBreachAfter(window, windowIndex)) {
       return "continue_chain_to_access";
     }
-    if (
-      /simple_run_choice|simple_hq_or_rnd_pressure|opportunistic_central_run|remote_contest/.test(
-        text,
-      )
-    ) {
+    if (selfplayEntryTextHasSimpleRunPressureSignal(text)) {
       return "continue_without_progress";
     }
   }
   if (
     entry.actionType === "start_run" &&
-    /simple_hq_or_rnd_pressure|opportunistic_central_run|remote_contest|simple_run_choice/.test(
-      text,
-    )
+    selfplayEntryTextHasSimpleRunPressureSignal(text)
   ) {
     return "run_microstep_required";
   }
@@ -590,7 +584,7 @@ function runWindowHasAccessOrBreachAfter(
         entry.actionType === "steal_agenda" ||
         entry.actionType === "trash_accessed_card" ||
         entry.actionType === "decline_trash" ||
-        /breach/.test(selfplayEntryText(entry))),
+        selfplayEntryTextHasBreachPendingSignal(selfplayEntryText(entry))),
   );
 }
 
@@ -703,16 +697,12 @@ function entryHasDrawOrCoverageNeed(
 ): boolean {
   return (
     (entry.runnerSetupMissingCoverageTypes?.length ?? 0) > 0 ||
-    /coverage|hand_goal|draw_for_answer|search_or_draw|supportsdraworsearchneed:true|answer/.test(
-      text,
-    )
+    selfplayEntryTextHasDrawOrCoverageNeedSignal(text)
   );
 }
 
 function entryHasLowDeltaSignal(text: string): boolean {
-  return /known_low_value|low_value|low_delta|no_current_payoff|stale|repeat/.test(
-    text,
-  );
+  return selfplayEntryTextHasLowDeltaSignal(text);
 }
 
 function selfplayEntryHasStructuredSignal(
@@ -748,7 +738,7 @@ function actionLimitSetupOrEconomyEntry(
     return true;
   }
   const text = selfplayEntryText(entry);
-  return /economy|recover|setup|draw_for_answers|search|coverage/.test(text);
+  return selfplayEntryTextHasSetupOrEconomySignal(text);
 }
 
 function actionLimitLowValueRepeatEntry(
@@ -765,7 +755,7 @@ function actionLimitLowValueRepeatEntry(
     return true;
   }
   const text = selfplayEntryText(entry);
-  return /known_low_value|no_current_payoff|low_value|stale/.test(text);
+  return selfplayEntryTextHasLowValueRepeatSignal(text);
 }
 
 function countRepeatedActionReasonsWithoutProgress(
@@ -930,10 +920,104 @@ function selfplayErrorShowsNoLegalAction(error: string): boolean {
 }
 
 function selfplayErrorTokens(error: string): string[] {
-  return error
+  return selfplayTextTokens(error);
+}
+
+function selfplayEntryTextHasBreachPendingSignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    selfplayTokensIncludeAny(tokens, ["breach", "remainingcount"]) ||
+    tokensIncludePhrase(tokens, ["access", "queue"])
+  );
+}
+
+function selfplayEntryTextHasSimpleRunPressureSignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    tokensIncludePhrase(tokens, ["simple", "run", "choice"]) ||
+    tokensIncludePhrase(tokens, ["simple", "hq", "or", "rnd", "pressure"]) ||
+    tokensIncludePhrase(tokens, ["opportunistic", "central", "run"]) ||
+    tokensIncludePhrase(tokens, ["remote", "contest"])
+  );
+}
+
+function selfplayEntryTextHasDrawOrCoverageNeedSignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    selfplayTokensIncludeAny(tokens, ["coverage", "answer"]) ||
+    tokensIncludePhrase(tokens, ["hand", "goal"]) ||
+    tokensIncludePhrase(tokens, ["draw", "for", "answer"]) ||
+    tokensIncludePhrase(tokens, ["search", "or", "draw"]) ||
+    tokensIncludePhrase(tokens, [
+      "supportsdraworsearchneed",
+      "true",
+    ])
+  );
+}
+
+function selfplayEntryTextHasLowDeltaSignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    selfplayTokensIncludeAny(tokens, ["stale", "repeat"]) ||
+    tokensIncludePhrase(tokens, ["known", "low", "value"]) ||
+    tokensIncludePhrase(tokens, ["low", "value"]) ||
+    tokensIncludePhrase(tokens, ["low", "delta"]) ||
+    tokensIncludePhrase(tokens, ["no", "current", "payoff"])
+  );
+}
+
+function selfplayEntryTextHasSetupOrEconomySignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    selfplayTokensIncludeAny(tokens, [
+      "economy",
+      "recover",
+      "setup",
+      "search",
+      "coverage",
+    ]) || tokensIncludePhrase(tokens, ["draw", "for", "answers"])
+  );
+}
+
+function selfplayEntryTextHasLowValueRepeatSignal(text: string): boolean {
+  const tokens = selfplayTextTokens(text);
+  return (
+    selfplayTokensIncludeAny(tokens, ["stale"]) ||
+    tokensIncludePhrase(tokens, ["known", "low", "value"]) ||
+    tokensIncludePhrase(tokens, ["no", "current", "payoff"]) ||
+    tokensIncludePhrase(tokens, ["low", "value"])
+  );
+}
+
+function selfplayEntryTextHasRecoveryLoopSignal(text: string): boolean {
+  return selfplayTokensIncludeAny(selfplayTextTokens(text), [
+    "recover",
+    "recovery",
+    "junkyard",
+    "heap",
+  ]);
+}
+
+function selfplayPlanKindHasAnySignal(
+  planKind: string,
+  signals: readonly string[],
+): boolean {
+  return selfplayTokensIncludeAny(selfplayTextTokens(planKind), signals);
+}
+
+function selfplayTextTokens(text: string): string[] {
+  return text
     .toLocaleLowerCase("en-US")
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
+}
+
+function selfplayTokensIncludeAny(
+  tokens: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const tokenSet = new Set(tokens);
+  return needles.some((needle) => tokenSet.has(needle));
 }
 
 function tokensIncludePhrase(
@@ -1029,7 +1113,7 @@ function selfplayEntryDetectorFindings(
   if (
     enabled.has("recovery_low_value_loop") &&
     entry.side === "runner" &&
-    /recover|recovery|junkyard|heap/.test(text) &&
+    selfplayEntryTextHasRecoveryLoopSignal(text) &&
     repeatedReasonWithoutProgress(summary.actionSequence, actionIndex, entry)
   ) {
     const recoveryContext = recoveryLowValueLoopContext(entry, text);
@@ -1481,10 +1565,15 @@ function selfplayPlanActionMismatch(
   entry: AiSimulationSummary["actionSequence"][number],
   text: string,
 ): boolean {
-  const planKind = entry.planKind?.toLocaleLowerCase("en-US");
+  const planKind = entry.planKind;
   if (!planKind) return false;
   if (
-    /(run|pressure|contest|access)/.test(planKind) &&
+    selfplayPlanKindHasAnySignal(planKind, [
+      "run",
+      "pressure",
+      "contest",
+      "access",
+    ]) &&
     entry.actionType !== "start_run" &&
     entry.actionType !== "access_card" &&
     entry.actionType !== "trash_accessed_card" &&
@@ -1494,7 +1583,7 @@ function selfplayPlanActionMismatch(
   )
     return true;
   if (
-    /(score|advance)/.test(planKind) &&
+    selfplayPlanKindHasAnySignal(planKind, ["score", "advance"]) &&
     entry.side === "corp" &&
     entry.scoreActionsAvailable &&
     entry.actionType !== "score_agenda" &&
@@ -1502,7 +1591,7 @@ function selfplayPlanActionMismatch(
   )
     return true;
   if (
-    /(install|rig|setup)/.test(planKind) &&
+    selfplayPlanKindHasAnySignal(planKind, ["install", "rig", "setup"]) &&
     entry.side === "runner" &&
     entry.actionType === "start_run" &&
     selfplayEntryHasStructuredSignal(entry, ["runnerpressureready:false"])

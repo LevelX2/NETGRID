@@ -180,7 +180,7 @@ function isReachabilityImprovement(action: ProgressDeltaAction): boolean {
   ) {
     return action.actionType !== "jack_out";
   }
-  return /reachability|known_path|access_path|continue_chain/.test(actionText(action));
+  return actionTextHasReachabilitySignal(actionText(action));
 }
 
 function isServerProtection(action: ProgressDeltaAction): boolean {
@@ -189,9 +189,7 @@ function isServerProtection(action: ProgressDeltaAction): boolean {
   if (!["install_card", "rez_ice", "advance_card"].includes(action.actionType)) {
     return false;
   }
-  return /protect|protection|remote|central|ice|rez|score_remote/.test(
-    actionText(action),
-  );
+  return actionTextHasServerProtectionSignal(actionText(action));
 }
 
 function hasFutureProgress(
@@ -215,7 +213,7 @@ function hasFutureProgress(
 function isEconomyAction(action: ProgressDeltaAction): boolean {
   return (
     action.actionType === "gain_credit" ||
-    /economy|credit|funding/.test(actionText(action))
+    actionTextHasEconomySignal(actionText(action))
   );
 }
 
@@ -236,9 +234,7 @@ function isPlausibleNoProgress(action: ProgressDeltaAction): boolean {
   ) {
     return true;
   }
-  return /reserve|coverage|afford|protect|rez|scoreline|funding_need|known_unaffordable_path/.test(
-    actionText(action),
-  );
+  return actionTextHasPlausibleNoProgressSignal(actionText(action));
 }
 
 function directLabelsInWindow(
@@ -330,6 +326,56 @@ function actionTextHasCoverageInstallSignal(text: string): boolean {
     "killer",
     "icebreaker",
   ]);
+}
+
+function actionTextHasReachabilitySignal(text: string): boolean {
+  const tokens = progressActionTextTokens(text);
+  return (
+    tokens.includes("reachability") ||
+    progressTokensIncludePhrase(tokens, ["known", "path"]) ||
+    progressTokensIncludePhrase(tokens, ["access", "path"]) ||
+    progressTokensIncludePhrase(tokens, ["continue", "chain"])
+  );
+}
+
+function actionTextHasServerProtectionSignal(text: string): boolean {
+  const tokens = progressActionTextTokens(text);
+  return (
+    progressTokensIncludeAny(tokens, [
+      "protect",
+      "protection",
+      "remote",
+      "central",
+      "ice",
+      "rez",
+    ]) || progressTokensIncludePhrase(tokens, ["score", "remote"])
+  );
+}
+
+function actionTextHasEconomySignal(text: string): boolean {
+  const tokens = progressActionTextTokens(text);
+  return progressTokensIncludeAny(tokens, [
+    "economy",
+    "credit",
+    "credits",
+    "funding",
+  ]);
+}
+
+function actionTextHasPlausibleNoProgressSignal(text: string): boolean {
+  const tokens = progressActionTextTokens(text);
+  return (
+    progressTokensIncludeAny(tokens, [
+      "reserve",
+      "coverage",
+      "afford",
+      "protect",
+      "rez",
+      "scoreline",
+    ]) ||
+    progressTokensIncludePhrase(tokens, ["funding", "need"]) ||
+    progressTokensIncludePhrase(tokens, ["known", "unaffordable", "path"])
+  );
 }
 
 function progressActionTextTokens(text: string): string[] {

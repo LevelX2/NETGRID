@@ -443,7 +443,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
     server,
     value: 0,
     witness: "none",
-    targetClass: /access|trash|damage/.test(text)
+    targetClass: corpAdvancementLooksLikeLowValueDecoy(text)
       ? "low_value_decoy"
       : "unknown_advanceable",
     windowValue: 0,
@@ -673,9 +673,49 @@ function corpTokensIncludePhrase(
 }
 
 function corpAdvancementLooksLikeTransferSource(text: string): boolean {
-  return /move any number of advancement counters|move .*advancement counters.*another installed card/.test(
-    text,
+  const tokens = corpRulesTextTokens(text);
+  return (
+    corpTokensIncludePhrase(tokens, [
+      "move",
+      "any",
+      "number",
+      "of",
+      "advancement",
+      "counters",
+    ]) || corpTokensIncludeMoveCountersToAnotherInstalledCard(tokens)
   );
+}
+
+function corpTokensIncludeMoveCountersToAnotherInstalledCard(
+  tokens: readonly string[],
+): boolean {
+  for (const [index, token] of tokens.entries()) {
+    if (token !== "move") continue;
+    for (let cursor = index + 1; cursor < tokens.length - 1; cursor += 1) {
+      if (tokens[cursor] !== "advancement") continue;
+      if (tokens[cursor + 1] !== "counters") continue;
+      if (
+        corpTokensIncludePhrase(tokens.slice(cursor + 2), [
+          "another",
+          "installed",
+          "card",
+        ])
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function corpAdvancementLooksLikeLowValueDecoy(text: string): boolean {
+  return corpTokensIncludeAny(corpRulesTextTokens(text), [
+    "access",
+    "accessed",
+    "trash",
+    "trashed",
+    "damage",
+  ]);
 }
 
 function corpAdvancementCreditCashoutValue(text: string): number {

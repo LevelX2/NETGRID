@@ -8966,6 +8966,122 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneununddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-delta-labeler.ts` ersetzt die Reachability-Progress-Erkennung für `reachability`, `known_path`, `access_path` und `continue_chain` durch gebundene Action-Text-Tokens.
+  - Exakte Tokens und Phrasen bleiben wirksam; Suffix-Rauschen wie `unknown_pathish` erzeugt kein `progress_reachability_improved` mehr.
+  - Die Erkennung bleibt reine Simulations-/Progress-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `progress-delta-labeler.test.ts` schützt positive und negative Reachability-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/progress-delta-labeler.test.ts` grün, 1 Datei, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-delta-labeler.ts` ersetzt die Server-Protection-Progress-Erkennung für `protect`, `protection`, `remote`, `central`, `ice`, `rez` und `score_remote` durch gebundene Action-Text-Tokens.
+  - Exakte Tokens und die Phrase `score remote` bleiben wirksam; Suffix-Rauschen wie `protective_noise` erzeugt kein direktes `progress_server_protected` mehr.
+  - Die Erkennung bleibt reine Simulations-/Progress-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `progress-delta-labeler.test.ts` schützt positive und negative Server-Protection-Tokenfälle; spätere Plausible-No-Progress-Heuristik bleibt separater Fallback.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/progress-delta-labeler.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihunderteinundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-delta-labeler.ts` ersetzt die Economy-Conversion-Erkennung für `economy`, `credit`, `credits` und `funding` durch gebundene Action-Text-Tokens.
+  - Direkte `gain_credit`-Actions bleiben unverändert Economy-Actions; der Rückbau begrenzt nur freie Textsignale aus `planKind`, `reasonCode`, `evidence`, `debugFacts` und `qualityTags`.
+  - Suffix-Rauschen wie `creditor_noise` löst trotz späterem Access keine `progress_economy_converted`-Klassifikation mehr aus.
+  - Die Erkennung bleibt reine Simulations-/Progress-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `progress-delta-labeler.test.ts` schützt positive und negative Economy-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/progress-delta-labeler.test.ts` grün, 1 Datei, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertzweiundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-delta-labeler.ts` ersetzt die Plausible-No-Progress-Erkennung für `reserve`, `coverage`, `afford`, `protect`, `rez`, `scoreline`, `funding_need` und `known_unaffordable_path` durch gebundene Action-Text-Tokens.
+  - Exakte Tokens und die Phrasen `funding need` sowie `known unaffordable path` bleiben wirksam; Suffix-Rauschen wie `known_unaffordable_pathish` wird wieder stale statt plausibel.
+  - Strukturierte Booleans und Coverage-Listen in `ProgressDeltaAction` bleiben weiterhin die bevorzugte Begründungsquelle vor Textsignalen.
+  - Die Erkennung bleibt reine Simulations-/Progress-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `progress-delta-labeler.test.ts` schützt positive und negative Plausible-No-Progress-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/progress-delta-labeler.test.ts` grün, 1 Datei, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertdreiundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ersetzt die restlichen freien Advancement-Counter-Regex-Fallbacks für Low-Value-Decoys und Transfer-Source-Erkennung durch gebundene Rules-Text-Tokens.
+  - Transferquellen erkennen weiter `move any number of advancement counters` sowie geordnete `move ... advancement counters ... another installed card`-Signale, aber nur mit exakten Tokens.
+  - Low-Value-Decoys erkennen weiter gebundene `access`-/`accessed`-, `trash`-/`trashed`- und `damage`-Tokens ohne Suffix-Treffer.
+  - Die Erkennung bleibt reine Runtime-Heuristik über sichtbaren normalisierten Rules-Text und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-advancement-counter.test.ts` schützt positive Transfer-Source-Erkennung und Suffix-Rauschen wie `countersink`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-advancement-counter.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "\.test\(" packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertvierundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt die Late-Run-Step-Erkennung für Breach-/Access-Queue- und Simple-Run-Pressure-Signale durch gebundene Selfplay-Text-Tokens.
+  - `breach`, `remainingCount`, `access_queue`, `simple_run_choice`, `simple_hq_or_rnd_pressure`, `opportunistic_central_run` und `remote_contest` bleiben wirksam, aber nur als exakte Tokens/Phrasen.
+  - Suffix-Rauschen wie `simple_run_choiceish` und `access_queueish` fällt wieder in `mixed_unknown` beziehungsweise `access_pending` zurück.
+  - Die Erkennung bleibt reine Selfplay-Trace-Diagnostik über redaction-safe Action-Text und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative Run-Step-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 21 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "breach\|remainingcount\|access_queue|simple_run_choice\|simple_hq_or_rnd_pressure\|opportunistic_central_run\|remote_contest" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertfünfundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt die Late-Draw-Coverage-/Hand-Goal- und Low-Delta-Erkennung durch gebundene Selfplay-Text-Tokens.
+  - `coverage`, `hand_goal`, `draw_for_answer`, `search_or_draw`, `supportsDrawOrSearchNeed:true`, `answer`, `known_low_value`, `low_value`, `low_delta`, `no_current_payoff`, `stale` und `repeat` bleiben wirksam, aber nur als exakte Tokens/Phrasen.
+  - Suffix-Rauschen wie `hand_goalish` fällt wieder in `late_draw_without_coverage_or_hand_goal`; `known_low_valueish` bleibt `mixed_unknown`.
+  - Strukturierte Trace-Felder wie `runnerSetupMissingCoverageTypes` bleiben vor Textsignalen die bevorzugte Begründungsquelle.
+  - Die Erkennung bleibt reine Selfplay-Trace-Diagnostik über redaction-safe Action-Text und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative Draw-/Low-Delta-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "coverage\|hand_goal\|draw_for_answer\|search_or_draw\|supportsdraworsearchneed:true\|answer|known_low_value\|low_value\|low_delta\|no_current_payoff\|stale\|repeat" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertsechsundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt die Action-Limit-Cluster-Erkennung für Setup-/Economy- und Low-Value-Repeat-Entries durch gebundene Selfplay-Text-Tokens.
+  - `economy`, `recover`, `setup`, `draw_for_answers`, `search`, `coverage`, `known_low_value`, `no_current_payoff`, `low_value` und `stale` bleiben wirksam, aber nur als exakte Tokens/Phrasen.
+  - Suffix-Rauschen wie `draw_for_answersish` und `known_low_valueish` erzeugt keinen Setup-/Low-Value-Clusterbeitrag mehr.
+  - Strukturierte Trace-Booleans bleiben vor Textsignalen die bevorzugte Begründungsquelle.
+  - Die Erkennung bleibt reine Selfplay-Trace-Diagnostik über redaction-safe Action-Text und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative Cluster-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 25 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "economy\|recover\|setup\|draw_for_answers\|search\|coverage|known_low_value\|no_current_payoff\|low_value\|stale" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertsiebenundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt die Recovery-Low-Value-Loop-Einstiegserkennung für `recover`, `recovery`, `junkyard` und `heap` durch gebundene Selfplay-Text-Tokens.
+  - Exakte Recovery-Tokens bleiben wirksam; Suffix-Rauschen wie `recoveryish` löst keinen `recovery_low_value_loop`-Finding-Einstieg mehr aus.
+  - Die bestehenden Recovery-Kontextprüfungen für Funding-, Coverage- und Search-/Draw-Bedarf bleiben unverändert nachgelagert.
+  - Die Erkennung bleibt reine Selfplay-Trace-Diagnostik über redaction-safe Action-Text und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative Recovery-Entry-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 26 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "recover\|recovery\|junkyard\|heap" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertachtundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt die Plan-Step-Mismatch-PlanKind-Erkennung für Run-/Pressure-/Contest-/Access-, Score-/Advance- und Install-/Rig-/Setup-Familien durch gebundene Selfplay-Text-Tokens.
+  - Exakte PlanKind-Tokens wie `run_pressure` bleiben wirksam; Suffix-Rauschen wie `runny_pressureish` löst keinen Plan-Step-Mismatch mehr aus.
+  - Die bestehenden Funding-/Reserve- und Known-Explanation-Ausnahmen bleiben unverändert nachgelagert.
+  - Die Erkennung bleibt reine Selfplay-Trace-Diagnostik über redaction-safe Action-Text und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive und negative PlanKind-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 27 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "run\|pressure\|contest\|access|score\|advance|install\|rig\|setup" packages/ai/src/simulation/selfplay-trace-mining.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

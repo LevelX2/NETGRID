@@ -67,6 +67,39 @@ describe("progress delta labeler", () => {
     ).toBe("no_progress_stale");
   });
 
+  it("bounds reachability progress signals to exact text tokens", () => {
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "trigger_ability",
+        reasonCode: "runner.known_path",
+      }),
+    ).toBe("progress_reachability_improved");
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "trigger_ability",
+        reasonCode: "runner.unknown_pathish",
+      }),
+    ).toBe("no_progress_stale");
+  });
+
+  it("bounds server protection signals to exact text tokens", () => {
+    expect(
+      actionLabel({
+        side: "corp",
+        actionType: "install_card",
+        reasonCode: "corp.score_remote",
+      }),
+    ).toBe("progress_server_protected");
+    const noisy = actionLabel({
+      side: "corp",
+      actionType: "install_card",
+      reasonCode: "corp.protective_noise",
+    });
+    expect(noisy).not.toBe("progress_server_protected");
+  });
+
   it("labels economy as converted only when follow-up progress appears", () => {
     const labels = labelProgressDeltaWindow([
       { index: 10, side: "runner", actionType: "gain_credit" },
@@ -76,6 +109,30 @@ describe("progress delta labeler", () => {
 
     expect(labels[0]?.label).toBe("progress_economy_converted");
     expect(labels[0]?.followUp.within5).toContain("progress_access");
+  });
+
+  it("bounds economy conversion text signals to exact tokens", () => {
+    const funded = labelProgressDeltaWindow([
+      {
+        index: 10,
+        side: "runner",
+        actionType: "draw_card",
+        reasonCode: "runner.funding",
+      },
+      { index: 11, side: "runner", actionType: "access_card" },
+    ]);
+    expect(funded[0]?.label).toBe("progress_economy_converted");
+
+    const noisy = labelProgressDeltaWindow([
+      {
+        index: 10,
+        side: "runner",
+        actionType: "draw_card",
+        reasonCode: "runner.creditor_noise",
+      },
+      { index: 11, side: "runner", actionType: "access_card" },
+    ]);
+    expect(noisy[0]?.label).not.toBe("progress_economy_converted");
   });
 
   it("keeps reserve economy plausible without treating it as progress", () => {
@@ -88,6 +145,23 @@ describe("progress delta labeler", () => {
 
     expect(result.label).toBe("no_progress_plausible");
     expect(result.primaryProgress).toBe(false);
+  });
+
+  it("bounds plausible no-progress text signals to exact tokens", () => {
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "draw_card",
+        reasonCode: "runner.known_unaffordable_path",
+      }),
+    ).toBe("no_progress_plausible");
+    expect(
+      actionLabel({
+        side: "runner",
+        actionType: "draw_card",
+        reasonCode: "runner.known_unaffordable_pathish",
+      }),
+    ).toBe("no_progress_stale");
   });
 
   it("labels unsupported filler actions as stale no-progress", () => {

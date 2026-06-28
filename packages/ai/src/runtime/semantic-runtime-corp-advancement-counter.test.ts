@@ -114,6 +114,28 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
     );
   });
 
+  it("derives transfer-source targets from bounded rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText(
+      "Move any number of advancement counters to another installed card.",
+    );
+
+    expect(assessment?.advancementWitness).toBe("counter_bank_only");
+    expect(assessment?.evidence).toContain(
+      "advancement_target_class:counter_bank_only",
+    );
+  });
+
+  it("ignores transfer-source substring noise in rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText(
+      "Move any number of advancement countersink to another installed card.",
+    );
+
+    expect(assessment?.advancementWitness).toBe("none");
+    expect(assessment?.evidence).not.toContain(
+      "advancement_target_class:counter_bank_only",
+    );
+  });
+
   it("bounds advancement placement operation profile rules text tokens", () => {
     const assessment = assessmentForAssetRulesText(
       "This card can be advanced.",

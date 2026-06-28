@@ -5,6 +5,7 @@ import {
   extractAiSelfplayDecisionPoints,
   isSelfplayTraceRedactionSafe,
   safeSelfplayFacts,
+  summarizeSelfplayActionLimitClusters,
   summarizeSelfplayActionLimitSubclusters,
 } from "./selfplay-trace-mining";
 
@@ -261,6 +262,36 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("blink-positive");
   });
 
+  it("bounds recovery loop entry signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "recovery-entry-positive-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "recovery-entry-positive-2",
+        reasonCode: "runner.recovery",
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "recovery-entry-noise-1",
+        reasonCode: "runner.recoveryish",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "recovery-entry-noise-2",
+        reasonCode: "runner.recoveryish",
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["recovery_low_value_loop"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("recovery-entry-positive-2");
+  });
+
   it("bounds recovery coverage signals to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "trigger_ability", {
@@ -437,6 +468,28 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("setup-mismatch-positive");
   });
 
+  it("bounds plan-mismatch plan-kind signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "plan-kind-positive",
+        planKind: "runner.run_pressure",
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "plan-kind-noise",
+        planKind: "runner.runny_pressureish",
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["plan_step_action_mismatch"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("plan-kind-positive");
+  });
+
   it("bounds run plan-mismatch funding and reserve explanations to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "gain_credit", {
@@ -540,6 +593,154 @@ describe("SelfplayTraceMining", () => {
     });
     expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
       runner_late_gain_credit_without_funding_need: 1,
+    });
+  });
+
+  it("bounds late run-step pressure signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-step-positive",
+        reasonCode: "runner.simple_run_choice",
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-step-noise",
+        reasonCode: "runner.simple_run_choiceish",
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      run_microstep_required: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      mixed_unknown: 1,
+    });
+  });
+
+  it("bounds breach pending run-step signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "access_card", {
+        selectedActionId: "breach-positive",
+        debugFacts: ["access_queue"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "access_card", {
+        selectedActionId: "breach-noise",
+        debugFacts: ["access_queueish"],
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      breach_pending: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      access_pending: 1,
+    });
+  });
+
+  it("bounds late draw coverage-need signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "draw-coverage-positive",
+        debugFacts: ["hand_goal"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "draw-coverage-noise",
+        debugFacts: ["hand_goalish"],
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      late_draw_for_coverage_or_hand_goal: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      late_draw_without_coverage_or_hand_goal: 1,
+    });
+  });
+
+  it("bounds late low-delta action signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "activated_card_ability", {
+        selectedActionId: "low-delta-positive",
+        debugFacts: ["known_low_value"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "activated_card_ability", {
+        selectedActionId: "low-delta-noise",
+        debugFacts: ["known_low_valueish"],
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitSubclusters([positive])).toMatchObject({
+      late_ability_reuse_low_delta: 1,
+    });
+    expect(summarizeSelfplayActionLimitSubclusters([noise])).toMatchObject({
+      mixed_unknown: 1,
+    });
+  });
+
+  it("bounds setup economy cluster signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "setup-economy-positive",
+        reasonCode: "runner.draw_for_answers.one",
+      }),
+      selfplayAction("runner", 2, "draw_card", {
+        selectedActionId: "setup-economy-positive-2",
+        reasonCode: "runner.draw_for_answers.two",
+      }),
+      selfplayAction("runner", 3, "draw_card", {
+        selectedActionId: "setup-economy-positive-3",
+        reasonCode: "runner.draw_for_answers.three",
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "setup-economy-noise",
+        reasonCode: "runner.draw_for_answersish",
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitClusters([positive])).toMatchObject({
+      action_limit_setup_economy_loop: 1,
+    });
+    expect(summarizeSelfplayActionLimitClusters([noise])).toMatchObject({
+      action_limit_mixed_or_unknown: 1,
+    });
+  });
+
+  it("bounds low-value repeat cluster signals to text tokens", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "low-value-positive",
+        evidence: ["known_low_value"],
+      }),
+      selfplayAction("runner", 2, "start_run", {
+        selectedActionId: "low-value-positive-2",
+        evidence: ["known_low_value"],
+      }),
+      selfplayAction("runner", 3, "start_run", {
+        selectedActionId: "low-value-positive-3",
+        evidence: ["known_low_value"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "low-value-noise",
+        evidence: ["known_low_valueish"],
+      }),
+    ]);
+
+    expect(summarizeSelfplayActionLimitClusters([positive])).toMatchObject({
+      action_limit_low_value_repeat: 1,
+    });
+    expect(summarizeSelfplayActionLimitClusters([noise])).toMatchObject({
+      action_limit_mixed_or_unknown: 1,
     });
   });
 
