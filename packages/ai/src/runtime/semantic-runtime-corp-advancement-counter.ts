@@ -405,9 +405,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       evidence: [],
     };
   }
-  if (
-    /advancement counter|advance .* before|can be advanced|counter/.test(text)
-  ) {
+  if (corpAdvancementLooksLikeCounterBank(text)) {
     return {
       card,
       server,
@@ -431,6 +429,30 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
     weakTargetPenalty: 140,
     evidence: [],
   };
+}
+
+function corpAdvancementLooksLikeCounterBank(text: string): boolean {
+  const tokens = corpRulesTextTokens(text);
+  return (
+    tokens.includes("counter") ||
+    tokens.includes("counters") ||
+    corpTokensIncludePhrase(tokens, ["can", "be", "advanced"]) ||
+    corpTokensIncludeAdvanceBefore(tokens)
+  );
+}
+
+function corpTokensIncludeAdvanceBefore(tokens: readonly string[]): boolean {
+  for (const [index, token] of tokens.entries()) {
+    if (token !== "advance") continue;
+    for (
+      let cursor = index + 1;
+      cursor < Math.min(tokens.length, index + 8);
+      cursor += 1
+    ) {
+      if (tokens[cursor] === "before") return true;
+    }
+  }
+  return false;
 }
 
 function corpAgendaOveradvanceThresholdAssessment(

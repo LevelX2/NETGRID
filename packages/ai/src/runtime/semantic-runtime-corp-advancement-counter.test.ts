@@ -93,6 +93,26 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
       "advancement_target_class:counter_cashout_action",
     );
   });
+
+  it("derives generic counter-bank targets from bounded rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText("This card can be advanced.");
+
+    expect(assessment?.advancementWitness).toBe("counter_bank_only");
+    expect(assessment?.evidence).toContain(
+      "advancement_target_class:counter_bank_only",
+    );
+  });
+
+  it("ignores generic counter-bank substring noise in rules text tokens", () => {
+    const assessment = assessmentForAssetRulesText(
+      "Encounter protocol only.",
+    );
+
+    expect(assessment?.advancementWitness).toBe("none");
+    expect(assessment?.evidence).not.toContain(
+      "advancement_target_class:counter_bank_only",
+    );
+  });
 });
 
 function assessmentForAgendaRulesText(agendaRulesText: string) {
