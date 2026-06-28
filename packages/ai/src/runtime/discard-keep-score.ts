@@ -90,14 +90,10 @@ export function discardKeepScore(
     }
     if (rolesMatch(roles, ["economy", "tempo"]))
       baseValue += input.playerView.own.credits < 4 ? 170 : 65;
-    if (
-      roles.includes("memory") ||
-      roles.includes("setup") ||
-      roles.includes("build_rig")
-    )
+    if (rolesMatch(roles, ["memory", "setup", "build_rig"]))
       baseValue += 80;
-    if (roles.includes("draw")) baseValue += 55;
-    if (roles.includes("run_pressure"))
+    if (rolesMatch(roles, ["draw"])) baseValue += 55;
+    if (rolesMatch(roles, ["run_pressure"]))
       baseValue += input.playerView.own.credits < 4 ? 20 : 90;
     if (runnerPlanRelevantBreaker) baseValue += 360;
     if (runnerBadPublicityTraceTech) baseValue += 240;

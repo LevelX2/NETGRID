@@ -37,10 +37,42 @@ describe("discard keep score", () => {
       ]).baseValue,
     ).toBe(benignRole);
   });
+
+  it("matches Runner discard value roles by bounded role terms", () => {
+    const neutral = score(
+      runnerCard("neutral-runner-card", "program"),
+      ["neutral_support"],
+      "runner",
+    ).baseValue;
+
+    expect(
+      score(
+        runnerCard("runner-setup-card", "program"),
+        ["support_memory", "build_rig", "draw", "run_pressure"],
+        "runner",
+      ).baseValue,
+    ).toBeGreaterThan(neutral);
+    expect(
+      score(
+        runnerCard("runner-noise-card", "program"),
+        [
+          "memoryish_noise",
+          "build_rigish_noise",
+          "drawish_noise",
+          "run_pressureish_noise",
+        ],
+        "runner",
+      ).baseValue,
+    ).toBe(neutral);
+  });
 });
 
-function score(card: VisibleCard, roles: readonly string[] = []) {
-  return discardKeepScore(input(card), card, {
+function score(
+  card: VisibleCard,
+  roles: readonly string[] = [],
+  side: "corp" | "runner" = "corp",
+) {
+  return discardKeepScore(input(card, side), card, {
     rolesForCardId: () => roles,
     definitionTypeForCardId: () => card.type,
     visibleCardPlayOrInstallCost: () => 0,
@@ -51,17 +83,20 @@ function score(card: VisibleCard, roles: readonly string[] = []) {
   });
 }
 
-function input(card: VisibleCard): AiDecisionInput {
+function input(card: VisibleCard, side: "corp" | "runner"): AiDecisionInput {
   return {
-    side: "corp",
+    side,
     playerView: {
-      side: "corp",
+      side,
       stateVersion: 1,
       timingPoint: "corp_discard.discard",
       activeSide: "corp",
       phase: "corp_discard_phase",
       own: {
-        identity: corpCard("corp-identity", "identity"),
+        identity:
+          side === "corp"
+            ? corpCard("corp-identity", "identity")
+            : runnerCard("runner-identity", "identity"),
         credits: 5,
         clicks: 0,
         agendaPoints: 0,
@@ -73,7 +108,10 @@ function input(card: VisibleCard): AiDecisionInput {
         tags: 0,
       },
       opponent: {
-        identity: corpCard("runner-identity", "identity"),
+        identity:
+          side === "corp"
+            ? runnerCard("runner-identity", "identity")
+            : corpCard("corp-identity", "identity"),
         credits: 5,
         clicks: 0,
         agendaPoints: 0,
@@ -96,7 +134,7 @@ function input(card: VisibleCard): AiDecisionInput {
     seed: "discard-score-test",
     decisionId: "discard-score-test",
     actionNumber: 1,
-    profileId: "corp",
+    profileId: side,
   } as unknown as AiDecisionInput;
 }
 
@@ -108,6 +146,19 @@ function corpCard(definitionId: string, type: string): VisibleCard {
     side: "corp",
     type,
     zone: "hq",
+    visibility: "private",
+    known: true,
+  } as VisibleCard;
+}
+
+function runnerCard(definitionId: string, type: string): VisibleCard {
+  return {
+    instanceId: `${definitionId}-instance`,
+    definitionId,
+    title: definitionId,
+    side: "runner",
+    type,
+    zone: "grip",
     visibility: "private",
     known: true,
   } as VisibleCard;
