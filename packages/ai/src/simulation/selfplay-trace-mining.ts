@@ -1469,7 +1469,7 @@ function selfplayPlanActionMismatch(
     /(install|rig|setup)/.test(planKind) &&
     entry.side === "runner" &&
     entry.actionType === "start_run" &&
-    text.includes("runnerpressureready:false")
+    selfplayEntryHasStructuredSignal(entry, ["runnerpressureready:false"])
   )
     return true;
   return false;

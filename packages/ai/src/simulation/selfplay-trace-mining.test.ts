@@ -386,6 +386,30 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("override-explanation-noise");
   });
 
+  it("bounds setup plan-mismatch pressure signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "setup-mismatch-positive",
+        planKind: "runner.setup",
+        debugFacts: ["runnerPressureReady:false"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "setup-mismatch-noise",
+        planKind: "runner.setup",
+        debugFacts: ["runnerPressureReady:falseish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["plan_step_action_mismatch"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("setup-mismatch-positive");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),
