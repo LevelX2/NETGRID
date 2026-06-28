@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { rolesMatch } from "./role-match";
 
 type RunnerSourceCardMetadata = {
   title?: string;
@@ -41,6 +42,11 @@ export function runnerSourceCardAnswerRole(
     sourceCard?.definitionId || dependencies.sourceDefinitionId(input, action);
   const roles = dependencies.rolesForCardId(sourceDefinitionId);
   const definitionDisplay = dependencies.sourceDefinition(sourceDefinitionId);
+  const mechanics = definitionDisplay?.mechanics ?? [];
+  if (rolesMatch(roles, ["search", "tutor"])) return "search";
+  if (rolesMatch(mechanics, ["search", "tutor"])) return "search";
+  if (rolesMatch(roles, ["draw"])) return "draw";
+  if (rolesMatch(mechanics, ["draw"])) return "draw";
   const text = [
     sourceCard?.title,
     sourceCard?.type,
@@ -50,8 +56,6 @@ export function runnerSourceCardAnswerRole(
     definitionDisplay?.type,
     ...(definitionDisplay?.subtypes ?? []),
     definitionDisplay?.rulesText,
-    ...(definitionDisplay?.mechanics ?? []),
-    ...roles,
   ]
     .filter(Boolean)
     .join(" ")

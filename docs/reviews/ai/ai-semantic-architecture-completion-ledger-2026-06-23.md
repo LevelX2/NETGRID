@@ -7387,6 +7387,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` siebenundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-source-card-answer-role.ts` trennt strukturierte Rollen und Definition-Mechaniken aus dem sichtbaren Source-Textblock.
+  - Rollen und Mechaniken werden über den gebundenen `rolesMatch`-Helper bewertet; `program_search` und `draw_card` bleiben als Search-/Draw-Antworten wirksam.
+  - Substringartiges Rauschen wie `research_noise` und `withdraw_card` erzeugt keine Search-/Draw-Antwort mehr; sichtbarer Kartentext bleibt bewusst weiter textbasiert.
+  - `runner-source-card-answer-role.test.ts` schützt strukturierte Treffer, Label-only-Text und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-source-card-answer-role.test.ts src/runtime/role-match.test.ts src/runtime/semantic-runtime-choice-builder.test.ts` grün, 3 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

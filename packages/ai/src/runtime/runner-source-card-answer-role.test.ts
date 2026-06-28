@@ -28,6 +28,24 @@ describe("runnerSourceCardAnswerRole", () => {
       runnerSourceCardAnswerRole(input(), definitionBacked, dependencies()),
     ).toBe("draw");
   });
+
+  it("ignores substring-only source roles and mechanics", () => {
+    const roleNoise = action({
+      actionId: "role-noise",
+      label: "Use ability",
+      payload: { sourceDefinitionId: "role-noise-source" },
+    });
+    const mechanicNoise = action({
+      actionId: "mechanic-noise",
+      label: "Use ability",
+      payload: { sourceDefinitionId: "mechanic-noise-source" },
+    });
+
+    expect(runnerSourceCardAnswerRole(input(), roleNoise, dependencies()))
+      .toBeUndefined();
+    expect(runnerSourceCardAnswerRole(input(), mechanicNoise, dependencies()))
+      .toBeUndefined();
+  });
 });
 
 function dependencies() {
@@ -38,10 +56,16 @@ function dependencies() {
         ? action.payload.sourceDefinitionId
         : undefined,
     rolesForCardId: (definitionId: string | undefined) =>
-      definitionId === "search-source" ? ["program_search"] : [],
+      definitionId === "search-source"
+        ? ["program_search"]
+        : definitionId === "role-noise-source"
+          ? ["research_noise"]
+          : [],
     sourceDefinition: (definitionId: string | undefined) =>
       definitionId === "draw-source"
         ? { mechanics: ["draw_card"] }
+        : definitionId === "mechanic-noise-source"
+          ? { mechanics: ["withdraw_card"] }
         : undefined,
   };
 }
