@@ -975,7 +975,8 @@ function selfplayEntryDetectorFindings(
     entry.side === "runner" &&
     entry.actionType === "start_run" &&
     entry.targetServerId === "archives" &&
-    (repeatedNoProgressRun || text.includes("archives_known_no_agenda"))
+    (repeatedNoProgressRun ||
+      selfplayEntryHasStructuredSignal(entry, ["archives_known_no_agenda"]))
   ) {
     findings.push(
       selfplayEntryFinding(

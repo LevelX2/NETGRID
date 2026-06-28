@@ -132,6 +132,30 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("run-remote-positive");
   });
 
+  it("bounds low-value archives signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "archives-positive",
+        targetServerId: "archives",
+        debugFacts: ["archives_known_no_agenda"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "archives-noise",
+        targetServerId: "archives",
+        debugFacts: ["archives_known_no_agendaish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["repeated_low_value_archives"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("archives-positive");
+  });
+
   it("bounds bank over-target signals to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "gain_credit", {
