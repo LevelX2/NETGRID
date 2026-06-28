@@ -40,8 +40,19 @@ export type TargetRefInput =
   | { kind: "hidden_blocked"; blocker?: string; evidence?: readonly string[] }
   | { kind: "unknown_unprojected"; blocker?: string; evidence?: readonly string[] };
 
-const HIDDEN_INFO_PATTERNS =
-  /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug|deckTop|decklist|deckOrder/i;
+const HIDDEN_INFO_MARKERS = [
+  "cardinstances",
+  "privatepayload",
+  "sessiontoken",
+  "reconnecttoken",
+  "jointoken",
+  "fullgamestate",
+  "aiinput",
+  "decisiondebug",
+  "decktop",
+  "decklist",
+  "deckorder",
+] as const;
 const SERVER_PATTERN = /^(hq|rd|archives|remote_\d+|new_remote)$/;
 const ID_PATTERN = /^[a-zA-Z0-9_.:-]+$/;
 
@@ -212,7 +223,7 @@ export function targetRefIsCompleteOrIrrelevant(targetRef: TargetRef): boolean {
 }
 
 export function targetRefIsRedactionSafe(value: unknown): boolean {
-  return !HIDDEN_INFO_PATTERNS.test(JSON.stringify(value));
+  return !targetRefContainsHiddenInfoMarker(JSON.stringify(value));
 }
 
 function completeTargetRef(
@@ -273,7 +284,7 @@ function evidenceFor(input: TargetRefInput): string[] {
 }
 
 function targetRefInputHasHiddenInfo(input: TargetRefInput): boolean {
-  return HIDDEN_INFO_PATTERNS.test(JSON.stringify(input));
+  return targetRefContainsHiddenInfoMarker(JSON.stringify(input));
 }
 
 function sanitizeId(value: string): string {
@@ -285,6 +296,34 @@ function sanitizeId(value: string): string {
 }
 
 function sanitizeEvidence(value: string): string {
-  if (HIDDEN_INFO_PATTERNS.test(value)) return "hidden_blocked";
+  if (targetRefContainsHiddenInfoMarker(value)) return "hidden_blocked";
   return sanitizeId(value).slice(0, 120);
+}
+
+function targetRefContainsHiddenInfoMarker(value: string): boolean {
+  const tokenSet = new Set(targetRefHiddenInfoTokens(value));
+  return HIDDEN_INFO_MARKERS.some((marker) => tokenSet.has(marker));
+}
+
+function targetRefHiddenInfoTokens(value: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of value) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character.toLocaleLowerCase("en-US");
+    } else {
+      if (current.length > 0) tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "A" && character <= "Z") ||
+    (character >= "0" && character <= "9")
+  );
 }

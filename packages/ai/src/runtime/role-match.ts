@@ -16,10 +16,17 @@ function roleMatchesNeedle(role: string, needle: string): boolean {
 
 function roleSegmentMatchesNeedle(segment: string, needle: string): boolean {
   if (segment === needle) return true;
-  if (needle.endsWith("_")) return segment.startsWith(needle);
-  return (
-    segment.startsWith(`${needle}_`) ||
-    segment.endsWith(`_${needle}`) ||
-    segment.includes(`_${needle}_`)
+  const tokens = segment.split("_").filter(Boolean);
+  if (needle.endsWith("_")) {
+    const prefix = needle.slice(0, -1);
+    return tokens[0] === prefix && tokens.length > 1;
+  }
+  const needleTokens = needle.split("_").filter(Boolean);
+  if (needleTokens.length <= 1) return tokens.includes(needle);
+  return tokens.some((token, index) =>
+    token === needleTokens[0] &&
+    needleTokens.every(
+      (needleToken, offset) => tokens[index + offset] === needleToken,
+    ),
   );
 }

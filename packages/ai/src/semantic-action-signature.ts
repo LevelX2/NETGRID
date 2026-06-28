@@ -28,8 +28,19 @@ export type SemanticActionSignatureInput = {
   choiceOptionId?: string;
 };
 
-const HIDDEN_INFO_PATTERNS =
-  /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug|deckTop|decklist|deckOrder/i;
+const HIDDEN_INFO_MARKERS = [
+  "cardinstances",
+  "privatepayload",
+  "sessiontoken",
+  "reconnecttoken",
+  "jointoken",
+  "fullgamestate",
+  "aiinput",
+  "decisiondebug",
+  "decktop",
+  "decklist",
+  "deckorder",
+] as const;
 
 export function semanticActionSignatureFromCandidate(
   candidate: ActionSemanticCandidate,
@@ -83,7 +94,7 @@ export function buildSemanticActionSignature(
 export function signatureInputIsRedactionSafe(
   input: SemanticActionSignatureInput,
 ): boolean {
-  return !HIDDEN_INFO_PATTERNS.test(JSON.stringify(input));
+  return !signatureInputContainsHiddenInfoMarker(JSON.stringify(input));
 }
 
 function sanitizeSignatureInput(
@@ -140,4 +151,32 @@ function timingClassFromCandidate(candidate: ActionSemanticCandidate): string {
     `encounter:${profile.encounterPhase ?? "unknown"}`,
     `access:${profile.accessPhase === true ? "yes" : "no"}`,
   ].join(",");
+}
+
+function signatureInputContainsHiddenInfoMarker(value: string): boolean {
+  const tokenSet = new Set(signatureInputHiddenInfoTokens(value));
+  return HIDDEN_INFO_MARKERS.some((marker) => tokenSet.has(marker));
+}
+
+function signatureInputHiddenInfoTokens(value: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of value) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character.toLocaleLowerCase("en-US");
+    } else {
+      if (current.length > 0) tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "A" && character <= "Z") ||
+    (character >= "0" && character <= "9")
+  );
 }

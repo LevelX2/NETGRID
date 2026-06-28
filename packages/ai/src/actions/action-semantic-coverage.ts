@@ -451,8 +451,46 @@ function countMapTable(counts: Record<string, number>): string {
 
 function forbiddenMarkersIn(value: unknown): string[] {
   const serialized = JSON.stringify(value);
+  const tokens = forbiddenReportMarkerTokens(serialized);
   return FORBIDDEN_REPORT_MARKERS.filter((marker) =>
-    serialized.includes(marker),
+    forbiddenReportTokensContainMarker(tokens, forbiddenReportMarkerTokens(marker)),
+  );
+}
+
+function forbiddenReportTokensContainMarker(
+  tokens: readonly string[],
+  markerTokens: readonly string[],
+): boolean {
+  if (markerTokens.length === 0) return false;
+  if (markerTokens.length === 1) return tokens.includes(markerTokens[0]!);
+  for (let index = 0; index <= tokens.length - markerTokens.length; index += 1) {
+    if (markerTokens.every((token, offset) => tokens[index + offset] === token)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function forbiddenReportMarkerTokens(value: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of value) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character.toLocaleLowerCase("en-US");
+    } else {
+      if (current.length > 0) tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "A" && character <= "Z") ||
+    (character >= "0" && character <= "9")
   );
 }
 

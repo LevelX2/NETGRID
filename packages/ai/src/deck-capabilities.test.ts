@@ -535,6 +535,15 @@ describe("DeckCapabilityProfile", () => {
         visibleCard("corp-tax", "local_alpha_tax", "corp", "ice", {
           title: "Tax ICE",
         }),
+        visibleCard("corp-wall", "local_alpha_wall", "corp", "ice", {
+          title: "Barrier",
+        }),
+        visibleCard("corp-code-gate", "local_alpha_code_gate", "corp", "ice", {
+          rulesText: "Code gate.",
+        }),
+        visibleCard("corp-sentry", "local_alpha_sentry", "corp", "ice", {
+          subtypes: ["Sentry"],
+        }),
         visibleCard("corp-campaign", "local_alpha_campaign", "corp", "asset", {
           title: "Campaign",
         }),
@@ -543,6 +552,9 @@ describe("DeckCapabilityProfile", () => {
         }),
         visibleCard("corp-tax-noise", "local_alpha_noise_ice", "corp", "ice", {
           title: "Taxi Traceish Payee Loser",
+        }),
+        visibleCard("corp-ice-type-noise", "local_alpha_ice_type_noise", "corp", "ice", {
+          title: "Barrierish code gateish sentryish",
         }),
         visibleCard("corp-remote-noise", "local_alpha_remote_noise", "corp", "asset", {
           title: "Campaignish Bankish Creditsish",
@@ -562,6 +574,11 @@ describe("DeckCapabilityProfile", () => {
     });
     expect(profile.corp?.rezReserveProfile.rezEconomyToolsKnown).toBe(1);
     expect(profile.corp?.iceTaxProfile.taxingIceKnown).toBe(1);
+    expect(profile.corp?.iceTaxProfile).toMatchObject({
+      barrierIceKnown: 1,
+      codeGateIceKnown: 1,
+      sentryIceKnown: 1,
+    });
     expect(profile.corp?.remotePlanProfile.remoteEconomyToolsKnown).toBe(2);
   });
 

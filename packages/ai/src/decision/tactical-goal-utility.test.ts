@@ -135,6 +135,16 @@ describe("TacticalGoalUtility", () => {
     expect(
       normalizeTacticalGoalUtility(
         goal({
+          goalId: "corp.visible_tag_punish",
+          family: "boardstate",
+          priority: 800,
+          urgency: "medium",
+        }),
+      ).family,
+    ).toBe("tag_punish");
+    expect(
+      normalizeTacticalGoalUtility(
+        goal({
           goalId: "corp.outscoreboard_noise",
           family: "boardstate",
           priority: 800,

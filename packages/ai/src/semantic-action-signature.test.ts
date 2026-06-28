@@ -59,4 +59,22 @@ describe("semantic action signatures", () => {
     expect(JSON.stringify(unsafe)).not.toContain("cardInstances");
     expect(unsafe.targetIdentity).toBe("unknown_hidden_blocked");
   });
+
+  it("bounds hidden-info marker detection to exact tokens", () => {
+    const signature = buildSemanticActionSignature({
+      actionType: "trigger_ability",
+      semanticActionType: "unknown",
+      sourceKind: "card",
+      targetIdentity: "server:hq",
+      costClass: "privatePayloadish_cost",
+      timingClass: "phase:main",
+    });
+
+    expect(signatureInputIsRedactionSafe({
+      actionType: "trigger_ability",
+      costClass: "privatePayloadish_cost",
+    })).toBe(true);
+    expect(signature.targetIdentity).toBe("server:hq");
+    expect(signature.costClass).toBe("privatePayloadish_cost");
+  });
 });

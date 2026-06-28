@@ -1129,6 +1129,15 @@ function runnerHandTextHasTraceCoverageSignal(text: string): boolean {
   ]);
 }
 
+function runnerHandTextHasVisibleThreatSignal(text: string): boolean {
+  return runnerHandTokensIncludeAny(runnerHandTextTokens(text), [
+    "damage",
+    "tag",
+    "flatline",
+    "trace",
+  ]);
+}
+
 function runnerHandTextHasIceSubroutineBreakSignal(text: string): boolean {
   const tokens = runnerHandTextTokens(text);
   return (
@@ -1948,7 +1957,7 @@ function visibleRunnerThreat(input: AiDecisionInput): boolean {
       server.root.some(
         (card) =>
           card.known &&
-          /damage|tag|flatline|trace/i.test(
+          runnerHandTextHasVisibleThreatSignal(
             [card.title, card.rulesText, card.definitionId]
               .filter(Boolean)
               .join(" "),

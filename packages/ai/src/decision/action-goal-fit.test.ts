@@ -103,7 +103,7 @@ describe("ActionGoalFit", () => {
     const tagFit = scoreActionGoalFit({
       candidate: {
         ...candidateFor("tag-1", "trigger_ability"),
-        semanticActionType: "tag.apply",
+        semanticActionType: "corp_tag_punish.apply",
       },
       utility: utility("corp.visible_tag_punish", "tag_punish"),
       legalActionIds: ["tag-1"],

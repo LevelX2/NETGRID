@@ -49,6 +49,17 @@ describe("semantic-redaction", () => {
     );
   });
 
+  it("bounds forbidden semantic marker detection to exact tokens", () => {
+    expect(redactSemanticString("privatePayloadish_bad_reason")).toBe(
+      "privatePayloadish_bad_reason",
+    );
+    expect(
+      containsForbiddenSemanticMarker({
+        privatePayloadish: "visible diagnostic noise",
+      }),
+    ).toBe(false);
+  });
+
   it("throws for unsafe semantic objects with a caller label", () => {
     expect(() =>
       assertSemanticObjectSideSafe(

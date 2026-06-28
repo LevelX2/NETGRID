@@ -38,8 +38,19 @@ export type CandidatePathBindingInput = {
   evidence?: readonly string[];
 };
 
-const HIDDEN_INFO_PATTERNS =
-  /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug|deckTop|decklist|deckOrder/i;
+const HIDDEN_INFO_MARKERS = [
+  "cardinstances",
+  "privatepayload",
+  "sessiontoken",
+  "reconnecttoken",
+  "jointoken",
+  "fullgamestate",
+  "aiinput",
+  "decisiondebug",
+  "decktop",
+  "decklist",
+  "deckorder",
+] as const;
 
 export function buildCandidatePathBinding(
   input: CandidatePathBindingInput,
@@ -104,7 +115,7 @@ export function buildCandidatePathBinding(
 }
 
 export function candidatePathBindingIsRedactionSafe(value: unknown): boolean {
-  return !HIDDEN_INFO_PATTERNS.test(JSON.stringify(value));
+  return !candidatePathBindingContainsHiddenInfoMarker(JSON.stringify(value));
 }
 
 function bindingBlockers(
@@ -132,4 +143,32 @@ function bindingBlockers(
   if (hardGates.length > 0) blockers.add("hard_gate_blocked");
   if (input.blockedReason) blockers.add(`blocked_reason:${input.blockedReason}`);
   return [...blockers].sort();
+}
+
+function candidatePathBindingContainsHiddenInfoMarker(value: string): boolean {
+  const tokenSet = new Set(candidatePathBindingHiddenInfoTokens(value));
+  return HIDDEN_INFO_MARKERS.some((marker) => tokenSet.has(marker));
+}
+
+function candidatePathBindingHiddenInfoTokens(value: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of value) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character.toLocaleLowerCase("en-US");
+    } else {
+      if (current.length > 0) tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "A" && character <= "Z") ||
+    (character >= "0" && character <= "9")
+  );
 }

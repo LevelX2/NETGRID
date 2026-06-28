@@ -406,6 +406,67 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment?.evidence).toContain("central_pressure:false");
   });
 
+  it("bounds visible central multiaccess text to exact tokens", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+    const servers = [
+      centralServer("hq", [centralIce("hq-ice")]),
+      centralServer("rd", []),
+      remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 3 })]),
+    ];
+
+    const noiseAssessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 4,
+        runnerRig: [
+          runnerCentralPressureCard(
+            "runner-noise",
+            "multiaccessory R&Dish pressure",
+          ),
+        ],
+        hq: [agenda],
+        servers,
+      }),
+      action,
+    );
+    const positiveAssessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 4,
+        runnerRig: [
+          runnerCentralPressureCard(
+            "runner-positive",
+            "multiaccess R&D pressure",
+          ),
+        ],
+        hq: [agenda],
+        servers,
+      }),
+      action,
+    );
+
+    expect(noiseAssessment).toMatchObject({
+      windowKind: "temporary_safe",
+      missingVisibleBreakerCoverage: true,
+    });
+    expect(noiseAssessment?.evidence).toContain("central_pressure:false");
+    expect(positiveAssessment).toMatchObject({
+      windowKind: "unsafe",
+      missingVisibleBreakerCoverage: true,
+    });
+    expect(positiveAssessment?.evidence).toContain("central_pressure:true");
+  });
+
   it("classifies multiple affordable relevant ice as a durable scoring remote", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(
@@ -914,6 +975,21 @@ function simpleKiller(instanceId: string): VisibleCard {
     type: "program",
     definitionId: "simple_killer",
     subtypes: ["Icebreaker", "Killer"],
+    owner: "runner",
+  } as VisibleCard;
+}
+
+function runnerCentralPressureCard(
+  instanceId: string,
+  rulesText: string,
+): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "program",
+    title: instanceId,
+    definitionId: instanceId,
+    rulesText,
     owner: "runner",
   } as VisibleCard;
 }

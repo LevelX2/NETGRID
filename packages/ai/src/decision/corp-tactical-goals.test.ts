@@ -79,8 +79,8 @@ describe("corp tactical goals", () => {
       if (candidate.actionId === "tag-punish") {
         return {
           ...candidate,
-          semanticActionType: "tag.apply",
-          actionTacticSignals: ["punish.payoff"],
+          semanticActionType: "corp_tag_punish.apply",
+          actionTacticSignals: ["visible_punish_payoff"],
         };
       }
       return {

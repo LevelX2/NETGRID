@@ -17,6 +17,10 @@ import {
   sumDoctrineMetrics,
 } from "./simulation-metric-aggregation";
 
+const DOCTRINE_CASE_HIDDEN_INFO_MARKERS = FORBIDDEN_AI_INPUT_FIELDS.map((field) =>
+  field.toLocaleLowerCase("en-US"),
+);
+
 type CentralRunActionSequenceEntry = {
   side?: string;
   actionType?: string;
@@ -390,9 +394,7 @@ export function isRedactionSafeCaseAnalysis(
   analysis: AiDoctrineQualityCaseAnalysis,
 ): boolean {
   const serialized = JSON.stringify(analysis);
-  return !FORBIDDEN_AI_INPUT_FIELDS.some((needle) =>
-    serialized.includes(needle),
-  );
+  return !doctrineCaseContainsHiddenInfoMarker(serialized);
 }
 
 export function analyzeDoctrineQualityCases(
@@ -431,4 +433,32 @@ export function analyzeDoctrineQualityCases(
     ...analysis,
     redactionSafe: isRedactionSafeCaseAnalysis(analysis),
   };
+}
+
+function doctrineCaseContainsHiddenInfoMarker(value: string): boolean {
+  const tokenSet = new Set(doctrineCaseHiddenInfoTokens(value));
+  return DOCTRINE_CASE_HIDDEN_INFO_MARKERS.some((marker) => tokenSet.has(marker));
+}
+
+function doctrineCaseHiddenInfoTokens(value: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of value) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character.toLocaleLowerCase("en-US");
+    } else {
+      if (current.length > 0) tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "A" && character <= "Z") ||
+    (character >= "0" && character <= "9")
+  );
 }

@@ -9194,6 +9194,211 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneunundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-hand-development.ts` ersetzt die sichtbare Remote-Threat-Erkennung für `damage`, `tag`, `flatline` und `trace` durch gebundene Runner-Hand-Texttokens.
+  - Exakte Threat-Tokens bleiben wirksam; Suffix-Rauschen wie `Damageish`, `Tagish` und `Traceish` erzeugt keine Defense-Dringlichkeit mehr.
+  - Die Erkennung bleibt reine Runner-Hand-Development-Diagnostik über sichtbare Remote-Root-Daten und erzeugt keine LegalAction-Projektion.
+  - `runner-hand-development.test.ts` schützt positive bestehende Defense-Fälle und einen negativen Remote-Threat-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runner-hand-development.test.ts` grün, 1 Datei, 19 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `rg -n "\.test\(|match\(" packages/ai/src/runner-hand-development.ts` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/semantic-ai-core-meta.ts` ersetzt die Trace-Scrubber-Detektion für Hidden-/Wrong-Side-/Private-Debug-Signale durch gebundene Meta-Trace-Tokens.
+  - Exakte Begriffe und Phrasen wie `opponent hand`, `HQ detail`, `R&D detail`, `unrezzed ice detail`, `facedown remote content`, `full state`, `choice option` und `private debug` bleiben wirksam; Suffix-Rauschen wie `FullStatement`, `opponent handler`, `HQ detailing` und `decisiondebugish` erzeugt keine Violation mehr.
+  - Die Redaction-Ersetzung bleibt unverändert regexbasiert, weil sie nach der Detektion gezielt Originaltext ersetzt.
+  - Die Erkennung bleibt reine Meta-/Trace-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `semantic-ai-core-meta.test.ts` schützt positive und negative Trace-Scrubber-Tokenfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-core-meta.test.ts` grün, 1 Datei, 25 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihunderteinundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legalaction-witness.ts` ersetzt den Hidden-Info-Guard für LegalAction-Witness-Quelle, Target, Choice-/Ability-IDs und den finalen Redaction-Safety-Scan durch gebundene Hidden-Info-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `sessionToken`, `fullGameState`, `AIInput`, `DecisionDebug`, `deckTop`, `decklist` und `deckOrder` bleiben blockiert; Suffix-Rauschen wie `cardInstancesish` oder `privatePayloadish` löst keinen Hidden-Block mehr aus.
+  - Die Erkennung bleibt reine LegalAction-Witness-Redaction-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `legalaction-witness.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/legalaction-witness.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertzweiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/candidate-path-binding.ts` ersetzt den Hidden-Info-Guard im Candidate-Path-Binding-Safety-Scan durch gebundene Hidden-Info-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `sessionToken`, `fullGameState`, `AIInput`, `DecisionDebug`, `deckTop`, `decklist` und `deckOrder` bleiben blockiert; Suffix-Rauschen in Binding-Evidence wie `cardInstancesish` löst keine Redaction mehr aus.
+  - Der vorgelagerte Semantic-Action-Signature-Guard bleibt bewusst ein Folgepaket.
+  - Die Erkennung bleibt reine Candidate-Path-Binding-Redaction-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `candidate-path-binding.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/candidate-path-binding.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertdreiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/semantic-action-signature.ts` ersetzt den Hidden-Info-Guard für Signature-Inputs durch gebundene Hidden-Info-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `sessionToken`, `fullGameState`, `AIInput`, `DecisionDebug`, `deckTop`, `decklist` und `deckOrder` bleiben blockiert; Suffix-Rauschen wie `privatePayloadish_cost` löst keine Hidden-Redaction mehr aus.
+  - Die Erkennung bleibt reine Semantic-Action-Signature-Redaction-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `semantic-action-signature.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-action-signature.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertvierundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/target-ref.ts` ersetzt den Hidden-Info-Guard für TargetRef-Inputs, Redaction-Safety und Evidence-Sanitizing durch gebundene Hidden-Info-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `sessionToken`, `fullGameState`, `AIInput`, `DecisionDebug`, `deckTop`, `decklist` und `deckOrder` bleiben blockiert; Suffix-Rauschen wie `cardInstancesish` oder `privatePayloadish_evidence` erzeugt keinen Hidden-Block mehr.
+  - Die strukturellen Target-ID-Parser für Server und technische IDs bleiben unverändert, weil sie keine Label-Fallback-Heuristik, sondern Formatvalidierung sind.
+  - Die Erkennung bleibt reine TargetRef-Redaction-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `target-ref.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/target-ref.test.ts` grün, 1 Datei, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertfünfundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` ersetzt den Selfplay-Trace-Redaction-Safety-Regex und die breite `FORBIDDEN_AI_INPUT_FIELDS`-Substring-Prüfung durch gebundene Hidden-Info-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `sessionToken`, `fullGameState`, `AIInput`, `DecisionDebug`, `tokenHash`, `decklist` und `deckOrder` bleiben blockiert; Suffix-Rauschen wie `cardInstancesish`, `privatePayloadish:ok` oder `deckOrderish:ok` bleibt redaction-safe.
+  - Die Erkennung bleibt reine Selfplay-Trace-Mining-Redaction-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `selfplay-trace-mining.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 28 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertsechsundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/side-safe-input.ts` ersetzt die breite `FORBIDDEN_AI_INPUT_FIELDS`-Substring-Prüfung durch gebundene verbotene AI-Input-Feldtokens.
+  - Exakte Feldmarker wie `cardInstances`, `privatePayload`, `sessionToken`, `reconnectToken`, `joinToken`, `tokenHash` und `fullGameState` bleiben blockiert; Suffix-Rauschen wie `cardInstancesish` oder `privatePayloadish` bleibt side-safe.
+  - Die Erkennung bleibt reine Simulation-Side-Safety-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `side-safe-input.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/side-safe-input.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertsiebenundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/doctrine-quality-tags.ts` ersetzt die Case-Analysis-Redaction-Safety-Substring-Prüfung auf `FORBIDDEN_AI_INPUT_FIELDS` durch gebundene Hidden-Input-Feldtokens.
+  - Exakte Feldmarker wie `cardInstances`, `privatePayload`, `sessionToken`, `reconnectToken`, `joinToken`, `tokenHash` und `fullGameState` bleiben blockiert; Suffix-Rauschen wie `privatePayloadish` bleibt redaction-safe.
+  - Die Erkennung bleibt reine Doctrine-Quality-Case-Analysis-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `doctrine-quality-tags.test.ts` schützt positive Hidden-Block-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/doctrine-quality-tags.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertachtundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-coverage.ts` ersetzt die Coverage-Report-Forbidden-Marker-Prüfung per `serialized.includes(marker)` durch gebundene Report-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `fullGameState`, `AIInput`, `DecisionDebug`, `hiddenZone`, `hidden zone`, `sourceCardInstanceId` und `CardInstance` bleiben blockiert; Suffix-Rauschen wie `privatePayloadish` erzeugt keinen Report-Leak mehr.
+  - Mehrwort-Marker wie `hidden zone` werden als zusammenhängende Tokenfolge geprüft.
+  - Die Erkennung bleibt reine Action-Semantic-Coverage-Report-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `action-semantic-coverage.test.ts` schützt positive Forbidden-Marker-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertneunundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/diagnostics/semantic-redaction.ts` ersetzt die zentrale Semantic-Redaction-Marker-Erkennung per `normalized.includes(marker)` durch gebundene Hidden-Info-Marker-Tokens.
+  - Exakte Marker wie `cardInstances`, `privatePayload`, `sessionToken`, `fullGameState`, `secretGripIds`, `deckOrder` und `hiddenRemoteIdentity` bleiben blockiert; Suffix-Rauschen wie `privatePayloadish_bad_reason` oder Objektkeys wie `privatePayloadish` bleibt side-safe.
+  - Die Erkennung bleibt reine Diagnostic-/Report-Redaction-Hygiene und erzeugt keine LegalAction-Projektion.
+  - `semantic-redaction.test.ts` schützt positive Forbidden-Marker-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/diagnostics/semantic-redaction.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ersetzt die sichtbare Runner-Central-Multiaccess-Erkennung per `normalizedText.includes(...)` durch gebundene Texttokens.
+  - Exakte Signale wie `multiaccess`, `additional card`, `access 1 additional`, `HQ`, `R&D`, `rnd` und `rd` bleiben wirksam; Suffix-Rauschen wie `multiaccessory` oder `R&Dish` erzeugt keine akute Central-Pressure-Übersteuerung mehr.
+  - Die Erkennung bleibt auf sichtbare Runner-Rig-Karten beschränkt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-scoring-window.test.ts` schützt positive R&D-Multiaccess-Fälle und einen negativen Suffix-Tokenfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-scoring-window.test.ts` grün, 1 Datei, 20 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihunderteinundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` ersetzt den `subtypeOrText`-Fallback per `text.includes(needle)` durch gebundene Deck-Capability-Texttokens und Phrase-Matches.
+  - Exakte Signale wie `wall`, `barrier`, `code gate`, `code_gate` und `sentry` bleiben wirksam; Suffix-Rauschen wie `barrierish`, `code gateish` und `sentryish` erzeugt keine ICE-Typ-Coverage mehr.
+  - Die Erkennung bleibt reine sichtbare Deck-Capability-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `deck-capabilities.test.ts` schützt positive ICE-Typ-Fälle und negative Suffix-Textfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts` grün, 1 Datei, 16 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertzweiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/diagnostics/coverage-selection-debug.ts` ersetzt die Coverage-Answer-Role-Extraktion aus zusammengeklebtem Debugtext per `matchAll` durch einen Parser für exakt benannte Rationale-Einträge.
+  - Exakte Einträge wie `coverageAnswerRole:program_search` und `coverage_answer_role:draw_for_answer` bleiben wirksam; ähnliche Schlüssel wie `coverageAnswerRoleish:...` oder `coverage_answer_role_suffix:...` erzeugen keine Answer-Role mehr.
+  - Die Erkennung bleibt reine Coverage-Selection-Debug-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `coverage-selection-debug.test.ts` schützt positive Camel-/Snake-Case-Rollen und negative ähnlich benannte Debugkeys.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/diagnostics/coverage-selection-debug.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertdreiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/role-match.ts` ersetzt die generische Role-Segment-Prüfung per manuellem `segment.includes(...)` durch gebundene `_`-Token- und Tokenfolgenprüfung.
+  - Exakte Rollen, Präfix-Needles wie `breaker_`, Einzelterm-Matches wie `economy` in `pre_economy_support` und zusammengesetzte Needles wie `economy_asset` bleiben wirksam; Suffix-Rauschen wie `economyish` und `breakerish_...` erzeugt keinen Match.
+  - Die Änderung bleibt ein generischer Runtime-Role-Matcher und erzeugt keine LegalAction-Projektion.
+  - `role-match.test.ts` schützt positive Exact-/Prefix-/Compound-Role-Fälle und negative Suffix-Noise-Fälle; abhängige Deck-/Remote-Trash-Tests sichern bestehende Consumer-Semantik.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/role-match.test.ts src/deck-capabilities.test.ts src/simulation/remote-trash-role.test.ts` grün, 3 Dateien, 20 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertvierundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/action-goal-fit.ts` ersetzt die lokale Semantic-Action-Term-Prüfung per `segment.includes(...)` durch gebundene `_`-Tokenprüfung.
+  - Exakte und zusammengesetzte Semantiksegmente wie `corp_tag_punish` bleiben für die jeweilige Goal-Familie wirksam; Suffix-Rauschen wie `tagalong` oder `damaged_goods` bleibt irrelevant.
+  - Die Änderung bleibt auf den ActionGoalFit-Family-Fallback beschränkt und erzeugt keine LegalAction-Projektion.
+  - `action-goal-fit.test.ts` schützt positive zusammengesetzte Tag-Semantik und negative Tag-/Damage-Noise-Fälle; `semantic-runtime-corp-score.test.ts` sichert einen Runtime-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/action-goal-fit.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 31 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertfünfundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/corp-tactical-goals.ts` ersetzt die lokale sichtbare Signal-Term-Prüfung per `segment.includes(...)` durch gebundene `_`-Tokenprüfung.
+  - Exakte und zusammengesetzte sichtbare Signale wie `corp_tag_punish` und `visible_punish_payoff` bleiben wirksam; Suffix-Rauschen wie `tagalong_punishment_noise` oder `ambushment_noise` erzeugt keine Korp-Punish-/Damage-Goals.
+  - Die Änderung bleibt auf die Corp-TacticalGoal-Synthese aus side-sicheren ActionSemanticCandidate-Signalen beschränkt und erzeugt keine LegalAction-Projektion.
+  - `corp-tactical-goals.test.ts` schützt positive zusammengesetzte Punish-Signale und negative Substring-Noise-Fälle; `doctrine-goal-synthesis.test.ts` sichert einen Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/corp-tactical-goals.test.ts src/decision/doctrine-goal-synthesis.test.ts` grün, 2 Dateien, 21 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertsechsundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/tactical-goal-utility.ts` ersetzt die lokale Goal-ID-Term-Prüfung per `segment.includes(...)` durch gebundene `_`-Tokenprüfung.
+  - Exakte und zusammengesetzte Goal-IDs wie `corp.visible_tag_punish` bleiben korrekt klassifizierbar; Suffix-Rauschen wie `outscoreboard`, `microeconomy` und `tagalong_punishment_noise` bleibt `setup`.
+  - Die Änderung bleibt auf TacticalGoalUtility-Family-Klassifikation beschränkt und erzeugt keine LegalAction-Projektion.
+  - `tactical-goal-utility.test.ts` schützt positive zusammengesetzte Goal-ID-Terms und negative Substring-Noise-Fälle; `action-goal-fit.test.ts` sichert den Anschluss an Scoring.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/tactical-goal-utility.test.ts src/decision/action-goal-fit.test.ts` grün, 2 Dateien, 25 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertsiebenundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/semantic-shadow-league.ts` ersetzt den Shadow-League-Dry-Run-Textklassifizierer per `segment.includes(...)` durch gebundene `_`-Token- und Tokenfolgenprüfung.
+  - Exakte Tokens und Phrasen wie `remote` in `remote_run` und `structured_alignment_required` bleiben wirksam; Suffix-Rauschen wie `notremote` oder `structured_alignment_requiredish` wird nicht gezählt.
+  - Die Änderung bleibt report-only Shadow-League-Diagnostik und erzeugt keine LegalAction-Projektion.
+  - `semantic-shadow-league.test.ts` schützt die bestehenden Runner-Safe-Access-Dry-Run-Klassifizierer inklusive positiver und negativer Textfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/semantic-shadow-league.test.ts -t "bounds runner safe access dry-run text classifiers"` grün, 1 Datei, 1 Test, 6 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertachtundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-candidate-matching.ts` ersetzt die lokale Bank-Step-Signal-Term-Prüfung per `segment.includes(...)` durch gebundene `_`-Tokenprüfung.
+  - Exakte Bank-/Cash-/Payout-Signale wie `cash_out_credit_bank` bleiben wirksam; Suffix-Rauschen wie `bankroll_noise`, `cashier_noise` und `payoutish_noise` erzeugt keine Plan-Step-Zuordnung.
+  - Die Änderung bleibt auf TacticalPlan-Candidate-Matching gegen vorhandene ActionSemanticCandidate-Signale beschränkt und erzeugt keine LegalAction-Projektion.
+  - `tactical-plan-candidate-matching.test.ts` schützt positive Bank-Signale und negative Substring-Noise-Fälle; `tactical-plans.test.ts` sichert die Plan-Mapping-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-candidate-matching.test.ts src/tactical-plans.test.ts` grün, 2 Dateien, 49 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
