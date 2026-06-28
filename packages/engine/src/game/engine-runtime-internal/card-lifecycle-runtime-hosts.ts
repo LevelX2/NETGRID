@@ -199,6 +199,11 @@ import {
   installCard as executeInstallCard,
   type InstallCardHost,
 } from "../install/install-card";
+import {
+  runnerInstallPaymentChoiceSourceSuffix,
+  runnerInstallPaymentPayloadForChoiceSource,
+  runnerInstallPaymentPublicPayload,
+} from "../install/runner-program-install-payment";
 import { rezCard as executeRezCard, type RezCardHost } from "../rez/rez-card";
 import {
   addRunnerTagsWithPrevention,
@@ -803,8 +808,8 @@ export function createCardLifecycleRuntimeHosts(
       runner: {
         ensureTurnFlags: () => ensureRunnerTurnFlags(state),
         requiresDataFortInstallTarget,
-        startRunnerProgramTrashBeforeInstallChoice: (cardId) =>
-          startRunnerProgramTrashBeforeInstallChoice(state, cardId),
+        startRunnerProgramTrashBeforeInstallChoice: (cardId, legalAction) =>
+          startRunnerProgramTrashBeforeInstallChoice(state, cardId, legalAction),
         forfeitRunnerAgendaForPointCost: (cardId) =>
           forfeitRunnerAgendaForPointCost(state, cardId),
         consumeValuPakProgramInstallAction: (legalAction) =>
@@ -839,8 +844,8 @@ export function createCardLifecycleRuntimeHosts(
         assertCorpIceInstallCostValid: (cardId, definition, legalAction) =>
           assertCorpIceInstallCostValid(state, cardId, definition, legalAction),
         spendClick: (side) => spendClick(state, side),
-        spendRunnerInstallCredits: (amount, cardType) =>
-          spendRunnerInstallCredits(state, amount, cardType),
+        spendRunnerInstallCredits: (amount, cardType, paymentPayload) =>
+          spendRunnerInstallCredits(state, amount, cardType, paymentPayload),
         runnerCanPayInstallCost: (amount, cardType) =>
           runnerCanPayInstallCost(state, amount, cardType),
         openRunnerCostPenaltySupportWindow: (legalAction, amount, cardType) =>
@@ -1174,6 +1179,7 @@ export function createCardLifecycleRuntimeHosts(
   function startRunnerProgramTrashBeforeInstallChoice(
     state: GameState,
     sourceCardId: CardInstanceId,
+    legalAction: LegalAction,
   ): void {
     if (!state.runner.grip.includes(sourceCardId))
       throw new Error("Die Programmquelle liegt nicht mehr im Grip.");
@@ -1213,7 +1219,7 @@ export function createCardLifecycleRuntimeHosts(
     state.pendingChoice = {
       choiceId: `runner_program_trash_before_install_${state.stateVersion + 1}`,
       side: "runner",
-      source: `runner_program_trash_before_install:${sourceCardId}:${state.stateVersion + 1}`,
+      source: `runner_program_trash_before_install:${sourceCardId}:${state.stateVersion + 1}${runnerInstallPaymentChoiceSourceSuffix(legalAction.payload)}`,
       prompt: "Programme vor Installation trashen",
       kind: "select_cards",
       options,
@@ -1313,6 +1319,7 @@ export function createCardLifecycleRuntimeHosts(
     delete state.pendingChoice;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
+      ...runnerInstallPaymentPayloadForChoiceSource(choice.source),
       cardId: sourceCardId,
       runnerProgramTrashBeforeInstall: true,
       runnerProgramTrashBeforeInstallResolved: true,
@@ -1322,11 +1329,16 @@ export function createCardLifecycleRuntimeHosts(
         ? { trashedCardDefinitionIds: trashedDefinitionIds.join(",") }
         : {}),
     };
-    spendRunnerInstallCredits(
+    const paymentResult = spendRunnerInstallCredits(
       state,
       definition.installCost ?? 0,
       definition.type,
+      legalAction.payload,
     );
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...runnerInstallPaymentPublicPayload(paymentResult),
+    };
     for (const cardId of uniqueTrashIds)
       trashRunnerInstalledCardToHeap(state, cardId);
     executeInstallCard(installCardHost(state), legalAction);
