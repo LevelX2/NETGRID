@@ -8906,6 +8906,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertdreiunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bank-investment-context.ts` ersetzt die Runner-Bank-Cashout-Action-Erkennung aus freiem `resourceAbility`-Text durch gebundene Tokens und geordnete Bank-Signale.
+  - Strukturierte `cardImplementationTakesHostedCredits`-Payloads bleiben Primärquelle; echte `take/cash/withdraw/payout ... bank`- und Bank-Cashout-Signale bleiben wirksam.
+  - Substring-Rauschen wie `bankroll payoutish` erzeugt keine Cashout-Action-Erkennung mehr.
+  - `runner-bank-investment-context.test.ts` schützt den negativen Cashout-Substring-Grenzfall über den öffentlichen `isRunnerBankCashOutAction`-Kontextpfad.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bank-investment-context.test.ts` grün, 1 Datei, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

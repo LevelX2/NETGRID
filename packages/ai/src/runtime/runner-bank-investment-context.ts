@@ -509,11 +509,35 @@ export function createRunnerBankInvestmentContext(
     if (action.payload?.cardImplementationTakesHostedCredits === true) {
       return true;
     }
+    return runnerBankTokensIndicateCashOutAction(text, sourceIsCreditBank);
+  }
+
+  function runnerBankTokensIndicateCashOutAction(
+    text: string,
+    sourceIsCreditBank: boolean,
+  ): boolean {
+    const tokens = runnerBankTextTokens(text);
+    if (
+      sourceIsCreditBank &&
+      runnerBankTokensIncludeAny(tokens, [
+        "nehmen",
+        "take",
+        "cash",
+        "withdraw",
+        "payout",
+      ])
+    ) {
+      return true;
+    }
     return (
-      (sourceIsCreditBank &&
-        /(?:nehmen|take|cash|withdraw|payout)/.test(text)) ||
-      /(?:take|cash|withdraw|payout).*(?:bank|credit_bank)/.test(text) ||
-      /(?:bank|credit_bank).*(?:take|cash|withdraw|payout)/.test(text)
+      runnerBankTokensIncludeOrdered(tokens, ["take", "bank"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["cash", "bank"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["withdraw", "bank"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["payout", "bank"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["bank", "take"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["bank", "cash"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["bank", "withdraw"]) ||
+      runnerBankTokensIncludeOrdered(tokens, ["bank", "payout"])
     );
   }
 

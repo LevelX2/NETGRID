@@ -171,6 +171,31 @@ describe("createRunnerBankInvestmentContext", () => {
       context.runnerBankInvestmentCommitmentEvidence(input, runAction),
     ).toContain("bankBuildLegal:false");
   });
+
+  it("ignores cashout-action substring noise in credit-bank action text", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 4 },
+    });
+    const noisyCashOutAction = runnerAction("trigger_ability", {
+      actionId: "substring-cashout-noise",
+      source: bank.instanceId,
+      resourceAbility: "bankroll payoutish",
+    });
+    const input = runnerInput({
+      rig: [bank],
+      legalActions: [noisyCashOutAction],
+    });
+
+    expect(context.isRunnerBankCashOutAction(input, noisyCashOutAction)).toBe(
+      false,
+    );
+  });
 });
 
 function createContext(
