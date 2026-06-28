@@ -1,6 +1,7 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 
 import { createAiHintsByCard, type AiCardHint } from "../ai-hints";
+import { rolesMatch } from "../runtime/role-match";
 import { classifyTagPunishPayoffFromOntology } from "../tag-punish-ontology-consumer";
 
 type AiCardHintWithSignals = AiCardHint & { tacticSignals?: string[] };
@@ -121,10 +122,7 @@ function hintForVisibleCard(card: VisibleCard): AiCardHint | undefined {
 }
 
 function hintHasRole(hint: AiCardHint | undefined, role: string): boolean {
-  return (
-    hint?.roles.includes(role) === true ||
-    hint?.planRoles.includes(role) === true
-  );
+  return rolesMatch([...(hint?.roles ?? []), ...(hint?.planRoles ?? [])], [role]);
 }
 
 function hintHasSignal(hint: AiCardHint | undefined, signal: string): boolean {
