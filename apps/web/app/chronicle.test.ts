@@ -2668,7 +2668,7 @@ describe("formatChronicleEvent", () => {
     const effects = formatChronicleEffectItems(event, "runner");
 
     expect(effects[0]?.title).toBe(
-      "Skivviss zwingt die Korp zu 2 zusätzlichen Karten.",
+      "Skivviss: Die Korp zieht zu Beginn ihres Zugs 2 zusätzliche Karten.",
     );
     expect(effects[0]?.description).toBe(
       "Grund: 2 Skivviss-Counter auf der Korp.",
@@ -2676,9 +2676,14 @@ describe("formatChronicleEvent", () => {
     expect(effects[0]?.chips).toEqual(
       expect.arrayContaining([
         "Skivviss",
+        "Automatisch",
+        "Korp-Zugstart",
         "2 Skivviss-Counter",
         "2 Zusatzkarten",
       ]),
+    );
+    expect(formatChronicleEffectItems(event, "corp")[0]?.title).toBe(
+      "Skivviss: Du ziehst zu Beginn deines Zugs 2 zusätzliche Karten.",
     );
   });
 

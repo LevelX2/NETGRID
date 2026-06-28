@@ -3421,15 +3421,19 @@ function formatChronicleEffect(
       category = "card";
       if (sourceDefinitionId === SKIVVISS_ID) {
         const targetSubject =
-          subject === "Du"
-            ? "dich"
-            : subject === "Der Runner"
-              ? "den Runner"
-              : subject.replace(/^Die /u, "die ");
-        title = `${sourceTitle ?? "Skivviss"} zwingt ${targetSubject} zu ${amount} ${amount === 1 ? "zusätzlicher Karte" : "zusätzlichen Karten"}`;
+          subject === "Du" ? "Du" : subject;
+        title = `${sourceTitle ?? "Skivviss"}: ${targetSubject} ${
+          targetSubject === "Du" ? "ziehst" : "zieht"
+        } zu Beginn ${
+          targetSubject === "Du" ? "deines" : "ihres"
+        } Zugs ${amount} ${
+          amount === 1 ? "zusätzliche Karte" : "zusätzliche Karten"
+        }`;
         description = `Grund: ${amount} Skivviss-Counter auf der Korp.`;
         chips.push(
           "Skivviss",
+          "Automatisch",
+          "Korp-Zugstart",
           `${amount} Skivviss-Counter`,
           amount === 1 ? "1 Zusatzkarte" : `${amount} Zusatzkarten`,
         );
