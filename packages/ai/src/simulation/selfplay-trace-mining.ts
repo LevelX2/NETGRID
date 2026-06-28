@@ -703,6 +703,25 @@ function entryHasLowDeltaSignal(text: string): boolean {
   );
 }
 
+function selfplayEntryHasStructuredSignal(
+  entry: AiSimulationSummary["actionSequence"][number],
+  needles: readonly string[],
+): boolean {
+  const normalizedNeedles = new Set(
+    needles.map((needle) => needle.toLocaleLowerCase("en-US")),
+  );
+  return [
+    entry.reasonCode,
+    ...(entry.evidence ?? []),
+    ...(entry.debugFacts ?? []),
+    ...(entry.qualityTags ?? []),
+  ].some((rawValue) => {
+    const value = rawValue.toLocaleLowerCase("en-US");
+    if (normalizedNeedles.has(value)) return true;
+    return value.split(":").some((segment) => normalizedNeedles.has(segment));
+  });
+}
+
 function actionLimitSetupOrEconomyEntry(
   entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
@@ -935,8 +954,10 @@ function selfplayEntryDetectorFindings(
     (entry.runnerRepeatRunOnKnownUnpayableRemotePath === true ||
       entry.runnerRunPenalizedAsKnownNoAccess === true ||
       entry.remoteRunSuppressedByKnownLowValueRemote === true ||
-      text.includes("known_no_current_payoff") ||
-      text.includes("known_low_value"))
+      selfplayEntryHasStructuredSignal(entry, [
+        "known_no_current_payoff",
+        "known_low_value",
+      ]))
   ) {
     findings.push(
       selfplayEntryFinding(
@@ -954,7 +975,8 @@ function selfplayEntryDetectorFindings(
     entry.side === "runner" &&
     entry.actionType === "start_run" &&
     entry.targetServerId === "archives" &&
-    (repeatedNoProgressRun || text.includes("archives_known_no_agenda"))
+    (repeatedNoProgressRun ||
+      selfplayEntryHasStructuredSignal(entry, ["archives_known_no_agenda"]))
   ) {
     findings.push(
       selfplayEntryFinding(
@@ -997,10 +1019,12 @@ function selfplayEntryDetectorFindings(
   if (
     enabled.has("bank_over_target_without_funding_need") &&
     entry.side === "runner" &&
-    (text.includes("bankovertarget:true") ||
-      text.includes("bankoverdesiredtarget:true") ||
-      text.includes("bankconcretefundingneed:false") ||
-      text.includes("bank_cashout_without_funding_need") ||
+    (selfplayEntryHasStructuredSignal(entry, [
+      "bankovertarget:true",
+      "bankoverdesiredtarget:true",
+      "bankconcretefundingneed:false",
+      "bank_cashout_without_funding_need",
+    ]) ||
       entry.runnerDebtEconomyTakenWithoutNeed === true)
   ) {
     findings.push(
@@ -1017,8 +1041,10 @@ function selfplayEntryDetectorFindings(
   if (
     enabled.has("risky_self_damage_action") &&
     entry.side === "runner" &&
-    text.includes("self_damage_survives:false") &&
-    !text.includes("runner.self_damage.safe_alternative")
+    selfplayEntryHasStructuredSignal(entry, ["self_damage_survives:false"]) &&
+    !selfplayEntryHasStructuredSignal(entry, [
+      "runner.self_damage.safe_alternative",
+    ])
   ) {
     findings.push(
       selfplayEntryFinding(
@@ -1036,9 +1062,11 @@ function selfplayEntryDetectorFindings(
     entry.side === "runner" &&
     (entry.actionType === "start_run" ||
       entry.actionType === "trigger_ability") &&
-    (text.includes("blocked_by_blink_hand_buffer:true") ||
-      text.includes("blinkriskseverity:lethal") ||
-      text.includes("blink_break_self_net_damage_risk"))
+    selfplayEntryHasStructuredSignal(entry, [
+      "blocked_by_blink_hand_buffer:true",
+      "blinkriskseverity:lethal",
+      "blink_break_self_net_damage_risk",
+    ])
   ) {
     findings.push(
       selfplayEntryFinding(
@@ -1319,20 +1347,26 @@ function recoveryLowValueLoopContext(
 ): { category: string; facts: string[] } {
   const coverageRecovery =
     entry.runnerRecoveryTakenForBreakerCoverage === true ||
-    text.includes("supportsactivecapabilityneed:true") ||
-    text.includes("coverageanswerrole:recovery_answer");
+    selfplayEntryHasStructuredSignal(entry, [
+      "supportsactivecapabilityneed:true",
+      "coverageanswerrole:recovery_answer",
+    ]);
   const fundingNeed =
-    text.includes("fundingneedreducesrecoverylooppenalty:true") ||
-    text.includes("runner_economy_funding_need:true") ||
-    text.includes("credit_base_funding_need:true") ||
-    text.includes("runner_credit_base_recommendation:fund_useful_hand_card") ||
+    selfplayEntryHasStructuredSignal(entry, [
+      "fundingneedreducesrecoverylooppenalty:true",
+      "runner_economy_funding_need:true",
+      "credit_base_funding_need:true",
+      "runner_credit_base_recommendation:fund_useful_hand_card",
+    ]) ||
     entry.runnerEconomyTakenToReachRunReserve === true ||
     entry.runnerEconomyChoicePlausible === true;
   const searchOrDrawNeed =
     entry.runnerSearchTakenForBreakerCoverage === true ||
-    text.includes("supportsdraworsearchneed:true") ||
-    text.includes("coverageanswerrole:program_search") ||
-    text.includes("coverageanswerrole:draw_for_answer");
+    selfplayEntryHasStructuredSignal(entry, [
+      "supportsdraworsearchneed:true",
+      "coverageanswerrole:program_search",
+      "coverageanswerrole:draw_for_answer",
+    ]);
   const pressureSkipped =
     entry.runnerSearchRecoveryChosenOverPressure === true ||
     entry.runnerEconomyChosenWhilePressureReady === true;
@@ -1420,7 +1454,7 @@ function selfplayPlanActionMismatch(
     entry.actionType !== "steal_agenda" &&
     !text.includes("funding_need:true") &&
     !text.includes("reserve") &&
-    !selfplayPlanMismatchHasKnownExplanation(text)
+    !selfplayPlanMismatchHasKnownExplanation(entry)
   )
     return true;
   if (
@@ -1435,7 +1469,7 @@ function selfplayPlanActionMismatch(
     /(install|rig|setup)/.test(planKind) &&
     entry.side === "runner" &&
     entry.actionType === "start_run" &&
-    text.includes("runnerpressureready:false")
+    selfplayEntryHasStructuredSignal(entry, ["runnerpressureready:false"])
   )
     return true;
   return false;
@@ -1445,26 +1479,32 @@ function selfplaySemanticOverrideSuspicious(
   entry: AiSimulationSummary["actionSequence"][number],
   text: string,
 ): boolean {
-  if (!text.includes("semantic_runtime_actual_differs_from_legacy_debug"))
+  if (
+    !selfplayEntryHasStructuredSignal(entry, [
+      "semantic_runtime_actual_differs_from_legacy_debug",
+    ])
+  )
     return false;
-  if (selfplayPlanMismatchHasKnownExplanation(text)) return false;
+  if (selfplayPlanMismatchHasKnownExplanation(entry)) return false;
   if (selfplayReactiveSemanticOverride(entry.actionType)) return false;
   return true;
 }
 
-function selfplayPlanMismatchHasKnownExplanation(text: string): boolean {
-  return (
-    text.includes("tactical_plan_mapping_outcome:semantic_choice_selected") ||
-    text.includes("selected_by_plan_mapping") ||
-    text.includes("runner_recent_same_server_runs") ||
-    text.includes("runner_repeated_low_value_central_run") ||
-    text.includes("runner_pressure_ready_false_positive:true") ||
-    text.includes("runner_phase_exit_blocked_by_cost:true") ||
-    text.includes("runner_phase_exit_blocked_by_target_value:true") ||
-    text.includes("self_damage_guard") ||
-    text.includes("program_sacrifice_penalty") ||
-    text.includes("runner_loan_liability")
-  );
+function selfplayPlanMismatchHasKnownExplanation(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  return selfplayEntryHasStructuredSignal(entry, [
+    "tactical_plan_mapping_outcome:semantic_choice_selected",
+    "selected_by_plan_mapping",
+    "runner_recent_same_server_runs",
+    "runner_repeated_low_value_central_run",
+    "runner_pressure_ready_false_positive:true",
+    "runner_phase_exit_blocked_by_cost:true",
+    "runner_phase_exit_blocked_by_target_value:true",
+    "self_damage_guard",
+    "program_sacrifice_penalty",
+    "runner_loan_liability",
+  ]);
 }
 
 function selfplayReactiveSemanticOverride(

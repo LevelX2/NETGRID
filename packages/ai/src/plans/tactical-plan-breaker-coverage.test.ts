@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
 
-import { isBreakerInstallAction } from "./tactical-plan-breaker-coverage";
+import {
+  isBreakerInstallAction,
+  missingBreakerCoverageKind,
+} from "./tactical-plan-breaker-coverage";
 
 describe("isBreakerInstallAction", () => {
   it("uses visible source card coverage and ignores label-only breaker text", () => {
@@ -20,6 +23,16 @@ describe("isBreakerInstallAction", () => {
     expect(
       matchesBreaker(installAction("missing-card", "Install Best Fracter")),
     ).toBe(false);
+  });
+});
+
+describe("missingBreakerCoverageKind", () => {
+  it("matches ICE coverage text by bounded terms", () => {
+    expect(missingCoverageForIceText("AP sentry")).toBe("breaker_sentry");
+    expect(missingCoverageForIceText("AP")).toBe("breaker_ap");
+    expect(missingCoverageForIceText("appliance trace")).toBe("breaker_trace");
+    expect(missingCoverageForIceText("appliance")).toBe("breaker_universal");
+    expect(missingCoverageForIceText("codegate")).toBe("breaker_code_gate");
   });
 });
 
@@ -59,6 +72,33 @@ function playerViewWithGrip(cards: VisibleCard[]): PlayerView {
     },
     servers: [],
   } as unknown as PlayerView;
+}
+
+function playerViewWithIce(ice: VisibleCard): PlayerView {
+  return {
+    ...playerViewWithGrip([]),
+    servers: [
+      {
+        id: "remote_1",
+        ice: [ice],
+        root: [],
+      },
+    ],
+  } as unknown as PlayerView;
+}
+
+function missingCoverageForIceText(text: string) {
+  return missingBreakerCoverageKind(
+    playerViewWithIce(
+      visibleCard({
+        instanceId: "ice",
+        type: "ice",
+        title: text,
+        rulesText: "",
+      }),
+    ),
+    "remote_1",
+  );
 }
 
 function visibleCard(overrides: Partial<VisibleCard>): VisibleCard {

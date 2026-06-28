@@ -4,6 +4,8 @@ import type {
   LegalAction,
 } from "@netgrid/shared";
 
+import { rolesMatch } from "./role-match";
+
 type CorpScoreTerminalWindowLike = {
   terminalWindow: boolean;
   scoreActionIds: readonly string[];
@@ -108,7 +110,7 @@ function semanticRuntimeCorpPassiveScoreLineActionKind(
     action.type === "activated_card_ability"
   ) {
     const roles = dependencies.rolesForAction(input, action);
-    return roles.some((role) => role.includes("economy"))
+    return rolesMatch(roles, ["economy"])
       ? "economy"
       : "non_score_action";
   }

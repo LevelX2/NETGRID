@@ -1,6 +1,7 @@
 import { CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS } from "./controlled-shadow-mode";
 import type { ShadowModeNoEffectFlags } from "./controlled-shadow-mode";
 import type { ActionGateResult } from "./action-semantic-candidate";
+import { rolesMatch } from "./runtime/role-match";
 
 export const META1_DECK_DOCTRINE_TACTICAL_GOAL_ENGINE_SCHEMA_VERSION =
   "meta1-deck-doctrine-tactical-goal-engine-v0" as const;
@@ -2263,20 +2264,24 @@ function goalFamiliesForStrategy(
   side: SemanticAiSide,
   strategyId: string,
 ): SemanticTacticalGoalFamily[] {
-  if (side === "runner" && strategyId.includes("rnd")) {
+  if (side === "runner" && strategyIdHasTerm(strategyId, "rnd")) {
     return ["runner_pressure_rnd", "runner_access_payoff"];
   }
-  if (side === "runner" && strategyId.includes("hq")) {
+  if (side === "runner" && strategyIdHasTerm(strategyId, "hq")) {
     return ["runner_pressure_hq", "runner_access_payoff"];
   }
   if (side === "runner") return ["runner_rig_setup", "runner_economy_stabilize"];
-  if (strategyId.includes("tag")) {
+  if (strategyIdHasTerm(strategyId, "tag")) {
     return ["corp_tag_runner", "corp_punish_tagged_runner"];
   }
-  if (strategyId.includes("remote")) {
+  if (strategyIdHasTerm(strategyId, "remote")) {
     return ["corp_build_remote", "corp_create_score_window", "corp_score_agenda"];
   }
   return ["corp_economy_stabilize", "corp_defend_rnd"];
+}
+
+function strategyIdHasTerm(strategyId: string, term: string): boolean {
+  return rolesMatch([strategyId], [term]);
 }
 
 function priorityFromSupportPackage(

@@ -103,6 +103,12 @@ export function makeActionId(
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   if (payload?.runnerProgramTrashBeforeInstall)
     parts.push("runner_program_trash_before_install");
+  if (payload?.runnerInstallPaymentSourceIds !== undefined)
+    parts.push(String(payload.runnerInstallPaymentSourceIds));
+  if (payload?.runnerInstallPaymentSourceAmounts !== undefined)
+    parts.push(String(payload.runnerInstallPaymentSourceAmounts));
+  if (payload?.runnerInstallPaymentHostedCredits !== undefined)
+    parts.push(String(payload.runnerInstallPaymentHostedCredits));
   if (payload?.breakerId) parts.push(String(payload.breakerId));
   if (payload?.iceId) parts.push(String(payload.iceId));
   if (payload?.subroutineIndex !== undefined)

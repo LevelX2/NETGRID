@@ -5,6 +5,7 @@ import type {
   CorpPunishKind,
   CorpVisibleTagPayoffCategory,
 } from "../runtime/corp-tag-punish-types";
+import { rolesMatch } from "../runtime/role-match";
 import {
   corpVisibleTagPayoffCategoryFromOntology,
 } from "../runtime/tag-punish-payoff-mapping";
@@ -46,8 +47,8 @@ export function createCorpVisibleTagPayoffCategoryContext(
     if (kind === "resource_trash_like" || kind === "power_grid_overload_like")
       return "trash";
     const roles = dependencies.rolesForAction(input, action);
-    if (roles.some((role) => role.includes("run_lock"))) return "run_lock";
-    if (roles.some((role) => role.includes("ambush"))) return "ambush";
+    if (rolesMatch(roles, ["run_lock"])) return "run_lock";
+    if (rolesMatch(roles, ["ambush"])) return "ambush";
     return "unknown";
   }
 

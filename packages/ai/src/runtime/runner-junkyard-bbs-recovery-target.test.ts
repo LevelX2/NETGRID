@@ -12,6 +12,9 @@ describe("runnerJunkyardBbsRecoveryTargetAssessment", () => {
     expect(assessment(["memory_support"]).evidence[0]).toBe(
       "target_class:memory_support:memory_remaining:0",
     );
+    expect(assessment(["support_breaker_fracter"]).evidence[0]).toBe(
+      "target_class:breaker_no_visible_need",
+    );
   });
 
   it("ignores substring-only recovery target role noise", () => {
@@ -19,6 +22,9 @@ describe("runnerJunkyardBbsRecoveryTargetAssessment", () => {
       "target_class:low_value",
     );
     expect(assessment(["memoryless_noise"]).evidence[0]).toBe(
+      "target_class:low_value",
+    );
+    expect(assessment(["breaker_fracterish_noise"]).evidence[0]).toBe(
       "target_class:low_value",
     );
   });

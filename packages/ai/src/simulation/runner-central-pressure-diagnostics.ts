@@ -4,6 +4,7 @@ import {
   centralServerId,
   type CentralServerId,
 } from "../runtime/server-target";
+import { rolesMatch } from "../runtime/role-match";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
 import type {
   BestTrueCentralCloseoutProfile,
@@ -111,9 +112,9 @@ export function createRunnerCentralPressureDiagnosticsForSimulationAction(
       installedInterfaceTargets.has(centralTarget);
     const anyMultiaccessInstalled = (input.playerView.own.rig ?? []).some(
       (card) =>
-        dependencies
-          .rolesForCardId(card.definitionId)
-          .some((role) => role.includes("multiaccess")),
+        rolesMatch(dependencies.rolesForCardId(card.definitionId), [
+          "multiaccess",
+        ]),
     );
     const repeatedLowValue =
       centralTarget !== undefined &&

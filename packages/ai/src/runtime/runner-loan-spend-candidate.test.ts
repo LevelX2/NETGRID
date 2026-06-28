@@ -6,6 +6,7 @@ import { runnerLoanSpendCandidateKind } from "./runner-loan-spend-candidate";
 describe("runnerLoanSpendCandidateKind", () => {
   it("classifies structured spend roles", () => {
     expect(kind(["breaker_fracter"])).toBe("direct_plan");
+    expect(kind(["support_breaker_fracter"])).toBe("direct_plan");
     expect(kind(["card_draw"])).toBe("generic_setup");
     expect(kind(["stack_search"])).toBe("generic_setup");
   });
@@ -14,6 +15,7 @@ describe("runnerLoanSpendCandidateKind", () => {
     expect(kind(["withdrawal_noise"])).toBe("ignore");
     expect(kind(["searchlight_noise"])).toBe("ignore");
     expect(kind(["breakerish_noise"])).toBe("ignore");
+    expect(kind(["breaker_fracterish_noise"])).toBe("ignore");
   });
 });
 

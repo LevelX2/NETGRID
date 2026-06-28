@@ -7,10 +7,25 @@ import type {
 } from "@netgrid/shared";
 import {
   knownRemoteAgendaAccessCommitment,
+  knownRemoteRootHasHighImpactRole,
   projectKnownRemoteTrashCommitment,
+  trashSupportEffectTargetHasFreeTrash,
 } from "./known-remote-access-commitment";
 
 describe("known remote access commitment", () => {
+  it("matches high-impact remote root roles by bounded role terms", () => {
+    expect(knownRemoteRootHasHighImpactRole(["asset_economy"])).toBe(true);
+    expect(knownRemoteRootHasHighImpactRole(["holovid_campaign"])).toBe(true);
+    expect(knownRemoteRootHasHighImpactRole(["access_tax"])).toBe(true);
+    expect(knownRemoteRootHasHighImpactRole(["access_taxish_noise"])).toBe(
+      false,
+    );
+    expect(knownRemoteRootHasHighImpactRole(["microeconomy_noise"])).toBe(
+      false,
+    );
+    expect(knownRemoteRootHasHighImpactRole(["campaigner_noise"])).toBe(false);
+  });
+
   it("models agenda access as a steal commitment", () => {
     expect(
       knownRemoteAgendaAccessCommitment("remote_1", [
@@ -130,6 +145,50 @@ describe("known remote access commitment", () => {
     );
   });
 
+  it("uses bounded free-trash support from installed runner cards", () => {
+    const projection = projectKnownRemoteTrashCommitment(
+      aiInput({
+        credits: 8,
+        rig: [
+          visibleCard("kilroy", {
+            definitionId: "onr_v1_096_kilroy-was-here",
+            title: "Kilroy Was Here",
+            type: "event",
+          }),
+        ],
+      }),
+      {
+        serverId: "remote_1",
+        definitionId: "neutral-known-asset",
+        rootType: "asset",
+        trashCost: 4,
+        creditsAfterPath: 8,
+        visibleCard: visibleCard("neutral-asset", {
+          definitionId: "neutral-known-asset",
+          title: "Neutral Asset",
+          type: "asset",
+        }),
+      },
+    );
+
+    expect(projection).toMatchObject({
+      generalTrashCost: 0,
+      creditsAfterTrash: 8,
+      evidence: expect.arrayContaining([
+        "known_remote_root_free_trash_support:true",
+        "known_remote_root_trash_support_source:onr_v1_096_kilroy-was-here",
+      ]),
+    });
+  });
+
+  it("matches free-trash effect targets by bounded marker segments", () => {
+    expect(trashSupportEffectTargetHasFreeTrash("free_trash")).toBe(true);
+    expect(trashSupportEffectTargetHasFreeTrash("access.free_trash")).toBe(true);
+    expect(trashSupportEffectTargetHasFreeTrash("not_free_trash_noise")).toBe(
+      false,
+    );
+  });
+
   it("uses supplied runner economy posture as access reserve basis", () => {
     const projection = projectKnownRemoteTrashCommitment(aiInput({ credits: 8 }), {
       serverId: "remote_1",
@@ -198,7 +257,10 @@ describe("known remote access commitment", () => {
   });
 });
 
-function aiInput(params: { credits: number }): AiDecisionInput {
+function aiInput(params: {
+  credits: number;
+  rig?: VisibleCard[];
+}): AiDecisionInput {
   const playerView: PlayerView = {
     stateVersion: 1,
     side: "runner",
@@ -218,7 +280,7 @@ function aiInput(params: { credits: number }): AiDecisionInput {
       stackOrRdCount: 20,
       heapOrArchives: [],
       scoreArea: [],
-      rig: [],
+      rig: params.rig ?? [],
       maxHandSize: 5,
       tags: 0,
     },

@@ -1,6 +1,7 @@
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { PlanMappingStatus, PlanStep } from "./tactical-plan-types";
+import { isBreakerRequiredCapabilityKind } from "./tactical-plan-coverage-kinds";
 
 export function mappingStatusForStep(
   step: PlanStep,
@@ -10,7 +11,7 @@ export function mappingStatusForStep(
   if (
     step.requiredCapabilities.some(
       (capability) =>
-        capability.kind.startsWith("breaker_") ||
+        isBreakerRequiredCapabilityKind(capability.kind) ||
         capability.kind === "remote_protection" ||
         capability.kind === "bank_payout",
     )

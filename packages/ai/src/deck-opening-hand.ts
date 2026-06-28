@@ -5,6 +5,7 @@ import {
   deckDoctrineRoleIsIce,
   rolesForDeckDoctrineCard,
 } from "./deck-doctrine-card-roles";
+import { rolesMatch } from "./runtime/role-match";
 
 export type OpeningHandEvaluation = {
   decision: "keep" | "mulligan";
@@ -24,15 +25,8 @@ export function evaluateCorpOpeningHand(
   );
   const agendaCount = handRoles.filter(deckDoctrineRoleIsAgenda).length;
   const iceCount = handRoles.filter(deckDoctrineRoleIsIce).length;
-  const economyCount = handRoles.filter(
-    (role) => role.includes("economy") || role.includes("draw"),
-  ).length;
-  const remoteRootCount = handRoles.filter(
-    (role) =>
-      role.includes("asset") ||
-      role.includes("upgrade") ||
-      role.includes("remote_support"),
-  ).length;
+  const economyCount = handRoles.filter(openingRoleIsEconomy).length;
+  const remoteRootCount = handRoles.filter(corpOpeningRoleIsRemoteRoot).length;
   const semanticContext = openingSemanticContext(input);
   const hasScorelineStrategy = semanticContext.strategies.some(
     (strategy) =>
@@ -102,9 +96,7 @@ export function evaluateRunnerOpeningHand(
     rolesForDeckDoctrineCard(card.definitionId ?? ""),
   );
   const breakerCount = handRoles.filter(deckDoctrineRoleIsBreaker).length;
-  const economyCount = handRoles.filter(
-    (role) => role.includes("economy") || role.includes("draw"),
-  ).length;
+  const economyCount = handRoles.filter(openingRoleIsEconomy).length;
   const setupCount = handRoles.filter(
     (role) =>
       role === "runner_program" ||
@@ -260,6 +252,14 @@ function semanticOpeningEvidence(context: OpeningSemanticContext): string[] {
       ? [`deck_capability_confidence:${context.capabilityConfidence}`]
       : []),
   ];
+}
+
+function openingRoleIsEconomy(role: string): boolean {
+  return rolesMatch([role], ["economy", "draw"]);
+}
+
+function corpOpeningRoleIsRemoteRoot(role: string): boolean {
+  return rolesMatch([role], ["asset", "upgrade", "remote_support"]);
 }
 
 function sortedUnique(values: string[]): string[] {

@@ -5,6 +5,7 @@ import {
 } from "@netgrid/shared";
 
 import { remoteTrashCostBucket } from "../runtime/remote-trash-cost";
+import { rolesMatch } from "../runtime/role-match";
 import { isRunnerEconomyRole, isRunnerPressureRole } from "../runtime/runner-role-classification";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import type { AiSimulationActionSequenceEntry } from "./ai-simulation-action-sequence-entry";
@@ -191,7 +192,7 @@ export function createRunnerHandUseDiagnosticsForSimulationAction(
       ...(discardRoles.some((role) => isRunnerEconomyRole(role))
         ? { runnerDiscardedPlayableEconomy: true }
         : {}),
-      ...(discardRoles.some((role) => role.startsWith("breaker_"))
+      ...(rolesMatch(discardRoles, ["breaker_"])
         ? { runnerDiscardedInstallableBreaker: true }
         : {}),
       ...(discardRoles.some((role) => isRunnerPressureRole(role))

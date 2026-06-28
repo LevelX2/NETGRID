@@ -4,6 +4,7 @@ import {
   buildDeckCapabilityProfile,
   redactedDeckCapabilityFacts,
 } from "./deck-capabilities";
+import { CARD_ROLES_BY_CARD } from "./ai-hints";
 import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
 import type {
   LegalAction,
@@ -216,6 +217,232 @@ describe("DeckCapabilityProfile", () => {
     });
   });
 
+  it("matches search access roles by bounded role terms", () => {
+    CARD_ROLES_BY_CARD.set("local_structured_search", {
+      cardId: "local_structured_search",
+      side: "runner",
+      roles: ["setup_program_search"],
+    });
+    CARD_ROLES_BY_CARD.set("local_noise_tool", {
+      cardId: "local_noise_tool",
+      side: "runner",
+      roles: ["program_searchish_noise", "searchlight_noise"],
+    });
+    try {
+      const inputView = playerView("runner");
+      inputView.own.gripOrHq = [
+        visibleCard("search-1", "local_structured_search", "runner", "program", {
+          title: "Structured Search",
+        }),
+        visibleCard("noise-1", "local_noise_tool", "runner", "program", {
+          title: "Noise Tool",
+        }),
+      ];
+
+      const profile = buildDeckCapabilityProfile({
+        side: "runner",
+        playerView: inputView,
+        legalActions: [],
+      });
+
+      expect(profile.runner?.searchAccess.tools.map((tool) => tool.cardId))
+        .toEqual(["local_structured_search"]);
+      expect(profile.runner?.searchAccess.tools[0]?.evidence).toContain(
+        "capability_source:structured",
+      );
+    } finally {
+      CARD_ROLES_BY_CARD.delete("local_structured_search");
+      CARD_ROLES_BY_CARD.delete("local_noise_tool");
+    }
+  });
+
+  it("matches breaker capability roles by bounded role prefixes", () => {
+    CARD_ROLES_BY_CARD.set("local_structured_breaker", {
+      cardId: "local_structured_breaker",
+      side: "runner",
+      roles: ["breaker_fracter"],
+    });
+    CARD_ROLES_BY_CARD.set("local_noise_breaker", {
+      cardId: "local_noise_breaker",
+      side: "runner",
+      roles: ["breakerish_fracter"],
+    });
+    try {
+      const inputView = playerView("runner");
+      inputView.own.gripOrHq = [
+        visibleCard("structured-breaker-1", "local_structured_breaker", "runner", "program", {
+          title: "Structured Breaker",
+        }),
+        visibleCard("noise-breaker-1", "local_noise_breaker", "runner", "program", {
+          title: "Noise Breaker",
+          rulesText: "Break one ice subroutine.",
+        }),
+      ];
+
+      const profile = buildDeckCapabilityProfile({
+        side: "runner",
+        playerView: inputView,
+        legalActions: [],
+      });
+
+      expect(profile.runner?.breakerInventory).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            cardId: "local_structured_breaker",
+            confidence: "medium",
+            evidence: expect.arrayContaining(["capability_source:role_or_subtype"]),
+          }),
+          expect.objectContaining({
+            cardId: "local_noise_breaker",
+            confidence: "low",
+            evidence: expect.arrayContaining([
+              "capability_source:text_fallback",
+              "text_fallback:transition_only",
+            ]),
+          }),
+        ]),
+      );
+    } finally {
+      CARD_ROLES_BY_CARD.delete("local_structured_breaker");
+      CARD_ROLES_BY_CARD.delete("local_noise_breaker");
+    }
+  });
+
+  it("matches corp plan roles by bounded role terms", () => {
+    CARD_ROLES_BY_CARD.set("local_plan_a", {
+      cardId: "local_plan_a",
+      side: "corp",
+      roles: ["remote_score_support"],
+    });
+    CARD_ROLES_BY_CARD.set("local_plan_b", {
+      cardId: "local_plan_b",
+      side: "corp",
+      roles: ["protect_remote"],
+    });
+    CARD_ROLES_BY_CARD.set("local_plan_c", {
+      cardId: "local_plan_c",
+      side: "corp",
+      roles: ["remote_economy_asset"],
+    });
+    CARD_ROLES_BY_CARD.set("local_plan_d", {
+      cardId: "local_plan_d",
+      side: "corp",
+      roles: ["remote_ambush"],
+    });
+    CARD_ROLES_BY_CARD.set("local_plan_e", {
+      cardId: "local_plan_e",
+      side: "corp",
+      roles: [
+        "scoreish_noise",
+        "remoteish_noise",
+        "economy_assetish_noise",
+        "ambushish_noise",
+      ],
+    });
+    try {
+      const inputView = playerView("corp");
+      inputView.servers = [
+        server("remote_1", [
+          visibleCard("plan-a", "local_plan_a", "corp", "operation", {
+            title: "Structured Plan A",
+          }),
+          visibleCard("plan-b", "local_plan_b", "corp", "upgrade", {
+            title: "Structured Plan B",
+          }),
+          visibleCard("plan-c", "local_plan_c", "corp", "asset", {
+            title: "Structured Plan C",
+          }),
+          visibleCard("plan-d", "local_plan_d", "corp", "asset", {
+            title: "Structured Plan D",
+          }),
+          visibleCard("plan-e", "local_plan_e", "corp", "asset", {
+            title: "Role Noise",
+          }),
+        ]),
+      ];
+
+      const profile = buildDeckCapabilityProfile({
+        side: "corp",
+        playerView: inputView,
+        legalActions: [],
+      });
+
+      expect(profile.corp?.scorePlanProfile.scoreSupportToolsKnown).toBe(1);
+      expect(profile.corp?.remotePlanProfile).toMatchObject({
+        remoteProtectionToolsKnown: 4,
+        remoteEconomyToolsKnown: 1,
+        ambushToolsKnown: 1,
+      });
+    } finally {
+      CARD_ROLES_BY_CARD.delete("local_plan_a");
+      CARD_ROLES_BY_CARD.delete("local_plan_b");
+      CARD_ROLES_BY_CARD.delete("local_plan_c");
+      CARD_ROLES_BY_CARD.delete("local_plan_d");
+      CARD_ROLES_BY_CARD.delete("local_plan_e");
+    }
+  });
+
+  it("matches runner attack plan roles by bounded role terms", () => {
+    CARD_ROLES_BY_CARD.set("local_runner_attack_a", {
+      cardId: "local_runner_attack_a",
+      side: "runner",
+      roles: ["interface_multiaccess"],
+    });
+    CARD_ROLES_BY_CARD.set("local_runner_attack_b", {
+      cardId: "local_runner_attack_b",
+      side: "runner",
+      roles: ["remote_contest_tool"],
+    });
+    CARD_ROLES_BY_CARD.set("local_runner_attack_c", {
+      cardId: "local_runner_attack_c",
+      side: "runner",
+      roles: ["early_setup"],
+    });
+    CARD_ROLES_BY_CARD.set("local_runner_attack_noise", {
+      cardId: "local_runner_attack_noise",
+      side: "runner",
+      roles: [
+        "multiaccessory_noise",
+        "remote_contestish_noise",
+        "setupish_noise",
+      ],
+    });
+    try {
+      const inputView = playerView("runner");
+      inputView.own.gripOrHq = [
+        visibleCard("attack-a", "local_runner_attack_a", "runner", "event", {
+          title: "Attack Plan A",
+        }),
+        visibleCard("attack-b", "local_runner_attack_b", "runner", "event", {
+          title: "Attack Plan B",
+        }),
+        visibleCard("attack-c", "local_runner_attack_c", "runner", "hardware", {
+          title: "Attack Plan C",
+        }),
+        visibleCard("attack-noise", "local_runner_attack_noise", "runner", "event", {
+          title: "Attack Noise",
+        }),
+      ];
+
+      const profile = buildDeckCapabilityProfile({
+        side: "runner",
+        playerView: inputView,
+        legalActions: [],
+      });
+
+      expect(profile.runner?.attackPlanProfile).toMatchObject({
+        centralPressureToolsKnown: 1,
+        remoteContestToolsKnown: 1,
+        setupToolsKnown: 1,
+      });
+    } finally {
+      CARD_ROLES_BY_CARD.delete("local_runner_attack_a");
+      CARD_ROLES_BY_CARD.delete("local_runner_attack_b");
+      CARD_ROLES_BY_CARD.delete("local_runner_attack_c");
+      CARD_ROLES_BY_CARD.delete("local_runner_attack_noise");
+    }
+  });
+
   it("marks missing runner coverage without guessing unavailable deck answers", () => {
     const profile = buildDeckCapabilityProfile({
       side: "runner",
@@ -248,15 +475,34 @@ describe("DeckCapabilityProfile", () => {
       ]),
     });
 
-    const facts = redactedDeckCapabilityFacts(profile);
+    const facts = redactedDeckCapabilityFacts({
+      ...profile,
+      missingCapabilities: [
+        ...profile.missingCapabilities,
+        {
+          capabilityId: "runner.synthetic_coverage",
+          kind: "synthetic_coverage",
+          severity: "hard",
+          evidence: ["test"],
+        },
+        {
+          capabilityId: "runner.coverageish_noise",
+          kind: "coverageish_noise",
+          severity: "hard",
+          evidence: ["test"],
+        },
+      ],
+    });
 
     expect(facts).toEqual(
       expect.arrayContaining([
         "breaker.wall=in_deck/draw_only",
         "breaker.code_gate=in_deck/draw_only",
         "bank_tool_count:1",
+        "missing:synthetic_coverage",
       ]),
     );
+    expect(facts).not.toContain("missing:coverageish_noise");
     expect(facts.join("\n")).not.toMatch(/onr_v1_|Codecracker|Dwarf|Broker/);
   });
 
@@ -348,6 +594,18 @@ function visibleIdentity(side: Side): PlayerView["own"]["identity"] {
     controller: side,
     type: "identity",
     known: true,
+  };
+}
+
+function server(
+  id: PlayerView["servers"][number]["id"],
+  root: VisibleCard[],
+): PlayerView["servers"][number] {
+  return {
+    id,
+    label: id,
+    ice: [],
+    root,
   };
 }
 

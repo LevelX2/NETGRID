@@ -1,4 +1,5 @@
 import { hasEvidenceFlag } from "../runtime/evidence-value";
+import { rolesMatch } from "../runtime/role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 
 export type RunnerEndgameCloseoutWindowSummary = {
@@ -396,8 +397,7 @@ export function isEndgameSetupOrEconomyAction(
     options.runnerEconomyProgressAction ||
     entry.actionType === "gain_credit" ||
     entry.actionType === "draw_card" ||
-    planKind?.includes("economy") === true ||
-    planKind?.includes("setup") === true
+    endgamePlanKindMatches(planKind, ["economy", "setup"])
   );
 }
 
@@ -412,7 +412,7 @@ export function isEndgameProtectionAction(
       (entry.actionType === "install_card" &&
         entry.installPlacement === "ice") ||
       entry.actionType === "rez_ice" ||
-      planKind?.includes("protect") === true)
+      endgamePlanKindMatches(planKind, ["protect"]))
   );
 }
 
@@ -471,10 +471,15 @@ export function isCorpEndgameStallSymptom(
     ) ||
     (entry.side === "corp" &&
       !options.meaningfulBoardProgress &&
-      (planKind?.includes("remote_build") === true ||
-        planKind?.includes("protect") === true ||
-        planKind?.includes("economy") === true))
+      endgamePlanKindMatches(planKind, ["remote_build", "protect", "economy"]))
   );
+}
+
+function endgamePlanKindMatches(
+  planKind: string | undefined,
+  needles: readonly string[],
+): boolean {
+  return planKind !== undefined && rolesMatch([planKind], needles);
 }
 
 export function countSameStrategicPlanRepeatsWithoutProgress<

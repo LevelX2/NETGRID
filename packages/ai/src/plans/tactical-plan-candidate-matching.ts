@@ -30,23 +30,43 @@ export function bankStepMatchesCandidate(
   if (step.kind !== "build_bank_counter" && step.kind !== "cash_out_bank") {
     return true;
   }
-  const signals = [
-    ...candidate.actionTacticSignals,
-    ...candidate.cardContextSignals,
-    candidate.semanticActionType,
-  ].join(" ").toLowerCase();
+  const signals = candidateBankSignals(candidate);
   if (step.kind === "build_bank_counter") {
     return (
       action.payload?.cardImplementationAddsHostedCredits === true ||
-      signals.includes("bank") ||
-      signals.includes("counter_bank") ||
-      signals.includes("temporary_resource_bank")
+      signals.some((signal) => signalHasTerm(signal, "bank"))
     );
   }
   return (
     action.payload?.cardImplementationTakesHostedCredits === true ||
-    signals.includes("cash") ||
-    signals.includes("payout") ||
-    signals.includes("bank")
+    signals.some(
+      (signal) =>
+        signalHasTerm(signal, "cash") ||
+        signalHasTerm(signal, "payout") ||
+        signalHasTerm(signal, "bank"),
+    )
+  );
+}
+
+function candidateBankSignals(candidate: ActionSemanticCandidate): string[] {
+  return [
+    ...candidate.actionTacticSignals,
+    ...candidate.cardContextSignals,
+    candidate.semanticActionType,
+  ].map((signal) => signal.toLocaleLowerCase("en-US"));
+}
+
+function signalHasTerm(signal: string, term: string): boolean {
+  return signal
+    .split(/[.:-]+/)
+    .some((segment) => signalSegmentHasTerm(segment, term));
+}
+
+function signalSegmentHasTerm(segment: string, term: string): boolean {
+  return (
+    segment === term ||
+    segment.startsWith(`${term}_`) ||
+    segment.endsWith(`_${term}`) ||
+    segment.includes(`_${term}_`)
   );
 }

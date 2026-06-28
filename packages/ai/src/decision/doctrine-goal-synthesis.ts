@@ -454,9 +454,8 @@ function hasCentralDefenseGap(
   central: "hq" | "rnd",
 ): boolean {
   return strategy.supportGaps.some((gap) => {
-    const normalized = gap.toLowerCase();
-    if (central === "hq") return normalized.includes("hq");
-    return normalized.includes("rnd") || normalized.includes("rd");
+    if (central === "hq") return gapHasTerm(gap, "hq");
+    return gapHasTerm(gap, "rnd") || gapHasTerm(gap, "rd");
   });
 }
 
@@ -465,8 +464,15 @@ function hasAnyGap(
   gaps: readonly string[],
 ): boolean {
   return strategy.supportGaps.some((gap) =>
-    gaps.some((blocked) => gap.includes(blocked)),
+    gaps.some((blocked) => gap === blocked),
   );
+}
+
+function gapHasTerm(gap: string, term: string): boolean {
+  return gap
+    .toLowerCase()
+    .split(/[._:-]+/)
+    .includes(term);
 }
 
 function goal(

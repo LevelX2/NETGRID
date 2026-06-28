@@ -120,6 +120,30 @@ describe("remote-contest-candidate", () => {
       ]),
     );
   });
+
+  it("matches primary goal ids by bounded utility-family terms", () => {
+    expect(
+      evaluateRemoteContestCandidate({
+        frame: frame(runCandidate("run-remote", "remote_1", "target_context")),
+        top: rankedAction(
+          "run-remote",
+          "runner.neutral.remote_contest_if_score_threat",
+          [],
+        ),
+        topActionType: "start_run",
+        scoreGap: 30,
+      }),
+    ).toBeDefined();
+
+    expect(
+      evaluateRemoteContestCandidate({
+        frame: frame(runCandidate("run-remote", "remote_1", "target_context")),
+        top: rankedAction("run-remote", "runner.remote_contestish_noise", []),
+        topActionType: "start_run",
+        scoreGap: 30,
+      }),
+    ).toBeUndefined();
+  });
 });
 
 function frame(candidate: ActionSemanticCandidate): SemanticDecisionFrame {
@@ -191,17 +215,21 @@ function payoff() {
   };
 }
 
-function rankedAction(actionId: string): SemanticRankedAction {
+function rankedAction(
+  actionId: string,
+  primaryGoalId = "runner.remote_contest",
+  evidence: string[] = ["utility_family:remote_contest"],
+): SemanticRankedAction {
   return {
     actionId,
     rank: 1,
     score: 150,
-    primaryGoalId: "runner.remote_contest",
+    primaryGoalId,
     components: [
       {
         component: "goal_fit",
         delta: 150,
-        evidence: ["utility_family:remote_contest"],
+        evidence,
       },
     ],
     blockers: [],

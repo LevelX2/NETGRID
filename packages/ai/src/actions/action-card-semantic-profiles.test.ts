@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildActionCardSemanticProfilesByDefinitionId } from "./action-card-semantic-profiles";
+import {
+  buildActionCardSemanticProfilesByDefinitionId,
+  strategySupportRoleForSignal,
+} from "./action-card-semantic-profiles";
 
 describe("ActionCardSemanticProfiles", () => {
   it("keeps legacy hint role fields as compatibility signals", () => {
@@ -82,6 +85,15 @@ describe("ActionCardSemanticProfiles", () => {
         expect.objectContaining({ evidence: "ai_hint_semantic_profile" }),
       ]),
     );
+  });
+
+  it("matches StrategySupportPair payoff roles by bounded signal segments", () => {
+    expect(strategySupportRoleForSignal("access.hq_multiaccess")).toBe(
+      "payoff_anchor",
+    );
+    expect(
+      strategySupportRoleForSignal("access.hq_multiaccessory_noise"),
+    ).toBe("anchor_evidence");
   });
 });
 

@@ -10,6 +10,7 @@ import {
   buildSemanticShadowLeagueReport,
   SEMANTIC_SHADOW_LEAGUE_SCHEMA_VERSION,
   playStrengthShadowLeagueExpectationsFromSamples,
+  type SemanticShadowLeagueReport,
 } from "./semantic-shadow-league";
 
 describe("SemanticShadowLeague", () => {
@@ -394,6 +395,17 @@ describe("SemanticShadowLeague", () => {
     expect(dryRun.blockedReasons.runner_safe_access_wrong_side).toBe(27);
   });
 
+  it("bounds runner safe access dry-run text classifiers", () => {
+    const dryRun = buildLocalDefaultPilotDryRunReport(
+      minimalRunnerSafeAccessReport(),
+      "runner_safe_access",
+    );
+
+    expect(dryRun.centralOnlyCases).toBe(1);
+    expect(dryRun.riskBlockedCases).toBe(1);
+    expect(dryRun.evidenceOnlyBlockedCases).toBe(1);
+  });
+
   it("keeps corp score window env-gated in the local default dry-run", () => {
     const report = buildSemanticShadowLeagueReport(
       buildRealEngineDecisionCorpus(buildRealEngineDecisionCorpusScenarios()),
@@ -430,6 +442,67 @@ function scenario(
   );
   if (!result) throw new Error(`Missing scenario ${scenarioId}`);
   return result;
+}
+
+function minimalRunnerSafeAccessReport(): SemanticShadowLeagueReport {
+  return {
+    scenarioCount: 4,
+    scenarios: [
+      dryRunScenario({
+        scenarioId: "safe-notremote-token",
+        topActionId: "notremote-run",
+        scopes: ["runner_safe_access"],
+      }),
+      dryRunScenario({
+        scenarioId: "safe-remote-token",
+        topActionId: "remote_run",
+        scopes: ["runner_safe_access"],
+      }),
+      dryRunScenario({
+        scenarioId: "risk-token",
+        blockedByReason: {
+          runner_safe_access_risk_gate: 1,
+          runner_safe_access_brisk_gate: 1,
+        },
+      }),
+      dryRunScenario({
+        scenarioId: "structured-token",
+        blockedByReason: {
+          runner_safe_access_structured_alignment_required: 1,
+          runner_safe_access_structured_alignment_requiredish: 1,
+        },
+      }),
+    ],
+    metrics: {
+      pilotCutoverReadiness: {
+        scopes: {
+          runner_safe_access: {
+            recommendation: "default_off_candidate",
+          },
+        },
+      },
+    },
+  } as unknown as SemanticShadowLeagueReport;
+}
+
+function dryRunScenario(params: {
+  scenarioId: string;
+  topActionId?: string;
+  scopes?: string[];
+  blockedByReason?: Record<string, number>;
+}) {
+  return {
+    scenarioId: params.scenarioId,
+    side: "runner",
+    topActionType: "start_run",
+    topActionId: params.topActionId ?? "draw",
+    observedMistakes: [],
+    pilotEligibility: {
+      scopes: params.scopes ?? [],
+      wouldOverride: false,
+      blockedByReason: params.blockedByReason ?? {},
+    },
+  };
 }
 
 function expectedSideCounts(

@@ -159,15 +159,19 @@ export function summarizeCentralCloseoutRepeatMetrics(
       const reason = entry.runnerCentralRunJustificationReason;
       if (reason && target) {
         const reasonKey = `${summary.seed}|${turn}|${target}`;
-        if (reason.includes("multiaccess"))
+        if (centralRunJustificationReasonMatches(reason, "multiaccess"))
           reasonKeys.multiaccess.add(reasonKey);
-        if (reason.includes("interface")) reasonKeys.interface.add(reasonKey);
-        if (reason.includes("closeout")) reasonKeys.closeout.add(reasonKey);
-        if (reason.includes("remote_uncontestable"))
+        if (centralRunJustificationReasonMatches(reason, "interface"))
+          reasonKeys.interface.add(reasonKey);
+        if (centralRunJustificationReasonMatches(reason, "closeout"))
+          reasonKeys.closeout.add(reasonKey);
+        if (
+          centralRunJustificationReasonMatches(reason, "remote_uncontestable")
+        )
           reasonKeys.remote_uncontestable.add(reasonKey);
-        if (reason.includes("hq_pressure"))
+        if (centralRunJustificationReasonMatches(reason, "hq_pressure"))
           reasonKeys.hq_pressure.add(reasonKey);
-        if (reason.includes("rnd_freshness"))
+        if (centralRunJustificationReasonMatches(reason, "rnd_freshness"))
           reasonKeys.rnd_freshness.add(reasonKey);
       }
 
@@ -283,4 +287,11 @@ export function summarizeCentralCloseoutRepeatMetrics(
     alternativeChosenAfterStaleCentralPenalty: noFreshSubstitutionKeys.size,
     substitutionLedToProgression: substitutionProgressionKeys.size,
   };
+}
+
+function centralRunJustificationReasonMatches(
+  reason: string,
+  expected: string,
+): boolean {
+  return reason.toLocaleLowerCase("en-US") === expected;
 }

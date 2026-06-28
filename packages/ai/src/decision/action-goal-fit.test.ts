@@ -99,6 +99,50 @@ describe("ActionGoalFit", () => {
     expect(fit.score).toBeGreaterThan(60);
   });
 
+  it("matches tag and damage fallback families by structured semantic terms", () => {
+    const tagFit = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("tag-1", "trigger_ability"),
+        semanticActionType: "tag.apply",
+      },
+      utility: utility("corp.visible_tag_punish", "tag_punish"),
+      legalActionIds: ["tag-1"],
+    });
+    const damageFit = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("damage-1", "trigger_ability"),
+        semanticActionType: "damage.net",
+      },
+      utility: utility("corp.damage_window", "damage_pressure"),
+      legalActionIds: ["damage-1"],
+    });
+
+    expect(tagFit.fitStatus).not.toBe("irrelevant");
+    expect(damageFit.fitStatus).not.toBe("irrelevant");
+  });
+
+  it("ignores substring-only tag and damage semantic noise", () => {
+    const tagNoise = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("tag-noise", "trigger_ability"),
+        semanticActionType: "tagalong.apply",
+      },
+      utility: utility("corp.visible_tag_punish", "tag_punish"),
+      legalActionIds: ["tag-noise"],
+    });
+    const damageNoise = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("damage-noise", "trigger_ability"),
+        semanticActionType: "damaged_goods",
+      },
+      utility: utility("corp.damage_window", "damage_pressure"),
+      legalActionIds: ["damage-noise"],
+    });
+
+    expect(tagNoise.fitStatus).toBe("irrelevant");
+    expect(damageNoise.fitStatus).toBe("irrelevant");
+  });
+
   it("blocks risky self-damage actions under critical survival goals", () => {
     const risky = {
       ...candidateFor("damage-1", "activated_card_ability"),
@@ -120,6 +164,42 @@ describe("ActionGoalFit", () => {
       "goal_family:survival",
       "urgency:critical",
     ]);
+  });
+
+  it("matches plan alignment evidence exactly", () => {
+    const aligned = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("gain-1", "gain_credit"),
+        evidence: ["plan_alignment:runner.build_economy_base"],
+      },
+      utility: {
+        ...utility("runner.build_economy_base", "economy"),
+        evidence: ["plan_alignment:runner.build_economy_base"],
+      },
+      legalActionIds: ["gain-1"],
+    });
+    const noise = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("gain-noise", "gain_credit"),
+        evidence: ["not_plan_alignment:runner.build_economy_base_noise"],
+      },
+      utility: {
+        ...utility("runner.build_economy_base", "economy"),
+        evidence: ["plan_alignment:runner.build_economy_base"],
+      },
+      legalActionIds: ["gain-noise"],
+    });
+
+    expect(
+      aligned.components.find(
+        (component) => component.component === "plan_alignment",
+      )?.delta,
+    ).toBe(8);
+    expect(
+      noise.components.find(
+        (component) => component.component === "plan_alignment",
+      )?.delta,
+    ).toBe(0);
   });
 
   it("blocks target-profile goals when target context is missing", () => {

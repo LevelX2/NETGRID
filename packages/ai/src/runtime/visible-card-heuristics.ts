@@ -1,5 +1,7 @@
 import type { PlayerView, VisibleCard } from "@netgrid/shared";
 
+import { rolesMatch } from "./role-match";
+
 export type VisibleCardHeuristicDefinition = {
   title?: string;
   subtypes?: readonly string[];
@@ -100,7 +102,7 @@ export function runnerCardLooksLikeCreditPayout(
   definition: VisibleCardHeuristicDefinition | undefined,
 ): boolean {
   const mechanics = definition?.mechanics ?? [];
-  if (mechanics.some((mechanic) => mechanic.includes("gain_credits"))) {
+  if (rolesMatch(mechanics, ["gain_credits"])) {
     return true;
   }
   return /gain\s+\[?\d+\]?\s+credits/i.test(
@@ -115,12 +117,8 @@ export function runnerBadPublicityOrTraceTechCard(
 ): boolean {
   const text = card ? visibleCardText(card, definition) : "";
   return (
-    roles.some(
-      (role) =>
-        role.includes("bad_publicity") ||
-        role.includes("trace") ||
-        role.includes("bad-publicity"),
-    ) || /bad publicity|bad_publicity|trace/i.test(text)
+    rolesMatch(roles, ["bad_publicity", "trace", "bad-publicity"]) ||
+    /bad publicity|bad_publicity|trace/i.test(text)
   );
 }
 

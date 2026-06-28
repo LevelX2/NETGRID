@@ -9,6 +9,7 @@ import {
   cardDefinitionPlanRoleForCoverageSearch,
   cardDefinitionProvidesBreakerCoverage,
   cardPlanRoleForCoverageSearch,
+  coveragePlanRoleMatches,
   recoveryTargetDefinitionId,
   recoveryTargetVisibleCard,
 } from "./tactical-plan-coverage-card-roles";
@@ -93,7 +94,11 @@ export function coverageSearchActionFit(
   const sourceRole = sourceCard
     ? cardPlanRoleForCoverageSearch(sourceCard)
     : undefined;
-  if (sourceCard && sourceRole?.includes("search")) {
+  if (
+    sourceCard &&
+    sourceRole &&
+    coveragePlanRoleMatches(sourceRole, ["search"])
+  ) {
     const answerRole: CoverageAnswerRole =
       action.type === "install_card" ? "search_engine_setup" : "program_search";
     return {
@@ -125,7 +130,8 @@ export function coverageSearchActionFit(
 
   if (
     sourceCard &&
-    sourceRole?.includes("draw") &&
+    sourceRole &&
+    coveragePlanRoleMatches(sourceRole, ["draw"]) &&
     action.type !== "install_card"
   ) {
     return {
@@ -198,8 +204,12 @@ export function coverageSearchActionFit(
   const matchedActionRole = sourceCard
     ? cardPlanRoleForCoverageSearch(sourceCard)
     : action.type;
+  const matchedActionRoleSupportsEconomy = coveragePlanRoleMatches(
+    matchedActionRole,
+    ["economy"],
+  );
   const supportsCreditNeed =
-    actionCreditCost(action) < 0 || matchedActionRole.includes("economy");
+    actionCreditCost(action) < 0 || matchedActionRoleSupportsEconomy;
   const penalties = economyFalseMatchLoopPenalties(
     fundingNeed,
     supportsCreditNeed,
@@ -212,14 +222,14 @@ export function coverageSearchActionFit(
     supportsDrawOrSearchNeed: false,
     supportsSurvivalNeed: false,
     recoveredCardPlanFit: "none",
-    recoveryLoopRisk: matchedActionRole.includes("economy") ? "medium" : "low",
+    recoveryLoopRisk: matchedActionRoleSupportsEconomy ? "medium" : "low",
     evidence: [
       `activeRequiredCapability:${requiredCoverage}`,
       "coverageAnswerRole:not_coverage_answer",
       "planStepExpectedRole:search_for_answer",
       `matchedActionRole:${matchedActionRole}`,
       "recoveredCardPlanFit:none",
-      matchedActionRole.includes("economy")
+      matchedActionRoleSupportsEconomy
         ? "why_livewire_not_search:economy_does_not_satisfy_coverage"
         : "rejectedFalseMatches:action_does_not_satisfy_coverage",
       ...recoveryLoopPenaltyEvidence(penalties),
@@ -327,8 +337,8 @@ function recoveryTargetEvaluation(
       : targetDefinitionId !== undefined &&
         cardDefinitionProvidesBreakerCoverage(targetDefinitionId, requiredCoverage);
   const supportsDrawOrSearchNeed =
-    targetRole.includes("search") || targetRole.includes("draw");
-  const supportsCreditNeed = targetRole.includes("economy");
+    coveragePlanRoleMatches(targetRole, ["search", "draw"]);
+  const supportsCreditNeed = coveragePlanRoleMatches(targetRole, ["economy"]);
   const recoveredCardPlanFit: RecoveryTargetPlanFit = supportsCoverage
     ? "high"
     : supportsDrawOrSearchNeed

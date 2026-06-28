@@ -2960,6 +2960,16 @@ export function formatChronicleEvent(
   }
   if (actionType === "install_card") {
     const recurringCreditsLoaded = numberValue(payload.recurringCreditsLoaded);
+    const installCostPaid = numberValue(payload.installCostPaid);
+    const normalCreditsPaid =
+      numberValue(payload.runnerInstallNormalCreditsPaid) ?? 0;
+    const hostedCreditsPaid =
+      numberValue(payload.runnerInstallHostedCreditsPaid) ?? 0;
+    const temporaryCreditsPaid =
+      numberValue(payload.runnerInstallTemporaryCreditsPaid) ?? 0;
+    const paymentSourceTitles = titlesForDefinitionIds(
+      stringValue(payload.runnerInstallPaymentSourceDefinitionIds),
+    );
     const iceInstallAdditionalCost =
       numberValue(payload.iceInstallAdditionalCost) ?? 0;
     const iceInstallTotalCost = numberValue(payload.iceInstallTotalCost);
@@ -2974,6 +2984,29 @@ export function formatChronicleEvent(
         ...(iceInstallTotalCost !== undefined
           ? [`${iceInstallTotalCost} gesamt`]
           : []),
+      );
+    }
+    if (installCostPaid !== undefined && installCostPaid > 0) {
+      const paymentParts = [
+        normalCreditsPaid > 0
+          ? `${creditText(normalCreditsPaid)} aus dem Creditpool`
+          : undefined,
+        hostedCreditsPaid > 0
+          ? `${creditText(hostedCreditsPaid)} aus Installationsquellen`
+          : undefined,
+        temporaryCreditsPaid > 0
+          ? `${creditText(temporaryCreditsPaid)} temporär`
+          : undefined,
+      ].filter(Boolean);
+      description =
+        paymentParts.length > 0
+          ? `Installationskosten: ${paymentParts.join(", ")}.`
+          : `Installationskosten: ${creditText(installCostPaid)}.`;
+      chips.push(
+        `${installCostPaid} ${creditLabel(installCostPaid)} bezahlt`,
+        ...(normalCreditsPaid > 0 ? [`${normalCreditsPaid} Pool`] : []),
+        ...(hostedCreditsPaid > 0 ? [`${hostedCreditsPaid} Quelle`] : []),
+        ...paymentSourceTitles,
       );
     }
   }
@@ -3421,15 +3454,19 @@ function formatChronicleEffect(
       category = "card";
       if (sourceDefinitionId === SKIVVISS_ID) {
         const targetSubject =
-          subject === "Du"
-            ? "dich"
-            : subject === "Der Runner"
-              ? "den Runner"
-              : subject.replace(/^Die /u, "die ");
-        title = `${sourceTitle ?? "Skivviss"} zwingt ${targetSubject} zu ${amount} ${amount === 1 ? "zusätzlicher Karte" : "zusätzlichen Karten"}`;
+          subject === "Du" ? "Du" : subject;
+        title = `${sourceTitle ?? "Skivviss"}: ${targetSubject} ${
+          targetSubject === "Du" ? "ziehst" : "zieht"
+        } zu Beginn ${
+          targetSubject === "Du" ? "deines" : "ihres"
+        } Zugs ${amount} ${
+          amount === 1 ? "zusätzliche Karte" : "zusätzliche Karten"
+        }`;
         description = `Grund: ${amount} Skivviss-Counter auf der Korp.`;
         chips.push(
           "Skivviss",
+          "Automatisch",
+          "Korp-Zugstart",
           `${amount} Skivviss-Counter`,
           amount === 1 ? "1 Zusatzkarte" : `${amount} Zusatzkarten`,
         );
@@ -4191,6 +4228,36 @@ function actionUseFromPayload(
 
 export function chronicleGroupLabel(item: ChronicleItem): string {
   return item.groupLabel;
+}
+
+export function chronicleStartTurnEffectGroupFromEvent(
+  event: PublicGameEvent,
+  eventTurnNumber: number | null | undefined,
+  item: ChronicleItem,
+): { label: string; kind: Side } | null {
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  const eventActor = sideValue(payload.actor);
+  if (
+    !chronicleEventCanCarryNextTurnStartEffects(event, actionType) ||
+    !eventActor ||
+    !item.actor ||
+    item.actor === eventActor
+  )
+    return null;
+  if (!item.chips.includes("Automatisch")) return null;
+  const label = chronicleTurnGroupLabel(
+    item.actor,
+    eventTurnNumber ? eventTurnNumber + 1 : null,
+  );
+  return { label, kind: item.actor };
+}
+
+function chronicleEventCanCarryNextTurnStartEffects(
+  event: PublicGameEvent,
+  actionType: string,
+): boolean {
+  return actionType === "end_turn" || isDiscardPhaseResolution(event);
 }
 
 function categoryFor(actionType: string): ChronicleCategory {

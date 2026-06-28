@@ -4,6 +4,7 @@ import type {
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
+import { rolesHaveBreakerRole } from "./breaker-role-match";
 
 type RunnerProgramSacrificeInstallAssessment = {
   memoryRequired: boolean;
@@ -74,7 +75,7 @@ export function runnerInstallScoreComponents(
   );
   if (muPressureMemorySupport) components.push(muPressureMemorySupport);
   if (persistentInstallFit) components.push(persistentInstallFit);
-  if (roles.some((role) => role.startsWith("breaker_"))) {
+  if (rolesHaveBreakerRole(roles)) {
     components.push({
       key: "runner_install_breaker",
       label: "Breaker-Aufbau",

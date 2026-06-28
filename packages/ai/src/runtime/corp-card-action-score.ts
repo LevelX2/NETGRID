@@ -1,10 +1,19 @@
 import { type LegalAction } from "@netgrid/shared";
+import { rolesMatch } from "./role-match";
 
 type CorpCardActionScoreFeatures = {
   credits: number;
   handCount: number;
   opponentTags: number;
 };
+
+const CORP_AGENDA_ROOT_ROLE_NEEDLES = [
+  "agenda_asset",
+  "agenda_support",
+  "agenda_protection",
+  "agenda_score",
+  "agenda_fast_advance",
+] as const;
 
 export function scoreCorpRootInstall(
   roles: string[],
@@ -13,9 +22,10 @@ export function scoreCorpRootInstall(
   profile: Record<string, number>,
 ): number {
   let score = 500 + (profile.remote ?? 1) * 45;
-  if (roles.some((role) => role.startsWith("agenda_")))
+  if (rolesMatch(roles, CORP_AGENDA_ROOT_ROLE_NEEDLES))
     score += 110 + (profile.score ?? 1) * 35;
-  if (roles.includes("economy_asset")) score += features.credits < 5 ? 90 : 30;
+  if (rolesMatch(roles, ["economy_asset"]))
+    score += features.credits < 5 ? 90 : 30;
   if (action.payload?.serverId === "new_remote") score += 35;
   return score;
 }
@@ -37,12 +47,12 @@ export function scoreCorpOperation(
   features: CorpCardActionScoreFeatures,
   profile: Record<string, number>,
 ): number {
-  if (roles.includes("tag_punishment"))
+  if (rolesMatch(roles, ["tag_punishment"]))
     return features.opponentTags > 0 ? 790 : 120;
   let score = 480;
-  if (roles.includes("economy_operation"))
+  if (rolesMatch(roles, ["economy_operation"]))
     score += features.credits < 6 ? 160 * (profile.economy ?? 1) : 70;
-  if (roles.includes("draw_operation"))
+  if (rolesMatch(roles, ["draw_operation"]))
     score += features.handCount < 4 ? 120 : 50;
   return score;
 }

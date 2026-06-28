@@ -54,6 +54,29 @@ describe("bankStepMatchesCandidate", () => {
       ),
     ).toBe(true);
   });
+
+  it("ignores substring-only bank and cash signals", () => {
+    expect(
+      bankStepMatchesCandidate(
+        { kind: "build_bank_counter" } as PlanStep,
+        candidate({
+          actionTacticSignals: ["bankroll_noise"],
+          semanticActionType: "unknown",
+        }),
+        legalAction({ actionId: "build-noise" }),
+      ),
+    ).toBe(false);
+    expect(
+      bankStepMatchesCandidate(
+        { kind: "cash_out_bank" } as PlanStep,
+        candidate({
+          actionTacticSignals: ["cashier_noise", "payoutish_noise"],
+          semanticActionType: "unknown",
+        }),
+        legalAction({ actionId: "cash-noise" }),
+      ),
+    ).toBe(false);
+  });
 });
 
 function legalAction(overrides: Partial<LegalAction>): LegalAction {

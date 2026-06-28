@@ -7307,6 +7307,1099 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` neunundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-passive-scoreline.ts` nutzt für passive Scoreline-Economy-Aktionsrollen den gehärteten `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `economy_asset` bleiben harte Economy-Passivaktion; substringartiges Rauschen wie `microeconomy_noise` fällt auf `non_score_action` zurück.
+  - `semantic-runtime-corp-passive-scoreline.test.ts` schützt strukturierte Economy-Rollen und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-passive-scoreline.test.ts src/runtime/semantic-runtime-corp-score.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 16 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` sechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bank-investment-context.ts` nutzt für Runner-Credit-Bank-Erkennung und konkrete Funding-Need-Rollen den gehärteten `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Economy-/Memory-/Pressure-/Setup-/Breaker-Rollen bleiben wirksam; substringartiges Rauschen wie `microeconomy` und `pressurewasher_noise` löst keine Credit-Bank- oder Funding-Need-Klassifikation mehr aus.
+  - `runner-bank-investment-context.test.ts` schützt strukturierte Credit-Bank-Hints, Bank-Build-/Cashout-Payloads und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bank-investment-context.test.ts src/runtime/semantic-runtime-plan-memory-exclusion.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts --testNamePattern "Broker|bank|credit-bank"` grün, 1 Datei, 2 Tests, 43 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts --testNamePattern 'bank'` grün, 1 Datei, 2 Tests, 43 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` einundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/visible-card-heuristics.ts` nutzt für Bad-Publicity-/Trace-Tech-Rollen den gehärteten `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Sichtbarer Kartentext bleibt bewusst weiter textbasiert; der Schnitt betrifft nur strukturierte Rollenfelder.
+  - `visible-card-heuristics.test.ts` schützt strukturierte Rollen wie `bad_publicity` und `trace_support` sowie Substring-Negativfälle wie `bad_publicityish_noise` und `traceroute_noise`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/visible-card-heuristics.test.ts src/runtime/role-match.test.ts src/runtime/discard-keep-score.test.ts` grün, 3 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "Bad-Publicity|bad_publicity|trace tech|discard"` grün, 1 Datei, 13 Tests, 521 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-bad-publicity-relevance-assessment.ts` nutzt für Bad-Publicity-Support-Rollen und Hint-Effect-Targets den gehärteten `rolesMatch`-Helper statt freier Substring-Prüfungen.
+  - Sichtbarer Kartentext bleibt bewusst weiter textbasiert; der Schnitt betrifft nur strukturierte Rollen- und Effect-Target-Felder.
+  - `runner-bad-publicity-relevance-assessment.test.ts` schützt strukturierte Rollen/Targets wie `bad_publicity_support` und `runner.bad_publicity` sowie Substring-Negativfälle wie `bad_publicityish_noise`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-bad-publicity-relevance-assessment.test.ts src/runtime/visible-card-heuristics.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "Bad-Publicity trace tech"` grün, 1 Datei, 1 Test, 533 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "support-only Bad Publicity"` grün, 1 Datei, 1 Test, 533 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --testNamePattern "Bad Publicity 7"` grün, 1 Datei, 1 Test, 533 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` dreiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/corp-tactical-goals.ts` ersetzt zusammengesetzte Regex-Prüfungen auf sichtbarem Candidate-Signaltext für Tag-/Trace-/Punish-/Damage-/Ambush-/Scorecloseout-Signale durch strukturierte Einzel-Signal-/Term-Prüfungen.
+  - Signale wie `tag.apply`, `punish.payoff`, `damage.net`, `ambush.window`, `corp.score_closeout` und `advance.counter_cashout` bleiben wirksam; substringartiges Rauschen wie `tagalong_punishment_noise`, `damaged_goods` und `ambushment_noise` erzeugt keine taktischen Corp-Punish-/Damage-Ziele.
+  - `corp-tactical-goals.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/corp-tactical-goals.test.ts src/decision/tactical-goal-utility.test.ts src/decision/semantic-shadow-decision.test.ts` grün, 3 Dateien, 26 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` vierundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/action-goal-fit.ts` bindet die `tag_punish`- und `damage_pressure`-Family-Fallbacks an strukturierte semantische Terme statt freie Substring-Treffer.
+  - Strukturierte Semantiken wie `tag.apply` und `damage.net` bleiben wertend; substringartiges Rauschen wie `tagalong.apply` und `damaged_goods` wird nicht mehr als Tag- oder Damage-Fallback-Fit klassifiziert.
+  - `action-goal-fit.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/action-goal-fit.test.ts src/decision/corp-tactical-goals.test.ts src/decision/tactical-goal-utility.test.ts` grün, 3 Dateien, 29 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` fünfundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-coverage-card-roles.ts` stellt einen strukturierten Coverage-Planrollen-Term-Helper bereit, der `search`, `draw` und `economy` nur als gebundene Rollenbestandteile wertet.
+  - `packages/ai/src/plans/tactical-plan-coverage-search-fit.ts` und `packages/ai/src/plans/tactical-plan-legal-coverage-answers.ts` nutzen diesen Helper statt freier Rollen-Substring-Prüfungen für Source- und Recovery-Target-Rollen.
+  - Strukturierte Rollen wie `search` und `draw` bleiben Coverage-Antworten; substringartiges Rauschen wie `research` und `microeconomy` erzeugt keine Search-/Draw-/Economy-Coverage-Antwort mehr.
+  - `tactical-plan-coverage-search-fit.test.ts` und `tactical-plan-legal-coverage-answers.test.ts` schützen Source- und Recovery-Target-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-coverage-search-fit.test.ts src/plans/tactical-plan-legal-coverage-answers.test.ts` grün, 2 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` sechsundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-corp-helpers.ts` bewertet Corp-Punish-Candidates nicht mehr über zusammengesetzten Candidate-Semantiktext mit freier Regex.
+  - Punish-Kandidaten werden aus strukturierten Candidate-Signalfeldern einzeln geprüft; exakte Signale wie `tag.source`, `trace.source`, `tag.payoff`, `damage.payoff`, `trash_runner_resource`, `net_damage` und `meat_damage` sowie gebundene `punish`-/`flatline`-Terme bleiben wirksam.
+  - Substringartiges Rauschen wie `punishment_noise` und `flatliner` erzeugt keine Corp-Punish-Kandidaten mehr.
+  - `tactical-plan-corp-helpers.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-corp-helpers.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` siebenundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-source-card-answer-role.ts` trennt strukturierte Rollen und Definition-Mechaniken aus dem sichtbaren Source-Textblock.
+  - Rollen und Mechaniken werden über den gebundenen `rolesMatch`-Helper bewertet; `program_search` und `draw_card` bleiben als Search-/Draw-Antworten wirksam.
+  - Substringartiges Rauschen wie `research_noise` und `withdraw_card` erzeugt keine Search-/Draw-Antwort mehr; sichtbarer Kartentext bleibt bewusst weiter textbasiert.
+  - `runner-source-card-answer-role.test.ts` schützt strukturierte Treffer, Label-only-Text und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-source-card-answer-role.test.ts src/runtime/role-match.test.ts src/runtime/semantic-runtime-choice-builder.test.ts` grün, 3 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` achtundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-candidate-matching.ts` bewertet Bank-Step-Kandidaten nicht mehr über zusammengefügten Signaltext mit freien `includes`-Treffern.
+  - Build-/Cashout-Bank-Schritte prüfen strukturierte Candidate-Signale einzeln auf gebundene `bank`-, `cash`- und `payout`-Terme; Payload-Flags für hosted-credit Add/Take bleiben unverändert wirksam.
+  - Strukturierte Signale wie `cash_out_credit_bank` bleiben passend; substringartiges Rauschen wie `bankroll_noise`, `cashier_noise` und `payoutish_noise` erzeugt keinen Bank-Step-Match mehr.
+  - `tactical-plan-candidate-matching.test.ts` schützt strukturierte Treffer, Label-only-Text, Payload-Fälle und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-candidate-matching.test.ts src/plans/tactical-plan-runner-plans.test.ts src/plans/tactical-plan-bank-tools.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` neunundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-effective-defense.ts` bewertet Corp-Effective-Defense-Signale nicht mehr über zusammengefügten Signaltext mit freien `includes`-Treffern.
+  - Relevante Signale für ETR, Trace, Tax/Damage und post-rez paid subroutines werden als einzelne strukturierte Signal-Terme geprüft; die `minimumUsefulX`-Grenze bleibt auf `trace.source`, `trace_ice` und bekannte variable Rez-Kinds beschränkt.
+  - Strukturierte Signale wie `trace.source`, `trace_ice`, `corp_ice.conditional_end_run` und `corp_ice.encounter_paid_subroutine_add` bleiben wirksam; substringartiges Rauschen wie `traceroute_noise`, `damaged_goods`, `taxable_noise`, `end_runner_noise` und `paid_subroutineish_noise` erzeugt keine Effective-Defense-Wertung mehr.
+  - `semantic-runtime-corp-effective-defense.test.ts` schützt strukturierte Treffer, Label-only-Text und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-effective-defense.test.ts src/runtime/semantic-runtime-corp-score.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 21 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` siebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-score-terminal-diagnostics.ts` nutzt für Score-Terminal-Diagnostic-Economy-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Economy-Rollen wie `economy_operation` bleiben wirksam; substringartiges Rauschen wie `microeconomy_noise` klassifiziert Play-/Ability-Actions nicht mehr als Economy-Familie.
+  - `corp-score-terminal-diagnostics.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/corp-score-terminal-diagnostics.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` einundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-visible-tag-payoff-category.ts` nutzt für sichtbare Corp-Tag-Payoff-Kategorien den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `run_lock` und `access_ambush` bleiben wirksam; substringartiges Rauschen wie `run_locksmith_noise` und `ambusher_noise` erzeugt keine Run-Lock-/Ambush-Kategorie mehr.
+  - `corp-visible-tag-payoff-category.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/corp-visible-tag-payoff-category.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-tag-punish-action-context.ts` nutzt für Corp-Tag-/Trace-Source- und Tag-Punishment-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `tag_source`, `trace_tag` und `tag_punishment` bleiben wirksam; substringartiges Rauschen wie `tagalong_source`, `tag_sourceish_noise`, `traceroute_noise` und `tag_punishmentish_noise` erzeugt keine Tag-/Trace-/Punish-Klassifikation mehr.
+  - `corp-tag-punish-action-context.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/corp-tag-punish-action-context.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` dreiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-install-classification.ts` nutzt für Runner-Draw-/Search-CardEffect-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `program_search` bleiben wirksam; substringartiges Rauschen wie `research_noise` erzeugt keine Draw-/Search-CardEffect-Klassifikation mehr.
+  - `runner-install-classification.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-install-classification.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` vierundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-setup-coverage-types.ts` nutzt für Runner-Coverage-Search-/Recovery-Metrikrollen und strukturierte Mechaniken den gebundenen `rolesMatch`-Helper statt freier Substring-Prüfungen.
+  - Strukturierte Rollen wie `program_search` und `trash_recovery` bleiben wirksam; substringartiges Rauschen wie `research_noise` und `recoveryish_noise` erzeugt keine Coverage-Search-/Recovery-Klassifikation mehr.
+  - `runner-setup-coverage-types.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-setup-coverage-types.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` fünfundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/doctrine-quality-tags.ts` nutzt für Economy-Stall-Ausnahmen bei Play-Event-/Operation-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `economy_operation` bleiben economy-wirksam; substringartiges Rauschen wie `microeconomy_noise` verhindert keine `economy_stall`-Markierung mehr. Die exakte `tempo`-Rolle bleibt bewusst exakt.
+  - `doctrine-quality-tags.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/doctrine-quality-tags.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` sechsundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-economy-setup-types.ts` nutzt für Runner-Economy-Setup-Unterklassen den gebundenen `rolesMatch`-Helper statt freier Rollen-/Mechanik-Substring-Prüfungen.
+  - Strukturierte Rollen wie `finite_economy_pool`, `loan_debt` und `tag_risk` bleiben wirksam; substringartiges Rauschen wie `infinite_noise`, `poolish_noise`, `loaner_noise`, `tagalong_noise` und `damaged_goods` erzeugt keine Finite-/Loan-/Downside-/Handsize-Klassifikation mehr.
+  - `runner-economy-setup-types.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-economy-setup-types.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` siebenundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-credit-reserve.ts` nutzt für sichtbare Remote-Steal-/Tax-/Protection-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `access_tax` und `scoring_protection` erhöhen weiterhin die Runner-Reserve; substringartiges Rauschen wie `access_taxish_noise` und `scoring_protectionish_noise` hebt den Reserve-Floor nicht mehr an.
+  - `runner-credit-reserve.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-credit-reserve.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` achtundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-known-no-access.ts` nutzt für Coverage-Repair-Diagnostic-Search-/Recovery-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `program_search` und `trash_recovery` bleiben Repair-Followups; substringartiges Rauschen wie `research_noise` und `recoveryish_noise` erzeugt keine Coverage-Repair-Erfüllung mehr.
+  - `runner-known-no-access.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-known-no-access.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` neunundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/central-pressure-card.ts`, `central-run-pressure-justification.ts`, `no-fresh-central.ts` und `runner-central-pressure-diagnostics.ts` nutzen für zentrale Runner-Pressure-/Multiaccess- und Setup-Search-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `interface_multiaccess` und `program_search` bleiben wirksam; substringartiges Rauschen wie `multiaccessory_noise` und `research_noise` erzeugt keine Multiaccess-/Setup-Search-Diagnostik mehr.
+  - `central-pressure-card.test.ts`, `central-run-pressure-justification.test.ts`, `no-fresh-central.test.ts` und `runner-central-pressure-diagnostics.test.ts` schützen strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/central-pressure-card.test.ts src/simulation/central-run-pressure-justification.test.ts src/simulation/no-fresh-central.test.ts src/simulation/runner-central-pressure-diagnostics.test.ts src/runtime/role-match.test.ts` grün, 5 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` achtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/remote-trash-role.ts` nutzt für Remote-Trash-Kategorien und finite Pool-Mechaniken den gebundenen `rolesMatch`-Helper statt freier Rollen-/Mechanik-Substring-Prüfungen.
+  - Strukturierte Rollen wie `remote_agenda_protection`, `ice_tax`, `economy_asset`, `tag_punishment`, `access_ambush` und `low_value` bleiben wirksam; substringartiges Rauschen wie `remote_agenda_protectionish_noise`, `nice_tax_noise`, `microeconomy_noise`, `tagalong_noise`, `ambusher_noise` und `slow_value_noise` erzeugt keine Remote-Trash-Kategorie mehr.
+  - `remote-trash-role.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/remote-trash-role.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` einundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-known-no-access.ts` nutzt für positive Bypass-/Probe-/Expose-/Inside-Job-Followups den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `run_probe` bleiben positive Probe-Signale; substringartiges Rauschen wie `probescape_noise` erzeugt keinen `probeRunWithPositiveInfoValue`-Pfad mehr.
+  - `runner-known-no-access.test.ts` schützt strukturierte Treffer und Substring-Negativfälle zusätzlich zum Coverage-Repair-Schutz.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-known-no-access.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/known-remote-access-commitment.ts` kapselt High-Impact-Remote-Root-Rollen in `knownRemoteRootHasHighImpactRole` und nutzt dort den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `asset_economy`, `holovid_campaign` und `access_tax` bleiben High-Impact-Signale; substringartiges Rauschen wie `access_taxish_noise`, `microeconomy_noise` und `campaigner_noise` erzeugt kein Reserve-Break-High-Impact-Signal mehr.
+  - `known-remote-access-commitment.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/known-remote-access-commitment.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` dreiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/remote-trash-cost.ts` nutzt für dedizierte Remote-Trash-Credit-Mechaniken den gebundenen `rolesMatch`-Helper statt freier Mechanik-Substring-Prüfungen.
+  - Strukturierte Mechaniken wie `upgrade_trash_payment` und `node_trash_recurring_credit` bleiben wirksam; substringartiges Rauschen wie `upgrade_trash_paymentish_noise` und `node_trash_recurring_credited_noise` liefert keine dedizierten Trash-Credits mehr.
+  - `remote-trash-cost.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/remote-trash-cost.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` vierundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/visible-card-heuristics.ts` nutzt für Runner-Credit-Payout-Mechaniken den gebundenen `rolesMatch`-Helper statt freier Mechanik-Substring-Prüfungen.
+  - Strukturierte Mechaniken wie `gain_credits` und `gain_credits_per_counter` bleiben Credit-Payout-Signale; substringartiges Rauschen wie `again_credits_noise` erzeugt keinen Credit-Payout-Treffer mehr.
+  - `visible-card-heuristics.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/visible-card-heuristics.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` fünfundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-no-run-economy-context.ts` nutzt für No-Run-Economy-Effektziele exakte Ziel-IDs und für Mechaniken den gebundenen `rolesMatch`-Helper statt freier Substring-Prüfungen.
+  - Strukturierte Effektziele `economy.turn_start_credit` und `risk.ends_on_run` sowie Mechaniken `start_of_turn_credit_gain` und `trash_on_run` bleiben wirksam; substringartiges Rauschen wie `economy.turn_start_credited_noise`, `risk.ends_on_runner_noise`, `start_of_turn_credit_gainish_noise` und `trash_on_runner_noise` erzeugt keine No-Run-Economy-Commitment-Aktivierung mehr.
+  - `runner-no-run-economy-context.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-no-run-economy-context.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` sechsundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-tag-creation-diagnostics.ts` nutzt für Trace-ReasonCodes den gebundenen `rolesMatch`-Helper statt freier `reasonCode`-Substring-Prüfung.
+  - Strukturierte ReasonCodes wie `corp.trace.bid_visible_amount` bleiben Trace-Signale; substringartiges Rauschen wie `traceroute_noise` erzeugt keine `corpTagCreatedByTraceSuccess`-Diagnostik mehr.
+  - `corp-tag-creation-diagnostics.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/corp-tag-creation-diagnostics.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` siebenundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/tag-punish-window-diagnostics-context.ts` nutzt für Runner-Trace-Tag-ReasonCodes den gebundenen `rolesMatch`-Helper statt freier `reasonCode`-Substring-Prüfung.
+  - Strukturierte ReasonCodes wie `corp.trace.bid_visible_amount` bleiben Runner-Trace-Tag-Signale; substringartiges Rauschen wie `traceroute_noise` erzeugt keine `runnerTaggedAfterTraceDuringRun`-Diagnostik mehr.
+  - `tag-punish-window-diagnostics-context.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/tag-punish-window-diagnostics-context.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` achtundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/doctrine-quality-tags.ts` nutzt für Central-Run-Contest-/Trash-ReasonCodes den gebundenen `rolesMatch`-Helper statt freier `reasonCode`-Substring-Prüfungen.
+  - Strukturierte ReasonCodes wie `runner.remote_contest` und `trash_remote` verhindern weiterhin die Low-Value-Repeat-Markierung; substringartiges Rauschen wie `contestable_noise` und `trashcan_noise` verhindert sie nicht mehr.
+  - `doctrine-quality-tags.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/doctrine-quality-tags.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` neunundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/plan-conversion-predicates.ts` nutzt für PlanKind-Verzweigungen den gebundenen `rolesMatch`-Helper statt freier PlanKind-Substring-Prüfungen.
+  - Strukturierte PlanKinds wie `setup_plan` bleiben konvertierungswirksam; substringartiges Rauschen wie `setupish_noise` erzeugt keine Setup-Konvertierung mehr.
+  - `plan-conversion-predicates.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/plan-conversion-predicates.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` neunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-endgame-closeout.ts` nutzt für Endgame-PlanKind-Kategorien den gebundenen `rolesMatch`-Helper statt freier PlanKind-Substring-Prüfungen.
+  - Strukturierte PlanKinds wie `economy_plan`, `protect_remote` und `remote_build` bleiben wirksam; substringartiges Rauschen wie `microeconomy_noise`, `protector_noise` und `remote_builder_noise` erzeugt keine Endgame-Setup-/Protection-/Corp-Stall-Kategorie mehr.
+  - `runner-endgame-closeout.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-endgame-closeout.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` einundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/strategic-plan-conversion-metrics.ts` nutzt für Strategic-Plan-Conversion-Metric-PlanKinds den gebundenen `rolesMatch`-Helper statt freier PlanKind-Substring-Prüfungen.
+  - Strukturierte PlanKinds wie `recover_economy_plan` und `protect_hq` bleiben wirksam; substringartiges Rauschen wie `recover_economyish_noise` und `protector_hq_noise` erzeugt keine Conversion-Metric-Kategorie mehr.
+  - `strategic-plan-conversion-metrics.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/strategic-plan-conversion-metrics.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweiundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-hardware-payoff-evidence.ts` nutzt für sichtbare Runner-Hardware-Multiaccess-Payoff-Texte gebundene Phrasen-/Wort-Regex statt freier Text-Substring-Prüfungen.
+  - Phrasen wie `Access 1 additional card` und `Multiaccess` bleiben Payoff-Signale; substringartiges Rauschen wie `Multiaccessory noise` erzeugt keinen `runner_hardware_payoff:multiaccess`-Evidence-Eintrag mehr.
+  - `runner-hardware-payoff-evidence.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-hardware-payoff-evidence.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` dreiundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-breaker-coverage.ts` nutzt für textbasierte ICE-Coverage-Fallbacks gebundene Wort-/Phrasenmatches statt freier Text-Substring-Prüfungen.
+  - Strukturierte Treffer wie `AP`, `trace`, `sentry` und `codegate` bleiben wirksam; substringartiges Rauschen wie `appliance` erzeugt keine `breaker_ap`-Coverage mehr.
+  - `tactical-plan-breaker-coverage.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-breaker-coverage.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` vierundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-visible-tag-punish-unknown-skip-diagnostics.ts` tokenisiert ReasonCode-/Evidence-Signale und nutzt den gebundenen `rolesMatch`-Helper statt freier Text-Substring-Prüfungen für Unknown-Skip-Attribution.
+  - Strukturierte Signale wie `score_window` und `protect_hq` bleiben plausible Skip-Gründe; substringartiges Rauschen wie `score_windowish_noise`, `protector_hq_noise` und `microeconomy_noise` erzeugt keine Unknown-Skip-Kategorie mehr.
+  - `corp-visible-tag-punish-unknown-skip-diagnostics.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/corp-visible-tag-punish-unknown-skip-diagnostics.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` fünfundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-run-action-matching.ts` nutzt für `path blocked`-Run-Blocker eine gebundene Phrase-Regex statt freier Text-Substring-Prüfung.
+  - Das strukturierte Signal `path blocked` blockiert weiterhin Run-Action-Matching; substringartiges Rauschen wie `path blockedness noise` blockiert strukturierte Run-Aktionen nicht mehr.
+  - `tactical-plan-run-action-matching.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-run-action-matching.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` sechsundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/remote-trash-role.ts` nutzt für finite-pool RulesText-Erkennung gebundene Wort-/Phrasenmatches statt freier Text-Substring-Prüfungen.
+  - Strukturierte Texte wie `Put 8 bits from the bank... Take bits` bleiben finite-pool-wirksam; substringartiges Rauschen wie `banker`, `intake` und `bitsy` erzeugt keine finite-pool-Erkennung mehr.
+  - `remote-trash-role.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/remote-trash-role.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` siebenundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` kapselt sichtbare Corp-Action-Candidate-Signale in `corpActionCandidateHasVisibleSignal` und nutzt exakte Signalvergleiche plus gebundenes `rolesMatch` statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `access_ambush` und `corp.score_closeout` bleiben wirksam; substringartiges Rauschen wie `ambusher_noise` erzeugt kein sichtbares Corp-Signal mehr.
+  - `semantic-runtime-corp-score.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` achtundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für `repeated_known_no_payoff_remote` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `remote_memory_payoff:known_low_value` bleiben wirksam; substringartiges Rauschen wie `known_low_valueish` erzeugt keinen No-Payoff-Remote-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` neunundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für `bank_over_target_without_funding_need` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `bankOverTarget:true` bleiben wirksam; substringartiges Rauschen wie `bankOverTarget:trueish` erzeugt keinen Bank-Over-Target-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für `risky_self_damage_action` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `self_damage_survives:false` bleiben wirksam; substringartiges Rauschen wie `self_damage_survives:falseish` erzeugt keinen Risky-Self-Damage-Fund mehr, und `runner.self_damage.safe_alternative` bleibt als exakter Entlastungsfakt erhalten.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer, Substring-Negativfälle und den Safe-Alternative-Ausschluss.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hunderterster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für `blink_low_hand_buffer_run` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `blinkRiskSeverity:lethal` bleiben wirksam; substringartiges Rauschen wie `blinkRiskSeverity:lethalish` erzeugt keinen Blink-Handbuffer-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertzweiter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für die Coverage-Recovery-Entlastung in `recovery_low_value_loop` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `coverageAnswerRole:recovery_answer` bleiben wirksam; substringartiges Rauschen wie `coverageAnswerRole:recovery_answerish` verhindert keinen Low-Value-Recovery-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertdritter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für die Funding-Need-Entlastung in `recovery_low_value_loop` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `runner_credit_base_recommendation:fund_useful_hand_card` bleiben wirksam; substringartiges Rauschen wie `fund_useful_hand_cardish` verhindert keinen Low-Value-Recovery-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertvierter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für die Search-/Draw-Entlastung in `recovery_low_value_loop` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `coverageAnswerRole:program_search` bleiben wirksam; substringartiges Rauschen wie `program_searchish` verhindert keinen Low-Value-Recovery-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertfünfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für `repeated_low_value_archives` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `archives_known_no_agenda` bleiben wirksam; substringartiges Rauschen wie `archives_known_no_agendaish` erzeugt keinen Low-Value-Archives-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsechster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für den Startmarker von `semantic_override_suspicious` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `semantic_runtime_actual_differs_from_legacy_debug` bleiben wirksam; substringartiges Rauschen wie `semantic_runtime_actual_differs_from_legacy_debugish` erzeugt keinen Semantic-Override-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 12 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsiebter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für bekannte `semantic_override_suspicious`-/Plan-Mismatch-Entlastungsgründe strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `selected_by_plan_mapping` bleiben wirksam; substringartiges Rauschen wie `selected_by_plan_mappingish` entlastet keinen Semantic-Override-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertachter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/selfplay-trace-mining.ts` nutzt für den Setup-Plan-Mismatch-Druckmarker `runnerPressureReady:false` strukturierte Signal-Einträge aus ReasonCode, Evidence, DebugFacts und QualityTags statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `runnerPressureReady:false` bleiben wirksam; substringartiges Rauschen wie `runnerPressureReady:falseish` erzeugt keinen Setup-Plan-Mismatch-Fund mehr.
+  - `selfplay-trace-mining.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/selfplay-trace-mining.test.ts` grün, 1 Datei, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertneunter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/central-closeout-repeat-metrics.ts` nutzt für Central-Run-Justification-Reasons exakte normalisierte Labelvergleiche statt freier Reason-Substring-Prüfung.
+  - Strukturierte Reasons wie `multiaccess` bleiben wirksam; substringartiges Rauschen wie `multiaccessory_noise` zählt nicht mehr als Central-Run-Multiaccess-Justification.
+  - `central-closeout-repeat-metrics.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/central-closeout-repeat-metrics.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-self-damage-choice.ts` nutzt für strukturierte Self-Damage-Hint-Targets exakte normalisierte Zielvergleiche statt freier Target-Substring-Prüfung.
+  - Strukturierte Targets wie `self` und `self_inflicted` bleiben wirksam; substringartiges Rauschen wie `selfish` erzeugt keine Self-Damage-Hint-Erkennung mehr.
+  - `runner-self-damage-choice.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-self-damage-choice.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertelfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-card-semantic-profiles.ts` nutzt für StrategySupport-Payoff-Rollen gebundene Tactic-Signal-Segmente statt freier Signal-Substring-Prüfung.
+  - Strukturierte Signale wie `access.hq_multiaccess` bleiben Payoff-Anker; substringartiges Rauschen wie `access.hq_multiaccessory_noise` erzeugt keine `payoff_anchor`-Rolle mehr.
+  - `action-card-semantic-profiles.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-card-semantic-profiles.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertzwölfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` nutzt für explizite Run-Signale und konkrete Server-Payloads exakte strukturierte Signalvergleiche statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `make_run` bleiben projektionswirksam; substringartiges Rauschen wie `make_runaway` erzeugt trotz Server-ID keine Run-Action-Projection mehr.
+  - `run-action-projection.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertdreizehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` nutzt für Path-Blocked-Run-Signale exakte strukturierte Signalvergleiche statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `path blocked` und `path_blocked` blockieren weiterhin die Projection; substringartiges Rauschen wie `path blockedness` blockiert keine Run-Action-Projection mehr.
+  - `run-action-projection.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertvierzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` nutzt für Scope-basierte Run-Projection exakte strukturierte Signalvergleiche statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signalpaare wie `run` plus `scope:hq` bleiben projektionswirksam; substringartiges Rauschen wie `runway` plus `scope:hq` erzeugt keine Run-Action-Projection mehr.
+  - `run-action-projection.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertfünfzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` nutzt für Run-Pressure-Event-Payoff-Erkennung exakte strukturierte Signalvergleiche statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `run_pressure` plus `multiaccess` bleiben projektionswirksam; substringartiges Rauschen wie `multiaccessory_noise` erzeugt keine Run-Action-Projection mehr.
+  - `run-action-projection.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsechzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` nutzt für Run-Action-Structure-Kategorien exakte strukturierte Signalvergleiche statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `multi_run_sequence` bleiben wirksam; substringartiges Rauschen wie `multi_run_sequenceish` erzeugt keine `multi_run_sequence`-Structure mehr.
+  - `run-action-projection.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Datei, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsiebzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` nutzt für HQ-via-Archives-Target- und Access-Override-Signale exakte strukturierte Signalvergleiche statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `target:hq_via_archives` bleiben wirksam; substringartiges Rauschen wie `target:hq_via_archivesish` erzeugt keinen HQ-Access-Override mehr.
+  - `run-action-projection.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Datei, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertachtzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` nutzt für Run-Projection-Constraint-Signale `no_noisy` und `bypass_first_ice` exakte strukturierte Signalvergleiche statt freier zusammengesetzter Text-Substring-Prüfung.
+  - Strukturierte Signale wie `no_noisy` und `bypass_first_ice` bleiben wirksam; substringartiges Rauschen wie `no_noisyish` und `inside_jobber` setzt keine Constraint-Flags mehr.
+  - `run-action-projection.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/run-action-projection.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertneunzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/central-pressure-card.ts` nutzt für R&D-, HQ- und Archives-Druckrollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-Prüfung.
+  - Strukturierte Rollen wie `pressure_rnd`, `support_hq_pressure` und `archives_pressure` bleiben wirksam; substringartiges Rauschen wie `pressure_rndish_noise` erzeugt keine Central-Pressure-Ziele mehr.
+  - `central-pressure-card.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/central-pressure-card.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/corp-card-action-score.ts` nutzt für Corp-Install-/Operation-Rollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-/Prefix-Prüfungen.
+  - Strukturierte Rollen wie `remote_economy_asset`, `tag_punishment_followup` und `economy_operation_burst` bleiben wirksam; substringartiges Rauschen wie `economy_assetish_noise` und `draw_operationish_noise` beeinflusst den Score nicht mehr.
+  - `corp-card-action-score.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-card-action-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hunderteinundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-card-action-score.ts` nutzt für Runner-Install-/Event-Rollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-Prüfungen.
+  - Strukturierte Rollen wie `support_memory`, `burst_economy`, `draw` und `run_pressure` bleiben wirksam; substringartiges Rauschen wie `memoryish_noise` und `run_pressureish_noise` beeinflusst den Score nicht mehr.
+  - `runner-card-action-score.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-card-action-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertzweiundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/shell-traders-action.ts` und `packages/ai/src/runtime/shell-traders-urgency.ts` nutzen für Shell-Traders-Zielwert- und Direktinstallationsrollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-Prüfungen.
+  - Strukturierte Rollen wie `support_memory`, `build_rig`, `runner_economy` und `tempo` bleiben wirksam; substringartiges Rauschen wie `memoryish_noise`, `build_rigish_noise` und `tempoish_noise` beeinflusst die Shell-Traders-Bewertung nicht mehr.
+  - `shell-traders-action.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/shell-traders-action.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertdreiundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/discard-keep-score.ts` nutzt für Runner-Discard-Keep-Rollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-Prüfungen.
+  - Strukturierte Rollen wie `support_memory`, `build_rig`, `draw` und `run_pressure` bleiben wirksam; substringartiges Rauschen wie `memoryish_noise`, `build_rigish_noise` und `run_pressureish_noise` beeinflusst den Runner-Discard-Keep-Score nicht mehr.
+  - `discard-keep-score.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/discard-keep-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertvierundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/search-choice-option.ts` nutzt für Search-Choice-Option-Rollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-Prüfungen.
+  - Strukturierte Rollen wie `support_memory` und `runner_economy` bleiben wirksam; substringartiges Rauschen wie `memoryish_noise` und `economyish_noise` beeinflusst die Search-Choice-Auswahl nicht mehr.
+  - `search-choice-option.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/search-choice-option.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertfünfundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/doctrine-quality-tags.ts` nutzt für Economy-/Tempo-Aktionsrollen den gebundenen `rolesMatch`-Helper statt gemischter `rolesMatch`- und direkter Rollen-`includes`-Prüfung.
+  - Strukturierte Rollen wie `economy_operation` und `burst_tempo` bleiben Economy-Stall-entlastend; substringartiges Rauschen wie `microeconomy_noise` und `tempoish_noise` entlastet keinen Economy-Stall mehr.
+  - `doctrine-quality-tags.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/doctrine-quality-tags.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsechsundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-visible-breaker-coverage.ts` nutzt für sichtbare Icebreaker-, Fracter-, Decoder- und Killer-Rollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-Prüfungen.
+  - Strukturierte Rollen wie `support_icebreaker`, `support_fracter`, `support_decoder` und `support_killer` bleiben wirksam; substringartiges Rauschen wie `icebreakerish_noise`, `fracterish_noise`, `decoderish_noise` und `killerish_noise` erzeugt keine sichtbare Breaker-Coverage mehr.
+  - `runner-visible-breaker-coverage.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-visible-breaker-coverage.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsiebenundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-tag-punish-visible-payoff.ts` nutzt für sichtbare Runner-Defense-Hintrollen den gebundenen `rolesMatch`-Helper statt direkter Rollen- und Planrollen-`includes`-Prüfungen.
+  - Strukturierte Rollen wie `support_damage_prevention`, `survive_meat_damage` und `support_trace_defense` bleiben wirksam; substringartiges Rauschen wie `damage_preventionish_noise`, `survive_meat_damageish_noise` und `trace_defenseish_noise` erzeugt keine Tag-Punish-Defense-Evidence mehr.
+  - `corp-tag-punish-visible-payoff.test.ts` schützt strukturierte Treffer und Substring-Negativfälle über einen isolierten Hint-Quellen-Mock.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/corp-tag-punish-visible-payoff.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertachtundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/runner-coverage-goals.ts` nutzt für Coverage-Search-Signale und aktive `breaker_search`-Goal-IDs gebundene semantische Wertvergleiche statt freier Regex-/Substring-Erkennung.
+  - Strukturierte Signale wie `setup.program_search` und Goal-IDs wie `runner.doctrine.breaker_search` bleiben wirksam; substringartiges Rauschen wie `setup.program_searchish_noise` und `runner.doctrine.breaker_searchish_noise` erzeugt keine Search-Find-Garantie mehr.
+  - `runner-coverage-goals.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/runner-coverage-goals.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertneunundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-mu-pressure-memory-support.ts` nutzt für Runner-Memory-Support-Rollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-Equality-Prüfungen.
+  - Strukturierte Rollen wie `support_memory` und `rig_memory_support` bleiben wirksam; substringartiges Rauschen wie `memoryish_noise` und `support_memoryish_noise` markiert keine Memory-Support-Karte mehr.
+  - `runner-mu-pressure-memory-support.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-mu-pressure-memory-support.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertdreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/pilot/remote-contest-candidate.ts` nutzt für `primaryGoalId`-Utility-Family-Erkennung den gebundenen `rolesMatch`-Helper statt freier Substring-Prüfung.
+  - Strukturierte Goal-IDs wie `runner.neutral.remote_contest_if_score_threat` bleiben wirksam; substringartiges Rauschen wie `runner.remote_contestish_noise` aktiviert keinen Remote-Contest-Kandidaten mehr.
+  - `remote-contest-candidate.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/pilot/remote-contest-candidate.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hunderteinunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-goal-evidence.ts` nutzt für Runner-Pressure- und Remote-Goal-IDs gebundene semantische Vergleiche statt freier `goalId.includes`-Prüfungen.
+  - Strukturierte Goal-IDs wie `runner.strategic.hq_pressure_followup` und `runner.remote_followup` bleiben wirksam; substringartiges Rauschen wie `runner.strategic.hq_pressureish_noise` und `runner.remoteish_noise` wird nicht mehr als Ziel-Fit erkannt.
+  - `tactical-plan-goal-evidence.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-goal-evidence.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertzweiunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/semantic-shadow-decision.ts` nutzt für Flatline-Survival-Goal-IDs den gebundenen `rolesMatch`-Helper statt freier `fit.goalId.includes("survive")`-Prüfung.
+  - Strukturierte Goal-IDs wie `runner.survive_flatline_window` bleiben als Survival-Threat-Fit wirksam; substringartiges Rauschen wie `runner.surviveish_noise` erzeugt keinen Threat-Response-Fit mehr.
+  - `semantic-shadow-decision.test.ts` schützt strukturierte Treffer und Substring-Negativfälle über einen Nicht-Draw-Install-Fall mit Blink-Flatline-Risiko.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/semantic-shadow-decision.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 16 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertdreiunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` trennt Search-Tool-Text-Fallbacks von Rollen-/Planrollen-Signalen und nutzt für strukturierte Search-Rollen den gebundenen `rolesMatch`-Helper.
+  - Strukturierte Rollen wie `setup_program_search` bleiben als Search-Tool-Evidence wirksam; substringartiges Rauschen wie `program_searchish_noise` und `searchlight_noise` erzeugt kein Search-Access-Tool mehr.
+  - `deck-capabilities.test.ts` schützt strukturierte Treffer und Substring-Negativfälle über kontrollierte `CARD_ROLES_BY_CARD`-Einträge.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertvierunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` nutzt für Corp-Score-, Remote-, Economy-Asset- und Ambush-Rollen den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen und trennt dabei relevante Text-Fallbacks von Rollenlisten.
+  - Strukturierte Rollen wie `remote_score_support`, `protect_remote`, `remote_economy_asset` und `remote_ambush` bleiben wirksam; substringartiges Rauschen wie `scoreish_noise`, `remoteish_noise`, `economy_assetish_noise` und `ambushish_noise` erhöht keine Corp-Plan-Zähler mehr.
+  - `deck-capabilities.test.ts` schützt strukturierte Treffer und Substring-Negativfälle über kontrollierte Corp-`CARD_ROLES_BY_CARD`-Einträge.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertfünfunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` zählt Runner-Angriffsplan-Tools kartenweise mit dem gebundenen `rolesMatch`-Helper statt über freie Substring-Suche in einem zusammengeklebten Rollentext.
+  - Strukturierte Rollen wie `interface_multiaccess`, `remote_contest_tool` und `early_setup` bleiben wirksam; substringartiges Rauschen wie `multiaccessory_noise`, `remote_contestish_noise` und `setupish_noise` erhöht keine Runner-Angriffsplan-Zähler mehr.
+  - `deck-capabilities.test.ts` schützt strukturierte Treffer und Substring-Negativfälle über kontrollierte Runner-`CARD_ROLES_BY_CARD`-Einträge.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsechsunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/discard-keep-score.ts` nutzt für Runner-Breaker-Duplikaterkennung den gebundenen `rolesMatch`-Helper statt direkter `startsWith("breaker_")`- und Rollen-`includes`-Prüfungen gegen installierte Karten.
+  - Strukturierte Rollen wie `breaker_fracter` und installierte `support_breaker_fracter` werden als gleiches Breaker-Segment erkannt; substringartiges Rauschen wie `breaker_fracterish_noise` schwächt den Discard-Keep-Wert nicht mehr.
+  - `discard-keep-score.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/discard-keep-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsiebenunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/search-choice-option.ts` nutzt für Search-Choice-Breaker-Rollen konkrete gebundene Breaker-Segmente statt des breiten `breaker_`-Prefix-Fallbacks und vergleicht installierte Rig-Rollen über dieselben Segmente.
+  - Strukturierte Rollen wie `support_breaker_fracter`, `breaker_fracter` und `breaker_decoder` bleiben wirksam; substringartiges Rauschen wie `breaker_fracterish_noise` erzeugt keinen Breaker-Search-Score mehr.
+  - `search-choice-option.test.ts` schützt strukturierte Treffer, installierte Duplikat-Erkennung und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/search-choice-option.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertachtunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/opportunity-projection.ts` erkennt Corp-Opportunity-Evidence für `score_window` und `rez_value_window` nur noch als exakten Marker oder als gebundenen `marker:`-Präfix statt über freie `includes`-Substring-Suche.
+  - Strukturierte Evidence wie `score_window:agenda_ready` und `rez_value_window:protect_scoring_remote` bleibt wirksam; substringartiges Rauschen wie `corp_score_windowish_noise` und `not_rez_value_window_noise` erzeugt keine Opportunity-Projektion mehr.
+  - `threat-opportunity.test.ts` schützt positive Marker und Substring-Negativfälle im bestehenden Projection-Harness.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/threat-opportunity.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertneununddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/threat-projection.ts` erkennt `corp_low_rez_reserve` nur noch über den exakten `low_rez_reserve`-Evidence-Marker oder den gebundenen `low_rez_reserve:`-Präfix statt über freie Substring-Suche.
+  - Strukturierte Evidence wie `low_rez_reserve:credits_below_outer_ice_cost` bleibt wirksam; substringartiges Rauschen wie `corp_low_rez_reserveish_noise` erzeugt keine Threat-Projektion mehr.
+  - `threat-opportunity.test.ts` schützt den Low-Rez-Reserve-Negativfall im bestehenden Projection-Harness.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/threat-opportunity.test.ts` grün, 1 Datei, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/breaker-role-match.ts` bündelt die konkrete Breaker-Segmentliste und den Vergleich gegen installierte Rig-Rollen.
+  - `runner-card-action-score.ts`, `runner-install-score.ts` und `search-choice-option.ts` nutzen den gemeinsamen Helper statt direkter `startsWith("breaker_")`-Prüfungen oder lokaler Breaker-Segmentlisten.
+  - Strukturierte Rollen wie `support_breaker_fracter` und `breaker_fracter` bleiben wirksam; substringartiges Rauschen wie `breaker_fracterish_noise` erzeugt keinen Runner-Install-Breaker-Score mehr.
+  - `runner-card-action-score.test.ts`, `runner-install-score.test.ts`, `search-choice-option.test.ts` und `role-match.test.ts` schützen die Runtime-Pfade.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-card-action-score.test.ts src/runtime/runner-install-score.test.ts src/runtime/search-choice-option.test.ts src/runtime/role-match.test.ts` grün, 4 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hunderteinundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/shell-traders-action.ts` und `shell-traders-urgency.ts` nutzen den gemeinsamen Breaker-Role-Helper statt direkter `startsWith("breaker_")`-Prüfungen.
+  - Strukturierte Rollen wie `support_breaker_fracter` werden für Shell-Traders-Zielwert und Direct-Install-Urgency erkannt; eine installierte `breaker_fracter`-Rolle verhindert den Duplikatbonus; `breaker_fracterish_noise` bleibt wirkungslos.
+  - `shell-traders-action.test.ts` schützt positive Breaker-Treffer, installierte-Duplikat-Erkennung und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/shell-traders-action.test.ts src/runtime/runner-install-score.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertzweiundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-loan-funding-need.ts` und `runner-loan-spend-candidate.ts` nutzen den gemeinsamen Breaker-Role-Helper statt breiter `startsWith("breaker_")`-/`rolesMatch(..., ["breaker_"])`-Prüfungen.
+  - Strukturierte Rollen wie `support_breaker_fracter` bleiben für Critical-Breaker-Funding und Loan-Spend-Klassifizierung wirksam; substringartiges Rauschen wie `breaker_fracterish_noise` bleibt wirkungslos.
+  - `runner-loan-funding-need.test.ts` und `runner-loan-spend-candidate.test.ts` schützen positive Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-loan-spend-candidate.test.ts src/runtime/runner-loan-funding-need.test.ts src/runtime/runner-install-score.test.ts src/runtime/role-match.test.ts` grün, 4 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertdreiundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-blink-recovery-score.ts` nutzt den gemeinsamen Breaker-Role-Helper statt direkter `startsWith("breaker_")`-Prüfung für stabile Breaker-Recovery-Installationen.
+  - Strukturierte Rollen wie `support_breaker_fracter` bleiben für Blink-Recovery-Setup wirksam; substringartiges Rauschen wie `breaker_fracterish_noise` erzeugt keinen Stable-Coverage-Recovery-Score.
+  - `runner-blink-recovery-score.test.ts` schützt positive Breaker-Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-blink-recovery-score.test.ts src/runtime/runner-install-score.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertvierundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-program-install-trash-policy.ts` nutzt für Breaker-Coverage im Program-Sacrifice-Kandidaten den gemeinsamen Breaker-Role-Helper statt `rolesMatch(..., ["breaker_"])`.
+  - Strukturierte Rollen wie `support_breaker_fracter` bleiben für Sacrifice-Schutz wirksam; substringartiges Rauschen wie `breaker_fracterish_noise` erzeugt keine `breaker_coverage`-Reason mehr.
+  - `runner-program-install-trash-policy.test.ts` schützt strukturierte Breaker-Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-program-install-trash-policy.test.ts src/runtime/runner-install-score.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertfünfundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/discard-plan.ts` und `discard-keep-score.ts` nutzen den gemeinsamen Breaker-Role-Helper beziehungsweise konkrete Breaker-Needles statt direkter `startsWith("breaker_")`-/`rolesMatch(..., ["breaker_"])`-Prüfungen.
+  - Runner-Discard erkennt strukturierte Hand- und Rig-Rollen wie `support_breaker_fracter`, behandelt installierte gleiche Breaker-Segmente als Duplikat und ignoriert `breaker_fracterish_noise`.
+  - `discard-plan.test.ts` und `discard-keep-score.test.ts` schützen Build-Rig-Plan, installierte Breaker-Erkennung und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/discard-plan.test.ts src/runtime/discard-keep-score.test.ts src/runtime/runner-install-score.test.ts src/runtime/role-match.test.ts` grün, 4 Dateien, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsechsundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-junkyard-bbs-recovery-target.ts` nutzt für Recovery-Target-Breaker-Erkennung den gemeinsamen Breaker-Role-Helper statt `rolesMatch(..., ["breaker_"])`.
+  - Strukturierte Rollen wie `support_breaker_fracter` bleiben als Breaker-Recovery-Ziel wirksam; substringartiges Rauschen wie `breaker_fracterish_noise` bleibt Low-Value.
+  - `runner-junkyard-bbs-recovery-target.test.ts` schützt Breaker-Positiv- und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-junkyard-bbs-recovery-target.test.ts src/runtime/runner-install-score.test.ts src/runtime/role-match.test.ts` grün, 3 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsiebenundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-coverage-kinds.ts` stellt `isBreakerRequiredCapabilityKind` als typed Predicate für die geschlossene `RequiredCapabilityKind`-Menge bereit.
+  - `tactical-plan-coverage-answers.ts` und `tactical-plan-mapping-helpers.ts` nutzen den Predicate statt roher `kind.startsWith("breaker_")`-Prüfungen.
+  - Echte Capability-Kinds wie `breaker_wall` bleiben wirksam; gecastetes Rauschen wie `breaker_wallish_noise` wird nicht mehr als fehlende Breaker-Coverage behandelt.
+  - `tactical-plan-coverage-kinds.test.ts` und `tactical-plan-coverage-answers.test.ts` schützen typed Treffer und Noise-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/plans/tactical-plan-coverage-kinds.test.ts src/plans/tactical-plan-coverage-answers.test.ts src/plans/tactical-plan-coverage-search-fit.test.ts` grün, 3 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertachtundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/known-remote-access-commitment.ts` erkennt Free-Trash-Support über `trashSupportEffectTargetHasFreeTrash` als gebundenes Effect-Target-Segment statt per freier `includes("free_trash")`-Suche.
+  - Free-Trash-Targets werden vor der Root-Target-Prüfung behandelt, sodass strukturierte Hints wie `free_trash` und `access.free_trash` als kostenloser Trash-Support wirken; Rauschen wie `not_free_trash_noise` bleibt wirkungslos.
+  - `known-remote-access-commitment.test.ts` schützt echte installierte Free-Trash-Unterstützung und Marker-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/known-remote-access-commitment.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertneunundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/action-goal-fit.ts` gleicht Plan-Alignment-Evidence nur noch als exakten Evidence-Eintrag ab statt per Substring-Suche in Candidate-Evidence.
+  - Strukturierte Evidence wie `plan_alignment:runner.build_economy_base` bleibt wirksam; Rauschen wie `not_plan_alignment:runner.build_economy_base_noise` erzeugt keinen Plan-Alignment-Bonus.
+  - `action-goal-fit.test.ts` schützt positive Evidence-Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/action-goal-fit.test.ts` grün, 1 Datei, 17 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/target-choice-shadow.ts` kapselt Hidden-Info-Evidence-Erkennung in `targetChoiceEvidenceHasHiddenInfoMarker` statt freier `includes("hidden_info")`-Suche.
+  - Strukturierte Marker wie `hidden_info` und `target_context:hidden_info_blocked` bleiben wirksam; Rauschen wie `not_hidden_info_noise` und `hidden_information_noise` blockiert keine Dry-Run-Auswahl.
+  - `target-choice-shadow.test.ts` schützt positive Hidden-Info-Marker und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/target-choice-shadow.test.ts` grün, 1 Datei, 19 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hunderteinundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/doctrine-goal-synthesis.ts` prüft Support-Gaps für blockierte Payoffs exakt und zentrale Server-Gaps über gebundene Gap-Tokens statt freier Substring-Suche.
+  - Strukturierte Gaps wie `weak_hq_defense`, `weak_rnd_defense` und `low_punish_payoff_density` bleiben wirksam; Rauschen wie `weak_hqish_defense` und `low_punish_payoff_densityish_noise` erzeugt keine falschen Blocker mehr.
+  - `doctrine-goal-synthesis.test.ts` schützt zentrale Gap-Erkennung und Payoff-Blocker-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/doctrine-goal-synthesis.test.ts` grün, 1 Datei, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertzweiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` prüft Corp-Scoreline-Target-Evidence über gebundene Evidence-Tokens statt freier `agenda`-/`scoreline`-Substring-Suche.
+  - Strukturierte Target-Evidence wie `target_role:agenda` bleibt Score-Closeout-Basis; Rauschen wie `target_role:agendaish_noise` erzeugt keinen `corp_score_closeout_semantic_candidate`-Bonus.
+  - `semantic-runtime-corp-score.test.ts` schützt positive Target-Evidence und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertdreiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/tactical-goal-merge.ts` klassifiziert `neutral`- und `doctrine`-Goal-IDs über gebundene Goal-ID-Segmente statt freier `.includes(".neutral.")`-/`.includes(".doctrine.")`-Suche.
+  - Strukturierte IDs mit Segment `neutral` oder `doctrine` bleiben wirksam; Rauschen wie `runner.neutralish.economy` und `runner.doctrineish.report` wird nicht als Neutral-/Doctrine-Report-Ziel aussortiert.
+  - `tactical-goal-merge.test.ts` schützt die Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/tactical-goal-merge.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertvierundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/corp-card-action-score.ts` bewertet Corp-Root-Agenda-Installationen über konkrete gebundene Agenda-Rollensegmente statt über den breiten `agenda_`-Prefix-Needle.
+  - Strukturierte Rollen wie `agenda_asset` und `remote_agenda_protection` bleiben wirksam; Rauschen wie `agendaish_asset` und `agendalike_asset` erzeugt keinen Agenda-Install-Bonus.
+  - `corp-card-action-score.test.ts` schützt positive Agenda-Rollen und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-card-action-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertfünfundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-board.ts` erkennt Agenda-Rollen für Corp-Scoreline-Board-Kontext über konkrete gebundene Agenda-Rollensegmente statt direktem `role.startsWith("agenda_")`.
+  - Exakte Rollen wie `agenda`, `corp_score_agenda`, `score_agenda` und strukturierte Segmente wie `agenda_protection` bleiben wirksam; Rauschen wie `agendaish_asset` und `agenda_like_noise` bleibt wirkungslos.
+  - `semantic-runtime-corp-board.test.ts` schützt positive Agenda-Rollen und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-board.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsechsundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/discard-keep-score.ts` bewertet Corp-ICE-Discard-Schutz über gebundene `rolesMatch`-Terme statt direkter `role.endsWith("_ice")`-Suffixprüfung.
+  - Strukturierte Rollen wie `remote_ice` und `etr_ice` bleiben wirksam; Rauschen wie `nice_noise` erzeugt keinen ICE-Discard-Wert.
+  - `discard-keep-score.test.ts` schützt positive ICE-Rollen und Substring-/Suffix-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/discard-keep-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsiebenundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-doctrine-card-roles.ts` klassifiziert Agenda-, Breaker- und ICE-Rollen über den gebundenen `rolesMatch`-Matcher statt direkter Prefix-/Suffix-Prüfungen.
+  - Strukturierte Rollen wie `agenda_2pt`, `breaker_fracter`, `corp_install_ice`, `barrier_ice`, `etr_ice` und `taxing_ice` bleiben wirksam; Rauschen wie `agendaish_asset`, `breakerish_fracter`, `icebreaker` und `nice_noise` bleibt wirkungslos.
+  - `deck-doctrine-card-roles.test.ts` schützt positive Rollenklassifikation und Substring-/Prefix-/Suffix-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-doctrine-card-roles.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertachtundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` stuft Runner-Breaker-Capability-Confidence über gebundene `rolesMatch`-Prefixrollen statt direktem `role.startsWith("breaker_")` ein.
+  - Strukturierte Rollen wie `breaker_fracter` bleiben als rollenbasierte Breaker-Evidence wirksam; Rauschen wie `breakerish_fracter` hebt Text-Fallback-Breaker nicht auf rollenbasierte Confidence an.
+  - `deck-capabilities.test.ts` schützt positive Breaker-Rollen und Prefix-Noise-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 12 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertneunundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-opening-hand.ts` zählt Opening-Hand-Economy- und Corp-Remote-Root-Rollen über gebundene `rolesMatch`-Terme statt freier `role.includes(...)`-Substring-Prüfungen.
+  - Strukturierte Rollen wie `economy_asset`, `draw_event` und `remote_support` bleiben wirksam; Rauschen wie `uneconomy_noise`, `drawish_noise`, `remote_supportish_noise`, `classet_noise` und `upgradeish_noise` bleibt wirkungslos.
+  - `deck-opening-hand.test.ts` schützt positive Economy-/Remote-Root-Rollen und Substring-Negativfälle über öffentliche Opening-Hand-Evaluatoren.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-opening-hand.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/tag-punish-ontology-consumer.ts` erkennt Legacy-Tag-/Punish-Rollenkonflikte über gebundene `rolesMatch`-Terme statt freier `role.includes(...)`-Substring-Prüfungen; die Einzelrolle `trace` bleibt bewusst exakt.
+  - Strukturierte Rollen wie `tag_punishment`, `trace_tag`, `tag_source`, `trace_ice` und `tag_ice` bleiben wirksam; Rauschen wie `tag_punishmentish_noise`, `damage_operational_noise`, `tag_sourceish_noise` und `trace_tagish_noise` bleibt wirkungslos.
+  - `tag-punish-ontology-consumer.test.ts` schützt positive Legacy-Konflikte und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/tag-punish-ontology-consumer.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hunderteinundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-install-classification.ts` erkennt Runner-Breaker-Installationsrollen über gebundene `rolesMatch(["breaker_"])`-Prefixrollen statt direkter `role.startsWith("breaker_")`-Prüfungen.
+  - Strukturierte Rollen wie `breaker_fracter`, `breaker_decoder` und `breaker_killer` bleiben wirksam; Rauschen wie `breakerish_fracter`, `breakerish_decoder`, `breakerish_killer` sowie nicht vorher erfasste `support_breaker_*`-Rollen bleiben wirkungslos.
+  - `runner-install-classification.test.ts` schützt Rig-Install-, installierbare-Breaker- und Low-Value-Duplicate-Klassifikation gegen Prefix-Noise.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-install-classification.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertzweiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/no-fresh-central.ts` erkennt `rig_unlock`-Alternativen und -Substitutionen über gebundene `rolesMatch(["breaker_"])`-Prefixrollen statt direkter `role.startsWith("breaker_")`-Prüfungen.
+  - Strukturierte Rollen wie `breaker_decoder` und `breaker_fracter` bleiben wirksam; Rauschen wie `breakerish_decoder`, `breakerish_fracter` sowie nicht vorher erfasste `support_breaker_*`-Rollen bleibt wirkungslos.
+  - `no-fresh-central.test.ts` schützt `rig_unlock`-Substitution und `betterAlternatives`-Kontext gegen Prefix-Noise.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/no-fresh-central.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertdreiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-hand-use-diagnostics.ts` markiert verworfene installierbare Breaker über gebundene `rolesMatch(["breaker_"])`-Prefixrollen statt direkter `role.startsWith("breaker_")`-Prüfung.
+  - Strukturierte Rollen wie `breaker_fracter` bleiben wirksam; Rauschen wie `breakerish_fracter` sowie nicht vorher erfasste `support_breaker_fracter`-Rollen bleibt wirkungslos.
+  - `runner-hand-use-diagnostics.test.ts` schützt positive Discard-Breaker-Diagnostics und Prefix-Noise-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-hand-use-diagnostics.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertvierundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/remote-role-ontology-consumer.ts` erkennt Legacy-Konflikte für Remote-Scoring-Protection- und Economy-Rollen über gebundene `rolesMatch`-Terme statt freier `legacy.includes(...)`-Substring-Prüfungen.
+  - Strukturierte Rollen wie `remote_agenda_protection`, `remote_economy_asset`, `protect_remote` und `agenda_steal_tax` bleiben wirksam; Rauschen wie `scoringish_noise`, `protect_remoteish_noise`, `remote_agenda_protectionish_noise`, `uneconomy_noise` und `economyish_noise` bleibt wirkungslos.
+  - `remote-role-ontology-consumer.test.ts` schützt positive Legacy-Konflikte und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/remote-role-ontology-consumer.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertfünfundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-hq-memory-diagnostics.ts` ermittelt HQ-Memory-Invalidation-Flags über exakte `invalidationReasons.includes(...)`-Array-Treffer statt über zusammengefügten Text mit freier Substring-Suche.
+  - Strukturierte Reasons wie `corp_draw_added_unknown_hq_card`, `known_hq_card_installed`, `known_hq_card_played`, `corp_discarded_hq_card` und `shuffle_changed_hq_hand` bleiben wirksam; Rauschen wie `known_hq_card_installedish_noise` und `shuffle_changed_hq_handish_noise` bleibt wirkungslos.
+  - `runner-hq-memory-diagnostics.test.ts` schützt positive Reason-Flags und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-hq-memory-diagnostics.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsechsundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/runner-known-card-position-diagnostics.ts` ermittelt Known-Position-Invalidation-Flags über exakte Reason-Array-Treffer statt über zusammengefügten Text mit freier Substring-Suche.
+  - Strukturierte Reasons wie `known_rnd_top_moved_to_hq`, `corp_draw_from_rd`, `remote_state_changed` und `conceal` bleiben wirksam; Rauschen wie `known_rnd_top_moved_to_hqish_noise`, `remote_state_changedish_noise`, `concealment_noise` und `reorderish_noise` bleibt wirkungslos.
+  - `runner-known-card-position-diagnostics.test.ts` schützt positive Known-Position-Flags und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/runner-known-card-position-diagnostics.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsiebenundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/plan-conversion-predicates.ts` erkennt Corp-Remote-Asset-Conversion-Evidence über gebundene `rolesMatch`-Terme statt freier `item.includes(...)`-Substring-Prüfungen.
+  - Strukturierte Evidence wie `corp.remote_support`, `economy_asset` und `asset_trash_target` bleibt wirksam; Rauschen wie `remote_supportish_noise`, `economy_assetish_noise` und `asset_trash_targetish_noise` bleibt wirkungslos.
+  - `plan-conversion-predicates.test.ts` schützt positive Corp-Remote-Asset-Conversion und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/plan-conversion-predicates.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertachtundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/plan-conversion-predicates.ts` erkennt Runner-Setup-ReasonCodes über gebundene `rolesMatch`-Terme statt freier `reasonCode.includes("setup"|"search")`-Substring-Prüfungen.
+  - Strukturierte ReasonCodes wie `runner.setup.draw` und `runner.search.breaker` bleiben wirksam; Rauschen wie `setupish_noise` und `research_noise` bleibt wirkungslos.
+  - `plan-conversion-predicates.test.ts` schützt positive Runner-Setup-ReasonCodes und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/plan-conversion-predicates.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertneunundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/belief-state.ts` klassifiziert Hidden-Zone-Actions über gebundene `rolesMatch`-Terme statt freier `hiddenZoneAction.includes(...)`-Substring-Prüfungen.
+  - Strukturierte Marker wie `corp_rd_shuffle`, `new_blood_conceal_reorder_installed_ice` und `p3_33_private_look` bleiben wirksam; Rauschen wie `reshuffleish_noise`, `concealment_noise` und `private_lookish_noise` bleibt wirkungslos.
+  - `belief-state.test.ts` schützt positive Hidden-Zone-Action-Familien und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/belief-state.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/plan-conversion-predicates.ts` prüft Runner-Probe-Pivot- und Corp-Protection-Followup-PlanKinds über gebundene `rolesMatch`-Terme statt freier `planKind.includes(...)`-Substring-Prüfungen.
+  - Strukturierte PlanKinds wie `recover_economy`, `rig`, `remote_contest` und `remote_build` bleiben wirksam; Rauschen wie `recover_economyish_noise` und `remote_builder_noise` bleibt wirkungslos.
+  - `plan-conversion-predicates.test.ts` schützt positive PlanKind-Followups und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/plan-conversion-predicates.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hunderteinundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/target-choice-shadow-readiness.ts` erkennt Hidden-Info-Blocker in Target-Choice-Readiness über den gebundenen `targetChoiceEvidenceHasHiddenInfoMarker` statt freier `entry.includes("hidden_info")`-Substring-Prüfungen.
+  - Strukturierte Evidence wie `hidden_info_blocked` bleibt wirksam; Rauschen wie `not_hidden_info_noise` bleibt wirkungslos und fällt auf den passenden Side-Safe-Followup zurück.
+  - `target-choice-shadow-readiness.test.ts` schützt positive Hidden-Info-Blocker und Substring-Negativfälle über die Readiness-Followup-Auswertung.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/target-choice-shadow-readiness.test.ts src/decision/target-choice-shadow.test.ts` grün, 2 Dateien, 21 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertzweiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/plan-conversion-predicates.ts` erkennt Corp-Remote-Asset- und Bait-ReasonCodes über gebundene `rolesMatch`-Terme statt freier `reasonCode.includes("asset"|"bait")`-Substring-Prüfungen.
+  - Strukturierte ReasonCodes wie `corp.plan.remote_asset` und `corp.plan.bait_runner` bleiben wirksam; Rauschen wie `corp.plan.assetish_noise` und `corp.plan.baitish_noise` bleibt wirkungslos.
+  - `plan-conversion-predicates.test.ts` schützt positive Corp-Remote-Asset-/Bait-ReasonCodes und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/plan-conversion-predicates.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertdreiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-invariants.ts` erkennt Support-Only-Signale über einen gebundenen Marker-Segment-Ausdruck statt freier `normalized.includes("support_only"|"support-only")`-Substring-Prüfungen.
+  - Strukturierte Marker wie `trace_defense.support-only` bleiben wirksam; Rauschen wie `trace_defense.not_support_only_noise` bleibt wirkungslos.
+  - `action-semantic-invariants.test.ts` schützt positive Support-Only-Segmente und Substring-Negativfälle über den Diagnostic-Report.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-invariants.test.ts` grün, 1 Datei, 19 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertvierundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/diagnostics/coverage-selection-debug.ts` erkennt Mantis-Source-Identitäten über einen gebundenen Token-Ausdruck statt freier `sourceIdentity.includes("mantis")`-Substring-Prüfung.
+  - Strukturierte Source-IDs wie `mantis-card` bleiben wirksam; Rauschen wie `romantis-card` bleibt wirkungslos.
+  - `coverage-selection-debug.test.ts` schützt positive Mantis-Token und Substring-Negativfälle über die Coverage-Selection-Debug-Evidence.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/diagnostics/coverage-selection-debug.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertfünfundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-capabilities.ts` filtert redaktierte Missing-Capability-Coverage-Facts über gebundene `rolesMatch`-Segmente statt freier `capability.kind.includes("coverage")`-Substring-Prüfung.
+  - Strukturierte Kinds wie `synthetic_coverage` bleiben wirksam; Rauschen wie `coverageish_noise` bleibt wirkungslos.
+  - `deck-capabilities.test.ts` schützt positive Missing-Coverage-Facts und Substring-Negativfälle im redaktierten Debug-Fact-Export.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/deck-capabilities.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 12 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsechsundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/semantic-ai-core-meta.ts` leitet StrategyPlan-GoalFamilies über gebundene `rolesMatch`-Terme statt freier `strategyId.includes("rnd"|"hq"|"tag"|"remote")`-Substring-Prüfungen ab.
+  - Strukturierte Strategy-IDs wie `runner.hq_pressure` und `corp.remote_scoring` bleiben wirksam; Rauschen wie `runner.hqish_noise` und `corp.remoteish_noise` fällt auf die Default-GoalFamilies zurück.
+  - `semantic-ai-core-meta.test.ts` schützt positive Runner-/Corp-Strategy-IDs und Substring-Negativfälle über die öffentliche Doctrine-Ableitung.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-core-meta.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 27 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertsiebenundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/semantic-shadow-league.ts` klassifiziert Runner-Safe-Access-Dry-Run-Remote-, Risk- und Structured-Alignment-Textmarker über gebundene Segmentterme statt freier `includes("remote"|"risk"|"structured_alignment_required")`-Substring-Prüfungen.
+  - Strukturierte Marker wie `remote_run`, `runner_safe_access_risk_gate` und `runner_safe_access_structured_alignment_required` bleiben wirksam; Rauschen wie `notremote-run`, `brisk_gate` und `structured_alignment_requiredish` bleibt wirkungslos.
+  - `semantic-shadow-league.test.ts` schützt die Boundary-Fälle über ein schmales Runner-Safe-Access-Dry-Run-Fixture.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/semantic-shadow-league.test.ts -t "bounds runner safe access dry-run text classifiers"` grün, 1 Datei, 1 Test, 6 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` hundertachtundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/known-remote-access-payoff.ts` filtert Remote-Invalidation-Evidence über gebundene Server-ID-Segmente statt freier `entry.includes(serverId)`-Substring-Prüfung.
+  - Strukturierte Invalidation-Zeilen wie `server:remote_1:root_changed` bleiben wirksam; Rauschen wie `server:remote_10:root_changed` triggert `remote_1` nicht mehr.
+  - `known-remote-access-payoff.test.ts` schützt positive und negative Remote-ID-Grenzfälle über `evaluateKnownRemoteAccessPayoff`.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/known-remote-access-payoff.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

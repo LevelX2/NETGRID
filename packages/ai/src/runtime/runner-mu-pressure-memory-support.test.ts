@@ -2,11 +2,19 @@ import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 
 import {
+  isRunnerMemorySupportCard,
   isUsefulRunnerProgramInHandForMuPressure,
   runnerMemorySupportSearchAction,
 } from "./runner-mu-pressure-memory-support";
 
 describe("runnerMemorySupportSearchAction", () => {
+  it("matches memory support cards by bounded role terms", () => {
+    expect(isMemorySupport(["support_memory"])).toBe(true);
+    expect(isMemorySupport(["rig_memory_support"])).toBe(true);
+    expect(isMemorySupport(["memoryish_noise"])).toBe(false);
+    expect(isMemorySupport(["support_memoryish_noise"])).toBe(false);
+  });
+
   it("uses structured roles and ignores label-only memory search text", () => {
     expect(
       runnerMemorySupportSearchAction(
@@ -39,6 +47,20 @@ describe("runnerMemorySupportSearchAction", () => {
     expect(usefulProgram(["pressurewasher_noise"])).toBe(false);
   });
 });
+
+function isMemorySupport(roles: readonly string[]): boolean {
+  return isRunnerMemorySupportCard(
+    {
+      instanceId: "support-instance",
+      definitionId: "support-definition",
+      title: "Support Card",
+      type: "hardware",
+      known: true,
+    } as VisibleCard,
+    roles,
+    (value) => value ?? 0,
+  );
+}
 
 function usefulProgram(roles: readonly string[]): boolean {
   const card: VisibleCard = {

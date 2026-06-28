@@ -1,5 +1,6 @@
 import type { Side } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
+import { rolesMatch } from "./runtime/role-match";
 
 const AI_HINTS = createAiHintsByCard();
 
@@ -26,22 +27,16 @@ export function deckDoctrineRoleIsAgenda(role: string): boolean {
     role === "agenda" ||
     role === "corp_score_agenda" ||
     role === "score_agenda" ||
-    role.startsWith("agenda_")
+    rolesMatch([role], ["agenda_"])
   );
 }
 
 export function deckDoctrineRoleIsBreaker(role: string): boolean {
-  return role.startsWith("breaker_");
+  return rolesMatch([role], ["breaker_"]);
 }
 
 export function deckDoctrineRoleIsIce(role: string): boolean {
-  return (
-    role === "corp_install_ice" ||
-    role === "corp_rez_ice" ||
-    role.endsWith("_ice") ||
-    role === "etr_ice" ||
-    role === "taxing_ice"
-  );
+  return rolesMatch([role], ["ice", "etr_ice", "taxing_ice"]);
 }
 
 function inferredRoles(

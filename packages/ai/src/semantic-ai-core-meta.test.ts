@@ -24,6 +24,7 @@ import {
   META6_LEGACY_FREEZE_CRITERIA,
   META6_SCOPE_READINESS_MATRIX,
   META6_TRACE_SCRUBBER_FORBIDDEN_SIGNALS,
+  type StrategyHypothesis,
   adaptSemanticDecisionToLegacyActual,
   buildDeckDoctrineFromProfile,
   buildDeckStrategicProfile,
@@ -95,6 +96,63 @@ describe("META1 DeckDoctrine + Multi-Turn TacticalGoal Engine v0", () => {
     ]);
   });
 
+  it("maps strategy ids to goal families by bounded terms", () => {
+    const runnerHqDoctrine = buildDeckDoctrineFromProfile(
+      buildDeckStrategicProfile({
+        profileId: "test-runner-hq",
+        side: "runner",
+        primaryStrategies: [
+          strategy("runner.hq_pressure"),
+        ],
+      }),
+    );
+    const runnerNoiseDoctrine = buildDeckDoctrineFromProfile(
+      buildDeckStrategicProfile({
+        profileId: "test-runner-hq-noise",
+        side: "runner",
+        primaryStrategies: [
+          strategy("runner.hqish_noise"),
+        ],
+      }),
+    );
+    const corpRemoteDoctrine = buildDeckDoctrineFromProfile(
+      buildDeckStrategicProfile({
+        profileId: "test-corp-remote",
+        side: "corp",
+        primaryStrategies: [
+          strategy("corp.remote_scoring"),
+        ],
+      }),
+    );
+    const corpNoiseDoctrine = buildDeckDoctrineFromProfile(
+      buildDeckStrategicProfile({
+        profileId: "test-corp-remote-noise",
+        side: "corp",
+        primaryStrategies: [
+          strategy("corp.remoteish_noise"),
+        ],
+      }),
+    );
+
+    expect(runnerHqDoctrine.primaryPlan?.goalFamilies).toEqual([
+      "runner_pressure_hq",
+      "runner_access_payoff",
+    ]);
+    expect(runnerNoiseDoctrine.primaryPlan?.goalFamilies).toEqual([
+      "runner_rig_setup",
+      "runner_economy_stabilize",
+    ]);
+    expect(corpRemoteDoctrine.primaryPlan?.goalFamilies).toEqual([
+      "corp_build_remote",
+      "corp_create_score_window",
+      "corp_score_agenda",
+    ]);
+    expect(corpNoiseDoctrine.primaryPlan?.goalFamilies).toEqual([
+      "corp_economy_stabilize",
+      "corp_defend_rnd",
+    ]);
+  });
+
   it("models multi-turn TacticalGoalState lifecycle, progress and blockers", () => {
     const report = buildMeta1DeckDoctrineTacticalGoalEngineReport();
 
@@ -142,6 +200,20 @@ describe("META1 DeckDoctrine + Multi-Turn TacticalGoal Engine v0", () => {
     );
   });
 });
+
+function strategy(strategyId: string): StrategyHypothesis {
+  return {
+    strategyId,
+    role: "primary",
+    confidence: "high",
+    anchorCards: [],
+    payoffCards: [],
+    enablerCards: [],
+    supportCards: [],
+    evidenceSignals: [`strategy:${strategyId}`],
+    missingRequirements: [],
+  };
+}
 
 describe("META6 Stabilization + Limited Rollout / Legacy-Freeze Prep", () => {
   it("builds a scope readiness matrix with fallback and rollback for every scope", () => {

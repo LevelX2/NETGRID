@@ -1,5 +1,6 @@
 import { createAiHintsByCard } from "../ai-hints";
 import { cardRolesForId } from "../runtime/card-role-lookup";
+import { rolesMatch } from "../runtime/role-match";
 import { isRunnerPressureRole } from "../runtime/runner-role-classification";
 import type { CentralServerId } from "../runtime/server-target";
 import { sortedUnique } from "../runtime/collection";
@@ -29,20 +30,18 @@ export function centralPressureTargetsForCard(
   const targets: CentralServerId[] = [];
   if (
     definitionId === "onr_v1_139_r-and-d-interface" ||
-    roles.includes("pressure_rnd") ||
-    roles.includes("rnd_pressure")
+    rolesMatch(roles, ["pressure_rnd", "rnd_pressure"])
   )
     targets.push("rd");
   if (
     definitionId === "onr_v1_129_hq-interface" ||
-    roles.includes("pressure_hq") ||
-    roles.includes("hq_pressure")
+    rolesMatch(roles, ["pressure_hq", "hq_pressure"])
   )
     targets.push("hq");
-  if (roles.includes("archives_pressure")) targets.push("archives");
+  if (rolesMatch(roles, ["archives_pressure"])) targets.push("archives");
   if (
     targets.length === 0 &&
-    roles.some((role) => role.includes("multiaccess")) &&
+    rolesMatch(roles, ["multiaccess"]) &&
     [
       "onr_v1_024_expert-schedule-analyzer",
       "onr_v1_041_microtech-ai-interface",

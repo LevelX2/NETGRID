@@ -1,6 +1,8 @@
 import { type AiDecisionInput } from "@netgrid/shared";
 
+import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { boundedSelectionCount } from "./choice-option";
+import { rolesMatch } from "./role-match";
 
 type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
 type PendingChoiceOption = PendingChoice["options"][number];
@@ -87,9 +89,9 @@ function scoreSearchChoiceOption(
         : -160 - (installCost - features.credits) * 30;
   }
 
-  const breakerRoles = roles.filter((role) => role.startsWith("breaker_"));
+  const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
   if (
-    breakerRoles.length > 0 ||
+    breakerRoleNeedles.length > 0 ||
     subtypes.some((subtype) =>
       ["icebreaker", "breaker", "decoder", "fracter", "killer"].includes(
         subtype,
@@ -97,14 +99,16 @@ function scoreSearchChoiceOption(
     )
   ) {
     score += 220;
-    for (const role of breakerRoles)
-      score += features.rigRoles.has(role) ? 40 : 180;
+    const rigRoles = [...features.rigRoles];
+    for (const roleNeedle of breakerRoleNeedles)
+      score += rolesMatch(rigRoles, [roleNeedle]) ? 40 : 180;
     if (features.rigRoles.size === 0) score += 120;
   }
 
-  if (roles.includes("memory") || (card.memoryLimitBonus ?? 0) > 0)
+  if (rolesMatch(roles, ["memory"]) || (card.memoryLimitBonus ?? 0) > 0)
     score += features.memoryRemaining <= 1 ? 170 : 60;
-  if (roles.includes("economy")) score += features.credits < 4 ? 90 : 25;
+  if (rolesMatch(roles, ["economy"]))
+    score += features.credits < 4 ? 90 : 25;
   if (card.definitionId && features.rigDefinitionIds.has(card.definitionId))
     score -= 90;
   score -= Math.max(0, card.memoryCost ?? 0) * 5;

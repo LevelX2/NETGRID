@@ -1,4 +1,5 @@
 import { alignRunTargetAction } from "../run-target-action-alignment";
+import { rolesMatch } from "../../runtime/role-match";
 import type { SemanticDecisionFrame } from "../semantic-decision-frame";
 import type { SemanticRankedAction } from "../semantic-decision-trace";
 
@@ -201,7 +202,8 @@ function rankedActionHasUtilityFamily(
   action: SemanticRankedAction,
   family: string,
 ): boolean {
-  if (action.primaryGoalId?.includes(family)) return true;
+  if (action.primaryGoalId && rolesMatch([action.primaryGoalId], [family]))
+    return true;
   return action.components.some(
     (component) =>
       component.component === "goal_fit" &&

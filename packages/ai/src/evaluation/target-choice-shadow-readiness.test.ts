@@ -142,6 +142,18 @@ describe("TargetChoice selectedChoices readiness", () => {
         blockedRequirementCount: 1,
       },
     };
+    const hiddenInfoNoise: TargetChoiceShadowReport = {
+      ...missingSideSafeOptions,
+      actionId: "hidden-info-noise",
+      blockedRequirements: [
+        {
+          requirementId: "server",
+          kind: "server",
+          reason: "no_side_safe_options",
+          evidence: ["not_hidden_info_noise"],
+        },
+      ],
+    };
     const scorecardUnclear = buildTargetChoiceShadowReport({
       action: action({ actionId: "unclear" }),
     });
@@ -154,6 +166,7 @@ describe("TargetChoice selectedChoices readiness", () => {
           missingSideSafeOptions,
           engineOnly,
           hiddenInfoBlocked,
+          hiddenInfoNoise,
           scorecardUnclear,
         ],
       },
@@ -163,12 +176,18 @@ describe("TargetChoice selectedChoices readiness", () => {
       "engine_only_target",
       "hidden_info_blocked",
       "missing_side_safe_options",
+      "missing_side_safe_options",
       "tie_without_preference",
       "scorecard_unclear",
     ]);
     expect(report.evidence).toEqual(
-      expect.arrayContaining(["followup_candidate_count:5"]),
+      expect.arrayContaining(["followup_candidate_count:6"]),
     );
+    expect(
+      report.followupCandidates.find(
+        (candidate) => candidate.actionId === "hidden-info-noise",
+      )?.kind,
+    ).toBe("missing_side_safe_options");
     expect(report.followupCandidates).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

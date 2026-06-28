@@ -7,6 +7,7 @@ import {
   remoteRoleIsScoringProtectionKind,
 } from "../remote-role-ontology-consumer";
 import { cardRolesForId } from "../runtime/card-role-lookup";
+import { rolesMatch } from "../runtime/role-match";
 
 export type RemoteTrashRole =
   | "economy"
@@ -63,54 +64,37 @@ export function remoteTrashRoleForVisibleCard(
     ...(demoDefinition?.subtypes ?? []),
   ];
   if (
-    roles.some(
-      (role) =>
-        role.includes("agenda_steal_tax") ||
-        role.includes("access_tax") ||
-        role.includes("remote_agenda_protection") ||
-        role.includes("scoring") ||
-        role.includes("protect_remote") ||
-        role.includes("remote_upgrade_tax"),
-    )
+    rolesMatch(roles, [
+      "agenda_steal_tax",
+      "access_tax",
+      "remote_agenda_protection",
+      "scoring",
+      "protect_remote",
+      "remote_upgrade_tax",
+    ])
   )
     return "scoring_protection";
   if (
-    roles.some(
-      (role) =>
-        role.includes("run_tax") ||
-        role.includes("ice_tax") ||
-        role.includes("access_tax") ||
-        role.includes("server_tax"),
-    ) ||
-    mechanics.some(
-      (mechanic: string) =>
-        mechanic.includes("break_subroutine_cost") ||
-        mechanic.includes("trash_cost_modifier") ||
-        mechanic.includes("trace_bid_credit_source") ||
-        mechanic.includes("run_flow"),
-    ) ||
+    rolesMatch(roles, ["run_tax", "ice_tax", "access_tax", "server_tax"]) ||
+    rolesMatch(mechanics, [
+      "break_subroutine_cost",
+      "trash_cost_modifier",
+      "trace_bid_credit_source",
+      "run_flow",
+    ]) ||
     subtypes.some((subtype) => subtype.toLowerCase() === "region")
   )
     return "run_tax";
   if (
-    roles.some((role) => role.includes("remote_capacity")) ||
-    mechanics.some((mechanic: string) => mechanic.includes("remote_capacity"))
+    rolesMatch(roles, ["remote_capacity"]) ||
+    rolesMatch(mechanics, ["remote_capacity"])
   )
     return "remote_capacity";
-  if (roles.some((role) => role.includes("economy"))) return "economy";
-  if (
-    roles.some(
-      (role) =>
-        role.includes("tag") ||
-        role.includes("trace") ||
-        role.includes("punish") ||
-        role.includes("damage"),
-    )
-  )
+  if (rolesMatch(roles, ["economy"])) return "economy";
+  if (rolesMatch(roles, ["tag", "trace", "punish", "damage"]))
     return "tag_punish";
-  if (roles.some((role) => role.includes("ambush") || role.includes("trap")))
-    return "ambush";
-  if (roles.some((role) => role.includes("low_value"))) return "low_value";
+  if (rolesMatch(roles, ["ambush", "trap"])) return "ambush";
+  if (rolesMatch(roles, ["low_value"])) return "low_value";
   if (card.type === "asset" || card.type === "upgrade") return "unknown";
   return "unknown";
 }
@@ -190,15 +174,20 @@ export function remoteTrashCardLooksLikeFinitePoolForMetrics(
     card.rulesText ?? ""
   }`.toLowerCase();
   return (
-    mechanics.some(
-      (mechanic: string) =>
-        mechanic.includes("finite_economy_pool") ||
-        mechanic.includes("hosted_credits") ||
-        mechanic.includes("bit_counter"),
-    ) ||
-    (rulesText.includes("put") &&
-      rulesText.includes("from the bank") &&
-      rulesText.includes("take") &&
-      rulesText.includes("bits"))
+    rolesMatch(mechanics, [
+      "finite_economy_pool",
+      "hosted_credits",
+      "bit_counter",
+    ]) ||
+    finitePoolRulesTextMatches(rulesText)
+  );
+}
+
+function finitePoolRulesTextMatches(rulesText: string): boolean {
+  return (
+    /\bput\b/.test(rulesText) &&
+    /\bfrom the bank\b/.test(rulesText) &&
+    /\btake\b/.test(rulesText) &&
+    /\bbits\b/.test(rulesText)
   );
 }

@@ -1,6 +1,7 @@
 import type { AiDecisionInput, LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import { rolesMatch } from "./runtime/role-match";
 import {
   estimateBreakerCostProfileFromOntology,
   getStructuredBreakerProfileForCard,
@@ -254,7 +255,9 @@ export function redactedDeckCapabilityFacts(
       ...breakerFacts,
       ...bankFacts,
       ...profile.missingCapabilities
-        .filter((capability) => capability.kind.includes("coverage"))
+        .filter((capability) =>
+          missingCapabilityKindHasCoverageSegment(capability.kind),
+        )
         .map((capability) => `missing:${capability.kind}`),
       `deck_capability_confidence:${profile.confidence}`,
     ];
@@ -268,6 +271,10 @@ export function redactedDeckCapabilityFacts(
     ];
   }
   return [`deck_capability_confidence:${profile.confidence}`];
+}
+
+function missingCapabilityKindHasCoverageSegment(kind: string): boolean {
+  return rolesMatch([kind], ["coverage"]);
 }
 
 function buildRunnerDeckCapabilityProfile(
@@ -454,7 +461,7 @@ function breakerCapabilityFromRecord(
   if (coverage.length === 0) return undefined;
   const visible = record.visibleCards[0];
   const roleBasedBreaker =
-    record.roles.some((role) => role.startsWith("breaker_")) ||
+    rolesMatch(record.roles, ["breaker_"]) ||
     record.subtypes.some((subtype) => /icebreaker|fracter|decoder|killer/i.test(subtype));
   const confidence: DeckCapabilityConfidence = breakerProfile
     ? "high"
@@ -635,20 +642,20 @@ function searchAccessToolForRecord(
   params: BuildDeckCapabilityProfileParams,
   record: CardCapabilityRecord,
 ): SearchAccessTool | undefined {
-  const text = normalizedRecordText(record);
-  const signals = [...record.roles, ...record.planRoles].join(" ").toLowerCase();
+  const text = normalizedRecordTextWithoutRoles(record);
+  const roleSignals = [...record.roles, ...record.planRoles];
+  const signals = roleSignals.join(" ").toLowerCase();
   const canSearchPrograms =
     /program_search|setup\.program_search|search.*program|search your stack for a program/.test(text) ||
-    /program_search|breaker_search/.test(signals);
+    rolesMatch(roleSignals, ["program_search", "breaker_search"]);
   const canSearchBreakers =
     canSearchPrograms ||
     /breaker_search|search.*breaker|icebreaker/.test(text) ||
-    /breaker_search/.test(signals);
+    rolesMatch(roleSignals, ["breaker_search"]);
   if (!canSearchPrograms && !canSearchBreakers) return undefined;
   const status = primaryStatus(record.locations);
   const structuredSearch =
-    /program_search|breaker_search/.test(signals) ||
-    record.roles.some((role) => role.includes("search"));
+    rolesMatch(roleSignals, ["program_search", "breaker_search", "search"]);
   return {
     cardId: record.cardId,
     title: record.title,
@@ -672,6 +679,16 @@ function searchAccessToolForRecord(
       `status:${status}`,
     ],
   };
+}
+
+function normalizedRecordTextWithoutRoles(record: CardCapabilityRecord): string {
+  return [
+    record.cardId,
+    record.title,
+    record.type,
+    ...record.subtypes,
+    record.text,
+  ].join(" ").toLowerCase();
 }
 
 function buildEconomyBankTools(
@@ -771,18 +788,22 @@ function buildMemoryCapabilityProfile(
 function buildRunnerAttackPlanProfile(
   records: readonly CardCapabilityRecord[],
 ): RunnerAttackPlanProfile {
-  const roleText = records.map((record) => record.roles.join(" ")).join(" ");
-  const centralPressureToolsKnown = countRoleMatches(roleText, [
+  const centralPressureToolsKnown = records.filter((record) =>
+    rolesMatch(record.roles, [
     "pressure_rnd",
     "pressure_hq",
     "multiaccess",
-  ]);
-  const remoteContestToolsKnown = countRoleMatches(roleText, [
+    ]),
+  ).length;
+  const remoteContestToolsKnown = records.filter((record) =>
+    rolesMatch(record.roles, [
     "remote_contest",
     "trash_support",
-  ]);
+    ]),
+  ).length;
   const setupToolsKnown = records.filter((record) =>
-    record.roles.some((role) => role.startsWith("setup") || role === "runner_program"),
+    rolesMatch(record.roles, ["setup"]) ||
+    record.roles.some((role) => role === "runner_program"),
   ).length;
   return {
     centralPressureToolsKnown,
@@ -804,8 +825,8 @@ function buildCorpScorePlanProfile(
     /advance|advancement/.test(normalizedRecordText(record)),
   ).length;
   const scoreSupportToolsKnown = records.filter((record) =>
-    record.roles.some((role) => role.includes("score")) ||
-    /score|agenda/.test(normalizedRecordText(record)),
+    rolesMatch(record.roles, ["score"]) ||
+    /score|agenda/.test(normalizedRecordTextWithoutRoles(record)),
   ).length;
   return {
     agendaToolsKnown,
@@ -855,15 +876,15 @@ function buildCorpRemotePlanProfile(
 ): CorpRemotePlanProfile {
   return {
     remoteProtectionToolsKnown: records.filter((record) =>
-      record.roles.some((role) => role.includes("remote") || role.includes("ice")) ||
+      rolesMatch(record.roles, ["remote", "ice"]) ||
       record.type === "ice",
     ).length,
     remoteEconomyToolsKnown: records.filter((record) =>
-      record.roles.some((role) => role.includes("economy_asset")) ||
-      /asset.*credit|campaign|bank/.test(normalizedRecordText(record)),
+      rolesMatch(record.roles, ["economy_asset"]) ||
+      /asset.*credit|campaign|bank/.test(normalizedRecordTextWithoutRoles(record)),
     ).length,
     ambushToolsKnown: records.filter((record) =>
-      record.roles.includes("ambush") || record.subtypes.includes("ambush"),
+      rolesMatch(record.roles, ["ambush"]) || record.subtypes.includes("ambush"),
     ).length,
     evidence: ["corp_remote_profile:conservative"],
   };
@@ -973,10 +994,6 @@ function subtypeOrText(record: CardCapabilityRecord, ...needles: string[]): bool
     record.subtypes.some((subtype) => subtype.toLowerCase() === needle) ||
     text.includes(needle),
   );
-}
-
-function countRoleMatches(roleText: string, roles: readonly string[]): number {
-  return roles.reduce((sum, role) => sum + (roleText.includes(role) ? 1 : 0), 0);
 }
 
 function compareBreakerCapabilities(

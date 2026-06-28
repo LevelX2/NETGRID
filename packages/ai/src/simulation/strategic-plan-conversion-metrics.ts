@@ -1,5 +1,6 @@
 import type { Side } from "@netgrid/shared";
 import { hasEvidenceFlag } from "../runtime/evidence-value";
+import { rolesMatch } from "../runtime/role-match";
 import type { AiSimulationActionSequenceEntry } from "./ai-simulation-action-sequence-entry";
 import type { AiMatchProgressionMetrics } from "./ai-match-progression-types";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
@@ -155,7 +156,10 @@ export function summarizeStrategicPlanConversionMetrics(
       )
         planIntentAbandonedWithoutReason += 1;
 
-      if (entry.side === "runner" && planKind.includes("recover_economy")) {
+      if (
+        entry.side === "runner" &&
+        strategicPlanKindMatches(planKind, ["recover_economy"])
+      ) {
         if (
           runnerEconomyConvertsToRunOrRig(
             strategicEntries,
@@ -165,7 +169,10 @@ export function summarizeStrategicPlanConversionMetrics(
         )
           runnerEconomyConvertedToRunOrRig += 1;
       }
-      if (entry.side === "runner" && planKind.includes("rig")) {
+      if (
+        entry.side === "runner" &&
+        strategicPlanKindMatches(planKind, ["rig"])
+      ) {
         if (
           runnerRigConvertsToRun(
             strategicEntries,
@@ -175,7 +182,10 @@ export function summarizeStrategicPlanConversionMetrics(
         )
           runnerRigConvertedToRun += 1;
       }
-      if (entry.side === "runner" && planKind.includes("safe_probe")) {
+      if (
+        entry.side === "runner" &&
+        strategicPlanKindMatches(planKind, ["safe_probe"])
+      ) {
         if (
           runnerProbeConvertsToUsefulInfoOrPivot(
             strategicEntries,
@@ -185,7 +195,10 @@ export function summarizeStrategicPlanConversionMetrics(
         )
           runnerProbeConvertedToUsefulInfoOrPivot += 1;
       }
-      if (entry.side === "runner" && planKind.includes("pressure")) {
+      if (
+        entry.side === "runner" &&
+        strategicPlanKindMatches(planKind, ["pressure"])
+      ) {
         if (
           runnerCentralPressureConvertsToStealOrFreshValue(
             strategicEntries,
@@ -195,7 +208,10 @@ export function summarizeStrategicPlanConversionMetrics(
         )
           runnerCentralPressureConvertedToStealOrFreshValue += 1;
       }
-      if (entry.side === "runner" && planKind.includes("contest_remote")) {
+      if (
+        entry.side === "runner" &&
+        strategicPlanKindMatches(planKind, ["contest_remote"])
+      ) {
         if (
           runnerRemoteContestConvertsToStealTrashOrAbort(
             strategicEntries,
@@ -205,7 +221,10 @@ export function summarizeStrategicPlanConversionMetrics(
         )
           runnerRemoteContestConvertedToStealTrashOrCorrectAbort += 1;
       }
-      if (entry.side === "corp" && planKind.includes("remote_build")) {
+      if (
+        entry.side === "corp" &&
+        strategicPlanKindMatches(planKind, ["remote_build"])
+      ) {
         if (
           corpRemoteBuildConvertsToAdvanceProtectOrScore(
             strategicEntries,
@@ -216,19 +235,25 @@ export function summarizeStrategicPlanConversionMetrics(
         )
           corpRemoteBuildConvertedToAdvanceProtectOrScore += 1;
       }
-      if (entry.side === "corp" && planKind.includes("advance")) {
+      if (
+        entry.side === "corp" &&
+        strategicPlanKindMatches(planKind, ["advance"])
+      ) {
         if (
           corpAdvanceConvertsToScoreOrProtectedWindow(strategicEntries, index)
         )
           corpAdvanceConvertedToScoreOrProtectedWindow += 1;
       }
-      if (entry.side === "corp" && planKind.includes("economy")) {
+      if (
+        entry.side === "corp" &&
+        strategicPlanKindMatches(planKind, ["economy"])
+      ) {
         if (corpEconomyConvertsToRezInstallScore(strategicEntries, index))
           corpEconomyConvertedToRezInstallScore += 1;
       }
       if (
         entry.side === "corp" &&
-        (planKind.includes("protect_hq") || planKind.includes("protect_rnd"))
+        strategicPlanKindMatches(planKind, ["protect_hq", "protect_rnd"])
       ) {
         if (corpProtectionConvertsToScoreSafety(strategicEntries, index))
           corpProtectionConvertedToScoreSafety += 1;
@@ -273,4 +298,11 @@ export function summarizeStrategicPlanConversionMetrics(
     corpEconomyConvertedToRezInstallScore,
     corpProtectionConvertedToScoreSafety,
   };
+}
+
+export function strategicPlanKindMatches(
+  planKind: string,
+  needles: readonly string[],
+): boolean {
+  return rolesMatch([planKind], needles);
 }

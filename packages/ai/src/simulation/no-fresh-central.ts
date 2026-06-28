@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import { rolesMatch } from "../runtime/role-match";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
 import {
   centralPressureTargetsForCard,
@@ -152,9 +153,7 @@ export function trueCentralCloseoutProfile(
   );
   const matchingInterface = installedTargets.has(target);
   const anyMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
-    dependencies
-      .rolesForCardId(card.definitionId)
-      .some((role) => role.includes("multiaccess")),
+    rolesMatch(dependencies.rolesForCardId(card.definitionId), ["multiaccess"]),
   );
   const hasRunEvent = input.legalActions.some((action) => {
     if (action.side !== "runner" || action.type !== "play_event") return false;
@@ -207,9 +206,9 @@ export function runnerNoFreshCentralContext(
       centralPressureTargetsForCard(card.definitionId).includes(target),
     );
     const anyMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
-      dependencies
-        .rolesForCardId(card.definitionId)
-        .some((role) => role.includes("multiaccess")),
+      rolesMatch(dependencies.rolesForCardId(card.definitionId), [
+        "multiaccess",
+      ]),
     );
     return (
       dependencies.centralRunStreakWithoutValueForMetrics(input, target) > 0 &&
@@ -251,9 +250,7 @@ export function runnerNoFreshCentralContext(
     input.legalActions.some(
       (action) =>
         action.type === "install_card" &&
-        dependencies
-          .rolesForAction(input, action)
-          .some((role) => role.startsWith("breaker_")),
+        rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"]),
     )
   )
     better.add("rig_unlock");
@@ -281,8 +278,7 @@ export function runnerNoFreshCentralContext(
         (role) =>
           role === "draw" ||
           role === "setup" ||
-          role.includes("search") ||
-          role.includes("tutor"),
+          rolesMatch([role], ["search", "tutor"]),
       );
     })
   )
@@ -301,9 +297,9 @@ export function runnerNoFreshCentralContext(
       allowed.add("interface");
     if (
       installed.some((card) =>
-        dependencies
-          .rolesForCardId(card.definitionId)
-          .some((role) => role.includes("multiaccess")),
+        rolesMatch(dependencies.rolesForCardId(card.definitionId), [
+          "multiaccess",
+        ]),
       )
     )
       allowed.add("multiaccess");
@@ -396,9 +392,7 @@ export function noFreshCentralSubstitutionTypeForAction(
     if (isCentralPressureCardForMetrics(definitionId, true))
       return "pressure_install";
     if (
-      dependencies
-        .rolesForAction(input, action)
-        .some((role) => role.startsWith("breaker_"))
+      rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"])
     )
       return "rig_unlock";
   }
@@ -409,7 +403,9 @@ export function noFreshCentralSubstitutionTypeForAction(
         .rolesForAction(input, action)
         .some(
           (role) =>
-            role === "draw" || role === "setup" || role.includes("search"),
+            role === "draw" ||
+            role === "setup" ||
+            rolesMatch([role], ["search"]),
         )) ||
     action.type === "resolve_choice"
   )

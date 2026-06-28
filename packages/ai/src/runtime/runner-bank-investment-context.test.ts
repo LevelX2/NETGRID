@@ -57,6 +57,54 @@ describe("createRunnerBankInvestmentContext", () => {
     ).toContain("bankStoredCredits:0");
   });
 
+  it("ignores substring-only economy roles for credit-bank detection", () => {
+    const context = createContext({
+      rolesForCardId: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? ["microeconomy"]
+          : [],
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const action = runnerAction("start_run", { serverId: "hq" });
+
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(
+        runnerInput({
+          rig: [
+            visibleRunnerCard("custom-runner-credit-bank", {
+              counters: { power: 4 },
+            }),
+          ],
+          legalActions: [action],
+        }),
+        action,
+      ),
+    ).toContain("bankStoredCredits:0");
+  });
+
+  it("ignores substring-only funding-need role noise", () => {
+    const action = runnerAction("install_card", {
+      actionId: "expensive-noise",
+      source: "expensive-noise-card",
+    });
+    const context = createContext({
+      actionCreditCost: () => 9,
+      rolesForAction: () => ["pressurewasher_noise"],
+    });
+
+    expect(
+      context.runnerBankHasConcreteFundingNeed(
+        runnerInput({
+          rig: [],
+          legalActions: [action],
+        }),
+      ),
+    ).toBe(false);
+  });
+
   it("classifies credit-bank build and cashout actions without card-name text", () => {
     const context = createContext({
       hintEffectsForDefinition: (definitionId) =>

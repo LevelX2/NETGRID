@@ -108,6 +108,308 @@ describe("SelfplayTraceMining", () => {
     expect(isSelfplayTraceRedactionSafe(findings)).toBe(true);
   });
 
+  it("bounds repeated no-payoff remote signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-remote-positive",
+        targetServerId: "remote_1",
+        evidence: ["remote_memory_payoff:known_low_value"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-remote-noise",
+        targetServerId: "remote_1",
+        evidence: ["remote_memory_payoff:known_low_valueish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["repeated_known_no_payoff_remote"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("run-remote-positive");
+  });
+
+  it("bounds low-value archives signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "archives-positive",
+        targetServerId: "archives",
+        debugFacts: ["archives_known_no_agenda"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "archives-noise",
+        targetServerId: "archives",
+        debugFacts: ["archives_known_no_agendaish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["repeated_low_value_archives"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("archives-positive");
+  });
+
+  it("bounds bank over-target signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "gain_credit", {
+        selectedActionId: "bank-positive",
+        debugFacts: ["bankOverTarget:true"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "gain_credit", {
+        selectedActionId: "bank-noise",
+        debugFacts: ["bankOverTarget:trueish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["bank_over_target_without_funding_need"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("bank-positive");
+  });
+
+  it("bounds risky self-damage signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "self-damage-positive",
+        debugFacts: ["self_damage_survives:false"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "self-damage-noise",
+        debugFacts: ["self_damage_survives:falseish"],
+      }),
+    ]);
+    const safeAlternative = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "self-damage-safe",
+        debugFacts: [
+          "self_damage_survives:false",
+          "runner.self_damage.safe_alternative",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions(
+      [positive, noise, safeAlternative],
+      {
+        detectorIds: ["risky_self_damage_action"],
+      },
+    );
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("self-damage-positive");
+  });
+
+  it("bounds blink hand-buffer signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "blink-positive",
+        debugFacts: ["blinkRiskSeverity:lethal"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "blink-noise",
+        debugFacts: ["blinkRiskSeverity:lethalish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["blink_low_hand_buffer_run"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("blink-positive");
+  });
+
+  it("bounds recovery coverage signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "recovery-positive-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "recovery-positive-2",
+        reasonCode: "runner.recovery",
+        debugFacts: ["coverageAnswerRole:recovery_answer"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "recovery-noise-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "recovery-noise-2",
+        reasonCode: "runner.recovery",
+        debugFacts: ["coverageAnswerRole:recovery_answerish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["recovery_low_value_loop"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("recovery-noise-2");
+  });
+
+  it("bounds recovery funding signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "funding-positive-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "funding-positive-2",
+        reasonCode: "runner.recovery",
+        debugFacts: [
+          "runner_credit_base_recommendation:fund_useful_hand_card",
+        ],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "funding-noise-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "funding-noise-2",
+        reasonCode: "runner.recovery",
+        debugFacts: [
+          "runner_credit_base_recommendation:fund_useful_hand_cardish",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["recovery_low_value_loop"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("funding-noise-2");
+  });
+
+  it("bounds recovery search signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "search-positive-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "search-positive-2",
+        reasonCode: "runner.recovery",
+        debugFacts: ["coverageAnswerRole:program_search"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "search-noise-1",
+        reasonCode: "runner.recovery",
+      }),
+      selfplayAction("runner", 2, "trigger_ability", {
+        selectedActionId: "search-noise-2",
+        reasonCode: "runner.recovery",
+        debugFacts: ["coverageAnswerRole:program_searchish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["recovery_low_value_loop"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("search-noise-2");
+  });
+
+  it("bounds semantic override markers to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "override-positive",
+        debugFacts: ["semantic_runtime_actual_differs_from_legacy_debug"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "override-noise",
+        debugFacts: [
+          "semantic_runtime_actual_differs_from_legacy_debugish",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["semantic_override_suspicious"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("override-positive");
+  });
+
+  it("bounds semantic override explanations to structured entries", () => {
+    const explained = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "override-explained",
+        debugFacts: [
+          "semantic_runtime_actual_differs_from_legacy_debug",
+          "selected_by_plan_mapping",
+        ],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "trigger_ability", {
+        selectedActionId: "override-explanation-noise",
+        debugFacts: [
+          "semantic_runtime_actual_differs_from_legacy_debug",
+          "selected_by_plan_mappingish",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([explained, noise], {
+      detectorIds: ["semantic_override_suspicious"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("override-explanation-noise");
+  });
+
+  it("bounds setup plan-mismatch pressure signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "setup-mismatch-positive",
+        planKind: "runner.setup",
+        debugFacts: ["runnerPressureReady:false"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "setup-mismatch-noise",
+        planKind: "runner.setup",
+        debugFacts: ["runnerPressureReady:falseish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["plan_step_action_mismatch"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("setup-mismatch-positive");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),

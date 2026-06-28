@@ -1,4 +1,5 @@
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
+import { rolesMatch } from "../runtime/role-match";
 import type {
   PlanScoreBreakdown,
   TacticalPlanBuildContext,
@@ -109,9 +110,11 @@ export function runnerPressureGoalForServer(
       (
         goal.goalId === "runner.strategic.central_pressure" ||
         goal.goalId === "runner.pressure_good_central_target" ||
-        goal.goalId.includes("central_pressure") ||
-        goal.goalId.includes("rnd_pressure") ||
-        goal.goalId.includes("hq_pressure")
+        goalIdMatches(goal.goalId, [
+          "central_pressure",
+          "rnd_pressure",
+          "hq_pressure",
+        ])
       ),
   );
 }
@@ -124,7 +127,7 @@ export function runnerRemoteGoalForServer(
     context,
     (goal) =>
       isStrategicTacticalGoal(goal) &&
-      (goal.family === "remote_contest" || goal.goalId.includes("remote")) &&
+      (goal.family === "remote_contest" || goalIdMatches(goal.goalId, ["remote"])) &&
       (goal.targetServerId === undefined || goal.targetServerId === serverId),
   );
 }
@@ -140,4 +143,8 @@ export function corpGoalForFamily(
       goal.goalId.startsWith("corp.") &&
       goal.family === family,
   );
+}
+
+function goalIdMatches(goalId: string, needles: readonly string[]): boolean {
+  return rolesMatch([goalId], needles);
 }

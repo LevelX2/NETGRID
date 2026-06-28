@@ -1,4 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { rolesMatch } from "./role-match";
 
 type KnownPathAssessment = {
   assessedKnownIceCount: number;
@@ -54,7 +55,7 @@ export function visibleBreakerCardCanAddressIce(
   const roles = dependencies.visibleBreakerRoles(breaker);
   const breakerText = dependencies.visibleCardText(breaker).toLowerCase();
   if (
-    roles.includes("icebreaker") &&
+    rolesMatch(roles, ["icebreaker"]) &&
     /break (?:an? |one |\d+ )?ice subroutine|breaks? .*subroutine/.test(
       breakerText,
     )
@@ -64,17 +65,17 @@ export function visibleBreakerCardCanAddressIce(
   const iceText = dependencies.visibleCardText(ice).toLowerCase();
   if (/wall|barrier/.test(iceText)) {
     return (
-      roles.includes("fracter") || /fracter|wall|barrier/.test(breakerText)
+      rolesMatch(roles, ["fracter"]) || /fracter|wall|barrier/.test(breakerText)
     );
   }
   if (/code gate|codegate/.test(iceText)) {
     return (
-      roles.includes("decoder") ||
+      rolesMatch(roles, ["decoder"]) ||
       /decoder|code gate|codegate/.test(breakerText)
     );
   }
   if (/sentry/.test(iceText)) {
-    return roles.includes("killer") || /killer|sentry/.test(breakerText);
+    return rolesMatch(roles, ["killer"]) || /killer|sentry/.test(breakerText);
   }
   return roles.length > 0 && /break/.test(breakerText);
 }

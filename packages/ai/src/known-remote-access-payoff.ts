@@ -73,7 +73,7 @@ export function evaluateKnownRemoteAccessPayoff(
 
   const knownRoots = knownRemoteRoots(input, serverId, beliefState);
   const remoteInvalidations = beliefState.invalidationLog
-    .filter((entry) => entry.includes(serverId))
+    .filter((entry) => invalidationEntryReferencesServer(entry, serverId))
     .slice(0, 3);
   if (knownRoots.length === 0) {
     const unknownRootCount = server.root.filter((card) => !card.known).length;
@@ -311,6 +311,13 @@ function knownRemoteRoots(
   return [...byPosition.values()].sort((left, right) =>
     left.positionKey.localeCompare(right.positionKey),
   );
+}
+
+function invalidationEntryReferencesServer(entry: string, serverId: string): boolean {
+  return entry
+    .toLowerCase()
+    .split(/[.:-]+/)
+    .some((segment) => segment === serverId);
 }
 
 function knownRemoteRootMemory(

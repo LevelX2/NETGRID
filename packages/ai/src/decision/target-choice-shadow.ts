@@ -223,7 +223,7 @@ function targetChoiceWouldSelect(
   }
   if (
     blocked.some((requirement) =>
-      requirement.evidence.some((entry) => entry.includes("hidden_info")),
+      requirement.evidence.some(targetChoiceEvidenceHasHiddenInfoMarker),
     )
   ) {
     return {};
@@ -249,6 +249,16 @@ function targetChoiceWouldSelect(
       ],
     },
   };
+}
+
+export function targetChoiceEvidenceHasHiddenInfoMarker(entry: string): boolean {
+  return entry
+    .toLowerCase()
+    .split(/[.:-]+/)
+    .some(
+      (segment) =>
+        segment === "hidden_info" || segment.startsWith("hidden_info_"),
+    );
 }
 
 function choiceOptions(

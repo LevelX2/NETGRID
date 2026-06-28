@@ -44,7 +44,6 @@ export function runnerHqMemoryDiagnosticsForMetrics(
       : 0;
   const unknownCardValue =
     centralRun && centralTarget === "hq" ? Math.min(140, unknownCount * 55) : 0;
-  const invalidationText = memory.invalidationReasons.join("|");
   return {
     hqKnownCards: memory.knownCount,
     hqUnknownCards: unknownCount,
@@ -53,25 +52,7 @@ export function runnerHqMemoryDiagnosticsForMetrics(
     hqKnownAgendaCount: knownAgendaDefinitions.length,
     hqKnownNonAgendaCount: knownNonAgendaCount,
     hqKnownAgendaPoints: knownAgendaPoints,
-    ...(invalidationText.includes("corp_draw_added_unknown_hq_card")
-      ? { hqMemoryInvalidatedByDraw: true }
-      : {}),
-    ...(invalidationText.includes("known_hq_card_installed") ||
-    invalidationText.includes("corp_installed_hidden_hq_card")
-      ? { hqMemoryInvalidatedByInstall: true }
-      : {}),
-    ...(invalidationText.includes("known_hq_card_played") ||
-    invalidationText.includes("corp_played_unknown_hq_card")
-      ? { hqMemoryInvalidatedByPlay: true }
-      : {}),
-    ...(invalidationText.includes("corp_discarded_hq_card")
-      ? { hqMemoryInvalidatedByDiscard: true }
-      : {}),
-    ...(invalidationText.includes("shuffle_changed_hq_hand") ||
-    invalidationText.includes("arrange_changed_hq_hand") ||
-    invalidationText.includes("swap_changed_hq_hand")
-      ? { hqMemoryInvalidatedByShuffleOrReorder: true }
-      : {}),
+    ...runnerHqMemoryInvalidationFlags(memory.invalidationReasons),
     ...(knownCardValue > 0 ? { hqRunValueFromKnownCards: knownCardValue } : {}),
     ...(unknownCardValue > 0
       ? { hqRunValueFromUnknownCards: unknownCardValue }
@@ -92,6 +73,32 @@ export function runnerHqMemoryDiagnosticsForMetrics(
     isRepeatedLowValueCentralRunForMetrics(input, "hq") &&
     !input.eventTail.some(aiEventMayChangeHqPressure)
       ? { hqRunRepeatedWithoutNewHqInfo: true }
+      : {}),
+  };
+}
+
+export function runnerHqMemoryInvalidationFlags(
+  invalidationReasons: readonly string[],
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  return {
+    ...(invalidationReasons.includes("corp_draw_added_unknown_hq_card")
+      ? { hqMemoryInvalidatedByDraw: true }
+      : {}),
+    ...(invalidationReasons.includes("known_hq_card_installed") ||
+    invalidationReasons.includes("corp_installed_hidden_hq_card")
+      ? { hqMemoryInvalidatedByInstall: true }
+      : {}),
+    ...(invalidationReasons.includes("known_hq_card_played") ||
+    invalidationReasons.includes("corp_played_unknown_hq_card")
+      ? { hqMemoryInvalidatedByPlay: true }
+      : {}),
+    ...(invalidationReasons.includes("corp_discarded_hq_card")
+      ? { hqMemoryInvalidatedByDiscard: true }
+      : {}),
+    ...(invalidationReasons.includes("shuffle_changed_hq_hand") ||
+    invalidationReasons.includes("arrange_changed_hq_hand") ||
+    invalidationReasons.includes("swap_changed_hq_hand")
+      ? { hqMemoryInvalidatedByShuffleOrReorder: true }
       : {}),
   };
 }

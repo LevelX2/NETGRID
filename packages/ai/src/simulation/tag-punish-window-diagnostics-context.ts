@@ -7,6 +7,7 @@ import type {
 
 import { corpTagPunishSkipReason } from "../runtime/corp-tag-punish-skip-reason";
 import { sortedUnique } from "../runtime/collection";
+import { rolesMatch } from "../runtime/role-match";
 import { traceTagExpectedSuccessEstimate } from "../runtime/trace-tag-success-estimate";
 import type { StructuredTagPunishLegalActionAssessment } from "../tag-punish-ontology-consumer";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
@@ -306,7 +307,7 @@ export function createTagPunishWindowDiagnosticsContext(
       );
       if (
         stateBeforeAction.run ||
-        decision.reasonCode.includes("trace") ||
+        rolesMatch([decision.reasonCode], ["trace"]) ||
         action.type === "resolve_choice"
       )
         diagnostics.runnerTaggedAfterTraceDuringRun = true;

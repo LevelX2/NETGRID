@@ -3,6 +3,7 @@ import type { PublicGameEvent, Side } from "@netgrid/shared";
 import {
   chronicleActionUseByEventId,
   chronicleRunGroupLabelFromEvent,
+  chronicleStartTurnEffectGroupFromEvent,
   chronicleTurnNumberByEventId,
   chronicleTurnSideByEventId,
   formatChronicleEffectItems,
@@ -2150,6 +2151,20 @@ describe("formatChronicleEvent", () => {
       "corp",
       { cardTitle: "Wall of Static" },
     );
+    const paidProgram = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "runner",
+        title: "Hammer",
+        zoneLabel: "Rig",
+        installCostPaid: 2,
+        runnerInstallNormalCreditsPaid: 1,
+        runnerInstallHostedCreditsPaid: 1,
+        runnerInstallPaymentSourceDefinitionIds:
+          "onr_v1_075_zetatech-software-installer",
+      }),
+      "runner",
+      { cardTitle: "Hammer" },
+    );
 
     expect(invisibility.description).toBe(
       "9 Recurring Credits wurden auf die Karte gelegt.",
@@ -2160,6 +2175,17 @@ describe("formatChronicleEvent", () => {
     );
     expect(taxedIce.chips).toEqual(
       expect.arrayContaining(["+2 Installkosten", "5 gesamt"]),
+    );
+    expect(paidProgram.description).toBe(
+      "Installationskosten: 1 Credit aus dem Creditpool, 1 Credit aus Installationsquellen.",
+    );
+    expect(paidProgram.chips).toEqual(
+      expect.arrayContaining([
+        "2 Credits bezahlt",
+        "1 Pool",
+        "1 Quelle",
+        "Zetatech Software Installer",
+      ]),
     );
   });
 
@@ -2668,7 +2694,7 @@ describe("formatChronicleEvent", () => {
     const effects = formatChronicleEffectItems(event, "runner");
 
     expect(effects[0]?.title).toBe(
-      "Skivviss zwingt die Korp zu 2 zusätzlichen Karten.",
+      "Skivviss: Die Korp zieht zu Beginn ihres Zugs 2 zusätzliche Karten.",
     );
     expect(effects[0]?.description).toBe(
       "Grund: 2 Skivviss-Counter auf der Korp.",
@@ -2676,9 +2702,14 @@ describe("formatChronicleEvent", () => {
     expect(effects[0]?.chips).toEqual(
       expect.arrayContaining([
         "Skivviss",
+        "Automatisch",
+        "Korp-Zugstart",
         "2 Skivviss-Counter",
         "2 Zusatzkarten",
       ]),
+    );
+    expect(formatChronicleEffectItems(event, "corp")[0]?.title).toBe(
+      "Skivviss: Du ziehst zu Beginn deines Zugs 2 zusätzliche Karten.",
     );
   });
 
@@ -4914,6 +4945,43 @@ describe("formatChronicleEvent", () => {
     expect(turnSides.evt_corp_forged_response).toBe("runner");
 
     expect(turnSides.evt_runner_end_1).toBe("runner");
+  });
+
+  it("groups start-turn effects carried by discard resolution under the next turn", () => {
+    const discardEvent = makeEvent("resolve_choice", {
+      actor: "runner",
+      discardResolved: true,
+      hiddenZoneAction: "discard_phase",
+      resolvedEffects: [
+        {
+          effectId: "corp.start.skivviss",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 3,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_v1_064_skivviss",
+          sourceTitle: "Skivviss",
+        },
+      ],
+    });
+    const skivvissItem = formatChronicleEffectItems(
+      discardEvent,
+      "runner",
+    )[0];
+
+    expect(skivvissItem?.title).toBe(
+      "Skivviss: Die Korp zieht zu Beginn ihres Zugs 3 zusätzliche Karten.",
+    );
+    expect(
+      skivvissItem
+        ? chronicleStartTurnEffectGroupFromEvent(
+            discardEvent,
+            30,
+            skivvissItem,
+          )
+        : null,
+    ).toEqual({ label: "Zug 31 - Korp", kind: "corp" });
   });
 
   it("formats resolved automatic effects as separate chronicle items", () => {

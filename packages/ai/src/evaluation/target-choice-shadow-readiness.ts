@@ -1,5 +1,8 @@
 import type { TargetChoiceShadowReport } from "../decision/target-choice-shadow";
-import { targetChoiceRecommendationForTargetFit } from "../decision/target-choice-shadow";
+import {
+  targetChoiceEvidenceHasHiddenInfoMarker,
+  targetChoiceRecommendationForTargetFit,
+} from "../decision/target-choice-shadow";
 import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
 import type { TargetChoiceShadowCoverageCase } from "./target-choice-shadow-coverage";
 
@@ -159,9 +162,7 @@ function followupCandidatesForReport(
     candidates.push(followupCandidate(scenarioId, report, "engine_only_target"));
   }
   if (
-    report.blockedRequirements.some((requirement) =>
-      requirement.evidence.some((entry) => entry.includes("hidden_info")),
-    )
+    targetChoiceReportHasHiddenInfoBlockedRequirement(report)
   ) {
     candidates.push(followupCandidate(scenarioId, report, "hidden_info_blocked"));
   }
@@ -213,11 +214,7 @@ function categoryForReport(
   report: TargetChoiceShadowReport,
 ): TargetChoiceSelectedChoicesReadinessCategory {
   if (report.scorecard.engineOnlyBlockedCount > 0) return "blocked_engine_only";
-  if (
-    report.blockedRequirements.some((requirement) =>
-      requirement.evidence.some((entry) => entry.includes("hidden_info")),
-    )
-  ) {
+  if (targetChoiceReportHasHiddenInfoBlockedRequirement(report)) {
     return "blocked_hidden_info";
   }
   if (report.scorecard.noSideSafeOptionsBlockedCount > 0) {
@@ -235,6 +232,14 @@ function categoryForReport(
     return "ready_for_shadow_only";
   }
   return "blocked_scorecard_unclear";
+}
+
+function targetChoiceReportHasHiddenInfoBlockedRequirement(
+  report: TargetChoiceShadowReport,
+): boolean {
+  return report.blockedRequirements.some((requirement) =>
+    requirement.evidence.some(targetChoiceEvidenceHasHiddenInfoMarker),
+  );
 }
 
 function emptyCategoryCounts(): Record<

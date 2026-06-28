@@ -58,7 +58,7 @@ export function semanticRuntimeCoverageSelectionDebug(
     `coverageAnswerSource:${sourceTitle}`,
     `coverageAnswerRole:${answerRole ?? "unknown"}`,
     "why_coverage_answer_selected:searches_for_required_breaker_coverage",
-    ...(sourceIdentity.includes("mantis")
+    ...(sourceIdentityHasMantisToken(sourceIdentity)
       ? ["why_mantis_selected:searches_for_required_breaker_coverage"]
       : []),
   ];
@@ -69,6 +69,10 @@ export function semanticRuntimeCoverageSelectionDebug(
     sourceTitle,
     evidence,
   };
+}
+
+function sourceIdentityHasMantisToken(sourceIdentity: string): boolean {
+  return /(^|[^a-z0-9])mantis([^a-z0-9]|$)/.test(sourceIdentity);
 }
 
 function semanticRuntimeCoverageAnswerRoleFromMapping(

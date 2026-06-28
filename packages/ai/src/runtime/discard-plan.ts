@@ -2,6 +2,7 @@ import { type AiDecisionInput, type VisibleCard } from "@netgrid/shared";
 
 import { sortedUnique } from "./collection";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
+import { rolesHaveBreakerRole } from "./breaker-role-match";
 
 export type DiscardPlanDependencies = {
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
@@ -16,19 +17,15 @@ export function discardCurrentPlanKind(
   if (input.side === "runner") {
     if (input.playerView.own.credits < 4) return "recover_economy";
     const hasInstalledBreaker = (input.playerView.own.rig ?? []).some((card) =>
-      dependencies
-        .rolesForCardId(card.definitionId)
-        .some((role) => role.startsWith("breaker_")),
+      rolesHaveBreakerRole(dependencies.rolesForCardId(card.definitionId)),
     );
     if (
       !hasInstalledBreaker &&
       hand.some((card) =>
-        dependencies.rolesForCardId(card.definitionId).some(
-          (role) =>
-            role.startsWith("breaker_") ||
-            role === "memory" ||
-            role === "setup",
-        ),
+        rolesHaveBreakerRole(dependencies.rolesForCardId(card.definitionId)) ||
+        dependencies
+          .rolesForCardId(card.definitionId)
+          .some((role) => role === "memory" || role === "setup"),
       )
     )
       return "build_rig";

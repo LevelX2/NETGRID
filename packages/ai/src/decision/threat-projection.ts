@@ -83,7 +83,7 @@ export function buildAiThreatProjections(
 
   if (
     frame.side === "corp" &&
-    frame.evidence.some((entry) => entry.includes("low_rez_reserve"))
+    hasEvidenceMarker(frame.evidence, "low_rez_reserve")
   ) {
     projections.push({
       threat: "corp_low_rez_reserve",
@@ -94,6 +94,15 @@ export function buildAiThreatProjections(
   }
 
   return dedupeThreats(projections);
+}
+
+function hasEvidenceMarker(
+  evidence: readonly string[],
+  marker: "low_rez_reserve",
+): boolean {
+  return evidence.some(
+    (entry) => entry === marker || entry.startsWith(`${marker}:`),
+  );
 }
 
 function runTargetThreat(

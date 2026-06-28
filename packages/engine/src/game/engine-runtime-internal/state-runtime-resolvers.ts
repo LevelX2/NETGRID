@@ -390,6 +390,12 @@ import {
   type RunDurationPaymentHost,
 } from "../run/run-duration-payment";
 import {
+  runnerInstallPaymentSourcePaymentsFromPayload,
+  runnerProgramInstallAutomaticCreditSourceIds,
+  runnerProgramInstallOptionalCreditSourceIds,
+  type RunnerInstallCreditSpendResult,
+} from "../install/runner-program-install-payment";
+import {
   resolvePassRezzedIceProgramTrashChoice as resolvePassRezzedIceProgramTrashChoiceInRunModule,
   resolveActiveIceProgramTrashChoice as resolveActiveIceProgramTrashChoiceInRunModule,
   type EncounterResolutionHost,
@@ -618,7 +624,6 @@ import {
   HQ_CARD_TRASH_EVENT_SOURCE,
   HQ_ACCESS_RETAIN_EVENT_SOURCE,
   PROGRAM_BUNDLE_INSTALL_EVENT_SOURCE,
-  ZETATECH_SOFTWARE_INSTALLER_SOURCE,
 } from "../../mechanics/longtail-card-effects";
 import {
   corpInstalledEconomyActionPayload,
@@ -1847,29 +1852,94 @@ function runnerRecurringCredits(state: GameState): number {
 function runnerProgramInstallRecurringCreditSourceIds(
   state: GameState,
 ): CardInstanceId[] {
-  return [
-    ...state.runner.rig.hardware.filter(
-      (cardId) => definitionFor(state, cardId).id === "v099_recurring_chip",
-    ),
-    ...state.runner.rig.programs.filter(
-      (cardId) =>
-        definitionFor(state, cardId).id === ZETATECH_SOFTWARE_INSTALLER_SOURCE,
-    ),
-  ].filter((cardId) => !isRestrictedHostedCreditSource(definitionFor(state, cardId)));
+  return runnerProgramInstallAutomaticCreditSourceIds(state);
 }
 
 function spendRunnerInstallCredits(
   state: GameState,
   amount: number,
   cardType: CardDefinition["type"],
-): void {
-  if (amount <= 0) return;
+  paymentPayload?: LegalAction["payload"],
+): RunnerInstallCreditSpendResult {
+  const result = {
+    amount: Math.max(0, Math.floor(amount)),
+    normalCreditsSpent: 0,
+    hostedCreditsSpent: 0,
+    recurringCreditsSpent: 0,
+    temporaryCreditsSpent: 0,
+    sourceDefinitionIds: [] as string[],
+    runnerCreditsAfter: state.runner.credits,
+  };
+  if (amount <= 0) return result;
   if (cardType !== "program") {
     spendCredits(state, "runner", amount);
-    return;
+    result.normalCreditsSpent = amount;
+    result.runnerCreditsAfter = state.runner.credits;
+    return result;
   }
   if (availableRunnerProgramInstallCredits(state) < amount)
     throw new Error("Der Runner kann die Installationskosten nicht bezahlen.");
+  const sourceDefinitionIds = new Set<string>();
+  const declaredSourcePayments =
+    runnerInstallPaymentSourcePaymentsFromPayload(paymentPayload);
+  if (declaredSourcePayments) {
+    let remaining = amount;
+    const optionalSources = new Set(
+      runnerProgramInstallOptionalCreditSourceIds(state),
+    );
+    const seenSources = new Set<CardInstanceId>();
+    for (const payment of declaredSourcePayments) {
+      if (seenSources.has(payment.sourceCardId))
+        throw new Error("Die Programminstallations-Zahlungsaufteilung enthaelt doppelte Quellen.");
+      seenSources.add(payment.sourceCardId);
+      if (!optionalSources.has(payment.sourceCardId))
+        throw new Error("Eine Zahlungsquelle ist fuer diese Programminstallation nicht legal.");
+      if (hostedPaymentCredits(state, payment.sourceCardId) < payment.amount)
+        throw new Error("Eine Zahlungsquelle hat nicht genug verfuegbare Bits.");
+      if (payment.amount <= 0) continue;
+      if (payment.amount > remaining)
+        throw new Error("Die Programminstallations-Zahlungsaufteilung zahlt zu viele Bits.");
+      spendHostedPaymentCredits(state, payment.sourceCardId, payment.amount);
+      remaining -= payment.amount;
+      result.hostedCreditsSpent += payment.amount;
+      sourceDefinitionIds.add(definitionFor(state, payment.sourceCardId).id);
+    }
+    const flags = ensureRunnerTurnFlags(state);
+    const temporary = Math.min(
+      valuPakTemporaryProgramInstallCredits(state),
+      remaining,
+    );
+    if (temporary > 0) {
+      spendRestrictedActionGrantTemporaryCredits(
+        flags,
+        RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
+        temporary,
+      );
+      flags.valuPakTemporaryProgramInstallCredits = Math.max(
+        0,
+        Math.floor(flags.valuPakTemporaryProgramInstallCredits ?? 0) - temporary,
+      );
+      remaining -= temporary;
+      result.temporaryCreditsSpent = temporary;
+    }
+    for (const cardId of runnerProgramInstallRecurringCreditSourceIds(state)) {
+      if (remaining <= 0) break;
+      const available = hostedPaymentCredits(state, cardId);
+      const spent = Math.min(available, remaining);
+      if (spent > 0) {
+        spendHostedPaymentCredits(state, cardId, spent);
+        remaining -= spent;
+        result.hostedCreditsSpent += spent;
+        result.recurringCreditsSpent += spent;
+        sourceDefinitionIds.add(definitionFor(state, cardId).id);
+      }
+    }
+    spendCredits(state, "runner", remaining);
+    result.normalCreditsSpent = remaining;
+    result.sourceDefinitionIds = [...sourceDefinitionIds].sort();
+    result.runnerCreditsAfter = state.runner.credits;
+    return result;
+  }
   let remaining = amount;
   const flags = ensureRunnerTurnFlags(state);
   const temporary = Math.min(
@@ -1887,6 +1957,7 @@ function spendRunnerInstallCredits(
       Math.floor(flags.valuPakTemporaryProgramInstallCredits ?? 0) - temporary,
     );
     remaining -= temporary;
+    result.temporaryCreditsSpent = temporary;
   }
   const restricted = spendRestrictedHostedCredits(
     state,
@@ -1895,6 +1966,9 @@ function spendRunnerInstallCredits(
     { installCardType: cardType },
   );
   remaining -= restricted.spent;
+  result.hostedCreditsSpent += restricted.spent;
+  for (const definitionId of restricted.sourceDefinitionIds)
+    sourceDefinitionIds.add(definitionId);
   for (const cardId of runnerProgramInstallRecurringCreditSourceIds(state)) {
     if (remaining <= 0) break;
     const available = hostedPaymentCredits(state, cardId);
@@ -1902,9 +1976,16 @@ function spendRunnerInstallCredits(
     if (spent > 0) {
       spendHostedPaymentCredits(state, cardId, spent);
       remaining -= spent;
+      result.hostedCreditsSpent += spent;
+      result.recurringCreditsSpent += spent;
+      sourceDefinitionIds.add(definitionFor(state, cardId).id);
     }
   }
   spendCredits(state, "runner", remaining);
+  result.normalCreditsSpent = remaining;
+  result.sourceDefinitionIds = [...sourceDefinitionIds].sort();
+  result.runnerCreditsAfter = state.runner.credits;
+  return result;
 }
 
 function runnerTagRemovalRecurringCreditSourceIds(

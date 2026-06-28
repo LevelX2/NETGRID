@@ -6,6 +6,7 @@ import {
 } from "./discard-fit-bonus";
 import { discardCurrentPlanKind } from "./discard-plan";
 import { sortedUnique } from "./collection";
+import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 
 export type DiscardCandidateScore = {
@@ -69,7 +70,7 @@ export function discardKeepScore(
     if (type === "agenda") baseValue += 330;
     if (
       type === "ice" ||
-      roles.some((role) => role.endsWith("_ice") || role === "etr_ice")
+      rolesMatch(roles, ["ice", "etr_ice"])
     )
       baseValue += 320;
     const economyRole = rolesMatch(roles, ["economy"]);
@@ -78,26 +79,22 @@ export function discardKeepScore(
     if (rolesMatch(roles, ["score", "remote"]))
       baseValue += 70;
   } else {
-    if (rolesMatch(roles, ["breaker_"])) {
-      const installedSameBreakerRole = roles.some(
-        (role) =>
-          role.startsWith("breaker_") &&
-          (input.playerView.own.rig ?? []).some((rigCard) =>
-            dependencies.rolesForCardId(rigCard.definitionId).includes(role),
-          ),
+    const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
+    if (breakerRoleNeedles.length > 0) {
+      const installedRigRoles = (input.playerView.own.rig ?? []).flatMap(
+        (rigCard) => dependencies.rolesForCardId(rigCard.definitionId),
+      );
+      const installedSameBreakerRole = breakerRoleNeedles.some((needle) =>
+        rolesMatch(installedRigRoles, [needle]),
       );
       baseValue += installedSameBreakerRole ? 95 : 210;
     }
     if (rolesMatch(roles, ["economy", "tempo"]))
       baseValue += input.playerView.own.credits < 4 ? 170 : 65;
-    if (
-      roles.includes("memory") ||
-      roles.includes("setup") ||
-      roles.includes("build_rig")
-    )
+    if (rolesMatch(roles, ["memory", "setup", "build_rig"]))
       baseValue += 80;
-    if (roles.includes("draw")) baseValue += 55;
-    if (roles.includes("run_pressure"))
+    if (rolesMatch(roles, ["draw"])) baseValue += 55;
+    if (rolesMatch(roles, ["run_pressure"]))
       baseValue += input.playerView.own.credits < 4 ? 20 : 90;
     if (runnerPlanRelevantBreaker) baseValue += 360;
     if (runnerBadPublicityTraceTech) baseValue += 240;

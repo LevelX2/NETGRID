@@ -39,7 +39,7 @@ export function isRunnerMemorySupportCard(
     .toLowerCase();
   return (
     safeNonNegativeInteger(card.memoryLimitBonus) > 0 ||
-    roles.some((role) => role === "memory" || role === "memory_support") ||
+    rolesMatch(roles, ["memory", "memory_support"]) ||
     /\b(memory|mu)\b|mem chip/.test(text)
   );
 }

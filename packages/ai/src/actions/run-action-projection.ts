@@ -102,8 +102,6 @@ export function projectInternalRunnerRunActions(
       if (!targetKind) continue;
       const accessServerId = accessServerIdForRunAction(
         action,
-        candidate,
-        hint,
         signals,
         targetServerId,
       );
@@ -215,9 +213,9 @@ function runActionProjectionEvidence(
 function runActionRelevant(action: LegalAction, signals: readonly string[]): boolean {
   if (action.type === "start_run") return true;
   const text = runActionSearchText(action, signals);
-  if (text.includes("path blocked")) return false;
-  if (concretePayloadServerId(action) && text.includes("run")) return true;
-  const explicitRunSignals = [
+  if (runActionHasStructuredSignal(signals, ["path blocked", "path_blocked"]))
+    return false;
+  const explicitRunSignals = runActionHasStructuredSignal(signals, [
     "start_run",
     "make_run",
     "make a run",
@@ -235,23 +233,41 @@ function runActionRelevant(action: LegalAction, signals: readonly string[]): boo
     "server_specific_archives",
     "server_specific_remote",
     "future_run_effect",
-  ].some((needle) => text.includes(needle));
+  ]);
+  if (concretePayloadServerId(action) && explicitRunSignals) return true;
   if (explicitRunSignals) return true;
   if (
-    text.includes("run") &&
-    (text.includes("scope:archives") ||
-      text.includes("scope:hq") ||
-      text.includes("scope:rd") ||
-      text.includes("scope:rnd") ||
-      text.includes("scope:remote") ||
-      text.includes("target:hq_via_archives"))
+    runActionHasStructuredSignal(signals, ["run"]) &&
+    runActionHasStructuredSignal(signals, [
+      "scope:archives",
+      "scope:hq",
+      "scope:rd",
+      "scope:rnd",
+      "scope:remote",
+      "target:hq_via_archives",
+    ])
   ) {
     return true;
   }
   return (
     action.type === "play_event" &&
-    text.includes("run_pressure") &&
-    (text.includes("multiaccess") || text.includes("access_replacement"))
+    runActionHasStructuredSignal(signals, ["run_pressure"]) &&
+    runActionHasStructuredSignal(signals, [
+      "multiaccess",
+      "access_replacement",
+    ])
+  );
+}
+
+function runActionHasStructuredSignal(
+  signals: readonly string[],
+  needles: readonly string[],
+): boolean {
+  const normalizedNeedles = new Set(
+    needles.map((needle) => needle.toLocaleLowerCase("en-US")),
+  );
+  return signals.some((signal) =>
+    normalizedNeedles.has(signal.toLocaleLowerCase("en-US")),
   );
 }
 
@@ -327,18 +343,25 @@ function runActionStructure(
   signals: readonly string[],
 ): RunnerRunActionStructure {
   if (action.type === "start_run") return "direct_start_run";
-  const text = runActionSearchText(action, signals);
-  if (text.includes("multi_run_sequence")) return "multi_run_sequence";
-  if (text.includes("followup_run") || text.includes("follow-up run")) {
+  if (runActionHasStructuredSignal(signals, ["multi_run_sequence"]))
+    return "multi_run_sequence";
+  if (
+    runActionHasStructuredSignal(signals, ["followup_run", "follow-up run"])
+  ) {
     return "followup_run";
   }
-  if (booleanPayloadValue(action, "bonusRunNoClick") || text.includes("bonus_run")) {
+  if (
+    booleanPayloadValue(action, "bonusRunNoClick") ||
+    runActionHasStructuredSignal(signals, ["bonus_run"])
+  ) {
     return "bonus_run";
   }
   if (
-    text.includes("gain_run_only_action") ||
-    text.includes("extra_run") ||
-    text.includes("extra action")
+    runActionHasStructuredSignal(signals, [
+      "gain_run_only_action",
+      "extra_run",
+      "extra action",
+    ])
   ) {
     return "extra_run";
   }
@@ -380,7 +403,11 @@ function targetServerIdsForRunAction(
   if (
     targetIds.length === 0 &&
     resolvedTargets.includes("archives") &&
-    signals.some((signal) => signal.toLowerCase().includes("hq_via_archives"))
+    runActionHasStructuredSignal(signals, [
+      "target:hq_via_archives",
+      "access.hq_via_archives",
+      "hq_via_archives",
+    ])
   ) {
     resolvedTargets = resolvedTargets.filter((targetId) => targetId !== "hq");
   }
@@ -391,8 +418,6 @@ function targetServerIdsForRunAction(
 
 function accessServerIdForRunAction(
   action: LegalAction,
-  candidate: ActionSemanticCandidate | undefined,
-  hint: AiCardHint | undefined,
   signals: readonly string[],
   targetServerId: string,
 ): string | undefined {
@@ -406,19 +431,13 @@ function accessServerIdForRunAction(
     .find((value): value is string => value !== undefined);
   if (direct) return direct;
 
-  const text = [
-    payloadSearchText(action),
-    signals.join(" "),
-    hint?.cardId ?? "",
-    candidate?.semanticActionType ?? "",
-  ]
-    .join(" ")
-    .toLowerCase();
   if (
     targetServerId === "archives" &&
-    (text.includes("target:hq_via_archives") ||
-      text.includes("access.hq_via_archives") ||
-      text.includes("hq_via_archives"))
+    runActionHasStructuredSignal(signals, [
+      "target:hq_via_archives",
+      "access.hq_via_archives",
+      "hq_via_archives",
+    ])
   ) {
     return "hq";
   }
@@ -694,12 +713,11 @@ function noNoisyBreakersForRunAction(
   signals: readonly string[],
 ): boolean {
   if (booleanPayloadValue(action, "noNoisyBreakers")) return true;
-  const text = `${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
-  return (
-    text.includes("no_noisy") ||
-    text.includes("no noisy") ||
-    text.includes("noisy_breaker_restriction")
-  );
+  return runActionHasStructuredSignal(signals, [
+    "no_noisy",
+    "no noisy",
+    "noisy_breaker_restriction",
+  ]);
 }
 
 function bypassFirstIceForRunAction(
@@ -707,12 +725,11 @@ function bypassFirstIceForRunAction(
   signals: readonly string[],
 ): boolean {
   if (booleanPayloadValue(action, "bypassFirstIce")) return true;
-  const text = `${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
-  return (
-    text.includes("bypass_first_ice") ||
-    text.includes("bypass first ice") ||
-    text.includes("inside_job")
-  );
+  return runActionHasStructuredSignal(signals, [
+    "bypass_first_ice",
+    "bypass first ice",
+    "inside_job",
+  ]);
 }
 
 

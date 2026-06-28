@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { rolesMatch } from "../runtime/role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import { remoteTrashCostForVisibleCard } from "./card-metric-lookup";
@@ -37,12 +38,11 @@ export function runnerCreditReserveTargetForInput(
     const visibleStealTax = server.root.some(
       (card) =>
         card.known &&
-        rolesForCardId(card.definitionId).some(
-          (role) =>
-            role.includes("agenda_steal_tax") ||
-            role.includes("remote_upgrade_tax") ||
-            role.includes("access_tax"),
-        ),
+        rolesMatch(rolesForCardId(card.definitionId), [
+          "agenda_steal_tax",
+          "remote_upgrade_tax",
+          "access_tax",
+        ]),
     )
       ? 5
       : 0;
@@ -79,15 +79,14 @@ export function runnerPostRunReserveTargetForRemoteInput(
   const visibleStealTax = server.root.some(
     (card) =>
       card.known &&
-      dependencies.rolesForCardId(card.definitionId).some(
-        (role) =>
-          role.includes("agenda_steal_tax") ||
-          role.includes("remote_upgrade_tax") ||
-          role.includes("access_tax") ||
-          role.includes("remote_agenda_protection") ||
-          role.includes("scoring_protection") ||
-          role.includes("protect_remote"),
-      ),
+      rolesMatch(dependencies.rolesForCardId(card.definitionId), [
+        "agenda_steal_tax",
+        "remote_upgrade_tax",
+        "access_tax",
+        "remote_agenda_protection",
+        "scoring_protection",
+        "protect_remote",
+      ]),
   );
   if (visibleStealTax) target = Math.max(target, 6);
   const relevantTrashCosts = server.root

@@ -14,6 +14,9 @@ describe("programSacrificeCandidate", () => {
     expect(candidate(["breaker_fracter"]).reasonCategories).toContain(
       "breaker_coverage",
     );
+    expect(candidate(["support_breaker_fracter"]).reasonCategories).toContain(
+      "breaker_coverage",
+    );
   });
 
   it("ignores substring-only sacrifice role noise", () => {
@@ -24,6 +27,9 @@ describe("programSacrificeCandidate", () => {
       "low_visible_role",
     ]);
     expect(candidate(["breakerish_noise"]).reasonCategories).toEqual([
+      "low_visible_role",
+    ]);
+    expect(candidate(["breaker_fracterish_noise"]).reasonCategories).toEqual([
       "low_visible_role",
     ]);
   });

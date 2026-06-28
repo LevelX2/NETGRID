@@ -1,4 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
+import { rolesMatch } from "../runtime/role-match";
 import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
 import {
   centralPressureTargetsForCard,
@@ -132,9 +133,7 @@ export function runnerCentralRunPressureJustificationReasons(
   const matchingInterface = installedTargets.has(centralTarget);
   const hasAnyInterface = installedTargets.size > 0;
   const hasMultiaccess = (input.playerView.own.rig ?? []).some((card) =>
-    dependencies
-      .rolesForCardId(card.definitionId)
-      .some((role) => role.includes("multiaccess")),
+    rolesMatch(dependencies.rolesForCardId(card.definitionId), ["multiaccess"]),
   );
   const openOrCheap = visibleBreakCost <= 1 || (server?.ice.length ?? 0) === 0;
   const preservesReserve =

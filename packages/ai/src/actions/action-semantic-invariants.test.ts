@@ -113,6 +113,45 @@ describe("Action semantic invariants", () => {
     expect(JSON.stringify(report)).not.toContain("rankedAlternatives");
   });
 
+  it("matches support-only signals by bounded marker segments", () => {
+    const report = buildActionSemanticInvariantReport([
+      {
+        cardId: "onr_v1_support_only_segment",
+        tacticSignals: ["trace_defense.support-only"],
+        strategySupport: [
+          {
+            strategyId: "runner.survival",
+            role: "support",
+            confidence: "low",
+            evidence: "Support-only trace defense must stay diagnostic.",
+          },
+        ],
+      },
+      {
+        cardId: "onr_v1_support_only_noise",
+        tacticSignals: ["trace_defense.not_support_only_noise"],
+        strategySupport: [
+          {
+            strategyId: "runner.survival",
+            role: "support",
+            confidence: "low",
+            evidence: "Noise markers must not create support-only issues.",
+          },
+        ],
+      },
+    ]);
+
+    expect(
+      report.issues.filter(
+        (issue) => issue.issueId === "support_only_strategy_id",
+      ),
+    ).toHaveLength(1);
+    expect(report.issues[0]?.evidence).toContain("trace_defense.support-only");
+    expect(JSON.stringify(report.issues)).not.toContain(
+      "not_support_only_noise",
+    );
+  });
+
   it("reports forbidden static signals and broad primary signals without precise peers", () => {
     const report = buildActionSemanticInvariantReport([
       {

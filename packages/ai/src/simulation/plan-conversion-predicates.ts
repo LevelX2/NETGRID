@@ -1,4 +1,5 @@
 import { centralServerId, isRemoteServerTarget } from "../runtime/server-target";
+import { rolesMatch } from "../runtime/role-match";
 
 export type PlanConversionDecisionEntry = {
   side?: string;
@@ -276,19 +277,18 @@ export function corpRemoteCreatedConvertsTo<
       }
       if (target === "bait") {
         return (
-          entry.reasonCode?.includes("bait") === true ||
+          reasonCodeMatchesTerm(entry.reasonCode, "bait") ||
           hasPlanConversionEvidenceFlag(entry, "plan:bait_runner")
         );
       }
       return (
         entry.actionType === "install_card" &&
-        (entry.reasonCode?.includes("asset") === true ||
-          (entry.evidence ?? []).some(
-            (item) =>
-              item.includes("remote_support") ||
-              item.includes("economy_asset") ||
-              item.includes("asset_trash_target"),
-          ))
+        (reasonCodeMatchesTerm(entry.reasonCode, "asset") ||
+          rolesMatch(entry.evidence ?? [], [
+            "remote_support",
+            "economy_asset",
+            "asset_trash_target",
+          ]))
       );
     });
 }
@@ -353,8 +353,7 @@ export function isRunnerSetupAction(
   return (
     entry.runnerDrawAction === true ||
     entry.actionType === "draw_card" ||
-    entry.reasonCode?.includes("setup") === true ||
-    entry.reasonCode?.includes("search") === true
+    rolesMatch(entry.reasonCode ? [entry.reasonCode] : [], ["setup", "search"])
   );
 }
 
@@ -586,30 +585,30 @@ export function planIntentConvertedWithin<
   isMeaningfulProgress: (entry: T) => boolean,
   isCorpRemoteAdvancementProgress: (entry: T) => boolean,
 ): boolean {
-  if (planKind.includes("setup") || planKind.includes("draw"))
+  if (planKindMatches(planKind, ["setup", "draw"]))
     return setupActionConvertsToRun(sequence, index, isMeaningfulProgress);
-  if (planKind.includes("economy"))
+  if (planKindMatches(planKind, ["economy"]))
     return economyActionConvertsToRun(sequence, index, isMeaningfulProgress);
-  if (planKind.includes("rig") || planKind.includes("breaker"))
+  if (planKindMatches(planKind, ["rig", "breaker"]))
     return (
       rigActionConvertsToRun(sequence, index, isMeaningfulProgress) ||
       isMeaningfulProgress(sequence[index]!)
     );
-  if (planKind.includes("remote_build") || planKind.includes("protect"))
+  if (planKindMatches(planKind, ["remote_build", "protect"]))
     return remoteBuildConvertsToAdvanceOrScore(
       sequence,
       index,
       isCorpRemoteAdvancementProgress,
     );
-  if (planKind.includes("advance"))
+  if (planKindMatches(planKind, ["advance"]))
     return advanceConvertsToScore(
       sequence,
       index,
       isCorpRemoteAdvancementProgress,
     );
-  if (planKind.includes("remote_contest"))
+  if (planKindMatches(planKind, ["remote_contest"]))
     return remoteContestConvertsToStealOrTrash(sequence, index);
-  if (planKind.includes("central") || planKind.includes("pressure"))
+  if (planKindMatches(planKind, ["central", "pressure"]))
     return centralPressureConvertsToSteal(sequence, index);
   return hasMeaningfulProgressWithin(
     sequence,
@@ -617,6 +616,10 @@ export function planIntentConvertedWithin<
     3,
     isMeaningfulProgress,
   );
+}
+
+function planKindMatches(planKind: string, needles: readonly string[]): boolean {
+  return rolesMatch([planKind], needles);
 }
 
 export function runnerEconomyConvertsToRunOrRig<
@@ -671,7 +674,7 @@ export function runnerProbeConvertsToUsefulInfoOrPivot<
       isMeaningfulProgress(later) ||
       later.targetServerId !== target ||
       ["recover_economy", "rig", "remote_contest"].some((needle) =>
-        planKindForConversion(later)?.includes(needle),
+        planKindMatchesTerm(planKindForConversion(later), needle),
       ),
   );
 }
@@ -777,7 +780,7 @@ export function corpProtectionConvertsToScoreSafety<
         later.actionType === "advance_card" ||
         later.protectedFinalAdvance === true ||
         later.protectBeforeAdvance === true ||
-        planKindForConversion(later)?.includes("remote_build") === true),
+        planKindMatchesTerm(planKindForConversion(later), "remote_build")),
   );
 }
 
@@ -810,4 +813,18 @@ function hasPlanConversionEvidenceFlag(
   flag: string,
 ): boolean {
   return (entry.evidence ?? []).includes(flag);
+}
+
+function planKindMatchesTerm(
+  planKind: string | undefined,
+  term: string,
+): boolean {
+  return planKind !== undefined && rolesMatch([planKind], [term]);
+}
+
+function reasonCodeMatchesTerm(
+  reasonCode: string | undefined,
+  term: string,
+): boolean {
+  return reasonCode !== undefined && rolesMatch([reasonCode], [term]);
 }

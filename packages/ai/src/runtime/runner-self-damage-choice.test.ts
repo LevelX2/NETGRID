@@ -101,6 +101,30 @@ describe("runnerSelfDamageSurvivalAssessment", () => {
       "self_damage_contract:action_cost_profile",
     );
   });
+
+  it("bounds structured self-damage hint targets", () => {
+    const action = selfDamageAction();
+    const input = runnerInput(action);
+
+    const selfAssessment = runnerSelfDamageSurvivalAssessment(input, action, {
+      sourceDefinitionIdForAction: () => "hint-self-damage-card",
+      hintEffectsForCard: () => [selfDamageHintEffect("self")],
+      fakedHitCardId: "faked-hit",
+      badPublicityLossThreshold: 7,
+    });
+    const noiseAssessment = runnerSelfDamageSurvivalAssessment(input, action, {
+      sourceDefinitionIdForAction: () => "hint-self-damage-card",
+      hintEffectsForCard: () => [selfDamageHintEffect("selfish")],
+      fakedHitCardId: "faked-hit",
+      badPublicityLossThreshold: 7,
+    });
+
+    expect(selfAssessment).toMatchObject({
+      selfDamageAmount: 1,
+      selfDamageType: "net",
+    });
+    expect(noiseAssessment).toBeUndefined();
+  });
 });
 
 function selfDamageAction(): LegalAction {
@@ -153,4 +177,16 @@ function runnerInput(action: LegalAction): AiDecisionInput {
       servers: [],
     },
   } as unknown as AiDecisionInput;
+}
+
+function selfDamageHintEffect(target: string): Record<string, unknown> {
+  return {
+    kind: "damage",
+    scope: "runner",
+    timing: "action",
+    amount: 1,
+    resource: "net_damage",
+    preventable: false,
+    target,
+  };
 }

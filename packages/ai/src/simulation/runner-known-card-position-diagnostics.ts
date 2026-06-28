@@ -18,10 +18,12 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
   const belief = reconstructBeliefState(input);
   const memory = belief.runnerOpponentModel?.knownPositionMemory ?? [];
   const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
-  const invalidationText = [
+  const invalidationReasons = [
     ...(belief.runnerOpponentModel?.rndTopFreshness.invalidationReasons ?? []),
     ...(hqMemory?.invalidationReasons ?? []),
-  ].join("|");
+  ];
+  const invalidationFlags =
+    runnerKnownCardPositionInvalidationFlags(invalidationReasons);
   const knownRemote = memory.filter(
     (entry) =>
       entry.zone.startsWith("remote_") && entry.positionKey.startsWith("root:"),
@@ -58,9 +60,8 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
     0,
   );
   const hqKnownFromRndDraw =
-    hqMemory?.invalidationReasons.some((reason) =>
-      reason.includes("known_rnd_top_moved_to_hq"),
-    ) ?? false;
+    hqMemory?.invalidationReasons.includes("known_rnd_top_moved_to_hq") ??
+    false;
   const hqKnownAgendaFromRnd =
     hqKnownFromRndDraw &&
     (hqMemory?.knownDefinitions ?? []).some(
@@ -85,15 +86,7 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
     )
       ? { knownRndTopCard: true }
       : {}),
-    ...(invalidationText.includes("known_rnd_top_moved_to_hq")
-      ? { knownRndTopMovedToHq: true, hqKnownFromRndDraw: true }
-      : {}),
-    ...(invalidationText.includes("corp_draw_from_rd") ||
-    invalidationText.includes("shuffle_changed_rd_top") ||
-    invalidationText.includes("arrange_changed_rd_top") ||
-    invalidationText.includes("swap_changed_rd_top")
-      ? { knownRndTopInvalidated: true }
-      : {}),
+    ...invalidationFlags,
     ...(action.type === "start_run" &&
     runTarget === "hq" &&
     hqKnownAgendaFromRnd
@@ -131,8 +124,8 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
     ...(rndFreshness?.freshenedByRunnerAccess === true
       ? { rndTopFreshenedByRunnerAccess: true }
       : {}),
-    ...(rndFreshness?.invalidationReasons.some((reason) =>
-      reason.includes("rd_known_top_sequence_advanced"),
+    ...(rndFreshness?.invalidationReasons.includes(
+      "rd_known_top_sequence_advanced",
     )
       ? {
           rndKnownTopAdvancedAfterAccess: true,
@@ -182,7 +175,7 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
     ...(knownRemote.length > 0
       ? { remoteMemoryRetainedAfterAccess: true }
       : {}),
-    ...(invalidationText.includes("remote_state_changed") ||
+    ...(invalidationFlags.remoteMemoryInvalidatedByInstallOrMove ||
     memory.some((entry) =>
       entry.invalidatedBy.some(
         (reason) => reason.includes("install") || reason.includes("move"),
@@ -221,10 +214,6 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
           knownUnrezzedIceRetained: true,
         }
       : {}),
-    ...(invalidationText.includes("conceal") ||
-    invalidationText.includes("reorder")
-      ? { knownUnrezzedIceInvalidated: true }
-      : {}),
     ...(runCostAdjusted > 0
       ? { runCostAdjustedByKnownUnrezzedIce: runCostAdjusted }
       : {}),
@@ -233,6 +222,29 @@ export function runnerKnownCardPositionDiagnosticsForMetrics(
       : {}),
     ...(action.type === "install_card" && knownUnrezzedIce.length > 0
       ? { rigPlanInfluencedByKnownUnrezzedIce: true }
+      : {}),
+  };
+}
+
+export function runnerKnownCardPositionInvalidationFlags(
+  invalidationReasons: readonly string[],
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  return {
+    ...(invalidationReasons.includes("known_rnd_top_moved_to_hq")
+      ? { knownRndTopMovedToHq: true, hqKnownFromRndDraw: true }
+      : {}),
+    ...(invalidationReasons.includes("corp_draw_from_rd") ||
+    invalidationReasons.includes("shuffle_changed_rd_top") ||
+    invalidationReasons.includes("arrange_changed_rd_top") ||
+    invalidationReasons.includes("swap_changed_rd_top")
+      ? { knownRndTopInvalidated: true }
+      : {}),
+    ...(invalidationReasons.includes("remote_state_changed")
+      ? { remoteMemoryInvalidatedByInstallOrMove: true }
+      : {}),
+    ...(invalidationReasons.includes("conceal") ||
+    invalidationReasons.includes("reorder")
+      ? { knownUnrezzedIceInvalidated: true }
       : {}),
   };
 }

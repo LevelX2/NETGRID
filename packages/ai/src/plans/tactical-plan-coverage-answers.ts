@@ -3,6 +3,7 @@ import type {
   RequiredCapabilityKind,
   TacticalPlan,
 } from "./tactical-plan-types";
+import { isBreakerRequiredCapabilityKind } from "./tactical-plan-coverage-kinds";
 
 export type CoverageAnswerRole =
   | "direct_breaker_install"
@@ -63,7 +64,7 @@ export function coverageSearchRequiredCapability(
   const capability = [
     ...step.requiredCapabilities,
     ...plan.requiredCapabilities,
-  ].find((candidate) => candidate.kind.startsWith("breaker_"));
+  ].find((candidate) => isBreakerRequiredCapabilityKind(candidate.kind));
   return capability?.kind;
 }
 
@@ -78,7 +79,7 @@ export function coverageSearchRequiredCapabilityForStep(
   step: PlanStep,
 ): RequiredCapabilityKind | undefined {
   const capability = step.requiredCapabilities.find((candidate) =>
-    candidate.kind.startsWith("breaker_"),
+    isBreakerRequiredCapabilityKind(candidate.kind),
   );
   return capability?.kind;
 }

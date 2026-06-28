@@ -2,9 +2,33 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
-import { semanticRuntimeCorpScoreComponents } from "./semantic-runtime-corp-score";
+import {
+  corpActionCandidateHasVisibleSignal,
+  semanticRuntimeCorpScoreComponents,
+} from "./semantic-runtime-corp-score";
 
 describe("semanticRuntimeCorpScoreComponents", () => {
+  it("matches corp action candidate visible signals by bounded terms", () => {
+    expect(
+      corpActionCandidateHasVisibleSignal(
+        candidate({ cardContextSignals: ["access_ambush"] }),
+        ["ambush"],
+      ),
+    ).toBe(true);
+    expect(
+      corpActionCandidateHasVisibleSignal(
+        candidate({ cardContextSignals: ["ambusher_noise"] }),
+        ["ambush"],
+      ),
+    ).toBe(false);
+    expect(
+      corpActionCandidateHasVisibleSignal(
+        candidate({ actionTacticSignals: ["corp.score_closeout"] }),
+        ["corp.score_closeout"],
+      ),
+    ).toBe(true);
+  });
+
   it("scores agenda closeout actions that match Corp tactical goals", () => {
     const components = semanticRuntimeCorpScoreComponents(
       corpInputWithGoals([
@@ -272,6 +296,84 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("matches score closeout target evidence by bounded terms", () => {
+    const closeoutAction = corpAction("targeted-closeout", "play_operation");
+    const input = corpInputWithGoals(
+      [],
+      [closeoutAction],
+    );
+    const baseCandidate = semanticCandidate(
+      "targeted-closeout",
+      "play.corp_operation",
+      ["corp.score_closeout"],
+      "play_operation",
+    );
+    const agendaTarget = {
+      ...baseCandidate,
+      targetContext: {
+        selectedTargets: [
+          {
+            targetId: "remote_1_agenda",
+            targetKind: "card",
+            targetSide: "corp",
+            visibilityScope: "actor_private",
+            evidence: ["target_role:agenda"],
+          },
+        ],
+        targetKind: "card",
+        targetZones: ["remote"],
+        targetSide: "corp",
+        hiddenInfoPolicy: "side_safe_engine_input_only",
+        availableTargetsStatus: "engine_provided",
+        targetProfileMatches: [],
+        targetConstraintResults: [],
+      },
+    } satisfies ActionSemanticCandidate;
+    const noiseTarget = {
+      ...baseCandidate,
+      targetContext: {
+        selectedTargets: [
+          {
+            targetId: "remote_1_asset",
+            targetKind: "card",
+            targetSide: "corp",
+            visibilityScope: "actor_private",
+            evidence: ["target_role:agendaish_noise"],
+          },
+        ],
+        targetKind: "card",
+        targetZones: ["remote"],
+        targetSide: "corp",
+        hiddenInfoPolicy: "side_safe_engine_input_only",
+        availableTargetsStatus: "engine_provided",
+        targetProfileMatches: [],
+        targetConstraintResults: [],
+      },
+    } satisfies ActionSemanticCandidate;
+
+    const agendaComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      closeoutAction,
+      "basic_install",
+      testDependencies(),
+      agendaTarget,
+    );
+    const noiseComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      closeoutAction,
+      "basic_install",
+      testDependencies(),
+      noiseTarget,
+    );
+
+    expect(agendaComponents.map((component) => component.key)).toContain(
+      "corp_score_closeout_semantic_candidate",
+    );
+    expect(noiseComponents.map((component) => component.key)).not.toContain(
+      "corp_score_closeout_semantic_candidate",
+    );
+  });
+
   it("uses ActionSemanticCandidate cost profile for rez affordability", () => {
     const candidate = {
       ...semanticCandidate("rez-ice", "corp_window.rez", []),
@@ -439,6 +541,44 @@ function corpInputWithGoals(
     },
     ownCorpTacticalGoals: goals,
   } as unknown as AiDecisionInput;
+}
+
+function candidate(
+  overrides: Partial<ActionSemanticCandidate> = {},
+): ActionSemanticCandidate {
+  return {
+    actionId: "candidate",
+    actionType: "trigger_ability",
+    actorSide: "corp",
+    visibilityScope: "public",
+    legalActionRef: {
+      actionId: "candidate",
+      actionType: "trigger_ability",
+      originalPayloadKeys: [],
+    },
+    sourceKind: "asset",
+    abilityBindingMethod: "bound",
+    semanticActionType: "corp.ability",
+    cardContextSignals: [],
+    actionTacticSignals: [],
+    strategySupport: [],
+    conditions: [],
+    risks: [],
+    constraints: [],
+    costProfile: { clickCost: 1, creditCost: 0, additionalCosts: [] },
+    timingProfile: { timingPoint: "corp_action.main", window: "main_action" },
+    boardContext: {
+      source: "ai_decision_input",
+      sideSafe: true,
+      notes: [],
+    },
+    confidence: "medium",
+    primaryProjectionStatus: "complete",
+    projectionIssues: [],
+    hardGates: [],
+    evidence: [],
+    ...overrides,
+  } as ActionSemanticCandidate;
 }
 
 function corpAction(
