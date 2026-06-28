@@ -8643,6 +8643,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsechster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-hardware-payoff-evidence.ts` erkennt Corp-sichtbare Runner-Hardware-Multiaccess-Payoffs über gebundene Tokens und Phrasen statt Regex auf normalisiertem Kartentext.
+  - Echte Hinweise wie `Access 1 additional card`, `additional card` und `Multiaccess` bleiben wirksam; Rauschen wie `Multiaccessory` und `Accessing 1 additionalish card` bleibt wirkungslos.
+  - `runner-hardware-payoff-evidence.test.ts` schützt positive Multiaccess-Phrasen und negative Substring-Grenzfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/runner-hardware-payoff-evidence.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

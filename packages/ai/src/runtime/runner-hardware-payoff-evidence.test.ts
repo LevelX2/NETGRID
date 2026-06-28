@@ -13,6 +13,9 @@ describe("corpVisibleRunnerHardwarePayoffEvidence", () => {
     expect(evidenceForText("Multiaccessory noise")).not.toContain(
       "runner_hardware_payoff:multiaccess",
     );
+    expect(evidenceForText("Accessing 1 additionalish card")).not.toContain(
+      "runner_hardware_payoff:multiaccess",
+    );
   });
 });
 
