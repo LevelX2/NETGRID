@@ -29,6 +29,7 @@ export function createSemanticRuntimeCorpScoreComposition<
         dependencies.corpRemoteScoreContestabilityAssessment,
       corpActionIsScoreLine: dependencies.corpActionIsScoreLine,
       corpInstallRemoteScore: dependencies.corpInstallRemoteScore,
+      corpScoringWindowAssessment: dependencies.corpScoringWindowAssessment,
       corpAdvancementCounterPlacementAssessment:
         dependencies.corpAdvancementCounterPlacementAssessment,
       corpHasRemoteInstability: dependencies.corpHasRemoteInstability,
