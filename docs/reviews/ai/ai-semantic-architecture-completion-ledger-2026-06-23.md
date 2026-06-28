@@ -7867,6 +7867,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hundertzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/corp-card-action-score.ts` nutzt für Corp-Install-/Operation-Rollen den gebundenen `rolesMatch`-Helper statt direkter Rollen-`includes`-/Prefix-Prüfungen.
+  - Strukturierte Rollen wie `remote_economy_asset`, `tag_punishment_followup` und `economy_operation_burst` bleiben wirksam; substringartiges Rauschen wie `economy_assetish_noise` und `draw_operationish_noise` beeinflusst den Score nicht mehr.
+  - `corp-card-action-score.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-card-action-score.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
