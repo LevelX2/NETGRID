@@ -188,6 +188,28 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("self-damage-positive");
   });
 
+  it("bounds blink hand-buffer signals to structured entries", () => {
+    const positive = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "blink-positive",
+        debugFacts: ["blinkRiskSeverity:lethal"],
+      }),
+    ]);
+    const noise = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "blink-noise",
+        debugFacts: ["blinkRiskSeverity:lethalish"],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([positive, noise], {
+      detectorIds: ["blink_low_hand_buffer_run"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("blink-positive");
+  });
+
   it("drops forbidden debug facts during redaction", () => {
     expect(
       safeSelfplayFacts(["safe_fact", "privatePayload:bad", "deckOrder:bad"]),

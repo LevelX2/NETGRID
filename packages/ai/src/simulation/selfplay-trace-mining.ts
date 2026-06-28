@@ -1061,9 +1061,11 @@ function selfplayEntryDetectorFindings(
     entry.side === "runner" &&
     (entry.actionType === "start_run" ||
       entry.actionType === "trigger_ability") &&
-    (text.includes("blocked_by_blink_hand_buffer:true") ||
-      text.includes("blinkriskseverity:lethal") ||
-      text.includes("blink_break_self_net_damage_risk"))
+    selfplayEntryHasStructuredSignal(entry, [
+      "blocked_by_blink_hand_buffer:true",
+      "blinkriskseverity:lethal",
+      "blink_break_self_net_damage_risk",
+    ])
   ) {
     findings.push(
       selfplayEntryFinding(
