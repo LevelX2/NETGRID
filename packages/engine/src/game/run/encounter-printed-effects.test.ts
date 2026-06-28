@@ -290,6 +290,48 @@ describe("encounter printed effects boundary", () => {
     ]);
   });
 
+  it("resolves zero printed damage without opening a damage event", () => {
+    const state = makeState();
+    const legalAction = { payload: {} } as LegalAction;
+    const summaries: DamageSummary[] = [];
+
+    const result = resolvePrintedDamageSubroutine(
+      makeHost(state, legalAction, {
+        createDamageImminentEvent: () => {
+          throw new Error("Zero damage must not create an imminent event.");
+        },
+        openDamageResolutionWindow: () => {
+          throw new Error("Zero damage must not open a prevention window.");
+        },
+        resolveDamageImminentEvent: () => {
+          throw new Error("Zero damage must not resolve damage.");
+        },
+      }),
+      {
+        definition: definitionFor("ice_1" as CardInstanceId),
+        subroutine: {
+          id: "zero_net_damage",
+          type: "do_damage",
+          damageType: "net",
+          amount: 0,
+        } as SubroutineDefinition,
+        subroutineIndex: 0,
+        damageSummaries: summaries,
+        legalAction,
+      },
+    );
+
+    expect(result).toMatchObject({
+      handled: true,
+      damageType: "net",
+      damageAmount: 0,
+    });
+    expect(summaries).toHaveLength(0);
+    expect(state.run?.resolvedSubroutineIndexes).toEqual([0]);
+    expect(legalAction.payload).toEqual({});
+    expect(legalAction.resolvedEffects).toBeUndefined();
+  });
+
   it("opens prevention/replacement windows without resolving printed core damage", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;

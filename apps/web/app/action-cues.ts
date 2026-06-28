@@ -198,6 +198,8 @@ export function deriveDamageImpactCues(input: Pick<CueDerivationInput, "viewerSi
       const damageType = damageTypeValue(payload.damageType);
       if (!damageType) return null;
       const amount = nonNegativeIntegerValue(payload.damageAmount) ?? positiveIntegerValue(payload.cardsTrashed) ?? 0;
+      const preventedAmount = positiveIntegerValue(payload.preventedAmount);
+      if (amount <= 0 && payload.flatline !== true && preventedAmount === undefined) return null;
       const cardsTrashed = nonNegativeIntegerValue(payload.cardsTrashed);
       const runnerGripBefore = nonNegativeIntegerValue(payload.runnerGripBefore);
       const runnerGripAfter = nonNegativeIntegerValue(payload.runnerGripAfter);

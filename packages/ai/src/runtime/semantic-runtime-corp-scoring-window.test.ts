@@ -150,6 +150,80 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     );
   });
 
+  it("marks non-immediate scorelines unsafe when runner can fund access before the next score chance", () => {
+    const agenda = agendaCard("remote-agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 4,
+    });
+    const action = corpAction("advance-remote-agenda", "advance_card", {
+      serverId: "remote_1",
+    }, agenda.instanceId);
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 2,
+        runnerRig: [simpleFracter("runner-fracter")],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            wallIce("remote-wall", { rezzed: true, rezCost: 0 }),
+          ], [agenda]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      scoreHorizon: "next_turn",
+      runnerCanContestNow: false,
+      runnerCanContestBeforeScore: true,
+      runnerCanReachAccessBeforeScore: true,
+      agendaStealRelevantBeforeScore: true,
+      recommendedNextStep: "build_remote_ice",
+    });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_exposure_credit_actions:3",
+        "visible_runner_contest_credits:2",
+        "visible_runner_exposure_contest_credits:5",
+      ]),
+    );
+  });
+
+  it("treats remote ICE as the next score-window step when it removes before-score contestability", () => {
+    const agenda = agendaCard("remote-agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 4,
+    });
+    const iceToInstall = wallIce("second-remote-wall", { rezCost: 2 });
+    const action = corpAction("install-second-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    }, iceToInstall.instanceId);
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 2,
+        runnerRig: [simpleFracter("runner-fracter")],
+        hq: [iceToInstall],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            wallIce("remote-wall", { rezzed: true, rezCost: 0 }),
+          ], [agenda]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "durable",
+      runnerCanContestBeforeScore: false,
+      recommendedNextStep: "build_remote_ice",
+    });
+  });
+
   it("lets acute HQ pressure override a temporary remote score window", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction("install-agenda", "install_card", {

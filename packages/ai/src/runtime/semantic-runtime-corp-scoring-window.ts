@@ -39,9 +39,13 @@ export type CorpScoringWindowAssessment = {
   runnerCanContestNow: boolean;
   runnerCanReachAccessNow: boolean;
   agendaStealRelevantNow: boolean;
+  runnerCanContestBeforeScore: boolean;
+  runnerCanReachAccessBeforeScore: boolean;
+  agendaStealRelevantBeforeScore: boolean;
   missingVisibleBreakerCoverage: boolean;
   corpCanRezRelevantIce: boolean;
   scoreHorizon: CorpScoringWindowHorizon;
+  runnerExposureCreditActions: number;
   recommendedNextStep: CorpScoringWindowNextStep;
   evidence: string[];
 };
@@ -117,6 +121,19 @@ export function semanticRuntimeCorpScoringWindowAssessment<
     dependencies,
   );
   const access = scoringWindowAccessAssessment(input, projectedServer);
+  const runnerExposureCreditActions = scoringWindowRunnerExposureCreditActions(
+    input,
+    scoreHorizon,
+    scoreLineAction,
+  );
+  const exposureAccess =
+    runnerExposureCreditActions > 0
+      ? scoringWindowAccessAssessment(
+          input,
+          projectedServer,
+          runnerExposureCreditActions,
+        )
+      : access;
   const hasScorePressure =
     scoreLineAction ||
     semanticRuntimeCorpHasAgendaInHq(input) ||
@@ -126,27 +143,35 @@ export function semanticRuntimeCorpScoringWindowAssessment<
   const immediateScore =
     action.type === "score_agenda" ||
     dependencies.advanceCompletesScore(input, action);
+  const runnerCanContestNow =
+    !immediateScore &&
+    access.runnerCanReachAccessNow &&
+    access.agendaStealRelevantNow;
+  const runnerCanContestBeforeScore =
+    !immediateScore &&
+    exposureAccess.runnerCanReachAccessNow &&
+    exposureAccess.agendaStealRelevantNow;
 
   const windowKind = scoringWindowKind({
     action,
     access,
     centralPressure,
+    exposureAccess,
     existingWindow,
     hasScorePressure,
     immediateScore,
     projectedServer,
     rezBudget,
+    runnerCanContestBeforeScore,
     scoreLineAction,
   });
-  const runnerCanContestNow =
-    !immediateScore &&
-    access.runnerCanReachAccessNow &&
-    access.agendaStealRelevantNow;
   const recommendedNextStep = scoringWindowRecommendedNextStep({
     action,
     hasScorePressure,
+    projectedServer,
     windowKind,
     rezBudget,
+    runnerCanContestBeforeScore,
     centralPressure,
   });
 
@@ -156,9 +181,13 @@ export function semanticRuntimeCorpScoringWindowAssessment<
     runnerCanContestNow,
     runnerCanReachAccessNow: access.runnerCanReachAccessNow,
     agendaStealRelevantNow: access.agendaStealRelevantNow,
+    runnerCanContestBeforeScore,
+    runnerCanReachAccessBeforeScore: exposureAccess.runnerCanReachAccessNow,
+    agendaStealRelevantBeforeScore: exposureAccess.agendaStealRelevantNow,
     missingVisibleBreakerCoverage: access.missingVisibleBreakerCoverage,
     corpCanRezRelevantIce: rezBudget.corpCanRezRelevantIce,
     scoreHorizon,
+    runnerExposureCreditActions,
     recommendedNextStep,
     evidence: [
       "corp_scoring_window:assessed",
@@ -168,16 +197,24 @@ export function semanticRuntimeCorpScoringWindowAssessment<
       `runner_can_contest_now:${runnerCanContestNow}`,
       `runner_can_reach_access_now:${access.runnerCanReachAccessNow}`,
       `agenda_steal_relevant_now:${access.agendaStealRelevantNow}`,
+      `runner_can_contest_before_score:${runnerCanContestBeforeScore}`,
+      `runner_can_reach_access_before_score:${exposureAccess.runnerCanReachAccessNow}`,
+      `agenda_steal_relevant_before_score:${exposureAccess.agendaStealRelevantNow}`,
+      `runner_exposure_credit_actions:${runnerExposureCreditActions}`,
       `missing_visible_installed_coverage:${access.missingVisibleBreakerCoverage}`,
       `corp_can_rez_relevant_ice:${rezBudget.corpCanRezRelevantIce}`,
       `corp_can_rez_full_path:${rezBudget.corpCanRezFullPath}`,
       `remote_effective_ice_count:${access.effectiveIceCount}`,
       `remote_affordable_ice_count:${rezBudget.affordableIceCount}`,
       `visible_runner_contest_credits:${access.visibleRunnerContestCredits}`,
+      `visible_runner_exposure_contest_credits:${exposureAccess.visibleRunnerContestCredits}`,
       `central_pressure:${centralPressure}`,
       `existing_scoring_remote:${existingWindow}`,
       `recommended_next_step:${recommendedNextStep}`,
       ...access.evidence,
+      ...(runnerExposureCreditActions > 0
+        ? exposureAccess.evidence.map((entry) => `exposure_${entry}`)
+        : []),
       ...rezBudget.evidence,
     ],
   };
@@ -221,6 +258,7 @@ function scoringWindowHorizon<TServer extends CorpServerLike>(
 function scoringWindowAccessAssessment(
   input: AiDecisionInput,
   server: CorpServerLike | undefined,
+  extraRunnerCredits = 0,
 ): {
   runnerCanReachAccessNow: boolean;
   agendaStealRelevantNow: boolean;
@@ -231,9 +269,15 @@ function scoringWindowAccessAssessment(
   visibleRunnerContestCredits: number;
   evidence: string[];
 } {
-  const visibleRunnerContestCredits =
+  const visibleRunnerBaseContestCredits =
     input.playerView.opponent.credits +
     visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? []);
+  const visibleRunnerExtraCredits = Math.max(
+    0,
+    Math.floor(extraRunnerCredits),
+  );
+  const visibleRunnerContestCredits =
+    visibleRunnerBaseContestCredits + visibleRunnerExtraCredits;
   const visibleRunnerIcebreakerCount = visibleRunnerInstalledIcebreakerCount(
     input.playerView.opponent.rig ?? [],
   );
@@ -246,7 +290,11 @@ function scoringWindowAccessAssessment(
       unmodeledIceCount: 0,
       visibleRunnerIcebreakerCount,
       visibleRunnerContestCredits,
-      evidence: ["remote_access:unprotected"],
+      evidence: [
+        "remote_access:unprotected",
+        `visible_runner_base_contest_credits:${visibleRunnerBaseContestCredits}`,
+        `visible_runner_extra_exposure_credits:${visibleRunnerExtraCredits}`,
+      ],
     };
   }
   const projectedIce = server.ice.map((ice) => ({
@@ -299,8 +347,25 @@ function scoringWindowAccessAssessment(
       ...(assessment.noAccessReason
         ? [`remote_access:no_access_reason:${assessment.noAccessReason}`]
         : []),
+      `visible_runner_base_contest_credits:${visibleRunnerBaseContestCredits}`,
+      `visible_runner_extra_exposure_credits:${visibleRunnerExtraCredits}`,
     ],
   };
+}
+
+function scoringWindowRunnerExposureCreditActions(
+  input: AiDecisionInput,
+  scoreHorizon: CorpScoringWindowHorizon,
+  scoreLineAction: boolean,
+): number {
+  if (!scoreLineAction || scoreHorizon === "immediate") return 0;
+  if (scoreHorizon !== "next_turn" && scoreHorizon !== "slow") return 0;
+  const visibleClicks = input.playerView.opponent.clicks;
+  const availableRunnerClicks =
+    typeof visibleClicks === "number" && Number.isFinite(visibleClicks)
+      ? Math.max(0, Math.floor(visibleClicks))
+      : 4;
+  return Math.max(3, availableRunnerClicks - 1);
 }
 
 function scoringWindowRezBudget<TServer extends CorpServerLike>(
@@ -350,11 +415,13 @@ function scoringWindowKind(params: {
   action: LegalAction;
   access: ReturnType<typeof scoringWindowAccessAssessment>;
   centralPressure: boolean;
+  exposureAccess: ReturnType<typeof scoringWindowAccessAssessment>;
   existingWindow: CorpScoringWindowKind;
   hasScorePressure: boolean;
   immediateScore: boolean;
   projectedServer: CorpServerLike | undefined;
   rezBudget: ReturnType<typeof scoringWindowRezBudget>;
+  runnerCanContestBeforeScore: boolean;
   scoreLineAction: boolean;
 }): CorpScoringWindowKind {
   if (params.immediateScore) return "durable";
@@ -365,6 +432,9 @@ function scoringWindowKind(params: {
     !params.rezBudget.corpCanRezRelevantIce ||
     params.access.agendaStealRelevantNow
   ) {
+    return params.scoreLineAction ? "unsafe" : "none";
+  }
+  if (params.runnerCanContestBeforeScore) {
     return params.scoreLineAction ? "unsafe" : "none";
   }
   if (
@@ -380,22 +450,22 @@ function scoringWindowKind(params: {
     params.projectedServer.ice.length >= 2 &&
     params.access.unmodeledIceCount === 0 &&
     params.rezBudget.corpCanRezFullPath &&
-    !params.access.runnerCanReachAccessNow
+    !params.exposureAccess.runnerCanReachAccessNow
   ) {
     return "durable";
   }
   if (
     params.hasScorePressure &&
     params.rezBudget.corpCanRezRelevantIce &&
-    !params.access.runnerCanReachAccessNow &&
+    !params.exposureAccess.runnerCanReachAccessNow &&
     !params.centralPressure
   ) {
     return "temporary_safe";
   }
   if (
     params.hasScorePressure &&
-    params.access.unmodeledIceCount > 0 &&
-    params.access.visibleRunnerIcebreakerCount === 0 &&
+    params.exposureAccess.unmodeledIceCount > 0 &&
+    params.exposureAccess.visibleRunnerIcebreakerCount === 0 &&
     params.rezBudget.corpCanRezRelevantIce &&
     !params.centralPressure
   ) {
@@ -403,7 +473,7 @@ function scoringWindowKind(params: {
   }
   if (
     params.hasScorePressure &&
-    params.access.missingVisibleBreakerCoverage &&
+    params.exposureAccess.missingVisibleBreakerCoverage &&
     params.rezBudget.corpCanRezRelevantIce &&
     !params.centralPressure
   ) {
@@ -434,8 +504,10 @@ function remoteContainsScoreLine(server: CorpServerLike | undefined): boolean {
 function scoringWindowRecommendedNextStep(params: {
   action: LegalAction;
   hasScorePressure: boolean;
+  projectedServer: CorpServerLike | undefined;
   windowKind: CorpScoringWindowKind;
   rezBudget: ReturnType<typeof scoringWindowRezBudget>;
+  runnerCanContestBeforeScore: boolean;
   centralPressure: boolean;
 }): CorpScoringWindowNextStep {
   if (params.windowKind === "durable" && params.action.type === "score_agenda") {
@@ -462,6 +534,17 @@ function scoringWindowRecommendedNextStep(params: {
     params.hasScorePressure &&
     !params.centralPressure &&
     params.windowKind !== "none"
+  ) {
+    return "build_remote_ice";
+  }
+  const remoteHasIce = (params.projectedServer?.ice.length ?? 0) > 0;
+  if (
+    params.windowKind === "unsafe" &&
+    params.hasScorePressure &&
+    !params.centralPressure &&
+    (!remoteHasIce ||
+      (params.runnerCanContestBeforeScore &&
+        params.rezBudget.corpCanRezRelevantIce))
   ) {
     return "build_remote_ice";
   }
@@ -505,11 +588,14 @@ function strongestExistingScoringRemote<TServer extends CorpServerLike>(
       } as unknown as LegalAction,
       access,
       centralPressure: false,
+      exposureAccess: access,
       existingWindow: "none",
       hasScorePressure: true,
       immediateScore: false,
       projectedServer: candidate,
       rezBudget,
+      runnerCanContestBeforeScore:
+        access.runnerCanReachAccessNow && access.agendaStealRelevantNow,
       scoreLineAction: false,
     });
     if (kind === "durable") return "durable";

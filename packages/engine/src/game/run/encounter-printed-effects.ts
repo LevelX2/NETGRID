@@ -186,6 +186,16 @@ export function resolvePrintedDamageSubroutine(
     cardHasSubtype(definition, "ap") &&
     host.callbacks.hasInstalledRunnerApDamageReducerHardware();
   const damageAmount = microtechApNetReduction ? 1 : printedAmount;
+  if (damageAmount <= 0) {
+    if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
+      run.resolvedSubroutineIndexes.push(subroutineIndex);
+    return {
+      handled: true,
+      damageType,
+      damageAmount: 0,
+      stateChanged: true,
+    };
+  }
   const event = host.callbacks.createDamageImminentEvent({
     damageId: `${run.runId}.${run.encounteredIceId}.${subroutineIndex}`,
     damageType,

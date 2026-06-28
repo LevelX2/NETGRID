@@ -9,6 +9,7 @@ import {
   semanticRuntimeCorpEffectiveDefenseContext,
 } from "./semantic-runtime-corp-effective-defense";
 import { rolesMatch } from "./role-match";
+import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 
 type SemanticRuntimeCorpSafetyGate = {
   allowed: boolean;
@@ -65,6 +66,13 @@ export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
     roles: string[],
     actionSemanticCandidate?: ActionSemanticCandidate,
   ) => number;
+  corpScoringWindowAssessment?:
+    | ((
+        input: AiDecisionInput,
+        action: LegalAction,
+        roles?: string[],
+      ) => CorpScoringWindowAssessment | undefined)
+    | undefined;
   corpAdvancementCounterPlacementAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -118,6 +126,10 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: safetyGate.evidence.join("|"),
       });
     }
+    addCorpScoringWindowEvidenceComponent(
+      components,
+      dependencies.corpScoringWindowAssessment?.(input, action),
+    );
   }
   if (action.type === "advance_card") {
     components.push({
@@ -144,6 +156,10 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: rezFloor.evidence.join("|"),
       });
     }
+    addCorpScoringWindowEvidenceComponent(
+      components,
+      dependencies.corpScoringWindowAssessment?.(input, action),
+    );
   }
   if (action.type === "rez_ice") {
     const rezCost = semanticRuntimeCorpActionCreditCost(
@@ -234,6 +250,10 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: scopeId,
       });
     }
+    addCorpScoringWindowEvidenceComponent(
+      components,
+      dependencies.corpScoringWindowAssessment?.(input, action, roles),
+    );
     const rezFloor = dependencies.corpRemoteRezFloorAssessment(input, action);
     if (rezFloor?.blockedByFloor) {
       components.push({
@@ -394,6 +414,19 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     });
   }
   return components;
+}
+
+function addCorpScoringWindowEvidenceComponent(
+  components: AiDecisionScoreComponent[],
+  assessment: CorpScoringWindowAssessment | undefined,
+): void {
+  if (!assessment) return;
+  components.push({
+    key: "corp_scoring_window_assessment",
+    label: "Scoring-Window",
+    value: 0,
+    reason: assessment.evidence.join("|"),
+  });
 }
 
 function corpTacticalGoalFitScoreComponent(

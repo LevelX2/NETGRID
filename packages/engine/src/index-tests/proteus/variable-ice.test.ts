@@ -837,6 +837,50 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
     }
   });
 
+  it("does not emit damage or prevention payloads when Dog Pile has no outside ICE", () => {
+    let state = proteusPhase3cGame("proteus-phase-3c-dog-pile-zero-outside");
+    const dogPileId = putCorpIceOnServer(state, "rd", DOG_PILE);
+    setRezzedForRelativeTest(state, dogPileId);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const encounteredIce = getPlayerView(state, "runner").run?.encounteredIce;
+    expect(encounteredIce).toMatchObject({
+      definitionId: DOG_PILE,
+      strength: 0,
+    });
+    expect(encounteredIce?.strengthModifier ?? 0).toBe(0);
+    const beforeGrip = state.runner.grip.length;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.runner.grip).toHaveLength(beforeGrip);
+    expect(state.run).toBeUndefined();
+    const payload = state.eventLog.at(-1)?.publicPayload ?? {};
+    expect(payload.damageResolved).toBeUndefined();
+    expect(payload.damageAmount).toBeUndefined();
+    expect(payload.preventedAmount).toBeUndefined();
+    expect(payload.eventModificationOutcome).toBeUndefined();
+    expect(payload.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: DOG_PILE,
+        subroutineIndex: 1,
+        subroutineType: "end_the_run",
+        endedRun: true,
+      }),
+    ]);
+    expect(JSON.stringify(payload)).not.toMatch(hiddenPayloadMarkers);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("creates one public Hunting Pack trace subroutine per rezzed outside ICE", () => {
     let state = proteusPhase3cGame("proteus-phase-3c-hunting-pack");
     const setup = encounterInnerRelativeIce(state, HUNTING_PACK);
