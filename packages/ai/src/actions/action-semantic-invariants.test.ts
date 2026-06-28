@@ -172,6 +172,32 @@ describe("Action semantic invariants", () => {
     );
   });
 
+  it("bounds structural-only signal markers by explicit delimiters", () => {
+    const report = buildActionSemanticInvariantReport([
+      {
+        cardId: "onr_v1_structural_marker_noise",
+        tacticSignals: [
+          "cardinal_nameplate",
+          "own_typeless",
+          "subtype_onlyish",
+        ],
+      },
+      {
+        cardId: "onr_v1_structural_marker",
+        tacticSignals: ["own-subtype-only"],
+      },
+    ]);
+
+    const structuralIssues = report.issues.filter(
+      (issue) => issue.issueId === "pure_type_subtype_name_signal",
+    );
+
+    expect(structuralIssues).toHaveLength(1);
+    expect(structuralIssues[0]?.evidence).toContain("own-subtype-only");
+    expect(JSON.stringify(structuralIssues)).not.toContain("cardinal_nameplate");
+    expect(JSON.stringify(structuralIssues)).not.toContain("subtype_onlyish");
+  });
+
   it("reports forbidden static signals and broad primary signals without precise peers", () => {
     const report = buildActionSemanticInvariantReport([
       {

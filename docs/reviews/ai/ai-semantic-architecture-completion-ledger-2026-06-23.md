@@ -8766,6 +8766,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneunzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-invariants.ts` ersetzt Support-only- und reine Type/Subtype/Name-Signal-Regexe durch explizite Boundary-Scanner.
+  - Marker wie `support_only`, `support-only`, `type_only`, `subtype-only`, `card_name` und `own-subtype` werden nur mit gültigen Delimitern akzeptiert.
+  - Rauschen wie `not_support_only_noise`, `cardinal_nameplate`, `own_typeless` und `subtype_onlyish` erzeugt keine Invariant-Findings.
+  - `action-semantic-invariants.test.ts` schützt den bestehenden Support-only-Grenzfall und ergänzt explizite Strukturmarker-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-invariants.test.ts` grün, 1 Datei, 22 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

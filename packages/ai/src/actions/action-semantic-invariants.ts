@@ -8,7 +8,7 @@ import type {
 export const ACTION_SEMANTIC_INVARIANT_REPORT_SCHEMA_VERSION =
   "action-semantic-invariants-v1" as const;
 
-const SUPPORT_ONLY_SIGNAL_RE = /(^|[.:-])support[_-]only($|[.:-])/;
+const STRUCTURAL_TERMS = ["type", "subtype", "name"] as const;
 
 export type ActionSemanticInvariantIssueId =
   | "pure_type_subtype_name_signal"
@@ -312,15 +312,85 @@ function completeStrategySupportPair(pair: StrategySupportPair): boolean {
 function pureStructuralSignal(signal: string): boolean {
   const normalized = signal.trim().toLowerCase();
   return (
-    /(^|[.:-])(type|subtype|name)[.:-]/.test(normalized) ||
-    /(^|[_-])(type|subtype|name)_only([_-]|$)/.test(normalized) ||
-    /^(card|own)[_-](type|subtype|name)([_-]|$)/.test(normalized)
+    STRUCTURAL_TERMS.some((term) =>
+      boundedMarker(normalized, term, [".", ":", "-"], [".", ":", "-"]),
+    ) ||
+    STRUCTURAL_TERMS.some((term) =>
+      boundedMarker(
+        normalized,
+        `${term}_only`,
+        ["_", "-"],
+        ["_", "-"],
+      ),
+    ) ||
+    STRUCTURAL_TERMS.some((term) =>
+      boundedMarker(
+        normalized,
+        `${term}-only`,
+        ["_", "-"],
+        ["_", "-"],
+      ),
+    ) ||
+    startsWithStructuralOwnerMarker(normalized)
   );
 }
 
 function supportOnlySignal(signal: string): boolean {
   const normalized = signal.trim().toLowerCase();
-  return SUPPORT_ONLY_SIGNAL_RE.test(normalized);
+  return (
+    boundedMarker(
+      normalized,
+      "support_only",
+      [".", ":", "-"],
+      [".", ":", "-"],
+    ) ||
+    boundedMarker(
+      normalized,
+      "support-only",
+      [".", ":", "-"],
+      [".", ":", "-"],
+    )
+  );
+}
+
+function startsWithStructuralOwnerMarker(value: string): boolean {
+  return STRUCTURAL_TERMS.some(
+    (term) =>
+      startsWithBoundedMarker(value, `card_${term}`, ["_", "-"]) ||
+      startsWithBoundedMarker(value, `card-${term}`, ["_", "-"]) ||
+      startsWithBoundedMarker(value, `own_${term}`, ["_", "-"]) ||
+      startsWithBoundedMarker(value, `own-${term}`, ["_", "-"]),
+  );
+}
+
+function startsWithBoundedMarker(
+  value: string,
+  marker: string,
+  afterDelimiters: readonly string[],
+): boolean {
+  if (!value.startsWith(marker)) return false;
+  const after = value.length <= marker.length ? "" : value[marker.length];
+  return after === "" || afterDelimiters.includes(after ?? "");
+}
+
+function boundedMarker(
+  value: string,
+  marker: string,
+  beforeDelimiters: readonly string[],
+  afterDelimiters: readonly string[],
+): boolean {
+  let start = value.indexOf(marker);
+  while (start >= 0) {
+    const before = start === 0 ? "" : value[start - 1];
+    const afterIndex = start + marker.length;
+    const after = afterIndex >= value.length ? "" : value[afterIndex];
+    const beforeBounded =
+      before === "" || beforeDelimiters.includes(before ?? "");
+    const afterBounded = after === "" || afterDelimiters.includes(after ?? "");
+    if (beforeBounded && afterBounded) return true;
+    start = value.indexOf(marker, start + 1);
+  }
+  return false;
 }
 
 function broadPrimarySignal(signal: string): boolean {
