@@ -40,6 +40,30 @@ describe("run target action alignment", () => {
     });
   });
 
+  it("normalizes exact remote server ids without reading free-text suffixes", () => {
+    expect(
+      alignRunTargetAction(runCandidate("run-remote-1", "server:remote-1"), {
+        targetServerId: "server.remote_1",
+        targetKind: "remote",
+      }),
+    ).toMatchObject({
+      serverId: "remote_1",
+      runTargetId: "remote_1",
+      aligned: true,
+    });
+
+    expect(
+      alignRunTargetAction(runCandidate("run-remote-noise", "remote_1_bonus"), {
+        targetServerId: "remote_1",
+        targetKind: "remote",
+      }),
+    ).toMatchObject({
+      actionId: "run-remote-noise",
+      aligned: false,
+      evidence: expect.arrayContaining(["candidate_server:none"]),
+    });
+  });
+
   it("does not let evidence override structured target context", () => {
     const candidate = {
       ...runCandidate("run-remote-1", "remote_1"),

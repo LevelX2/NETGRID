@@ -98,7 +98,7 @@ function parseEvidenceServer(
 
 function normalizeServerId(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
-  const normalized = value.trim().toLowerCase().replace(/^server[:.]/, "");
+  const normalized = stripServerPrefix(value.trim().toLowerCase());
   if (normalized === "hq") return "hq";
   if (
     normalized === "rd" ||
@@ -111,9 +111,28 @@ function normalizeServerId(value: unknown): string | undefined {
   if (normalized === "archives") {
     return "archives";
   }
-  const remoteMatch = normalized.match(/^remote[_-](\d+)$/);
-  if (remoteMatch?.[1]) return `remote_${remoteMatch[1]}`;
+  const remoteId = normalizeRemoteServerId(normalized);
+  if (remoteId) return remoteId;
   return undefined;
+}
+
+function stripServerPrefix(value: string): string {
+  if (value.startsWith("server:")) return value.slice("server:".length);
+  if (value.startsWith("server.")) return value.slice("server.".length);
+  return value;
+}
+
+function normalizeRemoteServerId(value: string): string | undefined {
+  const prefix =
+    value.startsWith("remote_") ? "remote_" : value.startsWith("remote-") ? "remote-" : undefined;
+  if (!prefix) return undefined;
+  const suffix = value.slice(prefix.length);
+  if (suffix.length === 0 || !onlyAsciiDigits(suffix)) return undefined;
+  return `remote_${suffix}`;
+}
+
+function onlyAsciiDigits(value: string): boolean {
+  return [...value].every((character) => character >= "0" && character <= "9");
 }
 
 function uniqueStrings(values: readonly string[]): string[] {

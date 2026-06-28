@@ -8736,6 +8736,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/shared typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsechzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/run-target-action-alignment.ts` normalisiert Run-Server-Ziele ohne Regex-Match und ohne Prefix-Regex; `server:`/`server.` werden explizit entfernt, Remote-IDs nur bei exakter `remote_`- oder `remote-`-Form mit reinen ASCII-Ziffern akzeptiert.
+  - Strukturierte Zielquellen aus RunProjectionSummary und TargetContext bleiben priorisiert; Evidence-Fallbacks akzeptieren weiterhin nur gebundene Server-Identifier.
+  - Rauschen wie `remote_1_bonus` wird nicht mehr über lokale Regex-Teiltreffer oder freie Textinterpretation als Remote-Server gelesen.
+  - `run-target-action-alignment.test.ts` schützt Remote-Normalisierung über `server:remote-1`/`server.remote_1` und den negativen Suffix-Grenzfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/run-target-action-alignment.test.ts` grün, 1 Datei, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
