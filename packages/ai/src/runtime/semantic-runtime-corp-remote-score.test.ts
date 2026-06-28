@@ -64,15 +64,39 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
 
     expect(centralInstallScore(damageIce, "rd")).toBe(250);
   });
+
+  it("routes first access-stop ICE toward R&D under visible R&D Interface pressure", () => {
+    const etrIce = corpCard("barrier", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 3,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      runnerRig: [
+        runnerCard("rd-interface", "hardware", {
+          definitionId: "onr_v1_139_r-and-d-interface",
+          title: "R&D Interface",
+        }),
+      ],
+    });
+
+    const hqScore = centralInstallScore(etrIce, "hq", input);
+    const rdScore = centralInstallScore(etrIce, "rd", input);
+
+    expect(hqScore).toBe(1050);
+    expect(rdScore).toBe(1350);
+    expect(rdScore).toBeGreaterThan(hqScore);
+  });
 });
 
 function centralInstallScore(
   ice: VisibleCard,
   serverId: "hq" | "rd",
+  input = corpInputForCentralInstall(ice),
 ): number {
   const action = centralInstallIceAction(ice, serverId);
   return semanticRuntimeCorpInstallRemoteScore(
-    corpInputForCentralInstall(ice),
+    input,
     action,
     [],
     centralInstallDependencies(),
@@ -158,7 +182,14 @@ function corpInput(): AiDecisionInput {
   } as unknown as AiDecisionInput;
 }
 
-function corpInputForCentralInstall(ice: VisibleCard): AiDecisionInput {
+function corpInputForCentralInstall(
+  ice: VisibleCard,
+  options: {
+    agendaInHq?: boolean;
+    runnerRig?: VisibleCard[];
+  } = {},
+): AiDecisionInput {
+  const agendaInHq = options.agendaInHq ?? true;
   return {
     side: "corp",
     legalActions: [],
@@ -175,16 +206,21 @@ function corpInputForCentralInstall(ice: VisibleCard): AiDecisionInput {
         clicks: 3,
         gripOrHq: [
           ice,
-          {
-            instanceId: "agenda-in-hq",
-            known: true,
-            type: "agenda",
-            owner: "corp",
-          },
+          ...(agendaInHq
+            ? [
+                {
+                  instanceId: "agenda-in-hq",
+                  known: true,
+                  type: "agenda",
+                  owner: "corp",
+                },
+              ]
+            : []),
         ],
       },
       opponent: {
         credits: 4,
+        rig: options.runnerRig ?? [],
         identity: {
           counterDisplays: [],
         },
@@ -208,6 +244,21 @@ function corpInputForCentralInstall(ice: VisibleCard): AiDecisionInput {
       ],
     },
   } as unknown as AiDecisionInput;
+}
+
+function runnerCard(
+  instanceId: string,
+  type: NonNullable<VisibleCard["type"]>,
+  overrides: Partial<VisibleCard> = {},
+): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type,
+    owner: "runner",
+    controller: "runner",
+    ...overrides,
+  } as VisibleCard;
 }
 
 function corpCard(

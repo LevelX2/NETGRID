@@ -7,11 +7,14 @@ import {
 
 import { RUNTIME_CARDS } from "../ai-hints";
 import type { CorpCentralRezReserveAssessment } from "./corp-scoring-assessment-types";
-
-type CentralServerId = "hq" | "rd";
+import {
+  semanticRuntimeCorpCentralPressureAssessment,
+  semanticRuntimeCorpNormalizeCentralServerId,
+  type CorpCentralServerId,
+} from "./semantic-runtime-corp-central-pressure";
 
 type CorpCentralThreatAssessment = {
-  serverId: CentralServerId;
+  serverId: CorpCentralServerId;
   active: boolean;
   pressure: number;
   runOrAccessEvents: number;
@@ -193,76 +196,24 @@ export function createSemanticRuntimeCorpCentralRezContext(
 
 function semanticRuntimeCorpCentralThreatAssessment(
   input: AiDecisionInput,
-  serverId: CentralServerId,
+  serverId: CorpCentralServerId,
 ): CorpCentralThreatAssessment {
-  const runOrAccessEvents = semanticRuntimeCorpCentralRunOrAccessEventCount(
+  const assessment = semanticRuntimeCorpCentralPressureAssessment(
     input,
     serverId,
   );
-  const pressure = Math.min(
-    1,
-    runOrAccessEvents / 4 + (input.playerView.opponent.credits >= 6 ? 0.1 : 0),
-  );
-  const hqAgendaExposure =
-    serverId === "hq" &&
-    input.playerView.own.gripOrHq.some(
-      (card) => card.known && card.type === "agenda",
-    );
-  const active =
-    hqAgendaExposure ||
-    pressure >= (serverId === "rd" ? 0.5 : 0.75);
   return {
     serverId,
-    active,
-    pressure,
-    runOrAccessEvents,
-    evidence: [
-      `corp_central_pressure_server:${serverId}`,
-      `corp_central_pressure_events:${runOrAccessEvents}`,
-      `corp_central_pressure:${pressure.toFixed(2)}`,
-      `corp_central_pressure_active:${active}`,
-      ...(hqAgendaExposure ? ["corp_hq_agenda_exposure:true"] : []),
-    ],
+    active: assessment.active,
+    pressure: assessment.pressure,
+    runOrAccessEvents: assessment.runOrAccessEvents,
+    evidence: assessment.evidence,
   };
-}
-
-function semanticRuntimeCorpCentralRunOrAccessEventCount(
-  input: AiDecisionInput,
-  serverId: CentralServerId,
-): number {
-  const eventsById = new Map(
-    [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])].map(
-      (event) => [event.eventId, event],
-    ),
-  );
-  return [...eventsById.values()].filter((event) => {
-    const payload = event.publicPayload;
-    const actor = payload.actor;
-    const actionType =
-      typeof payload.actionType === "string" ? payload.actionType : event.type;
-    return (
-      actor === "runner" &&
-      (actionType === "start_run" || actionType === "access_card") &&
-      semanticRuntimeCorpNormalizeCentralServerId(
-        typeof payload.serverId === "string" ? payload.serverId : undefined,
-      ) === serverId
-    );
-  }).length;
-}
-
-function semanticRuntimeCorpNormalizeCentralServerId(
-  value: string | undefined,
-): CentralServerId | undefined {
-  if (!value) return undefined;
-  const normalized = value.toLocaleLowerCase("en-US");
-  if (normalized === "hq") return "hq";
-  if (normalized === "rd") return "rd";
-  return undefined;
 }
 
 function semanticRuntimeCorpIsCentralServer(
   serverId: string | undefined,
-): serverId is CentralServerId {
+): serverId is CorpCentralServerId {
   return serverId === "hq" || serverId === "rd";
 }
 

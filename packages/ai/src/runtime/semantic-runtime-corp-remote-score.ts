@@ -10,6 +10,9 @@ import {
   semanticRuntimeCorpScoringWindowAssessment,
   type CorpScoringWindowAssessment,
 } from "./semantic-runtime-corp-scoring-window";
+import {
+  semanticRuntimeCorpCentralPressureAssessment,
+} from "./semantic-runtime-corp-central-pressure";
 
 type CorpServerLike = {
   id: string;
@@ -251,63 +254,7 @@ function semanticRuntimeCorpCentralInstallThreat(
   input: AiDecisionInput,
   serverId: "hq" | "rd",
 ): boolean {
-  const runOrAccessEvents = semanticRuntimeCorpCentralRunOrAccessEventCount(
-    input,
-    serverId,
-  );
-  const runnerCredits = input.playerView.opponent.credits;
-  return (
-    (serverId === "hq" && semanticRuntimeCorpHasAgendaInHq(input)) ||
-    runOrAccessEvents >= (serverId === "rd" ? 2 : 3) ||
-    (runOrAccessEvents > 0 && runnerCredits >= (serverId === "rd" ? 4 : 3))
-  );
-}
-
-function semanticRuntimeCorpCentralRunOrAccessEventCount(
-  input: AiDecisionInput,
-  serverId: "hq" | "rd",
-): number {
-  const eventsById = new Map(
-    [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])].map(
-      (event) => [event.eventId, event],
-    ),
-  );
-  return [...eventsById.values()].filter((event) => {
-    const payload = event.publicPayload;
-    const actor = typeof payload.actor === "string" ? payload.actor : undefined;
-    const actionType =
-      typeof payload.actionType === "string" ? payload.actionType : event.type;
-    return (
-      actor === "runner" &&
-      (actionType === "start_run" || actionType === "access_card") &&
-      semanticRuntimeCorpNormalizedCentralServerIdFromPayload(payload) ===
-        serverId
-    );
-  }).length;
-}
-
-function semanticRuntimeCorpNormalizedCentralServerIdFromPayload(
-  payload: Record<string, unknown>,
-): "hq" | "rd" | undefined {
-  return semanticRuntimeCorpNormalizedCentralServerId(
-    typeof payload.serverId === "string"
-      ? payload.serverId
-      : typeof payload.serverLabel === "string"
-        ? payload.serverLabel
-        : typeof payload.serverName === "string"
-          ? payload.serverName
-          : undefined,
-  );
-}
-
-function semanticRuntimeCorpNormalizedCentralServerId(
-  value: string | undefined,
-): "hq" | "rd" | undefined {
-  if (!value) return undefined;
-  const normalized = value.toLocaleLowerCase("en-US");
-  if (normalized === "hq") return "hq";
-  if (normalized === "rd" || normalized === "r&d") return "rd";
-  return undefined;
+  return semanticRuntimeCorpCentralPressureAssessment(input, serverId).active;
 }
 
 function roleMatchesAny(role: string, options: readonly string[]): boolean {
