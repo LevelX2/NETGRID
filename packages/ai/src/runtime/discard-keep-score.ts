@@ -6,6 +6,7 @@ import {
 } from "./discard-fit-bonus";
 import { discardCurrentPlanKind } from "./discard-plan";
 import { sortedUnique } from "./collection";
+import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 
 export type DiscardCandidateScore = {
@@ -78,15 +79,13 @@ export function discardKeepScore(
     if (rolesMatch(roles, ["score", "remote"]))
       baseValue += 70;
   } else {
-    if (rolesMatch(roles, ["breaker_"])) {
-      const installedSameBreakerRole = roles.some(
-        (role) =>
-          rolesMatch([role], ["breaker_"]) &&
-          (input.playerView.own.rig ?? []).some((rigCard) =>
-            rolesMatch(dependencies.rolesForCardId(rigCard.definitionId), [
-              role,
-            ]),
-          ),
+    const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
+    if (breakerRoleNeedles.length > 0) {
+      const installedRigRoles = (input.playerView.own.rig ?? []).flatMap(
+        (rigCard) => dependencies.rolesForCardId(rigCard.definitionId),
+      );
+      const installedSameBreakerRole = breakerRoleNeedles.some((needle) =>
+        rolesMatch(installedRigRoles, [needle]),
       );
       baseValue += installedSameBreakerRole ? 95 : 210;
     }

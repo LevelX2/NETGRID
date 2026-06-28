@@ -35,6 +35,50 @@ describe("discard plan", () => {
       }),
     ).toBeUndefined();
   });
+
+  it("detects runner build-rig plans from bounded breaker roles", () => {
+    const input = runnerInput([card("hand_breaker", "program")], []);
+
+    expect(
+      discardCurrentPlanKind(input, {
+        definitionTypeForCardId: () => "program",
+        rolesForCardId: (definitionId) =>
+          definitionId === "hand_breaker" ? ["support_breaker_fracter"] : [],
+      }),
+    ).toBe("build_rig");
+  });
+
+  it("ignores runner breaker-like substrings for build-rig plans", () => {
+    const input = runnerInput([card("hand_noise", "program")], []);
+
+    expect(
+      discardCurrentPlanKind(input, {
+        definitionTypeForCardId: () => "program",
+        rolesForCardId: (definitionId) =>
+          definitionId === "hand_noise" ? ["breaker_fracterish_noise"] : [],
+      }),
+    ).toBeUndefined();
+  });
+
+  it("treats installed bounded breaker roles as existing rig coverage", () => {
+    const input = runnerInput(
+      [card("hand_setup", "hardware")],
+      [card("installed_breaker", "program")],
+    );
+
+    expect(
+      discardCurrentPlanKind(input, {
+        definitionTypeForCardId: (definitionId) =>
+          definitionId === "hand_setup" ? "hardware" : "program",
+        rolesForCardId: (definitionId) =>
+          definitionId === "installed_breaker"
+            ? ["support_breaker_fracter"]
+            : definitionId === "hand_setup"
+              ? ["setup"]
+              : [],
+      }),
+    ).toBeUndefined();
+  });
 });
 
 function corpInput(hand: VisibleCard[]): AiDecisionInput {
@@ -44,6 +88,22 @@ function corpInput(hand: VisibleCard[]): AiDecisionInput {
       own: {
         credits: 8,
         gripOrHq: hand,
+      },
+    },
+  } as AiDecisionInput;
+}
+
+function runnerInput(
+  hand: VisibleCard[],
+  rig: VisibleCard[],
+): AiDecisionInput {
+  return {
+    side: "runner",
+    playerView: {
+      own: {
+        credits: 8,
+        gripOrHq: hand,
+        rig,
       },
     },
   } as AiDecisionInput;

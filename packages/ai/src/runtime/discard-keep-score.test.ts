@@ -91,9 +91,23 @@ describe("discard keep score", () => {
         "installed-noise": ["breaker_fracterish_noise"],
       },
     ).baseValue;
+    const supportBreaker = score(
+      runnerCard("support-breaker", "program"),
+      ["support_breaker_fracter"],
+      "runner",
+      [],
+    ).baseValue;
+    const candidateNoise = score(
+      runnerCard("candidate-noise", "program"),
+      ["breaker_fracterish_noise"],
+      "runner",
+      [],
+    ).baseValue;
 
     expect(installedSameBreaker).toBeLessThan(freshBreaker);
     expect(installedNoise).toBe(freshBreaker);
+    expect(supportBreaker).toBe(freshBreaker);
+    expect(candidateNoise).toBeLessThan(freshBreaker);
   });
 });
 
