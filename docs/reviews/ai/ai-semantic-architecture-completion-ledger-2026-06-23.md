@@ -8508,6 +8508,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` hunderteinundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/corp-tempo-goals.ts` klassifiziert Corp-Tempo-Evidence über gebundene Evidence-Tokens statt breiter Regex-Prüfungen auf zusammengefügtem Evidence-Text.
+  - Strukturierte Hinweise wie `protect remote scoreline`, `rez ice`, `Corporate Boon` und echte `score`-/`tag`-/`flatline`-Tokens bleiben wirksam; Rauschen wie `protectionist remoteish scoreline` und `creditor boonish` bleibt wirkungslos.
+  - `corp-tempo-goals.test.ts` schützt positive bestehende Tempo-Zuordnungen und negative Token-Grenzfälle für Remote- und Economy-Rauschen.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/corp-tempo-goals.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

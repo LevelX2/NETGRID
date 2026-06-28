@@ -60,6 +60,24 @@ describe("corp tempo goal resolution", () => {
     expect(explicitEvidence.progressRelevant).toBe(true);
   });
 
+  it("matches tempo evidence by bounded tokens", () => {
+    const remoteNoise = classifyCorpTempoGoal({
+      type: "activated_card_ability",
+      sourceTitle: "Unknown visible ability",
+      evidence: ["protectionist remoteish scoreline"],
+    });
+    const economyNoise = classifyCorpTempoGoal({
+      type: "trigger_ability",
+      sourceTitle: "Unknown visible ability",
+      evidence: ["creditor boonish"],
+    });
+
+    expect(remoteNoise.fit).toBe("opaque_ability");
+    expect(remoteNoise.progressRelevant).toBe(false);
+    expect(economyNoise.fit).toBe("opaque_ability");
+    expect(economyNoise.progressRelevant).toBe(false);
+  });
+
   it("classifies meaningful ICE protection from visible server evidence", () => {
     const rez = classifyCorpTempoGoal({
       type: "rez_ice",

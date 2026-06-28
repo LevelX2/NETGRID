@@ -38,7 +38,6 @@ export function classifyCorpTempoGoal(
   action: CorpTempoAction,
 ): CorpTempoGoalResolution {
   const evidence = sideSafeEvidence(action);
-  const text = evidence.join("|").toLocaleLowerCase("en-US");
 
   if (action.type === "score_agenda" || action.corpScoreTerminalScoreTaken) {
     return resolution(
@@ -56,7 +55,11 @@ export function classifyCorpTempoGoal(
       "Corp advances an agenda or scoreline toward completion.",
     );
   }
-  if (action.protectBeforeAdvance || /protect.*remote|remote.*protect/.test(text)) {
+  if (
+    action.protectBeforeAdvance ||
+    evidenceHasTerms(evidence, ["protect", "remote"]) ||
+    evidenceHasTerms(evidence, ["protection", "remote"])
+  ) {
     return resolution(
       "protect_remote",
       true,
@@ -64,7 +67,11 @@ export function classifyCorpTempoGoal(
       "Corp action has side-safe remote protection evidence.",
     );
   }
-  if (/protect.*central|central.*protect|\bhq\b|\brd\b|\barchives\b/.test(text)) {
+  if (
+    evidenceHasTerms(evidence, ["protect", "central"]) ||
+    evidenceHasTerms(evidence, ["protection", "central"]) ||
+    evidenceHasAnyTerm(evidence, ["hq", "rd", "archives"])
+  ) {
     return resolution(
       "protect_central",
       true,
@@ -72,7 +79,10 @@ export function classifyCorpTempoGoal(
       "Corp action has side-safe central protection evidence.",
     );
   }
-  if (action.type === "rez_ice" && /ice|rez|server|remote|central/.test(text)) {
+  if (
+    action.type === "rez_ice" &&
+    evidenceHasAnyTerm(evidence, ["ice", "rez", "server", "remote", "central"])
+  ) {
     return resolution(
       "rez_meaningful_ice",
       true,
@@ -82,7 +92,7 @@ export function classifyCorpTempoGoal(
   }
   if (
     action.type === "install_card" &&
-    /ice|remote|central|protect|server/.test(text)
+    evidenceHasAnyTerm(evidence, ["ice", "remote", "central", "protect", "server"])
   ) {
     return resolution(
       "install_meaningful_ice",
@@ -93,7 +103,7 @@ export function classifyCorpTempoGoal(
   }
   if (
     action.type === "gain_credit" ||
-    /credit|economy|corporate boon|boon/.test(text)
+    evidenceHasAnyTerm(evidence, ["credit", "economy", "corporate", "boon"])
   ) {
     return resolution(
       "economy_only",
@@ -103,13 +113,22 @@ export function classifyCorpTempoGoal(
     );
   }
   if (action.type === "activated_card_ability" || action.type === "trigger_ability") {
+    const abilityHasTempoEvidence = evidenceHasAnyTerm(evidence, [
+      "score",
+      "protect",
+      "protection",
+      "rez",
+      "ice",
+      "flatline",
+      "tag",
+    ]);
     return resolution(
-      /score|protect|rez|ice|flatline|tag/.test(text)
+      abilityHasTempoEvidence
         ? "protect_remote"
         : "opaque_ability",
-      /score|protect|rez|ice|flatline|tag/.test(text),
+      abilityHasTempoEvidence,
       evidence,
-      /score|protect|rez|ice|flatline|tag/.test(text)
+      abilityHasTempoEvidence
         ? "Ability has side-safe tempo evidence."
         : "Ability has no side-safe evidence for tempo progress.",
     );
@@ -119,6 +138,30 @@ export function classifyCorpTempoGoal(
     false,
     evidence,
     "Action is not a recognized Corp tempo goal in this shadow classifier.",
+  );
+}
+
+function evidenceHasTerms(evidence: readonly string[], terms: readonly string[]): boolean {
+  const termSet = new Set(terms.map((term) => term.toLocaleLowerCase("en-US")));
+  return evidence.some((entry) => {
+    const tokens = evidenceTokens(entry);
+    return [...termSet].every((term) => tokens.has(term));
+  });
+}
+
+function evidenceHasAnyTerm(evidence: readonly string[], terms: readonly string[]): boolean {
+  const termSet = new Set(terms.map((term) => term.toLocaleLowerCase("en-US")));
+  return evidence.some((entry) =>
+    [...evidenceTokens(entry)].some((token) => termSet.has(token)),
+  );
+}
+
+function evidenceTokens(entry: string): Set<string> {
+  return new Set(
+    entry
+      .toLocaleLowerCase("en-US")
+      .split(/[^a-z0-9]+/)
+      .filter((token) => token.length > 0),
   );
 }
 
