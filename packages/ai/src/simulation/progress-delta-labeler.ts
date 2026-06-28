@@ -148,7 +148,7 @@ function directProgressLabel(
   ) {
     return "progress_score";
   }
-  if (/flatline|tag_punish_terminal/.test(text)) return "progress_flatline";
+  if (actionTextHasFlatlineSignal(text)) return "progress_flatline";
   if (isCoverageInstall(action)) return "progress_coverage_install";
   if (isReachabilityImprovement(action)) return "progress_reachability_improved";
   if (isServerProtection(action)) return "progress_server_protected";
@@ -310,4 +310,43 @@ function actionText(action: ProgressDeltaAction): string {
     .filter(Boolean)
     .join("|")
     .toLocaleLowerCase("en-US");
+}
+
+function actionTextHasFlatlineSignal(text: string): boolean {
+  const tokens = progressActionTextTokens(text);
+  return (
+    tokens.includes("flatline") ||
+    progressTokensIncludePhrase(tokens, ["tag", "punish", "terminal"])
+  );
+}
+
+function progressActionTextTokens(text: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of text.toLocaleLowerCase("en-US")) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character;
+    } else if (current.length > 0) {
+      tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "0" && character <= "9")
+  );
+}
+
+function progressTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((_, index) =>
+    phrase.every((token, offset) => tokens[index + offset] === token),
+  );
 }

@@ -19,6 +19,21 @@ describe("progress delta labeler", () => {
     );
   });
 
+  it("bounds flatline progress signals to exact text tokens", () => {
+    expect(
+      actionLabel({
+        actionType: "trigger_ability",
+        reasonCode: "corp.damage.flatline",
+      }),
+    ).toBe("progress_flatline");
+    expect(
+      actionLabel({
+        actionType: "trigger_ability",
+        reasonCode: "corp.damage.flatlinedish",
+      }),
+    ).toBe("no_progress_stale");
+  });
+
   it("labels visible runner coverage installs without hidden card data", () => {
     const result = labelProgressDeltaAction({
       side: "runner",
