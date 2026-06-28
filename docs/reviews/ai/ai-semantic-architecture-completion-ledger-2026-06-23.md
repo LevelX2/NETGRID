@@ -9409,6 +9409,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-corp-helpers.ts` ersetzt die lokale Corp-Punish-/Flatline-Signal-Term-Prüfung per `segment.includes(...)` durch gebundene `_`-Tokenprüfung.
+  - Exakte Punktsegmente wie `punish.payoff`, Exact-Signale wie `tag.source`, zusammengesetzte Signale wie `visible_punish_payoff` und `score_flatline_window` bleiben wirksam; Suffix-Rauschen wie `punishment_noise`, `pre_punishment_support` und `flatliner` erzeugt keinen Corp-Punish-Plan-Kandidaten.
+  - Die Änderung bleibt auf TacticalPlan-Corp-Punish-Kandidaten aus side-sicheren ActionSemanticCandidate-Signalen beschränkt und erzeugt keine LegalAction-Projektion.
+  - `tactical-plan-corp-helpers.test.ts` schützt positive Exact-/Compound-Signale und negative Substring-Noise-Fälle; `tactical-plans.test.ts` sichert den Corp-Punish-Plan-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/plans/tactical-plan-corp-helpers.test.ts src/tactical-plans.test.ts -t "structured punish|translates Corp punish intent"` grün, 2 Dateien, 2 Tests, 45 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
