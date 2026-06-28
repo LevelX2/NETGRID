@@ -99,6 +99,50 @@ describe("ActionGoalFit", () => {
     expect(fit.score).toBeGreaterThan(60);
   });
 
+  it("matches tag and damage fallback families by structured semantic terms", () => {
+    const tagFit = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("tag-1", "trigger_ability"),
+        semanticActionType: "tag.apply",
+      },
+      utility: utility("corp.visible_tag_punish", "tag_punish"),
+      legalActionIds: ["tag-1"],
+    });
+    const damageFit = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("damage-1", "trigger_ability"),
+        semanticActionType: "damage.net",
+      },
+      utility: utility("corp.damage_window", "damage_pressure"),
+      legalActionIds: ["damage-1"],
+    });
+
+    expect(tagFit.fitStatus).not.toBe("irrelevant");
+    expect(damageFit.fitStatus).not.toBe("irrelevant");
+  });
+
+  it("ignores substring-only tag and damage semantic noise", () => {
+    const tagNoise = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("tag-noise", "trigger_ability"),
+        semanticActionType: "tagalong.apply",
+      },
+      utility: utility("corp.visible_tag_punish", "tag_punish"),
+      legalActionIds: ["tag-noise"],
+    });
+    const damageNoise = scoreActionGoalFit({
+      candidate: {
+        ...candidateFor("damage-noise", "trigger_ability"),
+        semanticActionType: "damaged_goods",
+      },
+      utility: utility("corp.damage_window", "damage_pressure"),
+      legalActionIds: ["damage-noise"],
+    });
+
+    expect(tagNoise.fitStatus).toBe("irrelevant");
+    expect(damageNoise.fitStatus).toBe("irrelevant");
+  });
+
   it("blocks risky self-damage actions under critical survival goals", () => {
     const risky = {
       ...candidateFor("damage-1", "activated_card_ability"),

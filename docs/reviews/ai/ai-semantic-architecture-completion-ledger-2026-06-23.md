@@ -7358,6 +7358,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` vierundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/action-goal-fit.ts` bindet die `tag_punish`- und `damage_pressure`-Family-Fallbacks an strukturierte semantische Terme statt freie Substring-Treffer.
+  - Strukturierte Semantiken wie `tag.apply` und `damage.net` bleiben wertend; substringartiges Rauschen wie `tagalong.apply` und `damaged_goods` wird nicht mehr als Tag- oder Damage-Fallback-Fit klassifiziert.
+  - `action-goal-fit.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/decision/action-goal-fit.test.ts src/decision/corp-tactical-goals.test.ts src/decision/tactical-goal-utility.test.ts` grün, 3 Dateien, 29 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

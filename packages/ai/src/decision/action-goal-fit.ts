@@ -283,12 +283,30 @@ function familyFallbackMatch(
     case "cleanup":
       return semantic === "tag.remove" || semantic.startsWith("counter.");
     case "tag_punish":
-      return semantic.includes("tag.");
+      return semanticHasTerm(semantic, "tag");
     case "damage_pressure":
-      return semantic.includes("damage") || semantic.startsWith("card_ability.");
+      return (
+        semanticHasTerm(semantic, "damage") ||
+        semantic.startsWith("card_ability.")
+      );
     case "target_resolution":
       return semantic === "choice.resolve" || Boolean(candidate.targetContext);
   }
+}
+
+function semanticHasTerm(semantic: string, term: string): boolean {
+  return semantic
+    .split(/[.:-]+/)
+    .some((segment) => semanticSegmentHasTerm(segment, term));
+}
+
+function semanticSegmentHasTerm(segment: string, term: string): boolean {
+  return (
+    segment === term ||
+    segment.startsWith(`${term}_`) ||
+    segment.endsWith(`_${term}`) ||
+    segment.includes(`_${term}_`)
+  );
 }
 
 function fitStatusForScore(
