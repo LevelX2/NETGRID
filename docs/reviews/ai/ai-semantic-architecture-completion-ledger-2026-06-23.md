@@ -7426,6 +7426,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` einundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-visible-tag-payoff-category.ts` nutzt für sichtbare Corp-Tag-Payoff-Kategorien den gebundenen `rolesMatch`-Helper statt freier Rollen-Substring-Prüfungen.
+  - Strukturierte Rollen wie `run_lock` und `access_ambush` bleiben wirksam; substringartiges Rauschen wie `run_locksmith_noise` und `ambusher_noise` erzeugt keine Run-Lock-/Ambush-Kategorie mehr.
+  - `corp-visible-tag-payoff-category.test.ts` schützt strukturierte Treffer und Substring-Negativfälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/simulation/corp-visible-tag-payoff-category.test.ts src/runtime/role-match.test.ts` grün, 2 Dateien, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
