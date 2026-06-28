@@ -475,21 +475,26 @@ function corpAgendaOveradvanceThresholdAssessment(
 }
 
 function corpAgendaOveradvanceThresholdSize(text: string): number | undefined {
-  const overMatch =
-    /for every (one|two|three|four|\d+) advancement counters? over/.exec(text);
-  if (overMatch?.[1]) return corpNumberWordToNumber(overMatch[1]);
-  const additionalAgendaPointMatch =
-    /additional agenda point for every (one|two|three|four|\d+) advancement counters? over/.exec(
-      text,
-    );
-  if (additionalAgendaPointMatch?.[1]) {
-    return corpNumberWordToNumber(additionalAgendaPointMatch[1]);
+  const tokens = corpRulesTextTokens(text);
+  for (const [index, token] of tokens.entries()) {
+    if (token !== "for" || tokens[index + 1] !== "every") continue;
+    const threshold = corpNumberWordToNumber(tokens[index + 2]);
+    if (
+      threshold !== undefined &&
+      tokens[index + 3] === "advancement" &&
+      (tokens[index + 4] === "counter" || tokens[index + 4] === "counters") &&
+      tokens[index + 5] === "over"
+    ) {
+      return threshold;
+    }
   }
   return undefined;
 }
 
-function corpNumberWordToNumber(value: string): number | undefined {
-  if (/^\d+$/.test(value)) return Number.parseInt(value, 10);
+function corpNumberWordToNumber(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = positiveIntegerTokenValue(value);
+  if (parsed !== undefined) return parsed;
   const byWord: Record<string, number> = {
     one: 1,
     two: 2,
@@ -497,6 +502,42 @@ function corpNumberWordToNumber(value: string): number | undefined {
     four: 4,
   };
   return byWord[value];
+}
+
+function corpRulesTextTokens(text: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  for (const character of text.toLocaleLowerCase("en-US")) {
+    if (isAsciiLetterOrDigit(character)) {
+      current += character;
+    } else if (current.length > 0) {
+      tokens.push(current);
+      current = "";
+    }
+  }
+  if (current.length > 0) tokens.push(current);
+  return tokens;
+}
+
+function isAsciiLetterOrDigit(character: string): boolean {
+  return (
+    (character >= "a" && character <= "z") ||
+    (character >= "0" && character <= "9")
+  );
+}
+
+function positiveIntegerTokenValue(
+  token: string | undefined,
+): number | undefined {
+  if (
+    token === undefined ||
+    token.length === 0 ||
+    ![...token].every((character) => character >= "0" && character <= "9")
+  ) {
+    return undefined;
+  }
+  const parsed = Number(token);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined;
 }
 
 function semanticRuntimeCorpHasTransferDestination(

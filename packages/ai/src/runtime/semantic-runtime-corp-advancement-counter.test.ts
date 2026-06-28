@@ -4,55 +4,9 @@ import { semanticRuntimeCorpAdvancementCounterPlacementAssessment } from "./sema
 
 describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
   it("derives agenda overadvance thresholds from generic rules text", () => {
-    const agenda = corpCard("custom-overadvance-agenda", {
-      advancementCounters: 4,
-      advancementRequirement: 3,
-      type: "agenda",
-    });
-    const advanceAction = corpAction("advance_card", {
-      cardId: agenda.instanceId,
-    });
-    const placementAction = corpAction("play_operation", {
-      cardId: "custom-advancement-distribution",
-    });
-    const input = corpInput({
-      root: [agenda],
-      legalActions: [advanceAction],
-    });
-
-    const assessment =
-      semanticRuntimeCorpAdvancementCounterPlacementAssessment(
-        input,
-        placementAction,
-        {
-          sourceDefinitionIdForAction: (_input, action) =>
-            typeof action.payload?.cardId === "string"
-              ? action.payload.cardId
-              : undefined,
-          normalizedRulesTextForDefinition: (definitionId) =>
-            definitionId === "custom-advancement-distribution"
-              ? "add one advancement counter to each of up to two installed cards that can be advanced"
-              : "for every two advancement counters over this agenda's difficulty that are on this agenda when you score it",
-          actionCreditCost: () => 0,
-          actionSourceCard: (_input, action) =>
-            action.actionId === advanceAction.actionId ? agenda : undefined,
-          visibleServerCard: (_input, cardId) =>
-            cardId === agenda.instanceId
-              ? {
-                  card: agenda,
-                  server: {
-                    id: "remote_1",
-                    label: "Remote 1",
-                    ice: [],
-                    root: [agenda],
-                  },
-                }
-              : undefined,
-          cardType: (card) => card.type,
-          cardAdvancementRequirement: (card) => card.advancementRequirement,
-          teamRestructuringCardId: "custom-team-restructuring",
-        },
-      );
+    const assessment = assessmentForAgendaRulesText(
+      "for every two advancement counters over this agenda's difficulty that are on this agenda when you score it",
+    );
 
     expect(assessment?.advancementWitness).toBe("overadvance_threshold");
     expect(assessment?.evidence).toContain(
@@ -61,7 +15,70 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
     expect(assessment?.evidence).toContain("overadvance_threshold_size:2");
     expect(assessment?.evidence).toContain("overadvance_hits_threshold:true");
   });
+
+  it("bounds agenda overadvance thresholds to exact rules text tokens", () => {
+    const assessment = assessmentForAgendaRulesText(
+      "for every twone advancement countersover this agenda's difficulty that are on this agenda when you score it",
+    );
+
+    expect(assessment?.advancementWitness).toBe("score_now");
+    expect(assessment?.evidence).not.toContain(
+      "advancement_target_class:agenda_overadvance_threshold",
+    );
+    expect(assessment?.evidence).not.toContain("overadvance_threshold_size:2");
+  });
 });
+
+function assessmentForAgendaRulesText(agendaRulesText: string) {
+  const agenda = corpCard("custom-overadvance-agenda", {
+    advancementCounters: 4,
+    advancementRequirement: 3,
+    type: "agenda",
+  });
+  const advanceAction = corpAction("advance_card", {
+    cardId: agenda.instanceId,
+  });
+  const placementAction = corpAction("play_operation", {
+    cardId: "custom-advancement-distribution",
+  });
+  const input = corpInput({
+    root: [agenda],
+    legalActions: [advanceAction],
+  });
+
+  return semanticRuntimeCorpAdvancementCounterPlacementAssessment(
+    input,
+    placementAction,
+    {
+      sourceDefinitionIdForAction: (_input, action) =>
+        typeof action.payload?.cardId === "string"
+          ? action.payload.cardId
+          : undefined,
+      normalizedRulesTextForDefinition: (definitionId) =>
+        definitionId === "custom-advancement-distribution"
+          ? "add one advancement counter to each of up to two installed cards that can be advanced"
+          : agendaRulesText,
+      actionCreditCost: () => 0,
+      actionSourceCard: (_input, action) =>
+        action.actionId === advanceAction.actionId ? agenda : undefined,
+      visibleServerCard: (_input, cardId) =>
+        cardId === agenda.instanceId
+          ? {
+              card: agenda,
+              server: {
+                id: "remote_1",
+                label: "Remote 1",
+                ice: [],
+                root: [agenda],
+              },
+            }
+          : undefined,
+      cardType: (card) => card.type,
+      cardAdvancementRequirement: (card) => card.advancementRequirement,
+      teamRestructuringCardId: "custom-team-restructuring",
+    },
+  );
+}
 
 function corpInput(input: {
   root: VisibleCard[];

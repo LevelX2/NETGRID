@@ -8836,6 +8836,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsechsundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ersetzt die Rules-Text-RegEx-Erkennung für Agenda-Overadvance-Thresholds durch gebundene Tokens der Form `for every <zahl> advancement counter(s) over`.
+  - Zahlenwörter `one` bis `four` und positive ASCII-Zahlen bleiben wirksam; zusammengeklebtes Rauschen wie `twone` oder `countersover` erzeugt keinen Overadvance-Threshold mehr.
+  - Der Pfad bleibt auf sichtbaren normalisierten Rules-Text begrenzt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-advancement-counter.test.ts` schützt den bestehenden positiven `two advancement counters over`-Fall und ergänzt den negativen Suffix-/Token-Grenzfall.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-advancement-counter.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
