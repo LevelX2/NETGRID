@@ -578,33 +578,21 @@ export function summarizeTagPunishWindowMetrics(
             entry.corpVisibleTagPayoffLegalActionKinds ?? [],
             unknownSkipPayoffKindCounts,
           );
+          const payoffKindSet = new Set(
+            entry.corpVisibleTagPayoffLegalActionKinds ?? [],
+          );
           unknownSkipPlausibilityCounts[
             entry.corpVisibleTagPunishUnknownSkipPlausibility ?? "unclassified"
           ] += 1;
-          if (
-            entry.corpVisibleTagPayoffLegalActionKinds?.includes("damage") ===
-            true
-          )
+          if (payoffKindSet.has("damage"))
             corpVisibleTagPunishUnknownSkipPayoffDamage += 1;
-          if (
-            entry.corpVisibleTagPayoffLegalActionKinds?.includes("economic") ===
-            true
-          )
+          if (payoffKindSet.has("economic"))
             corpVisibleTagPunishUnknownSkipPayoffEconomic += 1;
-          if (
-            entry.corpVisibleTagPayoffLegalActionKinds?.includes("trash") ===
-            true
-          )
+          if (payoffKindSet.has("trash"))
             corpVisibleTagPunishUnknownSkipPayoffTrash += 1;
-          if (
-            entry.corpVisibleTagPayoffLegalActionKinds?.includes("run_lock") ===
-            true
-          )
+          if (payoffKindSet.has("run_lock"))
             corpVisibleTagPunishUnknownSkipPayoffRunLock += 1;
-          if (
-            entry.corpVisibleTagPayoffLegalActionKinds?.includes("ambush") ===
-            true
-          )
+          if (payoffKindSet.has("ambush"))
             corpVisibleTagPunishUnknownSkipPayoffAmbush += 1;
           if (
             entry.corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal ===

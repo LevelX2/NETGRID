@@ -128,15 +128,16 @@ export function createTagPunishWindowDiagnosticsContext(
         if (visiblePunishOpportunities.length > 1)
           diagnostics.corpVisibleTagPunishDecisionWindowWithMultiplePayoffs =
             true;
-        if (visiblePayoffCategories.includes("damage"))
+        const visiblePayoffCategorySet = new Set(visiblePayoffCategories);
+        if (visiblePayoffCategorySet.has("damage"))
           diagnostics.corpVisibleTagDamagePunishLegalActions = true;
-        if (visiblePayoffCategories.includes("economic"))
+        if (visiblePayoffCategorySet.has("economic"))
           diagnostics.corpVisibleTagEconomicPunishLegalActions = true;
-        if (visiblePayoffCategories.includes("trash"))
+        if (visiblePayoffCategorySet.has("trash"))
           diagnostics.corpVisibleTagTrashPunishLegalActions = true;
-        if (visiblePayoffCategories.includes("run_lock"))
+        if (visiblePayoffCategorySet.has("run_lock"))
           diagnostics.corpVisibleTagRunLockPunishLegalActions = true;
-        if (visiblePayoffCategories.includes("ambush"))
+        if (visiblePayoffCategorySet.has("ambush"))
           diagnostics.corpVisibleTagAmbushPunishLegalActions = true;
         if (survivalContext.any) {
           diagnostics.runnerSurvivalCounterContextAvailable = true;
