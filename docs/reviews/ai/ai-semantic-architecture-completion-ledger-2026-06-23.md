@@ -10277,6 +10277,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes|\.includes\(term\)|accepted\.includes|reasonCodes\.includes|knownValues\.includes|split\([^\n]+\)\.includes|\.includes\(token\)' packages/ai/src` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsechsundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` ersetzt die freie RulesText-Substring-Prüfung auf `advancement counter` plus `remove`/`spend` durch lokale Token- und Phrase-Helper.
+  - Corp-Remote-Scoreline-Support bleibt für echte `advancement counter`/`advancement counters`-Texte wirksam; substring-nahe Noise-Werte wie `counterfeits` lösen keinen Scoreline-Kontextbedarf mehr aus.
+  - `semantic-runtime-corp-remote-score.test.ts` sichert den bestehenden Raymond-Ellison-Fall und einen neuen `advancement counterfeits`-Noise-Fall.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive RulesText-/Regex-Fallbacks noch auditiert und in kleine Pakete geschnitten werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-remote-score.test.ts` grün, 1 Datei, 16 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'advancement counter|text\.includes\(\"remove\"\)|text\.includes\(\"spend\"\)|text\.includes\(\"advancement counter\"\)' packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

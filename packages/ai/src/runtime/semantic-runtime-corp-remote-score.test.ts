@@ -328,6 +328,29 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
       installRootScore(raymond, "remote_1", input, ["scoreline_support"]),
     ).toBe(-900);
   });
+
+  it("bounds advancement-counter remote support rules text to exact tokens", () => {
+    const noiseUpgrade = corpCard("counterfeit-support", "upgrade", {
+      title: "Counterfeit Support",
+      rulesText:
+        "Remove advancement counterfeits from cards installed in this data fort.",
+    });
+    const input = corpInputForCentralInstall(noiseUpgrade, {
+      agendaInHq: true,
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [corpCard("remote-wall", "ice", { rezCost: 2 })],
+          root: [],
+        },
+      ],
+    });
+
+    expect(installRootScore(noiseUpgrade, "remote_1", input)).toBe(250);
+  });
 });
 
 function centralInstallScore(
