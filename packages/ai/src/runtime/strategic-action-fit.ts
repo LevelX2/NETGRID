@@ -256,7 +256,8 @@ function corpStrategicPunishAction(
 }
 
 function scopeIdHasToken(scopeId: string, token: string): boolean {
-  return scopeId.split(/[._:-]+/).includes(token);
+  const scopeTokenSet = new Set(scopeId.split(/[._:-]+/));
+  return scopeTokenSet.has(token);
 }
 
 function semanticSignals(
