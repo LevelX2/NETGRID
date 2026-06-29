@@ -5022,7 +5022,7 @@ export function classifyCorpScoredAgendaAbility(
     scoredAgendaDrawAmountFromText(text),
   );
   const observedGainedActions = scoredAgendaGainedActionsFromText(text);
-  const lowerText = text.toLowerCase();
+  const textTokens = corpRulesTextTokens(text);
   const counterEconomy =
     observedImmediateGain > 0 &&
     (storedCredits > 0 ||
@@ -5030,21 +5030,22 @@ export function classifyCorpScoredAgendaAbility(
       scoredAgendaLooksLikeCounterEconomyText(text));
   const heuristicKind: CorpScoredAgendaAbilityKind =
     action.payload?.agendaAbility === "hq_archives_shuffle_draw" ||
-    (lowerText.includes("shuffle") && observedDrawAmount > 0)
+    (corpTokensInclude(textTokens, "shuffle") && observedDrawAmount > 0)
       ? "scored_agenda_shuffle_draw"
       : counterEconomy
         ? "scored_agenda_counter_economy"
         : observedImmediateGain > 0
           ? "scored_agenda_economy"
           : observedDrawAmount > 1
-            ? "scored_agenda_draw"
-            : observedGainedActions > 0
-              ? "scored_agenda_extra_action"
-              : lowerText.includes("trace") && lowerText.includes("tag")
-                ? "scored_agenda_trace_tag"
-                : lowerText.includes("damage")
-                  ? "scored_agenda_damage_punish"
-                  : "scored_agenda_utility";
+          ? "scored_agenda_draw"
+          : observedGainedActions > 0
+            ? "scored_agenda_extra_action"
+            : corpTokensInclude(textTokens, "trace") &&
+                corpTokensInclude(textTokens, "tag")
+              ? "scored_agenda_trace_tag"
+              : corpTokensInclude(textTokens, "damage")
+                ? "scored_agenda_damage_punish"
+                : "scored_agenda_utility";
   const kind = resolveScoredAgendaOntologyKind(
     heuristicKind,
     ontologyAssessment?.kind,

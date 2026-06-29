@@ -10444,6 +10444,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: gezieltes Ripgrep auf die entfernte Counter-Economy-Regex ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsechsundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt die Scored-Agenda-Heuristic-Substring-Prüfungen für Shuffle, Trace/Tag und Damage durch Token-Membership.
+  - Scored-Agenda-Heuristiken nutzen damit denselben RulesText-Tokenstrom wie Credit-, Draw-, Action- und Counter-Economy-Erkennung.
+  - Status bleibt `IN_PROGRESS`, weil noch einzelne Legacy-Label-Werttransporte und ein erneuter produktiver Rest-Audit offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "classifies scored-agenda activated effects"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: gezieltes Ripgrep auf die entfernten Scored-Agenda-Substring-Prüfungen ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
