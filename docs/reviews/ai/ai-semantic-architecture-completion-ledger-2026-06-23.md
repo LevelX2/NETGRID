@@ -10452,6 +10452,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: gezieltes Ripgrep auf die entfernten Scored-Agenda-Substring-Prüfungen ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsiebenundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/runner-plans.ts` ersetzt den Remote-Trash-Finite-Pool-RulesText-Substring-Fallback durch lokale Token-Prädikate.
+  - Runner-Remote-Trash-Bewertung erkennt `put`, `from the bank`, `take` und `bits` weiter ohne freie `rulesText.includes(...)`-Kette.
+  - Status bleibt `IN_PROGRESS`, weil noch einzelne Legacy-Label-Werttransporte und ein erneuter produktiver Rest-Audit offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "recovers economy when Krash can pass Data Wall but cannot afford a known BBS trash afterward"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: gezieltes Ripgrep auf die entfernte `rulesText.includes`-Kette ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

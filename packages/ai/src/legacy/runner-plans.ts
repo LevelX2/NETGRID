@@ -7711,7 +7711,7 @@ function remoteTrashCardLooksLikeFinitePool(card: VisibleCard): boolean {
     (demoDefinition as { text?: string } | undefined)?.text ?? "";
   const rulesText = `${runtimeText} ${demoText} ${
     card.rulesText ?? ""
-  }`.toLowerCase();
+  }`;
   return (
     mechanics.some(
       (mechanic: string) =>
@@ -7719,10 +7719,41 @@ function remoteTrashCardLooksLikeFinitePool(card: VisibleCard): boolean {
         mechanic.includes("hosted_credits") ||
         mechanic.includes("bit_counter"),
     ) ||
-    (rulesText.includes("put") &&
-      rulesText.includes("from the bank") &&
-      rulesText.includes("take") &&
-      rulesText.includes("bits"))
+    runnerRemoteTrashRulesTextLooksLikeFinitePool(rulesText)
+  );
+}
+
+function runnerRemoteTrashRulesTextLooksLikeFinitePool(text: string): boolean {
+  const tokens = runnerRemoteTrashRulesTextTokens(text);
+  return (
+    runnerRemoteTrashTokensInclude(tokens, "put") &&
+    runnerRemoteTrashTokensIncludePhrase(tokens, ["from", "the", "bank"]) &&
+    runnerRemoteTrashTokensInclude(tokens, "take") &&
+    runnerRemoteTrashTokensInclude(tokens, "bits")
+  );
+}
+
+function runnerRemoteTrashRulesTextTokens(text: string): string[] {
+  return text
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function runnerRemoteTrashTokensInclude(
+  tokens: readonly string[],
+  accepted: string,
+): boolean {
+  return new Set(tokens).has(accepted);
+}
+
+function runnerRemoteTrashTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    token === phrase[0] &&
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
   );
 }
 
