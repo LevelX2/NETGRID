@@ -27,10 +27,11 @@ export function alignRunTargetAction(
   const runTargetId = normalizeServerId(target.targetServerId ?? target.targetId);
   const candidateServers = candidateRunServers(candidate);
   const candidateServerIds = candidateServers.serverIds;
+  const candidateServerIdSet = new Set(candidateServerIds);
   const aligned =
     candidate.semanticActionType === "run.start" &&
     runTargetId !== undefined &&
-    candidateServerIds.includes(runTargetId);
+    candidateServerIdSet.has(runTargetId);
   const serverId = candidateServerIds[0];
   return {
     actionId: candidate.actionId,

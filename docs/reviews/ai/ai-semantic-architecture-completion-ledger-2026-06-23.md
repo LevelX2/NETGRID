@@ -9791,6 +9791,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'acceptableActionIds\.includes' packages/ai/src/evaluation/practical-tactic-benchmark.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertzweiundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/run-target-action-alignment.ts` bindet CandidateServerIds über ein lokales Set statt direkter `candidateServerIds.includes(...)`-Prüfung.
+  - Strukturierte ServerIds bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `run-target-action-alignment.test.ts` sichert exakte HQ-/Remote-Alignment-, Summary- und Evidence-Fallback-Pfade.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/run-target-action-alignment.test.ts` grün, 1 Datei, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'candidateServerIds\.includes' packages/ai/src/decision/run-target-action-alignment.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
