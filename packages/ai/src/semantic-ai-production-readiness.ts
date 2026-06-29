@@ -1695,7 +1695,8 @@ export function buildMeta8InternalSemanticCanaryReport(): Meta8InternalSemanticC
 export function evaluateMeta8InternalCanaryFixture(
   fixture: Meta8InternalCanaryFixture,
 ): Meta8InternalCanaryResult {
-  const semanticActionInLegalActions = fixture.legalActionIds.includes(
+  const legalActionIdSet = new Set(fixture.legalActionIds);
+  const semanticActionInLegalActions = legalActionIdSet.has(
     fixture.semanticActionId,
   );
   const rollbackTriggers: SemanticAiRollbackTrigger[] = [];
@@ -2093,7 +2094,8 @@ export function buildMeta10LimitedScopedProductionCutoverReport(): Meta10Limited
 export function evaluateMeta10CutoverFixture(
   fixture: Meta10ProductionCutoverFixture,
 ): Meta10ProductionCutoverResult {
-  const semanticActionInLegalActions = fixture.legalActionIds.includes(
+  const legalActionIdSet = new Set(fixture.legalActionIds);
+  const semanticActionInLegalActions = legalActionIdSet.has(
     fixture.semanticActionId,
   );
   const result = meta10CutoverResultForFixture(
@@ -2941,10 +2943,12 @@ export function buildMeta17SemanticDefaultEligibleScopesReport(): Meta17Semantic
 export function evaluateMeta17SemanticDefaultFixture(
   fixture: Meta17SemanticDefaultFixture,
 ): Meta17SemanticDefaultResult {
-  const eligible = META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES.includes(
+  const eligibleScopeSet = new Set(META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES);
+  const legalActionIdSet = new Set(fixture.legalActionIds);
+  const eligible = eligibleScopeSet.has(
     fixture.scopeId as (typeof META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES)[number],
   );
-  const semanticActionInLegalActions = fixture.legalActionIds.includes(
+  const semanticActionInLegalActions = legalActionIdSet.has(
     fixture.semanticActionId,
   );
   let result: Meta17SemanticDefaultResult["result"];

@@ -9737,6 +9737,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'legalActionIds\.includes|META5_ALLOWED_OVERRIDE_SCOPES\.includes' packages/ai/src/semantic-ai-core-meta.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsechzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/semantic-ai-production-readiness.ts` bindet META8/META10/META17-LegalActionIds und META17-EligibleScopes über lokale Sets statt direkter `includes(...)`-Prüfungen.
+  - Strukturierte Scope-IDs und LegalActionIds bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `semantic-ai-production-readiness.test.ts` sichert META8-Canary, META10-Cutover und META17-Default-Gates.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/semantic-ai-production-readiness.test.ts` grün, 1 Datei, 46 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'legalActionIds\.includes|META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES\.includes' packages/ai/src/semantic-ai-production-readiness.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
