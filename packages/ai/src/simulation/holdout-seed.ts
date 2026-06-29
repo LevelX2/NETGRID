@@ -2,5 +2,6 @@ export function isHoldoutSeed(
   seed: string,
   holdoutSeeds: readonly string[],
 ): boolean {
-  return holdoutSeeds.includes(seed);
+  const holdoutSeedSet = new Set(holdoutSeeds);
+  return holdoutSeedSet.has(seed);
 }

@@ -9926,6 +9926,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n '\]\.includes\(candidate\.actionType\)|includes\(candidate\.actionType\)' packages/ai/src/actions/action-semantic-coverage.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsiebenunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/holdout-seed.ts` bindet Holdout-Seed-IDs über ein lokales Set statt direkter `holdoutSeeds.includes(...)`-Prüfung.
+  - Strukturierte Seed-IDs bleiben exakt; prefix-nahe Seed-Werte werden nicht als Holdout klassifiziert.
+  - `holdout-seed.test.ts` sichert exakte Holdout-Seed-Mitgliedschaft.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/simulation/holdout-seed.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'holdoutSeeds\.includes' packages/ai/src/simulation/holdout-seed.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
