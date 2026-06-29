@@ -9584,6 +9584,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t encounter` grün, 1 Datei, 2 Tests, 540 skipped.
   - Verifikation: `rg -n 'assessment\.evidence\.includes\(' packages/ai/src/runtime/runner-encounter-action-exclusion.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertneunundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/evidence-value.ts` bindet `hasEvidenceFlag` über ein lokales Evidence-Set statt direkter `entry.evidence.includes(flag)`-Prüfung.
+  - Strukturierte Evidence-Flags bleiben exakt wirksam; Prefix- und Value-Extraktion bleiben unverändert.
+  - `evidence-value.test.ts` sichert exakte Flags, negative Suffix-/Prefix-Abgrenzung, Value- und Number-Parsing.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/evidence-value.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'entry\.evidence\.includes\(flag\)|return entry\.evidence\.includes' packages/ai/src/runtime/evidence-value.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
