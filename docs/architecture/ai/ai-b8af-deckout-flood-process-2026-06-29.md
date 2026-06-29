@@ -1,6 +1,6 @@
 # AI B8AF Deckout Flood Prozess 2026-06-29
 
-Status: in Arbeit
+Status: abgeschlossen
 
 ## Anlass
 
@@ -30,9 +30,11 @@ Die Corp-KI soll bei niedrigem R&D-Restdeck und sichtbarem Agenda-Flood in HQ ei
 
 ## Verifikation
 
-- Fokussierte Vitest-Tests für `semantic-runtime-corp-score`.
-- `corepack pnpm --filter @netgrid/ai typecheck`
-- `git diff --check`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts --maxWorkers=1 --testTimeout=30000`: 1 Datei, 46 Tests grün.
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts src/runtime/semantic-runtime-corp-scoring-window.test.ts src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/semantic-runtime-corp-effective-defense.test.ts --maxWorkers=1 --testTimeout=30000`: 4 Dateien, 103 Tests grün.
+- `corepack pnpm --filter @netgrid/ai test`: 272 Dateien, 2191 Tests grün.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
 
 ## Worktree
 
