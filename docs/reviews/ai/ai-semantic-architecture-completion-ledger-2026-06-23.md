@@ -9560,6 +9560,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/tactical-plans.test.ts -t coverage` grün, 1 Datei, 10 Tests, 36 skipped.
   - Verifikation: `rg -n 'coverage\.includes|evidence\.includes' packages/ai/src/plans/tactical-plan-deck-coverage.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertsechsundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-hand-development.ts` bindet Persistent-Install-FunctionalCoverage, PrimaryGroups, NonAdditiveUtilityFamilies und BreakerCoverage-Overlap über lokale Sets statt direkter Array-`includes`-Prüfungen.
+  - Strukturierte Coverage- und Utility-Familien wie `breaker:universal`, `non_additive_utility:action_gated_search` und konkrete FunctionalCoverage-Gruppen bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `runner-hand-development.test.ts` sichert Duplicate-, Stackability-, Risk-Mitigation- und Persistent-Install-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-hand-development.test.ts` grün, 1 Datei, 19 Tests.
+  - Verifikation: `rg -n 'existingFunctionalCoverage\.includes|primaryGroups\.includes|nonAdditiveUtilityFamilies\.includes|left\.includes|right\.includes|right\.includes\(coverage\)' packages/ai/src/runner-hand-development.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

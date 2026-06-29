@@ -1268,19 +1268,20 @@ function persistentCoverageAlreadyPresent(
   coverage: string,
   existingFunctionalCoverage: readonly string[],
 ): boolean {
+  const existingCoverage = new Set(existingFunctionalCoverage);
   if (
     coverage.startsWith("non_additive_utility:") &&
-    existingFunctionalCoverage.includes("non_additive_utility:action_gated_search")
+    existingCoverage.has("non_additive_utility:action_gated_search")
   ) {
     return true;
   }
   if (!coverage.startsWith("breaker:")) {
-    return existingFunctionalCoverage.includes(coverage);
+    return existingCoverage.has(coverage);
   }
-  if (existingFunctionalCoverage.includes(coverage)) return true;
+  if (existingCoverage.has(coverage)) return true;
   const coverageKind = coverage.slice("breaker:".length);
   return coverageKind !== "universal" &&
-    existingFunctionalCoverage.includes("breaker:universal");
+    existingCoverage.has("breaker:universal");
 }
 
 function persistentProfilesOverlap(
@@ -1295,8 +1296,9 @@ function persistentProfilesOverlap(
   ) {
     return true;
   }
+  const installedPrimaryGroups = new Set(installed.primaryGroups);
   return candidate.primaryGroups.some((group) =>
-    installed.primaryGroups.includes(group),
+    installedPrimaryGroups.has(group),
   );
 }
 
@@ -1304,8 +1306,9 @@ function nonAdditiveUtilityProfilesOverlap(
   candidate: PersistentFunctionalProfile,
   installed: PersistentFunctionalProfile,
 ): boolean {
+  const installedFamilies = new Set(installed.nonAdditiveUtilityFamilies);
   return candidate.nonAdditiveUtilityFamilies.some((family) =>
-    installed.nonAdditiveUtilityFamilies.includes(family),
+    installedFamilies.has(family),
   );
 }
 
@@ -1322,8 +1325,12 @@ function breakerCoverageOverlaps(
   left: readonly BreakerCoverageKind[],
   right: readonly BreakerCoverageKind[],
 ): boolean {
-  if (left.includes("universal") || right.includes("universal")) return true;
-  return left.some((coverage) => right.includes(coverage));
+  const leftCoverage = new Set(left);
+  const rightCoverage = new Set(right);
+  if (leftCoverage.has("universal") || rightCoverage.has("universal")) {
+    return true;
+  }
+  return left.some((coverage) => rightCoverage.has(coverage));
 }
 
 function stackabilityClassForPersistentInstall(
