@@ -2861,23 +2861,44 @@ function redactViolation(
 function supportedActionTypesForGoal(
   goalFamily: SemanticTacticalGoalFamily,
 ): string[] {
-  if (goalFamily.includes("economy")) return ["gain_credit", "play_event", "play_operation"];
-  if (goalFamily.includes("draw")) return ["draw_card", "mandatory_draw"];
-  if (goalFamily.includes("pressure") || goalFamily.includes("contest")) {
-    return ["start_run", "continue_run"];
+  switch (goalFamily) {
+    case "runner_economy_stabilize":
+    case "corp_economy_stabilize":
+      return ["gain_credit", "play_event", "play_operation"];
+    case "runner_draw_find_tools":
+      return ["draw_card", "mandatory_draw"];
+    case "runner_pressure_hq":
+    case "runner_pressure_rnd":
+    case "runner_contest_remote":
+      return ["start_run", "continue_run"];
+    case "corp_create_score_window":
+    case "corp_score_agenda":
+      return ["advance_card", "score_agenda"];
+    case "corp_defend_hq":
+    case "corp_defend_rnd":
+    case "corp_rez_ice_tax":
+      return ["install_card", "rez_ice"];
+    case "runner_remove_tags":
+    case "corp_tag_runner":
+    case "corp_punish_tagged_runner":
+      return ["remove_tag", "play_operation"];
+    default:
+      return ["install_card", "activated_card_ability"];
   }
-  if (goalFamily.includes("score")) return ["advance_card", "score_agenda"];
-  if (goalFamily.includes("defend") || goalFamily.includes("ice")) {
-    return ["install_card", "rez_ice"];
-  }
-  if (goalFamily.includes("tag")) return ["remove_tag", "play_operation"];
-  return ["install_card", "activated_card_ability"];
 }
 
 function successCriteriaForGoal(goalFamily: SemanticTacticalGoalFamily): string[] {
-  if (goalFamily === "runner_remove_tags") return ["runner_tags_reduced_to_zero"];
-  if (goalFamily === "corp_score_agenda") return ["agenda_scored_by_engine_action"];
-  if (goalFamily.includes("economy")) return ["credit_floor_reached"];
-  if (goalFamily.includes("contest")) return ["remote_threat_resolved_or_downgraded"];
-  return ["goal_progress_marker_satisfied"];
+  switch (goalFamily) {
+    case "runner_remove_tags":
+      return ["runner_tags_reduced_to_zero"];
+    case "corp_score_agenda":
+      return ["agenda_scored_by_engine_action"];
+    case "runner_economy_stabilize":
+    case "corp_economy_stabilize":
+      return ["credit_floor_reached"];
+    case "runner_contest_remote":
+      return ["remote_threat_resolved_or_downgraded"];
+    default:
+      return ["goal_progress_marker_satisfied"];
+  }
 }

@@ -155,6 +155,10 @@ describe("META1 DeckDoctrine + Multi-Turn TacticalGoal Engine v0", () => {
 
   it("models multi-turn TacticalGoalState lifecycle, progress and blockers", () => {
     const report = buildMeta1DeckDoctrineTacticalGoalEngineReport();
+    const goalState = (goalFamily: string) =>
+      report.tacticalGoalStates.find(
+        (entry) => entry.goalFamily === goalFamily,
+      );
 
     expect(report.tacticalGoalStates.length).toBeGreaterThan(0);
     expect(report.tacticalGoalStates).toEqual(
@@ -177,6 +181,19 @@ describe("META1 DeckDoctrine + Multi-Turn TacticalGoal Engine v0", () => {
         }),
       ]),
     );
+    expect(goalState("runner_economy_stabilize")?.supportedActionTypes).toEqual(
+      ["gain_credit", "play_event", "play_operation"],
+    );
+    expect(goalState("runner_pressure_rnd")?.supportedActionTypes).toEqual([
+      "start_run",
+      "continue_run",
+    ]);
+    expect(goalState("runner_contest_remote")?.successCriteria).toEqual([
+      "remote_threat_resolved_or_downgraded",
+    ]);
+    expect(
+      goalState("corp_punish_tagged_runner")?.supportedActionTypes,
+    ).toEqual(["remove_tag", "play_operation"]);
   });
 
   it("makes Boardstate able to override Doctrine through explicit pivot examples", () => {
