@@ -93,3 +93,42 @@ export function buildSemanticRuntimeWhyCoverageReport(
   assertSemanticObjectSideSafe(report, "SemanticRuntimeWhyCoverageReport");
   return report;
 }
+
+export function renderSemanticRuntimeWhyCoverageMarkdown(
+  report: SemanticRuntimeWhyCoverageReport,
+): string {
+  return `# Semantic Runtime Why Coverage
+
+Scope: \`${report.scope}\`
+
+## Summary
+
+| Metric | Count |
+| --- | ---: |
+| Samples | ${report.sampleCount} |
+| Decisions with top-level WhyNot | ${report.decisionsWithTopLevelWhyNot} |
+| Decisions missing top-level WhyNot | ${report.decisionsMissingTopLevelWhyNot} |
+| Decisions with Runtime WhyNot section | ${report.decisionsWithRuntimeWhyNotSection} |
+| Decisions missing Runtime WhyNot section | ${report.decisionsMissingRuntimeWhyNotSection} |
+| ActionAlternatives | ${report.actionAlternativeCount} |
+| ActionAlternatives with WhyChosen | ${report.actionAlternativesWithWhyChosen} |
+| ActionAlternatives missing WhyChosen | ${report.actionAlternativesMissingWhyChosen} |
+| ActionAlternatives with WhyNot | ${report.actionAlternativesWithWhyNot} |
+| ActionAlternatives missing WhyNot | ${report.actionAlternativesMissingWhyNot} |
+| RankedAlternatives | ${report.rankedAlternativeCount} |
+| RankedAlternatives with WhyNot | ${report.rankedAlternativesWithWhyNot} |
+| RankedAlternatives missing WhyNot | ${report.rankedAlternativesMissingWhyNot} |
+
+## Gates
+
+| Gate | Value |
+| --- | --- |
+| Redaction status | \`${report.redactionStatus}\` |
+| Productive use allowed | \`${report.productiveUseAllowed}\` |
+| Runtime effect | \`${!report.noRuntimeEffect}\` |
+
+## Evidence
+
+${report.evidence.map((entry) => `- \`${entry}\``).join("\n")}
+`;
+}

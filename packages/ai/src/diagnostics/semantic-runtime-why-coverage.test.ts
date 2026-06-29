@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { containsForbiddenSemanticMarker } from "./semantic-redaction";
 import {
   buildSemanticRuntimeWhyCoverageReport,
+  renderSemanticRuntimeWhyCoverageMarkdown,
   SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION,
 } from "./semantic-runtime-why-coverage";
 
@@ -78,6 +79,12 @@ describe("SemanticRuntimeWhyCoverage", () => {
       ]),
     );
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
+
+    const markdown = renderSemanticRuntimeWhyCoverageMarkdown(report);
+    expect(markdown).toContain("# Semantic Runtime Why Coverage");
+    expect(markdown).toContain("| Decisions missing top-level WhyNot | 1 |");
+    expect(markdown).toContain("| Runtime effect | `false` |");
+    expect(containsForbiddenSemanticMarker(markdown)).toBe(false);
   });
 });
 
