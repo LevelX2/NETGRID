@@ -3278,6 +3278,16 @@ describe("Semantic AI runtime cutover", () => {
         "fallback_action_policy:economy_basic",
       ]),
     );
+    expect(decision.decisionDebug?.whyNot).toEqual(
+      expect.arrayContaining([
+        "fallback_reason:no_semantic_candidate",
+        "fallback_action_policy:economy_basic",
+        "fallback_candidate_count:2",
+        "fallback_choice_count:0",
+        "fallback_action_type:gain_credit",
+        "fallback_action_id:gain-credit",
+      ]),
+    );
   });
 
   it("does not expose shadow-only diagnostics through the public AI runtime API", () => {

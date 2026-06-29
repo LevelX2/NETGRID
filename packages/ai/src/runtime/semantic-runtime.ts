@@ -638,12 +638,27 @@ function semanticCoverageFallbackDebug(
     rankedAlternatives: [],
     actionAlternatives: [],
     scoreBreakdown: [],
-    whyNot: ["fallback_reason:no_semantic_candidate"],
+    whyNot: semanticCoverageFallbackWhyNot(evidence),
     evidence: [...evidence].slice(0, 12),
     fallbackUsed: true,
     profileId: input.profileId,
     timeoutUsed: false,
   };
+}
+
+function semanticCoverageFallbackWhyNot(evidence: readonly string[]): string[] {
+  return [
+    "fallback_reason:no_semantic_candidate",
+    ...evidence.filter(
+      (entry) =>
+        entry.startsWith("fallback_action_policy:") ||
+        entry.startsWith("fallback_candidate_count:") ||
+        entry.startsWith("fallback_choice_count:") ||
+        entry.startsWith("fallback_action_type:") ||
+        entry.startsWith("fallback_action_id:") ||
+        entry === "fallback_action:none",
+    ),
+  ];
 }
 
 function legacyDecisionProviderFrom(
