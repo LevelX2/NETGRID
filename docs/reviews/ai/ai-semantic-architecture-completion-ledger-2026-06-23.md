@@ -10070,6 +10070,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'reasonCodes\.includes|includes\(reason\.split' packages/ai/src/known-central-access-payoff.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertdreiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/hint-ontology.ts` bindet bekannte Ontology-Werte über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Hint-Ontology-Validierung bleibt exakt; unbekannte Effect-, Condition- und TargetProfile-Werte bleiben Fehler und bekannte Werte bleiben akzeptiert.
+  - `hint-ontology.test.ts` sichert aktive Hint-Daten, bekannte Werte und unknown-value-Fehlerpfade.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/hint-ontology.test.ts` grün, 1 Datei, 18 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'knownValues\.includes|includes\(value\)' packages/ai/src/hint-ontology.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
