@@ -9782,6 +9782,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'blockers\.includes|preferred\.includes' packages/ai/src/evaluation/decision-snapshot-suite.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihunderteinundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/practical-tactic-benchmark.ts` bindet Benchmark-AcceptableActionIds über ein lokales Set statt direkter `benchmarkCase.acceptableActionIds.includes(...)`-Prüfung.
+  - Strukturierte ActionIds bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `practical-tactic-benchmark.test.ts` sichert Benchmark-Korpus, Legacy-HitRate und Hidden-Transport-Hygiene.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/evaluation/practical-tactic-benchmark.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'acceptableActionIds\.includes' packages/ai/src/evaluation/practical-tactic-benchmark.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

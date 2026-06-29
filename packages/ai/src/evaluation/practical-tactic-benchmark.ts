@@ -113,7 +113,8 @@ export function evaluatePracticalTacticBenchmark(
   for (const benchmarkCase of cases) {
     totalsByCategory[benchmarkCase.category] += 1;
     const selectedActionId = selector(benchmarkCase.input).actionId;
-    const hit = benchmarkCase.acceptableActionIds.includes(selectedActionId);
+    const acceptableActionIdSet = new Set(benchmarkCase.acceptableActionIds);
+    const hit = acceptableActionIdSet.has(selectedActionId);
     if (hit) {
       hitsByCategory[benchmarkCase.category] += 1;
     } else {
