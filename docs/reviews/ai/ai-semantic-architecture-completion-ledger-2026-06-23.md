@@ -67,7 +67,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-16 | Doppelte und widersprüchliche Bewertungslogik beseitigen. | `VERIFIED` | Mehrere Module bewerten Reachability, Target, Economy, Access und Planfortschritt parallel. | Erfüllt: konkrete Boundary-Guards binden Score-Aggregation, Legacy-Action-Scoring, Runner-Reachability, Access-Payoff, Corp-Board-/Scoreline-Safety, TargetChoice-Fit, Goal-/Strategic-Fit, Corp-Economy-/Rez-Floor und Plan-Continuity an ihre Owner; vollständiger Boundary-Audit und Typecheck sind grün. |
 | AI-COMPLETE-17 | Fachliche Scoring-Consumer aufbauen. | `VERIFIED` | Aktueller Score enthält große Typpriorität und verstreute Komponenten. | Erfüllt: Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty sind als aktive normalisierte Consumer angebunden; Vertragstest schützt Vollständigkeit, Skalen und `active`-Status. |
 | AI-COMPLETE-18 | DecisionTrace, WhyChosen und WhyNot vollständig machen. | `VERIFIED` | Debug war vorhanden, aber WhyNot-Kategorien und Alternativenabdeckung mussten geprüft werden. | Erfüllt: Runtime-, Shadow-, Replay-, Selfplay-, Baseline- und Acceptance-Oberflächen transportieren redigierte WhyChosen-/WhyNot-Fakten; report-only Why-Coverage misst Top-Level-WhyNot, Runtime-WhyNot-Sections, ausgewählte ActionAlternative-WhyChosen, nicht ausgewählte ActionAlternative-WhyNot, Missing-Signale und Auditstatus; zwei unabhängige Abschlussaudits inklusive Pair-A-/Pair-B-Smokes sind grün. |
-| AI-COMPLETE-19 | Kommentare und Entwicklerleitplanken korrigieren. | `IN_PROGRESS` | Grenzkommentare existieren, müssen nach Runtime-Änderungen stimmen. | Erster Schnitt markiert Why-Coverage als report-only Auditoberfläche; zweiter Schnitt schützt per Boundary-Test, dass Runtime-Module den report-only Why-Coverage-Builder nicht importieren. Weitere veraltete Leitplanken werden auditiert. |
+| AI-COMPLETE-19 | Kommentare und Entwicklerleitplanken korrigieren. | `VERIFIED` | Grenzkommentare existierten und mussten nach Runtime-Änderungen stimmen. | Erfüllt: Why-Coverage ist als report-only Auditoberfläche kommentiert; Boundary-Test schützt, dass Runtime-Module den report-only Why-Coverage-Builder nicht importieren; Kommentar-Audit findet nur aktuelle Leitplanken und keine veralteten No-Effect-/Shadow-Only-Texte. |
 | AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `PENDING` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay müssen nach Reparatur geprüft werden. | Tests, Szenarien und Benchmarks belegen 0 Illegalität, 0 Hidden-Info-Verstoß, keine Action-Type-Dominanz und bessere Erklärbarkeit. |
 
 ## Neu gefundene In-Scope-Findings
@@ -10930,6 +10930,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Status bleibt `IN_PROGRESS`, weil weitere Kommentar- und Leitplanken-Audits offen sind.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "why coverage reports"` grün; AI-Typecheck grün.
 
+- `AI-COMPLETE-19` Abschlussaudit:
+  - Kommentar-/Leitplanken-Suche in Runtime-, Diagnostics-, Simulation- und ActionSemanticCandidate-Pfaden zeigt nur aktuelle report-only-/authority-/runtime-boundary-Leitplanken.
+  - Keine veralteten `no-effect`-, `shadow-only`- oder Legacy-Fallback-Kommentare gefunden, die dem aktuellen Runtime-Stand widersprechen.
+  - `packages/ai/src/decision/module-boundaries.test.ts` ist vollständig grün, 33 Tests.
+  - AI-Typecheck ist grün.
+  - `AI-COMPLETE-19` ist `VERIFIED`. Nächstes offenes Ziel ist `AI-COMPLETE-20`.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
@@ -10942,3 +10949,4 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
 | Audit 6 | `VERIFIED` | Zweiter vollständiger Abschlussaudit für `AI-COMPLETE-15`: keine produktiven freien `.match(`-, `.test(`-, `rulesText.includes`-, `text.includes`-, `lowerText.includes`-, `label.match`- oder `label.includes`-Treffer; direkte Token-Includes-Suche leer; verbleibende `action.label`-Treffer sind Werttransport beziehungsweise Debug-/Ranking-Ausgabe. |
 | Audit 7 | `VERIFIED` | Erster Abschlussaudit für `AI-COMPLETE-18`: fokussierte Testgruppe zu Runtime-DecisionDebug, Why-Coverage, Selfplay-TraceFacts, Selfplay-Why-Coverage, Selfplay-Trace-Mining-Report, Replay-Cluster und Replay-Acceptance-Harness grün; AI-Typecheck grün; Pair-A-Why-Coverage-Smoke belegt `auditStatus=complete` bei 20 Entscheidungen und 0 Missing-Coverage-Signalen. Zweiter unabhängiger Abschlussaudit offen. |
 | Audit 8 | `VERIFIED` | Zweiter Abschlussaudit für `AI-COMPLETE-18`: dieselbe fokussierte Testgruppe erneut grün, `selfplay-trace-facts` separat grün, AI-Typecheck grün; Pair-B-Why-Coverage-Smoke belegt `auditStatus=complete` bei 20 Entscheidungen und 0 Missing-Coverage-Signalen. `AI-COMPLETE-18` ist `VERIFIED`; nächstes offenes Ziel ist `AI-COMPLETE-19`. |
+| Audit 9 | `VERIFIED` | Abschlussaudit für `AI-COMPLETE-19`: Kommentar-/Leitplanken-Suche findet nur aktuelle report-only-/authority-/runtime-boundary-Leitplanken und keine widersprüchlichen No-Effect-/Shadow-Only-Kommentare; `src/decision/module-boundaries.test.ts` vollständig grün, 33 Tests; AI-Typecheck grün. `AI-COMPLETE-19` ist `VERIFIED`; nächstes offenes Ziel ist `AI-COMPLETE-20`. |
