@@ -9827,6 +9827,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'goalIds\.includes' packages/ai/src/runtime/runner-goal-fit-score.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsechsundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-program-install-trash-policy.ts` bindet ProgramSacrifice-ReasonCategories über eine lokale Set-Mitgliedschaft statt direkter `reasonCategories.includes(...)`-Prüfung.
+  - Strukturierte `counters_or_stored_value`-Evidence bleibt exakt; Substring-Rauschen zählt nicht als Counter-/Stored-Value-Kandidat.
+  - `runner-program-install-trash-policy.test.ts` sichert strukturierte Rollen, Substring-Rauschen und die exakte Evidence-Zählung.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/runner-program-install-trash-policy.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'reasonCategories\.includes' packages/ai/src/runtime/runner-program-install-trash-policy.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

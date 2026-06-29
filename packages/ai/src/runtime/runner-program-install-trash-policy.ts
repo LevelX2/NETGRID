@@ -76,7 +76,10 @@ export function runnerProgramInstallTrashAssessmentEvidence(params: {
     `program_sacrifice_acceptable_candidates:${params.candidates.filter((candidate) => candidate.acceptable).length}`,
     `program_sacrifice_counter_value_candidates:${
       params.candidates.filter((candidate) =>
-        candidate.reasonCategories.includes("counters_or_stored_value"),
+        programSacrificeCandidateHasReasonCategory(
+          candidate,
+          "counters_or_stored_value",
+        ),
       ).length
     }`,
     `program_sacrifice_can_free_required:${params.selection.canFreeRequiredMemory}`,
@@ -93,6 +96,13 @@ export function runnerProgramInstallTrashAssessmentEvidence(params: {
         ]
       : ["program_sacrifice_best_category:none"]),
   ];
+}
+
+function programSacrificeCandidateHasReasonCategory(
+  candidate: ProgramSacrificeCandidate,
+  category: string,
+): boolean {
+  return new Set(candidate.reasonCategories).has(category);
 }
 
 export function runnerProgramInstallDisplacementPenalty(
