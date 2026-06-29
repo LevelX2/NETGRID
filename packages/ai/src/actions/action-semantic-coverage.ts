@@ -284,6 +284,7 @@ function actionSemanticCandidateCoverageRow(
 ): ActionSemanticCandidateCoverageRow {
   const targetContextStatus: ActionSemanticTargetContextStatus =
     candidate.targetContext?.availableTargetsStatus ?? "missing";
+  const projectionIssueSet = new Set(candidate.projectionIssues);
   const rowWithoutSafety = {
     actionType: candidate.actionType,
     semanticActionType: candidate.semanticActionType,
@@ -297,9 +298,7 @@ function actionSemanticCandidateCoverageRow(
     hasTimingProfile: candidate.timingProfile.window !== undefined,
     hasTargetContext: candidate.targetContext !== undefined,
     targetContextStatus,
-    hiddenInfoBlocked: candidate.projectionIssues.includes(
-      "hidden_info_blocked",
-    ),
+    hiddenInfoBlocked: projectionIssueSet.has("hidden_info_blocked"),
     usesNeutralFallback:
       candidate.primaryProjectionStatus === "neutral_projected" ||
       candidate.sourceKind === "unknown" ||

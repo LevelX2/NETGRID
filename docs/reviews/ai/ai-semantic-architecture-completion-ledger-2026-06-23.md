@@ -9656,6 +9656,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'role\.evidence\.includes' packages/ai/src/strategic-intent-state.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsiebter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-coverage.ts` bindet Candidate-ProjectionIssues für Coverage-Zeilen über ein lokales Set statt direkter `candidate.projectionIssues.includes(...)`-Prüfung.
+  - Strukturierte ProjectionIssue-Flags wie `hidden_info_blocked` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `action-semantic-coverage.test.ts` sichert die Coverage-Summary- und Report-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-semantic-coverage.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'candidate\.projectionIssues\.includes' packages/ai/src/actions/action-semantic-coverage.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
