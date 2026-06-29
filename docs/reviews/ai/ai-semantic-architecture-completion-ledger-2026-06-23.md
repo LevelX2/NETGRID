@@ -10052,6 +10052,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'segment\.split\("_"\)\.filter\(Boolean\)\.includes\(term\)|includes\(term\)' packages/ai/src/plans/tactical-plan-corp-helpers.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihunderteinundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/doctrine-goal-synthesis.ts` bindet Doctrine-Support-Gap-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Doctrine-Gap-Erkennung bleibt exakt; zentrale Defense-, Punish- und Damage-Gaps ignorieren substring-nahe Rauschwerte weiter.
+  - `doctrine-goal-synthesis.test.ts` sichert Doctrine-Ziel-Synthese, unsupported Payoffs und substring-nahe Support-Gap-Rauschwerte.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/doctrine-goal-synthesis.test.ts` grün, 1 Datei, 14 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n '\.includes\(term\)|includes\(term\)' packages/ai/src/decision/doctrine-goal-synthesis.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

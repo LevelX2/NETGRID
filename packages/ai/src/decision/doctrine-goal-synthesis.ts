@@ -469,10 +469,11 @@ function hasAnyGap(
 }
 
 function gapHasTerm(gap: string, term: string): boolean {
-  return gap
+  const termSet = new Set(gap
     .toLowerCase()
     .split(/[._:-]+/)
-    .includes(term);
+    .filter(Boolean));
+  return termSet.has(term);
 }
 
 function goal(
