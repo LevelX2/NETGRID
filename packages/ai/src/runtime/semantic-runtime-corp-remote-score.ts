@@ -525,10 +525,11 @@ function semanticRuntimeCorpRecordHasToken(
   value: unknown,
   token: string,
 ): boolean {
-  return JSON.stringify(value)
+  const tokens = JSON.stringify(value)
     .toLocaleLowerCase("en-US")
     .split(/[^a-z0-9]+/)
-    .includes(token);
+    .filter(Boolean);
+  return new Set(tokens).has(token);
 }
 
 function semanticRuntimeCorpCentralInstallThreat(

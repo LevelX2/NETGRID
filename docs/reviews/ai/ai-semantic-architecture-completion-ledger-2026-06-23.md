@@ -10241,6 +10241,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n '\.includes\(term\)|includes\(term\)' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertzweiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` bindet Record-Token-Membership über ein lokales Set statt direkter `.includes(token)`-Prüfung.
+  - Strukturierte Corp-Remote-Scoring-Fallbacks bleiben exakt; sichtbare Record-Tokens werden weiterhin tokenisiert und substring-nahe Record-Rauschwerte bleiben ausgeschlossen.
+  - `semantic-runtime-corp-remote-score.test.ts` sichert zentrale Remote-/ICE-Scoring-Komponenten inklusive bounded Outside-ICE-Subroutine-Text.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-remote-score.test.ts` grün, 1 Datei, 15 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n '\.includes\(token\)|includes\(token\)' packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
