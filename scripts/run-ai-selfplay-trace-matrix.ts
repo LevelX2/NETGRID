@@ -4,6 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import {
   benchmarkDeckFromSnapshot,
   benchmarkDeckFromFrozenLocalSnapshot,
+  buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries,
   runAiSelfplayTraceMining,
   type PracticalMicroRuntimeMode,
   type PracticalMicroRuntimeRuleId,
@@ -91,6 +92,10 @@ const matrix = pairs.map(({ pair }) => {
     opportunitySnapshotRequests:
       opportunitySnapshotRequestsByPair.get(pair.id.toUpperCase()) ?? [],
   });
+  const whyCoverage =
+    buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries(
+      result.summaries,
+    );
   return {
     pair,
     runner: {
@@ -110,6 +115,7 @@ const matrix = pairs.map(({ pair }) => {
       ),
       actionLimitClusters: result.aggregate.actionLimitClusters,
       actionLimitSubclusters: result.aggregate.actionLimitSubclusters,
+      whyCoverage,
     },
     summaries: result.summaries.map((summary) => ({
       seed: summary.seed,
