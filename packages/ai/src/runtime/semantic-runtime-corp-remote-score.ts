@@ -195,11 +195,20 @@ function semanticRuntimeCorpRemoteSupportNeedsScorelineContext(
   ) {
     return true;
   }
-  const text =
-    `${card?.title ?? ""} ${card?.rulesText ?? ""}`.toLocaleLowerCase("en-US");
+  const tokens = semanticRuntimeCorpTextTokens([
+    card?.title,
+    card?.rulesText,
+  ]);
   return (
-    text.includes("advancement counter") &&
-    (text.includes("remove") || text.includes("spend"))
+    (semanticRuntimeCorpTokensIncludePhrase(tokens, [
+      "advancement",
+      "counter",
+    ]) ||
+      semanticRuntimeCorpTokensIncludePhrase(tokens, [
+        "advancement",
+        "counters",
+      ])) &&
+    semanticRuntimeCorpTokensIncludeAny(tokens, ["remove", "spend"])
   );
 }
 
@@ -522,10 +531,40 @@ function semanticRuntimeCorpRecordHasToken(
   value: unknown,
   token: string,
 ): boolean {
-  return JSON.stringify(value)
+  const tokens = JSON.stringify(value)
     .toLocaleLowerCase("en-US")
     .split(/[^a-z0-9]+/)
-    .includes(token);
+    .filter(Boolean);
+  return new Set(tokens).has(token);
+}
+
+function semanticRuntimeCorpTextTokens(values: readonly unknown[]): string[] {
+  return values.flatMap((value) =>
+    typeof value === "string"
+      ? value
+          .toLocaleLowerCase("en-US")
+          .split(/[^a-z0-9]+/)
+          .filter(Boolean)
+      : [],
+  );
+}
+
+function semanticRuntimeCorpTokensIncludeAny(
+  tokens: readonly string[],
+  accepted: readonly string[],
+): boolean {
+  const acceptedSet = new Set(accepted);
+  return tokens.some((token) => acceptedSet.has(token));
+}
+
+function semanticRuntimeCorpTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    token === phrase[0] &&
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
 }
 
 function semanticRuntimeCorpCentralInstallThreat(

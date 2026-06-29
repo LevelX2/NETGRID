@@ -721,6 +721,72 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("bounds Corp credit gain rules text to exact credit tokens", () => {
+    const creditNoise = corpAction(
+      "play-credit-noise",
+      "play_operation",
+      {},
+      "corp_credit_noise",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        0,
+        [
+          economyOperationCard({
+            instanceId: "corp_credit_noise",
+            definitionId: "v099_credit_noise_operation",
+            title: "Credit Noise",
+            rulesText: "Gain 3 creditish markers.",
+            cost: 0,
+          }),
+        ],
+        [creditNoise],
+      ),
+      creditNoise,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(
+      components.some(
+        (component) => component.key === "corp_operation_burst_economy",
+      ),
+    ).toBe(false);
+  });
+
+  it("bounds Corp draw rules text to exact card tokens", () => {
+    const drawNoise = corpAction(
+      "play-draw-noise",
+      "play_operation",
+      {},
+      "corp_draw_noise",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        0,
+        [
+          economyOperationCard({
+            instanceId: "corp_draw_noise",
+            definitionId: "v099_draw_noise_operation",
+            title: "Draw Noise",
+            rulesText: "Draw one cardish marker.",
+            cost: 0,
+          }),
+        ],
+        [drawNoise],
+      ),
+      drawNoise,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(
+      components.some(
+        (component) => component.key === "corp_operation_burst_economy",
+      ),
+    ).toBe(false);
+  });
+
   it("scores value-two Corp draw operations above basic draw without burst tier", () => {
     const simpleDraw = corpAction(
       "play-simple-draw",
@@ -792,6 +858,39 @@ describe("semanticRuntimeCorpScoreComponents", () => {
         (component) => component.key === "corp_operation_burst_economy",
       ),
     ).toBe(false);
+  });
+
+  it("bounds visible drawback operation rules text to exact bad publicity tokens", () => {
+    const noisyOperation = corpAction(
+      "play-noisy-publicity",
+      "play_operation",
+      {},
+      "corp_noisy_publicity",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        0,
+        [
+          economyOperationCard({
+            instanceId: "corp_noisy_publicity",
+            definitionId: "v099_noisy_publicity_operation",
+            title: "Noisy Publicity Operation",
+            rulesText: "Gain 3 credits and take 1 bad publicityish marker.",
+            cost: 0,
+          }),
+        ],
+        [noisyOperation],
+      ),
+      noisyOperation,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(
+      components.some(
+        (component) => component.key === "corp_operation_burst_economy",
+      ),
+    ).toBe(true);
   });
 
   it("scores advance, rez and install actions that match Corp tactical goals", () => {

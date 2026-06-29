@@ -10241,6 +10241,97 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n '\.includes\(term\)|includes\(term\)' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertzweiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` bindet Record-Token-Membership über ein lokales Set statt direkter `.includes(token)`-Prüfung.
+  - Strukturierte Corp-Remote-Scoring-Fallbacks bleiben exakt; sichtbare Record-Tokens werden weiterhin tokenisiert und substring-nahe Record-Rauschwerte bleiben ausgeschlossen.
+  - `semantic-runtime-corp-remote-score.test.ts` sichert zentrale Remote-/ICE-Scoring-Komponenten inklusive bounded Outside-ICE-Subroutine-Text.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-remote-score.test.ts` grün, 1 Datei, 15 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n '\.includes\(token\)|includes\(token\)' packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertdreiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-aware-alternative-snapshot.ts` bindet die einzelne Hard-Gate-Token-Membership über einen lokalen `tokensInclude`-Helper statt direkter `tokens.includes("gate")`-Prüfung.
+  - Progress-Aware-Alternative-Snapshots bleiben bounded: Hard-Gate-Marker werden aus strukturiert tokenisierten Einträgen erkannt, substring-nahe Noise-Werte bleiben ausgeschlossen.
+  - `progress-aware-alternative-snapshot.test.ts` sichert Hard-Gate-Summary und bounded Snapshot-Marker.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/simulation/progress-aware-alternative-snapshot.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(\"gate\"\)|tokens\.includes' packages/ai/src/simulation/progress-aware-alternative-snapshot.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertvierundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/semantic-ai-core-meta.ts` bindet die Trace-Scrubber-Einzel-Tokens `gegnerhand`, `fullstate` und `decisiondebug` über einen lokalen `metaTraceTokensInclude`-Helper statt direkter `tokens.includes(...)`-Prüfungen.
+  - Der META6-Trace-Scrubber bleibt exakt tokenbasiert: echte verbotene Tokens werden erkannt, substring-nahe Noise-Werte wie `FullStatement` und `decisiondebugish` bleiben erlaubt.
+  - `semantic-ai-core-meta.test.ts` sichert sowohl die bestehenden Noise-Fälle als auch einen exakten Token-Fall für `gegnerhand fullstate decisiondebug`.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/semantic-ai-core-meta.test.ts` grün, 1 Datei, 25 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes' packages/ai/src/semantic-ai-core-meta.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertfünfundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/semantic-shadow-league.ts` bindet die Single-Term-Segment-Membership in `segmentHasBoundedTerm` über einen lokalen `segmentTokensInclude`-Helper statt direkter `tokens.includes(term)`-Prüfung.
+  - Runner-Safe-Access-Dry-Run-Klassifikation bleibt bounded: `remote`, `risk` und `structured_alignment_required` zählen nur an Segment-/Unterstrichgrenzen; substring-nahe Noise-Werte bleiben ausgeschlossen.
+  - `semantic-shadow-league.test.ts` sichert den Dry-Run-Classifier mit `notremote`, `brisk` und `structured_alignment_requiredish` als Noise-Fälle.
+  - Status bleibt `IN_PROGRESS`, weil nach diesem Resttreffer ein erneuter breiter Audit auf direkte Membership-Cluster und Text-/Regex-Heuristiken nötig ist.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/evaluation/semantic-shadow-league.test.ts -t "bounds runner safe access dry-run text classifiers"` grün, 1 Test; die komplette `semantic-shadow-league.test.ts` bleibt wegen bestehender Score-/Basic-Setup-Erwartungsdrift rot (`averageScoreGap` 24.52 statt 25, `basic_setup` Dry-Run-Kandidat statt `do_not_default`) und wird nicht als Paketnachweis verwendet.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes|\.includes\(term\)|accepted\.includes|reasonCodes\.includes|knownValues\.includes|split\([^\n]+\)\.includes|\.includes\(token\)' packages/ai/src` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertsechsundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` ersetzt die freie RulesText-Substring-Prüfung auf `advancement counter` plus `remove`/`spend` durch lokale Token- und Phrase-Helper.
+  - Corp-Remote-Scoreline-Support bleibt für echte `advancement counter`/`advancement counters`-Texte wirksam; substring-nahe Noise-Werte wie `counterfeits` lösen keinen Scoreline-Kontextbedarf mehr aus.
+  - `semantic-runtime-corp-remote-score.test.ts` sichert den bestehenden Raymond-Ellison-Fall und einen neuen `advancement counterfeits`-Noise-Fall.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive RulesText-/Regex-Fallbacks noch auditiert und in kleine Pakete geschnitten werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-remote-score.test.ts` grün, 1 Datei, 16 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'advancement counter|text\.includes\(\"remove\"\)|text\.includes\(\"spend\"\)|text\.includes\(\"advancement counter\"\)' packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertsiebenundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` ersetzt die Bad-Publicity-RulesText-Regex für sichtbare Operation-Drawbacks durch lokale Token-Sequenzprüfung (`take|add|gain|suffer`, positive Zahl, `bad`, `publicity`).
+  - Corp-Immediate-Economy bleibt für echte Bad-Publicity-Drawbacks ausgeschlossen; substring-nahe RulesText-Werte wie `bad publicityish` erzeugen keinen Drawback-Blocker.
+  - `semantic-runtime-corp-score.test.ts` sichert den bestehenden Bad-Publicity-Drawback und einen neuen `bad publicityish`-Noise-Fall.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive RulesText-/Regex-Fallbacks noch auditiert und in kleine Pakete geschnitten werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts` grün, 1 Datei, 26 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'bad publicity|\\b\(\?:take\|add\|gain\|suffer\)|\.test\(text\)' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertachtundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ersetzt die sichtbare Advancement-Burst-RulesText-Regex durch eine lokale Token-Sequenzprüfung `add <Zahl/Wortzahl> advancement counter(s)`.
+  - Corp-Scoring-Window erkennt echte in-turn Advancement-Bursts weiter; substring-nahe RulesText-Werte wie `advancement counterfeits` erzeugen kein sofortiges Score-Fenster.
+  - `semantic-runtime-corp-scoring-window.test.ts` sichert den bestehenden Project-Consultants-Fall und einen neuen Counterfeit-Noise-Fall.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive RulesText-/Regex-Fallbacks noch auditiert und in kleine Pakete geschnitten werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-scoring-window.test.ts` grün, 1 Datei, 28 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'text\.match|advancement\s+counters\?|\\badd\\s' packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertneunundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` ersetzt die Credit-Gain-RulesText-Regexes für `Gain [n]`, `gain n credit(s)` und `erhalte n credit(s)` durch lokale Token-Sequenzprüfung mit expliziten Klammer-Markern.
+  - Corp-Immediate-Economy erkennt echte Credit-Gain-Operationen weiter; `gain n` ohne Credit-Token oder substring-nahe Werte wie `creditish` erzeugen keinen Economy-Gain.
+  - `semantic-runtime-corp-score.test.ts` sichert bestehende bracket-, englische und deutsche Credit-Gain-Fälle sowie einen neuen `creditish`-Noise-Fall.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive RulesText-/Regex-Fallbacks noch auditiert und in kleine Pakete geschnitten werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts` grün, 1 Datei, 27 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'bracketMatch|gain\\s\+\\\[|gain\\s\+\(one|erhalte\\s\+' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer; Draw-RulesText-Regexes bleiben als eigener Folgecluster offen.
+
+- `AI-COMPLETE-15` dreihundertachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` ersetzt die Draw-RulesText-Regexes für `draw n card(s)` und `ziehe n karte(n)` durch lokale Token-Sequenzprüfung.
+  - Corp-Immediate-Economy erkennt echte Draw-Operationen weiter; substring-nahe RulesText-Werte wie `cardish` erzeugen keinen Draw-Gain.
+  - `semantic-runtime-corp-score.test.ts` sichert bestehende englische und deutsche Draw-Fälle sowie einen neuen `cardish`-Noise-Fall.
+  - Status bleibt `IN_PROGRESS`, weil nach diesem Parser-Rückbau ein erneuter breiter RulesText-/Regex-Audit nötig ist.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts` grün, 1 Datei, 28 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'rulesText\?\.match|draw\\s\+\(one|ziehe\\s\+' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihunderteinundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - Paket: Produktiver RulesText-/Regex-/Label-Restaudit nach den Tokenisierungs-Paketen.
+  - Ergebnis: Die konkret verfolgten produktiven Pfade `packages/ai/src/runtime`, `packages/ai/src/simulation`, `packages/ai/src/decision` und `packages/ai/src/actions` haben keine Treffer mehr für `.match(`, `.test(`, `text.includes`, `rulesText?.match`, `label.match`, `label.includes` oder `action.label`.
+  - Restbestand: Treffer bleiben in `packages/ai/src/legacy`, insbesondere Corp-Advancement-/Access-/Damage-RulesText-Regexes sowie Runner-Broker-/Short-Term-Contract-Label-Fallbacks; diese werden als nächster Legacy-Cluster bearbeitet.
+  - Direkte Membership-Suche bleibt leer: keine Treffer für `tokens.includes`, `.includes(term)`, `accepted.includes`, `reasonCodes.includes`, `knownValues.includes`, `split(...).includes` oder `.includes(token)` unter `packages/ai/src`.
+  - Status bleibt `IN_PROGRESS`, weil der Legacy-Restbestand noch produktiv erreichbar sein kann und in Folgepaketen abgebaut oder als nicht mehr produktiv nachgewiesen werden muss.
+  - Verifikation: `rg -n "\.match\(|\.test\(|text\.includes|rulesText\?\.match|label\.match|label\.includes|action\.label" packages/ai/src/runtime packages/ai/src/simulation packages/ai/src/decision packages/ai/src/actions --glob '!**/*.test.ts'` ohne Treffer.
+  - Verifikation: `rg -n "\.match\(|\.test\(|text\.includes|rulesText\?\.match|label\.match|label\.includes|action\.label" packages/ai/src/legacy --glob '!**/*.test.ts'` listet den Legacy-Restbestand.
+  - Verifikation: `rg -n "tokens\.includes|\.includes\(term\)|accepted\.includes|reasonCodes\.includes|knownValues\.includes|split\([^\n]+\)\.includes|\.includes\(token\)" packages/ai/src` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
