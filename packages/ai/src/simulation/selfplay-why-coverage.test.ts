@@ -34,6 +34,7 @@ describe("selfplay why coverage", () => {
       ]);
 
     expect(report).toMatchObject({
+      auditStatus: "incomplete",
       sampleCount: 2,
       decisionsWithTopLevelWhyNot: 1,
       decisionsWithRuntimeWhyNotSection: 1,
@@ -46,6 +47,10 @@ describe("selfplay why coverage", () => {
       actionAlternativesWithWhyNot: 1,
       productiveUseAllowed: false,
       noRuntimeEffect: true,
+      missingCoverageSignals: [
+        "decisions_missing_top_level_why_not:1",
+        "decisions_missing_runtime_why_not_section:1",
+      ],
     });
   });
 });

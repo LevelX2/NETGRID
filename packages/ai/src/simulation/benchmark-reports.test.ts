@@ -430,10 +430,12 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("## Action Limit Clusters");
     expect(report).toContain("## Action Limit Subclusters");
     expect(report).toContain("## Why Coverage");
+    expect(report).toContain("- Audit status:");
     expect(report).toContain("- Decisions sampled:");
     expect(report).toContain("- Decisions with Runtime WhyNot section:");
     expect(report).toContain("- Selected ActionAlternatives with WhyChosen:");
     expect(report).toContain("- Non-selected ActionAlternatives with WhyNot:");
+    expect(report).toContain("- Missing coverage signals:");
     expect(JSON.stringify({ result, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );

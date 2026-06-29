@@ -7,6 +7,7 @@ export const SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION =
 export type SemanticRuntimeWhyCoverageReport = {
   schemaVersion: typeof SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION;
   scope: "semantic_runtime_why_coverage_report_only";
+  auditStatus: "empty_sample" | "complete" | "incomplete";
   sampleCount: number;
   decisionsWithTopLevelWhyNot: number;
   decisionsMissingTopLevelWhyNot: number;
@@ -29,6 +30,7 @@ export type SemanticRuntimeWhyCoverageReport = {
   redactionStatus: "passed";
   productiveUseAllowed: false;
   noRuntimeEffect: true;
+  missingCoverageSignals: string[];
   evidence: string[];
 };
 
@@ -47,45 +49,80 @@ export function buildSemanticRuntimeWhyCoverageReport(
   const rankedAlternatives = decisions.flatMap(
     (decision) => decision.rankedAlternatives ?? [],
   );
+  const decisionsWithTopLevelWhyNot = decisions.filter(
+    (decision) => (decision.whyNot?.length ?? 0) > 0,
+  ).length;
+  const decisionsMissingTopLevelWhyNot = decisions.filter(
+    (decision) => (decision.whyNot?.length ?? 0) === 0,
+  ).length;
+  const decisionsWithRuntimeWhyNotSection = decisions.filter((decision) =>
+    (decision.detailSections ?? []).some(
+      (section) => section.id === "runtime_why_not",
+    ),
+  ).length;
+  const decisionsMissingRuntimeWhyNotSection = decisions.filter(
+    (decision) =>
+      !(decision.detailSections ?? []).some(
+        (section) => section.id === "runtime_why_not",
+      ),
+  ).length;
+  const selectedActionAlternativesWithWhyChosen =
+    selectedActionAlternatives.filter(
+      (alternative) => (alternative.whyChosen?.length ?? 0) > 0,
+    ).length;
+  const selectedActionAlternativesMissingWhyChosen =
+    selectedActionAlternatives.filter(
+      (alternative) => (alternative.whyChosen?.length ?? 0) === 0,
+    ).length;
+  const nonSelectedActionAlternativesWithWhyNot =
+    nonSelectedActionAlternatives.filter(
+      (alternative) => (alternative.whyNot?.length ?? 0) > 0,
+    ).length;
+  const nonSelectedActionAlternativesMissingWhyNot =
+    nonSelectedActionAlternatives.filter(
+      (alternative) => (alternative.whyNot?.length ?? 0) === 0,
+    ).length;
+  const missingCoverageSignals = [
+    ...(decisionsMissingTopLevelWhyNot > 0
+      ? [`decisions_missing_top_level_why_not:${decisionsMissingTopLevelWhyNot}`]
+      : []),
+    ...(decisionsMissingRuntimeWhyNotSection > 0
+      ? [
+          `decisions_missing_runtime_why_not_section:${decisionsMissingRuntimeWhyNotSection}`,
+        ]
+      : []),
+    ...(selectedActionAlternativesMissingWhyChosen > 0
+      ? [
+          `selected_action_alternatives_missing_why_chosen:${selectedActionAlternativesMissingWhyChosen}`,
+        ]
+      : []),
+    ...(nonSelectedActionAlternativesMissingWhyNot > 0
+      ? [
+          `non_selected_action_alternatives_missing_why_not:${nonSelectedActionAlternativesMissingWhyNot}`,
+        ]
+      : []),
+  ];
   const report: SemanticRuntimeWhyCoverageReport = {
     schemaVersion: SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION,
     scope: "semantic_runtime_why_coverage_report_only",
+    auditStatus:
+      decisions.length === 0
+        ? "empty_sample"
+        : missingCoverageSignals.length === 0
+          ? "complete"
+          : "incomplete",
     sampleCount: decisions.length,
-    decisionsWithTopLevelWhyNot: decisions.filter(
-      (decision) => (decision.whyNot?.length ?? 0) > 0,
-    ).length,
-    decisionsMissingTopLevelWhyNot: decisions.filter(
-      (decision) => (decision.whyNot?.length ?? 0) === 0,
-    ).length,
-    decisionsWithRuntimeWhyNotSection: decisions.filter((decision) =>
-      (decision.detailSections ?? []).some(
-        (section) => section.id === "runtime_why_not",
-      ),
-    ).length,
-    decisionsMissingRuntimeWhyNotSection: decisions.filter(
-      (decision) =>
-        !(decision.detailSections ?? []).some(
-          (section) => section.id === "runtime_why_not",
-        ),
-    ).length,
+    decisionsWithTopLevelWhyNot,
+    decisionsMissingTopLevelWhyNot,
+    decisionsWithRuntimeWhyNotSection,
+    decisionsMissingRuntimeWhyNotSection,
     actionAlternativeCount: actionAlternatives.length,
     selectedActionAlternativeCount: selectedActionAlternatives.length,
-    selectedActionAlternativesWithWhyChosen: selectedActionAlternatives.filter(
-      (alternative) => (alternative.whyChosen?.length ?? 0) > 0,
-    ).length,
-    selectedActionAlternativesMissingWhyChosen:
-      selectedActionAlternatives.filter(
-        (alternative) => (alternative.whyChosen?.length ?? 0) === 0,
-      ).length,
+    selectedActionAlternativesWithWhyChosen,
+    selectedActionAlternativesMissingWhyChosen,
     nonSelectedActionAlternativeCount: nonSelectedActionAlternatives.length,
-    nonSelectedActionAlternativesWithWhyNot:
-      nonSelectedActionAlternatives.filter(
-        (alternative) => (alternative.whyNot?.length ?? 0) > 0,
-      ).length,
-    nonSelectedActionAlternativesMissingWhyNot:
-      nonSelectedActionAlternatives.filter(
-        (alternative) => (alternative.whyNot?.length ?? 0) === 0,
-      ).length,
+    nonSelectedActionAlternativesWithWhyNot,
+    nonSelectedActionAlternativesMissingWhyNot,
     actionAlternativesWithWhyChosen: actionAlternatives.filter(
       (alternative) => (alternative.whyChosen?.length ?? 0) > 0,
     ).length,
@@ -108,13 +145,18 @@ export function buildSemanticRuntimeWhyCoverageReport(
     redactionStatus: "passed",
     productiveUseAllowed: false,
     noRuntimeEffect: true,
+    missingCoverageSignals,
     evidence: [
       "semantic_runtime_why_coverage:report_only",
-      `sample_count:${decisions.length}`,
-      `decision_top_level_why_not_count:${
-        decisions.filter((decision) => (decision.whyNot?.length ?? 0) > 0)
-          .length
+      `audit_status:${
+        decisions.length === 0
+          ? "empty_sample"
+          : missingCoverageSignals.length === 0
+            ? "complete"
+            : "incomplete"
       }`,
+      `sample_count:${decisions.length}`,
+      `decision_top_level_why_not_count:${decisionsWithTopLevelWhyNot}`,
       `action_alternative_count:${actionAlternatives.length}`,
       `selected_action_alternative_count:${selectedActionAlternatives.length}`,
       `non_selected_action_alternative_count:${nonSelectedActionAlternatives.length}`,
@@ -160,9 +202,14 @@ Scope: \`${report.scope}\`
 
 | Gate | Value |
 | --- | --- |
+| Audit status | \`${report.auditStatus}\` |
 | Redaction status | \`${report.redactionStatus}\` |
 | Productive use allowed | \`${report.productiveUseAllowed}\` |
 | Runtime effect | \`${!report.noRuntimeEffect}\` |
+
+## Missing Coverage
+
+${report.missingCoverageSignals.length > 0 ? report.missingCoverageSignals.map((entry) => `- \`${entry}\``).join("\n") : "- `none`"}
 
 ## Evidence
 

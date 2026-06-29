@@ -54,6 +54,7 @@ describe("SemanticRuntimeWhyCoverage", () => {
     expect(report).toMatchObject({
       schemaVersion: SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION,
       scope: "semantic_runtime_why_coverage_report_only",
+      auditStatus: "incomplete",
       sampleCount: 2,
       decisionsWithTopLevelWhyNot: 1,
       decisionsMissingTopLevelWhyNot: 1,
@@ -76,10 +77,15 @@ describe("SemanticRuntimeWhyCoverage", () => {
       redactionStatus: "passed",
       productiveUseAllowed: false,
       noRuntimeEffect: true,
+      missingCoverageSignals: [
+        "decisions_missing_top_level_why_not:1",
+        "decisions_missing_runtime_why_not_section:1",
+      ],
     });
     expect(report.evidence).toEqual(
       expect.arrayContaining([
         "semantic_runtime_why_coverage:report_only",
+        "audit_status:incomplete",
         "sample_count:2",
         "decision_top_level_why_not_count:1",
         "selected_action_alternative_count:1",
@@ -91,6 +97,10 @@ describe("SemanticRuntimeWhyCoverage", () => {
     const markdown = renderSemanticRuntimeWhyCoverageMarkdown(report);
     expect(markdown).toContain("# Semantic Runtime Why Coverage");
     expect(markdown).toContain("| Decisions missing top-level WhyNot | 1 |");
+    expect(markdown).toContain("| Audit status | `incomplete` |");
+    expect(markdown).toContain(
+      "- `decisions_missing_runtime_why_not_section:1`",
+    );
     expect(markdown).toContain(
       "| Selected ActionAlternatives with WhyChosen | 1 |",
     );
