@@ -1,6 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { scoreActionGoalFit, type ActionGoalFit } from "./action-goal-fit";
 import { synthesizeDoctrineTacticalGoals } from "./doctrine-goal-synthesis";
 import { buildAiOpportunityProjections } from "./opportunity-projection";

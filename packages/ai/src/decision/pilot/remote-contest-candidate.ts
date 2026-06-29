@@ -1,5 +1,5 @@
 import { alignRunTargetAction } from "../run-target-action-alignment";
-import { rolesMatch } from "../../runtime/role-match";
+import { rolesMatch } from "../../role-match";
 import type { SemanticDecisionFrame } from "../semantic-decision-frame";
 import type { SemanticRankedAction } from "../semantic-decision-trace";
 

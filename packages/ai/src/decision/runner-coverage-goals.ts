@@ -1,4 +1,4 @@
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 
 export type RunnerCoverageType = "barrier" | "code_gate" | "sentry" | "unknown";
 
