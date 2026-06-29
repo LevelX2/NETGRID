@@ -303,7 +303,8 @@ function semanticHasTerm(semantic: string, term: string): boolean {
 
 function semanticSegmentHasTerm(segment: string, term: string): boolean {
   if (segment === term) return true;
-  return segment.split("_").filter(Boolean).includes(term);
+  const termSet = new Set(segment.split("_").filter(Boolean));
+  return termSet.has(term);
 }
 
 function fitStatusForScore(

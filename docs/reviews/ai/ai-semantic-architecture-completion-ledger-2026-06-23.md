@@ -10016,6 +10016,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'segment\.split\("_"\)\.filter\(Boolean\)\.includes\(term\)|includes\(term\)' packages/ai/src/decision/tactical-goal-utility.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsiebenundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/action-goal-fit.ts` bindet SemanticAction-Untersegmente über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte ActionGoalFit-Zuordnung bleibt exakt; Tag- und Damage-Fallbackfamilien erkennen nur bounded Semantik-Terme und ignorieren substring-nahe Rauschsignale weiter.
+  - `action-goal-fit.test.ts` sichert Tag-/Damage-Term-Matches, Substring-Rauschen, Plan-Alignment-Exactness und Target-/Risk-Hard-Gates.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/action-goal-fit.test.ts` grün, 1 Datei, 17 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'segment\.split\("_"\)\.filter\(Boolean\)\.includes\(term\)|includes\(term\)' packages/ai/src/decision/action-goal-fit.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
