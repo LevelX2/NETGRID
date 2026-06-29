@@ -5286,18 +5286,40 @@ function scoredAgendaDrawAmountFromText(text: string): number {
 }
 
 function scoredAgendaGainedActionsFromText(text: string): number {
-  const normalized = text.toLowerCase();
+  return corpActionGainAmountFromText(text);
+}
+
+function corpActionGainAmountFromText(text: string): number {
+  const tokens = corpRulesTextTokens(text);
+  const amountToken = tokens.find((token, index) =>
+    corpActionGainAmountToken(tokens, index),
+  );
+  if (amountToken) return corpActionAmountTokenToNumber(amountToken) ?? 0;
   if (
-    normalized.includes("gain an action") ||
-    normalized.includes("gain 1 action") ||
-    normalized.includes("aktion ausgeben") ||
-    normalized.includes("aktion gewinnen")
+    corpTokensIncludePhrase(tokens, ["aktion", "ausgeben"]) ||
+    corpTokensIncludePhrase(tokens, ["aktion", "gewinnen"])
   )
     return 1;
-  const match = /\bgain\s+(\d+)\s+actions?/i.exec(text);
-  if (!match) return 0;
-  const amount = Number(match[1]);
-  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+  return 0;
+}
+
+function corpActionGainAmountToken(
+  tokens: readonly string[],
+  index: number,
+): boolean {
+  if (corpActionAmountTokenToNumber(tokens[index] ?? "") === undefined)
+    return false;
+  const hasGainBefore =
+    tokens[index - 1] === "gain" ||
+    (tokens[index - 1] === "bracketopen" && tokens[index - 2] === "gain");
+  const actionToken =
+    tokens[index + 1] === "bracketclose" ? tokens[index + 2] : tokens[index + 1];
+  return hasGainBefore && (actionToken === "action" || actionToken === "actions");
+}
+
+function corpActionAmountTokenToNumber(value: string): number | undefined {
+  if (value === "an") return 1;
+  return corpNumberWordToNumber(value);
 }
 
 function rolesForVisibleCorpCards(input: AiDecisionInput): string[] {
@@ -9201,16 +9223,11 @@ function extraActionsForCard(
   if (!cardId) return 0;
   const runtimeCard = RUNTIME_CARDS[cardId];
   const demoCard = DEMO_CARDS_BY_ID[cardId];
-  if (
-    !demoCard?.mechanics?.includes("gain_actions") &&
-    !/\bgain\b.+\bactions?\b/i.test(runtimeCard?.text ?? "")
-  )
+  const text = runtimeCard?.text ?? demoCard?.rulesText ?? "";
+  const textAmount = corpActionGainAmountFromText(text);
+  if (!demoCard?.mechanics?.includes("gain_actions") && textAmount <= 0)
     return 0;
-  const text = (runtimeCard?.text ?? demoCard?.rulesText ?? "").toLowerCase();
-  if (/\bthree\b|3/.test(text)) return 3;
-  if (/\btwo\b|2/.test(text)) return 2;
-  if (/\bone\b|1/.test(text)) return 1;
-  return 0;
+  return textAmount;
 }
 
 function numberPayload(action: LegalAction, key: string): number {

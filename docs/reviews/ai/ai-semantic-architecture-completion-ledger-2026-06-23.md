@@ -10412,6 +10412,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: gezieltes Ripgrep auf die entfernten Advancement-Burst-Amount-Regexes ohne Treffer; der separate Action-Gain-Amount-Cluster bleibt offen.
 
+- `AI-COMPLETE-15` dreihundertzweiundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt die Legacy-Corp-Action-Gain-RulesText-Regexes und freien Substring-Fallbacks durch gemeinsame Token-Prädikate.
+  - Scored-Agenda-Extra-Actions und Overtime-Incentives erkennen `gain an action`, `gain 1/2/3 actions`, bracket notation und die bestehenden deutschen Aktionsphrasen weiter ohne freie Regex-/Substring-Auswertung.
+  - Status bleibt `IN_PROGRESS`, weil der Scored-Agenda-Counter-Economy-Resttreffer und einzelne `action.label`-Werttransporte noch offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "Corporate Boon|Overtime Incentives"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: gezieltes Ripgrep auf die entfernten Action-Gain-Regexes und Substrings ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
