@@ -9647,6 +9647,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'option\.evidence\.includes' packages/ai/src/decision/target-choice-shadow.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsechster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/strategic-intent-state.ts` bindet RoleStatus-Evidence für Closeout-Window-Erkennung über lokale Sets statt direkter `role.evidence.includes(...)`-Prüfung.
+  - Strukturierte Evidence-Flags wie `legal_score:true`, `legal_punish_payoff:true` und `legal_closeout_action:true` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `strategic-intent-state.test.ts` sichert StrategicIntentState-Phasen, Memory und Closeout-/Strategy-Transitions.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/strategic-intent-state.test.ts` grün, 1 Datei, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'role\.evidence\.includes' packages/ai/src/strategic-intent-state.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

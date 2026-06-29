@@ -868,7 +868,10 @@ function roleEvidenceIncludes(
   roles: readonly StrategicRoleStatusSnapshot[],
   evidence: string,
 ): boolean {
-  return roles.some((role) => role.evidence.includes(evidence));
+  return roles.some((role) => {
+    const roleEvidenceSet = new Set(role.evidence);
+    return roleEvidenceSet.has(evidence);
+  });
 }
 
 function uniqueStrings(values: readonly string[]): string[] {
