@@ -25,12 +25,13 @@ Zweck: Erstes Ownership-Artefakt für `AI-COMPLETE-16`, damit doppelte oder wide
 - Legacy Action Scoring: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `scoreActionsForLegacy` und `createLegacyActionScoringComposition` außerhalb der Legacy-Schicht nur in `runtime/ai-action-entrypoints-composition.ts` und `runtime/semantic-runtime-action-exclusion-composition.ts`. Neue produktive Legacy-Scoring-Consumer fallen damit als Boundary-Verstoß auf.
 - Runner Run Reachability: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `evaluateRunnerRunTargets` nur im Run-Target-Evaluator, in Public-/Evaluation-Reexports und in den Runtime-Orchestrierungsstellen. Neue direkte Legacy- oder Score-Modul-Consumer fallen damit als Boundary-Verstoß auf.
 - Access Payoff: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt direkte `evaluateKnownRemoteAccessPayoff`-/`evaluateKnownCentralAccessPayoff`-Nutzung nur in den Payoff-Ownern, Run-Target-Evaluation, Tactical-Plan-Runner-Plans, Public-Reexport und dem Legacy-Runner-Adapter `legacy-runner-access-payoff.ts`. `legacy/runner-plans.ts` nutzt den Adapter statt direkter Owner-Aufrufe.
+- Corp Board-Triage und Scoreline-Safety: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `semanticRuntimeCorpBoardTriage`, `semanticRuntimeCorpActionIsScoreLine`, `semanticRuntimeCorpRemoteHasScoreLine`, `semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine` und `semanticRuntimeCorpScoreNowSafetyGate` nur in den jeweiligen Runtime-Ownern sowie den expliziten Context-/Composition-Consumern. Neue direkte Scoreline-/Safety-Entscheidungen außerhalb dieser Owner fallen damit als Boundary-Verstoß auf.
 
 ## Erste Audit-Befunde
 
 - `rg` zeigt erwartungsgemäß viele Score-/Reachability-/Access-Treffer, aber keine einzelne zentrale Owner-Dokumentation vor diesem Artefakt.
-- Die stärksten Kollisionszonen sind Runner-Run-Reachability versus Legacy-Runner-Planer, Remote-/Access-Payoff versus Simulation-Metriken, Corp-Board-Triage versus Corp-Scoreline/Safety und Legacy-Action-Scoring versus Runtime-Score.
-- Nächster Umsetzungsschnitt sollte eine konkrete Kollisionszone in Code oder Tests binden, statt die Matrix breiter zu machen.
+- Die stärksten noch offenen Kollisionszonen liegen nach den ersten Guards bei Goal-/Strategic-Fit, TargetChoice-Fit, Corp-Economy-/Rez-Floor-Skalierung und Plan-Continuity-Fortschritt.
+- Nächster Umsetzungsschnitt sollte eine dieser verbleibenden Kollisionszonen in Code oder Tests binden, statt die Matrix breiter zu machen.
 
 ## Gates
 

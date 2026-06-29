@@ -10522,6 +10522,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "recovers economy when Krash can pass Data Wall but cannot afford a known BBS trash afterward"` in `packages/ai` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
 
+- `AI-COMPLETE-16` sechster Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Corp-Board-Triage und Scoreline-Safety: `semanticRuntimeCorpBoardTriage`, `semanticRuntimeCorpActionIsScoreLine`, `semanticRuntimeCorpRemoteHasScoreLine`, `semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine` und `semanticRuntimeCorpScoreNowSafetyGate` dürfen nur in den jeweiligen Runtime-Ownern und expliziten Context-/Composition-Consumern auftauchen.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert den Guard und reduziert die offenen Kollisionszonen auf Goal-/Strategic-Fit, TargetChoice-Fit, Corp-Economy-/Rez-Floor-Skalierung und Plan-Continuity-Fortschritt.
+  - Status bleibt `IN_PROGRESS`, weil diese weiteren konkreten Owner-Bindungen offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps corp board triage and scoreline safety behind runtime owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -746,6 +746,70 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps corp board triage and scoreline safety behind runtime owners", () => {
+    const allowedFilesBySymbol = new Map<string, Set<string>>([
+      [
+        "semanticRuntimeCorpBoardTriage",
+        new Set([
+          "runtime/semantic-runtime-corp-board-triage.ts",
+          "runtime/semantic-runtime-corp-score.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpActionIsScoreLine",
+        new Set([
+          "runtime/semantic-runtime-corp-board.ts",
+          "runtime/semantic-runtime-corp-board-context.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpRemoteHasScoreLine",
+        new Set([
+          "runtime/semantic-runtime-corp-board.ts",
+          "runtime/semantic-runtime-corp-board-context.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine",
+        new Set([
+          "runtime/semantic-runtime-corp-risk.ts",
+          "runtime/semantic-runtime-corp-risk-context.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpScoreNowSafetyGate",
+        new Set([
+          "runtime/semantic-runtime-corp-score-safety.ts",
+          "runtime/semantic-runtime-corp-score-safety-context.ts",
+          "runtime/semantic-runtime-corp-scoring-evidence-composition.ts",
+        ]),
+      ],
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        return [...allowedFilesBySymbol.entries()].flatMap(
+          ([symbol, allowedFiles]) => {
+            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+              return [];
+            }
+            return [
+              `${relative} references ${symbol} outside corp board triage or scoreline safety ownership`,
+            ];
+          },
+        );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
   it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
