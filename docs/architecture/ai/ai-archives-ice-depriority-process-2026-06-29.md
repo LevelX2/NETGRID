@@ -1,6 +1,6 @@
 # AI Archives ICE Depriorisierung 2026-06-29
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Quelle/Vorgabe
 
@@ -64,3 +64,10 @@ Kernartefakte:
 Done-Gate:
 
 - Arbeitsbranch sauber, lokal nach `main` integriert, relevante Checks im Hauptworkspace wiederholt.
+
+Ergebnis:
+
+- Archives-ICE ohne konkrete Agenda im Archiv ist nun negativ, auch bei wiederholtem Archives-Druck.
+- Ein erstes Archives-ICE bei konkret sichtbarer Agenda im Archiv bleibt nur als Notfall positiv.
+- Weitere Archives-ICE nach bereits vorhandenem Archives-Schutz werden negativ bewertet, besonders bei HQ-/R&D- oder HQ-Agenda-Druck.
+- Die Regressionen sichern die Abgrenzung gegen Vorrats-Archives-ICE, repeated Archives probing und überbauten Archives-Schutz.
