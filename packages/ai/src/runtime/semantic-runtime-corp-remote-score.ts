@@ -228,22 +228,19 @@ function semanticRuntimeCorpArchivesIceInstallScore<
     (card) => card.known !== false && card.type === "agenda",
   );
   if (archivesAgendaRisk) {
-    if (iceCount === 0) return 900;
-    if (iceCount === 1) return acuteHqOrRd || agendaInHq ? 450 : 650;
-    if (acuteHqOrRd || agendaInHq) return -350;
-    return 150;
+    if (iceCount === 0) return acuteHqOrRd || agendaInHq ? 350 : 550;
+    return acuteHqOrRd || agendaInHq ? -700 : -350;
   }
 
   const archivesRunPressure =
     semanticRuntimeCorpArchivesRunOrAccessEventCount(input);
   if (archivesRunPressure >= 2) {
-    if (iceCount === 0) return 450;
-    return acuteHqOrRd || agendaInHq ? -250 : 250;
+    return acuteHqOrRd || agendaInHq ? -900 : -650;
   }
 
-  if (acuteHqOrRd || agendaInHq) return -450;
+  if (acuteHqOrRd || agendaInHq) return -950;
 
-  return 75;
+  return -650;
 }
 
 function semanticRuntimeCorpDynamicOnlyRemoteIce(

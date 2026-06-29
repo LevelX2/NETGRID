@@ -209,7 +209,7 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     ).toBe(650);
   });
 
-  it("downranks Archives ICE without concrete Archives risk under R&D pressure", () => {
+  it("strongly downranks Archives ICE without concrete Archives risk under R&D pressure", () => {
     const etrIce = corpCard("barrier", "ice", {
       definitionId: "simple_barrier_ice",
       rezCost: 2,
@@ -222,12 +222,24 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     const archivesScore = installIceScore(etrIce, "archives", input);
     const rdScore = centralInstallScore(etrIce, "rd", input);
 
-    expect(archivesScore).toBe(-450);
+    expect(archivesScore).toBe(-950);
     expect(rdScore).toBe(1350);
     expect(archivesScore).toBeLessThan(rdScore);
   });
 
-  it("keeps Archives ICE valuable when an agenda is actually in Archives", () => {
+  it("downranks empty Archives ICE even without current central pressure", () => {
+    const etrIce = corpCard("barrier", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 2,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+    });
+
+    expect(installIceScore(etrIce, "archives", input)).toBe(-650);
+  });
+
+  it("allows only first Archives ICE as emergency cover when an agenda is actually in Archives", () => {
     const etrIce = corpCard("barrier", "ice", {
       definitionId: "simple_barrier_ice",
       rezCost: 2,
@@ -241,10 +253,10 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
       ],
     });
 
-    expect(installIceScore(etrIce, "archives", input)).toBe(900);
+    expect(installIceScore(etrIce, "archives", input)).toBe(550);
   });
 
-  it("caps further Archives ICE once an agenda Archives is already double-protected under HQ pressure", () => {
+  it("rejects further Archives ICE once an archived agenda already has ICE under HQ pressure", () => {
     const etrIce = corpCard("barrier", "ice", {
       definitionId: "simple_barrier_ice",
       rezCost: 2,
@@ -277,10 +289,26 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
       ],
     });
 
-    expect(installIceScore(etrIce, "archives", input)).toBe(-350);
+    expect(installIceScore(etrIce, "archives", input)).toBe(-700);
     expect(centralInstallScore(etrIce, "hq", input)).toBeGreaterThan(
       installIceScore(etrIce, "archives", input),
     );
+  });
+
+  it("keeps repeated Archives probing negative when no agenda is in Archives", () => {
+    const etrIce = corpCard("barrier", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 2,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      eventTail: [
+        publicArchivesRunEvent("archives-run-1"),
+        publicArchivesRunEvent("archives-run-2"),
+      ],
+    });
+
+    expect(installIceScore(etrIce, "archives", input)).toBe(-650);
   });
 
   it("does not treat dynamic-only remote ICE as a full scoring remote build", () => {
@@ -466,6 +494,7 @@ function corpInputForCentralInstall(
     runnerRig?: VisibleCard[];
     archivesCards?: VisibleCard[];
     servers?: AiDecisionInput["playerView"]["servers"];
+    eventTail?: AiDecisionInput["eventTail"];
   } = {},
 ): AiDecisionInput {
   const agendaInHq = options.agendaInHq ?? true;
@@ -474,7 +503,7 @@ function corpInputForCentralInstall(
     legalActions: [],
     profileId: "test-corp",
     difficulty: "normal",
-    eventTail: [],
+    eventTail: options.eventTail ?? [],
     seed: "corp-central-score-candidate-test",
     decisionId: "corp-central-score-candidate-test.1",
     actionNumber: 1,
@@ -524,6 +553,21 @@ function corpInputForCentralInstall(
       ],
     },
   } as unknown as AiDecisionInput;
+}
+
+function publicArchivesRunEvent(eventId: string) {
+  return {
+    eventId,
+    type: "start_run",
+    stateVersionBefore: 1,
+    stateVersionAfter: 2,
+    stateHashAfter: "test-state-hash",
+    publicPayload: {
+      actor: "runner",
+      actionType: "start_run",
+      serverId: "archives",
+    },
+  };
 }
 
 function rdInterface(): VisibleCard {
