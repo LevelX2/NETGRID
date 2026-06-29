@@ -1,0 +1,719 @@
+{
+  "schemaVersion": "ai-selfplay-trace-matrix-v1",
+  "generatedAt": "2026-06-29T13:55:34.324Z",
+  "gitHead": "f7fad7b58",
+  "config": {
+    "pairIds": [
+      "a"
+    ],
+    "pairFiles": [],
+    "seeds": [
+      "ai-complete-18-why-smoke-001"
+    ],
+    "maxActions": 20,
+    "maxFindings": 50,
+    "includeActionAlternatives": true,
+    "maxAlternativesPerFinding": 3
+  },
+  "aggregate": {
+    "games": 1,
+    "decisions": 20,
+    "findings": 2,
+    "findingsBySeverity": {
+      "critical": 0,
+      "high": 1,
+      "medium": 1,
+      "low": 0
+    },
+    "findingsByDetector": {
+      "illegal_action": 0,
+      "replay_failure": 0,
+      "hidden_info_marker": 0,
+      "no_legal_action_failure": 0,
+      "action_limit_reached": 1,
+      "repeated_no_progress_run": 1,
+      "repeated_known_no_payoff_remote": 0,
+      "repeated_low_value_archives": 0,
+      "recovery_low_value_loop": 0,
+      "bank_over_target_without_funding_need": 0,
+      "risky_self_damage_action": 0,
+      "blink_low_hand_buffer_run": 0,
+      "duplicate_low_delta_install": 0,
+      "overdraw_without_urgency": 0,
+      "plan_step_action_mismatch": 0,
+      "semantic_override_suspicious": 0,
+      "corp_never_scores_long_game": 1,
+      "runner_never_accesses_long_game": 0
+    },
+    "illegalActions": 0,
+    "replayFailures": 0,
+    "actionLimitReached": 1,
+    "allRedactionSafe": true,
+    "redactionSafe": true,
+    "averageGameLength": 20,
+    "corpAgendaScores": 0,
+    "runnerAgendaSteals": 1,
+    "corpFlatlines": 0,
+    "scoreWindowMissed": 0,
+    "unsafeScoreChosen": 0,
+    "passiveActionWithScoreLineAvailable": 2,
+    "actionLimitClusters": {
+      "action_limit_runner_repeated_no_progress_run": 0,
+      "action_limit_runner_remote_contest_blocked": 0,
+      "action_limit_corp_scoreline_stall": 0,
+      "action_limit_setup_economy_loop": 1,
+      "action_limit_low_value_repeat": 0,
+      "action_limit_mixed_or_unknown": 0
+    },
+    "actionLimitSubclusters": {
+      "late_gain_credit_without_funding_need": 0,
+      "runner_late_gain_credit_without_funding_need": 0,
+      "runner_late_gain_credit_real_reserve": 0,
+      "runner_late_gain_credit_no_safe_alternative": 0,
+      "corp_late_gain_credit_without_rez_score_protection_need": 0,
+      "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+      "corp_late_gain_credit_no_safe_alternative": 0,
+      "late_draw_for_coverage_or_hand_goal": 0,
+      "late_draw_without_coverage_or_hand_goal": 0,
+      "late_ability_reuse_low_delta": 0,
+      "late_install_low_delta": 0,
+      "late_run_step_stall": 0,
+      "run_microstep_required": 0,
+      "continue_chain_to_access": 0,
+      "break_pump_required": 0,
+      "jackout_loop": 0,
+      "continue_without_progress": 0,
+      "access_pending": 1,
+      "breach_pending": 0,
+      "mixed_unknown": 0
+    }
+  },
+  "diagnostics": {
+    "unsafeScoreChosenByReason": {},
+    "actionLimitClusters": {
+      "action_limit_runner_repeated_no_progress_run": 0,
+      "action_limit_runner_remote_contest_blocked": 0,
+      "action_limit_corp_scoreline_stall": 0,
+      "action_limit_setup_economy_loop": 1,
+      "action_limit_low_value_repeat": 0,
+      "action_limit_mixed_or_unknown": 0
+    }
+  },
+  "matrix": [
+    {
+      "pair": {
+        "id": "A",
+        "label": "Deep Market Engine vs Siren Fortress",
+        "runner": "real_scene_runner_deep_market_engine_snapshot_v1",
+        "corp": "real_scene_corp_siren_fortress_snapshot_v1"
+      },
+      "runner": {
+        "deckHash": "fnv1a:b409555d"
+      },
+      "corp": {
+        "deckHash": "fnv1a:c10cdf3d"
+      },
+      "aggregate": {
+        "games": 1,
+        "decisions": 20,
+        "findings": 2,
+        "findingsBySeverity": {
+          "critical": 0,
+          "high": 1,
+          "medium": 1,
+          "low": 0
+        },
+        "findingsByDetector": {
+          "illegal_action": 0,
+          "replay_failure": 0,
+          "hidden_info_marker": 0,
+          "no_legal_action_failure": 0,
+          "action_limit_reached": 1,
+          "repeated_no_progress_run": 1,
+          "repeated_known_no_payoff_remote": 0,
+          "repeated_low_value_archives": 0,
+          "recovery_low_value_loop": 0,
+          "bank_over_target_without_funding_need": 0,
+          "risky_self_damage_action": 0,
+          "blink_low_hand_buffer_run": 0,
+          "duplicate_low_delta_install": 0,
+          "overdraw_without_urgency": 0,
+          "plan_step_action_mismatch": 0,
+          "semantic_override_suspicious": 0,
+          "corp_never_scores_long_game": 1,
+          "runner_never_accesses_long_game": 0
+        },
+        "illegalActions": 0,
+        "replayFailures": 0,
+        "actionLimitReached": 1,
+        "allRedactionSafe": true,
+        "redactionSafe": true,
+        "averageGameLength": 20,
+        "corpAgendaScores": 0,
+        "runnerAgendaSteals": 1,
+        "corpFlatlines": 0,
+        "scoreWindowMissed": 0,
+        "unsafeScoreChosen": 0,
+        "passiveActionWithScoreLineAvailable": 2,
+        "actionLimitClusters": {
+          "action_limit_runner_repeated_no_progress_run": 0,
+          "action_limit_runner_remote_contest_blocked": 0,
+          "action_limit_corp_scoreline_stall": 0,
+          "action_limit_setup_economy_loop": 1,
+          "action_limit_low_value_repeat": 0,
+          "action_limit_mixed_or_unknown": 0
+        },
+        "actionLimitSubclusters": {
+          "late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_real_reserve": 0,
+          "runner_late_gain_credit_no_safe_alternative": 0,
+          "corp_late_gain_credit_without_rez_score_protection_need": 0,
+          "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+          "corp_late_gain_credit_no_safe_alternative": 0,
+          "late_draw_for_coverage_or_hand_goal": 0,
+          "late_draw_without_coverage_or_hand_goal": 0,
+          "late_ability_reuse_low_delta": 0,
+          "late_install_low_delta": 0,
+          "late_run_step_stall": 0,
+          "run_microstep_required": 0,
+          "continue_chain_to_access": 0,
+          "break_pump_required": 0,
+          "jackout_loop": 0,
+          "continue_without_progress": 0,
+          "access_pending": 1,
+          "breach_pending": 0,
+          "mixed_unknown": 0
+        }
+      },
+      "diagnostics": {
+        "unsafeScoreChosenByReason": {},
+        "actionLimitClusters": {
+          "action_limit_runner_repeated_no_progress_run": 0,
+          "action_limit_runner_remote_contest_blocked": 0,
+          "action_limit_corp_scoreline_stall": 0,
+          "action_limit_setup_economy_loop": 1,
+          "action_limit_low_value_repeat": 0,
+          "action_limit_mixed_or_unknown": 0
+        },
+        "actionLimitSubclusters": {
+          "late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_real_reserve": 0,
+          "runner_late_gain_credit_no_safe_alternative": 0,
+          "corp_late_gain_credit_without_rez_score_protection_need": 0,
+          "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+          "corp_late_gain_credit_no_safe_alternative": 0,
+          "late_draw_for_coverage_or_hand_goal": 0,
+          "late_draw_without_coverage_or_hand_goal": 0,
+          "late_ability_reuse_low_delta": 0,
+          "late_install_low_delta": 0,
+          "late_run_step_stall": 0,
+          "run_microstep_required": 0,
+          "continue_chain_to_access": 0,
+          "break_pump_required": 0,
+          "jackout_loop": 0,
+          "continue_without_progress": 0,
+          "access_pending": 1,
+          "breach_pending": 0,
+          "mixed_unknown": 0
+        },
+        "whyCoverage": {
+          "schemaVersion": "semantic-runtime-why-coverage-v1",
+          "scope": "semantic_runtime_why_coverage_report_only",
+          "auditStatus": "complete",
+          "sampleCount": 20,
+          "decisionsRequiringWhyNot": 2,
+          "decisionsNotRequiringWhyNot": 18,
+          "decisionsWithTopLevelWhyNot": 9,
+          "decisionsMissingTopLevelWhyNot": 0,
+          "decisionsWithRuntimeWhyNotSection": 9,
+          "decisionsMissingRuntimeWhyNotSection": 0,
+          "actionAlternativeCount": 10,
+          "selectedActionAlternativeCount": 6,
+          "selectedActionAlternativesWithWhyChosen": 6,
+          "selectedActionAlternativesMissingWhyChosen": 0,
+          "nonSelectedActionAlternativeCount": 4,
+          "nonSelectedActionAlternativesWithWhyNot": 4,
+          "nonSelectedActionAlternativesMissingWhyNot": 0,
+          "actionAlternativesWithWhyChosen": 6,
+          "actionAlternativesMissingWhyChosen": 4,
+          "actionAlternativesWithWhyNot": 4,
+          "actionAlternativesMissingWhyNot": 6,
+          "rankedAlternativeCount": 0,
+          "rankedAlternativesWithWhyNot": 0,
+          "rankedAlternativesMissingWhyNot": 0,
+          "redactionStatus": "passed",
+          "productiveUseAllowed": false,
+          "noRuntimeEffect": true,
+          "missingCoverageSignals": [],
+          "evidence": [
+            "semantic_runtime_why_coverage:report_only",
+            "audit_status:complete",
+            "sample_count:20",
+            "decision_top_level_why_not_count:9",
+            "action_alternative_count:10",
+            "selected_action_alternative_count:6",
+            "non_selected_action_alternative_count:4",
+            "ranked_alternative_count:0"
+          ]
+        }
+      },
+      "summaries": [
+        {
+          "seed": "ai-complete-18-why-smoke-001",
+          "winner": "action_limit_reached",
+          "actions": 20,
+          "turns": 2,
+          "finalAgendaPoints": {
+            "runner": 2,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:ddb4825b",
+          "replayOk": true,
+          "replayErrors": [],
+          "lastActionTypes": [
+            "start_run",
+            "access_card",
+            "steal_agenda",
+            "start_run",
+            "access_card",
+            "start_run",
+            "access_card",
+            "end_turn",
+            "mandatory_draw",
+            "install_card"
+          ],
+          "last40ActionTypes": [
+            "resolve_choice",
+            "resolve_choice",
+            "mandatory_draw",
+            "install_card",
+            "install_card",
+            "gain_credit",
+            "end_turn",
+            "start_run",
+            "access_card",
+            "trash_accessed_card",
+            "start_run",
+            "access_card",
+            "steal_agenda",
+            "start_run",
+            "access_card",
+            "start_run",
+            "access_card",
+            "end_turn",
+            "mandatory_draw",
+            "install_card"
+          ],
+          "actionAlternativeSnapshots": [
+            {
+              "actionIndex": 14,
+              "side": "runner",
+              "stateVersionBefore": 14,
+              "selectedActionType": "access_card",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "access_card",
+                  "semanticActionType": "coverage_setup",
+                  "selected": true,
+                  "sourceKind": "game_rule",
+                  "scoreKeys": [
+                    "semantic_type_tie_breaker",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "coverage_relevant",
+                  "expectedProgressLabel": "progress_access",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "semantic_runtime_actual",
+                    "rawSemanticScore:115",
+                    "finalSelectionScore:115",
+                    "selected_by_plan_mapping:false",
+                    "scope:access_trash_steal",
+                    "reasonCode:runner.semantic.access_trash_steal"
+                  ],
+                  "whyNot": []
+                }
+              ]
+            },
+            {
+              "actionIndex": 15,
+              "side": "runner",
+              "stateVersionBefore": 15,
+              "selectedActionType": "start_run",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "start_run",
+                  "semanticActionType": "coverage_setup",
+                  "selected": true,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_tie_breaker",
+                    "runner_goal_fit_reachable_run",
+                    "runner_rnd_pressure",
+                    "runner_rnd_unknown_top",
+                    "runner_free_server_path",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "selected_by_plan_mapping"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "coverage_relevant",
+                  "expectedProgressLabel": "progress_reachability_improved",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "selected_by_plan_mapping",
+                    "rawSemanticScore:2263",
+                    "finalSelectionScore:2513",
+                    "displayOnlyScore:true",
+                    "selected_by_plan_mapping:true",
+                    "scope:simple_hq_or_rnd_pressure",
+                    "reasonCode:runner.semantic.simple_hq_or_rnd_pressure",
+                    "selectedPlan:runner.opportunistic_central_run"
+                  ],
+                  "whyNot": []
+                },
+                {
+                  "rank": 2,
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "selected": false,
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Krash",
+                  "scoreKeys": [
+                    "semantic_type_tie_breaker",
+                    "runner_persistent_install_fit",
+                    "runner_install_breaker",
+                    "semantic_strategic_action_fit",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "progress_coverage_install",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:1209",
+                    "finalSelectionScore:1209",
+                    "displayOnlyScore:true",
+                    "scope:basic_install",
+                    "reasonCode:runner.semantic.basic_install",
+                    "selectedPlan:runner.opportunistic_central_run"
+                  ]
+                },
+                {
+                  "rank": 3,
+                  "actionType": "start_run",
+                  "semanticActionType": "coverage_setup",
+                  "selected": false,
+                  "sourceKind": "basic_action",
+                  "scoreKeys": [
+                    "semantic_type_tie_breaker",
+                    "runner_goal_fit_reachable_run",
+                    "runner_hq_pressure",
+                    "runner_run_target_semantic_guidance",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty",
+                    "plan_selection_adjustment"
+                  ],
+                  "hardGates": [
+                    "excluded_by_current_plan"
+                  ],
+                  "targetContextStatus": "blocked_by_hard_gate",
+                  "expectedProgressLabel": "progress_reachability_improved",
+                  "blockedReason": "plan_mismatch",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "plan_mismatch",
+                    "excluded_by_current_plan",
+                    "rawSemanticScore:1189",
+                    "finalSelectionScore:1189",
+                    "displayOnlyScore:true",
+                    "scope:simple_hq_or_rnd_pressure",
+                    "reasonCode:runner.semantic.simple_hq_or_rnd_pressure",
+                    "selectedPlan:runner.opportunistic_central_run"
+                  ]
+                }
+              ]
+            },
+            {
+              "actionIndex": 16,
+              "side": "runner",
+              "stateVersionBefore": 16,
+              "selectedActionType": "access_card",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "access_card",
+                  "semanticActionType": "coverage_setup",
+                  "selected": true,
+                  "sourceKind": "game_rule",
+                  "scoreKeys": [
+                    "semantic_type_tie_breaker",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "coverage_relevant",
+                  "expectedProgressLabel": "progress_access",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "semantic_runtime_actual",
+                    "rawSemanticScore:115",
+                    "finalSelectionScore:115",
+                    "selected_by_plan_mapping:false",
+                    "scope:access_trash_steal",
+                    "reasonCode:runner.semantic.access_trash_steal"
+                  ],
+                  "whyNot": []
+                }
+              ]
+            },
+            {
+              "actionIndex": 17,
+              "side": "runner",
+              "stateVersionBefore": 17,
+              "selectedActionType": "end_turn",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "end_turn",
+                  "semanticActionType": "coverage_setup",
+                  "selected": true,
+                  "sourceKind": "game_rule",
+                  "scoreKeys": [
+                    "semantic_type_tie_breaker",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "coverage_relevant",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "semantic_runtime_actual",
+                    "rawSemanticScore:35",
+                    "finalSelectionScore:35",
+                    "selected_by_plan_mapping:false",
+                    "scope:end_turn",
+                    "reasonCode:runner.semantic.end_turn"
+                  ],
+                  "whyNot": []
+                }
+              ]
+            },
+            {
+              "actionIndex": 18,
+              "side": "corp",
+              "stateVersionBefore": 18,
+              "selectedActionType": "mandatory_draw",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "mandatory_draw",
+                  "semanticActionType": "coverage_setup",
+                  "selected": true,
+                  "sourceKind": "game_rule",
+                  "scoreKeys": [
+                    "semantic_type_tie_breaker",
+                    "corp_board_triage_context",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "coverage_relevant",
+                  "expectedProgressLabel": "no_progress_stale",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "semantic_runtime_actual",
+                    "rawSemanticScore:123",
+                    "finalSelectionScore:123",
+                    "selected_by_plan_mapping:false",
+                    "scope:mandatory_draw",
+                    "reasonCode:corp.semantic.mandatory_draw"
+                  ],
+                  "whyNot": []
+                }
+              ]
+            },
+            {
+              "actionIndex": 19,
+              "side": "corp",
+              "stateVersionBefore": 19,
+              "selectedActionType": "install_card",
+              "alternatives": [
+                {
+                  "rank": 1,
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "selected": true,
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Data Wall",
+                  "scoreKeys": [
+                    "semantic_type_tie_breaker",
+                    "corp_board_triage_mismatch",
+                    "corp_install_protection",
+                    "corp_install_remote_context",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "coverage_relevant",
+                  "expectedProgressLabel": "progress_server_protected",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [
+                    "semantic_runtime_actual",
+                    "rawSemanticScore:2725",
+                    "finalSelectionScore:2725",
+                    "selected_by_plan_mapping:false",
+                    "scope:basic_install",
+                    "reasonCode:corp.semantic.basic_install"
+                  ],
+                  "whyNot": []
+                },
+                {
+                  "rank": 2,
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "selected": false,
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Data Wall",
+                  "scoreKeys": [
+                    "semantic_type_tie_breaker",
+                    "corp_board_triage_mismatch",
+                    "corp_install_protection",
+                    "corp_install_remote_context",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "scoreline_relevant",
+                  "expectedProgressLabel": "progress_server_protected",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "semantic_score_below_selected",
+                    "rawSemanticScore:2290",
+                    "finalSelectionScore:2290",
+                    "scope:basic_install",
+                    "reasonCode:corp.semantic.basic_install"
+                  ]
+                },
+                {
+                  "rank": 3,
+                  "actionType": "install_card",
+                  "semanticActionType": "coverage_setup",
+                  "selected": false,
+                  "sourceKind": "visible_card_or_ability",
+                  "sourceDefinitionId": "Corporate Negotiating Center",
+                  "scoreKeys": [
+                    "semantic_type_tie_breaker",
+                    "corp_board_triage_context",
+                    "corp_install_economy",
+                    "corp_install_remote_context",
+                    "semantic_strategic_action_fit",
+                    "semantic_private_actor_bonus",
+                    "semantic_credit_cost_penalty"
+                  ],
+                  "hardGates": [],
+                  "targetContextStatus": "scoreline_relevant",
+                  "expectedProgressLabel": "progress_server_protected",
+                  "similarLaterProgress": "unknown_shadow_only",
+                  "whyChosen": [],
+                  "whyNot": [
+                    "semantic_score_below_selected",
+                    "rawSemanticScore:1709",
+                    "finalSelectionScore:1709",
+                    "scope:basic_install",
+                    "reasonCode:corp.semantic.basic_install"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "topFindings": [
+        {
+          "matchId": "selfplay:ai-complete-18-why-smoke-001",
+          "seed": "ai-complete-18-why-smoke-001",
+          "actionIndex": 19,
+          "side": "corp",
+          "selectedActionType": "install_card",
+          "planKind": "basic_install",
+          "detectorIds": [
+            "action_limit_reached",
+            "corp_never_scores_long_game"
+          ],
+          "severity": "high",
+          "shortReason": "Long selfplay game ended without a Corp score. | Selfplay game reached the configured action limit before a result.",
+          "relevantDebugFacts": [
+            "ability_semantic_binding:ability_binding:corp.install_card.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.0:unresolved:none:onr_v1_237_data-wall",
+            "ability_semantic_binding:ability_binding_status:corp.install_card.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.0:unresolved",
+            "ability_semantic_binding:ability_tactic_signal:corp.install_card.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.0:install.card",
+            "ability_semantic_binding:ability_tactic_signal:corp.install_card.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.0:setup.install",
+            "action_semantic_candidate:install.card",
+            "action_semantic_projection:action_projection:corp.install_card.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.0:install_card:install.card:card:partial_projected:low",
+            "action_semantic_projection:action_projection_candidate_count:14",
+            "action_semantic_projection:partial_projected",
+            "action_semantic_projection:projection_signal_count:corp.install_card.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.0:11",
+            "action_semantic_projection:semantic_origin:corp.install_card.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.0:ability_level",
+            "action_type:install_card",
+            "compatibility_signals:compatibility_signal:corp.install_card.corp_onr_v1_237_data-wall_3.rd.corp_onr_v1_237_data-wall_3.0:role:barrier_ice"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-complete-18-why-smoke-001",
+            "stateVersion": 19,
+            "fromActionIndex": 17,
+            "toActionIndex": 20
+          }
+        },
+        {
+          "matchId": "selfplay:ai-complete-18-why-smoke-001",
+          "seed": "ai-complete-18-why-smoke-001",
+          "actionIndex": 15,
+          "side": "runner",
+          "selectedActionType": "start_run",
+          "planKind": "runner.opportunistic_central_run",
+          "detectorIds": [
+            "repeated_no_progress_run"
+          ],
+          "severity": "medium",
+          "shortReason": "Runner repeated rd without intervening progress.",
+          "relevantDebugFacts": [
+            "ability_semantic_binding:ability_binding:runner.install_card.runner_onr_v1_176_the-shell-traders_1.runner_onr_v1_176_the-shell-traders_1:unresolved:none:onr_v1_176_the-shell-tra...",
+            "ability_semantic_binding:ability_binding_status:runner.install_card.runner_onr_v1_176_the-shell-traders_1.runner_onr_v1_176_the-shell-traders_1:unresolved",
+            "ability_semantic_binding:ability_tactic_signal:runner.install_card.runner_onr_v1_176_the-shell-traders_1.runner_onr_v1_176_the-shell-traders_1:install.card",
+            "ability_semantic_binding:ability_tactic_signal:runner.install_card.runner_onr_v1_176_the-shell-traders_1.runner_onr_v1_176_the-shell-traders_1:setup.install",
+            "action_semantic_candidate:run.start",
+            "action_semantic_projection:action_projection:runner.start_run.rd:start_run:run.start:basic_action:projected:high",
+            "action_semantic_projection:action_projection_candidate_count:12",
+            "action_semantic_projection:projected",
+            "action_semantic_projection:projection_signal_count:runner.start_run.rd:4",
+            "action_semantic_projection:semantic_origin:runner.start_run.rd:basic_action",
+            "action_type:start_run",
+            "compatibility_signals:compatibility_signal:runner.install_card.runner_onr_v1_176_the-shell-traders_1.runner_onr_v1_176_the-shell-traders_1:role:counter"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-complete-18-why-smoke-001",
+            "stateVersion": 15,
+            "fromActionIndex": 13,
+            "toActionIndex": 16
+          }
+        }
+      ]
+    }
+  ]
+}
