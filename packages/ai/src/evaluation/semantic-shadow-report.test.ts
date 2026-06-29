@@ -33,6 +33,9 @@ describe("SemanticShadowRuntimeComparison", () => {
       expect.arrayContaining([
         "calibration_profile:baseline_v1",
         "calibration_mode:baseline",
+        "shadow_top_why_chosen:ranked_semantic_action",
+        "shadow_top_why_chosen:rank:1",
+        "shadow_top_why_chosen:primary_goal:runner.build_economy_base",
       ]),
     );
   });

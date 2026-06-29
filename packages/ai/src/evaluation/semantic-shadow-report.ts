@@ -76,6 +76,9 @@ export function compareSemanticShadowToRuntime(params: {
       ...(top?.primaryGoalId && shadowTopLegal
         ? [`shadow_top_goal:${top.primaryGoalId}`]
         : []),
+      ...(top && shadowTopLegal
+        ? top.whyChosen?.map((fact) => `shadow_top_why_chosen:${fact}`) ?? []
+        : []),
       ...(params.trace.frameSummary.calibrationProfileId
         ? [`calibration_profile:${params.trace.frameSummary.calibrationProfileId}`]
         : []),
