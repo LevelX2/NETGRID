@@ -1474,8 +1474,10 @@ function hasRiskyUniversalPressure(
   return (
     riskProfile.has("runner.risky_universal_breaker_pressure") ||
     (params.deckCapabilities?.runner?.breakerInventory.some(
-      (breaker) =>
-        breaker.coverage.includes("universal") && breaker.risks.length > 0,
+      (breaker) => {
+        const coverage = new Set(breaker.coverage);
+        return coverage.has("universal") && breaker.risks.length > 0;
+      },
     ) ??
       false)
   );
