@@ -545,15 +545,18 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       },
       "agenda-in-hq",
     );
-    const installRemoteIce = corpAction("install-remote-1-ice", "install_card", {
-      placement: "ice",
-      serverId: "remote_1",
-    });
-    const input = corpInputWithGoals([], [
-      installNewRemoteAgenda,
-      installRemoteAgenda,
-      installRemoteIce,
-    ]);
+    const installRemoteIce = corpAction(
+      "install-remote-1-ice",
+      "install_card",
+      {
+        placement: "ice",
+        serverId: "remote_1",
+      },
+    );
+    const input = corpInputWithGoals(
+      [],
+      [installNewRemoteAgenda, installRemoteAgenda, installRemoteIce],
+    );
     const dependencies = {
       ...testDependencies(),
       corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
@@ -731,6 +734,212 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("forces a playable existing remote agenda install under HQ agenda pressure", () => {
+    const installAgenda = corpAction(
+      "install-agenda-remote-1",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "agenda-1",
+    );
+    const installSupportRoot = corpAction(
+      "install-support-remote-1",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+      },
+      "support-root",
+    );
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithHqCards(
+      8,
+      [agendaCard("agenda-1"), corpCard("support-root", "asset")],
+      [installAgenda, installSupportRoot, gainCredit],
+    );
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 3,
+      credits: 4,
+    });
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-data-wall", { rezCost: 1, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              missingVisibleBreakerCoverage: true,
+              runnerCanReachAccessNow: false,
+              runnerCanContestBeforeScore: false,
+              runnerCanReachAccessBeforeScore: false,
+              affordableDurableRelevantIceCount: 1,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: true,
+              dynamicProtectionWeaknessCount: 0,
+              agendaStealSeverity: "normal",
+              recommendedNextStep: "none",
+              evidence: ["test_hq_agenda_pressure_playable_scoreline"],
+            })
+          : undefined,
+    };
+
+    const installComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installAgenda,
+      "basic_install",
+      dependencies,
+    );
+    const supportComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installSupportRoot,
+      "basic_install",
+      dependencies,
+    );
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      dependencies,
+    );
+
+    expect(installComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining(
+            "triage_primary:force_scoreline_clock",
+          ),
+        }),
+      ]),
+    );
+    expect(supportComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_mismatch",
+          reason: expect.stringContaining(
+            "triage_primary:force_scoreline_clock",
+          ),
+        }),
+      ]),
+    );
+    expect(creditComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_mismatch",
+          reason: expect.stringContaining(
+            "triage_primary:force_scoreline_clock",
+          ),
+        }),
+      ]),
+    );
+    expect(totalScore(installComponents)).toBeGreaterThan(
+      totalScore(supportComponents),
+    );
+    expect(totalScore(installComponents)).toBeGreaterThan(
+      totalScore(creditComponents),
+    );
+  });
+
+  it("does not force a game-ending contestable HQ-flood scoreline", () => {
+    const installAgenda = corpAction(
+      "install-game-ending-agenda",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "agenda-1",
+    );
+    const installRemoteIce = corpAction("install-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const input = corpInputWithHqCards(
+      8,
+      [agendaCard("agenda-1", 2), agendaCard("agenda-2", 2)],
+      [installAgenda, installRemoteIce],
+    );
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 5,
+      credits: 8,
+    });
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-data-wall", { rezCost: 1, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              missingVisibleBreakerCoverage: true,
+              runnerCanReachAccessNow: true,
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              affordableDurableRelevantIceCount: 1,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: true,
+              dynamicProtectionWeaknessCount: 0,
+              agendaStealSeverity: "game_ending",
+              runnerAgendaPointsAfterSteal: 7,
+              recommendedNextStep: "build_remote_ice",
+              evidence: ["test_hq_agenda_pressure_contestable_scoreline"],
+            })
+          : undefined,
+    };
+
+    const installComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installAgenda,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(JSON.stringify(installComponents)).not.toContain(
+      "force_scoreline_clock",
+    );
+    expect(
+      totalScoreFor(input, installRemoteIce, "basic_install", dependencies),
+    ).toBeGreaterThan(totalScore(installComponents));
+  });
+
   it("penalizes draw economy operations during deckout agenda flood", () => {
     const dayShift = corpAction(
       "play-day-shift",
@@ -885,9 +1094,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_board_triage_mismatch",
-          reason: expect.stringContaining(
-            "triage_required_rez_floor:4",
-          ),
+          reason: expect.stringContaining("triage_required_rez_floor:4"),
         }),
       ]),
     );
@@ -911,12 +1118,10 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       placement: "ice",
       serverId: "remote_1",
     });
-    const input = corpInputWithDeckoutFlood(
-      6,
-      [agendaCard("agenda-1")],
-      3,
-      [installAgenda, installRemoteIce],
-    );
+    const input = corpInputWithDeckoutFlood(6, [agendaCard("agenda-1")], 3, [
+      installAgenda,
+      installRemoteIce,
+    ]);
     const dependencies = {
       ...testDependencies(),
       corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
@@ -1094,6 +1299,78 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
     expect(totalScore(wallComponents)).toBeGreaterThan(
       totalScore(brainWashComponents),
+    );
+  });
+
+  it("prefers HQ access-stop ICE over tax-only ICE under HQ agenda pressure", () => {
+    const agenda = agendaCard("agenda-1");
+    const taxOnlyIce = corpCard("ball-and-chain", "ice", {
+      title: "Ball and Chain",
+      definitionId: "onr_v1_222_ball-and-chain",
+      rezCost: 2,
+    });
+    const etrIce = corpCard("data-wall", "ice", {
+      title: "Data Wall",
+      definitionId: "onr_v1_237_data-wall",
+      rezCost: 1,
+    });
+    const installTaxOnly = corpAction(
+      "install-ball-and-chain-hq",
+      "install_card",
+      { placement: "ice", serverId: "hq" },
+      taxOnlyIce.instanceId,
+    );
+    const installEtr = corpAction(
+      "install-data-wall-hq",
+      "install_card",
+      { placement: "ice", serverId: "hq" },
+      etrIce.instanceId,
+    );
+    const input = corpInputWithHqCards(
+      6,
+      [agenda, taxOnlyIce, etrIce],
+      [installTaxOnly, installEtr],
+    );
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 3,
+      credits: 6,
+    });
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+    ];
+
+    const taxComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installTaxOnly,
+      "basic_install",
+      testDependencies(),
+    );
+    const etrComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installEtr,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(taxComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_central_ice_low_access_stop_install_penalty",
+          reason: expect.stringContaining("access_stop:false"),
+        }),
+      ]),
+    );
+    expect(etrComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_central_ice_access_stop_install_value",
+          reason: expect.stringContaining("access_stop:true"),
+        }),
+      ]),
+    );
+    expect(totalScore(etrComponents)).toBeGreaterThan(
+      totalScore(taxComponents),
     );
   });
 
@@ -2297,6 +2574,31 @@ function corpInputWithRemoteAgenda(
       legalActions,
     },
   } as unknown as AiDecisionInput;
+}
+
+function runnerOpponent(
+  overrides: Partial<AiDecisionInput["playerView"]["opponent"]> = {},
+): AiDecisionInput["playerView"]["opponent"] {
+  return {
+    identity: {
+      instanceId: "runner-identity",
+      known: true,
+      owner: "runner",
+      type: "identity",
+      counterDisplays: [],
+    },
+    credits: 4,
+    clicks: 4,
+    agendaPoints: 0,
+    tags: 0,
+    handCount: 4,
+    maxHandSize: 5,
+    deckCount: 20,
+    discardCount: 0,
+    rig: [],
+    scoreArea: [],
+    ...overrides,
+  };
 }
 
 function accountsReceivableCard(): VisibleCard {
