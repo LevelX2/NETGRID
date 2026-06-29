@@ -9836,6 +9836,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'reasonCategories\.includes' packages/ai/src/runtime/runner-program-install-trash-policy.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsiebenundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-runner-run-targets.ts` bindet Runner-Pressure-`allowedProbeTargets` über ein lokales Set statt direkter `allowedProbeTargets.includes(...)`-Prüfung.
+  - Strukturierte ServerIds bleiben exakt; Substring-nahe Remote-IDs erhalten keinen Pressure-Probe-Bonus.
+  - `tactical-plan-runner-run-targets.test.ts` sichert die exakte ServerId-Bindung für erlaubte und nicht erlaubte Probe-Ziele.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/plans/tactical-plan-runner-run-targets.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'allowedProbeTargets\.includes' packages/ai/src/plans/tactical-plan-runner-run-targets.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

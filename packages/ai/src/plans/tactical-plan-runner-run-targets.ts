@@ -165,9 +165,10 @@ export function runnerPressureProbeAllowance(
   budget: RunnerPressureBudget,
   serverId: string,
 ): { priorityBonus: number; evidence: string[] } {
+  const allowedProbeTargetSet = new Set(budget.allowedProbeTargets);
   if (
     !budget.canSpendActionOnPressure ||
-    !budget.allowedProbeTargets.includes(serverId)
+    !allowedProbeTargetSet.has(serverId)
   ) {
     return {
       priorityBonus: 0,
