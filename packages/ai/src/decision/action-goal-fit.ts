@@ -192,8 +192,9 @@ function planAlignmentComponent(
   candidate: ActionSemanticCandidate,
   utility: TacticalGoalUtility,
 ): ScoreComponentDelta {
+  const candidateEvidenceSet = new Set(candidate.evidence);
   const aligned = utility.evidence.some((entry) =>
-    candidate.evidence.includes(entry),
+    candidateEvidenceSet.has(entry),
   );
   return {
     component: "plan_alignment",
