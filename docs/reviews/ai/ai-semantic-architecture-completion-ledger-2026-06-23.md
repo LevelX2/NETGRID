@@ -9629,6 +9629,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'availablePayoff\.evidence\.includes|evidence\.includes' packages/ai/src/runtime/corp-tagged-payoff-window.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertvierter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/strategic-runtime-context.ts` bindet Runtime-Portfolio-CandidateIds, PrimaryStrategies und TargetVector-Evidence über lokale Sets statt direkter `candidateIds.includes(...)`, `profile.primaryStrategies.includes(...)` und `targetVector.evidence.includes(...)`-Prüfungen.
+  - Strukturierte StrategyIds und TargetVector-Evidence-Flags bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `strategic-runtime-context.test.ts` sichert Portfolio-Auswahl, BlockedCandidates und exakte TargetOpportunity-Evidence-Flags.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/strategic-runtime-context.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'candidateIds\.includes|profile\.primaryStrategies\.includes|targetVector\.evidence\.includes' packages/ai/src/runtime/strategic-runtime-context.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

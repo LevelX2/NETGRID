@@ -80,6 +80,7 @@ function buildRuntimeStrategyPortfolio(
     ...profile.primaryStrategies,
     ...profile.secondaryStrategies,
   ]);
+  const candidateIdSet = new Set(candidateIds);
   const profileCandidates = candidateIds
     .map((strategyId) => runtimePortfolioCandidate(params, strategyId))
     .filter(
@@ -107,7 +108,7 @@ function buildRuntimeStrategyPortfolio(
       (candidate) => candidate.runtimeStatus !== "productive",
     ),
     ...Object.keys(profile.strategyScores)
-    .filter((strategyId) => !candidateIds.includes(strategyId))
+    .filter((strategyId) => !candidateIdSet.has(strategyId))
     .map((strategyId) =>
       runtimePortfolioCandidate(params, strategyId, "blocked"),
     )
@@ -155,6 +156,7 @@ function runtimePortfolioCandidate(
   const targetVector = targetVectorForFamily(params, family, strategyId);
   const reserve = reserveRequirementForFamily(params, family);
   const runtimeStatus = score.runtimeStatus ?? "legacy_unspecified";
+  const primaryStrategySet = new Set(profile.primaryStrategies);
   const selectionScore =
     score.finalScore +
     roleReadinessBonus(roleStatuses) +
@@ -166,7 +168,7 @@ function runtimePortfolioCandidate(
     family,
     candidateRole:
       forcedRole ??
-      (profile.primaryStrategies.includes(strategyId) ? "primary" : "secondary"),
+      (primaryStrategySet.has(strategyId) ? "primary" : "secondary"),
     runtimeStatus,
     runtimeBlockers: [...(score.runtimeBlockers ?? [])].sort(),
     confidence: score.confidence,
@@ -252,7 +254,8 @@ function targetVectorEvidenceHasFlag(
   targetVector: StrategicTargetVector,
   flag: string,
 ): boolean {
-  return targetVector.evidence.includes(flag);
+  const targetVectorEvidenceSet = new Set(targetVector.evidence);
+  return targetVectorEvidenceSet.has(flag);
 }
 
 function reserveReadinessBonus(reserve: StrategicReserveRequirement): number {
@@ -264,7 +267,8 @@ function candidateRoleBonus(
   profile: AiDeckStrategyProfile,
   strategyId: string,
 ): number {
-  return profile.primaryStrategies.includes(strategyId) ? 2 : 0;
+  const primaryStrategySet = new Set(profile.primaryStrategies);
+  return primaryStrategySet.has(strategyId) ? 2 : 0;
 }
 
 function roundScore(value: number): number {
