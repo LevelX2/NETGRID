@@ -17,7 +17,7 @@ Zweck: AI-COMPLETE-17 baut fachliche Scoring-Consumer auf. Dieser Vertrag hält 
 | Risk | `packages/ai/src/decision/action-goal-fit.ts` | `active` | `-100..100`, neutral `0` |
 | Doctrine | `packages/ai/src/decision/doctrine-goal-synthesis.ts` | `active` | `-100..100`, neutral `0` |
 | Plan Continuity | `packages/ai/src/plans/tactical-plan-progression.ts` | `active` | `-100..100`, neutral `0` |
-| Terminal Outcome | `packages/ai/src/runtime/semantic-runtime-corp-score-safety.ts` | `partial` | `-100..100`, neutral `0` |
+| Terminal Outcome | `packages/ai/src/runtime/semantic-runtime-corp-score-safety.ts` | `active` | `-100..100`, neutral `0` |
 | Reserve | `packages/ai/src/runtime/semantic-runtime-corp-score.ts` | `active` | `-100..100`, neutral `0` |
 | Uncertainty | `packages/ai/src/belief-state.ts` | `contract_only` | `-100..100`, neutral `0` |
 
@@ -30,4 +30,4 @@ Zweck: AI-COMPLETE-17 baut fachliche Scoring-Consumer auf. Dieser Vertrag hält 
 
 ## Nächste Schnitte
 
-1. Terminal-Outcome und Uncertainty als explizite Score-Komponenten anbinden.
+1. Uncertainty als explizite Score-Komponente anbinden.

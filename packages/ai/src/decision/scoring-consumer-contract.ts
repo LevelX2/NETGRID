@@ -128,8 +128,12 @@ export const SCORING_CONSUMER_DIMENSIONS = [
     id: "terminal_outcome",
     owner: "runtime/semantic-runtime-corp-score-safety.ts",
     scale: { min: -100, max: 100, neutral: 0 },
-    implementationStatus: "partial",
-    evidenceKeys: ["terminalWindow", "corp_scoreline_safety_gate"],
+    implementationStatus: "active",
+    evidenceKeys: [
+      "corp_scoreline_safety_gate",
+      "terminal_outcome_raw_value:",
+      "terminal_outcome_normalized_value:",
+    ],
   },
   {
     id: "reserve",

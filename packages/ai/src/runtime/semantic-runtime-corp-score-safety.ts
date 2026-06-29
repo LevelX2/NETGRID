@@ -22,6 +22,9 @@ export type SemanticRuntimeCorpScoreSafetyDependencies = {
   ) => CorpScoreTerminalWindowLike;
 };
 
+const TERMINAL_OUTCOME_ALLOWED_VALUE = 100;
+const TERMINAL_OUTCOME_BLOCKED_VALUE = -100;
+
 export function semanticRuntimeCorpScoreNowSafetyGate(
   input: AiDecisionInput,
   action: LegalAction,
@@ -41,17 +44,35 @@ export function semanticRuntimeCorpScoreNowSafetyGate(
   const scoreActionIdSet = new Set(terminal.scoreActionIds);
   const scoreLegal = scoreActionIdSet.has(action.actionId);
   const reasons = semanticRuntimeCorpUnsafeScoreReasons(terminal, scoreLegal);
+  const allowed = reasons.length === 0;
   return {
-    allowed: reasons.length === 0,
+    allowed,
     evidence:
-      reasons.length === 0
+      allowed
         ? [
             "corp_scoreline_safety_gate_passed:true",
             `protected_remote_ready:${terminal.protectedRemoteIds.length > 0}`,
             `runner_access_threat_high:${terminal.runnerAccessThreatHigh}`,
+            ...terminalOutcomeEvidence(true),
           ]
-        : reasons,
+        : [...reasons, ...terminalOutcomeEvidence(false)],
   };
+}
+
+export function normalizedTerminalOutcomeValue(rawValue: number): number {
+  return Math.max(-100, Math.min(100, Math.round(rawValue)));
+}
+
+function terminalOutcomeEvidence(allowed: boolean): string[] {
+  const rawValue = allowed
+    ? TERMINAL_OUTCOME_ALLOWED_VALUE
+    : TERMINAL_OUTCOME_BLOCKED_VALUE;
+  const normalizedValue = normalizedTerminalOutcomeValue(rawValue);
+  return [
+    `terminal_outcome_allowed:${allowed}`,
+    `terminal_outcome_raw_value:${rawValue}`,
+    `terminal_outcome_normalized_value:${normalizedValue}`,
+  ];
 }
 
 function semanticRuntimeCorpUnsafeScoreReasons(
