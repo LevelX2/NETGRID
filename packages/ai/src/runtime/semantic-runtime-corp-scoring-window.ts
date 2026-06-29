@@ -1073,15 +1073,16 @@ function visibleRunnerCentralMultiaccess(
   return (input.playerView.opponent.rig ?? []).some((card) => {
     if (card.known === false) return false;
     const tokens = visibleRunnerCentralMultiaccessTokens(card);
+    const tokenSet = new Set(tokens);
     const hasCentralMultiaccess =
-      tokens.includes("multiaccess") ||
+      tokenSet.has("multiaccess") ||
       tokensIncludePhrase(tokens, ["additional", "card"]) ||
       tokensIncludePhrase(tokens, ["access", "1", "additional"]);
     if (!hasCentralMultiaccess) {
       return false;
     }
-    if (serverId === "hq") return tokens.includes("hq");
-    return tokens.includes("rnd") || tokens.includes("rd");
+    if (serverId === "hq") return tokenSet.has("hq");
+    return tokenSet.has("rnd") || tokenSet.has("rd");
   });
 }
 
