@@ -12,10 +12,17 @@ describe("corpPunishCandidates", () => {
     const structuredPunish = candidate("structured-punish", {
       actionTacticSignals: ["punish.payoff"],
     });
+    const compoundPunish = candidate("compound-punish", {
+      actionTacticSignals: ["visible_punish_payoff"],
+    });
+    const compoundFlatline = candidate("compound-flatline", {
+      actionTacticSignals: ["score_flatline_window"],
+    });
     const noise = candidate("noise", {
       actionTacticSignals: [
         "tagalong.source",
         "punishment_noise",
+        "pre_punishment_support",
         "flatliner",
       ],
     });
@@ -23,11 +30,22 @@ describe("corpPunishCandidates", () => {
     expect(
       corpPunishCandidates(
         {
-          candidates: [structuredTag, structuredPunish, noise],
+          candidates: [
+            structuredTag,
+            structuredPunish,
+            compoundPunish,
+            compoundFlatline,
+            noise,
+          ],
         } as unknown as TacticalPlanBuildContext,
         { goalId: "corp.apply_punish_pressure" } as TacticalGoalLike,
       ).map((entry) => entry.actionId),
-    ).toEqual(["structured-tag", "structured-punish"]);
+    ).toEqual([
+      "structured-tag",
+      "structured-punish",
+      "compound-punish",
+      "compound-flatline",
+    ]);
   });
 });
 

@@ -185,6 +185,21 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     ).toBeGreaterThan(0);
   });
 
+  it("counts city-grid card ids as region support without substring noise", () => {
+    const profile = buildDeckStrategyProfile({
+      deckSnapshotId: "ai030-corp-city-grid-id-diagnostic",
+      side: "corp",
+      cards: [
+        { cardId: "onr_v1_367_rio-de-janeiro-city-grid", quantity: 2 },
+        { cardId: "test_city-gridish-noise", quantity: 3 },
+      ],
+    });
+
+    expect(
+      profile.corpProfile?.remoteProfile.regionCityGridUpgradeSupport,
+    ).toBe(2);
+  });
+
   it("reports Corp economy/rez-reserve support from structured function signals", () => {
     const profile = buildDeckStrategyProfile(
       snapshotById("onr_origin_corp_ai_snapshot_v1"),
