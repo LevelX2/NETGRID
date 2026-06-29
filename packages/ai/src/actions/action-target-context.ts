@@ -127,14 +127,15 @@ function targetProjectionStatusForAction(
 }
 
 function targetContextCompletesPartialProjection(action: LegalAction): boolean {
-  return [
+  const partialProjectionCompletionActionTypeSet = new Set([
     "resolve_choice",
     "trash_accessed_card",
     "trash_resource",
     "rez_ice",
     "advance_card",
     "score_agenda",
-  ].includes(action.type);
+  ]);
+  return partialProjectionCompletionActionTypeSet.has(action.type);
 }
 
 function normalizeServerId(value: unknown): string | undefined {

@@ -9908,6 +9908,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n '\]\.includes\(action\.type\)|includes\(action\.type\)' packages/ai/src/actions/action-source-binding.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertfünfunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-target-context.ts` bindet TargetContext-Completion-ActionTypes über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte ActionTypes bleiben exakt; substring-nahe Typen komplettieren keine partial projection.
+  - `action-target-context.test.ts` sichert exakte Completion für `score_agenda` gegenüber einem Rauschtyp.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-target-context.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n '\]\.includes\(action\.type\)|includes\(action\.type\)' packages/ai/src/actions/action-target-context.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
