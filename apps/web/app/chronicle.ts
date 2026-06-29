@@ -1486,8 +1486,9 @@ export function formatChronicleEvent(
         break;
       }
       if (
+        hiddenZoneAction === "corp_hq_agenda_reveal" ||
         hiddenZoneAction ===
-        "v1917_corporate_negotiating_center_hq_agenda_reveal"
+          "v1917_corporate_negotiating_center_hq_agenda_reveal"
       ) {
         const revealedTitles = publicRevealTitleList(
           payload.publicRevealTitles,
@@ -1506,7 +1507,10 @@ export function formatChronicleEvent(
                 subject,
                 `${agendaRevealCountText(revealedCount)} aus HQ durch ${source} vorgezeigt und ${creditText(gainedCredits)} erhalten`,
               )
-            : phrase(subject, `keine HQ-Agenda durch ${source} vorgezeigt`);
+            : phrase(
+                subject,
+                `keine Agenda aus HQ durch ${source} vorgezeigt`,
+              );
         description =
           revealedTitles.length > 0
             ? `Gezeigt: ${revealedTitles.join(", ")}. Timing: Start-of-turn.`
@@ -1517,9 +1521,10 @@ export function formatChronicleEvent(
           source,
           "HQ Reveal",
           `${revealedCount} ${revealedCount === 1 ? "Agenda" : "Agenden"}`,
-          `+${gainedCredits} ${creditLabel(gainedCredits)}`,
-          "Start-of-turn",
         );
+        if (gainedCredits > 0)
+          chips.push(`+${gainedCredits} ${creditLabel(gainedCredits)}`);
+        chips.push("Start-of-turn");
         break;
       }
       if (hiddenZoneAction === "p3_33_private_look") {

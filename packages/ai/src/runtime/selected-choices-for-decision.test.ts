@@ -60,10 +60,33 @@ describe("selectedChoicesForDecision", () => {
       selectedOptionIds: ["ice_a_hq", "ice_b_hq"],
     });
   });
+
+  it("selects Corporate Negotiating Center HQ agenda options when revealing agendas", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice({
+        kind: "select_cards",
+        source: "v1917.corp_hq_agenda_reveal:cnc_source:8",
+        minSelections: 0,
+        maxSelections: 2,
+        options: [
+          { id: "card_hq_agenda_1", label: "HQ-Agenda", value: "hq_agenda_1" },
+          { id: "card_hq_agenda_2", label: "HQ-Agenda", value: "hq_agenda_2" },
+        ],
+      }),
+      resolveChoiceAction(),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["card_hq_agenda_1", "card_hq_agenda_2"],
+    });
+  });
 });
 
 function inputWithChoice(choice: {
-  kind: "select_option";
+  kind: "select_option" | "select_cards";
+  source?: string;
   minSelections: number;
   maxSelections: number;
   options?: Array<{ id: string; label: string; value?: string }>;
@@ -74,7 +97,7 @@ function inputWithChoice(choice: {
       pendingChoice: {
         choiceId: "choice_multi",
         side: "corp",
-        source: "card_implementation.agenda_purge_install_targets:test",
+        source: choice.source ?? "card_implementation.agenda_purge_install_targets:test",
         prompt: "Choose targets",
         kind: choice.kind,
         options: choice.options ?? [

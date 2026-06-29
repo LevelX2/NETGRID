@@ -138,6 +138,45 @@ export function archivesRevealFromLatestEvent(
   };
 }
 
+export function hqAgendaRevealFromLatestEvent(
+  event: PublicGameEvent | undefined,
+  detailsById: Record<string, CatalogCardDetail>,
+  viewerSide: Side
+): AccessReveal | null {
+  if (!event || !isCorpHqAgendaRevealEvent(event)) return null;
+  const definitionIds = payloadStringList(event.publicPayload, "publicRevealDefinitionIds").length > 0
+    ? payloadStringList(event.publicPayload, "publicRevealDefinitionIds")
+    : payloadStringList(event.publicPayload, "revealedAgendaDefinitionIds");
+  if (definitionIds.length === 0) return null;
+  const titles = payloadPipeStringList(event.publicPayload, "publicRevealTitles");
+  const cards = definitionIds.map((definitionId, index) => {
+    const detail = detailsById[definitionId] ?? null;
+    const title = detail?.title ?? titles[index] ?? definitionId;
+    return detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, definitionId, title);
+  });
+  const actorSide = payloadSide(event.publicPayload, "actor") ?? "corp";
+  const sourceTitle =
+    payloadString(event.publicPayload, "sourceTitle") ??
+    "Corporate Negotiating Center";
+  const trashSubject = cards.length === 1 ? "Diese Agenda wurde" : "Diese Agenden wurden";
+  const trashVerb = cards.length === 1 ? "bleibt" : "bleiben";
+  return {
+    eventId: event.eventId,
+    kind: "hq_agenda_reveal",
+    actorSide,
+    viewerSide,
+    serverLabel: "HQ",
+    serverTitleLabel: "Hauptquartier (HQ)",
+    serverLocationPhrase: "im Hauptquartier (HQ)",
+    description: hqAgendaRevealDescription(actorSide, viewerSide, cards.length, sourceTitle),
+    revealedCards: cards,
+    actions: [],
+    trashStatus: `${trashSubject} öffentlich vorgezeigt und ${trashVerb} hier sichtbar, bis du das Ansehen beendest.`,
+    revealedCardStatus: "Aus HQ vorgezeigt",
+    dismissLabel: "Ansehen beenden"
+  };
+}
+
 export function exposeReviewFromLatestEvent(
   event: PublicGameEvent | undefined,
   detailsById: Record<string, CatalogCardDetail>,
@@ -176,6 +215,19 @@ export function retainedArchivesRevealEvent(events: PublicGameEvent[], dismissed
   return null;
 }
 
+export function retainedHqAgendaRevealEvent(events: PublicGameEvent[], dismissedEventIds: string[]): PublicGameEvent | null {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (!event) continue;
+    if (isCorpHqAgendaRevealCandidateEvent(event)) {
+      if (dismissedEventIds.includes(event.eventId) || !isCorpHqAgendaRevealEvent(event))
+        return null;
+      return event;
+    }
+  }
+  return null;
+}
+
 function revealedEventCardId(event: PublicGameEvent): string | null {
   const cardId =
     event.publicPayload.cardDefinitionId ??
@@ -202,6 +254,17 @@ function exposeReviewDescription(actorSide: Side, viewerSide: Side, count: numbe
   const object = count === 1 ? "eine Karte" : `${count} Karten`;
   const locations = Array.from(new Set(serverLabels)).filter(Boolean);
   return `${subject} ${object}${locations.length > 0 ? ` in ${locations.join(", ")}` : ""} angesehen.`;
+}
+
+function hqAgendaRevealDescription(
+  actorSide: Side,
+  viewerSide: Side,
+  count: number,
+  sourceTitle: string
+): string {
+  const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
+  const object = count === 1 ? "eine Agenda" : `${count} Agenden`;
+  return `${subject} ${object} aus HQ durch ${sourceTitle} vorgezeigt.`;
 }
 
 function payloadString(payload: Record<string, unknown>, key: string): string | null {
@@ -277,6 +340,29 @@ function isArchivesBreachRevealEvent(event: PublicGameEvent): boolean {
   if (payload.hiddenZoneAction !== "archives_breach_reveal") return false;
   const serverLabel = serverDisplayLabel(payloadString(payload, "serverLabel") ?? payloadString(payload, "serverId") ?? "");
   return serverLabel === "Archive" && Boolean(payloadPositiveInteger(payload, "archivesRevealCount"));
+}
+
+function isCorpHqAgendaRevealEvent(event: PublicGameEvent): boolean {
+  if (!isCorpHqAgendaRevealCandidateEvent(event)) return false;
+  const payload = event.publicPayload;
+  return (
+    payloadStringList(payload, "publicRevealDefinitionIds").length > 0 ||
+    payloadStringList(payload, "revealedAgendaDefinitionIds").length > 0
+  );
+}
+
+function isCorpHqAgendaRevealCandidateEvent(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload;
+  if (payload.actionType !== "resolve_choice") return false;
+  if (
+    payload.hiddenZoneAction !== "corp_hq_agenda_reveal" &&
+    payload.hiddenZoneAction !==
+      "v1917_corporate_negotiating_center_hq_agenda_reveal"
+  )
+    return false;
+  if (payload.publicRevealKind && payload.publicRevealKind !== "reveal")
+    return false;
+  return true;
 }
 
 function accessActorSubject(side: Side): string {

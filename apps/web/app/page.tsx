@@ -335,7 +335,9 @@ import {
   accessRevealFromLatestEvent,
   archivesRevealFromLatestEvent,
   exposeReviewFromLatestEvent,
+  hqAgendaRevealFromLatestEvent,
   retainedArchivesRevealEvent,
+  retainedHqAgendaRevealEvent,
   revealedEventCardIds
 } from "../features/actions/access-review-derivation";
 import { eventActionType, localActionSoundKey, localActionSoundKind, publicEventsAfter } from "../features/actions/local-action-sounds";
@@ -1352,11 +1354,13 @@ export default function Page() {
   const latestAccessRevealEvent = payload ? latestRetainableAccessRevealEvent(payload.eventTail) : null;
   const lastDismissedAccessEventId = dismissedAccessEventIds.at(-1) ?? null;
   const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, lastDismissedAccessEventId) : null;
+  const hqAgendaRevealEvent = payload ? retainedHqAgendaRevealEvent(payload.eventTail, dismissedAccessEventIds) : null;
+  const hqAgendaReveal = payload ? hqAgendaRevealFromLatestEvent(hqAgendaRevealEvent ?? undefined, catalogDetailsById, payload.side) : null;
   const archivesRevealEvent = payload ? retainedArchivesRevealEvent(payload.eventTail, dismissedAccessEventIds) : null;
   const archivesReveal = payload ? archivesRevealFromLatestEvent(archivesRevealEvent ?? undefined, catalogDetailsById, payload.side) : null;
   const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, payload.eventTail, latestAccessRevealEvent) : null;
   const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, payload.eventTail) : null;
-  const accessReveal = archivesReveal ?? currentAccessReveal ?? retainedEventAccessReveal;
+  const accessReveal = hqAgendaReveal ?? archivesReveal ?? currentAccessReveal ?? retainedEventAccessReveal;
   const showAccessReveal = Boolean(accessReveal && !dismissedAccessEventIds.includes(accessReveal.eventId));
   const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
   const exposeReview = payload ? exposeReviewFromLatestEvent(exposeReviewEvent ?? undefined, catalogDetailsById, payload.side) : null;

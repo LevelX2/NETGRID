@@ -871,6 +871,76 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("shows current Corporate Negotiating Center HQ agenda reveal events", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "corp_hq_agenda_reveal",
+        sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+        sourceTitle: "Corporate Negotiating Center",
+        publicRevealKind: "reveal",
+        publicRevealDefinitionIds: "simple_agenda",
+        publicRevealTitles: "Simple Agenda",
+        revealedAgendaDefinitionIds: "simple_agenda",
+        revealedCount: 1,
+        gainedCredits: 1,
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Die Korp hat eine Agenda aus HQ durch Corporate Negotiating Center vorgezeigt und 1 Credit erhalten.",
+    );
+    expect(item.description).toBe(
+      "Gezeigt: Simple Agenda. Timing: Start-of-turn.",
+    );
+    expect(item.category).toBe("agenda");
+    expect(item.visibility).toBe("public");
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Corporate Negotiating Center",
+        "HQ Reveal",
+        "1 Agenda",
+        "+1 Credit",
+        "Start-of-turn",
+      ]),
+    );
+  });
+
+  it("shows Corporate Negotiating Center zero reveals without a zero-credit chip", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "corp_hq_agenda_reveal",
+        sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+        sourceTitle: "Corporate Negotiating Center",
+        publicRevealKind: "reveal",
+        publicRevealDefinitionIds: "",
+        publicRevealTitles: "",
+        revealedAgendaDefinitionIds: "",
+        revealedCount: 0,
+        gainedCredits: 0,
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Die Korp hat keine Agenda aus HQ durch Corporate Negotiating Center vorgezeigt.",
+    );
+    expect(item.description).toBe("Timing: Start-of-turn.");
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Corporate Negotiating Center",
+        "HQ Reveal",
+        "0 Agenden",
+        "Start-of-turn",
+      ]),
+    );
+    expect(item.chips).not.toContain("+0 Credits");
+  });
+
   it("shows Smith's Pawnshop choices with the corrected 2-credit gain", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {

@@ -442,6 +442,58 @@ describe("deriveOpponentActionCues", () => {
     expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
   });
 
+  it("shows current Corporate Negotiating Center reveal cues with gained credits", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_cnc", "resolve_choice", {
+          actor: "corp",
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "corp_hq_agenda_reveal",
+          sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+          sourceTitle: "Corporate Negotiating Center",
+          publicRevealKind: "reveal",
+          publicRevealDefinitionIds: "simple_agenda",
+          publicRevealTitles: "Simple Agenda",
+          revealedAgendaDefinitionIds: "simple_agenda",
+          revealedCount: 1,
+          gainedCredits: 1
+        })
+      ]
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.title).toBe("Die Korp hat eine Agenda aus HQ durch Corporate Negotiating Center vorgezeigt und 1 Credit erhalten.");
+    expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
+  });
+
+  it("shows Corporate Negotiating Center no-agenda cues explicitly", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_cnc_none", "resolve_choice", {
+          actor: "corp",
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "corp_hq_agenda_reveal",
+          sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+          sourceTitle: "Corporate Negotiating Center",
+          publicRevealKind: "reveal",
+          publicRevealDefinitionIds: "",
+          publicRevealTitles: "",
+          revealedAgendaDefinitionIds: "",
+          revealedCount: 0,
+          gainedCredits: 0
+        })
+      ]
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.title).toBe("Die Korp hat keine Agenda aus HQ durch Corporate Negotiating Center vorgezeigt.");
+    expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
+  });
+
   it("keeps automatic system cues behind the local option", () => {
     const systemEvent = event("evt_auto_credit", "gain_credit", { amount: 2 });
 

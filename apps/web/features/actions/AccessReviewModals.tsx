@@ -9,7 +9,7 @@ import { CostChips } from "./ActionControls";
 
 export type AccessReveal = {
   eventId: string;
-  kind: "access" | "archives_reveal";
+  kind: "access" | "archives_reveal" | "hq_agenda_reveal";
   actorSide: Side;
   viewerSide: Side;
   serverLabel: string;
@@ -21,6 +21,8 @@ export type AccessReveal = {
   actions: LegalAction[];
   trashStatus: string;
   followupStatus?: string;
+  revealedCardStatus?: string;
+  dismissLabel?: string;
 };
 
 export type ExposeReview = {
@@ -52,10 +54,17 @@ export function AccessRevealModal({
     onDismiss();
   };
   const isArchivesReveal = reveal.kind === "archives_reveal";
+  const isHqAgendaReveal = reveal.kind === "hq_agenda_reveal";
   const title = isArchivesReveal
     ? "Archivkarten aufgedeckt"
+    : isHqAgendaReveal
+      ? "HQ-Agenden vorgezeigt"
     : `Zugriff auf ${reveal.serverTitleLabel}`;
-  const eyebrow = isArchivesReveal ? "Archiv" : "Zugriff";
+  const eyebrow = isArchivesReveal
+    ? "Archiv"
+    : isHqAgendaReveal
+      ? "HQ Reveal"
+      : "Zugriff";
 
   return (
     <div className="accessRevealOverlay" role="dialog" aria-modal="true" aria-labelledby="access-reveal-title">
@@ -78,7 +87,7 @@ export function AccessRevealModal({
                 <CardView card={card} displayMode={displayMode} preview />
                 <div className="exposeReviewCardText">
                   <strong>{card.title}</strong>
-                  <span>Jetzt offen im Archiv</span>
+                  <span>{reveal.revealedCardStatus ?? "Jetzt offen im Archiv"}</span>
                 </div>
               </div>
             ))}
@@ -110,7 +119,7 @@ export function AccessRevealModal({
               {reveal.actions.length === 0 ? (
                 <button className="button" onClick={onDismiss}>
                   <Check size={15} />
-                  OK
+                  {reveal.dismissLabel ?? "OK"}
                 </button>
               ) : null}
             </div>
