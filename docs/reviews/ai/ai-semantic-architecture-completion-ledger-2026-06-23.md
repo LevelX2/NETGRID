@@ -10537,6 +10537,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps target choice fit output behind target fit and diagnostics owners"` in `packages/ai` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
 
+- `AI-COMPLETE-16` achter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Goal-/Strategic-Fit-Evaluation: `scoreActionGoalFit` und `buildTacticalGoalUtilities` dürfen nur in den Decision-Ownern, Semantic-Shadow-Decision und expliziten Evaluation-Reports verwendet werden.
+  - Derselbe Guard begrenzt `semanticRuntimeStrategicActionFitScoreComponents` auf Strategic-Fit-Owner und Runtime-Score-Breakdown sowie `semanticRuntimeStrategicActionFitEvidence` auf Strategic-Fit-Owner und Runtime-Choice-Builder.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert den Guard und reduziert die offenen Kollisionszonen auf Corp-Economy-/Rez-Floor-Skalierung und Plan-Continuity-Fortschritt.
+  - Status bleibt `IN_PROGRESS`, weil diese verbleibenden Owner-Bindungen noch offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps goal and strategic fit evaluation behind scoring owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

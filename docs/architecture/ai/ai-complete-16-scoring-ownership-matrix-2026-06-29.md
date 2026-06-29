@@ -27,11 +27,12 @@ Zweck: Erstes Ownership-Artefakt für `AI-COMPLETE-16`, damit doppelte oder wide
 - Access Payoff: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt direkte `evaluateKnownRemoteAccessPayoff`-/`evaluateKnownCentralAccessPayoff`-Nutzung nur in den Payoff-Ownern, Run-Target-Evaluation, Tactical-Plan-Runner-Plans, Public-Reexport und dem Legacy-Runner-Adapter `legacy-runner-access-payoff.ts`. `legacy/runner-plans.ts` nutzt den Adapter statt direkter Owner-Aufrufe.
 - Corp Board-Triage und Scoreline-Safety: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `semanticRuntimeCorpBoardTriage`, `semanticRuntimeCorpActionIsScoreLine`, `semanticRuntimeCorpRemoteHasScoreLine`, `semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine` und `semanticRuntimeCorpScoreNowSafetyGate` nur in den jeweiligen Runtime-Ownern sowie den expliziten Context-/Composition-Consumern. Neue direkte Scoreline-/Safety-Entscheidungen außerhalb dieser Owner fallen damit als Boundary-Verstoß auf.
 - TargetChoice-Fit: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `targetChoiceRecommendationForTargetFit` nur im TargetChoice-Owner, in `semantic-shadow-decision.ts` und in den Coverage-/Readiness-Evaluationen; `buildTargetChoiceShadowReport` bleibt auf TargetChoice-Owner, Semantic-Shadow-Decision und Debug-Ausgabe begrenzt. Damit bleibt TargetChoice produktiv ein Target-Fit-Signal und kein paralleler Selected-Choice-/Selected-Target-Entscheider.
+- Goal-/Strategic-Fit: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `scoreActionGoalFit` und `buildTacticalGoalUtilities` nur in den Decision-Ownern, Semantic-Shadow-Decision und expliziten Evaluation-Reports; `semanticRuntimeStrategicActionFitScoreComponents` und `semanticRuntimeStrategicActionFitEvidence` bleiben auf den Strategic-Fit-Owner sowie Runtime-Score-/Choice-Consumer begrenzt. Neue parallele Goal-/Strategic-Fit-Bewertungen außerhalb dieser Owner fallen damit als Boundary-Verstoß auf.
 
 ## Erste Audit-Befunde
 
 - `rg` zeigt erwartungsgemäß viele Score-/Reachability-/Access-Treffer, aber keine einzelne zentrale Owner-Dokumentation vor diesem Artefakt.
-- Die stärksten noch offenen Kollisionszonen liegen nach den ersten Guards bei Goal-/Strategic-Fit, Corp-Economy-/Rez-Floor-Skalierung und Plan-Continuity-Fortschritt.
+- Die stärksten noch offenen Kollisionszonen liegen nach den ersten Guards bei Corp-Economy-/Rez-Floor-Skalierung und Plan-Continuity-Fortschritt.
 - Nächster Umsetzungsschnitt sollte eine dieser verbleibenden Kollisionszonen in Code oder Tests binden, statt die Matrix breiter zu machen.
 
 ## Gates

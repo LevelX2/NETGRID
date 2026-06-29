@@ -854,6 +854,60 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps goal and strategic fit evaluation behind scoring owners", () => {
+    const allowedFilesBySymbol = new Map<string, Set<string>>([
+      [
+        "scoreActionGoalFit",
+        new Set([
+          "decision/action-goal-fit.ts",
+          "decision/semantic-shadow-decision.ts",
+          "evaluation/doctrine-goal-action-fit.ts",
+        ]),
+      ],
+      [
+        "buildTacticalGoalUtilities",
+        new Set([
+          "decision/tactical-goal-utility.ts",
+          "decision/semantic-shadow-decision.ts",
+          "evaluation/decision-snapshot-suite.ts",
+          "evaluation/doctrine-goal-action-fit.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeStrategicActionFitScoreComponents",
+        new Set([
+          "runtime/strategic-action-fit.ts",
+          "runtime/semantic-runtime-score-breakdown.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeStrategicActionFitEvidence",
+        new Set([
+          "runtime/strategic-action-fit.ts",
+          "runtime/semantic-runtime-choice-builder.ts",
+        ]),
+      ],
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        return [...allowedFilesBySymbol.entries()].flatMap(
+          ([symbol, allowedFiles]) => {
+            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+              return [];
+            }
+            return [
+              `${relative} references ${symbol} outside goal or strategic fit ownership`,
+            ];
+          },
+        );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
   it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
