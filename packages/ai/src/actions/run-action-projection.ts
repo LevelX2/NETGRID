@@ -508,30 +508,31 @@ function targetServerIdsFromSignals(
   signals: readonly string[],
 ): string[] {
   const tokens = signals.map((signal) => signal.toLowerCase());
+  const tokenSet = new Set(tokens);
   const targetIds: string[] = [];
   if (
     signalTokensInclude(tokens, "server_specific_hq") ||
-    tokens.includes("scope:hq")
+    tokenSet.has("scope:hq")
   ) {
     targetIds.push("hq");
   }
   if (
     signalTokensInclude(tokens, "server_specific_rnd") ||
     signalTokensInclude(tokens, "server_specific_rd") ||
-    tokens.includes("scope:rnd") ||
-    tokens.includes("scope:rd")
+    tokenSet.has("scope:rnd") ||
+    tokenSet.has("scope:rd")
   ) {
     targetIds.push("rd");
   }
   if (
     signalTokensInclude(tokens, "server_specific_archives") ||
-    tokens.includes("scope:archives")
+    tokenSet.has("scope:archives")
   ) {
     targetIds.push("archives");
   }
   if (
     signalTokensInclude(tokens, "server_specific_remote") ||
-    tokens.includes("scope:remote")
+    tokenSet.has("scope:remote")
   ) {
     const remoteServers = input.playerView.servers.filter((server) =>
       server.id.startsWith("remote_"),

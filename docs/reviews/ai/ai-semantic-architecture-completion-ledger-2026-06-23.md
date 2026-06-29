@@ -10214,6 +10214,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes\(normalizedTerm\)|accepted\.includes\(token\)' packages/ai/src/actions/run-action-projection.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertneunundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` bindet RunAction-Target-Scope-Tokens über ein lokales Set statt direkter `tokens.includes("scope:*")`-Prüfungen.
+  - Strukturierte Scope-Zielprojektion bleibt exakt; HQ-, R&D-, Archives- und Remote-Scope-Signale bleiben auf explizite Token gebunden.
+  - `run-action-projection.test.ts` sichert scoped run signals, hq-via-archives overrides, Constraints und Payoff-Bounding.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/run-action-projection.test.ts` grün, 1 Datei, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\("scope:hq"\)|tokens\.includes\("scope:rnd"\)|tokens\.includes\("scope:rd"\)|tokens\.includes\("scope:archives"\)|tokens\.includes\("scope:remote"\)' packages/ai/src/actions/run-action-projection.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
