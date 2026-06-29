@@ -9399,6 +9399,76 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertneunundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-coverage-card-roles.ts` ersetzt die lokale Coverage-Plan-Role-Segment-Prüfung per `segment.includes(...)` durch gebundene `_`-Token- und Tokenfolgenprüfung.
+  - Exakte Rollen, Präfix-Needles wie `breaker_`, Einzelterm-Matches wie `economy` in `remote_economy_asset_support` und zusammengesetzte Needles wie `pressure_hq` bleiben wirksam; Suffix-Rauschen wie `microeconomy`, `economyish_support` und `breakerish_fracter` erzeugt keinen Coverage-Role-Match.
+  - Die Änderung bleibt auf TacticalPlan-Coverage-Answer-/Recovery-Matching gegen bereits sichtbare oder strukturierte Rollensignale beschränkt und erzeugt keine LegalAction-Projektion.
+  - `tactical-plan-coverage-card-roles.test.ts` schützt positive Exact-/Prefix-/Compound-Role-Fälle und negative Suffix-Noise-Fälle; `tactical-plan-coverage-search-fit.test.ts` und `tactical-plan-legal-coverage-answers.test.ts` sichern die Plan-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/plans/tactical-plan-coverage-card-roles.test.ts src/plans/tactical-plan-coverage-search-fit.test.ts src/plans/tactical-plan-legal-coverage-answers.test.ts` grün, 3 Dateien, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-corp-helpers.ts` ersetzt die lokale Corp-Punish-/Flatline-Signal-Term-Prüfung per `segment.includes(...)` durch gebundene `_`-Tokenprüfung.
+  - Exakte Punktsegmente wie `punish.payoff`, Exact-Signale wie `tag.source`, zusammengesetzte Signale wie `visible_punish_payoff` und `score_flatline_window` bleiben wirksam; Suffix-Rauschen wie `punishment_noise`, `pre_punishment_support` und `flatliner` erzeugt keinen Corp-Punish-Plan-Kandidaten.
+  - Die Änderung bleibt auf TacticalPlan-Corp-Punish-Kandidaten aus side-sicheren ActionSemanticCandidate-Signalen beschränkt und erzeugt keine LegalAction-Projektion.
+  - `tactical-plan-corp-helpers.test.ts` schützt positive Exact-/Compound-Signale und negative Substring-Noise-Fälle; `tactical-plans.test.ts` sichert den Corp-Punish-Plan-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/plans/tactical-plan-corp-helpers.test.ts src/tactical-plans.test.ts -t "structured punish|translates Corp punish intent"` grün, 2 Dateien, 2 Tests, 45 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihunderteinundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-effective-defense.ts` ersetzt die lokale Effective-Defense-Signal-Term-Prüfung per `segment.includes(...)` durch gebundene `_`-Token- und Tokenfolgenprüfung.
+  - Exakte Signale und zusammengesetzte Defense-Terme wie `trace_ice`, `conditional_end_run`, `encounter_paid_subroutine_add` und `paid_subroutine` bleiben wirksam; Suffix-Rauschen wie `traceroute_noise`, `damaged_goods`, `paid_subroutineish_noise` und `encounter_paid_subroutineish_add` erzeugt keine Stop-/Tax-/Paid-Ability-Defense.
+  - Die Änderung bleibt auf Runtime-Corp-Effective-Defense-Bewertung aus side-sicheren ActionSemanticCandidate-Signalen beschränkt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-effective-defense.test.ts` schützt positive Trace-/Paid-Subroutine-Defense-Fälle und negative Substring-Noise-Fälle; `semantic-runtime-corp-score.test.ts` sichert den Corp-Score-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-effective-defense.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 22 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertzweiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` ersetzt die lokale Hint-Role-Prüfung per `normalized.includes(...)` durch den gemeinsamen gebundenen `rolesMatch`-Matcher.
+  - Exakte Hint-Rollen, Präfix-Rollen wie `breaker_` und zusammengesetzte Rollen wie `pressure_hq` bleiben über den Runtime-Role-Matcher wirksam; Suffix-Rauschen wie `microeconomy`, `tagalong` oder `breakerish_fracter` bleibt durch `role-match.test.ts` ausgeschlossen.
+  - Die Änderung bleibt auf zentrale ICE-Profilbewertung aus bekannten Hint-Rollen beschränkt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-remote-score.test.ts` schützt die zentralen ICE-Scoring-Consumer; `role-match.test.ts` schützt die Exact-/Prefix-/Compound- und negativen Substring-Fälle; `semantic-runtime-corp-score.test.ts` sichert den Runtime-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/role-match.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 3 Dateien, 19 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertdreiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ersetzt den lokalen Scoring-Window-Signalvergleich per manuellen `_`-/`.`-Delimiter-`includes(...)`-Prüfungen durch eine gebundene Delimiter-Tokenfolgenprüfung.
+  - Exakte und zusammengesetzte Signals wie `corp_ice.outer_ice_scaling`, `corp_ice.position_scaling`, `etr_ice`, `end_run`, `damage_ice` und `program_trash` bleiben wirksam; Suffix-Rauschen bleibt durch Delimiter-Tokenfolgen statt freier Teilstrings ausgeschlossen.
+  - Die Änderung bleibt auf Corp-Scoring-Window-ICE-Qualitätsbewertung aus bekannten Hint-Rollen, Planrollen und Tactic-Signals beschränkt und erzeugt keine LegalAction-Projektion.
+  - `semantic-runtime-corp-scoring-window.test.ts` schützt die Score-Window-ICE-Qualität inklusive Position-Scaling-Evidence und Central-Pressure-Bounds; `semantic-runtime-corp-score.test.ts` sichert den Runtime-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-scoring-window.test.ts src/runtime/semantic-runtime-corp-score.test.ts` grün, 2 Dateien, 34 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertvierundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` ersetzt die Event-only-RunAction-Relevanzprüfung auf exakte Bare-Signale wie `multiaccess` und `access_replacement` durch eine gebundene Signal-Tokenfolgenprüfung gegen strukturierte Hint-Signale.
+  - Strukturierte Signale wie `effect:multiaccess`, `access.hq_multiaccess`, `effect:access_replacement`, `access.replacement`, `access.hq_via_archives` und `target:noisy_breaker_restriction` werden wieder erkannt; Suffix-Rauschen wie `multiaccessory_noise` bleibt durch Tokenbindung ausgeschlossen.
+  - Die Relevanzregel gilt nun für side-sichere Run-Pressure-Aktionen unabhängig davon, ob sie aus Event oder Program-Ability stammen, und erzeugt Projektionen weiterhin nur aus LegalActions und strukturierten Hint-/Payload-Signalen.
+  - `run-action-projection.test.ts` schützt die strukturierten Projection-Bounds; `runner-run-target-evaluation.test.ts` sichert Shredder, All-Hands, Rush Hour und den geblockten Multiaccess-Pfad wieder grün.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/run-action-projection.test.ts src/runner-run-target-evaluation.test.ts` grün, 2 Dateien, 63 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
+- `AI-COMPLETE-15` zweihundertfünfundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-run-target-evaluation.ts` ersetzt die lokale RunAction-Payoff-Signalprüfung per freien `signal.includes(...)`-Prüfungen durch gebundene Signal-Token- und Tokenfolgenprüfung.
+  - Strukturierte Projection-Signale wie `access.hq_multiaccess`, `access.rnd_multiaccess`, `access.hq_info`, `access.rnd_topdeck_info`, `access.free_trash` und `access_trash` bleiben wirksam; Suffix-Rauschen wie `multiaccessory`, `R&Dish`, `tagalong` oder `damaged_goods` erzeugt keine RunAction-Payoff- oder Risk-Penalty-Matches.
+  - Die Änderung bleibt auf bereits erzeugte RunActionProjection-Signale beschränkt und erzeugt keine LegalAction-Projektion.
+  - `run-action-projection.test.ts` schützt die strukturierten Projection-Bounds; `runner-run-target-evaluation.test.ts` sichert Shredder, All-Hands, Rush Hour, blocked Multiaccess und die bestehenden Access-Payoff-Evaluations.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/run-action-projection.test.ts src/runner-run-target-evaluation.test.ts` grün, 2 Dateien, 63 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

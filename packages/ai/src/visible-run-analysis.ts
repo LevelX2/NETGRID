@@ -1663,7 +1663,7 @@ function creditsToBreakVisibleSubroutinesWithBreaker(
   if (
     !breakerDefinition ||
     !iceDefinition ||
-    !breakerDefinition.subtypes.includes("icebreaker")
+    !hasSubtype(breakerDefinition.subtypes, "icebreaker")
   )
     return undefined;
   const iceSubtypes = ice.subtypes ?? iceDefinition.subtypes;
@@ -1763,7 +1763,7 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
   if (
     !breakerDefinition ||
     !iceDefinition ||
-    !breakerDefinition.subtypes.includes("icebreaker")
+    !hasSubtype(breakerDefinition.subtypes, "icebreaker")
   )
     return undefined;
   const iceSubtypes = ice.subtypes ?? iceDefinition.subtypes;

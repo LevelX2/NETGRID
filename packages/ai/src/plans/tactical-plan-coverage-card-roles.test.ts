@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { VisibleCard } from "@netgrid/shared";
 
-import { cardPlanRoleForCoverageSearch } from "./tactical-plan-coverage-card-roles";
+import {
+  cardPlanRoleForCoverageSearch,
+  coveragePlanRoleMatches,
+} from "./tactical-plan-coverage-card-roles";
 
 describe("cardPlanRoleForCoverageSearch", () => {
   it("classifies coverage search roles by bounded card tokens", () => {
@@ -19,6 +22,26 @@ describe("cardPlanRoleForCoverageSearch", () => {
         card({ rulesText: "Searching drawish creditor gainish 3." }),
       ),
     ).toBe("resource");
+  });
+});
+
+describe("coveragePlanRoleMatches", () => {
+  it("matches bounded coverage role tokens and compound phrases", () => {
+    expect(coveragePlanRoleMatches("remote_economy_asset_support", ["economy"])).toBe(
+      true,
+    );
+    expect(
+      coveragePlanRoleMatches("runner.pressure_hq.support", ["pressure_hq"]),
+    ).toBe(true);
+    expect(coveragePlanRoleMatches("breaker_fracter", ["breaker_"])).toBe(true);
+  });
+
+  it("ignores substring-only coverage role noise", () => {
+    expect(coveragePlanRoleMatches("microeconomy", ["economy"])).toBe(false);
+    expect(coveragePlanRoleMatches("economyish_support", ["economy"])).toBe(false);
+    expect(coveragePlanRoleMatches("breakerish_fracter", ["breaker_"])).toBe(
+      false,
+    );
   });
 });
 
