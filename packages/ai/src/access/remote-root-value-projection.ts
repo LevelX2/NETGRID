@@ -138,7 +138,8 @@ function tokensIncludeAny(
   tokens: readonly string[],
   accepted: readonly string[],
 ): boolean {
-  return tokens.some((token) => accepted.includes(token));
+  const acceptedSet = new Set(accepted);
+  return tokens.some((token) => acceptedSet.has(token));
 }
 
 function tokensIncludePhrase(

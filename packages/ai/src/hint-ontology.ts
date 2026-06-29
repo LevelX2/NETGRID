@@ -1207,7 +1207,8 @@ function validateOptionalKnown<const T extends readonly string[]>(
   issues: AiHintOntologyIssue[],
 ): void {
   if (value === undefined) return;
-  if (typeof value !== "string" || !knownValues.includes(value)) {
+  const knownValueSet = new Set(knownValues);
+  if (typeof value !== "string" || !knownValueSet.has(value)) {
     addIssue(
       issues,
       "error",

@@ -10061,6 +10061,96 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n '\.includes\(term\)|includes\(term\)' packages/ai/src/decision/doctrine-goal-synthesis.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertzweiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/known-central-access-payoff.ts` bindet HQ-Memory-Invalidation-Reason-Codes über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Reason-Code-Erkennung bleibt exakt; Event-Suffixe nach `:` werden weiter entfernt und substring-nahe Rauschgründe bleiben ausgeschlossen.
+  - `known-central-access-payoff.test.ts` sichert HQ-Knownness-Payoffs und exact Reason-Code-Matching.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/known-central-access-payoff.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'reasonCodes\.includes|includes\(reason\.split' packages/ai/src/known-central-access-payoff.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertdreiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/hint-ontology.ts` bindet bekannte Ontology-Werte über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Hint-Ontology-Validierung bleibt exakt; unbekannte Effect-, Condition- und TargetProfile-Werte bleiben Fehler und bekannte Werte bleiben akzeptiert.
+  - `hint-ontology.test.ts` sichert aktive Hint-Daten, bekannte Werte und unknown-value-Fehlerpfade.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/hint-ontology.test.ts` grün, 1 Datei, 18 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'knownValues\.includes|includes\(value\)' packages/ai/src/hint-ontology.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertvierundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-invariants.ts` bindet Hidden-Info-Marker-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Invariant-Prüfung bleibt exakt; Hidden-Info-Marker bleiben tokengebunden und substring-nahe Rauschwerte bleiben ausgeschlossen.
+  - `action-semantic-invariants.test.ts` sichert Hidden-Info-Token-Bounding, Support-only-Segmente, Structural-Marker und Fixture-ID-Segmente.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-semantic-invariants.test.ts` grün, 1 Datei, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'accepted\.includes\(token\)|includes\(token\)' packages/ai/src/actions/action-semantic-invariants.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertfünfundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/access/remote-root-value-projection.ts` bindet Remote-Root-Role-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Remote-Root-Value-Projektion bleibt exakt; Economy-, Campaign-, Ambush- und Engine-Rollen bleiben tokengebunden und substring-nahe Rauschwerte bleiben ausgeschlossen.
+  - `remote-root-value-projection.test.ts` sichert Remote-Root-Wertklassifikation und substring-nahe Role-Noise-Werte.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/access/remote-root-value-projection.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'accepted\.includes\(token\)|includes\(token\)' packages/ai/src/access/remote-root-value-projection.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertsechsundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-aware-alternative-snapshot.ts` bindet Alternative-Snapshot-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Progress-, Hard-Gate-, Source- und Blocker-Klassifikation bleibt exakt; hard-gate-nahe Rauschmarker bleiben ausgeschlossen.
+  - `progress-aware-alternative-snapshot.test.ts` sichert Score-/Coverage-Snapshots, Hard-Gate-Erkennung und bounded Rauschmarker.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/simulation/progress-aware-alternative-snapshot.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'accepted\.includes\(token\)|includes\(token\)' packages/ai/src/simulation/progress-aware-alternative-snapshot.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertsiebenundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/practical-tactic-overlay.ts` bindet Practical-Tactic-Payload-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Overlay-Kandidaten bleiben compare-only; Breaker-, Payoff-, ICE- und Source-Tokens bleiben bounded und label-only Rauschen bleibt ausgeschlossen.
+  - `practical-tactic-overlay.test.ts` sichert Compare-only-Verhalten, strukturierte Payloads, label-only Ignorieren und Payoff-/Coverage-Fälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/practical-tactic-overlay.test.ts` grün, 1 Datei, 11 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'accepted\.includes\(token\)|includes\(token\)' packages/ai/src/runtime/practical-tactic-overlay.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertachtundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/role-match.ts` bindet Single-Needle-Rollentokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Rollenmatches bleiben exakt; Exact-, Prefix- und Compound-Matches bleiben erhalten und substring-nahe Rollenrauschwerte bleiben ausgeschlossen.
+  - `role-match.test.ts` sichert bounded Rollenmatches, Prefix-Rollen und substring-only Rauschen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/role-match.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(needle\)|includes\(needle\)' packages/ai/src/runtime/role-match.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertneunundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-coverage-card-roles.ts` bindet Coverage-Plan-Rollentokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Coverage-Rollenmatches bleiben exakt; Bounded Card-Tokens, Prefix-Rollen und Compound-Phrasen bleiben erhalten und substring-nahe Rauschrollen bleiben ausgeschlossen.
+  - `tactical-plan-coverage-card-roles.test.ts` sichert Coverage-Rollenerkennung, Compound-Matches und substring-only Rauschen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/plans/tactical-plan-coverage-card-roles.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(needle\)|includes\(needle\)' packages/ai/src/plans/tactical-plan-coverage-card-roles.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihundertsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` bindet Corp-Scoring-Window-Signal-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Scoring-Window-Signal-Erkennung bleibt exakt; Remote-, Scoreline-, Agenda- und Protection-Signale bleiben bounded und substring-nahe Rauschwerte bleiben ausgeschlossen.
+  - `semantic-runtime-corp-scoring-window.test.ts` sichert Scoring-Window-Assessments, Remote-Safety, Central-Pressure-Override und relevante ICE-Bewertung.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-scoring-window.test.ts` grün, 1 Datei, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(normalizedNeedle\)|includes\(normalizedNeedle\)' packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ohne Treffer.
+
+- `AI-COMPLETE-15` dreihunderteinundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/strategic-action-fit.ts` bindet StrategicActionFit-Scope-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Scope-ID-Erkennung bleibt exakt; Runner-Setup- und Corp-Tag-Punish-Scopes bleiben tokengebunden und substring-nahe Scope-Rauschwerte bleiben ausgeschlossen.
+  - `strategic-action-fit.test.ts` sichert Runner-Setup- und Corp-Tag-Scopes by token statt Substring.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/strategic-action-fit.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'scopeId\.split\(/\[\._:-\]\+/\)\.includes|includes\(token\)' packages/ai/src/runtime/strategic-action-fit.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
