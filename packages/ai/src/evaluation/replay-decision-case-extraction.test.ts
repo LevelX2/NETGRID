@@ -61,6 +61,27 @@ describe("ReplayDecisionCaseExtraction", () => {
                 whyNot: ["slower"],
               },
             ],
+            actionAlternatives: [
+              {
+                rank: 1,
+                actionId: "run-remote",
+                actionType: "start_run",
+                label: "sessionToken label leak",
+                selected: true,
+                priority: 120,
+                whyChosen: ["semantic_runtime_actual", "rank:1"],
+                whyNot: [],
+              },
+              {
+                rank: 2,
+                actionId: "draw",
+                actionType: "draw_card",
+                selected: false,
+                excluded: true,
+                whyChosen: [],
+                whyNot: ["semantic_excluded:known_no_current_payoff"],
+              },
+            ],
           },
         }),
         traceRow({
@@ -95,6 +116,24 @@ describe("ReplayDecisionCaseExtraction", () => {
     expect(report.cases[0]?.observables.rankedAlternatives[1]?.summary).toBe(
       "[redacted]",
     );
+    expect(report.cases[0]?.observables.actionAlternatives).toEqual([
+      {
+        rank: 1,
+        actionType: "start_run",
+        selected: true,
+        priority: 120,
+        whyChosen: ["semantic_runtime_actual", "rank:1"],
+        whyNot: [],
+      },
+      {
+        rank: 2,
+        actionType: "draw_card",
+        selected: false,
+        excluded: true,
+        whyChosen: [],
+        whyNot: ["semantic_excluded:known_no_current_payoff"],
+      },
+    ]);
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
     expect(JSON.stringify(report)).not.toContain("fullGameState leak");
     expect(JSON.stringify(report)).not.toContain("sessionToken leak");
@@ -141,4 +180,3 @@ function traceRow(
     ...overrides,
   };
 }
-
