@@ -10420,6 +10420,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: gezieltes Ripgrep auf die entfernten Action-Gain-Regexes und Substrings ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertdreiundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt die Legacy-Scored-Agenda-Credit-Gain-RulesText-Regexes durch Token-Prädikate.
+  - Scored-Agenda-Ökonomie erkennt `gain/take <Zahl>`, bracket notation und `<Zahl> Credits nehmen` weiter ohne freie Regex-Auswertung.
+  - Status bleibt `IN_PROGRESS`, weil die Scored-Agenda-Draw-Amount-Regex und die Counter-Economy-Heuristik noch offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "Political Overthrow|Corporate Coup"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: gezieltes Ripgrep auf die entfernten Scored-Agenda-Credit-Gain-Regexes ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

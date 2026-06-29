@@ -5268,13 +5268,39 @@ function scoredAgendaAbilityText(
 }
 
 function scoredAgendaCreditGainFromText(text: string): number {
-  const normalized = text.replace(/\[[^\d]*(\d+)[^\d]*\]/g, "$1");
-  const match =
-    /\b(?:gain|take)\s+(\d+)(?:\s+(?:credits?|bits?))?/i.exec(normalized) ??
-    /(\d+)\s+Credits?\s+nehmen/i.exec(normalized);
-  if (!match) return 0;
-  const amount = Number(match[1]);
-  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+  const tokens = corpRulesTextTokens(text);
+  const amountToken = tokens.find((token, index) =>
+    corpScoredAgendaCreditGainAmountToken(tokens, index),
+  );
+  return amountToken ? (corpNumberWordToNumber(amountToken) ?? 0) : 0;
+}
+
+function corpScoredAgendaCreditGainAmountToken(
+  tokens: readonly string[],
+  index: number,
+): boolean {
+  if (corpNumberWordToNumber(tokens[index] ?? "") === undefined) return false;
+  const previousToken = tokens[index - 1];
+  const tokenBeforeBracket = tokens[index - 2];
+  const tokenAfterAmount =
+    tokens[index + 1] === "bracketclose" ? tokens[index + 2] : tokens[index + 1];
+  const tokenAfterCredit =
+    tokens[index + 1] === "bracketclose" ? tokens[index + 3] : tokens[index + 2];
+  if (
+    previousToken === "gain" ||
+    previousToken === "take" ||
+    (previousToken === "bracketopen" &&
+      (tokenBeforeBracket === "gain" || tokenBeforeBracket === "take"))
+  )
+    return true;
+  return (
+    corpTokensIncludeAny([tokenAfterAmount ?? ""], [
+      "credit",
+      "credits",
+      "bit",
+      "bits",
+    ]) && tokenAfterCredit === "nehmen"
+  );
 }
 
 function scoredAgendaDrawAmountFromText(text: string): number {
