@@ -24,7 +24,8 @@ export function runnerRunTargetGuidanceScoreComponent(
 ): AiDecisionScoreComponent | undefined {
   const evaluation = dependencies.evaluationForAction(input, action);
   if (!evaluation) return undefined;
-  const value = dependencies.guidanceValue(evaluation);
+  const rawValue = dependencies.guidanceValue(evaluation);
+  const value = normalizedRunTargetGuidanceValue(rawValue);
   if (
     value < 0 &&
     dependencies.visibleHighPayoffRunOverride(input, action)
@@ -44,6 +45,8 @@ export function runnerRunTargetGuidanceScoreComponent(
       `known_access:${evaluation.knownAccessState}`,
       `path:${evaluation.pathPassability}`,
       `credits_after:${evaluation.creditsAfterRun}`,
+      `raw_guidance:${rawValue}`,
+      `normalized_guidance:${value}`,
       ...evaluation.evidence
         .filter(
           (entry) =>
@@ -56,4 +59,8 @@ export function runnerRunTargetGuidanceScoreComponent(
       ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 24) ?? []),
     ].join("|"),
   };
+}
+
+export function normalizedRunTargetGuidanceValue(rawValue: number): number {
+  return Math.max(-100, Math.min(100, Math.round(rawValue / 50)));
 }

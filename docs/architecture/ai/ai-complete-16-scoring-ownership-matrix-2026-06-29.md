@@ -1,6 +1,6 @@
 # AI-COMPLETE-16 Scoring Ownership Matrix
 
-Status: `IN_PROGRESS`
+Status: `VERIFIED`
 
 Zweck: Erstes Ownership-Artefakt für `AI-COMPLETE-16`, damit doppelte oder widersprüchliche Bewertungslogik nicht mehr über verstreute Score-Module, Legacy-Planer und Simulation-Diagnostik entschieden wird.
 
@@ -19,11 +19,23 @@ Zweck: Erstes Ownership-Artefakt für `AI-COMPLETE-16`, damit doppelte oder wide
 | Plan Continuity und Fortschritt | `packages/ai/src/runtime/semantic-runtime.ts`, TacticalPlan-/Progression-Module | Choice-Builder, WhyChosen/WhyNot, Simulation-Metriken | Planfortschritt darf keine blockierten oder payofflosen Wiederholungen gegenüber Reachability/Access-Memory hochziehen. |
 | Legacy Action Scoring | `packages/ai/src/legacy/legacy-action-scorer.ts`, `legacy-action-scoring-composition.ts` | Legacy-Fallback, Comparator, Exclusion-Kontext | Legacy bleibt gekapselt; produktive Ownership liegt bei Runtime-/Decision-Ownern. |
 
+## Guard-Status
+
+- Score-Aggregation: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `semanticRuntimeScoreFromComponents` nur noch im Score-Components-Owner, im Runtime-Choice-Builder und im Public-Entrypoint-Reexport. Neue produktive Gesamtpunkt-Summierungen außerhalb dieser Boundary fallen damit als Boundary-Verstoß auf.
+- Legacy Action Scoring: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `scoreActionsForLegacy` und `createLegacyActionScoringComposition` außerhalb der Legacy-Schicht nur in `runtime/ai-action-entrypoints-composition.ts` und `runtime/semantic-runtime-action-exclusion-composition.ts`. Neue produktive Legacy-Scoring-Consumer fallen damit als Boundary-Verstoß auf.
+- Runner Run Reachability: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `evaluateRunnerRunTargets` nur im Run-Target-Evaluator, in Public-/Evaluation-Reexports und in den Runtime-Orchestrierungsstellen. Neue direkte Legacy- oder Score-Modul-Consumer fallen damit als Boundary-Verstoß auf.
+- Access Payoff: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt direkte `evaluateKnownRemoteAccessPayoff`-/`evaluateKnownCentralAccessPayoff`-Nutzung nur in den Payoff-Ownern, Run-Target-Evaluation, Tactical-Plan-Runner-Plans, Public-Reexport und dem Legacy-Runner-Adapter `legacy-runner-access-payoff.ts`. `legacy/runner-plans.ts` nutzt den Adapter statt direkter Owner-Aufrufe.
+- Corp Board-Triage und Scoreline-Safety: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `semanticRuntimeCorpBoardTriage`, `semanticRuntimeCorpActionIsScoreLine`, `semanticRuntimeCorpRemoteHasScoreLine`, `semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine` und `semanticRuntimeCorpScoreNowSafetyGate` nur in den jeweiligen Runtime-Ownern sowie den expliziten Context-/Composition-Consumern. Neue direkte Scoreline-/Safety-Entscheidungen außerhalb dieser Owner fallen damit als Boundary-Verstoß auf.
+- TargetChoice-Fit: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `targetChoiceRecommendationForTargetFit` nur im TargetChoice-Owner, in `semantic-shadow-decision.ts` und in den Coverage-/Readiness-Evaluationen; `buildTargetChoiceShadowReport` bleibt auf TargetChoice-Owner, Semantic-Shadow-Decision und Debug-Ausgabe begrenzt. Damit bleibt TargetChoice produktiv ein Target-Fit-Signal und kein paralleler Selected-Choice-/Selected-Target-Entscheider.
+- Goal-/Strategic-Fit: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `scoreActionGoalFit` und `buildTacticalGoalUtilities` nur in den Decision-Ownern, Semantic-Shadow-Decision und expliziten Evaluation-Reports; `semanticRuntimeStrategicActionFitScoreComponents` und `semanticRuntimeStrategicActionFitEvidence` bleiben auf den Strategic-Fit-Owner sowie Runtime-Score-/Choice-Consumer begrenzt. Neue parallele Goal-/Strategic-Fit-Bewertungen außerhalb dieser Owner fallen damit als Boundary-Verstoß auf.
+- Corp Economy, Rez-Floor und Passive Scoreline: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt Remote-/Central-Rez-Floor-Assessments, Rez-Floor-FundingNeed und Passive-Scoreline-Penalty nur in den Runtime-Ownern und den expliziten Corp-Scoring-Compositions. Damit bleiben Economy-Stabilisierung und Reserve-Skalierung an denselben Score-/Evidence-Pfad gebunden.
+- Plan Continuity und Plan-Memory: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt Planfortschreibung, Planranking und Map-Berechtigung nur im TacticalPlan-Progression-Owner und der `tactical-plans.ts`-Fassade; Plan-Memory-Exclusions bleiben auf den Runtime-Owner und die Runner-Support-Compositions begrenzt. Damit darf Planfortschritt blockierte oder payofflose Wiederholungen nicht außerhalb dieser Owner hochziehen.
+
 ## Erste Audit-Befunde
 
 - `rg` zeigt erwartungsgemäß viele Score-/Reachability-/Access-Treffer, aber keine einzelne zentrale Owner-Dokumentation vor diesem Artefakt.
-- Die stärksten Kollisionszonen sind Runner-Run-Reachability versus Legacy-Runner-Planer, Remote-/Access-Payoff versus Simulation-Metriken, Corp-Board-Triage versus Corp-Scoreline/Safety und Legacy-Action-Scoring versus Runtime-Score.
-- Nächster Umsetzungsschnitt sollte eine konkrete Kollisionszone in Code oder Tests binden, statt die Matrix breiter zu machen.
+- Die benannten Kollisionszonen sind durch konkrete Boundary-Guards gebunden.
+- Nächster Umsetzungsschnitt sollte ein Abschlussaudit der konkreten Owner-Bindungen durchführen und `AI-COMPLETE-16` nur bei ausreichender Evidenz schließen.
 
 ## Gates
 

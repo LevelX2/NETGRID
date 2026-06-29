@@ -6,11 +6,20 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
+  beliefUncertaintyConsumerFacts,
   hiddenZoneActionEventFamily,
+  normalizedBeliefUncertaintyValue,
   reconstructBeliefState,
 } from "./belief-state";
 
 describe("belief-state hidden zone action classification", () => {
+  it("normalizes belief uncertainty into the scoring consumer scale", () => {
+    expect(normalizedBeliefUncertaintyValue(0)).toBe(0);
+    expect(normalizedBeliefUncertaintyValue(-25)).toBe(-25);
+    expect(normalizedBeliefUncertaintyValue(-150)).toBe(-100);
+    expect(normalizedBeliefUncertaintyValue(150)).toBe(100);
+  });
+
   it("matches hidden-zone action markers by bounded terms", () => {
     expect(hiddenZoneActionEventFamily("corp_rd_shuffle")).toBe("shuffle");
     expect(hiddenZoneActionEventFamily("new_blood_conceal_reorder_installed_ice")).toBe(
@@ -340,6 +349,33 @@ describe("belief-state known position memory", () => {
 });
 
 describe("belief-state remote hypothesis invalidations", () => {
+  it("exposes side-safe uncertainty consumer facts without changing uncertainty entries", () => {
+    const input = runnerInput([]);
+    input.playerView.servers = [
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [{ known: false }],
+        root: [{ known: false }],
+      },
+    ] as unknown as PlayerView["servers"];
+
+    const belief = reconstructBeliefState(input);
+
+    expect(belief.uncertainty).toEqual(
+      expect.arrayContaining([
+        "unknown_opponent_hand_or_hidden_zones",
+        "unknown_remote_cards_remain_hypotheses",
+        "unrezzed_ice_titles_remain_unknown",
+      ]),
+    );
+    expect(beliefUncertaintyConsumerFacts(belief)).toEqual([
+      "belief_uncertainty_count:3",
+      "belief_uncertainty_raw_value:-75",
+      "belief_uncertainty_normalized_value:-75",
+    ]);
+  });
+
   it("matches invalidation entries by bounded remote server id", () => {
     const remote10Advance = publicEvent("evt_remote_10_advance", "advance_card", 1, {
       actor: "corp",

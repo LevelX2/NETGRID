@@ -4,6 +4,7 @@ import {
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "../ai-hints";
 import {
+  beliefUncertaintyConsumerFacts,
   reconstructBeliefState,
   type CorpOpponentModel,
   type RunnerOpponentModel,
@@ -16,6 +17,7 @@ export type SemanticRuntimeMemoryDebug = {
   hypotheses: string[];
   invalidations: string[];
   beliefUncertainty: string[];
+  beliefUncertaintyConsumer: string[];
   opponentModel?: Record<string, unknown>;
   items: string[];
 };
@@ -40,6 +42,7 @@ export function semanticRuntimeMemoryDebug(
     input.side === "runner"
       ? semanticRuntimeRunnerOpponentMemorySummary(belief.runnerOpponentModel)
       : semanticRuntimeCorpOpponentMemorySummary(belief.corpOpponentModel);
+  const beliefUncertaintyConsumer = beliefUncertaintyConsumerFacts(belief);
   const items = [
     `memory_version:${belief.version}`,
     ...semanticRuntimeOwnHandMemoryItems(input),
@@ -47,6 +50,7 @@ export function semanticRuntimeMemoryDebug(
       ? semanticRuntimeRunnerMemoryItems(belief.runnerOpponentModel)
       : semanticRuntimeCorpMemoryItems(belief.corpOpponentModel)),
     ...belief.uncertainty.slice(0, 4).map((entry) => `uncertainty:${entry}`),
+    ...beliefUncertaintyConsumer,
   ];
   return {
     memoryVersion: belief.version,
@@ -54,6 +58,7 @@ export function semanticRuntimeMemoryDebug(
     hypotheses: uniqueDebugStrings(hypotheses).slice(0, 6),
     invalidations: belief.invalidationLog.slice(0, 6),
     beliefUncertainty: belief.uncertainty.slice(0, 6),
+    beliefUncertaintyConsumer,
     ...(opponentModel ? { opponentModel } : {}),
     items,
   };

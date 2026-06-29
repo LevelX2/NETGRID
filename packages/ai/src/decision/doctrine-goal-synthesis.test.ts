@@ -4,9 +4,20 @@ import type {
   DeckDoctrineV2DiagnosticStatus,
   DeckDoctrineV2StrategyDiagnostic,
 } from "../deck-doctrine-strategy";
-import { synthesizeDoctrineTacticalGoals } from "./doctrine-goal-synthesis";
+import {
+  normalizedDoctrineGoalPriority,
+  synthesizeDoctrineTacticalGoals,
+} from "./doctrine-goal-synthesis";
 
 describe("doctrine goal synthesis", () => {
+  it("normalizes doctrine goal priority into the scoring consumer scale", () => {
+    expect(normalizedDoctrineGoalPriority(0)).toBe(0);
+    expect(normalizedDoctrineGoalPriority(520)).toBe(52);
+    expect(normalizedDoctrineGoalPriority(810)).toBe(81);
+    expect(normalizedDoctrineGoalPriority(1500)).toBe(100);
+    expect(normalizedDoctrineGoalPriority(-1500)).toBe(-100);
+  });
+
   it("turns anchorless doctrine into a neutral setup goal", () => {
     const goals = synthesizeDoctrineTacticalGoals(
       diagnostic("runner", "anchorless", true, []),
@@ -32,7 +43,11 @@ describe("doctrine goal synthesis", () => {
       expect.objectContaining({
         goalId: "runner.doctrine.rnd_pressure_access",
         family: "pressure",
-        evidence: expect.arrayContaining(["doctrine_goal:run_access"]),
+        evidence: expect.arrayContaining([
+          "doctrine_goal:run_access",
+          "doctrine_raw_priority:790",
+          "doctrine_normalized_value:79",
+        ]),
       }),
     ]);
   });

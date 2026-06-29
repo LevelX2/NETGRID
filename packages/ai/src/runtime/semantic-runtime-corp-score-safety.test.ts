@@ -1,9 +1,19 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
-import { semanticRuntimeCorpScoreNowSafetyGate } from "./semantic-runtime-corp-score-safety";
+import {
+  normalizedTerminalOutcomeValue,
+  semanticRuntimeCorpScoreNowSafetyGate,
+} from "./semantic-runtime-corp-score-safety";
 
 describe("semanticRuntimeCorpScoreNowSafetyGate", () => {
+  it("normalizes terminal outcome values into the scoring consumer scale", () => {
+    expect(normalizedTerminalOutcomeValue(100)).toBe(100);
+    expect(normalizedTerminalOutcomeValue(-100)).toBe(-100);
+    expect(normalizedTerminalOutcomeValue(150)).toBe(100);
+    expect(normalizedTerminalOutcomeValue(-150)).toBe(-100);
+  });
+
   it("allows score-now only for exact legal score action ids", () => {
     const dependencies = {
       scoreTerminalWindow: () => ({
@@ -22,12 +32,22 @@ describe("semanticRuntimeCorpScoreNowSafetyGate", () => {
       ),
     ).toMatchObject({
       allowed: true,
+      evidence: expect.arrayContaining([
+        "terminal_outcome_allowed:true",
+        "terminal_outcome_raw_value:100",
+        "terminal_outcome_normalized_value:100",
+      ]),
     });
     expect(
       semanticRuntimeCorpScoreNowSafetyGate(input(), action("score"), dependencies),
     ).toMatchObject({
       allowed: false,
-      evidence: ["unsafe_score_unknown_higher_priority"],
+      evidence: expect.arrayContaining([
+        "unsafe_score_unknown_higher_priority",
+        "terminal_outcome_allowed:false",
+        "terminal_outcome_raw_value:-100",
+        "terminal_outcome_normalized_value:-100",
+      ]),
     });
   });
 });

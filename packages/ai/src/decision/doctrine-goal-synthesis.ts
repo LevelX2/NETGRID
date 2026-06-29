@@ -4,6 +4,8 @@ import type {
 } from "../deck-doctrine-strategy";
 import type { TacticalGoalLike } from "./semantic-decision-frame";
 
+const DOCTRINE_SCORE_NORMALIZATION_DIVISOR = 10;
+
 export function synthesizeDoctrineTacticalGoals(
   diagnostic: DeckDoctrineV2Diagnostic | undefined,
 ): TacticalGoalLike[] {
@@ -483,14 +485,26 @@ function goal(
   urgency: NonNullable<TacticalGoalLike["urgency"]>,
   evidence: readonly string[],
 ): TacticalGoalLike {
+  const normalizedValue = normalizedDoctrineGoalPriority(priority);
   return {
     goalId,
     family,
     priority,
     urgency,
     source: "deck",
-    evidence,
+    evidence: [
+      ...evidence,
+      `doctrine_raw_priority:${priority}`,
+      `doctrine_normalized_value:${normalizedValue}`,
+    ],
   };
+}
+
+export function normalizedDoctrineGoalPriority(priority: number): number {
+  return Math.max(
+    -100,
+    Math.min(100, Math.round(priority / DOCTRINE_SCORE_NORMALIZATION_DIVISOR)),
+  );
 }
 
 function dedupeGoals(goals: readonly TacticalGoalLike[]): TacticalGoalLike[] {

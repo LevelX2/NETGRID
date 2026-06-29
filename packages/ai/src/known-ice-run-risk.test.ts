@@ -116,8 +116,10 @@ describe("known visible ICE run risk", () => {
 
     expect(decision.actionId).toBe(gain.actionId);
     expect(runAlternative?.excluded).not.toBe(true);
-    expect(guidance).toMatchObject({ value: -2100 });
+    expect(guidance).toMatchObject({ value: -42 });
     expect(guidance?.reason).toContain("recommendation:gain_credits_first");
+    expect(guidance?.reason).toContain("raw_guidance:-2100");
+    expect(guidance?.reason).toContain("normalized_guidance:-42");
     expect(guidance?.reason).toContain("visible_ice_hazard:trace_tag");
     expect(guidance?.reason).toContain(
       "visible_trace_tag_hazard_unavoidable:true",

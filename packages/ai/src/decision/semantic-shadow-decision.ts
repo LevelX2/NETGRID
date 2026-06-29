@@ -1,6 +1,6 @@
 import type { LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 import { scoreActionGoalFit, type ActionGoalFit } from "./action-goal-fit";
 import { synthesizeDoctrineTacticalGoals } from "./doctrine-goal-synthesis";
 import { buildAiOpportunityProjections } from "./opportunity-projection";
@@ -104,6 +104,22 @@ export function buildSemanticShadowDecision(
       components: [...fit.components, ...contextualComponents],
       blockers: fit.blockers,
       explanation: explainRankedAction(candidate, fit, contextualComponents),
+    });
+  }
+  const tracedActionIds = new Set([
+    ...rankedActions.map((action) => action.actionId),
+    ...rejectedActions.map((action) => action.actionId),
+  ]);
+  for (const legalActionId of frame.legalActionIds) {
+    if (tracedActionIds.has(legalActionId)) continue;
+    rejectedActions.push({
+      actionId: legalActionId,
+      reason: "missing_semantic_candidate",
+      blockers: ["missing_semantic_candidate"],
+      evidence: [
+        `legal_action:${legalActionId}`,
+        "why_not:missing_semantic_candidate",
+      ],
     });
   }
 
@@ -537,7 +553,7 @@ function doctrineGoalTraceSummary(
     scope: "doctrine_goal_trace_summary",
     reportOnly: true,
     productiveUseAllowed: false,
-    runtimeConsumerStatus: "none",
+    runtimeConsumerStatus: "active",
     goalCount: goals.length,
     goals: goals.map((goal) => ({
       goalId: goal.goalId,
@@ -549,6 +565,7 @@ function doctrineGoalTraceSummary(
     evidence: [
       "doctrine_goals:trace_summary",
       `doctrine_goal_count:${goals.length}`,
+      "doctrine_consumer_status:active",
       "productive_use_allowed:false",
     ],
   };

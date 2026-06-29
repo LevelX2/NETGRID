@@ -9,7 +9,7 @@ import {
 } from "../access/access-reserve-adapter";
 import type { AccessDecisionReason, AccessIntent } from "../access/access-decision-types";
 import { projectRemoteRootValue } from "../access/remote-root-value-projection";
-import { rolesMatch } from "../runtime/role-match";
+import { rolesMatch } from "../role-match";
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 

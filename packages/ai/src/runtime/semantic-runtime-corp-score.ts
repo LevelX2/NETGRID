@@ -44,6 +44,7 @@ type CorpBurstEconomyOperation = {
 
 const CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE = 2;
 const CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE = 3;
+const CORP_RESERVE_SCORE_NORMALIZATION_DIVISOR = 50;
 
 export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
   actionCreditCost: (action: LegalAction) => number;
@@ -173,12 +174,14 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     }
     const rezFloor = dependencies.corpRemoteRezFloorAssessment(input, action);
     if (rezFloor?.blockedByFloor) {
-      components.push({
-        key: "corp_remote_rez_floor_penalty",
-        label: "Remote-Rez-Floor",
-        value: -2400,
-        reason: rezFloor.evidence.join("|"),
-      });
+      components.push(
+        corpReserveScoreComponent(
+          "corp_remote_rez_floor_penalty",
+          "Remote-Rez-Floor",
+          -2400,
+          rezFloor.evidence,
+        ),
+      );
     }
     addCorpScoringWindowEvidenceComponent(
       components,
@@ -290,24 +293,28 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     );
     const rezFloor = dependencies.corpRemoteRezFloorAssessment(input, action);
     if (rezFloor?.blockedByFloor) {
-      components.push({
-        key: "corp_remote_rez_floor_penalty",
-        label: "Remote-Rez-Floor",
-        value: -2400,
-        reason: rezFloor.evidence.join("|"),
-      });
+      components.push(
+        corpReserveScoreComponent(
+          "corp_remote_rez_floor_penalty",
+          "Remote-Rez-Floor",
+          -2400,
+          rezFloor.evidence,
+        ),
+      );
     }
     const centralRezFloor = dependencies.corpCentralRezReserveAssessment(
       input,
       action,
     );
     if (centralRezFloor?.blockedByFloor) {
-      components.push({
-        key: "corp_central_rez_floor_penalty",
-        label: "Zentrale Rez-Reserve",
-        value: -2600,
-        reason: centralRezFloor.evidence.join("|"),
-      });
+      components.push(
+        corpReserveScoreComponent(
+          "corp_central_rez_floor_penalty",
+          "Zentrale Rez-Reserve",
+          -2600,
+          centralRezFloor.evidence,
+        ),
+      );
     }
   }
   const contestableScoreLine =
@@ -396,20 +403,24 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       });
     }
     if (dependencies.corpHasRemoteRezFloorFundingNeed(input)) {
-      components.push({
-        key: "corp_remote_rez_floor_credit_reserve",
-        label: "Remote-Rez-Floor",
-        value: 900,
-        reason: "low_rez_reserve",
-      });
+      components.push(
+        corpReserveScoreComponent(
+          "corp_remote_rez_floor_credit_reserve",
+          "Remote-Rez-Floor",
+          900,
+          ["low_rez_reserve"],
+        ),
+      );
     }
     if (dependencies.corpHasCentralRezFloorFundingNeed(input)) {
-      components.push({
-        key: "corp_central_rez_floor_credit_reserve",
-        label: "Zentrale Rez-Reserve",
-        value: 900,
-        reason: "central_rez_reserve_needed",
-      });
+      components.push(
+        corpReserveScoreComponent(
+          "corp_central_rez_floor_credit_reserve",
+          "Zentrale Rez-Reserve",
+          900,
+          ["central_rez_reserve_needed"],
+        ),
+      );
     }
   }
   if (
@@ -420,12 +431,14 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     !dependencies.corpHasCentralRezFloorFundingNeed(input) &&
     corpInputHasConcreteDevelopmentAction(input, action)
   ) {
-    components.push({
-      key: "corp_reserve_satisfied_credit_loop_penalty",
-      label: "Reserve erfüllt",
-      value: -750,
-      reason: "reserve_satisfied_concrete_action_available",
-    });
+    components.push(
+      corpReserveScoreComponent(
+        "corp_reserve_satisfied_credit_loop_penalty",
+        "Reserve erfüllt",
+        -750,
+        ["reserve_satisfied_concrete_action_available"],
+      ),
+    );
   }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 4) {
     components.push({
@@ -443,20 +456,24 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       });
     }
     if (dependencies.corpHasRemoteRezFloorFundingNeed(input)) {
-      components.push({
-        key: "corp_remote_rez_floor_draw_fallback",
-        label: "Remote-Rez-Floor",
-        value: 450,
-        reason: "low_rez_reserve",
-      });
+      components.push(
+        corpReserveScoreComponent(
+          "corp_remote_rez_floor_draw_fallback",
+          "Remote-Rez-Floor",
+          450,
+          ["low_rez_reserve"],
+        ),
+      );
     }
     if (dependencies.corpHasCentralRezFloorFundingNeed(input)) {
-      components.push({
-        key: "corp_central_rez_floor_draw_fallback",
-        label: "Zentrale Rez-Reserve",
-        value: 450,
-        reason: "central_rez_reserve_needed",
-      });
+      components.push(
+        corpReserveScoreComponent(
+          "corp_central_rez_floor_draw_fallback",
+          "Zentrale Rez-Reserve",
+          450,
+          ["central_rez_reserve_needed"],
+        ),
+      );
     }
   }
   const taggedRunnerPayoffPressure =
@@ -487,6 +504,35 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     });
   }
   return components;
+}
+
+export function normalizedCorpReserveScoreValue(rawValue: number): number {
+  return Math.max(
+    -100,
+    Math.min(
+      100,
+      Math.round(rawValue / CORP_RESERVE_SCORE_NORMALIZATION_DIVISOR),
+    ),
+  );
+}
+
+function corpReserveScoreComponent(
+  key: string,
+  label: string,
+  rawValue: number,
+  evidence: readonly string[],
+): AiDecisionScoreComponent {
+  const normalizedValue = normalizedCorpReserveScoreValue(rawValue);
+  return {
+    key,
+    label,
+    value: normalizedValue,
+    reason: [
+      ...evidence,
+      `reserve_raw_value:${rawValue}`,
+      `reserve_normalized_value:${normalizedValue}`,
+    ].join("|"),
+  };
 }
 
 function corpInputHasConcreteDevelopmentAction(
@@ -609,19 +655,20 @@ function corpDownstreamRezReserveAssessment<TConsumer extends string>(
   const postRezCredits = input.playerView.own.credits - rezCost;
   if (postRezCredits >= innerRezFloor) return undefined;
   const isCentral = location.server.id === "hq" || location.server.id === "rd";
-  return {
-    key: "corp_downstream_rez_floor_preservation",
-    label: "Innere ICE-Reserve",
-    value: isCentral ? -1500 : -1000,
-    reason: [
+  const rawValue = isCentral ? -1500 : -1000;
+  return corpReserveScoreComponent(
+    "corp_downstream_rez_floor_preservation",
+    "Innere ICE-Reserve",
+    rawValue,
+    [
       "downstream_rez_floor:blocked_after_current_rez",
       `server:${location.server.id}`,
       `post_rez_credits:${postRezCredits}`,
       `inner_rez_floor:${innerRezFloor}`,
       `visible_breaker_coverage:${effectiveDefense.visibleBreakerCoverage}`,
       `zero_effect_risk:${effectiveDefense.zeroEffectRisk}`,
-    ].join("|"),
-  };
+    ],
+  );
 }
 
 function visibleActionSourceId(action: LegalAction): string | undefined {

@@ -458,8 +458,8 @@ describe("AI module boundaries", () => {
           "../ai-hints",
           "../belief-state",
           "../breaker-ontology-consumer",
-          "../known-remote-access-payoff",
           "../visible-run-analysis",
+          "./legacy-runner-access-payoff",
           "./runner-plan-metadata",
         ],
       ],
@@ -632,6 +632,398 @@ describe("AI module boundaries", () => {
             ),
         ),
     );
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps semantic runtime score summation owned by score components", () => {
+    const allowedFiles = new Set([
+      "ai-runtime-public-entrypoints.ts",
+      "runtime/semantic-runtime-choice-builder.ts",
+      "runtime/semantic-runtime-score-components.ts",
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        if (!content.includes("semanticRuntimeScoreFromComponents")) return [];
+        const relative = relativeFile(file);
+        return allowedFiles.has(relative)
+          ? []
+          : [
+              `${relative} references semanticRuntimeScoreFromComponents outside score aggregation ownership`,
+            ];
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps legacy action scoring restricted to fallback compositions", () => {
+    const allowedFiles = new Set([
+      "legacy/legacy-action-scorer.ts",
+      "legacy/legacy-action-scoring-composition.ts",
+      "legacy/legacy-entrypoints.ts",
+      "runtime/ai-action-entrypoints-composition.ts",
+      "runtime/semantic-runtime-action-exclusion-composition.ts",
+    ]);
+    const guardedSymbols = [
+      "scoreActionsForLegacy",
+      "createLegacyActionScoringComposition",
+    ];
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const referencesGuardedSymbol = guardedSymbols.some((symbol) =>
+          content.includes(symbol),
+        );
+        if (!referencesGuardedSymbol) return [];
+        const relative = relativeFile(file);
+        return allowedFiles.has(relative)
+          ? []
+          : [
+              `${relative} references legacy action scoring outside fallback composition ownership`,
+            ];
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps runner run-target evaluation owned by the run-target evaluator", () => {
+    const allowedFiles = new Set([
+      "ai-runtime-public-entrypoints.ts",
+      "evaluation/real-engine-decision-corpus-fixtures.ts",
+      "index.ts",
+      "runner-run-target-evaluation.ts",
+      "runtime/semantic-runtime.ts",
+      "runtime/semantic-runtime-decision-composition.ts",
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        if (!content.includes("evaluateRunnerRunTargets")) return [];
+        const relative = relativeFile(file);
+        return allowedFiles.has(relative)
+          ? []
+          : [
+              `${relative} references evaluateRunnerRunTargets outside run-target evaluation ownership`,
+            ];
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps known access payoff evaluation behind access payoff owners", () => {
+    const allowedFiles = new Set([
+      "ai-runtime-public-entrypoints.ts",
+      "known-central-access-payoff.ts",
+      "known-remote-access-payoff.ts",
+      "legacy/legacy-runner-access-payoff.ts",
+      "runner-run-target-evaluation.ts",
+      "plans/tactical-plan-runner-plans.ts",
+    ]);
+    const guardedSymbols = [
+      "evaluateKnownCentralAccessPayoff",
+      "evaluateKnownRemoteAccessPayoff",
+    ];
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const referencesGuardedSymbol = guardedSymbols.some((symbol) =>
+          content.includes(symbol),
+        );
+        if (!referencesGuardedSymbol) return [];
+        const relative = relativeFile(file);
+        return allowedFiles.has(relative)
+          ? []
+          : [
+              `${relative} references known access payoff evaluation outside owner or adapter boundaries`,
+            ];
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps corp board triage and scoreline safety behind runtime owners", () => {
+    const allowedFilesBySymbol = new Map<string, Set<string>>([
+      [
+        "semanticRuntimeCorpBoardTriage",
+        new Set([
+          "runtime/semantic-runtime-corp-board-triage.ts",
+          "runtime/semantic-runtime-corp-score.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpActionIsScoreLine",
+        new Set([
+          "runtime/semantic-runtime-corp-board.ts",
+          "runtime/semantic-runtime-corp-board-context.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpRemoteHasScoreLine",
+        new Set([
+          "runtime/semantic-runtime-corp-board.ts",
+          "runtime/semantic-runtime-corp-board-context.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine",
+        new Set([
+          "runtime/semantic-runtime-corp-risk.ts",
+          "runtime/semantic-runtime-corp-risk-context.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpScoreNowSafetyGate",
+        new Set([
+          "runtime/semantic-runtime-corp-score-safety.ts",
+          "runtime/semantic-runtime-corp-score-safety-context.ts",
+          "runtime/semantic-runtime-corp-scoring-evidence-composition.ts",
+        ]),
+      ],
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        return [...allowedFilesBySymbol.entries()].flatMap(
+          ([symbol, allowedFiles]) => {
+            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+              return [];
+            }
+            return [
+              `${relative} references ${symbol} outside corp board triage or scoreline safety ownership`,
+            ];
+          },
+        );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps target choice fit output behind target fit and diagnostics owners", () => {
+    const allowedFilesBySymbol = new Map<string, Set<string>>([
+      [
+        "targetChoiceRecommendationForTargetFit",
+        new Set([
+          "decision/target-choice-shadow.ts",
+          "decision/semantic-shadow-decision.ts",
+          "evaluation/target-choice-shadow-coverage.ts",
+          "evaluation/target-choice-shadow-readiness.ts",
+        ]),
+      ],
+      [
+        "buildTargetChoiceShadowReport",
+        new Set([
+          "decision/target-choice-shadow.ts",
+          "decision/semantic-shadow-decision.ts",
+          "diagnostics/semantic-runtime-debug.ts",
+        ]),
+      ],
+      [
+        "targetChoiceWouldSelectForAccessDecisionProjection",
+        new Set(["decision/target-choice-shadow.ts"]),
+      ],
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        return [...allowedFilesBySymbol.entries()].flatMap(
+          ([symbol, allowedFiles]) => {
+            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+              return [];
+            }
+            return [
+              `${relative} references ${symbol} outside target choice fit or diagnostics ownership`,
+            ];
+          },
+        );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps goal and strategic fit evaluation behind scoring owners", () => {
+    const allowedFilesBySymbol = new Map<string, Set<string>>([
+      [
+        "scoreActionGoalFit",
+        new Set([
+          "decision/action-goal-fit.ts",
+          "decision/semantic-shadow-decision.ts",
+          "evaluation/doctrine-goal-action-fit.ts",
+        ]),
+      ],
+      [
+        "buildTacticalGoalUtilities",
+        new Set([
+          "decision/tactical-goal-utility.ts",
+          "decision/semantic-shadow-decision.ts",
+          "evaluation/decision-snapshot-suite.ts",
+          "evaluation/doctrine-goal-action-fit.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeStrategicActionFitScoreComponents",
+        new Set([
+          "runtime/strategic-action-fit.ts",
+          "runtime/semantic-runtime-score-breakdown.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeStrategicActionFitEvidence",
+        new Set([
+          "runtime/strategic-action-fit.ts",
+          "runtime/semantic-runtime-choice-builder.ts",
+        ]),
+      ],
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        return [...allowedFilesBySymbol.entries()].flatMap(
+          ([symbol, allowedFiles]) => {
+            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+              return [];
+            }
+            return [
+              `${relative} references ${symbol} outside goal or strategic fit ownership`,
+            ];
+          },
+        );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps corp economy reserve and rez-floor scoring behind runtime owners", () => {
+    const allowedFilesBySymbol = new Map<string, Set<string>>([
+      [
+        "semanticRuntimeCorpRemoteRezFloorAssessment",
+        new Set([
+          "runtime/semantic-runtime-corp-rez-floor.ts",
+          "runtime/semantic-runtime-corp-rez-floor-context.ts",
+          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpHasRemoteRezFloorFundingNeed",
+        new Set([
+          "runtime/semantic-runtime-corp-rez-floor.ts",
+          "runtime/semantic-runtime-corp-rez-floor-context.ts",
+          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpCentralRezReserveAssessment",
+        new Set([
+          "runtime/semantic-runtime-corp-central-rez-context.ts",
+          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpHasCentralRezFloorFundingNeed",
+        new Set([
+          "runtime/semantic-runtime-corp-central-rez-context.ts",
+          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpPassiveScoreLinePenalty",
+        new Set([
+          "runtime/semantic-runtime-corp-passive-scoreline.ts",
+          "runtime/semantic-runtime-corp-passive-scoreline-context.ts",
+          "runtime/semantic-runtime-corp-scoring-evidence-composition.ts",
+        ]),
+      ],
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        return [...allowedFilesBySymbol.entries()].flatMap(
+          ([symbol, allowedFiles]) => {
+            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+              return [];
+            }
+            return [
+              `${relative} references ${symbol} outside corp economy reserve or rez-floor ownership`,
+            ];
+          },
+        );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps plan continuity and plan-memory exclusions behind their owners", () => {
+    const allowedFilesBySymbol = new Map<string, Set<string>>([
+      [
+        "progressTacticalPlans",
+        new Set(["plans/tactical-plan-progression.ts", "tactical-plans.ts"]),
+      ],
+      [
+        "rankTacticalPlans",
+        new Set(["plans/tactical-plan-progression.ts", "tactical-plans.ts"]),
+      ],
+      [
+        "planCanMapToCurrentAction",
+        new Set(["plans/tactical-plan-progression.ts", "tactical-plans.ts"]),
+      ],
+      [
+        "createSemanticRuntimePlanMemoryExclusionContext",
+        new Set([
+          "runtime/semantic-runtime-plan-memory-exclusion.ts",
+          "runtime/runner-economy-commitment-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimePlanMemoryActionExclusion",
+        new Set([
+          "runtime/semantic-runtime-plan-memory-exclusion.ts",
+          "runtime/runner-economy-commitment-composition.ts",
+          "runtime/runner-development-support-composition.ts",
+          "runtime/ai-runtime-simulation-composition.ts",
+        ]),
+      ],
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        return [...allowedFilesBySymbol.entries()].flatMap(
+          ([symbol, allowedFiles]) => {
+            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+              return [];
+            }
+            return [
+              `${relative} references ${symbol} outside plan continuity or plan-memory ownership`,
+            ];
+          },
+        );
+      });
 
     expect(violations).toEqual([]);
   });

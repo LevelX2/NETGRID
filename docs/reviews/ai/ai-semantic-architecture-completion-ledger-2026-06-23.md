@@ -64,9 +64,9 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-13 | Micro-/Overlay-/Override-Pfade in den Spine integrieren oder entfernen. | `VERIFIED` | `runtime/practical-*` und Runtime-Overlays sind aktiv. | Erfüllt: Practical-Tactic und Practical-Micro sind compare-only ohne Actual Override; TacticalPlan-Mapping liefert modellierte Outcome-Entscheidungen statt nachgelagertem Override-Zweig. |
 | AI-COMPLETE-14 | Kartennamenspezifische und payloadspezifische KI-Logik abbauen. | `VERIFIED` | CardDefinitionId-, Titel- und Label-Treffer in `index.ts`, `tactical-plans.ts` und Runtimepfaden. | Erfüllt: produktive Planner-/Scorer-/Targeter-Pfade für die auditierten Kartenfälle nutzen Ontologie, Hint-/Rollen-Semantik, sichtbare Quellen oder gekapselte Adapter; der produktive Audit auf die bearbeiteten Kartennamen und DefinitionIds ist sauber. |
 | AI-COMPLETE-15 | Text-/Regex-/Label-Fallbacks aus produktiver Entscheidung lösen. | `VERIFIED` | `action.label` und Regex werden in produktiven Pfaden verwendet. | Erfüllt: produktive Runtime-/Simulation-/Decision-/Actions-Pfade sowie die geprüften Legacy-Corp-/Runner-Pfade enthalten keine freien Text-/Regex-/Label-Parser-Fallbacks mehr; verbleibende `action.label`-Treffer sind Werttransport für tokenisierte Parser oder Debug-/Ranking-Ausgabe; zwei vollständige Abschlussaudits ohne neue In-Scope-Findings. |
-| AI-COMPLETE-16 | Doppelte und widersprüchliche Bewertungslogik beseitigen. | `IN_PROGRESS` | Mehrere Module bewerten Reachability, Target, Economy, Access und Planfortschritt parallel. | Ownership-Matrix angelegt; nächste Schnitte müssen konkrete Kollisionszonen an Owner binden und konkurrierende Produktivlogik entfernen. |
-| AI-COMPLETE-17 | Fachliche Scoring-Consumer aufbauen. | `PENDING` | Aktueller Score enthält große Typpriorität und verstreute Komponenten. | Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty haben definierte Skalen. |
-| AI-COMPLETE-18 | DecisionTrace, WhyChosen und WhyNot vollständig machen. | `PENDING` | Debug ist vorhanden, aber WhyNot-Kategorien und Alternativenabdeckung müssen geprüft werden. | Redaction-safe Trace erklärt gewählte Action und relevante Ablehnungen inklusive Fallback/Gaps. |
+| AI-COMPLETE-16 | Doppelte und widersprüchliche Bewertungslogik beseitigen. | `VERIFIED` | Mehrere Module bewerten Reachability, Target, Economy, Access und Planfortschritt parallel. | Erfüllt: konkrete Boundary-Guards binden Score-Aggregation, Legacy-Action-Scoring, Runner-Reachability, Access-Payoff, Corp-Board-/Scoreline-Safety, TargetChoice-Fit, Goal-/Strategic-Fit, Corp-Economy-/Rez-Floor und Plan-Continuity an ihre Owner; vollständiger Boundary-Audit und Typecheck sind grün. |
+| AI-COMPLETE-17 | Fachliche Scoring-Consumer aufbauen. | `VERIFIED` | Aktueller Score enthält große Typpriorität und verstreute Komponenten. | Erfüllt: Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty sind als aktive normalisierte Consumer angebunden; Vertragstest schützt Vollständigkeit, Skalen und `active`-Status. |
+| AI-COMPLETE-18 | DecisionTrace, WhyChosen und WhyNot vollständig machen. | `IN_PROGRESS` | Debug ist vorhanden, aber WhyNot-Kategorien und Alternativenabdeckung müssen geprüft werden. | Erster Trace-Abdeckungsschnitt ergänzt WhyNot für legale Aktionen ohne Semantic-Candidate; weitere WhyChosen-/WhyNot-Kategorien und Runtime-Debug-Abdeckung sind offen. |
 | AI-COMPLETE-19 | Kommentare und Entwicklerleitplanken korrigieren. | `PENDING` | Grenzkommentare existieren, müssen nach Runtime-Änderungen stimmen. | Nur knappe, aktuelle Grenzkommentare an Fehlentwicklungsrisiken; veraltete No-Effect-Texte entfernt. |
 | AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `PENDING` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay müssen nach Reparatur geprüft werden. | Tests, Szenarien und Benchmarks belegen 0 Illegalität, 0 Hidden-Info-Verstoß, keine Action-Type-Dominanz und bessere Erklärbarkeit. |
 
@@ -10491,6 +10491,169 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Status ist `IN_PROGRESS`, weil die Matrix noch in konkrete Owner-Bindungen und Rückbau konkurrierender Logik übersetzt werden muss.
   - Verifikation: `rg -n "AI-COMPLETE-16|Ownership-Matrix|widersprüchliche Bewertungslogik|Reachability|Target|Economy|Access|Planfortschritt|Score Owner|Owner" docs/reviews/ai docs/architecture/ai packages/ai/src -g "*.md" -g "*.ts"` zur Bestandsermittlung ausgeführt.
   - Verifikation: `rg -n "function .*Score|evaluate.*Score|score.*Action|Reachability|reachability|TargetFit|target.*fit|economy.*score|access.*value|plan.*progress|progress.*score" packages/ai/src/runtime packages/ai/src/decision packages/ai/src/simulation packages/ai/src/legacy -g "*.ts"` zur Kollisionszonensuche ausgeführt.
+
+- `AI-COMPLETE-16` zweiter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt die Score-Aggregation: `semanticRuntimeScoreFromComponents` darf produktiv nur im Score-Components-Owner, Runtime-Choice-Builder und Public-Entrypoint-Reexport auftauchen.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert diesen Guard als erste konkrete Owner-Bindung.
+  - Status bleibt `IN_PROGRESS`, weil weitere Kollisionszonen zu Reachability, Access-Payoff, Board-Triage und Legacy-Action-Scoring noch gebunden werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps semantic runtime score summation owned by score components"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-16` dritter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Legacy-Action-Scoring: `scoreActionsForLegacy` und `createLegacyActionScoringComposition` dürfen außerhalb der Legacy-Schicht nur in den expliziten Fallback-/Exclusion-Composition-Modulen auftauchen.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert diesen Guard als Legacy-Action-Scoring-Owner-Bindung.
+  - Status bleibt `IN_PROGRESS`, weil Reachability-, Access-Payoff- und Corp-Board-Triage-Kollisionszonen noch gebunden werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps legacy action scoring restricted to fallback compositions"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-16` vierter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Runner-Run-Reachability: `evaluateRunnerRunTargets` darf nur im Run-Target-Evaluator, in Public-/Evaluation-Reexports und in den Runtime-Orchestrierungsstellen auftauchen.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert diesen Guard als Runner-Run-Reachability-Owner-Bindung.
+  - Status bleibt `IN_PROGRESS`, weil Access-Payoff- und Corp-Board-Triage-Kollisionszonen noch gebunden werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps runner run-target evaluation owned by the run-target evaluator"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-16` fünfter Ownership-Schnitt:
+  - `packages/ai/src/legacy/legacy-runner-access-payoff.ts` kapselt Legacy-Runner-Zugriffe auf den Known-Remote-Access-Payoff-Owner.
+  - `packages/ai/src/legacy/runner-plans.ts` nutzt den Adapter statt direkter `evaluateKnownRemoteAccessPayoff`-Aufrufe.
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt direkte Known-Access-Payoff-Evaluation auf Owner, Run-Target-Evaluation, Tactical-Plan-Runner-Plans, Public-Reexport und den Legacy-Adapter.
+  - Status bleibt `IN_PROGRESS`, weil Corp-Board-Triage-Kollisionszonen und weitere konkrete Owner-Bindungen offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps known access payoff evaluation behind access payoff owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "recovers economy when Krash can pass Data Wall but cannot afford a known BBS trash afterward"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-16` sechster Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Corp-Board-Triage und Scoreline-Safety: `semanticRuntimeCorpBoardTriage`, `semanticRuntimeCorpActionIsScoreLine`, `semanticRuntimeCorpRemoteHasScoreLine`, `semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine` und `semanticRuntimeCorpScoreNowSafetyGate` dürfen nur in den jeweiligen Runtime-Ownern und expliziten Context-/Composition-Consumern auftauchen.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert den Guard und reduziert die offenen Kollisionszonen auf Goal-/Strategic-Fit, TargetChoice-Fit, Corp-Economy-/Rez-Floor-Skalierung und Plan-Continuity-Fortschritt.
+  - Status bleibt `IN_PROGRESS`, weil diese weiteren konkreten Owner-Bindungen offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps corp board triage and scoreline safety behind runtime owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-16` siebter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt TargetChoice-Fit-Output: `targetChoiceRecommendationForTargetFit` darf nur im TargetChoice-Owner, in `semantic-shadow-decision.ts` und in den Coverage-/Readiness-Evaluationen verwendet werden.
+  - Derselbe Guard begrenzt `buildTargetChoiceShadowReport` auf TargetChoice-Owner, Semantic-Shadow-Decision und Debug-Ausgabe; `targetChoiceWouldSelectForAccessDecisionProjection` bleibt auf den TargetChoice-Owner beschränkt.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert, dass TargetChoice produktiv ein Target-Fit-Signal bleibt und kein paralleler Selected-Choice-/Selected-Target-Entscheider wird.
+  - Status bleibt `IN_PROGRESS`, weil Goal-/Strategic-Fit, Corp-Economy-/Rez-Floor-Skalierung und Plan-Continuity-Fortschritt noch konkrete Owner-Bindungen brauchen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps target choice fit output behind target fit and diagnostics owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-16` achter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Goal-/Strategic-Fit-Evaluation: `scoreActionGoalFit` und `buildTacticalGoalUtilities` dürfen nur in den Decision-Ownern, Semantic-Shadow-Decision und expliziten Evaluation-Reports verwendet werden.
+  - Derselbe Guard begrenzt `semanticRuntimeStrategicActionFitScoreComponents` auf Strategic-Fit-Owner und Runtime-Score-Breakdown sowie `semanticRuntimeStrategicActionFitEvidence` auf Strategic-Fit-Owner und Runtime-Choice-Builder.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert den Guard und reduziert die offenen Kollisionszonen auf Corp-Economy-/Rez-Floor-Skalierung und Plan-Continuity-Fortschritt.
+  - Status bleibt `IN_PROGRESS`, weil diese verbleibenden Owner-Bindungen noch offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps goal and strategic fit evaluation behind scoring owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-16` neunter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Corp-Economy-/Rez-Floor-Skalierung: Remote-/Central-Rez-Floor-Assessments, Rez-Floor-FundingNeeds und Passive-Scoreline-Penalty dürfen nur in den jeweiligen Runtime-Ownern und den expliziten Corp-Scoring-Compositions auftauchen.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert, dass Economy-Stabilisierung und Reserve-Skalierung an denselben Score-/Evidence-Pfad gebunden bleiben.
+  - Status bleibt `IN_PROGRESS`, weil Plan-Continuity-Fortschritt und ein Abschlussaudit der konkreten Owner-Bindungen noch offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps corp economy reserve and rez-floor scoring behind runtime owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-16` zehnter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Plan-Continuity und Plan-Memory: `progressTacticalPlans`, `rankTacticalPlans` und `planCanMapToCurrentAction` dürfen nur im TacticalPlan-Progression-Owner und in der `tactical-plans.ts`-Fassade auftauchen.
+  - Derselbe Guard begrenzt `createSemanticRuntimePlanMemoryExclusionContext` und `semanticRuntimePlanMemoryActionExclusion` auf den Runtime-Owner sowie die expliziten Runner-Support-Compositions.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert, dass Planfortschritt blockierte oder payofflose Wiederholungen nicht außerhalb dieser Owner hochziehen darf.
+  - Status bleibt `IN_PROGRESS`, weil noch ein Abschlussaudit der konkreten Owner-Bindungen aussteht.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps plan continuity and plan-memory exclusions behind their owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-16` Abschlussaudit:
+  - Vollständige `module-boundaries.test.ts`-Suite schützt alle in der Ownership-Matrix benannten konkreten Kollisionszonen: Score-Aggregation, Legacy-Action-Scoring, Runner-Reachability, Access-Payoff, Corp-Board-/Scoreline-Safety, TargetChoice-Fit, Goal-/Strategic-Fit, Corp-Economy-/Rez-Floor und Plan-Continuity.
+  - Audit-Fix: `packages/ai/src/role-match.ts` ist der gemeinsame Decision-/Runtime-Helper; `packages/ai/src/runtime/role-match.ts` re-exportiert nur noch, und Decision-/Pilot-Module importieren nicht mehr aus `runtime`.
+  - Audit-Fix: `packages/ai/src/decision/module-boundaries.test.ts` erwartet den neuen Legacy-Runner-Access-Payoff-Adapter im Legacy-Import-Freeze.
+  - Status: `AI-COMPLETE-16` ist `VERIFIED`; nächstes offenes Ledger-Ziel ist `AI-COMPLETE-17`.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts` in `packages/ai` grün, 32 Tests.
+  - Verifikation: `rg -n "runtime/role-match" packages/ai/src/decision packages/ai/src/legacy/runner-plans.ts packages/ai/src/decision/module-boundaries.test.ts` ohne Treffer.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-17` erster Scoring-Consumer-Schnitt:
+  - `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` legt den ersten Consumer-Vertrag mit den Pflichtdimensionen Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty an.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` bildet diesen Vertrag maschinenlesbar mit Owner, Status, Skala `-100..100` und Evidence-Keys ab.
+  - `packages/ai/src/decision/scoring-consumer-contract.test.ts` schützt vollständige und eindeutige Dimensionen sowie gebundene Skalen/Owner.
+  - Status ist `IN_PROGRESS`, weil mehrere Dimensionen noch `partial` oder `contract_only` sind und in folgenden Paketen produktiv normalisiert werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/scoring-consumer-contract.test.ts` in `packages/ai` grün.
+
+- `AI-COMPLETE-17` zweiter Scoring-Consumer-Schnitt:
+  - `packages/ai/src/runtime/runner-run-target-guidance-score.ts` normalisiert den vorhandenen RunTarget-Guidance-Rohwert über `normalizedRunTargetGuidanceValue` auf die Consumer-Skala `-100..100`.
+  - Die Guidance-Evidence enthält weiter die RunTarget-Empfehlung und ergänzt `raw_guidance` plus `normalized_guidance`, damit Kalibrierung nachvollziehbar bleibt.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` markiert `reachability` als `active`; `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` zieht die Tabelle nach.
+  - Status bleibt `IN_PROGRESS`, weil Reserve, Boardstate, Doctrine, Plan Continuity, Terminal Outcome und Uncertainty noch nicht vollständig normalisiert aktiv sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/runner-run-target-guidance-score.test.ts src/known-ice-run-risk.test.ts -t "run-target guidance|unknown R&D run"` in `packages/ai` grün.
+
+- `AI-COMPLETE-17` dritter Scoring-Consumer-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-board-triage.ts` normalisiert Boardstate-Triage-Rohwerte über `normalizedCorpBoardTriageValue` auf die Consumer-Skala `-100..100`.
+  - Triage-Evidence enthält `triage_raw_value` und `triage_normalized_value`, während Triage-Primärentscheidung, Alignment und Reason unverändert bleiben.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` markiert `boardstate_need` als `active`; `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` zieht die Tabelle nach.
+  - Status bleibt `IN_PROGRESS`, weil Reserve, Doctrine, Plan Continuity, Terminal Outcome und Uncertainty noch nicht vollständig normalisiert aktiv sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-board-triage.test.ts src/runtime/semantic-runtime-corp-score.test.ts -t "board triage|downstream budget"` in `packages/ai` grün.
+
+- `AI-COMPLETE-17` vierter Scoring-Consumer-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` normalisiert Corp-Reserve-Rohwerte über `normalizedCorpReserveScoreValue` auf die Consumer-Skala `-100..100`.
+  - Remote-/Central-Rez-Floor, Credit-/Draw-Reserve-Fallbacks, erfüllte Reserve und Downstream-Rez-Floor behalten ihre fachliche Evidence und ergänzen `reserve_raw_value` plus `reserve_normalized_value`.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` markiert `reserve` als `active`; `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` zieht die Tabelle nach.
+  - Status bleibt `IN_PROGRESS`, weil Doctrine, Plan Continuity, Terminal Outcome und Uncertainty noch nicht vollständig normalisiert aktiv sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts -t "reserve|downstream rez"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts` in `packages/ai` grün, 35 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-17` fünfter Scoring-Consumer-Schnitt:
+  - `packages/ai/src/decision/doctrine-goal-synthesis.ts` normalisiert Doctrine-Goal-Prioritäten über `normalizedDoctrineGoalPriority` auf die Consumer-Skala `-100..100`.
+  - Doctrine-Goal-Evidence enthält weiter `doctrine_v2` und ergänzt `doctrine_raw_priority` plus `doctrine_normalized_value`, ohne die bestehende Report-only-Grenze produktiv zu öffnen.
+  - `packages/ai/src/decision/semantic-shadow-decision.ts` markiert den Doctrine-Trace als aktiven report-only Consumer mit `doctrine_consumer_status:active`.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` markiert `doctrine` als `active`; `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` zieht die Tabelle nach.
+  - Status bleibt `IN_PROGRESS`, weil Plan Continuity, Terminal Outcome und Uncertainty noch nicht vollständig normalisiert aktiv sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/doctrine-goal-synthesis.test.ts src/decision/semantic-shadow-decision.test.ts -t "doctrine"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/doctrine-goal-synthesis.test.ts src/decision/semantic-shadow-decision.test.ts` in `packages/ai` grün, 29 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-17` sechster Scoring-Consumer-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-progression.ts` normalisiert Plan-Continuity-Rohwerte über `normalizedPlanContinuityValue` auf die Consumer-Skala `-100..100`.
+  - Die Fortschreibung behält den bisherigen Planprioritätsbonus für Ranking bei, weist aber im `previous_plan_continuity`-ScoreBreakdown und in Plan-Evidence `plan_continuity_raw_value` plus `plan_continuity_normalized_value` aus.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` markiert `plan_continuity` als `active`; `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` zieht die Tabelle nach.
+  - Status bleibt `IN_PROGRESS`, weil Terminal Outcome und Uncertainty noch nicht vollständig normalisiert aktiv sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/plans/tactical-plan-progression.test.ts` in `packages/ai` grün, 2 Tests.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/tactical-plans.test.ts` in `packages/ai` grün, 46 Tests.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/scoring-consumer-contract.test.ts` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-17` siebter Scoring-Consumer-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score-safety.ts` weist Scoreline-Safety-Gate-Outcomes als normalisierte Terminal-Outcome-Consumer aus.
+  - Erlaubte Score-Now-Gates erhalten `terminal_outcome_raw_value:100` und `terminal_outcome_normalized_value:100`; blockierte Gates erhalten die entsprechenden `-100`-Evidence-Tokens, ohne die Gate-Entscheidung oder Scoreline-Policy zu verändern.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` markiert `terminal_outcome` als `active`; `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` zieht die Tabelle nach.
+  - Status bleibt `IN_PROGRESS`, weil Uncertainty noch nicht vollständig normalisiert aktiv ist.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score-safety.test.ts` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts` in `packages/ai` grün, 35 Tests.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/scoring-consumer-contract.test.ts` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-17` achter Scoring-Consumer-Schnitt:
+  - `packages/ai/src/belief-state.ts` normalisiert Belief-Uncertainty-Signale über `normalizedBeliefUncertaintyValue` auf die Consumer-Skala `-100..100`, ohne die signaturrelevante `uncertainty`-Liste zu verändern.
+  - `beliefUncertaintyConsumerFacts` erzeugt side-safe Evidence mit `belief_uncertainty_count`, `belief_uncertainty_raw_value` und `belief_uncertainty_normalized_value`.
+  - `packages/ai/src/diagnostics/semantic-runtime-memory-debug.ts` transportiert diese Facts im bestehenden Memory-Debug-Pfad neben `beliefUncertainty`.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` markiert `uncertainty` als `active`; `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` zieht die Tabelle nach.
+  - Status blieb vor dem Abschlussaudit `IN_PROGRESS`, weil noch ein Audit gegen den vollständigen Consumer-Vertrag ausstand.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/belief-state.test.ts src/diagnostics/semantic-runtime-memory-debug.test.ts` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/scoring-consumer-contract.test.ts` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-17` Abschlussaudit:
+  - `packages/ai/src/decision/scoring-consumer-contract.test.ts` schützt jetzt zusätzlich, dass jede AI-COMPLETE-17-Pflichtdimension `implementationStatus: "active"` trägt.
+  - `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` ist auf `VERIFIED` gesetzt; alle zwölf Dimensionen sind `active`.
+  - Status: `AI-COMPLETE-17` ist `VERIFIED`; nächstes offenes Ledger-Ziel ist `AI-COMPLETE-18`.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/scoring-consumer-contract.test.ts src/decision/doctrine-goal-synthesis.test.ts src/decision/semantic-shadow-decision.test.ts src/plans/tactical-plan-progression.test.ts src/runtime/runner-run-target-guidance-score.test.ts src/runtime/semantic-runtime-corp-board-triage.test.ts src/runtime/semantic-runtime-corp-score-safety.test.ts src/belief-state.test.ts src/diagnostics/semantic-runtime-memory-debug.test.ts` in `packages/ai` grün, 9 Dateien, 56 Tests.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts src/tactical-plans.test.ts` in `packages/ai` grün, 2 Dateien, 81 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-18` erster Trace-Abdeckungsschnitt:
+  - `packages/ai/src/decision/semantic-shadow-decision.ts` ergänzt `rejectedActions` für legale Aktionen ohne `ActionSemanticCandidate`.
+  - Diese WhyNot-Einträge tragen `reason: "missing_semantic_candidate"`, einen gleichnamigen Blocker und redaction-safe Evidence `why_not:missing_semantic_candidate`.
+  - `packages/ai/src/decision/semantic-shadow-decision.test.ts` schützt, dass LegalActions ohne Candidate nicht mehr aus dem Trace verschwinden.
+  - Status bleibt `IN_PROGRESS`, weil WhyChosen-/WhyNot-Kategorien und Runtime-Debug-Abdeckung noch breiter auditiert werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/semantic-shadow-decision.test.ts` in `packages/ai` grün, 15 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
 
 ## Audit-Ledger
 
