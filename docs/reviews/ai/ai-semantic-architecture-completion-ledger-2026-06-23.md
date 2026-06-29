@@ -9536,6 +9536,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/deck-doctrine-strategy.test.ts` grün, 1 Datei, 17 Tests.
   - Verifikation: `rg -n 'primaryStrategies\.includes|functionSignals\.includes|supportGaps\.includes' packages/ai/src/deck-doctrine-strategy.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertdreiundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-strategic-intent.ts` bindet Runner-Breaker-Coverage in der Risk-Profile-Erkennung über ein lokales Set je Breaker statt direkter `coverage.includes("universal")`-Prüfung.
+  - Strukturierte Coverage-Werte wie `universal` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `runner-strategic-intent.test.ts` sichert die RiskProfile- und StrategicIntent-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-strategic-intent.test.ts` grün, 1 Datei, 7 Tests.
+  - Verifikation: `rg -n 'coverage\.includes\("universal"\)' packages/ai/src/runner-strategic-intent.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

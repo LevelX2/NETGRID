@@ -301,9 +301,10 @@ function hasRiskyUniversalCoverage(
   const functionCounts = strategyProfile?.functionSignalCounts ?? {};
   const universalCoverage = deckCapabilities?.runner?.breakerCoverageMatrix.universal;
   const universalBreakers =
-    deckCapabilities?.runner?.breakerInventory.filter((breaker) =>
-      breaker.coverage.includes("universal"),
-    ) ?? [];
+    deckCapabilities?.runner?.breakerInventory.filter((breaker) => {
+      const coverage = new Set(breaker.coverage);
+      return coverage.has("universal");
+    }) ?? [];
   return (
     (functionCounts["breaker.risky"] ?? 0) > 0 ||
     (functionCounts["risk.opponent_guessing_game"] ?? 0) > 0 ||
