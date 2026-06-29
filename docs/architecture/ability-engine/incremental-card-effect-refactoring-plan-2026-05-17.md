@@ -352,7 +352,8 @@ expect(state).toEqual(beforeState);
 Modifier sind je Mechanik anders gespeichert:
 
 - MRAM: `maxHandSizeBonus` auf `CardDefinition`, ausgewertet in `runnerInstalledMaxHandSizeModifier`.
-- Krash: `run.remainderStrengthBonusByBreaker`.
+- Grubb: `run.remainderStrengthBonusByBreaker`.
+- Krash: normale `CardInstance.strengthModifier`-Encounter-Pump; der frühere Run-Bonuspfad wurde am 2026-06-29 als falsche Regelannahme korrigiert.
 - normale Breaker-Pumps: `CardInstance.strengthModifier`, Cleanup über `resetBreakerStrength`.
 - Virizz: `run.breakSubroutineAdditionalCost`.
 - Tutor/Future-ICE-Strength: `run.futureEncounterIceStrengthBonus`.
@@ -409,7 +410,7 @@ Nicht sofort den State umbauen. Zuerst eine reine Query-Schicht:
 3. Diese Funktion rekonstruiert bestehende Modifier aus dem aktuellen State, ohne State-Shape zu ändern.
 4. Pilot-Abfragen:
    - `maxHandSize` nutzt weiterhin bestehende Berechnung, aber Test prüft, dass `collectActiveModifiers` MRAM/Main-Office abbildet.
-   - `runRemainderStrengthBonusForBreaker` bleibt aktiv, aber `collectActiveModifiers` bildet Krash ab.
+   - `runRemainderStrengthBonusForBreaker` bleibt aktiv, aber `collectActiveModifiers` bildet echte Run-Pump-Quellen wie Grubb ab.
 5. Erst im zweiten Schritt einzelne Berechnungen auf `sumActiveModifiers` umstellen.
 
 ### Risiken
@@ -423,9 +424,12 @@ Nicht sofort den State umbauen. Zuerst eine reine Query-Schicht:
 - MRAM:
   - Handgröße steigt in PlayerView.
   - `collectActiveModifiers` enthält `max_hand_size +2`.
-- Krash:
+- Grubb:
   - runweiter Pump bleibt bis Run-Ende.
   - Query-Schicht enthält `breaker_strength` mit `duration: "run"`.
+- Krash:
+  - encounter-gebundener Pump wird beim nächsten ICE zurückgesetzt.
+  - Query-Schicht darf Krash nicht als `duration: "run"` abbilden.
 - Virizz:
   - Break-Kostenmodifikator bleibt rest-of-run.
   - Query-Schicht bildet `break_subroutine_cost` ab.
@@ -1009,7 +1013,7 @@ Shared:
 
 6. `refactor(engine): add active modifier query layer`
    - `collectActiveModifiers` als reine Query ohne State-Migration.
-   - Tests für MRAM und Krash als Abbild, nicht als neue Wirkung.
+- Tests für MRAM und echte Run-Pump-Quellen wie Grubb als Abbild, nicht als neue Wirkung.
 
 7. `refactor(engine/web): add reveal resolved effect pilot`
    - `reveal_cards` als additive `ResolvedGameEffectKind`.

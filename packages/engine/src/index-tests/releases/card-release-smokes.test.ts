@@ -1806,11 +1806,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(dwarfBreak.label).toBe("Dwarf: Subroutine brechen");
   });
 
-  it("keeps Krash strength pumps for the current run and clears them at run end", () => {
+  it("resets Krash strength pumps between ICE encounters", () => {
     const runnerDeck: DeckDefinition = {
       ...ONR_V1_RUNNER_DECK,
-      id: "v123_krash_run_pump_runner",
-      name: "V1.2.3 Krash Run Pump Runner",
+      id: "v123_krash_encounter_pump_runner",
+      name: "V1.2.3 Krash Encounter Pump Runner",
       cards: [
         { id: "onr_v1_039_krash", quantity: 1 },
         ...ONR_V1_RUNNER_DECK.cards.filter(
@@ -1820,8 +1820,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     };
     const corpDeck: DeckDefinition = {
       ...ONR_V1_CORP_DECK,
-      id: "v123_krash_run_pump_corp",
-      name: "V1.2.3 Krash Run Pump Corp",
+      id: "v123_krash_encounter_pump_corp",
+      name: "V1.2.3 Krash Encounter Pump Corp",
       cards: [
         { id: "simple_barrier_ice", quantity: 1 },
         { id: "simple_code_gate_ice", quantity: 2 },
@@ -1836,7 +1836,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     };
     let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "v123-krash-run-pump-duration",
+        seed: "v123-krash-encounter-pump-duration",
         runnerDeck,
         corpDeck,
         agendaPointsToWin: 7,
@@ -1895,27 +1895,13 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         (card) => card.instanceId === krashId,
       )?.strength,
     ).toBe(3);
-    const krashModifierState = structuredClone(state);
-    const krashModifierHash = hashState(state);
-    const krashModifiers = collectActiveModifiers(state);
-    expect(state).toEqual(krashModifierState);
-    expect(hashState(state)).toBe(krashModifierHash);
     expect(
-      krashModifiers.filter(
+      collectActiveModifiers(state).some(
         (modifier) =>
           modifier.kind === "breaker_strength" &&
           modifier.target?.id === krashId,
       ),
-    ).toEqual([
-      expect.objectContaining({
-        sourceDefinitionId: "onr_v1_039_krash",
-        side: "runner",
-        amount: 3,
-        duration: "run",
-        target: { kind: "card", id: krashId },
-        visibility: "public",
-      }),
-    ]);
+    ).toBe(false);
     state = apply(
       state,
       "runner",
@@ -1938,7 +1924,34 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       getPlayerView(state, "runner").own.rig?.find(
         (card) => card.instanceId === krashId,
       )?.strength,
-    ).toBe(3);
+    ).toBe(0);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          String(action.payload?.breakerId) === krashId,
+      ),
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        String(action.payload?.breakerId) === krashId,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        String(action.payload?.breakerId) === krashId,
+    );
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === krashId,
+      )?.strength,
+    ).toBe(2);
     expect(
       getLegalActions(state, "runner").some(
         (action) =>

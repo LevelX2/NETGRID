@@ -9,6 +9,5 @@ export const krashImplementation: CardImplementationDefinition = {
     breakCost: 2,
     matches: { kind: "any" },
     pumpCost: 2,
-    pumpDuration: "current_run",
   }),
 };

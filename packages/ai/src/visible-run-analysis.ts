@@ -150,7 +150,6 @@ export function runnerKnownPathAssessmentIsKnownNoAccess(
 
 const RUN_REMAINDER_STRENGTH_BREAKER_IDS = new Set([
   "onr_v1_030_grubb",
-  "onr_v1_039_krash",
 ]);
 
 export function serverIdFromEvent(event: PublicGameEvent): string | undefined {
