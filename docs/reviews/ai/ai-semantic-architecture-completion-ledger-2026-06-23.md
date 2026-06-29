@@ -10576,6 +10576,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Status ist `IN_PROGRESS`, weil mehrere Dimensionen noch `partial` oder `contract_only` sind und in folgenden Paketen produktiv normalisiert werden müssen.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/scoring-consumer-contract.test.ts` in `packages/ai` grün.
 
+- `AI-COMPLETE-17` zweiter Scoring-Consumer-Schnitt:
+  - `packages/ai/src/runtime/runner-run-target-guidance-score.ts` normalisiert den vorhandenen RunTarget-Guidance-Rohwert über `normalizedRunTargetGuidanceValue` auf die Consumer-Skala `-100..100`.
+  - Die Guidance-Evidence enthält weiter die RunTarget-Empfehlung und ergänzt `raw_guidance` plus `normalized_guidance`, damit Kalibrierung nachvollziehbar bleibt.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` markiert `reachability` als `active`; `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` zieht die Tabelle nach.
+  - Status bleibt `IN_PROGRESS`, weil Reserve, Boardstate, Doctrine, Plan Continuity, Terminal Outcome und Uncertainty noch nicht vollständig normalisiert aktiv sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/runner-run-target-guidance-score.test.ts src/known-ice-run-risk.test.ts -t "run-target guidance|unknown R&D run"` in `packages/ai` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

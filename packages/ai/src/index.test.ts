@@ -23398,11 +23398,13 @@ describe("V1.4.2 belief state and opponent model", () => {
       ),
     ).not.toBe(true);
     expect(guidance).toMatchObject({
-      value: -2100,
+      value: -42,
     });
     expect(guidance?.reason).toContain("target:archives");
     expect(guidance?.reason).toContain("access:hq");
     expect(guidance?.reason).toContain("recommendation:gain_credits_first");
+    expect(guidance?.reason).toContain("raw_guidance:-2100");
+    expect(guidance?.reason).toContain("normalized_guidance:-42");
     expect(guidance?.reason).toContain("path:blocked_unpayable");
   });
 

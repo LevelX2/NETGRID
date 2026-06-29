@@ -77,8 +77,12 @@ export const SCORING_CONSUMER_DIMENSIONS = [
     id: "reachability",
     owner: "runner-run-target-evaluation.ts",
     scale: { min: -100, max: 100, neutral: 0 },
-    implementationStatus: "partial",
-    evidenceKeys: ["run_target", "reachable", "path_passability"],
+    implementationStatus: "active",
+    evidenceKeys: [
+      "runner_run_target_semantic_guidance",
+      "raw_guidance:",
+      "normalized_guidance:",
+    ],
   },
   {
     id: "boardstate_need",
