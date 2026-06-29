@@ -9593,6 +9593,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'entry\.evidence\.includes\(flag\)|return entry\.evidence\.includes' packages/ai/src/runtime/evidence-value.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-card-semantic-join.ts` bindet CardContext- und ProfileActionTactic-Signale über lokale Sets statt direkter `cardLevelContextSignals.includes(...)`- und `profileActionTacticSignals.includes(...)`-Prüfungen.
+  - Strukturierte Signal-Buckets für Kartenkontext, Aktions-Taktik und Kompatibilität bleiben getrennt; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `action-semantic-candidate.test.ts` sichert die AI041-Join-Buckets für CardContext-, ActionTactic- und Compatibility-Signale.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/action-semantic-candidate.test.ts` grün, 1 Datei, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'cardLevelContextSignals\.includes|profileActionTacticSignals\.includes' packages/ai/src/actions/action-card-semantic-join.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

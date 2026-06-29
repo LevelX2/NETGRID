@@ -1184,6 +1184,38 @@ describe("buildActionSemanticCandidates", () => {
     );
   });
 
+  it("keeps profile tactic signal buckets separated by structured membership", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "bucket-instance",
+          payload: { sourceDefinitionId: "bucket-card" },
+        }),
+      ],
+      cardSemanticProfilesByDefinitionId: {
+        "bucket-card": {
+          cardId: "bucket-card",
+          tacticSignals: [
+            "card.context.economy",
+            "card.context.economy:action",
+            "run.access",
+          ],
+          compatibilitySignals: ["line_support:runner.setup"],
+        },
+      },
+    });
+
+    if (!candidate) throw new Error("Expected bucket candidate");
+    expect(candidate.cardContextSignals).toEqual([
+      "card.context.economy",
+      "card.context.economy:action",
+    ]);
+    expect(candidate.actionTacticSignals).toEqual(["run.access"]);
+    expect(candidate.compatibilitySignals).toEqual([
+      "line_support:runner.setup",
+    ]);
+  });
+
   it("prefers sourceCardInstanceId over the legacy sourceCardId binding alias", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [

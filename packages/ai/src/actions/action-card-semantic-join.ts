@@ -61,12 +61,14 @@ export function applyCardSemanticJoin(
   const cardLevelContextSignals = cardContextSignalsFromProfile(
     profile.tacticSignals,
   );
+  const cardLevelContextSignalSet = new Set(cardLevelContextSignals);
   const profileActionTacticSignals =
     profileLevelApplies || abilitySemantics.length === 1
       ? profile.tacticSignals.filter(
-          (signal) => !cardLevelContextSignals.includes(signal),
+          (signal) => !cardLevelContextSignalSet.has(signal),
         )
       : [];
+  const profileActionTacticSignalSet = new Set(profileActionTacticSignals);
   const cardContextSignals = uniqueStrings([
     ...candidate.cardContextSignals,
     ...cardLevelContextSignals,
@@ -85,8 +87,8 @@ export function applyCardSemanticJoin(
     ...(actionAbility?.compatibilitySignals ?? []),
     ...profile.tacticSignals.filter(
       (signal) =>
-        !cardLevelContextSignals.includes(signal) &&
-        !profileActionTacticSignals.includes(signal),
+        !cardLevelContextSignalSet.has(signal) &&
+        !profileActionTacticSignalSet.has(signal),
     ),
   ]);
   const projectionIssues = new Set(candidate.projectionIssues);
