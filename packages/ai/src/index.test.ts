@@ -22908,7 +22908,13 @@ describe("V1.4.2 belief state and opponent model", () => {
       );
     expect(selectedRankedAlternative).toMatchObject({
       selectedActionType: actualAction?.type,
-      whyNot: ["selected_action"],
+      whyNot: expect.arrayContaining([
+        "selected_action",
+        "semantic_runtime_actual",
+        "selected_by_plan_mapping:false",
+        "scope:simple_hq_or_rnd_pressure",
+        "reasonCode:runner.semantic.simple_hq_or_rnd_pressure",
+      ]),
     });
     expect(decision.decisionDebug?.warnings ?? []).not.toContain(
       "semantic_runtime_actual_differs_from_legacy_debug",
