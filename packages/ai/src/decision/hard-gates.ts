@@ -49,7 +49,8 @@ function legalActionGate(
       evidence: ["legal_action_ids:not_provided"],
     };
   }
-  const legal = params.legalActionIds.includes(params.candidate.actionId);
+  const legalActionIdSet = new Set(params.legalActionIds);
+  const legal = legalActionIdSet.has(params.candidate.actionId);
   return {
     gate: "not_in_legal_actions",
     status: legal ? "pass" : "block",
@@ -60,8 +61,9 @@ function legalActionGate(
 function hiddenInfoGate(
   candidate: ActionSemanticCandidate,
 ): ActionGoalHardGateResult {
+  const projectionIssueSet = new Set(candidate.projectionIssues);
   const blocked =
-    candidate.projectionIssues.includes("hidden_info_blocked") ||
+    projectionIssueSet.has("hidden_info_blocked") ||
     candidate.hardGates.some(
       (gate) => gate.gateId === "hidden_info" && gate.status === "block",
     );
@@ -111,11 +113,12 @@ function targetContextGate(
   params: EvaluateActionGoalHardGatesParams,
 ): ActionGoalHardGateResult {
   const targetContext = params.candidate.targetContext;
+  const projectionIssueSet = new Set(params.candidate.projectionIssues);
   const requiresTargetContext =
     params.utility.family === "target_resolution" ||
     ((params.utility.family === "run_access" ||
       params.utility.family === "remote_contest") &&
-      params.candidate.projectionIssues.includes("target_context_unavailable") &&
+      projectionIssueSet.has("target_context_unavailable") &&
       (params.candidate.semanticActionType.startsWith("run.") ||
         params.candidate.semanticActionType.startsWith("access.")));
   const hasTargetContext = Boolean(targetContext);
@@ -204,10 +207,12 @@ export function candidateMatchesSignal(
   candidate: ActionSemanticCandidate,
   signal: string,
 ): boolean {
+  const actionTacticSignalSet = new Set(candidate.actionTacticSignals);
+  const cardContextSignalSet = new Set(candidate.cardContextSignals);
   return (
     candidate.semanticActionType === signal ||
     candidate.semanticActionType.startsWith(`${signal}.`) ||
-    candidate.actionTacticSignals.includes(signal) ||
-    candidate.cardContextSignals.includes(signal)
+    actionTacticSignalSet.has(signal) ||
+    cardContextSignalSet.has(signal)
   );
 }
