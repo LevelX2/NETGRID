@@ -5,7 +5,7 @@
 - Branch: `codex/ai-endgame-scoreline`
 - Worktree: `C:\Projekte\NETGRID_AI_ENDGAME_SCORELINE`
 - Integrationsziel: lokaler `main`
-- Umsetzung: freigegeben, sequenziell, ohne Push/PR
+- Umsetzung: verifiziert, lokale Main-Integration folgt, ohne Push/PR
 
 ## Quelle/Vorgabe
 
@@ -151,3 +151,31 @@ Debug-Erweiterung:
 - Das Scoring-Window soll zusätzlich side-safe ausgeben, ob die Agenda im Remote einen game-ending oder near-ending Steal darstellt.
 - Dynamic-ICE-Schwächen sollen als generische Risiko-Evidence erscheinen, nicht mit verdeckten Kartendaten.
 - Archives-ICE-Kappung soll über Scorekomponenten nachvollziehbar sein, ohne gegnerseitige Hidden-Info zu leaken.
+
+## Verifizierter Umsetzungsstand
+
+Commits:
+
+- `b1b0f6eb1 docs(ai): record endgame scoreline replay process`
+- `7e9a086dc docs(ai): map endgame scoreline implementation surface`
+- `10abba876 fix(ai): harden corp endgame scoring windows`
+- `f142ce71d fix(ai): require effective dynamic ice protection`
+- `76e3c71e5 docs(ai): record endgame scoreline verification`
+
+Umgesetzte Kernpunkte:
+
+- Agenda-Install-Actions werden im Scoring-Window in den konkreten Remote-Root projiziert.
+- Scoreline-Evidence enthält jetzt Agenda-Punkte-Risiko, Runner-Punkte nach Steal, Steal-Schwere, Dynamic-ICE-Reserve und durable relevante ICE.
+- Game-ending oder near-winning nicht-immediate Scorelines mit Runner-Exposure und dynamischer Scheinsicherheit werden `unsafe`.
+- Dynamic-only Remote-ICE erzeugt keinen vollen Scoring-Remote-Aufbauwert mehr.
+- Archives-ICE-Bonus ist auf konkrete Archives-Risiken begrenzt und wird unter akutem HQ/R&D- oder HQ-Agenda-Druck abgewertet.
+
+Bestandene Checks:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-scoring-window.test.ts src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/semantic-runtime-corp-score.test.ts src/runtime/semantic-runtime-corp-passive-scoreline.test.ts src/runtime/semantic-runtime-corp-rez-floor.test.ts src/runtime/semantic-runtime-corp-effective-defense.test.ts src/runtime/semantic-runtime-corp-central-rez-context.test.ts`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `git diff --check`
+
+Nicht ausgeführt:
+
+- `corepack pnpm check:ai`, weil keine AI-Hint- oder generierten AI-Daten geändert wurden.
