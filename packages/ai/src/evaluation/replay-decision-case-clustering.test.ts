@@ -33,6 +33,15 @@ describe("ReplayDecisionCaseClustering", () => {
     expect(report.candidates.every((entry) => entry.status !== undefined)).toBe(
       true,
     );
+    const firstCandidate = report.candidates.find(
+      (entry) => entry.caseId === "case-1",
+    );
+    expect(firstCandidate?.evidence).toEqual(
+      expect.arrayContaining([
+        "challenger_why_not:semantic_score_above_selected",
+        "selected_why_not:selected_score_lower_than_challenger",
+      ]),
+    );
     expect(report.productiveUseAllowed).toBe(false);
     expect(report.noRuntimeEffect).toBe(true);
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
@@ -56,8 +65,24 @@ function sourceReport(): ReplayDecisionCaseExtractionReport {
     },
     cases: [
       caseEntry("case-1", "discovery", "draw_card", [
-        { rank: 1, selectedActionType: "start_run", planKind: "simple_run_choice", score: 8125, visibleReasons: [], warnings: [], whyNot: [] },
-        { rank: 2, selectedActionType: "draw_card", planKind: "runner.obtain_breaker_coverage", score: 5325, visibleReasons: [], warnings: [], whyNot: [] },
+        {
+          rank: 1,
+          selectedActionType: "start_run",
+          planKind: "simple_run_choice",
+          score: 8125,
+          visibleReasons: [],
+          warnings: [],
+          whyNot: ["semantic_score_above_selected"],
+        },
+        {
+          rank: 2,
+          selectedActionType: "draw_card",
+          planKind: "runner.obtain_breaker_coverage",
+          score: 5325,
+          visibleReasons: [],
+          warnings: [],
+          whyNot: ["selected_score_lower_than_challenger"],
+        },
       ]),
       caseEntry("case-2", "discovery", "draw_card", [
         { rank: 1, selectedActionType: "start_run", planKind: "simple_run_choice", score: 7655, visibleReasons: [], warnings: [], whyNot: [] },

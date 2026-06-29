@@ -1,5 +1,8 @@
 import { createHash } from "node:crypto";
-import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
+import {
+  assertSemanticObjectSideSafe,
+  redactSemanticString,
+} from "../diagnostics/semantic-redaction";
 import type {
   ReplayDecisionCase,
   ReplayDecisionCaseExtractionReport,
@@ -174,9 +177,22 @@ function candidateFromCase(
       `selected_action_type:${decisionCase.decision.selectedActionType}`,
       `challenger_action_type:${top.selectedActionType}`,
       `score_gap:${scoreGap}`,
+      ...whyNotEvidence("challenger_why_not", top.whyNot),
+      ...whyNotEvidence(
+        "selected_why_not",
+        selectedAlternative?.whyNot ?? decisionCase.observables.whyNot,
+      ),
       ...decisionCase.observables.warnings.map((warning) => `warning:${warning}`),
     ],
   };
+}
+
+function whyNotEvidence(prefix: string, whyNot: readonly string[]): string[] {
+  return whyNot
+    .slice(0, 6)
+    .map((fact) => redactSemanticString(fact).trim())
+    .filter((fact) => fact.length > 0)
+    .map((fact) => `${prefix}:${fact.slice(0, 240)}`);
 }
 
 function blockedCandidate(
@@ -285,4 +301,3 @@ function average(values: readonly number[]): number {
   if (values.length === 0) return 0;
   return Math.round((values.reduce((sum, value) => sum + value, 0) / values.length) * 1000) / 1000;
 }
-
