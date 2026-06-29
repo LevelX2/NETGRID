@@ -9602,6 +9602,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'cardLevelContextSignals\.includes|profileActionTacticSignals\.includes' packages/ai/src/actions/action-card-semantic-join.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihunderterster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/risk-action-projection.ts` bindet Blink-Risk-DefinitionIds und RecentBlinkFailure-Evidence über lokale Sets statt direkter `profile.definitionIds.includes(...)`- und `evidence.includes(...)`-Prüfungen.
+  - Strukturierte DefinitionIds und Evidence-Flags wie `recentBlinkFailure:true` und `recentBlinkFailureTarget:<serverId>` bleiben exakt servergebunden wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `runner-run-target-evaluation.test.ts` sichert den Same-Server-Blink-Failure-Penalty inklusive Zielserver-Evidence.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-run-target-evaluation.test.ts -t Blink` grün, 1 Datei, 2 Tests, 51 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'profile\.definitionIds\.includes|evidence\.includes' packages/ai/src/actions/risk-action-projection.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

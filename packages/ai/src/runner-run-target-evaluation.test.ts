@@ -723,6 +723,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluation?.evidence).toEqual(
       expect.arrayContaining([
         "recentBlinkFailure:true",
+        "recentBlinkFailureTarget:remote_1",
         "recentBlinkDamageAmount:3",
         "sameServerRepeatedBlinkRiskPenalty:-900",
         "repeated_no_progress_blink_run:true",

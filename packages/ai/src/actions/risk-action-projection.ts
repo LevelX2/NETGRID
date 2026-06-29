@@ -40,9 +40,10 @@ export function randomBreakOrDamageRiskProfileForDefinitionId(
   definitionId: string | undefined,
 ): RandomBreakOrDamageRiskProfile | undefined {
   if (!definitionId) return undefined;
-  return RANDOM_BREAK_OR_DAMAGE_RISK_PROFILES.find((profile) =>
-    profile.definitionIds.includes(definitionId),
-  );
+  return RANDOM_BREAK_OR_DAMAGE_RISK_PROFILES.find((profile) => {
+    const definitionIdSet = new Set(profile.definitionIds);
+    return definitionIdSet.has(definitionId);
+  });
 }
 
 export function buildBlinkRiskAssessment(params: {
@@ -333,9 +334,10 @@ function recentBlinkFailureForServer(
   targetServerId: string,
   evidence: readonly string[],
 ): { recentFailure: boolean; recentDamageAmount: number } {
+  const evidenceSet = new Set(evidence);
   const recentFailure =
-    evidence.includes("recentBlinkFailure:true") &&
-    evidence.includes(`recentBlinkFailureTarget:${targetServerId}`);
+    evidenceSet.has("recentBlinkFailure:true") &&
+    evidenceSet.has(`recentBlinkFailureTarget:${targetServerId}`);
   return {
     recentFailure,
     recentDamageAmount: recentFailure
