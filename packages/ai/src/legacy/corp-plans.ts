@@ -7134,6 +7134,8 @@ function corpAdvancementAmbushTargetClass(
 function corpRulesTextTokens(text: string): string[] {
   return text
     .replaceAll(":", " colon ")
+    .replaceAll("[", " bracketopen ")
+    .replaceAll("]", " bracketclose ")
     .toLocaleLowerCase("en-US")
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
@@ -7179,11 +7181,33 @@ function corpAdvancementLooksLikeTransferSource(text: string): boolean {
 }
 
 function corpAdvancementCreditCashoutValue(text: string): number {
-  const match =
-    /\bgain\s+\[?(\d+)\]?\s+(?:credits?\s+)?(?:for each|per|for every)?/.exec(
-      text,
-    );
-  return match?.[1] ? Number.parseInt(match[1], 10) : 0;
+  const tokens = corpRulesTextTokens(text);
+  const amountToken = tokens.find((token, index) =>
+    corpAdvancementCreditCashoutAmountToken(tokens, index),
+  );
+  return corpNumberWordToNumber(amountToken ?? "") ?? 0;
+}
+
+function corpAdvancementCreditCashoutAmountToken(
+  tokens: readonly string[],
+  index: number,
+): boolean {
+  if (corpNumberWordToNumber(tokens[index] ?? "") === undefined) return false;
+  if (tokens[index - 2] === "gain" && tokens[index - 1] === "bracketopen") {
+    return tokens[index + 1] === "bracketclose";
+  }
+  if (!tokens.slice(Math.max(0, index - 3), index).includes("gain")) {
+    return false;
+  }
+  const tail = tokens.slice(index + 1);
+  return (
+    corpTokensIncludeAny([tokens[index + 1] ?? ""], ["credit", "credits"]) ||
+    corpTokensIncludePhrase(tail, ["for", "each"]) ||
+    corpTokensIncludePhrase(tail, ["for", "every"]) ||
+    tokens[index + 1] === "per" ||
+    corpTokensIncludePhrase(tail, ["advancement", "counter"]) ||
+    corpTokensIncludePhrase(tail, ["advancement", "counters"])
+  );
 }
 
 function corpAdvancementCashoutScalesPerCounter(text: string): boolean {
