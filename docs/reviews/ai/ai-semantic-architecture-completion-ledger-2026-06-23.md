@@ -10223,6 +10223,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes\("scope:hq"\)|tokens\.includes\("scope:rnd"\)|tokens\.includes\("scope:rd"\)|tokens\.includes\("scope:archives"\)|tokens\.includes\("scope:remote"\)' packages/ai/src/actions/run-action-projection.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` bindet Counter-Bank- und Access-Ambush-RulesText-Tokens über lokale Sets statt direkter `.includes(...)`-Prüfungen.
+  - Strukturierte Advancement-Counter-Zielklassifikation bleibt exakt; Counter-, Program- und Hardware-Tokens bleiben bounded und substring-nahe RulesText-Rauschwerte bleiben ausgeschlossen.
+  - `semantic-runtime-corp-advancement-counter.test.ts` sichert Advancement-Counter-Cashouts, Counter-Banks, Ambush-Rauschwerte und Transfer-Source-Bounding.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-advancement-counter.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\("counter"\)|tokens\.includes\("counters"\)|tokens\.includes\("program"\)|tokens\.includes\("hardware"\)' packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -454,9 +454,10 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
 
 function corpAdvancementLooksLikeCounterBank(text: string): boolean {
   const tokens = corpRulesTextTokens(text);
+  const tokenSet = new Set(tokens);
   return (
-    tokens.includes("counter") ||
-    tokens.includes("counters") ||
+    tokenSet.has("counter") ||
+    tokenSet.has("counters") ||
     corpTokensIncludePhrase(tokens, ["can", "be", "advanced"]) ||
     corpTokensIncludeAdvanceBefore(tokens)
   );
@@ -640,14 +641,15 @@ function corpAdvancementAmbushTargetClass(
   ) {
     return "access_brain_damage_ambush";
   }
+  const tokenSet = new Set(tokens);
   if (
-    tokens.includes("program") &&
+    tokenSet.has("program") &&
     corpTokensIncludeAny(tokens, ["trash", "destroy"])
   ) {
     return "access_program_trash_ambush";
   }
   if (
-    tokens.includes("hardware") &&
+    tokenSet.has("hardware") &&
     corpTokensIncludeAny(tokens, ["trash", "destroy"])
   ) {
     return "access_hardware_trash_ambush";
