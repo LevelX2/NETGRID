@@ -223,8 +223,9 @@ export function deriveObservedRemoteNoProgressAccessMemory(
 export function declinedTrashOutcomePlanEvidence(
   payoffEvidence: readonly string[],
 ): string[] {
-  const applies = payoffEvidence.includes("remote_access_outcome_applies:true");
-  const suppressesPlanBonus = payoffEvidence.includes(
+  const payoffEvidenceSet = new Set(payoffEvidence);
+  const applies = payoffEvidenceSet.has("remote_access_outcome_applies:true");
+  const suppressesPlanBonus = payoffEvidenceSet.has(
     "remote_access_outcome_suppresses_plan_bonus:true",
   );
   return remoteAccessOutcomePlanEvidence({
