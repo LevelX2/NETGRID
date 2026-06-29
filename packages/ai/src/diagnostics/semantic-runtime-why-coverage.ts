@@ -9,12 +9,17 @@ export type SemanticRuntimeWhyCoverageReport = {
   scope: "semantic_runtime_why_coverage_report_only";
   sampleCount: number;
   decisionsWithTopLevelWhyNot: number;
+  decisionsMissingTopLevelWhyNot: number;
   decisionsWithRuntimeWhyNotSection: number;
+  decisionsMissingRuntimeWhyNotSection: number;
   actionAlternativeCount: number;
   actionAlternativesWithWhyChosen: number;
+  actionAlternativesMissingWhyChosen: number;
   actionAlternativesWithWhyNot: number;
+  actionAlternativesMissingWhyNot: number;
   rankedAlternativeCount: number;
   rankedAlternativesWithWhyNot: number;
+  rankedAlternativesMissingWhyNot: number;
   redactionStatus: "passed";
   productiveUseAllowed: false;
   noRuntimeEffect: true;
@@ -37,21 +42,39 @@ export function buildSemanticRuntimeWhyCoverageReport(
     decisionsWithTopLevelWhyNot: decisions.filter(
       (decision) => (decision.whyNot?.length ?? 0) > 0,
     ).length,
+    decisionsMissingTopLevelWhyNot: decisions.filter(
+      (decision) => (decision.whyNot?.length ?? 0) === 0,
+    ).length,
     decisionsWithRuntimeWhyNotSection: decisions.filter((decision) =>
       (decision.detailSections ?? []).some(
         (section) => section.id === "runtime_why_not",
       ),
     ).length,
+    decisionsMissingRuntimeWhyNotSection: decisions.filter(
+      (decision) =>
+        !(decision.detailSections ?? []).some(
+          (section) => section.id === "runtime_why_not",
+        ),
+    ).length,
     actionAlternativeCount: actionAlternatives.length,
     actionAlternativesWithWhyChosen: actionAlternatives.filter(
       (alternative) => (alternative.whyChosen?.length ?? 0) > 0,
     ).length,
+    actionAlternativesMissingWhyChosen: actionAlternatives.filter(
+      (alternative) => (alternative.whyChosen?.length ?? 0) === 0,
+    ).length,
     actionAlternativesWithWhyNot: actionAlternatives.filter(
       (alternative) => (alternative.whyNot?.length ?? 0) > 0,
+    ).length,
+    actionAlternativesMissingWhyNot: actionAlternatives.filter(
+      (alternative) => (alternative.whyNot?.length ?? 0) === 0,
     ).length,
     rankedAlternativeCount: rankedAlternatives.length,
     rankedAlternativesWithWhyNot: rankedAlternatives.filter(
       (alternative) => (alternative.whyNot?.length ?? 0) > 0,
+    ).length,
+    rankedAlternativesMissingWhyNot: rankedAlternatives.filter(
+      (alternative) => (alternative.whyNot?.length ?? 0) === 0,
     ).length,
     redactionStatus: "passed",
     productiveUseAllowed: false,
