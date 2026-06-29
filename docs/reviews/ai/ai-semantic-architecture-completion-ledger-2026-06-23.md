@@ -10034,6 +10034,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'segment\.split\("_"\)\.filter\(Boolean\)\.includes\(term\)|includes\(term\)' packages/ai/src/decision/corp-tactical-goals.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertneunundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-candidate-matching.ts` bindet Bank-Step-Signal-Untersegmente über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Bank-Step-Zuordnung bleibt exakt; Cash-, Payout- und Bank-Signale bleiben bounded und Label-Texte bleiben aus dem Matching heraus.
+  - `tactical-plan-candidate-matching.test.ts` sichert semantische Candidate-Signale, Hosted-Credit-Payloads und Substring-Rauschen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/plans/tactical-plan-candidate-matching.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'segment\.split\("_"\)\.filter\(Boolean\)\.includes\(term\)|includes\(term\)' packages/ai/src/plans/tactical-plan-candidate-matching.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
