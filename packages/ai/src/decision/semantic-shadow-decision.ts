@@ -85,6 +85,7 @@ export function buildSemanticShadowDecision(
         evidence: fit?.components.flatMap((component) => component.evidence) ?? [
           `candidate:${candidate.semanticActionType}`,
         ],
+        whyNot: rejectedActionWhyNot(candidate, fit),
       });
       continue;
     }
@@ -120,6 +121,11 @@ export function buildSemanticShadowDecision(
         `legal_action:${legalActionId}`,
         "why_not:missing_semantic_candidate",
       ],
+      whyNot: [
+        "missing_semantic_candidate",
+        `legal_action:${legalActionId}`,
+        "why_not:missing_semantic_candidate",
+      ],
     });
   }
 
@@ -129,6 +135,7 @@ export function buildSemanticShadowDecision(
   );
   rankedActions.forEach((action, index) => {
     action.rank = index + 1;
+    action.whyChosen = rankedActionWhyChosen(action);
   });
   rejectedActions.sort((left, right) =>
     left.actionId.localeCompare(right.actionId),
@@ -166,6 +173,39 @@ export function buildSemanticShadowDecision(
     ...(doctrineGoals ? { doctrineGoals } : {}),
     noRuntimeEffect: true,
   };
+}
+
+function rankedActionWhyChosen(action: SemanticRankedAction): string[] {
+  return [
+    "ranked_semantic_action",
+    `rank:${action.rank}`,
+    `score:${action.score}`,
+    ...(action.primaryGoalId ? [`primary_goal:${action.primaryGoalId}`] : []),
+    ...action.components
+      .slice(0, 8)
+      .map((component) => `score_component:${component.component}:${component.delta}`),
+  ];
+}
+
+function rejectedActionWhyNot(
+  candidate: ActionSemanticCandidate,
+  fit: ActionGoalFit | undefined,
+): string[] {
+  if (!fit) {
+    return [
+      "no_tactical_goal_fit",
+      `semantic_action_type:${candidate.semanticActionType}`,
+    ];
+  }
+  return [
+    "blocked_by_action_goal_fit",
+    `goal:${fit.goalId}`,
+    `fit_status:${fit.fitStatus}`,
+    ...fit.blockers.map((blocker) => `blocker:${blocker}`),
+    ...fit.components
+      .slice(0, 8)
+      .map((component) => `score_component:${component.component}:${component.delta}`),
+  ];
 }
 
 function bestFitForCandidate(

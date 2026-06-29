@@ -66,7 +66,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-15 | Text-/Regex-/Label-Fallbacks aus produktiver Entscheidung lösen. | `VERIFIED` | `action.label` und Regex werden in produktiven Pfaden verwendet. | Erfüllt: produktive Runtime-/Simulation-/Decision-/Actions-Pfade sowie die geprüften Legacy-Corp-/Runner-Pfade enthalten keine freien Text-/Regex-/Label-Parser-Fallbacks mehr; verbleibende `action.label`-Treffer sind Werttransport für tokenisierte Parser oder Debug-/Ranking-Ausgabe; zwei vollständige Abschlussaudits ohne neue In-Scope-Findings. |
 | AI-COMPLETE-16 | Doppelte und widersprüchliche Bewertungslogik beseitigen. | `VERIFIED` | Mehrere Module bewerten Reachability, Target, Economy, Access und Planfortschritt parallel. | Erfüllt: konkrete Boundary-Guards binden Score-Aggregation, Legacy-Action-Scoring, Runner-Reachability, Access-Payoff, Corp-Board-/Scoreline-Safety, TargetChoice-Fit, Goal-/Strategic-Fit, Corp-Economy-/Rez-Floor und Plan-Continuity an ihre Owner; vollständiger Boundary-Audit und Typecheck sind grün. |
 | AI-COMPLETE-17 | Fachliche Scoring-Consumer aufbauen. | `VERIFIED` | Aktueller Score enthält große Typpriorität und verstreute Komponenten. | Erfüllt: Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty sind als aktive normalisierte Consumer angebunden; Vertragstest schützt Vollständigkeit, Skalen und `active`-Status. |
-| AI-COMPLETE-18 | DecisionTrace, WhyChosen und WhyNot vollständig machen. | `IN_PROGRESS` | Debug ist vorhanden, aber WhyNot-Kategorien und Alternativenabdeckung müssen geprüft werden. | Erster Trace-Abdeckungsschnitt ergänzt WhyNot für legale Aktionen ohne Semantic-Candidate; weitere WhyChosen-/WhyNot-Kategorien und Runtime-Debug-Abdeckung sind offen. |
+| AI-COMPLETE-18 | DecisionTrace, WhyChosen und WhyNot vollständig machen. | `IN_PROGRESS` | Debug ist vorhanden, aber WhyNot-Kategorien und Alternativenabdeckung müssen geprüft werden. | Erster Trace-Abdeckungsschnitt ergänzt WhyNot für legale Aktionen ohne Semantic-Candidate; zweiter Schnitt strukturiert ausgeschlossene Runtime-Alternativen; dritter Schnitt strukturiert WhyChosen; vierter Schnitt strukturiert nicht ausgeschlossene WhyNot-Alternativen; fünfter Schnitt zieht `rankedAlternatives` nach; sechster Schnitt befüllt `SemanticDecisionTrace.whyChosen/whyNot`; siebter Schnitt transportiert Top-WhyChosen in Shadow-Vergleichsreports; achter Schnitt transportiert Rejected-WhyNot in Snapshot-Mistake-Evidence; neunter Schnitt transportiert `actionAlternatives` in Replay-Cases; zehnter Schnitt strukturiert Coverage-Fallback-WhyNot; elfter Schnitt schützt ActionAlternatives-Why-Facts per Contract-Test. Weitere Trace-Kategorien und Runtime-Debug-Abdeckung sind offen. |
 | AI-COMPLETE-19 | Kommentare und Entwicklerleitplanken korrigieren. | `PENDING` | Grenzkommentare existieren, müssen nach Runtime-Änderungen stimmen. | Nur knappe, aktuelle Grenzkommentare an Fehlentwicklungsrisiken; veraltete No-Effect-Texte entfernt. |
 | AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `PENDING` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay müssen nach Reparatur geprüft werden. | Tests, Szenarien und Benchmarks belegen 0 Illegalität, 0 Hidden-Info-Verstoß, keine Action-Type-Dominanz und bessere Erklärbarkeit. |
 
@@ -10654,6 +10654,81 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Status bleibt `IN_PROGRESS`, weil WhyChosen-/WhyNot-Kategorien und Runtime-Debug-Abdeckung noch breiter auditiert werden müssen.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/semantic-shadow-decision.test.ts` in `packages/ai` grün, 15 Tests.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-18` zweiter Runtime-Debug-WhyNot-Schnitt:
+  - `packages/ai/src/diagnostics/semantic-runtime-debug.ts` ergänzt `semanticRuntimeDebugExcludedActionWhyNot` als zentralen Helper für ausgeschlossene Runtime-Alternativen.
+  - `packages/ai/src/diagnostics/semantic-runtime-action-alternatives.ts` nutzt den Helper und behält die bisherigen Kompatibilitäts-Einträge `semantic_excluded:<key>` und Exclusion-Reason bei.
+  - Ausgeschlossene Alternativen tragen zusätzlich redaction-safe strukturierte Evidence für Exclusion-Reason, Raw-/Final-Score, Scope, ReasonCode und Planselection-Kontext.
+  - `packages/ai/src/diagnostics/semantic-runtime-debug.test.ts` schützt die neue WhyNot-Struktur.
+  - Status bleibt `IN_PROGRESS`, weil weitere WhyChosen-/WhyNot-Kategorien und ein Abschlussaudit für DecisionTrace-Vollständigkeit offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/diagnostics/semantic-runtime-debug.test.ts` grün, 7 Tests.
+
+- `AI-COMPLETE-18` dritter Runtime-Debug-WhyChosen-Schnitt:
+  - `packages/ai/src/diagnostics/semantic-runtime-debug.ts` strukturiert `semanticRuntimeDebugActionWhyChosen` für normale Semantic-Runtime-Auswahl mit Raw-/Final-Score, Plan-Mapping-Status, Scope und ReasonCode.
+  - Plan-gemappte Auswahl behält `selected_by_plan_mapping`, Raw-/Final-Score und `displayOnlyScore:true` bei und ergänzt denselben Scope-/ReasonCode-Kontext.
+  - Die WhyChosen-Facts laufen durch `scrubEvidence` und bleiben frei von Labels, Payloads oder versteckten Kartendaten.
+  - `packages/ai/src/diagnostics/semantic-runtime-debug.test.ts` schützt den normalen Nicht-Plan-Fall und die erweiterten Plan-Mapping-Facts.
+  - Status bleibt `IN_PROGRESS`, weil weitere Trace-Kategorien und ein Abschlussaudit für DecisionTrace-Vollständigkeit offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/diagnostics/semantic-runtime-debug.test.ts` grün, 8 Tests.
+
+- `AI-COMPLETE-18` vierter Runtime-Debug-WhyNot-Schnitt:
+  - `packages/ai/src/diagnostics/semantic-runtime-debug.ts` strukturiert `semanticRuntimeDebugActionWhyNot` für nicht ausgeschlossene Alternativen mit Raw-/Final-Score, Scope und ReasonCode.
+  - Plan-gemappte Nichtauswahl behält `lower_plan_fit` beziehungsweise `plan_mismatch`, den Mapping-Grund und `displayOnlyScore:true` bei und ergänzt denselben Kontext.
+  - Normale Nichtauswahl behält `semantic_score_below_selected` bei und ist dadurch für Selfplay-/Trace-Mining nicht mehr nur pauschal begründet.
+  - `packages/ai/src/diagnostics/semantic-runtime-debug.test.ts` schützt den normalen Nicht-Plan-Fall und die erweiterten Plan-Mapping-Facts.
+  - Status bleibt `IN_PROGRESS`, weil weitere Trace-Kategorien und ein Abschlussaudit für DecisionTrace-Vollständigkeit offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/diagnostics/semantic-runtime-debug.test.ts` grün, 9 Tests.
+
+- `AI-COMPLETE-18` fünfter Runtime-Debug-Ranked-Alternatives-Schnitt:
+  - `packages/ai/src/diagnostics/semantic-runtime-debug.ts` nutzt die zentralen WhyChosen-/WhyNot-Helper jetzt auch für `rankedAlternatives`.
+  - Ausgewählte Ranked-Alternativen behalten `selected_action` im historischen `whyNot`-Feld und ergänzen strukturierte Semantic-Runtime-Selection-Facts.
+  - Nicht ausgewählte Ranked-Alternativen tragen nicht mehr nur `semantic_score_below_selected`, sondern auch Raw-/Final-Score, Scope und ReasonCode.
+  - `packages/ai/src/diagnostics/semantic-runtime-debug.test.ts` schützt selected und nicht-selected Ranked-Alternatives; ausgeschlossene Choices bleiben aus dieser Liste herausgefiltert.
+  - Status bleibt `IN_PROGRESS`, weil weitere Trace-Kategorien und ein Abschlussaudit für DecisionTrace-Vollständigkeit offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/diagnostics/semantic-runtime-debug.test.ts` grün, 9 Tests.
+
+- `AI-COMPLETE-18` sechster SemanticDecisionTrace-Why-Schnitt:
+  - `packages/ai/src/decision/semantic-decision-trace.ts` ergänzt optionale `whyChosen`- und `whyNot`-Felder für Ranked- beziehungsweise Rejected-Actions.
+  - `packages/ai/src/decision/semantic-shadow-decision.ts` befüllt Ranked-Actions mit Rank, Score, PrimaryGoal und Score-Komponenten als WhyChosen-Facts.
+  - Rejected-Actions erhalten strukturierte WhyNot-Facts für Goal-Fit-Blocker, No-Tactical-Goal-Fit und fehlende Semantic-Candidates.
+  - `packages/ai/src/decision/semantic-shadow-decision.test.ts` schützt Ranked-WhyChosen, Missing-Candidate-WhyNot und Blocked-WhyNot.
+  - Status bleibt `IN_PROGRESS`, weil weitere Trace-Kategorien und ein Abschlussaudit für DecisionTrace-Vollständigkeit offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/semantic-shadow-decision.test.ts` grün, 15 Tests.
+
+- `AI-COMPLETE-18` siebter Shadow-Report-WhyChosen-Schnitt:
+  - `packages/ai/src/evaluation/semantic-shadow-report.ts` transportiert `SemanticDecisionTrace.rankedActions[0].whyChosen` redigiert als `shadow_top_why_chosen:<fact>` in die Shadow-vs-Runtime-Comparison-Evidence.
+  - Bestehende Legalitäts-, Agreement-, Score-, Goal- und Kalibrierungs-Evidence bleibt unverändert.
+  - `packages/ai/src/evaluation/semantic-shadow-report.test.ts` schützt, dass Top-WhyChosen-Facts in Vergleichsreports sichtbar werden.
+  - Status bleibt `IN_PROGRESS`, weil weitere Trace-Kategorien und ein Abschlussaudit für DecisionTrace-Vollständigkeit offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/evaluation/semantic-shadow-report.test.ts` grün, 5 Tests.
+
+- `AI-COMPLETE-18` achter Snapshot-Mistake-WhyNot-Schnitt:
+  - `packages/ai/src/evaluation/decision-snapshot-suite.ts` ergänzt Rejected-Action-`whyNot` als `trace_why_not:<fact>` in Mistake-Evidence für `plan_step_mismatch` und `target_choice_unavailable`.
+  - Die Mistake-Klassifikation selbst bleibt unverändert; nur die Diagnose-Evidence wird vollständiger.
+  - `packages/ai/src/evaluation/decision-snapshot-suite.test.ts` schützt, dass Target-Choice-Unavailable-Evidence die Trace-WhyNot-Blocker enthält.
+  - Status bleibt `IN_PROGRESS`, weil weitere Trace-Kategorien und ein Abschlussaudit für DecisionTrace-Vollständigkeit offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/evaluation/decision-snapshot-suite.test.ts` grün, 6 Tests.
+
+- `AI-COMPLETE-18` neunter Replay-Case-Action-Alternatives-Schnitt:
+  - `packages/ai/src/evaluation/replay-decision-case-extraction.ts` übernimmt side-safe `actionAlternatives` mit Rank, ActionType, selected/excluded, Priority, WhyChosen und WhyNot in Replay-Decision-Cases.
+  - Action-IDs, Labels und Source-Titles werden in diesem Replay-Case-Artefakt bewusst nicht übernommen.
+  - `packages/ai/src/evaluation/replay-decision-case-extraction.test.ts` schützt den neuen Block inklusive Redaction eines absichtlich eingebetteten Label-Leaks.
+  - Status bleibt `IN_PROGRESS`, weil weitere Trace-Kategorien und ein Abschlussaudit für DecisionTrace-Vollständigkeit offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/evaluation/replay-decision-case-extraction.test.ts` grün, 2 Tests.
+
+- `AI-COMPLETE-18` zehnter Coverage-Fallback-WhyNot-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime.ts` strukturiert `decisionDebug.whyNot` für Semantic-Coverage-Fallbacks mit Fallback-Policy, Candidate-/Choice-Zahlen und ausgewählter Fallback-LegalAction.
+  - Der bestehende Evidence-Block bleibt unverändert; `whyNot` verwendet dieselben bereits scrubbed Fallback-Facts.
+  - `packages/ai/src/semantic-ai-runtime-cutover.test.ts` schützt die neue Fallback-WhyNot-Struktur.
+  - Status bleibt `IN_PROGRESS`, weil weitere Trace-Kategorien und ein Abschlussaudit für DecisionTrace-Vollständigkeit offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/semantic-ai-runtime-cutover.test.ts -t "semantic coverage fallback"` grün, 1 Test.
+
+- `AI-COMPLETE-18` elfter ActionAlternatives-Contract-Schnitt:
+  - `packages/ai/src/diagnostics/semantic-runtime-action-alternatives.test.ts` schützt die maschinenlesbaren Why-Facts für selected, nicht-selected und excluded Runtime-Action-Alternatives.
+  - Der Test bindet die zentrale Debug-Oberfläche an `semantic_runtime_actual`, `semantic_score_below_selected`, `semantic_excluded:*`, Raw-/Final-Score, Scope und ReasonCode.
+  - Keine Produktionslogik geändert; der Schnitt ist ein Regression-Guard für die vorherigen Runtime-Debug-Why-Schnitte.
+  - Status bleibt `IN_PROGRESS`, weil weitere Trace-Kategorien und ein Abschlussaudit für DecisionTrace-Vollständigkeit offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/diagnostics/semantic-runtime-action-alternatives.test.ts` grün, 1 Test.
 
 ## Audit-Ledger
 

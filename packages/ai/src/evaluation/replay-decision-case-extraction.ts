@@ -50,6 +50,16 @@ export type ReplayDecisionCaseRankedAlternative = {
   whyNot: string[];
 };
 
+export type ReplayDecisionCaseActionAlternative = {
+  rank: number;
+  actionType?: string;
+  selected: boolean;
+  excluded?: boolean;
+  priority?: number;
+  whyChosen: string[];
+  whyNot: string[];
+};
+
 export type ReplayDecisionCase = {
   kind: "replay_decision_case";
   caseId: string;
@@ -88,6 +98,7 @@ export type ReplayDecisionCase = {
     whyNot: string[];
     scoreBreakdown: ReplayDecisionCaseMetric[];
     rankedAlternatives: ReplayDecisionCaseRankedAlternative[];
+    actionAlternatives: ReplayDecisionCaseActionAlternative[];
   };
   reproducibility: {
     stateVersion: number;
@@ -225,6 +236,7 @@ export function extractReplayDecisionCaseFromTrace(
       whyNot: safeTextArray(raw.whyNot),
       scoreBreakdown: scoreBreakdown(raw.scoreBreakdown),
       rankedAlternatives: rankedAlternatives(raw.rankedAlternatives),
+      actionAlternatives: actionAlternatives(raw.actionAlternatives),
     },
     reproducibility: {
       stateVersion: trace.stateVersion,
@@ -271,6 +283,25 @@ function rankedAlternatives(value: unknown): ReplayDecisionCaseRankedAlternative
         ...optionalText("summary", entry.summary),
         visibleReasons: safeTextArray(entry.visibleReasons),
         warnings: safeTextArray(entry.warnings),
+        whyNot: safeTextArray(entry.whyNot),
+      },
+    ];
+  });
+}
+
+function actionAlternatives(value: unknown): ReplayDecisionCaseActionAlternative[] {
+  if (!Array.isArray(value)) return [];
+  return value.slice(0, 8).flatMap((entry, index) => {
+    if (!isRecord(entry)) return [];
+    const excluded = booleanValue(entry.excluded);
+    return [
+      {
+        rank: numberValue(entry.rank) ?? index + 1,
+        ...optionalText("actionType", entry.actionType),
+        selected: booleanValue(entry.selected) ?? false,
+        ...(excluded !== undefined ? { excluded } : {}),
+        ...optionalNumber("priority", entry.priority),
+        whyChosen: safeTextArray(entry.whyChosen),
         whyNot: safeTextArray(entry.whyNot),
       },
     ];
@@ -337,6 +368,10 @@ function safeOptionalText(value: unknown): string | undefined {
 function numberValue(value: unknown): number | undefined {
   if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
   return value;
+}
+
+function booleanValue(value: unknown): boolean | undefined {
+  return typeof value === "boolean" ? value : undefined;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

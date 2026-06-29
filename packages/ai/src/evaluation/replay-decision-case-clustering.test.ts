@@ -117,6 +117,7 @@ function caseEntry(
       whyNot: [],
       scoreBreakdown: [],
       rankedAlternatives,
+      actionAlternatives: [],
     },
     reproducibility: {
       stateVersion: 1,

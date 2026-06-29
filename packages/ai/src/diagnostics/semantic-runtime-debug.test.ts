@@ -14,6 +14,7 @@ import {
   semanticRuntimeDebugActionWhyNot,
   semanticRuntimeDebugCalibrationProfileItems,
   semanticRuntimeDebugCoverageScoreBreakdown,
+  semanticRuntimeDebugExcludedActionWhyNot,
   semanticRuntimeDebugMistakeSummaryItems,
   semanticRuntimeDebugPilotScopeItems,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
@@ -48,6 +49,9 @@ describe("SemanticRuntimeDebug", () => {
       "rawSemanticScore:80",
       "finalSelectionScore:330",
       "displayOnlyScore:true",
+      "selected_by_plan_mapping:true",
+      "scope:runner_safe_access",
+      "reasonCode:semantic.runtime",
       "selectedPlan:runner.obtain_breaker_coverage",
     ]);
     expect(
@@ -58,6 +62,32 @@ describe("SemanticRuntimeDebug", () => {
       "rawSemanticScore:120",
       "finalSelectionScore:120",
       "displayOnlyScore:true",
+      "scope:runner_safe_access",
+      "reasonCode:semantic.runtime",
+      "selectedPlan:runner.obtain_breaker_coverage",
+    ]);
+    const excludedChoice = choice(action("run-hq", "start_run"), 60, {
+      exclusion: {
+        key: "known_central_no_current_payoff",
+        label: "Known central no current payoff",
+        reason: "hq_payoff_low",
+      },
+      reasonCode: "semantic.runtime.central.payoff",
+      scopeId: "central_run",
+    });
+    expect(
+      semanticRuntimeDebugExcludedActionWhyNot(excludedChoice, 60, context),
+    ).toEqual([
+      "semantic_excluded:known_central_no_current_payoff",
+      "hq_payoff_low",
+      "semantic_exclusion_reason:hq_payoff_low",
+      "rawSemanticScore:60",
+      "finalSelectionScore:60",
+      "excluded:true",
+      "scope:central_run",
+      "reasonCode:semantic.runtime.central.payoff",
+      "plan_selection_context:true",
+      "selectedPlan:runner.obtain_breaker_coverage",
     ]);
     expect(
       semanticRuntimeDebugPlanSelectionScoreBreakdown(
@@ -72,6 +102,49 @@ describe("SemanticRuntimeDebug", () => {
         label: "Plan-Auswahl",
         value: 250,
       }),
+    ]);
+  });
+
+  it("explains non-plan semantic runtime selections with structured why-chosen facts", () => {
+    const selected = choice(action("gain", "gain_credit"), 75, {
+      reasonCode: "runner.semantic.economy",
+      scopeId: "basic_economy_draw",
+    });
+    const context = buildSemanticRuntimeDebugPlanContext({
+      selectedActionId: "gain",
+      selectedChoice: selected,
+      mappedActionIds: [],
+    });
+
+    expect(context.selectedByPlanMapping).toBe(false);
+    expect(semanticRuntimeDebugActionWhyChosen(selected, context)).toEqual([
+      "semantic_runtime_actual",
+      "rawSemanticScore:75",
+      "finalSelectionScore:75",
+      "selected_by_plan_mapping:false",
+      "scope:basic_economy_draw",
+      "reasonCode:runner.semantic.economy",
+    ]);
+  });
+
+  it("explains non-plan semantic runtime rejections with structured why-not facts", () => {
+    const rejected = choice(action("draw", "draw_card"), 45, {
+      reasonCode: "runner.semantic.hand_development",
+      scopeId: "basic_economy_draw",
+    });
+    const context = buildSemanticRuntimeDebugPlanContext({
+      selectedActionId: "gain",
+      selectedChoice: choice(action("gain", "gain_credit"), 90),
+      mappedActionIds: [],
+    });
+
+    expect(context.selectedByPlanMapping).toBe(false);
+    expect(semanticRuntimeDebugActionWhyNot(rejected, 45, context)).toEqual([
+      "semantic_score_below_selected",
+      "rawSemanticScore:45",
+      "finalSelectionScore:45",
+      "scope:basic_economy_draw",
+      "reasonCode:runner.semantic.hand_development",
     ]);
   });
 
@@ -336,6 +409,10 @@ describe("SemanticRuntimeDebug", () => {
 
   it("formats ranked alternatives through caller-provided score rows", () => {
     const selected = choice(action("run-hq", "start_run"), 90);
+    const lower = choice(action("draw", "draw_card"), 55, {
+      reasonCode: "runner.semantic.hand_development",
+      scopeId: "basic_economy_draw",
+    });
     const blocked = choice(action("gain", "gain_credit"), 40, {
       exclusion: {
         key: "blocked",
@@ -345,7 +422,7 @@ describe("SemanticRuntimeDebug", () => {
     });
 
     const ranked = semanticRuntimeDebugRankedAlternatives({
-      rankedChoices: [selected, blocked],
+      rankedChoices: [selected, lower, blocked],
       selectedActionId: "run-hq",
       scoreBreakdownForChoice: () => [
         {
@@ -363,7 +440,27 @@ describe("SemanticRuntimeDebug", () => {
         planId: "semantic_runtime:runner_safe_access:start_run",
         selectedActionType: "start_run",
         visibleReasons: ["safe"],
-        whyNot: ["selected_action"],
+        whyNot: [
+          "selected_action",
+          "semantic_runtime_actual",
+          "rawSemanticScore:90",
+          "finalSelectionScore:90",
+          "selected_by_plan_mapping:false",
+          "scope:runner_safe_access",
+          "reasonCode:semantic.runtime",
+        ],
+      }),
+      expect.objectContaining({
+        rank: 2,
+        planId: "semantic_runtime:basic_economy_draw:draw_card",
+        selectedActionType: "draw_card",
+        whyNot: [
+          "semantic_score_below_selected",
+          "rawSemanticScore:55",
+          "finalSelectionScore:55",
+          "scope:basic_economy_draw",
+          "reasonCode:runner.semantic.hand_development",
+        ],
       }),
     ]);
   });

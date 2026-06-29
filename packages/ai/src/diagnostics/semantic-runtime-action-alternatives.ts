@@ -10,6 +10,7 @@ import {
   semanticRuntimeDebugActionWhyChosen,
   semanticRuntimeDebugActionWhyNot,
   semanticRuntimeDebugCoverageScoreBreakdown,
+  semanticRuntimeDebugExcludedActionWhyNot,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
 } from "./semantic-runtime-debug";
 
@@ -91,10 +92,11 @@ export function buildSemanticRuntimeActionAlternatives({
           }
         : {
             whyNot: choice.exclusion
-              ? [
-                  `semantic_excluded:${choice.exclusion.key}`,
-                  choice.exclusion.reason,
-                ]
+              ? semanticRuntimeDebugExcludedActionWhyNot(
+                  choice,
+                  displayScore,
+                  planSelection,
+                )
               : semanticRuntimeDebugActionWhyNot(
                   choice,
                   displayScore,

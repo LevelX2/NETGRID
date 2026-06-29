@@ -453,17 +453,27 @@ export function semanticRuntimeDebugActionWhyChosen(
   context: SemanticRuntimeDebugPlanContext,
 ): string[] {
   if (context.selectedByPlanMapping) {
-    return [
+    return scrubEvidence([
       "selected_by_plan_mapping",
       `rawSemanticScore:${choice.score}`,
       `finalSelectionScore:${choice.score + context.planMatchDisplayBoost}`,
       "displayOnlyScore:true",
+      "selected_by_plan_mapping:true",
+      ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),
+      ...(choice.reasonCode ? [`reasonCode:${choice.reasonCode}`] : []),
       ...(context.selectedPlanType
         ? [`selectedPlan:${context.selectedPlanType}`]
         : []),
-    ];
+    ]);
   }
-  return ["semantic_runtime_actual"];
+  return scrubEvidence([
+    "semantic_runtime_actual",
+    `rawSemanticScore:${choice.score}`,
+    `finalSelectionScore:${choice.score}`,
+    "selected_by_plan_mapping:false",
+    ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),
+    ...(choice.reasonCode ? [`reasonCode:${choice.reasonCode}`] : []),
+  ]);
 }
 
 export function semanticRuntimeDebugActionWhyNot(
@@ -473,18 +483,53 @@ export function semanticRuntimeDebugActionWhyNot(
 ): string[] {
   if (context.selectedByPlanMapping) {
     const mapped = context.mappedActionOrder.has(choice.action.actionId);
-    return [
+    return scrubEvidence([
       mapped ? "lower_plan_fit" : "plan_mismatch",
       mapped ? "selected_by_plan_mapping" : "excluded_by_current_plan",
       `rawSemanticScore:${choice.score}`,
       `finalSelectionScore:${displayScore}`,
       "displayOnlyScore:true",
+      ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),
+      ...(choice.reasonCode ? [`reasonCode:${choice.reasonCode}`] : []),
+      ...(context.selectedPlanType
+        ? [`selectedPlan:${context.selectedPlanType}`]
+        : []),
       ...(displayScore < choice.score
         ? ["lower_final_score_after_adjustment"]
         : []),
-    ];
+    ]);
   }
-  return ["semantic_score_below_selected"];
+  return scrubEvidence([
+    "semantic_score_below_selected",
+    `rawSemanticScore:${choice.score}`,
+    `finalSelectionScore:${displayScore}`,
+    ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),
+    ...(choice.reasonCode ? [`reasonCode:${choice.reasonCode}`] : []),
+  ]);
+}
+
+export function semanticRuntimeDebugExcludedActionWhyNot(
+  choice: SemanticRuntimeChoice,
+  displayScore: number,
+  context: SemanticRuntimeDebugPlanContext,
+): string[] {
+  if (!choice.exclusion) {
+    return semanticRuntimeDebugActionWhyNot(choice, displayScore, context);
+  }
+  return scrubEvidence([
+    `semantic_excluded:${choice.exclusion.key}`,
+    choice.exclusion.reason,
+    `semantic_exclusion_reason:${choice.exclusion.reason}`,
+    `rawSemanticScore:${choice.score}`,
+    `finalSelectionScore:${displayScore}`,
+    "excluded:true",
+    ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),
+    ...(choice.reasonCode ? [`reasonCode:${choice.reasonCode}`] : []),
+    ...(context.selectedByPlanMapping ? ["plan_selection_context:true"] : []),
+    ...(context.selectedPlanType
+      ? [`selectedPlan:${context.selectedPlanType}`]
+      : []),
+  ]);
 }
 
 export function semanticRuntimeDebugStrategicRuntimeItems(
@@ -650,26 +695,35 @@ export function semanticRuntimeDebugRankedAlternatives(params: {
   ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
   scrubEvidence: (evidence: string[]) => string[];
 }): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
+  const selectedChoice = params.rankedChoices.find(
+    (choice) => choice.action.actionId === params.selectedActionId,
+  );
+  const context = buildSemanticRuntimeDebugPlanContext({
+    selectedActionId: params.selectedActionId,
+    ...(selectedChoice ? { selectedChoice } : {}),
+  });
   return params.rankedChoices
     .filter((choice) => !choice.exclusion)
     .slice(0, 24)
-    .map((choice, index) => ({
-      rank: index + 1,
-      planId: `semantic_runtime:${choice.scopeId}:${choice.action.type}`,
-      planKind: choice.scopeId,
-      selectedActionType: choice.action.type,
-      summary: choice.explanation,
-      score: choice.score,
-      ...(choice.confidence !== undefined
-        ? { confidence: choice.confidence }
-        : {}),
-      visibleReasons: params.scrubEvidence(choice.evidence).slice(0, 4),
-      scoreBreakdown: params.scoreBreakdownForChoice(choice),
-      whyNot:
-        choice.action.actionId === params.selectedActionId
-          ? ["selected_action"]
-          : ["semantic_score_below_selected"],
-    }));
+    .map((choice, index) => {
+      const selected = choice.action.actionId === params.selectedActionId;
+      return {
+        rank: index + 1,
+        planId: `semantic_runtime:${choice.scopeId}:${choice.action.type}`,
+        planKind: choice.scopeId,
+        selectedActionType: choice.action.type,
+        summary: choice.explanation,
+        score: choice.score,
+        ...(choice.confidence !== undefined
+          ? { confidence: choice.confidence }
+          : {}),
+        visibleReasons: params.scrubEvidence(choice.evidence).slice(0, 4),
+        scoreBreakdown: params.scoreBreakdownForChoice(choice),
+        whyNot: selected
+          ? ["selected_action", ...semanticRuntimeDebugActionWhyChosen(choice, context)]
+          : semanticRuntimeDebugActionWhyNot(choice, choice.score, context),
+      };
+    });
 }
 
 export function semanticRuntimeDebugShadowTopItems(

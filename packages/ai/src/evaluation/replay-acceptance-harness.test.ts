@@ -153,6 +153,7 @@ function caseEntry(
           whyNot: [],
         },
       ],
+      actionAlternatives: [],
     },
     reproducibility: {
       stateVersion: 13,

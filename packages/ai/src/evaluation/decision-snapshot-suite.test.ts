@@ -183,6 +183,12 @@ describe("DecisionSnapshotSuite", () => {
     expect(mistakes.map((mistake) => mistake.mistakeClass)).toContain(
       "target_choice_unavailable",
     );
+    expect(mistakes.flatMap((mistake) => mistake.evidence)).toEqual(
+      expect.arrayContaining([
+        "trace_why_not:blocked_by_action_goal_fit",
+        "trace_why_not:blocker:target_context_missing_for_target_profile",
+      ]),
+    );
   });
 });
 
