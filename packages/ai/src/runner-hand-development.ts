@@ -416,32 +416,33 @@ function currentNeedForCard(
   role: RunnerHandDevelopmentRole,
 ): RunnerHandDevelopmentCurrentNeed {
   const intent = params.strategicIntent;
+  const setupEngine = new Set(intent?.setupEngine ?? []);
   const credits = params.input.playerView.own.credits;
   switch (role) {
     case "memory_support":
       return params.deckCapabilities?.runner?.memoryProfile.missingMemoryPressure ||
         context.memoryAvailable === 0
         ? "acute"
-        : intent?.setupEngine.includes("runner.rig_first") === true
+        : setupEngine.has("runner.rig_first")
           ? "useful_now"
           : "setup";
     case "breaker_or_rig_piece":
       return runnerNeedsCoverageFromHand(params.deckCapabilities)
         ? "acute"
-        : intent?.setupEngine.includes("runner.rig_first") === true ||
-            intent?.setupEngine.includes("runner.search_breaker_setup") === true
+        : setupEngine.has("runner.rig_first") ||
+            setupEngine.has("runner.search_breaker_setup")
           ? "useful_now"
           : "setup";
     case "economy_engine":
     case "bank_tool":
       return credits <= 2
         ? "acute"
-        : intent?.setupEngine.includes("runner.economy_setup_before_pressure") === true
+        : setupEngine.has("runner.economy_setup_before_pressure")
           ? "useful_now"
           : "setup";
     case "draw_or_search_engine":
-      return intent?.setupEngine.includes("runner.draw_or_search_setup") === true ||
-        intent?.setupEngine.includes("runner.search_breaker_setup") === true
+      return setupEngine.has("runner.draw_or_search_setup") ||
+        setupEngine.has("runner.search_breaker_setup")
         ? "useful_now"
         : "setup";
     case "access_payoff":
@@ -1915,23 +1916,24 @@ function roleMatchesStrategicIntent(
   intent: RunnerStrategicIntentProfile | undefined,
 ): boolean {
   if (!intent) return false;
+  const setupEngine = new Set(intent.setupEngine);
   if (
     (role === "breaker_or_rig_piece" || role === "memory_support") &&
-    (intent.setupEngine.includes("runner.rig_first") ||
-      intent.setupEngine.includes("runner.search_breaker_setup"))
+    (setupEngine.has("runner.rig_first") ||
+      setupEngine.has("runner.search_breaker_setup"))
   ) {
     return true;
   }
   if (
     (role === "economy_engine" || role === "bank_tool") &&
-    intent.setupEngine.includes("runner.economy_setup_before_pressure")
+    setupEngine.has("runner.economy_setup_before_pressure")
   ) {
     return true;
   }
   if (
     role === "draw_or_search_engine" &&
-    (intent.setupEngine.includes("runner.draw_or_search_setup") ||
-      intent.setupEngine.includes("runner.search_breaker_setup"))
+    (setupEngine.has("runner.draw_or_search_setup") ||
+      setupEngine.has("runner.search_breaker_setup"))
   ) {
     return true;
   }

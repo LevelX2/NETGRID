@@ -9477,6 +9477,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n 'text\.includes|subtypes\.includes|roles\.includes|riskTags\.includes|effectTargets\.includes|legacyRoles\.includes|includes\("(multiaccess|free_trash|mantis|trace|damage|tag|hq_info|topdeck_info|access_trash|city-grid|economy|draw|pressure|contest|score|defend|ice|outside)' packages/ai/src --glob '!**/*.test.ts' --glob '!**/*.spec.ts' --glob '!**/legacy/**'` ohne Treffer.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` zweihundertsechsundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-hand-development.ts` bindet Runner-Setup-Strategie-IDs in `currentNeedForCard` und `roleMatchesStrategicIntent` über lokale Sets statt wiederholter direkter Array-`includes`-Prüfungen.
+  - Strukturierte Strategie-IDs wie `runner.rig_first`, `runner.search_breaker_setup`, `runner.economy_setup_before_pressure` und `runner.draw_or_search_setup` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `runner-hand-development.test.ts` sichert die bestehenden Hand-Development-, Availability-, Need-, Strategic-Fit- und Persistent-Install-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere generische Text-/Regex-Heuristiken und direkte Membership-Cluster auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-hand-development.test.ts` grün, 1 Datei, 19 Tests.
+  - Verifikation: `rg -n 'setupEngine\.includes|strategicIntent\?\.setupEngine\.includes|intent\?\.setupEngine\.includes|intent\.setupEngine\.includes' packages/ai/src/runner-hand-development.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
