@@ -665,9 +665,10 @@ function buildDefaultShadowRankingCandidateDrafts(
 ): ShadowActionRankingCandidateDraft[] {
   return fixtureCorpus.flatMap((scenario) =>
     scenario.availableLegalActions.map((action) => {
+      const knownGapSet = new Set(action.knownGaps);
       const hiddenInfoBlocked =
         scenario.hiddenInfoPolicy === "hidden_info_blocked" ||
-        action.knownGaps.includes("hidden_info_blocked");
+        knownGapSet.has("hidden_info_blocked");
       const unresolvedGaps = uniqueProjectionIssues(action.knownGaps);
       const scoreStatus: ShadowScoreDraftStatus = hiddenInfoBlocked
         ? "blocked_by_gate"

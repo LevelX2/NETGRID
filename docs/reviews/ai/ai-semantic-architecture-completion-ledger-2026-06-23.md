@@ -9755,6 +9755,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'payoffEvidence\.includes' packages/ai/src/memory/remote-access-outcome.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertachtzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/shadow-scoring-diagnostics.ts` bindet ShadowScoring-KnownGaps über ein lokales Set statt direkter `action.knownGaps.includes(...)`-Prüfung.
+  - Strukturierte Gap-Flags wie `hidden_info_blocked` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `shadow-scoring-diagnostics.test.ts` sichert ShadowScoringFixture-Design, RankingDrafts und HardGate-Readiness.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/shadow-scoring-diagnostics.test.ts` grün, 1 Datei, 12 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'knownGaps\.includes' packages/ai/src/shadow-scoring-diagnostics.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
