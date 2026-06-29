@@ -1821,12 +1821,14 @@ export function scrubTraceForProduction(
 export function evaluateScopedOverridePilotFixture(
   fixture: ScopedOverridePilotFixture,
 ): ScopedOverridePilotResult {
-  const allowedScope = META5_ALLOWED_OVERRIDE_SCOPES.includes(
+  const allowedScopeSet = new Set<ScopedSemanticOverrideScope>(
+    META5_ALLOWED_OVERRIDE_SCOPES,
+  );
+  const legalActionIdSet = new Set(fixture.legalActionIds);
+  const allowedScope = allowedScopeSet.has(
     fixture.scope as ScopedSemanticOverrideScope,
   );
-  const semanticInLegalActions = fixture.legalActionIds.includes(
-    fixture.semanticActionId,
-  );
+  const semanticInLegalActions = legalActionIdSet.has(fixture.semanticActionId);
   const blockReasons = [
     ...(!allowedScope ? [`Scope is blocked or not whitelisted: ${fixture.scope}`] : []),
     ...(!semanticInLegalActions ? ["Semantic action is not in LegalActions."] : []),
@@ -1864,9 +1866,10 @@ export function evaluateScopedOverridePilotFixture(
 export function runAgreementOnlyCanary(
   input: AgreementOnlyCanaryInput,
 ): AgreementOnlyCanaryResult {
+  const legalActionIdSet = new Set(input.legalActionIds);
   const semanticInLegalActions =
     input.semanticActionId !== undefined &&
-    input.legalActionIds.includes(input.semanticActionId);
+    legalActionIdSet.has(input.semanticActionId);
   const sameAction =
     input.semanticActionId !== undefined &&
     input.semanticActionId === input.legacyActionId;
@@ -1918,9 +1921,10 @@ export function runAgreementOnlyCanary(
 export function adaptSemanticDecisionToLegacyActual(
   input: SemanticDecisionAdapterInput,
 ): SemanticDecisionAdapterResult {
+  const legalActionIdSet = new Set(input.legalActionIds);
   const semanticActionInLegalActions =
     input.semanticActionId !== undefined &&
-    input.legalActionIds.includes(input.semanticActionId);
+    legalActionIdSet.has(input.semanticActionId);
   const triggers: SemanticAiRollbackTrigger[] = [];
 
   if (input.semanticActionId !== undefined && !semanticActionInLegalActions) {
