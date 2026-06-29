@@ -17,6 +17,7 @@ import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
 } from "./runner-visible-breaker-coverage";
+import { rolesMatch } from "./role-match";
 
 type CorpServerLike = {
   id: string;
@@ -89,7 +90,9 @@ export function semanticRuntimeCorpInstallRemoteScore<
       dependencies,
     );
   }
-  if (installsIce && serverId === "archives") return 350;
+  if (installsIce && serverId === "archives") {
+    return semanticRuntimeCorpArchivesIceInstallScore(input, server);
+  }
   if (!dependencies.isRemoteServerTarget(serverId)) return 0;
 
   const emptyRemoteCount = dependencies.emptyRemoteCount(input);
@@ -109,6 +112,8 @@ export function semanticRuntimeCorpInstallRemoteScore<
 
   if (installsIce) {
     if (scoringWindow?.recommendedNextStep === "build_remote_ice") {
+      if (semanticRuntimeCorpDynamicOnlyRemoteIce(scoringWindow)) return 450;
+      if ((scoringWindow.dynamicProtectionWeaknessCount ?? 0) > 0) return 800;
       if (scoringWindow.windowKind === "durable") return 1350;
       if (scoringWindow.windowKind === "temporary_safe") return 1150;
     }
@@ -124,6 +129,10 @@ export function semanticRuntimeCorpInstallRemoteScore<
         actionSemanticCandidate,
       )
     ) {
+      const sourceCard = dependencies.actionSourceCard(input, action);
+      if (semanticRuntimeCorpRemoteInstallHasDynamicProtectionRisk(sourceCard)) {
+        return 450;
+      }
       return serverId === "new_remote" ? 1050 : 900;
     }
     let score = serverId === "new_remote" ? -1600 : -900;
@@ -144,6 +153,56 @@ export function semanticRuntimeCorpInstallRemoteScore<
     return hasStabilizingAlternative ? -900 : -350;
   }
   return protectedRemote ? 250 : -150;
+}
+
+function semanticRuntimeCorpArchivesIceInstallScore<TServer extends CorpServerLike>(
+  input: AiDecisionInput,
+  server: TServer | undefined,
+): number {
+  const archivesAgendaRisk = (input.playerView.own.heapOrArchives ?? []).some(
+    (card) => card.known !== false && card.type === "agenda",
+  );
+  if (archivesAgendaRisk) return (server?.ice.length ?? 0) === 0 ? 900 : 650;
+
+  const archivesRunPressure =
+    semanticRuntimeCorpArchivesRunOrAccessEventCount(input);
+  if (archivesRunPressure >= 2) {
+    return (server?.ice.length ?? 0) === 0 ? 450 : 250;
+  }
+
+  const acuteHqOrRd =
+    semanticRuntimeCorpCentralPressureAssessment(input, "hq").active ||
+    semanticRuntimeCorpCentralPressureAssessment(input, "rd").active;
+  if (acuteHqOrRd || semanticRuntimeCorpHasAgendaInHq(input)) return -450;
+
+  return 75;
+}
+
+function semanticRuntimeCorpDynamicOnlyRemoteIce(
+  scoringWindow: CorpScoringWindowAssessment,
+): boolean {
+  return (
+    (scoringWindow.dynamicProtectionWeaknessCount ?? 0) > 0 &&
+    (scoringWindow.affordableDurableRelevantIceCount ?? 0) === 0
+  );
+}
+
+function semanticRuntimeCorpRemoteInstallHasDynamicProtectionRisk(
+  card: VisibleCard | undefined,
+): boolean {
+  if (!card?.definitionId) return false;
+  const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+  const signals = [
+    ...semanticRuntimeCorpHintRiskTags(hint),
+    ...semanticRuntimeCorpHintTacticSignals(hint),
+  ];
+  return rolesMatch(signals, [
+    "position_dependent_ice",
+    "position_scaling",
+    "outer_ice_scaling",
+    "same_fort_reposition",
+    "mobile_position_change",
+  ]);
 }
 
 function semanticRuntimeCorpCentralIceInstallScore<
@@ -401,6 +460,57 @@ function semanticRuntimeCorpCentralInstallThreat(
   serverId: "hq" | "rd",
 ): boolean {
   return semanticRuntimeCorpCentralPressureAssessment(input, serverId).active;
+}
+
+function semanticRuntimeCorpArchivesRunOrAccessEventCount(
+  input: AiDecisionInput,
+): number {
+  const eventsById = new Map(
+    [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])].map(
+      (event) => [event.eventId, event],
+    ),
+  );
+  return [...eventsById.values()].filter((event) => {
+    const payload = event.publicPayload;
+    const actor = typeof payload.actor === "string" ? payload.actor : undefined;
+    const actionType =
+      typeof payload.actionType === "string" ? payload.actionType : event.type;
+    return (
+      actor === "runner" &&
+      (actionType === "start_run" || actionType === "access_card") &&
+      semanticRuntimeCorpArchivesServerIdFromPayload(payload) === "archives"
+    );
+  }).length;
+}
+
+function semanticRuntimeCorpArchivesServerIdFromPayload(
+  payload: Record<string, unknown>,
+): "archives" | undefined {
+  const value =
+    stringPayload(payload, "serverId") ??
+    stringPayload(payload, "attackedServerId") ??
+    stringPayload(payload, "targetServerId") ??
+    stringPayload(payload, "server") ??
+    stringPayload(payload, "serverLabel") ??
+    stringPayload(payload, "serverName");
+  return normalizeArchivesServerId(value);
+}
+
+function normalizeArchivesServerId(
+  value: string | undefined,
+): "archives" | undefined {
+  if (!value) return undefined;
+  return value.trim().toLocaleLowerCase("en-US") === "archives"
+    ? "archives"
+    : undefined;
+}
+
+function stringPayload(
+  payload: Record<string, unknown>,
+  key: string,
+): string | undefined {
+  const value = payload[key];
+  return typeof value === "string" ? value : undefined;
 }
 
 function roleMatchesAny(role: string, options: readonly string[]): boolean {

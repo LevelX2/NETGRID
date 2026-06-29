@@ -58,6 +58,10 @@ export type CorpScoringWindowAssessment = {
   agendaStealSeverity?: CorpScoringWindowAgendaStealSeverity;
   missingVisibleBreakerCoverage: boolean;
   corpCanRezRelevantIce: boolean;
+  affordableDurableRelevantIceCount?: number;
+  dynamicProtectionWeaknessCount?: number;
+  dynamicProtectionReserve?: number;
+  corpCanRezFullPathWithDynamicReserve?: boolean;
   scoreHorizon: CorpScoringWindowHorizon;
   runnerExposureCreditActions: number;
   recommendedNextStep: CorpScoringWindowNextStep;
@@ -216,6 +220,12 @@ export function semanticRuntimeCorpScoringWindowAssessment<
     agendaStealSeverity,
     missingVisibleBreakerCoverage: access.missingVisibleBreakerCoverage,
     corpCanRezRelevantIce: rezBudget.corpCanRezRelevantIce,
+    affordableDurableRelevantIceCount:
+      rezBudget.affordableDurableRelevantIceCount,
+    dynamicProtectionWeaknessCount: rezBudget.dynamicProtectionWeaknessCount,
+    dynamicProtectionReserve: rezBudget.dynamicProtectionReserve,
+    corpCanRezFullPathWithDynamicReserve:
+      rezBudget.corpCanRezFullPathWithDynamicReserve,
     scoreHorizon,
     runnerExposureCreditActions,
     recommendedNextStep,
