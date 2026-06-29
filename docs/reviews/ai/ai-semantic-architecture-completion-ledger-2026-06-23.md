@@ -9890,6 +9890,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'missingCoverageTypes\.includes|\]\.includes\(action\.type\)' packages/ai/src/decision/runner-coverage-goals.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertdreiunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-invariants.ts` bindet Evidence-Segmente, TargetProfile-Issues, StrategySupport-Confidence-Level und Fixture-ID-Segmente über lokale Sets statt direkter `.includes(...)`-Prüfungen.
+  - Strukturierte Invariant-Werte bleiben exakt; Hidden-Info-, Confidence- und Fixture-Prüfungen behalten ihre bounded Testabdeckung.
+  - `action-semantic-invariants.test.ts` sichert Side-safe TargetProfiles, Hidden-Info-Token, Support-only-Marker, Structural-Marker und Fixture-Segmente.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-semantic-invariants.test.ts` grün, 1 Datei, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n -F 'evidence.split(":").includes' ...`, `rg -n -F 'issues.includes' ...`, `rg -n -F '["low", "medium", "high"].includes' ...` und `rg -n -F 'segments.includes(' ...` ohne Treffer in `packages/ai/src/actions/action-semantic-invariants.ts`.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

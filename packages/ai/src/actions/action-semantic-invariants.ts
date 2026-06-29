@@ -267,7 +267,8 @@ function broadSignalStrategySupportIssues(
 }
 
 function evidenceReferencesSignal(evidence: string, signal: string): boolean {
-  return evidence.split(":").includes(signal);
+  const evidenceSegmentSet = new Set(evidence.split(":"));
+  return evidenceSegmentSet.has(signal);
 }
 
 function targetProfileIssues(
@@ -283,7 +284,7 @@ function targetProfileIssues(
     ].filter((value) => value.length > 0);
     const matchedHiddenInfo =
       match.status === "matched" &&
-      match.issues.includes("hidden_info_blocked" as ActionProjectionIssue);
+      new Set(match.issues).has("hidden_info_blocked" as ActionProjectionIssue);
     if (!matchedHiddenInfo && !evidence.some((value) => hiddenInfoText(value))) {
       return [];
     }
@@ -301,10 +302,11 @@ function targetProfileIssues(
 }
 
 function completeStrategySupportPair(pair: StrategySupportPair): boolean {
+  const allowedConfidenceSet = new Set(["low", "medium", "high"]);
   return (
     nonEmptyString(pair.strategyId) &&
     nonEmptyString(pair.role) &&
-    ["low", "medium", "high"].includes(pair.confidence) &&
+    allowedConfidenceSet.has(pair.confidence) &&
     nonEmptyString(pair.evidence)
   );
 }
@@ -474,11 +476,12 @@ function tokensIncludePhrase(
 
 function fixtureLikeCardId(cardId: string): boolean {
   const segments = splitIdentifierSegments(cardId.toLocaleLowerCase("en-US"));
+  const segmentSet = new Set(segments);
   return (
     segments[0] === "test" ||
     segments[0] === "fixture" ||
-    segments.includes("fixture") ||
-    segments.includes("harness")
+    segmentSet.has("fixture") ||
+    segmentSet.has("harness")
   );
 }
 
