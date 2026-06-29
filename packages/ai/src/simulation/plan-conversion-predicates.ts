@@ -832,7 +832,8 @@ function hasPlanConversionEvidenceFlag(
   entry: PlanConversionDecisionEntry,
   flag: string,
 ): boolean {
-  return (entry.evidence ?? []).includes(flag);
+  const evidenceFlagSet = new Set(entry.evidence ?? []);
+  return evidenceFlagSet.has(flag);
 }
 
 function planKindMatchesTerm(

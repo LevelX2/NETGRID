@@ -9935,6 +9935,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'holdoutSeeds\.includes' packages/ai/src/simulation/holdout-seed.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertachtunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/plan-conversion-predicates.ts` bindet PlanConversion-Evidence-Flags über ein lokales Set statt direkter `entry.evidence.includes(...)`-Prüfung.
+  - Strukturierte Evidence-Flags bleiben exakt; Plan-Conversion-Prädikate behalten die bounded Evidence-/Reason-Code-Semantik.
+  - `plan-conversion-predicates.test.ts` sichert bounded PlanKinds, Evidence-Rollen, Reason-Codes, Runner-Setup und Follow-up-Konversionen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/simulation/plan-conversion-predicates.test.ts` grün, 1 Datei, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'entry\.evidence.*includes|evidence \?\? \[\]\)\.includes|evidence.*includes\(flag\)' packages/ai/src/simulation/plan-conversion-predicates.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
