@@ -45,6 +45,7 @@ export function selfplayTraceFactsForDecision(
       : []),
     ...(safeDebug.visibleReasons ?? []),
     ...(safeDebug.warnings ?? []),
+    ...(safeDebug.whyNot?.map((fact) => `topLevelWhyNot:${fact}`) ?? []),
     ...(safeDebug.evidence ?? []),
     ...(safeDebug.detailSections?.flatMap((section) =>
       section.items.slice(0, 4).map((item) => `${section.id}:${item}`),
