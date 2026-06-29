@@ -43,6 +43,19 @@ describe("access reveal UI helpers", () => {
     expect(accessDecisionLabel(ok, "Archive")).toBe("Archiv-Zugriff abschließen");
   });
 
+  it("makes Red Herrings payment explicit before stealing an agenda", () => {
+    const steal = legalAction("steal_agenda", "Priority Requisition stehlen");
+    steal.payload = {
+      stealAdditionalCost: 5,
+      stealCost: 5,
+      stealCostSourceTitles: "Red Herrings"
+    };
+
+    expect(accessDecisionLabel(steal, "Remote 1")).toBe(
+      "5 Credits wegen Red Herrings bezahlen und Agenda aus Remote 1 stehlen"
+    );
+  });
+
   it("labels free access trash actions as free", () => {
     const trash = legalAction("trash_accessed_card", "Dog Pile kostenlos trashen");
     trash.payload = {

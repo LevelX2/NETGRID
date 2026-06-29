@@ -2674,6 +2674,12 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(accessRevealStatusLabel({ type: "agenda" }, [steal], "runner", "runner", "Remote 1")).toBe(
       "Remote 1-Zugriff: Red Herrings: 5 Credits zusätzliche Stehlkosten. Diese Agenda kann jetzt gestohlen werden."
     );
+    expect(actionButtonLabel(steal)).toBe(
+      "5 Credits wegen Red Herrings bezahlen und Priority Requisition stehlen"
+    );
+    expect(contextualCardActionLabel(steal)).toBe(
+      "5 Credits wegen Red Herrings bezahlen"
+    );
   });
 
   it("explains Red Herrings when the Runner cannot pay the steal cost", () => {

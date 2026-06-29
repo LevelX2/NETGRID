@@ -1,5 +1,5 @@
 import type { LegalAction } from "@netgrid/shared";
-import { normalizeVisibleTerms } from "./action-board-ui";
+import { normalizeVisibleTerms, stealCostPaymentLabel } from "./action-board-ui";
 
 export type AccessRevealActionGroups = {
   primaryActions: LegalAction[];
@@ -16,7 +16,11 @@ export function accessRevealActionGroups(actions: LegalAction[]): AccessRevealAc
 export function accessDecisionLabel(action: LegalAction, serverLabel?: string): string {
   const accessContext = accessDecisionContextLabel(serverLabel);
   if (action.type === "access_card") return accessContext ? `Nächste ${accessContext}-Karte` : "Nächste Karte";
-  if (action.type === "steal_agenda") return accessContext ? `Agenda aus ${accessContext} stehlen` : "Agenda stehlen";
+  if (action.type === "steal_agenda") {
+    const paymentLabel = stealCostPaymentLabel(action.payload);
+    const stealLabel = accessContext ? `Agenda aus ${accessContext} stehlen` : "Agenda stehlen";
+    return paymentLabel ? `${paymentLabel} und ${stealLabel}` : stealLabel;
+  }
   if (action.type === "trash_accessed_card") {
     if (action.payload?.freeAccessTrash === true) return accessContext ? `Kostenlos aus ${accessContext} trashen` : "Kostenlos trashen";
     return accessContext ? `Aus ${accessContext} trashen` : "Trashen";

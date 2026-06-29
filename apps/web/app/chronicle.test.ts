@@ -4096,6 +4096,30 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("+2 Agenda");
   });
 
+  it("names Red Herrings payments when a paid agenda steal resolves", () => {
+    const item = formatChronicleEvent(
+      makeEvent("steal_agenda", {
+        actor: "runner",
+        title: "Project Agenda",
+        agendaPoints: 2,
+        stealAdditionalCost: 5,
+        stealCost: 5,
+        stealCostSourceTitles: "Red Herrings",
+      }),
+      "runner",
+      {
+        cardTitle: "Project Agenda",
+      },
+    );
+
+    expect(item.title).toBe(
+      "Du hast Project Agenda gestohlen und 2 Agenda-Punkte erhalten und 5 Credits wegen Red Herrings bezahlt.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["+2 Agenda", "5 Credits", "Red Herrings"]),
+    );
+  });
+
   it("names accessed cards when the access event reveals one", () => {
     const item = formatChronicleEvent(
       makeEvent("access_card", {
