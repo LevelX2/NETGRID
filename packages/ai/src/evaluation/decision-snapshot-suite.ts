@@ -182,14 +182,15 @@ export function classifyDecisionTraceMistakes(
     });
   }
   for (const rejected of trace.rejectedActions) {
-    if (rejected.blockers.includes("plan_step_mismatch")) {
+    const blockerSet = new Set(rejected.blockers);
+    if (blockerSet.has("plan_step_mismatch")) {
       mistakes.push({
         mistakeClass: "plan_step_mismatch",
         actionId: rejected.actionId,
         evidence: rejected.evidence,
       });
     }
-    if (rejected.blockers.includes("target_context_missing_for_target_profile")) {
+    if (blockerSet.has("target_context_missing_for_target_profile")) {
       mistakes.push({
         mistakeClass: "target_choice_unavailable",
         actionId: rejected.actionId,
@@ -228,7 +229,8 @@ function preferredGoalFamilyMatches(params: {
   if (!top?.primaryGoalId) return false;
   const utilities = buildTacticalGoalUtilities(params.frame.tacticalGoals);
   const topUtility = utilities.find((utility) => utility.goalId === top.primaryGoalId);
-  return Boolean(topUtility && preferred.includes(topUtility.family));
+  const preferredGoalFamilySet = new Set(preferred);
+  return Boolean(topUtility && preferredGoalFamilySet.has(topUtility.family));
 }
 
 function dedupeMistakes(

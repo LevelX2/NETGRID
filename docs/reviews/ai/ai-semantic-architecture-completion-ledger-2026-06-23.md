@@ -9773,6 +9773,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'mistakeClasses\.includes' packages/ai/src/evaluation/selfplay-decision-snapshot-mining.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/decision-snapshot-suite.ts` bindet RejectedAction-Blocker und PreferredGoalFamilies über lokale Sets statt direkter `rejected.blockers.includes(...)`- und `preferred.includes(...)`-Prüfungen.
+  - Strukturierte Blocker-IDs und GoalFamily-IDs bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `decision-snapshot-suite.test.ts` sichert Snapshot-Evaluation, Mistake-Klassifikation und PreferredGoalFamily-Matches.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/evaluation/decision-snapshot-suite.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'blockers\.includes|preferred\.includes' packages/ai/src/evaluation/decision-snapshot-suite.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
