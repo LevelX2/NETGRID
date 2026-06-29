@@ -125,10 +125,14 @@ export const SCORING_CONSUMER_DIMENSIONS = [
   },
   {
     id: "reserve",
-    owner: "runtime/semantic-runtime-corp-rez-floor.ts",
+    owner: "runtime/semantic-runtime-corp-score.ts",
     scale: { min: -100, max: 100, neutral: 0 },
-    implementationStatus: "partial",
-    evidenceKeys: ["remote_rez_floor:", "access_reserve_desired:"],
+    implementationStatus: "active",
+    evidenceKeys: [
+      "remote_rez_floor:",
+      "reserve_raw_value:",
+      "reserve_normalized_value:",
+    ],
   },
   {
     id: "uncertainty",

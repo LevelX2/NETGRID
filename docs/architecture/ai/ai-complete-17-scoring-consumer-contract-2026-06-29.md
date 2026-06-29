@@ -18,7 +18,7 @@ Zweck: AI-COMPLETE-17 baut fachliche Scoring-Consumer auf. Dieser Vertrag hält 
 | Doctrine | `packages/ai/src/decision/doctrine-goal-synthesis.ts` | `partial` | `-100..100`, neutral `0` |
 | Plan Continuity | `packages/ai/src/plans/tactical-plan-progression.ts` | `partial` | `-100..100`, neutral `0` |
 | Terminal Outcome | `packages/ai/src/runtime/semantic-runtime-corp-score-safety.ts` | `partial` | `-100..100`, neutral `0` |
-| Reserve | `packages/ai/src/runtime/semantic-runtime-corp-rez-floor.ts`, Access-Reserve-Adapter | `partial` | `-100..100`, neutral `0` |
+| Reserve | `packages/ai/src/runtime/semantic-runtime-corp-score.ts` | `active` | `-100..100`, neutral `0` |
 | Uncertainty | `packages/ai/src/belief-state.ts` | `contract_only` | `-100..100`, neutral `0` |
 
 ## Code-Vertrag
@@ -30,6 +30,5 @@ Zweck: AI-COMPLETE-17 baut fachliche Scoring-Consumer auf. Dieser Vertrag hält 
 
 ## Nächste Schnitte
 
-1. Reserve-Signale in normalisierte `-100..100`-Consumer überführen.
-2. Doctrine- und Plan-Continuity-Komponenten als fachliche Consumer sichtbar machen.
-3. Terminal-Outcome und Uncertainty als explizite Score-Komponenten anbinden.
+1. Doctrine- und Plan-Continuity-Komponenten als fachliche Consumer sichtbar machen.
+2. Terminal-Outcome und Uncertainty als explizite Score-Komponenten anbinden.

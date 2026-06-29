@@ -8,12 +8,22 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import {
   corpActionCandidateHasVisibleSignal,
+  normalizedCorpReserveScoreValue,
   semanticRuntimeCorpScoreComponents,
   type SemanticRuntimeCorpScoreDependencies,
 } from "./semantic-runtime-corp-score";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 
 describe("semanticRuntimeCorpScoreComponents", () => {
+  it("normalizes reserve score values into the scoring consumer scale", () => {
+    expect(normalizedCorpReserveScoreValue(0)).toBe(0);
+    expect(normalizedCorpReserveScoreValue(900)).toBe(18);
+    expect(normalizedCorpReserveScoreValue(-750)).toBe(-15);
+    expect(normalizedCorpReserveScoreValue(-1500)).toBe(-30);
+    expect(normalizedCorpReserveScoreValue(7500)).toBe(100);
+    expect(normalizedCorpReserveScoreValue(-7500)).toBe(-100);
+  });
+
   it("matches corp action candidate visible signals by bounded terms", () => {
     expect(
       corpActionCandidateHasVisibleSignal(
@@ -540,7 +550,12 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_reserve_satisfied_credit_loop_penalty",
-          value: -750,
+          value: -15,
+          reason: expect.stringContaining("reserve_raw_value:-750"),
+        }),
+        expect.objectContaining({
+          key: "corp_reserve_satisfied_credit_loop_penalty",
+          reason: expect.stringContaining("reserve_normalized_value:-15"),
         }),
       ]),
     );
@@ -1396,8 +1411,16 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_downstream_rez_floor_preservation",
-          value: -1500,
+          value: -30,
           reason: expect.stringContaining("inner_rez_floor:6"),
+        }),
+        expect.objectContaining({
+          key: "corp_downstream_rez_floor_preservation",
+          reason: expect.stringContaining("reserve_raw_value:-1500"),
+        }),
+        expect.objectContaining({
+          key: "corp_downstream_rez_floor_preservation",
+          reason: expect.stringContaining("reserve_normalized_value:-30"),
         }),
       ]),
     );
