@@ -487,6 +487,30 @@ export function semanticRuntimeDebugActionWhyNot(
   return ["semantic_score_below_selected"];
 }
 
+export function semanticRuntimeDebugExcludedActionWhyNot(
+  choice: SemanticRuntimeChoice,
+  displayScore: number,
+  context: SemanticRuntimeDebugPlanContext,
+): string[] {
+  if (!choice.exclusion) {
+    return semanticRuntimeDebugActionWhyNot(choice, displayScore, context);
+  }
+  return scrubEvidence([
+    `semantic_excluded:${choice.exclusion.key}`,
+    choice.exclusion.reason,
+    `semantic_exclusion_reason:${choice.exclusion.reason}`,
+    `rawSemanticScore:${choice.score}`,
+    `finalSelectionScore:${displayScore}`,
+    "excluded:true",
+    ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),
+    ...(choice.reasonCode ? [`reasonCode:${choice.reasonCode}`] : []),
+    ...(context.selectedByPlanMapping ? ["plan_selection_context:true"] : []),
+    ...(context.selectedPlanType
+      ? [`selectedPlan:${context.selectedPlanType}`]
+      : []),
+  ]);
+}
+
 export function semanticRuntimeDebugStrategicRuntimeItems(
   input: AiDecisionInput,
   selectedEvidence: readonly string[],

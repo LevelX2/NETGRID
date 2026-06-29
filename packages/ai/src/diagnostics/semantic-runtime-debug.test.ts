@@ -14,6 +14,7 @@ import {
   semanticRuntimeDebugActionWhyNot,
   semanticRuntimeDebugCalibrationProfileItems,
   semanticRuntimeDebugCoverageScoreBreakdown,
+  semanticRuntimeDebugExcludedActionWhyNot,
   semanticRuntimeDebugMistakeSummaryItems,
   semanticRuntimeDebugPilotScopeItems,
   semanticRuntimeDebugPlanSelectionScoreBreakdown,
@@ -58,6 +59,29 @@ describe("SemanticRuntimeDebug", () => {
       "rawSemanticScore:120",
       "finalSelectionScore:120",
       "displayOnlyScore:true",
+    ]);
+    const excludedChoice = choice(action("run-hq", "start_run"), 60, {
+      exclusion: {
+        key: "known_central_no_current_payoff",
+        label: "Known central no current payoff",
+        reason: "hq_payoff_low",
+      },
+      reasonCode: "semantic.runtime.central.payoff",
+      scopeId: "central_run",
+    });
+    expect(
+      semanticRuntimeDebugExcludedActionWhyNot(excludedChoice, 60, context),
+    ).toEqual([
+      "semantic_excluded:known_central_no_current_payoff",
+      "hq_payoff_low",
+      "semantic_exclusion_reason:hq_payoff_low",
+      "rawSemanticScore:60",
+      "finalSelectionScore:60",
+      "excluded:true",
+      "scope:central_run",
+      "reasonCode:semantic.runtime.central.payoff",
+      "plan_selection_context:true",
+      "selectedPlan:runner.obtain_breaker_coverage",
     ]);
     expect(
       semanticRuntimeDebugPlanSelectionScoreBreakdown(
