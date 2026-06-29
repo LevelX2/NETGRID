@@ -69,6 +69,6 @@ function sourceAppliesToTarget(
   targetKind: AccessTargetKind,
 ): boolean {
   if (!source.targetKinds || source.targetKinds.length === 0) return true;
-  return source.targetKinds.includes(targetKind);
+  const targetKinds = new Set(source.targetKinds);
+  return targetKinds.has(targetKind);
 }
-

@@ -9568,6 +9568,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-hand-development.test.ts` grün, 1 Datei, 19 Tests.
   - Verifikation: `rg -n 'existingFunctionalCoverage\.includes|primaryGroups\.includes|nonAdditiveUtilityFamilies\.includes|left\.includes|right\.includes|right\.includes\(coverage\)' packages/ai/src/runner-hand-development.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertsiebenundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/access/remote-trash-spendability.ts` bindet Remote-Trash-Credit-Source-TargetKinds über ein lokales Set statt direkter `targetKinds.includes(...)`-Prüfung.
+  - Strukturierte Access-TargetKinds wie `asset` und `upgrade` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `remote-trash-spendability.test.ts` sichert dedizierte Remote-Trash-Credits, Zielart-Grenzen und Free-Trash-Spendability.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/access/remote-trash-spendability.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `rg -n 'targetKinds\.includes' packages/ai/src/access/remote-trash-spendability.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
