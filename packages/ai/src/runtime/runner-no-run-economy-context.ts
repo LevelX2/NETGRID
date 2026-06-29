@@ -213,12 +213,13 @@ export function createRunnerNoRunEconomyContext(
       .hintEffectsForDefinition(definitionId)
       .map((effect) => stringRecordValue(effect, "target") ?? "")
       .filter(Boolean);
+    const effectTargetSet = new Set(effectTargets);
     const mechanics = dependencies.mechanicsForDefinition(definitionId);
     const hasTurnStartEconomy =
-      effectTargets.includes("economy.turn_start_credit") ||
+      effectTargetSet.has("economy.turn_start_credit") ||
       rolesMatch(mechanics, ["start_of_turn_credit_gain"]);
     const hasRunDrawback =
-      effectTargets.includes("risk.ends_on_run") ||
+      effectTargetSet.has("risk.ends_on_run") ||
       rolesMatch(mechanics, ["trash_on_run"]);
     return hasTurnStartEconomy && hasRunDrawback;
   }
