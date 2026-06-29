@@ -9881,6 +9881,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'descriptor\.actionTypes\.includes' packages/ai/src/actions/tag-effect-semantics.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertzweiunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/runner-coverage-goals.ts` bindet MissingCoverageTypes und Run-ActionTypes über lokale Sets statt direkter `.includes(...)`-Prüfungen.
+  - Strukturierte Coverage- und Action-Type-Werte bleiben exakt; substring-nahe Run-Typen werden nicht als Run-Action klassifiziert.
+  - `runner-coverage-goals.test.ts` sichert strukturierte Coverage-/Search-Signale, bounded GoalIds und exakte Run-Action-Type-Erkennung.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/runner-coverage-goals.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'missingCoverageTypes\.includes|\]\.includes\(action\.type\)' packages/ai/src/decision/runner-coverage-goals.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

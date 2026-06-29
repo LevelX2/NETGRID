@@ -163,9 +163,8 @@ function visibleCoverageForAction(
       (card) => card.title === action.sourceTitle,
     )?.coverageTypes ?? [];
   const combined = uniqueCoverage([...actionCoverage, ...cardCoverage]);
-  return combined.filter((coverage) =>
-    context.missingCoverageTypes.includes(coverage),
-    );
+  const missingCoverageSet = new Set(context.missingCoverageTypes);
+  return combined.filter((coverage) => missingCoverageSet.has(coverage));
 }
 
 function matchedCoverageGoalIds(
@@ -213,13 +212,14 @@ function semanticValueMatches(
 }
 
 function isRunAction(action: RunnerCoverageGoalAction): boolean {
-  return [
+  const runActionTypeSet = new Set([
     "start_run",
     "continue_run",
     "break_subroutine",
     "pump_breaker",
     "access_card",
-  ].includes(action.type);
+  ]);
+  return runActionTypeSet.has(action.type);
 }
 
 function resolution(

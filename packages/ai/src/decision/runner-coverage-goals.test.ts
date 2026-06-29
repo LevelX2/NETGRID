@@ -72,4 +72,21 @@ describe("resolveRunnerCoverageGoalForAction", () => {
       }).fit,
     ).toBe("unrelated");
   });
+
+  it("treats run action types as exact structured action types", () => {
+    const context = {
+      missingCoverageTypes: ["barrier" as const],
+    };
+
+    expect(
+      resolveRunnerCoverageGoalForAction(context, {
+        type: "start_run",
+      }).fit,
+    ).toBe("run_ignores_unresolved_coverage");
+    expect(
+      resolveRunnerCoverageGoalForAction(context, {
+        type: "start_run_noise",
+      }).fit,
+    ).toBe("unrelated");
+  });
 });
