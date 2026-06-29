@@ -24,6 +24,7 @@ import {
   runRuntimeShadowHarness,
   semanticShadowDecisionTraceEnabled,
   type ShadowDecisionTrace,
+  type ShadowScenarioFixture,
 } from "./controlled-shadow-mode";
 import { buildDeckDoctrineV2Diagnostic } from "./deck-doctrine-strategy";
 
@@ -237,6 +238,44 @@ describe("buildSemanticShadowDecisionReport", () => {
         "candidate_score_status:ranked_shadow_only",
       ]),
     });
+    expect(decision.noRuntimeEffect).toBe(true);
+  });
+
+  it("explains disabled no-candidate fixtures with structured why-not traces", () => {
+    const fixture: ShadowScenarioFixture = {
+      scenarioId: "unit_no_candidate",
+      side: "runner",
+      description: "Unit no-candidate fixture.",
+      setupKind: "synthetic_legal_actions",
+      expectedLegalActionTypes: [],
+      expectedTacticalGoals: [],
+      requiredCandidateFields: [],
+      knownProjectionGaps: [],
+      hiddenInfoBoundary: [],
+      allowedShadow: false,
+      reasonIfDisabled: "unit_disabled_shadow",
+    };
+
+    const decision = buildSemanticShadowDecisionForFixture(fixture);
+
+    expect(decision.scoreStatus).toBe("no_candidate");
+    expect(decision.blockingReasons).toEqual([
+      expect.objectContaining({
+        candidateId: "unit_no_candidate.no_candidate",
+        scoreStatus: "not_scored",
+        reason: "unit_disabled_shadow",
+      }),
+    ]);
+    expect(decision.whyNot).toEqual([
+      expect.objectContaining({
+        reason: "no_candidate",
+        evidence: expect.arrayContaining([
+          "why_not:no_candidate",
+          "candidate_score_status:not_scored",
+          "unit_no_candidate",
+        ]),
+      }),
+    ]);
     expect(decision.noRuntimeEffect).toBe(true);
   });
 

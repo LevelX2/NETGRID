@@ -225,6 +225,7 @@ export type WhyNotTrace = {
     | "lower_doctrine_alignment"
     | "cost_or_timing_unknown"
     | "target_context_missing"
+    | "no_candidate"
     | "not_scored";
   evidence: string[];
 };
@@ -1701,20 +1702,21 @@ export function buildSemanticShadowDecisionForFixture(
     rankCandidateForFixture(fixture, actionType, index),
   );
   if (!fixture.allowedShadow || ranking.length === 0) {
+    const blockingReasons = [
+      {
+        candidateId: `${fixture.scenarioId}.no_candidate`,
+        scoreStatus: "not_scored" as const,
+        reason:
+          fixture.reasonIfDisabled ??
+          "Scenario has no semantic shadow candidate in AI053.",
+        evidence: [fixture.scenarioId],
+      },
+    ];
     return {
       scoreStatus: "no_candidate",
       ranking,
-      blockingReasons: [
-        {
-          candidateId: `${fixture.scenarioId}.no_candidate`,
-          scoreStatus: "not_scored",
-          reason:
-            fixture.reasonIfDisabled ??
-            "Scenario has no semantic shadow candidate in AI053.",
-          evidence: [fixture.scenarioId],
-        },
-      ],
-      whyNot: [],
+      blockingReasons,
+      whyNot: blockingReasons.map(whyNotForBlockingReason),
       noRuntimeEffect: true,
     };
   }
@@ -2049,6 +2051,7 @@ function whyNotReasonForBlockingReason(
   reason: ShadowBlockingReason,
 ): WhyNotTrace["reason"] {
   if (reason.scoreStatus === "blocked_by_gate") return "hard_gate_blocked";
+  if (reason.scoreStatus === "not_scored") return "no_candidate";
   if (reason.gap === "target_context_unavailable") {
     return "target_context_missing";
   }
