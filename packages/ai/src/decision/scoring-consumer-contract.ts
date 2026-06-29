@@ -88,8 +88,12 @@ export const SCORING_CONSUMER_DIMENSIONS = [
     id: "boardstate_need",
     owner: "runtime/semantic-runtime-corp-board-triage.ts",
     scale: { min: -100, max: 100, neutral: 0 },
-    implementationStatus: "partial",
-    evidenceKeys: ["corp_board_triage_primary:", "corp_board_triage_alignment"],
+    implementationStatus: "active",
+    evidenceKeys: [
+      "corp_board_triage_primary:",
+      "triage_raw_value:",
+      "triage_normalized_value:",
+    ],
   },
   {
     id: "risk",

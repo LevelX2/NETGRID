@@ -10583,6 +10583,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Status bleibt `IN_PROGRESS`, weil Reserve, Boardstate, Doctrine, Plan Continuity, Terminal Outcome und Uncertainty noch nicht vollständig normalisiert aktiv sind.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/runner-run-target-guidance-score.test.ts src/known-ice-run-risk.test.ts -t "run-target guidance|unknown R&D run"` in `packages/ai` grün.
 
+- `AI-COMPLETE-17` dritter Scoring-Consumer-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-board-triage.ts` normalisiert Boardstate-Triage-Rohwerte über `normalizedCorpBoardTriageValue` auf die Consumer-Skala `-100..100`.
+  - Triage-Evidence enthält `triage_raw_value` und `triage_normalized_value`, während Triage-Primärentscheidung, Alignment und Reason unverändert bleiben.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` markiert `boardstate_need` als `active`; `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` zieht die Tabelle nach.
+  - Status bleibt `IN_PROGRESS`, weil Reserve, Doctrine, Plan Continuity, Terminal Outcome und Uncertainty noch nicht vollständig normalisiert aktiv sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-board-triage.test.ts src/runtime/semantic-runtime-corp-score.test.ts -t "board triage|downstream budget"` in `packages/ai` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -13,7 +13,7 @@ Zweck: AI-COMPLETE-17 baut fachliche Scoring-Consumer auf. Dieser Vertrag hält 
 | Cost | `packages/ai/src/decision/action-goal-fit.ts`, Runtime-Credit-Cost-Penalty | `active` | `-100..100`, neutral `0` |
 | Timing | `packages/ai/src/decision/action-goal-fit.ts` | `active` | `-100..100`, neutral `0` |
 | Reachability | `packages/ai/src/runner-run-target-evaluation.ts` plus `runtime/runner-run-target-guidance-score.ts` | `active` | `-100..100`, neutral `0` |
-| Boardstate Need | `packages/ai/src/runtime/semantic-runtime-corp-board-triage.ts` | `partial` | `-100..100`, neutral `0` |
+| Boardstate Need | `packages/ai/src/runtime/semantic-runtime-corp-board-triage.ts` | `active` | `-100..100`, neutral `0` |
 | Risk | `packages/ai/src/decision/action-goal-fit.ts` | `active` | `-100..100`, neutral `0` |
 | Doctrine | `packages/ai/src/decision/doctrine-goal-synthesis.ts` | `partial` | `-100..100`, neutral `0` |
 | Plan Continuity | `packages/ai/src/plans/tactical-plan-progression.ts` | `partial` | `-100..100`, neutral `0` |
@@ -30,6 +30,6 @@ Zweck: AI-COMPLETE-17 baut fachliche Scoring-Consumer auf. Dieser Vertrag hält 
 
 ## Nächste Schnitte
 
-1. Reserve- und Boardstate-Signale in normalisierte `-100..100`-Consumer überführen.
+1. Reserve-Signale in normalisierte `-100..100`-Consumer überführen.
 2. Doctrine- und Plan-Continuity-Komponenten als fachliche Consumer sichtbar machen.
 3. Terminal-Outcome und Uncertainty als explizite Score-Komponenten anbinden.

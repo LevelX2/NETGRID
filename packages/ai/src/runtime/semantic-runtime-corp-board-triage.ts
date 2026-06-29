@@ -270,25 +270,43 @@ export function semanticRuntimeCorpBoardTriageActionComponent<
     actionSemanticCandidate,
   );
   if (alignment === "match") {
+    const rawValue =
+      triage.severity === "critical"
+        ? TRIAGE_ALIGNMENT_BONUS + 350
+        : TRIAGE_ALIGNMENT_BONUS;
+    const value = normalizedCorpBoardTriageValue(rawValue);
     return {
       key: "corp_board_triage_alignment",
       label: "Corp-Board-Triage",
-      value:
-        triage.severity === "critical"
-          ? TRIAGE_ALIGNMENT_BONUS + 350
-          : TRIAGE_ALIGNMENT_BONUS,
-      reason: triageReason(triage, action, actionServerId, "match"),
+      value,
+      reason: triageReason(
+        triage,
+        action,
+        actionServerId,
+        "match",
+        rawValue,
+        value,
+      ),
     };
   }
   if (alignment === "mismatch") {
+    const rawValue =
+      triage.severity === "low" || triage.severity === "medium"
+        ? TRIAGE_MISMATCH_MEDIUM
+        : TRIAGE_MISMATCH_HIGH;
+    const value = normalizedCorpBoardTriageValue(rawValue);
     return {
       key: "corp_board_triage_mismatch",
       label: "Corp-Board-Triage",
-      value:
-        triage.severity === "low" || triage.severity === "medium"
-          ? TRIAGE_MISMATCH_MEDIUM
-          : TRIAGE_MISMATCH_HIGH,
-      reason: triageReason(triage, action, actionServerId, "mismatch"),
+      value,
+      reason: triageReason(
+        triage,
+        action,
+        actionServerId,
+        "mismatch",
+        rawValue,
+        value,
+      ),
     };
   }
   return {
@@ -820,6 +838,8 @@ function triageReason(
   action: LegalAction,
   actionServerId: string | undefined,
   alignment: "match" | "mismatch" | "neutral",
+  rawValue = 0,
+  normalizedValue = 0,
 ): string {
   return [
     `triage_primary:${triage.primary}`,
@@ -845,8 +865,14 @@ function triageReason(
     `triage_action_id:${action.actionId}`,
     `triage_action_server:${actionServerId ?? "none"}`,
     `triage_alignment:${alignment}`,
+    `triage_raw_value:${rawValue}`,
+    `triage_normalized_value:${normalizedValue}`,
     ...triage.evidence.slice(0, 12),
   ].join("|");
+}
+
+export function normalizedCorpBoardTriageValue(rawValue: number): number {
+  return Math.max(-100, Math.min(100, Math.round(rawValue / 50)));
 }
 
 function inputWithOpponentDefaults(input: AiDecisionInput): AiDecisionInput {
