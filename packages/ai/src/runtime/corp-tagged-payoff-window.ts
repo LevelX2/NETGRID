@@ -90,9 +90,10 @@ export function createCorpTaggedPayoffWindowContext(
       action.actionId,
     );
     if (!availablePayoff) return undefined;
+    const availablePayoffEvidenceSet = new Set(availablePayoff.evidence);
     const availableDamagePayoff =
       availablePayoff.kind === "damage" ||
-      availablePayoff.evidence.includes("corp_tagged_meat_damage_payoff:true");
+      availablePayoffEvidenceSet.has("corp_tagged_meat_damage_payoff:true");
     let passiveKind: string | undefined;
     let value = 0;
     let key = "corp_tagged_payoff_window_passive_penalty";

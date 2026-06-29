@@ -9620,6 +9620,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'candidate\.evidence\.includes' packages/ai/src/decision/action-goal-fit.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertdritter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/corp-tagged-payoff-window.ts` bindet verfügbare Tagged-Payoff-Evidence über ein lokales Set statt direkter `availablePayoff.evidence.includes(...)`-Prüfung.
+  - Strukturierte Evidence `corp_tagged_meat_damage_payoff:true` bleibt exakt wirksam und kann passive Setup-Penalties weiter korrekt verschärfen; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `corp-tagged-payoff-window.test.ts` sichert den konkreten Tagged-Payoff-Window-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/corp-tagged-payoff-window.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'availablePayoff\.evidence\.includes|evidence\.includes' packages/ai/src/runtime/corp-tagged-payoff-window.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
