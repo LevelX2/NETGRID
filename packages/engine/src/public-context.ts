@@ -233,7 +233,9 @@ export function publicContextForAction(
       const value = legalAction.payload?.[key];
       if (typeof value === "number") context[key] = value;
     }
-    if (typeof legalAction.payload.brokenIceVirusCounterChoiceOpened === "boolean")
+    if (
+      typeof legalAction.payload.brokenIceVirusCounterChoiceOpened === "boolean"
+    )
       context.brokenIceVirusCounterChoiceOpened =
         legalAction.payload.brokenIceVirusCounterChoiceOpened;
     if (typeof legalAction.payload.targetCardDefinitionId === "string")
@@ -598,6 +600,27 @@ export function publicContextForAction(
         legalAction.payload.unbrokenSubroutineCount;
       context.encounterWillEndRun = legalAction.payload.encounterWillEndRun;
     }
+    if (
+      legalAction.payload?.corpPostPassIceAbility === "return_passed_ice_to_hq"
+    ) {
+      context.corpPostPassIceAbility = "return_passed_ice_to_hq";
+      for (const key of [
+        "sourceDefinitionId",
+        "passedIceDefinitionId",
+        "serverLabel",
+        "decision",
+        "paymentAmount",
+        "paidCredits",
+        "returnedToHq",
+        "returnedCardDefinitionId",
+        "gainCredits",
+        "gainedCredits",
+        "corpCreditsAfter",
+      ]) {
+        const value = legalAction.payload?.[key];
+        if (value !== undefined) context[key] = value;
+      }
+    }
     for (const key of [
       "encounterTaxForFutureIce",
       "encounterTaxPaid",
@@ -683,8 +706,7 @@ export function publicContextForAction(
     if (typeof legalAction.payload.baseDamageAmount === "number")
       context.baseDamageAmount = legalAction.payload.baseDamageAmount;
     if (typeof legalAction.payload.damageAmountModifier === "number")
-      context.damageAmountModifier =
-        legalAction.payload.damageAmountModifier;
+      context.damageAmountModifier = legalAction.payload.damageAmountModifier;
     if (typeof legalAction.payload.coreDamageAfter === "number")
       context.coreDamageAfter = legalAction.payload.coreDamageAfter;
     if (typeof legalAction.payload.runnerMaxHandSizeAfter === "number")
@@ -752,7 +774,9 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.scoredAgendaFreeRezChoiceOpened === "boolean")
     context.scoredAgendaFreeRezChoiceOpened =
       legalAction.payload.scoredAgendaFreeRezChoiceOpened;
-  if (typeof legalAction.payload?.scoredAgendaFreeRezCandidateCount === "number")
+  if (
+    typeof legalAction.payload?.scoredAgendaFreeRezCandidateCount === "number"
+  )
     context.scoredAgendaFreeRezCandidateCount =
       legalAction.payload.scoredAgendaFreeRezCandidateCount;
   if (typeof legalAction.payload?.scoredAgendaFreeRezDeclined === "boolean")
@@ -861,10 +885,14 @@ export function publicContextForAction(
     )
       context.hqToNewRemoteInstallRezRezCandidateCount =
         legalAction.payload.hqToNewRemoteInstallRezRezCandidateCount;
-    if (typeof legalAction.payload.scoredAgendaFreeRezChoiceOpened === "boolean")
+    if (
+      typeof legalAction.payload.scoredAgendaFreeRezChoiceOpened === "boolean"
+    )
       context.scoredAgendaFreeRezChoiceOpened =
         legalAction.payload.scoredAgendaFreeRezChoiceOpened;
-    if (typeof legalAction.payload.scoredAgendaFreeRezCandidateCount === "number")
+    if (
+      typeof legalAction.payload.scoredAgendaFreeRezCandidateCount === "number"
+    )
       context.scoredAgendaFreeRezCandidateCount =
         legalAction.payload.scoredAgendaFreeRezCandidateCount;
     if (typeof legalAction.payload.scoredAgendaFreeRezFreeRez === "boolean")
@@ -1324,7 +1352,10 @@ export function publicContextForAction(
     context.onScoreLostAllCredits = true;
   if (typeof legalAction.payload?.corpCreditsAfter === "number")
     context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
-  if (legalAction.payload?.agendaAbility === "scored_agenda_credit_until_install_or_rez") {
+  if (
+    legalAction.payload?.agendaAbility ===
+    "scored_agenda_credit_until_install_or_rez"
+  ) {
     context.agendaAbility = legalAction.payload.agendaAbility;
     if (typeof legalAction.payload.gainedCredits === "number")
       context.gainedCredits = legalAction.payload.gainedCredits;
@@ -1583,7 +1614,8 @@ export function publicContextForAction(
   }
   if (
     typeof legalAction.payload?.v1922RunnerProgramAbility === "string" ||
-    legalAction.payload?.runnerUtilityAbility === "trash_fully_broken_passed_ice"
+    legalAction.payload?.runnerUtilityAbility ===
+      "trash_fully_broken_passed_ice"
   ) {
     if (typeof legalAction.payload?.runnerUtilityAbility === "string")
       context.runnerUtilityAbility = legalAction.payload.runnerUtilityAbility;
@@ -1671,9 +1703,7 @@ export function publicContextForAction(
     if (typeof legalAction.payload.futureAgendaPointForfeitPaid === "number")
       context.futureAgendaPointForfeitPaid =
         legalAction.payload.futureAgendaPointForfeitPaid;
-    if (
-      typeof legalAction.payload.futureAgendaPointForfeitPending === "number"
-    )
+    if (typeof legalAction.payload.futureAgendaPointForfeitPending === "number")
       context.futureAgendaPointForfeitPending =
         legalAction.payload.futureAgendaPointForfeitPending;
     if (legalAction.payload.specialZone)
@@ -1773,7 +1803,8 @@ export function publicContextForAction(
     if (typeof legalAction.payload.v1921DieRoll === "number")
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
     if (typeof legalAction.payload.runStartRandomStrengthBonus === "number")
-      context.runStartRandomStrengthBonus = legalAction.payload.runStartRandomStrengthBonus;
+      context.runStartRandomStrengthBonus =
+        legalAction.payload.runStartRandomStrengthBonus;
     if (typeof legalAction.payload.sourceDefinitionId === "string")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.randomCounterAfter === "number")
@@ -1924,9 +1955,11 @@ export function publicContextForAction(
       if (typeof value === "number") context[key] = value;
     }
     if (typeof legalAction.payload.randomDiceSplitChoiceOpened === "boolean")
-      context.randomDiceSplitChoiceOpened = legalAction.payload.randomDiceSplitChoiceOpened;
+      context.randomDiceSplitChoiceOpened =
+        legalAction.payload.randomDiceSplitChoiceOpened;
     if (typeof legalAction.payload.randomDiceLoopComplete === "boolean")
-      context.randomDiceLoopComplete = legalAction.payload.randomDiceLoopComplete;
+      context.randomDiceLoopComplete =
+        legalAction.payload.randomDiceLoopComplete;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (typeof legalAction.payload.randomPurpose === "string")

@@ -391,10 +391,10 @@ export function formatChronicleEvent(
         if (autoPassChosenIce) {
           title = phrase(
             subject,
-            `durch Social Engineering ${runTarget} und ${chosenIceLabel} gewählt; Run auf ${runTarget} gestartet und das ICE automatisch passiert`,
+            `durch Social Engineering ${runTarget} und ${chosenIceLabel} gewählt; Run auf ${runTarget} gestartet und Auto-Pass für dieses ICE vorgemerkt`,
           );
           description =
-            "Der Social-Engineering-Run entsteht aus der Zielauswahl; das gewählte ICE wird nur für diesen Run automatisch passiert.";
+            "Die Korp bekommt vor dem Auto-Pass die normale Rez-Gelegenheit.";
           chips.push(
             "Social Engineering",
             "Run",
@@ -2296,6 +2296,69 @@ export function formatChronicleEvent(
       break;
     case "continue_run":
       if (
+        stringValue(payload.corpPostPassIceAbility) ===
+        "return_passed_ice_to_hq"
+      ) {
+        const passedIceDefinitionId = stringValue(
+          payload.passedIceDefinitionId,
+        );
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          titleForDefinitionId(passedIceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "das passierte ICE";
+        const decision = stringValue(payload.decision);
+        const paymentAmount =
+          numberValue(payload.paymentAmount) ??
+          numberValue(payload.paidCredits) ??
+          0;
+        const target =
+          serverLabel ?? displayServerLabel(stringValue(payload.serverId));
+        category = "run";
+        importance = decision === "return_to_hq" ? "important" : "normal";
+        visibility = "public";
+        cardDefinitionId =
+          cardDefinitionId ?? sourceDefinitionId ?? passedIceDefinitionId;
+        cardTitle = source;
+        cardText = undefined;
+        cardDetailLines = [];
+        if (decision === "return_to_hq") {
+          title = phrase(
+            subject,
+            `${source} nach dem Passieren${target ? ` auf ${target}` : ""} ins HQ zurückgenommen`,
+          );
+          description =
+            paymentAmount > 0
+              ? `${source} wurde statt ${creditText(paymentAmount)} zu zahlen uninstalliert und im HQ gespeichert.`
+              : `${source} wurde uninstalliert und im HQ gespeichert.`;
+          chips.push(source, "Post-Pass", "HQ", ...(target ? [target] : []));
+          break;
+        }
+        if (decision === "pay") {
+          title = phrase(
+            subject,
+            `${creditText(paymentAmount)} für ${source} nach dem Passieren bezahlt`,
+          );
+          description = target
+            ? `${source} bleibt auf ${target} installiert; der Run läuft weiter.`
+            : `${source} bleibt installiert; der Run läuft weiter.`;
+          chips.push(source, "Post-Pass", creditText(paymentAmount));
+          break;
+        }
+        if (decision === "decline") {
+          title = phrase(
+            subject,
+            `${source} nach dem Passieren liegen gelassen`,
+          );
+          description = target
+            ? `${source} bleibt auf ${target} installiert; der Run läuft weiter.`
+            : `${source} bleibt installiert; der Run läuft weiter.`;
+          chips.push(source, "Post-Pass", "Liegen gelassen");
+          break;
+        }
+      }
+      if (
         payloadBooleanValue(payload, "socialEngineeringAutoPassedIce") ===
           true ||
         (payloadBooleanValue(payload, "autoPassChosenIce") === true &&
@@ -2601,7 +2664,11 @@ export function formatChronicleEvent(
         subject,
         `${cardTitle ?? "eine Agenda"}${accessServerSourceSuffix(serverLabel)} gestohlen${points}`,
       );
-      chips.push("Steal", ...(serverLabel ? [serverLabel] : []), ...agendaPointChips(agendaPoints));
+      chips.push(
+        "Steal",
+        ...(serverLabel ? [serverLabel] : []),
+        ...agendaPointChips(agendaPoints),
+      );
       break;
     }
     case "trash_accessed_card":
@@ -2615,7 +2682,12 @@ export function formatChronicleEvent(
         const freeTrashSource = freeAccessTrashSourceLabel(payload);
         if (freeTrashSource) {
           description = `${freeTrashSource} erlaubt diesen kostenlosen Trash auch für Karten, die normalerweise nicht getrasht werden können.`;
-          chips.push("Trash", ...(serverLabel ? [serverLabel] : []), freeTrashSource, "Kostenlos");
+          chips.push(
+            "Trash",
+            ...(serverLabel ? [serverLabel] : []),
+            freeTrashSource,
+            "Kostenlos",
+          );
         } else {
           chips.push("Trash", ...(serverLabel ? [serverLabel] : []));
         }
@@ -2629,7 +2701,10 @@ export function formatChronicleEvent(
       break;
     case "decline_trash":
       category = "run";
-      title = phrase(subject, `${serverLabel ? `den ${accessServerStatusLabel(serverLabel)}` : "den Zugriff"} abgeschlossen`);
+      title = phrase(
+        subject,
+        `${serverLabel ? `den ${accessServerStatusLabel(serverLabel)}` : "den Zugriff"} abgeschlossen`,
+      );
       chips.push("Zugriff", ...(serverLabel ? [serverLabel] : []));
       break;
     case "remove_tag":
@@ -3457,8 +3532,7 @@ function formatChronicleEffect(
     case "draw_cards":
       category = "card";
       if (sourceDefinitionId === SKIVVISS_ID) {
-        const targetSubject =
-          subject === "Du" ? "Du" : subject;
+        const targetSubject = subject === "Du" ? "Du" : subject;
         title = `${sourceTitle ?? "Skivviss"}: ${targetSubject} ${
           targetSubject === "Du" ? "ziehst" : "zieht"
         } zu Beginn ${

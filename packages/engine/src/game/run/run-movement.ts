@@ -144,43 +144,53 @@ export function buildCorpPostPassIceReturnToHqActions(
     const amount = Math.max(0, Math.floor(pending.paymentAmount ?? 0));
     if (host.state.corp.credits >= amount) {
       actions.push(
-        host.actions.buildLegalAction(
-          "corp",
-          "continue_run",
-          `${sourceTitle}: ${amount} Credit zahlen`,
-          `${pending.sourceCardInstanceId}.pay`,
-          amount > 0 ? [{ credits: amount }] : [],
-          { ...basePayload, decision: "pay", paymentAmount: amount },
+        makePublicPostPassIceReturnAction(
+          host.actions.buildLegalAction(
+            "corp",
+            "continue_run",
+            `${sourceTitle}: ${amount} Credit zahlen`,
+            `${pending.sourceCardInstanceId}.pay`,
+            amount > 0 ? [{ credits: amount }] : [],
+            { ...basePayload, decision: "pay", paymentAmount: amount },
+          ),
         ),
       );
     }
   } else {
     actions.push(
-      host.actions.buildLegalAction(
-        "corp",
-        "continue_run",
-        `${sourceTitle}: liegen lassen`,
-        `${pending.sourceCardInstanceId}.decline`,
-        [],
-        { ...basePayload, decision: "decline" },
+      makePublicPostPassIceReturnAction(
+        host.actions.buildLegalAction(
+          "corp",
+          "continue_run",
+          `${sourceTitle}: liegen lassen`,
+          `${pending.sourceCardInstanceId}.decline`,
+          [],
+          { ...basePayload, decision: "decline" },
+        ),
       ),
     );
   }
   actions.push(
-    host.actions.buildLegalAction(
-      "corp",
-      "continue_run",
-      `${sourceTitle}: nach HQ zurücknehmen`,
-      `${pending.sourceCardInstanceId}.return_to_hq`,
-      [],
-      {
-        ...basePayload,
-        decision: "return_to_hq",
-        ...(pending.gainCredits ? { gainCredits: pending.gainCredits } : {}),
-      },
+    makePublicPostPassIceReturnAction(
+      host.actions.buildLegalAction(
+        "corp",
+        "continue_run",
+        `${sourceTitle}: nach HQ zurücknehmen`,
+        `${pending.sourceCardInstanceId}.return_to_hq`,
+        [],
+        {
+          ...basePayload,
+          decision: "return_to_hq",
+          ...(pending.gainCredits ? { gainCredits: pending.gainCredits } : {}),
+        },
+      ),
     ),
   );
   return actions;
+}
+
+function makePublicPostPassIceReturnAction(action: LegalAction): LegalAction {
+  return { ...action, visibility: "public" };
 }
 
 export function buildRunnerPostPassFutureStrengthActions(

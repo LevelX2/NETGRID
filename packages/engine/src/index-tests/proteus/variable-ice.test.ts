@@ -2399,9 +2399,20 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       side: "corp",
       zone: "hq",
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      hiddenPayloadMarkers,
-    );
+    const returnEvent = state.eventLog.at(-1);
+    expect(returnEvent?.visibilityClass).toBe("public");
+    expect(returnEvent?.publicPayload).toMatchObject({
+      corpPostPassIceAbility: "return_passed_ice_to_hq",
+      decision: "return_to_hq",
+      returnedToHq: true,
+      sourceDefinitionId: TWISTY_PASSAGES,
+      passedIceDefinitionId: TWISTY_PASSAGES,
+      returnedCardDefinitionId: TWISTY_PASSAGES,
+      serverLabel: "R&D",
+    });
+    const serializedReturnPayload = JSON.stringify(returnEvent?.publicPayload);
+    expect(serializedReturnPayload).not.toMatch(hiddenPayloadMarkers);
+    expect(serializedReturnPayload).not.toContain(iceId);
   });
 
   it("PRO010 prioritizes corp lifecycle over Rasmin Bridger post-pass Fort payment", () => {

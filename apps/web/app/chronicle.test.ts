@@ -333,10 +333,10 @@ describe("formatChronicleEvent", () => {
       ]),
     );
     expect(targetChoice.title).toBe(
-      "Die Runner-KI hat durch Social Engineering HQ und ICE 1 gewählt; Run auf HQ gestartet und das ICE automatisch passiert.",
+      "Die Runner-KI hat durch Social Engineering HQ und ICE 1 gewählt; Run auf HQ gestartet und Auto-Pass für dieses ICE vorgemerkt.",
     );
     expect(targetChoice.description).toBe(
-      "Der Social-Engineering-Run entsteht aus der Zielauswahl; das gewählte ICE wird nur für diesen Run automatisch passiert.",
+      "Die Korp bekommt vor dem Auto-Pass die normale Rez-Gelegenheit.",
     );
     expect(targetChoice.category).toBe("run");
     expect(targetChoice.cardDefinitionId).toBe("onr_v1_111_social-engineering");
@@ -353,6 +353,62 @@ describe("formatChronicleEvent", () => {
     );
     expect(chronicleRunGroupLabelFromEvent(targetChoiceEvent)).toBe(
       "Run auf HQ",
+    );
+  });
+
+  it("explains public post-pass ICE return decisions", () => {
+    const returned = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "corp",
+        corpPostPassIceAbility: "return_passed_ice_to_hq",
+        sourceDefinitionId: "onr_proteus_043_twisty-passages",
+        sourceTitle: "Twisty Passages",
+        passedIceDefinitionId: "onr_proteus_043_twisty-passages",
+        returnedCardDefinitionId: "onr_proteus_043_twisty-passages",
+        serverLabel: "R&D",
+        decision: "return_to_hq",
+        returnedToHq: true,
+        paymentAmount: 1,
+      }),
+      "runner",
+    );
+    const paid = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "corp",
+        corpPostPassIceAbility: "return_passed_ice_to_hq",
+        sourceDefinitionId: "onr_proteus_043_twisty-passages",
+        sourceTitle: "Twisty Passages",
+        passedIceDefinitionId: "onr_proteus_043_twisty-passages",
+        serverLabel: "R&D",
+        decision: "pay",
+        paymentAmount: 1,
+        paidCredits: 1,
+      }),
+      "runner",
+    );
+
+    expect(returned.title).toBe(
+      "Die Korp hat Twisty Passages nach dem Passieren auf R&D ins HQ zurückgenommen.",
+    );
+    expect(returned.description).toBe(
+      "Twisty Passages wurde statt 1 Credit zu zahlen uninstalliert und im HQ gespeichert.",
+    );
+    expect(returned.category).toBe("run");
+    expect(returned.importance).toBe("important");
+    expect(returned.visibility).toBe("public");
+    expect(returned.cardDefinitionId).toBe("onr_proteus_043_twisty-passages");
+    expect(returned.cardTitle).toBe("Twisty Passages");
+    expect(returned.chips).toEqual(
+      expect.arrayContaining(["Twisty Passages", "Post-Pass", "HQ", "R&D"]),
+    );
+    expect(paid.title).toBe(
+      "Die Korp hat 1 Credit für Twisty Passages nach dem Passieren bezahlt.",
+    );
+    expect(paid.description).toBe(
+      "Twisty Passages bleibt auf R&D installiert; der Run läuft weiter.",
+    );
+    expect(paid.chips).toEqual(
+      expect.arrayContaining(["Twisty Passages", "Post-Pass", "1 Credit"]),
     );
   });
 
@@ -5026,21 +5082,14 @@ describe("formatChronicleEvent", () => {
         },
       ],
     });
-    const skivvissItem = formatChronicleEffectItems(
-      discardEvent,
-      "runner",
-    )[0];
+    const skivvissItem = formatChronicleEffectItems(discardEvent, "runner")[0];
 
     expect(skivvissItem?.title).toBe(
       "Skivviss: Die Korp zieht zu Beginn ihres Zugs 3 zusätzliche Karten.",
     );
     expect(
       skivvissItem
-        ? chronicleStartTurnEffectGroupFromEvent(
-            discardEvent,
-            30,
-            skivvissItem,
-          )
+        ? chronicleStartTurnEffectGroupFromEvent(discardEvent, 30, skivvissItem)
         : null,
     ).toEqual({ label: "Zug 31 - Korp", kind: "corp" });
   });
@@ -5783,7 +5832,9 @@ describe("formatChronicleEvent", () => {
       "runner",
     );
 
-    expect(firstAccess.title).toBe("Du hast auf Pattel Antibody in R&D zugegriffen.");
+    expect(firstAccess.title).toBe(
+      "Du hast auf Pattel Antibody in R&D zugegriffen.",
+    );
     expect(secondAccess.title).toBe(
       "Du hast auf Bel-Digmo Antibody in R&D zugegriffen, weil die Korp 3 Highlighter-Counter hat.",
     );
