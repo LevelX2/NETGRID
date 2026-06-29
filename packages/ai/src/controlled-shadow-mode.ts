@@ -2022,6 +2022,10 @@ function whyNotForRankedCandidates(
     comparedWithCandidateId: topCandidate.candidateId,
     reason: "lower_goal_alignment",
     evidence: [
+      "why_not:lower_goal_alignment",
+      `candidate_rank:${candidate.rankIndex}`,
+      `compared_with_candidate:${topCandidate.candidateId}`,
+      `candidate_score_status:${candidate.scoreStatus}`,
       "AI053 v0 uses deterministic input order when no hard gate or required gap blocks ranking.",
     ],
   }));
@@ -2031,7 +2035,13 @@ function whyNotForBlockingReason(reason: ShadowBlockingReason): WhyNotTrace {
   return {
     candidateId: reason.candidateId,
     reason: whyNotReasonForBlockingReason(reason),
-    evidence: [...reason.evidence],
+    evidence: [
+      `why_not:${whyNotReasonForBlockingReason(reason)}`,
+      `candidate_score_status:${reason.scoreStatus}`,
+      ...(reason.gateId ? [`gate:${reason.gateId}`] : []),
+      ...(reason.gap ? [`gap:${reason.gap}`] : []),
+      ...reason.evidence,
+    ],
   };
 }
 

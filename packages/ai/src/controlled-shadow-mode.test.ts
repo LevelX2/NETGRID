@@ -227,6 +227,16 @@ describe("buildSemanticShadowDecisionReport", () => {
     expect(decision.selectedCandidateId).toBe(
       "runner_draw_vs_credit.draw_card.1",
     );
+    expect(decision.whyNot[0]).toMatchObject({
+      reason: "lower_goal_alignment",
+      comparedWithCandidateId: "runner_draw_vs_credit.draw_card.1",
+      evidence: expect.arrayContaining([
+        "why_not:lower_goal_alignment",
+        "candidate_rank:1",
+        "compared_with_candidate:runner_draw_vs_credit.draw_card.1",
+        "candidate_score_status:ranked_shadow_only",
+      ]),
+    });
     expect(decision.noRuntimeEffect).toBe(true);
   });
 
@@ -247,6 +257,26 @@ describe("buildSemanticShadowDecisionReport", () => {
         expect.objectContaining({
           scoreStatus: "blocked_by_gap",
           gap: "target_context_unavailable",
+        }),
+      ]),
+    );
+    expect(blocked?.decision.whyNot).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          reason: "target_context_missing",
+          evidence: expect.arrayContaining([
+            "why_not:target_context_missing",
+            "candidate_score_status:blocked_by_gap",
+            "gap:target_context_unavailable",
+          ]),
+        }),
+        expect.objectContaining({
+          reason: "required_gap",
+          evidence: expect.arrayContaining([
+            "why_not:required_gap",
+            "candidate_score_status:blocked_by_gap",
+            "gap:ability_unresolved",
+          ]),
         }),
       ]),
     );
