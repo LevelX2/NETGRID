@@ -916,7 +916,8 @@ function buildCorpRemotePlanProfile(
       ),
     ).length,
     ambushToolsKnown: records.filter((record) =>
-      rolesMatch(record.roles, ["ambush"]) || record.subtypes.includes("ambush"),
+      rolesMatch(record.roles, ["ambush"]) ||
+      record.subtypes.some((subtype) => subtype.toLowerCase() === "ambush"),
     ).length,
     evidence: ["corp_remote_profile:conservative"],
   };

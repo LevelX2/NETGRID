@@ -495,6 +495,14 @@ describe("DeckCapabilityProfile", () => {
           visibleCard("plan-e", "local_plan_e", "corp", "asset", {
             title: "Role Noise",
           }),
+          visibleCard("plan-f", "local_plan_f", "corp", "asset", {
+            title: "Subtype Ambush",
+            subtypes: ["Ambush"],
+          }),
+          visibleCard("plan-g", "local_plan_g", "corp", "asset", {
+            title: "Subtype Noise",
+            subtypes: ["ambushish"],
+          }),
         ]),
       ];
 
@@ -508,7 +516,7 @@ describe("DeckCapabilityProfile", () => {
       expect(profile.corp?.remotePlanProfile).toMatchObject({
         remoteProtectionToolsKnown: 4,
         remoteEconomyToolsKnown: 1,
-        ambushToolsKnown: 1,
+        ambushToolsKnown: 2,
       });
     } finally {
       CARD_ROLES_BY_CARD.delete("local_plan_a");
