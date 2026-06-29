@@ -1394,14 +1394,17 @@ function memorySupport(
   stats: DeckStrategyStats,
   dimension: string,
 ): { score: number; evidence: DeckStrategyEvidence[] } {
-  const cards = stats.cards.filter(
-    (card) =>
-      card.roles.includes("memory") ||
-      card.requiredMechanics.includes("memory") ||
+  const cards = stats.cards.filter((card) => {
+    const roles = new Set(card.roles);
+    const requiredMechanics = new Set(card.requiredMechanics);
+    return (
+      roles.has("memory") ||
+      requiredMechanics.has("memory") ||
       card.effects.some(
         (effect) => effect.kind === "memory" || effect.kind === "hand_size",
-      ),
-  );
+      )
+    );
+  });
   const count = cards.reduce((sum, card) => sum + card.quantity, 0);
   return {
     score: supportCountScore(count, 2),
@@ -1919,13 +1922,15 @@ function coverageBucket(count: number, searchCount: number): CoverageBucket {
 
 function riskyEconomyCount(stats: DeckStrategyStats): number | "unknown" {
   const risky = stats.cards
-    .filter(
-      (card) =>
+    .filter((card) => {
+      const riskTags = new Set(card.riskTags);
+      return (
         card.functionSignals.some((signal) => signal.startsWith("economy.")) &&
-        (card.riskTags.includes("tag_self") ||
+        (riskTags.has("tag_self") ||
           card.costProfileReserveRisk === "high" ||
-          card.effects.some((effect) => effect.kind === "forgo_actions")),
-    )
+          card.effects.some((effect) => effect.kind === "forgo_actions"))
+      );
+    })
     .reduce((sum, card) => sum + card.quantity, 0);
   return risky > 0 ? risky : "unknown";
 }
