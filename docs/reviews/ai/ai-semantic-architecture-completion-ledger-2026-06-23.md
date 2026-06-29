@@ -10545,6 +10545,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps goal and strategic fit evaluation behind scoring owners"` in `packages/ai` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
 
+- `AI-COMPLETE-16` neunter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Corp-Economy-/Rez-Floor-Skalierung: Remote-/Central-Rez-Floor-Assessments, Rez-Floor-FundingNeeds und Passive-Scoreline-Penalty dürfen nur in den jeweiligen Runtime-Ownern und den expliziten Corp-Scoring-Compositions auftauchen.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert, dass Economy-Stabilisierung und Reserve-Skalierung an denselben Score-/Evidence-Pfad gebunden bleiben.
+  - Status bleibt `IN_PROGRESS`, weil Plan-Continuity-Fortschritt und ein Abschlussaudit der konkreten Owner-Bindungen noch offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps corp economy reserve and rez-floor scoring behind runtime owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

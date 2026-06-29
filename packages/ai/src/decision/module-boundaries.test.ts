@@ -908,6 +908,75 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps corp economy reserve and rez-floor scoring behind runtime owners", () => {
+    const allowedFilesBySymbol = new Map<string, Set<string>>([
+      [
+        "semanticRuntimeCorpRemoteRezFloorAssessment",
+        new Set([
+          "runtime/semantic-runtime-corp-rez-floor.ts",
+          "runtime/semantic-runtime-corp-rez-floor-context.ts",
+          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpHasRemoteRezFloorFundingNeed",
+        new Set([
+          "runtime/semantic-runtime-corp-rez-floor.ts",
+          "runtime/semantic-runtime-corp-rez-floor-context.ts",
+          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpCentralRezReserveAssessment",
+        new Set([
+          "runtime/semantic-runtime-corp-central-rez-context.ts",
+          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpHasCentralRezFloorFundingNeed",
+        new Set([
+          "runtime/semantic-runtime-corp-central-rez-context.ts",
+          "runtime/semantic-runtime-corp-funding-contestability-composition.ts",
+          "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimeCorpPassiveScoreLinePenalty",
+        new Set([
+          "runtime/semantic-runtime-corp-passive-scoreline.ts",
+          "runtime/semantic-runtime-corp-passive-scoreline-context.ts",
+          "runtime/semantic-runtime-corp-scoring-evidence-composition.ts",
+        ]),
+      ],
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        return [...allowedFilesBySymbol.entries()].flatMap(
+          ([symbol, allowedFiles]) => {
+            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+              return [];
+            }
+            return [
+              `${relative} references ${symbol} outside corp economy reserve or rez-floor ownership`,
+            ];
+          },
+        );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
   it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
