@@ -6,10 +6,11 @@ export function corpVisibleRunnerHardwarePayoffEvidence(
   const tokens = hardwarePayoffTokens(
     `${card.title ?? ""} ${card.rulesText ?? ""}`,
   );
+  const tokenSet = new Set(tokens);
   const hasMultiaccessPayoff =
     hardwarePayoffTokensIncludePhrase(tokens, ["additional", "card"]) ||
     hardwarePayoffTokensIncludePhrase(tokens, ["access", "1", "additional"]) ||
-    tokens.includes("multiaccess");
+    tokenSet.has("multiaccess");
   return [
     `target_definition:${card.definitionId ?? "unknown"}`,
     ...(hasMultiaccessPayoff ? ["runner_hardware_payoff:multiaccess"] : []),
