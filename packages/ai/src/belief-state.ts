@@ -212,6 +212,8 @@ type HqHiddenInstallDepartureMemory = {
   candidateGroup?: HqHandCandidateGroupMemory;
 };
 
+const BELIEF_UNCERTAINTY_SCORE_PER_SIGNAL = -25;
+
 export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
   const history = beliefHistory(input);
   const classifications = history.map(classifyBeliefEvent);
@@ -284,12 +286,36 @@ export function beliefDebugSummary(beliefState: BeliefState): Record<string, unk
     facts,
     hypotheses,
     uncertainty: beliefState.uncertainty.slice(0, 6),
+    uncertaintyConsumer: beliefUncertaintyConsumerFacts(beliefState),
     invalidations: beliefState.invalidationLog.slice(0, 6),
     ...(beliefState.rndTopFreshness ? { rndTopFreshness: beliefState.rndTopFreshness } : {}),
     ...(beliefState.knownPositionMemory ? { knownPositionMemory: beliefState.knownPositionMemory } : {}),
     ...(beliefState.runnerOpponentModel ? { runnerOpponentModel: beliefState.runnerOpponentModel } : {}),
     ...(beliefState.corpOpponentModel ? { corpOpponentModel: beliefState.corpOpponentModel } : {})
   };
+}
+
+export function beliefUncertaintyConsumerFacts(
+  beliefState: BeliefState,
+): string[] {
+  const activeUncertaintyCount = activeBeliefUncertaintyCount(
+    beliefState.uncertainty,
+  );
+  const rawValue = activeUncertaintyCount * BELIEF_UNCERTAINTY_SCORE_PER_SIGNAL;
+  const normalizedValue = normalizedBeliefUncertaintyValue(rawValue);
+  return [
+    `belief_uncertainty_count:${activeUncertaintyCount}`,
+    `belief_uncertainty_raw_value:${rawValue}`,
+    `belief_uncertainty_normalized_value:${normalizedValue}`,
+  ];
+}
+
+export function normalizedBeliefUncertaintyValue(rawValue: number): number {
+  return Math.max(-100, Math.min(100, Math.round(rawValue)));
+}
+
+function activeBeliefUncertaintyCount(uncertainty: readonly string[]): number {
+  return uncertainty.filter((entry) => entry !== "known_projection_only").length;
 }
 
 function beliefHistory(input: AiDecisionInput): PublicGameEvent[] {

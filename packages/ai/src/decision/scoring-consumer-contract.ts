@@ -150,8 +150,12 @@ export const SCORING_CONSUMER_DIMENSIONS = [
     id: "uncertainty",
     owner: "belief-state.ts",
     scale: { min: -100, max: 100, neutral: 0 },
-    implementationStatus: "contract_only",
-    evidenceKeys: ["beliefUncertainty", "unknown_payoff"],
+    implementationStatus: "active",
+    evidenceKeys: [
+      "beliefUncertainty",
+      "belief_uncertainty_raw_value:",
+      "belief_uncertainty_normalized_value:",
+    ],
   },
 ] as const satisfies readonly ScoringConsumerDimension[];
 

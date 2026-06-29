@@ -27,6 +27,14 @@ describe("semanticRuntimeMemoryDebug", () => {
       "own_hand_content_visibility:preview_private_section",
     );
     expect(debug.items).toContain("hq_known:0/5");
+    expect(debug.items).toContain("belief_uncertainty_count:1");
+    expect(debug.items).toContain("belief_uncertainty_raw_value:-25");
+    expect(debug.items).toContain("belief_uncertainty_normalized_value:-25");
+    expect(debug.beliefUncertaintyConsumer).toEqual([
+      "belief_uncertainty_count:1",
+      "belief_uncertainty_raw_value:-25",
+      "belief_uncertainty_normalized_value:-25",
+    ]);
     expect(debug.facts.join("|")).not.toContain("runner-card");
     expect(debug.opponentModel).toEqual(
       expect.objectContaining({

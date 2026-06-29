@@ -19,7 +19,7 @@ Zweck: AI-COMPLETE-17 baut fachliche Scoring-Consumer auf. Dieser Vertrag hält 
 | Plan Continuity | `packages/ai/src/plans/tactical-plan-progression.ts` | `active` | `-100..100`, neutral `0` |
 | Terminal Outcome | `packages/ai/src/runtime/semantic-runtime-corp-score-safety.ts` | `active` | `-100..100`, neutral `0` |
 | Reserve | `packages/ai/src/runtime/semantic-runtime-corp-score.ts` | `active` | `-100..100`, neutral `0` |
-| Uncertainty | `packages/ai/src/belief-state.ts` | `contract_only` | `-100..100`, neutral `0` |
+| Uncertainty | `packages/ai/src/belief-state.ts` | `active` | `-100..100`, neutral `0` |
 
 ## Code-Vertrag
 
@@ -30,4 +30,4 @@ Zweck: AI-COMPLETE-17 baut fachliche Scoring-Consumer auf. Dieser Vertrag hält 
 
 ## Nächste Schnitte
 
-1. Uncertainty als explizite Score-Komponente anbinden.
+1. Abschlussaudit ausführen und AI-COMPLETE-17 gegen Vertrag, Tests und Ledger verifizieren.
