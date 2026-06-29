@@ -318,7 +318,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_operation_burst_economy",
-          value: 1020,
+          value: 1530,
           reason: expect.stringContaining("operation_action_value:2"),
         }),
       ]),

@@ -749,7 +749,7 @@ function corpImmediateEconomyOperationScoreValue(
 ): number {
   return operation.actionValue >= CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE
     ? 1350 + operation.actionValue * 180
-    : 700 + operation.actionValue * 160;
+    : 1050 + operation.actionValue * 240;
 }
 
 function corpImmediateEconomyThresholdScoreValue(

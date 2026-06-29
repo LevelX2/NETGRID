@@ -127,3 +127,30 @@ Der Arbeitsbranch wird im eigenen Worktree umgesetzt. Nach jedem abgeschlossenen
 - Drawback-Operationen werden nicht pauschal durch die Immediate-Economy-Heuristik hochgezogen.
 - Fokussierte Tests und Typecheck bestehen.
 - Arbeitsbranch ist lokal nach `main` gemergt.
+
+## Umsetzungsstand vor lokaler Integration
+
+Commits:
+
+- `docs(ai): record corp immediate economy coverage process`
+- `fix(ai): broaden corp immediate economy operation scoring`
+- `test(ai): cover corp immediate economy legal action choices`
+
+Umgesetzte Kernpunkte:
+
+- Bracket notation `Gain [N].` wird als unmittelbarer Credit-Gain erkannt.
+- Deutsche Operationstexte `Erhalte ... Credits.` und `Ziehe ... Karten.` werden für statische Immediate-Economy-Bewertung erkannt.
+- Action-Wert 2 erhält einen schwächeren Direct-Play-Tier, der Basis-Credit und Basis-Draw im Decision-Stack schlägt, aber unter dem Burst-Tier ab Action-Wert 3 bleibt.
+- Visible Bad-Publicity-Drawbacks verhindern die generische Economy-Aufwertung.
+- `Credit Consolidation`, `v08_credit_surge_operation`, `v08_archive_planning_operation`, `simple_draw_operation` und bestehende O:NR-Economy-Operationen sind durch fokussierte Tests abgedeckt.
+
+Bestandene Checks:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/semantic-runtime-corp-score.test.ts --maxWorkers=1 --testTimeout=30000`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts --maxWorkers=1 --testTimeout=30000 -t "Accounts Receivable|Efficiency Experts|Night Shift|Credit Consolidation|credit surge|value-two German draw"`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `git diff --check`
+
+Noch offen:
+
+- Finaler Abgleich mit lokalem `main`, erneute Abschlusschecks und lokaler Merge nach `main`.
