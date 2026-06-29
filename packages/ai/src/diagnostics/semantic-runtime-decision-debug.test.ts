@@ -26,6 +26,14 @@ describe("SemanticRuntimeDecisionDebug", () => {
             "privatePayload should redact",
           ],
         },
+        {
+          rank: 3,
+          actionId: "draw-again",
+          actionType: "draw_card",
+          selected: false,
+          priority: 44,
+          whyNot: ["semantic_score_below_selected"],
+        },
       ]),
     ).toEqual([
       "alternative:draw_card:semantic_score_below_selected",
