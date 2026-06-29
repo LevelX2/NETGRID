@@ -10322,6 +10322,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'rulesText\?\.match|draw\\s\+\(one|ziehe\\s\+' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihunderteinundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - Paket: Produktiver RulesText-/Regex-/Label-Restaudit nach den Tokenisierungs-Paketen.
+  - Ergebnis: Die konkret verfolgten produktiven Pfade `packages/ai/src/runtime`, `packages/ai/src/simulation`, `packages/ai/src/decision` und `packages/ai/src/actions` haben keine Treffer mehr für `.match(`, `.test(`, `text.includes`, `rulesText?.match`, `label.match`, `label.includes` oder `action.label`.
+  - Restbestand: Treffer bleiben in `packages/ai/src/legacy`, insbesondere Corp-Advancement-/Access-/Damage-RulesText-Regexes sowie Runner-Broker-/Short-Term-Contract-Label-Fallbacks; diese werden als nächster Legacy-Cluster bearbeitet.
+  - Direkte Membership-Suche bleibt leer: keine Treffer für `tokens.includes`, `.includes(term)`, `accepted.includes`, `reasonCodes.includes`, `knownValues.includes`, `split(...).includes` oder `.includes(token)` unter `packages/ai/src`.
+  - Status bleibt `IN_PROGRESS`, weil der Legacy-Restbestand noch produktiv erreichbar sein kann und in Folgepaketen abgebaut oder als nicht mehr produktiv nachgewiesen werden muss.
+  - Verifikation: `rg -n "\.match\(|\.test\(|text\.includes|rulesText\?\.match|label\.match|label\.includes|action\.label" packages/ai/src/runtime packages/ai/src/simulation packages/ai/src/decision packages/ai/src/actions --glob '!**/*.test.ts'` ohne Treffer.
+  - Verifikation: `rg -n "\.match\(|\.test\(|text\.includes|rulesText\?\.match|label\.match|label\.includes|action\.label" packages/ai/src/legacy --glob '!**/*.test.ts'` listet den Legacy-Restbestand.
+  - Verifikation: `rg -n "tokens\.includes|\.includes\(term\)|accepted\.includes|reasonCodes\.includes|knownValues\.includes|split\([^\n]+\)\.includes|\.includes\(token\)" packages/ai/src` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
