@@ -234,6 +234,9 @@ function buildPromotionQueue(
           `candidate_status:${candidate.status}`,
           `selected_action_type:${candidate.selectedActionType}`,
           ...candidate.mistakeClasses.map((mistake) => `mistake:${mistake}`),
+          ...candidate.evidence
+            .filter((entry) => entry.startsWith("alternative:"))
+            .slice(0, 6),
         ],
       };
     })
@@ -381,10 +384,26 @@ function candidateFromFinding(
       "candidate_snapshot:not_executable_without_redacted_input_builder",
       "runtime_consumer:none",
       "productive_use_allowed:false",
+      ...candidateAlternativeWhyEvidence(legalActionCandidates),
       ...point.facts.map(safe),
       ...finding.relevantDebugFacts.map(safe),
     ],
   };
+}
+
+function candidateAlternativeWhyEvidence(
+  candidates: readonly SelfplayDecisionSnapshotLegalActionCandidate[],
+): string[] {
+  return candidates
+    .flatMap((candidate) =>
+      candidate.evidence
+        .filter(
+          (entry) =>
+            entry.startsWith("why_chosen:") || entry.startsWith("why_not:"),
+        )
+        .map((entry) => `alternative:${candidate.actionType}:${entry}`),
+    )
+    .slice(0, 12);
 }
 
 function legalActionCandidateFromAlternative(

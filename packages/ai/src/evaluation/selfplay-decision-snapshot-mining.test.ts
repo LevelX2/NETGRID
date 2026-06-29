@@ -117,6 +117,11 @@ describe("SelfplayDecisionSnapshotMining", () => {
         "unsafe_run",
       ],
     });
+    expect(candidate?.evidence).toEqual(
+      expect.arrayContaining([
+        "alternative:start_run:why_not:known_no_current_payoff",
+      ]),
+    );
     expect(candidate?.candidateSnapshot.legalActionCandidates).toEqual([
       expect.objectContaining({
         actionId: "run-remote-2",
@@ -129,6 +134,15 @@ describe("SelfplayDecisionSnapshotMining", () => {
         selected: false,
       }),
     ]);
+    expect(
+      report.promotionQueue.find(
+        (entry) => entry.snapshotId === candidate?.snapshotId,
+      )?.evidence,
+    ).toEqual(
+      expect.arrayContaining([
+        "alternative:start_run:why_not:known_no_current_payoff",
+      ]),
+    );
     expect(report.candidatesByMistakeClass.unsafe_run).toBe(2);
     expect(report.candidatesByMistakeClass.ignored_remote_threat).toBe(2);
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
