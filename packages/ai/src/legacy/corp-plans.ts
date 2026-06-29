@@ -7186,8 +7186,11 @@ function corpAdvancementCreditCashoutValue(text: string): number {
 }
 
 function corpAdvancementCashoutScalesPerCounter(text: string): boolean {
-  return /for each advancement counter|per advancement counter|for every advancement counter/.test(
-    text,
+  const tokens = corpRulesTextTokens(text);
+  return (
+    corpTokensIncludePhrase(tokens, ["for", "each", "advancement", "counter"]) ||
+    corpTokensIncludePhrase(tokens, ["per", "advancement", "counter"]) ||
+    corpTokensIncludePhrase(tokens, ["for", "every", "advancement", "counter"])
   );
 }
 
