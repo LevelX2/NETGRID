@@ -288,7 +288,10 @@ function runActionSignalHasTerm(signal: string, term: string): boolean {
   const termTokens = normalizedTerm
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
-  if (termTokens.length <= 1) return tokens.includes(normalizedTerm);
+  if (termTokens.length <= 1) {
+    const tokenSet = new Set(tokens);
+    return tokenSet.has(normalizedTerm);
+  }
   return tokens.some((token, index) =>
     token === termTokens[0] &&
     termTokens.every(
@@ -738,7 +741,8 @@ function tokensIncludeAny(
   tokens: readonly string[],
   accepted: readonly string[],
 ): boolean {
-  return tokens.some((token) => accepted.includes(token));
+  const acceptedSet = new Set(accepted);
+  return tokens.some((token) => acceptedSet.has(token));
 }
 
 function tokensIncludePhrase(

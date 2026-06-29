@@ -10205,6 +10205,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes\(term\)|includes\(term\)' packages/ai/src/runtime/semantic-runtime-corp-effective-defense.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertachtundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/run-action-projection.ts` bindet RunAction-Signal-Terme und Access-Payoff-Tokens über lokale Sets statt direkter `.includes(...)`-Prüfungen.
+  - Strukturierte RunAction-Projektion bleibt exakt; Run-, Multiaccess-, Constraint-, Hq-via-Archives- und Access-Payoff-Signale bleiben bounded und substring-nahe Rauschwerte bleiben ausgeschlossen.
+  - `run-action-projection.test.ts` sichert strukturierte Run-Signale, Scope-/Payoff-/Constraint-Bounding und label-only Ignorieren.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/run-action-projection.test.ts` grün, 1 Datei, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(normalizedTerm\)|accepted\.includes\(token\)' packages/ai/src/actions/run-action-projection.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
