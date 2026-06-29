@@ -24,6 +24,7 @@ Zweck: Erstes Ownership-Artefakt für `AI-COMPLETE-16`, damit doppelte oder wide
 - Score-Aggregation: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `semanticRuntimeScoreFromComponents` nur noch im Score-Components-Owner, im Runtime-Choice-Builder und im Public-Entrypoint-Reexport. Neue produktive Gesamtpunkt-Summierungen außerhalb dieser Boundary fallen damit als Boundary-Verstoß auf.
 - Legacy Action Scoring: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `scoreActionsForLegacy` und `createLegacyActionScoringComposition` außerhalb der Legacy-Schicht nur in `runtime/ai-action-entrypoints-composition.ts` und `runtime/semantic-runtime-action-exclusion-composition.ts`. Neue produktive Legacy-Scoring-Consumer fallen damit als Boundary-Verstoß auf.
 - Runner Run Reachability: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `evaluateRunnerRunTargets` nur im Run-Target-Evaluator, in Public-/Evaluation-Reexports und in den Runtime-Orchestrierungsstellen. Neue direkte Legacy- oder Score-Modul-Consumer fallen damit als Boundary-Verstoß auf.
+- Access Payoff: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt direkte `evaluateKnownRemoteAccessPayoff`-/`evaluateKnownCentralAccessPayoff`-Nutzung nur in den Payoff-Ownern, Run-Target-Evaluation, Tactical-Plan-Runner-Plans, Public-Reexport und dem Legacy-Runner-Adapter `legacy-runner-access-payoff.ts`. `legacy/runner-plans.ts` nutzt den Adapter statt direkter Owner-Aufrufe.
 
 ## Erste Audit-Befunde
 

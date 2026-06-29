@@ -29,7 +29,6 @@ import {
   type KnownHqHandMemory,
   type RndTopFreshnessMemory,
 } from "../belief-state";
-import { evaluateKnownRemoteAccessPayoff } from "../known-remote-access-payoff";
 import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
@@ -54,6 +53,7 @@ import {
   visibleRisksForPlan,
   type RunnerPlanKind,
 } from "./runner-plan-metadata";
+import { legacyRunnerKnownRemoteAccessPayoff } from "./legacy-runner-access-payoff";
 const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
   "onr_v1_309_bbs-whispering-campaign";
 
@@ -3823,7 +3823,7 @@ function knownRemoteRootTrashAffordabilityPenalty(
   if (candidate.kind !== "contest_remote" || !target?.startsWith("remote_"))
     return { penalty: 0, reasons: [], evidence: [] };
   void features;
-  const payoff = evaluateKnownRemoteAccessPayoff(input, target);
+  const payoff = legacyRunnerKnownRemoteAccessPayoff(input, target);
   return {
     penalty: payoff.penalty,
     reasons: payoff.reasons,
@@ -4550,7 +4550,7 @@ function runnerRemoteTargetStillContestable(
   if (!server || server.rootCount <= 0) return false;
   const estimate = runnerKnownPathEstimate(input, target, features);
   if (!estimate || estimate.blocked) return false;
-  const payoff = evaluateKnownRemoteAccessPayoff(input, target);
+  const payoff = legacyRunnerKnownRemoteAccessPayoff(input, target);
   if (payoff.knownNoCurrentPayoff) return false;
   return runnerRemoteContestProfile(input, target, features).contestable;
 }
@@ -4717,7 +4717,7 @@ function evaluateKnownRemoteMemoryValue(
   if (candidate.kind !== "contest_remote" || !target?.startsWith("remote_")) {
     return { score: 0, reasons: [], evidence: [] };
   }
-  const payoff = evaluateKnownRemoteAccessPayoff(input, target, beliefState);
+  const payoff = legacyRunnerKnownRemoteAccessPayoff(input, target, beliefState);
   const score = payoff.score - payoff.penalty;
   return {
     score,

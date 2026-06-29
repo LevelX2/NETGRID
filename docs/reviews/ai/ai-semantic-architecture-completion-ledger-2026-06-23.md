@@ -10513,6 +10513,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps runner run-target evaluation owned by the run-target evaluator"` in `packages/ai` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
 
+- `AI-COMPLETE-16` fünfter Ownership-Schnitt:
+  - `packages/ai/src/legacy/legacy-runner-access-payoff.ts` kapselt Legacy-Runner-Zugriffe auf den Known-Remote-Access-Payoff-Owner.
+  - `packages/ai/src/legacy/runner-plans.ts` nutzt den Adapter statt direkter `evaluateKnownRemoteAccessPayoff`-Aufrufe.
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt direkte Known-Access-Payoff-Evaluation auf Owner, Run-Target-Evaluation, Tactical-Plan-Runner-Plans, Public-Reexport und den Legacy-Adapter.
+  - Status bleibt `IN_PROGRESS`, weil Corp-Board-Triage-Kollisionszonen und weitere konkrete Owner-Bindungen offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps known access payoff evaluation behind access payoff owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "recovers economy when Krash can pass Data Wall but cannot afford a known BBS trash afterward"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

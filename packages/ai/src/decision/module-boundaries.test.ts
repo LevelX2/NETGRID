@@ -714,6 +714,38 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps known access payoff evaluation behind access payoff owners", () => {
+    const allowedFiles = new Set([
+      "ai-runtime-public-entrypoints.ts",
+      "known-central-access-payoff.ts",
+      "known-remote-access-payoff.ts",
+      "legacy/legacy-runner-access-payoff.ts",
+      "runner-run-target-evaluation.ts",
+      "plans/tactical-plan-runner-plans.ts",
+    ]);
+    const guardedSymbols = [
+      "evaluateKnownCentralAccessPayoff",
+      "evaluateKnownRemoteAccessPayoff",
+    ];
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const referencesGuardedSymbol = guardedSymbols.some((symbol) =>
+          content.includes(symbol),
+        );
+        if (!referencesGuardedSymbol) return [];
+        const relative = relativeFile(file);
+        return allowedFiles.has(relative)
+          ? []
+          : [
+              `${relative} references known access payoff evaluation outside owner or adapter boundaries`,
+            ];
+      });
+
+    expect(violations).toEqual([]);
+  });
+
   it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
