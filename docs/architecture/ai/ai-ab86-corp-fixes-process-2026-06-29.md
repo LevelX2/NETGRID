@@ -29,13 +29,16 @@ Die Corp-KI soll aus dem AB86-Spiel generische Verbesserungen erhalten: spielbar
 Ziel: Match, Fehlergruppen und Umsetzungsgrenzen dokumentieren.
 
 Kernartefakte:
+
 - `docs/architecture/ai/ai-ab86-corp-fixes-process-2026-06-29.md`
 - `docs/reviews/ai/ai-ab86-corp-replay-evidence-2026-06-29.md`
 
 Checks:
+
 - `git diff --check`
 
 Commit:
+
 - `docs(ai): record ab86 corp fix process`
 
 ### Paket 2: Runtime-Anpassung
@@ -43,16 +46,19 @@ Commit:
 Ziel: Bestehende Corp-Board-Triage und Score-Komponenten anpassen.
 
 Konkrete Arbeit:
+
 - `force_scoreline_clock` von reinem Deckout-Fall auf side-safe HQ-Agenda-Flood mit spielbarer bestehender Scoring-Remote erweitern.
 - Non-scoreline-Root-/Support-Installationen und passive Economy/Draw unter dieser Lage als Mismatch behandeln.
 - Zentral-ICE-Installationen mit fehlendem Access-Stop bei HQ/R&D-Agenda-Druck negativ markieren, ohne reine Tax-/Damage-ICE generell wertlos zu machen.
 - Scoreline-Fenster mit affordable relevant ICE und fehlender sichtbarer installierter Runner-Coverage unter HQ-Druck nicht als unspielbares Geschenk behandeln.
 
 Checks:
+
 - fokussierte Runtime-Tests
 - `git diff --check`
 
 Commit:
+
 - `fix(ai): tighten corp hq flood scoreline triage`
 
 ### Paket 3: Regressionen und Typecheck
@@ -60,11 +66,13 @@ Commit:
 Ziel: Tests für die AB86-Muster ergänzen und relevante Gates laufen lassen.
 
 Checks:
+
 - `corepack pnpm --filter @netgrid/ai test -- --run packages/ai/src/runtime/semantic-runtime-corp-score.test.ts packages/ai/src/runtime/semantic-runtime-corp-scoring-window.test.ts packages/ai/src/runtime/semantic-runtime-corp-remote-score.test.ts`
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
 Commit:
+
 - `test(ai): cover ab86 corp scoreline regressions`
 
 ### Paket 4: Finalisierung und lokale Integration
@@ -72,15 +80,18 @@ Commit:
 Ziel: Final-Report und Wissenslog schreiben, Arbeitsbranch lokal nach `main` mergen.
 
 Kernartefakte:
+
 - `docs/reviews/ai/ai-ab86-corp-fixes-final-2026-06-29.md`
 - `KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md`
 
 Checks:
+
 - relevante fokussierte Tests
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
 Commit:
+
 - `docs(ai): close ab86 corp fixes`
 
 ### Paket 5: Post-Merge
@@ -88,6 +99,7 @@ Commit:
 Ziel: Hauptworkspace prüfen, Worktree sauber entfernen und Ergebnis melden.
 
 Checks:
+
 - `git status --short --branch`
 - `git diff --check`
 - bei Risiko fokussierte AI-Tests auf `main`
