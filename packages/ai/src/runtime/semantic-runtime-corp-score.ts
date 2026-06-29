@@ -1100,8 +1100,9 @@ function corpActionCandidateTargetsCorpScoreline(
 }
 
 function evidenceHasTerm(entry: string, term: string): boolean {
-  return entry
+  const termSet = new Set(entry
     .toLocaleLowerCase("en-US")
     .split(/[._:-]+/)
-    .includes(term);
+    .filter(Boolean));
+  return termSet.has(term);
 }

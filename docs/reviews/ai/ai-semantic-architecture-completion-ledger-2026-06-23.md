@@ -10232,6 +10232,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes\("counter"\)|tokens\.includes\("counters"\)|tokens\.includes\("program"\)|tokens\.includes\("hardware"\)' packages/ai/src/runtime/semantic-runtime-corp-advancement-counter.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihunderteinundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` bindet Corp-Score-Target-Evidence-Terme über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Corp-Score-Closeout-Zielerkennung bleibt exakt; Agenda- und Scoreline-Evidence bleibt bounded und substring-nahe Target-Rauschwerte bleiben ausgeschlossen.
+  - `semantic-runtime-corp-score.test.ts` sichert Corp-Score-Komponenten, strukturierte Rollen und bounded Target-Evidence-Fälle.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts` grün, 1 Datei, 24 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n '\.includes\(term\)|includes\(term\)' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
