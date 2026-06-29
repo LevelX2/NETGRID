@@ -6979,9 +6979,7 @@ function corpAdvancementTargetAssessment(
       evidence: [],
     };
   }
-  if (
-    /advancement counter|advance .* before|can be advanced|counter/.test(text)
-  ) {
+  if (corpAdvancementLooksLikeCounterBank(text)) {
     return {
       card: located.card,
       serverId: located.serverId,
@@ -6998,13 +6996,31 @@ function corpAdvancementTargetAssessment(
     serverId: located.serverId,
     value: 0,
     witness: "none",
-    targetClass: /access|trash|damage/.test(text)
+    targetClass: corpAdvancementLooksLikeLowValueDecoy(text)
       ? "low_value_decoy"
       : "unknown_advanceable",
     windowValue: 0,
     weakTargetPenalty: 100,
     evidence: [],
   };
+}
+
+function corpAdvancementLooksLikeCounterBank(text: string): boolean {
+  const tokens = corpRulesTextTokens(text);
+  return (
+    corpTokensIncludePhrase(tokens, ["advancement", "counter"]) ||
+    corpTokensInclude(tokens, "counter") ||
+    corpTokensIncludePhraseBefore(tokens, ["advance"], "before") ||
+    corpTokensIncludePhrase(tokens, ["can", "be", "advanced"])
+  );
+}
+
+function corpAdvancementLooksLikeLowValueDecoy(text: string): boolean {
+  return corpTokensIncludeAny(corpRulesTextTokens(text), [
+    "access",
+    "trash",
+    "damage",
+  ]);
 }
 
 function corpAgendaOveradvanceThresholdAssessment(

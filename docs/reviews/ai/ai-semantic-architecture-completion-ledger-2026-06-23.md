@@ -10396,6 +10396,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'add one advancement counter to each of up to two installed cards that can be advanced' packages/ai/src/legacy/corp-plans.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt die allgemeinen Counter-Bank- und Low-Value-Decoy-RulesText-Regexes durch lokale Token-Prädikate.
+  - Legacy-Corp-Advancement-Zielklassifikation erkennt `advancement counter`, `advance ... before`, `can be advanced`, `counter` sowie Access-/Trash-/Damage-Decoys weiter ohne freie Regex.
+  - Status bleibt `IN_PROGRESS`, weil weitere Legacy-Corp-RulesText-Regexes für Advancement-Burst-Amounts und Action-Gain-Erkennung offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "classifies .* advancement counter placement"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: gezieltes Ripgrep auf die entfernten Counter-Bank-/Decoy-Regexes ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
