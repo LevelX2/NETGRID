@@ -27,4 +27,12 @@ describe("scoring consumer contract", () => {
       expect(dimension.evidenceKeys.length).toBeGreaterThan(0);
     }
   });
+
+  it("keeps every AI-COMPLETE-17 scoring dimension actively implemented", () => {
+    for (const id of REQUIRED_SCORING_CONSUMER_DIMENSIONS) {
+      expect(scoringConsumerDimensionById(id).implementationStatus).toBe(
+        "active",
+      );
+    }
+  });
 });

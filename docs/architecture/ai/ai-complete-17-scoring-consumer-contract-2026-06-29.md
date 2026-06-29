@@ -1,6 +1,6 @@
 # AI-COMPLETE-17 Scoring Consumer Contract
 
-Status: `IN_PROGRESS`
+Status: `VERIFIED`
 
 Zweck: AI-COMPLETE-17 baut fachliche Scoring-Consumer auf. Dieser Vertrag hält die geforderten Scoring-Dimensionen, ihre aktuellen Owner und den Implementierungsstatus fest, damit die nächsten Code-Schnitte gezielt fehlende Consumer schließen statt neue Parallelbewertungen einzuführen.
 
@@ -28,6 +28,6 @@ Zweck: AI-COMPLETE-17 baut fachliche Scoring-Consumer auf. Dieser Vertrag hält 
 - `contract_only` bedeutet: fachlicher Owner und Skalenband sind festgelegt, aber produktive Score-Komponenten fehlen noch.
 - `partial` bedeutet: es gibt produktive oder diagnostische Signale, aber die Dimension ist noch nicht vollständig als normalisierter fachlicher Consumer in der Runtime verankert.
 
-## Nächste Schnitte
+## Abschluss
 
-1. Abschlussaudit ausführen und AI-COMPLETE-17 gegen Vertrag, Tests und Ledger verifizieren.
+AI-COMPLETE-17 ist abgeschlossen. Alle Pflichtdimensionen sind im maschinenlesbaren Vertrag vorhanden, auf `-100..100` skaliert und als `active` markiert; `packages/ai/src/decision/scoring-consumer-contract.test.ts` schützt diesen Zustand.
