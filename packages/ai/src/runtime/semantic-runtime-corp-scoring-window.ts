@@ -38,6 +38,12 @@ export type CorpScoringWindowNextStep =
   | "gain_credit"
   | "none";
 
+export type CorpScoringWindowAgendaStealSeverity =
+  | "none"
+  | "normal"
+  | "near_win"
+  | "game_ending";
+
 export type CorpScoringWindowAssessment = {
   serverId: string;
   windowKind: CorpScoringWindowKind;
@@ -47,6 +53,9 @@ export type CorpScoringWindowAssessment = {
   runnerCanContestBeforeScore: boolean;
   runnerCanReachAccessBeforeScore: boolean;
   agendaStealRelevantBeforeScore: boolean;
+  agendaPointsAtRisk?: number;
+  runnerAgendaPointsAfterSteal?: number;
+  agendaStealSeverity?: CorpScoringWindowAgendaStealSeverity;
   missingVisibleBreakerCoverage: boolean;
   corpCanRezRelevantIce: boolean;
   scoreHorizon: CorpScoringWindowHorizon;
@@ -144,6 +153,19 @@ export function semanticRuntimeCorpScoringWindowAssessment<
   const immediateScore =
     action.type === "score_agenda" ||
     dependencies.advanceCompletesScore(input, action);
+  const agendaPointsAtRisk = scoringWindowAgendaPointsAtRisk(
+    input,
+    action,
+    projectedServer,
+    dependencies,
+    scoreLineAction,
+  );
+  const runnerAgendaPointsAfterSteal =
+    input.playerView.opponent.agendaPoints + agendaPointsAtRisk;
+  const agendaStealSeverity = scoringWindowAgendaStealSeverity(
+    input,
+    agendaPointsAtRisk,
+  );
   const runnerCanContestNow =
     !immediateScore &&
     access.runnerCanReachAccessNow &&
@@ -164,14 +186,18 @@ export function semanticRuntimeCorpScoringWindowAssessment<
     projectedServer,
     rezBudget,
     runnerCanContestBeforeScore,
+    runnerExposureCreditActions,
+    agendaStealSeverity,
     scoreLineAction,
   });
   const recommendedNextStep = scoringWindowRecommendedNextStep({
     action,
+    agendaStealSeverity,
     hasScorePressure,
     projectedServer,
     windowKind,
     rezBudget,
+    runnerExposureCreditActions,
     runnerCanContestBeforeScore,
     centralPressure,
   });
@@ -185,6 +211,9 @@ export function semanticRuntimeCorpScoringWindowAssessment<
     runnerCanContestBeforeScore,
     runnerCanReachAccessBeforeScore: exposureAccess.runnerCanReachAccessNow,
     agendaStealRelevantBeforeScore: exposureAccess.agendaStealRelevantNow,
+    agendaPointsAtRisk,
+    runnerAgendaPointsAfterSteal,
+    agendaStealSeverity,
     missingVisibleBreakerCoverage: access.missingVisibleBreakerCoverage,
     corpCanRezRelevantIce: rezBudget.corpCanRezRelevantIce,
     scoreHorizon,
@@ -201,16 +230,22 @@ export function semanticRuntimeCorpScoringWindowAssessment<
       `runner_can_contest_before_score:${runnerCanContestBeforeScore}`,
       `runner_can_reach_access_before_score:${exposureAccess.runnerCanReachAccessNow}`,
       `agenda_steal_relevant_before_score:${exposureAccess.agendaStealRelevantNow}`,
+      `agenda_points_at_risk:${agendaPointsAtRisk}`,
+      `runner_agenda_points_after_steal:${runnerAgendaPointsAfterSteal}`,
+      `agenda_steal_severity:${agendaStealSeverity}`,
       `runner_exposure_credit_actions:${runnerExposureCreditActions}`,
       `missing_visible_installed_coverage:${access.missingVisibleBreakerCoverage}`,
       `corp_can_rez_relevant_ice:${rezBudget.corpCanRezRelevantIce}`,
       `corp_can_rez_full_path:${rezBudget.corpCanRezFullPath}`,
+      `corp_can_rez_full_path_with_dynamic_reserve:${rezBudget.corpCanRezFullPathWithDynamicReserve}`,
       `remote_effective_ice_count:${access.effectiveIceCount}`,
       `remote_affordable_ice_count:${rezBudget.affordableIceCount}`,
       `remote_relevant_ice_count:${rezBudget.relevantIceCount}`,
       `remote_affordable_relevant_ice_count:${rezBudget.affordableRelevantIceCount}`,
       `remote_durable_relevant_ice_count:${rezBudget.durableRelevantIceCount}`,
       `remote_weak_position_scaling_ice_count:${rezBudget.weakPositionScalingIceCount}`,
+      `remote_dynamic_protection_weakness_count:${rezBudget.dynamicProtectionWeaknessCount}`,
+      `remote_dynamic_protection_reserve:${rezBudget.dynamicProtectionReserve}`,
       `visible_runner_contest_credits:${access.visibleRunnerContestCredits}`,
       `visible_runner_exposure_contest_credits:${exposureAccess.visibleRunnerContestCredits}`,
       `central_pressure:${centralPressure}`,
@@ -231,11 +266,19 @@ function projectedRemoteServerForAction<TServer extends CorpServerLike>(
   server: TServer | undefined,
   dependencies: SemanticRuntimeCorpScoringWindowDependencies<TServer>,
 ): CorpServerLike | undefined {
-  if (action.type !== "install_card" || action.payload?.placement !== "ice") {
+  if (action.type !== "install_card") {
     return server;
   }
   const sourceCard = dependencies.actionSourceCard?.(input, action);
-  if (!sourceCard || sourceCard.type !== "ice") return server;
+  if (!sourceCard) return server;
+  if (action.payload?.placement !== "ice") {
+    return {
+      id: server?.id ?? dependencies.actionServerId(input, action) ?? "remote_1",
+      ice: [...(server?.ice ?? [])],
+      root: [...(server?.root ?? []), sourceCard],
+    };
+  }
+  if (sourceCard.type !== "ice") return server;
   return {
     id: server?.id ?? dependencies.actionServerId(input, action) ?? "remote_1",
     ice: [...(server?.ice ?? []), sourceCard],
@@ -386,6 +429,9 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
   durableRelevantIceCount: number;
   affordableDurableRelevantIceCount: number;
   weakPositionScalingIceCount: number;
+  dynamicProtectionWeaknessCount: number;
+  dynamicProtectionReserve: number;
+  corpCanRezFullPathWithDynamicReserve: boolean;
   evidence: string[];
 } {
   if (!server || server.ice.length === 0) {
@@ -398,6 +444,9 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
       durableRelevantIceCount: 0,
       affordableDurableRelevantIceCount: 0,
       weakPositionScalingIceCount: 0,
+      dynamicProtectionWeaknessCount: 0,
+      dynamicProtectionReserve: 0,
+      corpCanRezFullPathWithDynamicReserve: false,
       evidence: ["remote_rez_budget:no_ice"],
     };
   }
@@ -429,28 +478,45 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
   const weakPositionScalingIceCount = qualities.filter(
     (quality) => quality.weakPositionScaling,
   ).length;
+  const dynamicProtectionWeaknessCount = qualities.filter(
+    (quality) => quality.dynamicProtectionWeakness,
+  ).length;
+  const dynamicProtectionReserve = qualities.reduce(
+    (sum, quality) => sum + quality.dynamicReserve,
+    0,
+  );
   const minimumRezCost =
     relevantRezCosts.length > 0 ? Math.min(...relevantRezCosts) : Infinity;
   const totalRezCost = relevantRezCosts.reduce((sum, cost) => sum + cost, 0);
+  const totalRezCostWithDynamicReserve =
+    totalRezCost + dynamicProtectionReserve;
   return {
     corpCanRezRelevantIce:
       relevantRezCosts.length > 0 && creditsAfterAction >= minimumRezCost,
     corpCanRezFullPath:
       relevantRezCosts.length > 0 && creditsAfterAction >= totalRezCost,
+    corpCanRezFullPathWithDynamicReserve:
+      relevantRezCosts.length > 0 &&
+      creditsAfterAction >= totalRezCostWithDynamicReserve,
     affordableIceCount,
     relevantIceCount,
     affordableRelevantIceCount,
     durableRelevantIceCount,
     affordableDurableRelevantIceCount,
     weakPositionScalingIceCount,
+    dynamicProtectionWeaknessCount,
+    dynamicProtectionReserve,
     evidence: [
       `remote_rez_budget:credits_after_action:${creditsAfterAction}`,
       `remote_rez_budget:min_relevant_rez_cost:${Number.isFinite(minimumRezCost) ? minimumRezCost : "none"}`,
       `remote_rez_budget:full_relevant_path_rez_cost:${totalRezCost}`,
+      `remote_rez_budget:full_relevant_path_with_dynamic_reserve:${totalRezCostWithDynamicReserve}`,
       `remote_rez_budget:relevant_ice_count:${relevantIceCount}`,
       `remote_rez_budget:affordable_relevant_ice_count:${affordableRelevantIceCount}`,
       `remote_rez_budget:durable_relevant_ice_count:${durableRelevantIceCount}`,
       `remote_rez_budget:weak_position_scaling_ice_count:${weakPositionScalingIceCount}`,
+      `remote_rez_budget:dynamic_protection_weakness_count:${dynamicProtectionWeaknessCount}`,
+      `remote_rez_budget:dynamic_protection_reserve:${dynamicProtectionReserve}`,
     ],
   };
 }
@@ -463,14 +529,21 @@ function scoringWindowIceQuality(
   relevant: boolean;
   durableRelevant: boolean;
   weakPositionScaling: boolean;
+  dynamicProtectionWeakness: boolean;
+  dynamicReserve: number;
 } {
   const relevant = iceHasPotentialScoringProtection(ice);
   const weakPositionScaling =
     relevant && iceHasUnsupportedPositionScaling(server, ice, iceIndex);
+  const dynamicProtectionWeakness =
+    relevant && iceHasDynamicProtectionWeakness(ice);
   return {
     relevant,
-    durableRelevant: relevant && !weakPositionScaling,
+    durableRelevant:
+      relevant && !weakPositionScaling && !dynamicProtectionWeakness,
     weakPositionScaling,
+    dynamicProtectionWeakness,
+    dynamicReserve: relevant && iceHasSameFortRepositionRisk(ice) ? 1 : 0,
   };
 }
 
@@ -521,14 +594,40 @@ function iceHasUnsupportedPositionScaling(
   iceIndex: number,
 ): boolean {
   const signals = scoringWindowCardSignals(ice);
-  const positionScaling = signals.some((signal) =>
+  const positionScaling = scoringWindowIceHasPositionScalingRisk(signals);
+  if (!positionScaling) return false;
+  return server.ice.slice(iceIndex + 1).length === 0;
+}
+
+function iceHasDynamicProtectionWeakness(ice: VisibleCard): boolean {
+  const signals = scoringWindowCardSignals(ice);
+  return (
+    scoringWindowIceHasPositionScalingRisk(signals) ||
+    iceHasSameFortRepositionRisk(ice)
+  );
+}
+
+function scoringWindowIceHasPositionScalingRisk(
+  signals: readonly string[],
+): boolean {
+  return signals.some((signal) =>
     scoringWindowSignalMatches(signal, [
       "corp_ice.outer_ice_scaling",
       "corp_ice.position_scaling",
+      "position_dependent_ice",
     ]),
   );
-  if (!positionScaling) return false;
-  return server.ice.slice(iceIndex + 1).length === 0;
+}
+
+function iceHasSameFortRepositionRisk(ice: VisibleCard): boolean {
+  const signals = scoringWindowCardSignals(ice);
+  return signals.some((signal) =>
+    scoringWindowSignalMatches(signal, [
+      "same_fort_reposition",
+      "corp_ice.mobile_position_change",
+      "mobile_position_change",
+    ]),
+  );
 }
 
 function scoringWindowCardSignals(card: VisibleCard): string[] {
@@ -538,6 +637,8 @@ function scoringWindowCardSignals(card: VisibleCard): string[] {
   return [
     ...(hint?.roles ?? []),
     ...(hint?.planRoles ?? []),
+    ...((hint as { riskTags?: readonly string[] } | undefined)?.riskTags ??
+      []),
     ...((hint as { tacticSignals?: readonly string[] } | undefined)
       ?.tacticSignals ?? []),
   ];
@@ -573,6 +674,8 @@ function scoringWindowKind(params: {
   projectedServer: CorpServerLike | undefined;
   rezBudget: ReturnType<typeof scoringWindowRezBudget>;
   runnerCanContestBeforeScore: boolean;
+  runnerExposureCreditActions: number;
+  agendaStealSeverity: CorpScoringWindowAgendaStealSeverity;
   scoreLineAction: boolean;
 }): CorpScoringWindowKind {
   if (params.immediateScore) return "durable";
@@ -587,6 +690,18 @@ function scoringWindowKind(params: {
   }
   if (params.runnerCanContestBeforeScore) {
     return params.scoreLineAction ? "unsafe" : "none";
+  }
+  if (
+    params.scoreLineAction &&
+    scoringWindowHasSevereExposureRisk(
+      params.agendaStealSeverity,
+      params.runnerExposureCreditActions,
+    ) &&
+    params.rezBudget.dynamicProtectionWeaknessCount > 0 &&
+    (params.rezBudget.affordableDurableRelevantIceCount < 2 ||
+      !params.rezBudget.corpCanRezFullPathWithDynamicReserve)
+  ) {
+    return "unsafe";
   }
   if (
     params.action.type === "install_card" &&
@@ -655,12 +770,99 @@ function remoteContainsScoreLine(server: CorpServerLike | undefined): boolean {
   );
 }
 
+function scoringWindowAgendaPointsAtRisk<TServer extends CorpServerLike>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  projectedServer: CorpServerLike | undefined,
+  dependencies: SemanticRuntimeCorpScoringWindowDependencies<TServer>,
+  scoreLineAction: boolean,
+): number {
+  if (!scoreLineAction) return 0;
+  const sourceCard =
+    action.type === "install_card"
+      ? dependencies.actionSourceCard?.(input, action)
+      : undefined;
+  if (sourceCard?.type === "agenda") {
+    return visibleAgendaPoints(sourceCard);
+  }
+  const agendaPoints = (projectedServer?.root ?? [])
+    .filter((card) => card.type === "agenda" || card.known === true)
+    .map(visibleAgendaPoints)
+    .filter((points) => points > 0);
+  return agendaPoints.length > 0 ? Math.max(...agendaPoints) : 0;
+}
+
+function visibleAgendaPoints(card: VisibleCard): number {
+  if (
+    typeof card.agendaPoints === "number" &&
+    Number.isFinite(card.agendaPoints)
+  ) {
+    return Math.max(0, Math.floor(card.agendaPoints));
+  }
+  const runtimeAgendaPoints =
+    card.definitionId !== undefined
+      ? (RUNTIME_CARDS[card.definitionId] as
+          | { numeric?: { agendaPoints?: number | null } }
+          | undefined)?.numeric?.agendaPoints
+      : undefined;
+  if (
+    typeof runtimeAgendaPoints === "number" &&
+    Number.isFinite(runtimeAgendaPoints)
+  ) {
+    return Math.max(0, Math.floor(runtimeAgendaPoints));
+  }
+  const demoAgendaPoints =
+    card.definitionId !== undefined
+      ? DEMO_CARDS_BY_ID[card.definitionId]?.agendaPoints
+      : undefined;
+  if (
+    typeof demoAgendaPoints === "number" &&
+    Number.isFinite(demoAgendaPoints)
+  ) {
+    return Math.max(0, Math.floor(demoAgendaPoints));
+  }
+  return card.type === "agenda" ? 2 : 0;
+}
+
+function scoringWindowAgendaStealSeverity(
+  input: AiDecisionInput,
+  agendaPointsAtRisk: number,
+): CorpScoringWindowAgendaStealSeverity {
+  if (agendaPointsAtRisk <= 0) return "none";
+  const agendaPointsToWin =
+    typeof input.playerView.agendaPointsToWin === "number" &&
+    Number.isFinite(input.playerView.agendaPointsToWin)
+      ? input.playerView.agendaPointsToWin
+      : 7;
+  const runnerAgendaPoints =
+    typeof input.playerView.opponent.agendaPoints === "number" &&
+    Number.isFinite(input.playerView.opponent.agendaPoints)
+      ? input.playerView.opponent.agendaPoints
+      : 0;
+  const afterSteal = runnerAgendaPoints + agendaPointsAtRisk;
+  if (afterSteal >= agendaPointsToWin) return "game_ending";
+  if (afterSteal >= agendaPointsToWin - 1) return "near_win";
+  return "normal";
+}
+
+function scoringWindowHasSevereExposureRisk(
+  severity: CorpScoringWindowAgendaStealSeverity,
+  runnerExposureCreditActions: number,
+): boolean {
+  return (
+    runnerExposureCreditActions > 0 &&
+    (severity === "game_ending" || severity === "near_win")
+  );
+}
+
 function scoringWindowRecommendedNextStep(params: {
   action: LegalAction;
+  agendaStealSeverity: CorpScoringWindowAgendaStealSeverity;
   hasScorePressure: boolean;
   projectedServer: CorpServerLike | undefined;
   windowKind: CorpScoringWindowKind;
   rezBudget: ReturnType<typeof scoringWindowRezBudget>;
+  runnerExposureCreditActions: number;
   runnerCanContestBeforeScore: boolean;
   centralPressure: boolean;
 }): CorpScoringWindowNextStep {
@@ -695,6 +897,20 @@ function scoringWindowRecommendedNextStep(params: {
     return "build_remote_ice";
   }
   const remoteHasIce = (params.projectedServer?.ice.length ?? 0) > 0;
+  if (
+    params.windowKind === "unsafe" &&
+    params.hasScorePressure &&
+    !params.centralPressure &&
+    scoringWindowHasSevereExposureRisk(
+      params.agendaStealSeverity,
+      params.runnerExposureCreditActions,
+    ) &&
+    params.rezBudget.dynamicProtectionWeaknessCount > 0
+  ) {
+    return params.rezBudget.corpCanRezFullPathWithDynamicReserve
+      ? "build_remote_ice"
+      : "gain_credit";
+  }
   if (
     params.windowKind === "unsafe" &&
     params.hasScorePressure &&
@@ -753,6 +969,8 @@ function strongestExistingScoringRemote<TServer extends CorpServerLike>(
       rezBudget,
       runnerCanContestBeforeScore:
         access.runnerCanReachAccessNow && access.agendaStealRelevantNow,
+      runnerExposureCreditActions: 0,
+      agendaStealSeverity: "none",
       scoreLineAction: false,
     });
     if (kind === "durable") return "durable";
