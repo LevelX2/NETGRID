@@ -158,6 +158,28 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     expect(centralInstallScore(huntingPack, "rd", input)).toBe(200);
   });
 
+  it("bounds outside-ice subroutine text to exact tokens", () => {
+    const outsideNoiseIce = corpCard("position-noise", "ice", {
+      title: "Position Noise",
+      rezCost: 1,
+      effectiveRunQuote: testRunQuoteWithText(
+        "position-noise",
+        "Outsideish support reference.",
+      ),
+    });
+    const outsideTokenIce = corpCard("outside-token", "ice", {
+      title: "Outside Token",
+      rezCost: 1,
+      effectiveRunQuote: testRunQuoteWithText(
+        "outside-token",
+        "Needs outside ICE support.",
+      ),
+    });
+
+    expect(centralInstallScore(outsideNoiseIce, "rd")).toBe(450);
+    expect(centralInstallScore(outsideTokenIce, "rd")).toBe(100);
+  });
+
   it("keeps Credit Blocks strong only when the wall mode is fundable against visible Killer coverage", () => {
     const creditBlocks = corpCard("credit-blocks", "ice", {
       definitionId: "onr_proteus_017_credit-blocks",
@@ -384,6 +406,24 @@ function corpCard(
     owner: "corp",
     ...overrides,
   } as VisibleCard;
+}
+
+function testRunQuoteWithText(
+  id: string,
+  text: string,
+): NonNullable<VisibleCard["effectiveRunQuote"]> {
+  return {
+    iceInstanceId: id,
+    iceDefinitionId: id,
+    effectiveStrength: 1,
+    subroutines: [
+      {
+        id: `${id}-sub`,
+        type: "test_text_probe",
+        text,
+      },
+    ],
+  } as unknown as NonNullable<VisibleCard["effectiveRunQuote"]>;
 }
 
 function semanticCandidate(
