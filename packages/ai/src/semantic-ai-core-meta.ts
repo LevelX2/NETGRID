@@ -2773,7 +2773,7 @@ function detectTraceScrubberViolations(
     if (signal === "opponent_hand") {
       return (
         metaTraceTokensIncludePhrase(tokens, ["opponent", "hand"]) ||
-        tokens.includes("gegnerhand")
+        metaTraceTokensInclude(tokens, "gegnerhand")
       );
     }
     if (signal === "hq_or_rd_wrong_side_detail") {
@@ -2798,7 +2798,7 @@ function detectTraceScrubberViolations(
       );
     }
     if (signal === "full_state_fragment") {
-      return tokens.includes("fullstate") ||
+      return metaTraceTokensInclude(tokens, "fullstate") ||
         metaTraceTokensIncludePhrase(tokens, ["full", "state"]);
     }
     if (signal === "choice_option_leak") {
@@ -2810,7 +2810,7 @@ function detectTraceScrubberViolations(
     if (signal === "private_debug_data") {
       return (
         metaTraceTokensIncludePhrase(tokens, ["private", "debug"]) ||
-        tokens.includes("decisiondebug")
+        metaTraceTokensInclude(tokens, "decisiondebug")
       );
     }
     return false;
@@ -2822,6 +2822,13 @@ function metaTraceTextTokens(text: string): string[] {
     .toLocaleLowerCase("en-US")
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
+}
+
+function metaTraceTokensInclude(
+  tokens: readonly string[],
+  accepted: string,
+): boolean {
+  return new Set(tokens).has(accepted);
 }
 
 function metaTraceTokensIncludePhrase(

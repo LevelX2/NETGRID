@@ -274,6 +274,10 @@ describe("META6 Stabilization + Limited Rollout / Legacy-Freeze Prep", () => {
       "noisy",
       "FullStatement references opponent handler, HQ detailing and decisiondebugish notes.",
     );
+    const exactTokens = scrubTraceForProduction(
+      "exact-tokens",
+      "gegnerhand fullstate decisiondebug",
+    );
 
     expect(META6_TRACE_SCRUBBER_FORBIDDEN_SIGNALS).toEqual(
       expect.arrayContaining([
@@ -295,6 +299,14 @@ describe("META6 Stabilization + Limited Rollout / Legacy-Freeze Prep", () => {
     expect(safe.violations).toEqual([]);
     expect(noisy.safe).toBe(true);
     expect(noisy.violations).toEqual([]);
+    expect(exactTokens.safe).toBe(false);
+    expect(exactTokens.violations).toEqual(
+      expect.arrayContaining([
+        "opponent_hand",
+        "full_state_fragment",
+        "private_debug_data",
+      ]),
+    );
   });
 
   it("keeps legacy freeze criteria strict and does not allow legacy removal", () => {

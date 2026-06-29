@@ -10259,6 +10259,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes\(\"gate\"\)|tokens\.includes' packages/ai/src/simulation/progress-aware-alternative-snapshot.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertvierundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/semantic-ai-core-meta.ts` bindet die Trace-Scrubber-Einzel-Tokens `gegnerhand`, `fullstate` und `decisiondebug` über einen lokalen `metaTraceTokensInclude`-Helper statt direkter `tokens.includes(...)`-Prüfungen.
+  - Der META6-Trace-Scrubber bleibt exakt tokenbasiert: echte verbotene Tokens werden erkannt, substring-nahe Noise-Werte wie `FullStatement` und `decisiondebugish` bleiben erlaubt.
+  - `semantic-ai-core-meta.test.ts` sichert sowohl die bestehenden Noise-Fälle als auch einen exakten Token-Fall für `gegnerhand fullstate decisiondebug`.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/semantic-ai-core-meta.test.ts` grün, 1 Datei, 25 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes' packages/ai/src/semantic-ai-core-meta.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
