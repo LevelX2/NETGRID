@@ -298,6 +298,43 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment?.evidence).toContain("central_pressure:true");
   });
 
+  it("treats agenda-heavy HQ with visibly breakable ICE as acute central pressure", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 8,
+        runnerRig: [simpleFracter("runner-fracter")],
+        hq: [agenda],
+        servers: [
+          centralServer("hq", [
+            wallIce("hq-wall", { rezzed: true, rezCost: 0 }),
+          ]),
+          centralServer("rd", [centralIce("rd-ice")]),
+          remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 3 })]),
+        ],
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      missingVisibleBreakerCoverage: false,
+    });
+    expect(assessment?.evidence).toContain("central_pressure:true");
+  });
+
   it("lets acute R&D run history override a temporary remote score window", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(

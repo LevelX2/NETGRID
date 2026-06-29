@@ -218,7 +218,17 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: effectiveDefense.evidence.join("|"),
       });
     }
+    const downstreamReserve = corpDownstreamRezReserveAssessment(
+      input,
+      action,
+      actionSemanticCandidate,
+      dependencies,
+      effectiveDefense,
+    );
+    if (downstreamReserve) components.push(downstreamReserve);
   }
+  const postPassIceLifecycle = corpPostPassIceLifecycleComponent(action);
+  if (postPassIceLifecycle) components.push(postPassIceLifecycle);
   if (action.type === "install_card") {
     const roles = dependencies.rolesForAction(input, action);
     if (dependencies.corpActionIsScoreLine(input, action, roles)) {
@@ -390,6 +400,20 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       });
     }
   }
+  if (
+    action.type === "gain_credit" &&
+    credits >= 4 &&
+    !dependencies.corpHasRemoteRezFloorFundingNeed(input) &&
+    !dependencies.corpHasCentralRezFloorFundingNeed(input) &&
+    corpInputHasConcreteDevelopmentAction(input, action)
+  ) {
+    components.push({
+      key: "corp_reserve_satisfied_credit_loop_penalty",
+      label: "Reserve erfüllt",
+      value: -750,
+      reason: "reserve_satisfied_concrete_action_available",
+    });
+  }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 4) {
     components.push({
       key: "corp_low_hand",
@@ -452,6 +476,186 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   return components;
 }
 
+function corpInputHasConcreteDevelopmentAction(
+  input: AiDecisionInput,
+  currentAction: LegalAction,
+): boolean {
+  const legalActions =
+    input.legalActions ?? input.playerView.legalActions ?? [];
+  return legalActions.some((candidate) => {
+    if (candidate.actionId === currentAction.actionId) return false;
+    if (candidate.side !== "corp") return false;
+    return (
+      candidate.type === "score_agenda" ||
+      candidate.type === "advance_card" ||
+      candidate.type === "rez_ice" ||
+      (candidate.type === "install_card" &&
+        (candidate.payload?.placement === "ice" ||
+          candidate.payload?.placement === "root")) ||
+      candidate.type === "play_operation"
+    );
+  });
+}
+
+function corpPostPassIceLifecycleComponent(
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (
+    action.type !== "continue_run" ||
+    action.payload?.corpPostPassIceAbility !== "return_passed_ice_to_hq"
+  ) {
+    return undefined;
+  }
+  const decision =
+    typeof action.payload.decision === "string"
+      ? action.payload.decision
+      : "unknown";
+  const serverId =
+    typeof action.payload.serverId === "string"
+      ? action.payload.serverId
+      : "unknown";
+  const paymentAmount =
+    typeof action.payload.paymentAmount === "number" &&
+    Number.isFinite(action.payload.paymentAmount)
+      ? Math.max(0, Math.floor(action.payload.paymentAmount))
+      : 0;
+  const isCentral = serverId === "hq" || serverId === "rd";
+  const hqReinstallExtraCost = decision === "return_to_hq" && serverId === "hq";
+  if (decision === "pay") {
+    return {
+      key: "corp_post_pass_ice_lifecycle_preserve",
+      label: "ICE-Schutz erhalten",
+      value: isCentral ? 1200 : 850,
+      reason: [
+        "post_pass_ice_lifecycle:pay",
+        `server:${serverId}`,
+        `payment_amount:${paymentAmount}`,
+        "ice_remains_installed:true",
+      ].join("|"),
+    };
+  }
+  if (decision === "decline") {
+    return {
+      key: "corp_post_pass_ice_lifecycle_decline_return",
+      label: "ICE liegen lassen",
+      value: isCentral ? 650 : 450,
+      reason: [
+        "post_pass_ice_lifecycle:decline",
+        `server:${serverId}`,
+        "ice_remains_installed:true",
+      ].join("|"),
+    };
+  }
+  if (decision === "return_to_hq") {
+    return {
+      key: "corp_post_pass_ice_lifecycle_return_to_hq_penalty",
+      label: "ICE-Schutzverlust",
+      value: isCentral ? -1900 : -1200,
+      reason: [
+        "post_pass_ice_lifecycle:return_to_hq",
+        `server:${serverId}`,
+        "ice_remains_installed:false",
+        "central_protection_loss:" + isCentral,
+        ...(hqReinstallExtraCost ? ["hq_ice_reinstall_extra_cost:2"] : []),
+      ].join("|"),
+    };
+  }
+  return undefined;
+}
+
+function corpDownstreamRezReserveAssessment<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  dependencies: Pick<
+    SemanticRuntimeCorpScoreDependencies<TConsumer>,
+    "actionCreditCost"
+  >,
+  effectiveDefense: ReturnType<
+    typeof semanticRuntimeCorpEffectiveDefenseContext
+  >,
+): AiDecisionScoreComponent | undefined {
+  if (!effectiveDefense?.isRezzableNow) return undefined;
+  if (
+    !effectiveDefense.visibleBreakerCoverage &&
+    !effectiveDefense.zeroEffectRisk
+  ) {
+    return undefined;
+  }
+  const sourceId = visibleActionSourceId(action);
+  if (!sourceId) return undefined;
+  const location = corpServerIceLocation(input, sourceId);
+  if (!location || location.iceIndex <= 0) return undefined;
+  const innerRezFloor = minimumInnerUnrezzedIceRezCost(location);
+  if (innerRezFloor === undefined) return undefined;
+  const rezCost = semanticRuntimeCorpActionCreditCost(
+    dependencies,
+    action,
+    actionSemanticCandidate,
+  );
+  const postRezCredits = input.playerView.own.credits - rezCost;
+  if (postRezCredits >= innerRezFloor) return undefined;
+  const isCentral = location.server.id === "hq" || location.server.id === "rd";
+  return {
+    key: "corp_downstream_rez_floor_preservation",
+    label: "Innere ICE-Reserve",
+    value: isCentral ? -1500 : -1000,
+    reason: [
+      "downstream_rez_floor:blocked_after_current_rez",
+      `server:${location.server.id}`,
+      `post_rez_credits:${postRezCredits}`,
+      `inner_rez_floor:${innerRezFloor}`,
+      `visible_breaker_coverage:${effectiveDefense.visibleBreakerCoverage}`,
+      `zero_effect_risk:${effectiveDefense.zeroEffectRisk}`,
+    ].join("|"),
+  };
+}
+
+function visibleActionSourceId(action: LegalAction): string | undefined {
+  if (
+    typeof action.source === "string" &&
+    action.source !== "basic_action" &&
+    action.source !== "game_rule"
+  ) {
+    return action.source;
+  }
+  const payloadCardId = action.payload?.cardId;
+  return typeof payloadCardId === "string" ? payloadCardId : undefined;
+}
+
+function corpServerIceLocation(
+  input: AiDecisionInput,
+  sourceId: string,
+):
+  | {
+      server: AiDecisionInput["playerView"]["servers"][number];
+      iceIndex: number;
+    }
+  | undefined {
+  for (const server of input.playerView.servers ?? []) {
+    const iceIndex = server.ice.findIndex((ice) => ice.instanceId === sourceId);
+    if (iceIndex >= 0) return { server, iceIndex };
+  }
+  return undefined;
+}
+
+function minimumInnerUnrezzedIceRezCost(location: {
+  server: AiDecisionInput["playerView"]["servers"][number];
+  iceIndex: number;
+}): number | undefined {
+  const costs = location.server.ice
+    .slice(0, location.iceIndex)
+    .filter((ice) => ice.rezzed !== true)
+    .map((ice) =>
+      typeof ice.rezCost === "number" && Number.isFinite(ice.rezCost)
+        ? Math.max(0, Math.floor(ice.rezCost))
+        : undefined,
+    )
+    .filter((cost): cost is number => cost !== undefined);
+  if (costs.length === 0) return undefined;
+  return Math.min(...costs);
+}
+
 function addCorpScoringWindowEvidenceComponent(
   components: AiDecisionScoreComponent[],
   assessment: CorpScoringWindowAssessment | undefined,
@@ -508,7 +712,10 @@ function corpTacticalGoalsForInput(
 }
 
 function semanticRuntimeCorpActionCreditCost<TConsumer extends string>(
-  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  dependencies: Pick<
+    SemanticRuntimeCorpScoreDependencies<TConsumer>,
+    "actionCreditCost"
+  >,
   action: LegalAction,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): number {

@@ -3,7 +3,9 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import { selectEfficientTraceBidOption } from "../trace-bid-efficiency";
 import { type LatestTraceContext } from "./trace-context";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 
 export function selectedBidChoiceOptionId(
   input: AiDecisionInput,
@@ -20,12 +22,7 @@ export function selectedBidChoiceOptionId(
   const maxBid = bidOptions.at(-1)?.amount ?? 0;
   let desired = 0;
   if (input.side === "corp") {
-    desired =
-      input.difficulty === "hard"
-        ? Math.min(2, maxBid)
-        : input.difficulty === "normal"
-          ? Math.min(1, maxBid)
-          : 0;
+    desired = corpDesiredBidAmount(input, choice, maxBid);
   } else {
     const tieBid = Math.max(
       0,
@@ -45,4 +42,26 @@ export function selectedBidChoiceOptionId(
       }).option ?? selected;
   }
   return selected?.id;
+}
+
+function corpDesiredBidAmount(
+  input: AiDecisionInput,
+  choice: PendingChoice,
+  maxBid: number,
+): number {
+  if (
+    choice.source.startsWith(
+      "hidden_zone.secret_spend_guess_then_targeted_bypass_run.guess:",
+    )
+  ) {
+    if (input.difficulty === "hard") return maxBid;
+    if (input.difficulty === "normal")
+      return Math.max(2, Math.ceil(maxBid * 0.75));
+    return Math.min(2, maxBid);
+  }
+  return input.difficulty === "hard"
+    ? Math.min(2, maxBid)
+    : input.difficulty === "normal"
+      ? Math.min(1, maxBid)
+      : 0;
 }
