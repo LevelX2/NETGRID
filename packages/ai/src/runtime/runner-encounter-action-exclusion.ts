@@ -55,7 +55,8 @@ export function runnerEncounterActionExclusion(
   if (action.type === "pump_breaker") {
     const assessment = dependencies.pumpViabilityAssessment(input, action);
     if (assessment.canLeadToBreak) return undefined;
-    const remotePayoffBlocked = assessment.evidence.includes(
+    const evidence = new Set(assessment.evidence);
+    const remotePayoffBlocked = evidence.has(
       "encounter_remote_payoff_blocked:true",
     );
     return {
@@ -76,7 +77,8 @@ export function runnerEncounterActionExclusion(
     if (blinkExclusion) return blinkExclusion;
     const assessment = dependencies.breakAccessPathAssessment(input, action);
     if (assessment.canPreserveAccessPath) return undefined;
-    const remotePayoffBlocked = assessment.evidence.includes(
+    const evidence = new Set(assessment.evidence);
+    const remotePayoffBlocked = evidence.has(
       "encounter_remote_payoff_blocked:true",
     );
     return {

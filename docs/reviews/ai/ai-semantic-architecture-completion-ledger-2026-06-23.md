@@ -9576,6 +9576,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/access/remote-trash-spendability.test.ts` grün, 1 Datei, 4 Tests.
   - Verifikation: `rg -n 'targetKinds\.includes' packages/ai/src/access/remote-trash-spendability.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertachtundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-encounter-action-exclusion.ts` bindet Encounter-Remote-Payoff-Evidence über lokale Sets statt direkter `assessment.evidence.includes(...)`-Prüfungen.
+  - Strukturierte Evidence `encounter_remote_payoff_blocked:true` bleibt exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - Der gefilterte `index.test.ts`-Encounter-Lauf sichert die Runner-Encounter-Exclusion-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t encounter` grün, 1 Datei, 2 Tests, 540 skipped.
+  - Verifikation: `rg -n 'assessment\.evidence\.includes\(' packages/ai/src/runtime/runner-encounter-action-exclusion.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
