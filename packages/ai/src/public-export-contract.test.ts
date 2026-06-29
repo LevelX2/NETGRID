@@ -35,6 +35,7 @@ describe("AI public export contract", () => {
       "formatActionSemanticCandidateCoverageReport",
       "buildSemanticRuntimeWhyCoverageReport",
       "renderSemanticRuntimeWhyCoverageMarkdown",
+      "buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries",
       "buildDeckStrategyProfile",
       "reconstructBeliefState",
     ];

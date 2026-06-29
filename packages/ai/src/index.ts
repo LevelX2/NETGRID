@@ -380,6 +380,9 @@ export {
   benchmarkDeckFromSnapshot,
 } from "./simulation/benchmark-deck-snapshot-resolver";
 export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local-editable-deck-resolver";
+export {
+  buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries,
+} from "./simulation/selfplay-why-coverage";
 export type {
   SimulationBenchmarkProfile,
   SimulationBenchmarkProfileId,
