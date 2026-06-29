@@ -195,10 +195,7 @@ function semanticRuntimeCorpRemoteSupportNeedsScorelineContext(
   ) {
     return true;
   }
-  const tokens = semanticRuntimeCorpTextTokens([
-    card?.title,
-    card?.rulesText,
-  ]);
+  const tokens = semanticRuntimeCorpTextTokens([card?.title, card?.rulesText]);
   return (
     (semanticRuntimeCorpTokensIncludePhrase(tokens, [
       "advancement",
@@ -341,7 +338,9 @@ function semanticRuntimeCorpCentralIceInstallScore<
   return firstCentralIce ? 450 : 250;
 }
 
-function semanticRuntimeCorpCentralIceProfile(card: VisibleCard | undefined): {
+export function semanticRuntimeCorpCentralIceProfile(
+  card: VisibleCard | undefined,
+): {
   hasAccessStop: boolean;
   hasTaxOrDamage: boolean;
   positionDependent: boolean;
@@ -433,8 +432,10 @@ function semanticRuntimeCorpCentralIceProfile(card: VisibleCard | undefined): {
     semanticRuntimeCorpHintTargetProfiles(hint).some(
       (profile) => profile.kind === "mode_choice",
     );
+  const hasAccessStop =
+    hasStructuredStop || (visibleSubroutines.length === 0 && hasHintStop);
   return {
-    hasAccessStop: hasStructuredStop || hasHintStop,
+    hasAccessStop,
     hasTaxOrDamage: hasStructuredTaxOrDamage || hasHintTaxOrDamage,
     positionDependent,
     modeChoice,
@@ -561,9 +562,12 @@ function semanticRuntimeCorpTokensIncludePhrase(
   tokens: readonly string[],
   phrase: readonly string[],
 ): boolean {
-  return tokens.some((token, index) =>
-    token === phrase[0] &&
-    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  return tokens.some(
+    (token, index) =>
+      token === phrase[0] &&
+      phrase.every(
+        (phraseToken, offset) => tokens[index + offset] === phraseToken,
+      ),
   );
 }
 
