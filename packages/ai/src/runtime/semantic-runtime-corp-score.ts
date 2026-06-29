@@ -910,15 +910,23 @@ function corpScoreableAgendaAdvancePenaltyComponent(
   if (!corpLegalScoreActionExistsForCard(input, sourceCard.instanceId)) {
     return undefined;
   }
-  if (corpAgendaHasVisibleOveradvancePayoff(sourceCard)) return undefined;
+  if (
+    corpAgendaAdvanceReachesVisibleOveradvancePayoff(
+      sourceCard,
+      counters,
+      requirement,
+    )
+  ) {
+    return undefined;
+  }
   const serverId = corpServerIdForRootCard(input, sourceCard.instanceId);
   return {
     key: "corp_scoreable_agenda_overadvance_penalty",
     label: "Scorebare Agenda weiter advancen",
-    value: -2600,
+    value: -4200,
     reason: [
       "score_agenda_legal:true",
-      "overadvance_payoff_visible:false",
+      "overadvance_next_threshold_reached:false",
       `card:${sourceCard.instanceId}`,
       `server:${serverId ?? "unknown"}`,
       `advancement_requirement:${requirement}`,
@@ -950,30 +958,52 @@ function corpVisibleAdvancementRequirement(
   );
 }
 
-function corpAgendaHasVisibleOveradvancePayoff(card: VisibleCard): boolean {
+function corpAgendaAdvanceReachesVisibleOveradvancePayoff(
+  card: VisibleCard,
+  counters: number,
+  requirement: number,
+): boolean {
+  const interval = corpVisibleOveradvanceCounterInterval(card);
+  if (interval === undefined) return false;
+  const overNow = Math.max(0, counters - requirement);
+  const overAfterAdvance = Math.max(0, counters + 1 - requirement);
+  return (
+    Math.floor(overAfterAdvance / interval) > Math.floor(overNow / interval)
+  );
+}
+
+function corpVisibleOveradvanceCounterInterval(
+  card: VisibleCard,
+): number | undefined {
   const definition = visibleCardDefinition(card);
   const mechanics = definition?.mechanics ?? [];
+  const text = [card.rulesText, definition?.rulesText]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
+  const tokens = corpRulesTextTokens(text);
+  const interval = tokens
+    .map((token, index) => {
+      if (token !== "for" || tokens[index + 1] !== "every") return 0;
+      const amount = numberFromDigitOrWord(tokens[index + 2] ?? "");
+      if (amount <= 0) return 0;
+      const referencesAdvancementCounters =
+        tokens[index + 3] === "advancement" &&
+        (tokens[index + 4] === "counter" ||
+          tokens[index + 4] === "counters") &&
+        tokens[index + 5] === "over";
+      return referencesAdvancementCounters ? amount : 0;
+    })
+    .find((amount) => amount > 0);
+  if (interval !== undefined) return interval;
+  if (tokens.includes("overadvance")) return 1;
   if (
     mechanics.some((mechanic) =>
       rolesMatch([mechanic], ["overadvance", "overadvance_bonus"]),
     )
   ) {
-    return true;
+    return 1;
   }
-  const text = [card.rulesText, definition?.rulesText]
-    .filter((value): value is string => typeof value === "string")
-    .join(" ");
-  const tokens = corpRulesTextTokens(text);
-  return tokens.some((token, index) => {
-    if (token === "overadvance") return true;
-    if (token !== "for" || tokens[index + 1] !== "every") return false;
-    return (
-      numberFromDigitOrWord(tokens[index + 2] ?? "") > 0 &&
-      tokens[index + 3] === "advancement" &&
-      (tokens[index + 4] === "counter" || tokens[index + 4] === "counters") &&
-      tokens[index + 5] === "over"
-    );
-  });
+  return undefined;
 }
 
 function corpServerIdForRootCard(

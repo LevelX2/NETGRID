@@ -24,8 +24,14 @@ export function semanticRuntimeVisibleSourceCard(
   input: AiDecisionInput,
   action: LegalAction,
 ): VisibleCard | undefined {
-  if (action.source !== "basic_action" && action.source !== "game_rule") {
-    const byInstance = findVisibleCard(input, action.source);
+  const actionSource =
+    typeof action.source === "string" ? action.source : undefined;
+  if (
+    actionSource !== undefined &&
+    actionSource !== "basic_action" &&
+    actionSource !== "game_rule"
+  ) {
+    const byInstance = findVisibleCard(input, actionSource);
     if (byInstance) return byInstance;
   }
   const payload = action.payload ?? {};
@@ -36,9 +42,9 @@ export function semanticRuntimeVisibleSourceCard(
         ? payload.sourceDefinitionId
         : typeof payload.sourceCardDefinitionId === "string"
           ? payload.sourceCardDefinitionId
-          : action.source.startsWith("onr_") ||
-              action.source.startsWith("simple_")
-            ? action.source
+          : actionSource?.startsWith("onr_") ||
+              actionSource?.startsWith("simple_")
+            ? actionSource
             : undefined;
   const allVisibleCards = [
     ...input.playerView.own.gripOrHq,
@@ -81,10 +87,12 @@ export function sourceDefinitionIdForAction(
   input: AiDecisionInput,
   action: LegalAction,
 ): string {
-  if (action.source === "basic_action" || action.source === "game_rule")
+  const actionSource =
+    typeof action.source === "string" ? action.source : undefined;
+  if (actionSource === "basic_action" || actionSource === "game_rule")
     return "";
   return (
-    findVisibleCard(input, action.source)?.definitionId ??
+    (actionSource ? findVisibleCard(input, actionSource)?.definitionId : undefined) ??
     semanticRuntimeVisibleSourceCard(input, action)?.definitionId ??
     ""
   );

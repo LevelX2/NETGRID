@@ -233,6 +233,69 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("treats advance on an already scoreable agenda as a score-now mismatch", () => {
+    const agenda = corpCard("project-zurich", "agenda", {
+      title: "Project Zurich",
+      advancementRequirement: 3,
+      advancementCounters: 3,
+      agendaPoints: 2,
+      rulesText:
+        "For every two advancement counters over Project Zurich's difficulty, gain 1 at the start of each of your turns.",
+    });
+    const advanceAgenda = corpAction(
+      "advance-project-zurich",
+      "advance_card",
+      { cardId: agenda.instanceId, serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    advanceAgenda.costs = [{ clicks: 1, credits: 1 }];
+    const scoreAgenda = corpAction(
+      "score-project-zurich",
+      "score_agenda",
+      { cardId: agenda.instanceId, serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    const input = corpInputWithRemoteAgenda(5, 1, agenda, [
+      advanceAgenda,
+      scoreAgenda,
+    ]);
+
+    const advanceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceAgenda,
+      "simple_score_advance",
+      {
+        ...testDependencies(),
+        corpAdvanceCompletesScore: () => true,
+      },
+    );
+
+    expect(advanceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_mismatch",
+          value: -4200,
+          reason: expect.stringContaining("triage_primary:score_now"),
+        }),
+        expect.objectContaining({
+          key: "corp_scoreable_agenda_overadvance_penalty",
+          value: -4200,
+          reason: expect.stringContaining(
+            "overadvance_next_threshold_reached:false",
+          ),
+        }),
+      ]),
+    );
+    expect(
+      totalScoreFor(
+        input,
+        scoreAgenda,
+        "simple_score_advance",
+        testDependencies(),
+      ),
+    ).toBeGreaterThan(totalScore(advanceComponents));
+  });
+
   it("rewards advance actions that keep a same-turn agenda score closeout reachable", () => {
     const agenda = corpCard("security-purge", "agenda", {
       title: "Security Purge",
@@ -322,8 +385,10 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_scoreable_agenda_overadvance_penalty",
-          value: -2600,
-          reason: expect.stringContaining("overadvance_payoff_visible:false"),
+          value: -4200,
+          reason: expect.stringContaining(
+            "overadvance_next_threshold_reached:false",
+          ),
         }),
       ]),
     );
@@ -337,7 +402,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     ).toBeGreaterThan(totalScore(advanceComponents));
   });
 
-  it("does not suppress extra advancement for visible overadvance agendas", () => {
+  it("penalizes visible overadvance agendas until the next threshold is reached", () => {
     const agenda = corpCard("overadvance-agenda", "agenda", {
       title: "Overadvance Agenda",
       advancementRequirement: 3,
@@ -369,9 +434,57 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       advanceAgenda,
       "simple_score_advance",
       testDependencies(),
+    );
+
+    expect(keys).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_scoreable_agenda_overadvance_penalty",
+          reason: expect.stringContaining(
+            "overadvance_next_threshold_reached:false",
+          ),
+        }),
+      ]),
+    );
+  });
+
+  it("allows extra advancement when it reaches a visible overadvance threshold", () => {
+    const agenda = corpCard("overadvance-agenda", "agenda", {
+      title: "Overadvance Agenda",
+      advancementRequirement: 3,
+      advancementCounters: 4,
+      agendaPoints: 2,
+      rulesText:
+        "For every two advancement counters over the difficulty, gain 3 credits.",
+    });
+    const advanceAgenda = corpAction(
+      "advance-overadvance-agenda",
+      "advance_card",
+      { cardId: agenda.instanceId, serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    advanceAgenda.costs = [{ clicks: 1, credits: 1 }];
+    const scoreAgenda = corpAction(
+      "score-overadvance-agenda",
+      "score_agenda",
+      { cardId: agenda.instanceId, serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    const input = corpInputWithRemoteAgenda(5, 3, agenda, [
+      advanceAgenda,
+      scoreAgenda,
+    ]);
+
+    const componentKeys = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceAgenda,
+      "simple_score_advance",
+      testDependencies(),
     ).map((component) => component.key);
 
-    expect(keys).not.toContain("corp_scoreable_agenda_overadvance_penalty");
+    expect(componentKeys).not.toContain(
+      "corp_scoreable_agenda_overadvance_penalty",
+    );
   });
 
   it("uses board triage so remote protection beats unsafe scoreline advancement", () => {
@@ -408,6 +521,82 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       totalScoreFor(input, installRemoteIce, "basic_install", dependencies),
     ).toBeGreaterThan(
       totalScoreFor(input, advanceAgenda, "simple_score_advance", dependencies),
+    );
+  });
+
+  it("targets the existing unsafe score remote over a hypothetical new remote", () => {
+    const installRemoteAgenda = corpAction(
+      "install-agenda-remote-1",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      "agenda-in-hq",
+    );
+    const installNewRemoteAgenda = corpAction(
+      "install-agenda-new-remote",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "new_remote",
+      },
+      "agenda-in-hq",
+    );
+    const installRemoteIce = corpAction("install-remote-1-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const input = corpInputWithGoals([], [
+      installNewRemoteAgenda,
+      installRemoteAgenda,
+      installRemoteIce,
+    ]);
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installRemoteAgenda.actionId ||
+        action.actionId === installNewRemoteAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.type === "install_card" && action.payload?.placement !== "ice"
+          ? scoringWindow({
+              serverId: String(action.payload?.serverId),
+              windowKind: "unsafe",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealSeverity: "game_ending",
+              runnerAgendaPointsAfterSteal: 7,
+              recommendedNextStep: "build_remote_ice",
+              evidence: [`test_remote_window:${action.payload?.serverId}`],
+            })
+          : undefined,
+    };
+
+    const iceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installRemoteIce,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(iceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          value: 1200,
+          reason: expect.stringContaining("triage_target:remote_1"),
+        }),
+      ]),
+    );
+    expect(
+      totalScoreFor(input, installRemoteIce, "basic_install", dependencies),
+    ).toBeGreaterThan(
+      totalScoreFor(input, installRemoteAgenda, "basic_install", dependencies),
     );
   });
 

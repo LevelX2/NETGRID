@@ -323,6 +323,56 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     expect(assessment?.evidence).toContain("visible_runner_contest_credits:5");
   });
 
+  it("counts visible pre-run stored credit take actions before runner exposure", () => {
+    const agenda = agendaCard("game-ending-agenda", {
+      agendaPoints: 2,
+      advancementRequirement: 3,
+    });
+    const action = corpAction(
+      "install-game-ending-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 10,
+        runnerAgendaPoints: 5,
+        runnerRig: [simpleFracter("runner-fracter"), brokerResource("broker", 6)],
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            wallIce("remote-wall-1", { rezzed: true, rezCost: 0 }),
+            wallIce("remote-wall-2", { rezzed: true, rezCost: 0 }),
+            wallIce("remote-wall-3", { rezzed: true, rezCost: 0 }),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      runnerCanReachAccessNow: false,
+      runnerCanReachAccessBeforeScore: true,
+      runnerCanContestBeforeScore: true,
+      agendaStealSeverity: "game_ending",
+      recommendedNextStep: "build_remote_ice",
+    });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "visible_runner_exposure_contest_credits:18",
+        "exposure_visible_runner_pre_run_credit_take_bonus:5",
+      ]),
+    );
+  });
+
   it("marks non-immediate scorelines unsafe when runner can fund access before the next score chance", () => {
     const agenda = agendaCard("remote-agenda", {
       advancementCounters: 1,
@@ -1329,6 +1379,29 @@ function simpleKiller(instanceId: string): VisibleCard {
     definitionId: "simple_killer",
     subtypes: ["Icebreaker", "Killer"],
     owner: "runner",
+  } as VisibleCard;
+}
+
+function brokerResource(instanceId: string, hostedCredits: number): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "resource",
+    title: "Broker",
+    definitionId: "onr_v1_154_broker",
+    rulesText:
+      "A: Put 3 credits from the bank on Broker. A: Take all the bits from Broker.",
+    owner: "runner",
+    counterDisplays: [
+        {
+          id: `${instanceId}-bits`,
+          amount: hostedCredits,
+          displayKind: "stored_credits",
+          label: "Bits",
+          ariaLabel: "Bits",
+          counterType: "bit",
+      },
+    ],
   } as VisibleCard;
 }
 

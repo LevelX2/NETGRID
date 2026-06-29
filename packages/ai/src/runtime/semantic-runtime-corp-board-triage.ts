@@ -2,6 +2,7 @@ import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
   LegalAction,
+  VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { rolesMatch } from "./role-match";
@@ -109,8 +110,10 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
   );
   const currentCredits = input.playerView.own.credits;
 
-  const scoreNow = actions.find(({ action }) =>
-    actionClosesScoreNow(input, action, dependencies),
+  const scoreNow = actions.find(
+    (entry) =>
+      actionClosesScoreNow(input, entry.action, dependencies) ||
+      actionKeepsSideSafeSameTurnScoreCloseout(input, entry, dependencies),
   );
   if (scoreNow) {
     return {
@@ -126,8 +129,8 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     };
   }
 
-  const remoteProtection = actions.find((entry) =>
-    scoreRemoteNeedsProtection(entry),
+  const remoteProtection = highestPriorityScoreRemoteEntry(
+    actions.filter((entry) => scoreRemoteNeedsProtection(entry)),
   );
   if (remoteProtection?.scoringWindow) {
     return {
@@ -146,7 +149,9 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     };
   }
 
-  const remoteFunding = actions.find((entry) => scoreRemoteNeedsFunding(entry));
+  const remoteFunding = highestPriorityScoreRemoteEntry(
+    actions.filter((entry) => scoreRemoteNeedsFunding(entry)),
+  );
   if (remoteFunding?.scoringWindow) {
     return {
       primary: "fund_score_remote",
@@ -274,18 +279,18 @@ export function semanticRuntimeCorpBoardTriageActionComponent<
       triage.severity === "critical"
         ? TRIAGE_ALIGNMENT_BONUS + 350
         : TRIAGE_ALIGNMENT_BONUS;
-    const value = normalizedCorpBoardTriageValue(rawValue);
+    const normalizedValue = normalizedCorpBoardTriageValue(rawValue);
     return {
       key: "corp_board_triage_alignment",
       label: "Corp-Board-Triage",
-      value,
+      value: rawValue,
       reason: triageReason(
         triage,
         action,
         actionServerId,
         "match",
         rawValue,
-        value,
+        normalizedValue,
       ),
     };
   }
@@ -294,18 +299,18 @@ export function semanticRuntimeCorpBoardTriageActionComponent<
       triage.severity === "low" || triage.severity === "medium"
         ? TRIAGE_MISMATCH_MEDIUM
         : TRIAGE_MISMATCH_HIGH;
-    const value = normalizedCorpBoardTriageValue(rawValue);
+    const normalizedValue = normalizedCorpBoardTriageValue(rawValue);
     return {
       key: "corp_board_triage_mismatch",
       label: "Corp-Board-Triage",
-      value,
+      value: rawValue,
       reason: triageReason(
         triage,
         action,
         actionServerId,
         "mismatch",
         rawValue,
-        value,
+        normalizedValue,
       ),
     };
   }
@@ -327,10 +332,24 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
 ): "match" | "mismatch" | "neutral" {
   switch (triage.primary) {
     case "score_now":
-      return actionClosesScoreNow(input, action, dependencies)
+      return actionClosesScoreNow(input, action, dependencies) ||
+        actionKeepsSideSafeSameTurnScoreCloseoutForAction(
+          input,
+          action,
+          dependencies,
+        )
         ? "match"
         : "mismatch";
     case "protect_score_remote":
+      if (
+        actionKeepsSideSafeSameTurnScoreCloseoutForAction(
+          input,
+          action,
+          dependencies,
+        )
+      ) {
+        return "match";
+      }
       if (
         actionProtectsServer(
           input,
@@ -469,10 +488,162 @@ function actionClosesScoreNow<TConsumer extends string>(
   if (action.type === "score_agenda") {
     return dependencies.corpScoreNowSafetyGate(input, action).allowed;
   }
+  if (legalScoreActionExistsForSameSource(input, action)) return false;
   return (
     action.type === "advance_card" &&
     dependencies.corpAdvanceCompletesScore?.(input, action) === true
   );
+}
+
+function actionKeepsSameTurnScoreCloseoutReachable<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
+  if (action.type !== "advance_card") return false;
+  if (legalScoreActionExistsForSameSource(input, action)) return false;
+  const sourceCard = semanticRuntimeVisibleSourceCard(input, action);
+  if (!sourceCard || sourceCard.known === false) return false;
+  const requirement = corpTriageVisibleAdvancementRequirement(sourceCard);
+  if (requirement === undefined) return false;
+  const counters = corpTriagePositiveNumber(sourceCard.advancementCounters) ?? 0;
+  if (counters >= requirement) return false;
+
+  const countersAfterCurrentAction = counters + 1;
+  const additionalAdvancesNeeded = Math.max(
+    0,
+    requirement - countersAfterCurrentAction,
+  );
+  if (
+    additionalAdvancesNeeded === 0 &&
+    dependencies.corpAdvanceCompletesScore?.(input, action) !== true
+  ) {
+    return false;
+  }
+
+  const remainingClicks =
+    input.playerView.own.clicks - Math.max(1, corpTriageActionClickCost(action));
+  const remainingCredits =
+    input.playerView.own.credits -
+    Math.max(1, dependencies.actionCreditCost(action));
+  return (
+    remainingClicks >= additionalAdvancesNeeded &&
+    remainingCredits >= additionalAdvancesNeeded
+  );
+}
+
+function actionKeepsSideSafeSameTurnScoreCloseout<TConsumer extends string>(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
+  return (
+    actionKeepsSameTurnScoreCloseoutReachable(input, entry.action, dependencies) &&
+    scoringWindowAllowsSameTurnScoreNow(entry.scoringWindow)
+  );
+}
+
+function actionKeepsSideSafeSameTurnScoreCloseoutForAction<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
+  if (!actionKeepsSameTurnScoreCloseoutReachable(input, action, dependencies)) {
+    return false;
+  }
+  const roles = dependencies.rolesForAction(input, action);
+  return scoringWindowAllowsSameTurnScoreNow(
+    dependencies.corpScoringWindowAssessment?.(input, action, roles),
+  );
+}
+
+function scoringWindowAllowsSameTurnScoreNow(
+  assessment: CorpScoringWindowAssessment | undefined,
+): boolean {
+  if (!assessment) return true;
+  return (
+    assessment.scoreHorizon === "immediate" &&
+    assessment.windowKind !== "unsafe" &&
+    assessment.windowKind !== "none" &&
+    !assessment.runnerCanContestBeforeScore &&
+    !assessment.runnerCanReachAccessBeforeScore
+  );
+}
+
+function legalScoreActionExistsForSameSource(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const source = typeof action.source === "string" ? action.source : undefined;
+  if (!source) return false;
+  return corpLegalActions(input).some(
+    (candidate) =>
+      candidate.type === "score_agenda" &&
+      candidate.side === "corp" &&
+      candidate.source === source,
+  );
+}
+
+function corpTriageVisibleAdvancementRequirement(
+  card: VisibleCard,
+): number | undefined {
+  return (
+    corpTriagePositiveNumber(card.advancementRequirement) ??
+    corpTriagePositiveNumber(visibleCardDefinition(card)?.advancementRequirement)
+  );
+}
+
+function corpTriageActionClickCost(action: LegalAction): number {
+  const costs = action.costs
+    .map((cost) => cost.clicks)
+    .filter((value): value is number => typeof value === "number");
+  if (costs.length > 0) return costs.reduce((sum, value) => sum + value, 0);
+  return action.type === "advance_card" ? 1 : 0;
+}
+
+function corpTriagePositiveNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? value
+    : undefined;
+}
+
+function highestPriorityScoreRemoteEntry(
+  entries: readonly ScoredLegalAction[],
+): ScoredLegalAction | undefined {
+  return [...entries].sort(
+    (left, right) =>
+      scoreRemoteEntryPriority(right) - scoreRemoteEntryPriority(left),
+  )[0];
+}
+
+function scoreRemoteEntryPriority(entry: ScoredLegalAction): number {
+  const assessment = entry.scoringWindow;
+  if (!assessment) return 0;
+  const severity =
+    assessment.agendaStealSeverity === "game_ending"
+      ? 400
+      : assessment.agendaStealSeverity === "near_win"
+        ? 300
+        : assessment.agendaStealSeverity === "normal"
+          ? 220
+          : 100;
+  const existingRemoteBonus =
+    entry.serverId && entry.serverId !== "new_remote" ? 90 : 0;
+  const concreteScorelineBonus =
+    entry.action.type === "advance_card" ||
+    (entry.action.type === "install_card" &&
+      entry.action.payload?.placement !== "ice" &&
+      entry.serverId !== "new_remote")
+      ? 60
+      : 0;
+  const contestBonus =
+    assessment.runnerCanContestBeforeScore ||
+    assessment.runnerCanReachAccessBeforeScore
+      ? 50
+      : 0;
+  return severity + existingRemoteBonus + concreteScorelineBonus + contestBonus;
 }
 
 function scoreRemoteNeedsFunding(entry: ScoredLegalAction): boolean {
