@@ -185,6 +185,41 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     });
   });
 
+  it("bounds visible in-turn advancement burst text to exact tokens", () => {
+    const agenda = agendaCard("agenda-in-hq", {
+      advancementRequirement: 3,
+    });
+    const counterfeitConsultants = operationCard("counterfeit-consultants", {
+      title: "Counterfeit Consultants",
+      cost: 10,
+      rulesText:
+        "Add four advancement counterfeits to any combination of installed cards.",
+    });
+    const action = corpAction(
+      "install-noise-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 10,
+        ownClicks: 3,
+        runnerCredits: 9,
+        hq: [agenda, counterfeitConsultants],
+        servers: protectedCentralServers([remoteServer("remote_1", [])]),
+      }),
+      action,
+    );
+
+    expect(assessment?.scoreHorizon).not.toBe("immediate");
+  });
+
   it("treats unmodeled generic remote ice as temporary only when no breaker is installed", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(

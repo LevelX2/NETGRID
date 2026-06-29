@@ -10295,6 +10295,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'bad publicity|\\b\(\?:take\|add\|gain\|suffer\)|\.test\(text\)' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertachtundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ersetzt die sichtbare Advancement-Burst-RulesText-Regex durch eine lokale Token-Sequenzprüfung `add <Zahl/Wortzahl> advancement counter(s)`.
+  - Corp-Scoring-Window erkennt echte in-turn Advancement-Bursts weiter; substring-nahe RulesText-Werte wie `advancement counterfeits` erzeugen kein sofortiges Score-Fenster.
+  - `semantic-runtime-corp-scoring-window.test.ts` sichert den bestehenden Project-Consultants-Fall und einen neuen Counterfeit-Noise-Fall.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive RulesText-/Regex-Fallbacks noch auditiert und in kleine Pakete geschnitten werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-scoring-window.test.ts` grün, 1 Datei, 28 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'text\.match|advancement\s+counters\?|\\badd\\s' packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

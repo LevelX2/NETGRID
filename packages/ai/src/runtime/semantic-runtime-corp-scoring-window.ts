@@ -404,16 +404,14 @@ function scoringWindowVisibleInTurnAdvancementBurstAvailable<
 }
 
 function scoringWindowVisibleAdvancementBurstAmount(card: VisibleCard): number {
-  const text = scoringWindowVisibleCardText(card);
-  const digitMatch = text.match(
-    /\badd\s+(\d+)\s+advancement\s+counters?\b/i,
+  const tokens = scoringWindowVisibleCardTextTokens(card);
+  const amountToken = tokens.find(
+    (token, index) =>
+      tokens[index - 1] === "add" &&
+      tokens[index + 1] === "advancement" &&
+      (tokens[index + 2] === "counter" || tokens[index + 2] === "counters"),
   );
-  if (digitMatch) return scoringWindowPositiveInteger(digitMatch[1]);
-  const wordMatch = text.match(
-    /\badd\s+(one|two|three|four|five|six|seven|eight|nine|ten)\s+advancement\s+counters?\b/i,
-  );
-  if (wordMatch) return scoringWindowPositiveInteger(wordMatch[1]);
-  return 0;
+  return scoringWindowPositiveInteger(amountToken);
 }
 
 function scoringWindowVisibleOperationCost(card: VisibleCard): number {
@@ -468,6 +466,13 @@ function scoringWindowVisibleCardText(card: VisibleCard): string {
   ]
     .filter((value): value is string => typeof value === "string")
     .join(" ");
+}
+
+function scoringWindowVisibleCardTextTokens(card: VisibleCard): string[] {
+  return scoringWindowVisibleCardText(card)
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
 }
 
 function scoringWindowPositiveInteger(value: string | undefined): number {
