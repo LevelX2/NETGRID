@@ -4,6 +4,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import type { DeckDefinition, DeckPublicMetadata, Side } from "@netgrid/shared";
 import {
+  buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries,
   runAiSelfplayTraceMining,
   summarizeMatchProgressionMetrics,
   type AiSimulationSummary,
@@ -167,6 +168,8 @@ function writeCurrentOutput(status: "running" | "complete"): void {
 
 function buildOutput(status: "running" | "complete") {
   const progression = summarizeMatchProgressionMetrics(summaries);
+  const whyCoverage =
+    buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries(summaries);
   const traceMiningAggregate = combineTraceMiningAggregates(
     traceAggregates,
     summaries,
@@ -212,6 +215,7 @@ function buildOutput(status: "running" | "complete") {
     },
     aggregate,
     traceMiningAggregate,
+    whyCoverage,
     progression,
     topFindings: topFindings.slice(0, 50).map((finding) => ({
       seed: finding.seed,
@@ -486,6 +490,16 @@ function markdownReport(output: BaselineOutput): string {
     `- Corp score actions: ${output.progression.corpScores}`,
     `- Runner steal actions: ${output.progression.runnerSteals}`,
     `- Missed score windows: ${output.progression.missedScoreWindows}`,
+    "",
+    "## Why Coverage",
+    "",
+    `- Decisions sampled: ${output.whyCoverage.sampleCount}`,
+    `- Decisions with top-level WhyNot: ${output.whyCoverage.decisionsWithTopLevelWhyNot}`,
+    `- Decisions missing top-level WhyNot: ${output.whyCoverage.decisionsMissingTopLevelWhyNot}`,
+    `- Decisions with Runtime WhyNot section: ${output.whyCoverage.decisionsWithRuntimeWhyNotSection}`,
+    `- ActionAlternatives: ${output.whyCoverage.actionAlternativeCount}`,
+    `- ActionAlternatives with WhyChosen: ${output.whyCoverage.actionAlternativesWithWhyChosen}`,
+    `- ActionAlternatives with WhyNot: ${output.whyCoverage.actionAlternativesWithWhyNot}`,
     "",
     "## Vergleichshinweis",
     "",
