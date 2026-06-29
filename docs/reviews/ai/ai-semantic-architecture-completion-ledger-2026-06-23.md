@@ -10364,6 +10364,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'for each advancement counter|per advancement counter|for every advancement counter' packages/ai/src/legacy/corp-plans.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsechsundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt die Action-Cashout-RulesText-Regex für `advancement counter:`, `counter ... action`, `spend ... advancement counter` und `remove ... advancement counter` durch lokale Token-/Phrase-Prüfungen.
+  - Der gemeinsame Corp-RulesText-Tokenizer erhält Doppelpunkte als `colon`-Token, damit die `advancement counter:`-Form ohne Regex weiter erkennbar bleibt.
+  - Status bleibt `IN_PROGRESS`, weil weitere Legacy-Corp-RulesText-Regexes für Credit-Cashout-Value und Overadvance offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "classifies .* advancement counter placement"` grün, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'advancement counter\.\*:\\s\*|counter\.\*action|spend \.\*advancement counter|remove \.\*advancement counter' packages/ai/src/legacy/corp-plans.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

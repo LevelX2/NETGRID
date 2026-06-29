@@ -7133,6 +7133,7 @@ function corpAdvancementAmbushTargetClass(
 
 function corpRulesTextTokens(text: string): string[] {
   return text
+    .replaceAll(":", " colon ")
     .toLocaleLowerCase("en-US")
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
@@ -7195,8 +7196,52 @@ function corpAdvancementCashoutScalesPerCounter(text: string): boolean {
 }
 
 function corpAdvancementLooksLikeActionCashout(text: string): boolean {
-  return /advancement counter.*:\s*|counter.*action|spend .*advancement counter|remove .*advancement counter/.test(
-    text,
+  const tokens = corpRulesTextTokens(text);
+  return (
+    corpTokensIncludePhraseBefore(tokens, ["advancement", "counter"], "colon") ||
+    corpTokensIncludePhraseBefore(tokens, ["counter"], "action") ||
+    corpTokensIncludeTokenBeforePhrase(tokens, "spend", [
+      "advancement",
+      "counter",
+    ]) ||
+    corpTokensIncludeTokenBeforePhrase(tokens, "remove", [
+      "advancement",
+      "counter",
+    ])
+  );
+}
+
+function corpTokensIncludePhraseBefore(
+  tokens: readonly string[],
+  phrase: readonly string[],
+  laterToken: string,
+): boolean {
+  return tokens.some(
+    (token, index) =>
+      token === phrase[0] &&
+      phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken) &&
+      tokens.slice(index + phrase.length).some((candidate) => candidate === laterToken),
+  );
+}
+
+function corpTokensIncludeTokenBeforePhrase(
+  tokens: readonly string[],
+  earlierToken: string,
+  phrase: readonly string[],
+): boolean {
+  return tokens.some(
+    (token, index) =>
+      token === earlierToken &&
+      tokens
+        .slice(index + 1)
+        .some(
+          (candidate, offset) =>
+            candidate === phrase[0] &&
+            phrase.every(
+              (phraseToken, phraseOffset) =>
+                tokens[index + 1 + offset + phraseOffset] === phraseToken,
+            ),
+        ),
   );
 }
 
