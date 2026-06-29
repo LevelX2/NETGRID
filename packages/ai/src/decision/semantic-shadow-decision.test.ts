@@ -529,17 +529,22 @@ describe("SemanticShadowDecision", () => {
       scope: "doctrine_goal_trace_summary",
       reportOnly: true,
       productiveUseAllowed: false,
-      runtimeConsumerStatus: "none",
+      runtimeConsumerStatus: "active",
       goalCount: 1,
       goals: [
         expect.objectContaining({
           goalId: "runner.doctrine.remote_contest",
           family: "remote_contest",
           source: "deck",
+          evidence: expect.arrayContaining([
+            "doctrine_raw_priority:800",
+            "doctrine_normalized_value:80",
+          ]),
         }),
       ],
       evidence: expect.arrayContaining([
         "doctrine_goals:trace_summary",
+        "doctrine_consumer_status:active",
         "productive_use_allowed:false",
       ]),
     });

@@ -537,7 +537,7 @@ function doctrineGoalTraceSummary(
     scope: "doctrine_goal_trace_summary",
     reportOnly: true,
     productiveUseAllowed: false,
-    runtimeConsumerStatus: "none",
+    runtimeConsumerStatus: "active",
     goalCount: goals.length,
     goals: goals.map((goal) => ({
       goalId: goal.goalId,
@@ -549,6 +549,7 @@ function doctrineGoalTraceSummary(
     evidence: [
       "doctrine_goals:trace_summary",
       `doctrine_goal_count:${goals.length}`,
+      "doctrine_consumer_status:active",
       "productive_use_allowed:false",
     ],
   };

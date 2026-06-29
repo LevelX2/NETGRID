@@ -51,7 +51,7 @@ export type SemanticDecisionTraceDoctrineGoalSummary = {
   scope: "doctrine_goal_trace_summary";
   reportOnly: true;
   productiveUseAllowed: false;
-  runtimeConsumerStatus: "none";
+  runtimeConsumerStatus: "active";
   goalCount: number;
   goals: {
     goalId: string;

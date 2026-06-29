@@ -106,8 +106,12 @@ export const SCORING_CONSUMER_DIMENSIONS = [
     id: "doctrine",
     owner: "decision/doctrine-goal-synthesis.ts",
     scale: { min: -100, max: 100, neutral: 0 },
-    implementationStatus: "partial",
-    evidenceKeys: ["doctrine_v2:", "source:deck"],
+    implementationStatus: "active",
+    evidenceKeys: [
+      "doctrine_v2:",
+      "doctrine_raw_priority:",
+      "doctrine_normalized_value:",
+    ],
   },
   {
     id: "plan_continuity",
