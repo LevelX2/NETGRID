@@ -572,7 +572,8 @@ function hiddenInfoGuardField(
   const hiddenInfoGate = candidate.hardGates.find(
     (gate) => gate.gateId === "hidden_info",
   );
-  if (candidate.projectionIssues.includes("hidden_info_blocked")) {
+  const projectionIssueSet = new Set(candidate.projectionIssues);
+  if (projectionIssueSet.has("hidden_info_blocked")) {
     return field(
       "hidden_info_guard",
       "blocked",
@@ -614,6 +615,7 @@ function sourceCardContextField(
   const sourceCardId = candidate.sourceCardId;
   const hasSourceCard = sourceCardId !== undefined;
   const hasCardSignals = candidate.cardContextSignals.length > 0;
+  const projectionIssueSet = new Set(candidate.projectionIssues);
   if (sourceCardId !== undefined && hasCardSignals) {
     return field(
       "source_card_context",
@@ -628,7 +630,7 @@ function sourceCardContextField(
       ...(candidate.sourceCardId !== undefined ? [candidate.sourceCardId] : []),
       ...candidate.cardContextSignals,
     ],
-    candidate.projectionIssues.includes("card_semantics_unavailable")
+    projectionIssueSet.has("card_semantics_unavailable")
       ? ["card_semantics_unavailable"]
       : [],
     ["Card source or card context signals are incomplete."],
@@ -638,7 +640,8 @@ function sourceCardContextField(
 function abilityBindingField(
   candidate: ActionSemanticCandidate,
 ): DeckDoctrineV2DiagnosticField {
-  if (candidate.projectionIssues.includes("ability_unresolved")) {
+  const projectionIssueSet = new Set(candidate.projectionIssues);
+  if (projectionIssueSet.has("ability_unresolved")) {
     return field(
       "ability_binding",
       "partial",
@@ -836,8 +839,9 @@ function tacticalGoalBlockerApplies(
   candidate: ActionSemanticCandidate,
   policy: TacticalGoalBlockerPolicy,
 ): boolean {
+  const projectionIssueSet = new Set(candidate.projectionIssues);
   const issueBlocked = policy.issues.some((issue) =>
-    candidate.projectionIssues.includes(issue),
+    projectionIssueSet.has(issue),
   );
   const gateBlocked = policy.gateIds.some((gateId) =>
     candidate.hardGates.some(

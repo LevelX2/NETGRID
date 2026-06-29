@@ -9701,6 +9701,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'pilotScopesFromEnv\(\)\.includes|legalActionIds\.includes' packages/ai/src/decision/pilot/pilot-scope-registry.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertzwölfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/action-doctrine-goal-diagnostics.ts` bindet Diagnostic- und TacticalGoalBlocker-ProjectionIssues über lokale Sets statt direkter `candidate.projectionIssues.includes(...)`-Prüfungen.
+  - Strukturierte ProjectionIssue-Flags wie `hidden_info_blocked`, `card_semantics_unavailable` und `ability_unresolved` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `action-doctrine-goal-diagnostics.test.ts` sichert DoctrineDiagnostic-Readiness, Fields und Mapping-Blocker.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/action-doctrine-goal-diagnostics.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'candidate\.projectionIssues\.includes|projectionIssues\.includes' packages/ai/src/action-doctrine-goal-diagnostics.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
