@@ -129,6 +129,10 @@ describe("DecisionDebug diagnostics", () => {
         "sessionToken:bad",
       ],
       coverageGapItems: ["coverage_gap:unresolved-action:ability_unresolved"],
+      runtimeWhyNotItems: [
+        "alternative:draw_card:semantic_score_below_selected",
+        "alternative:draw_card:privatePayload:bad",
+      ],
     });
 
     expect(diagnostics.detailSections).toEqual(
@@ -168,6 +172,11 @@ describe("DecisionDebug diagnostics", () => {
           id: "coverage_gaps",
           title: "Coverage Gaps",
           items: ["coverage_gap:unresolved-action:ability_unresolved"],
+        },
+        {
+          id: "runtime_why_not",
+          title: "Runtime Why Not",
+          items: ["alternative:draw_card:semantic_score_below_selected"],
         },
       ]),
     );

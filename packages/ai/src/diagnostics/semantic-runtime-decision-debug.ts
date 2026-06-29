@@ -70,6 +70,8 @@ export function buildSemanticRuntimeDecisionDebug({
     true,
     selectedPlanSelection,
   );
+  const topLevelWhyNot =
+    semanticRuntimeDecisionDebugTopLevelWhyNot(actionAlternatives);
   const debugDiagnostics = buildSemanticDecisionDebugDiagnostics({
     scopeId: selected.scopeId,
     selectedActionType: selected.action.type,
@@ -104,6 +106,7 @@ export function buildSemanticRuntimeDecisionDebug({
     targetContextItems: actionPrecisionDebug.targetContextItems,
     compatibilitySignalItems: actionPrecisionDebug.compatibilitySignalItems,
     coverageGapItems: actionPrecisionDebug.coverageGapItems,
+    runtimeWhyNotItems: topLevelWhyNot,
     ...(planRuntime.planAlternatives.length > 0 || planRuntime.previousPlan
       ? {
           tacticalPlanItems: semanticRuntimeDebugTacticalPlanItems(planRuntime),
@@ -155,7 +158,7 @@ export function buildSemanticRuntimeDecisionDebug({
         selectedPlanSelection,
       ),
     ],
-    whyNot: semanticRuntimeDecisionDebugTopLevelWhyNot(actionAlternatives),
+    whyNot: topLevelWhyNot,
     longTermPlan: debugDiagnostics.longTermPlan,
     ...(memoryDebug.memoryVersion
       ? { memoryVersion: memoryDebug.memoryVersion }

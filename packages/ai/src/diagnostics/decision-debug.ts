@@ -43,6 +43,7 @@ export type SemanticDecisionDebugDiagnosticsInput = {
   targetContextItems?: readonly string[];
   compatibilitySignalItems?: readonly string[];
   coverageGapItems?: readonly string[];
+  runtimeWhyNotItems?: readonly string[];
   tacticalPlanItems?: readonly string[];
   memoryItems?: readonly string[];
   memorySectionTitle?: string;
@@ -241,6 +242,15 @@ export function buildSemanticDecisionDebugDiagnostics(
             id: "coverage_gaps",
             title: "Coverage Gaps",
             items: sideSafeDebugItems(input.coverageGapItems),
+          },
+        ]
+      : []),
+    ...(input.runtimeWhyNotItems && input.runtimeWhyNotItems.length > 0
+      ? [
+          {
+            id: "runtime_why_not",
+            title: "Runtime Why Not",
+            items: sideSafeDebugItems(input.runtimeWhyNotItems),
           },
         ]
       : []),
