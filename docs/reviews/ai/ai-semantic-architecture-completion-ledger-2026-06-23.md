@@ -10196,6 +10196,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n '\["breaker", "icebreaker", "fracter", "decoder", "killer"\]\.includes|tokens\.includes\("break"\)|tokens\.includes\("breaks"\)|tokens\.includes\("subroutine"\)' packages/ai/src/plans/tactical-plan-breaker-cards.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsiebenundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-effective-defense.ts` bindet Corp-Effective-Defense-Signal-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Defense-Signal-Erkennung bleibt exakt; Trace-, Damage-, Tax-, ETR- und Paid-Subroutine-Signale bleiben bounded und substring-nahe Rauschwerte bleiben ausgeschlossen.
+  - `semantic-runtime-corp-effective-defense.test.ts` sichert effektive Defense-Kontexte, Trace-/X-Werte, Paid-Subroutine-Budgets und substring-only Defense-Signal-Rauschen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-effective-defense.test.ts` grün, 1 Datei, 10 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(term\)|includes\(term\)' packages/ai/src/runtime/semantic-runtime-corp-effective-defense.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

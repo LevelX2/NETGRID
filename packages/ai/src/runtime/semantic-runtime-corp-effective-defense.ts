@@ -342,7 +342,10 @@ function signalSegmentHasTerm(segment: string, term: string): boolean {
   if (segment === term) return true;
   const tokens = segment.split("_").filter(Boolean);
   const termTokens = term.split("_").filter(Boolean);
-  if (termTokens.length <= 1) return tokens.includes(term);
+  if (termTokens.length <= 1) {
+    const tokenSet = new Set(tokens);
+    return tokenSet.has(term);
+  }
   return tokens.some(
     (token, index) =>
       token === termTokens[0] &&
