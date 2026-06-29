@@ -2,7 +2,7 @@
 
 ## Status
 
-`IN_PROGRESS`
+`VERIFIED`
 
 Branch: `codex/ai-semantic-architecture-completion`
 
@@ -43,7 +43,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | `corepack pnpm install` | `VERIFIED` | Lockfile unverändert; Worktree-Abhängigkeiten installiert. |
 | `corepack pnpm --filter @netgrid/ai typecheck` | `VERIFIED` | grün. |
 | `git diff --check` | `VERIFIED` | grün. |
-| `corepack pnpm --filter @netgrid/ai test` | `VERIFIED` | Nach `AI-COMPLETE-F002`: 271 Dateien, 2176 Tests grün. |
+| `corepack pnpm --filter @netgrid/ai test` | `VERIFIED` | Nach Gesamtabschluss-Audit B: 271 Dateien, 2176 Tests grün. |
 
 ## Startziele
 
@@ -51,8 +51,8 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | --- | --- | --- | --- | --- |
 | AI-COMPLETE-01 | Produktive Action-Type-Priorität entfernen. | `VERIFIED` | `semanticRuntimeTypePriority` war produktiver Scorebestandteil in `semanticRuntimeScoreBreakdown`. | Erfüllt: produktiver Score nutzt nur noch `semanticRuntimeTypeTieBreakerScore`; Tag-Removal, Coverage-Search, kartenbasierter Draw, Run-only-Aktionen und erreichbare Runs erhalten fachliche Goal-Fit-Komponenten; Pflichtszenarien und voller AI-Testlauf sind grün. |
 | AI-COMPLETE-02 | Semantic Runtime von Legacy-Entscheidung entkoppeln. | `VERIFIED` | Runtime-Pfade enthielten `legacyDecision` als vorab berechnete Eingabe. | Erfüllt: Runner-/Corp-Einstiege übergeben einen memoisierten Legacy-Provider; die Runtime materialisiert Legacy nur bei Forced-Legacy, No-Candidate-Fallback oder nach der semantischen Auswahl für Diagnose/Comparator. |
-| AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `VERIFIED` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Erfüllt: `index.ts` ist importfreie Public-Re-Export-Fassade bei 397 Zeilen; Boundary-Test verhindert lokale Imports, lokale Implementierungen und direkte Composition-Erzeugung; zwei Audits ohne neue In-Scope-Findings. |
-| AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `VERIFIED` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Erfüllt: `tactical-plans.ts` ist dünne Plan-Fassade bei 306 Zeilen; Runner-, Corp-, Mapping-, Progression-/Ranking- und Debug-/Redaction-Verantwortungen liegen in getrennten Modulen; Boundary-Test und zwei Abschluss-Audits sind grün. |
+| AI-COMPLETE-03 | `packages/ai/src/index.ts` entkernen. | `VERIFIED` | 35172 Zeilen, viele Runtime-/Scoring-/Debug-/Benchmark-Verantwortungen. | Erfüllt: `index.ts` ist importfreie Public-Re-Export-Fassade bei aktuell 414 Zeilen; Boundary-Test verhindert lokale Imports, lokale Implementierungen und direkte Composition-Erzeugung; zwei Audits ohne neue In-Scope-Findings. |
+| AI-COMPLETE-04 | `tactical-plans.ts` real aufteilen. | `VERIFIED` | 3945 Zeilen mit Runner/Corp/Mapping/Progression/Debug/Labelpfaden. | Erfüllt: `tactical-plans.ts` ist dünne Plan-Fassade bei aktuell 215 Zeilen; Runner-, Corp-, Mapping-, Progression-/Ranking- und Debug-/Redaction-Verantwortungen liegen in getrennten Modulen; Boundary-Test und zwei Abschluss-Audits sind grün. |
 | AI-COMPLETE-05 | Legacy kontrolliert migrieren, einfrieren und abbauen. | `VERIFIED` | Legacy-Planer zusammen 17786 Zeilen; Adapter und Fallbacks aktiv. | Erfüllt: produktiver Legacy-Zugriff läuft über `legacy-entrypoints.ts`, Public-Kompatibilität über `legacy-public-contract.ts`; Matrix klassifiziert alle Nutzungen; ersetzte Top-Level-Facades sind entfernt und per Boundary-Test blockiert. |
 | AI-COMPLETE-06 | Productive DeckDoctrine vereinheitlichen. | `VERIFIED` | Alte Doctrine/PlanWeight-Begriffe existieren neben neuen Profilen. | Erfüllt: produktiver Decision-Input nutzt `deck-doctrine-runtime-context.ts` mit StrategyProfile, report-only Doctrine-v2-Diagnostic, NeutralDoctrine, Vollständigkeitsstatus und Rollenstatus; Doctrine-v1-PlanWeights sind Legacy-gekapselt, Public-v1-Exports laufen über den Legacy-Public-Contract. |
 | AI-COMPLETE-07 | Runner-TacticalGoals produktiv vollständig integrieren. | `VERIFIED` | Runner-Zielmodule existieren, Integration und Coverage werden geprüft. | Erfüllt: Runner-Ziele entstehen aus Doctrine, Capabilities und Boardstate, werden in Semantic Runtime und TacticalPlans diagnostisch geführt und wirken für Pressure, Remote Contest, Economy, Setup, Risk-Control und Bypass im Hauptscore. |
@@ -11004,3 +11004,4 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
 | Audit 12 | `VERIFIED` | Regression-Gate nach `AI-COMPLETE-F002`: vollständiger `@netgrid/ai`-Testlauf grün mit 271 Dateien und 2176 Tests; `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` und `git diff --check` grün; keine neue Engine-Autorität, keine LegalAction-Erzeugung und keine Hidden-Info-Grenzerweiterung. |
 | Audit 13 | `VERIFIED` | Kopftabellen-Messwerte nachgezogen: `docs/reviews/ai/ai-semantic-completion-metrics-audit-2026-06-29.md` klassifiziert Legacy-/Label-/Regex-/TargetProfile-/TargetConstraint-Resttreffer, bestätigt den semantischen No-Candidate-Fallback statt Legacy-Fallback und verweist auf die bestehende ActionSemanticCandidate-Coverage-Basis; `src/actions/action-semantic-coverage.test.ts` grün, 6 Tests. |
 | Audit 14 | `VERIFIED` | Gesamtabschluss-Audit A: `docs/reviews/ai/ai-semantic-architecture-completion-final-audit-a-2026-06-29.md` prüft alle AI-COMPLETE-Startziele, F001/F002, Kopftabellen-Messwerte, Boundary-Gates, Typecheck und aktuellen vollständigen `@netgrid/ai`-Testlauf; 271 Testdateien und 2176 Tests grün; kein neues In-Scope-Finding. Gesamtstatus bleibt bis zum zweiten Gesamtabschluss-Audit `IN_PROGRESS`. |
+| Audit 15 | `VERIFIED` | Gesamtabschluss-Audit B: `docs/reviews/ai/ai-semantic-architecture-completion-final-audit-b-2026-06-29.md` wiederholt die Statusprüfung unabhängig mit 20/20 Startzielen `VERIFIED`, 2/2 Findings `VERIFIED`, 0 offenen Kopftabellen-Messwerten, 0 blockierten Zielzeilen, sauberem Worktree, grünem Typecheck und erneut vollständigem `@netgrid/ai`-Testlauf mit 271 Testdateien und 2176 Tests; kein neues In-Scope-Finding. Ledger-Gesamtstatus ist `VERIFIED`. |
