@@ -3797,13 +3797,14 @@ describe("MVP 0.3 AI controller contract", () => {
 
     expect(decision.actionId).toBe(gain.actionId);
     expect(debugText).toContain("corp_tag_punish_payoff_funding");
-    expect(debugText).toContain("corp_visible_meat_damage_payoff:true");
+    expect(debugText).toContain("corp_tagged_payoff_targeted_funding:true");
+    expect(debugText).not.toContain("corp_visible_meat_damage_payoff:true");
     expect(
       installAlternative?.scoreBreakdown?.some(
         (component) =>
           component.key === "corp_tag_punish_endgame_slow_setup_penalty",
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(assertAiInputIsSideSafe(input)).toBe(true);
     expect(debugText).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,

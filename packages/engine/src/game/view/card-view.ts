@@ -218,6 +218,7 @@ function counterDisplaysForKnownCard(
     ...(restrictedPoolCounterDisplays(definition, instance) ?? []),
     ...(recurringCreditCounterDisplays(definition, instance) ?? []),
     ...(specialCounterDisplays(definition, instance) ?? []),
+    ...(variablePaidEndTheRunSubroutineDisplays(definition, instance) ?? []),
   ];
 }
 
@@ -390,6 +391,52 @@ function restrictedPoolDisplayLabel(
   )
     return "Run-Bits";
   return "Eingeschränkte Bits";
+}
+
+function variablePaidEndTheRunSubroutineDisplays(
+  definition: CardDefinition,
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  const variableIce = instance.variableIceState;
+  if (
+    !instance.rezzed ||
+    variableIce?.family !== "paid_end_the_run_subroutines"
+  )
+    return undefined;
+  const amount = Math.max(
+    0,
+    Math.floor(variableIce.subroutineCount ?? variableIce.value ?? 0),
+  );
+  if (amount <= 0) return undefined;
+  const additionalCost = Math.max(
+    0,
+    Math.floor(variableIce.additionalCostPaid),
+  );
+  const totalRezCost =
+    definition.rezCost !== undefined
+      ? Math.max(0, Math.floor(definition.rezCost + additionalCost))
+      : undefined;
+  const subroutineLabel =
+    amount === 1 ? "End-the-run-Subroutine" : "End-the-run-Subroutinen";
+  const paidLabel =
+    totalRezCost !== undefined
+      ? `${additionalCost} zusätzliche ${creditLabel(additionalCost)} beim Rezzen, ` +
+        `${totalRezCost} ${creditLabel(totalRezCost)} insgesamt`
+      : `${additionalCost} zusätzliche ${creditLabel(additionalCost)} beim Rezzen`;
+  return [
+    {
+      id: "variable_paid_etr_subroutines",
+      amount,
+      displayKind: "generic_counter",
+      label: "End-the-run-Subroutinen",
+      ariaLabel: `${definition.title}: ${amount} ${subroutineLabel}; ${paidLabel}`,
+      usageHint: "status_marker",
+    },
+  ];
+}
+
+function creditLabel(amount: number): string {
+  return amount === 1 ? "Credit" : "Credits";
 }
 
 function specialCounterDisplays(

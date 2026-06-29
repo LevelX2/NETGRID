@@ -11,6 +11,13 @@ import {
   semanticRuntimeCorpScoringWindowAssessment,
   type CorpScoringWindowAssessment,
 } from "./semantic-runtime-corp-scoring-window";
+import {
+  semanticRuntimeCorpCentralPressureAssessment,
+} from "./semantic-runtime-corp-central-pressure";
+import {
+  visibleBreakerCardCanAddressIce,
+  visibleBreakerRoles,
+} from "./runner-visible-breaker-coverage";
 
 type CorpServerLike = {
   id: string;
@@ -156,10 +163,43 @@ function semanticRuntimeCorpCentralIceInstallScore<
     input,
     serverId,
   );
+  const rezCost = sourceCard
+    ? (dependencies.visibleIceRezCost(sourceCard) ?? sourceCard.rezCost ?? 0)
+    : 0;
+  const creditsAfterInstall =
+    input.playerView.own.credits - dependencies.actionCreditCost(action);
+  const canRez = rezCost <= creditsAfterInstall;
+  const visibleCoverage = sourceCard
+    ? semanticRuntimeCorpVisibleRunnerCoverageCanBreakIce(
+        input,
+        sourceCard,
+        profile,
+        creditsAfterInstall,
+        rezCost,
+      )
+    : false;
+  const positionDependentWeakSolo =
+    profile.positionDependent && firstCentralIce;
 
-  if (profile.hasAccessStop) {
+  if (!canRez) {
+    if (centralThreat) return firstCentralIce ? 250 : 150;
+    return firstCentralIce ? 100 : 50;
+  }
+  if (profile.hasAccessStop && !visibleCoverage) {
     if (centralThreat) return firstCentralIce ? 1350 : 950;
     return firstCentralIce ? 1050 : 750;
+  }
+  if (profile.hasAccessStop && visibleCoverage) {
+    if (positionDependentWeakSolo) {
+      if (centralThreat) return firstCentralIce ? 250 : 150;
+      return firstCentralIce ? 150 : 100;
+    }
+    if (centralThreat) return firstCentralIce ? 650 : 450;
+    return firstCentralIce ? 500 : 350;
+  }
+  if (positionDependentWeakSolo) {
+    if (centralThreat) return firstCentralIce ? 200 : 125;
+    return firstCentralIce ? 100 : 75;
   }
   if (profile.hasTaxOrDamage) {
     if (centralThreat) return firstCentralIce ? 450 : 250;
@@ -172,6 +212,9 @@ function semanticRuntimeCorpCentralIceInstallScore<
 function semanticRuntimeCorpCentralIceProfile(card: VisibleCard | undefined): {
   hasAccessStop: boolean;
   hasTaxOrDamage: boolean;
+  positionDependent: boolean;
+  modeChoice: boolean;
+  definitionId?: string;
 } {
   const definitionId = card?.definitionId;
   const runtimeDefinition = definitionId
@@ -242,73 +285,123 @@ function semanticRuntimeCorpCentralIceProfile(card: VisibleCard | undefined): {
         "tag",
       ].includes(effect.kind),
     ) === true;
+  const hintTacticSignals = semanticRuntimeCorpHintTacticSignals(hint);
+  const positionDependent =
+    semanticRuntimeCorpHintRiskTags(hint).includes(
+      "position_dependent_ice",
+    ) ||
+    hintTacticSignals.some((signal) =>
+      roleMatchesAny(signal, ["position_scaling", "outer_ice_scaling"]),
+    ) ||
+    visibleSubroutines.some((subroutine) =>
+      JSON.stringify(subroutine)
+        .toLocaleLowerCase("en-US")
+        .includes("outside"),
+    );
+  const modeChoice =
+    hintTacticSignals.some((signal) =>
+      roleMatchesAny(signal, ["type_choice_or_mode_choice"]),
+    ) ||
+    semanticRuntimeCorpHintTargetProfiles(hint).some(
+      (profile) => profile.kind === "mode_choice",
+    );
   return {
     hasAccessStop: hasStructuredStop || hasHintStop,
     hasTaxOrDamage: hasStructuredTaxOrDamage || hasHintTaxOrDamage,
+    positionDependent,
+    modeChoice,
+    ...(definitionId ? { definitionId } : {}),
   };
+}
+
+function semanticRuntimeCorpVisibleRunnerCoverageCanBreakIce(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+  profile: ReturnType<typeof semanticRuntimeCorpCentralIceProfile>,
+  creditsAfterInstall: number,
+  rezCost: number,
+): boolean {
+  const rawCoverage = (input.playerView.opponent.rig ?? []).some(
+    (card) =>
+      card.known !== false &&
+      card.type === "program" &&
+      visibleBreakerCardCanAddressIce(card, ice, {
+        visibleBreakerRoles,
+        visibleCardText: semanticRuntimeCorpVisibleCardCoverageText,
+      }),
+  );
+  if (!rawCoverage) return false;
+  if (
+    profile.definitionId === "onr_proteus_017_credit-blocks" &&
+    profile.modeChoice &&
+    creditsAfterInstall >= rezCost + 1 &&
+    !semanticRuntimeCorpVisibleRunnerHasBreakerRole(input, "fracter")
+  ) {
+    return false;
+  }
+  return true;
+}
+
+function semanticRuntimeCorpVisibleRunnerHasBreakerRole(
+  input: AiDecisionInput,
+  role: "fracter" | "decoder" | "killer",
+): boolean {
+  return (input.playerView.opponent.rig ?? []).some(
+    (card) => card.known !== false && visibleBreakerRoles(card).includes(role),
+  );
+}
+
+function semanticRuntimeCorpVisibleCardCoverageText(card: VisibleCard): string {
+  const hint = card.definitionId ? AI_HINTS_BY_CARD.get(card.definitionId) : undefined;
+  return [
+    card.title,
+    card.rulesText,
+    card.definitionId,
+    ...(card.subtypes ?? []),
+    ...(hint?.roles ?? []),
+    ...(hint?.planRoles ?? []),
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
+}
+
+function semanticRuntimeCorpHintTacticSignals(
+  hint: ReturnType<typeof AI_HINTS_BY_CARD.get>,
+): string[] {
+  const value = (hint as { tacticSignals?: unknown } | undefined)
+    ?.tacticSignals;
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+function semanticRuntimeCorpHintRiskTags(
+  hint: ReturnType<typeof AI_HINTS_BY_CARD.get>,
+): string[] {
+  const value = (hint as { riskTags?: unknown } | undefined)?.riskTags;
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+function semanticRuntimeCorpHintTargetProfiles(
+  hint: ReturnType<typeof AI_HINTS_BY_CARD.get>,
+): Array<{ kind?: string }> {
+  const value = (hint as { targetProfiles?: unknown } | undefined)
+    ?.targetProfiles;
+  return Array.isArray(value)
+    ? value.filter(
+        (entry): entry is { kind?: string } =>
+          typeof entry === "object" && entry !== null,
+      )
+    : [];
 }
 
 function semanticRuntimeCorpCentralInstallThreat(
   input: AiDecisionInput,
   serverId: "hq" | "rd",
 ): boolean {
-  const runOrAccessEvents = semanticRuntimeCorpCentralRunOrAccessEventCount(
-    input,
-    serverId,
-  );
-  const runnerCredits = input.playerView.opponent.credits;
-  return (
-    (serverId === "hq" && semanticRuntimeCorpHasAgendaInHq(input)) ||
-    runOrAccessEvents >= (serverId === "rd" ? 2 : 3) ||
-    (runOrAccessEvents > 0 && runnerCredits >= (serverId === "rd" ? 4 : 3))
-  );
-}
-
-function semanticRuntimeCorpCentralRunOrAccessEventCount(
-  input: AiDecisionInput,
-  serverId: "hq" | "rd",
-): number {
-  const eventsById = new Map(
-    [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])].map(
-      (event) => [event.eventId, event],
-    ),
-  );
-  return [...eventsById.values()].filter((event) => {
-    const payload = event.publicPayload;
-    const actor = typeof payload.actor === "string" ? payload.actor : undefined;
-    const actionType =
-      typeof payload.actionType === "string" ? payload.actionType : event.type;
-    return (
-      actor === "runner" &&
-      (actionType === "start_run" || actionType === "access_card") &&
-      semanticRuntimeCorpNormalizedCentralServerIdFromPayload(payload) ===
-        serverId
-    );
-  }).length;
-}
-
-function semanticRuntimeCorpNormalizedCentralServerIdFromPayload(
-  payload: Record<string, unknown>,
-): "hq" | "rd" | undefined {
-  return semanticRuntimeCorpNormalizedCentralServerId(
-    typeof payload.serverId === "string"
-      ? payload.serverId
-      : typeof payload.serverLabel === "string"
-        ? payload.serverLabel
-        : typeof payload.serverName === "string"
-          ? payload.serverName
-          : undefined,
-  );
-}
-
-function semanticRuntimeCorpNormalizedCentralServerId(
-  value: string | undefined,
-): "hq" | "rd" | undefined {
-  if (!value) return undefined;
-  const normalized = value.toLocaleLowerCase("en-US");
-  if (normalized === "hq") return "hq";
-  if (normalized === "rd" || normalized === "r&d") return "rd";
-  return undefined;
+  return semanticRuntimeCorpCentralPressureAssessment(input, serverId).active;
 }
 
 function roleMatchesAny(role: string, options: readonly string[]): boolean {

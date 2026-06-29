@@ -6892,6 +6892,19 @@ select {
   height: calc(10px * var(--lane-card-scale, 1));
 }
 
+.lane .variableSubroutineBadge {
+  right: calc(5px * var(--lane-card-scale, 1));
+  top: calc(5px * var(--lane-card-scale, 1));
+  min-height: calc(18px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1)) calc(6px * var(--lane-card-scale, 1));
+  font-size: calc(8px * var(--lane-card-scale, 1));
+}
+
+.lane .variableSubroutineBadge .subroutineIcon {
+  width: calc(10px * var(--lane-card-scale, 1));
+  height: calc(10px * var(--lane-card-scale, 1));
+}
+
 .lane .advancementGem {
   width: calc(13px * var(--lane-card-scale, 1));
   height: calc(13px * var(--lane-card-scale, 1));
@@ -7035,6 +7048,36 @@ select {
 .iceModifierBadge .subroutineIcon {
   width: 10px;
   height: 10px;
+  border-color: color-mix(in srgb, var(--text), var(--ice) 30%);
+  color: var(--text);
+}
+
+.variableSubroutineBadge {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  z-index: 46;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 19px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--ice), white 25%);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 26% 18%, color-mix(in srgb, var(--ice), white 36%), transparent 34%),
+    linear-gradient(135deg, color-mix(in srgb, var(--ice), black 32%), rgb(18 23 30 / 0.96));
+  box-shadow: 0 6px 14px rgb(0 0 0 / 0.34);
+  color: var(--text);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.variableSubroutineBadge .subroutineIcon {
+  width: 11px;
+  height: 11px;
   border-color: color-mix(in srgb, var(--text), var(--ice) 30%);
   color: var(--text);
 }
@@ -12009,7 +12052,8 @@ select,
 .sideZoneCount,
 .serverCount,
 .cardTooltipStat,
-.strengthBoostBadge {
+.strengthBoostBadge,
+.variableSubroutineBadge {
   cursor: default;
   user-select: none;
   -webkit-user-select: none;

@@ -45,7 +45,7 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
     );
   });
 
-  it("ignores label-only central pressure events", () => {
+  it("counts label-only central pressure events", () => {
     const context = testContext();
     const input = corpInput({
       credits: 2,
@@ -53,6 +53,11 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
         publicEvent("label-rd-run", "start_run", 1, {
           actor: "runner",
           actionType: "start_run",
+          serverLabel: "R&D",
+        }),
+        publicEvent("label-rd-access", "access_card", 2, {
+          actor: "runner",
+          actionType: "access_card",
           serverLabel: "R&D",
         }),
       ],
@@ -64,7 +69,29 @@ describe("createSemanticRuntimeCorpCentralRezContext", () => {
     });
 
     expect(context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)).toBe(
-      false,
+      true,
+    );
+  });
+
+  it("treats visible R&D Interface as R&D pressure before the next run", () => {
+    const context = testContext();
+    const input = corpInput({
+      credits: 2,
+      runnerRig: [
+        runnerCard("rd-interface", "hardware", {
+          definitionId: "onr_v1_139_r-and-d-interface",
+          title: "R&D Interface",
+        }),
+      ],
+      servers: [
+        server("hq"),
+        server("rd", [corpCard("rd-ice", "ice", { rezzed: false, rezCost: 3 })]),
+        server("archives"),
+      ],
+    });
+
+    expect(context.semanticRuntimeCorpHasCentralRezFloorFundingNeed(input)).toBe(
+      true,
     );
   });
 
@@ -120,6 +147,7 @@ function testContext() {
 function corpInput(options: {
   credits?: number;
   gripOrHq?: VisibleCard[];
+  runnerRig?: VisibleCard[];
   servers?: PlayerView["servers"];
   events?: PublicGameEvent[];
 } = {}): AiDecisionInput {
@@ -136,6 +164,7 @@ function corpInput(options: {
       },
       opponent: {
         credits: 4,
+        rig: options.runnerRig ?? [],
       },
       servers: options.servers ?? [
         server("hq"),
@@ -203,6 +232,23 @@ function corpCard(
     title: instanceId,
     owner: "corp",
     controller: "corp",
+    type,
+    known: true,
+    ...overrides,
+  };
+}
+
+function runnerCard(
+  instanceId: string,
+  type: NonNullable<VisibleCard["type"]>,
+  overrides: Partial<VisibleCard> = {},
+): VisibleCard {
+  return {
+    instanceId,
+    definitionId: instanceId,
+    title: instanceId,
+    owner: "runner",
+    controller: "runner",
     type,
     known: true,
     ...overrides,

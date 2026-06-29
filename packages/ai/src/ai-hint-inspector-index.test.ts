@@ -554,7 +554,13 @@ describe("AI005 hint inspector index", () => {
     const riddler = card(index, "onr_proteus_034_riddler");
     const caryatid = card(index, "onr_proteus_013_caryatid");
     const brainWash = card(index, "onr_proteus_011_brain-wash");
+    const compiledBugZapper = compiledCard("onr_proteus_012_bug-zapper");
+    const compiledCreditBlocks = compiledCard("onr_proteus_017_credit-blocks");
     const compiledDogPile = compiledCard("onr_proteus_021_dog-pile");
+    const compiledHuntingPack = compiledCard("onr_proteus_026_hunting-pack");
+    const compiledMobileBarricade = compiledCard(
+      "onr_proteus_033_mobile-barricade",
+    );
     const compiledRiddler = compiledCard("onr_proteus_034_riddler");
 
     expect(caryatid.planRolesClassification).toEqual(
@@ -582,6 +588,24 @@ describe("AI005 hint inspector index", () => {
     expect(compiledDogPile.riskTags).toContain("position_dependent_ice");
     expect(compiledDogPile.manualNotes?.join(" ")).toContain(
       "solo Dog Pile is only a temporary coverage window",
+    );
+    expect(compiledBugZapper.riskTags).toContain("position_dependent_ice");
+    expect(compiledBugZapper.manualNotes?.join(" ")).toContain(
+      "solo Bug Zapper should not be treated as durable",
+    );
+    expect(compiledHuntingPack.riskTags).toContain("position_dependent_ice");
+    expect(compiledHuntingPack.manualNotes?.join(" ")).toContain(
+      "solo Hunting Pack is setup",
+    );
+    expect(compiledCreditBlocks.riskTags).toContain("credit_reserve");
+    expect(compiledCreditBlocks.manualNotes?.join(" ")).toContain(
+      "base rez plus 1",
+    );
+    expect(compiledMobileBarricade.riskTags).toContain(
+      "same_fort_reposition",
+    );
+    expect(compiledMobileBarricade.manualNotes?.join(" ")).toContain(
+      "same data fort",
     );
 
     expect(riddler.planRolesClassification).toEqual(
