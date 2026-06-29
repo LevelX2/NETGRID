@@ -10468,6 +10468,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: gezieltes Ripgrep auf die entfernten Corp-Board-Triage-Regexes ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertneunundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - Paket: Produktiver Rest-Audit nach Legacy-Scored-Agenda-, Runner-Finite-Pool- und Corp-Board-Triage-Rückbau.
+  - Ergebnis: In den produktiven Runtime-/Simulation-/Decision-/Actions-Pfaden und den bearbeiteten Legacy-Corp-/Runner-Pfaden bleiben keine freien `.match(`-, `.test(`-, `rulesText.includes`-, `text.includes`-, `lowerText.includes`-, `label.match`- oder `label.includes`-Treffer.
+  - Restbestand: `action.label` bleibt nur als Werttransport in bereits tokenisierten Legacy-Label-Parsern, Scored-Agenda-Textaggregation und Debug-/Ranking-Ausgaben; Testdatei-Treffer sind außerhalb des produktiven Pfads.
+  - Direkte Membership-Suche bleibt leer: keine Treffer für `tokens.includes`, `.includes(term)`, `accepted.includes`, `reasonCodes.includes`, `knownValues.includes`, `split(...).includes` oder `.includes(token)` unter `packages/ai/src`.
+  - Status bleibt `IN_PROGRESS`, weil der finale Gesamtabschluss noch einen breiteren Abschlussaudit gegen Zielartefakte und Gates braucht.
+  - Verifikation: `rg -n "\.match\(|\.test\(|rulesText\?\.match|label\.match|label\.includes|action\.label|text\.includes|rulesText\.includes|lowerText\.includes" packages/ai/src/runtime packages/ai/src/simulation packages/ai/src/decision packages/ai/src/actions packages/ai/src/legacy/corp-plans.ts packages/ai/src/legacy/runner-plans.ts` zeigt nur `action.label`-Werttransporte in produktiven Dateien sowie Testtreffer.
+  - Verifikation: `rg -n "tokens\.includes|\.includes\(term\)|accepted\.includes|reasonCodes\.includes|knownValues\.includes|split\([^\n]*\.includes|\.includes\(token\)" packages/ai/src` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
