@@ -680,14 +680,16 @@ function actionProvidesEconomy<TConsumer extends string>(
   ) {
     return false;
   }
-  return actionCandidateHasVisibleSignal(actionSemanticCandidate, [
-    "economy",
-    "economy_operation",
-    "draw_operation",
-    "recover_economy",
-    "economy.corp_credit_burst",
-    "corp_credit_burst",
-  ]);
+  return (
+    actionCandidateHasVisibleSignal(actionSemanticCandidate, [
+      "economy",
+      "economy_operation",
+      "draw_operation",
+      "recover_economy",
+      "economy.corp_credit_burst",
+      "corp_credit_burst",
+    ]) || actionHasVisibleImmediateEconomyOrDrawSource(input, action)
+  );
 }
 
 function actionHasVisibleImmediateEconomyOrDrawSource(
@@ -698,7 +700,9 @@ function actionHasVisibleImmediateEconomyOrDrawSource(
   if (!source || source.known === false) return false;
   const definition = visibleCardDefinition(source);
   const type = source.type ?? definition?.type;
-  if (type !== "operation") return false;
+  if (action.type === "play_operation" && type !== "operation") {
+    return false;
+  }
   const text = [source.rulesText, definition?.rulesText]
     .filter((value): value is string => typeof value === "string")
     .join(" ");
