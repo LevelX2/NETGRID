@@ -187,14 +187,14 @@ export function classifyDecisionTraceMistakes(
       mistakes.push({
         mistakeClass: "plan_step_mismatch",
         actionId: rejected.actionId,
-        evidence: rejected.evidence,
+        evidence: rejectedMistakeEvidence(rejected),
       });
     }
     if (blockerSet.has("target_context_missing_for_target_profile")) {
       mistakes.push({
         mistakeClass: "target_choice_unavailable",
         actionId: rejected.actionId,
-        evidence: rejected.evidence,
+        evidence: rejectedMistakeEvidence(rejected),
       });
     }
   }
@@ -203,6 +203,15 @@ export function classifyDecisionTraceMistakes(
     mistake.actionId === undefined ||
     legalActionIds.has(mistake.actionId),
   ));
+}
+
+function rejectedMistakeEvidence(
+  rejected: SemanticDecisionTrace["rejectedActions"][number],
+): string[] {
+  return [
+    ...rejected.evidence,
+    ...(rejected.whyNot ?? []).map((fact) => `trace_why_not:${fact}`),
+  ];
 }
 
 function legalActionInvariantHolds(
