@@ -38,7 +38,9 @@ export type RunMovementHost = {
     cardInstanceFor: (cardId: CardInstanceId) => CardInstance;
   };
   servers: {
-    mustServer: (serverId: Exclude<ServerId, "new_remote"> | string) => CorpServer;
+    mustServer: (
+      serverId: Exclude<ServerId, "new_remote"> | string,
+    ) => CorpServer;
     publicServerLabel: (
       serverId: Exclude<ServerId, "new_remote">,
     ) => string | undefined;
@@ -99,7 +101,10 @@ export function handleRunMovementAction(
   host: RunMovementHost,
   legalAction: LegalAction,
 ): RunMovementActionResult {
-  if (legalAction.type === "continue_run" && host.state.run?.corpPostPassIceReturnToHq)
+  if (
+    legalAction.type === "continue_run" &&
+    host.state.run?.corpPostPassIceReturnToHq
+  )
     return resolveCorpPostPassIceReturnToHq(host, legalAction);
   if (
     legalAction.type === "continue_run" &&
@@ -107,7 +112,10 @@ export function handleRunMovementAction(
   )
     return resolvePostPassCancellableFutureStrength(host, legalAction);
   if (legalAction.type === "jack_out") return jackOutRunner(host, legalAction);
-  if (legalAction.type === "continue_run" && host.state.run?.phase === "movement")
+  if (
+    legalAction.type === "continue_run" &&
+    host.state.run?.phase === "movement"
+  )
     return continueFromMovement(host, legalAction);
   return { handled: false };
 }
@@ -117,7 +125,9 @@ export function buildCorpPostPassIceReturnToHqActions(
 ): LegalAction[] {
   const pending = host.state.run?.corpPostPassIceReturnToHq;
   if (!pending) return [];
-  const sourceTitle = host.cards.definitionFor(pending.sourceCardInstanceId).title;
+  const sourceTitle = host.cards.definitionFor(
+    pending.sourceCardInstanceId,
+  ).title;
   const serverLabel = host.servers.publicServerLabel(pending.serverId);
   const basePayload = {
     corpPostPassIceAbility: "return_passed_ice_to_hq",
@@ -178,7 +188,9 @@ export function buildRunnerPostPassFutureStrengthActions(
 ): LegalAction[] {
   const pending = host.state.run?.postPassCancellableFutureIceStrength;
   if (!pending) return [];
-  const sourceTitle = host.cards.definitionFor(pending.sourceCardInstanceId).title;
+  const sourceTitle = host.cards.definitionFor(
+    pending.sourceCardInstanceId,
+  ).title;
   const serverLabel = host.servers.publicServerLabel(pending.serverId);
   const basePayload = {
     postPassFutureStrengthAbility: "cancel_future_ice_strength_bonus",
@@ -251,6 +263,10 @@ export function jackOutRunner(
 export function passApproachedIce(host: RunMovementHost): RunMovementResult {
   const run = mustRun(host.state);
   if (!run.approachedIceId) throw new Error("Kein ICE wird approached.");
+  if (run.secretSpendGuessRunAutoPassIceId === run.approachedIceId) {
+    delete run.secretSpendGuessRunAutoPassIceId;
+    return movePastCurrentIce(host);
+  }
   const ice = host.cards.cardInstanceFor(run.approachedIceId);
   if (ice.rezzed) {
     host.encounter.beginEncounter(run.approachedIceId);
@@ -273,16 +289,10 @@ export function approachOrEncounterIce(
   const run = mustRun(state);
   const ice = host.cards.cardInstanceFor(approachedIceId);
   run.approachedIceId = approachedIceId;
-  if (run.secretSpendGuessRunAutoPassIceId === approachedIceId) {
-    delete run.secretSpendGuessRunAutoPassIceId;
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        autoPassChosenIce: true,
-        secretSpendGuessRunAutoPassedIce: true,
-      };
-    }
-    return movePastCurrentIce(host);
+  const secretSpendAutoPass =
+    run.secretSpendGuessRunAutoPassIceId === approachedIceId;
+  if (secretSpendAutoPass) {
+    markSecretSpendGuessAutoPass(legalAction);
   }
   if (run.bypassFirstIceRemaining) {
     run.bypassFirstIceRemaining = false;
@@ -307,6 +317,7 @@ export function approachOrEncounterIce(
         stateChanged: true,
       };
     }
+    if (secretSpendAutoPass) return passApproachedIce(host);
     host.encounter.beginEncounter(approachedIceId, legalAction);
     return {
       handled: true,
@@ -400,7 +411,9 @@ export function movePastCurrentIce(
         resolvedSubroutineIndexes: [],
       };
       state.timingPoint = "run.jack_out_window";
-      state.activeSide = state.run.corpPostPassIceReturnToHq ? "corp" : "runner";
+      state.activeSide = state.run.corpPostPassIceReturnToHq
+        ? "corp"
+        : "runner";
       return {
         handled: true,
         runContinues: true,
@@ -475,7 +488,9 @@ export function continueFromMovement(
     ).choiceOpened
   )
     return { handled: true, postPassChoiceOpened: true, stateChanged: true };
-  clearFullyBrokenPassedIceTrashPostPassMarker(host.encounter.encounterResolutionHost());
+  clearFullyBrokenPassedIceTrashPostPassMarker(
+    host.encounter.encounterResolutionHost(),
+  );
   clearFullyBrokenPassedIcePostPassMarker(
     host.encounter.encounterResolutionHost(),
   );
@@ -520,7 +535,9 @@ function resolvePostPassPayOrEndRun(
   if (!Number.isInteger(actionAmount) || actionAmount !== amount)
     throw new Error("Die Fort-Pass-Kosten passen nicht mehr.");
   if (String(legalAction.payload?.passedIceId ?? "") !== pending.passedIceId)
-    throw new Error("Das passierte ICE passt nicht mehr zum Fort-Pass-Fenster.");
+    throw new Error(
+      "Das passierte ICE passt nicht mehr zum Fort-Pass-Fenster.",
+    );
   if (String(legalAction.payload?.serverId ?? "") !== pending.serverId)
     throw new Error("Der Fort-Pass-Server passt nicht mehr.");
   if (decision === "pay") {
@@ -567,7 +584,9 @@ function resolvePostPassCancellableFutureStrength(
   const pending = run.postPassCancellableFutureIceStrength;
   if (!pending) return { handled: false };
   if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf dieses Post-Pass-Fenster entscheiden.");
+    throw new Error(
+      "Nur der Runner darf dieses Post-Pass-Fenster entscheiden.",
+    );
   if (
     legalAction.payload?.postPassFutureStrengthAbility !==
     "cancel_future_ice_strength_bonus"
@@ -575,7 +594,10 @@ function resolvePostPassCancellableFutureStrength(
     throw new Error("Die Post-Pass-Aktion passt nicht zum Strength-Fenster.");
   if (String(legalAction.payload?.passedIceId ?? "") !== pending.passedIceId)
     throw new Error("Das passierte ICE passt nicht mehr.");
-  if (String(legalAction.payload?.sourceCardId ?? "") !== pending.sourceCardInstanceId)
+  if (
+    String(legalAction.payload?.sourceCardId ?? "") !==
+    pending.sourceCardInstanceId
+  )
     throw new Error("Die Strength-Quelle passt nicht mehr.");
   const decision = String(legalAction.payload?.decision ?? "");
   if (decision === "pay") {
@@ -619,15 +641,22 @@ function resolveCorpPostPassIceReturnToHq(
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf dieses Post-Pass-Fenster entscheiden.");
   if (legalAction.payload?.corpPostPassIceAbility !== "return_passed_ice_to_hq")
-    throw new Error("Die Post-Pass-Aktion passt nicht zum ICE-Lifecycle-Fenster.");
+    throw new Error(
+      "Die Post-Pass-Aktion passt nicht zum ICE-Lifecycle-Fenster.",
+    );
   if (String(legalAction.payload?.passedIceId ?? "") !== pending.passedIceId)
     throw new Error("Das passierte ICE passt nicht mehr.");
-  if (String(legalAction.payload?.sourceCardId ?? "") !== pending.sourceCardInstanceId)
+  if (
+    String(legalAction.payload?.sourceCardId ?? "") !==
+    pending.sourceCardInstanceId
+  )
     throw new Error("Die Lifecycle-Quelle passt nicht mehr.");
   const decision = String(legalAction.payload?.decision ?? "");
   if (decision === "pay") {
     if (pending.mode !== "required_pay_or_return")
-      throw new Error("Diese ICE-Lifecycle-Faehigkeit hat keine Pflichtzahlung.");
+      throw new Error(
+        "Diese ICE-Lifecycle-Faehigkeit hat keine Pflichtzahlung.",
+      );
     const amount = Math.max(0, Math.floor(pending.paymentAmount ?? 0));
     const paid = Number(legalAction.payload?.paymentAmount ?? amount);
     if (!Number.isInteger(paid) || paid !== amount)
@@ -646,7 +675,9 @@ function resolveCorpPostPassIceReturnToHq(
   }
   if (decision === "decline") {
     if (pending.mode !== "optional_return_gain")
-      throw new Error("Diese ICE-Lifecycle-Faehigkeit darf nicht abgelehnt werden.");
+      throw new Error(
+        "Diese ICE-Lifecycle-Faehigkeit darf nicht abgelehnt werden.",
+      );
     delete run.corpPostPassIceReturnToHq;
     host.state.activeSide = "runner";
     return { handled: true, runContinues: true, stateChanged: true };
@@ -669,7 +700,10 @@ function resolveCorpPostPassIceReturnToHq(
   throw new Error("Die ICE-Lifecycle-Entscheidung ist ungueltig.");
 }
 
-function returnPassedIceToHq(host: RunMovementHost, iceId: CardInstanceId): void {
+function returnPassedIceToHq(
+  host: RunMovementHost,
+  iceId: CardInstanceId,
+): void {
   const instance = host.cards.cardInstanceFor(iceId);
   if (instance.zone.zone !== "serverIce")
     throw new Error("Das ICE ist nicht mehr installiert.");
@@ -695,11 +729,15 @@ function fortPassFollowupsForPassedIce(
   "lastPassedIceId" | "postPassPayOrEndRun" | "corpPostPassIceReturnToHq"
 > {
   if (!passedIceId) return {};
-  const passedIceLifecycle = fortRunWindowImplementationForCard(
-    host,
-    passedIceId,
-    "corp_return_passed_ice_to_hq",
-  );
+  const passedIce = host.state.cardInstances[passedIceId];
+  const passedIceLifecycle =
+    passedIce?.rezzed === true
+      ? fortRunWindowImplementationForCard(
+          host,
+          passedIceId,
+          "corp_return_passed_ice_to_hq",
+        )
+      : undefined;
   const payOrEndSources = server.root
     .filter((cardId) => {
       const instance = host.state.cardInstances[cardId];
@@ -768,6 +806,17 @@ function fortRunWindowImplementationForCard<
     (window): window is Extract<CardFortRunWindowImplementation, { kind: K }> =>
       window.kind === kind,
   );
+}
+
+function markSecretSpendGuessAutoPass(
+  legalAction: LegalAction | undefined,
+): void {
+  if (!legalAction) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    autoPassChosenIce: true,
+    secretSpendGuessRunAutoPassedIce: true,
+  };
 }
 
 function mustRun(state: GameState): ActiveRun {

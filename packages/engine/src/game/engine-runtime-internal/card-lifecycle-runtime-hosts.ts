@@ -728,6 +728,7 @@ export function createCardLifecycleRuntimeHosts(
     openRunnerCostPenaltySupportWindow,
     requiresDataFortInstallTarget,
     rootInstallRezzesOnInstall,
+    runMovementHostForState,
     runRezWindowHostForState,
     runnerCanPayInstallCost,
     runnerProgramInstallMemoryReachableAfterTrash,
@@ -911,18 +912,29 @@ export function createCardLifecycleRuntimeHosts(
             legalAction,
           ),
         handlePostIceRezContinuation: (cardId, legalAction) => {
-          const continuation = continueAfterCorpRootRezIfWindowIsComplete(
-            encounterEntryHostForState(state),
-            legalAction,
-          );
-          if (continuation.handled) return true;
           const run = state.run;
-          return Boolean(
+          const rootRezWindowStillOpen = Boolean(
             state.timingPoint === "run.approach_ice" &&
             run?.phase === "approach_ice" &&
             run.approachedIceId === cardId &&
             corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
           );
+          if (rootRezWindowStillOpen) return true;
+          if (
+            state.timingPoint === "run.approach_ice" &&
+            run?.phase === "approach_ice" &&
+            run.approachedIceId === cardId &&
+            run.secretSpendGuessRunAutoPassIceId === cardId
+          ) {
+            passApproachedIce(runMovementHostForState(state));
+            return true;
+          }
+          const continuation = continueAfterCorpRootRezIfWindowIsComplete(
+            encounterEntryHostForState(state),
+            legalAction,
+          );
+          if (continuation.handled) return true;
+          return false;
         },
         beginEncounter: (cardId, legalAction) =>
           beginEncounter(

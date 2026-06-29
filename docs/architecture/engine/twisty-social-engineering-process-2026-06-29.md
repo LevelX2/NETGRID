@@ -8,14 +8,14 @@ Quelle/Vorgabe: Nutzerfreigabe vom 2026-06-29 nach Analyse des aktuellen SQLite-
 Die Vorgabe ist ausreichend präzise für automatische Umsetzung.
 
 - Gesamtziel: `Social Engineering` darf beim automatischen Passieren einer unrezzed `Twisty Passages` keinen aktiven `Twisty Passages`-Rücknahmeeffekt auslösen. Legal rezzed ausgelöste Rücknahmen müssen in der Spielchronik nachvollziehbar bleiben.
-- Endzustand: Die Rules Engine öffnet `corp_return_passed_ice_to_hq` nur für rezzed passierte ICE, sofern die Kartenfamilie keine ausdrückliche unrezzed-Ausnahme hat. Die Chronik erklärt den legalen Rücknahmefall side-safe.
+- Endzustand: `Social Engineering` erhält die normale Approach-/Rez-Gelegenheit vor dem automatischen Passieren. Die Rules Engine öffnet `corp_return_passed_ice_to_hq` nur für rezzed passierte ICE, sofern die Kartenfamilie keine ausdrückliche unrezzed-Ausnahme hat. Die Chronik erklärt den legalen Rücknahmefall side-safe.
 - In Scope: Run-Movement-/Run-Window-Logik, Proteus-Regressionstests, Chronik-Rendering und Chronik-Tests.
 - Nicht-Ziele: Neue Kartenfreischaltungen, KI-Strategieänderungen, DB-Migrationen, Replay-Reparatur historischer Events, UI-Redesign, Remote-Push oder Pull Request.
 - Verifikation: Paketnahe Engine- und Web-Tests, Typecheck soweit paketnah nötig, `git diff --check`.
 
 ## Gesamtziel
 
-Der Prozess behebt den im aktuellen Spiel beobachteten Rules-Engine-Fehler: Eine unrezzed `Twisty Passages` auf R&D wurde durch `Social Engineering` automatisch passiert und durfte danach trotzdem nach HQ zurückgenommen werden. Nach dem Fix bleibt dieser Trigger gesperrt, solange die ICE unrezzed ist. Wenn die Corp die ICE beim Approach rezzed, darf der automatische Pass weiterhin den legalen Rücknahme-/Zahlungsentscheid auslösen.
+Der Prozess behebt den im aktuellen Spiel beobachteten Rules-Engine-Fehler: Eine unrezzed `Twisty Passages` auf R&D wurde durch `Social Engineering` automatisch passiert und durfte danach trotzdem nach HQ zurückgenommen werden. Nach dem Fix bleibt zuerst das Approach-/Rez-Fenster erhalten. Danach bleibt dieser Trigger gesperrt, solange die ICE unrezzed ist. Wenn die Corp die ICE beim Approach rezzed, darf der automatische Pass weiterhin den legalen Rücknahme-/Zahlungsentscheid auslösen.
 
 ## Annahmen
 
@@ -79,16 +79,18 @@ Commit-Message: `docs(engine): plan twisty social engineering fix`.
 
 ### TSE-01 Engine-Guard und Regressionen
 
-Ziel: Unrezzed passierte ICE darf keinen eigenen post-pass Rücknahmeeffekt öffnen.
+Ziel: `Social Engineering` wahrt die Corp-Rez-Gelegenheit, und unrezzed passierte ICE darf keinen eigenen post-pass Rücknahmeeffekt öffnen.
 Konkrete Arbeit:
 
+- Regression: Nach `Social Engineering` auf eine unrezzed ICE steht die Corp zuerst im Approach-/Rez-Fenster.
 - Regression: `Social Engineering` auf unrezzed `Twisty Passages` öffnet keinen `corpPostPassIceReturnToHq`-Choice und erhöht HQ nicht.
 - Regression: Rezzed `Twisty Passages` bleibt legal und öffnet nach automatischem Pass weiterhin den Zahlungs-/Rücknahmeentscheid.
+- Run-Movement-Änderung: Auto-Pass-Markierungen werden erst nach dem Rez-/Nicht-Rez-Entscheid verbraucht.
 - Run-Movement-Guard: `corp_return_passed_ice_to_hq` wird nur für rezzed passierte ICE geprüft.
 
 Kernartefakte: `packages/engine/src/game/run/run-movement.ts`, Proteus-Engine-Tests.
 Checks: paketnaher Vitest-Lauf für Proteus variable/post-pass ICE, `pnpm --filter @netgrid/engine typecheck`, `git diff --check`.
-Done-Gate: Beide Regressionen grün; keine Hidden-Info-Erweiterung.
+Done-Gate: Rez-Gelegenheit und beide Twisty-Regressionen grün; keine Hidden-Info-Erweiterung.
 Commit-Message: `fix(engine): require rezzed ice for post-pass return windows`.
 
 ### TSE-02 Chronik-Erklärung für legale Rücknahme
