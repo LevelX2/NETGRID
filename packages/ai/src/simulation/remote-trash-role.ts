@@ -185,11 +185,12 @@ export function remoteTrashCardLooksLikeFinitePoolForMetrics(
 
 function finitePoolRulesTextMatches(rulesText: string): boolean {
   const tokens = remoteTrashRulesTextTokens(rulesText);
+  const tokenSet = new Set(tokens);
   return (
-    tokens.includes("put") &&
+    tokenSet.has("put") &&
     remoteTrashTokensIncludePhrase(tokens, ["from", "the", "bank"]) &&
-    tokens.includes("take") &&
-    tokens.includes("bits")
+    tokenSet.has("take") &&
+    tokenSet.has("bits")
   );
 }
 

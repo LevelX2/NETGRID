@@ -10178,6 +10178,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes\("flatline"\)|tokens\.includes\("reachability"\)' packages/ai/src/simulation/progress-delta-labeler.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertfünfundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/remote-trash-role.ts` bindet finite-pool Rules-Text-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfungen.
+  - Strukturierte Remote-Trash-Rollen- und finite-pool-Erkennung bleibt exakt; Bank-/Take-/Bits-Tokens bleiben bounded und substring-nahe Rules-Text-Rauschwerte bleiben ausgeschlossen.
+  - `remote-trash-role.test.ts` sichert bounded Remote-Trash-Rollen und finite-pool Rules-Text-Phrasen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/simulation/remote-trash-role.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\("put"\)|tokens\.includes\("take"\)|tokens\.includes\("bits"\)' packages/ai/src/simulation/remote-trash-role.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
