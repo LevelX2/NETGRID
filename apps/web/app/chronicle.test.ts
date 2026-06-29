@@ -1450,6 +1450,67 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("shows current engine Playful AI random dice payload fields in the chronicle", () => {
+    const played = formatChronicleEvent(
+      makeEvent("play_event", {
+        actor: "runner",
+        title: "Playful AI",
+        cardDefinitionId: "onr_v1_104_playful-ai",
+        sourceDefinitionId: "onr_v1_104_playful-ai",
+        abilityId: "random_dice_loop",
+        v1921RunnerEventAbility: "random_dice_loop",
+        v1921DieRoll: 5,
+        randomDiceLoopRolls: "5",
+        randomDiceSplitChoiceOpened: false,
+        randomDiceLoopComplete: true,
+        randomDiceLoopRemainingDice: 0,
+      }),
+      "runner",
+    );
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        title: "Playful AI",
+        sourceDefinitionId: "onr_v1_104_playful-ai",
+        abilityId: "random_dice_loop",
+        v1921RunnerEventAbility: "random_dice_loop",
+        v1921DieRoll: 5,
+        randomDiceLoopRolls: "4,5",
+        randomDiceSplitGainedCredits: 1,
+        randomDiceSplitSetAsideDice: 2,
+        randomDiceLoopRolledDice: 2,
+        randomDiceLoopQueuedBeforeRolls: 2,
+        randomDiceLoopQueuedAfterRolls: 0,
+        randomDiceLoopComplete: true,
+      }),
+      "runner",
+    );
+
+    expect(played.title).toBe(
+      "Du hast Playful AI gespielt und eine 5 gewürfelt.",
+    );
+    expect(played.description).toBe(
+      "Die Playful-AI-Schleife ist ohne weitere Entscheidung abgeschlossen.",
+    );
+    expect(played.chips).toEqual(
+      expect.arrayContaining(["Playful AI", "Wurf 5", "Fertig"]),
+    );
+    expect(resolved.title).toBe(
+      "Du hast Playful AI aufgelöst: 1 Credit genommen und 2 Würfel beiseitegelegt.",
+    );
+    expect(resolved.description).toBe(
+      "Danach wurden 2 beiseitegelegte Würfel geworfen: 4, 5. Die Playful-AI-Schleife ist abgeschlossen.",
+    );
+    expect(resolved.chips).toEqual(
+      expect.arrayContaining([
+        "Playful AI",
+        "+1 Credit",
+        "2 beiseite",
+        "Würfe 4, 5",
+      ]),
+    );
+  });
+
   it("shows partial Playful AI queued dice without treating the roll history as newly rolled dice", () => {
     const partial = formatChronicleEvent(
       makeEvent("resolve_choice", {

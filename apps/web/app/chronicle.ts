@@ -82,6 +82,7 @@ const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 const BLINK_ID = "onr_v1_007_blink";
 const SOCIAL_ENGINEERING_ID = "onr_v1_111_social-engineering";
 const VIRAL_15_ID = "onr_v1_276_viral-15";
+const PLAYFUL_AI_ID = "onr_v1_104_playful-ai";
 
 export function isISpySuccessfulRunFollowupPayload(
   payload: Record<string, unknown>,
@@ -141,6 +142,7 @@ export function formatChronicleEvent(
   const agendaAbility = stringValue(payload.agendaAbility);
   const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
   const abilityId = payloadAbilityId(payload);
+  const playfulAiDiceLoop = isPlayfulAiDiceLoopPayload(payload, abilityId);
   const searchReveal = stringValue(payload.searchReveal);
   const searchDestination = stringValue(payload.searchDestination);
   const shellTradersAbility = shellTradersAbilityFromPayload(
@@ -262,19 +264,34 @@ export function formatChronicleEvent(
         chips.push("Smith's Pawnshop", "Pass");
         break;
       }
-      if (abilityId === "playful_ai_dice_loop") {
-        const gainedCredits = numberValue(payload.playfulAiGainedCredits) ?? 0;
-        const setAsideDice = numberValue(payload.playfulAiSetAsideDice) ?? 0;
+      if (playfulAiDiceLoop) {
+        const gainedCredits =
+          numberValue(payload.playfulAiGainedCredits) ??
+          numberValue(payload.randomDiceSplitGainedCredits) ??
+          0;
+        const setAsideDice =
+          numberValue(payload.playfulAiSetAsideDice) ??
+          numberValue(payload.randomDiceSplitSetAsideDice) ??
+          0;
         const lastRoll = payloadRandomRoll(payload);
-        const dieRolls = numberArrayValue(payload.playfulAiDieRolls);
+        const dieRolls = numberArrayValue(
+          payload.playfulAiDieRolls ?? payload.randomDiceLoopRolls,
+        );
         const queuedBeforeRolls = numberValue(
-          payload.playfulAiDiceQueuedBeforeRolls,
+          payload.playfulAiDiceQueuedBeforeRolls ??
+            payload.randomDiceLoopQueuedBeforeRolls,
         );
         const remainingDice =
           numberValue(payload.playfulAiRemainingDice) ??
-          numberValue(payload.playfulAiDiceQueuedAfterRolls);
-        const choiceOpened = payload.playfulAiChoiceOpened === true;
-        const complete = payload.playfulAiComplete === true;
+          numberValue(payload.playfulAiDiceQueuedAfterRolls) ??
+          numberValue(payload.randomDiceLoopRemainingDice) ??
+          numberValue(payload.randomDiceLoopQueuedAfterRolls);
+        const choiceOpened =
+          (payload.playfulAiChoiceOpened ??
+            payload.randomDiceSplitChoiceOpened) === true;
+        const complete =
+          (payload.playfulAiComplete ?? payload.randomDiceLoopComplete) ===
+          true;
         category = gainedCredits > 0 ? "economy" : "card";
         visibility = "public";
         title = phrase(
@@ -1967,11 +1984,17 @@ export function formatChronicleEvent(
         );
         break;
       }
-      if (actionType === "play_event" && abilityId === "playful_ai_dice_loop") {
+      if (actionType === "play_event" && playfulAiDiceLoop) {
         const dieRoll = payloadRandomRoll(payload);
-        const dieRolls = numberArrayValue(payload.playfulAiDieRolls);
-        const choiceOpened = payload.playfulAiChoiceOpened === true;
-        const complete = payload.playfulAiComplete === true;
+        const dieRolls = numberArrayValue(
+          payload.playfulAiDieRolls ?? payload.randomDiceLoopRolls,
+        );
+        const choiceOpened =
+          (payload.playfulAiChoiceOpened ??
+            payload.randomDiceSplitChoiceOpened) === true;
+        const complete =
+          (payload.playfulAiComplete ?? payload.randomDiceLoopComplete) ===
+          true;
         category = "card";
         importance = choiceOpened ? "important" : "normal";
         title = phrase(
@@ -4945,6 +4968,26 @@ function dieText(amount: number): string {
   return amount === 1 ? "Würfel" : "Würfel";
 }
 
+function isPlayfulAiDiceLoopPayload(
+  payload: Record<string, unknown>,
+  abilityId: string | null,
+): boolean {
+  const eventAbility = stringValue(payload.v1921RunnerEventAbility);
+  if (
+    abilityId === "playful_ai_dice_loop" ||
+    eventAbility === "playful_ai_dice_loop"
+  )
+    return true;
+  const sourceDefinitionId =
+    stringValue(payload.sourceDefinitionId) ??
+    stringValue(payload.cardDefinitionId) ??
+    stringValueFromRecord(payload.targets, "sourceDefinitionId");
+  return (
+    sourceDefinitionId === PLAYFUL_AI_ID &&
+    (abilityId === "random_dice_loop" || eventAbility === "random_dice_loop")
+  );
+}
+
 function playfulAiRollChips(
   dieRolls: number[],
   fallbackRoll: number | undefined,
@@ -5612,6 +5655,14 @@ function numberValueFromRecord(
 ): number | undefined {
   if (!value || typeof value !== "object") return undefined;
   return numberValue((value as Record<string, unknown>)[key]);
+}
+
+function stringValueFromRecord(
+  value: unknown,
+  key: string,
+): string | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  return stringValue((value as Record<string, unknown>)[key]);
 }
 
 function numberArrayValue(value: unknown): number[] {
