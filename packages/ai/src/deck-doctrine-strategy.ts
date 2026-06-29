@@ -1782,7 +1782,7 @@ function buildCorpProfiles(
         (card.runtimeSubtypes.some((subtype) =>
           ["city grid", "region", "upgrade"].includes(subtype),
         ) ||
-          card.cardId.includes("city-grid") ||
+          cardIdHasTokenPhrase(card.cardId, ["city", "grid"]) ||
           card.remoteRoleKind !== undefined),
     )
     .reduce((sum, card) => sum + card.quantity, 0);
@@ -1857,6 +1857,20 @@ function buildCorpProfiles(
         regionSupport > 0 ? regionSupport : "unknown",
     },
   };
+}
+
+function cardIdHasTokenPhrase(
+  cardId: string,
+  phrase: readonly string[],
+): boolean {
+  const tokens = cardId.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  return tokens.some(
+    (token, index) =>
+      token === phrase[0] &&
+      phrase.every(
+        (phraseToken, offset) => tokens[index + offset] === phraseToken,
+      ),
+  );
 }
 
 function deckWarnings(stats: DeckStrategyStats): string[] {
