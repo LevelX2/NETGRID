@@ -9469,6 +9469,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
 
+- `AI-COMPLETE-15` Rest-Audit nach den Set-/Token-Bindungsschnitten:
+  - Die zuletzt bearbeiteten produktiven Pfade binden Deck-Doctrine-Supportrollen, Tag-/Punish-Legacyrollen, sichtbare Payoff-Kategorien, Runner-Hardware-Payoff-Tokens und Central-/Scoring-Window-Multiaccess-Tokens über exakte Sets oder gebundene Tokenfolgen statt über freie Teilstrings.
+  - Die Prüfung bleibt auf produktiven, nicht-legacy AI-Code beschränkt und erzeugt keine neue LegalAction-Projektion, keine Engine-Änderung und keine Hidden-Info-Ausweitung.
+  - Restliche produktive `includes(...)`-Treffer in `packages/ai/src` sind nach aktuellem Review exakte Array-/Set-Mitgliedschaften, bekannte Projection-Issue-/Gap-Codes, action-type-Allowlists, gebundene Token-/Segmenthelper oder bewusst getrennte Bericht-/Evaluationspfade.
+  - Status bleibt `IN_PROGRESS`, weil `AI-COMPLETE-15` weiterhin eine vollständige Abschlussprüfung über alle generischen Text-/Regex-Heuristiken benötigt.
+  - Verifikation: `rg -n 'text\.includes|subtypes\.includes|roles\.includes|riskTags\.includes|effectTargets\.includes|legacyRoles\.includes|includes\("(multiaccess|free_trash|mantis|trace|damage|tag|hq_info|topdeck_info|access_trash|city-grid|economy|draw|pressure|contest|score|defend|ice|outside)' packages/ai/src --glob '!**/*.test.ts' --glob '!**/*.spec.ts' --glob '!**/legacy/**'` ohne Treffer.
+  - Verifikation: `git diff --check` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
@@ -9477,3 +9485,4 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
 | Audit 2 | `VERIFIED` | Keine neuen In-Scope-Findings zu `AI-COMPLETE-03`: unabhängiger Skriptcheck bestätigt Linecount <= 450, keine Imports, keine lokalen Implementierungen, keine Composition-Aufrufe, keine Inline-Arrows und vorhandene Facade-Marker; `src/decision/module-boundaries.test.ts` und `src/public-export-contract.test.ts` grün, 16 Tests; `corepack pnpm --filter @netgrid/ai typecheck` grün. |
 | Audit 3 | `VERIFIED` | Keine neuen In-Scope-Findings zu `AI-COMPLETE-04`: `packages/ai/src/tactical-plans.ts` liegt bei 306/307 gezählten Zeilen je Zählmethode, enthält keine lokalen Helper-Funktionen, importiert Runner-, Corp- und Step-Candidate-Matching-Owner-Module und `src/decision/module-boundaries.test.ts` ist grün, 14 Tests. |
 | Audit 4 | `VERIFIED` | Keine neuen In-Scope-Findings zu `AI-COMPLETE-04`: unabhängige Owner-Suche bestätigt `buildRunnerTacticalPlans`, `buildCorpTacticalPlans`, `candidateMatchesStep` und `planStepCandidatePriority` nur in ihren ausgelagerten Modulen; diese Module importieren `tactical-plans.ts` nicht; `tactical-plans.ts` hat keine verbotenen Direktimporte zu den splitten Plan-Implementierungsmodulen; `git diff --check` grün. |
+| Audit 5 | `VERIFIED` | Keine neuen In-Scope-Findings in der gezielten produktiven Restprüfung zu freien `includes`-Substring-Mustern für Rollen, Subtypes, RiskTags, EffectTargets, LegacyRoles und kritische Semantik-Tokens; dies ist ein Teil-Audit für `AI-COMPLETE-15`, kein Abschluss-Audit. |
