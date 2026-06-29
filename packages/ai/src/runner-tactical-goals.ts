@@ -55,12 +55,15 @@ export function buildRunnerTacticalGoals(
   if (params.input.side !== "runner") return [];
   const goals: RunnerTacticalGoal[] = [];
   const strategicIntent = params.strategicIntent;
+  const setupEngine = new Set(strategicIntent?.setupEngine ?? []);
+  const riskProfile = new Set(strategicIntent?.riskProfile ?? []);
+  const pressureVectors = new Set(strategicIntent?.pressureVectors ?? []);
   const runTargets = params.runTargetEvaluations ?? [];
   const economyPosture = params.economyPosture;
   const deckCapabilities = params.deckCapabilities;
   if (
-    strategicIntent?.setupEngine.includes("runner.search_breaker_setup") ||
-    strategicIntent?.setupEngine.includes("runner.rig_first") ||
+    setupEngine.has("runner.search_breaker_setup") ||
+    setupEngine.has("runner.rig_first") ||
     runnerUniversalCoverageNotInstalled(deckCapabilities)
   ) {
     goals.push(goal({
@@ -94,8 +97,8 @@ export function buildRunnerTacticalGoals(
     }));
   }
   if (
-    strategicIntent?.setupEngine.includes("runner.draw_or_search_setup") ||
-    strategicIntent?.setupEngine.includes("runner.search_breaker_setup")
+    setupEngine.has("runner.draw_or_search_setup") ||
+    setupEngine.has("runner.search_breaker_setup")
   ) {
     goals.push(goal({
       goalId: "runner.draw_or_search_for_setup",
@@ -113,9 +116,7 @@ export function buildRunnerTacticalGoals(
   );
   if (
     lowValueRuns.length > 0 ||
-    strategicIntent?.riskProfile.includes(
-      "runner.risky_universal_breaker_pressure",
-    )
+    riskProfile.has("runner.risky_universal_breaker_pressure")
   ) {
     goals.push(goal({
       goalId: "runner.avoid_low_value_risk_runs",
@@ -127,7 +128,7 @@ export function buildRunnerTacticalGoals(
         : "strategic_intent",
       evidence: [
         `low_value_target_count:${lowValueRuns.length}`,
-        `risky_universal_pressure:${strategicIntent?.riskProfile.includes("runner.risky_universal_breaker_pressure") === true}`,
+        `risky_universal_pressure:${riskProfile.has("runner.risky_universal_breaker_pressure")}`,
       ],
     }));
   }
@@ -189,9 +190,7 @@ export function buildRunnerTacticalGoals(
     }));
   }
   if (
-    strategicIntent?.pressureVectors.includes(
-      "runner.conditional_remote_contest",
-    ) &&
+    pressureVectors.has("runner.conditional_remote_contest") &&
     runTargets.some((target) => highValueRunTarget(target))
   ) {
     goals.push(goal({

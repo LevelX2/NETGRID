@@ -1470,10 +1470,9 @@ function effectTarget(
 function hasRiskyUniversalPressure(
   params: EvaluateRunnerRunTargetsParams,
 ): boolean {
+  const riskProfile = new Set(params.strategicIntent?.riskProfile ?? []);
   return (
-    params.strategicIntent?.riskProfile.includes(
-      "runner.risky_universal_breaker_pressure",
-    ) === true ||
+    riskProfile.has("runner.risky_universal_breaker_pressure") ||
     (params.deckCapabilities?.runner?.breakerInventory.some(
       (breaker) =>
         breaker.coverage.includes("universal") && breaker.risks.length > 0,

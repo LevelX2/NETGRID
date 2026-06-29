@@ -27,6 +27,7 @@ export function buildRunnerEconomyPosture(
   params: EconomyPostureParams,
 ): RunnerEconomyPosture {
   const credits = params.input.playerView.own.credits;
+  const setupEngine = new Set(params.strategicIntent?.setupEngine ?? []);
   const riskAdjustedRunReserve = hasRiskyUniversalPressure(params);
   const bankToolsRelevant =
     (params.deckCapabilities?.runner?.economyBankTools.length ?? 0) > 0;
@@ -63,9 +64,7 @@ export function buildRunnerEconomyPosture(
     credits <= 2 ||
     (creditBasePlan.economyPriority === "high" &&
       credits < creditBasePlan.desiredCreditReserve) ||
-    params.strategicIntent?.setupEngine.includes(
-      "runner.economy_setup_before_pressure",
-    ) === true;
+    setupEngine.has("runner.economy_setup_before_pressure");
   const recommendation = fundingNeed && hasCashOut
     ? "cash_out_bank"
     : fundingNeed || (buildEconomyBeforePressure && credits < desiredCreditReserve)
@@ -417,10 +416,9 @@ function creditBaseEconomyPriority(params: {
 function hasRiskyUniversalPressure(
   params: EconomyPostureParams,
 ): boolean {
+  const riskProfile = new Set(params.strategicIntent?.riskProfile ?? []);
   return (
-    params.strategicIntent?.riskProfile.includes(
-      "runner.risky_universal_breaker_pressure",
-    ) === true ||
+    riskProfile.has("runner.risky_universal_breaker_pressure") ||
     (params.deckCapabilities?.runner?.breakerInventory.some(
       (breaker) =>
         breaker.coverage.includes("universal") && breaker.risks.length > 0,

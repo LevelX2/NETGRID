@@ -9485,6 +9485,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-hand-development.test.ts` grün, 1 Datei, 19 Tests.
   - Verifikation: `rg -n 'setupEngine\.includes|strategicIntent\?\.setupEngine\.includes|intent\?\.setupEngine\.includes|intent\.setupEngine\.includes' packages/ai/src/runner-hand-development.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertsiebenundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-tactical-goals.ts`, `packages/ai/src/runner-economy-posture.ts` und `packages/ai/src/runner-run-target-evaluation.ts` binden Runner-StrategicIntent-Setup-, Risk- und Pressure-Vectors über lokale Sets statt direkter Array-`includes`-Prüfungen.
+  - Strukturierte IDs wie `runner.search_breaker_setup`, `runner.rig_first`, `runner.draw_or_search_setup`, `runner.economy_setup_before_pressure`, `runner.risky_universal_breaker_pressure` und `runner.conditional_remote_contest` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `runner-tactical-goals.test.ts` und `runner-run-target-evaluation.test.ts` sichern TacticalGoal-, EconomyPosture-, RunTarget- und Reserve-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-tactical-goals.test.ts src/runner-run-target-evaluation.test.ts` grün, 2 Dateien, 66 Tests.
+  - Verifikation: `rg -n 'setupEngine\.includes|riskProfile\.includes|pressureVectors\.includes|strategicIntent\?\.setupEngine\.includes|strategicIntent\?\.riskProfile\.includes|strategicIntent\?\.pressureVectors\.includes' packages/ai/src --glob '!**/*.test.ts' --glob '!**/legacy/**'` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
