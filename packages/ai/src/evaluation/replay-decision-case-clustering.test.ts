@@ -40,6 +40,8 @@ describe("ReplayDecisionCaseClustering", () => {
       expect.arrayContaining([
         "challenger_why_not:semantic_score_above_selected",
         "selected_why_not:selected_score_lower_than_challenger",
+        "selected_action_why_chosen:selected_by_plan_mapping",
+        "challenger_action_why_not:known_no_current_payoff",
       ]),
     );
     expect(report.productiveUseAllowed).toBe(false);
@@ -64,26 +66,47 @@ function sourceReport(): ReplayDecisionCaseExtractionReport {
       byPlanKind: {},
     },
     cases: [
-      caseEntry("case-1", "discovery", "draw_card", [
-        {
-          rank: 1,
-          selectedActionType: "start_run",
-          planKind: "simple_run_choice",
-          score: 8125,
-          visibleReasons: [],
-          warnings: [],
-          whyNot: ["semantic_score_above_selected"],
-        },
-        {
-          rank: 2,
-          selectedActionType: "draw_card",
-          planKind: "runner.obtain_breaker_coverage",
-          score: 5325,
-          visibleReasons: [],
-          warnings: [],
-          whyNot: ["selected_score_lower_than_challenger"],
-        },
-      ]),
+      caseEntry(
+        "case-1",
+        "discovery",
+        "draw_card",
+        [
+          {
+            rank: 1,
+            selectedActionType: "start_run",
+            planKind: "simple_run_choice",
+            score: 8125,
+            visibleReasons: [],
+            warnings: [],
+            whyNot: ["semantic_score_above_selected"],
+          },
+          {
+            rank: 2,
+            selectedActionType: "draw_card",
+            planKind: "runner.obtain_breaker_coverage",
+            score: 5325,
+            visibleReasons: [],
+            warnings: [],
+            whyNot: ["selected_score_lower_than_challenger"],
+          },
+        ],
+        [
+          {
+            rank: 1,
+            actionType: "draw_card",
+            selected: true,
+            whyChosen: ["selected_by_plan_mapping"],
+            whyNot: [],
+          },
+          {
+            rank: 2,
+            actionType: "start_run",
+            selected: false,
+            whyChosen: [],
+            whyNot: ["known_no_current_payoff"],
+          },
+        ],
+      ),
       caseEntry("case-2", "discovery", "draw_card", [
         { rank: 1, selectedActionType: "start_run", planKind: "simple_run_choice", score: 7655, visibleReasons: [], warnings: [], whyNot: [] },
         { rank: 2, selectedActionType: "draw_card", planKind: "runner.obtain_breaker_coverage", score: 5325, visibleReasons: [], warnings: [], whyNot: [] },
@@ -105,6 +128,7 @@ function caseEntry(
   split: "discovery" | "holdout",
   selectedActionType: string,
   rankedAlternatives: ReplayDecisionCaseExtractionReport["cases"][number]["observables"]["rankedAlternatives"],
+  actionAlternatives: ReplayDecisionCaseExtractionReport["cases"][number]["observables"]["actionAlternatives"] = [],
 ): ReplayDecisionCaseExtractionReport["cases"][number] {
   return {
     kind: "replay_decision_case",
@@ -142,7 +166,7 @@ function caseEntry(
       whyNot: [],
       scoreBreakdown: [],
       rankedAlternatives,
-      actionAlternatives: [],
+      actionAlternatives,
     },
     reproducibility: {
       stateVersion: 1,

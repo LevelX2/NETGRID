@@ -136,6 +136,12 @@ function candidateFromCase(
   const selectedAlternative = decisionCase.observables.rankedAlternatives.find(
     (entry) => entry.selectedActionType === decisionCase.decision.selectedActionType,
   );
+  const selectedActionAlternative =
+    decisionCase.observables.actionAlternatives.find((entry) => entry.selected);
+  const challengerActionAlternative =
+    decisionCase.observables.actionAlternatives.find(
+      (entry) => !entry.selected && entry.actionType === top.selectedActionType,
+    );
   const selectedScore = selectedAlternative?.score ?? decisionCase.decision.score;
   if (top.score === undefined || selectedScore === undefined) {
     return blockedCandidate(decisionCase, "blocked_shadow_only", [
@@ -182,13 +188,33 @@ function candidateFromCase(
         "selected_why_not",
         selectedAlternative?.whyNot ?? decisionCase.observables.whyNot,
       ),
+      ...whyFactEvidence(
+        "selected_action_why_chosen",
+        selectedActionAlternative?.whyChosen ?? [],
+      ),
+      ...whyFactEvidence(
+        "selected_action_why_not",
+        selectedActionAlternative?.whyNot ?? [],
+      ),
+      ...whyFactEvidence(
+        "challenger_action_why_chosen",
+        challengerActionAlternative?.whyChosen ?? [],
+      ),
+      ...whyFactEvidence(
+        "challenger_action_why_not",
+        challengerActionAlternative?.whyNot ?? [],
+      ),
       ...decisionCase.observables.warnings.map((warning) => `warning:${warning}`),
     ],
   };
 }
 
 function whyNotEvidence(prefix: string, whyNot: readonly string[]): string[] {
-  return whyNot
+  return whyFactEvidence(prefix, whyNot);
+}
+
+function whyFactEvidence(prefix: string, facts: readonly string[]): string[] {
+  return facts
     .slice(0, 6)
     .map((fact) => redactSemanticString(fact).trim())
     .filter((fact) => fact.length > 0)
