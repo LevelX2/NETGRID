@@ -1847,7 +1847,7 @@ function evaluateRunnerRemoteContestAndTrashDiscipline(
       target !== undefined &&
       recentRunnerDeclinedRelevantRemoteTrash(input, target)
     ) {
-      score -= 560;
+      score -= 4200;
       reasons.push("avoid_repeat_remote_after_declined_trash");
       evidence.push("runner_repeat_remote_after_declined_trash_penalized:true");
     }
@@ -7658,7 +7658,7 @@ function recentRunnerDeclinedRelevantRemoteTrash(
     if (event.publicPayload.actor !== "runner") continue;
     const actionType = publicActionType(event);
     if (actionType === "start_run") {
-      currentRunTarget = serverIdFromEvent(event);
+      currentRunTarget = publicRunServerId(event);
       sawAccessOnTarget = false;
       if (currentRunTarget !== serverId) declinedOnTarget = false;
       continue;
@@ -7680,6 +7680,53 @@ function recentRunnerDeclinedRelevantRemoteTrash(
   return (
     declinedOnTarget && remoteServerHasKnownRelevantTrashTarget(input, serverId)
   );
+}
+
+function publicRunServerId(event: PublicGameEvent): string | undefined {
+  return (
+    serverIdFromEvent(event) ??
+    visibleServerLabelId(stringPayloadField(event.publicPayload, "serverLabel")) ??
+    visibleServerLabelId(stringPayloadField(event.publicPayload, "serverName")) ??
+    visibleServerLabelId(
+      nestedStringPayload(event.publicPayload, "targets", "serverLabel"),
+    ) ??
+    visibleServerLabelId(
+      nestedStringPayload(event.publicPayload, "targets", "serverName"),
+    )
+  );
+}
+
+function visibleServerLabelId(label: string | undefined): string | undefined {
+  if (!label) return undefined;
+  const normalized = label.trim().toLowerCase();
+  if (normalized === "hq") return "hq";
+  if (normalized === "r&d" || normalized === "rd" || normalized === "rnd")
+    return "rd";
+  if (normalized === "archives") return "archives";
+  if (normalized.startsWith("remote_")) return normalized;
+  const remoteMatch = /^remote[\s_-]+(\d+)$/.exec(normalized);
+  const remoteIndex = remoteMatch?.[1];
+  if (remoteIndex) return `remote_${Number.parseInt(remoteIndex, 10)}`;
+  return undefined;
+}
+
+function nestedStringPayload(
+  payload: Record<string, unknown>,
+  parentKey: string,
+  childKey: string,
+): string | undefined {
+  const parent = payload[parentKey];
+  if (!parent || typeof parent !== "object" || Array.isArray(parent))
+    return undefined;
+  return stringPayloadField(parent as Record<string, unknown>, childKey);
+}
+
+function stringPayloadField(
+  payload: Record<string, unknown>,
+  key: string,
+): string | undefined {
+  const value = payload[key];
+  return typeof value === "string" ? value : undefined;
 }
 
 function remoteTrashVisibleCorpValueRemaining(card: VisibleCard): number {

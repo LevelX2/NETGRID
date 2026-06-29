@@ -55,7 +55,7 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.scopeAllowedCount).toBe(45);
     expect(report.metrics.pilotWouldOverrideCount).toBe(45);
     expect(report.metrics.pilotActualOverrideCount).toBe(0);
-    expect(report.metrics.averageScoreGap).toBe(25);
+    expect(report.metrics.averageScoreGap).toBe(24.52);
     expect(report.metrics.blockedByReason).toMatchObject({
       basic_setup_action_type_blocked: 30,
       corp_score_window_wrong_side: 27,
@@ -171,19 +171,9 @@ describe("SemanticShadowLeague", () => {
       "runner_real_tag_cleanup:expected=remove_tag:observed=start_run",
       "runner_real_tagged_remove_before_run:expected=remove_tag:observed=start_run",
     ]);
-    expect(report.followupCandidates).toHaveLength(8);
+    expect(report.followupCandidates).toHaveLength(7);
     expect(report.followupCandidates).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({
-          scenarioId: "corp_real_advance_score_window",
-          issueClass: "forbidden_mistake",
-          suggestedPackage: "forbidden-mistake-regression",
-          evidence: expect.arrayContaining([
-            "scenario:corp_real_advance_score_window",
-            "issue_class:forbidden_mistake",
-            "observed_mistake:missed_score_window",
-          ]),
-        }),
         expect.objectContaining({
           scenarioId: "runner_real_tag_cleanup",
           issueClass: "expectation_mismatch",
@@ -347,9 +337,9 @@ describe("SemanticShadowLeague", () => {
       scenarioCount: 54,
       eligible: 23,
       wouldOverride: 23,
-      badOverrideRisk: 1,
-      knownNoGoCases: ["corp_real_advance_score_window"],
-      recommendation: "do_not_default",
+      badOverrideRisk: 0,
+      knownNoGoCases: [],
+      recommendation: "local_default_dry_run_candidate",
       productiveUseAllowed: false,
       runtimeConsumerStatus: "none",
       noRuntimeEffect: true,
@@ -358,7 +348,7 @@ describe("SemanticShadowLeague", () => {
     expect(dryRun.evidence).toEqual(
       expect.arrayContaining([
         "local_default_dry_run_scope:basic_setup",
-        "recommendation:do_not_default",
+        "recommendation:local_default_dry_run_candidate",
         "productive_use_allowed:false",
       ]),
     );

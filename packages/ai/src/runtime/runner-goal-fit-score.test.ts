@@ -200,6 +200,58 @@ describe("runnerSemanticGoalFitScoreComponent", () => {
       "goal:runner.avoid_low_value_risk_runs",
     );
   });
+
+  it("does not score run-if-free unknown probes as generic goal fit", () => {
+    const action = {
+      actionId: "run-archives",
+      side: "runner",
+      type: "start_run",
+      payload: { serverId: "archives" },
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals([]);
+    const evaluation = {
+      targetServerId: "archives",
+      recommendation: "run_if_free",
+      pathPassability: "reachable",
+      accessPayoff: "unknown",
+    } as unknown as RunnerRunTargetEvaluation;
+
+    expect(
+      runnerSemanticGoalFitScoreComponent(
+        input,
+        action,
+        "simple_run_choice",
+        undefined,
+        testDependencies({ evaluation }),
+      ),
+    ).toBeUndefined();
+  });
+
+  it("does not score gain-credits-first runs as generic goal fit", () => {
+    const action = {
+      actionId: "run-hq",
+      side: "runner",
+      type: "start_run",
+      payload: { serverId: "hq" },
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals([]);
+    const evaluation = {
+      targetServerId: "hq",
+      recommendation: "gain_credits_first",
+      pathPassability: "reachable",
+      accessPayoff: "unknown",
+    } as unknown as RunnerRunTargetEvaluation;
+
+    expect(
+      runnerSemanticGoalFitScoreComponent(
+        input,
+        action,
+        "simple_run_choice",
+        undefined,
+        testDependencies({ evaluation }),
+      ),
+    ).toBeUndefined();
+  });
 });
 
 function runnerInputWithGoals(

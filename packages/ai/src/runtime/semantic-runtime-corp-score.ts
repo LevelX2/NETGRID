@@ -311,10 +311,16 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         corpReserveScoreComponent(
           "corp_central_rez_floor_penalty",
           "Zentrale Rez-Reserve",
-          -2600,
+          -4200,
           centralRezFloor.evidence,
         ),
       );
+      components.push({
+        key: "corp_central_unrezzable_ice_install_stop",
+        label: "Unrezzbare Zentral-ICE-Installation",
+        value: -500,
+        reason: centralRezFloor.evidence.join("|"),
+      });
     }
   }
   const contestableScoreLine =

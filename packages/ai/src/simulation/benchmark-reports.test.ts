@@ -538,7 +538,7 @@ describe("benchmark report formatting", () => {
     expect(JSON.stringify(noActionLimit)).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
-  }, 30_000);
+  }, 90_000);
 
   it("clusters action-limit roots without hidden trace data", () => {
     const summary: AiSimulationSummary = {

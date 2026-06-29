@@ -17657,7 +17657,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(remoteRunTarget).toMatchObject({
       accessPayoff: "trash_unaffordable",
       knownAccessState: "known_no_current_payoff",
-      recommendation: "gain_credits_first",
+      recommendation: "declined_trash_memory_active",
     });
     expect(remoteRunTarget?.evidence).toEqual(
       expect.arrayContaining([

@@ -337,12 +337,45 @@ function publicActor(event: PublicGameEvent): string | undefined {
 }
 
 function eventServerId(event: PublicGameEvent): string | undefined {
-  return (
+  const raw =
     stringPayloadValue(event, "serverId") ??
     stringPayloadValue(event, "attackedServerId") ??
     stringPayloadValue(event, "targetServerId") ??
-    stringPayloadValue(event, "server")
+    stringPayloadValue(event, "server");
+  if (raw) return canonicalServerId(raw);
+  return (
+    visibleServerLabelId(stringPayloadValue(event, "serverLabel")) ??
+    visibleServerLabelId(stringPayloadValue(event, "serverName")) ??
+    visibleServerLabelId(nestedStringPayloadValue(event, "targets", "serverLabel")) ??
+    visibleServerLabelId(nestedStringPayloadValue(event, "targets", "serverName"))
   );
+}
+
+function canonicalServerId(serverId: string): string {
+  const normalized = serverId.trim().toLowerCase();
+  if (normalized === "hq") return "hq";
+  if (normalized === "rd" || normalized === "rnd" || normalized === "r&d")
+    return "rd";
+  if (normalized === "archives") return "archives";
+  if (normalized.startsWith("remote_")) return normalized;
+  const remoteMatch = /^remote[\s_-]+(\d+)$/.exec(normalized);
+  const remoteIndex = remoteMatch?.[1];
+  if (remoteIndex) return `remote_${Number.parseInt(remoteIndex, 10)}`;
+  return serverId;
+}
+
+function visibleServerLabelId(label: string | undefined): string | undefined {
+  if (!label) return undefined;
+  const canonical = canonicalServerId(label);
+  if (
+    canonical === "hq" ||
+    canonical === "rd" ||
+    canonical === "archives" ||
+    canonical.startsWith("remote_")
+  ) {
+    return canonical;
+  }
+  return undefined;
 }
 
 function stringPayloadValue(
@@ -350,6 +383,18 @@ function stringPayloadValue(
   key: string,
 ): string | undefined {
   const value = event.publicPayload[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+function nestedStringPayloadValue(
+  event: PublicGameEvent,
+  parentKey: string,
+  childKey: string,
+): string | undefined {
+  const parent = event.publicPayload[parentKey];
+  if (!parent || typeof parent !== "object" || Array.isArray(parent))
+    return undefined;
+  const value = (parent as Record<string, unknown>)[childKey];
   return typeof value === "string" ? value : undefined;
 }
 

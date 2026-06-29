@@ -517,7 +517,7 @@ function deriveKnownPositionMemory(playerView: PlayerView, history: PublicGameEv
     if (!knownPositionFamilySet.has(classification.family)) continue;
 
     const zone =
-      classification.serverId ??
+      accessEventZone(classification) ??
       (event ? stringValue(event.publicPayload.privateLookZone) : undefined) ??
       (event ? stringValue(event.publicPayload.exposedServerId) : undefined) ??
       "unknown";
@@ -1070,7 +1070,7 @@ function rdTopRemovedByRunnerAccess(event: BeliefEventClassification): boolean {
   ]);
   return (
     event.actor === "runner" &&
-    event.serverId === "rd" &&
+    accessEventZone(event) === "rd" &&
     runnerRdTopRemovalActionTypeSet.has(event.actionType)
   );
 }
@@ -1079,7 +1079,7 @@ function isRunnerHqAccess(event: BeliefEventClassification): boolean {
   return (
     event.actor === "runner" &&
     event.actionType === "access_card" &&
-    event.serverId === "hq" &&
+    accessEventZone(event) === "hq" &&
     event.accessedArea !== "root" &&
     !event.accessedCardPositionKey?.startsWith("root:")
   );
@@ -1220,7 +1220,7 @@ function knownDefinitionsFromEvent(
     return [
       {
         definitionId,
-        positionKey: classification.serverId === "rd" ? "top" : "accessed"
+        positionKey: accessEventZone(classification) === "rd" ? "top" : "accessed"
       }
     ];
   }
@@ -1482,7 +1482,30 @@ function deriveRndTopFreshness(
 }
 
 function isRunnerRdAccess(event: BeliefEventClassification): boolean {
-  return event.actor === "runner" && event.actionType === "access_card" && event.serverId === "rd";
+  return (
+    event.actor === "runner" &&
+    event.actionType === "access_card" &&
+    accessEventZone(event) === "rd"
+  );
+}
+
+function accessEventZone(
+  event: BeliefEventClassification,
+): string | undefined {
+  if (event.serverId) return event.serverId;
+  if (event.runTargetServerId) return event.runTargetServerId;
+  if (event.accessedArea) {
+    const zone = canonicalStructuredServerId(event.accessedArea);
+    if (zone === "hq" || zone === "rd" || zone === "archives")
+      return zone;
+  }
+  const positionPrefix = event.accessedCardPositionKey?.split(":")[0];
+  if (positionPrefix) {
+    const zone = canonicalStructuredServerId(positionPrefix);
+    if (zone === "hq" || zone === "rd" || zone === "archives")
+      return zone;
+  }
+  return undefined;
 }
 
 function rndInvalidationReason(event: BeliefEventClassification): string | undefined {
@@ -1497,7 +1520,7 @@ function rndInvalidationReason(event: BeliefEventClassification): string | undef
     "move_to_set_aside",
     "return_from_set_aside",
   ]);
-  if (event.serverId === "rd" && rdMovedCardActionTypeSet.has(event.actionType)) {
+  if (accessEventZone(event) === "rd" && rdMovedCardActionTypeSet.has(event.actionType)) {
     return "rd_access_moved_card";
   }
   return undefined;
@@ -1648,8 +1671,12 @@ function visibleServerLabelId(label: string | undefined): string | undefined {
 }
 
 function canonicalStructuredServerId(serverId: string): string {
-  if (serverId === "hq" || serverId === "rd" || serverId === "archives") return serverId;
-  if (serverId.startsWith("remote_")) return serverId;
+  const normalized = serverId.trim().toLowerCase();
+  if (normalized === "hq") return "hq";
+  if (normalized === "rd" || normalized === "rnd" || normalized === "r&d")
+    return "rd";
+  if (normalized === "archives") return "archives";
+  if (normalized.startsWith("remote_")) return normalized;
   return serverId;
 }
 

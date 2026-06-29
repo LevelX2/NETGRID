@@ -128,7 +128,8 @@ export function runnerSemanticGoalFitScoreComponent(
   if (
     evaluation &&
     evaluation.pathPassability === "reachable" &&
-    evaluation.recommendation !== "do_not_run_now"
+    (evaluation.recommendation === "run_now" ||
+      runnerRunTargetHasHighValueAccess(evaluation))
   ) {
     return {
       key: "runner_goal_fit_reachable_run",

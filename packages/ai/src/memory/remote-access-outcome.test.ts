@@ -210,6 +210,40 @@ describe("remote access outcome memory", () => {
     );
   });
 
+  it("derives no-progress memory from visible remote labels in public events", () => {
+    const input = aiInput({
+      eventTail: [
+        publicEvent("evt-run", 8, "start_run", {
+          actor: "runner",
+          actionType: "start_run",
+          serverLabel: "Remote 1",
+        }),
+        publicEvent("evt-access", 9, "access_card", {
+          actor: "runner",
+          actionType: "access_card",
+          targets: { serverLabel: "Remote 1" },
+          cardDefinitionId: "onr_v1_317_data-masons",
+        }),
+      ],
+      servers: [
+        server("remote_1", [
+          visibleCard("remote-root", {
+            definitionId: "onr_v1_317_data-masons",
+            type: "asset",
+            trashCost: 1,
+          }),
+        ]),
+      ],
+    });
+
+    expect(
+      deriveObservedRemoteNoProgressAccessMemory(input, "remote_1"),
+    ).toMatchObject({
+      applies: true,
+      suppressesPlanBonus: true,
+    });
+  });
+
   it("does not derive no-progress memory after a visible remote change", () => {
     const input = aiInput({
       eventTail: [

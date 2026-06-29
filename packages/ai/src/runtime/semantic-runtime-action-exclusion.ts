@@ -107,8 +107,7 @@ export function semanticRuntimeActionExclusion(
   if (
     input.side !== "runner" ||
     !serverId ||
-    !accessServerId ||
-    !runTargetEvaluation
+    !accessServerId
   )
     return undefined;
   const blinkRunExclusion = dependencies.runnerBlinkRunExclusion(input, action);
