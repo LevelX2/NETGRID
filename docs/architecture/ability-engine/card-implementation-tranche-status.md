@@ -102,7 +102,7 @@ Der ActionType ist bewusst neutral: `activated_card_ability`, nicht `gain_credit
 - Corporate Negotiating Center: Legacy-/Reveal-/Chronik-Scope.
 - Restrictive Net Zoning: Legacy-/Target-Binding-Scope.
 - MRAM / Militech MRAM: Legacy-/ActiveModifier-Query-Stand für Handgrößenmodifier.
-- Krash / Virizz: Legacy-/ActiveModifier-Query-Stand für Run- bzw. Breakkostenmodifier. Diese Query-Rekonstruktion ist Übergang, nicht finales Ability-Engine-Zielbild.
+- Krash / Virizz: Krash bleibt Icebreaker-/Encounter-Scope; Virizz bleibt Legacy-/ActiveModifier-Query-Stand für Run-Breakkostenmodifier. Diese Query-Rekonstruktion ist Übergang, nicht finales Ability-Engine-Zielbild.
 
 ## 5. Bestehende generische Bausteine
 

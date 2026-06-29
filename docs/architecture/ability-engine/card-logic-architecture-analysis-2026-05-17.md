@@ -128,7 +128,7 @@ Beispiele:
 - Start-of-turn-Effekte laufen in `startRunnerTurn`, `applyRunnerStartOfTurnEffects`, `applyCorpStartOfTurnEffects`.
 - `Corporate Negotiating Center` öffnet manuell eine Pending Choice über `startCorporateNegotiatingCenterChoice`.
 - `Startup Immolator` nutzt einen Run-Zwischenzustand `startupImmolatorPendingPassedIceId`.
-- `Krash` nutzt `run.remainderStrengthBonusByBreaker`, nicht einen allgemeinen Duration-Modifier.
+- `Grubb` nutzt wegen seines Kartentexts `run.remainderStrengthBonusByBreaker`; `Krash` wurde am 2026-06-29 als normale encounter-gebundene Icebreaker-Pump korrigiert.
 - Olivia Salazar nutzt einen eigenen Approach-Rez-Pfad und Run-End-Derez-Flags.
 
 Es gibt also Timingfenster, aber noch kein Modell wie:
@@ -187,8 +187,8 @@ Aktueller Stand:
 
 - Gemeint ist `Krash`, nicht `Crash`.
 - `Krash` ist als Icebreaker-Definition generisch angelegt.
-- Die runweite Laufzeit ist aber ein Engine-Sonderfall für `[GRUBB_ID, KRASH_ID]`.
-- Der Bonus landet in `run.remainderStrengthBonusByBreaker`.
+- Korrektur 2026-06-29: Der gedruckte Text nennt keine Laufzeit "for the remainder of this run"; der Pump gilt daher nur für den aktuellen ICE-Encounter.
+- Der frühere Run-Sonderfall für `[GRUBB_ID, KRASH_ID]` ist überholt. `Grubb` bleibt wegen seines ausdrücklichen Kartentexts im Run-Bonuspfad, `Krash` nicht.
 
 Architekturbefund:
 
@@ -500,7 +500,7 @@ Für jede freigegebene Karte sollte es mindestens folgende Testfamilien geben:
 
 - Bekannte Fehlerfälle als permanente Regressionen sichern:
   - MRAM Handgröße
-  - Krash runweiter Pump
+  - Krash encounter-gebundener Pump und Grubb runweiter Pump
   - Olivia reduzierte Rez-Kosten
   - Startup Immolator Post-Pass-Aktion
   - Corporate Negotiating Center Reveal

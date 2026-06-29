@@ -33,7 +33,7 @@ Recommended P3.22:
 | Loan from Chiba | `onr_v1_168_loan-from-chiba` | `legacy_engine_special_case` | `index.ts` install path | Not fully conformant | `on_leave_play`, pay-or-lose-game, optional end-of-turn self-trash, Runner debt lifecycle | Medium/Large | Dedicated lifecycle batch |
 | Corporate Negotiating Center | `onr_v1_314_corporate-negotiating-center` | `legacy_engine_special_case` | `index.ts`, `mechanics/hidden-zone.ts` | Appears conformant | Hidden-zone choice, reveal selected cards, optional start-of-turn choice, public/private payload split | Large | Hidden-info/reveal batch |
 | Restrictive Net Zoning | `onr_v1_173_restrictive-net-zoning` | `legacy_engine_special_case` | `index.ts` install choice and ICE install tax | Not conformant: uses `+1`, spoiler says `+2` | Persistent target binding, on-install server choice, Runner-source server-scoped install-cost modifier | Medium/Large | Immediate correctness hotfix, later target-binding pilot |
-| Krash | `onr_v1_039_krash` | `legacy_engine_special_case` | `index.ts`, `active-modifiers.ts`, shared icebreaker fields | Appears conformant | Icebreaker ability DSL, pump duration, break-subroutine action/effect, current encounter binding | Large | Icebreaker DSL batch |
+| Krash | `onr_v1_039_krash` | `legacy_engine_special_case` | `index.ts`, shared icebreaker fields, `card-implementations/onr-v1/runner/programs/krash.ts` | Appears conformant after 2026-06-29 encounter-duration correction | Icebreaker ability DSL, pump duration, break-subroutine action/effect, current encounter binding | Large | Icebreaker DSL batch |
 | Virizz | `onr_v1_277_virizz` | `legacy_engine_special_case` | shared subroutine data, `index.ts`, `active-modifiers.ts` | Appears conformant | ICE subroutine CardImplementation DSL, temporary run-duration break-cost modifier | Medium/Large | ICE subroutine DSL or run-duration modifier batch |
 
 ## 3. Karten im Detail
@@ -303,33 +303,33 @@ Current implementation:
 - Current special-case locations:
   - `packages/shared/src/index.ts` shared icebreaker fields.
   - `packages/engine/src/index.ts` encounter pump/break action generation and resolution.
-  - `packages/engine/src/ability-engine/active-modifiers.ts` active run-duration breaker-strength view.
+  - `packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts` for the printed icebreaker abilities.
 - Krash is represented as an installed Runner program/icebreaker with:
   - break cost 2,
   - pump cost 2,
   - base strength 0,
   - memory cost 1.
-- Pumping Krash adds a run-duration strength bonus through `run.remainderStrengthBonusByBreaker`.
+- Pumping Krash adds encounter-bound strength through the standard icebreaker pump path. It does not use `run.remainderStrengthBonusByBreaker`.
 - Break actions use the current break-cost calculation path, so later break-cost modifiers such as Crystal Palace and Virizz participate in revalidation.
 
 Known tests:
 
-- Krash pump strength persists for the current run and clears at run end.
+- Krash pump strength resets when the current ICE encounter ends.
 - Krash break and pump behavior is covered in existing encounter/icebreaker tests.
 
 Spoiler conformance:
 
-- Appears conformant under the current project model where icebreaker strength pumps last for the current run.
+- Appears conformant after the 2026-06-29 correction: the printed text has no run-duration clause, so strength does not carry to the next ICE.
 
 Missing tests or risks:
 
-- Existing tests are adequate for current legacy behavior.
+- Existing tests cover reset between ICE and prevent the superseded run-duration behavior from returning.
 - Migration should avoid duplicating shared icebreaker fields and CardImplementation abilities.
 
 Missing CardImplementation building blocks:
 
 - A generic icebreaker ability DSL.
-- Pump-strength effect with current-run duration.
+- Pump-strength effect with current-encounter duration.
 - Break-subroutine action/effect integrated with current encounter revalidation.
 - Current ICE/subroutine target binding.
 - Interaction with break-subroutine-cost modifiers.

@@ -114,7 +114,7 @@ Kartentypverteilung:
 - Corporate Negotiating Center bleibt Legacy/Reveal-Scope.
 - Restrictive Net Zoning bleibt Legacy/Target-Binding-Scope.
 - MRAM / Militech MRAM bleiben Hand-size ActiveModifier/Shared-Legacy.
-- Krash / Virizz bleiben run-duration ActiveModifier-Legacy.
+- Krash bleibt Icebreaker-/Encounter-Scope; Virizz bleibt run-duration Breakkosten-Legacy.
 
 ## 6. Wiederkehrende Architektur-Pattern
 
@@ -149,7 +149,7 @@ Die Wellen stehen in `card-implementation-v1-migration-waves.md`. Kurzfassung:
 5. Corporate Negotiating Center: Hidden-Info-/Reveal-Pilot; Risiko PublicPayload/Chronik-Redaktion.
 6. Restrictive Net Zoning: Target-Binding-/server-scoped-modifier-Pilot; Risiko persistent target and server labels.
 7. MRAM / Militech MRAM: passive hand_size modifier; Risiko Shared-Feld-Migration und ActiveModifier-Grenze.
-8. Krash / Virizz: run-duration modifier migration; Risiko duration cleanup and break-cost/strength semantics.
+8. Krash / Virizz: Icebreaker-/Run-Duration-Migration; Krash braucht encounter-gebundene Pump-/Break-Semantik, Virizz run-duration Breakkosten-Semantik.
 9. Tesseract Fort Construction / Tutor: additional_subroutine Folgekarte; Risiko komplexere Subroutine-Semantik als Encoder, Inc.
 10. Eine einfache pending Prep/Operation mit tag oder damage: niedriger Scope für den nächsten Effect-Pilot, nachdem `lose_credits` mit Closed Accounts bereits abgedeckt ist.
 

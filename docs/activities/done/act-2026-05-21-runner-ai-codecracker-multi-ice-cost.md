@@ -36,9 +36,9 @@ Die Runner-KI soll bei sichtbaren gerezzten ICE-Pfaden korrekt einplanen, dass n
 - Nutzerbefund vom 2026-05-21: Die Runner-KI lief mit zu wenigen Credits auf R&D mit zwei gerezzten `Endless Corridor`, brach ab, nahm 1 Credit und startete erneut einen weiterhin nicht bezahlbaren Run.
 - `Codecracker` (`onr_v1_014_codecracker`) hat Stärke 0, pumpt für 1 Credit um +1 Stärke und bricht Code-Gate-Subroutinen für 0 Credits.
 - `Endless Corridor` (`onr_v1_239_endless-corridor`) ist ein Code Gate mit Stärke 2 und zwei End-the-run-Subroutinen.
-- Gesicherte Engine-Grenze: normale Breaker-Pumps werden beim Encounter-Ende zurückgesetzt; nur `Grubb` und `Krash` nutzen den run-dauernden Strength-Bonuspfad.
+- Gesicherte Engine-Grenze: normale Breaker-Pumps werden beim Encounter-Ende zurückgesetzt; `Grubb` nutzt wegen seines ausdrücklichen Kartentexts den run-dauernden Strength-Bonuspfad. Die frühere `Krash`-Ausnahme wurde am 2026-06-29 als falsche Regelannahme korrigiert.
 - Aktueller KI-Befund: `packages/ai/src/visible-run-analysis.ts` trägt die erreichte Breaker-Stärke über mehrere ICE hinweg weiter und unterschätzt dadurch normale Breaker-Pumpkosten.
-- Verwandtes erledigtes Paket: `docs/activities/done/act-2026-05-17-crash-pump-run-duration.md` hält die `Krash`-Ausnahme fest.
+- Verwandtes erledigtes Paket: `docs/activities/done/act-2026-05-17-crash-pump-run-duration.md` ist durch die Krash-Regelkorrektur vom 2026-06-29 überholt.
 
 ## Scope
 
@@ -49,7 +49,7 @@ Die Runner-KI soll bei sichtbaren gerezzten ICE-Pfaden korrekt einplanen, dass n
 
 ## Nicht im Scope
 
-- Keine Änderung an Engine-Regeln für `Codecracker`, `Endless Corridor`, `Grubb` oder `Krash`.
+- Keine Änderung an Engine-Regeln für `Codecracker`, `Endless Corridor` oder `Grubb`.
 - Keine Änderung an Kartendaten, sofern die lokalen Werte bestätigt bleiben.
 - Keine UI-/Chronik-Änderung.
 - Keine generelle Neubewertung unbekannter oder unrezzter ICE.
@@ -59,7 +59,7 @@ Die Runner-KI soll bei sichtbaren gerezzten ICE-Pfaden korrekt einplanen, dass n
 - [ ] `Codecracker` gegen zwei gerezzte `Endless Corridor` wird als 4-Credit-Pfad bewertet.
 - [ ] Runner-KI mit 3 Credits startet in diesem Zustand keinen R&D-Run, wenn eine legale Economy-Aktion verfügbar ist.
 - [ ] Runner-KI mit 4 Credits wird durch die Korrektur nicht pauschal vom sichtbaren R&D-Run abgehalten.
-- [ ] Run-dauernde Pump-Ausnahmen wie `Krash` bleiben erhalten und werden nicht regressiert.
+- [ ] Run-dauernde Pump-Ausnahmen wie `Grubb` bleiben erhalten und werden nicht regressiert.
 - [ ] Die geteilte sichtbare Breakkostenanalyse ist für Runner- und Corp-Planung konsistent.
 
 ## Umsetzungshinweise
@@ -71,7 +71,7 @@ Die Runner-KI soll bei sichtbaren gerezzten ICE-Pfaden korrekt einplanen, dass n
 
 ## Ergebnisnotiz
 
-Erledigt am 2026-05-21. Die sichtbare Runanalyse trägt Breaker-Stärke über mehrere ICE nur noch für run-dauernde Pump-Ausnahmen weiter (`Grubb`, `Krash` oder Karten mit `run_remainder_strength_bonus`). Normale Breaker wie `Codecracker` werden pro ICE-Encounter neu mit ihrer Ausgangsstärke bewertet. Dadurch kostet der sichtbare Pfad `Codecracker` gegen zwei gerezzte `Endless Corridor` 4 Credits; mit 3 Credits wählt die Runner-KI Economy statt R&D-Run, mit 4 Credits ist der Pfad nicht mehr als blockiert markiert.
+Erledigt am 2026-05-21; aktualisiert am 2026-06-29. Die sichtbare Runanalyse trägt Breaker-Stärke über mehrere ICE nur noch für echte run-dauernde Pump-Ausnahmen weiter (`Grubb` oder Karten mit `run_remainder_strength_bonus`). Normale Breaker wie `Codecracker` und `Krash` werden pro ICE-Encounter neu mit ihrer Ausgangsstärke bewertet. Dadurch kostet der sichtbare Pfad `Codecracker` gegen zwei gerezzte `Endless Corridor` 4 Credits; mit 3 Credits wählt die Runner-KI Economy statt R&D-Run, mit 4 Credits ist der Pfad nicht mehr als blockiert markiert.
 
 Die gleiche Korrektur ist im Corp-Contest-Kapazitätspfad berücksichtigt, damit Runner- und Corp-Planung dieselbe sichtbare Breakkostenannahme nutzen. Der bestehende generische Multi-ICE-Test wurde auf die korrigierte normale Pump-Laufzeit angepasst.
 

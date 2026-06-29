@@ -16,6 +16,8 @@ blockedBy: []
 resultArtifacts:
   - packages/engine/src/index.ts
   - packages/engine/src/index.test.ts
+supersededBy:
+  - "2026-06-29 Krash encounter-duration rules correction"
 checks:
   - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "Krash strength pumps" --passWithNoTests
   - corepack pnpm --filter @netgrid/engine typecheck
@@ -23,6 +25,8 @@ checks:
 ---
 
 # Krash: Pump-Bonus bis zum Run-Ende halten
+
+> Korrektur 2026-06-29: Diese Activity beruhte auf einer falschen Regelannahme. Der gedruckte Krash-Text sagt nur `[2]: +1 strength`; im Gegensatz zu Grubb steht dort kein "for the remainder of this run". Der Krash-Pump ist daher wieder encounter-gebunden und muss beim nächsten ICE neu bezahlt werden.
 
 ## Ziel
 
@@ -62,4 +66,4 @@ Der Stärke-Pump von `Krash` soll innerhalb desselben Runs beim nächsten ICE er
 
 ## Ergebnisnotiz
 
-Krash nutzt jetzt den rungebundenen Strength-Bonuspfad. Der Pump-Bonus bleibt beim nächsten ICE desselben Runs in `PlayerView` und LegalActions wirksam und wird beim Run-Ende entfernt. Eine Engine-Regression deckt zwei ICE in einem Run und den Cleanup nach Zugriff ab.
+Überholt durch Korrektur vom 2026-06-29: Krash nutzt nicht mehr den rungebundenen Strength-Bonuspfad. Der Pump-Bonus bleibt nur im aktuellen ICE-Encounter erhalten; beim nächsten ICE steht Krash wieder auf seiner Basisstärke und muss erneut gepumpt werden. Run-gebundene Stärke bleibt Karten wie Grubb vorbehalten, deren Text die Laufzeit ausdrücklich nennt.
