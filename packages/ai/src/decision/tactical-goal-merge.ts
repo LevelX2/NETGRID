@@ -332,7 +332,8 @@ function isReportOnlyDoctrineGoal(goal: TacticalGoalLike): boolean {
 }
 
 function goalIdHasSegment(goalId: string, segment: string): boolean {
-  return goalId.split(/[.:-]+/).includes(segment);
+  const segmentSet = new Set(goalId.split(/[.:-]+/));
+  return segmentSet.has(segment);
 }
 
 function dedupeGoals(inputs: readonly GoalInput[]): TacticalGoalLike[] {

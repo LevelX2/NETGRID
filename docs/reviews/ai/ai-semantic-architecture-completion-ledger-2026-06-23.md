@@ -9998,6 +9998,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'projectionSignalTokens\(signal\)\.includes' packages/ai/src/runner-run-target-evaluation.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertfünfundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/tactical-goal-merge.ts` bindet TacticalGoal-ID-Segmente über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Goal-ID-Segmente bleiben exakt; Doctrine- und Neutral-Quellenklassifikation ignoriert substring-nahe Rauschsegmente weiter.
+  - `tactical-goal-merge.test.ts` sichert produktive Merge-Pfade und den bounded Segment-Schutz für `doctrine` und `neutral`.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/tactical-goal-merge.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'goalId\.split\(/\[\.:-\]\+/\)\.includes|includes\(segment\)' packages/ai/src/decision/tactical-goal-merge.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
