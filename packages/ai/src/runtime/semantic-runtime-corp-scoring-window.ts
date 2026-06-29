@@ -157,7 +157,8 @@ export function semanticRuntimeCorpScoringWindowAssessment<
   const existingWindow = strongestExistingScoringRemote(input, dependencies);
   const immediateScore =
     action.type === "score_agenda" ||
-    dependencies.advanceCompletesScore(input, action);
+    dependencies.advanceCompletesScore(input, action) ||
+    scoreHorizon === "immediate";
   const agendaPointsAtRisk = scoringWindowAgendaPointsAtRisk(
     input,
     action,
@@ -179,11 +180,23 @@ export function semanticRuntimeCorpScoringWindowAssessment<
     !immediateScore &&
     exposureAccess.runnerCanReachAccessNow &&
     exposureAccess.agendaStealRelevantNow;
+  const delayedExposureRisk = scoringWindowDelayedScoreExposureRisk({
+    access,
+    agendaStealSeverity,
+    exposureAccess,
+    immediateScore,
+    projectedServer,
+    rezBudget,
+    runnerExposureCreditActions,
+    scoreHorizon,
+    scoreLineAction,
+  });
 
   const windowKind = scoringWindowKind({
     action,
     access,
     centralPressure,
+    delayedExposureRisk,
     exposureAccess,
     existingWindow,
     hasScorePressure,
@@ -205,6 +218,7 @@ export function semanticRuntimeCorpScoringWindowAssessment<
     runnerExposureCreditActions,
     runnerCanContestBeforeScore,
     centralPressure,
+    delayedExposureRisk,
   });
 
   return {
@@ -244,6 +258,7 @@ export function semanticRuntimeCorpScoringWindowAssessment<
       `agenda_points_at_risk:${agendaPointsAtRisk}`,
       `runner_agenda_points_after_steal:${runnerAgendaPointsAfterSteal}`,
       `agenda_steal_severity:${agendaStealSeverity}`,
+      `delayed_score_exposure_risk:${delayedExposureRisk}`,
       `runner_exposure_credit_actions:${runnerExposureCreditActions}`,
       `missing_visible_installed_coverage:${access.missingVisibleBreakerCoverage}`,
       `corp_can_rez_relevant_ice:${rezBudget.corpCanRezRelevantIce}`,
@@ -312,7 +327,39 @@ function scoringWindowHorizon<TServer extends CorpServerLike>(
   const sourceCard = dependencies.actionSourceCard?.(input, action);
   const requirement = sourceCard?.advancementRequirement;
   if (typeof requirement !== "number") return "unknown";
+  const remainingCorpClicksAfterAction = Math.max(
+    0,
+    Math.floor(
+      (typeof input.playerView.own.clicks === "number"
+        ? input.playerView.own.clicks
+        : 3) - scoringWindowActionClickCost(action),
+    ),
+  );
+  if (remainingCorpClicksAfterAction > requirement) return "immediate";
   return requirement <= 3 ? "next_turn" : "slow";
+}
+
+function scoringWindowActionClickCost(action: LegalAction): number {
+  const explicitClicks = (action.costs ?? []).reduce(
+    (sum, cost) =>
+      sum +
+      (typeof cost.clicks === "number" && Number.isFinite(cost.clicks)
+        ? Math.max(0, Math.floor(cost.clicks))
+        : 0),
+    0,
+  );
+  if (explicitClicks > 0) return explicitClicks;
+  if (
+    action.type === "install_card" ||
+    action.type === "advance_card" ||
+    action.type === "score_agenda" ||
+    action.type === "play_operation" ||
+    action.type === "gain_credit" ||
+    action.type === "draw_card"
+  ) {
+    return 1;
+  }
+  return 0;
 }
 
 function scoringWindowAccessAssessment(
@@ -680,6 +727,7 @@ function scoringWindowKind(params: {
   action: LegalAction;
   access: ReturnType<typeof scoringWindowAccessAssessment>;
   centralPressure: boolean;
+  delayedExposureRisk: boolean;
   exposureAccess: ReturnType<typeof scoringWindowAccessAssessment>;
   existingWindow: CorpScoringWindowKind;
   hasScorePressure: boolean;
@@ -704,6 +752,9 @@ function scoringWindowKind(params: {
   if (params.runnerCanContestBeforeScore) {
     return params.scoreLineAction ? "unsafe" : "none";
   }
+  if (params.delayedExposureRisk) {
+    return params.scoreLineAction ? "unsafe" : "none";
+  }
   if (
     params.scoreLineAction &&
     scoringWindowHasSevereExposureRisk(
@@ -721,7 +772,8 @@ function scoringWindowKind(params: {
     params.action.payload?.placement === "ice" &&
     (params.existingWindow === "durable" ||
       params.existingWindow === "temporary_safe") &&
-    !remoteContainsScoreLine(params.projectedServer)
+    !remoteContainsScoreLine(params.projectedServer) &&
+    !scoringWindowIceInstallImprovesExistingWindow(params)
   ) {
     return "none";
   }
@@ -771,6 +823,56 @@ function scoringWindowKind(params: {
     return "temporary_safe";
   }
   return params.scoreLineAction ? "unsafe" : "none";
+}
+
+function scoringWindowDelayedScoreExposureRisk(params: {
+  access: ReturnType<typeof scoringWindowAccessAssessment>;
+  agendaStealSeverity: CorpScoringWindowAgendaStealSeverity;
+  exposureAccess: ReturnType<typeof scoringWindowAccessAssessment>;
+  immediateScore: boolean;
+  projectedServer: CorpServerLike | undefined;
+  rezBudget: ReturnType<typeof scoringWindowRezBudget>;
+  runnerExposureCreditActions: number;
+  scoreHorizon: CorpScoringWindowHorizon;
+  scoreLineAction: boolean;
+}): boolean {
+  if (!params.scoreLineAction || params.immediateScore) return false;
+  if (params.scoreHorizon === "immediate") return false;
+  if (params.runnerExposureCreditActions <= 0) return false;
+  if (params.agendaStealSeverity === "none") return false;
+  const iceCount = params.projectedServer?.ice.length ?? 0;
+  if (iceCount <= 0) return false;
+  const lightOrUnprovenRemote =
+    iceCount <= 1 ||
+    (params.rezBudget.affordableDurableRelevantIceCount ?? 0) < 2 ||
+    !params.rezBudget.corpCanRezFullPath ||
+    (params.rezBudget.dynamicProtectionWeaknessCount ?? 0) > 0;
+  if (!lightOrUnprovenRemote) return false;
+  const safetyDependsOnMissingCoverage =
+    params.access.missingVisibleBreakerCoverage ||
+    params.exposureAccess.missingVisibleBreakerCoverage ||
+    (params.exposureAccess.unmodeledIceCount > 0 &&
+      params.exposureAccess.visibleRunnerIcebreakerCount === 0);
+  if (!safetyDependsOnMissingCoverage) return false;
+  return (
+    params.access.visibleRunnerContestCredits >= 8 ||
+    params.exposureAccess.visibleRunnerContestCredits >= 10
+  );
+}
+
+function scoringWindowIceInstallImprovesExistingWindow(params: {
+  existingWindow: CorpScoringWindowKind;
+  exposureAccess: ReturnType<typeof scoringWindowAccessAssessment>;
+  projectedServer: CorpServerLike | undefined;
+  rezBudget: ReturnType<typeof scoringWindowRezBudget>;
+}): boolean {
+  return (
+    params.existingWindow === "temporary_safe" &&
+    (params.projectedServer?.ice.length ?? 0) >= 2 &&
+    (params.rezBudget.affordableDurableRelevantIceCount ?? 0) >= 2 &&
+    params.rezBudget.corpCanRezFullPath &&
+    !params.exposureAccess.runnerCanReachAccessNow
+  );
 }
 
 function remoteContainsScoreLine(server: CorpServerLike | undefined): boolean {
@@ -878,9 +980,10 @@ function scoringWindowRecommendedNextStep(params: {
   windowKind: CorpScoringWindowKind;
   rezBudget: ReturnType<typeof scoringWindowRezBudget>;
   runnerExposureCreditActions: number;
-  runnerCanContestBeforeScore: boolean;
-  centralPressure: boolean;
-}): CorpScoringWindowNextStep {
+    runnerCanContestBeforeScore: boolean;
+    centralPressure: boolean;
+    delayedExposureRisk: boolean;
+  }): CorpScoringWindowNextStep {
   if (
     params.windowKind === "durable" &&
     params.action.type === "score_agenda"
@@ -912,6 +1015,14 @@ function scoringWindowRecommendedNextStep(params: {
     return "build_remote_ice";
   }
   const remoteHasIce = (params.projectedServer?.ice.length ?? 0) > 0;
+  if (
+    params.windowKind === "unsafe" &&
+    params.hasScorePressure &&
+    !params.centralPressure &&
+    params.delayedExposureRisk
+  ) {
+    return "build_remote_ice";
+  }
   if (
     params.windowKind === "unsafe" &&
     params.hasScorePressure &&
@@ -987,6 +1098,7 @@ function strongestExistingScoringRemote<TServer extends CorpServerLike>(
       runnerExposureCreditActions: 0,
       agendaStealSeverity: "none",
       scoreLineAction: false,
+      delayedExposureRisk: false,
     });
     if (kind === "durable") return "durable";
     if (kind === "temporary_safe") strongest = "temporary_safe";

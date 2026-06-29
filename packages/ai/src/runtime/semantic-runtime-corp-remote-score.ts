@@ -219,21 +219,29 @@ function semanticRuntimeCorpRemoteHasAdvancementContext(
 function semanticRuntimeCorpArchivesIceInstallScore<
   TServer extends CorpServerLike,
 >(input: AiDecisionInput, server: TServer | undefined): number {
+  const iceCount = server?.ice.length ?? 0;
+  const acuteHqOrRd =
+    semanticRuntimeCorpCentralPressureAssessment(input, "hq").active ||
+    semanticRuntimeCorpCentralPressureAssessment(input, "rd").active;
+  const agendaInHq = semanticRuntimeCorpHasAgendaInHq(input);
   const archivesAgendaRisk = (input.playerView.own.heapOrArchives ?? []).some(
     (card) => card.known !== false && card.type === "agenda",
   );
-  if (archivesAgendaRisk) return (server?.ice.length ?? 0) === 0 ? 900 : 650;
+  if (archivesAgendaRisk) {
+    if (iceCount === 0) return 900;
+    if (iceCount === 1) return acuteHqOrRd || agendaInHq ? 450 : 650;
+    if (acuteHqOrRd || agendaInHq) return -350;
+    return 150;
+  }
 
   const archivesRunPressure =
     semanticRuntimeCorpArchivesRunOrAccessEventCount(input);
   if (archivesRunPressure >= 2) {
-    return (server?.ice.length ?? 0) === 0 ? 450 : 250;
+    if (iceCount === 0) return 450;
+    return acuteHqOrRd || agendaInHq ? -250 : 250;
   }
 
-  const acuteHqOrRd =
-    semanticRuntimeCorpCentralPressureAssessment(input, "hq").active ||
-    semanticRuntimeCorpCentralPressureAssessment(input, "rd").active;
-  if (acuteHqOrRd || semanticRuntimeCorpHasAgendaInHq(input)) return -450;
+  if (acuteHqOrRd || agendaInHq) return -450;
 
   return 75;
 }

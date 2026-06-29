@@ -74,6 +74,76 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     });
   });
 
+  it("downgrades delayed one-ice agenda installs when rich runner exposure exists", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-delayed-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 9,
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 3 })]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      scoreHorizon: "next_turn",
+      missingVisibleBreakerCoverage: true,
+      runnerCanContestBeforeScore: false,
+      recommendedNextStep: "build_remote_ice",
+    });
+    expect(assessment?.evidence).toContain(
+      "delayed_score_exposure_risk:true",
+    );
+  });
+
+  it("allows an unprotected remote install when remaining Corp clicks can close before runner exposure", () => {
+    const agenda = agendaCard("agenda-in-hq", {
+      advancementRequirement: 2,
+    });
+    const action = corpAction(
+      "install-immediate-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownClicks: 4,
+        runnerCredits: 9,
+        hq: [agenda],
+        servers: protectedCentralServers([remoteServer("remote_1", [])]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "durable",
+      scoreHorizon: "immediate",
+      runnerCanContestNow: false,
+      recommendedNextStep: "install_agenda",
+    });
+  });
+
   it("treats unmodeled generic remote ice as temporary only when no breaker is installed", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(
@@ -747,6 +817,37 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     });
   });
 
+  it("allows second remote ICE when it upgrades a temporary scoring remote to durable", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const iceToInstall = wallIce("second-remote-wall", { rezCost: 2 });
+    const action = corpAction(
+      "install-second-remote-ice",
+      "install_card",
+      {
+        placement: "ice",
+        serverId: "remote_1",
+      },
+      iceToInstall.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 6,
+        runnerCredits: 9,
+        hq: [agenda, iceToInstall],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 2 })]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "durable",
+      recommendedNextStep: "build_remote_ice",
+    });
+  });
+
   it("does not create remote-ice spam without agenda pressure or a scoreline", () => {
     const iceToInstall = wallIce("new-remote-wall", { rezCost: 2 });
     const action = corpAction(
@@ -874,6 +975,7 @@ function assess(input: AiDecisionInput, action: LegalAction) {
 
 function corpInput(overrides: {
   ownCredits?: number;
+  ownClicks?: number;
   runnerCredits?: number;
   runnerAgendaPoints?: number;
   agendaPointsToWin?: number;
@@ -889,7 +991,7 @@ function corpInput(overrides: {
     playerView: {
       own: {
         credits: overrides.ownCredits ?? 5,
-        clicks: 3,
+        clicks: overrides.ownClicks ?? 3,
         agendaPoints: 0,
         gripOrHq: overrides.hq ?? [],
         scoreArea: [],
