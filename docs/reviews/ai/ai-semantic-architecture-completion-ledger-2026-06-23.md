@@ -10348,6 +10348,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'net damage|brain damage|core-damage|core damage|/program/|/hardware/|trash\|destroy' packages/ai/src/legacy/corp-plans.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertvierundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt die Advancement-Counter-Transfer-Source-RulesText-Regex durch lokale Token-/Phrase-Prüfungen.
+  - Legacy-Corp-Team-Restructuring erkennt `move any number of advancement counters` und Transfer zu `another installed card` weiter, ohne freie `move .* advancement counters .* another installed card`-Regex.
+  - Status bleibt `IN_PROGRESS`, weil weitere Legacy-Corp-RulesText-Regexes für Cashout, Action-Cashout und Overadvance offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "allows Team Restructuring to win with two meaningful advanceable targets"` grün, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'move any number of advancement counters|move \.\*advancement counters\.\*another installed card' packages/ai/src/legacy/corp-plans.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

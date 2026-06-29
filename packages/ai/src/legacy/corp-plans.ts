@@ -7161,8 +7161,19 @@ function corpTokensIncludePhrase(
 }
 
 function corpAdvancementLooksLikeTransferSource(text: string): boolean {
-  return /move any number of advancement counters|move .*advancement counters.*another installed card/.test(
-    text,
+  const tokens = corpRulesTextTokens(text);
+  return (
+    corpTokensIncludePhrase(tokens, [
+      "move",
+      "any",
+      "number",
+      "of",
+      "advancement",
+      "counters",
+    ]) ||
+    (corpTokensInclude(tokens, "move") &&
+      corpTokensIncludePhrase(tokens, ["advancement", "counters"]) &&
+      corpTokensIncludePhrase(tokens, ["another", "installed", "card"]))
   );
 }
 
