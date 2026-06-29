@@ -130,3 +130,24 @@ Commit:
 - Neue Debug-Evidence erklärt die Entscheidung side-safe.
 - Arbeitsbranch ist lokal nach `main` gemergt.
 
+## Runtime-Audit, Paket 2
+
+Die vorhandene Runtime reicht für die Umsetzung aus. Es ist kein Parallel-Planner nötig.
+
+Betroffene Hauptflächen:
+
+- `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts`: zentrale Assessment-Funktion für `temporary_safe`, `durable`, Runner-Exposure, Rezbudget und Evidence. Hier wird die strengere Endgame-/Dynamic-ICE-Sicherheitslogik angeschlossen.
+- `packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts`: Installationsbewertung für Remote-, Central- und Archives-ICE. Hier wird der pauschale Archives-ICE-Bonus durch eine konkrete Risikoabwägung ersetzt.
+- `packages/ai/src/runtime/semantic-runtime-corp-score.ts`: Scorekomponenten konsumieren bereits `corpScoringWindowAssessment`; zusätzliche Evidence aus dem Assessment wird automatisch in Decision-Traces sichtbar.
+- `packages/ai/src/runtime/semantic-runtime-corp-scoring-evidence-composition.ts`: passive Scoreline-Strafen hängen bereits an sicheren Scoring-Windows. Kein separater Eingriff nötig, solange `windowKind` korrekt ist.
+
+Tests:
+
+- `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.test.ts`: neue Regressionen für Endgame-Exposure, Dynamic-ICE-Budget und Immediate-Gegenprobe.
+- `packages/ai/src/runtime/semantic-runtime-corp-remote-score.test.ts`: neue Regression für Archives-ICE-Kappung unter R&D/HQ-Druck.
+
+Debug-Erweiterung:
+
+- Das Scoring-Window soll zusätzlich side-safe ausgeben, ob die Agenda im Remote einen game-ending oder near-ending Steal darstellt.
+- Dynamic-ICE-Schwächen sollen als generische Risiko-Evidence erscheinen, nicht mit verdeckten Kartendaten.
+- Archives-ICE-Kappung soll über Scorekomponenten nachvollziehbar sein, ohne gegnerseitige Hidden-Info zu leaken.
