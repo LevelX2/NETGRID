@@ -110,6 +110,52 @@ describe("SemanticRuntimeWhyCoverage", () => {
     expect(markdown).toContain("| Runtime effect | `false` |");
     expect(containsForbiddenSemanticMarker(markdown)).toBe(false);
   });
+
+  it("marks fully explained samples as complete", () => {
+    const report = buildSemanticRuntimeWhyCoverageReport([
+      decisionDebug({
+        whyNot: ["alternative:draw_card:semantic_score_below_selected"],
+        detailSections: [
+          {
+            id: "runtime_why_not",
+            title: "Runtime Why Not",
+            items: ["alternative:draw_card:semantic_score_below_selected"],
+          },
+        ],
+        actionAlternatives: [
+          {
+            rank: 1,
+            actionId: "gain",
+            actionType: "gain_credit",
+            selected: true,
+            whyChosen: ["semantic_runtime_actual"],
+          },
+          {
+            rank: 2,
+            actionId: "draw",
+            actionType: "draw_card",
+            selected: false,
+            whyNot: ["semantic_score_below_selected"],
+          },
+        ],
+      }),
+    ]);
+
+    expect(report.auditStatus).toBe("complete");
+    expect(report.missingCoverageSignals).toEqual([]);
+    expect(renderSemanticRuntimeWhyCoverageMarkdown(report)).toContain(
+      "- `none`",
+    );
+  });
+
+  it("keeps empty samples distinct from complete coverage", () => {
+    const report = buildSemanticRuntimeWhyCoverageReport([]);
+
+    expect(report.auditStatus).toBe("empty_sample");
+    expect(report.sampleCount).toBe(0);
+    expect(report.missingCoverageSignals).toEqual([]);
+    expect(report.evidence).toContain("audit_status:empty_sample");
+  });
 });
 
 function decisionDebug(
