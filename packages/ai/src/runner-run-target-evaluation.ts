@@ -660,7 +660,8 @@ function projectionHasAccessSignal(
 }
 
 function projectionSignalHasToken(signal: string, token: string): boolean {
-  return projectionSignalTokens(signal).includes(token);
+  const signalTokenSet = new Set(projectionSignalTokens(signal));
+  return signalTokenSet.has(token);
 }
 
 function projectionSignalHasPhrase(

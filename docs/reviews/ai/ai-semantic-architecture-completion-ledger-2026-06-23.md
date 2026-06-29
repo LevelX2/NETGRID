@@ -9989,6 +9989,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'includes\(expected\)' packages/ai/src/actions/action-card-semantic-profiles.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertvierundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runner-run-target-evaluation.ts` bindet ProjectionSignal-Tokens über ein lokales Set statt direkter `projectionSignalTokens(...).includes(...)`-Prüfung.
+  - Strukturierte Signal-Tokens bleiben exakt; RunTarget-Trace-/Topdeck-/Access-Payoff-Pfade behalten ihre vorhandene Testabdeckung.
+  - `runner-run-target-evaluation.test.ts` sichert RunTarget-, Trace-, Payoff- und EconomyPosture-Verhalten.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-run-target-evaluation.test.ts` grün, 1 Datei, 53 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'projectionSignalTokens\(signal\)\.includes' packages/ai/src/runner-run-target-evaluation.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
