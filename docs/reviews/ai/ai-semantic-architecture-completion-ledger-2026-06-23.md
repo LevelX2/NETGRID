@@ -43,7 +43,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | `corepack pnpm install` | `VERIFIED` | Lockfile unverändert; Worktree-Abhängigkeiten installiert. |
 | `corepack pnpm --filter @netgrid/ai typecheck` | `VERIFIED` | grün. |
 | `git diff --check` | `VERIFIED` | grün. |
-| `corepack pnpm --filter @netgrid/ai test` | `VERIFIED` | Nach `AI-COMPLETE-F001`: 134 Dateien, 1541 Tests grün. |
+| `corepack pnpm --filter @netgrid/ai test` | `VERIFIED` | Nach `AI-COMPLETE-F002`: 271 Dateien, 2176 Tests grün. |
 
 ## Startziele
 
@@ -75,6 +75,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | ID | Ziel | Status | Ausgangsevidenz | Definition of Done |
 | --- | --- | --- | --- | --- |
 | AI-COMPLETE-F001 | Baseline-Regression bei `The Shell Traders` reparieren. | `VERIFIED` | Full AI-Test war rot: vier `packages/ai/src/index.test.ts`-Fälle fanden keine erwarteten Shell-Traders-`LegalActions`, weil Engine-LegalActions jetzt `delayedInstallAbility` statt `shellTradersAbility` tragen. | Erfüllt: gemeinsame Delayed-Install-Erkennung akzeptiert neue Engine-Payloads und alte Fixtures; fokussierte Shell-Traders-Tests und vollständiger `@netgrid/ai test` grün. |
+| AI-COMPLETE-F002 | Semantic-Runtime-Regressionsgates nach Full-Test-Drift reparieren. | `VERIFIED` | Full AI-Test war rot: Remote-Decline-Memory, R&D/HQ-Freshness, Runner-Low-Credit, Corp-Zentral-Rezreserve, Archives-Exclusion, Shadow-League-Snapshots und ein Selfplay-Benchmark-Timeout drifteten nach den AI-COMPLETE-20-Gates. | Erfüllt: side-safe Server-/Label-Normalisierung, Remote-Decline-Strafe, Goal-Fit-Grenzen, zentrale Rezreserve-Hard-Malus, generische Archives-Exclusion und Snapshot-/Timeout-Nachzug sind umgesetzt; vollständiger `@netgrid/ai test` grün mit 271 Dateien und 2176 Tests. |
 
 ## Implementierungsnachweise
 
@@ -86,6 +87,19 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
   - Verifikation: `corepack pnpm --filter @netgrid/ai typecheck` grün.
   - Verifikation: `git diff --check` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 134 Dateien, 1541 Tests.
+
+- `AI-COMPLETE-F002`:
+  - `packages/ai/src/belief-state.ts` normalisiert side-safe strukturierte Server-IDs und sichtbare R&D/HQ/Archives-Zonen für Access-/Freshness-Memory.
+  - `packages/ai/src/memory/remote-access-outcome.ts` und `packages/ai/src/legacy/runner-plans.ts` erkennen Remote-Access-Verlauf aus strukturierten Server-IDs und sichtbaren Remote-Labels, sodass wiederholte bekannte Remote-Runs nach abgelehntem Trash hart abgewertet werden.
+  - `packages/ai/src/runtime/runner-goal-fit-score.ts` vergibt generischen Reachable-Run-Goal-Fit nur noch für echte `run_now`- oder High-Payoff-Runs; `run_if_free`-/`gain_credits_first`-Unknown-Probes überstimmen keine Economy-/Coverage-Pläne mehr.
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` ergänzt einen harten Malus für zentrale ICE-Installationen, die bei aktiver HQ-/R&D-Bedrohung nach der Installation nicht rezzbar bleiben.
+  - `packages/ai/src/runtime/semantic-runtime-action-exclusion.ts` wendet serverbasierte Runner-Exclusions auch auf generische Run-Events mit side-safe `payload.serverId` an; leere Archives werden dadurch wieder ausgeschlossen.
+  - `packages/ai/src/evaluation/semantic-shadow-league.test.ts` dokumentiert die neue report-only Kalibrierung: Basic-Setup ist lokaler Default-Dry-Run-Kandidat ohne bekannte No-Go-Cases; der Durchschnitts-Score-Gap liegt bei 24.52.
+  - `packages/ai/src/simulation/benchmark-reports.test.ts` nutzt für den Selfplay-Trace-Mining-Lauf denselben 90s-Testtimeout wie die Nachbar-Smokes.
+  - Verifikation: fokussierte Regressionstests zu Remote-Decline, R&D/HQ-Memory, Archives-Exclusion, Runner-Low-Credit, Corp-Zentral-Rezreserve, Shadow-League und Benchmark-Timeout grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `git diff --check` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai test` grün, 271 Dateien, 2176 Tests.
 
 - `AI-COMPLETE-01`:
   - `packages/ai/src/index.ts` ersetzt die produktive Score-Komponente `semantic_type_priority` durch den bounded `semantic_type_tie_breaker`.
@@ -10987,3 +11001,4 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
 | Audit 9 | `VERIFIED` | Abschlussaudit für `AI-COMPLETE-19`: Kommentar-/Leitplanken-Suche findet nur aktuelle report-only-/authority-/runtime-boundary-Leitplanken und keine widersprüchlichen No-Effect-/Shadow-Only-Kommentare; `src/decision/module-boundaries.test.ts` vollständig grün, 33 Tests; AI-Typecheck grün. `AI-COMPLETE-19` ist `VERIFIED`; nächstes offenes Ziel ist `AI-COMPLETE-20`. |
 | Audit 10 | `VERIFIED` | Erster Abschlussaudit für `AI-COMPLETE-20`: volles A-D-Holdout-Gate mit 75 Spielen und 9477 Entscheidungen grün; 0 Action-Limits, 0 IllegalActions, 0 ReplayFailures, RedactionSafe true, alle 15 Dominanzberichte `complete`, maximale Top-Share 0.253, alle 15 Why-Coverage-Berichte `complete` mit 0 Missing-Signalen; praktische Metriken besser bei Candidate Runner-Steals und Candidate Corp-Scores. |
 | Audit 11 | `VERIFIED` | Zweiter Abschlussaudit für `AI-COMPLETE-20`: separates Full-Holdout-Gate-B-Artefakt mit identischer Decision-Evidence und identischen Scenario-Aggregaten; erneut 75 Spiele, 9477 Entscheidungen, 0 Action-Limits, 0 IllegalActions, 0 ReplayFailures, RedactionSafe true, 0 Dominance-Failures, 0 Why-Coverage-Missing-Signale. `AI-COMPLETE-20` ist `VERIFIED`; kein neues In-Scope-Finding. |
+| Audit 12 | `VERIFIED` | Regression-Gate nach `AI-COMPLETE-F002`: vollständiger `@netgrid/ai`-Testlauf grün mit 271 Dateien und 2176 Tests; `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` und `git diff --check` grün; keine neue Engine-Autorität, keine LegalAction-Erzeugung und keine Hidden-Info-Grenzerweiterung. |
