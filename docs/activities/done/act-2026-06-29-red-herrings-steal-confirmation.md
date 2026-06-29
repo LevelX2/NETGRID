@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-06-29-red-herrings-steal-confirmation
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: high
@@ -8,12 +8,17 @@ primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-29
 startedAt:
-completedAt:
+completedAt: 2026-06-29
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/access-reveal-ui.ts
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/chronicle.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/access-reveal-ui.test.ts app/action-board-ui.test.ts app/chronicle.test.ts --passWithNoTests
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/assets-nodes-upgrades.test.ts --passWithNoTests
 ---
 
 # Red Herrings Steal-Zahlung explizit bestätigen und chronisieren
@@ -47,12 +52,12 @@ Wenn der Runner eine Agenda aus einem Fort mit gerezztem `Red Herrings` accesset
 
 ## Akzeptanzkriterien
 
-- [ ] Beim Zugriff auf eine Agenda aus einem Fort mit gerezztem `Red Herrings` und mindestens 5 Runner-Credits wird vor dem Bezahlen/Stehlen ausdrücklich sichtbar, dass 5 Credits wegen Red Herrings bezahlt werden.
-- [ ] Falls das Regelmodell Nicht-Bezahlen trotz ausreichender Credits erlaubt, gibt es eine LegalAction zum Nicht-Stehlen ohne Creditzahlung; falls nicht, ist die kostenpflichtige Steal-Aktion trotzdem eindeutig bestätigungspflichtig dargestellt.
-- [ ] Nach erfolgreichem Steal zeigt die Spielchronik sinngemäß: Agenda wurde gestohlen und 5 Credits wurden wegen Red Herrings bezahlt.
-- [ ] Bei weniger als 5 Runner-Credits bleibt Stehlen blockiert beziehungsweise nur die bestehende Nicht-Stehlen-/Weiter-Aktion legal; keine Zahlung wird angezeigt oder gebucht.
-- [ ] Event-/Chroniktext nutzt nur öffentliche Payload-Felder wie `stealCost` und `stealCostSourceTitles` und leakt keine verdeckten Kartendaten.
-- [ ] Bestehende Red-Herrings-Engine-Regressionen für Kosten, Revalidierung, Replay und StateHash bleiben grün.
+- [x] Beim Zugriff auf eine Agenda aus einem Fort mit gerezztem `Red Herrings` und mindestens 5 Runner-Credits wird vor dem Bezahlen/Stehlen ausdrücklich sichtbar, dass 5 Credits wegen Red Herrings bezahlt werden.
+- [x] Falls das Regelmodell Nicht-Bezahlen trotz ausreichender Credits erlaubt, gibt es eine LegalAction zum Nicht-Stehlen ohne Creditzahlung; falls nicht, ist die kostenpflichtige Steal-Aktion trotzdem eindeutig bestätigungspflichtig dargestellt.
+- [x] Nach erfolgreichem Steal zeigt die Spielchronik sinngemäß: Agenda wurde gestohlen und 5 Credits wurden wegen Red Herrings bezahlt.
+- [x] Bei weniger als 5 Runner-Credits bleibt Stehlen blockiert beziehungsweise nur die bestehende Nicht-Stehlen-/Weiter-Aktion legal; keine Zahlung wird angezeigt oder gebucht.
+- [x] Event-/Chroniktext nutzt nur öffentliche Payload-Felder wie `stealCost` und `stealCostSourceTitles` und leakt keine verdeckten Kartendaten.
+- [x] Bestehende Red-Herrings-Engine-Regressionen für Kosten, Revalidierung, Replay und StateHash bleiben grün.
 
 ## Umsetzungshinweise
 
@@ -63,4 +68,4 @@ Wenn der Runner eine Agenda aus einem Fort mit gerezztem `Red Herrings` accesset
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt am 2026-06-29. Die Access-Reveal-Entscheidung, allgemeine Action-/Kontextlabels und die Chronik nennen kostenpflichtige Agenda-Steals jetzt explizit über öffentliche `stealCost`-/`stealCostSourceTitles`-Payloads, z. B. `5 Credits wegen Red Herrings bezahlen und Agenda aus Remote 1 stehlen` sowie `5 Credits wegen Red Herrings bezahlt` in der Chronik. Das Regelmodell wurde nicht erweitert; es bleibt bei der vorhandenen Engine-LegalAction mit Kosten und Revalidierung. Die fokussierten Web-Tests und der bestehende Red-Herrings-nahe Engine-Regressionslauf sind grün.

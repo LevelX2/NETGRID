@@ -2660,14 +2660,16 @@ export function formatChronicleEvent(
       category = "agenda";
       importance = "critical";
       const points = agendaPointSuffix(agendaPoints);
+      const payment = stealCostPaymentSuffix(payload);
       title = phrase(
         subject,
-        `${cardTitle ?? "eine Agenda"}${accessServerSourceSuffix(serverLabel)} gestohlen${points}`,
+        `${cardTitle ?? "eine Agenda"}${accessServerSourceSuffix(serverLabel)} gestohlen${points}${payment}`,
       );
       chips.push(
         "Steal",
         ...(serverLabel ? [serverLabel] : []),
         ...agendaPointChips(agendaPoints),
+        ...stealCostPaymentChips(payload),
       );
       break;
     }
@@ -5388,6 +5390,35 @@ function agendaPointSuffix(points: number | null | undefined): string {
 
 function agendaPointChips(points: number | null | undefined): string[] {
   return typeof points === "number" ? [`+${points} Agenda`] : [];
+}
+
+function stealCostPaymentSuffix(payload: Record<string, unknown>): string {
+  const amount =
+    positiveIntegerValue(payload.stealAdditionalCost) ??
+    positiveIntegerValue(payload.stealCost);
+  if (!amount) return "";
+  const source = joinChronicleParts(stealCostSourceTitles(payload));
+  return ` und ${creditText(amount)}${source ? ` wegen ${source}` : ""} bezahlt`;
+}
+
+function stealCostPaymentChips(payload: Record<string, unknown>): string[] {
+  const amount =
+    positiveIntegerValue(payload.stealAdditionalCost) ??
+    positiveIntegerValue(payload.stealCost);
+  if (!amount) return [];
+  return [
+    `${amount} ${creditLabel(amount)}`,
+    ...stealCostSourceTitles(payload),
+  ];
+}
+
+function stealCostSourceTitles(payload: Record<string, unknown>): string[] {
+  return (
+    stringValue(payload.stealCostSourceTitles)
+      ?.split(",")
+      .map((title) => title.trim())
+      .filter(Boolean) ?? []
+  );
 }
 
 function safeLabel(label: string): string {

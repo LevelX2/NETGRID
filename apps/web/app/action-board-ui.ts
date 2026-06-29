@@ -531,6 +531,8 @@ export function actionButtonLabel(action: LegalAction): string {
       return "Zugriff auf Karte";
     case "decline_trash":
       return "Zugriff abschließen";
+    case "steal_agenda":
+      return stealAgendaActionButtonLabel(action);
     case "advance_card":
       return "Installation ausbauen";
     case "end_turn":
@@ -576,7 +578,7 @@ export function contextualCardActionLabel(action: LegalAction): string {
     case "trash_resource":
       return "Trashen";
     case "steal_agenda":
-      return "Stehlen";
+      return stealCostPaymentLabel(action.payload) ?? "Stehlen";
     case "trigger_ability":
       return triggerAbilityActionLabel(action, true);
     default:
@@ -844,6 +846,26 @@ function spentActionClicksThisTurn(side: Side, events: PublicGameEvent[]): numbe
 
 function positiveInteger(value: unknown): number {
   return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : 0;
+}
+
+export function stealCostPaymentLabel(payload: LegalAction["payload"] | undefined): string | null {
+  const additionalCost = positiveInteger(payload?.stealAdditionalCost) || positiveInteger(payload?.stealCost);
+  if (additionalCost <= 0) return null;
+  const sourceLabel = stealCostSourceLabel(payload?.stealCostSourceTitles);
+  return `${additionalCost} ${additionalCost === 1 ? "Credit" : "Credits"} wegen ${sourceLabel} bezahlen`;
+}
+
+function stealAgendaActionButtonLabel(action: LegalAction): string {
+  const paymentLabel = stealCostPaymentLabel(action.payload);
+  if (!paymentLabel) return normalizeVisibleTerms(action.label);
+  const agendaTitle = accessedAgendaTitleFromStealActionLabel(action.label);
+  return `${paymentLabel} und ${agendaTitle ? `${agendaTitle} stehlen` : "Agenda stehlen"}`;
+}
+
+function accessedAgendaTitleFromStealActionLabel(label: string): string | null {
+  const title = normalizeVisibleTerms(label).match(/^(.+?)\s+stehlen$/i)?.[1]?.trim();
+  if (!title || /^(agenda|eine agenda)$/i.test(title)) return null;
+  return title;
 }
 
 export function actionCostChips(action: Pick<LegalAction, "costs"> & Partial<Pick<LegalAction, "type" | "payload">>): CostChipView[] {
