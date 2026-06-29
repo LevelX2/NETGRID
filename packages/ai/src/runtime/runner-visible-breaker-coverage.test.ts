@@ -14,6 +14,11 @@ describe("visibleBreakerRoles", () => {
     expect(visibleBreakerRoles(visibleProgram("generic-breaker", ["Icebreaker"]))).toEqual([
       "icebreaker",
     ]);
+    expect(
+      visibleBreakerRoles(
+        visibleProgram("spaced-killer", [" Icebreaker ", " Killer "]),
+      ),
+    ).toEqual(["killer"]);
   });
 });
 

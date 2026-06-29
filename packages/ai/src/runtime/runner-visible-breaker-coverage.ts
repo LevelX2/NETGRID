@@ -143,20 +143,22 @@ export function visibleBreakerRoleCounts(
 }
 
 export function visibleBreakerRoles(card: VisibleCard): string[] {
-  const subtypes = (card.subtypes ?? []).map((subtype) =>
-    subtype.toLowerCase(),
+  const subtypes = new Set(
+    (card.subtypes ?? []).map((subtype) =>
+      subtype.trim().toLocaleLowerCase("en-US"),
+    ),
   );
   const roles = new Set<string>();
-  if (subtypes.includes("fracter")) {
+  if (subtypes.has("fracter")) {
     roles.add("fracter");
   }
-  if (subtypes.includes("decoder")) {
+  if (subtypes.has("decoder")) {
     roles.add("decoder");
   }
-  if (subtypes.includes("killer")) {
+  if (subtypes.has("killer")) {
     roles.add("killer");
   }
-  if (subtypes.includes("icebreaker") && roles.size === 0) {
+  if (subtypes.has("icebreaker") && roles.size === 0) {
     roles.add("icebreaker");
   }
   return [...roles].sort();
