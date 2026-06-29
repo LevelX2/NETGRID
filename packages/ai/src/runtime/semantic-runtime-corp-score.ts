@@ -7,6 +7,7 @@ import type {
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "./semantic-runtime-corp-effective-defense";
+import { semanticRuntimeCorpBoardTriageActionComponent } from "./semantic-runtime-corp-board-triage";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { rolesMatch } from "./role-match";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
@@ -72,6 +73,10 @@ export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
     action: LegalAction,
     roles?: string[],
   ) => boolean;
+  corpAdvanceCompletesScore?: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean;
   corpInstallRemoteScore: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -122,6 +127,13 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     actionSemanticCandidate,
   );
   if (tacticalGoalFit) components.push(tacticalGoalFit);
+  const boardTriage = semanticRuntimeCorpBoardTriageActionComponent(
+    input,
+    action,
+    dependencies,
+    actionSemanticCandidate,
+  );
+  if (boardTriage) components.push(boardTriage);
   if (action.type === "score_agenda") {
     components.push({
       key: "corp_score_available_agenda",
