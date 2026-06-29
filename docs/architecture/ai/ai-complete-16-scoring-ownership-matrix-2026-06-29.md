@@ -29,12 +29,13 @@ Zweck: Erstes Ownership-Artefakt für `AI-COMPLETE-16`, damit doppelte oder wide
 - TargetChoice-Fit: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `targetChoiceRecommendationForTargetFit` nur im TargetChoice-Owner, in `semantic-shadow-decision.ts` und in den Coverage-/Readiness-Evaluationen; `buildTargetChoiceShadowReport` bleibt auf TargetChoice-Owner, Semantic-Shadow-Decision und Debug-Ausgabe begrenzt. Damit bleibt TargetChoice produktiv ein Target-Fit-Signal und kein paralleler Selected-Choice-/Selected-Target-Entscheider.
 - Goal-/Strategic-Fit: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `scoreActionGoalFit` und `buildTacticalGoalUtilities` nur in den Decision-Ownern, Semantic-Shadow-Decision und expliziten Evaluation-Reports; `semanticRuntimeStrategicActionFitScoreComponents` und `semanticRuntimeStrategicActionFitEvidence` bleiben auf den Strategic-Fit-Owner sowie Runtime-Score-/Choice-Consumer begrenzt. Neue parallele Goal-/Strategic-Fit-Bewertungen außerhalb dieser Owner fallen damit als Boundary-Verstoß auf.
 - Corp Economy, Rez-Floor und Passive Scoreline: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt Remote-/Central-Rez-Floor-Assessments, Rez-Floor-FundingNeed und Passive-Scoreline-Penalty nur in den Runtime-Ownern und den expliziten Corp-Scoring-Compositions. Damit bleiben Economy-Stabilisierung und Reserve-Skalierung an denselben Score-/Evidence-Pfad gebunden.
+- Plan Continuity und Plan-Memory: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt Planfortschreibung, Planranking und Map-Berechtigung nur im TacticalPlan-Progression-Owner und der `tactical-plans.ts`-Fassade; Plan-Memory-Exclusions bleiben auf den Runtime-Owner und die Runner-Support-Compositions begrenzt. Damit darf Planfortschritt blockierte oder payofflose Wiederholungen nicht außerhalb dieser Owner hochziehen.
 
 ## Erste Audit-Befunde
 
 - `rg` zeigt erwartungsgemäß viele Score-/Reachability-/Access-Treffer, aber keine einzelne zentrale Owner-Dokumentation vor diesem Artefakt.
-- Die stärksten noch offenen Kollisionszonen liegen nach den ersten Guards bei Plan-Continuity-Fortschritt und einem Abschlussaudit der konkreten Owner-Bindungen.
-- Nächster Umsetzungsschnitt sollte eine dieser verbleibenden Kollisionszonen in Code oder Tests binden, statt die Matrix breiter zu machen.
+- Die benannten Kollisionszonen sind durch konkrete Boundary-Guards gebunden.
+- Nächster Umsetzungsschnitt sollte ein Abschlussaudit der konkreten Owner-Bindungen durchführen und `AI-COMPLETE-16` nur bei ausreichender Evidenz schließen.
 
 ## Gates
 

@@ -10552,6 +10552,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps corp economy reserve and rez-floor scoring behind runtime owners"` in `packages/ai` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
 
+- `AI-COMPLETE-16` zehnter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Plan-Continuity und Plan-Memory: `progressTacticalPlans`, `rankTacticalPlans` und `planCanMapToCurrentAction` dürfen nur im TacticalPlan-Progression-Owner und in der `tactical-plans.ts`-Fassade auftauchen.
+  - Derselbe Guard begrenzt `createSemanticRuntimePlanMemoryExclusionContext` und `semanticRuntimePlanMemoryActionExclusion` auf den Runtime-Owner sowie die expliziten Runner-Support-Compositions.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert, dass Planfortschritt blockierte oder payofflose Wiederholungen nicht außerhalb dieser Owner hochziehen darf.
+  - Status bleibt `IN_PROGRESS`, weil noch ein Abschlussaudit der konkreten Owner-Bindungen aussteht.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps plan continuity and plan-memory exclusions behind their owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

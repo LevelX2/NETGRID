@@ -977,6 +977,57 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps plan continuity and plan-memory exclusions behind their owners", () => {
+    const allowedFilesBySymbol = new Map<string, Set<string>>([
+      [
+        "progressTacticalPlans",
+        new Set(["plans/tactical-plan-progression.ts", "tactical-plans.ts"]),
+      ],
+      [
+        "rankTacticalPlans",
+        new Set(["plans/tactical-plan-progression.ts", "tactical-plans.ts"]),
+      ],
+      [
+        "planCanMapToCurrentAction",
+        new Set(["plans/tactical-plan-progression.ts", "tactical-plans.ts"]),
+      ],
+      [
+        "createSemanticRuntimePlanMemoryExclusionContext",
+        new Set([
+          "runtime/semantic-runtime-plan-memory-exclusion.ts",
+          "runtime/runner-economy-commitment-composition.ts",
+        ]),
+      ],
+      [
+        "semanticRuntimePlanMemoryActionExclusion",
+        new Set([
+          "runtime/semantic-runtime-plan-memory-exclusion.ts",
+          "runtime/runner-economy-commitment-composition.ts",
+          "runtime/runner-development-support-composition.ts",
+          "runtime/ai-runtime-simulation-composition.ts",
+        ]),
+      ],
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        return [...allowedFilesBySymbol.entries()].flatMap(
+          ([symbol, allowedFiles]) => {
+            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+              return [];
+            }
+            return [
+              `${relative} references ${symbol} outside plan continuity or plan-memory ownership`,
+            ];
+          },
+        );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
   it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
