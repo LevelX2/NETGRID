@@ -5639,12 +5639,14 @@ function runnerInstalledEconomyAbilityId(
       ? action.payload.cardImplementationAbilityLabel
       : action.label;
   if (sourceCard.definitionId === "onr_v1_154_broker") {
-    if (/auf Broker legen/i.test(label)) return "broker_load_credits";
-    if (/von Broker nehmen/i.test(label)) return "broker_take_credits";
+    if (runnerInstalledEconomyLabelIsBrokerLoad(label))
+      return "broker_load_credits";
+    if (runnerInstalledEconomyLabelIsBrokerTake(label))
+      return "broker_take_credits";
   }
   if (
     sourceCard.definitionId === "onr_v1_178_short-term-contract" &&
-    /Credits?\s+nehmen/i.test(label)
+    runnerInstalledEconomyLabelHasCreditTake(label)
   )
     return "short_term_contract_take_credits";
   return "";
@@ -5662,7 +5664,7 @@ function activatedRunnerEconomyCreditGain(
       : action.label;
   if (
     sourceCard.definitionId === "onr_v1_154_broker" &&
-    /von Broker nehmen/i.test(label)
+    runnerInstalledEconomyLabelIsBrokerTake(label)
   )
     return storedCredits;
   const amount = runnerCreditGainLabelAmount(label);
@@ -5730,10 +5732,13 @@ function runnerHintActionCreditAmounts(
 }
 
 function runnerCreditGainLabelAmount(label: string): number {
-  const match = /(\d+)\s+Credits?\s+nehmen/i.exec(label);
-  if (!match) return 0;
-  const amount = Number(match[1]);
-  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+  const tokens = runnerInstalledEconomyLabelTokens(label);
+  const amountToken = tokens.find(
+    (token, index) =>
+      runnerInstalledEconomyTokenIsCredit(tokens[index + 1]) &&
+      tokens[index + 2] === "nehmen",
+  );
+  return runnerInstalledEconomyPositiveInteger(amountToken);
 }
 
 function activatedRunnerEconomyCreditBuild(
@@ -5747,12 +5752,67 @@ function activatedRunnerEconomyCreditBuild(
       : action.label;
   if (
     sourceCard.definitionId !== "onr_v1_154_broker" ||
-    !/auf Broker legen/i.test(label)
+    !runnerInstalledEconomyLabelIsBrokerLoad(label)
   )
     return 0;
-  const match = /(\d+)\s+Credits?/i.exec(label);
-  const amount = Number(match?.[1] ?? 0);
-  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+  const tokens = runnerInstalledEconomyLabelTokens(label);
+  const amountToken = tokens.find((token, index) =>
+    runnerInstalledEconomyTokenIsCredit(tokens[index + 1]),
+  );
+  return runnerInstalledEconomyPositiveInteger(amountToken);
+}
+
+function runnerInstalledEconomyLabelIsBrokerLoad(label: string): boolean {
+  return runnerInstalledEconomyTokensIncludePhrase(
+    runnerInstalledEconomyLabelTokens(label),
+    ["auf", "broker", "legen"],
+  );
+}
+
+function runnerInstalledEconomyLabelIsBrokerTake(label: string): boolean {
+  return runnerInstalledEconomyTokensIncludePhrase(
+    runnerInstalledEconomyLabelTokens(label),
+    ["von", "broker", "nehmen"],
+  );
+}
+
+function runnerInstalledEconomyLabelHasCreditTake(label: string): boolean {
+  const tokens = runnerInstalledEconomyLabelTokens(label);
+  return tokens.some(
+    (token, index) =>
+      runnerInstalledEconomyTokenIsCredit(token) && tokens[index + 1] === "nehmen",
+  );
+}
+
+function runnerInstalledEconomyLabelTokens(label: string): string[] {
+  return label
+    .toLocaleLowerCase("de-DE")
+    .split(/[^\p{L}0-9]+/u)
+    .filter(Boolean);
+}
+
+function runnerInstalledEconomyTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    token === phrase[0] &&
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
+}
+
+function runnerInstalledEconomyTokenIsCredit(
+  token: string | undefined,
+): boolean {
+  return token === "credit" || token === "credits";
+}
+
+function runnerInstalledEconomyPositiveInteger(
+  token: string | undefined,
+): number {
+  if (token === undefined || token === "") return 0;
+  const amount = Number.parseInt(token, 10);
+  return String(amount) === token && amount > 0 ? amount : 0;
 }
 
 function buildCandidate(

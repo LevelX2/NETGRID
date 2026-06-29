@@ -10332,6 +10332,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n "\.match\(|\.test\(|text\.includes|rulesText\?\.match|label\.match|label\.includes|action\.label" packages/ai/src/legacy --glob '!**/*.test.ts'` listet den Legacy-Restbestand.
   - Verifikation: `rg -n "tokens\.includes|\.includes\(term\)|accepted\.includes|reasonCodes\.includes|knownValues\.includes|split\([^\n]+\)\.includes|\.includes\(token\)" packages/ai/src` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertzweiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/runner-plans.ts` ersetzt Broker-/Short-Term-Contract-Label-Regexes für `auf Broker legen`, `von Broker nehmen`, `Credits nehmen` und Credit-Mengen durch lokale Label-Token-Helper.
+  - Legacy-Runner-Economy erkennt bestehende Broker-Build-/Cashout- und Short-Term-Contract-Cashout-Labels weiter, aber substring-nahe Label-Fragmente werden nicht mehr über freie Regexes akzeptiert.
+  - Status bleibt `IN_PROGRESS`, weil der Legacy-Runner-Cluster noch weitere `action.label`-Zugriffe enthält und danach der Legacy-Corp-RulesText-Cluster offen bleibt.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/semantic-ai-runtime-cutover.test.ts -t "Broker"` grün, 7 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'auf Broker legen|von Broker nehmen|Credits\?\\s\+nehmen|\\(\\d\+\\)\\s\+Credits|/.*Broker|\.exec\(label\)|\.test\(label\)' packages/ai/src/legacy/runner-plans.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
