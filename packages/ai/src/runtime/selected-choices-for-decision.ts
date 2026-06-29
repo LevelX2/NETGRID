@@ -1,4 +1,9 @@
-import { type AiDecision, type AiDecisionInput, type LegalAction, type VisibleCard } from "@netgrid/shared";
+import {
+  type AiDecision,
+  type AiDecisionInput,
+  type LegalAction,
+  type VisibleCard,
+} from "@netgrid/shared";
 
 import { selectedBidChoiceOptionId } from "./bid-choice-option";
 import { selectableChoiceOptions } from "./choice-option";
@@ -6,16 +11,21 @@ import { selectedCorpAdvancementCounterChoiceOptionId } from "./corp-advancement
 import { selectedDiscardChoiceOptionIds } from "./discard-choice-selection";
 import { selectedPlayfulAiChoiceOptionId } from "./playful-ai-choice-option";
 import { selectedPostBidLinkChoiceOptionId } from "./post-bid-link-choice-option";
-import { selectedSearchChoiceOptionIds, type SearchChoiceFeatureSnapshot } from "./search-choice-option";
+import {
+  selectedSearchChoiceOptionIds,
+  type SearchChoiceFeatureSnapshot,
+} from "./search-choice-option";
 import {
   selectedDefaultCardChoiceOptionIds,
-  selectedFirstChoiceOptionId,
+  selectedFallbackChoiceOptionIds,
 } from "./select-card-choice-option";
 import { selectedSetupMulliganChoiceOptionId } from "./setup-mulligan-choice-option";
 import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-choice-option";
 import { latestTraceContext } from "./trace-context";
 
-type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
+type PendingChoice = NonNullable<
+  AiDecisionInput["playerView"]["pendingChoice"]
+>;
 type PendingChoiceOptions = PendingChoice["options"];
 
 type DiscardScore = {
@@ -23,12 +33,12 @@ type DiscardScore = {
 };
 
 export type SelectedChoicesForDecisionDependencies = {
-  readonly evaluateCorpOpeningHand: (
-    input: AiDecisionInput,
-  ) => { readonly decision: string };
-  readonly evaluateRunnerOpeningHand: (
-    input: AiDecisionInput,
-  ) => { readonly decision: string };
+  readonly evaluateCorpOpeningHand: (input: AiDecisionInput) => {
+    readonly decision: string;
+  };
+  readonly evaluateRunnerOpeningHand: (input: AiDecisionInput) => {
+    readonly decision: string;
+  };
   readonly discardKeepScore: (
     input: AiDecisionInput,
     card: VisibleCard,
@@ -45,9 +55,7 @@ export type SelectedChoicesForDecisionDependencies = {
   readonly extractAiFeatures: (
     input: AiDecisionInput,
   ) => SearchChoiceFeatureSnapshot;
-  readonly rolesForCardId: (
-    cardId: string | undefined,
-  ) => readonly string[];
+  readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
 };
 
 export function selectedChoicesForDecision(
@@ -84,7 +92,8 @@ export function selectedChoicesForDecision(
     choice.kind === "select_cards" &&
     choice.source.startsWith("v1912.shell_traders_start_turn")
   ) {
-    const selectedOptionId = selectedShellTradersStartTurnChoiceOptionId(choice);
+    const selectedOptionId =
+      selectedShellTradersStartTurnChoiceOptionId(choice);
     return selectedOptionId !== undefined
       ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
@@ -95,11 +104,12 @@ export function selectedChoicesForDecision(
   ) {
     return {
       choiceId: choice.choiceId,
-      selectedOptionIds: dependencies.selectedRunnerProgramInstallTrashOptionIds(
-        input,
-        choice,
-        selectableOptions,
-      ),
+      selectedOptionIds:
+        dependencies.selectedRunnerProgramInstallTrashOptionIds(
+          input,
+          choice,
+          selectableOptions,
+        ),
     };
   }
   if (
@@ -164,10 +174,13 @@ export function selectedChoicesForDecision(
       : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (choice.kind !== "bid_amount") {
-    const selectedOptionId = selectedFirstChoiceOptionId(selectableOptions);
-    return selectedOptionId !== undefined
-      ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
-      : { choiceId: choice.choiceId, selectedOptionIds: [] };
+    return {
+      choiceId: choice.choiceId,
+      selectedOptionIds: selectedFallbackChoiceOptionIds(
+        choice,
+        selectableOptions,
+      ),
+    };
   }
 
   const selectedOptionId = selectedBidChoiceOptionId(
