@@ -121,7 +121,8 @@ export function applyTagEffectSemantics(
     candidate.sourceDefinitionId !== undefined
       ? TAG_EFFECT_DESCRIPTORS_BY_DEFINITION_ID[candidate.sourceDefinitionId]
       : undefined;
-  if (!descriptor || !descriptor.actionTypes.includes(action.type)) {
+  const descriptorActionTypeSet = new Set(descriptor?.actionTypes ?? []);
+  if (!descriptor || !descriptorActionTypeSet.has(action.type)) {
     return candidate;
   }
 

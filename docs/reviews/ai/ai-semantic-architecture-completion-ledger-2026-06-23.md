@@ -9872,6 +9872,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'policies\.includes' packages/ai/src/legalaction-witness.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihunderteinunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/tag-effect-semantics.ts` bindet TagEffect-Descriptor-ActionTypes über ein lokales Set statt direkter `descriptor.actionTypes.includes(...)`-Prüfung.
+  - Strukturierte LegalAction-Typen bleiben exakt; nicht passende ActionTypes erhalten kein TagEffectProfile aus dem Descriptor.
+  - `tag-effect-semantics.test.ts` sichert die Descriptor-Projektion für `play_event` und den Nicht-Treffer für `install_card`.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/tag-effect-semantics.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'descriptor\.actionTypes\.includes' packages/ai/src/actions/tag-effect-semantics.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
