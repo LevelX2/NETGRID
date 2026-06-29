@@ -1,6 +1,6 @@
 # AI 3DB62D Corp Fixes Prozess 2026-06-29
 
-Status: aktiv
+Status: abgeschlossen
 
 ## Anlass
 
@@ -33,6 +33,13 @@ Die Corp-KI soll konkrete Score-now-, Remote-Safety- und Triage-Lagen kohärente
 - Fokussierte Vitest-Tests für `semantic-runtime-corp-board-triage`, `semantic-runtime-corp-scoring-window`, `semantic-runtime-corp-remote-score` und `semantic-runtime-corp-score`.
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
+
+Abschlussstand:
+
+- Fokussierte Runtime-/Regressionstests: 6 Dateien, 166 Tests grün.
+- Vollständiger `@netgrid/ai`-Testlauf: 272 Dateien, 2187 Tests grün.
+- `@netgrid/ai`-Typecheck grün.
+- `git diff --check` grün.
 
 ## Worktree
 
