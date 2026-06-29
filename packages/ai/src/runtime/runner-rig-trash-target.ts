@@ -14,8 +14,9 @@ export function corpVisibleRunnerRigTrashTarget(
   ].filter(
     (value): value is string => typeof value === "string" && value.length > 0,
   );
+  const targetIdSet = new Set(targetIds);
   return (input.playerView.opponent.rig ?? []).find(
-    (card) => card.known && targetIds.includes(card.instanceId),
+    (card) => card.known && targetIdSet.has(card.instanceId),
   );
 }
 

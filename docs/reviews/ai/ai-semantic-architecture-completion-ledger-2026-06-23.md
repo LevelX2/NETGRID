@@ -9809,6 +9809,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'currentKnownRootDefinitionIds\.includes' packages/ai/src/memory/remote-access-outcome.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertvierundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-rig-trash-target.ts` bindet Runner-Rig-Ziel-IDs über ein lokales Set statt direkter `targetIds.includes(...)`-Prüfung.
+  - Strukturierte `cardId`-/`targetCardId`-Treffer bleiben exakt auf sichtbare bekannte Runner-Rig-Karten beschränkt; Substring- oder Label-Fallbacks entstehen nicht.
+  - `runner-rig-trash-target.test.ts` sichert exakte Ziel-ID-Bindung, Hidden-Card-Ausschluss und den bestehenden Hardware-Fallback.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/runner-rig-trash-target.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'targetIds\.includes' packages/ai/src/runtime/runner-rig-trash-target.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
