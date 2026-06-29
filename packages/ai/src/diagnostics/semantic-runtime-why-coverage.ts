@@ -39,6 +39,7 @@ export type SemanticRuntimeWhyCoverageReport = {
 export function buildSemanticRuntimeWhyCoverageReport(
   decisions: readonly AiDecisionDebug[],
 ): SemanticRuntimeWhyCoverageReport {
+  // Report-only audit surface; runtime selection must never consume this status.
   const actionAlternatives = decisions.flatMap(
     (decision) => decision.actionAlternatives ?? [],
   );
