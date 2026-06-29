@@ -9719,6 +9719,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'knownProjectionGaps\.includes|gapReasons\.includes' packages/ai/src/controlled-shadow-mode.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertvierzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/shadow-readiness-expansion.ts` bindet ShadowReadiness-KnownProjectionGaps über lokale Sets statt direkter `fixture.knownProjectionGaps.includes(...)`-Prüfungen.
+  - Strukturierte Gap-Flags wie `hidden_info_blocked` und `ability_unresolved` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `shadow-readiness-expansion.test.ts` sichert AI061/AI062/AI065/AI068-Gap- und Promotion-Guards.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/shadow-readiness-expansion.test.ts` grün, 1 Datei, 25 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'knownProjectionGaps\.includes' packages/ai/src/shadow-readiness-expansion.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

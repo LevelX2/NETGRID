@@ -851,9 +851,13 @@ export function buildAi061SrTargetContextProjectionExpansionReport(
     )?.count ?? 0;
   const notProjected = expandedFixtures
     .filter(
-      (fixture) =>
-        fixture.scenarioId === "corp_ambush_or_remote_bait" &&
-        fixture.knownProjectionGaps.includes("hidden_info_blocked"),
+      (fixture) => {
+        const knownProjectionGapSet = new Set(fixture.knownProjectionGaps);
+        return (
+          fixture.scenarioId === "corp_ambush_or_remote_bait" &&
+          knownProjectionGapSet.has("hidden_info_blocked")
+        );
+      },
     )
     .map((fixture) => ({
       scenarioId: fixture.scenarioId,
@@ -910,9 +914,13 @@ export function buildAi062SrAbilityBindingExpansionReport(
       ?.count ?? 0;
   const unresolved = expandedFixtures
     .filter(
-      (fixture) =>
-        fixture.scenarioId === "multi_ability_card_unresolved" &&
-        fixture.knownProjectionGaps.includes("ability_unresolved"),
+      (fixture) => {
+        const knownProjectionGapSet = new Set(fixture.knownProjectionGaps);
+        return (
+          fixture.scenarioId === "multi_ability_card_unresolved" &&
+          knownProjectionGapSet.has("ability_unresolved")
+        );
+      },
     )
     .map((fixture) => ({
       scenarioId: fixture.scenarioId,
@@ -1419,7 +1427,8 @@ function runtimeCoverageExpansionPromotion(
 function ai068BlockedPromotionReason(
   fixture: ShadowScenarioFixture,
 ): Ai068SrRuntimeBackedShadowFixtureCoverageExpansionReport["blockedPromotionCandidates"][number]["reason"] {
-  if (fixture.knownProjectionGaps.includes("hidden_info_blocked")) {
+  const knownProjectionGapSet = new Set(fixture.knownProjectionGaps);
+  if (knownProjectionGapSet.has("hidden_info_blocked")) {
     return "hidden_info_blocked_guard";
   }
   if (fixture.scenarioId === "multi_ability_card_unresolved") {
@@ -1431,7 +1440,8 @@ function ai068BlockedPromotionReason(
 function notPromotedReason(
   fixture: ShadowScenarioFixture,
 ): Ai065SrRuntimeBackedShadowFixturePromotionReport["notPromoted"][number]["reason"] {
-  if (fixture.knownProjectionGaps.includes("hidden_info_blocked")) {
+  const knownProjectionGapSet = new Set(fixture.knownProjectionGaps);
+  if (knownProjectionGapSet.has("hidden_info_blocked")) {
     return "hidden_info_guard";
   }
   if (fixture.scenarioId === "multi_ability_card_unresolved") {
