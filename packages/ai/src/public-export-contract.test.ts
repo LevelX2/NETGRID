@@ -33,6 +33,8 @@ describe("AI public export contract", () => {
       "evaluateDoctrineQualityGate",
       "summarizeActionSemanticCandidateCoverage",
       "formatActionSemanticCandidateCoverageReport",
+      "buildSemanticRuntimeWhyCoverageReport",
+      "renderSemanticRuntimeWhyCoverageMarkdown",
       "buildDeckStrategyProfile",
       "reconstructBeliefState",
     ];

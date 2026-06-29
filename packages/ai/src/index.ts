@@ -30,6 +30,14 @@ export type {
   RunnerOpponentModel,
 } from "./belief-state";
 export {
+  buildSemanticRuntimeWhyCoverageReport,
+  renderSemanticRuntimeWhyCoverageMarkdown,
+  SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION,
+} from "./diagnostics/semantic-runtime-why-coverage";
+export type {
+  SemanticRuntimeWhyCoverageReport,
+} from "./diagnostics/semantic-runtime-why-coverage";
+export {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
   buildAiDecisionInputDto,
 } from "./input-dto";
