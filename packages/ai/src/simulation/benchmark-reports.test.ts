@@ -8,6 +8,7 @@ import {
   formatMatchProgressionBenchmarkReport,
   formatMatchProgressionBenchmarkSuiteReport,
 } from "./benchmark-reports";
+import { buildSelfplayActionTypeDominanceReport } from "./selfplay-action-type-dominance";
 import {
   summarizeSelfplayActionLimitClusters,
   summarizeSelfplayActionLimitSubclusters,
@@ -427,6 +428,9 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("| scoreWindowMissed |");
     expect(report).toContain("| unsafeScoreChosen |");
     expect(report).toContain("| passiveActionWithScoreLineAvailable |");
+    expect(report).toContain("## Action Type Dominance");
+    expect(report).toContain("- Status:");
+    expect(report).toContain("| Side | Top Action Type | Decisions | Top Share | Status |");
     expect(report).toContain("## Action Limit Clusters");
     expect(report).toContain("## Action Limit Subclusters");
     expect(report).toContain("## Why Coverage");
@@ -589,6 +593,70 @@ describe("benchmark report formatting", () => {
       1,
     );
     expect(JSON.stringify(clusters)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  });
+
+  it("summarizes action type dominance by side from selfplay traces", () => {
+    const balanced: AiSimulationSummary = {
+      seed: "selfplay-action-type-balanced",
+      winner: "action_limit_reached",
+      actions: 8,
+      turns: 4,
+      finalAgendaPoints: { runner: 0, corp: 0 },
+      finalStateHash: "fnv1a:selfplay-action-type-balanced",
+      eventLogLength: 8,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "start_run"),
+        selfplayAction("runner", 2, "gain_credit"),
+        selfplayAction("runner", 3, "draw_card"),
+        selfplayAction("runner", 4, "install_card"),
+        selfplayAction("corp", 5, "install_card"),
+        selfplayAction("corp", 6, "gain_credit"),
+        selfplayAction("corp", 7, "rez_ice"),
+        selfplayAction("corp", 8, "advance_card"),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+    const dominant: AiSimulationSummary = {
+      ...balanced,
+      seed: "selfplay-action-type-dominant",
+      finalStateHash: "fnv1a:selfplay-action-type-dominant",
+      actionSequence: [
+        selfplayAction("runner", 1, "gain_credit"),
+        selfplayAction("runner", 2, "gain_credit"),
+        selfplayAction("runner", 3, "gain_credit"),
+        selfplayAction("runner", 4, "gain_credit"),
+        selfplayAction("runner", 5, "gain_credit"),
+        selfplayAction("runner", 6, "start_run"),
+        selfplayAction("corp", 7, "install_card"),
+        selfplayAction("corp", 8, "gain_credit"),
+      ],
+    };
+
+    const complete = buildSelfplayActionTypeDominanceReport([balanced], {
+      minDecisions: 4,
+      threshold: 0.7,
+    });
+    const review = buildSelfplayActionTypeDominanceReport([dominant], {
+      minDecisions: 4,
+      threshold: 0.7,
+    });
+
+    expect(complete.status).toBe("complete");
+    expect(complete.bySide.runner.topShare).toBe(0.25);
+    expect(review.status).toBe("dominance_review_required");
+    expect(review.bySide.runner).toMatchObject({
+      topActionType: "gain_credit",
+      topShare: 0.833,
+      status: "dominance_review_required",
+    });
+    expect(review.findings).toContain("runner:gain_credit_share:0.833");
+    expect(JSON.stringify({ complete, review })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
   });

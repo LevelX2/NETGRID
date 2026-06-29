@@ -30,7 +30,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | `packages/ai/src/deck-capabilities.ts` | 936 Zeilen |
 | Semantische Module mit Legacy-/LegacyDecision-Treffern | PENDING Messauswertung |
 | Produktive `action.label`-/Regex-/Titel-Treffer | PENDING Messauswertung |
-| Action-Type-Scoreverwendungen | PENDING Messauswertung |
+| Action-Type-Scoreverwendungen | `IN_PROGRESS` report-only Dominanzmessung mit erstem Pair-A-Smoke ohne Action-Type-Dominanz. |
 | Legacy-Fallback-Rate | PENDING Messauswertung |
 | ActionSemanticCandidate-Coverage | PENDING Messauswertung |
 | TargetProfile-/TargetConstraint-Coverage | PENDING Messauswertung |
@@ -68,7 +68,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-17 | Fachliche Scoring-Consumer aufbauen. | `VERIFIED` | Aktueller Score enthält große Typpriorität und verstreute Komponenten. | Erfüllt: Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty sind als aktive normalisierte Consumer angebunden; Vertragstest schützt Vollständigkeit, Skalen und `active`-Status. |
 | AI-COMPLETE-18 | DecisionTrace, WhyChosen und WhyNot vollständig machen. | `VERIFIED` | Debug war vorhanden, aber WhyNot-Kategorien und Alternativenabdeckung mussten geprüft werden. | Erfüllt: Runtime-, Shadow-, Replay-, Selfplay-, Baseline- und Acceptance-Oberflächen transportieren redigierte WhyChosen-/WhyNot-Fakten; report-only Why-Coverage misst Top-Level-WhyNot, Runtime-WhyNot-Sections, ausgewählte ActionAlternative-WhyChosen, nicht ausgewählte ActionAlternative-WhyNot, Missing-Signale und Auditstatus; zwei unabhängige Abschlussaudits inklusive Pair-A-/Pair-B-Smokes sind grün. |
 | AI-COMPLETE-19 | Kommentare und Entwicklerleitplanken korrigieren. | `VERIFIED` | Grenzkommentare existierten und mussten nach Runtime-Änderungen stimmen. | Erfüllt: Why-Coverage ist als report-only Auditoberfläche kommentiert; Boundary-Test schützt, dass Runtime-Module den report-only Why-Coverage-Builder nicht importieren; Kommentar-Audit findet nur aktuelle Leitplanken und keine veralteten No-Effect-/Shadow-Only-Texte. |
-| AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `PENDING` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay müssen nach Reparatur geprüft werden. | Tests, Szenarien und Benchmarks belegen 0 Illegalität, 0 Hidden-Info-Verstoß, keine Action-Type-Dominanz und bessere Erklärbarkeit. |
+| AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `IN_PROGRESS` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay müssen nach Reparatur geprüft werden. | Erster Schnitt ergänzt report-only Action-Type-Dominanzmessung in Selfplay-/PS2-Gate-Reports; Pair-A-Smoke zeigt Safety grün und keine Dominanz. Größere Benchmark-/Holdout-Evidence bleibt offen. |
 
 ## Neu gefundene In-Scope-Findings
 
@@ -10936,6 +10936,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - `packages/ai/src/decision/module-boundaries.test.ts` ist vollständig grün, 33 Tests.
   - AI-Typecheck ist grün.
   - `AI-COMPLETE-19` ist `VERIFIED`. Nächstes offenes Ziel ist `AI-COMPLETE-20`.
+
+- `AI-COMPLETE-20` erster Action-Type-Dominanz-Messschnitt:
+  - `packages/ai/src/simulation/selfplay-action-type-dominance.ts` ergänzt einen report-only Dominanzbericht aus Selfplay-Action-Sequences mit Side-Buckets, Top-Share, Threshold-Status und Findings.
+  - `packages/ai/src/simulation/benchmark-reports.ts` rendert die Dominanzmessung im Selfplay-Trace-Mining-Report.
+  - `scripts/run-ai-ps2-play-strength-gate.ts` schreibt den Dominanzbericht je PS2-Leg in das Gate-JSON und nimmt den Status in die Gate-Evidence auf.
+  - `docs/reviews/ai/ai-complete-20-action-type-dominance-smoke-2026-06-29.json` und `.md` belegen einen ersten Pair-A-Smoke: Safety grün, 0 IllegalActions, 0 ReplayFailures, alle sechs Leg-Dominanzberichte `complete`, maximale Top-Share 0.263.
+  - Status bleibt `IN_PROGRESS`, weil ein breiteres Holdout-/Benchmark-Fenster für den Abschluss von `AI-COMPLETE-20` noch fehlt.
+  - Verifikation: fokussierte Benchmark-Report-Tests grün, AI-Typecheck grün, PS2-Pair-A-Smoke grün.
 
 ## Audit-Ledger
 

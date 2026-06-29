@@ -7,6 +7,7 @@ import type {
   AiMatchProgressionBenchmarkSuiteResult,
 } from "../index";
 import type { AiSelfplayTraceMiningResult } from "./selfplay-trace-mining";
+import { buildSelfplayActionTypeDominanceReport } from "./selfplay-action-type-dominance";
 import { buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries } from "./selfplay-why-coverage";
 
 // Simulation-only report helpers. Live AI decisions must not depend on these
@@ -183,6 +184,9 @@ export function formatAiSelfplayTraceMiningReport(
     buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries(
       result.summaries,
     );
+  const actionTypeDominance = buildSelfplayActionTypeDominanceReport(
+    result.summaries,
+  );
   const severityRows = Object.entries(result.aggregate.findingsBySeverity).map(
     ([severity, count]) => `| ${severity} | ${count} |`,
   );
@@ -239,6 +243,27 @@ export function formatAiSelfplayTraceMiningReport(
     `| scoreWindowMissed | ${result.aggregate.scoreWindowMissed} |`,
     `| unsafeScoreChosen | ${result.aggregate.unsafeScoreChosen} |`,
     `| passiveActionWithScoreLineAvailable | ${result.aggregate.passiveActionWithScoreLineAvailable} |`,
+    "",
+    "## Action Type Dominance",
+    "",
+    `- Status: ${actionTypeDominance.status}`,
+    `- Threshold: ${actionTypeDominance.threshold}`,
+    `- Decisions: ${actionTypeDominance.decisions}`,
+    `- Top share: ${actionTypeDominance.topShare}`,
+    `- Findings: ${actionTypeDominance.findings.length > 0 ? actionTypeDominance.findings.join(", ") : "none"}`,
+    "",
+    "| Side | Top Action Type | Decisions | Top Share | Status |",
+    "| --- | --- | ---: | ---: | --- |",
+    ...(["all", "runner", "corp"] as const).map((side) => {
+      const bucket = actionTypeDominance.bySide[side];
+      return `| ${side} | ${bucket.topActionType ?? "none"} | ${bucket.decisions} | ${bucket.topShare} | ${bucket.status} |`;
+    }),
+    "",
+    "| Side | Action Type | Count | Share |",
+    "| --- | --- | ---: | ---: |",
+    ...actionTypeDominance.topRows.map(
+      (row) => `| ${row.side} | ${row.actionType} | ${row.count} | ${row.share} |`,
+    ),
     "",
     "## Findings By Severity",
     "",

@@ -383,6 +383,15 @@ export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local
 export {
   buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries,
 } from "./simulation/selfplay-why-coverage";
+export {
+  buildSelfplayActionTypeDominanceReport,
+} from "./simulation/selfplay-action-type-dominance";
+export type {
+  AiSelfplayActionTypeDominanceBucket,
+  AiSelfplayActionTypeDominanceReport,
+  AiSelfplayActionTypeDominanceRow,
+  AiSelfplayActionTypeDominanceStatus,
+} from "./simulation/selfplay-action-type-dominance";
 export type {
   SimulationBenchmarkProfile,
   SimulationBenchmarkProfileId,

@@ -1,0 +1,2711 @@
+{
+  "schemaVersion": "ai-ps2-play-strength-gate-v1",
+  "generatedAt": "2026-06-29T14:15:29.601Z",
+  "config": {
+    "seeds": [
+      "ai-v143-tuning-001"
+    ],
+    "maxActions": 80,
+    "scenarios": [
+      "default_demo",
+      "A"
+    ],
+    "candidate": "current_candidate + practicalTacticOverlay.enabled",
+    "legacy": "basic_runner_ai/basic_corp_ai"
+  },
+  "tacticBenchmark": {
+    "legacy": {
+      "caseCount": 40,
+      "hits": 0,
+      "misses": 40,
+      "hitRate": 0,
+      "hitsByCategory": {
+        "corp_safe_score": 0,
+        "runner_steal_agenda": 0,
+        "runner_trash_value": 0,
+        "runner_open_access_card": 0,
+        "runner_install_coverage": 0,
+        "runner_take_high_payoff_run": 0,
+        "corp_real_punish": 0,
+        "corp_abandon_stale_punish": 0,
+        "runner_continue_reachable_run": 0,
+        "runner_avoid_stale_run": 0
+      },
+      "totalsByCategory": {
+        "corp_safe_score": 4,
+        "runner_steal_agenda": 4,
+        "runner_trash_value": 4,
+        "runner_open_access_card": 4,
+        "runner_install_coverage": 4,
+        "runner_take_high_payoff_run": 4,
+        "corp_real_punish": 4,
+        "corp_abandon_stale_punish": 4,
+        "runner_continue_reachable_run": 4,
+        "runner_avoid_stale_run": 4
+      },
+      "missesByCase": [
+        {
+          "caseId": "ai222-corp-safe-score-1",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-1",
+          "acceptableActionIds": [
+            "score-1"
+          ],
+          "badActionIds": [
+            "gain-1",
+            "protect-1"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-safe-score-2",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-2",
+          "acceptableActionIds": [
+            "score-2"
+          ],
+          "badActionIds": [
+            "gain-2",
+            "protect-2"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-safe-score-3",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-3",
+          "acceptableActionIds": [
+            "score-3"
+          ],
+          "badActionIds": [
+            "gain-3",
+            "protect-3"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-safe-score-4",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-4",
+          "acceptableActionIds": [
+            "score-4"
+          ],
+          "badActionIds": [
+            "gain-4",
+            "protect-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-1",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-1",
+          "acceptableActionIds": [
+            "steal-1"
+          ],
+          "badActionIds": [
+            "decline-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-2",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-2",
+          "acceptableActionIds": [
+            "steal-2"
+          ],
+          "badActionIds": [
+            "decline-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-3",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-3",
+          "acceptableActionIds": [
+            "steal-3"
+          ],
+          "badActionIds": [
+            "decline-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-4",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-4",
+          "acceptableActionIds": [
+            "steal-4"
+          ],
+          "badActionIds": [
+            "decline-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-1",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-1",
+          "acceptableActionIds": [
+            "trash-1"
+          ],
+          "badActionIds": [
+            "decline-trash-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-2",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-2",
+          "acceptableActionIds": [
+            "trash-2"
+          ],
+          "badActionIds": [
+            "decline-trash-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-3",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-3",
+          "acceptableActionIds": [
+            "trash-3"
+          ],
+          "badActionIds": [
+            "decline-trash-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-4",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-4",
+          "acceptableActionIds": [
+            "trash-4"
+          ],
+          "badActionIds": [
+            "decline-trash-4"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-1",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-1",
+          "acceptableActionIds": [
+            "access-card-1"
+          ],
+          "badActionIds": [
+            "gain-before-access-1"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-2",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-2",
+          "acceptableActionIds": [
+            "access-card-2"
+          ],
+          "badActionIds": [
+            "gain-before-access-2"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-3",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-3",
+          "acceptableActionIds": [
+            "access-card-3"
+          ],
+          "badActionIds": [
+            "gain-before-access-3"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-4",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-4",
+          "acceptableActionIds": [
+            "access-card-4"
+          ],
+          "badActionIds": [
+            "gain-before-access-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-1",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-1",
+          "acceptableActionIds": [
+            "install-fracter-1"
+          ],
+          "badActionIds": [
+            "run-hq-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-2",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-2",
+          "acceptableActionIds": [
+            "install-fracter-2"
+          ],
+          "badActionIds": [
+            "run-hq-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-3",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-3",
+          "acceptableActionIds": [
+            "install-fracter-3"
+          ],
+          "badActionIds": [
+            "run-hq-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-4",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-4",
+          "acceptableActionIds": [
+            "install-fracter-4"
+          ],
+          "badActionIds": [
+            "run-hq-4"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-1",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-1",
+          "acceptableActionIds": [
+            "run-payoff-1"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-1"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-2",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-2",
+          "acceptableActionIds": [
+            "run-payoff-2"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-2"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-3",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-3",
+          "acceptableActionIds": [
+            "run-payoff-3"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-3"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-4",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-4",
+          "acceptableActionIds": [
+            "run-payoff-4"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-4"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-1",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-1",
+          "acceptableActionIds": [
+            "punish-1"
+          ],
+          "badActionIds": [
+            "gain-punish-1"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-2",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-2",
+          "acceptableActionIds": [
+            "punish-2"
+          ],
+          "badActionIds": [
+            "gain-punish-2"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-3",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-3",
+          "acceptableActionIds": [
+            "punish-3"
+          ],
+          "badActionIds": [
+            "gain-punish-3"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-4",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-4",
+          "acceptableActionIds": [
+            "punish-4"
+          ],
+          "badActionIds": [
+            "gain-punish-4"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-1",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-1",
+          "acceptableActionIds": [
+            "advance-1",
+            "score-1"
+          ],
+          "badActionIds": [
+            "punish-stale-1"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-2",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-2",
+          "acceptableActionIds": [
+            "advance-2",
+            "score-2"
+          ],
+          "badActionIds": [
+            "punish-stale-2"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-3",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-3",
+          "acceptableActionIds": [
+            "advance-3",
+            "score-3"
+          ],
+          "badActionIds": [
+            "punish-stale-3"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-4",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-4",
+          "acceptableActionIds": [
+            "advance-4",
+            "score-4"
+          ],
+          "badActionIds": [
+            "punish-stale-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-1",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-1",
+          "acceptableActionIds": [
+            "continue-1"
+          ],
+          "badActionIds": [
+            "jack-out-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-2",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-2",
+          "acceptableActionIds": [
+            "continue-2"
+          ],
+          "badActionIds": [
+            "jack-out-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-3",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-3",
+          "acceptableActionIds": [
+            "continue-3"
+          ],
+          "badActionIds": [
+            "jack-out-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-4",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-4",
+          "acceptableActionIds": [
+            "continue-4"
+          ],
+          "badActionIds": [
+            "jack-out-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-1",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-1",
+          "acceptableActionIds": [
+            "install-pressure-1",
+            "draw-1"
+          ],
+          "badActionIds": [
+            "run-rd-stale-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-2",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-2",
+          "acceptableActionIds": [
+            "install-pressure-2",
+            "draw-2"
+          ],
+          "badActionIds": [
+            "run-rd-stale-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-3",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-3",
+          "acceptableActionIds": [
+            "install-pressure-3",
+            "draw-3"
+          ],
+          "badActionIds": [
+            "run-rd-stale-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-4",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-4",
+          "acceptableActionIds": [
+            "install-pressure-4",
+            "draw-4"
+          ],
+          "badActionIds": [
+            "run-rd-stale-4"
+          ]
+        }
+      ]
+    },
+    "candidate": {
+      "caseCount": 40,
+      "hits": 0,
+      "misses": 40,
+      "hitRate": 0,
+      "hitsByCategory": {
+        "corp_safe_score": 0,
+        "runner_steal_agenda": 0,
+        "runner_trash_value": 0,
+        "runner_open_access_card": 0,
+        "runner_install_coverage": 0,
+        "runner_take_high_payoff_run": 0,
+        "corp_real_punish": 0,
+        "corp_abandon_stale_punish": 0,
+        "runner_continue_reachable_run": 0,
+        "runner_avoid_stale_run": 0
+      },
+      "totalsByCategory": {
+        "corp_safe_score": 4,
+        "runner_steal_agenda": 4,
+        "runner_trash_value": 4,
+        "runner_open_access_card": 4,
+        "runner_install_coverage": 4,
+        "runner_take_high_payoff_run": 4,
+        "corp_real_punish": 4,
+        "corp_abandon_stale_punish": 4,
+        "runner_continue_reachable_run": 4,
+        "runner_avoid_stale_run": 4
+      },
+      "missesByCase": [
+        {
+          "caseId": "ai222-corp-safe-score-1",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-1",
+          "acceptableActionIds": [
+            "score-1"
+          ],
+          "badActionIds": [
+            "gain-1",
+            "protect-1"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-safe-score-2",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-2",
+          "acceptableActionIds": [
+            "score-2"
+          ],
+          "badActionIds": [
+            "gain-2",
+            "protect-2"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-safe-score-3",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-3",
+          "acceptableActionIds": [
+            "score-3"
+          ],
+          "badActionIds": [
+            "gain-3",
+            "protect-3"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-safe-score-4",
+          "category": "corp_safe_score",
+          "selectedActionId": "gain-4",
+          "acceptableActionIds": [
+            "score-4"
+          ],
+          "badActionIds": [
+            "gain-4",
+            "protect-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-1",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-1",
+          "acceptableActionIds": [
+            "steal-1"
+          ],
+          "badActionIds": [
+            "decline-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-2",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-2",
+          "acceptableActionIds": [
+            "steal-2"
+          ],
+          "badActionIds": [
+            "decline-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-3",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-3",
+          "acceptableActionIds": [
+            "steal-3"
+          ],
+          "badActionIds": [
+            "decline-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-steal-agenda-4",
+          "category": "runner_steal_agenda",
+          "selectedActionId": "decline-4",
+          "acceptableActionIds": [
+            "steal-4"
+          ],
+          "badActionIds": [
+            "decline-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-1",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-1",
+          "acceptableActionIds": [
+            "trash-1"
+          ],
+          "badActionIds": [
+            "decline-trash-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-2",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-2",
+          "acceptableActionIds": [
+            "trash-2"
+          ],
+          "badActionIds": [
+            "decline-trash-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-3",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-3",
+          "acceptableActionIds": [
+            "trash-3"
+          ],
+          "badActionIds": [
+            "decline-trash-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-trash-value-4",
+          "category": "runner_trash_value",
+          "selectedActionId": "decline-trash-4",
+          "acceptableActionIds": [
+            "trash-4"
+          ],
+          "badActionIds": [
+            "decline-trash-4"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-1",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-1",
+          "acceptableActionIds": [
+            "access-card-1"
+          ],
+          "badActionIds": [
+            "gain-before-access-1"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-2",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-2",
+          "acceptableActionIds": [
+            "access-card-2"
+          ],
+          "badActionIds": [
+            "gain-before-access-2"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-3",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-3",
+          "acceptableActionIds": [
+            "access-card-3"
+          ],
+          "badActionIds": [
+            "gain-before-access-3"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-open-access-card-4",
+          "category": "runner_open_access_card",
+          "selectedActionId": "gain-before-access-4",
+          "acceptableActionIds": [
+            "access-card-4"
+          ],
+          "badActionIds": [
+            "gain-before-access-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-1",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-1",
+          "acceptableActionIds": [
+            "install-fracter-1"
+          ],
+          "badActionIds": [
+            "run-hq-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-2",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-2",
+          "acceptableActionIds": [
+            "install-fracter-2"
+          ],
+          "badActionIds": [
+            "run-hq-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-3",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-3",
+          "acceptableActionIds": [
+            "install-fracter-3"
+          ],
+          "badActionIds": [
+            "run-hq-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-install-coverage-4",
+          "category": "runner_install_coverage",
+          "selectedActionId": "run-hq-4",
+          "acceptableActionIds": [
+            "install-fracter-4"
+          ],
+          "badActionIds": [
+            "run-hq-4"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-1",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-1",
+          "acceptableActionIds": [
+            "run-payoff-1"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-1"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-2",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-2",
+          "acceptableActionIds": [
+            "run-payoff-2"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-2"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-3",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-3",
+          "acceptableActionIds": [
+            "run-payoff-3"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-3"
+          ]
+        },
+        {
+          "caseId": "ai-ps2-runner-high-payoff-run-4",
+          "category": "runner_take_high_payoff_run",
+          "selectedActionId": "draw-before-payoff-run-4",
+          "acceptableActionIds": [
+            "run-payoff-4"
+          ],
+          "badActionIds": [
+            "draw-before-payoff-run-4"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-1",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-1",
+          "acceptableActionIds": [
+            "punish-1"
+          ],
+          "badActionIds": [
+            "gain-punish-1"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-2",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-2",
+          "acceptableActionIds": [
+            "punish-2"
+          ],
+          "badActionIds": [
+            "gain-punish-2"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-3",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-3",
+          "acceptableActionIds": [
+            "punish-3"
+          ],
+          "badActionIds": [
+            "gain-punish-3"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-real-punish-4",
+          "category": "corp_real_punish",
+          "selectedActionId": "gain-punish-4",
+          "acceptableActionIds": [
+            "punish-4"
+          ],
+          "badActionIds": [
+            "gain-punish-4"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-1",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-1",
+          "acceptableActionIds": [
+            "advance-1",
+            "score-1"
+          ],
+          "badActionIds": [
+            "punish-stale-1"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-2",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-2",
+          "acceptableActionIds": [
+            "advance-2",
+            "score-2"
+          ],
+          "badActionIds": [
+            "punish-stale-2"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-3",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-3",
+          "acceptableActionIds": [
+            "advance-3",
+            "score-3"
+          ],
+          "badActionIds": [
+            "punish-stale-3"
+          ]
+        },
+        {
+          "caseId": "ai222-corp-stale-punish-4",
+          "category": "corp_abandon_stale_punish",
+          "selectedActionId": "punish-stale-4",
+          "acceptableActionIds": [
+            "advance-4",
+            "score-4"
+          ],
+          "badActionIds": [
+            "punish-stale-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-1",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-1",
+          "acceptableActionIds": [
+            "continue-1"
+          ],
+          "badActionIds": [
+            "jack-out-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-2",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-2",
+          "acceptableActionIds": [
+            "continue-2"
+          ],
+          "badActionIds": [
+            "jack-out-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-3",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-3",
+          "acceptableActionIds": [
+            "continue-3"
+          ],
+          "badActionIds": [
+            "jack-out-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-continue-run-4",
+          "category": "runner_continue_reachable_run",
+          "selectedActionId": "jack-out-4",
+          "acceptableActionIds": [
+            "continue-4"
+          ],
+          "badActionIds": [
+            "jack-out-4"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-1",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-1",
+          "acceptableActionIds": [
+            "install-pressure-1",
+            "draw-1"
+          ],
+          "badActionIds": [
+            "run-rd-stale-1"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-2",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-2",
+          "acceptableActionIds": [
+            "install-pressure-2",
+            "draw-2"
+          ],
+          "badActionIds": [
+            "run-rd-stale-2"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-3",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-3",
+          "acceptableActionIds": [
+            "install-pressure-3",
+            "draw-3"
+          ],
+          "badActionIds": [
+            "run-rd-stale-3"
+          ]
+        },
+        {
+          "caseId": "ai222-runner-avoid-stale-run-4",
+          "category": "runner_avoid_stale_run",
+          "selectedActionId": "run-rd-stale-4",
+          "acceptableActionIds": [
+            "install-pressure-4",
+            "draw-4"
+          ],
+          "badActionIds": [
+            "run-rd-stale-4"
+          ]
+        }
+      ]
+    },
+    "hitRateDelta": 0
+  },
+  "aggregate": {
+    "legacyVsLegacy": {
+      "games": 2,
+      "decisions": 106,
+      "findings": 12,
+      "findingsBySeverity": {
+        "critical": 0,
+        "high": 0,
+        "medium": 12,
+        "low": 0
+      },
+      "findingsByDetector": {
+        "illegal_action": 0,
+        "replay_failure": 0,
+        "hidden_info_marker": 0,
+        "no_legal_action_failure": 0,
+        "action_limit_reached": 1,
+        "repeated_no_progress_run": 11,
+        "repeated_known_no_payoff_remote": 0,
+        "repeated_low_value_archives": 0,
+        "recovery_low_value_loop": 0,
+        "bank_over_target_without_funding_need": 0,
+        "risky_self_damage_action": 0,
+        "blink_low_hand_buffer_run": 0,
+        "duplicate_low_delta_install": 0,
+        "overdraw_without_urgency": 0,
+        "plan_step_action_mismatch": 0,
+        "semantic_override_suspicious": 0,
+        "corp_never_scores_long_game": 0,
+        "runner_never_accesses_long_game": 0
+      },
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "actionLimitReached": 1,
+      "allRedactionSafe": true,
+      "redactionSafe": true,
+      "averageGameLength": 53,
+      "corpAgendaScores": 2,
+      "runnerAgendaSteals": 3,
+      "corpFlatlines": 0,
+      "scoreWindowMissed": 0,
+      "unsafeScoreChosen": 0,
+      "passiveActionWithScoreLineAvailable": 2,
+      "actionLimitClusters": {
+        "action_limit_runner_repeated_no_progress_run": 0,
+        "action_limit_runner_remote_contest_blocked": 0,
+        "action_limit_corp_scoreline_stall": 0,
+        "action_limit_setup_economy_loop": 0,
+        "action_limit_low_value_repeat": 1,
+        "action_limit_mixed_or_unknown": 0
+      },
+      "actionLimitSubclusters": {
+        "late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_real_reserve": 0,
+        "runner_late_gain_credit_no_safe_alternative": 0,
+        "corp_late_gain_credit_without_rez_score_protection_need": 0,
+        "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+        "corp_late_gain_credit_no_safe_alternative": 0,
+        "late_draw_for_coverage_or_hand_goal": 0,
+        "late_draw_without_coverage_or_hand_goal": 0,
+        "late_ability_reuse_low_delta": 0,
+        "late_install_low_delta": 0,
+        "late_run_step_stall": 0,
+        "run_microstep_required": 0,
+        "continue_chain_to_access": 0,
+        "break_pump_required": 0,
+        "jackout_loop": 0,
+        "continue_without_progress": 0,
+        "access_pending": 1,
+        "breach_pending": 0,
+        "mixed_unknown": 0
+      }
+    },
+    "candidateRunnerVsLegacyCorp": {
+      "games": 2,
+      "decisions": 107,
+      "findings": 27,
+      "findingsBySeverity": {
+        "critical": 0,
+        "high": 0,
+        "medium": 27,
+        "low": 0
+      },
+      "findingsByDetector": {
+        "illegal_action": 0,
+        "replay_failure": 0,
+        "hidden_info_marker": 0,
+        "no_legal_action_failure": 0,
+        "action_limit_reached": 1,
+        "repeated_no_progress_run": 14,
+        "repeated_known_no_payoff_remote": 0,
+        "repeated_low_value_archives": 0,
+        "recovery_low_value_loop": 22,
+        "bank_over_target_without_funding_need": 0,
+        "risky_self_damage_action": 0,
+        "blink_low_hand_buffer_run": 0,
+        "duplicate_low_delta_install": 0,
+        "overdraw_without_urgency": 0,
+        "plan_step_action_mismatch": 1,
+        "semantic_override_suspicious": 0,
+        "corp_never_scores_long_game": 0,
+        "runner_never_accesses_long_game": 0
+      },
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "actionLimitReached": 1,
+      "allRedactionSafe": true,
+      "redactionSafe": true,
+      "averageGameLength": 53.5,
+      "corpAgendaScores": 1,
+      "runnerAgendaSteals": 4,
+      "corpFlatlines": 0,
+      "scoreWindowMissed": 0,
+      "unsafeScoreChosen": 0,
+      "passiveActionWithScoreLineAvailable": 2,
+      "actionLimitClusters": {
+        "action_limit_runner_repeated_no_progress_run": 0,
+        "action_limit_runner_remote_contest_blocked": 0,
+        "action_limit_corp_scoreline_stall": 0,
+        "action_limit_setup_economy_loop": 0,
+        "action_limit_low_value_repeat": 1,
+        "action_limit_mixed_or_unknown": 0
+      },
+      "actionLimitSubclusters": {
+        "late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_real_reserve": 0,
+        "runner_late_gain_credit_no_safe_alternative": 0,
+        "corp_late_gain_credit_without_rez_score_protection_need": 0,
+        "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+        "corp_late_gain_credit_no_safe_alternative": 0,
+        "late_draw_for_coverage_or_hand_goal": 0,
+        "late_draw_without_coverage_or_hand_goal": 0,
+        "late_ability_reuse_low_delta": 0,
+        "late_install_low_delta": 0,
+        "late_run_step_stall": 0,
+        "run_microstep_required": 0,
+        "continue_chain_to_access": 0,
+        "break_pump_required": 0,
+        "jackout_loop": 0,
+        "continue_without_progress": 0,
+        "access_pending": 1,
+        "breach_pending": 0,
+        "mixed_unknown": 0
+      }
+    },
+    "legacyRunnerVsCandidateCorp": {
+      "games": 2,
+      "decisions": 160,
+      "findings": 28,
+      "findingsBySeverity": {
+        "critical": 0,
+        "high": 1,
+        "medium": 27,
+        "low": 0
+      },
+      "findingsByDetector": {
+        "illegal_action": 0,
+        "replay_failure": 0,
+        "hidden_info_marker": 0,
+        "no_legal_action_failure": 0,
+        "action_limit_reached": 2,
+        "repeated_no_progress_run": 26,
+        "repeated_known_no_payoff_remote": 0,
+        "repeated_low_value_archives": 14,
+        "recovery_low_value_loop": 0,
+        "bank_over_target_without_funding_need": 0,
+        "risky_self_damage_action": 0,
+        "blink_low_hand_buffer_run": 0,
+        "duplicate_low_delta_install": 0,
+        "overdraw_without_urgency": 0,
+        "plan_step_action_mismatch": 0,
+        "semantic_override_suspicious": 0,
+        "corp_never_scores_long_game": 1,
+        "runner_never_accesses_long_game": 0
+      },
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "actionLimitReached": 2,
+      "allRedactionSafe": true,
+      "redactionSafe": true,
+      "averageGameLength": 80,
+      "corpAgendaScores": 1,
+      "runnerAgendaSteals": 2,
+      "corpFlatlines": 0,
+      "scoreWindowMissed": 0,
+      "unsafeScoreChosen": 0,
+      "passiveActionWithScoreLineAvailable": 0,
+      "actionLimitClusters": {
+        "action_limit_runner_repeated_no_progress_run": 0,
+        "action_limit_runner_remote_contest_blocked": 0,
+        "action_limit_corp_scoreline_stall": 0,
+        "action_limit_setup_economy_loop": 0,
+        "action_limit_low_value_repeat": 1,
+        "action_limit_mixed_or_unknown": 1
+      },
+      "actionLimitSubclusters": {
+        "late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_without_funding_need": 0,
+        "runner_late_gain_credit_real_reserve": 0,
+        "runner_late_gain_credit_no_safe_alternative": 0,
+        "corp_late_gain_credit_without_rez_score_protection_need": 0,
+        "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+        "corp_late_gain_credit_no_safe_alternative": 0,
+        "late_draw_for_coverage_or_hand_goal": 0,
+        "late_draw_without_coverage_or_hand_goal": 1,
+        "late_ability_reuse_low_delta": 0,
+        "late_install_low_delta": 0,
+        "late_run_step_stall": 0,
+        "run_microstep_required": 0,
+        "continue_chain_to_access": 0,
+        "break_pump_required": 0,
+        "jackout_loop": 0,
+        "continue_without_progress": 0,
+        "access_pending": 1,
+        "breach_pending": 0,
+        "mixed_unknown": 0
+      }
+    }
+  },
+  "aggregateDeltas": {
+    "candidateRunnerVsLegacy": {
+      "actionLimitReached": 0,
+      "runnerAgendaSteals": 1,
+      "corpAgendaScores": -1,
+      "averageGameLength": 0.5
+    },
+    "candidateCorpVsLegacy": {
+      "actionLimitReached": 1,
+      "runnerAgendaSteals": -1,
+      "corpAgendaScores": -1,
+      "averageGameLength": 27
+    }
+  },
+  "scenarioResults": [
+    {
+      "scenarioId": "default_demo",
+      "label": "Default demo decks",
+      "decks": {
+        "runner": "default",
+        "corp": "default"
+      },
+      "pairedMatches": {
+        "legacyVsLegacy": {
+          "aggregate": {
+            "games": 1,
+            "decisions": 80,
+            "findings": 12,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 0,
+              "medium": 12,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 1,
+              "repeated_no_progress_run": 11,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 0,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 1,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 80,
+            "corpAgendaScores": 2,
+            "runnerAgendaSteals": 0,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 2,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 1,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 1,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "whyCoverage": {
+            "schemaVersion": "semantic-runtime-why-coverage-v1",
+            "scope": "semantic_runtime_why_coverage_report_only",
+            "auditStatus": "complete",
+            "sampleCount": 80,
+            "decisionsRequiringWhyNot": 0,
+            "decisionsNotRequiringWhyNot": 80,
+            "decisionsWithTopLevelWhyNot": 0,
+            "decisionsMissingTopLevelWhyNot": 0,
+            "decisionsWithRuntimeWhyNotSection": 0,
+            "decisionsMissingRuntimeWhyNotSection": 0,
+            "actionAlternativeCount": 0,
+            "selectedActionAlternativeCount": 0,
+            "selectedActionAlternativesWithWhyChosen": 0,
+            "selectedActionAlternativesMissingWhyChosen": 0,
+            "nonSelectedActionAlternativeCount": 0,
+            "nonSelectedActionAlternativesWithWhyNot": 0,
+            "nonSelectedActionAlternativesMissingWhyNot": 0,
+            "actionAlternativesWithWhyChosen": 0,
+            "actionAlternativesMissingWhyChosen": 0,
+            "actionAlternativesWithWhyNot": 0,
+            "actionAlternativesMissingWhyNot": 0,
+            "rankedAlternativeCount": 0,
+            "rankedAlternativesWithWhyNot": 0,
+            "rankedAlternativesMissingWhyNot": 0,
+            "redactionStatus": "passed",
+            "productiveUseAllowed": false,
+            "noRuntimeEffect": true,
+            "missingCoverageSignals": [],
+            "evidence": [
+              "semantic_runtime_why_coverage:report_only",
+              "audit_status:complete",
+              "sample_count:80",
+              "decision_top_level_why_not_count:0",
+              "action_alternative_count:0",
+              "selected_action_alternative_count:0",
+              "non_selected_action_alternative_count:0",
+              "ranked_alternative_count:0"
+            ]
+          },
+          "actionTypeDominance": {
+            "schemaVersion": "ai-selfplay-action-type-dominance-v1",
+            "threshold": 0.7,
+            "minDecisions": 10,
+            "status": "complete",
+            "decisions": 80,
+            "topShare": 0.188,
+            "findings": [],
+            "bySide": {
+              "all": {
+                "side": "all",
+                "decisions": 80,
+                "topActionType": "access_card",
+                "topShare": 0.188,
+                "status": "complete"
+              },
+              "runner": {
+                "side": "runner",
+                "decisions": 51,
+                "topActionType": "access_card",
+                "topShare": 0.294,
+                "status": "complete"
+              },
+              "corp": {
+                "side": "corp",
+                "decisions": 29,
+                "topActionType": "advance_card",
+                "topShare": 0.241,
+                "status": "complete"
+              }
+            },
+            "topRows": [
+              {
+                "side": "runner",
+                "actionType": "access_card",
+                "count": 15,
+                "share": 0.294
+              },
+              {
+                "side": "runner",
+                "actionType": "start_run",
+                "count": 15,
+                "share": 0.294
+              },
+              {
+                "side": "runner",
+                "actionType": "decline_trash",
+                "count": 14,
+                "share": 0.275
+              },
+              {
+                "side": "corp",
+                "actionType": "advance_card",
+                "count": 7,
+                "share": 0.241
+              },
+              {
+                "side": "corp",
+                "actionType": "install_card",
+                "count": 6,
+                "share": 0.207
+              },
+              {
+                "side": "all",
+                "actionType": "access_card",
+                "count": 15,
+                "share": 0.188
+              },
+              {
+                "side": "all",
+                "actionType": "start_run",
+                "count": 15,
+                "share": 0.188
+              },
+              {
+                "side": "all",
+                "actionType": "decline_trash",
+                "count": 14,
+                "share": 0.175
+              },
+              {
+                "side": "corp",
+                "actionType": "end_turn",
+                "count": 5,
+                "share": 0.172
+              },
+              {
+                "side": "corp",
+                "actionType": "mandatory_draw",
+                "count": 5,
+                "share": 0.172
+              },
+              {
+                "side": "all",
+                "actionType": "end_turn",
+                "count": 9,
+                "share": 0.113
+              },
+              {
+                "side": "all",
+                "actionType": "install_card",
+                "count": 8,
+                "share": 0.1
+              }
+            ]
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 80,
+              "turns": 9,
+              "finalAgendaPoints": {
+                "runner": 0,
+                "corp": 5
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "candidateRunnerVsLegacyCorp": {
+          "aggregate": {
+            "games": 1,
+            "decisions": 80,
+            "findings": 27,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 0,
+              "medium": 27,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 1,
+              "repeated_no_progress_run": 14,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 22,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 1,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 0,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 1,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 80,
+            "corpAgendaScores": 1,
+            "runnerAgendaSteals": 1,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 2,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 1,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 1,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "whyCoverage": {
+            "schemaVersion": "semantic-runtime-why-coverage-v1",
+            "scope": "semantic_runtime_why_coverage_report_only",
+            "auditStatus": "complete",
+            "sampleCount": 80,
+            "decisionsRequiringWhyNot": 0,
+            "decisionsNotRequiringWhyNot": 80,
+            "decisionsWithTopLevelWhyNot": 21,
+            "decisionsMissingTopLevelWhyNot": 0,
+            "decisionsWithRuntimeWhyNotSection": 21,
+            "decisionsMissingRuntimeWhyNotSection": 0,
+            "actionAlternativeCount": 0,
+            "selectedActionAlternativeCount": 0,
+            "selectedActionAlternativesWithWhyChosen": 0,
+            "selectedActionAlternativesMissingWhyChosen": 0,
+            "nonSelectedActionAlternativeCount": 0,
+            "nonSelectedActionAlternativesWithWhyNot": 0,
+            "nonSelectedActionAlternativesMissingWhyNot": 0,
+            "actionAlternativesWithWhyChosen": 0,
+            "actionAlternativesMissingWhyChosen": 0,
+            "actionAlternativesWithWhyNot": 0,
+            "actionAlternativesMissingWhyNot": 0,
+            "rankedAlternativeCount": 0,
+            "rankedAlternativesWithWhyNot": 0,
+            "rankedAlternativesMissingWhyNot": 0,
+            "redactionStatus": "passed",
+            "productiveUseAllowed": false,
+            "noRuntimeEffect": true,
+            "missingCoverageSignals": [],
+            "evidence": [
+              "semantic_runtime_why_coverage:report_only",
+              "audit_status:complete",
+              "sample_count:80",
+              "decision_top_level_why_not_count:21",
+              "action_alternative_count:0",
+              "selected_action_alternative_count:0",
+              "non_selected_action_alternative_count:0",
+              "ranked_alternative_count:0"
+            ]
+          },
+          "actionTypeDominance": {
+            "schemaVersion": "ai-selfplay-action-type-dominance-v1",
+            "threshold": 0.7,
+            "minDecisions": 10,
+            "status": "complete",
+            "decisions": 80,
+            "topShare": 0.225,
+            "findings": [],
+            "bySide": {
+              "all": {
+                "side": "all",
+                "decisions": 80,
+                "topActionType": "start_run",
+                "topShare": 0.225,
+                "status": "complete"
+              },
+              "runner": {
+                "side": "runner",
+                "decisions": 46,
+                "topActionType": "start_run",
+                "topShare": 0.391,
+                "status": "complete"
+              },
+              "corp": {
+                "side": "corp",
+                "decisions": 34,
+                "topActionType": "install_card",
+                "topShare": 0.206,
+                "status": "complete"
+              }
+            },
+            "topRows": [
+              {
+                "side": "runner",
+                "actionType": "start_run",
+                "count": 18,
+                "share": 0.391
+              },
+              {
+                "side": "runner",
+                "actionType": "access_card",
+                "count": 17,
+                "share": 0.37
+              },
+              {
+                "side": "all",
+                "actionType": "start_run",
+                "count": 18,
+                "share": 0.225
+              },
+              {
+                "side": "all",
+                "actionType": "access_card",
+                "count": 17,
+                "share": 0.213
+              },
+              {
+                "side": "corp",
+                "actionType": "install_card",
+                "count": 7,
+                "share": 0.206
+              },
+              {
+                "side": "corp",
+                "actionType": "end_turn",
+                "count": 6,
+                "share": 0.176
+              },
+              {
+                "side": "corp",
+                "actionType": "gain_credit",
+                "count": 6,
+                "share": 0.176
+              },
+              {
+                "side": "corp",
+                "actionType": "mandatory_draw",
+                "count": 6,
+                "share": 0.176
+              },
+              {
+                "side": "all",
+                "actionType": "end_turn",
+                "count": 11,
+                "share": 0.138
+              },
+              {
+                "side": "corp",
+                "actionType": "advance_card",
+                "count": 4,
+                "share": 0.118
+              },
+              {
+                "side": "runner",
+                "actionType": "end_turn",
+                "count": 5,
+                "share": 0.109
+              },
+              {
+                "side": "all",
+                "actionType": "gain_credit",
+                "count": 8,
+                "share": 0.1
+              }
+            ]
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 80,
+              "turns": 11,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 2
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "legacyRunnerVsCandidateCorp": {
+          "aggregate": {
+            "games": 1,
+            "decisions": 80,
+            "findings": 16,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 0,
+              "medium": 16,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 1,
+              "repeated_no_progress_run": 16,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 14,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 0,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 1,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 80,
+            "corpAgendaScores": 1,
+            "runnerAgendaSteals": 1,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 1,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 1,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 0,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "whyCoverage": {
+            "schemaVersion": "semantic-runtime-why-coverage-v1",
+            "scope": "semantic_runtime_why_coverage_report_only",
+            "auditStatus": "complete",
+            "sampleCount": 80,
+            "decisionsRequiringWhyNot": 0,
+            "decisionsNotRequiringWhyNot": 80,
+            "decisionsWithTopLevelWhyNot": 24,
+            "decisionsMissingTopLevelWhyNot": 0,
+            "decisionsWithRuntimeWhyNotSection": 24,
+            "decisionsMissingRuntimeWhyNotSection": 0,
+            "actionAlternativeCount": 0,
+            "selectedActionAlternativeCount": 0,
+            "selectedActionAlternativesWithWhyChosen": 0,
+            "selectedActionAlternativesMissingWhyChosen": 0,
+            "nonSelectedActionAlternativeCount": 0,
+            "nonSelectedActionAlternativesWithWhyNot": 0,
+            "nonSelectedActionAlternativesMissingWhyNot": 0,
+            "actionAlternativesWithWhyChosen": 0,
+            "actionAlternativesMissingWhyChosen": 0,
+            "actionAlternativesWithWhyNot": 0,
+            "actionAlternativesMissingWhyNot": 0,
+            "rankedAlternativeCount": 0,
+            "rankedAlternativesWithWhyNot": 0,
+            "rankedAlternativesMissingWhyNot": 0,
+            "redactionStatus": "passed",
+            "productiveUseAllowed": false,
+            "noRuntimeEffect": true,
+            "missingCoverageSignals": [],
+            "evidence": [
+              "semantic_runtime_why_coverage:report_only",
+              "audit_status:complete",
+              "sample_count:80",
+              "decision_top_level_why_not_count:24",
+              "action_alternative_count:0",
+              "selected_action_alternative_count:0",
+              "non_selected_action_alternative_count:0",
+              "ranked_alternative_count:0"
+            ]
+          },
+          "actionTypeDominance": {
+            "schemaVersion": "ai-selfplay-action-type-dominance-v1",
+            "threshold": 0.7,
+            "minDecisions": 10,
+            "status": "complete",
+            "decisions": 80,
+            "topShare": 0.263,
+            "findings": [],
+            "bySide": {
+              "all": {
+                "side": "all",
+                "decisions": 80,
+                "topActionType": "start_run",
+                "topShare": 0.263,
+                "status": "complete"
+              },
+              "runner": {
+                "side": "runner",
+                "decisions": 41,
+                "topActionType": "start_run",
+                "topShare": 0.512,
+                "status": "complete"
+              },
+              "corp": {
+                "side": "corp",
+                "decisions": 39,
+                "topActionType": "install_card",
+                "topShare": 0.231,
+                "status": "complete"
+              }
+            },
+            "topRows": [
+              {
+                "side": "runner",
+                "actionType": "start_run",
+                "count": 21,
+                "share": 0.512
+              },
+              {
+                "side": "all",
+                "actionType": "start_run",
+                "count": 21,
+                "share": 0.263
+              },
+              {
+                "side": "corp",
+                "actionType": "install_card",
+                "count": 9,
+                "share": 0.231
+              },
+              {
+                "side": "corp",
+                "actionType": "end_turn",
+                "count": 7,
+                "share": 0.179
+              },
+              {
+                "side": "corp",
+                "actionType": "mandatory_draw",
+                "count": 7,
+                "share": 0.179
+              },
+              {
+                "side": "all",
+                "actionType": "end_turn",
+                "count": 13,
+                "share": 0.163
+              },
+              {
+                "side": "runner",
+                "actionType": "end_turn",
+                "count": 6,
+                "share": 0.146
+              },
+              {
+                "side": "all",
+                "actionType": "install_card",
+                "count": 11,
+                "share": 0.138
+              },
+              {
+                "side": "runner",
+                "actionType": "access_card",
+                "count": 5,
+                "share": 0.122
+              },
+              {
+                "side": "corp",
+                "actionType": "gain_credit",
+                "count": 4,
+                "share": 0.103
+              },
+              {
+                "side": "corp",
+                "actionType": "play_operation",
+                "count": 4,
+                "share": 0.103
+              },
+              {
+                "side": "runner",
+                "actionType": "play_event",
+                "count": 4,
+                "share": 0.098
+              }
+            ]
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 80,
+              "turns": 13,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 2
+              },
+              "replayOk": true
+            }
+          ]
+        }
+      },
+      "deltas": {
+        "candidateRunnerVsLegacy": {
+          "actionLimitReached": 0,
+          "runnerAgendaSteals": 1,
+          "corpAgendaScores": -1,
+          "averageGameLength": 0
+        },
+        "candidateCorpVsLegacy": {
+          "actionLimitReached": 0,
+          "runnerAgendaSteals": 1,
+          "corpAgendaScores": -1,
+          "averageGameLength": 0
+        }
+      }
+    },
+    {
+      "scenarioId": "A",
+      "label": "Deep Market Engine vs Siren Fortress",
+      "decks": {
+        "runner": {
+          "deckHash": "fnv1a:b409555d"
+        },
+        "corp": {
+          "deckHash": "fnv1a:c10cdf3d"
+        }
+      },
+      "pairedMatches": {
+        "legacyVsLegacy": {
+          "aggregate": {
+            "games": 1,
+            "decisions": 26,
+            "findings": 0,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 0,
+              "medium": 0,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 0,
+              "repeated_no_progress_run": 0,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 0,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 0,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 26,
+            "corpAgendaScores": 0,
+            "runnerAgendaSteals": 3,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 0,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 0,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "whyCoverage": {
+            "schemaVersion": "semantic-runtime-why-coverage-v1",
+            "scope": "semantic_runtime_why_coverage_report_only",
+            "auditStatus": "complete",
+            "sampleCount": 26,
+            "decisionsRequiringWhyNot": 0,
+            "decisionsNotRequiringWhyNot": 26,
+            "decisionsWithTopLevelWhyNot": 0,
+            "decisionsMissingTopLevelWhyNot": 0,
+            "decisionsWithRuntimeWhyNotSection": 0,
+            "decisionsMissingRuntimeWhyNotSection": 0,
+            "actionAlternativeCount": 0,
+            "selectedActionAlternativeCount": 0,
+            "selectedActionAlternativesWithWhyChosen": 0,
+            "selectedActionAlternativesMissingWhyChosen": 0,
+            "nonSelectedActionAlternativeCount": 0,
+            "nonSelectedActionAlternativesWithWhyNot": 0,
+            "nonSelectedActionAlternativesMissingWhyNot": 0,
+            "actionAlternativesWithWhyChosen": 0,
+            "actionAlternativesMissingWhyChosen": 0,
+            "actionAlternativesWithWhyNot": 0,
+            "actionAlternativesMissingWhyNot": 0,
+            "rankedAlternativeCount": 0,
+            "rankedAlternativesWithWhyNot": 0,
+            "rankedAlternativesMissingWhyNot": 0,
+            "redactionStatus": "passed",
+            "productiveUseAllowed": false,
+            "noRuntimeEffect": true,
+            "missingCoverageSignals": [],
+            "evidence": [
+              "semantic_runtime_why_coverage:report_only",
+              "audit_status:complete",
+              "sample_count:26",
+              "decision_top_level_why_not_count:0",
+              "action_alternative_count:0",
+              "selected_action_alternative_count:0",
+              "non_selected_action_alternative_count:0",
+              "ranked_alternative_count:0"
+            ]
+          },
+          "actionTypeDominance": {
+            "schemaVersion": "ai-selfplay-action-type-dominance-v1",
+            "threshold": 0.7,
+            "minDecisions": 10,
+            "status": "complete",
+            "decisions": 26,
+            "topShare": 0.154,
+            "findings": [],
+            "bySide": {
+              "all": {
+                "side": "all",
+                "decisions": 26,
+                "topActionType": "access_card",
+                "topShare": 0.154,
+                "status": "complete"
+              },
+              "runner": {
+                "side": "runner",
+                "decisions": 15,
+                "topActionType": "access_card",
+                "topShare": 0.267,
+                "status": "complete"
+              },
+              "corp": {
+                "side": "corp",
+                "decisions": 11,
+                "topActionType": "advance_card",
+                "topShare": 0.364,
+                "status": "complete"
+              }
+            },
+            "topRows": [
+              {
+                "side": "corp",
+                "actionType": "advance_card",
+                "count": 4,
+                "share": 0.364
+              },
+              {
+                "side": "runner",
+                "actionType": "access_card",
+                "count": 4,
+                "share": 0.267
+              },
+              {
+                "side": "runner",
+                "actionType": "start_run",
+                "count": 4,
+                "share": 0.267
+              },
+              {
+                "side": "runner",
+                "actionType": "steal_agenda",
+                "count": 3,
+                "share": 0.2
+              },
+              {
+                "side": "corp",
+                "actionType": "end_turn",
+                "count": 2,
+                "share": 0.182
+              },
+              {
+                "side": "corp",
+                "actionType": "install_card",
+                "count": 2,
+                "share": 0.182
+              },
+              {
+                "side": "corp",
+                "actionType": "mandatory_draw",
+                "count": 2,
+                "share": 0.182
+              },
+              {
+                "side": "all",
+                "actionType": "access_card",
+                "count": 4,
+                "share": 0.154
+              },
+              {
+                "side": "all",
+                "actionType": "advance_card",
+                "count": 4,
+                "share": 0.154
+              },
+              {
+                "side": "all",
+                "actionType": "start_run",
+                "count": 4,
+                "share": 0.154
+              },
+              {
+                "side": "all",
+                "actionType": "end_turn",
+                "count": 3,
+                "share": 0.115
+              },
+              {
+                "side": "all",
+                "actionType": "steal_agenda",
+                "count": 3,
+                "share": 0.115
+              }
+            ]
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "runner",
+              "actions": 26,
+              "turns": 3,
+              "finalAgendaPoints": {
+                "runner": 8,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "candidateRunnerVsLegacyCorp": {
+          "aggregate": {
+            "games": 1,
+            "decisions": 27,
+            "findings": 0,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 0,
+              "medium": 0,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 0,
+              "repeated_no_progress_run": 0,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 0,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 0,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 27,
+            "corpAgendaScores": 0,
+            "runnerAgendaSteals": 3,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 0,
+              "action_limit_mixed_or_unknown": 0
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 0,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "whyCoverage": {
+            "schemaVersion": "semantic-runtime-why-coverage-v1",
+            "scope": "semantic_runtime_why_coverage_report_only",
+            "auditStatus": "complete",
+            "sampleCount": 27,
+            "decisionsRequiringWhyNot": 0,
+            "decisionsNotRequiringWhyNot": 27,
+            "decisionsWithTopLevelWhyNot": 6,
+            "decisionsMissingTopLevelWhyNot": 0,
+            "decisionsWithRuntimeWhyNotSection": 6,
+            "decisionsMissingRuntimeWhyNotSection": 0,
+            "actionAlternativeCount": 0,
+            "selectedActionAlternativeCount": 0,
+            "selectedActionAlternativesWithWhyChosen": 0,
+            "selectedActionAlternativesMissingWhyChosen": 0,
+            "nonSelectedActionAlternativeCount": 0,
+            "nonSelectedActionAlternativesWithWhyNot": 0,
+            "nonSelectedActionAlternativesMissingWhyNot": 0,
+            "actionAlternativesWithWhyChosen": 0,
+            "actionAlternativesMissingWhyChosen": 0,
+            "actionAlternativesWithWhyNot": 0,
+            "actionAlternativesMissingWhyNot": 0,
+            "rankedAlternativeCount": 0,
+            "rankedAlternativesWithWhyNot": 0,
+            "rankedAlternativesMissingWhyNot": 0,
+            "redactionStatus": "passed",
+            "productiveUseAllowed": false,
+            "noRuntimeEffect": true,
+            "missingCoverageSignals": [],
+            "evidence": [
+              "semantic_runtime_why_coverage:report_only",
+              "audit_status:complete",
+              "sample_count:27",
+              "decision_top_level_why_not_count:6",
+              "action_alternative_count:0",
+              "selected_action_alternative_count:0",
+              "non_selected_action_alternative_count:0",
+              "ranked_alternative_count:0"
+            ]
+          },
+          "actionTypeDominance": {
+            "schemaVersion": "ai-selfplay-action-type-dominance-v1",
+            "threshold": 0.7,
+            "minDecisions": 10,
+            "status": "complete",
+            "decisions": 27,
+            "topShare": 0.185,
+            "findings": [],
+            "bySide": {
+              "all": {
+                "side": "all",
+                "decisions": 27,
+                "topActionType": "access_card",
+                "topShare": 0.185,
+                "status": "complete"
+              },
+              "runner": {
+                "side": "runner",
+                "decisions": 16,
+                "topActionType": "access_card",
+                "topShare": 0.313,
+                "status": "complete"
+              },
+              "corp": {
+                "side": "corp",
+                "decisions": 11,
+                "topActionType": "advance_card",
+                "topShare": 0.364,
+                "status": "complete"
+              }
+            },
+            "topRows": [
+              {
+                "side": "corp",
+                "actionType": "advance_card",
+                "count": 4,
+                "share": 0.364
+              },
+              {
+                "side": "runner",
+                "actionType": "access_card",
+                "count": 5,
+                "share": 0.313
+              },
+              {
+                "side": "runner",
+                "actionType": "start_run",
+                "count": 5,
+                "share": 0.313
+              },
+              {
+                "side": "runner",
+                "actionType": "steal_agenda",
+                "count": 3,
+                "share": 0.188
+              },
+              {
+                "side": "all",
+                "actionType": "access_card",
+                "count": 5,
+                "share": 0.185
+              },
+              {
+                "side": "all",
+                "actionType": "start_run",
+                "count": 5,
+                "share": 0.185
+              },
+              {
+                "side": "corp",
+                "actionType": "end_turn",
+                "count": 2,
+                "share": 0.182
+              },
+              {
+                "side": "corp",
+                "actionType": "install_card",
+                "count": 2,
+                "share": 0.182
+              },
+              {
+                "side": "corp",
+                "actionType": "mandatory_draw",
+                "count": 2,
+                "share": 0.182
+              },
+              {
+                "side": "all",
+                "actionType": "advance_card",
+                "count": 4,
+                "share": 0.148
+              },
+              {
+                "side": "all",
+                "actionType": "end_turn",
+                "count": 3,
+                "share": 0.111
+              },
+              {
+                "side": "all",
+                "actionType": "steal_agenda",
+                "count": 3,
+                "share": 0.111
+              }
+            ]
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "runner",
+              "actions": 27,
+              "turns": 3,
+              "finalAgendaPoints": {
+                "runner": 8,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        },
+        "legacyRunnerVsCandidateCorp": {
+          "aggregate": {
+            "games": 1,
+            "decisions": 80,
+            "findings": 12,
+            "findingsBySeverity": {
+              "critical": 0,
+              "high": 1,
+              "medium": 11,
+              "low": 0
+            },
+            "findingsByDetector": {
+              "illegal_action": 0,
+              "replay_failure": 0,
+              "hidden_info_marker": 0,
+              "no_legal_action_failure": 0,
+              "action_limit_reached": 1,
+              "repeated_no_progress_run": 10,
+              "repeated_known_no_payoff_remote": 0,
+              "repeated_low_value_archives": 0,
+              "recovery_low_value_loop": 0,
+              "bank_over_target_without_funding_need": 0,
+              "risky_self_damage_action": 0,
+              "blink_low_hand_buffer_run": 0,
+              "duplicate_low_delta_install": 0,
+              "overdraw_without_urgency": 0,
+              "plan_step_action_mismatch": 0,
+              "semantic_override_suspicious": 0,
+              "corp_never_scores_long_game": 1,
+              "runner_never_accesses_long_game": 0
+            },
+            "illegalActions": 0,
+            "replayFailures": 0,
+            "actionLimitReached": 1,
+            "allRedactionSafe": true,
+            "redactionSafe": true,
+            "averageGameLength": 80,
+            "corpAgendaScores": 0,
+            "runnerAgendaSteals": 1,
+            "corpFlatlines": 0,
+            "scoreWindowMissed": 0,
+            "unsafeScoreChosen": 0,
+            "passiveActionWithScoreLineAvailable": 0,
+            "actionLimitClusters": {
+              "action_limit_runner_repeated_no_progress_run": 0,
+              "action_limit_runner_remote_contest_blocked": 0,
+              "action_limit_corp_scoreline_stall": 0,
+              "action_limit_setup_economy_loop": 0,
+              "action_limit_low_value_repeat": 0,
+              "action_limit_mixed_or_unknown": 1
+            },
+            "actionLimitSubclusters": {
+              "late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_without_funding_need": 0,
+              "runner_late_gain_credit_real_reserve": 0,
+              "runner_late_gain_credit_no_safe_alternative": 0,
+              "corp_late_gain_credit_without_rez_score_protection_need": 0,
+              "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+              "corp_late_gain_credit_no_safe_alternative": 0,
+              "late_draw_for_coverage_or_hand_goal": 0,
+              "late_draw_without_coverage_or_hand_goal": 0,
+              "late_ability_reuse_low_delta": 0,
+              "late_install_low_delta": 0,
+              "late_run_step_stall": 0,
+              "run_microstep_required": 0,
+              "continue_chain_to_access": 0,
+              "break_pump_required": 0,
+              "jackout_loop": 0,
+              "continue_without_progress": 0,
+              "access_pending": 1,
+              "breach_pending": 0,
+              "mixed_unknown": 0
+            }
+          },
+          "whyCoverage": {
+            "schemaVersion": "semantic-runtime-why-coverage-v1",
+            "scope": "semantic_runtime_why_coverage_report_only",
+            "auditStatus": "complete",
+            "sampleCount": 80,
+            "decisionsRequiringWhyNot": 0,
+            "decisionsNotRequiringWhyNot": 80,
+            "decisionsWithTopLevelWhyNot": 17,
+            "decisionsMissingTopLevelWhyNot": 0,
+            "decisionsWithRuntimeWhyNotSection": 17,
+            "decisionsMissingRuntimeWhyNotSection": 0,
+            "actionAlternativeCount": 0,
+            "selectedActionAlternativeCount": 0,
+            "selectedActionAlternativesWithWhyChosen": 0,
+            "selectedActionAlternativesMissingWhyChosen": 0,
+            "nonSelectedActionAlternativeCount": 0,
+            "nonSelectedActionAlternativesWithWhyNot": 0,
+            "nonSelectedActionAlternativesMissingWhyNot": 0,
+            "actionAlternativesWithWhyChosen": 0,
+            "actionAlternativesMissingWhyChosen": 0,
+            "actionAlternativesWithWhyNot": 0,
+            "actionAlternativesMissingWhyNot": 0,
+            "rankedAlternativeCount": 0,
+            "rankedAlternativesWithWhyNot": 0,
+            "rankedAlternativesMissingWhyNot": 0,
+            "redactionStatus": "passed",
+            "productiveUseAllowed": false,
+            "noRuntimeEffect": true,
+            "missingCoverageSignals": [],
+            "evidence": [
+              "semantic_runtime_why_coverage:report_only",
+              "audit_status:complete",
+              "sample_count:80",
+              "decision_top_level_why_not_count:17",
+              "action_alternative_count:0",
+              "selected_action_alternative_count:0",
+              "non_selected_action_alternative_count:0",
+              "ranked_alternative_count:0"
+            ]
+          },
+          "actionTypeDominance": {
+            "schemaVersion": "ai-selfplay-action-type-dominance-v1",
+            "threshold": 0.7,
+            "minDecisions": 10,
+            "status": "complete",
+            "decisions": 80,
+            "topShare": 0.2,
+            "findings": [],
+            "bySide": {
+              "all": {
+                "side": "all",
+                "decisions": 80,
+                "topActionType": "start_run",
+                "topShare": 0.2,
+                "status": "complete"
+              },
+              "runner": {
+                "side": "runner",
+                "decisions": 47,
+                "topActionType": "start_run",
+                "topShare": 0.34,
+                "status": "complete"
+              },
+              "corp": {
+                "side": "corp",
+                "decisions": 33,
+                "topActionType": "end_turn",
+                "topShare": 0.152,
+                "status": "complete"
+              }
+            },
+            "topRows": [
+              {
+                "side": "runner",
+                "actionType": "start_run",
+                "count": 16,
+                "share": 0.34
+              },
+              {
+                "side": "runner",
+                "actionType": "access_card",
+                "count": 14,
+                "share": 0.298
+              },
+              {
+                "side": "all",
+                "actionType": "start_run",
+                "count": 16,
+                "share": 0.2
+              },
+              {
+                "side": "all",
+                "actionType": "access_card",
+                "count": 14,
+                "share": 0.175
+              },
+              {
+                "side": "corp",
+                "actionType": "end_turn",
+                "count": 5,
+                "share": 0.152
+              },
+              {
+                "side": "corp",
+                "actionType": "mandatory_draw",
+                "count": 5,
+                "share": 0.152
+              },
+              {
+                "side": "corp",
+                "actionType": "activated_card_ability",
+                "count": 4,
+                "share": 0.121
+              },
+              {
+                "side": "corp",
+                "actionType": "decline_rez",
+                "count": 4,
+                "share": 0.121
+              },
+              {
+                "side": "corp",
+                "actionType": "gain_credit",
+                "count": 4,
+                "share": 0.121
+              },
+              {
+                "side": "corp",
+                "actionType": "install_card",
+                "count": 4,
+                "share": 0.121
+              },
+              {
+                "side": "all",
+                "actionType": "end_turn",
+                "count": 9,
+                "share": 0.113
+              },
+              {
+                "side": "runner",
+                "actionType": "continue_run",
+                "count": 5,
+                "share": 0.106
+              }
+            ]
+          },
+          "summaries": [
+            {
+              "seed": "ai-v143-tuning-001",
+              "winner": "action_limit_reached",
+              "actions": 80,
+              "turns": 9,
+              "finalAgendaPoints": {
+                "runner": 3,
+                "corp": 0
+              },
+              "replayOk": true
+            }
+          ]
+        }
+      },
+      "deltas": {
+        "candidateRunnerVsLegacy": {
+          "actionLimitReached": 0,
+          "runnerAgendaSteals": 0,
+          "corpAgendaScores": 0,
+          "averageGameLength": 1
+        },
+        "candidateCorpVsLegacy": {
+          "actionLimitReached": 1,
+          "runnerAgendaSteals": -2,
+          "corpAgendaScores": 0,
+          "averageGameLength": 54
+        }
+      }
+    }
+  ],
+  "decision": {
+    "mergeAllowed": false,
+    "recommendation": "keep_default_off",
+    "safetyGreen": true,
+    "tacticBetter": false,
+    "practicalMetricBetter": true,
+    "runnerMetricBetter": true,
+    "corpMetricBetter": false,
+    "evidence": [
+      "scenarios:2",
+      "games_per_leg:2",
+      "tactic_hit_rate_delta:0",
+      "legacy_action_limits:1",
+      "candidate_runner_action_limits:1",
+      "candidate_corp_action_limits:2",
+      "legacy_runner_steals:3",
+      "candidate_runner_steals:4",
+      "legacy_corp_scores:2",
+      "candidate_corp_scores:1",
+      "candidate_runner_illegal:0",
+      "candidate_corp_illegal:0",
+      "candidate_runner_replay_failures:0",
+      "candidate_corp_replay_failures:0",
+      "default_demo:legacy:action_type_dominance:complete:top_share:0.188",
+      "default_demo:candidate_runner:action_type_dominance:complete:top_share:0.225",
+      "default_demo:candidate_corp:action_type_dominance:complete:top_share:0.263",
+      "A:legacy:action_type_dominance:complete:top_share:0.154",
+      "A:candidate_runner:action_type_dominance:complete:top_share:0.185",
+      "A:candidate_corp:action_type_dominance:complete:top_share:0.2"
+    ]
+  }
+}

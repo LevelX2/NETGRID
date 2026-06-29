@@ -4,6 +4,7 @@ import {
   benchmarkDeckFromFrozenLocalSnapshot,
   benchmarkDeckFromSnapshot,
   buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries,
+  buildSelfplayActionTypeDominanceReport,
   evaluatePracticalTacticBenchmark,
   frozenLegacyPracticalTacticSelector,
   runAiSelfplayTraceMining,
@@ -206,6 +207,7 @@ function decision() {
       `candidate_corp_illegal:${aggregate.legacyRunnerVsCandidateCorp.illegalActions}`,
       `candidate_runner_replay_failures:${aggregate.candidateRunnerVsLegacyCorp.replayFailures}`,
       `candidate_corp_replay_failures:${aggregate.legacyRunnerVsCandidateCorp.replayFailures}`,
+      ...dominanceEvidence(),
     ],
   };
 }
@@ -238,6 +240,7 @@ function summarize(result: TraceMiningResult) {
       buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries(
         result.summaries,
       ),
+    actionTypeDominance: buildSelfplayActionTypeDominanceReport(result.summaries),
     summaries: result.summaries.map((summary) => ({
       seed: summary.seed,
       winner: summary.winner,
@@ -249,6 +252,27 @@ function summarize(result: TraceMiningResult) {
       actionLimitReached: summary.actionLimitReached,
     })),
   };
+}
+
+function dominanceEvidence(): string[] {
+  return scenarioResults.flatMap((scenario) =>
+    (
+      [
+        ["legacy", scenario.pairedMatches.legacyVsLegacy.actionTypeDominance],
+        [
+          "candidate_runner",
+          scenario.pairedMatches.candidateRunnerVsLegacyCorp.actionTypeDominance,
+        ],
+        [
+          "candidate_corp",
+          scenario.pairedMatches.legacyRunnerVsCandidateCorp.actionTypeDominance,
+        ],
+      ] as const
+    ).map(
+      ([leg, report]) =>
+        `${scenario.scenarioId}:${leg}:action_type_dominance:${report.status}:top_share:${report.topShare}`,
+    ),
+  );
 }
 
 function buildScenarios(pairIds: PairId[]): Scenario[] {
