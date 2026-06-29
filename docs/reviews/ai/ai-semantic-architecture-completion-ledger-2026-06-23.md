@@ -9493,6 +9493,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-tactical-goals.test.ts src/runner-run-target-evaluation.test.ts` grün, 2 Dateien, 66 Tests.
   - Verifikation: `rg -n 'setupEngine\.includes|riskProfile\.includes|pressureVectors\.includes|strategicIntent\?\.setupEngine\.includes|strategicIntent\?\.riskProfile\.includes|strategicIntent\?\.pressureVectors\.includes' packages/ai/src --glob '!**/*.test.ts' --glob '!**/legacy/**'` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertachtundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/discard-fit-bonus.ts` bindet Discard-Strategie-IDs über ein lokales Set statt direkter `strategies.includes(...)`- und `strategies.some(...)`-Prüfungen.
+  - Strukturierte Strategy-IDs wie `runner.hq_pressure`, `runner.rnd_pressure`, `runner.economy_first`, `runner.rig_first`, `runner.search.breaker`, `corp.ice_tax_glacier`, `corp.rush_score`, `corp.remote_scoring`, `corp.fast_advance` und `corp.asset_economy` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - Der gefilterte `index.test.ts`-Lauf sichert die bestehenden Discard-Keep-/Discard-Fit-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t discard` grün, 1 Datei, 13 Tests, 525 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'strategies\.includes|strategies\.some\(' packages/ai/src/runtime/discard-fit-bonus.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

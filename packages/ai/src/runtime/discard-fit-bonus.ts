@@ -82,13 +82,12 @@ export function discardStrategicFitBonus(
   cost: number,
 ): number {
   const strategies = discardStrategyIds(input);
+  const strategySet = new Set(strategies);
   let bonus = 0;
   if (input.side === "runner") {
     if (
-      strategies.some(
-        (strategy) =>
-          strategy === "runner.rig_first" || strategy === "runner.search.breaker",
-      ) &&
+      (strategySet.has("runner.rig_first") ||
+        strategySet.has("runner.search.breaker")) &&
       rolesMatch(roles, [
         "breaker_",
         "memory",
@@ -99,7 +98,7 @@ export function discardStrategicFitBonus(
     )
       bonus += 30;
     if (
-      strategies.includes("runner.hq_pressure") &&
+      strategySet.has("runner.hq_pressure") &&
       rolesMatch(roles, [
         "pressure_hq",
         "run_pressure",
@@ -110,7 +109,7 @@ export function discardStrategicFitBonus(
     )
       bonus += 26;
     if (
-      strategies.includes("runner.rnd_pressure") &&
+      strategySet.has("runner.rnd_pressure") &&
       rolesMatch(roles, [
         "pressure_rnd",
         "run_pressure",
@@ -121,31 +120,28 @@ export function discardStrategicFitBonus(
     )
       bonus += 26;
     if (
-      strategies.includes("runner.economy_first") &&
+      strategySet.has("runner.economy_first") &&
       rolesMatch(roles, ["economy", "tempo"])
     )
       bonus += 24;
   } else {
     if (
-      strategies.includes("corp.ice_tax_glacier") &&
+      strategySet.has("corp.ice_tax_glacier") &&
       (type === "ice" ||
         rolesMatch(roles, ["ice", "etr_ice", "taxing_ice", "remote", "economy"]))
     )
       bonus += 30;
     if (
-      strategies.some(
-        (strategy) =>
-          strategy === "corp.rush_score" ||
-          strategy === "corp.remote_scoring" ||
-          strategy === "corp.fast_advance",
-      ) &&
+      (strategySet.has("corp.rush_score") ||
+        strategySet.has("corp.remote_scoring") ||
+        strategySet.has("corp.fast_advance")) &&
       (type === "agenda" ||
         cost <= 3 ||
         rolesMatch(roles, ["score", "ice", "tempo", "advance"]))
     )
       bonus += 24;
     if (
-      strategies.includes("corp.asset_economy") &&
+      strategySet.has("corp.asset_economy") &&
       (type === "asset" ||
         type === "upgrade" ||
         rolesMatch(roles, ["asset", "upgrade", "remote", "economy"]))
