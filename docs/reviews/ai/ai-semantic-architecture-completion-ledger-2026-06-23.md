@@ -10945,6 +10945,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Status bleibt `IN_PROGRESS`, weil ein breiteres Holdout-/Benchmark-Fenster für den Abschluss von `AI-COMPLETE-20` noch fehlt.
   - Verifikation: fokussierte Benchmark-Report-Tests grün, AI-Typecheck grün, PS2-Pair-A-Smoke grün.
 
+- `AI-COMPLETE-20` zweiter Play-Quality-Gate-Schnitt:
+  - `docs/reviews/ai/ai-complete-20-play-quality-gate-2026-06-29.json` und `.md` belegen Default-Demo plus Pair A/B mit fünf Seeds und drei Legs.
+  - Safety bleibt grün: 0 Action-Limits, 0 IllegalActions, 0 ReplayFailures, RedactionSafe true.
+  - Action-Type-Dominanz bleibt grün: alle neun Leg-Berichte `complete`, maximale Top-Share 0.231.
+  - Erklärbarkeit bleibt grün: alle neun Why-Coverage-Berichte `complete`, 0 Missing-Coverage-Signale.
+  - Praktische Metriken verbessern sich im Gate: Candidate Runner verbessert Runner-Steals von 16 auf 31; Candidate Corp verbessert Corp-Scores von 15 auf 19.
+  - `mergeAllowed` bleibt false, weil der separate Taktik-Hit-Rate-Delta 0 ist; dies ist Play-Quality-/Safety-Evidence, kein Runtime-Default-Cutover.
+  - Status bleibt `IN_PROGRESS`, bis ein volles A-D-Holdout-Fenster oder Abschlussaudit geprüft ist.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
