@@ -9710,6 +9710,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'candidate\.projectionIssues\.includes|projectionIssues\.includes' packages/ai/src/action-doctrine-goal-diagnostics.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertdreizehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/controlled-shadow-mode.ts` bindet ControlledShadow-KnownProjectionGaps und Trace-GapReasons über lokale Sets statt direkter `knownProjectionGaps.includes(...)`- und `gapReasons.includes(...)`-Prüfungen.
+  - Strukturierte Gap-Flags wie `hidden_info_blocked`, `target_context_unavailable`, `cost_unknown` und `timing_unknown` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `controlled-shadow-mode.test.ts` sichert SemanticShadowDecision-Status, BlockingReasons und Legacy-Deltakategorien.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/controlled-shadow-mode.test.ts` grün, 1 Datei, 44 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'knownProjectionGaps\.includes|gapReasons\.includes' packages/ai/src/controlled-shadow-mode.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

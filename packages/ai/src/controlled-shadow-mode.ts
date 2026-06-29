@@ -1421,6 +1421,7 @@ function semanticShadowDecisionTraceRankingEntry(params: {
     ...(params.candidate?.projectionIssues ?? []),
     ...(basicSemantics?.projectionIssues ?? []),
   ]);
+  const gapReasonSet = new Set(gapReasons);
   const gateReasons = [
     ...(params.candidate?.hardGates ?? [])
       .filter((gate) => gate.status === "block" || gate.severity === "error")
@@ -1428,7 +1429,7 @@ function semanticShadowDecisionTraceRankingEntry(params: {
         (gate) =>
           `${gate.gateId}:${gate.reason ?? "semantic trace gate blocked"}`,
       ),
-    ...(gapReasons.includes("hidden_info_blocked")
+    ...(gapReasonSet.has("hidden_info_blocked")
       ? ["hidden_info:hidden_info_blocked"]
       : []),
   ];
@@ -1973,7 +1974,8 @@ function scoreStatusForFixture(
 ): SemanticShadowScoreStatus {
   if (!fixture.allowedShadow) return "not_scored";
   if (fixture.expectedLegalActionTypes.length === 0) return "no_candidate";
-  if (fixture.knownProjectionGaps.includes("hidden_info_blocked")) {
+  const knownProjectionGapSet = new Set(fixture.knownProjectionGaps);
+  if (knownProjectionGapSet.has("hidden_info_blocked")) {
     return "blocked_by_gate";
   }
   if (fixture.knownProjectionGaps.length > 0) return "blocked_by_gap";
@@ -1984,7 +1986,8 @@ function blockingReasonsForCandidate(
   fixture: ShadowScenarioFixture,
   candidate: ShadowCandidateRank,
 ): ShadowBlockingReason[] {
-  if (fixture.knownProjectionGaps.includes("hidden_info_blocked")) {
+  const knownProjectionGapSet = new Set(fixture.knownProjectionGaps);
+  if (knownProjectionGapSet.has("hidden_info_blocked")) {
     return [
       {
         candidateId: candidate.candidateId,
@@ -2049,7 +2052,8 @@ function gapEvidence(
   fixture: ShadowScenarioFixture,
   gap: ActionProjectionIssue,
 ): string[] {
-  return fixture.knownProjectionGaps.includes(gap)
+  const knownProjectionGapSet = new Set(fixture.knownProjectionGaps);
+  return knownProjectionGapSet.has(gap)
     ? [`AI053 blocked evidence gap: ${gap}`]
     : [];
 }
@@ -2087,7 +2091,8 @@ function deltaCategoriesForBlockedDecision(
   decision: SemanticShadowDecision,
 ): LegacySemanticDeltaCategory[] {
   if (decision.scoreStatus === "blocked_by_gate") {
-    return fixture.knownProjectionGaps.includes("hidden_info_blocked")
+    const knownProjectionGapSet = new Set(fixture.knownProjectionGaps);
+    return knownProjectionGapSet.has("hidden_info_blocked")
       ? ["semantic_avoids_hidden_info"]
       : ["semantic_selected_risky_action"];
   }
