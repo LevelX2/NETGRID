@@ -9863,6 +9863,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'scoreActionIds\.includes' packages/ai/src/runtime/semantic-runtime-corp-score-safety.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertdreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legalaction-witness.ts` bindet LegalActionWitness-RedactionPolicies über ein lokales Set statt direkter `policies.includes(...)`-Prüfungen.
+  - Strukturierte `hidden_blocked`-/`actor_private`-Policies behalten ihre Priorität; Witness-Policy-Kombination nutzt keine Text- oder Label-Heuristik.
+  - `legalaction-witness.test.ts` sichert Public-, Hidden-Blocked-, Hidden-Token-Grenz- und Actor-Private-Witness-Pfade.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/legalaction-witness.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'policies\.includes' packages/ai/src/legalaction-witness.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

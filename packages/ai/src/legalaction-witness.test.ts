@@ -80,6 +80,18 @@ describe("LegalActionWitness v1", () => {
     expect(witness.blockers).not.toContain("target_ref_hidden_blocked");
   });
 
+  it("keeps actor-known card sources actor-private", () => {
+    const witness = buildLegalActionWitness({
+      legalAction: action("trigger_ability", {
+        source: "visible.runner.rig.program",
+      }),
+      stateVersion: 6,
+    });
+
+    expect(witness.sourceRef.kind).toBe("actor_known_card");
+    expect(witness.redactionPolicy).toBe("actor_private");
+  });
+
   it("does not mutate the original LegalAction", () => {
     const legalAction = action("start_run", {
       payload: { serverId: "hq" },

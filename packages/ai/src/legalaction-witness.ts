@@ -295,8 +295,9 @@ function stringRecordValue(
 function combineRedactionPolicies(
   policies: readonly (LegalActionWitnessRedactionPolicy | undefined)[],
 ): LegalActionWitnessRedactionPolicy {
-  if (policies.includes("hidden_blocked")) return "hidden_blocked";
-  if (policies.includes("actor_private")) return "actor_private";
+  const policySet = new Set(policies);
+  if (policySet.has("hidden_blocked")) return "hidden_blocked";
+  if (policySet.has("actor_private")) return "actor_private";
   return "public";
 }
 
