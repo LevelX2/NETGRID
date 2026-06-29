@@ -156,10 +156,10 @@ export function strategySupportRoleForSignal(signal: string): string {
 }
 
 function tacticSignalHasSegment(signal: string, expected: string): boolean {
-  return signal
+  const segmentSet = new Set(signal
     .toLocaleLowerCase("en-US")
-    .split(/[._:-]+/)
-    .includes(expected);
+    .split(/[._:-]+/));
+  return segmentSet.has(expected);
 }
 
 function conditionFromHint(condition: AiHintCondition): SemanticCondition {
