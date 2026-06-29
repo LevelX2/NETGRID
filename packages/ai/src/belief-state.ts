@@ -385,7 +385,8 @@ function revealedOpponentEntries(input: AiDecisionInput, classifications: Belief
     const event = input.playerView.publicEvents.find((candidate) => candidate.eventId === classification.eventId) ?? input.eventTail.find((candidate) => candidate.eventId === classification.eventId);
     const definitionId = event ? stringValue(event.publicPayload.cardDefinitionId) : undefined;
     if (!definitionId) continue;
-    if (!["access", "reveal", "expose", "rez", "score", "steal", "trash"].includes(classification.family)) continue;
+    const revealedOpponentFamilySet = new Set(["access", "reveal", "expose", "rez", "score", "steal", "trash"]);
+    if (!revealedOpponentFamilySet.has(classification.family)) continue;
     entries.push({
       key: `opponent-event:${classification.eventId}:${definitionId}`,
       side: input.side,
@@ -486,7 +487,8 @@ function deriveKnownPositionMemory(playerView: PlayerView, history: PublicGameEv
       ? knownDefinitionsFromEvent(event, classification, definitionId)
       : [];
     if (knownDefinitions.length === 0) continue;
-    if (!["access", "reveal", "expose", "rez"].includes(classification.family)) continue;
+    const knownPositionFamilySet = new Set(["access", "reveal", "expose", "rez"]);
+    if (!knownPositionFamilySet.has(classification.family)) continue;
 
     const zone =
       classification.serverId ??

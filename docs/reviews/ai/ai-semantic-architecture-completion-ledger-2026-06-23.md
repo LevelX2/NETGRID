@@ -9944,6 +9944,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'entry\.evidence.*includes|evidence \?\? \[\]\)\.includes|evidence.*includes\(flag\)' packages/ai/src/simulation/plan-conversion-predicates.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertneununddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/belief-state.ts` bindet Revealed-Opponent- und Known-Position-EventFamilies über lokale Sets statt direkter `.includes(...)`-Prüfungen.
+  - Strukturierte EventFamily-Werte bleiben exakt; Belief-State-Reveal-/Access-/Rez-Folgen behalten ihre vorhandene Memory-Abdeckung.
+  - `belief-state.test.ts` sichert Hidden-Zone-Klassifikation, R&D-Freshness, HQ-Memory, KnownPositionMemory und Reveal-Kind-Grenzen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/belief-state.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n -F '["access", "reveal", "expose", "rez", "score", "steal", "trash"].includes' ...` und `rg -n -F '["access", "reveal", "expose", "rez"].includes' ...` ohne Treffer in `packages/ai/src/belief-state.ts`.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
