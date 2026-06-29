@@ -40,11 +40,10 @@ export function bestDeckBreakerForRequiredCoverage(
   const coverage = deckCoverageKindForRequiredCapability(requiredCoverage);
   if (!coverage) return undefined;
   const inventory = context.deckCapabilities?.runner?.breakerInventory ?? [];
-  return inventory.find(
-    (breaker) =>
-      breaker.coverage.includes(coverage) ||
-      breaker.coverage.includes("universal"),
-  );
+  return inventory.find((breaker) => {
+    const breakerCoverage = new Set(breaker.coverage);
+    return breakerCoverage.has(coverage) || breakerCoverage.has("universal");
+  });
 }
 
 export function coveragePlanStatusForRequiredCoverage(
@@ -60,10 +59,8 @@ export function coveragePlanStatusForRequiredCoverage(
 export function deckCapabilityHasDeckSnapshot(
   context: TacticalPlanBuildContext,
 ): boolean {
-  return (
-    context.deckCapabilities?.evidence.includes("deck_snapshot:present") ===
-    true
-  );
+  const evidence = new Set(context.deckCapabilities?.evidence ?? []);
+  return evidence.has("deck_snapshot:present");
 }
 
 export function deckCapabilityEvidenceForRequiredCoverage(

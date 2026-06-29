@@ -9552,6 +9552,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runner-run-target-evaluation.test.ts src/runner-tactical-goals.test.ts` grün, 2 Dateien, 66 Tests.
   - Verifikation: `rg -n 'coverage\.includes\("universal"\)' packages/ai/src/runner-economy-posture.ts packages/ai/src/runner-run-target-evaluation.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertfünfundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-deck-coverage.ts` bindet Runner-Breaker-Coverage und DeckSnapshot-Evidence über lokale Sets statt direkter `coverage.includes(...)`- und `evidence.includes(...)`-Prüfungen.
+  - Strukturierte Coverage-Werte wie `universal` und Snapshot-Evidence `deck_snapshot:present` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - Der gefilterte `tactical-plans.test.ts`-Lauf sichert die Coverage-Plan-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/tactical-plans.test.ts -t coverage` grün, 1 Datei, 10 Tests, 36 skipped.
+  - Verifikation: `rg -n 'coverage\.includes|evidence\.includes' packages/ai/src/plans/tactical-plan-deck-coverage.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
