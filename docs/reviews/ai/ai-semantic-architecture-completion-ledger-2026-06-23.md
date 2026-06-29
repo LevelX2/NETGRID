@@ -10388,6 +10388,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'for every .*advancement counters\?|additional agenda point for every|\^\\d\+\$' packages/ai/src/legacy/corp-plans.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertneunundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt die feste Team-Restructuring-RulesText-Regex für `add one advancement counter to each of up to two installed cards that can be advanced` durch eine lokale Token-Phrase.
+  - Legacy-Corp-Advancement-Operation-Profile erkennt Team-Restructuring weiter über DefinitionId oder exakte Tokenfolge, ohne Regex.
+  - Status bleibt `IN_PROGRESS`, weil weitere Legacy-Corp-RulesText-Regexes für allgemeine Advanceable-/Target-Text-Heuristiken und Advancement-Burst-Amounts offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "Team Restructuring"` grün, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'add one advancement counter to each of up to two installed cards that can be advanced' packages/ai/src/legacy/corp-plans.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

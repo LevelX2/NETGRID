@@ -6783,9 +6783,24 @@ function corpAdvancementCounterPlacementProfileForAction(
   const text = normalizedRulesTextForDefinition(definitionId);
   if (
     definitionId === TEAM_RESTRUCTURING_CARD_ID ||
-    /\badd one advancement counter to each of up to two installed cards that can be advanced\b/.test(
-      text,
-    )
+    corpTokensIncludePhrase(corpRulesTextTokens(text), [
+      "add",
+      "one",
+      "advancement",
+      "counter",
+      "to",
+      "each",
+      "of",
+      "up",
+      "to",
+      "two",
+      "installed",
+      "cards",
+      "that",
+      "can",
+      "be",
+      "advanced",
+    ])
   ) {
     return {
       maxTargets: 2,
