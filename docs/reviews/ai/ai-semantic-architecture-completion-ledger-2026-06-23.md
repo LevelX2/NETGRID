@@ -9665,6 +9665,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'candidate\.projectionIssues\.includes' packages/ai/src/actions/action-semantic-coverage.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertachter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/playeraction-dry-run-builder.ts` bindet LegalActionIds für Candidate- und Witness-DryRun-Builder über lokale Sets statt direkter `input.legalActionIds.includes(...)`-Prüfungen.
+  - Strukturierte ActionIds bleiben exakt engine-legal gebunden; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `playeraction-dry-run-builder.test.ts` sichert Built- und Blocked-Pfade inklusive `action_not_in_legal_actions`.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/playeraction-dry-run-builder.test.ts` grün, 1 Datei, 9 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'legalActionIds\.includes|input\.legalActionIds\.includes' packages/ai/src/playeraction-dry-run-builder.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

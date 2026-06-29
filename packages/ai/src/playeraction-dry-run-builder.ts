@@ -91,14 +91,16 @@ export function buildPlayerActionFromWitness(
 
 function dryRunBlockers(input: PlayerActionDryRunBuildInput): string[] {
   const blockers = new Set<string>();
+  const legalActionIdSet =
+    input.legalActionIds !== undefined ? new Set(input.legalActionIds) : undefined;
   if (input.binding.proofStatus !== "bound") {
     for (const blocker of input.binding.blockers) blockers.add(`binding:${blocker}`);
   }
   if (!input.binding.actionId) blockers.add("action_id_redacted");
   if (
     input.binding.actionId &&
-    input.legalActionIds !== undefined &&
-    !input.legalActionIds.includes(input.binding.actionId)
+    legalActionIdSet !== undefined &&
+    !legalActionIdSet.has(input.binding.actionId)
   ) {
     blockers.add("action_not_in_legal_actions");
   }
@@ -129,6 +131,8 @@ function actionFamilySupported(
 
 function witnessBuildBlockers(input: PlayerActionWitnessBuildInput): string[] {
   const blockers = new Set<string>();
+  const legalActionIdSet =
+    input.legalActionIds !== undefined ? new Set(input.legalActionIds) : undefined;
   if (input.witness.redactionPolicy === "hidden_blocked") {
     blockers.add("witness_hidden_blocked");
   }
@@ -136,8 +140,8 @@ function witnessBuildBlockers(input: PlayerActionWitnessBuildInput): string[] {
     for (const blocker of input.witness.blockers) blockers.add(`witness:${blocker}`);
   }
   if (
-    input.legalActionIds !== undefined &&
-    !input.legalActionIds.includes(input.witness.actionId)
+    legalActionIdSet !== undefined &&
+    !legalActionIdSet.has(input.witness.actionId)
   ) {
     blockers.add("action_not_in_legal_actions");
   }
