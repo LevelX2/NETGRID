@@ -9502,6 +9502,16 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'strategies\.includes|strategies\.some\(' packages/ai/src/runtime/discard-fit-bonus.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertneunundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-opening-hand.ts` bindet Opening-Hand-Strategie- und Warning-IDs über lokale Sets statt direkter `strategies.includes(...)`, `strategies.some(...)` und `warnings.includes(...)`-Prüfungen.
+  - Strukturierte IDs wie `corp.remote_scoring`, `corp.rush_score`, `corp.fast_advance`, `corp.ice_tax_glacier`, `runner.rig_first`, `runner.search.breaker`, `runner.economy_first`, `runner.rnd_pressure`, `runner.hq_pressure`, `runner.remote_contest` und `strategy_profile:neutral_missing_snapshot` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `deck-opening-hand.test.ts` sichert die Opening-Hand-Role-Classification; der gefilterte `index.test.ts`-Mulligan-Lauf sichert die Setup-Mulligan-Integration.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/deck-opening-hand.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/deck-opening-hand.test.ts src/index.test.ts -t mulligan` grün, 1 Datei, 2 Tests, 542 skipped.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'strategies\.includes|strategies\.some\(|warnings\.includes' packages/ai/src/deck-opening-hand.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

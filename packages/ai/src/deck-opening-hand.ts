@@ -28,15 +28,14 @@ export function evaluateCorpOpeningHand(
   const economyCount = handRoles.filter(openingRoleIsEconomy).length;
   const remoteRootCount = handRoles.filter(corpOpeningRoleIsRemoteRoot).length;
   const semanticContext = openingSemanticContext(input);
-  const hasScorelineStrategy = semanticContext.strategies.some(
-    (strategy) =>
-      strategy === "corp.remote_scoring" ||
-      strategy === "corp.rush_score" ||
-      strategy === "corp.fast_advance",
-  );
+  const strategySet = new Set(semanticContext.strategies);
+  const hasScorelineStrategy =
+    strategySet.has("corp.remote_scoring") ||
+    strategySet.has("corp.rush_score") ||
+    strategySet.has("corp.fast_advance");
   const hasRemoteProtectionSupport =
     semanticContext.corpRemoteProtectionTools > 0 ||
-    semanticContext.strategies.includes("corp.ice_tax_glacier");
+    strategySet.has("corp.ice_tax_glacier");
   let score = 0;
   const reasons: string[] = [];
   const evidence = [
@@ -115,6 +114,7 @@ export function evaluateRunnerOpeningHand(
   ).length;
   const handSize = input.playerView.own.gripOrHq.length;
   const semanticContext = openingSemanticContext(input);
+  const strategySet = new Set(semanticContext.strategies);
   let score = 0;
   const reasons: string[] = [];
   const evidence = [
@@ -146,25 +146,19 @@ export function evaluateRunnerOpeningHand(
   score += handSize >= 4 && handSize <= 6 ? 14 : handSize >= 3 ? 8 : 0;
 
   if (
-    semanticContext.strategies.some(
-      (strategy) =>
-        strategy === "runner.rig_first" ||
-        strategy === "runner.search.breaker",
-    )
+    strategySet.has("runner.rig_first") ||
+    strategySet.has("runner.search.breaker")
   ) {
     score += breakerCount > 0 && setupCount > 0 ? 12 : setupCount > 0 ? 6 : 0;
   } else if (
     semanticContext.runnerEconomyTools > 0 &&
-    semanticContext.strategies.includes("runner.economy_first")
+    strategySet.has("runner.economy_first")
   ) {
     score += economyCount > 0 ? 12 : 4;
   } else if (
-    semanticContext.strategies.some(
-      (strategy) =>
-        strategy === "runner.rnd_pressure" ||
-        strategy === "runner.hq_pressure" ||
-        strategy === "runner.remote_contest",
-    )
+    strategySet.has("runner.rnd_pressure") ||
+    strategySet.has("runner.hq_pressure") ||
+    strategySet.has("runner.remote_contest")
   ) {
     score +=
       pressureCount > 0 && (breakerCount > 0 || economyCount > 0) ? 12 : 4;
@@ -221,9 +215,10 @@ function openingSemanticContext(input: AiDecisionInput): OpeningSemanticContext 
     ...(strategyProfile?.primaryStrategies ?? []),
     ...(strategyProfile?.secondaryStrategies ?? []),
   ]);
+  const warningSet = new Set(strategyProfile?.warnings ?? []);
   const neutral =
-    strategyProfile?.warnings.includes("strategy_profile:neutral_missing_snapshot") ===
-      true || strategies.length === 0;
+    warningSet.has("strategy_profile:neutral_missing_snapshot") ||
+    strategies.length === 0;
   return {
     strategies,
     strategyProfileStatus: strategyProfile
