@@ -284,8 +284,9 @@ function highestPriorityGoal(
   goals: readonly RunnerTacticalGoal[],
   goalIds: readonly RunnerTacticalGoal["goalId"][],
 ): RunnerTacticalGoal | undefined {
+  const goalIdSet = new Set(goalIds);
   return goals
-    .filter((goal) => goalIds.includes(goal.goalId))
+    .filter((goal) => goalIdSet.has(goal.goalId))
     .sort((left, right) => right.priority - left.priority)[0];
 }
 

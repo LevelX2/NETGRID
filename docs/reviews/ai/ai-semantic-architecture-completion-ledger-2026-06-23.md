@@ -9818,6 +9818,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'targetIds\.includes' packages/ai/src/runtime/runner-rig-trash-target.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertfünfundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/runner-goal-fit-score.ts` bindet Runner-TacticalGoal-IDs im Highest-Priority-Helper über ein lokales Set statt direkter `goalIds.includes(...)`-Prüfung.
+  - Strukturierte GoalIds bleiben exakt wirksam; Economy-, Setup-, Bypass- und Risk-Control-Fit erhalten keine Text-, Label- oder Substring-Ausweitung.
+  - `runner-goal-fit-score.test.ts` sichert die relevanten TacticalGoal-Fit-Pfade.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/runner-goal-fit-score.test.ts` grün, 1 Datei, 5 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'goalIds\.includes' packages/ai/src/runtime/runner-goal-fit-score.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
