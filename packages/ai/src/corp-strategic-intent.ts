@@ -300,10 +300,12 @@ function primaryWinIntentFor(params: {
       break;
   }
   if (params.punishPlan.length > 0) return "corp.punish_runner";
-  if (params.scorePlan.includes("corp.fast_advance_scoreline")) {
+  const scorePlan = new Set(params.scorePlan);
+  const defensePlan = new Set(params.defensePlan);
+  if (scorePlan.has("corp.fast_advance_scoreline")) {
     return "corp.score_fast_advance";
   }
-  if (params.defensePlan.includes("corp.ice_tax_glacier")) {
+  if (defensePlan.has("corp.ice_tax_glacier")) {
     return "corp.tax_and_score";
   }
   if (params.scorePlan.length > 0) return "corp.score_agendas";

@@ -9512,6 +9512,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'strategies\.includes|strategies\.some\(|warnings\.includes' packages/ai/src/deck-opening-hand.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/corp-strategic-intent.ts` bindet Score- und Defense-Plan-IDs in `primaryWinIntentFor` über lokale Sets statt direkter `scorePlan.includes(...)`- und `defensePlan.includes(...)`-Prüfungen.
+  - Strukturierte Plan-IDs wie `corp.fast_advance_scoreline` und `corp.ice_tax_glacier` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `corp-strategic-intent.test.ts` sichert die bestehenden CorpStrategicIntent-Plan-Consumer.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/corp-strategic-intent.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `rg -n 'scorePlan\.includes|defensePlan\.includes' packages/ai/src/corp-strategic-intent.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
