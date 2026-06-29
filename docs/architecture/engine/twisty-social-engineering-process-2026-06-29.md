@@ -1,6 +1,6 @@
 # Twisty Social Engineering Paketprozess
 
-Status: geplant
+Status: verifiziert vor lokaler Integration
 Quelle/Vorgabe: Nutzerfreigabe vom 2026-06-29 nach Analyse des aktuellen SQLite-Spiels `match_c1426609ec05a7d5`.
 
 ## Zielprüfung
@@ -16,6 +16,14 @@ Die Vorgabe ist ausreichend präzise für automatische Umsetzung.
 ## Gesamtziel
 
 Der Prozess behebt den im aktuellen Spiel beobachteten Rules-Engine-Fehler: Eine unrezzed `Twisty Passages` auf R&D wurde durch `Social Engineering` automatisch passiert und durfte danach trotzdem nach HQ zurückgenommen werden. Nach dem Fix bleibt zuerst das Approach-/Rez-Fenster erhalten. Danach bleibt dieser Trigger gesperrt, solange die ICE unrezzed ist. Wenn die Corp die ICE beim Approach rezzed, darf der automatische Pass weiterhin den legalen Rücknahme-/Zahlungsentscheid auslösen.
+
+## Ergebnisstand
+
+- TSE-00: Prozessartefakt angelegt und committed mit `93205b082 docs(engine): plan twisty social engineering fix`.
+- TSE-01: `Social Engineering` wahrt jetzt die Approach-/Rez-Gelegenheit; unrezzed passierte ICE öffnen kein eigenes `corp_return_passed_ice_to_hq`; rezzed `Twisty Passages` behält den legalen Rücknahme-/Zahlungsentscheid. Committed mit `0d882fbb6 fix(engine): require rezzed ice for post-pass return windows`.
+- TSE-02: Legale post-pass ICE-Rücknahmen werden öffentlich, side-safe und ohne CardInstance-IDs projiziert. Die Chronik erklärt Rücknahme, Zahlung und Social-Engineering-Zielwahl nachvollziehbar. Committed mit `c7d454781 fix(web): explain legal twisty return in chronicle`.
+- Abschlusschecks vor TSE-03-Dokumentationscommit: `corepack pnpm --filter @netgrid/engine test -- variable-ice` (173 Testfiles, 1530 Tests grün), `corepack pnpm --filter @netgrid/engine typecheck`, `corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts` (142 Tests grün), `corepack pnpm format:changed`, `git diff --check`.
+- Nicht verwertbarer breiter Check: `corepack pnpm --filter @netgrid/web typecheck` scheitert an bestehenden Strategy-Profile-Typfehlern in `apps/web/app/api/decks/strategy-profile/*`, nicht an den TSE-Dateien.
 
 ## Annahmen
 
