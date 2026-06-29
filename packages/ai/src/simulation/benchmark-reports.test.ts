@@ -429,6 +429,9 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("| passiveActionWithScoreLineAvailable |");
     expect(report).toContain("## Action Limit Clusters");
     expect(report).toContain("## Action Limit Subclusters");
+    expect(report).toContain("## Why Coverage");
+    expect(report).toContain("- Decisions sampled:");
+    expect(report).toContain("- Decisions with Runtime WhyNot section:");
     expect(JSON.stringify({ result, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );

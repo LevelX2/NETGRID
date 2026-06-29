@@ -7,6 +7,7 @@ import type {
   AiMatchProgressionBenchmarkSuiteResult,
 } from "../index";
 import type { AiSelfplayTraceMiningResult } from "./selfplay-trace-mining";
+import { buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries } from "./selfplay-why-coverage";
 
 // Simulation-only report helpers. Live AI decisions must not depend on these
 // aggregate benchmark outputs as an action source.
@@ -178,6 +179,10 @@ export function formatDoctrineQualityBenchmarkReport(
 export function formatAiSelfplayTraceMiningReport(
   result: AiSelfplayTraceMiningResult,
 ): string {
+  const whyCoverage =
+    buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries(
+      result.summaries,
+    );
   const severityRows = Object.entries(result.aggregate.findingsBySeverity).map(
     ([severity, count]) => `| ${severity} | ${count} |`,
   );
@@ -262,6 +267,16 @@ export function formatAiSelfplayTraceMiningReport(
     ...(actionLimitSubclusterRows.length > 0
       ? actionLimitSubclusterRows
       : ["| none | 0 |"]),
+    "",
+    "## Why Coverage",
+    "",
+    `- Decisions sampled: ${whyCoverage.sampleCount}`,
+    `- Decisions with top-level WhyNot: ${whyCoverage.decisionsWithTopLevelWhyNot}`,
+    `- Decisions missing top-level WhyNot: ${whyCoverage.decisionsMissingTopLevelWhyNot}`,
+    `- Decisions with Runtime WhyNot section: ${whyCoverage.decisionsWithRuntimeWhyNotSection}`,
+    `- ActionAlternatives: ${whyCoverage.actionAlternativeCount}`,
+    `- ActionAlternatives with WhyChosen: ${whyCoverage.actionAlternativesWithWhyChosen}`,
+    `- ActionAlternatives with WhyNot: ${whyCoverage.actionAlternativesWithWhyNot}`,
     "",
     "## Top Findings",
     "",
