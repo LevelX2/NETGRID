@@ -61,7 +61,8 @@ function choiceSourceHasSearchToken(source: string | undefined): boolean {
     .toLocaleLowerCase("en-US")
     .split(/[^a-z0-9]+/)
     .filter((token) => token.length > 0);
-  return tokens.includes("search") || tokens.includes("stack");
+  const tokenSet = new Set(tokens);
+  return tokenSet.has("search") || tokenSet.has("stack");
 }
 
 function scoreSearchChoiceOption(

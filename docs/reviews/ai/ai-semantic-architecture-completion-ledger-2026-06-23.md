@@ -10160,6 +10160,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes\(markerTokens\[0\]!\)|includes\(markerTokens\[0\]' packages/ai/src/actions/action-semantic-coverage.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertdreiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/search-choice-option.ts` bindet SearchChoice-Source-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfungen.
+  - Strukturierte Search-/Stack-Choice-Erkennung bleibt exakt; source-only Rauschwerte wie `searchlight` und `stackish` bleiben ausgeschlossen.
+  - `search-choice-option.test.ts` sichert bounded Source-Tokens, Suchrollen und Breaker-/Rig-Rollenmatches.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/search-choice-option.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\("search"\)|tokens\.includes\("stack"\)' packages/ai/src/runtime/search-choice-option.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
