@@ -30,7 +30,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | `packages/ai/src/deck-capabilities.ts` | 936 Zeilen |
 | Semantische Module mit Legacy-/LegacyDecision-Treffern | PENDING Messauswertung |
 | Produktive `action.label`-/Regex-/Titel-Treffer | PENDING Messauswertung |
-| Action-Type-Scoreverwendungen | `IN_PROGRESS` report-only Dominanzmessung mit erstem Pair-A-Smoke ohne Action-Type-Dominanz. |
+| Action-Type-Scoreverwendungen | `VERIFIED` report-only Dominanzmessung mit vollem A-D-Holdout ohne Action-Type-Dominanz. |
 | Legacy-Fallback-Rate | PENDING Messauswertung |
 | ActionSemanticCandidate-Coverage | PENDING Messauswertung |
 | TargetProfile-/TargetConstraint-Coverage | PENDING Messauswertung |
@@ -68,7 +68,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-17 | Fachliche Scoring-Consumer aufbauen. | `VERIFIED` | Aktueller Score enthält große Typpriorität und verstreute Komponenten. | Erfüllt: Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty sind als aktive normalisierte Consumer angebunden; Vertragstest schützt Vollständigkeit, Skalen und `active`-Status. |
 | AI-COMPLETE-18 | DecisionTrace, WhyChosen und WhyNot vollständig machen. | `VERIFIED` | Debug war vorhanden, aber WhyNot-Kategorien und Alternativenabdeckung mussten geprüft werden. | Erfüllt: Runtime-, Shadow-, Replay-, Selfplay-, Baseline- und Acceptance-Oberflächen transportieren redigierte WhyChosen-/WhyNot-Fakten; report-only Why-Coverage misst Top-Level-WhyNot, Runtime-WhyNot-Sections, ausgewählte ActionAlternative-WhyChosen, nicht ausgewählte ActionAlternative-WhyNot, Missing-Signale und Auditstatus; zwei unabhängige Abschlussaudits inklusive Pair-A-/Pair-B-Smokes sind grün. |
 | AI-COMPLETE-19 | Kommentare und Entwicklerleitplanken korrigieren. | `VERIFIED` | Grenzkommentare existierten und mussten nach Runtime-Änderungen stimmen. | Erfüllt: Why-Coverage ist als report-only Auditoberfläche kommentiert; Boundary-Test schützt, dass Runtime-Module den report-only Why-Coverage-Builder nicht importieren; Kommentar-Audit findet nur aktuelle Leitplanken und keine veralteten No-Effect-/Shadow-Only-Texte. |
-| AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `IN_PROGRESS` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay müssen nach Reparatur geprüft werden. | Erster Schnitt ergänzt report-only Action-Type-Dominanzmessung in Selfplay-/PS2-Gate-Reports; Pair-A-Smoke zeigt Safety grün und keine Dominanz. Größere Benchmark-/Holdout-Evidence bleibt offen. |
+| AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `IN_PROGRESS` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay müssen nach Reparatur geprüft werden. | Full-Holdout-Kandidat erfüllt Safety, Redaction, Why-Coverage, Action-Type-Dominanz und praktische Metriken im A-D-Gate; zweiter Abschlussaudit bleibt offen. |
 
 ## Neu gefundene In-Scope-Findings
 
@@ -10953,6 +10953,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Praktische Metriken verbessern sich im Gate: Candidate Runner verbessert Runner-Steals von 16 auf 31; Candidate Corp verbessert Corp-Scores von 15 auf 19.
   - `mergeAllowed` bleibt false, weil der separate Taktik-Hit-Rate-Delta 0 ist; dies ist Play-Quality-/Safety-Evidence, kein Runtime-Default-Cutover.
   - Status bleibt `IN_PROGRESS`, bis ein volles A-D-Holdout-Fenster oder Abschlussaudit geprüft ist.
+
+- `AI-COMPLETE-20` dritter Full-Holdout-Gate-Schnitt:
+  - `docs/reviews/ai/ai-complete-20-full-holdout-gate-2026-06-29.json` und `.md` belegen Default-Demo plus Pair A-D mit fünf Seeds und drei Legs.
+  - Umfang: 75 Spiele, 9477 Entscheidungen.
+  - Safety bleibt grün: 0 Action-Limits, 0 IllegalActions, 0 ReplayFailures, RedactionSafe true.
+  - Action-Type-Dominanz bleibt grün: alle 15 Leg-Berichte `complete`, maximale Top-Share 0.253.
+  - Erklärbarkeit bleibt grün: alle 15 Why-Coverage-Berichte `complete`, 0 Missing-Coverage-Signale.
+  - Praktische Metriken verbessern sich im Gate: Candidate Runner verbessert Runner-Steals von 35 auf 54; Candidate Corp verbessert Corp-Scores von 18 auf 23.
+  - `AI-COMPLETE-20` ist Abschlusskandidat, bleibt aber bis zum zweiten Abschlussaudit `IN_PROGRESS`.
 
 ## Audit-Ledger
 
