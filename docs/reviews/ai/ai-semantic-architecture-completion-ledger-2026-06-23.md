@@ -10133,6 +10133,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes\(needle\)|includes\(needle\)' packages/ai/src/plans/tactical-plan-coverage-card-roles.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` bindet Corp-Scoring-Window-Signal-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Scoring-Window-Signal-Erkennung bleibt exakt; Remote-, Scoreline-, Agenda- und Protection-Signale bleiben bounded und substring-nahe Rauschwerte bleiben ausgeschlossen.
+  - `semantic-runtime-corp-scoring-window.test.ts` sichert Scoring-Window-Assessments, Remote-Safety, Central-Pressure-Override und relevante ICE-Bewertung.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-scoring-window.test.ts` grün, 1 Datei, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(normalizedNeedle\)|includes\(normalizedNeedle\)' packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

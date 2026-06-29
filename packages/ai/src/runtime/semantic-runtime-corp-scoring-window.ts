@@ -665,7 +665,10 @@ function scoringWindowSignalMatches(
     if (normalized === normalizedNeedle) return true;
     const tokens = normalized.split(/[._:-]+/).filter(Boolean);
     const needleTokens = normalizedNeedle.split(/[._:-]+/).filter(Boolean);
-    if (needleTokens.length <= 1) return tokens.includes(normalizedNeedle);
+    if (needleTokens.length <= 1) {
+      const tokenSet = new Set(tokens);
+      return tokenSet.has(normalizedNeedle);
+    }
     return tokens.some(
       (token, index) =>
         token === needleTokens[0] &&
