@@ -403,6 +403,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   if (
     action.type === "gain_credit" &&
     credits >= 4 &&
+    !dependencies.corpHasRemoteInstability(input) &&
     !dependencies.corpHasRemoteRezFloorFundingNeed(input) &&
     !dependencies.corpHasCentralRezFloorFundingNeed(input) &&
     corpInputHasConcreteDevelopmentAction(input, action)

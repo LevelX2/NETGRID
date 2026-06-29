@@ -175,6 +175,40 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("keeps basic credit viable when the only development line is currently unstable", () => {
+    const basicCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const installRemoteAgenda = corpAction(
+      "install-remote-agenda",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "new_remote",
+      },
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([], [basicCredit, installRemoteAgenda]),
+      basicCredit,
+      "basic_economy_draw",
+      {
+        ...testDependencies(),
+        corpHasRemoteInstability: () => true,
+      },
+    );
+
+    expect(components).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_reserve_satisfied_credit_loop_penalty",
+        }),
+      ]),
+    );
+  });
+
   it("scores mixed credit and draw Corp operations by combined action value", () => {
     const nightShift = corpAction(
       "play-night-shift",
