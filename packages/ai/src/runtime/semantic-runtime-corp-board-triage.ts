@@ -17,6 +17,7 @@ import { semanticRuntimeVisibleSourceCard } from "./visible-card-lookup";
 
 export type CorpBoardTriagePrimary =
   | "score_now"
+  | "force_scoreline_clock"
   | "protect_score_remote"
   | "fund_score_remote"
   | "protect_hq"
@@ -97,6 +98,17 @@ type ScoredLegalAction = {
   centralRezFloor?: RezFloorAssessment | undefined;
 };
 
+type DeckoutAgendaFloodPressure = {
+  severity: CorpBoardTriageSeverity;
+  targetServerId?: string | undefined;
+  scoreRemoteServerId?: string | undefined;
+  requiredRezFloor?: number | undefined;
+  hqAgendaCount: number;
+  hqAgendaPoints: number;
+  rdCount: number;
+  evidence: string[];
+};
+
 const TRIAGE_ALIGNMENT_BONUS = 850;
 const TRIAGE_MISMATCH_HIGH = -4200;
 const TRIAGE_MISMATCH_MEDIUM = -2200;
@@ -125,6 +137,27 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
         "corp_board_triage_primary:score_now",
         "corp_board_triage_severity:critical",
         `corp_board_triage_action:${scoreNow.action.actionId}`,
+      ],
+    };
+  }
+
+  const deckoutFloodPressure = corpDeckoutAgendaFloodPressure(
+    input,
+    actions,
+    dependencies,
+  );
+  if (deckoutFloodPressure) {
+    return {
+      primary: "force_scoreline_clock",
+      severity: deckoutFloodPressure.severity,
+      targetServerId: deckoutFloodPressure.targetServerId,
+      scoreRemoteServerId: deckoutFloodPressure.scoreRemoteServerId,
+      requiredRezFloor: deckoutFloodPressure.requiredRezFloor,
+      currentCredits,
+      evidence: [
+        "corp_board_triage_primary:force_scoreline_clock",
+        `corp_board_triage_severity:${deckoutFloodPressure.severity}`,
+        ...deckoutFloodPressure.evidence,
       ],
     };
   }
@@ -340,6 +373,65 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         )
         ? "match"
         : "mismatch";
+    case "force_scoreline_clock": {
+      const needsFunding =
+        triage.requiredRezFloor !== undefined &&
+        triage.currentCredits !== undefined &&
+        triage.currentCredits < triage.requiredRezFloor;
+      if (
+        actionKeepsSideSafeSameTurnScoreCloseoutForAction(
+          input,
+          action,
+          dependencies,
+        ) ||
+        actionAcceleratesScoreline(actionSemanticCandidate)
+      ) {
+        return "match";
+      }
+      if (
+        actionHasVisibleDrawSource(input, action, actionSemanticCandidate)
+      ) {
+        return "mismatch";
+      }
+      if (actionPushesUnsafeScoreline(input, action, dependencies)) {
+        return needsFunding && legalEconomyActionExists(input)
+          ? "mismatch"
+          : "match";
+      }
+      if (
+        actionProtectsServer(
+          input,
+          action,
+          actionServerId,
+          triage,
+          dependencies,
+          actionSemanticCandidate,
+        )
+      ) {
+        return "match";
+      }
+      if (
+        needsFunding &&
+        actionProvidesEconomy(
+          input,
+          action,
+          dependencies,
+          actionSemanticCandidate,
+        )
+      ) {
+        return "match";
+      }
+      return actionDelaysForcedScoreline(
+        input,
+        action,
+        actionServerId,
+        triage,
+        dependencies,
+        actionSemanticCandidate,
+      )
+        ? "mismatch"
+        : "neutral";
+    }
     case "protect_score_remote":
       if (
         actionKeepsSideSafeSameTurnScoreCloseoutForAction(
@@ -478,6 +570,94 @@ function corpLegalActions(input: AiDecisionInput): LegalAction[] {
   return (input.legalActions ?? input.playerView.legalActions ?? []).filter(
     (action) => action.side === "corp",
   );
+}
+
+function corpDeckoutAgendaFloodPressure<TConsumer extends string>(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): DeckoutAgendaFloodPressure | undefined {
+  const rdCount = corpTriagePositiveNumber(input.playerView.own.stackOrRdCount);
+  if (rdCount === undefined || rdCount > 6) return undefined;
+
+  const hqAgendaCards = input.playerView.own.gripOrHq.filter(
+    corpTriageVisibleCardIsAgenda,
+  );
+  const hqAgendaCount = hqAgendaCards.length;
+  const hqAgendaPoints = hqAgendaCards.reduce(
+    (sum, card) => sum + corpTriageVisibleAgendaPoints(card),
+    0,
+  );
+  if (hqAgendaCount < 2 && hqAgendaPoints < 4) return undefined;
+
+  const scorelineEntries = actions.filter((entry) =>
+    actionPushesUnsafeScoreline(input, entry.action, dependencies),
+  );
+  if (scorelineEntries.length === 0) return undefined;
+
+  const preferred = highestPriorityDeckoutScorelineEntry(scorelineEntries);
+  const requiredRezFloor =
+    corpTriagePositiveNumber(preferred?.scoringWindow?.dynamicProtectionReserve) ??
+    (preferred?.remoteRezFloor?.blockedByFloor
+      ? input.playerView.own.credits + 1
+      : undefined);
+  const targetServerId = preferred?.serverId;
+  const severity =
+    rdCount <= 2 || (rdCount <= 4 && hqAgendaPoints >= 6)
+      ? "critical"
+      : "high";
+  return {
+    severity,
+    targetServerId,
+    scoreRemoteServerId:
+      targetServerId && targetServerId.startsWith("remote_")
+        ? targetServerId
+        : undefined,
+    requiredRezFloor,
+    hqAgendaCount,
+    hqAgendaPoints,
+    rdCount,
+    evidence: [
+      "corp_deckout_agenda_flood:true",
+      `corp_rd_count:${rdCount}`,
+      `corp_hq_agenda_count:${hqAgendaCount}`,
+      `corp_hq_agenda_points:${hqAgendaPoints}`,
+      ...(targetServerId ? [`corp_forced_scoreline_target:${targetServerId}`] : []),
+      ...(requiredRezFloor !== undefined
+        ? [`corp_forced_scoreline_rez_floor:${requiredRezFloor}`]
+        : []),
+    ],
+  };
+}
+
+function highestPriorityDeckoutScorelineEntry(
+  entries: readonly ScoredLegalAction[],
+): ScoredLegalAction | undefined {
+  return [...entries].sort(
+    (left, right) =>
+      deckoutScorelineEntryPriority(right) -
+      deckoutScorelineEntryPriority(left),
+  )[0];
+}
+
+function deckoutScorelineEntryPriority(entry: ScoredLegalAction): number {
+  const existingRemoteBonus =
+    entry.serverId && entry.serverId !== "new_remote" ? 180 : 0;
+  const actionBonus =
+    entry.action.type === "advance_card"
+      ? 140
+      : entry.action.type === "install_card"
+        ? 100
+        : 0;
+  const safetyBonus =
+    entry.scoringWindow?.windowKind === "durable"
+      ? 100
+      : entry.scoringWindow?.windowKind === "temporary_safe"
+        ? 60
+        : entry.scoringWindow?.recommendedNextStep === "gain_credit"
+          ? 30
+          : 0;
+  return existingRemoteBonus + actionBonus + safetyBonus;
 }
 
 function actionClosesScoreNow<TConsumer extends string>(
@@ -764,6 +944,98 @@ function actionPushesUnsafeScoreline<TConsumer extends string>(
       (action.type === "install_card" &&
         action.payload?.placement !== "ice")) &&
     dependencies.corpActionIsScoreLine(input, action, roles)
+  );
+}
+
+function actionAcceleratesScoreline(
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): boolean {
+  return actionCandidateHasVisibleSignal(actionSemanticCandidate, [
+    "corp.score_closeout",
+    "score_closeout",
+    "advance.counter_cashout",
+    "advance_scoreline",
+    "corp.tactical.advance_scoreline",
+  ]);
+}
+
+function actionDelaysForcedScoreline<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  actionServerId: string | undefined,
+  triage: CorpBoardTriage,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): boolean {
+  if (action.type === "draw_card" || action.type === "gain_credit") {
+    return true;
+  }
+  if (action.type === "end_turn") return true;
+  if (actionServerId === "archives") return true;
+  if (action.type === "install_card") {
+    if (actionServerId !== triage.targetServerId) return true;
+    return (
+      action.payload?.placement !== "ice" &&
+      !actionPushesUnsafeScoreline(input, action, dependencies)
+    );
+  }
+  if (action.type === "rez_ice") {
+    return actionServerId !== triage.targetServerId;
+  }
+  if (
+    action.type === "play_operation" ||
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability"
+  ) {
+    if (actionAcceleratesScoreline(actionSemanticCandidate)) return false;
+    return actionProvidesEconomy(
+      input,
+      action,
+      dependencies,
+      actionSemanticCandidate,
+    );
+  }
+  return false;
+}
+
+function actionHasVisibleDrawSource(
+  input: AiDecisionInput,
+  action: LegalAction,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): boolean {
+  if (action.type === "draw_card") return true;
+  if (
+    actionCandidateHasVisibleSignal(actionSemanticCandidate, [
+      "draw",
+      "draw_operation",
+      "recover_draw",
+    ])
+  ) {
+    return true;
+  }
+  const source = semanticRuntimeVisibleSourceCard(input, action);
+  if (!source || source.known === false) return false;
+  const definition = visibleCardDefinition(source);
+  const text = [source.rulesText, definition?.rulesText]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
+  return corpBoardTriageTokensIncludeDraw(
+    corpBoardTriageRulesTextTokens(text),
+  );
+}
+
+function corpTriageVisibleCardIsAgenda(card: VisibleCard): boolean {
+  if (card.known === false) return false;
+  const definition = visibleCardDefinition(card);
+  return card.type === "agenda" || definition?.type === "agenda";
+}
+
+function corpTriageVisibleAgendaPoints(card: VisibleCard): number {
+  const definition = visibleCardDefinition(card);
+  return (
+    corpTriagePositiveNumber(card.agendaPoints) ??
+    corpTriagePositiveNumber(definition?.agendaPoints) ??
+    0
   );
 }
 
