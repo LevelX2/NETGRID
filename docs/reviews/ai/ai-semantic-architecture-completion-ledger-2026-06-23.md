@@ -10088,6 +10088,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'accepted\.includes\(token\)|includes\(token\)' packages/ai/src/actions/action-semantic-invariants.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertfünfundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/access/remote-root-value-projection.ts` bindet Remote-Root-Role-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Remote-Root-Value-Projektion bleibt exakt; Economy-, Campaign-, Ambush- und Engine-Rollen bleiben tokengebunden und substring-nahe Rauschwerte bleiben ausgeschlossen.
+  - `remote-root-value-projection.test.ts` sichert Remote-Root-Wertklassifikation und substring-nahe Role-Noise-Werte.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/access/remote-root-value-projection.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'accepted\.includes\(token\)|includes\(token\)' packages/ai/src/access/remote-root-value-projection.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
