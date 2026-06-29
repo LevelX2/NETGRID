@@ -5304,11 +5304,22 @@ function corpScoredAgendaCreditGainAmountToken(
 }
 
 function scoredAgendaDrawAmountFromText(text: string): number {
-  const normalized = text.replace(/\btwo\b/gi, "2").replace(/\bfive\b/gi, "5");
-  const match = /\bdraw\s+(\d+)\s+cards?/i.exec(normalized);
-  if (!match) return 0;
-  const amount = Number(match[1]);
-  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+  const tokens = corpRulesTextTokens(text);
+  const amountToken = tokens.find((token, index) =>
+    corpScoredAgendaDrawAmountToken(tokens, index),
+  );
+  return amountToken ? (corpNumberWordToNumber(amountToken) ?? 0) : 0;
+}
+
+function corpScoredAgendaDrawAmountToken(
+  tokens: readonly string[],
+  index: number,
+): boolean {
+  if (corpNumberWordToNumber(tokens[index] ?? "") === undefined) return false;
+  return (
+    tokens[index - 1] === "draw" &&
+    (tokens[index + 1] === "card" || tokens[index + 1] === "cards")
+  );
 }
 
 function scoredAgendaGainedActionsFromText(text: string): number {
@@ -7145,6 +7156,7 @@ function corpNumberWordToNumber(value: string): number | undefined {
     two: 2,
     three: 3,
     four: 4,
+    five: 5,
   };
   return byWord[value];
 }

@@ -10428,6 +10428,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: gezieltes Ripgrep auf die entfernten Scored-Agenda-Credit-Gain-Regexes ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertvierundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt die Legacy-Scored-Agenda-Draw-Amount-RulesText-Regex durch Token-Prädikate.
+  - Scored-Agenda-Draw und Shuffle-Draw erkennen `draw <Zahl/Zahlwort> card(s)` weiter; der gemeinsame Zahlwort-Helper deckt dafür nun auch `five` ab.
+  - Status bleibt `IN_PROGRESS`, weil die Scored-Agenda-Counter-Economy-Heuristik und einzelne Label-Werttransporte noch offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "Employee Empowerment|Chief Financial Officer"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: gezieltes Ripgrep auf die entfernte Scored-Agenda-Draw-Regex ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
