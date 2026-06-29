@@ -1055,14 +1055,16 @@ function corpCreditGainFromRulesText(rulesText: string | undefined): number {
 }
 
 function corpDrawCountFromRulesText(rulesText: string | undefined): number {
-  const englishMatch = rulesText?.match(
-    /\bdraw\s+(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+cards?\b/i,
+  const tokens = corpRulesTextTokens(rulesText);
+  const drawToken = tokens.find(
+    (token, index) =>
+      (tokens[index - 1] === "draw" || tokens[index - 1] === "ziehe") &&
+      (tokens[index + 1] === "card" ||
+        tokens[index + 1] === "cards" ||
+        tokens[index + 1] === "karte" ||
+        tokens[index + 1] === "karten"),
   );
-  if (englishMatch) return numberFromDigitOrWord(englishMatch[1] ?? "");
-  const germanMatch = rulesText?.match(
-    /\bziehe\s+(eins|eine|einen|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|\d+)\s+karten?\b/i,
-  );
-  if (germanMatch) return numberFromDigitOrWord(germanMatch[1] ?? "");
+  if (drawToken) return numberFromDigitOrWord(drawToken);
   return 0;
 }
 

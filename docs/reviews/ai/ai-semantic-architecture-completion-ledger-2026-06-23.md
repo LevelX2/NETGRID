@@ -10313,6 +10313,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'bracketMatch|gain\\s\+\\\[|gain\\s\+\(one|erhalte\\s\+' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer; Draw-RulesText-Regexes bleiben als eigener Folgecluster offen.
 
+- `AI-COMPLETE-15` dreihundertachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` ersetzt die Draw-RulesText-Regexes für `draw n card(s)` und `ziehe n karte(n)` durch lokale Token-Sequenzprüfung.
+  - Corp-Immediate-Economy erkennt echte Draw-Operationen weiter; substring-nahe RulesText-Werte wie `cardish` erzeugen keinen Draw-Gain.
+  - `semantic-runtime-corp-score.test.ts` sichert bestehende englische und deutsche Draw-Fälle sowie einen neuen `cardish`-Noise-Fall.
+  - Status bleibt `IN_PROGRESS`, weil nach diesem Parser-Rückbau ein erneuter breiter RulesText-/Regex-Audit nötig ist.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts` grün, 1 Datei, 28 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'rulesText\?\.match|draw\\s\+\(one|ziehe\\s\+' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

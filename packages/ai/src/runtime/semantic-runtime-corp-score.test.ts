@@ -383,6 +383,39 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     ).toBe(false);
   });
 
+  it("bounds Corp draw rules text to exact card tokens", () => {
+    const drawNoise = corpAction(
+      "play-draw-noise",
+      "play_operation",
+      {},
+      "corp_draw_noise",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        0,
+        [
+          economyOperationCard({
+            instanceId: "corp_draw_noise",
+            definitionId: "v099_draw_noise_operation",
+            title: "Draw Noise",
+            rulesText: "Draw one cardish marker.",
+            cost: 0,
+          }),
+        ],
+        [drawNoise],
+      ),
+      drawNoise,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(
+      components.some(
+        (component) => component.key === "corp_operation_burst_economy",
+      ),
+    ).toBe(false);
+  });
+
   it("scores value-two Corp draw operations above basic draw without burst tier", () => {
     const simpleDraw = corpAction(
       "play-simple-draw",
