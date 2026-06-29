@@ -10506,6 +10506,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps legacy action scoring restricted to fallback compositions"` in `packages/ai` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
 
+- `AI-COMPLETE-16` vierter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Runner-Run-Reachability: `evaluateRunnerRunTargets` darf nur im Run-Target-Evaluator, in Public-/Evaluation-Reexports und in den Runtime-Orchestrierungsstellen auftauchen.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert diesen Guard als Runner-Run-Reachability-Owner-Bindung.
+  - Status bleibt `IN_PROGRESS`, weil Access-Payoff- und Corp-Board-Triage-Kollisionszonen noch gebunden werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps runner run-target evaluation owned by the run-target evaluator"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

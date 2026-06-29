@@ -689,6 +689,31 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps runner run-target evaluation owned by the run-target evaluator", () => {
+    const allowedFiles = new Set([
+      "ai-runtime-public-entrypoints.ts",
+      "evaluation/real-engine-decision-corpus-fixtures.ts",
+      "index.ts",
+      "runner-run-target-evaluation.ts",
+      "runtime/semantic-runtime.ts",
+      "runtime/semantic-runtime-decision-composition.ts",
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        if (!content.includes("evaluateRunnerRunTargets")) return [];
+        const relative = relativeFile(file);
+        return allowedFiles.has(relative)
+          ? []
+          : [
+              `${relative} references evaluateRunnerRunTargets outside run-target evaluation ownership`,
+            ];
+      });
+
+    expect(violations).toEqual([]);
+  });
+
   it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
