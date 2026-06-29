@@ -10115,6 +10115,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'accepted\.includes\(token\)|includes\(token\)' packages/ai/src/runtime/practical-tactic-overlay.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertachtundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/role-match.ts` bindet Single-Needle-Rollentokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Rollenmatches bleiben exakt; Exact-, Prefix- und Compound-Matches bleiben erhalten und substring-nahe Rollenrauschwerte bleiben ausgeschlossen.
+  - `role-match.test.ts` sichert bounded Rollenmatches, Prefix-Rollen und substring-only Rauschen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/role-match.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(needle\)|includes\(needle\)' packages/ai/src/runtime/role-match.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
