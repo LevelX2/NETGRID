@@ -13,7 +13,10 @@ export function payloadAbilityId(payload: PayloadLike): string | null {
     const legacy = stringValue(payload?.[field]);
     if (legacy) return legacy;
   }
-  return stringValue(payload?.hiddenZoneAction) ?? stringValue(payload?.agendaAbility);
+  return (
+    stringValue(payload?.hiddenZoneAction) ??
+    stringValue(payload?.agendaAbility)
+  );
 }
 
 export function payloadHasAbility(
@@ -45,10 +48,7 @@ export function isDataFortReclamationInstallPayload(
 }
 
 export function isDataFortReclamationRezPayload(payload: PayloadLike): boolean {
-  return payloadHasAbility(
-    payload,
-    "v1922_data_fort_reclamation_rez_sequence",
-  );
+  return payloadHasAbility(payload, "v1922_data_fort_reclamation_rez_sequence");
 }
 
 export function isExposeServerCardPayload(payload: PayloadLike): boolean {
@@ -65,7 +65,10 @@ export function isExposeOutermostIceEachDataFortPayload(
 }
 
 export function isSecurityPurgePayload(payload: PayloadLike): boolean {
-  return payloadHasAbility(payload, "v1922_security_purge");
+  return (
+    payloadHasAbility(payload, "v1922_security_purge") ||
+    payloadHasAbility(payload, "agenda_purge")
+  );
 }
 
 export function actionNeedsRegionReplacementConfirmation(
@@ -97,5 +100,7 @@ function stringValue(value: unknown): string | null {
 }
 
 function numberValue(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
 }

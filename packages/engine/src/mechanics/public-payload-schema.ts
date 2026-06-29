@@ -70,6 +70,8 @@ const AMOUNT_KEYS = [
   "fortTraceBitPoolSpent",
   "fortTraceBitPoolRemaining",
   "recurringCreditsLoaded",
+  "overadvanceRecurringCredits",
+  "projectZurichOveradvance",
   "paidCredits",
   "rezCostPaid",
   "trashCostPaid",
@@ -177,7 +179,9 @@ export function publicAbilityMetadata(
   const abilityId = stringValue(combined.abilityId) ?? legacyAbility?.abilityId;
   const hiddenZoneAction = stringValue(combined.hiddenZoneAction);
   const inferredAbilityId = abilityId ?? hiddenZoneAction;
-  const family = stringValue(combined.abilityFamily) as AbilityFamily | undefined;
+  const family = stringValue(combined.abilityFamily) as
+    | AbilityFamily
+    | undefined;
   const abilityFamily = isAbilityFamily(family)
     ? family
     : inferAbilityFamily(inferredAbilityId, combined);
@@ -233,9 +237,15 @@ function inferAbilityFamily(
   ]
     .filter(Boolean)
     .join(" ");
-  if (/hidden|stack|grip|hq|rd|archives|reveal|search|arrange|shuffle|reorder|swap/i.test(haystack))
+  if (
+    /hidden|stack|grip|hq|rd|archives|reveal|search|arrange|shuffle|reorder|swap/i.test(
+      haystack,
+    )
+  )
     return "hidden-zone";
-  if (/prevent|avoid|replacement|damage|flatline|hardware-trash/i.test(haystack))
+  if (
+    /prevent|avoid|replacement|damage|flatline|hardware-trash/i.test(haystack)
+  )
     return "damage-prevention";
   if (/trace|tag|link/i.test(haystack)) return "trace-tags";
   if (/run|access|breach|jack|ice|subroutine|rez|derez/i.test(haystack))
@@ -269,19 +279,21 @@ function inferEffectKind(
     return "trash_card";
   if (abilityId?.includes("install") || actionType === "install_card")
     return "install_card";
-  if (abilityId?.includes("run") || actionType === "start_run")
-    return "run";
+  if (abilityId?.includes("run") || actionType === "start_run") return "run";
   if (abilityId?.includes("counter")) return "counter_change";
   if (abilityId?.includes("die") || abilityId?.includes("dice"))
     return "random";
   return undefined;
 }
 
-function publicAmounts(payload: Record<string, unknown>): Record<string, number> {
+function publicAmounts(
+  payload: Record<string, unknown>,
+): Record<string, number> {
   const amounts: Record<string, number> = {};
   for (const key of AMOUNT_KEYS) {
     const value = payload[key];
-    if (typeof value === "number" && Number.isFinite(value)) amounts[key] = value;
+    if (typeof value === "number" && Number.isFinite(value))
+      amounts[key] = value;
   }
   const randomRoll =
     numberValue(payload.randomRoll) ??
@@ -313,7 +325,9 @@ function stringValue(value: unknown): string | undefined {
 }
 
 function numberValue(value: unknown): number | undefined {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
 }
 
 function isAbilityFamily(value: string | undefined): value is AbilityFamily {

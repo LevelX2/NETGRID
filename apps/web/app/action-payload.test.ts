@@ -25,19 +25,26 @@ describe("action payload ability compatibility", () => {
   it("keeps legacy payload fields and hidden-zone actions as fallback", () => {
     expect(
       actionHasAbility(
-        { payload: { v1911HiddenZoneAbility: "self_modifying_code_install_program" } },
+        {
+          payload: {
+            v1911HiddenZoneAbility: "self_modifying_code_install_program",
+          },
+        },
         "self_modifying_code_install_program",
       ),
     ).toBe(true);
-    expect(payloadAbilityId({ hiddenZoneAction: "v1911_expose_server_card" })).toBe(
-      "v1911_expose_server_card",
-    );
+    expect(
+      payloadAbilityId({ hiddenZoneAction: "v1911_expose_server_card" }),
+    ).toBe("v1911_expose_server_card");
   });
 
   it("keeps legacy agenda ability and random roll fields behind helper fallbacks", () => {
-    expect(payloadHasAbility({ agendaAbility: "v1922_security_purge" }, "v1922_security_purge")).toBe(
-      true,
-    );
+    expect(
+      payloadHasAbility(
+        { agendaAbility: "v1922_security_purge" },
+        "v1922_security_purge",
+      ),
+    ).toBe(true);
     expect(
       payloadRandomRoll({
         amounts: { randomRoll: 6 },
@@ -68,7 +75,10 @@ describe("action payload ability compatibility", () => {
         hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
       }),
     ).toBe(true);
-    expect(isSecurityPurgePayload({ agendaAbility: "v1922_security_purge" })).toBe(
+    expect(
+      isSecurityPurgePayload({ agendaAbility: "v1922_security_purge" }),
+    ).toBe(true);
+    expect(isSecurityPurgePayload({ agendaAbility: "agenda_purge" })).toBe(
       true,
     );
   });

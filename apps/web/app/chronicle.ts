@@ -2123,6 +2123,21 @@ export function formatChronicleEvent(
         break;
       }
       const points = agendaPointSuffix(agendaPoints);
+      const zurichSummary = projectZurichScoreSummary(payload);
+      if (zurichSummary) {
+        category = "economy";
+        title = phrase(
+          subject,
+          `${cardTitle ?? "Project Zurich"} gescored${points} und ${zurichSummary.suffix}`,
+        );
+        description = zurichSummary.description;
+        chips.push(
+          "Score",
+          ...agendaPointChips(agendaPoints),
+          ...zurichSummary.chips,
+        );
+        break;
+      }
       const scoreEffect =
         scoreAgendaPayloadEffect(payload) ?? mergedCardResolverEffect;
       const selectedServerSuffix = selectedServerLabel
@@ -4453,6 +4468,37 @@ function scoreAgendaPayloadEffect(
   return undefined;
 }
 
+function projectZurichScoreSummary(
+  payload: Record<string, unknown>,
+): { suffix: string; description: string; chips: string[] } | undefined {
+  const overadvancedBy = numberValue(payload.projectZurichOveradvance);
+  const recurringCredits = numberValue(payload.overadvanceRecurringCredits);
+  if (overadvancedBy === undefined && recurringCredits === undefined)
+    return undefined;
+  const overadvance = Math.max(0, Math.floor(overadvancedBy ?? 0));
+  const credits = Math.max(0, Math.floor(recurringCredits ?? 0));
+  const creditPhrase = creditText(credits);
+  const overadvanceText =
+    overadvance === 1
+      ? "1 zusätzlicher Advancement-Counter"
+      : `${overadvance} zusätzliche Advancement-Counter`;
+  return {
+    suffix:
+      credits > 0
+        ? `${creditPhrase} zu Beginn jedes Korp-Zugs vorbereitet`
+        : "keine wiederkehrenden Credits vorbereitet",
+    description:
+      credits > 0
+        ? `Overadvance: ${overadvanceText}. Project Zurich gibt der Korp zu Beginn jedes ihrer Züge ${creditPhrase}.`
+        : `Overadvance: ${overadvanceText}; dadurch entstehen keine wiederkehrenden Credits.`,
+    chips: [
+      "Project Zurich",
+      `Overadvance ${overadvance}`,
+      `+${credits} ${creditLabel(credits)}/Zug`,
+    ],
+  };
+}
+
 function mergedCardResolverEventEffect(
   event: PublicGameEvent,
 ): EffectSummary | undefined {
@@ -4615,6 +4661,12 @@ function securityPurgeChronicleSummary(
     numberValue(payload.revealedIceCount) ?? installedIceCount;
   const trashedCount = numberValue(payload.trashedCount) ?? 0;
   const pendingTrashCount = numberValue(payload.pendingTrashCount) ?? 0;
+  const revealedTitles = titlesForDefinitionIds(
+    stringValue(payload.publicRevealDefinitionIds),
+  );
+  const revealedIceTitles = iceTitlesForDefinitionIds(
+    stringValue(payload.publicRevealDefinitionIds),
+  );
   const installedTitles = titlesForDefinitionIds(
     stringValue(payload.installedIceDefinitionIds),
   );
@@ -4627,7 +4679,17 @@ function securityPurgeChronicleSummary(
   const trashedTitles = titlesForDefinitionIds(
     stringValue(payload.trashedDefinitionIds),
   );
-  if (payload.securityPurgeTargetChoiceResolved === true) {
+  const revealedDescription =
+    revealedTitles.length > 0
+      ? `Aufgedeckt: ${revealedTitles.join(", ")}`
+      : undefined;
+  const targetChoiceResolved =
+    payload.securityPurgeTargetChoiceResolved === true ||
+    payload.agendaPurgeTargetChoiceResolved === true;
+  const targetChoiceOpened =
+    payload.securityPurgeTargetChoiceOpened === true ||
+    payload.agendaPurgeTargetChoiceOpened === true;
+  if (targetChoiceResolved) {
     const singleInstalledTitle = installedTitles[0];
     const singleServerLabel = installedServerLabels[0];
     const installedPairs = installedTitles.map((title, index) => {
@@ -4649,24 +4711,36 @@ function securityPurgeChronicleSummary(
         installedIceCount === 1 && singleInstalledTitle && singleServerLabel
           ? `${singleInstalledTitle} durch ${agendaTitle} vor ${singleServerLabel} installiert und gerezzt`
           : `${agendaTitle} aufgelöst: ${installedIceCount} ICE installiert und gerezzt`,
-      description: [installedDescription, trashDescription]
+      description: [revealedDescription, installedDescription, trashDescription]
         .filter((part): part is string => Boolean(part))
         .join(". "),
       chips: [
         "Security Purge",
+        revealedCount > 0 ? `Top ${revealedCount}` : "R&D Reveal",
         `${installedIceCount} ICE`,
         ...installedServerLabels,
         `${trashedCount} Trash`,
       ],
     };
   }
-  if (payload.securityPurgeTargetChoiceOpened === true) {
+  if (targetChoiceOpened) {
+    const iceText =
+      revealedIceTitles.length > 0
+        ? `ICE zur Installation: ${joinChronicleParts(revealedIceTitles)}`
+        : `${revealedIceCount} ICE gefunden`;
     return {
       title: `${agendaTitle} gescored und ${revealedCount} R&D-Karten aufgedeckt`,
-      description: `${revealedIceCount} ICE gefunden; die Korp wählt Zielserver. ${pendingTrashCount} Nicht-ICE ${pendingTrashCount === 1 ? "wird" : "werden"} anschließend getrasht`,
+      description: [
+        revealedDescription,
+        `${iceText}; die Korp wählt Zielserver`,
+        `${pendingTrashCount} Nicht-ICE ${pendingTrashCount === 1 ? "wird" : "werden"} anschließend getrasht`,
+      ]
+        .filter((part): part is string => Boolean(part))
+        .join(". "),
       chips: [
         "Score",
         "R&D Reveal",
+        revealedCount > 0 ? `Top ${revealedCount}` : "",
         `${revealedIceCount} ICE`,
         `${pendingTrashCount} Trash offen`,
       ],
@@ -4674,13 +4748,18 @@ function securityPurgeChronicleSummary(
   }
   return {
     title: `${agendaTitle} gescored und ${revealedCount} R&D-Karten aufgedeckt`,
-    description:
+    description: [
+      revealedDescription,
       installedIceCount > 0
         ? `${installedIceCount} ICE installiert und gerezzt; ${trashedCount} Nicht-ICE getrasht`
         : `Kein ICE gefunden; ${trashedCount} Nicht-ICE getrasht`,
+    ]
+      .filter((part): part is string => Boolean(part))
+      .join(". "),
     chips: [
       "Score",
       "R&D Reveal",
+      revealedCount > 0 ? `Top ${revealedCount}` : "",
       `${installedIceCount || revealedIceCount} ICE`,
       `${trashedCount} Trash`,
     ],
@@ -5239,13 +5318,27 @@ function titleForDefinitionId(
   return definitionId ? DEMO_CARDS_BY_ID[definitionId]?.title : undefined;
 }
 
-function titlesForDefinitionIds(value: string | undefined): string[] {
+function definitionIdsFromCsv(value: string | undefined): string[] {
   return value
     ? value
         .split(",")
-        .map((definitionId) => titleForDefinitionId(definitionId.trim()))
-        .filter((title): title is string => Boolean(title))
+        .map((definitionId) => definitionId.trim())
+        .filter(Boolean)
     : [];
+}
+
+function titlesForDefinitionIds(value: string | undefined): string[] {
+  return definitionIdsFromCsv(value)
+    .map((definitionId) => titleForDefinitionId(definitionId))
+    .filter((title): title is string => Boolean(title));
+}
+
+function iceTitlesForDefinitionIds(value: string | undefined): string[] {
+  return definitionIdsFromCsv(value)
+    .map((definitionId) => DEMO_CARDS_BY_ID[definitionId])
+    .flatMap((definition) =>
+      definition?.type === "ice" ? [definition.title] : [],
+    );
 }
 
 function runnerHardwareDeckReplacementSuffix(

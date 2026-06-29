@@ -1990,6 +1990,12 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.overadvanceBonusAgendaPoints === "number")
     context.overadvanceBonusAgendaPoints =
       legalAction.payload.overadvanceBonusAgendaPoints;
+  if (typeof legalAction.payload?.overadvanceRecurringCredits === "number")
+    context.overadvanceRecurringCredits =
+      legalAction.payload.overadvanceRecurringCredits;
+  if (typeof legalAction.payload?.projectZurichOveradvance === "number")
+    context.projectZurichOveradvance =
+      legalAction.payload.projectZurichOveradvance;
   if (state.winner && state.gameEndReason)
     context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;

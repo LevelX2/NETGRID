@@ -495,6 +495,45 @@ describe("PublicContext golden payload gate", () => {
     });
   });
 
+  it("forwards Project Zurich overadvance credits into public payload amounts", () => {
+    const previous = goldenState("public-context-project-zurich-before");
+    const next = structuredClone(previous);
+    next.stateVersion = previous.stateVersion + 1;
+    const legalAction = goldenAction({
+      actionId: "golden:score:project-zurich",
+      side: "corp",
+      type: "score_agenda",
+      label: "Score Project Zurich",
+      payload: {
+        cardId: "simple_agenda",
+        projectZurichOveradvance: 4,
+        overadvanceRecurringCredits: 2,
+      },
+    });
+
+    const event = buildEventWithHost(
+      buildEventHost(),
+      previous.stateVersion,
+      next.stateVersion,
+      "fnv1a:project-zurich-public-context" as StateHash,
+      previous,
+      next,
+      legalAction,
+      playerActionFor(previous, legalAction),
+    );
+
+    expect(event.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      actor: "corp",
+      projectZurichOveradvance: 4,
+      overadvanceRecurringCredits: 2,
+      amounts: {
+        projectZurichOveradvance: 4,
+        overadvanceRecurringCredits: 2,
+      },
+    });
+  });
+
   it("keeps Web, Chronicle and AI DTO contract fields represented by the golden set", () => {
     // Fields read by Chronicle/ActionBoard/AI DTO; keep in sync with STATUS-8.
     const pinned = new Set([
@@ -655,7 +694,9 @@ function addCorpRootCard(
     advancementCounters: 0,
     strengthModifier: 0,
   };
-  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) {
     state.corp.servers.push({
       id: serverId,
@@ -687,7 +728,9 @@ function expectGoldenPayload(
 ): void {
   expectPublicPayloadIsSideSafe(payload);
   expect(Object.keys(payload).sort()).toEqual(Object.keys(expected).sort());
-  expect(stablePayloadSnapshot(payload)).toEqual(stablePayloadSnapshot(expected));
+  expect(stablePayloadSnapshot(payload)).toEqual(
+    stablePayloadSnapshot(expected),
+  );
 }
 
 function stablePayloadSnapshot(value: unknown): unknown {
@@ -726,7 +769,10 @@ function expectPublicPayloadIsSideSafe(payload: Record<string, unknown>): void {
   }
 }
 
-function collectObjectKeys(value: unknown, keys = new Set<string>()): Set<string> {
+function collectObjectKeys(
+  value: unknown,
+  keys = new Set<string>(),
+): Set<string> {
   if (Array.isArray(value)) {
     for (const entry of value) collectObjectKeys(entry, keys);
     return keys;

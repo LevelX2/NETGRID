@@ -4759,13 +4759,15 @@ describe("formatChronicleEvent", () => {
         actor: "corp",
         cardDefinitionId: "onr_v1_216_security-purge",
         title: "Security Purge",
-        agendaAbility: "v1922_security_purge",
+        agendaAbility: "agenda_purge",
+        publicRevealDefinitionIds:
+          "onr_v1_274_tutor,simple_economy_operation,simple_economy_asset",
         revealedCount: 3,
         revealedIceCount: 1,
         pendingTrashCount: 2,
         installedIceCount: 0,
         trashedCount: 0,
-        securityPurgeTargetChoiceOpened: true,
+        agendaPurgeTargetChoiceOpened: true,
       }),
       "runner",
     );
@@ -4773,13 +4775,15 @@ describe("formatChronicleEvent", () => {
       makeEvent("resolve_choice", {
         actor: "corp",
         sourceDefinitionId: "onr_v1_216_security-purge",
-        agendaAbility: "v1922_security_purge",
-        hiddenZoneAction: "v1922_security_purge_install_targets",
+        agendaAbility: "agenda_purge",
+        hiddenZoneAction: "agenda_purge_install_targets",
         revealedCount: 3,
         revealedIceCount: 1,
         installedIceCount: 1,
         trashedCount: 2,
-        securityPurgeTargetChoiceResolved: true,
+        agendaPurgeTargetChoiceResolved: true,
+        publicRevealDefinitionIds:
+          "onr_v1_274_tutor,simple_economy_operation,simple_economy_asset",
         installedIceDefinitionIds: "onr_v1_274_tutor",
         installedIceServerLabels: "R&D",
         trashedDefinitionIds: "simple_economy_operation,simple_economy_asset",
@@ -4830,11 +4834,17 @@ describe("formatChronicleEvent", () => {
     expect(securityPurge.title).toBe(
       "Die Korp hat Security Purge gescored und 3 R&D-Karten aufgedeckt.",
     );
-    expect(securityPurge.description).toBe(
-      "1 ICE gefunden; die Korp wählt Zielserver. 2 Nicht-ICE werden anschließend getrasht.",
+    expect(securityPurge.description).toContain(
+      "Aufgedeckt: Tutor, Simple Economy Operation, Simple Economy Asset.",
+    );
+    expect(securityPurge.description).toContain(
+      "ICE zur Installation: Tutor; die Korp wählt Zielserver.",
     );
     expect(securityPurgeResolve.title).toBe(
       "Die Korp hat Tutor durch Security Purge vor R&D installiert und gerezzt.",
+    );
+    expect(securityPurgeResolve.description).toContain(
+      "Aufgedeckt: Tutor, Simple Economy Operation, Simple Economy Asset.",
     );
     expect(securityPurgeResolve.description).toContain(
       "Installiert und gerezzt: Tutor vor R&D.",
@@ -4847,6 +4857,56 @@ describe("formatChronicleEvent", () => {
     );
     expect(boardwalk.chips).toContain("Wurf 4");
     expect(flak.title).toBe("Du hast mit Flak eine Subroutine gebrochen.");
+  });
+
+  it("describes Project Zurich overadvance and recurring Corp start credits", () => {
+    const scoreItem = formatChronicleEvent(
+      makeEvent("score_agenda", {
+        actor: "corp",
+        cardDefinitionId: "onr_proteus_008_project-zurich",
+        title: "Project Zurich",
+        agendaPoints: 2,
+        projectZurichOveradvance: 4,
+        overadvanceRecurringCredits: 2,
+      }),
+      "runner",
+    );
+    const startItems = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "runner",
+        resolvedEffects: [
+          {
+            effectId: "corp.start.scored_agenda.credit.pro013_zurich",
+            kind: "gain_credits",
+            visibility: "public",
+            side: "corp",
+            amount: 2,
+            reason: "start_of_turn",
+            sourceDefinitionId: "onr_proteus_008_project-zurich",
+            sourceTitle: "Project Zurich",
+          },
+        ],
+      }),
+      "runner",
+    );
+
+    expect(scoreItem.title).toBe(
+      "Die Korp hat Project Zurich gescored und 2 Agenda-Punkte erhalten und 2 Credits zu Beginn jedes Korp-Zugs vorbereitet.",
+    );
+    expect(scoreItem.description).toBe(
+      "Overadvance: 4 zusätzliche Advancement-Counter. Project Zurich gibt der Korp zu Beginn jedes ihrer Züge 2 Credits.",
+    );
+    expect(scoreItem.chips).toEqual(
+      expect.arrayContaining([
+        "Project Zurich",
+        "Overadvance 4",
+        "+2 Credits/Zug",
+      ]),
+    );
+    expect(startItems[0]?.title).toBe("Project Zurich gibt Korp 2 Credits.");
+    expect(startItems[0]?.chips).toEqual(
+      expect.arrayContaining(["+2 Credits", "Automatisch"]),
+    );
   });
 
   it("describes Corp advances as installations and developments without leaking hidden titles", () => {
