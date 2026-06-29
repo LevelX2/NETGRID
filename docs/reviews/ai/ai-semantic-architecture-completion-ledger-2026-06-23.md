@@ -65,7 +65,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-14 | Kartennamenspezifische und payloadspezifische KI-Logik abbauen. | `VERIFIED` | CardDefinitionId-, Titel- und Label-Treffer in `index.ts`, `tactical-plans.ts` und Runtimepfaden. | Erfüllt: produktive Planner-/Scorer-/Targeter-Pfade für die auditierten Kartenfälle nutzen Ontologie, Hint-/Rollen-Semantik, sichtbare Quellen oder gekapselte Adapter; der produktive Audit auf die bearbeiteten Kartennamen und DefinitionIds ist sauber. |
 | AI-COMPLETE-15 | Text-/Regex-/Label-Fallbacks aus produktiver Entscheidung lösen. | `VERIFIED` | `action.label` und Regex werden in produktiven Pfaden verwendet. | Erfüllt: produktive Runtime-/Simulation-/Decision-/Actions-Pfade sowie die geprüften Legacy-Corp-/Runner-Pfade enthalten keine freien Text-/Regex-/Label-Parser-Fallbacks mehr; verbleibende `action.label`-Treffer sind Werttransport für tokenisierte Parser oder Debug-/Ranking-Ausgabe; zwei vollständige Abschlussaudits ohne neue In-Scope-Findings. |
 | AI-COMPLETE-16 | Doppelte und widersprüchliche Bewertungslogik beseitigen. | `VERIFIED` | Mehrere Module bewerten Reachability, Target, Economy, Access und Planfortschritt parallel. | Erfüllt: konkrete Boundary-Guards binden Score-Aggregation, Legacy-Action-Scoring, Runner-Reachability, Access-Payoff, Corp-Board-/Scoreline-Safety, TargetChoice-Fit, Goal-/Strategic-Fit, Corp-Economy-/Rez-Floor und Plan-Continuity an ihre Owner; vollständiger Boundary-Audit und Typecheck sind grün. |
-| AI-COMPLETE-17 | Fachliche Scoring-Consumer aufbauen. | `PENDING` | Aktueller Score enthält große Typpriorität und verstreute Komponenten. | Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty haben definierte Skalen. |
+| AI-COMPLETE-17 | Fachliche Scoring-Consumer aufbauen. | `IN_PROGRESS` | Aktueller Score enthält große Typpriorität und verstreute Komponenten. | Consumer-Vertrag angelegt; Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty haben definierte Owner und Skalen, aber mehrere Dimensionen sind noch `partial` oder `contract_only`. |
 | AI-COMPLETE-18 | DecisionTrace, WhyChosen und WhyNot vollständig machen. | `PENDING` | Debug ist vorhanden, aber WhyNot-Kategorien und Alternativenabdeckung müssen geprüft werden. | Redaction-safe Trace erklärt gewählte Action und relevante Ablehnungen inklusive Fallback/Gaps. |
 | AI-COMPLETE-19 | Kommentare und Entwicklerleitplanken korrigieren. | `PENDING` | Grenzkommentare existieren, müssen nach Runtime-Änderungen stimmen. | Nur knappe, aktuelle Grenzkommentare an Fehlentwicklungsrisiken; veraltete No-Effect-Texte entfernt. |
 | AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `PENDING` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay müssen nach Reparatur geprüft werden. | Tests, Szenarien und Benchmarks belegen 0 Illegalität, 0 Hidden-Info-Verstoß, keine Action-Type-Dominanz und bessere Erklärbarkeit. |
@@ -10568,6 +10568,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts` in `packages/ai` grün, 32 Tests.
   - Verifikation: `rg -n "runtime/role-match" packages/ai/src/decision packages/ai/src/legacy/runner-plans.ts packages/ai/src/decision/module-boundaries.test.ts` ohne Treffer.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
+- `AI-COMPLETE-17` erster Scoring-Consumer-Schnitt:
+  - `docs/architecture/ai/ai-complete-17-scoring-consumer-contract-2026-06-29.md` legt den ersten Consumer-Vertrag mit den Pflichtdimensionen Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty an.
+  - `packages/ai/src/decision/scoring-consumer-contract.ts` bildet diesen Vertrag maschinenlesbar mit Owner, Status, Skala `-100..100` und Evidence-Keys ab.
+  - `packages/ai/src/decision/scoring-consumer-contract.test.ts` schützt vollständige und eindeutige Dimensionen sowie gebundene Skalen/Owner.
+  - Status ist `IN_PROGRESS`, weil mehrere Dimensionen noch `partial` oder `contract_only` sind und in folgenden Paketen produktiv normalisiert werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/scoring-consumer-contract.test.ts` in `packages/ai` grün.
 
 ## Audit-Ledger
 
