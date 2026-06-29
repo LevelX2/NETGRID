@@ -9,7 +9,9 @@ import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import {
   corpActionCandidateHasVisibleSignal,
   semanticRuntimeCorpScoreComponents,
+  type SemanticRuntimeCorpScoreDependencies,
 } from "./semantic-runtime-corp-score";
+import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 
 describe("semanticRuntimeCorpScoreComponents", () => {
   it("matches corp action candidate visible signals by bounded terms", () => {
@@ -144,6 +146,375 @@ describe("semanticRuntimeCorpScoreComponents", () => {
           reason: expect.stringContaining("credits_after_funding:5"),
         }),
       ]),
+    );
+  });
+
+  it("uses board triage so score-now beats passive economy", () => {
+    const scoreAgenda = corpAction("score-agenda", "score_agenda", {
+      serverId: "remote_1",
+    });
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithGoals([], [scoreAgenda, gainCredit]);
+    const dependencies = testDependencies();
+
+    expect(
+      totalScoreFor(input, scoreAgenda, "simple_score_advance", dependencies),
+    ).toBeGreaterThan(
+      totalScoreFor(input, gainCredit, "basic_economy_draw", dependencies),
+    );
+  });
+
+  it("uses board triage so remote protection beats unsafe scoreline advancement", () => {
+    const advanceAgenda = corpAction("advance-agenda", "advance_card", {
+      serverId: "remote_1",
+    });
+    const installRemoteIce = corpAction("install-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const input = corpInputWithGoals([], [advanceAgenda, installRemoteIce]);
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealSeverity: "near_win",
+              recommendedNextStep: "build_remote_ice",
+              evidence: ["test_remote_window:unsafe"],
+            })
+          : undefined,
+    };
+
+    expect(
+      totalScoreFor(input, installRemoteIce, "basic_install", dependencies),
+    ).toBeGreaterThan(
+      totalScoreFor(input, advanceAgenda, "simple_score_advance", dependencies),
+    );
+  });
+
+  it("uses board triage so funding beats blind scoreline advancement below rez floor", () => {
+    const advanceAgenda = corpAction("advance-agenda", "advance_card", {
+      serverId: "remote_1",
+    });
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithGoals([], [advanceAgenda, gainCredit]);
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId,
+      corpRemoteRezFloorAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? {
+              blockedByFloor: true,
+              evidence: ["remote_rez_floor:blocked"],
+            }
+          : undefined,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              corpCanRezRelevantIce: false,
+              recommendedNextStep: "gain_credit",
+              evidence: ["test_remote_window:needs_funding"],
+            })
+          : undefined,
+    };
+
+    expect(
+      totalScoreFor(input, gainCredit, "basic_economy_draw", dependencies),
+    ).toBeGreaterThan(
+      totalScoreFor(input, advanceAgenda, "simple_score_advance", dependencies),
+    );
+  });
+
+  it("uses board triage so HQ protection beats remote setup under agenda exposure", () => {
+    const protectHq = corpAction("protect-hq", "install_card", {
+      placement: "ice",
+      serverId: "hq",
+    });
+    const buildRemote = corpAction("build-remote", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const input = corpInputWithHqCards(
+      6,
+      [agendaCard()],
+      [protectHq, buildRemote],
+    );
+    input.playerView.opponent = {
+      identity: {
+        instanceId: "runner-identity",
+        known: true,
+        owner: "runner",
+        type: "identity",
+        counterDisplays: [],
+      },
+      credits: 6,
+      clicks: 4,
+      agendaPoints: 5,
+      tags: 0,
+      handCount: 4,
+      maxHandSize: 5,
+      deckCount: 20,
+      discardCount: 0,
+      rig: [],
+      scoreArea: [],
+    };
+
+    expect(
+      totalScoreFor(input, protectHq, "basic_install", testDependencies()),
+    ).toBeGreaterThan(
+      totalScoreFor(input, buildRemote, "basic_install", testDependencies()),
+    );
+  });
+
+  it("does not treat damage-only central ICE as satisfying critical central triage", () => {
+    const brainWash = corpCard("brain-wash", "ice", {
+      rulesText: "Do 1 net damage.",
+      rezzed: false,
+      rezCost: 1,
+    });
+    const wall = corpCard("wall", "ice", {
+      rulesText: "End the run.",
+      rezzed: false,
+      rezCost: 1,
+    });
+    const rezBrainWash = corpAction(
+      "rez-brain-wash",
+      "rez_ice",
+      {
+        serverId: "hq",
+      },
+      brainWash.instanceId,
+    );
+    const rezWall = corpAction(
+      "rez-wall",
+      "rez_ice",
+      {
+        serverId: "hq",
+      },
+      wall.instanceId,
+    );
+    const input = corpInputWithHqCards(
+      6,
+      [agendaCard()],
+      [rezBrainWash, rezWall],
+    );
+    input.playerView.opponent = {
+      identity: {
+        instanceId: "runner-identity",
+        known: true,
+        owner: "runner",
+        type: "identity",
+        counterDisplays: [],
+      },
+      credits: 0,
+      clicks: 0,
+      agendaPoints: 5,
+      tags: 0,
+      handCount: 0,
+      maxHandSize: 5,
+      deckCount: 0,
+      discardCount: 0,
+      rig: [],
+      scoreArea: [],
+    };
+    input.playerView.servers = [
+      {
+        id: "hq",
+        label: "HQ",
+        ice: [brainWash, wall],
+        root: [],
+      },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      { id: "archives", label: "Archives", ice: [], root: [] },
+    ];
+    const brainWashCandidate = semanticCandidate(
+      rezBrainWash.actionId,
+      "rez.ice",
+      ["damage"],
+      "rez_ice",
+    );
+    const wallCandidate = semanticCandidate(
+      rezWall.actionId,
+      "rez.ice",
+      ["end_the_run"],
+      "rez_ice",
+    );
+
+    const brainWashComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      rezBrainWash,
+      "simple_rez",
+      testDependencies(),
+      brainWashCandidate,
+    );
+    const wallComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      rezWall,
+      "simple_rez",
+      testDependencies(),
+      wallCandidate,
+    );
+
+    expect(brainWashComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "corp_board_triage_mismatch" }),
+      ]),
+    );
+    expect(wallComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "corp_board_triage_alignment" }),
+      ]),
+    );
+    expect(totalScore(wallComponents)).toBeGreaterThan(
+      totalScore(brainWashComponents),
+    );
+  });
+
+  it("uses board triage and downstream budget so inner relevant ICE beats breakable outer rez", () => {
+    const innerSentry = corpIce("inner-sentry", {
+      definitionId: "simple_sentry_ice",
+      subtypes: ["Sentry"],
+      rezCost: 6,
+    });
+    const outerWall = corpIce("outer-wall", {
+      definitionId: "simple_barrier_ice",
+      subtypes: ["Barrier"],
+      rezCost: 1,
+    });
+    const rezInner = corpAction(
+      "rez-inner-sentry",
+      "rez_ice",
+      { serverId: "hq" },
+      innerSentry.instanceId,
+    );
+    const rezOuter = corpAction(
+      "rez-outer-wall",
+      "rez_ice",
+      { serverId: "hq" },
+      outerWall.instanceId,
+    );
+    const input = corpInputWithHqCards(6, [agendaCard()], [rezInner, rezOuter]);
+    input.playerView.opponent = {
+      identity: {
+        instanceId: "runner-identity",
+        known: true,
+        owner: "runner",
+        type: "identity",
+        counterDisplays: [],
+      },
+      credits: 4,
+      clicks: 4,
+      agendaPoints: 5,
+      tags: 0,
+      handCount: 4,
+      maxHandSize: 5,
+      deckCount: 20,
+      discardCount: 0,
+      rig: [fracterBreaker()],
+      scoreArea: [],
+    };
+    input.playerView.servers = [
+      {
+        id: "hq",
+        label: "HQ",
+        root: [],
+        ice: [innerSentry, outerWall],
+      },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      { id: "archives", label: "Archives", ice: [], root: [] },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      actionCreditCost: (action: LegalAction) =>
+        action.actionId === rezInner.actionId ? 6 : 1,
+    };
+    const innerCandidate = {
+      ...semanticCandidate(
+        rezInner.actionId,
+        "corp_window.rez",
+        ["role:etr_ice", "corp_ice.end_run"],
+        "rez_ice",
+      ),
+      costProfile: {
+        creditCost: 6,
+        costKnownStatus: "known" as const,
+        additionalCosts: [],
+      },
+    };
+    const outerCandidate = {
+      ...semanticCandidate(
+        rezOuter.actionId,
+        "corp_window.rez",
+        ["role:etr_ice", "corp_ice.end_run"],
+        "rez_ice",
+      ),
+      costProfile: {
+        creditCost: 1,
+        costKnownStatus: "known" as const,
+        additionalCosts: [],
+      },
+    };
+
+    const innerComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      rezInner,
+      "simple_rez",
+      dependencies,
+      innerCandidate,
+    );
+    const outerComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      rezOuter,
+      "simple_rez",
+      dependencies,
+      outerCandidate,
+    );
+
+    expect(innerComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ key: "corp_board_triage_alignment" }),
+      ]),
+    );
+    expect(outerComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_downstream_rez_floor_preservation",
+        }),
+        expect.objectContaining({ key: "corp_board_triage_mismatch" }),
+      ]),
+    );
+    expect(totalScore(innerComponents)).toBeGreaterThan(
+      totalScore(outerComponents),
     );
   });
 
@@ -1277,7 +1648,7 @@ function corpAction(
   } as unknown as LegalAction;
 }
 
-function testDependencies() {
+function testDependencies(): SemanticRuntimeCorpScoreDependencies<string> {
   return {
     actionCreditCost: () => 0,
     rolesForAction: () => [],
@@ -1287,6 +1658,7 @@ function testDependencies() {
     corpCentralRezReserveAssessment: () => undefined,
     corpRemoteScoreContestabilityAssessment: () => undefined,
     corpActionIsScoreLine: () => false,
+    corpAdvanceCompletesScore: () => false,
     corpInstallRemoteScore: () => 0,
     corpAdvancementCounterPlacementAssessment: () => undefined,
     corpHasRemoteInstability: () => false,
@@ -1296,6 +1668,79 @@ function testDependencies() {
     corpTaggedPayoffWindowPassiveActionPenalty: () => undefined,
     corpPassiveScoreLinePenalty: () => undefined,
   };
+}
+
+function totalScoreFor(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+  dependencies: ReturnType<typeof testDependencies>,
+  actionSemanticCandidate?: ActionSemanticCandidate,
+): number {
+  return totalScore(
+    semanticRuntimeCorpScoreComponents(
+      input,
+      action,
+      scopeId,
+      dependencies,
+      actionSemanticCandidate,
+    ),
+  );
+}
+
+function totalScore(components: readonly { value: number }[]): number {
+  return components.reduce((sum, component) => sum + component.value, 0);
+}
+
+function scoringWindow(
+  overrides: Partial<CorpScoringWindowAssessment> = {},
+): CorpScoringWindowAssessment {
+  return {
+    serverId: "remote_1",
+    windowKind: "unsafe",
+    runnerCanContestNow: false,
+    runnerCanReachAccessNow: false,
+    agendaStealRelevantNow: false,
+    runnerCanContestBeforeScore: false,
+    runnerCanReachAccessBeforeScore: false,
+    agendaStealRelevantBeforeScore: false,
+    agendaPointsAtRisk: 2,
+    runnerAgendaPointsAfterSteal: 4,
+    agendaStealSeverity: "normal",
+    missingVisibleBreakerCoverage: false,
+    corpCanRezRelevantIce: true,
+    affordableDurableRelevantIceCount: 0,
+    dynamicProtectionWeaknessCount: 0,
+    dynamicProtectionReserve: 0,
+    corpCanRezFullPathWithDynamicReserve: true,
+    scoreHorizon: "next_turn",
+    runnerExposureCreditActions: 3,
+    recommendedNextStep: "build_remote_ice",
+    evidence: ["test_scoring_window"],
+    ...overrides,
+  };
+}
+
+function agendaCard(): VisibleCard {
+  return corpCard("agenda-in-hq", "agenda", {
+    advancementRequirement: 3,
+    agendaPoints: 2,
+  });
+}
+
+function corpCard(
+  instanceId: string,
+  type: NonNullable<VisibleCard["type"]>,
+  overrides: Partial<VisibleCard> = {},
+): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    owner: "corp",
+    side: "corp",
+    type,
+    ...overrides,
+  } as VisibleCard;
 }
 
 function componentKeysForInstallRoles(roles: string[]): string[] {
