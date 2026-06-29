@@ -177,7 +177,7 @@ function alternativeEntryShowsHardGate(entry: string): boolean {
       "suppressed",
     ]) ||
     tokensIncludePhrase(tokens, ["hard", "gate"]) ||
-    tokens.includes("gate")
+    tokensInclude(tokens, "gate")
   );
 }
 
@@ -196,6 +196,10 @@ function tokensIncludeAny(
 ): boolean {
   const acceptedSet = new Set(accepted);
   return tokens.some((token) => acceptedSet.has(token));
+}
+
+function tokensInclude(tokens: readonly string[], accepted: string): boolean {
+  return new Set(tokens).has(accepted);
 }
 
 function tokensIncludePhrase(

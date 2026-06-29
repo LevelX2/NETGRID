@@ -10250,6 +10250,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n '\.includes\(token\)|includes\(token\)' packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertdreiundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progress-aware-alternative-snapshot.ts` bindet die einzelne Hard-Gate-Token-Membership über einen lokalen `tokensInclude`-Helper statt direkter `tokens.includes("gate")`-Prüfung.
+  - Progress-Aware-Alternative-Snapshots bleiben bounded: Hard-Gate-Marker werden aus strukturiert tokenisierten Einträgen erkannt, substring-nahe Noise-Werte bleiben ausgeschlossen.
+  - `progress-aware-alternative-snapshot.test.ts` sichert Hard-Gate-Summary und bounded Snapshot-Marker.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/simulation/progress-aware-alternative-snapshot.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(\"gate\"\)|tokens\.includes' packages/ai/src/simulation/progress-aware-alternative-snapshot.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
