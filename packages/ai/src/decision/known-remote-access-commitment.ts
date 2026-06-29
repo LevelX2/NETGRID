@@ -329,10 +329,13 @@ export function trashSupportEffectTargetHasFreeTrash(
   target: string | undefined,
 ): boolean {
   if (!target) return false;
-  return target
-    .toLowerCase()
-    .split(/[.:-]+/)
-    .includes("free_trash");
+  const targetTokens = new Set(
+    target
+      .toLowerCase()
+      .split(/[.:-]+/)
+      .filter(Boolean),
+  );
+  return targetTokens.has("free_trash");
 }
 
 function trashSupportEffectMatchesRoot(
