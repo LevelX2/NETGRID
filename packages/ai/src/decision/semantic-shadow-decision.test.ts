@@ -53,6 +53,49 @@ describe("SemanticShadowDecision", () => {
     expect(trace.noRuntimeEffect).toBe(true);
   });
 
+  it("adds WhyNot coverage for legal actions without semantic candidates", () => {
+    const input = inputFor("runner", [
+      legalAction("gain-1", "gain_credit", "runner"),
+      legalAction("unclassified-1", "resolve_choice", "runner"),
+    ]);
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    }).filter((candidate) => candidate.actionId === "gain-1");
+    const frame = buildSemanticDecisionFrame({
+      input,
+      actionCandidates: candidates,
+      tacticalGoals: [
+        {
+          goalId: "runner.build_economy_base",
+          family: "economy",
+          priority: 940,
+          urgency: "high",
+          source: "economy_posture",
+          evidence: ["funding_need:true"],
+        },
+      ],
+    });
+
+    const trace = buildSemanticShadowDecision(frame);
+
+    expect(trace.rankedActions.map((action) => action.actionId)).toEqual([
+      "gain-1",
+    ]);
+    expect(trace.rejectedActions).toContainEqual(
+      expect.objectContaining({
+        actionId: "unclassified-1",
+        reason: "missing_semantic_candidate",
+        blockers: ["missing_semantic_candidate"],
+        evidence: expect.arrayContaining([
+          "legal_action:unclassified-1",
+          "why_not:missing_semantic_candidate",
+        ]),
+      }),
+    );
+  });
+
   it("explains blocked actions separately", () => {
     const input = inputFor("runner", [
       legalAction("choice-1", "resolve_choice", "runner"),

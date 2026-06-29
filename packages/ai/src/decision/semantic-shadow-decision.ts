@@ -106,6 +106,22 @@ export function buildSemanticShadowDecision(
       explanation: explainRankedAction(candidate, fit, contextualComponents),
     });
   }
+  const tracedActionIds = new Set([
+    ...rankedActions.map((action) => action.actionId),
+    ...rejectedActions.map((action) => action.actionId),
+  ]);
+  for (const legalActionId of frame.legalActionIds) {
+    if (tracedActionIds.has(legalActionId)) continue;
+    rejectedActions.push({
+      actionId: legalActionId,
+      reason: "missing_semantic_candidate",
+      blockers: ["missing_semantic_candidate"],
+      evidence: [
+        `legal_action:${legalActionId}`,
+        "why_not:missing_semantic_candidate",
+      ],
+    });
+  }
 
   rankedActions.sort(
     (left, right) =>
