@@ -162,12 +162,16 @@ function semanticRuntimeDebugAbilitySemanticBindingItems(
   candidates: readonly ActionSemanticCandidate[],
 ): string[] {
   const abilityCandidates = candidates.filter(
-    (candidate) =>
-      candidate.sourceKind === "card" ||
-      candidate.abilityBindingMethod !== "unresolved" ||
-      candidate.abilityId !== undefined ||
-      candidate.sourceDefinitionId !== undefined ||
-      candidate.projectionIssues.includes("ability_unresolved"),
+    (candidate) => {
+      const projectionIssueSet = new Set(candidate.projectionIssues);
+      return (
+        candidate.sourceKind === "card" ||
+        candidate.abilityBindingMethod !== "unresolved" ||
+        candidate.abilityId !== undefined ||
+        candidate.sourceDefinitionId !== undefined ||
+        projectionIssueSet.has("ability_unresolved")
+      );
+    },
   );
   if (abilityCandidates.length === 0) return [];
   return scrubEvidence(
@@ -195,9 +199,13 @@ function semanticRuntimeDebugTargetContextItems(
   candidates: readonly ActionSemanticCandidate[],
 ): string[] {
   const targetCandidates = candidates.filter(
-    (candidate) =>
-      candidate.targetContext !== undefined ||
-      candidate.projectionIssues.includes("target_context_unavailable"),
+    (candidate) => {
+      const projectionIssueSet = new Set(candidate.projectionIssues);
+      return (
+        candidate.targetContext !== undefined ||
+        projectionIssueSet.has("target_context_unavailable")
+      );
+    },
   );
   if (targetCandidates.length === 0) return [];
   return scrubEvidence(
@@ -317,7 +325,8 @@ function semanticRuntimeDebugOrigin(
   if ((candidate.compatibilitySignals?.length ?? 0) > 0) {
     return "compatibility_only";
   }
-  if (candidate.projectionIssues.includes("ability_unresolved")) {
+  const projectionIssueSet = new Set(candidate.projectionIssues);
+  if (projectionIssueSet.has("ability_unresolved")) {
     return "ability_unresolved";
   }
   return "fallback_coverage_candidate";
