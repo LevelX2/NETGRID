@@ -10124,6 +10124,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes\(needle\)|includes\(needle\)' packages/ai/src/runtime/role-match.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertneunundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-coverage-card-roles.ts` bindet Coverage-Plan-Rollentokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Coverage-Rollenmatches bleiben exakt; Bounded Card-Tokens, Prefix-Rollen und Compound-Phrasen bleiben erhalten und substring-nahe Rauschrollen bleiben ausgeschlossen.
+  - `tactical-plan-coverage-card-roles.test.ts` sichert Coverage-Rollenerkennung, Compound-Matches und substring-only Rauschen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/plans/tactical-plan-coverage-card-roles.test.ts` grün, 1 Datei, 3 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(needle\)|includes\(needle\)' packages/ai/src/plans/tactical-plan-coverage-card-roles.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

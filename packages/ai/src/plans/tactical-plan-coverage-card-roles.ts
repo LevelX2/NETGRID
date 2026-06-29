@@ -99,7 +99,10 @@ function coveragePlanRoleSegmentMatches(segment: string, needle: string): boolea
     return tokens[0] === prefix && tokens.length > 1;
   }
   const needleTokens = needle.split("_").filter(Boolean);
-  if (needleTokens.length <= 1) return tokens.includes(needle);
+  if (needleTokens.length <= 1) {
+    const tokenSet = new Set(tokens);
+    return tokenSet.has(needle);
+  }
   return tokens.some((token, index) =>
     token === needleTokens[0] &&
     needleTokens.every(
