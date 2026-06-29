@@ -117,8 +117,12 @@ export const SCORING_CONSUMER_DIMENSIONS = [
     id: "plan_continuity",
     owner: "plans/tactical-plan-progression.ts",
     scale: { min: -100, max: 100, neutral: 0 },
-    implementationStatus: "partial",
-    evidenceKeys: ["previous_plan_continuity", "plan_progression:"],
+    implementationStatus: "active",
+    evidenceKeys: [
+      "previous_plan_continuity",
+      "plan_continuity_raw_value:",
+      "plan_continuity_normalized_value:",
+    ],
   },
   {
     id: "terminal_outcome",

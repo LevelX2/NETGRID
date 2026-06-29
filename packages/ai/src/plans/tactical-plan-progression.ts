@@ -5,6 +5,7 @@ import type {
 } from "./tactical-plan-types";
 
 const PLAN_CONTINUITY_PRIORITY_BONUS = 120;
+const PLAN_CONTINUITY_SCORE_NORMALIZATION_DIVISOR = 10;
 
 export function planCanMapToCurrentAction(plan: TacticalPlan): boolean {
   return (
@@ -57,14 +58,26 @@ export function progressTacticalPlans(
         ...plan.evidence,
         `previous_plan:${previousPlan.planId}`,
         `plan_progression:${previousPlan.status}->${plan.status}`,
+        `plan_continuity_raw_value:${PLAN_CONTINUITY_PRIORITY_BONUS}`,
+        `plan_continuity_normalized_value:${normalizedPlanContinuityValue(
+          PLAN_CONTINUITY_PRIORITY_BONUS,
+        )}`,
       ],
       scoreBreakdown: [
         ...plan.scoreBreakdown,
         {
           key: "previous_plan_continuity",
           label: "Planfortschreibung",
-          value: PLAN_CONTINUITY_PRIORITY_BONUS,
-          reason: previousPlan.planId,
+          value: normalizedPlanContinuityValue(
+            PLAN_CONTINUITY_PRIORITY_BONUS,
+          ),
+          reason: [
+            previousPlan.planId,
+            `plan_continuity_raw_value:${PLAN_CONTINUITY_PRIORITY_BONUS}`,
+            `plan_continuity_normalized_value:${normalizedPlanContinuityValue(
+              PLAN_CONTINUITY_PRIORITY_BONUS,
+            )}`,
+          ].join("|"),
         },
       ],
     } satisfies TacticalPlan;
@@ -100,6 +113,16 @@ export function progressTacticalPlans(
     plans: continued,
     planProgressionReason: "previous_plan_considered",
   };
+}
+
+export function normalizedPlanContinuityValue(rawValue: number): number {
+  return Math.max(
+    -100,
+    Math.min(
+      100,
+      Math.round(rawValue / PLAN_CONTINUITY_SCORE_NORMALIZATION_DIVISOR),
+    ),
+  );
 }
 
 export function rankTacticalPlans(
