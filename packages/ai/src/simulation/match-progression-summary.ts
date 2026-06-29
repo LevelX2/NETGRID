@@ -53,15 +53,16 @@ export function summarizeMatchProgressionMetrics(
   const runnerRuns = actionSequence.filter(
     (entry) => entry.side === "runner" && entry.actionType === "start_run",
   );
+  const successfulRunActionTypeSet = new Set([
+    "access_card",
+    "steal_agenda",
+    "trash_accessed_card",
+    "decline_trash",
+  ]);
   const successfulRunActions = actionSequence.filter(
     (entry) =>
       entry.side === "runner" &&
-      [
-        "access_card",
-        "steal_agenda",
-        "trash_accessed_card",
-        "decline_trash",
-      ].includes(entry.actionType),
+      successfulRunActionTypeSet.has(entry.actionType),
   );
   const remoteTrashActions = actionSequence.filter(
     (entry) =>
