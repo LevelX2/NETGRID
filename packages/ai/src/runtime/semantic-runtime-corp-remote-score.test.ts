@@ -244,6 +244,45 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     expect(installIceScore(etrIce, "archives", input)).toBe(900);
   });
 
+  it("caps further Archives ICE once an agenda Archives is already double-protected under HQ pressure", () => {
+    const etrIce = corpCard("barrier", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 2,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: true,
+      archivesCards: [
+        corpCard("archived-agenda", "agenda", {
+          agendaPoints: 2,
+        }),
+      ],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        {
+          id: "archives",
+          label: "Archives",
+          ice: [
+            corpCard("archives-wall-1", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+            corpCard("archives-wall-2", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+          ],
+          root: [],
+        },
+      ],
+    });
+
+    expect(installIceScore(etrIce, "archives", input)).toBe(-350);
+    expect(centralInstallScore(etrIce, "hq", input)).toBeGreaterThan(
+      installIceScore(etrIce, "archives", input),
+    );
+  });
+
   it("does not treat dynamic-only remote ICE as a full scoring remote build", () => {
     const huntingPack = corpCard("hunting-pack", "ice", {
       definitionId: "onr_proteus_026_hunting-pack",
