@@ -193,6 +193,26 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps why coverage reports out of runtime selection", () => {
+    const violations = productionFiles("runtime").flatMap((file) =>
+      importsFrom(file)
+        .filter(
+          (reference) =>
+            resolvedImportBasename(file, reference.importSource) ===
+            "semantic-runtime-why-coverage",
+        )
+        .map((reference) =>
+          violation(
+            file,
+            reference,
+            "runtime modules must not import report-only why coverage",
+          ),
+        ),
+    );
+
+    expect(violations).toEqual([]);
+  });
+
   it("keeps reports modules away from action choosers", () => {
     const violations = productionFiles("reports").flatMap((file) =>
       importsFrom(file).flatMap((reference) => {

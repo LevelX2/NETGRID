@@ -67,7 +67,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-16 | Doppelte und widersprüchliche Bewertungslogik beseitigen. | `VERIFIED` | Mehrere Module bewerten Reachability, Target, Economy, Access und Planfortschritt parallel. | Erfüllt: konkrete Boundary-Guards binden Score-Aggregation, Legacy-Action-Scoring, Runner-Reachability, Access-Payoff, Corp-Board-/Scoreline-Safety, TargetChoice-Fit, Goal-/Strategic-Fit, Corp-Economy-/Rez-Floor und Plan-Continuity an ihre Owner; vollständiger Boundary-Audit und Typecheck sind grün. |
 | AI-COMPLETE-17 | Fachliche Scoring-Consumer aufbauen. | `VERIFIED` | Aktueller Score enthält große Typpriorität und verstreute Komponenten. | Erfüllt: Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty sind als aktive normalisierte Consumer angebunden; Vertragstest schützt Vollständigkeit, Skalen und `active`-Status. |
 | AI-COMPLETE-18 | DecisionTrace, WhyChosen und WhyNot vollständig machen. | `VERIFIED` | Debug war vorhanden, aber WhyNot-Kategorien und Alternativenabdeckung mussten geprüft werden. | Erfüllt: Runtime-, Shadow-, Replay-, Selfplay-, Baseline- und Acceptance-Oberflächen transportieren redigierte WhyChosen-/WhyNot-Fakten; report-only Why-Coverage misst Top-Level-WhyNot, Runtime-WhyNot-Sections, ausgewählte ActionAlternative-WhyChosen, nicht ausgewählte ActionAlternative-WhyNot, Missing-Signale und Auditstatus; zwei unabhängige Abschlussaudits inklusive Pair-A-/Pair-B-Smokes sind grün. |
-| AI-COMPLETE-19 | Kommentare und Entwicklerleitplanken korrigieren. | `IN_PROGRESS` | Grenzkommentare existieren, müssen nach Runtime-Änderungen stimmen. | Erster Schnitt markiert Why-Coverage als report-only Auditoberfläche, die nicht von der Runtime-Auswahl konsumiert werden darf. Weitere veraltete Leitplanken werden auditiert. |
+| AI-COMPLETE-19 | Kommentare und Entwicklerleitplanken korrigieren. | `IN_PROGRESS` | Grenzkommentare existieren, müssen nach Runtime-Änderungen stimmen. | Erster Schnitt markiert Why-Coverage als report-only Auditoberfläche; zweiter Schnitt schützt per Boundary-Test, dass Runtime-Module den report-only Why-Coverage-Builder nicht importieren. Weitere veraltete Leitplanken werden auditiert. |
 | AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `PENDING` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay müssen nach Reparatur geprüft werden. | Tests, Szenarien und Benchmarks belegen 0 Illegalität, 0 Hidden-Info-Verstoß, keine Action-Type-Dominanz und bessere Erklärbarkeit. |
 
 ## Neu gefundene In-Scope-Findings
@@ -10923,6 +10923,12 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Die Änderung ist Kommentar-/Leitplankenpflege und ändert keine Runtime-Entscheidung.
   - Status bleibt `IN_PROGRESS`, weil weitere Kommentar- und Leitplanken-Audits offen sind.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/diagnostics/semantic-runtime-why-coverage.test.ts` grün; AI-Typecheck grün.
+
+- `AI-COMPLETE-19` zweiter Why-Coverage-Runtime-Boundary-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt, dass Runtime-Module den report-only Why-Coverage-Builder nicht importieren.
+  - Die Änderung ist eine Entwicklerleitplanke und ändert keine Runtime-Entscheidung.
+  - Status bleibt `IN_PROGRESS`, weil weitere Kommentar- und Leitplanken-Audits offen sind.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "why coverage reports"` grün; AI-Typecheck grün.
 
 ## Audit-Ledger
 
