@@ -10529,6 +10529,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps corp board triage and scoreline safety behind runtime owners"` in `packages/ai` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
 
+- `AI-COMPLETE-16` siebter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt TargetChoice-Fit-Output: `targetChoiceRecommendationForTargetFit` darf nur im TargetChoice-Owner, in `semantic-shadow-decision.ts` und in den Coverage-/Readiness-Evaluationen verwendet werden.
+  - Derselbe Guard begrenzt `buildTargetChoiceShadowReport` auf TargetChoice-Owner, Semantic-Shadow-Decision und Debug-Ausgabe; `targetChoiceWouldSelectForAccessDecisionProjection` bleibt auf den TargetChoice-Owner beschränkt.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert, dass TargetChoice produktiv ein Target-Fit-Signal bleibt und kein paralleler Selected-Choice-/Selected-Target-Entscheider wird.
+  - Status bleibt `IN_PROGRESS`, weil Goal-/Strategic-Fit, Corp-Economy-/Rez-Floor-Skalierung und Plan-Continuity-Fortschritt noch konkrete Owner-Bindungen brauchen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps target choice fit output behind target fit and diagnostics owners"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

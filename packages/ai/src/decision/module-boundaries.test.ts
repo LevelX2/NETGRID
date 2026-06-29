@@ -810,6 +810,50 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps target choice fit output behind target fit and diagnostics owners", () => {
+    const allowedFilesBySymbol = new Map<string, Set<string>>([
+      [
+        "targetChoiceRecommendationForTargetFit",
+        new Set([
+          "decision/target-choice-shadow.ts",
+          "decision/semantic-shadow-decision.ts",
+          "evaluation/target-choice-shadow-coverage.ts",
+          "evaluation/target-choice-shadow-readiness.ts",
+        ]),
+      ],
+      [
+        "buildTargetChoiceShadowReport",
+        new Set([
+          "decision/target-choice-shadow.ts",
+          "decision/semantic-shadow-decision.ts",
+          "diagnostics/semantic-runtime-debug.ts",
+        ]),
+      ],
+      [
+        "targetChoiceWouldSelectForAccessDecisionProjection",
+        new Set(["decision/target-choice-shadow.ts"]),
+      ],
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        return [...allowedFilesBySymbol.entries()].flatMap(
+          ([symbol, allowedFiles]) => {
+            if (!content.includes(symbol) || allowedFiles.has(relative)) {
+              return [];
+            }
+            return [
+              `${relative} references ${symbol} outside target choice fit or diagnostics ownership`,
+            ];
+          },
+        );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
   it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
