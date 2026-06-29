@@ -9528,6 +9528,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/compiled-hints-runtime.test.ts src/deck-doctrine-strategy.test.ts` grün, 2 Dateien, 33 Tests.
   - Verifikation: `rg -n 'sideEffects\?\.includes|profileCoverage\.includes' packages/ai/src/breaker-ontology-consumer.ts packages/ai/src/deck-doctrine-strategy.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` zweihundertzweiundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/deck-doctrine-strategy.ts` bindet PrimaryStrategy-Exclusion, FunctionSignal-Zählung und SupportGap-Blocker über lokale Sets statt direkter `primaryStrategies.includes(...)`, `functionSignals.includes(...)` und `supportGaps.includes(...)`-Prüfungen.
+  - Strukturierte Strategy-, FunctionSignal- und SupportGap-IDs bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `deck-doctrine-strategy.test.ts` sichert Strategieaggregation, Coverage-Gaps, Tag-/Punish-Pairing und RuntimeBlocker.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/deck-doctrine-strategy.test.ts` grün, 1 Datei, 17 Tests.
+  - Verifikation: `rg -n 'primaryStrategies\.includes|functionSignals\.includes|supportGaps\.includes' packages/ai/src/deck-doctrine-strategy.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

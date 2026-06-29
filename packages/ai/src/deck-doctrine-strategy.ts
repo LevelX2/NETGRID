@@ -422,12 +422,13 @@ export function buildDeckStrategyProfile(
     .filter(([, score]) => score.finalScore >= 45 && score.runtimeStatus === "productive")
     .slice(0, 3)
     .map(([strategyId]) => strategyId);
+  const primaryStrategySet = new Set(primaryStrategies);
   const secondaryStrategies = rankedStrategies
     .filter(
       ([strategyId, score]) =>
         score.finalScore >= 30 &&
         score.runtimeStatus === "productive" &&
-        !primaryStrategies.includes(strategyId),
+        !primaryStrategySet.has(strategyId),
     )
     .slice(0, 5)
     .map(([strategyId]) => strategyId);
@@ -1274,7 +1275,7 @@ function accessCapableSignalCount(
 ): number {
   return stats.cards
     .filter((card) => !card.accessBreakerCoverageBlocked)
-    .filter((card) => card.functionSignals.includes(signalId))
+    .filter((card) => new Set(card.functionSignals).has(signalId))
     .reduce((sum, card) => sum + card.quantity, 0);
 }
 
@@ -1661,17 +1662,18 @@ function strategyRuntimeBlockers(
       blockers.push(`hard_support_gap:${gap}`);
     }
   }
+  const supportGapSet = new Set(supportGaps);
   if (
     goal.strategyId === "corp.tag_trace_punish" &&
-    (supportGaps.includes("low_tag_sources") ||
-      supportGaps.includes("payoff_without_enablers") ||
-      supportGaps.includes("low_punish_payoff_density"))
+    (supportGapSet.has("low_tag_sources") ||
+      supportGapSet.has("payoff_without_enablers") ||
+      supportGapSet.has("low_punish_payoff_density"))
   ) {
     blockers.push("tag_punish_source_payoff_pair_incomplete");
   }
   if (
     goal.strategyId === "corp.damage_kill" &&
-    supportGaps.includes("payoff_without_enablers")
+    supportGapSet.has("payoff_without_enablers")
   ) {
     blockers.push("damage_payoff_enabler_incomplete");
   }
