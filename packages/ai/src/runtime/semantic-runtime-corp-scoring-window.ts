@@ -336,6 +336,18 @@ function scoringWindowHorizon<TServer extends CorpServerLike>(
     ),
   );
   if (remainingCorpClicksAfterAction > requirement) return "immediate";
+  if (
+    scoringWindowVisibleInTurnAdvancementBurstAvailable(
+      input,
+      action,
+      sourceCard,
+      requirement,
+      remainingCorpClicksAfterAction,
+      dependencies,
+    )
+  ) {
+    return "immediate";
+  }
   return requirement <= 3 ? "next_turn" : "slow";
 }
 
@@ -360,6 +372,138 @@ function scoringWindowActionClickCost(action: LegalAction): number {
     return 1;
   }
   return 0;
+}
+
+function scoringWindowVisibleInTurnAdvancementBurstAvailable<
+  TServer extends CorpServerLike,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceCard: VisibleCard | undefined,
+  requirement: number,
+  remainingCorpClicksAfterAction: number,
+  dependencies: SemanticRuntimeCorpScoringWindowDependencies<TServer>,
+): boolean {
+  if (!sourceCard || sourceCard.type !== "agenda") return false;
+  if (remainingCorpClicksAfterAction < 2) return false;
+  const creditsAfterAction =
+    input.playerView.own.credits - dependencies.actionCreditCost(action);
+  return input.playerView.own.gripOrHq.some((card) => {
+    if (card.known === false || card.instanceId === sourceCard.instanceId) {
+      return false;
+    }
+    if (card.type !== "operation") return false;
+    const burstCounters = scoringWindowVisibleAdvancementBurstAmount(card);
+    if (burstCounters <= 0) return false;
+    const operationCost = scoringWindowVisibleOperationCost(card);
+    if (operationCost > creditsAfterAction) return false;
+    const basicAdvancesNeeded = Math.max(0, requirement - burstCounters);
+    const clicksNeeded = 1 + basicAdvancesNeeded + 1;
+    return remainingCorpClicksAfterAction >= clicksNeeded;
+  });
+}
+
+function scoringWindowVisibleAdvancementBurstAmount(card: VisibleCard): number {
+  const text = scoringWindowVisibleCardText(card);
+  const digitMatch = text.match(
+    /\badd\s+(\d+)\s+advancement\s+counters?\b/i,
+  );
+  if (digitMatch) return scoringWindowPositiveInteger(digitMatch[1]);
+  const wordMatch = text.match(
+    /\badd\s+(one|two|three|four|five|six|seven|eight|nine|ten)\s+advancement\s+counters?\b/i,
+  );
+  if (wordMatch) return scoringWindowPositiveInteger(wordMatch[1]);
+  return 0;
+}
+
+function scoringWindowVisibleOperationCost(card: VisibleCard): number {
+  const runtimeNumeric =
+    card.definitionId !== undefined
+      ? (
+          RUNTIME_CARDS[card.definitionId] as
+            | {
+                numeric?: {
+                  cost?: number | null;
+                  installCost?: number | null;
+                };
+              }
+            | undefined
+        )?.numeric
+      : undefined;
+  const demoCost =
+    card.definitionId !== undefined
+      ? DEMO_CARDS_BY_ID[card.definitionId]?.cost
+      : undefined;
+  return (
+    positiveVisibleNumber(card.cost) ??
+    positiveVisibleNumber(runtimeNumeric?.cost) ??
+    positiveVisibleNumber(runtimeNumeric?.installCost) ??
+    positiveVisibleNumber(demoCost) ??
+    0
+  );
+}
+
+function scoringWindowVisibleCardText(card: VisibleCard): string {
+  const runtimeText =
+    card.definitionId !== undefined
+      ? (
+          RUNTIME_CARDS[card.definitionId] as
+            | {
+                text?: string;
+                rulesText?: string;
+              }
+            | undefined
+        )
+      : undefined;
+  const demoText =
+    card.definitionId !== undefined
+      ? DEMO_CARDS_BY_ID[card.definitionId]?.rulesText
+      : undefined;
+  return [
+    card.title,
+    card.rulesText,
+    runtimeText?.text,
+    runtimeText?.rulesText,
+    demoText,
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
+}
+
+function scoringWindowPositiveInteger(value: string | undefined): number {
+  if (!value) return 0;
+  const numeric = Number.parseInt(value, 10);
+  if (Number.isFinite(numeric) && numeric > 0) return numeric;
+  switch (value.toLocaleLowerCase("en-US")) {
+    case "one":
+      return 1;
+    case "two":
+      return 2;
+    case "three":
+      return 3;
+    case "four":
+      return 4;
+    case "five":
+      return 5;
+    case "six":
+      return 6;
+    case "seven":
+      return 7;
+    case "eight":
+      return 8;
+    case "nine":
+      return 9;
+    case "ten":
+      return 10;
+    default:
+      return 0;
+  }
+}
+
+function positiveVisibleNumber(value: number | null | undefined): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? value
+    : undefined;
 }
 
 function scoringWindowAccessAssessment(

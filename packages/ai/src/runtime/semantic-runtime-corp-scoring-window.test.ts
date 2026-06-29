@@ -144,6 +144,47 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     });
   });
 
+  it("recognizes visible in-turn advancement bursts as immediate score windows", () => {
+    const agenda = agendaCard("agenda-in-hq", {
+      advancementRequirement: 3,
+    });
+    const projectConsultants = operationCard("project-consultants", {
+      definitionId: "onr_v1_300_project-consultants",
+      title: "Project Consultants",
+      cost: 10,
+      rulesText:
+        "Add four advancement counters to any combination of installed cards that can be advanced.",
+    });
+    const action = corpAction(
+      "install-burst-closeout-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 10,
+        ownClicks: 3,
+        runnerCredits: 9,
+        hq: [agenda, projectConsultants],
+        servers: protectedCentralServers([remoteServer("remote_1", [])]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "durable",
+      scoreHorizon: "immediate",
+      runnerCanContestNow: false,
+      recommendedNextStep: "install_agenda",
+    });
+  });
+
   it("treats unmodeled generic remote ice as temporary only when no breaker is installed", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(
@@ -1099,6 +1140,19 @@ function agendaCard(
     advancementRequirement: 3,
     advancementCounters: 0,
     agendaPoints: 2,
+    owner: "corp",
+    ...overrides,
+  } as VisibleCard;
+}
+
+function operationCard(
+  instanceId: string,
+  overrides: Partial<VisibleCard> = {},
+): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "operation",
     owner: "corp",
     ...overrides,
   } as VisibleCard;
