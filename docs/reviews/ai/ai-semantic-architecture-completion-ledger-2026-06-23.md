@@ -68,7 +68,7 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | AI-COMPLETE-17 | Fachliche Scoring-Consumer aufbauen. | `VERIFIED` | Aktueller Score enthält große Typpriorität und verstreute Komponenten. | Erfüllt: Goal Fit, Target Fit, Cost, Timing, Reachability, Boardstate Need, Risk, Doctrine, Plan Continuity, Terminal Outcome, Reserve und Uncertainty sind als aktive normalisierte Consumer angebunden; Vertragstest schützt Vollständigkeit, Skalen und `active`-Status. |
 | AI-COMPLETE-18 | DecisionTrace, WhyChosen und WhyNot vollständig machen. | `VERIFIED` | Debug war vorhanden, aber WhyNot-Kategorien und Alternativenabdeckung mussten geprüft werden. | Erfüllt: Runtime-, Shadow-, Replay-, Selfplay-, Baseline- und Acceptance-Oberflächen transportieren redigierte WhyChosen-/WhyNot-Fakten; report-only Why-Coverage misst Top-Level-WhyNot, Runtime-WhyNot-Sections, ausgewählte ActionAlternative-WhyChosen, nicht ausgewählte ActionAlternative-WhyNot, Missing-Signale und Auditstatus; zwei unabhängige Abschlussaudits inklusive Pair-A-/Pair-B-Smokes sind grün. |
 | AI-COMPLETE-19 | Kommentare und Entwicklerleitplanken korrigieren. | `VERIFIED` | Grenzkommentare existierten und mussten nach Runtime-Änderungen stimmen. | Erfüllt: Why-Coverage ist als report-only Auditoberfläche kommentiert; Boundary-Test schützt, dass Runtime-Module den report-only Why-Coverage-Builder nicht importieren; Kommentar-Audit findet nur aktuelle Leitplanken und keine veralteten No-Effect-/Shadow-Only-Texte. |
-| AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `IN_PROGRESS` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay müssen nach Reparatur geprüft werden. | Full-Holdout-Kandidat erfüllt Safety, Redaction, Why-Coverage, Action-Type-Dominanz und praktische Metriken im A-D-Gate; zweiter Abschlussaudit bleibt offen. |
+| AI-COMPLETE-20 | Praktische Spielqualität und Kalibrierung belegen. | `VERIFIED` | Full AI-Test ist baseline-rot; Benchmarks/Selfplay mussten nach Reparatur geprüft werden. | Erfüllt: Zwei volle A-D-Holdout-Gates belegen 0 Action-Limits, 0 IllegalActions, 0 ReplayFailures, RedactionSafe true, Why-Coverage `complete` ohne Missing-Signale, keine Action-Type-Dominanz und bessere praktische Metriken; Default-Cutover bleibt bewusst gesperrt. |
 
 ## Neu gefundene In-Scope-Findings
 
@@ -10963,6 +10963,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Praktische Metriken verbessern sich im Gate: Candidate Runner verbessert Runner-Steals von 35 auf 54; Candidate Corp verbessert Corp-Scores von 18 auf 23.
   - `AI-COMPLETE-20` ist Abschlusskandidat, bleibt aber bis zum zweiten Abschlussaudit `IN_PROGRESS`.
 
+- `AI-COMPLETE-20` zweiter Full-Holdout-Abschlussaudit:
+  - `docs/reviews/ai/ai-complete-20-full-holdout-gate-b-2026-06-29.json` und `.md` wiederholen das volle A-D-Gate in ein eigenes Artefakt.
+  - Umfang erneut: 75 Spiele, 9477 Entscheidungen.
+  - Safety erneut grün: 0 Action-Limits, 0 IllegalActions, 0 ReplayFailures, RedactionSafe true.
+  - Action-Type-Dominanz erneut grün: 0 Dominance-Failures, maximale Top-Share 0.253.
+  - Erklärbarkeit erneut grün: 0 Why-Coverage-Missing-Signale.
+  - Decision-Evidence und Scenario-Aggregate sind mit dem ersten Full-Holdout-Gate identisch.
+  - `AI-COMPLETE-20` ist `VERIFIED`; kein neues In-Scope-Finding.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
@@ -10976,3 +10985,5 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
 | Audit 7 | `VERIFIED` | Erster Abschlussaudit für `AI-COMPLETE-18`: fokussierte Testgruppe zu Runtime-DecisionDebug, Why-Coverage, Selfplay-TraceFacts, Selfplay-Why-Coverage, Selfplay-Trace-Mining-Report, Replay-Cluster und Replay-Acceptance-Harness grün; AI-Typecheck grün; Pair-A-Why-Coverage-Smoke belegt `auditStatus=complete` bei 20 Entscheidungen und 0 Missing-Coverage-Signalen. Zweiter unabhängiger Abschlussaudit offen. |
 | Audit 8 | `VERIFIED` | Zweiter Abschlussaudit für `AI-COMPLETE-18`: dieselbe fokussierte Testgruppe erneut grün, `selfplay-trace-facts` separat grün, AI-Typecheck grün; Pair-B-Why-Coverage-Smoke belegt `auditStatus=complete` bei 20 Entscheidungen und 0 Missing-Coverage-Signalen. `AI-COMPLETE-18` ist `VERIFIED`; nächstes offenes Ziel ist `AI-COMPLETE-19`. |
 | Audit 9 | `VERIFIED` | Abschlussaudit für `AI-COMPLETE-19`: Kommentar-/Leitplanken-Suche findet nur aktuelle report-only-/authority-/runtime-boundary-Leitplanken und keine widersprüchlichen No-Effect-/Shadow-Only-Kommentare; `src/decision/module-boundaries.test.ts` vollständig grün, 33 Tests; AI-Typecheck grün. `AI-COMPLETE-19` ist `VERIFIED`; nächstes offenes Ziel ist `AI-COMPLETE-20`. |
+| Audit 10 | `VERIFIED` | Erster Abschlussaudit für `AI-COMPLETE-20`: volles A-D-Holdout-Gate mit 75 Spielen und 9477 Entscheidungen grün; 0 Action-Limits, 0 IllegalActions, 0 ReplayFailures, RedactionSafe true, alle 15 Dominanzberichte `complete`, maximale Top-Share 0.253, alle 15 Why-Coverage-Berichte `complete` mit 0 Missing-Signalen; praktische Metriken besser bei Candidate Runner-Steals und Candidate Corp-Scores. |
+| Audit 11 | `VERIFIED` | Zweiter Abschlussaudit für `AI-COMPLETE-20`: separates Full-Holdout-Gate-B-Artefakt mit identischer Decision-Evidence und identischen Scenario-Aggregaten; erneut 75 Spiele, 9477 Entscheidungen, 0 Action-Limits, 0 IllegalActions, 0 ReplayFailures, RedactionSafe true, 0 Dominance-Failures, 0 Why-Coverage-Missing-Signale. `AI-COMPLETE-20` ist `VERIFIED`; kein neues In-Scope-Finding. |
