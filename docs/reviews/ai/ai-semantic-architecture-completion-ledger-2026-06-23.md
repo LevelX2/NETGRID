@@ -10499,6 +10499,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps semantic runtime score summation owned by score components"` in `packages/ai` grün.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
 
+- `AI-COMPLETE-16` dritter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt Legacy-Action-Scoring: `scoreActionsForLegacy` und `createLegacyActionScoringComposition` dürfen außerhalb der Legacy-Schicht nur in den expliziten Fallback-/Exclusion-Composition-Modulen auftauchen.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert diesen Guard als Legacy-Action-Scoring-Owner-Bindung.
+  - Status bleibt `IN_PROGRESS`, weil Reachability-, Access-Payoff- und Corp-Board-Triage-Kollisionszonen noch gebunden werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps legacy action scoring restricted to fallback compositions"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

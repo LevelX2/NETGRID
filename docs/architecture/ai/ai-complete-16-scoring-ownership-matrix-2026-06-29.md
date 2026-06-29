@@ -22,6 +22,7 @@ Zweck: Erstes Ownership-Artefakt für `AI-COMPLETE-16`, damit doppelte oder wide
 ## Guard-Status
 
 - Score-Aggregation: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `semanticRuntimeScoreFromComponents` nur noch im Score-Components-Owner, im Runtime-Choice-Builder und im Public-Entrypoint-Reexport. Neue produktive Gesamtpunkt-Summierungen außerhalb dieser Boundary fallen damit als Boundary-Verstoß auf.
+- Legacy Action Scoring: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `scoreActionsForLegacy` und `createLegacyActionScoringComposition` außerhalb der Legacy-Schicht nur in `runtime/ai-action-entrypoints-composition.ts` und `runtime/semantic-runtime-action-exclusion-composition.ts`. Neue produktive Legacy-Scoring-Consumer fallen damit als Boundary-Verstoß auf.
 
 ## Erste Audit-Befunde
 

@@ -658,6 +658,37 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps legacy action scoring restricted to fallback compositions", () => {
+    const allowedFiles = new Set([
+      "legacy/legacy-action-scorer.ts",
+      "legacy/legacy-action-scoring-composition.ts",
+      "legacy/legacy-entrypoints.ts",
+      "runtime/ai-action-entrypoints-composition.ts",
+      "runtime/semantic-runtime-action-exclusion-composition.ts",
+    ]);
+    const guardedSymbols = [
+      "scoreActionsForLegacy",
+      "createLegacyActionScoringComposition",
+    ];
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const referencesGuardedSymbol = guardedSymbols.some((symbol) =>
+          content.includes(symbol),
+        );
+        if (!referencesGuardedSymbol) return [];
+        const relative = relativeFile(file);
+        return allowedFiles.has(relative)
+          ? []
+          : [
+              `${relative} references legacy action scoring outside fallback composition ownership`,
+            ];
+      });
+
+    expect(violations).toEqual([]);
+  });
+
   it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
