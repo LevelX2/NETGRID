@@ -10286,6 +10286,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'advancement counter|text\.includes\(\"remove\"\)|text\.includes\(\"spend\"\)|text\.includes\(\"advancement counter\"\)' packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsiebenundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` ersetzt die Bad-Publicity-RulesText-Regex für sichtbare Operation-Drawbacks durch lokale Token-Sequenzprüfung (`take|add|gain|suffer`, positive Zahl, `bad`, `publicity`).
+  - Corp-Immediate-Economy bleibt für echte Bad-Publicity-Drawbacks ausgeschlossen; substring-nahe RulesText-Werte wie `bad publicityish` erzeugen keinen Drawback-Blocker.
+  - `semantic-runtime-corp-score.test.ts` sichert den bestehenden Bad-Publicity-Drawback und einen neuen `bad publicityish`-Noise-Fall.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive RulesText-/Regex-Fallbacks noch auditiert und in kleine Pakete geschnitten werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts` grün, 1 Datei, 26 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'bad publicity|\\b\(\?:take\|add\|gain\|suffer\)|\.test\(text\)' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

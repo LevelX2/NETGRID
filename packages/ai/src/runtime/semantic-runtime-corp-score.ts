@@ -982,8 +982,36 @@ function corpImmediateEconomyOperationHasVisibleDrawback(
   }
   const text = [card.rulesText, definition?.rulesText]
     .filter((value): value is string => typeof value === "string")
-    .join("\n");
-  return /\b(?:take|add|gain|suffer)\s+\d+\s+bad publicity\b/i.test(text);
+    .flatMap(corpImmediateEconomyRulesTextTokens);
+  return corpImmediateEconomyRulesTextHasBadPublicityDrawback(text);
+}
+
+function corpImmediateEconomyRulesTextHasBadPublicityDrawback(
+  tokens: readonly string[],
+): boolean {
+  const drawbackVerbs = new Set(["take", "add", "gain", "suffer"]);
+  return tokens.some(
+    (token, index) =>
+      drawbackVerbs.has(token) &&
+      corpImmediateEconomyTokenIsPositiveInteger(tokens[index + 1]) &&
+      tokens[index + 2] === "bad" &&
+      tokens[index + 3] === "publicity",
+  );
+}
+
+function corpImmediateEconomyRulesTextTokens(text: string): string[] {
+  return text
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function corpImmediateEconomyTokenIsPositiveInteger(
+  token: string | undefined,
+): boolean {
+  if (token === undefined || token === "") return false;
+  const numeric = Number.parseInt(token, 10);
+  return String(numeric) === token && numeric > 0;
 }
 
 function visibleSourceCardForAction(

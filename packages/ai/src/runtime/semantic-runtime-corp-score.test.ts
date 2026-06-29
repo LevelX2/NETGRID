@@ -423,6 +423,39 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     ).toBe(false);
   });
 
+  it("bounds visible drawback operation rules text to exact bad publicity tokens", () => {
+    const noisyOperation = corpAction(
+      "play-noisy-publicity",
+      "play_operation",
+      {},
+      "corp_noisy_publicity",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        0,
+        [
+          economyOperationCard({
+            instanceId: "corp_noisy_publicity",
+            definitionId: "v099_noisy_publicity_operation",
+            title: "Noisy Publicity Operation",
+            rulesText: "Gain 3 credits and take 1 bad publicityish marker.",
+            cost: 0,
+          }),
+        ],
+        [noisyOperation],
+      ),
+      noisyOperation,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(
+      components.some(
+        (component) => component.key === "corp_operation_burst_economy",
+      ),
+    ).toBe(true);
+  });
+
   it("scores advance, rez and install actions that match Corp tactical goals", () => {
     const cases: Array<{
       goal: TacticalGoalLike;
