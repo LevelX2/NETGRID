@@ -11,9 +11,7 @@ import {
   semanticRuntimeCorpScoringWindowAssessment,
   type CorpScoringWindowAssessment,
 } from "./semantic-runtime-corp-scoring-window";
-import {
-  semanticRuntimeCorpCentralPressureAssessment,
-} from "./semantic-runtime-corp-central-pressure";
+import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
 import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
@@ -130,7 +128,9 @@ export function semanticRuntimeCorpInstallRemoteScore<
       )
     ) {
       const sourceCard = dependencies.actionSourceCard(input, action);
-      if (semanticRuntimeCorpRemoteInstallHasDynamicProtectionRisk(sourceCard)) {
+      if (
+        semanticRuntimeCorpRemoteInstallHasDynamicProtectionRisk(sourceCard)
+      ) {
         return 450;
       }
       return serverId === "new_remote" ? 1050 : 900;
@@ -149,16 +149,76 @@ export function semanticRuntimeCorpInstallRemoteScore<
     return hasStabilizingAlternative ? -2700 : -1700;
   }
 
+  if (
+    placement !== "ice" &&
+    semanticRuntimeCorpRemoteSupportNeedsScorelineContext(
+      dependencies.actionSourceCard(input, action),
+      roles,
+      actionSemanticCandidate,
+    ) &&
+    !semanticRuntimeCorpRemoteHasAdvancementContext(server)
+  ) {
+    return protectedRemote ? -900 : -1300;
+  }
+
   if (serverId === "new_remote" && emptyRemoteCount > 0) {
     return hasStabilizingAlternative ? -900 : -350;
   }
   return protectedRemote ? 250 : -150;
 }
 
-function semanticRuntimeCorpArchivesIceInstallScore<TServer extends CorpServerLike>(
-  input: AiDecisionInput,
-  server: TServer | undefined,
-): number {
+function semanticRuntimeCorpRemoteSupportNeedsScorelineContext(
+  card: VisibleCard | undefined,
+  roles: readonly string[],
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): boolean {
+  const hint = card?.definitionId
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
+    : undefined;
+  const signals = [
+    ...roles,
+    ...(hint?.roles ?? []),
+    ...(hint?.planRoles ?? []),
+    ...semanticRuntimeCorpHintRiskTags(hint),
+    ...semanticRuntimeCorpHintTacticSignals(hint),
+    ...(actionSemanticCandidate?.cardContextSignals ?? []),
+    ...(actionSemanticCandidate?.actionTacticSignals ?? []),
+    ...(actionSemanticCandidate?.evidence ?? []),
+  ];
+  if (
+    rolesMatch(signals, [
+      "requires_advancement_counter",
+      "advancement_counter",
+      "scoreline_support",
+      "remote_score_support",
+    ])
+  ) {
+    return true;
+  }
+  const text =
+    `${card?.title ?? ""} ${card?.rulesText ?? ""}`.toLocaleLowerCase("en-US");
+  return (
+    text.includes("advancement counter") &&
+    (text.includes("remove") || text.includes("spend"))
+  );
+}
+
+function semanticRuntimeCorpRemoteHasAdvancementContext(
+  server: CorpServerLike | undefined,
+): boolean {
+  return (
+    server?.root.some(
+      (card) =>
+        card.type === "agenda" ||
+        (card.advancementCounters ?? 0) > 0 ||
+        typeof card.advancementRequirement === "number",
+    ) === true
+  );
+}
+
+function semanticRuntimeCorpArchivesIceInstallScore<
+  TServer extends CorpServerLike,
+>(input: AiDecisionInput, server: TServer | undefined): number {
   const archivesAgendaRisk = (input.playerView.own.heapOrArchives ?? []).some(
     (card) => card.known !== false && card.type === "agenda",
   );
@@ -345,9 +405,7 @@ function semanticRuntimeCorpCentralIceProfile(card: VisibleCard | undefined): {
     ) === true;
   const hintTacticSignals = semanticRuntimeCorpHintTacticSignals(hint);
   const positionDependent =
-    semanticRuntimeCorpHintRiskTags(hint).includes(
-      "position_dependent_ice",
-    ) ||
+    semanticRuntimeCorpHintRiskTags(hint).includes("position_dependent_ice") ||
     hintTacticSignals.some((signal) =>
       roleMatchesAny(signal, ["position_scaling", "outer_ice_scaling"]),
     ) ||
@@ -408,7 +466,9 @@ function semanticRuntimeCorpVisibleRunnerHasBreakerRole(
 }
 
 function semanticRuntimeCorpVisibleCardCoverageText(card: VisibleCard): string {
-  const hint = card.definitionId ? AI_HINTS_BY_CARD.get(card.definitionId) : undefined;
+  const hint = card.definitionId
+    ? AI_HINTS_BY_CARD.get(card.definitionId)
+    : undefined;
   return [
     card.title,
     card.rulesText,
