@@ -248,10 +248,11 @@ function promotionCategory(
   candidate: SelfplayDecisionSnapshotCandidate,
 ): SelfplayDecisionSnapshotPromotionCategory {
   if (candidate.status !== "candidate_snapshot") return "defer_missing_engine_state";
-  if (candidate.mistakeClasses.includes("target_choice_unavailable")) {
+  const mistakeClassSet = new Set(candidate.mistakeClasses);
+  if (mistakeClassSet.has("target_choice_unavailable")) {
     return "defer_target_choice_gap";
   }
-  if (candidate.mistakeClasses.includes("plan_step_mismatch")) {
+  if (mistakeClassSet.has("plan_step_mismatch")) {
     return "defer_doctrine_gap";
   }
   if (

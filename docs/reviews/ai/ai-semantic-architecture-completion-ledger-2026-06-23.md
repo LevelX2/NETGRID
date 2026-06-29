@@ -9764,6 +9764,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'knownGaps\.includes' packages/ai/src/shadow-scoring-diagnostics.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertneunzehnter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/selfplay-decision-snapshot-mining.ts` bindet SelfplayDecisionSnapshot-MistakeClasses über ein lokales Set statt direkter `candidate.mistakeClasses.includes(...)`-Prüfungen.
+  - Strukturierte MistakeClasses `target_choice_unavailable` und `plan_step_mismatch` bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `selfplay-decision-snapshot-mining.test.ts` sichert SnapshotMining-Summary und Promotion-Kategorien.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/evaluation/selfplay-decision-snapshot-mining.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'mistakeClasses\.includes' packages/ai/src/evaluation/selfplay-decision-snapshot-mining.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
