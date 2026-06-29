@@ -10007,6 +10007,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'goalId\.split\(/\[\.:-\]\+/\)\.includes|includes\(segment\)' packages/ai/src/decision/tactical-goal-merge.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsechsundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/tactical-goal-utility.ts` bindet Goal-ID-Untersegmente über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Utility-Familienzuordnung bleibt exakt; Economy-, Coverage-, Tag-Punish- und Scoreline-Erkennung ignorieren substring-nahe Rauschsignale weiter.
+  - `tactical-goal-utility.test.ts` sichert die Utility-Familienzuordnung, bounded Evidence-Token und Hidden-Info-Redaction-Grenzen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/tactical-goal-utility.test.ts` grün, 1 Datei, 8 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'segment\.split\("_"\)\.filter\(Boolean\)\.includes\(term\)|includes\(term\)' packages/ai/src/decision/tactical-goal-utility.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

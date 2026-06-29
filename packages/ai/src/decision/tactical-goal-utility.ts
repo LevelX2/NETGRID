@@ -147,7 +147,8 @@ function goalIdHasTerm(goalId: string, term: string): boolean {
 
 function goalIdSegmentHasTerm(segment: string, term: string): boolean {
   if (segment === term) return true;
-  return segment.split("_").filter(Boolean).includes(term);
+  const termSet = new Set(segment.split("_").filter(Boolean));
+  return termSet.has(term);
 }
 
 function normalizePriority(priority: number): number {
