@@ -340,12 +340,12 @@ function groupsForCandidate(
     groups.add("run_action");
   }
   if (
-    [
+    new Set([
       "access_card",
       "steal_agenda",
       "trash_accessed_card",
       "decline_trash",
-    ].includes(candidate.actionType) ||
+    ]).has(candidate.actionType) ||
     candidate.semanticActionType.startsWith("access.")
   ) {
     groups.add("access_action");

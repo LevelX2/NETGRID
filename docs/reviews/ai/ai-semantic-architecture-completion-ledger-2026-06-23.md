@@ -9917,6 +9917,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n '\]\.includes\(action\.type\)|includes\(action\.type\)' packages/ai/src/actions/action-target-context.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsechsunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-coverage.ts` bindet Access-ActionTypes für Coverage-Gruppen über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Candidate-ActionTypes bleiben exakt; Access-Gruppierung bleibt an bekannte ActionTypes oder `access.`-Semantik gebunden.
+  - `action-semantic-coverage.test.ts` sichert Coverage-Gruppen, Report-Summary und verbotene Markergrenzen.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-semantic-coverage.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n '\]\.includes\(candidate\.actionType\)|includes\(candidate\.actionType\)' packages/ai/src/actions/action-semantic-coverage.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
