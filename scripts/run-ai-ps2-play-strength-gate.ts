@@ -3,6 +3,7 @@ import { dirname, join, resolve } from "node:path";
 import {
   benchmarkDeckFromFrozenLocalSnapshot,
   benchmarkDeckFromSnapshot,
+  buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries,
   evaluatePracticalTacticBenchmark,
   frozenLegacyPracticalTacticSelector,
   runAiSelfplayTraceMining,
@@ -233,6 +234,10 @@ function deltas(
 function summarize(result: TraceMiningResult) {
   return {
     aggregate: result.aggregate,
+    whyCoverage:
+      buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries(
+        result.summaries,
+      ),
     summaries: result.summaries.map((summary) => ({
       seed: summary.seed,
       winner: summary.winner,
