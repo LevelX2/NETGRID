@@ -6,6 +6,13 @@ export function progressionEntriesWithRunTargets(
   actionSequence: AiSimulationSummary["actionSequence"],
 ): AiSimulationSummary["actionSequence"] {
   let currentRunTarget: string | undefined;
+  const runTargetFollowupActionTypeSet = new Set([
+    "access_card",
+    "steal_agenda",
+    "trash_accessed_card",
+    "decline_trash",
+    "jack_out",
+  ]);
   return actionSequence.map((entry) => {
     if (entry.side === "runner" && entry.actionType === "start_run") {
       currentRunTarget = entry.targetServerId;
@@ -14,13 +21,7 @@ export function progressionEntriesWithRunTargets(
     if (
       entry.side === "runner" &&
       !entry.targetServerId &&
-      [
-        "access_card",
-        "steal_agenda",
-        "trash_accessed_card",
-        "decline_trash",
-        "jack_out",
-      ].includes(entry.actionType) &&
+      runTargetFollowupActionTypeSet.has(entry.actionType) &&
       currentRunTarget
     ) {
       return { ...entry, targetServerId: currentRunTarget };

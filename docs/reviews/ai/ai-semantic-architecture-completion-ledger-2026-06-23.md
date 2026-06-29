@@ -9962,6 +9962,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n -F '[\"steal_agenda\", \"trash_accessed_card\", \"move_to_removed_from_game\", \"move_to_set_aside\"].includes' ...` und `rg -n -F '[\"steal_agenda\", \"trash_accessed_card\", \"move_to_removed_from_game\", \"move_to_set_aside\", \"return_from_set_aside\"].includes' ...` ohne Treffer in `packages/ai/src/belief-state.ts`.
 
+- `AI-COMPLETE-15` dreihunderteinundvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/progression-action-sequence.ts` bindet Run-Target-Follow-up-ActionTypes über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte ActionTypes bleiben exakt; substring-nahe Follow-up-Typen übernehmen kein Run-Target.
+  - `progression-action-sequence.test.ts` sichert exakte Access-Follow-up-Zielübernahme.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/simulation/progression-action-sequence.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n '\]\.includes\(entry\.actionType\)|includes\(entry\.actionType\)' packages/ai/src/simulation/progression-action-sequence.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
