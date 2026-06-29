@@ -10492,6 +10492,13 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `rg -n "AI-COMPLETE-16|Ownership-Matrix|widersprüchliche Bewertungslogik|Reachability|Target|Economy|Access|Planfortschritt|Score Owner|Owner" docs/reviews/ai docs/architecture/ai packages/ai/src -g "*.md" -g "*.ts"` zur Bestandsermittlung ausgeführt.
   - Verifikation: `rg -n "function .*Score|evaluate.*Score|score.*Action|Reachability|reachability|TargetFit|target.*fit|economy.*score|access.*value|plan.*progress|progress.*score" packages/ai/src/runtime packages/ai/src/decision packages/ai/src/simulation packages/ai/src/legacy -g "*.ts"` zur Kollisionszonensuche ausgeführt.
 
+- `AI-COMPLETE-16` zweiter Ownership-Schnitt:
+  - `packages/ai/src/decision/module-boundaries.test.ts` schützt die Score-Aggregation: `semanticRuntimeScoreFromComponents` darf produktiv nur im Score-Components-Owner, Runtime-Choice-Builder und Public-Entrypoint-Reexport auftauchen.
+  - `docs/architecture/ai/ai-complete-16-scoring-ownership-matrix-2026-06-29.md` dokumentiert diesen Guard als erste konkrete Owner-Bindung.
+  - Status bleibt `IN_PROGRESS`, weil weitere Kollisionszonen zu Reachability, Access-Payoff, Board-Triage und Legacy-Action-Scoring noch gebunden werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/module-boundaries.test.ts -t "keeps semantic runtime score summation owned by score components"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

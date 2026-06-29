@@ -19,6 +19,10 @@ Zweck: Erstes Ownership-Artefakt für `AI-COMPLETE-16`, damit doppelte oder wide
 | Plan Continuity und Fortschritt | `packages/ai/src/runtime/semantic-runtime.ts`, TacticalPlan-/Progression-Module | Choice-Builder, WhyChosen/WhyNot, Simulation-Metriken | Planfortschritt darf keine blockierten oder payofflosen Wiederholungen gegenüber Reachability/Access-Memory hochziehen. |
 | Legacy Action Scoring | `packages/ai/src/legacy/legacy-action-scorer.ts`, `legacy-action-scoring-composition.ts` | Legacy-Fallback, Comparator, Exclusion-Kontext | Legacy bleibt gekapselt; produktive Ownership liegt bei Runtime-/Decision-Ownern. |
 
+## Guard-Status
+
+- Score-Aggregation: `packages/ai/src/decision/module-boundaries.test.ts` erlaubt `semanticRuntimeScoreFromComponents` nur noch im Score-Components-Owner, im Runtime-Choice-Builder und im Public-Entrypoint-Reexport. Neue produktive Gesamtpunkt-Summierungen außerhalb dieser Boundary fallen damit als Boundary-Verstoß auf.
+
 ## Erste Audit-Befunde
 
 - `rg` zeigt erwartungsgemäß viele Score-/Reachability-/Access-Treffer, aber keine einzelne zentrale Owner-Dokumentation vor diesem Artefakt.

@@ -636,6 +636,28 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps semantic runtime score summation owned by score components", () => {
+    const allowedFiles = new Set([
+      "ai-runtime-public-entrypoints.ts",
+      "runtime/semantic-runtime-choice-builder.ts",
+      "runtime/semantic-runtime-score-components.ts",
+    ]);
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        if (!content.includes("semanticRuntimeScoreFromComponents")) return [];
+        const relative = relativeFile(file);
+        return allowedFiles.has(relative)
+          ? []
+          : [
+              `${relative} references semanticRuntimeScoreFromComponents outside score aggregation ownership`,
+            ];
+      });
+
+    expect(violations).toEqual([]);
+  });
+
   it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
