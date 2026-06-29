@@ -1282,7 +1282,8 @@ function breakerProfileBlocksAccessCoverage(
   profile: { sideEffects?: string[]; restrictions?: string[] } | undefined,
 ): boolean {
   if (!profile) return false;
-  if (profile.sideEffects?.includes("ends_run_after_use")) return true;
+  const sideEffects = new Set(profile.sideEffects ?? []);
+  if (sideEffects.has("ends_run_after_use")) return true;
   return (profile.restrictions ?? []).some((restriction) =>
     ACCESS_BLOCKING_BREAKER_RESTRICTIONS.has(restriction),
   );

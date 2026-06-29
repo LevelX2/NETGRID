@@ -66,7 +66,8 @@ export function breakerProfileBlocksAccessReachability(
   profile: AiHintBreakerProfile | undefined,
 ): boolean {
   if (!profile) return false;
-  if (profile.sideEffects?.includes("ends_run_after_use")) return true;
+  const sideEffects = new Set(profile.sideEffects ?? []);
+  if (sideEffects.has("ends_run_after_use")) return true;
   return (profile.restrictions ?? []).some((restriction) =>
     ACCESS_BLOCKING_BREAKER_RESTRICTIONS.has(restriction),
   );
@@ -231,9 +232,9 @@ function profileCoversCoverage(
 ): boolean {
   if (!profile || !coverage) return false;
   if (breakerProfileBlocksAccessReachability(profile)) return false;
-  const profileCoverage = profile.coverage ?? [];
+  const profileCoverage = new Set(profile.coverage ?? []);
   return (
-    profileCoverage.includes("universal") || profileCoverage.includes(coverage)
+    profileCoverage.has("universal") || profileCoverage.has(coverage)
   );
 }
 
