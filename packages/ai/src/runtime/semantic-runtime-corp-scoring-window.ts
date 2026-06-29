@@ -9,6 +9,7 @@ import {
   assessKnownRezzedIcePath,
   endTheRunSubroutineCount,
 } from "../visible-run-analysis";
+import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
 
 type CorpServerLike = {
   id: string;
@@ -283,7 +284,8 @@ function projectedRemoteServerForAction<TServer extends CorpServerLike>(
   if (!sourceCard) return server;
   if (action.payload?.placement !== "ice") {
     return {
-      id: server?.id ?? dependencies.actionServerId(input, action) ?? "remote_1",
+      id:
+        server?.id ?? dependencies.actionServerId(input, action) ?? "remote_1",
       ice: [...(server?.ice ?? [])],
       root: [...(server?.root ?? []), sourceCard],
     };
@@ -647,8 +649,7 @@ function scoringWindowCardSignals(card: VisibleCard): string[] {
   return [
     ...(hint?.roles ?? []),
     ...(hint?.planRoles ?? []),
-    ...((hint as { riskTags?: readonly string[] } | undefined)?.riskTags ??
-      []),
+    ...((hint as { riskTags?: readonly string[] } | undefined)?.riskTags ?? []),
     ...((hint as { tacticSignals?: readonly string[] } | undefined)
       ?.tacticSignals ?? []),
   ];
@@ -665,11 +666,12 @@ function scoringWindowSignalMatches(
     const tokens = normalized.split(/[._:-]+/).filter(Boolean);
     const needleTokens = normalizedNeedle.split(/[._:-]+/).filter(Boolean);
     if (needleTokens.length <= 1) return tokens.includes(normalizedNeedle);
-    return tokens.some((token, index) =>
-      token === needleTokens[0] &&
-      needleTokens.every(
-        (needleToken, offset) => tokens[index + offset] === needleToken,
-      ),
+    return tokens.some(
+      (token, index) =>
+        token === needleTokens[0] &&
+        needleTokens.every(
+          (needleToken, offset) => tokens[index + offset] === needleToken,
+        ),
     );
   });
 }
@@ -812,9 +814,11 @@ function visibleAgendaPoints(card: VisibleCard): number {
   }
   const runtimeAgendaPoints =
     card.definitionId !== undefined
-      ? (RUNTIME_CARDS[card.definitionId] as
-          | { numeric?: { agendaPoints?: number | null } }
-          | undefined)?.numeric?.agendaPoints
+      ? (
+          RUNTIME_CARDS[card.definitionId] as
+            | { numeric?: { agendaPoints?: number | null } }
+            | undefined
+        )?.numeric?.agendaPoints
       : undefined;
   if (
     typeof runtimeAgendaPoints === "number" &&
@@ -997,26 +1001,30 @@ function semanticRuntimeCorpHasAgendaInHq(input: AiDecisionInput): boolean {
 }
 
 function semanticRuntimeCorpCentralPressure(input: AiDecisionInput): boolean {
-  const runnerCredits =
-    input.playerView.opponent.credits +
-    visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? []);
   const agendaInHq = semanticRuntimeCorpHasAgendaInHq(input);
   const hq = input.playerView.servers.find((server) => server.id === "hq");
   const rd = input.playerView.servers.find((server) => server.id === "rd");
-  const hqInsufficientlyProtected = (hq?.ice.length ?? 0) === 0;
-  const rdInsufficientlyProtected = (rd?.ice.length ?? 0) === 0;
+  const hqAccess = scoringWindowAccessAssessment(input, hq);
+  const rdAccess = scoringWindowAccessAssessment(input, rd);
   const hqRunOrAccessEvents = centralRunOrAccessEventCount(input, "hq");
   const rdRunOrAccessEvents = centralRunOrAccessEventCount(input, "rd");
+  const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
+  const rdPressure = semanticRuntimeCorpCentralPressureAssessment(input, "rd");
   return (
-    (agendaInHq && hqInsufficientlyProtected && runnerCredits >= 1) ||
-    (hqInsufficientlyProtected &&
-      runnerCredits >= 2 &&
+    (agendaInHq &&
+      hqAccess.runnerCanReachAccessNow &&
+      hqAccess.visibleRunnerContestCredits >= 1) ||
+    (hqAccess.runnerCanReachAccessNow &&
+      hqAccess.visibleRunnerContestCredits >= 2 &&
       (hqRunOrAccessEvents >= 3 ||
-        visibleRunnerCentralMultiaccess(input, "hq"))) ||
-    (rdInsufficientlyProtected &&
-      runnerCredits >= 4 &&
+        visibleRunnerCentralMultiaccess(input, "hq") ||
+        hqPressure.successfulAccessEvents > 0)) ||
+    (rdAccess.runnerCanReachAccessNow &&
+      rdAccess.visibleRunnerContestCredits >= 4 &&
       (rdRunOrAccessEvents >= 2 ||
-        visibleRunnerCentralMultiaccess(input, "rd")))
+        visibleRunnerCentralMultiaccess(input, "rd") ||
+        rdPressure.successfulAccessEvents > 0 ||
+        rdPressure.eventMultiaccess))
   );
 }
 
@@ -1108,9 +1116,12 @@ function tokensIncludePhrase(
   tokens: readonly string[],
   phrase: readonly string[],
 ): boolean {
-  return tokens.some((token, index) =>
-    token === phrase[0] &&
-    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  return tokens.some(
+    (token, index) =>
+      token === phrase[0] &&
+      phrase.every(
+        (phraseToken, offset) => tokens[index + offset] === phraseToken,
+      ),
   );
 }
 

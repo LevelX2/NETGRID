@@ -13,6 +13,7 @@ export type EffectiveDefenseContext = {
   hasMeaningfulTaxOrDamage: boolean;
   requiresPostRezPaidAbility: boolean;
   postRezAbilityAffordable: boolean;
+  visibleBreakerCoverage: boolean;
   minimumUsefulX?: number;
   zeroEffectRisk: boolean;
   evidence: string[];
@@ -62,32 +63,30 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
     minimumUsefulX !== undefined &&
     variableRezValue !== undefined &&
     variableRezValue < minimumUsefulX;
-  const requiresPostRezPaidAbility =
-    defenseSignals.some(
-      (signal) =>
-        signalHasTerm(signal, "encounter_paid_subroutine_add") ||
-        signalHasTerm(signal, "paid_subroutine"),
-    );
+  const requiresPostRezPaidAbility = defenseSignals.some(
+    (signal) =>
+      signalHasTerm(signal, "encounter_paid_subroutine_add") ||
+      signalHasTerm(signal, "paid_subroutine"),
+  );
   const postRezAbilityMinimumCost = requiresPostRezPaidAbility ? 2 : 0;
   const postRezAbilityAffordable =
-    !requiresPostRezPaidAbility ||
-    postRezCredits >= postRezAbilityMinimumCost;
-  const hasEtrSignal =
-    defenseSignals.some(
-      (signal) =>
-        signalHasTerm(signal, "etr_ice") ||
-        signalHasTerm(signal, "end_the_run") ||
-        signalHasTerm(signal, "end_run") ||
-        signalHasTerm(signal, "conditional_end_run") ||
-        signalHasTerm(signal, "ice_protection"),
-    );
-  const hasTraceSignal =
-    defenseSignals.some((signal) => signalHasTerm(signal, "trace"));
+    !requiresPostRezPaidAbility || postRezCredits >= postRezAbilityMinimumCost;
+  const hasEtrSignal = defenseSignals.some(
+    (signal) =>
+      signalHasTerm(signal, "etr_ice") ||
+      signalHasTerm(signal, "end_the_run") ||
+      signalHasTerm(signal, "end_run") ||
+      signalHasTerm(signal, "conditional_end_run") ||
+      signalHasTerm(signal, "ice_protection"),
+  );
+  const hasTraceSignal = defenseSignals.some((signal) =>
+    signalHasTerm(signal, "trace"),
+  );
   const hasTaxOrDamageSignal =
     defenseSignals.some(
-      (signal) => signalHasTerm(signal, "tax") || signalHasTerm(signal, "damage"),
-    ) ||
-    hasTraceSignal;
+      (signal) =>
+        signalHasTerm(signal, "tax") || signalHasTerm(signal, "damage"),
+    ) || hasTraceSignal;
   const visibleBreakerCoverage = visibleRunnerCoverageCanBreakRezzedIce(
     input,
     action,
@@ -128,6 +127,7 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
     hasMeaningfulTaxOrDamage,
     requiresPostRezPaidAbility,
     postRezAbilityAffordable,
+    visibleBreakerCoverage,
     ...(minimumUsefulX !== undefined ? { minimumUsefulX } : {}),
     zeroEffectRisk,
     evidence: [
@@ -140,7 +140,9 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
       `effective_defense_post_rez_ability_affordable:${postRezAbilityAffordable}`,
       `effective_defense_visible_breaker_coverage:${visibleBreakerCoverage}`,
       `effective_defense_zero_effect:${zeroEffectRisk}`,
-      ...(variableRezKind ? [`effective_defense_variable_kind:${variableRezKind}`] : []),
+      ...(variableRezKind
+        ? [`effective_defense_variable_kind:${variableRezKind}`]
+        : []),
       ...(variableRezValue !== undefined
         ? [`effective_defense_variable_value:${variableRezValue}`]
         : []),
@@ -176,10 +178,7 @@ function visibleRunnerCoverageCanBreakRezzedIce(
   );
 }
 
-function visibleActionSourceCard(
-  input: AiDecisionInput,
-  action: LegalAction,
-) {
+function visibleActionSourceCard(input: AiDecisionInput, action: LegalAction) {
   const sourceId = action.source;
   if (!sourceId || sourceId === "basic_action" || sourceId === "game_rule") {
     return undefined;
@@ -206,7 +205,12 @@ function selectedSubtypesAfterRez(action: LegalAction): string[] {
     : [];
 }
 
-function visibleCardText(card: { title?: string; rulesText?: string; definitionId?: string; subtypes?: readonly string[] }): string {
+function visibleCardText(card: {
+  title?: string;
+  rulesText?: string;
+  definitionId?: string;
+  subtypes?: readonly string[];
+}): string {
   return [
     card.title,
     card.rulesText,
@@ -243,8 +247,9 @@ function defenseSignalEntries(
     actionSemanticCandidate?.semanticActionType,
     ...(actionSemanticCandidate?.actionTacticSignals ?? []),
     ...(actionSemanticCandidate?.cardContextSignals ?? []),
-    ...(actionSemanticCandidate?.strategySupport.map((support) => support.strategyId) ??
-      []),
+    ...(actionSemanticCandidate?.strategySupport.map(
+      (support) => support.strategyId,
+    ) ?? []),
     ...(actionSemanticCandidate?.evidence ?? []),
   ]
     .filter((value): value is string => typeof value === "string")
@@ -338,10 +343,11 @@ function signalSegmentHasTerm(segment: string, term: string): boolean {
   const tokens = segment.split("_").filter(Boolean);
   const termTokens = term.split("_").filter(Boolean);
   if (termTokens.length <= 1) return tokens.includes(term);
-  return tokens.some((token, index) =>
-    token === termTokens[0] &&
-    termTokens.every(
-      (termToken, offset) => tokens[index + offset] === termToken,
-    ),
+  return tokens.some(
+    (token, index) =>
+      token === termTokens[0] &&
+      termTokens.every(
+        (termToken, offset) => tokens[index + offset] === termToken,
+      ),
   );
 }

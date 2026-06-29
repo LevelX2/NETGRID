@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -259,6 +263,32 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
 
     expect(installIceScore(huntingPack, "remote_1", input)).toBe(450);
   });
+
+  it("downranks advancement-counter remote support without scoreline context", () => {
+    const raymond = corpCard("raymond", "upgrade", {
+      definitionId: "onr_proteus_071_raymond-ellison",
+      title: "Raymond Ellison",
+      rulesText:
+        "Remove any number of advancement counters from cards installed in this data fort.",
+    });
+    const input = corpInputForCentralInstall(raymond, {
+      agendaInHq: true,
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [corpCard("remote-wall", "ice", { rezCost: 2 })],
+          root: [],
+        },
+      ],
+    });
+
+    expect(
+      installRootScore(raymond, "remote_1", input, ["scoreline_support"]),
+    ).toBe(-900);
+  });
 });
 
 function centralInstallScore(
@@ -285,6 +315,27 @@ function installIceScore(
     input,
     action,
     [],
+    centralInstallDependencies(),
+  );
+}
+
+function installRootScore(
+  card: VisibleCard,
+  serverId: `remote_${number}`,
+  input = corpInputForCentralInstall(card),
+  roles: string[] = [],
+): number {
+  const action = {
+    ...centralInstallIceAction(card, serverId),
+    payload: {
+      placement: "root",
+      serverId,
+    },
+  } as LegalAction;
+  return semanticRuntimeCorpInstallRemoteScore(
+    input,
+    action,
+    roles,
     centralInstallDependencies(),
   );
 }

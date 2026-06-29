@@ -147,6 +147,34 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("penalizes basic credit loops when reserve is satisfied and development is legal", () => {
+    const basicCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const installRemoteIce = corpAction("install-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([], [basicCredit, installRemoteIce]),
+      basicCredit,
+      "basic_economy_draw",
+      testDependencies(),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_reserve_satisfied_credit_loop_penalty",
+          value: -750,
+        }),
+      ]),
+    );
+  });
+
   it("scores mixed credit and draw Corp operations by combined action value", () => {
     const nightShift = corpAction(
       "play-night-shift",
@@ -537,6 +565,51 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("preserves central ICE for post-pass lifecycle payments over returning it to HQ", () => {
+    const payComponents = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([]),
+      corpAction("twisty.pay", "continue_run", {
+        corpPostPassIceAbility: "return_passed_ice_to_hq",
+        sourceDefinitionId: "onr_proteus_043_twisty-passages",
+        decision: "pay",
+        paymentAmount: 1,
+        serverId: "hq",
+      }),
+      "simple_run_choice",
+      testDependencies(),
+    );
+    const returnComponents = semanticRuntimeCorpScoreComponents(
+      corpInputWithGoals([]),
+      corpAction("twisty.return_to_hq", "continue_run", {
+        corpPostPassIceAbility: "return_passed_ice_to_hq",
+        sourceDefinitionId: "onr_proteus_043_twisty-passages",
+        decision: "return_to_hq",
+        serverId: "hq",
+      }),
+      "simple_run_choice",
+      testDependencies(),
+    );
+
+    expect(payComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_post_pass_ice_lifecycle_preserve",
+          value: 1200,
+          reason: expect.stringContaining("payment_amount:1"),
+        }),
+      ]),
+    );
+    expect(returnComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_post_pass_ice_lifecycle_return_to_hq_penalty",
+          value: -1900,
+          reason: expect.stringContaining("hq_ice_reinstall_extra_cost:2"),
+        }),
+      ]),
+    );
+  });
+
   it("scores visible damage or ambush actions from side-safe action semantics", () => {
     const components = semanticRuntimeCorpScoreComponents(
       corpInputWithGoals([
@@ -758,6 +831,74 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("penalizes breakable outer rez when it drops below an inner central rez floor", () => {
+    const action = corpAction(
+      "rez-outer-wall",
+      "rez_ice",
+      { cardId: "outer-wall" },
+      "outer-wall",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      {
+        ...corpInputWithGoals([]),
+        playerView: {
+          ...corpInputWithGoals([]).playerView,
+          own: {
+            ...corpInputWithGoals([]).playerView.own,
+            credits: 6,
+          },
+          opponent: {
+            rig: [fracterBreaker()],
+          },
+          servers: [
+            {
+              id: "hq",
+              label: "HQ",
+              root: [],
+              ice: [
+                corpIce("inner-sentry", { rezCost: 6 }),
+                corpIce("outer-wall", {
+                  definitionId: "simple_barrier_ice",
+                  subtypes: ["Barrier"],
+                  rezCost: 1,
+                }),
+              ],
+            },
+          ],
+        },
+      } as unknown as AiDecisionInput,
+      action,
+      "simple_rez",
+      {
+        ...testDependencies(),
+        actionCreditCost: () => 1,
+      },
+      {
+        ...semanticCandidate(
+          "rez-outer-wall",
+          "corp_window.rez",
+          ["role:etr_ice", "corp_ice.end_run"],
+          "rez_ice",
+        ),
+        costProfile: {
+          creditCost: 1,
+          costKnownStatus: "known",
+          additionalCosts: [],
+        },
+      },
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_downstream_rez_floor_preservation",
+          value: -1500,
+          reason: expect.stringContaining("inner_rez_floor:6"),
+        }),
+      ]),
+    );
+  });
+
   it("penalizes action-id encoded zero-effect X rez actions without extra defense semantics", () => {
     const actionId = "corp.rez_ice.test_ice.test_ice.x_strength.0.0";
     const components = semanticRuntimeCorpScoreComponents(
@@ -914,6 +1055,37 @@ function economyOperationCard(
     owner: "corp",
     controller: "corp",
     ...rest,
+  };
+}
+
+function corpIce(
+  instanceId: string,
+  overrides: Partial<VisibleCard> = {},
+): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    title: instanceId,
+    definitionId: instanceId,
+    type: "ice",
+    owner: "corp",
+    controller: "corp",
+    rezzed: false,
+    ...overrides,
+  };
+}
+
+function fracterBreaker(): VisibleCard {
+  return {
+    instanceId: "runner-fracter",
+    known: true,
+    title: "Runner Fracter",
+    definitionId: "runner-fracter",
+    type: "program",
+    owner: "runner",
+    controller: "runner",
+    subtypes: ["Icebreaker", "Fracter"],
+    rulesText: "Break barrier subroutines.",
   };
 }
 
