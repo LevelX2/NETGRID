@@ -96,14 +96,15 @@ export function evaluateRemoteAccessOutcomeMemory(
     creditsOrReserveImproved?: boolean;
   },
 ): RemoteAccessOutcomeMemoryStatus {
+  const currentKnownRootDefinitionIdSet = new Set(
+    context.currentKnownRootDefinitionIds,
+  );
   const status = evaluateAccessOutcomeMemoryStatus(
     remoteAccessOutcomeCompatibilityRecord(entry),
     {
       currentRemoteFingerprint:
         entry.expiresWhenRemoteChanges &&
-        !context.currentKnownRootDefinitionIds.includes(
-          entry.knownRootDefinitionId,
-        )
+        !currentKnownRootDefinitionIdSet.has(entry.knownRootDefinitionId)
           ? "legacy_remote_changed"
           : legacyRemoteFingerprint(entry.knownRootDefinitionId),
       currentCredits: context.creditsOrReserveImproved === true ? 1 : 0,
