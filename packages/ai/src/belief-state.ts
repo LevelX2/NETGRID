@@ -1036,15 +1036,16 @@ function positionInvalidatesKey(key: string, event: BeliefEventClassification): 
 }
 
 function rdTopRemovedByRunnerAccess(event: BeliefEventClassification): boolean {
+  const runnerRdTopRemovalActionTypeSet = new Set([
+    "steal_agenda",
+    "trash_accessed_card",
+    "move_to_removed_from_game",
+    "move_to_set_aside",
+  ]);
   return (
     event.actor === "runner" &&
     event.serverId === "rd" &&
-    [
-      "steal_agenda",
-      "trash_accessed_card",
-      "move_to_removed_from_game",
-      "move_to_set_aside",
-    ].includes(event.actionType)
+    runnerRdTopRemovalActionTypeSet.has(event.actionType)
   );
 }
 
@@ -1463,7 +1464,14 @@ function rndInvalidationReason(event: BeliefEventClassification): string | undef
   if (event.family === "shuffle") return "shuffle_changed_rd_top";
   if (event.family === "arrange") return "arrange_changed_rd_top";
   if (event.family === "swap") return "swap_changed_rd_top";
-  if (event.serverId === "rd" && ["steal_agenda", "trash_accessed_card", "move_to_removed_from_game", "move_to_set_aside", "return_from_set_aside"].includes(event.actionType)) {
+  const rdMovedCardActionTypeSet = new Set([
+    "steal_agenda",
+    "trash_accessed_card",
+    "move_to_removed_from_game",
+    "move_to_set_aside",
+    "return_from_set_aside",
+  ]);
+  if (event.serverId === "rd" && rdMovedCardActionTypeSet.has(event.actionType)) {
     return "rd_access_moved_card";
   }
   return undefined;

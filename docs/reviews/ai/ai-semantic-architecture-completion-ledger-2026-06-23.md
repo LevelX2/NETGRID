@@ -9953,6 +9953,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n -F '["access", "reveal", "expose", "rez", "score", "steal", "trash"].includes' ...` und `rg -n -F '["access", "reveal", "expose", "rez"].includes' ...` ohne Treffer in `packages/ai/src/belief-state.ts`.
 
+- `AI-COMPLETE-15` dreihundertvierzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/belief-state.ts` bindet R&D-Top-Removal- und R&D-Moved-Card-ActionTypes über lokale Sets statt direkter `.includes(...)`-Prüfungen.
+  - Strukturierte ActionTypes bleiben exakt; R&D-Freshness- und Known-Top-Invalidation behalten ihre vorhandene `trash_accessed_card`-Abdeckung.
+  - `belief-state.test.ts` sichert R&D-Top-Freshness und label-unabhängige Serverbindung.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/belief-state.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n -F '[\"steal_agenda\", \"trash_accessed_card\", \"move_to_removed_from_game\", \"move_to_set_aside\"].includes' ...` und `rg -n -F '[\"steal_agenda\", \"trash_accessed_card\", \"move_to_removed_from_game\", \"move_to_set_aside\", \"return_from_set_aside\"].includes' ...` ohne Treffer in `packages/ai/src/belief-state.ts`.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
