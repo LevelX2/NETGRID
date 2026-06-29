@@ -654,7 +654,8 @@ export function hqMemoryInvalidationReasonMatches(
   reason: string,
   reasonCodes: readonly string[],
 ): boolean {
-  return reasonCodes.includes(reason.split(":")[0] ?? reason);
+  const reasonCodeSet = new Set(reasonCodes);
+  return reasonCodeSet.has(reason.split(":")[0] ?? reason);
 }
 
 function knownCentralPathCost(

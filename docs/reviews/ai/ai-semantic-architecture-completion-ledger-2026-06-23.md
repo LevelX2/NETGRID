@@ -10061,6 +10061,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n '\.includes\(term\)|includes\(term\)' packages/ai/src/decision/doctrine-goal-synthesis.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertzweiundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/known-central-access-payoff.ts` bindet HQ-Memory-Invalidation-Reason-Codes über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Reason-Code-Erkennung bleibt exakt; Event-Suffixe nach `:` werden weiter entfernt und substring-nahe Rauschgründe bleiben ausgeschlossen.
+  - `known-central-access-payoff.test.ts` sichert HQ-Knownness-Payoffs und exact Reason-Code-Matching.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/known-central-access-payoff.test.ts` grün, 1 Datei, 4 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'reasonCodes\.includes|includes\(reason\.split' packages/ai/src/known-central-access-payoff.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
