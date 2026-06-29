@@ -483,18 +483,29 @@ export function semanticRuntimeDebugActionWhyNot(
 ): string[] {
   if (context.selectedByPlanMapping) {
     const mapped = context.mappedActionOrder.has(choice.action.actionId);
-    return [
+    return scrubEvidence([
       mapped ? "lower_plan_fit" : "plan_mismatch",
       mapped ? "selected_by_plan_mapping" : "excluded_by_current_plan",
       `rawSemanticScore:${choice.score}`,
       `finalSelectionScore:${displayScore}`,
       "displayOnlyScore:true",
+      ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),
+      ...(choice.reasonCode ? [`reasonCode:${choice.reasonCode}`] : []),
+      ...(context.selectedPlanType
+        ? [`selectedPlan:${context.selectedPlanType}`]
+        : []),
       ...(displayScore < choice.score
         ? ["lower_final_score_after_adjustment"]
         : []),
-    ];
+    ]);
   }
-  return ["semantic_score_below_selected"];
+  return scrubEvidence([
+    "semantic_score_below_selected",
+    `rawSemanticScore:${choice.score}`,
+    `finalSelectionScore:${displayScore}`,
+    ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),
+    ...(choice.reasonCode ? [`reasonCode:${choice.reasonCode}`] : []),
+  ]);
 }
 
 export function semanticRuntimeDebugExcludedActionWhyNot(

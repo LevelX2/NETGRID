@@ -62,6 +62,9 @@ describe("SemanticRuntimeDebug", () => {
       "rawSemanticScore:120",
       "finalSelectionScore:120",
       "displayOnlyScore:true",
+      "scope:runner_safe_access",
+      "reasonCode:semantic.runtime",
+      "selectedPlan:runner.obtain_breaker_coverage",
     ]);
     const excludedChoice = choice(action("run-hq", "start_run"), 60, {
       exclusion: {
@@ -121,6 +124,27 @@ describe("SemanticRuntimeDebug", () => {
       "selected_by_plan_mapping:false",
       "scope:basic_economy_draw",
       "reasonCode:runner.semantic.economy",
+    ]);
+  });
+
+  it("explains non-plan semantic runtime rejections with structured why-not facts", () => {
+    const rejected = choice(action("draw", "draw_card"), 45, {
+      reasonCode: "runner.semantic.hand_development",
+      scopeId: "basic_economy_draw",
+    });
+    const context = buildSemanticRuntimeDebugPlanContext({
+      selectedActionId: "gain",
+      selectedChoice: choice(action("gain", "gain_credit"), 90),
+      mappedActionIds: [],
+    });
+
+    expect(context.selectedByPlanMapping).toBe(false);
+    expect(semanticRuntimeDebugActionWhyNot(rejected, 45, context)).toEqual([
+      "semantic_score_below_selected",
+      "rawSemanticScore:45",
+      "finalSelectionScore:45",
+      "scope:basic_economy_draw",
+      "reasonCode:runner.semantic.hand_development",
     ]);
   });
 
