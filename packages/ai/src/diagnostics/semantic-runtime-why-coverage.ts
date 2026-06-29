@@ -1,0 +1,72 @@
+import type { AiDecisionDebug } from "@netgrid/shared";
+import { assertSemanticObjectSideSafe } from "./semantic-redaction";
+
+export const SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION =
+  "semantic-runtime-why-coverage-v1" as const;
+
+export type SemanticRuntimeWhyCoverageReport = {
+  schemaVersion: typeof SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION;
+  scope: "semantic_runtime_why_coverage_report_only";
+  sampleCount: number;
+  decisionsWithTopLevelWhyNot: number;
+  decisionsWithRuntimeWhyNotSection: number;
+  actionAlternativeCount: number;
+  actionAlternativesWithWhyChosen: number;
+  actionAlternativesWithWhyNot: number;
+  rankedAlternativeCount: number;
+  rankedAlternativesWithWhyNot: number;
+  redactionStatus: "passed";
+  productiveUseAllowed: false;
+  noRuntimeEffect: true;
+  evidence: string[];
+};
+
+export function buildSemanticRuntimeWhyCoverageReport(
+  decisions: readonly AiDecisionDebug[],
+): SemanticRuntimeWhyCoverageReport {
+  const actionAlternatives = decisions.flatMap(
+    (decision) => decision.actionAlternatives ?? [],
+  );
+  const rankedAlternatives = decisions.flatMap(
+    (decision) => decision.rankedAlternatives ?? [],
+  );
+  const report: SemanticRuntimeWhyCoverageReport = {
+    schemaVersion: SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION,
+    scope: "semantic_runtime_why_coverage_report_only",
+    sampleCount: decisions.length,
+    decisionsWithTopLevelWhyNot: decisions.filter(
+      (decision) => (decision.whyNot?.length ?? 0) > 0,
+    ).length,
+    decisionsWithRuntimeWhyNotSection: decisions.filter((decision) =>
+      (decision.detailSections ?? []).some(
+        (section) => section.id === "runtime_why_not",
+      ),
+    ).length,
+    actionAlternativeCount: actionAlternatives.length,
+    actionAlternativesWithWhyChosen: actionAlternatives.filter(
+      (alternative) => (alternative.whyChosen?.length ?? 0) > 0,
+    ).length,
+    actionAlternativesWithWhyNot: actionAlternatives.filter(
+      (alternative) => (alternative.whyNot?.length ?? 0) > 0,
+    ).length,
+    rankedAlternativeCount: rankedAlternatives.length,
+    rankedAlternativesWithWhyNot: rankedAlternatives.filter(
+      (alternative) => (alternative.whyNot?.length ?? 0) > 0,
+    ).length,
+    redactionStatus: "passed",
+    productiveUseAllowed: false,
+    noRuntimeEffect: true,
+    evidence: [
+      "semantic_runtime_why_coverage:report_only",
+      `sample_count:${decisions.length}`,
+      `decision_top_level_why_not_count:${
+        decisions.filter((decision) => (decision.whyNot?.length ?? 0) > 0)
+          .length
+      }`,
+      `action_alternative_count:${actionAlternatives.length}`,
+      `ranked_alternative_count:${rankedAlternatives.length}`,
+    ],
+  };
+  assertSemanticObjectSideSafe(report, "SemanticRuntimeWhyCoverageReport");
+  return report;
+}
