@@ -9692,6 +9692,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'candidate\.projectionIssues\.includes|projectionIssues\.includes' packages/ai/src/diagnostics/semantic-runtime-debug.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertelfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/pilot/pilot-scope-registry.ts` bindet Pilot-Env-Scopes und Frame-LegalActionIds über lokale Sets statt direkter `pilotScopesFromEnv().includes(...)`- und `params.frame.legalActionIds.includes(...)`-Prüfungen.
+  - Strukturierte PilotScope-IDs und ActionIds bleiben exakt wirksam; die Änderung erzeugt keine neue Text-, Label- oder LegalAction-Projektion.
+  - `pilot-scope-registry.test.ts` sichert Env-Parsing, Pilot-Choice-Gates und Scope-Allowance.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/pilot/pilot-scope-registry.test.ts` grün, 1 Datei, 13 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'pilotScopesFromEnv\(\)\.includes|legalActionIds\.includes' packages/ai/src/decision/pilot/pilot-scope-registry.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

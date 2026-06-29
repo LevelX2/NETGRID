@@ -71,7 +71,8 @@ export function parsePilotScopes(env: string | undefined): AiPlayStrengthPilotSc
 }
 
 export function semanticBasicSetupPilotEnabled(): boolean {
-  return pilotScopesFromEnv().includes(BASIC_SETUP_PILOT_MODE);
+  const pilotScopeSet = new Set(pilotScopesFromEnv());
+  return pilotScopeSet.has(BASIC_SETUP_PILOT_MODE);
 }
 
 export function semanticPlayStrengthPilotEnabled(): boolean {
@@ -88,7 +89,8 @@ export function semanticPilotChoice(params: {
   if (scopes.length === 0) return undefined;
   const top = params.trace.rankedActions[0];
   if (!top) return undefined;
-  if (!params.frame.legalActionIds.includes(top.actionId)) return undefined;
+  const legalActionIdSet = new Set(params.frame.legalActionIds);
+  if (!legalActionIdSet.has(top.actionId)) return undefined;
   if (top.blockers.length > 0) return undefined;
   const minimumScoreGap =
     semanticShadowCalibrationProfileFromEnv().pilotMinimumScoreGap;
