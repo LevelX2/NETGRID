@@ -695,26 +695,35 @@ export function semanticRuntimeDebugRankedAlternatives(params: {
   ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
   scrubEvidence: (evidence: string[]) => string[];
 }): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
+  const selectedChoice = params.rankedChoices.find(
+    (choice) => choice.action.actionId === params.selectedActionId,
+  );
+  const context = buildSemanticRuntimeDebugPlanContext({
+    selectedActionId: params.selectedActionId,
+    ...(selectedChoice ? { selectedChoice } : {}),
+  });
   return params.rankedChoices
     .filter((choice) => !choice.exclusion)
     .slice(0, 24)
-    .map((choice, index) => ({
-      rank: index + 1,
-      planId: `semantic_runtime:${choice.scopeId}:${choice.action.type}`,
-      planKind: choice.scopeId,
-      selectedActionType: choice.action.type,
-      summary: choice.explanation,
-      score: choice.score,
-      ...(choice.confidence !== undefined
-        ? { confidence: choice.confidence }
-        : {}),
-      visibleReasons: params.scrubEvidence(choice.evidence).slice(0, 4),
-      scoreBreakdown: params.scoreBreakdownForChoice(choice),
-      whyNot:
-        choice.action.actionId === params.selectedActionId
-          ? ["selected_action"]
-          : ["semantic_score_below_selected"],
-    }));
+    .map((choice, index) => {
+      const selected = choice.action.actionId === params.selectedActionId;
+      return {
+        rank: index + 1,
+        planId: `semantic_runtime:${choice.scopeId}:${choice.action.type}`,
+        planKind: choice.scopeId,
+        selectedActionType: choice.action.type,
+        summary: choice.explanation,
+        score: choice.score,
+        ...(choice.confidence !== undefined
+          ? { confidence: choice.confidence }
+          : {}),
+        visibleReasons: params.scrubEvidence(choice.evidence).slice(0, 4),
+        scoreBreakdown: params.scoreBreakdownForChoice(choice),
+        whyNot: selected
+          ? ["selected_action", ...semanticRuntimeDebugActionWhyChosen(choice, context)]
+          : semanticRuntimeDebugActionWhyNot(choice, choice.score, context),
+      };
+    });
 }
 
 export function semanticRuntimeDebugShadowTopItems(

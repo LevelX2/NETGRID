@@ -409,6 +409,10 @@ describe("SemanticRuntimeDebug", () => {
 
   it("formats ranked alternatives through caller-provided score rows", () => {
     const selected = choice(action("run-hq", "start_run"), 90);
+    const lower = choice(action("draw", "draw_card"), 55, {
+      reasonCode: "runner.semantic.hand_development",
+      scopeId: "basic_economy_draw",
+    });
     const blocked = choice(action("gain", "gain_credit"), 40, {
       exclusion: {
         key: "blocked",
@@ -418,7 +422,7 @@ describe("SemanticRuntimeDebug", () => {
     });
 
     const ranked = semanticRuntimeDebugRankedAlternatives({
-      rankedChoices: [selected, blocked],
+      rankedChoices: [selected, lower, blocked],
       selectedActionId: "run-hq",
       scoreBreakdownForChoice: () => [
         {
@@ -436,7 +440,27 @@ describe("SemanticRuntimeDebug", () => {
         planId: "semantic_runtime:runner_safe_access:start_run",
         selectedActionType: "start_run",
         visibleReasons: ["safe"],
-        whyNot: ["selected_action"],
+        whyNot: [
+          "selected_action",
+          "semantic_runtime_actual",
+          "rawSemanticScore:90",
+          "finalSelectionScore:90",
+          "selected_by_plan_mapping:false",
+          "scope:runner_safe_access",
+          "reasonCode:semantic.runtime",
+        ],
+      }),
+      expect.objectContaining({
+        rank: 2,
+        planId: "semantic_runtime:basic_economy_draw:draw_card",
+        selectedActionType: "draw_card",
+        whyNot: [
+          "semantic_score_below_selected",
+          "rawSemanticScore:55",
+          "finalSelectionScore:55",
+          "scope:basic_economy_draw",
+          "reasonCode:runner.semantic.hand_development",
+        ],
       }),
     ]);
   });
