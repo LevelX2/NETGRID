@@ -28,12 +28,12 @@ Start-Commit: `670944b57a9497c969bd54a26e578b37886ec758`
 | `packages/ai/src/legacy/corp-plans.ts` | 9307 Zeilen |
 | `packages/ai/src/deck-doctrine.ts` | 287 Zeilen |
 | `packages/ai/src/deck-capabilities.ts` | 936 Zeilen |
-| Semantische Module mit Legacy-/LegacyDecision-Treffern | PENDING Messauswertung |
-| Produktive `action.label`-/Regex-/Titel-Treffer | PENDING Messauswertung |
+| Semantische Module mit Legacy-/LegacyDecision-Treffern | `VERIFIED` aktueller Source-Scan: 42 Treffer in 6 Dateien im semantischen Runtime-Bereich; klassifiziert als gekapselter Provider, Forced-Legacy-Notaus, opt-in Practical-Micro-Vergleich oder Baseline-Support, nicht als normaler No-Candidate-Fallback. |
+| Produktive `action.label`-/Regex-/Titel-Treffer | `VERIFIED` aktueller Source-Scan: 11 `action.label`-Treffer als Werttransport, Debug-/Report-Ausgabe oder Legacy-Adapter; 0 freie produktive `.label.includes`-/`.label.match`-/`.label.toLowerCase`-/Prefix-/Suffix-Parser und 0 produktive `RegExp`-Konstrukte. |
 | Action-Type-Scoreverwendungen | `VERIFIED` report-only Dominanzmessung mit vollem A-D-Holdout ohne Action-Type-Dominanz. |
-| Legacy-Fallback-Rate | PENDING Messauswertung |
-| ActionSemanticCandidate-Coverage | PENDING Messauswertung |
-| TargetProfile-/TargetConstraint-Coverage | PENDING Messauswertung |
+| Legacy-Fallback-Rate | `VERIFIED` Normalpfad nicht mehr als Legacy-Rate messbar: der No-Candidate-Fallback ist `semantic_coverage_fallback` auf vorhandene Engine-`LegalActions`; Legacy bleibt nur Forced-Legacy-Notaus, Benchmark-/Shadow-/Fixture-Vergleich oder opt-in Practical-Micro-Vergleich. |
+| ActionSemanticCandidate-Coverage | `VERIFIED` Coverage-Basis `action-semantic-candidate-coverage-2026-06-12.json`: `sourceResolvedRate=1`, `abilityResolvedRate=0.0455`, `targetContextRate=0.4091`, `costKnownRate=1`, `timingKnownRate=1`, 0 Hidden-Info-Leaks, 0 Runtime-/Selection-/LegalAction-Generation-Changes; aktueller Coverage-Test grün. |
+| TargetProfile-/TargetConstraint-Coverage | `VERIFIED` aktueller Source-Scan: 33 `TargetProfileMatch`-/`targetProfileMatches`-Treffer in 11 Dateien und 8 `targetConstraintResults`-Treffer in 4 Dateien; Nutzung bleibt side-safe im TargetContext/Hard-Gate/Debug-Pfad und erzeugt keine Ziele oder LegalActions. |
 | WhyNot-Abdeckung | `VERIFIED` report-only Coverage-Messung mit `auditStatus`, Missing-Signalen, Selfplay-/Baseline-/Replay-Oberflächen und Pair-A-Smoke. |
 
 ## Baseline-Checks
@@ -11002,3 +11002,4 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
 | Audit 10 | `VERIFIED` | Erster Abschlussaudit für `AI-COMPLETE-20`: volles A-D-Holdout-Gate mit 75 Spielen und 9477 Entscheidungen grün; 0 Action-Limits, 0 IllegalActions, 0 ReplayFailures, RedactionSafe true, alle 15 Dominanzberichte `complete`, maximale Top-Share 0.253, alle 15 Why-Coverage-Berichte `complete` mit 0 Missing-Signalen; praktische Metriken besser bei Candidate Runner-Steals und Candidate Corp-Scores. |
 | Audit 11 | `VERIFIED` | Zweiter Abschlussaudit für `AI-COMPLETE-20`: separates Full-Holdout-Gate-B-Artefakt mit identischer Decision-Evidence und identischen Scenario-Aggregaten; erneut 75 Spiele, 9477 Entscheidungen, 0 Action-Limits, 0 IllegalActions, 0 ReplayFailures, RedactionSafe true, 0 Dominance-Failures, 0 Why-Coverage-Missing-Signale. `AI-COMPLETE-20` ist `VERIFIED`; kein neues In-Scope-Finding. |
 | Audit 12 | `VERIFIED` | Regression-Gate nach `AI-COMPLETE-F002`: vollständiger `@netgrid/ai`-Testlauf grün mit 271 Dateien und 2176 Tests; `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` und `git diff --check` grün; keine neue Engine-Autorität, keine LegalAction-Erzeugung und keine Hidden-Info-Grenzerweiterung. |
+| Audit 13 | `VERIFIED` | Kopftabellen-Messwerte nachgezogen: `docs/reviews/ai/ai-semantic-completion-metrics-audit-2026-06-29.md` klassifiziert Legacy-/Label-/Regex-/TargetProfile-/TargetConstraint-Resttreffer, bestätigt den semantischen No-Candidate-Fallback statt Legacy-Fallback und verweist auf die bestehende ActionSemanticCandidate-Coverage-Basis; `src/actions/action-semantic-coverage.test.ts` grün, 6 Tests. |
