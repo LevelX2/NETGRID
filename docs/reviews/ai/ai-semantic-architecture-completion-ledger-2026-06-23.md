@@ -10187,6 +10187,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes\("put"\)|tokens\.includes\("take"\)|tokens\.includes\("bits"\)' packages/ai/src/simulation/remote-trash-role.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertsechsundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/plans/tactical-plan-breaker-cards.ts` bindet Breaker-Subtype- und Universal-Breaker-Texttokens über lokale Sets statt direkter `.includes(...)`-Prüfungen.
+  - Strukturierte Breaker-Erkennung bleibt exakt; Subtype-, Title-, Definition- und RulesText-Tokens bleiben bounded und substring-nahe Breaker-/Coverage-Rauschwerte bleiben ausgeschlossen.
+  - `tactical-plan-breaker-coverage.test.ts` sichert sichtbare SourceCard-Coverage, label-only Ignorieren, Universal-Breaker-Text und bounded ICE-Coverage-Terme.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/plans/tactical-plan-breaker-coverage.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n '\["breaker", "icebreaker", "fracter", "decoder", "killer"\]\.includes|tokens\.includes\("break"\)|tokens\.includes\("breaks"\)|tokens\.includes\("subroutine"\)' packages/ai/src/plans/tactical-plan-breaker-cards.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

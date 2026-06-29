@@ -1,13 +1,19 @@
 import type { VisibleCard } from "@netgrid/shared";
 import type { RequiredCapabilityKind } from "./tactical-plan-types";
 
+const BREAKER_SUBTYPE_TOKENS = new Set([
+  "breaker",
+  "icebreaker",
+  "fracter",
+  "decoder",
+  "killer",
+]);
+
 export function cardLooksLikeBreaker(card: VisibleCard): boolean {
   return (
     card.type === "program" &&
     ((card.subtypes ?? []).some((subtype) =>
-      cardTokens(subtype).some((token) =>
-        ["breaker", "icebreaker", "fracter", "decoder", "killer"].includes(token),
-      ),
+      cardTokens(subtype).some((token) => BREAKER_SUBTYPE_TOKENS.has(token)),
     ) ||
       cardHasAnyToken(card.title, ["breaker", "icebreaker"]) ||
       cardHasAnyToken(card.definitionId, ["breaker", "icebreaker"]))
@@ -108,10 +114,11 @@ function cardLooksLikeUniversalBreaker(tokens: readonly string[]): boolean {
     const iceIndex = nextTokens.findIndex((next) => next === "ice");
     return iceIndex >= 0 && nextTokens[iceIndex + 1] === "subroutine";
   });
+  const tokenSet = new Set(tokens);
   return (
     hasGenericIceBreakPhrase ||
-    ((tokens.includes("break") || tokens.includes("breaks")) &&
-      tokens.includes("subroutine") &&
+    ((tokenSet.has("break") || tokenSet.has("breaks")) &&
+      tokenSet.has("subroutine") &&
       !tokensIncludeAny(tokens, ["wall", "barrier", "codegate", "sentry"]) &&
       !tokensIncludePhrase(tokens, ["code", "gate"]))
   );
