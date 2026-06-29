@@ -5027,7 +5027,7 @@ export function classifyCorpScoredAgendaAbility(
     observedImmediateGain > 0 &&
     (storedCredits > 0 ||
       numberPayload(action, "removePowerCounterAmount") > 0 ||
-      /counter|coup|take\s+\[?\d+\]?.*from/i.test(text));
+      scoredAgendaLooksLikeCounterEconomyText(text));
   const heuristicKind: CorpScoredAgendaAbilityKind =
     action.payload?.agendaAbility === "hq_archives_shuffle_draw" ||
     (lowerText.includes("shuffle") && observedDrawAmount > 0)
@@ -5273,6 +5273,28 @@ function scoredAgendaCreditGainFromText(text: string): number {
     corpScoredAgendaCreditGainAmountToken(tokens, index),
   );
   return amountToken ? (corpNumberWordToNumber(amountToken) ?? 0) : 0;
+}
+
+function scoredAgendaLooksLikeCounterEconomyText(text: string): boolean {
+  const tokens = corpRulesTextTokens(text);
+  return (
+    corpTokensIncludeAny(tokens, ["counter", "counters", "coup"]) ||
+    tokens.some((_token, index) =>
+      corpScoredAgendaTakeAmountFromToken(tokens, index),
+    )
+  );
+}
+
+function corpScoredAgendaTakeAmountFromToken(
+  tokens: readonly string[],
+  index: number,
+): boolean {
+  if (corpNumberWordToNumber(tokens[index] ?? "") === undefined) return false;
+  const hasTakeBefore =
+    tokens[index - 1] === "take" ||
+    (tokens[index - 1] === "bracketopen" && tokens[index - 2] === "take");
+  const tailStart = tokens[index + 1] === "bracketclose" ? index + 2 : index + 1;
+  return hasTakeBefore && corpTokensInclude(tokens.slice(tailStart), "from");
 }
 
 function corpScoredAgendaCreditGainAmountToken(
