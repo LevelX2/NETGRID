@@ -231,14 +231,15 @@ function visibleCardProvidesCentralMultiaccess(
     card.definitionId ?? ""
   }`.toLocaleLowerCase("en-US");
   const tokens = visibleTextTokens(text);
-  if (!visibleTextHasCentralMultiaccess(tokens)) {
+  const tokenSet = new Set(tokens);
+  if (!visibleTextHasCentralMultiaccess(tokens, tokenSet)) {
     return false;
   }
-  if (serverId === "hq") return tokens.includes("hq");
+  if (serverId === "hq") return tokenSet.has("hq");
   return (
     visibleTextHasPhrase(tokens, ["r", "d"]) ||
-    tokens.includes("rd") ||
-    tokens.includes("rnd")
+    tokenSet.has("rd") ||
+    tokenSet.has("rnd")
   );
 }
 
@@ -306,9 +307,12 @@ function recordPayload(
     : undefined;
 }
 
-function visibleTextHasCentralMultiaccess(tokens: readonly string[]): boolean {
+function visibleTextHasCentralMultiaccess(
+  tokens: readonly string[],
+  tokenSet: ReadonlySet<string>,
+): boolean {
   return (
-    tokens.includes("multiaccess") ||
+    tokenSet.has("multiaccess") ||
     visibleTextHasPhrase(tokens, ["additional", "card"]) ||
     visibleTextHasPhrase(tokens, ["access", "1", "additional"])
   );
