@@ -72,10 +72,12 @@ export function semanticRuntimeCoverageSelectionDebug(
 }
 
 function sourceIdentityHasMantisToken(sourceIdentity: string): boolean {
-  return sourceIdentity
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean)
-    .includes("mantis");
+  const tokens = new Set(
+    sourceIdentity
+      .split(/[^a-z0-9]+/)
+      .filter(Boolean),
+  );
+  return tokens.has("mantis");
 }
 
 function semanticRuntimeCoverageAnswerRoleFromMapping(
@@ -93,7 +95,8 @@ function semanticRuntimeCoverageAnswerRoleFromMapping(
     "basic_draw_fallback",
     "not_coverage_answer",
   ];
-  return priority.find((role) => roles.includes(role)) ?? roles[0];
+  const roleSet = new Set(roles);
+  return priority.find((role) => roleSet.has(role)) ?? roles[0];
 }
 
 function semanticRuntimeCoverageAnswerRoleFromEntry(

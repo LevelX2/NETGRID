@@ -178,6 +178,189 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("scores bracket notation Corp credit operations", () => {
+    const creditConsolidation = corpAction(
+      "play-credit-consolidation",
+      "play_operation",
+      {},
+      "corp_credit_consolidation",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        10,
+        [
+          economyOperationCard({
+            instanceId: "corp_credit_consolidation",
+            definitionId: "onr_proteus_047_credit-consolidation",
+            title: "Credit Consolidation",
+            rulesText: "Gain [15].",
+            cost: 10,
+          }),
+        ],
+        [creditConsolidation],
+      ),
+      creditConsolidation,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_operation_burst_economy",
+          value: 2250,
+          reason: expect.stringContaining("operation_gain:15"),
+        }),
+      ]),
+    );
+    expect(JSON.stringify(components)).toContain("burst_economy_net_gain:5");
+    expect(JSON.stringify(components)).toContain("operation_action_value:5");
+  });
+
+  it("scores German immediate credit and draw operations", () => {
+    const creditSurge = corpAction(
+      "play-credit-surge",
+      "play_operation",
+      {},
+      "corp_credit_surge",
+    );
+    const archivePlanning = corpAction(
+      "play-archive-planning",
+      "play_operation",
+      {},
+      "corp_archive_planning",
+    );
+
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        1,
+        [
+          economyOperationCard({
+            instanceId: "corp_credit_surge",
+            definitionId: "v08_credit_surge_operation",
+            title: "Credit Surge",
+            rulesText: "Erhalte 7 Credits.",
+            cost: 1,
+          }),
+        ],
+        [creditSurge],
+      ),
+      creditSurge,
+      "basic_install",
+      testDependencies(),
+    );
+    const drawComponents = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        0,
+        [
+          economyOperationCard({
+            instanceId: "corp_archive_planning",
+            definitionId: "v08_archive_planning_operation",
+            title: "Archive Planning",
+            rulesText: "Ziehe 3 Karten.",
+            cost: 0,
+          }),
+        ],
+        [archivePlanning],
+      ),
+      archivePlanning,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(creditComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_operation_burst_economy",
+          value: 2430,
+          reason: expect.stringContaining("burst_economy_net_gain:6"),
+        }),
+      ]),
+    );
+    expect(drawComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_operation_burst_economy",
+          value: 1890,
+          reason: expect.stringContaining("operation_draw:3"),
+        }),
+      ]),
+    );
+  });
+
+  it("scores value-two Corp draw operations above basic draw without burst tier", () => {
+    const simpleDraw = corpAction(
+      "play-simple-draw",
+      "play_operation",
+      {},
+      "corp_simple_draw",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        0,
+        [
+          economyOperationCard({
+            instanceId: "corp_simple_draw",
+            definitionId: "simple_draw_operation",
+            title: "Simple Draw Operation",
+            rulesText: "Ziehe 2 Karten.",
+            cost: 0,
+          }),
+        ],
+        [simpleDraw],
+      ),
+      simpleDraw,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_operation_burst_economy",
+          value: 1530,
+          reason: expect.stringContaining("operation_action_value:2"),
+        }),
+      ]),
+    );
+    expect(JSON.stringify(components)).toContain(
+      "operation_economy_tier:efficient",
+    );
+  });
+
+  it("does not score visible drawback operations as generic immediate economy", () => {
+    const badPublicityOperation = corpAction(
+      "play-bad-publicity",
+      "play_operation",
+      {},
+      "corp_bad_publicity",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        0,
+        [
+          economyOperationCard({
+            instanceId: "corp_bad_publicity",
+            definitionId: "v099_bad_publicity_operation",
+            title: "Bad Publicity Operation",
+            rulesText: "Gain 3 credits and take 1 bad publicity.",
+            cost: 0,
+          }),
+        ],
+        [badPublicityOperation],
+      ),
+      badPublicityOperation,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(
+      components.some(
+        (component) => component.key === "corp_operation_burst_economy",
+      ),
+    ).toBe(false);
+  });
+
   it("scores advance, rez and install actions that match Corp tactical goals", () => {
     const cases: Array<{
       goal: TacticalGoalLike;
@@ -715,6 +898,22 @@ function nightShiftCard(): VisibleCard {
     cost: 0,
     owner: "corp",
     controller: "corp",
+  };
+}
+
+function economyOperationCard(
+  overrides: Partial<VisibleCard> & { instanceId: string },
+): VisibleCard {
+  const { instanceId, ...rest } = overrides;
+  return {
+    instanceId,
+    known: true,
+    title: "Economy Operation",
+    type: "operation",
+    cost: 0,
+    owner: "corp",
+    controller: "corp",
+    ...rest,
   };
 }
 

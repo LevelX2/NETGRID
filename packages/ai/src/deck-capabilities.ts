@@ -587,12 +587,18 @@ function buildBreakerCoverageMatrix(
   return Object.fromEntries(
     BREAKER_COVERAGES.map((coverage) => {
       const matching = breakerInventory.filter((breaker) =>
-        breaker.coverage.includes(coverage) ||
-        breaker.coverage.includes("universal"),
+        breakerHasCoverage(breaker, coverage) ||
+        breakerHasCoverage(breaker, "universal"),
       );
-      const installed = matching.some((breaker) => breaker.locations.includes("installed"));
-      const inHand = matching.some((breaker) => breaker.locations.includes("in_hand"));
-      const inHeapOrArchives = matching.some((breaker) => breaker.locations.includes("discarded"));
+      const installed = matching.some((breaker) =>
+        breakerHasLocation(breaker, "installed"),
+      );
+      const inHand = matching.some((breaker) =>
+        breakerHasLocation(breaker, "in_hand"),
+      );
+      const inHeapOrArchives = matching.some((breaker) =>
+        breakerHasLocation(breaker, "discarded"),
+      );
       const inDeckKnown = matching.some((breaker) =>
         breaker.quantityKnownInDeck > visibleKnownCopyCount(breaker),
       );
@@ -916,7 +922,8 @@ function buildCorpRemotePlanProfile(
       ),
     ).length,
     ambushToolsKnown: records.filter((record) =>
-      rolesMatch(record.roles, ["ambush"]) || record.subtypes.includes("ambush"),
+      rolesMatch(record.roles, ["ambush"]) ||
+      record.subtypes.some((subtype) => subtype.toLowerCase() === "ambush"),
     ).length,
     evidence: ["corp_remote_profile:conservative"],
   };
@@ -1205,12 +1212,27 @@ function runtimeNumber(
 }
 
 function primaryStatus(locations: readonly CapabilityCardStatus[]): CapabilityCardStatus {
-  if (locations.includes("installed")) return "installed";
-  if (locations.includes("in_hand")) return "in_hand";
-  if (locations.includes("in_deck")) return "in_deck";
-  if (locations.includes("discarded")) return "discarded";
-  if (locations.includes("scored")) return "scored";
+  const locationSet = new Set(locations);
+  if (locationSet.has("installed")) return "installed";
+  if (locationSet.has("in_hand")) return "in_hand";
+  if (locationSet.has("in_deck")) return "in_deck";
+  if (locationSet.has("discarded")) return "discarded";
+  if (locationSet.has("scored")) return "scored";
   return "unavailable";
+}
+
+function breakerHasCoverage(
+  breaker: BreakerCapability,
+  coverage: BreakerCoverageKind,
+): boolean {
+  return new Set(breaker.coverage).has(coverage);
+}
+
+function breakerHasLocation(
+  breaker: BreakerCapability,
+  location: CapabilityCardStatus,
+): boolean {
+  return new Set(breaker.locations).has(location);
 }
 
 function subtypeOrText(record: CardCapabilityRecord, ...needles: string[]): boolean {

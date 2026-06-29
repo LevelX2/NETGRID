@@ -6298,6 +6298,140 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
   });
 
+  it("uses basic credit to unlock Credit Consolidation before nonurgent HQ ICE", () => {
+    const input = corpEconomyOperationInput(
+      "ai-corp-credit-consolidation-threshold",
+      9,
+      CREDIT_CONSOLIDATION_CARD_ID_FOR_TEST,
+    );
+    const creditConsolidation = economyOperationAction(
+      input,
+      CREDIT_CONSOLIDATION_CARD_ID_FOR_TEST,
+    );
+    const hqIceInstall = hqIceInstallAction(
+      input,
+      ACCOUNTS_RECEIVABLE_HQ_ICE_CARD_ID_FOR_TEST,
+    );
+    const basicCredit = basicCorpCreditAction(input);
+
+    expect(creditConsolidation).toBeUndefined();
+    expect(hqIceInstall).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!hqIceInstall || !basicCredit)
+      throw new Error("Missing Credit Consolidation threshold fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [hqIceInstall, basicCredit],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(basicCredit.actionId);
+    expect(debugText).toContain("corp_operation_economy_threshold_funding");
+    expect(debugText).toContain("operation_gain:15");
+    expect(debugText).toContain("burst_economy_net_gain:5");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("plays Credit Consolidation before the basic credit action", () => {
+    const input = corpEconomyOperationInput(
+      "ai-corp-credit-consolidation-play",
+      10,
+      CREDIT_CONSOLIDATION_CARD_ID_FOR_TEST,
+    );
+    const creditConsolidation = economyOperationAction(
+      input,
+      CREDIT_CONSOLIDATION_CARD_ID_FOR_TEST,
+    );
+    const basicCredit = basicCorpCreditAction(input);
+
+    expect(creditConsolidation).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!creditConsolidation || !basicCredit)
+      throw new Error("Missing Credit Consolidation play fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, creditConsolidation],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(creditConsolidation.actionId);
+    expect(debugText).toContain("corp_operation_burst_economy");
+    expect(debugText).toContain("operation_cost:10");
+    expect(debugText).toContain("operation_gain:15");
+    expect(debugText).toContain("operation_action_value:5");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("plays German credit surge before the basic credit action", () => {
+    const input = corpEconomyOperationInput(
+      "ai-corp-credit-surge-play",
+      1,
+      CREDIT_SURGE_CARD_ID_FOR_TEST,
+    );
+    const creditSurge = economyOperationAction(
+      input,
+      CREDIT_SURGE_CARD_ID_FOR_TEST,
+    );
+    const basicCredit = basicCorpCreditAction(input);
+
+    expect(creditSurge).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!creditSurge || !basicCredit)
+      throw new Error("Missing Credit Surge fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, creditSurge],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(creditSurge.actionId);
+    expect(debugText).toContain("corp_operation_burst_economy");
+    expect(debugText).toContain("operation_cost:1");
+    expect(debugText).toContain("operation_gain:7");
+    expect(debugText).toContain("burst_economy_net_gain:6");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("plays value-two German draw operation before basic actions", () => {
+    const input = corpEconomyOperationInput(
+      "ai-corp-simple-draw-play",
+      0,
+      SIMPLE_DRAW_OPERATION_CARD_ID_FOR_TEST,
+    );
+    const simpleDraw = economyOperationAction(
+      input,
+      SIMPLE_DRAW_OPERATION_CARD_ID_FOR_TEST,
+    );
+    const basicCredit = basicCorpCreditAction(input);
+    const basicDraw = basicCorpDrawAction(input);
+
+    expect(simpleDraw).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    expect(basicDraw).toBeDefined();
+    if (!simpleDraw || !basicCredit || !basicDraw)
+      throw new Error("Missing Simple Draw fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, basicDraw, simpleDraw],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(simpleDraw.actionId);
+    expect(debugText).toContain("corp_operation_burst_economy");
+    expect(debugText).toContain("operation_draw:2");
+    expect(debugText).toContain("operation_action_value:2");
+    expect(debugText).toContain("operation_economy_tier:efficient");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
   it("does not give opaque Corp abilities the installed-economy bonus", () => {
     const input = installedCorpBbsEconomyInput(
       "ai-corp-semantic-opaque-bbs-ability",
@@ -28138,6 +28272,10 @@ const DERMATECH_BODYPLATING_CARD_ID_FOR_TEST =
 const ACCOUNTS_RECEIVABLE_CARD_ID_FOR_TEST = "onr_v1_281_accounts-receivable";
 const EFFICIENCY_EXPERTS_CARD_ID_FOR_TEST = "onr_v1_290_efficiency-experts";
 const NIGHT_SHIFT_CARD_ID_FOR_TEST = "onr_v1_295_night-shift";
+const CREDIT_CONSOLIDATION_CARD_ID_FOR_TEST =
+  "onr_proteus_047_credit-consolidation";
+const CREDIT_SURGE_CARD_ID_FOR_TEST = "v08_credit_surge_operation";
+const SIMPLE_DRAW_OPERATION_CARD_ID_FOR_TEST = "simple_draw_operation";
 const ACCOUNTS_RECEIVABLE_HQ_ICE_CARD_ID_FOR_TEST = "onr_v1_243_fetch-4-0-1";
 
 const V111_CORP_DECK: DeckDefinition = {

@@ -181,16 +181,17 @@ export function summarizeCentralCloseoutRepeatMetrics(
         noFreshKeys.add(key);
         const alternatives =
           entry.runnerNoFreshCentralBetterAlternativeTypes ?? [];
+        const alternativeSet = new Set(alternatives);
         if (alternatives.length > 0) noFreshWithBetterKeys.add(key);
         else noFreshWithoutBetterKeys.add(key);
         if (entry.runnerNoFreshCentralRunTaken) {
           noFreshRunKeys.add(key);
-          if (alternatives.includes("economy")) staleDespite.economy.add(key);
-          if (alternatives.includes("rig_unlock"))
+          if (alternativeSet.has("economy")) staleDespite.economy.add(key);
+          if (alternativeSet.has("rig_unlock"))
             staleDespite.rig_unlock.add(key);
-          if (alternatives.includes("remote_contest"))
+          if (alternativeSet.has("remote_contest"))
             staleDespite.remote_contest.add(key);
-          if (alternatives.includes("pressure_install"))
+          if (alternativeSet.has("pressure_install"))
             staleDespite.pressure_install.add(key);
           const allowed = entry.runnerStaleCentralAllowedReason;
           if (allowed) {

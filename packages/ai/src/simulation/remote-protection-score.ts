@@ -59,7 +59,7 @@ export function runnerContestRiskForSimulation(
   const breakers =
     input.playerView.opponent.rig?.filter((card) =>
       card.definitionId
-        ? RUNTIME_CARDS[card.definitionId]?.subtypes.includes("icebreaker")
+        ? runtimeCardHasSubtype(card.definitionId, "icebreaker")
         : false,
     ).length ?? 0;
   const rezzedIce =
@@ -70,4 +70,12 @@ export function runnerContestRiskForSimulation(
   if (runnerCredits >= 6 && breakers > 0) return "high";
   if (rezzedIce > 0 || runnerCredits <= 3 || breakers === 0) return "low";
   return "medium";
+}
+
+function runtimeCardHasSubtype(definitionId: string, subtype: string): boolean {
+  return (
+    RUNTIME_CARDS[definitionId]?.subtypes.some(
+      (entry) => entry.toLocaleLowerCase("en-US") === subtype,
+    ) ?? false
+  );
 }

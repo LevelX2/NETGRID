@@ -352,9 +352,7 @@ function semanticRuntimeCorpCentralIceProfile(card: VisibleCard | undefined): {
       roleMatchesAny(signal, ["position_scaling", "outer_ice_scaling"]),
     ) ||
     visibleSubroutines.some((subroutine) =>
-      JSON.stringify(subroutine)
-        .toLocaleLowerCase("en-US")
-        .includes("outside"),
+      semanticRuntimeCorpRecordHasToken(subroutine, "outside"),
     );
   const modeChoice =
     hintTacticSignals.some((signal) =>
@@ -453,6 +451,16 @@ function semanticRuntimeCorpHintTargetProfiles(
           typeof entry === "object" && entry !== null,
       )
     : [];
+}
+
+function semanticRuntimeCorpRecordHasToken(
+  value: unknown,
+  token: string,
+): boolean {
+  return JSON.stringify(value)
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .includes(token);
 }
 
 function semanticRuntimeCorpCentralInstallThreat(

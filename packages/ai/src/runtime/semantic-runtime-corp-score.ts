@@ -41,7 +41,8 @@ type CorpBurstEconomyOperation = {
   evidence: string[];
 };
 
-const CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE = 3;
+const CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE = 2;
+const CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE = 3;
 
 export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
   actionCreditCost: (action: LegalAction) => number;
@@ -340,8 +341,8 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   if (burstEconomyOperation) {
     components.push({
       key: "corp_operation_burst_economy",
-      label: "Burst-Economy-Operation",
-      value: 1350 + burstEconomyOperation.actionValue * 180,
+      label: "Immediate-Economy-Operation",
+      value: corpImmediateEconomyOperationScoreValue(burstEconomyOperation),
       reason: burstEconomyOperation.evidence.join("|"),
     });
   }
@@ -353,7 +354,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     components.push({
       key: "corp_operation_economy_threshold_funding",
       label: "Operation-Schwelle",
-      value: 1200 + burstEconomyThreshold.actionValue * 160,
+      value: corpImmediateEconomyThresholdScoreValue(burstEconomyThreshold),
       reason: burstEconomyThreshold.evidence.join("|"),
     });
   }
@@ -711,17 +712,17 @@ function corpBurstEconomyOperationForVisibleCard(
   const definition = visibleCardDefinition(card);
   const type = card.type ?? definition?.type;
   if (type !== "operation") return undefined;
+  if (corpImmediateEconomyOperationHasVisibleDrawback(card, definition)) {
+    return undefined;
+  }
   const cost =
     positiveOrZeroNumber(card.cost) ??
     positiveOrZeroNumber(definition?.cost) ??
     positiveOrZeroNumber(fallbackCost) ??
     0;
-  const gain = corpCreditGainFromRulesText(
-    card.rulesText ?? definition?.rulesText,
-  );
-  const drawCards = corpDrawCountFromRulesText(
-    card.rulesText ?? definition?.rulesText,
-  );
+  const rulesText = card.rulesText ?? definition?.rulesText;
+  const gain = corpCreditGainFromRulesText(rulesText);
+  const drawCards = corpDrawCountFromRulesText(rulesText);
   if (gain <= 0 && drawCards <= 0) return undefined;
   const netGain = gain - cost;
   const actionValue = netGain + drawCards;
@@ -738,8 +739,43 @@ function corpBurstEconomyOperationForVisibleCard(
       `operation_draw:${drawCards}`,
       `burst_economy_net_gain:${netGain}`,
       `operation_action_value:${actionValue}`,
+      `operation_economy_tier:${actionValue >= CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE ? "burst" : "efficient"}`,
     ],
   };
+}
+
+function corpImmediateEconomyOperationScoreValue(
+  operation: CorpBurstEconomyOperation,
+): number {
+  return operation.actionValue >= CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE
+    ? 1350 + operation.actionValue * 180
+    : 1050 + operation.actionValue * 240;
+}
+
+function corpImmediateEconomyThresholdScoreValue(
+  operation: CorpBurstEconomyOperation,
+): number {
+  return operation.actionValue >= CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE
+    ? 1200 + operation.actionValue * 160
+    : 650 + operation.actionValue * 140;
+}
+
+function corpImmediateEconomyOperationHasVisibleDrawback(
+  card: VisibleCard,
+  definition: ReturnType<typeof visibleCardDefinition>,
+): boolean {
+  const mechanics = definition?.mechanics ?? [];
+  if (
+    mechanics.some((mechanic) =>
+      ["bad_publicity", "add_bad_publicity"].includes(mechanic),
+    )
+  ) {
+    return true;
+  }
+  const text = [card.rulesText, definition?.rulesText]
+    .filter((value): value is string => typeof value === "string")
+    .join("\n");
+  return /\b(?:take|add|gain|suffer)\s+\d+\s+bad publicity\b/i.test(text);
 }
 
 function visibleSourceCardForAction(
@@ -765,34 +801,68 @@ function visibleSourceCardForAction(
 }
 
 function corpCreditGainFromRulesText(rulesText: string | undefined): number {
-  const match = rulesText?.match(/\bgain\s+(\d+)\s+credits?\b/i);
-  if (!match) return 0;
-  const gain = Number.parseInt(match[1] ?? "", 10);
-  return Number.isFinite(gain) && gain > 0 ? gain : 0;
+  const bracketMatch = rulesText?.match(/\bgain\s+\[(\d+)\](?=\W|$)/i);
+  if (bracketMatch) return numberFromDigitOrWord(bracketMatch[1] ?? "");
+  const englishMatch = rulesText?.match(
+    /\bgain\s+(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+credits?\b/i,
+  );
+  if (englishMatch) return numberFromDigitOrWord(englishMatch[1] ?? "");
+  const germanMatch = rulesText?.match(
+    /\berhalte\s+(eins|eine|einen|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|\d+)\s+credits?\b/i,
+  );
+  if (germanMatch) return numberFromDigitOrWord(germanMatch[1] ?? "");
+  return 0;
 }
 
 function corpDrawCountFromRulesText(rulesText: string | undefined): number {
-  const match = rulesText?.match(
-    /\bdraw\s+(one|two|three|four|five|\d+)\s+cards?\b/i,
+  const englishMatch = rulesText?.match(
+    /\bdraw\s+(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+cards?\b/i,
   );
-  if (!match) return 0;
-  return numberFromDigitOrWord(match[1] ?? "");
+  if (englishMatch) return numberFromDigitOrWord(englishMatch[1] ?? "");
+  const germanMatch = rulesText?.match(
+    /\bziehe\s+(eins|eine|einen|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|\d+)\s+karten?\b/i,
+  );
+  if (germanMatch) return numberFromDigitOrWord(germanMatch[1] ?? "");
+  return 0;
 }
 
 function numberFromDigitOrWord(value: string): number {
   const numeric = Number.parseInt(value, 10);
   if (Number.isFinite(numeric) && numeric > 0) return numeric;
-  switch (value.toLocaleLowerCase("en-US")) {
+  switch (value.trim().toLocaleLowerCase("de-DE")) {
     case "one":
+    case "eins":
+    case "eine":
+    case "einen":
       return 1;
     case "two":
+    case "zwei":
       return 2;
     case "three":
+    case "drei":
       return 3;
     case "four":
+    case "vier":
       return 4;
     case "five":
+    case "fünf":
+    case "fuenf":
       return 5;
+    case "six":
+    case "sechs":
+      return 6;
+    case "seven":
+    case "sieben":
+      return 7;
+    case "eight":
+    case "acht":
+      return 8;
+    case "nine":
+    case "neun":
+      return 9;
+    case "ten":
+    case "zehn":
+      return 10;
     default:
       return 0;
   }

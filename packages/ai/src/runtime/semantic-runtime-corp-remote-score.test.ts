@@ -88,6 +88,34 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     expect(rdScore).toBeGreaterThan(hqScore);
   });
 
+  it("bounds visible central multiaccess fallback text to exact tokens", () => {
+    const etrIce = corpCard("barrier", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 3,
+    });
+    const noiseInput = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      runnerRig: [
+        runnerCard("rd-noise", "hardware", {
+          title: "multiaccessory R&Dish pressure",
+          rulesText: "Access 1 additionally shaped cardinals.",
+        }),
+      ],
+    });
+    const fallbackInput = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      runnerRig: [
+        runnerCard("rd-fallback", "hardware", {
+          title: "R&D Text Interface",
+          rulesText: "Whenever you access R&D, access 1 additional card.",
+        }),
+      ],
+    });
+
+    expect(centralInstallScore(etrIce, "rd", noiseInput)).toBe(1050);
+    expect(centralInstallScore(etrIce, "rd", fallbackInput)).toBe(1350);
+  });
+
   it("does not treat unaffordable central ICE as real R&D protection", () => {
     const etrIce = corpCard("expensive-barrier", "ice", {
       definitionId: "simple_barrier_ice",
@@ -128,6 +156,28 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     });
 
     expect(centralInstallScore(huntingPack, "rd", input)).toBe(200);
+  });
+
+  it("bounds outside-ice subroutine text to exact tokens", () => {
+    const outsideNoiseIce = corpCard("position-noise", "ice", {
+      title: "Position Noise",
+      rezCost: 1,
+      effectiveRunQuote: testRunQuoteWithText(
+        "position-noise",
+        "Outsideish support reference.",
+      ),
+    });
+    const outsideTokenIce = corpCard("outside-token", "ice", {
+      title: "Outside Token",
+      rezCost: 1,
+      effectiveRunQuote: testRunQuoteWithText(
+        "outside-token",
+        "Needs outside ICE support.",
+      ),
+    });
+
+    expect(centralInstallScore(outsideNoiseIce, "rd")).toBe(450);
+    expect(centralInstallScore(outsideTokenIce, "rd")).toBe(100);
   });
 
   it("keeps Credit Blocks strong only when the wall mode is fundable against visible Killer coverage", () => {
@@ -428,6 +478,24 @@ function corpCard(
     owner: "corp",
     ...overrides,
   } as VisibleCard;
+}
+
+function testRunQuoteWithText(
+  id: string,
+  text: string,
+): NonNullable<VisibleCard["effectiveRunQuote"]> {
+  return {
+    iceInstanceId: id,
+    iceDefinitionId: id,
+    effectiveStrength: 1,
+    subroutines: [
+      {
+        id: `${id}-sub`,
+        type: "test_text_probe",
+        text,
+      },
+    ],
+  } as unknown as NonNullable<VisibleCard["effectiveRunQuote"]>;
 }
 
 function semanticCandidate(
