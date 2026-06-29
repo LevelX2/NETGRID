@@ -387,11 +387,18 @@ function segmentHasBoundedTerm(segment: string, term: string): boolean {
   if (segment === term) return true;
   const tokens = segment.split("_").filter(Boolean);
   const termTokens = term.split("_").filter(Boolean);
-  if (termTokens.length <= 1) return tokens.includes(term);
+  if (termTokens.length <= 1) return segmentTokensInclude(tokens, term);
   return tokens.some((token, index) =>
     token === termTokens[0] &&
     termTokens.every((termToken, offset) => tokens[index + offset] === termToken),
   );
+}
+
+function segmentTokensInclude(
+  tokens: readonly string[],
+  accepted: string,
+): boolean {
+  return new Set(tokens).has(accepted);
 }
 
 function buildScenarioReport(

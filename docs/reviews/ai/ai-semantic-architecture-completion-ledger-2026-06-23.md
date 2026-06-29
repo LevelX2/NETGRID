@@ -10268,6 +10268,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'tokens\.includes' packages/ai/src/semantic-ai-core-meta.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertfünfundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/evaluation/semantic-shadow-league.ts` bindet die Single-Term-Segment-Membership in `segmentHasBoundedTerm` über einen lokalen `segmentTokensInclude`-Helper statt direkter `tokens.includes(term)`-Prüfung.
+  - Runner-Safe-Access-Dry-Run-Klassifikation bleibt bounded: `remote`, `risk` und `structured_alignment_required` zählen nur an Segment-/Unterstrichgrenzen; substring-nahe Noise-Werte bleiben ausgeschlossen.
+  - `semantic-shadow-league.test.ts` sichert den Dry-Run-Classifier mit `notremote`, `brisk` und `structured_alignment_requiredish` als Noise-Fälle.
+  - Status bleibt `IN_PROGRESS`, weil nach diesem Resttreffer ein erneuter breiter Audit auf direkte Membership-Cluster und Text-/Regex-Heuristiken nötig ist.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/evaluation/semantic-shadow-league.test.ts -t "bounds runner safe access dry-run text classifiers"` grün, 1 Test; die komplette `semantic-shadow-league.test.ts` bleibt wegen bestehender Score-/Basic-Setup-Erwartungsdrift rot (`averageScoreGap` 24.52 statt 25, `basic_setup` Dry-Run-Kandidat statt `do_not_default`) und wird nicht als Paketnachweis verwendet.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes|\.includes\(term\)|accepted\.includes|reasonCodes\.includes|knownValues\.includes|split\([^\n]+\)\.includes|\.includes\(token\)' packages/ai/src` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
