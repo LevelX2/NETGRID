@@ -7110,14 +7110,54 @@ function corpAdvancementAmbushTargetClass(
       | "access_hardware_trash_ambush"
     >
   | undefined {
-  if (/net damage/.test(text)) return "access_net_damage_ambush";
-  if (/brain damage|core-damage|core damage/.test(text))
+  const tokens = corpRulesTextTokens(text);
+  if (corpTokensIncludePhrase(tokens, ["net", "damage"]))
+    return "access_net_damage_ambush";
+  if (
+    corpTokensIncludePhrase(tokens, ["brain", "damage"]) ||
+    corpTokensIncludePhrase(tokens, ["core", "damage"])
+  )
     return "access_brain_damage_ambush";
-  if (/program/.test(text) && /trash|destroy/.test(text))
+  if (
+    corpTokensInclude(tokens, "program") &&
+    corpTokensIncludeAny(tokens, ["trash", "destroy"])
+  )
     return "access_program_trash_ambush";
-  if (/hardware/.test(text) && /trash|destroy/.test(text))
+  if (
+    corpTokensInclude(tokens, "hardware") &&
+    corpTokensIncludeAny(tokens, ["trash", "destroy"])
+  )
     return "access_hardware_trash_ambush";
   return undefined;
+}
+
+function corpRulesTextTokens(text: string): string[] {
+  return text
+    .toLocaleLowerCase("en-US")
+    .split(/[^a-z0-9]+/)
+    .filter(Boolean);
+}
+
+function corpTokensInclude(tokens: readonly string[], accepted: string): boolean {
+  return new Set(tokens).has(accepted);
+}
+
+function corpTokensIncludeAny(
+  tokens: readonly string[],
+  accepted: readonly string[],
+): boolean {
+  const acceptedSet = new Set(accepted);
+  return tokens.some((token) => acceptedSet.has(token));
+}
+
+function corpTokensIncludePhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some((token, index) =>
+    token === phrase[0] &&
+    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  );
 }
 
 function corpAdvancementLooksLikeTransferSource(text: string): boolean {

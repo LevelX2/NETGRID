@@ -10340,6 +10340,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'auf Broker legen|von Broker nehmen|Credits\?\\s\+nehmen|\\(\\d\+\\)\\s\+Credits|/.*Broker|\.exec\(label\)|\.test\(label\)' packages/ai/src/legacy/runner-plans.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertdreiundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt Ambush-RulesText-Regexes für Net-/Brain-/Core-Damage sowie Program-/Hardware-Trash durch lokale Token- und Phrase-Helper.
+  - Legacy-Corp-Advancement-Counter-Zielklassifikation erkennt bestehende Ambush-Zielklassen weiter, ohne freie Regex-Matches auf Damage-/Trash-Fragmente zu verwenden.
+  - Status bleibt `IN_PROGRESS`, weil weitere Legacy-Corp-RulesText-Regexes für Transfer, Cashout, Action-Cashout und Overadvance offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "classifies .* advancement counter placement"` grün, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'net damage|brain damage|core-damage|core damage|/program/|/hardware/|trash\|destroy' packages/ai/src/legacy/corp-plans.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
