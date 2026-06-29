@@ -461,7 +461,10 @@ function forbiddenReportTokensContainMarker(
   markerTokens: readonly string[],
 ): boolean {
   if (markerTokens.length === 0) return false;
-  if (markerTokens.length === 1) return tokens.includes(markerTokens[0]!);
+  if (markerTokens.length === 1) {
+    const tokenSet = new Set(tokens);
+    return tokenSet.has(markerTokens[0]!);
+  }
   for (let index = 0; index <= tokens.length - markerTokens.length; index += 1) {
     if (markerTokens.every((token, offset) => tokens[index + offset] === token)) {
       return true;

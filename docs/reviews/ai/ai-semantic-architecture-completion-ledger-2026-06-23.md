@@ -10151,6 +10151,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'scopeId\.split\(/\[\._:-\]\+/\)\.includes|includes\(token\)' packages/ai/src/runtime/strategic-action-fit.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertzweiundsechzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-coverage.ts` bindet Forbidden-Report-Marker-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Coverage-Report-Redaction bleibt exakt; verbotene Marker bleiben tokengebunden und substring-nahe Markerwerte bleiben ausgeschlossen.
+  - `action-semantic-coverage.test.ts` sichert Coverage-Reports, Hidden-Info-Redaction und exact forbidden marker tokens.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-semantic-coverage.test.ts` grün, 1 Datei, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'tokens\.includes\(markerTokens\[0\]!\)|includes\(markerTokens\[0\]' packages/ai/src/actions/action-semantic-coverage.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
