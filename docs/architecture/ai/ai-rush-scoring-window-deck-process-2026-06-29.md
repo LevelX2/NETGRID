@@ -1,6 +1,6 @@
 # AI Rush Scoring Window und Deck-Prozess 2026-06-29
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Quelle/Vorgabe
 
@@ -133,6 +133,13 @@ Done-Gate:
 
 - Arbeitsbranch ist sauber, lokal nach `main` gemerged, Worktree entfernt oder sauber belassen, Final-Report nennt Checks und Restgrenzen.
 
+Ergebnis:
+
+- Corp-Scoring-Window-Runtime, Remote-ICE-Priorisierung, Archives-ICE-Kappung und Economy-Alternative bei unsicheren Remote-Linien wurden side-safe gehärtet.
+- In-turn Advancement-Burst-Fenster aus sichtbaren eigenen HQ-Operationen werden als `immediate` erkannt, wenn die Corp die Agenda vor der nächsten Runner-Zugriffschance schließen kann.
+- Das lokale Deck `KI Rush Score Window v2` wurde unter `%APPDATA%\NetGrid\Decks\local_corp_ki_rush_score_window_v2_2026_06_29.json` angelegt und validiert.
+- Fokussierte Corp-/Cutover-Tests, Typecheck und Diff-Hygiene sind grün. Der breite `@netgrid/ai`-Testlauf bleibt an separaten Runner-/Boundary-/Shadow-League-Fällen rot; die vorher neu sichtbaren Corp-Cutover-Fälle sind behoben.
+
 Commit-Vorschlag:
 
 - `docs: summarize AI rush scoring window changes`
@@ -140,4 +147,3 @@ Commit-Vorschlag:
 ## Sicherheitsblocker
 
 Stoppen, wenn eine Verbesserung verdeckte Runner-Daten, FullState, nicht-legale Aktionen oder nicht-redigierte private ICE-Identitäten in öffentliche Debugflächen benötigen würde.
-
