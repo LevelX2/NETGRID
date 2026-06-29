@@ -484,7 +484,10 @@ function optionsWithEvidence(
   options: readonly TargetChoiceShadowOption[],
   evidence: string,
 ): number {
-  return options.filter((option) => option.evidence.includes(evidence)).length;
+  return options.filter((option) => {
+    const optionEvidenceSet = new Set(option.evidence);
+    return optionEvidenceSet.has(evidence);
+  }).length;
 }
 
 function optionsWithEvidencePrefix(

@@ -9638,6 +9638,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'candidateIds\.includes|profile\.primaryStrategies\.includes|targetVector\.evidence\.includes' packages/ai/src/runtime/strategic-runtime-context.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertfünfter Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/decision/target-choice-shadow.ts` bindet Option-Evidence beim Scorecard-Counting über lokale Sets statt direkter `option.evidence.includes(...)`-Prüfung.
+  - Strukturierte Evidence wie `preferred:true` und `avoid:true` bleibt exakt wirksam; Prefix-basierte Evidence-Zählungen bleiben unverändert bei ihren eigenen Prefix-Checks.
+  - `target-choice-shadow.test.ts` sichert die Scorecard-Consumer für TargetChoiceShadow.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/decision/target-choice-shadow.test.ts` grün, 1 Datei, 19 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'option\.evidence\.includes' packages/ai/src/decision/target-choice-shadow.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
