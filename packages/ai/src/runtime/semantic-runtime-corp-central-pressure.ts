@@ -230,20 +230,15 @@ function visibleCardProvidesCentralMultiaccess(
   const text = `${card.title ?? ""} ${card.rulesText ?? ""} ${
     card.definitionId ?? ""
   }`.toLocaleLowerCase("en-US");
-  if (
-    !(
-      text.includes("multiaccess") ||
-      text.includes("additional card") ||
-      text.includes("access 1 additional")
-    )
-  ) {
+  const tokens = visibleTextTokens(text);
+  if (!visibleTextHasCentralMultiaccess(tokens)) {
     return false;
   }
-  if (serverId === "hq") return visibleTextHasToken(text, "hq");
+  if (serverId === "hq") return tokens.includes("hq");
   return (
-    text.includes("r&d") ||
-    visibleTextHasToken(text, "rd") ||
-    visibleTextHasToken(text, "rnd")
+    visibleTextHasPhrase(tokens, ["r", "d"]) ||
+    tokens.includes("rd") ||
+    tokens.includes("rnd")
   );
 }
 
@@ -311,8 +306,29 @@ function recordPayload(
     : undefined;
 }
 
-function visibleTextHasToken(text: string, token: string): boolean {
-  return text.split(/[^a-z0-9]+/).includes(token);
+function visibleTextHasCentralMultiaccess(tokens: readonly string[]): boolean {
+  return (
+    tokens.includes("multiaccess") ||
+    visibleTextHasPhrase(tokens, ["additional", "card"]) ||
+    visibleTextHasPhrase(tokens, ["access", "1", "additional"])
+  );
+}
+
+function visibleTextTokens(text: string): string[] {
+  return text.split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+function visibleTextHasPhrase(
+  tokens: readonly string[],
+  phrase: readonly string[],
+): boolean {
+  return tokens.some(
+    (token, index) =>
+      token === phrase[0] &&
+      phrase.every(
+        (phraseToken, offset) => tokens[index + offset] === phraseToken,
+      ),
+  );
 }
 
 function clamp01(value: number): number {

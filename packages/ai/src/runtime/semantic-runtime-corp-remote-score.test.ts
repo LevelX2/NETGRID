@@ -88,6 +88,34 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     expect(rdScore).toBeGreaterThan(hqScore);
   });
 
+  it("bounds visible central multiaccess fallback text to exact tokens", () => {
+    const etrIce = corpCard("barrier", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 3,
+    });
+    const noiseInput = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      runnerRig: [
+        runnerCard("rd-noise", "hardware", {
+          title: "multiaccessory R&Dish pressure",
+          rulesText: "Access 1 additionally shaped cardinals.",
+        }),
+      ],
+    });
+    const fallbackInput = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      runnerRig: [
+        runnerCard("rd-fallback", "hardware", {
+          title: "R&D Text Interface",
+          rulesText: "Whenever you access R&D, access 1 additional card.",
+        }),
+      ],
+    });
+
+    expect(centralInstallScore(etrIce, "rd", noiseInput)).toBe(1050);
+    expect(centralInstallScore(etrIce, "rd", fallbackInput)).toBe(1350);
+  });
+
   it("does not treat unaffordable central ICE as real R&D protection", () => {
     const etrIce = corpCard("expensive-barrier", "ice", {
       definitionId: "simple_barrier_ice",
