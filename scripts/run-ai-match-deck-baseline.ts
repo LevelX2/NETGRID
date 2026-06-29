@@ -498,6 +498,8 @@ function markdownReport(output: BaselineOutput): string {
     `- Decisions missing top-level WhyNot: ${output.whyCoverage.decisionsMissingTopLevelWhyNot}`,
     `- Decisions with Runtime WhyNot section: ${output.whyCoverage.decisionsWithRuntimeWhyNotSection}`,
     `- ActionAlternatives: ${output.whyCoverage.actionAlternativeCount}`,
+    `- Selected ActionAlternatives with WhyChosen: ${output.whyCoverage.selectedActionAlternativesWithWhyChosen}/${output.whyCoverage.selectedActionAlternativeCount}`,
+    `- Non-selected ActionAlternatives with WhyNot: ${output.whyCoverage.nonSelectedActionAlternativesWithWhyNot}/${output.whyCoverage.nonSelectedActionAlternativeCount}`,
     `- ActionAlternatives with WhyChosen: ${output.whyCoverage.actionAlternativesWithWhyChosen}`,
     `- ActionAlternatives with WhyNot: ${output.whyCoverage.actionAlternativesWithWhyNot}`,
     "",

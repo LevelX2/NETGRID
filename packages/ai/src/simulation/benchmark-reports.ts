@@ -275,6 +275,8 @@ export function formatAiSelfplayTraceMiningReport(
     `- Decisions missing top-level WhyNot: ${whyCoverage.decisionsMissingTopLevelWhyNot}`,
     `- Decisions with Runtime WhyNot section: ${whyCoverage.decisionsWithRuntimeWhyNotSection}`,
     `- ActionAlternatives: ${whyCoverage.actionAlternativeCount}`,
+    `- Selected ActionAlternatives with WhyChosen: ${whyCoverage.selectedActionAlternativesWithWhyChosen}/${whyCoverage.selectedActionAlternativeCount}`,
+    `- Non-selected ActionAlternatives with WhyNot: ${whyCoverage.nonSelectedActionAlternativesWithWhyNot}/${whyCoverage.nonSelectedActionAlternativeCount}`,
     `- ActionAlternatives with WhyChosen: ${whyCoverage.actionAlternativesWithWhyChosen}`,
     `- ActionAlternatives with WhyNot: ${whyCoverage.actionAlternativesWithWhyNot}`,
     "",

@@ -13,6 +13,12 @@ export type SemanticRuntimeWhyCoverageReport = {
   decisionsWithRuntimeWhyNotSection: number;
   decisionsMissingRuntimeWhyNotSection: number;
   actionAlternativeCount: number;
+  selectedActionAlternativeCount: number;
+  selectedActionAlternativesWithWhyChosen: number;
+  selectedActionAlternativesMissingWhyChosen: number;
+  nonSelectedActionAlternativeCount: number;
+  nonSelectedActionAlternativesWithWhyNot: number;
+  nonSelectedActionAlternativesMissingWhyNot: number;
   actionAlternativesWithWhyChosen: number;
   actionAlternativesMissingWhyChosen: number;
   actionAlternativesWithWhyNot: number;
@@ -31,6 +37,12 @@ export function buildSemanticRuntimeWhyCoverageReport(
 ): SemanticRuntimeWhyCoverageReport {
   const actionAlternatives = decisions.flatMap(
     (decision) => decision.actionAlternatives ?? [],
+  );
+  const selectedActionAlternatives = actionAlternatives.filter(
+    (alternative) => alternative.selected,
+  );
+  const nonSelectedActionAlternatives = actionAlternatives.filter(
+    (alternative) => !alternative.selected,
   );
   const rankedAlternatives = decisions.flatMap(
     (decision) => decision.rankedAlternatives ?? [],
@@ -57,6 +69,23 @@ export function buildSemanticRuntimeWhyCoverageReport(
         ),
     ).length,
     actionAlternativeCount: actionAlternatives.length,
+    selectedActionAlternativeCount: selectedActionAlternatives.length,
+    selectedActionAlternativesWithWhyChosen: selectedActionAlternatives.filter(
+      (alternative) => (alternative.whyChosen?.length ?? 0) > 0,
+    ).length,
+    selectedActionAlternativesMissingWhyChosen:
+      selectedActionAlternatives.filter(
+        (alternative) => (alternative.whyChosen?.length ?? 0) === 0,
+      ).length,
+    nonSelectedActionAlternativeCount: nonSelectedActionAlternatives.length,
+    nonSelectedActionAlternativesWithWhyNot:
+      nonSelectedActionAlternatives.filter(
+        (alternative) => (alternative.whyNot?.length ?? 0) > 0,
+      ).length,
+    nonSelectedActionAlternativesMissingWhyNot:
+      nonSelectedActionAlternatives.filter(
+        (alternative) => (alternative.whyNot?.length ?? 0) === 0,
+      ).length,
     actionAlternativesWithWhyChosen: actionAlternatives.filter(
       (alternative) => (alternative.whyChosen?.length ?? 0) > 0,
     ).length,
@@ -87,6 +116,8 @@ export function buildSemanticRuntimeWhyCoverageReport(
           .length
       }`,
       `action_alternative_count:${actionAlternatives.length}`,
+      `selected_action_alternative_count:${selectedActionAlternatives.length}`,
+      `non_selected_action_alternative_count:${nonSelectedActionAlternatives.length}`,
       `ranked_alternative_count:${rankedAlternatives.length}`,
     ],
   };
@@ -111,6 +142,12 @@ Scope: \`${report.scope}\`
 | Decisions with Runtime WhyNot section | ${report.decisionsWithRuntimeWhyNotSection} |
 | Decisions missing Runtime WhyNot section | ${report.decisionsMissingRuntimeWhyNotSection} |
 | ActionAlternatives | ${report.actionAlternativeCount} |
+| Selected ActionAlternatives | ${report.selectedActionAlternativeCount} |
+| Selected ActionAlternatives with WhyChosen | ${report.selectedActionAlternativesWithWhyChosen} |
+| Selected ActionAlternatives missing WhyChosen | ${report.selectedActionAlternativesMissingWhyChosen} |
+| Non-selected ActionAlternatives | ${report.nonSelectedActionAlternativeCount} |
+| Non-selected ActionAlternatives with WhyNot | ${report.nonSelectedActionAlternativesWithWhyNot} |
+| Non-selected ActionAlternatives missing WhyNot | ${report.nonSelectedActionAlternativesMissingWhyNot} |
 | ActionAlternatives with WhyChosen | ${report.actionAlternativesWithWhyChosen} |
 | ActionAlternatives missing WhyChosen | ${report.actionAlternativesMissingWhyChosen} |
 | ActionAlternatives with WhyNot | ${report.actionAlternativesWithWhyNot} |

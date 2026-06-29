@@ -60,6 +60,12 @@ describe("SemanticRuntimeWhyCoverage", () => {
       decisionsWithRuntimeWhyNotSection: 1,
       decisionsMissingRuntimeWhyNotSection: 1,
       actionAlternativeCount: 2,
+      selectedActionAlternativeCount: 1,
+      selectedActionAlternativesWithWhyChosen: 1,
+      selectedActionAlternativesMissingWhyChosen: 0,
+      nonSelectedActionAlternativeCount: 1,
+      nonSelectedActionAlternativesWithWhyNot: 1,
+      nonSelectedActionAlternativesMissingWhyNot: 0,
       actionAlternativesWithWhyChosen: 1,
       actionAlternativesMissingWhyChosen: 1,
       actionAlternativesWithWhyNot: 1,
@@ -76,6 +82,8 @@ describe("SemanticRuntimeWhyCoverage", () => {
         "semantic_runtime_why_coverage:report_only",
         "sample_count:2",
         "decision_top_level_why_not_count:1",
+        "selected_action_alternative_count:1",
+        "non_selected_action_alternative_count:1",
       ]),
     );
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
@@ -83,6 +91,12 @@ describe("SemanticRuntimeWhyCoverage", () => {
     const markdown = renderSemanticRuntimeWhyCoverageMarkdown(report);
     expect(markdown).toContain("# Semantic Runtime Why Coverage");
     expect(markdown).toContain("| Decisions missing top-level WhyNot | 1 |");
+    expect(markdown).toContain(
+      "| Selected ActionAlternatives with WhyChosen | 1 |",
+    );
+    expect(markdown).toContain(
+      "| Non-selected ActionAlternatives with WhyNot | 1 |",
+    );
     expect(markdown).toContain("| Runtime effect | `false` |");
     expect(containsForbiddenSemanticMarker(markdown)).toBe(false);
   });
