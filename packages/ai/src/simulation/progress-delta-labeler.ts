@@ -310,8 +310,9 @@ function actionText(action: ProgressDeltaAction): string {
 
 function actionTextHasFlatlineSignal(text: string): boolean {
   const tokens = progressActionTextTokens(text);
+  const tokenSet = new Set(tokens);
   return (
-    tokens.includes("flatline") ||
+    tokenSet.has("flatline") ||
     progressTokensIncludePhrase(tokens, ["tag", "punish", "terminal"])
   );
 }
@@ -330,8 +331,9 @@ function actionTextHasCoverageInstallSignal(text: string): boolean {
 
 function actionTextHasReachabilitySignal(text: string): boolean {
   const tokens = progressActionTextTokens(text);
+  const tokenSet = new Set(tokens);
   return (
-    tokens.includes("reachability") ||
+    tokenSet.has("reachability") ||
     progressTokensIncludePhrase(tokens, ["known", "path"]) ||
     progressTokensIncludePhrase(tokens, ["access", "path"]) ||
     progressTokensIncludePhrase(tokens, ["continue", "chain"])
