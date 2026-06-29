@@ -9845,6 +9845,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'allowedProbeTargets\.includes' packages/ai/src/plans/tactical-plan-runner-run-targets.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertachtundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/simulation/corp-score-terminal-diagnostics.ts` bindet Score-, Advance-to-Score- und Agenda-Install-ActionIds über lokale Sets statt direkter `.includes(...)`-Prüfungen.
+  - Strukturierte ActionIds bleiben exakt wirksam; substring-nahe ActionIds markieren keine Terminal-Score-Aktion.
+  - `corp-score-terminal-diagnostics.test.ts` sichert Rollenklassifikation und exakte Terminal-ActionId-Diagnostik.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/simulation/corp-score-terminal-diagnostics.test.ts` grün, 1 Datei, 2 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'scoreActionIds\.includes|advanceToScoreActionIds\.includes|agendaInstallActionIds\.includes' packages/ai/src/simulation/corp-score-terminal-diagnostics.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

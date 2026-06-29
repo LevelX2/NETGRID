@@ -84,13 +84,12 @@ export function createCorpScoreTerminalDiagnosticsForSimulationAction(
     if (input.side !== "corp" || action.side !== "corp") return {};
     const terminal = assessCorpScoreTerminalWindow(input);
     if (!terminal.terminalWindow) return {};
-    const scoreTaken = terminal.scoreActionIds.includes(action.actionId);
-    const advanceTaken = terminal.advanceToScoreActionIds.includes(
-      action.actionId,
-    );
-    const agendaInstalled = terminal.agendaInstallActionIds.includes(
-      action.actionId,
-    );
+    const scoreActionIdSet = new Set(terminal.scoreActionIds);
+    const advanceToScoreActionIdSet = new Set(terminal.advanceToScoreActionIds);
+    const agendaInstallActionIdSet = new Set(terminal.agendaInstallActionIds);
+    const scoreTaken = scoreActionIdSet.has(action.actionId);
+    const advanceTaken = advanceToScoreActionIdSet.has(action.actionId);
+    const agendaInstalled = agendaInstallActionIdSet.has(action.actionId);
     const taken = scoreTaken || advanceTaken || agendaInstalled;
     const skipped = !taken;
     const family = corpScoreTerminalChosenFamily(input, action);
