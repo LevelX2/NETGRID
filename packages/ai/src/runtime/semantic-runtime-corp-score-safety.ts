@@ -38,7 +38,8 @@ export function semanticRuntimeCorpScoreNowSafetyGate(
     };
   }
   const terminal = dependencies.scoreTerminalWindow(input);
-  const scoreLegal = terminal.scoreActionIds.includes(action.actionId);
+  const scoreActionIdSet = new Set(terminal.scoreActionIds);
+  const scoreLegal = scoreActionIdSet.has(action.actionId);
   const reasons = semanticRuntimeCorpUnsafeScoreReasons(terminal, scoreLegal);
   return {
     allowed: reasons.length === 0,

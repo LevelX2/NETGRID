@@ -9854,6 +9854,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'scoreActionIds\.includes|advanceToScoreActionIds\.includes|agendaInstallActionIds\.includes' packages/ai/src/simulation/corp-score-terminal-diagnostics.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertneunundzwanzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score-safety.ts` bindet legale Corp-Score-ActionIds über ein lokales Set statt direkter `scoreActionIds.includes(...)`-Prüfung.
+  - Strukturierte `score_agenda`-ActionIds bleiben exakt; substring-nahe ActionIds passieren das Score-Now-Safety-Gate nicht.
+  - `semantic-runtime-corp-score-safety.test.ts` sichert erlaubte und nicht erlaubte exakte Score-ActionIds.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score-safety.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'scoreActionIds\.includes' packages/ai/src/runtime/semantic-runtime-corp-score-safety.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
