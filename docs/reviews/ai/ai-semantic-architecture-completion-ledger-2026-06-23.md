@@ -10079,6 +10079,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'knownValues\.includes|includes\(value\)' packages/ai/src/hint-ontology.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertvierundfünfzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-semantic-invariants.ts` bindet Hidden-Info-Marker-Tokens über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte Invariant-Prüfung bleibt exakt; Hidden-Info-Marker bleiben tokengebunden und substring-nahe Rauschwerte bleiben ausgeschlossen.
+  - `action-semantic-invariants.test.ts` sichert Hidden-Info-Token-Bounding, Support-only-Segmente, Structural-Marker und Fixture-ID-Segmente.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-semantic-invariants.test.ts` grün, 1 Datei, 23 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'accepted\.includes\(token\)|includes\(token\)' packages/ai/src/actions/action-semantic-invariants.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |
