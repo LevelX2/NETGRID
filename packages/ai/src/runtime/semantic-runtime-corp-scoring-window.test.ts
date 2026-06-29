@@ -736,6 +736,95 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       recommendedNextStep: "none",
     });
   });
+
+  it("marks a game-ending non-immediate dynamic-ICE scoreline unsafe", () => {
+    const agenda = agendaCard("game-ending-agenda", {
+      agendaPoints: 3,
+      advancementRequirement: 3,
+    });
+    const action = corpAction(
+      "install-game-ending-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 2,
+        runnerAgendaPoints: 4,
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            huntingPackIce("hunting-pack"),
+            mobileBarricadeIce("mobile-barricade"),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      scoreHorizon: "next_turn",
+      runnerCanContestBeforeScore: false,
+      agendaPointsAtRisk: 3,
+      runnerAgendaPointsAfterSteal: 7,
+      agendaStealSeverity: "game_ending",
+      recommendedNextStep: "gain_credit",
+    });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "agenda_steal_severity:game_ending",
+        "remote_dynamic_protection_weakness_count:2",
+        "remote_dynamic_protection_reserve:1",
+        "corp_can_rez_full_path_with_dynamic_reserve:false",
+      ]),
+    );
+  });
+
+  it("keeps a game-ending static ETR window temporary when no visible coverage can contest", () => {
+    const agenda = agendaCard("game-ending-static-agenda", {
+      agendaPoints: 3,
+      advancementRequirement: 3,
+    });
+    const action = corpAction(
+      "install-game-ending-static-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 3,
+        runnerAgendaPoints: 4,
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [wallIce("remote-wall", { rezCost: 2 })]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "temporary_safe",
+      missingVisibleBreakerCoverage: true,
+      agendaStealSeverity: "game_ending",
+      recommendedNextStep: "install_agenda",
+    });
+    expect(assessment?.evidence).toContain(
+      "remote_dynamic_protection_weakness_count:0",
+    );
+  });
 });
 
 function assess(input: AiDecisionInput, action: LegalAction) {
@@ -749,6 +838,8 @@ function assess(input: AiDecisionInput, action: LegalAction) {
 function corpInput(overrides: {
   ownCredits?: number;
   runnerCredits?: number;
+  runnerAgendaPoints?: number;
+  agendaPointsToWin?: number;
   runnerRig?: VisibleCard[];
   hq?: VisibleCard[];
   eventTail?: AiDecisionInput["eventTail"];
@@ -762,14 +853,20 @@ function corpInput(overrides: {
       own: {
         credits: overrides.ownCredits ?? 5,
         clicks: 3,
+        agendaPoints: 0,
         gripOrHq: overrides.hq ?? [],
+        scoreArea: [],
       },
       opponent: {
         credits: overrides.runnerCredits ?? 4,
+        clicks: 4,
+        agendaPoints: overrides.runnerAgendaPoints ?? 0,
         rig: overrides.runnerRig ?? [],
+        scoreArea: [],
       },
       servers: overrides.servers,
       publicEvents: [],
+      agendaPointsToWin: overrides.agendaPointsToWin ?? 7,
     },
   } as unknown as AiDecisionInput;
 }
@@ -932,6 +1029,34 @@ function dogPileIce(instanceId: string): VisibleCard {
     subtypes: ["Sentry"],
     rezzed: false,
     rezCost: 2,
+    owner: "corp",
+  } as VisibleCard;
+}
+
+function huntingPackIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "ice",
+    title: "Hunting Pack",
+    definitionId: "onr_proteus_026_hunting-pack",
+    subtypes: ["Sentry"],
+    rezzed: false,
+    rezCost: 1,
+    owner: "corp",
+  } as VisibleCard;
+}
+
+function mobileBarricadeIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "ice",
+    title: "Mobile Barricade",
+    definitionId: "onr_proteus_033_mobile-barricade",
+    subtypes: ["Barrier"],
+    rezzed: false,
+    rezCost: 1,
     owner: "corp",
   } as VisibleCard;
 }

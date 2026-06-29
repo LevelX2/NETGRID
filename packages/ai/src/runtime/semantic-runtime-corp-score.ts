@@ -2,12 +2,12 @@ import type {
   AiDecisionInput,
   AiDecisionScoreComponent,
   LegalAction,
+  VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
-import {
-  semanticRuntimeCorpEffectiveDefenseContext,
-} from "./semantic-runtime-corp-effective-defense";
+import { semanticRuntimeCorpEffectiveDefenseContext } from "./semantic-runtime-corp-effective-defense";
+import { visibleCardDefinition } from "./card-definition-lookup";
 import { rolesMatch } from "./role-match";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 
@@ -31,6 +31,17 @@ type SemanticRuntimeCorpContestabilityAssessment = {
   contestable: boolean;
   evidence: string[];
 };
+
+type CorpBurstEconomyOperation = {
+  cost: number;
+  gain: number;
+  drawCards: number;
+  netGain: number;
+  actionValue: number;
+  evidence: string[];
+};
+
+const CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE = 3;
 
 export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
   actionCreditCost: (action: LegalAction) => number;
@@ -320,6 +331,32 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       });
     }
   }
+  const burstEconomyOperation = corpBurstEconomyOperationForAction(
+    input,
+    action,
+    dependencies,
+    actionSemanticCandidate,
+  );
+  if (burstEconomyOperation) {
+    components.push({
+      key: "corp_operation_burst_economy",
+      label: "Burst-Economy-Operation",
+      value: 1350 + burstEconomyOperation.actionValue * 180,
+      reason: burstEconomyOperation.evidence.join("|"),
+    });
+  }
+  const burstEconomyThreshold =
+    action.type === "gain_credit" && action.source === "basic_action"
+      ? corpBurstEconomyThresholdAfterBasicCredit(input)
+      : undefined;
+  if (burstEconomyThreshold) {
+    components.push({
+      key: "corp_operation_economy_threshold_funding",
+      label: "Operation-Schwelle",
+      value: 1200 + burstEconomyThreshold.actionValue * 160,
+      reason: burstEconomyThreshold.evidence.join("|"),
+    });
+  }
   if (action.type === "gain_credit" && credits < 6) {
     components.push({
       key: "corp_low_credits",
@@ -384,10 +421,8 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       });
     }
   }
-  const taggedRunnerPayoffPressure = dependencies.corpTaggedRunnerPayoffPressure(
-    input,
-    action,
-  );
+  const taggedRunnerPayoffPressure =
+    dependencies.corpTaggedRunnerPayoffPressure(input, action);
   if (taggedRunnerPayoffPressure) components.push(taggedRunnerPayoffPressure);
   const taggedPayoffPassivePenalty =
     dependencies.corpTaggedPayoffWindowPassiveActionPenalty(input, action);
@@ -463,10 +498,12 @@ function corpTacticalGoalsForInput(
   input: AiDecisionInput,
 ): readonly TacticalGoalLike[] {
   return (
-    input as AiDecisionInput & {
-      ownCorpTacticalGoals?: readonly TacticalGoalLike[];
-    }
-  ).ownCorpTacticalGoals ?? [];
+    (
+      input as AiDecisionInput & {
+        ownCorpTacticalGoals?: readonly TacticalGoalLike[];
+      }
+    ).ownCorpTacticalGoals ?? []
+  );
 }
 
 function semanticRuntimeCorpActionCreditCost<TConsumer extends string>(
@@ -519,7 +556,17 @@ function corpGoalMatchesAction(
     case "corp.tactical.protect_central":
       return action.type === "install_card";
     case "corp.tactical.stabilize_economy":
-      return action.type === "gain_credit" || action.type === "draw_card";
+      return (
+        action.type === "gain_credit" ||
+        action.type === "draw_card" ||
+        (action.type === "play_operation" &&
+          corpActionCandidateHasVisibleSignal(actionSemanticCandidate, [
+            "economy_operation",
+            "recover_economy",
+            "economy.corp_credit_burst",
+            "corp_credit_burst",
+          ]))
+      );
     case "corp.tactical.visible_tag_punish":
       return (
         scopeId === "corp_tag_punish" ||
@@ -533,9 +580,7 @@ function corpGoalMatchesAction(
     case "corp.tactical.visible_damage_or_ambush_window":
       return (
         scopeId === "corp_tag_punish" ||
-        corpActionCandidateHasVisibleSignal(actionSemanticCandidate, [
-          "ambush",
-        ])
+        corpActionCandidateHasVisibleSignal(actionSemanticCandidate, ["ambush"])
       );
     default:
       return false;
@@ -556,8 +601,7 @@ export function corpActionCandidateHasVisibleSignal(
     ...candidate.actionTacticSignals,
     ...candidate.cardContextSignals,
     ...candidate.evidence,
-  ]
-    .map((signal) => signal.toLocaleLowerCase("en-US"));
+  ].map((signal) => signal.toLocaleLowerCase("en-US"));
   return needles.some((needle) => {
     const normalizedNeedle = needle.toLocaleLowerCase("en-US");
     return (
@@ -600,6 +644,164 @@ function corpInputHasScoreCloseoutBasis(input: AiDecisionInput): boolean {
           typeof card.advancementRequirement === "number"),
     ),
   );
+}
+
+function corpBurstEconomyOperationForAction<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): CorpBurstEconomyOperation | undefined {
+  if (action.type !== "play_operation") return undefined;
+  const sourceCard = visibleSourceCardForAction(input, action);
+  if (!sourceCard) return undefined;
+  const fallbackCost = semanticRuntimeCorpActionCreditCost(
+    dependencies,
+    action,
+    actionSemanticCandidate,
+  );
+  const operation = corpBurstEconomyOperationForVisibleCard(
+    sourceCard,
+    fallbackCost,
+  );
+  if (!operation) return undefined;
+  if (input.playerView.own.credits < operation.cost) return undefined;
+  return {
+    ...operation,
+    evidence: [
+      "corp_operation_burst_economy:true",
+      ...operation.evidence,
+      "play_operation_affordable:true",
+    ],
+  };
+}
+
+function corpBurstEconomyThresholdAfterBasicCredit(
+  input: AiDecisionInput,
+): CorpBurstEconomyOperation | undefined {
+  const credits = input.playerView.own.credits;
+  const creditsAfterFunding = credits + 1;
+  const bestOperation = input.playerView.own.gripOrHq
+    .map((card) => corpBurstEconomyOperationForVisibleCard(card))
+    .filter((operation): operation is CorpBurstEconomyOperation => {
+      return (
+        operation !== undefined &&
+        operation.cost > credits &&
+        operation.cost <= creditsAfterFunding
+      );
+    })
+    .sort((left, right) => right.actionValue - left.actionValue)[0];
+  if (!bestOperation) return undefined;
+  return {
+    ...bestOperation,
+    evidence: [
+      "corp_operation_economy_threshold:true",
+      `credits_before_funding:${credits}`,
+      `credits_after_funding:${creditsAfterFunding}`,
+      ...bestOperation.evidence,
+    ],
+  };
+}
+
+function corpBurstEconomyOperationForVisibleCard(
+  card: VisibleCard,
+  fallbackCost?: number,
+): CorpBurstEconomyOperation | undefined {
+  if (card.known === false) return undefined;
+  const definition = visibleCardDefinition(card);
+  const type = card.type ?? definition?.type;
+  if (type !== "operation") return undefined;
+  const cost =
+    positiveOrZeroNumber(card.cost) ??
+    positiveOrZeroNumber(definition?.cost) ??
+    positiveOrZeroNumber(fallbackCost) ??
+    0;
+  const gain = corpCreditGainFromRulesText(
+    card.rulesText ?? definition?.rulesText,
+  );
+  const drawCards = corpDrawCountFromRulesText(
+    card.rulesText ?? definition?.rulesText,
+  );
+  if (gain <= 0 && drawCards <= 0) return undefined;
+  const netGain = gain - cost;
+  const actionValue = netGain + drawCards;
+  if (actionValue < CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE) return undefined;
+  return {
+    cost,
+    gain,
+    drawCards,
+    netGain,
+    actionValue,
+    evidence: [
+      `operation_cost:${cost}`,
+      `operation_gain:${gain}`,
+      `operation_draw:${drawCards}`,
+      `burst_economy_net_gain:${netGain}`,
+      `operation_action_value:${actionValue}`,
+    ],
+  };
+}
+
+function visibleSourceCardForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): VisibleCard | undefined {
+  if (
+    typeof action.source !== "string" ||
+    action.source === "basic_action" ||
+    action.source === "game_rule"
+  ) {
+    return undefined;
+  }
+  return [
+    input.playerView.own.gripOrHq,
+    input.playerView.own.heapOrArchives,
+    input.playerView.own.scoreArea,
+    input.playerView.own.rig ?? [],
+    ...input.playerView.servers.flatMap((server) => [server.ice, server.root]),
+  ]
+    .flat()
+    .find((card) => card.instanceId === action.source && card.known);
+}
+
+function corpCreditGainFromRulesText(rulesText: string | undefined): number {
+  const match = rulesText?.match(/\bgain\s+(\d+)\s+credits?\b/i);
+  if (!match) return 0;
+  const gain = Number.parseInt(match[1] ?? "", 10);
+  return Number.isFinite(gain) && gain > 0 ? gain : 0;
+}
+
+function corpDrawCountFromRulesText(rulesText: string | undefined): number {
+  const match = rulesText?.match(
+    /\bdraw\s+(one|two|three|four|five|\d+)\s+cards?\b/i,
+  );
+  if (!match) return 0;
+  return numberFromDigitOrWord(match[1] ?? "");
+}
+
+function numberFromDigitOrWord(value: string): number {
+  const numeric = Number.parseInt(value, 10);
+  if (Number.isFinite(numeric) && numeric > 0) return numeric;
+  switch (value.toLocaleLowerCase("en-US")) {
+    case "one":
+      return 1;
+    case "two":
+      return 2;
+    case "three":
+      return 3;
+    case "four":
+      return 4;
+    case "five":
+      return 5;
+    default:
+      return 0;
+  }
+}
+
+function positiveOrZeroNumber(value: number | undefined): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0
+    ? value
+    : undefined;
 }
 
 function corpActionCandidateTargetsCorpScoreline(

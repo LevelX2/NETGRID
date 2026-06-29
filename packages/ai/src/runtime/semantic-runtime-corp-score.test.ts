@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
@@ -51,9 +55,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
         expect.objectContaining({
           key: "corp_goal_fit_tactical_goal",
           value: 900,
-          reason: expect.stringContaining(
-            "goal:corp.tactical.score_closeout",
-          ),
+          reason: expect.stringContaining("goal:corp.tactical.score_closeout"),
         }),
       ]),
     );
@@ -84,6 +86,93 @@ describe("semanticRuntimeCorpScoreComponents", () => {
           reason: expect.stringContaining(
             "goal:corp.tactical.stabilize_economy",
           ),
+        }),
+      ]),
+    );
+  });
+
+  it("scores playable Corp burst economy operations by net credit gain", () => {
+    const accountsReceivable = corpAction(
+      "play-accounts-receivable",
+      "play_operation",
+      {},
+      "corp_accounts_receivable",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(5, [accountsReceivableCard()], [accountsReceivable]),
+      accountsReceivable,
+      "basic_install",
+      testDependencies(),
+      semanticCandidate(
+        accountsReceivable.actionId,
+        "play.corp_operation",
+        ["economy.corp_credit_burst"],
+        "play_operation",
+      ),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_operation_burst_economy",
+          value: 2070,
+          reason: expect.stringContaining("burst_economy_net_gain:4"),
+        }),
+      ]),
+    );
+  });
+
+  it("scores basic credit when it unlocks a visible burst economy operation", () => {
+    const basicCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(4, [accountsReceivableCard()], [basicCredit]),
+      basicCredit,
+      "basic_economy_draw",
+      testDependencies(),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_operation_economy_threshold_funding",
+          value: 1840,
+          reason: expect.stringContaining("credits_after_funding:5"),
+        }),
+      ]),
+    );
+  });
+
+  it("scores mixed credit and draw Corp operations by combined action value", () => {
+    const nightShift = corpAction(
+      "play-night-shift",
+      "play_operation",
+      {},
+      "corp_night_shift",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(0, [nightShiftCard()], [nightShift]),
+      nightShift,
+      "basic_install",
+      testDependencies(),
+      semanticCandidate(
+        nightShift.actionId,
+        "play.corp_operation",
+        ["economy.corp_credit_burst"],
+        "play_operation",
+      ),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_operation_burst_economy",
+          value: 1890,
+          reason: expect.stringContaining("operation_draw:1"),
         }),
       ]),
     );
@@ -328,9 +417,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
         expect.objectContaining({
           key: "corp_goal_fit_tactical_goal",
           value: 860,
-          reason: expect.stringContaining(
-            "goal:corp.tactical.score_closeout",
-          ),
+          reason: expect.stringContaining("goal:corp.tactical.score_closeout"),
         }),
         expect.objectContaining({
           key: "corp_score_closeout_semantic_candidate",
@@ -342,10 +429,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
 
   it("matches score closeout target evidence by bounded terms", () => {
     const closeoutAction = corpAction("targeted-closeout", "play_operation");
-    const input = corpInputWithGoals(
-      [],
-      [closeoutAction],
-    );
+    const input = corpInputWithGoals([], [closeoutAction]);
     const baseCandidate = semanticCandidate(
       "targeted-closeout",
       "play.corp_operation",
@@ -587,6 +671,53 @@ function corpInputWithGoals(
   } as unknown as AiDecisionInput;
 }
 
+function corpInputWithHqCards(
+  credits: number,
+  hqCards: VisibleCard[],
+  legalActions: LegalAction[] = [],
+): AiDecisionInput {
+  const base = corpInputWithGoals([], legalActions);
+  return {
+    ...base,
+    playerView: {
+      ...base.playerView,
+      own: {
+        ...base.playerView.own,
+        credits,
+        gripOrHq: hqCards,
+      },
+    },
+  } as unknown as AiDecisionInput;
+}
+
+function accountsReceivableCard(): VisibleCard {
+  return {
+    instanceId: "corp_accounts_receivable",
+    known: true,
+    title: "Accounts Receivable",
+    definitionId: "onr_v1_281_accounts-receivable",
+    type: "operation",
+    rulesText: "Gain 9 credits.",
+    cost: 5,
+    owner: "corp",
+    controller: "corp",
+  };
+}
+
+function nightShiftCard(): VisibleCard {
+  return {
+    instanceId: "corp_night_shift",
+    known: true,
+    title: "Night Shift",
+    definitionId: "onr_v1_295_night-shift",
+    type: "operation",
+    rulesText: "Gain 2 credits and draw one card.",
+    cost: 0,
+    owner: "corp",
+    controller: "corp",
+  };
+}
+
 function candidate(
   overrides: Partial<ActionSemanticCandidate> = {},
 ): ActionSemanticCandidate {
@@ -629,12 +760,14 @@ function corpAction(
   actionId: string,
   type: LegalAction["type"],
   payload: LegalAction["payload"] = {},
+  source?: string,
 ): LegalAction {
   return {
     actionId,
     side: "corp",
     type,
     label: actionId,
+    source,
     costs: [],
     payload,
   } as unknown as LegalAction;

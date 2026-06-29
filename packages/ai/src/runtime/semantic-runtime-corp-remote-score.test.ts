@@ -204,11 +204,80 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
       centralInstallScore(creditBlocks, "rd", unfundableWallModeInput),
     ).toBe(650);
   });
+
+  it("downranks Archives ICE without concrete Archives risk under R&D pressure", () => {
+    const etrIce = corpCard("barrier", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 2,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      runnerRig: [rdInterface()],
+    });
+
+    const archivesScore = installIceScore(etrIce, "archives", input);
+    const rdScore = centralInstallScore(etrIce, "rd", input);
+
+    expect(archivesScore).toBe(-450);
+    expect(rdScore).toBe(1350);
+    expect(archivesScore).toBeLessThan(rdScore);
+  });
+
+  it("keeps Archives ICE valuable when an agenda is actually in Archives", () => {
+    const etrIce = corpCard("barrier", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 2,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      archivesCards: [
+        corpCard("archived-agenda", "agenda", {
+          agendaPoints: 2,
+        }),
+      ],
+    });
+
+    expect(installIceScore(etrIce, "archives", input)).toBe(900);
+  });
+
+  it("does not treat dynamic-only remote ICE as a full scoring remote build", () => {
+    const huntingPack = corpCard("hunting-pack", "ice", {
+      definitionId: "onr_proteus_026_hunting-pack",
+      title: "Hunting Pack",
+      rezCost: 1,
+    });
+    const input = corpInputForCentralInstall(huntingPack, {
+      agendaInHq: true,
+      credits: 3,
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        { id: "archives", label: "Archives", ice: [], root: [] },
+        { id: "remote_1", label: "Remote 1", ice: [], root: [] },
+      ],
+    });
+
+    expect(installIceScore(huntingPack, "remote_1", input)).toBe(450);
+  });
 });
 
 function centralInstallScore(
   ice: VisibleCard,
   serverId: "hq" | "rd",
+  input = corpInputForCentralInstall(ice),
+): number {
+  const action = centralInstallIceAction(ice, serverId);
+  return semanticRuntimeCorpInstallRemoteScore(
+    input,
+    action,
+    [],
+    centralInstallDependencies(),
+  );
+}
+
+function installIceScore(
+  ice: VisibleCard,
+  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
   input = corpInputForCentralInstall(ice),
 ): number {
   const action = centralInstallIceAction(ice, serverId);
@@ -240,7 +309,7 @@ function remoteInstallIceAction(): LegalAction {
 
 function centralInstallIceAction(
   ice: VisibleCard,
-  serverId: "hq" | "rd",
+  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
 ): LegalAction {
   return {
     actionId: `install-${serverId}-ice`,
@@ -305,6 +374,8 @@ function corpInputForCentralInstall(
     agendaInHq?: boolean;
     credits?: number;
     runnerRig?: VisibleCard[];
+    archivesCards?: VisibleCard[];
+    servers?: AiDecisionInput["playerView"]["servers"];
   } = {},
 ): AiDecisionInput {
   const agendaInHq = options.agendaInHq ?? true;
@@ -322,6 +393,7 @@ function corpInputForCentralInstall(
       own: {
         credits: options.credits ?? 5,
         clicks: 3,
+        heapOrArchives: options.archivesCards ?? [],
         gripOrHq: [
           ice,
           ...(agendaInHq
@@ -343,7 +415,7 @@ function corpInputForCentralInstall(
           counterDisplays: [],
         },
       },
-      servers: [
+      servers: options.servers ?? [
         {
           id: "hq",
           ice: [],
