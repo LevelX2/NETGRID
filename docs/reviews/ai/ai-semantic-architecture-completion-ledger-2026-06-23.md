@@ -10404,6 +10404,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: gezieltes Ripgrep auf die entfernten Counter-Bank-/Decoy-Regexes ohne Treffer.
 
+- `AI-COMPLETE-15` dreihunderteinundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt die Advancement-Burst-Amount-RulesText-Regexes durch Token-Sequenzprüfung auf `<Zahl/Zahlwort> advancement counter(s)`.
+  - Legacy-Corp-Operationen wie Team Restructuring leiten die hinzugefügte Counter-Anzahl weiter aus sichtbarem RulesText ab, ohne freie Wortzahl-/Ziffern-Regexes.
+  - Status bleibt `IN_PROGRESS`, weil die Legacy-Corp-Action-Gain-Erkennung und der Scored-Agenda-Counter-Economy-Resttreffer noch offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "Team Restructuring"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: gezieltes Ripgrep auf die entfernten Advancement-Burst-Amount-Regexes ohne Treffer; der separate Action-Gain-Amount-Cluster bleibt offen.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

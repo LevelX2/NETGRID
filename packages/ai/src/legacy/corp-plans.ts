@@ -7401,13 +7401,22 @@ function advancementCountersAddedByAction(
 }
 
 function advancementCountersFromRulesText(text: string): number {
-  const normalized = text.toLocaleLowerCase("en-US");
-  if (!/\badvancement counters?\b/.test(normalized)) return 0;
-  if (/\bfour\b|4/.test(normalized)) return 4;
-  if (/\bthree\b|3/.test(normalized)) return 3;
-  if (/\btwo\b|2/.test(normalized)) return 2;
-  if (/\bone\b|1/.test(normalized)) return 1;
-  return 0;
+  const tokens = corpRulesTextTokens(text);
+  const amountToken = tokens.find((token, index) =>
+    corpAdvancementCounterAmountToken(tokens, index),
+  );
+  return amountToken ? (corpNumberWordToNumber(amountToken) ?? 0) : 0;
+}
+
+function corpAdvancementCounterAmountToken(
+  tokens: readonly string[],
+  index: number,
+): boolean {
+  if (corpNumberWordToNumber(tokens[index] ?? "") === undefined) return false;
+  return (
+    tokens[index + 1] === "advancement" &&
+    (tokens[index + 2] === "counter" || tokens[index + 2] === "counters")
+  );
 }
 
 function bestRemoteAdvancementTarget(
