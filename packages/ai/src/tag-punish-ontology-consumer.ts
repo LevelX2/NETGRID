@@ -148,13 +148,14 @@ export function tagPunishOntologyConflictWithLegacy(
   legacyRoles: string[],
 ): boolean {
   if (!profile) return false;
+  const legacyRoleSet = new Set(legacyRoles);
   const legacyClaimsTag = rolesMatch(legacyRoles, [
     "tag_source",
     "tag_enabler",
     "trace_tag",
     "trace_ice",
     "tag_ice",
-  ]) || legacyRoles.includes("trace");
+  ]) || legacyRoleSet.has("trace");
   const legacyClaimsPayoff = rolesMatch(legacyRoles, [
     "tag_punishment",
     "damage_operation",

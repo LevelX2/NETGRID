@@ -15,6 +15,9 @@ describe("tag punish ontology conflict detection", () => {
     expect(
       tagPunishOntologyConflictWithLegacy(payoffProfile(), ["trace_tag"]),
     ).toBe(true);
+    expect(
+      tagPunishOntologyConflictWithLegacy(payoffProfile(), ["trace"]),
+    ).toBe(true);
   });
 
   it("ignores tag and payoff substring noise in legacy roles", () => {
