@@ -49,6 +49,9 @@ describe("SemanticRuntimeDebug", () => {
       "rawSemanticScore:80",
       "finalSelectionScore:330",
       "displayOnlyScore:true",
+      "selected_by_plan_mapping:true",
+      "scope:runner_safe_access",
+      "reasonCode:semantic.runtime",
       "selectedPlan:runner.obtain_breaker_coverage",
     ]);
     expect(
@@ -96,6 +99,28 @@ describe("SemanticRuntimeDebug", () => {
         label: "Plan-Auswahl",
         value: 250,
       }),
+    ]);
+  });
+
+  it("explains non-plan semantic runtime selections with structured why-chosen facts", () => {
+    const selected = choice(action("gain", "gain_credit"), 75, {
+      reasonCode: "runner.semantic.economy",
+      scopeId: "basic_economy_draw",
+    });
+    const context = buildSemanticRuntimeDebugPlanContext({
+      selectedActionId: "gain",
+      selectedChoice: selected,
+      mappedActionIds: [],
+    });
+
+    expect(context.selectedByPlanMapping).toBe(false);
+    expect(semanticRuntimeDebugActionWhyChosen(selected, context)).toEqual([
+      "semantic_runtime_actual",
+      "rawSemanticScore:75",
+      "finalSelectionScore:75",
+      "selected_by_plan_mapping:false",
+      "scope:basic_economy_draw",
+      "reasonCode:runner.semantic.economy",
     ]);
   });
 

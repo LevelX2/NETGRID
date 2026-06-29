@@ -453,17 +453,27 @@ export function semanticRuntimeDebugActionWhyChosen(
   context: SemanticRuntimeDebugPlanContext,
 ): string[] {
   if (context.selectedByPlanMapping) {
-    return [
+    return scrubEvidence([
       "selected_by_plan_mapping",
       `rawSemanticScore:${choice.score}`,
       `finalSelectionScore:${choice.score + context.planMatchDisplayBoost}`,
       "displayOnlyScore:true",
+      "selected_by_plan_mapping:true",
+      ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),
+      ...(choice.reasonCode ? [`reasonCode:${choice.reasonCode}`] : []),
       ...(context.selectedPlanType
         ? [`selectedPlan:${context.selectedPlanType}`]
         : []),
-    ];
+    ]);
   }
-  return ["semantic_runtime_actual"];
+  return scrubEvidence([
+    "semantic_runtime_actual",
+    `rawSemanticScore:${choice.score}`,
+    `finalSelectionScore:${choice.score}`,
+    "selected_by_plan_mapping:false",
+    ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),
+    ...(choice.reasonCode ? [`reasonCode:${choice.reasonCode}`] : []),
+  ]);
 }
 
 export function semanticRuntimeDebugActionWhyNot(
