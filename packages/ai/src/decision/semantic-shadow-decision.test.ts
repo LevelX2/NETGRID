@@ -49,6 +49,19 @@ describe("SemanticShadowDecision", () => {
         frame.legalActionIds.includes(action.actionId),
       ),
     ).toBe(true);
+    expect(
+      trace.rankedActions.every((action) =>
+        action.whyChosen?.includes("ranked_semantic_action"),
+      ),
+    ).toBe(true);
+    expect(trace.rankedActions[0]?.whyChosen).toEqual(
+      expect.arrayContaining([
+        "ranked_semantic_action",
+        "rank:1",
+        expect.stringMatching(/^score:/),
+        "primary_goal:runner.build_economy_base",
+      ]),
+    );
     expect(trace.selectedActionId).toBeUndefined();
     expect(trace.noRuntimeEffect).toBe(true);
   });
@@ -92,6 +105,11 @@ describe("SemanticShadowDecision", () => {
           "legal_action:unclassified-1",
           "why_not:missing_semantic_candidate",
         ]),
+        whyNot: expect.arrayContaining([
+          "missing_semantic_candidate",
+          "legal_action:unclassified-1",
+          "why_not:missing_semantic_candidate",
+        ]),
       }),
     );
   });
@@ -128,6 +146,11 @@ describe("SemanticShadowDecision", () => {
       reason: "blocked_by_action_goal_fit",
       blockers: expect.arrayContaining([
         "target_context_missing_for_target_profile",
+      ]),
+      whyNot: expect.arrayContaining([
+        "blocked_by_action_goal_fit",
+        "fit_status:blocked",
+        "blocker:target_context_missing_for_target_profile",
       ]),
     });
     expect(rejectedChoice?.evidence).toEqual(

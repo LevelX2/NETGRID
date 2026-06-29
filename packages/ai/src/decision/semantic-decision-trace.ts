@@ -17,6 +17,7 @@ export type SemanticRankedAction = {
   components: SemanticScoreComponentTrace[];
   blockers: string[];
   explanation: string;
+  whyChosen?: string[];
 };
 
 export type SemanticRejectedAction = {
@@ -24,6 +25,7 @@ export type SemanticRejectedAction = {
   reason: string;
   blockers: string[];
   evidence: string[];
+  whyNot?: string[];
 };
 
 export type SemanticDecisionTraceTargetChoiceShadowSummary = {
