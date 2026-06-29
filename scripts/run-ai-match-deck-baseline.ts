@@ -495,6 +495,8 @@ function markdownReport(output: BaselineOutput): string {
     "",
     `- Audit status: ${output.whyCoverage.auditStatus}`,
     `- Decisions sampled: ${output.whyCoverage.sampleCount}`,
+    `- Decisions requiring WhyNot: ${output.whyCoverage.decisionsRequiringWhyNot}`,
+    `- Decisions not requiring WhyNot: ${output.whyCoverage.decisionsNotRequiringWhyNot}`,
     `- Decisions with top-level WhyNot: ${output.whyCoverage.decisionsWithTopLevelWhyNot}`,
     `- Decisions missing top-level WhyNot: ${output.whyCoverage.decisionsMissingTopLevelWhyNot}`,
     `- Decisions with Runtime WhyNot section: ${output.whyCoverage.decisionsWithRuntimeWhyNotSection}`,

@@ -272,6 +272,8 @@ export function formatAiSelfplayTraceMiningReport(
     "",
     `- Audit status: ${whyCoverage.auditStatus}`,
     `- Decisions sampled: ${whyCoverage.sampleCount}`,
+    `- Decisions requiring WhyNot: ${whyCoverage.decisionsRequiringWhyNot}`,
+    `- Decisions not requiring WhyNot: ${whyCoverage.decisionsNotRequiringWhyNot}`,
     `- Decisions with top-level WhyNot: ${whyCoverage.decisionsWithTopLevelWhyNot}`,
     `- Decisions missing top-level WhyNot: ${whyCoverage.decisionsMissingTopLevelWhyNot}`,
     `- Decisions with Runtime WhyNot section: ${whyCoverage.decisionsWithRuntimeWhyNotSection}`,

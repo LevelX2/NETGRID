@@ -48,7 +48,22 @@ describe("SemanticRuntimeWhyCoverage", () => {
           },
         ],
       }),
-      decisionDebug(),
+      decisionDebug({
+        actionAlternatives: [
+          {
+            rank: 1,
+            actionId: "gain-again",
+            actionType: "gain_credit",
+            selected: true,
+          },
+          {
+            rank: 2,
+            actionId: "run",
+            actionType: "start_run",
+            selected: false,
+          },
+        ],
+      }),
     ]);
 
     expect(report).toMatchObject({
@@ -56,21 +71,23 @@ describe("SemanticRuntimeWhyCoverage", () => {
       scope: "semantic_runtime_why_coverage_report_only",
       auditStatus: "incomplete",
       sampleCount: 2,
+      decisionsRequiringWhyNot: 2,
+      decisionsNotRequiringWhyNot: 0,
       decisionsWithTopLevelWhyNot: 1,
       decisionsMissingTopLevelWhyNot: 1,
       decisionsWithRuntimeWhyNotSection: 1,
       decisionsMissingRuntimeWhyNotSection: 1,
-      actionAlternativeCount: 2,
-      selectedActionAlternativeCount: 1,
+      actionAlternativeCount: 4,
+      selectedActionAlternativeCount: 2,
       selectedActionAlternativesWithWhyChosen: 1,
-      selectedActionAlternativesMissingWhyChosen: 0,
-      nonSelectedActionAlternativeCount: 1,
+      selectedActionAlternativesMissingWhyChosen: 1,
+      nonSelectedActionAlternativeCount: 2,
       nonSelectedActionAlternativesWithWhyNot: 1,
-      nonSelectedActionAlternativesMissingWhyNot: 0,
+      nonSelectedActionAlternativesMissingWhyNot: 1,
       actionAlternativesWithWhyChosen: 1,
-      actionAlternativesMissingWhyChosen: 1,
+      actionAlternativesMissingWhyChosen: 3,
       actionAlternativesWithWhyNot: 1,
-      actionAlternativesMissingWhyNot: 1,
+      actionAlternativesMissingWhyNot: 3,
       rankedAlternativeCount: 2,
       rankedAlternativesWithWhyNot: 2,
       rankedAlternativesMissingWhyNot: 0,
@@ -80,6 +97,8 @@ describe("SemanticRuntimeWhyCoverage", () => {
       missingCoverageSignals: [
         "decisions_missing_top_level_why_not:1",
         "decisions_missing_runtime_why_not_section:1",
+        "selected_action_alternatives_missing_why_chosen:1",
+        "non_selected_action_alternatives_missing_why_not:1",
       ],
     });
     expect(report.evidence).toEqual(
@@ -88,14 +107,15 @@ describe("SemanticRuntimeWhyCoverage", () => {
         "audit_status:incomplete",
         "sample_count:2",
         "decision_top_level_why_not_count:1",
-        "selected_action_alternative_count:1",
-        "non_selected_action_alternative_count:1",
+        "selected_action_alternative_count:2",
+        "non_selected_action_alternative_count:2",
       ]),
     );
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
 
     const markdown = renderSemanticRuntimeWhyCoverageMarkdown(report);
     expect(markdown).toContain("# Semantic Runtime Why Coverage");
+    expect(markdown).toContain("| Decisions requiring WhyNot | 2 |");
     expect(markdown).toContain("| Decisions missing top-level WhyNot | 1 |");
     expect(markdown).toContain("| Audit status | `incomplete` |");
     expect(markdown).toContain(

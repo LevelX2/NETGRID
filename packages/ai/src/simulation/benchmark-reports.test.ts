@@ -432,6 +432,8 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("## Why Coverage");
     expect(report).toContain("- Audit status:");
     expect(report).toContain("- Decisions sampled:");
+    expect(report).toContain("- Decisions requiring WhyNot:");
+    expect(report).toContain("- Decisions not requiring WhyNot:");
     expect(report).toContain("- Decisions with Runtime WhyNot section:");
     expect(report).toContain("- Selected ActionAlternatives with WhyChosen:");
     expect(report).toContain("- Non-selected ActionAlternatives with WhyNot:");

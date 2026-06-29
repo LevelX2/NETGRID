@@ -9,6 +9,8 @@ export type SemanticRuntimeWhyCoverageReport = {
   scope: "semantic_runtime_why_coverage_report_only";
   auditStatus: "empty_sample" | "complete" | "incomplete";
   sampleCount: number;
+  decisionsRequiringWhyNot: number;
+  decisionsNotRequiringWhyNot: number;
   decisionsWithTopLevelWhyNot: number;
   decisionsMissingTopLevelWhyNot: number;
   decisionsWithRuntimeWhyNotSection: number;
@@ -49,10 +51,11 @@ export function buildSemanticRuntimeWhyCoverageReport(
   const rankedAlternatives = decisions.flatMap(
     (decision) => decision.rankedAlternatives ?? [],
   );
+  const decisionsRequiringWhyNot = decisions.filter(decisionRequiresWhyNot);
   const decisionsWithTopLevelWhyNot = decisions.filter(
     (decision) => (decision.whyNot?.length ?? 0) > 0,
   ).length;
-  const decisionsMissingTopLevelWhyNot = decisions.filter(
+  const decisionsMissingTopLevelWhyNot = decisionsRequiringWhyNot.filter(
     (decision) => (decision.whyNot?.length ?? 0) === 0,
   ).length;
   const decisionsWithRuntimeWhyNotSection = decisions.filter((decision) =>
@@ -60,7 +63,7 @@ export function buildSemanticRuntimeWhyCoverageReport(
       (section) => section.id === "runtime_why_not",
     ),
   ).length;
-  const decisionsMissingRuntimeWhyNotSection = decisions.filter(
+  const decisionsMissingRuntimeWhyNotSection = decisionsRequiringWhyNot.filter(
     (decision) =>
       !(decision.detailSections ?? []).some(
         (section) => section.id === "runtime_why_not",
@@ -112,6 +115,9 @@ export function buildSemanticRuntimeWhyCoverageReport(
           ? "complete"
           : "incomplete",
     sampleCount: decisions.length,
+    decisionsRequiringWhyNot: decisionsRequiringWhyNot.length,
+    decisionsNotRequiringWhyNot:
+      decisions.length - decisionsRequiringWhyNot.length,
     decisionsWithTopLevelWhyNot,
     decisionsMissingTopLevelWhyNot,
     decisionsWithRuntimeWhyNotSection,
@@ -167,6 +173,14 @@ export function buildSemanticRuntimeWhyCoverageReport(
   return report;
 }
 
+function decisionRequiresWhyNot(decision: AiDecisionDebug): boolean {
+  return (
+    (decision.actionAlternatives ?? []).some(
+      (alternative) => !alternative.selected,
+    ) || (decision.rankedAlternatives?.length ?? 0) > 1
+  );
+}
+
 export function renderSemanticRuntimeWhyCoverageMarkdown(
   report: SemanticRuntimeWhyCoverageReport,
 ): string {
@@ -179,6 +193,8 @@ Scope: \`${report.scope}\`
 | Metric | Count |
 | --- | ---: |
 | Samples | ${report.sampleCount} |
+| Decisions requiring WhyNot | ${report.decisionsRequiringWhyNot} |
+| Decisions not requiring WhyNot | ${report.decisionsNotRequiringWhyNot} |
 | Decisions with top-level WhyNot | ${report.decisionsWithTopLevelWhyNot} |
 | Decisions missing top-level WhyNot | ${report.decisionsMissingTopLevelWhyNot} |
 | Decisions with Runtime WhyNot section | ${report.decisionsWithRuntimeWhyNotSection} |
