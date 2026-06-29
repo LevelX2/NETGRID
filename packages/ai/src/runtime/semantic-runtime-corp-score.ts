@@ -1037,16 +1037,20 @@ function visibleSourceCardForAction(
 }
 
 function corpCreditGainFromRulesText(rulesText: string | undefined): number {
-  const bracketMatch = rulesText?.match(/\bgain\s+\[(\d+)\](?=\W|$)/i);
-  if (bracketMatch) return numberFromDigitOrWord(bracketMatch[1] ?? "");
-  const englishMatch = rulesText?.match(
-    /\bgain\s+(one|two|three|four|five|six|seven|eight|nine|ten|\d+)\s+credits?\b/i,
+  const tokens = corpRulesTextTokens(rulesText);
+  const bracketToken = tokens.find(
+    (token, index) =>
+      tokens[index - 2] === "gain" &&
+      tokens[index - 1] === "bracketopen" &&
+      tokens[index + 1] === "bracketclose",
   );
-  if (englishMatch) return numberFromDigitOrWord(englishMatch[1] ?? "");
-  const germanMatch = rulesText?.match(
-    /\berhalte\s+(eins|eine|einen|zwei|drei|vier|fünf|fuenf|sechs|sieben|acht|neun|zehn|\d+)\s+credits?\b/i,
+  if (bracketToken) return numberFromDigitOrWord(bracketToken);
+  const creditToken = tokens.find(
+    (token, index) =>
+      (tokens[index - 1] === "gain" || tokens[index - 1] === "erhalte") &&
+      (tokens[index + 1] === "credit" || tokens[index + 1] === "credits"),
   );
-  if (germanMatch) return numberFromDigitOrWord(germanMatch[1] ?? "");
+  if (creditToken) return numberFromDigitOrWord(creditToken);
   return 0;
 }
 
@@ -1102,6 +1106,16 @@ function numberFromDigitOrWord(value: string): number {
     default:
       return 0;
   }
+}
+
+function corpRulesTextTokens(rulesText: string | undefined): string[] {
+  if (!rulesText) return [];
+  return rulesText
+    .replaceAll("[", " bracketopen ")
+    .replaceAll("]", " bracketclose ")
+    .toLocaleLowerCase("de-DE")
+    .split(/[^\p{L}0-9]+/u)
+    .filter(Boolean);
 }
 
 function positiveOrZeroNumber(value: number | undefined): number | undefined {

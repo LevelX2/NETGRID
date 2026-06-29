@@ -10304,6 +10304,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'text\.match|advancement\s+counters\?|\\badd\\s' packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertneunundsiebzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-score.ts` ersetzt die Credit-Gain-RulesText-Regexes für `Gain [n]`, `gain n credit(s)` und `erhalte n credit(s)` durch lokale Token-Sequenzprüfung mit expliziten Klammer-Markern.
+  - Corp-Immediate-Economy erkennt echte Credit-Gain-Operationen weiter; `gain n` ohne Credit-Token oder substring-nahe Werte wie `creditish` erzeugen keinen Economy-Gain.
+  - `semantic-runtime-corp-score.test.ts` sichert bestehende bracket-, englische und deutsche Credit-Gain-Fälle sowie einen neuen `creditish`-Noise-Fall.
+  - Status bleibt `IN_PROGRESS`, weil weitere produktive RulesText-/Regex-Fallbacks noch auditiert und in kleine Pakete geschnitten werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts` grün, 1 Datei, 27 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'bracketMatch|gain\\s\+\\\[|gain\\s\+\(one|erhalte\\s\+' packages/ai/src/runtime/semantic-runtime-corp-score.ts` ohne Treffer; Draw-RulesText-Regexes bleiben als eigener Folgecluster offen.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

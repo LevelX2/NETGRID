@@ -350,6 +350,39 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("bounds Corp credit gain rules text to exact credit tokens", () => {
+    const creditNoise = corpAction(
+      "play-credit-noise",
+      "play_operation",
+      {},
+      "corp_credit_noise",
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(
+        0,
+        [
+          economyOperationCard({
+            instanceId: "corp_credit_noise",
+            definitionId: "v099_credit_noise_operation",
+            title: "Credit Noise",
+            rulesText: "Gain 3 creditish markers.",
+            cost: 0,
+          }),
+        ],
+        [creditNoise],
+      ),
+      creditNoise,
+      "basic_install",
+      testDependencies(),
+    );
+
+    expect(
+      components.some(
+        (component) => component.key === "corp_operation_burst_economy",
+      ),
+    ).toBe(false);
+  });
+
   it("scores value-two Corp draw operations above basic draw without burst tier", () => {
     const simpleDraw = corpAction(
       "play-simple-draw",
