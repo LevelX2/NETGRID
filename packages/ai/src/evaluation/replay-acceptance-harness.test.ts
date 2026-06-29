@@ -34,12 +34,19 @@ describe("ReplayAcceptanceHarness", () => {
     expect(report.gates.holdoutIgnoredDuringClustering).toBe(true);
     expect(report.gates.currentAiHoldoutEvaluated).toBe(false);
     expect(report.gates.portableReproAvailable).toBe(false);
+    expect(report.whyEvidenceSignals).toEqual([
+      "selected_action_why_chosen:selected_by_plan_mapping",
+      "challenger_action_why_not:known_no_current_payoff",
+    ]);
     expect(report.conclusions).toContain(
       "Die aktuelle KI wurde noch nicht auf denselben Holdout-DecisionPoints ausgefuehrt.",
     );
     expect(containsForbiddenSemanticMarker(report)).toBe(false);
     expect(renderReplayAcceptanceHarnessMarkdown(report)).toContain(
       "Abnahme unvollstaendig",
+    );
+    expect(renderReplayAcceptanceHarnessMarkdown(report)).toContain(
+      "challenger_action_why_not:known_no_current_payoff",
     );
   });
 
@@ -99,7 +106,27 @@ function clusterReport(): ReplayDecisionCandidateClusterReport {
     },
     selectedClusterForRepro: "replay-cluster-test",
     clusters: [],
-    candidates: [],
+    candidates: [
+      {
+        kind: "replay_decision_candidate",
+        candidateId: "candidate-1",
+        caseId: "case-1",
+        status: "candidate_needs_same_state_repro",
+        clusterKey:
+          "runner|draw_card|runner.obtain_breaker_coverage|to|start_run|simple_hq_or_rnd_pressure",
+        side: "runner",
+        selectedActionType: "draw_card",
+        selectedPlanKind: "runner.obtain_breaker_coverage",
+        challengerActionType: "start_run",
+        challengerPlanKind: "simple_hq_or_rnd_pressure",
+        scoreGap: 2320,
+        mistakeClasses: ["missed_safe_access"],
+        evidence: [
+          "selected_action_why_chosen:selected_by_plan_mapping",
+          "challenger_action_why_not:known_no_current_payoff",
+        ],
+      },
+    ],
     redactionStatus: "passed",
     noRuntimeEffect: true,
     productiveUseAllowed: false,

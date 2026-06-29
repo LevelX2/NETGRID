@@ -1,4 +1,7 @@
-import { assertSemanticObjectSideSafe } from "../diagnostics/semantic-redaction";
+import {
+  assertSemanticObjectSideSafe,
+  redactSemanticString,
+} from "../diagnostics/semantic-redaction";
 import type {
   ReplayDecisionCase,
   ReplayDecisionCaseExtractionReport,
@@ -51,6 +54,7 @@ export type ReplayAcceptanceHarnessReport = {
     portableReproAvailable: boolean;
     fullAiTestGreen: boolean;
   };
+  whyEvidenceSignals: string[];
   conclusions: string[];
   noRuntimeEffect: true;
   productiveUseAllowed: false;
@@ -81,6 +85,7 @@ export function buildReplayAcceptanceHarnessReport(
     fullAiTestGreen: options.fullAiTestGreen === true,
   };
   const status = acceptanceStatus(gates);
+  const whyEvidenceSignals = collectWhyEvidenceSignals(clustering);
   const report: ReplayAcceptanceHarnessReport = {
     schemaVersion: REPLAY_ACCEPTANCE_HARNESS_SCHEMA_VERSION,
     scope: "ai_replay_acceptance_hygiene",
@@ -98,6 +103,7 @@ export function buildReplayAcceptanceHarnessReport(
       portableReproFixtures,
     },
     gates,
+    whyEvidenceSignals,
     conclusions: conclusions(status, gates, historicalFixedPatternHoldoutCases),
     noRuntimeEffect: true,
     productiveUseAllowed: false,
@@ -129,6 +135,10 @@ Status: \`${report.status}\`
 ## Gates
 
 ${gateRows(report.gates)}
+
+## Why Evidence
+
+${report.whyEvidenceSignals.length > 0 ? report.whyEvidenceSignals.map((entry) => `- \`${entry}\``).join("\n") : "- `none`"}
 
 ## Schlussfolgerungen
 
@@ -207,6 +217,23 @@ function gateRows(gates: ReplayAcceptanceHarnessReport["gates"]): string {
     .map(([key, value]) => `| \`${key}\` | ${value ? "ja" : "nein"} |`)
     .join("\n")
     .replace(/^/, "| Gate | Erfuellt |\n| --- | --- |\n");
+}
+
+function collectWhyEvidenceSignals(
+  clustering: ReplayDecisionCandidateClusterReport,
+): string[] {
+  return unique(
+    clustering.candidates
+      .flatMap((candidate) => candidate.evidence)
+      .filter((entry) => entry.includes("_why_"))
+      .map((entry) => redactSemanticString(entry).trim())
+      .filter((entry) => entry.length > 0)
+      .map((entry) => entry.slice(0, 240)),
+  ).slice(0, 12);
+}
+
+function unique(values: readonly string[]): string[] {
+  return [...new Set(values)];
 }
 
 function safeText(value: string): string {
