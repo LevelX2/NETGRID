@@ -10380,6 +10380,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n 'gain\\s\+\\\[|gain\\s\+\\\[?\(\\d\+\)|\\bgain\\s\+\\\[?(\d\+)\\\]?' packages/ai/src/legacy/corp-plans.ts` ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertachtundachtzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/legacy/corp-plans.ts` ersetzt die Overadvance-Threshold-RulesText-Regexes für `for every <n> advancement counter(s) over` durch lokale Token-Sequenzprüfung.
+  - `corpNumberWordToNumber` nutzt nun einen numerischen String-Vergleich statt `^\d+$`-Regex.
+  - Status bleibt `IN_PROGRESS`, weil weitere Legacy-Corp-RulesText-Regexes für allgemeine Advanceable-/Target-Text-Heuristiken und Advancement-Burst-Amounts offen sind.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/index.test.ts -t "classifies exact overadvance threshold"` grün, 6 Tests.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n 'for every .*advancement counters\?|additional agenda point for every|\^\\d\+\$' packages/ai/src/legacy/corp-plans.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -7045,20 +7045,22 @@ function corpAgendaOveradvanceThresholdSize(
     return 2;
   }
   if (definitionId === "onr_proteus_007_project-venice") return 3;
-  const overMatch =
-    /for every (one|two|three|four|\d+) advancement counters? over/.exec(text);
-  if (overMatch?.[1]) return corpNumberWordToNumber(overMatch[1]);
-  const additionalAgendaPointMatch =
-    /additional agenda point for every (one|two|three|four|\d+) advancement counters? over/.exec(
-      text,
-    );
-  if (additionalAgendaPointMatch?.[1])
-    return corpNumberWordToNumber(additionalAgendaPointMatch[1]);
+  const tokens = corpRulesTextTokens(text);
+  const thresholdToken = tokens.find(
+    (token, index) =>
+      tokens[index - 2] === "for" &&
+      tokens[index - 1] === "every" &&
+      tokens[index + 1] === "advancement" &&
+      (tokens[index + 2] === "counter" || tokens[index + 2] === "counters") &&
+      tokens[index + 3] === "over",
+  );
+  if (thresholdToken) return corpNumberWordToNumber(thresholdToken);
   return undefined;
 }
 
 function corpNumberWordToNumber(value: string): number | undefined {
-  if (/^\d+$/.test(value)) return Number.parseInt(value, 10);
+  const numeric = Number.parseInt(value, 10);
+  if (String(numeric) === value && numeric > 0) return numeric;
   const byWord: Record<string, number> = {
     one: 1,
     two: 2,
