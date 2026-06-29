@@ -10460,6 +10460,14 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: gezieltes Ripgrep auf die entfernte `rulesText.includes`-Kette ohne Treffer.
 
+- `AI-COMPLETE-15` dreihundertachtundneunzigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/runtime/semantic-runtime-corp-board-triage.ts` ersetzt die durch den Main-Abgleich neu aufgetauchten Economy-/Draw-RulesText-Regexes durch lokale Token-Prädikate.
+  - Corp-Board-Triage erkennt sichtbare Operationen mit `gain/erhalte/erhält/nimm/nehme <Zahl> credits/kredite/bits` und `draw/ziehe/zieht <Zahl> cards/karten` weiter ohne freie Regex.
+  - Status bleibt `IN_PROGRESS`, weil nach dem Runtime-Nachzug erneut ein produktiver Rest-Audit nötig ist.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/runtime/semantic-runtime-corp-score.test.ts -t "scores German immediate credit and draw operations|uses board triage so funding beats"` in `packages/ai` grün.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: gezieltes Ripgrep auf die entfernten Corp-Board-Triage-Regexes ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

@@ -683,14 +683,79 @@ function actionHasVisibleImmediateEconomyOrDrawSource(
   if (type !== "operation") return false;
   const text = [source.rulesText, definition?.rulesText]
     .filter((value): value is string => typeof value === "string")
-    .join(" ")
-    .toLocaleLowerCase("de-DE");
+    .join(" ");
+  const tokens = corpBoardTriageRulesTextTokens(text);
   return (
-    /\b(?:gain|erhalte|erhält|nimm|nehme)\s+(?:\[\d+\]|\d+)\s+(?:credits?|kredite?|bits?)\b/u.test(
-      text,
-    ) ||
-    /\b(?:draw|ziehe|zieht)\s+\d+\s+(?:cards?|karten?)\b/u.test(text)
+    corpBoardTriageTokensIncludeCreditGain(tokens) ||
+    corpBoardTriageTokensIncludeDraw(tokens)
   );
+}
+
+function corpBoardTriageRulesTextTokens(text: string): string[] {
+  return text
+    .toLocaleLowerCase("de-DE")
+    .split(/[^\p{L}0-9]+/u)
+    .filter(Boolean);
+}
+
+function corpBoardTriageTokensIncludeCreditGain(
+  tokens: readonly string[],
+): boolean {
+  return tokens.some(
+    (token, index) =>
+      corpBoardTriageCreditGainVerb(tokens[index - 1]) &&
+      corpBoardTriagePositiveInteger(token) > 0 &&
+      corpBoardTriageCreditToken(tokens[index + 1]),
+  );
+}
+
+function corpBoardTriageTokensIncludeDraw(tokens: readonly string[]): boolean {
+  return tokens.some(
+    (token, index) =>
+      corpBoardTriageDrawVerb(tokens[index - 1]) &&
+      corpBoardTriagePositiveInteger(token) > 0 &&
+      corpBoardTriageCardToken(tokens[index + 1]),
+  );
+}
+
+function corpBoardTriageCreditGainVerb(token: string | undefined): boolean {
+  return (
+    token === "gain" ||
+    token === "erhalte" ||
+    token === "erhält" ||
+    token === "nimm" ||
+    token === "nehme"
+  );
+}
+
+function corpBoardTriageDrawVerb(token: string | undefined): boolean {
+  return token === "draw" || token === "ziehe" || token === "zieht";
+}
+
+function corpBoardTriageCreditToken(token: string | undefined): boolean {
+  return (
+    token === "credit" ||
+    token === "credits" ||
+    token === "kredit" ||
+    token === "kredite" ||
+    token === "bit" ||
+    token === "bits"
+  );
+}
+
+function corpBoardTriageCardToken(token: string | undefined): boolean {
+  return (
+    token === "card" ||
+    token === "cards" ||
+    token === "karte" ||
+    token === "karten"
+  );
+}
+
+function corpBoardTriagePositiveInteger(token: string | undefined): number {
+  if (!token) return 0;
+  const amount = Number.parseInt(token, 10);
+  return String(amount) === token && amount > 0 ? amount : 0;
 }
 
 function legalEconomyActionExists(input: AiDecisionInput): boolean {
