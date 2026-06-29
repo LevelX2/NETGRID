@@ -180,8 +180,8 @@ describe("MVP 0.3 AI controller contract", () => {
       expect.arrayContaining(["strategy_profile:neutral_missing_snapshot"]),
     );
     expect(
-      (runnerInput as AiDecisionInputWithDeckCapabilities).ownDeckStrategyProfile
-        ?.warnings,
+      (runnerInput as AiDecisionInputWithDeckCapabilities)
+        .ownDeckStrategyProfile?.warnings,
     ).toEqual(
       expect.arrayContaining(["strategy_profile:neutral_missing_snapshot"]),
     );
@@ -190,8 +190,8 @@ describe("MVP 0.3 AI controller contract", () => {
         ?.primaryStrategy.family,
     ).toBe("neutral");
     expect(
-      (runnerInput as AiDecisionInputWithDeckCapabilities).ownStrategicIntentState
-        ?.primaryStrategy.family,
+      (runnerInput as AiDecisionInputWithDeckCapabilities)
+        .ownStrategicIntentState?.primaryStrategy.family,
     ).toBe("neutral");
     expect(corpInput.legalActions).toEqual(getLegalActions(state, "corp"));
     expect(runnerInput.playerView).toEqual(getPlayerView(state, "runner"));
@@ -265,9 +265,9 @@ describe("MVP 0.3 AI controller contract", () => {
       },
     });
     expect(runnerInput.ownStrategicIntentState?.side).toBe("runner");
-    expect(runnerInput.ownStrategicIntentState?.targetVector.evidence).toContain(
-      "target_source:runtime_context",
-    );
+    expect(
+      runnerInput.ownStrategicIntentState?.targetVector.evidence,
+    ).toContain("target_source:runtime_context");
     expect(runnerInput.ownStrategicIntentState?.reserve.evidence).toContain(
       "reserve_source:runtime_context",
     );
@@ -312,7 +312,9 @@ describe("MVP 0.3 AI controller contract", () => {
       );
       expect(
         decision.decisionDebug?.detailSections?.map((section) => section.id),
-      ).toEqual(expect.arrayContaining(["strategic_runtime", "selection_score"]));
+      ).toEqual(
+        expect.arrayContaining(["strategic_runtime", "selection_score"]),
+      );
       expect(
         JSON.stringify({
           input,
@@ -3549,7 +3551,9 @@ describe("MVP 0.3 AI controller contract", () => {
 
     expect(decision.actionId).toBe(diplomaticTrash.actionId);
     expect(debugText).toContain("corp_tagged_damage_prevention_resource_trash");
-    expect(debugText).toContain("runner_resource_damage_prevention_visible:true");
+    expect(debugText).toContain(
+      "runner_resource_damage_prevention_visible:true",
+    );
     expect(debugText).toContain("cancel_blocked:true");
     expect(debugText).toContain("corp_visible_meat_damage_payoff:true");
     expect(assertAiInputIsSideSafe(input)).toBe(true);
@@ -6169,6 +6173,128 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(debugText).toContain("installed_corp_economy_kind:pool_payout");
     expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
     expect(debugText).toContain("installed_corp_economy_stored_credits:16");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("uses basic credit to unlock Accounts Receivable before nonurgent HQ ICE", () => {
+    const input = accountsReceivableCorpEconomyInput(
+      "ai-corp-accounts-threshold",
+      4,
+    );
+    const accountsReceivable = accountsReceivableAction(input);
+    const hqIceInstall = hqIceInstallAction(
+      input,
+      ACCOUNTS_RECEIVABLE_HQ_ICE_CARD_ID_FOR_TEST,
+    );
+    const basicCredit = basicCorpCreditAction(input);
+
+    expect(accountsReceivable).toBeUndefined();
+    expect(hqIceInstall).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!hqIceInstall || !basicCredit)
+      throw new Error("Missing Accounts Receivable threshold fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [hqIceInstall, basicCredit],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(basicCredit.actionId);
+    expect(debugText).toContain("corp_operation_economy_threshold_funding");
+    expect(debugText).toContain("corp_operation_economy_threshold:true");
+    expect(debugText).toContain("credits_after_funding:5");
+    expect(debugText).toContain("burst_economy_net_gain:4");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("plays Accounts Receivable before basic credit and nonurgent HQ ICE", () => {
+    const input = accountsReceivableCorpEconomyInput(
+      "ai-corp-accounts-play",
+      5,
+    );
+    const accountsReceivable = accountsReceivableAction(input);
+    const hqIceInstall = hqIceInstallAction(
+      input,
+      ACCOUNTS_RECEIVABLE_HQ_ICE_CARD_ID_FOR_TEST,
+    );
+    const basicCredit = basicCorpCreditAction(input);
+
+    expect(accountsReceivable).toBeDefined();
+    expect(hqIceInstall).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!accountsReceivable || !hqIceInstall || !basicCredit)
+      throw new Error("Missing Accounts Receivable play fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [hqIceInstall, basicCredit, accountsReceivable],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(accountsReceivable.actionId);
+    expect(debugText).toContain("corp_operation_burst_economy");
+    expect(debugText).toContain("operation_cost:5");
+    expect(debugText).toContain("operation_gain:9");
+    expect(debugText).toContain("burst_economy_net_gain:4");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("plays Efficiency Experts before the basic credit action", () => {
+    const input = efficiencyExpertsCorpEconomyInput(
+      "ai-corp-efficiency-experts-play",
+      0,
+    );
+    const efficiencyExperts = efficiencyExpertsAction(input);
+    const basicCredit = basicCorpCreditAction(input);
+
+    expect(efficiencyExperts).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!efficiencyExperts || !basicCredit)
+      throw new Error("Missing Efficiency Experts fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, efficiencyExperts],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(efficiencyExperts.actionId);
+    expect(debugText).toContain("corp_operation_burst_economy");
+    expect(debugText).toContain("operation_cost:0");
+    expect(debugText).toContain("operation_gain:3");
+    expect(debugText).toContain("burst_economy_net_gain:3");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("plays Night Shift before basic credit and basic draw", () => {
+    const input = nightShiftCorpEconomyInput("ai-corp-night-shift-play", 0);
+    const nightShift = nightShiftAction(input);
+    const basicCredit = basicCorpCreditAction(input);
+    const basicDraw = basicCorpDrawAction(input);
+
+    expect(nightShift).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    expect(basicDraw).toBeDefined();
+    if (!nightShift || !basicCredit || !basicDraw)
+      throw new Error("Missing Night Shift fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, basicDraw, nightShift],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(nightShift.actionId);
+    expect(debugText).toContain("corp_operation_burst_economy");
+    expect(debugText).toContain("operation_cost:0");
+    expect(debugText).toContain("operation_gain:2");
+    expect(debugText).toContain("operation_draw:1");
+    expect(debugText).toContain("operation_action_value:3");
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
   });
 
@@ -28009,6 +28135,10 @@ const SCHLAGHUND_CARD_ID_FOR_TEST = "onr_v1_339_schlaghund";
 const FULL_BODY_CONVERSION_CARD_ID_FOR_TEST = "onr_v1_127_full-body-conversion";
 const DERMATECH_BODYPLATING_CARD_ID_FOR_TEST =
   "onr_v1_125_dermatech-bodyplating";
+const ACCOUNTS_RECEIVABLE_CARD_ID_FOR_TEST = "onr_v1_281_accounts-receivable";
+const EFFICIENCY_EXPERTS_CARD_ID_FOR_TEST = "onr_v1_290_efficiency-experts";
+const NIGHT_SHIFT_CARD_ID_FOR_TEST = "onr_v1_295_night-shift";
+const ACCOUNTS_RECEIVABLE_HQ_ICE_CARD_ID_FOR_TEST = "onr_v1_243_fetch-4-0-1";
 
 const V111_CORP_DECK: DeckDefinition = {
   ...V094_CORP_DECK,
@@ -28584,6 +28714,137 @@ function installedCorpBbsEconomyInput(seed: string, bbsBits: number[] = [16]) {
     difficulty: "normal",
     profileId: "corp-ai-v1.4.0-normal",
   });
+}
+
+function accountsReceivableCorpEconomyInput(
+  seed: string,
+  credits: number,
+): AiDecisionInput {
+  return corpEconomyOperationInput(
+    seed,
+    credits,
+    ACCOUNTS_RECEIVABLE_CARD_ID_FOR_TEST,
+  );
+}
+
+function efficiencyExpertsCorpEconomyInput(
+  seed: string,
+  credits: number,
+): AiDecisionInput {
+  return corpEconomyOperationInput(
+    seed,
+    credits,
+    EFFICIENCY_EXPERTS_CARD_ID_FOR_TEST,
+  );
+}
+
+function nightShiftCorpEconomyInput(
+  seed: string,
+  credits: number,
+): AiDecisionInput {
+  return corpEconomyOperationInput(seed, credits, NIGHT_SHIFT_CARD_ID_FOR_TEST);
+}
+
+function corpEconomyOperationInput(
+  seed: string,
+  credits: number,
+  operationDefinitionId: string,
+): AiDecisionInput {
+  let state = createGameAfterSetup({
+    seed,
+    baseline: CURRENT_RULES_BASELINE,
+    runnerDeck: ONR_V1_1_2K_RUNNER_DECK,
+    corpDeck: {
+      ...ONR_V1_1_2K_CORP_DECK,
+      id: `accounts_receivable_corp_${seed}`,
+      name: "Accounts Receivable Corp Economy Fixture",
+      cards: deckCardsWithAddedQuantities(ONR_V1_1_2K_CORP_DECK.cards, [
+        { id: operationDefinitionId, quantity: 2 },
+        { id: ACCOUNTS_RECEIVABLE_HQ_ICE_CARD_ID_FOR_TEST, quantity: 1 },
+      ]),
+    },
+    agendaPointsToWin: 7,
+  });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  moveCorpCardToHq(state, operationDefinitionId);
+  moveCorpCardToHq(state, ACCOUNTS_RECEIVABLE_HQ_ICE_CARD_ID_FOR_TEST);
+  state.corp.credits = credits;
+  state.corp.clicks = 3;
+  return buildAiDecisionInput(state, "corp", {
+    difficulty: "normal",
+    profileId: "corp-ai-v1.4.0-normal",
+  });
+}
+
+function deckCardsWithAddedQuantities(
+  cards: DeckDefinition["cards"],
+  additions: DeckDefinition["cards"],
+): DeckDefinition["cards"] {
+  const merged = cards.map((entry) => ({ ...entry }));
+  for (const addition of additions) {
+    const existing = merged.find((entry) => entry.id === addition.id);
+    if (existing) {
+      existing.quantity += addition.quantity;
+    } else {
+      merged.push({ ...addition });
+    }
+  }
+  return merged;
+}
+
+function accountsReceivableAction(
+  input: AiDecisionInput,
+): LegalAction | undefined {
+  return economyOperationAction(input, ACCOUNTS_RECEIVABLE_CARD_ID_FOR_TEST);
+}
+
+function efficiencyExpertsAction(
+  input: AiDecisionInput,
+): LegalAction | undefined {
+  return economyOperationAction(input, EFFICIENCY_EXPERTS_CARD_ID_FOR_TEST);
+}
+
+function nightShiftAction(input: AiDecisionInput): LegalAction | undefined {
+  return economyOperationAction(input, NIGHT_SHIFT_CARD_ID_FOR_TEST);
+}
+
+function economyOperationAction(
+  input: AiDecisionInput,
+  definitionId: string,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.type === "play_operation" &&
+      sourceDefinitionFromInput(input, action) === definitionId,
+  );
+}
+
+function hqIceInstallAction(
+  input: AiDecisionInput,
+  definitionId: string,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.type === "install_card" &&
+      action.payload?.placement === "ice" &&
+      action.payload?.serverId === "hq" &&
+      sourceDefinitionFromInput(input, action) === definitionId,
+  );
+}
+
+function basicCorpCreditAction(
+  input: AiDecisionInput,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.type === "gain_credit" && action.source === "basic_action",
+  );
+}
+
+function basicCorpDrawAction(input: AiDecisionInput): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) => action.type === "draw_card" && action.source === "basic_action",
+  );
 }
 
 function corpReplayTagPunishWindowInput(
@@ -31544,10 +31805,16 @@ function strategyFamilyForDiscardTest(
 ): NonNullable<
   AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
 >["primaryStrategy"]["family"] {
-  if (strategyId.startsWith("runner.rig") || strategyId.includes("search.breaker")) {
+  if (
+    strategyId.startsWith("runner.rig") ||
+    strategyId.includes("search.breaker")
+  ) {
     return "runner_setup";
   }
-  if (strategyId === "runner.hq_pressure" || strategyId === "runner.rnd_pressure") {
+  if (
+    strategyId === "runner.hq_pressure" ||
+    strategyId === "runner.rnd_pressure"
+  ) {
     return "runner_central_pressure";
   }
   if (strategyId === "runner.remote_contest") return "runner_remote_contest";
@@ -31568,7 +31835,10 @@ function strategyTargetKindForDiscardTest(
 ): NonNullable<
   AiDecisionInputWithDeckCapabilities["ownStrategicIntentState"]
 >["targetVector"]["kind"] {
-  if (strategyId === "runner.hq_pressure" || strategyId === "runner.rnd_pressure") {
+  if (
+    strategyId === "runner.hq_pressure" ||
+    strategyId === "runner.rnd_pressure"
+  ) {
     return "central";
   }
   if (strategyId === "runner.remote_contest") return "remote";
