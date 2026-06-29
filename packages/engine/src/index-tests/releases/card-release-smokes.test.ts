@@ -3165,8 +3165,20 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     expect(getPlayerView(wrong, "corp").pendingChoice).toBeUndefined();
     wrong = applyChoice(wrong, "runner", `ice_${iceId}`);
+    expect(wrong.timingPoint).toBe("run.approach_ice");
+    expect(wrong.activeSide).toBe("corp");
+    expect(wrong.run).toMatchObject({
+      phase: "approach_ice",
+      approachedIceId: iceId,
+      secretSpendGuessRunAutoPassIceId: iceId,
+    });
+    expect(
+      getLegalActions(wrong, "corp").some(
+        (action) => action.type === "rez_ice" && action.source === iceId,
+      ),
+    ).toBe(true);
     expect(wrong.run?.position).toMatchObject({
-      kind: "server",
+      kind: "ice",
       serverId: "rd",
     });
     expect(wrong.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -3181,6 +3193,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(JSON.stringify(wrong.eventLog.at(-1)?.publicPayload)).not.toContain(
       "simple_barrier_ice",
     );
+    wrong = apply(wrong, "corp", (action) => action.type === "decline_rez");
+    expect(wrong.run?.position).toMatchObject({
+      kind: "server",
+      serverId: "rd",
+    });
   });
 
   it("loads Pocket Virtual Reality temporary encounter trace credits for its printed traces", () => {

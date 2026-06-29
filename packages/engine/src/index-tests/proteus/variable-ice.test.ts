@@ -19,12 +19,8 @@ import {
 } from "../../index";
 import { collectActiveModifiers } from "../../ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "../../card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "../../card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "../../mechanics/public-payload-schema";
 import { publicContextForAction } from "../../public-context";
 import {
@@ -352,9 +348,9 @@ describe("Proteus Phase 3a Variable ICE Foundation", () => {
         (action) =>
           action.type === "start_run" && action.payload?.serverId === "rd",
       );
-      expect(
-        JSON.stringify(getPlayerView(state, "runner")),
-      ).not.toContain("variable_paid_etr_subroutines");
+      expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+        "variable_paid_etr_subroutines",
+      );
       const rezAction = mustAction(
         state,
         "corp",
@@ -524,8 +520,15 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
       ["onr_proteus_040_sumo-2008", "wall", "onr_v1_021_dwarf", 1],
     ] as const;
 
-    for (const [iceDefinitionId, selectedSubtype, breakerDefinitionId, extraCost] of cases) {
-      let state = proteusPhase3bGame(`proteus-phase-3b-subtype-${iceDefinitionId}`);
+    for (const [
+      iceDefinitionId,
+      selectedSubtype,
+      breakerDefinitionId,
+      extraCost,
+    ] of cases) {
+      let state = proteusPhase3bGame(
+        `proteus-phase-3b-subtype-${iceDefinitionId}`,
+      );
       state.corp.credits = 20;
       state.runner.credits = 20;
       const breakerId = installRunnerProgramForTest(state, breakerDefinitionId);
@@ -601,7 +604,9 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
       "onr_proteus_024_gatekeeper",
       "onr_proteus_036_sandstorm",
     ] as const) {
-      let state = proteusPhase3bGame(`proteus-phase-3b-paid-etr-${iceDefinitionId}`);
+      let state = proteusPhase3bGame(
+        `proteus-phase-3b-paid-etr-${iceDefinitionId}`,
+      );
       state.corp.credits = 12;
       const iceId = putCorpIceOnServer(state, "rd", iceDefinitionId);
       state = apply(
@@ -669,7 +674,11 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
   it("stores Homing Missile X as strength, trace base and trace bid limit", () => {
     let state = proteusPhase3bGame("proteus-phase-3b-homing-missile");
     state.corp.credits = 20;
-    const iceId = putCorpIceOnServer(state, "rd", "onr_proteus_025_homing-missile");
+    const iceId = putCorpIceOnServer(
+      state,
+      "rd",
+      "onr_proteus_025_homing-missile",
+    );
     state = apply(
       state,
       "runner",
@@ -687,7 +696,11 @@ describe("Proteus Phase 3b Variable Cost/Strength/Subtype ICE", () => {
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "corp", (action) => action.actionId === rezAction.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === rezAction.actionId,
+    );
     expect(state.cardInstances[iceId]?.variableIceState).toMatchObject({
       family: "x_strength",
       value: 5,
@@ -786,7 +799,11 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
     while (state.run?.encounteredIceId !== targetId) {
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
     }
     return { state, targetId };
   }
@@ -794,8 +811,12 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
   function resolveOpenTraceWithDefaultChoices(state: GameState): GameState {
     while (state.trace) {
       const option =
-        state.pendingChoice?.options.find((candidate) => candidate.id === "bid_0") ??
-        state.pendingChoice?.options.find((candidate) => candidate.id === "pass") ??
+        state.pendingChoice?.options.find(
+          (candidate) => candidate.id === "bid_0",
+        ) ??
+        state.pendingChoice?.options.find(
+          (candidate) => candidate.id === "pass",
+        ) ??
         state.pendingChoice?.options[0];
       if (!option) throw new Error("Trace choice option missing.");
       state = applyChoice(state, state.activeSide, option.id);
@@ -827,11 +848,7 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
   });
 
   it("counts only rezzed ICE outside the current ICE for strength and damage", () => {
-    for (const definitionId of [
-      BUG_ZAPPER,
-      DOG_PILE,
-      MASTERMIND,
-    ] as const) {
+    for (const definitionId of [BUG_ZAPPER, DOG_PILE, MASTERMIND] as const) {
       let state = proteusPhase3cGame(`proteus-phase-3c-${definitionId}`);
       const setup = encounterInnerRelativeIce(state, definitionId);
       state = setup.state;
@@ -847,7 +864,11 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
       }
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
       if (definitionId === BUG_ZAPPER) {
         expect(beforeGrip - state.runner.grip.length).toBe(4);
       } else if (definitionId === DOG_PILE) {
@@ -926,7 +947,11 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "runner", (action) => action.actionId === continueAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
     expect(state.trace).toMatchObject({
       sourceCardInstanceId: setup.targetId,
       baseTraceStrength: 5,
@@ -1043,7 +1068,9 @@ describe("Proteus Phase 3e ICE Repositioning", () => {
     ).toBe(false);
 
     const drifted = structuredClone(state);
-    const server = drifted.corp.servers.find((candidate) => candidate.id === "rd");
+    const server = drifted.corp.servers.find(
+      (candidate) => candidate.id === "rd",
+    );
     if (!server) throw new Error("Missing R&D server");
     server.ice = [innerId, middleId];
     drifted.corp.hq.push(mobileId);
@@ -1063,7 +1090,11 @@ describe("Proteus Phase 3e ICE Repositioning", () => {
       }).ok,
     ).toBe(false);
 
-    state = apply(state, "corp", (action) => action.actionId === reposition.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === reposition.actionId,
+    );
     const rd = state.corp.servers.find((candidate) => candidate.id === "rd");
     expect(rd?.ice).toEqual([mobileId, innerId, middleId]);
     expect(state.cardInstances[mobileId]).toMatchObject({
@@ -1145,12 +1176,14 @@ describe("Proteus Phase 3e ICE Repositioning", () => {
     );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "corp", (action) => action.actionId === reposition.actionId);
-    expect(state.corp.servers.find((server) => server.id === "rd")?.ice).toEqual([
-      middleId,
-      outerId,
-      walkingId,
-    ]);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === reposition.actionId,
+    );
+    expect(
+      state.corp.servers.find((server) => server.id === "rd")?.ice,
+    ).toEqual([middleId, outerId, walkingId]);
     expect(state.run?.approachedIceId).toBe(walkingId);
     expect(state.cardInstances[walkingId]).toMatchObject({
       faceup: true,
@@ -1249,7 +1282,10 @@ describe("Proteus Dynamic Public ETR ICE", () => {
       ?.ice.find((card) => card.instanceId === iceId) as
       | { effectiveRunQuote?: { subroutines: Array<{ id: string }> } }
       | undefined;
-    return ice?.effectiveRunQuote?.subroutines.map((subroutine) => subroutine.id) ?? [];
+    return (
+      ice?.effectiveRunQuote?.subroutines.map((subroutine) => subroutine.id) ??
+      []
+    );
   }
 
   function startEncounterWithRezzedIce(
@@ -1275,12 +1311,7 @@ describe("Proteus Dynamic Public ETR ICE", () => {
     const codeGateId = putCorpIceOnServer(state, "hq", CODE_GATE);
     const wallId = putCorpIceOnServer(state, "archives", WALL);
     const sentryId = putCorpIceOnServer(state, "archives", SENTRY);
-    for (const cardId of [
-      minotaurId,
-      codeGateId,
-      wallId,
-      sentryId,
-    ]) {
+    for (const cardId of [minotaurId, codeGateId, wallId, sentryId]) {
       setRezzed(state, cardId);
     }
     const initial = structuredClone(state);
@@ -1301,7 +1332,9 @@ describe("Proteus Dynamic Public ETR ICE", () => {
       encounterWillEndRun: true,
     });
     expect(JSON.stringify(continueAction.payload)).not.toContain(minotaurId);
-    expect(JSON.stringify(continueAction.payload)).not.toMatch(hiddenPayloadMarkers);
+    expect(JSON.stringify(continueAction.payload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
 
     const stale = structuredClone(state);
     stale.cardInstances[wallId] = {
@@ -1352,8 +1385,7 @@ describe("Proteus Dynamic Public ETR ICE", () => {
       state,
       "corp",
       (action) =>
-        action.type === "activated_card_ability" &&
-        action.source === riddlerId,
+        action.type === "activated_card_ability" && action.source === riddlerId,
     );
     expect(addAction.costs).toEqual([{ credits: 2 }]);
     expect(addAction.payload).toMatchObject({
@@ -1410,8 +1442,7 @@ describe("Proteus Dynamic Public ETR ICE", () => {
       state,
       "corp",
       (action) =>
-        action.type === "activated_card_ability" &&
-        action.source === riddlerId,
+        action.type === "activated_card_ability" && action.source === riddlerId,
     );
     expect(state.corp.credits).toBe(6);
     expect(effectiveSubroutineIds(state, "rd", riddlerId)).toHaveLength(2);
@@ -1467,14 +1498,13 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   const ICEBERG = "onr_proteus_027_iceberg";
   const MARIONETTE = "onr_proteus_029_marionette";
   const SCAFFOLDING = "onr_proteus_037_scaffolding";
-  const MISLEADING_ACCESS_MENUS =
-    "onr_proteus_032_misleading-access-menus";
+  const MISLEADING_ACCESS_MENUS = "onr_proteus_032_misleading-access-menus";
   const SNOWBANK = "onr_proteus_038_snowbank";
   const TUMBLERS = "onr_proteus_042_tumblers";
   const TWISTY_PASSAGES = "onr_proteus_043_twisty-passages";
-  const WASHED_UP_SOLO_CONSTRUCT =
-    "onr_proteus_045_washed-up-solo-construct";
+  const WASHED_UP_SOLO_CONSTRUCT = "onr_proteus_045_washed-up-solo-construct";
   const RASMIN_BRIDGER = "onr_proteus_070_rasmin-bridger";
+  const SOCIAL_ENGINEERING = "onr_v1_111_social-engineering";
   const hiddenPayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
 
@@ -1543,6 +1573,33 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     });
   }
 
+  function proteusSocialEngineeringTwistyGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_6_2_RUNNER_DECK,
+          id: `${seed}_runner`,
+          cards: [
+            { id: SOCIAL_ENGINEERING, quantity: 1 },
+            ...ONR_V1_6_2_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_6_2_CORP_DECK,
+          id: `${seed}_corp`,
+          cards: [
+            { id: TWISTY_PASSAGES, quantity: 1 },
+            ...ONR_V1_6_2_CORP_DECK.cards.filter(
+              (card) => card.id !== TWISTY_PASSAGES,
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
   function setRezzed(state: GameState, cardId: CardInstanceId): void {
     state.cardInstances[cardId] = {
       ...state.cardInstances[cardId]!,
@@ -1587,7 +1644,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     );
     const rezCreditsBefore = state.corp.credits;
     state = enterEncounterFromMovementWindow(
-      apply(state, "corp", (action) => action.type === "rez_ice" && action.source === iceId),
+      apply(
+        state,
+        "corp",
+        (action) => action.type === "rez_ice" && action.source === iceId,
+      ),
     );
     return { state, iceId, rezCreditsBefore };
   }
@@ -1595,13 +1656,35 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   function resolveOpenTraceWithDefaultChoices(state: GameState): GameState {
     while (state.trace) {
       const option =
-        state.pendingChoice?.options.find((candidate) => candidate.id === "bid_0") ??
-        state.pendingChoice?.options.find((candidate) => candidate.id === "pass") ??
+        state.pendingChoice?.options.find(
+          (candidate) => candidate.id === "bid_0",
+        ) ??
+        state.pendingChoice?.options.find(
+          (candidate) => candidate.id === "pass",
+        ) ??
         state.pendingChoice?.options[0];
       if (!option) throw new Error("Trace choice option missing.");
       state = applyChoice(state, state.activeSide, option.id);
     }
     return state;
+  }
+
+  function chooseSocialEngineeringAutoPassTarget(
+    state: GameState,
+    iceId: CardInstanceId,
+  ): GameState {
+    state.runner.credits = 5;
+    const socialEngineeringId = moveRunnerCardToGrip(state, SOCIAL_ENGINEERING);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === socialEngineeringId,
+    );
+    state = applyChoice(state, "runner", "hide_3");
+    state = applyChoice(state, "corp", "guess_2");
+    return applyChoice(state, "runner", `ice_${iceId}`);
   }
 
   it("resolves Brain Wash brain damage with stale, side, actionId, and ICE revalidation", () => {
@@ -1619,8 +1702,7 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     );
     expect(continueAction.payload).toMatchObject({
       unbrokenSubroutineCount: 1,
-      encounterSubroutineIds:
-        `card_implementation.${BRAIN_WASH}.printed_subroutine.1.brain_damage`,
+      encounterSubroutineIds: `card_implementation.${BRAIN_WASH}.printed_subroutine.1.brain_damage`,
     });
 
     expect(
@@ -1663,7 +1745,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       }).ok,
     ).toBe(false);
 
-    state = apply(state, "runner", (action) => action.actionId === continueAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
       damageType: "core",
@@ -1714,7 +1800,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         `card_implementation.${COLONEL_FAILURE}.printed_subroutine.5.end_the_run`,
       ].join(","),
     );
-    state = apply(state, "runner", (action) => action.actionId === continueAction.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
     expect(state.run).toBeUndefined();
     expect(state.runner.rig.programs).toHaveLength(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -1872,7 +1962,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       });
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
-      state = apply(state, "runner", (action) => action.actionId === paidContinue.actionId);
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === paidContinue.actionId,
+      );
       const paidPayload = state.eventLog.at(-1)?.publicPayload;
       state = enterEncounterFromMovementWindow(state);
       expect(state.run?.phase).toBe("access");
@@ -1916,9 +2010,9 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
           endedRun: true,
         }),
       ]);
-      expect(JSON.stringify(refused.eventLog.at(-1)?.publicPayload)).not.toMatch(
-        hiddenPayloadMarkers,
-      );
+      expect(
+        JSON.stringify(refused.eventLog.at(-1)?.publicPayload),
+      ).not.toMatch(hiddenPayloadMarkers);
     },
   );
 
@@ -1974,7 +2068,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         action.payload?.decision === "pay",
     );
     expect(pay.costs).toEqual([{ credits: 2 }]);
-    state = apply(state, "runner", (action) => action.actionId === pay.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === pay.actionId,
+    );
     expect(state.run?.futureEncounterIceStrengthBonus).toBe(0);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -1995,7 +2093,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         action.payload?.payOrTrashProgramSubroutineIndexes === "0",
     );
     expect(paid.costs).toEqual([{ credits: 1 }]);
-    state = apply(state, "runner", (action) => action.actionId === paid.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === paid.actionId,
+    );
     expect(state.runner.rig.programs).toContain(programId);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
       expect.objectContaining({
@@ -2010,7 +2112,10 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       proteusSimpleCorpIceGame("proteus-pro010-washed-up-trash"),
       WASHED_UP_SOLO_CONSTRUCT,
     ).state;
-    const trashedProgramId = installRunnerProgramForTest(refusing, "simple_decoder");
+    const trashedProgramId = installRunnerProgramForTest(
+      refusing,
+      "simple_decoder",
+    );
     refusing = apply(
       refusing,
       "runner",
@@ -2023,19 +2128,26 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
   });
 
   it("PRO010 supports Washed-Up Solo Construct paid branch then reaching a second ICE and runner ending the run", () => {
-    let state = proteusSimpleCorpIceGame("proteus-pro010-washed-up-then-snowbank");
+    let state = proteusSimpleCorpIceGame(
+      "proteus-pro010-washed-up-then-snowbank",
+    );
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 30;
     state.runner.credits = 20;
     const secondIceId = putCorpIceOnServer(state, "rd", SNOWBANK);
-    const washedUpId = putCorpIceOnServer(state, "rd", WASHED_UP_SOLO_CONSTRUCT);
+    const washedUpId = putCorpIceOnServer(
+      state,
+      "rd",
+      WASHED_UP_SOLO_CONSTRUCT,
+    );
     setRezzed(state, washedUpId);
     setRezzed(state, secondIceId);
     state = enterEncounterFromMovementWindow(
       apply(
         toRunnerTurnFromCorpMain(state),
         "runner",
-        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
       ),
     );
     expect(state.run?.encounteredIceId).toBe(washedUpId);
@@ -2051,7 +2163,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         action.payload?.payOrTrashProgramSubroutineIndexes === "0",
     );
     expect(payWashed.costs).toEqual([{ credits: 1 }]);
-    state = apply(state, "runner", (action) => action.actionId === payWashed.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === payWashed.actionId,
+    );
     expect(state.runner.credits).toBe(creditsBefore - 1);
     expect(state.runner.rig.programs).toContain(programId);
     expect(state.runner.heap).toHaveLength(heapBefore);
@@ -2059,7 +2175,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     for (let index = 0; index < 4; index += 1) {
       if (!state.run || state.run?.phase !== "encounter_ice") break;
       if (state.run.encounteredIceId !== washedUpId) break;
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
     }
     expect(state.run?.phase).toBe("movement");
     expect(state.run?.approachedIceId).toBe(secondIceId);
@@ -2075,7 +2195,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         action.payload?.encounterWillEndRun === true &&
         action.payload?.payOrEndRunSubroutineIndexes === undefined,
     );
-    state = apply(state, "runner", (action) => action.actionId === refuseSecond.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === refuseSecond.actionId,
+    );
 
     expect(state.run).toBeUndefined();
     expect(state.runner.rig.programs).toContain(programId);
@@ -2096,7 +2220,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         action.costs[0]?.credits === 2,
     );
     expect(addSubroutine.costs).toEqual([{ credits: 2 }]);
-    state = apply(state, "corp", (action) => action.actionId === addSubroutine.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === addSubroutine.actionId,
+    );
     const continueAction = mustAction(
       state,
       "runner",
@@ -2133,13 +2261,19 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       );
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
       const corpActions = getLegalActions(state, "corp").filter(
         (action) =>
           action.type === "continue_run" &&
           action.payload?.corpPostPassIceAbility === "return_passed_ice_to_hq",
       );
-      expect(corpActions.map((action) => action.payload?.decision).sort()).toEqual(
+      expect(
+        corpActions.map((action) => action.payload?.decision).sort(),
+      ).toEqual(
         mode === "required_pay_or_return"
           ? ["pay", "return_to_hq"]
           : ["decline", "return_to_hq"],
@@ -2148,7 +2282,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         (action) => action.payload?.decision === "return_to_hq",
       );
       if (!returnAction) throw new Error("Return action missing.");
-      state = apply(state, "corp", (action) => action.actionId === returnAction.actionId);
+      state = apply(
+        state,
+        "corp",
+        (action) => action.actionId === returnAction.actionId,
+      );
       expect(state.corp.hq).toContain(iceId);
       expect(state.cardInstances[iceId]?.zone).toEqual({
         side: "corp",
@@ -2162,6 +2300,120 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       expect(hashState(replay.state)).toBe(hashState(state));
     },
   );
+
+  it("PRO010 gives Social Engineering a rez window and blocks unrezzed Twisty lifecycle", () => {
+    let state = proteusSocialEngineeringTwistyGame(
+      "proteus-pro010-social-unrezzed-twisty",
+    );
+    state.corp.credits = 30;
+    const iceId = putCorpIceOnServer(state, "rd", TWISTY_PASSAGES);
+    const hqBefore = state.corp.hq.length;
+
+    state = chooseSocialEngineeringAutoPassTarget(state, iceId);
+
+    expect(state.timingPoint).toBe("run.approach_ice");
+    expect(state.activeSide).toBe("corp");
+    expect(state.run).toMatchObject({
+      phase: "approach_ice",
+      approachedIceId: iceId,
+      secretSpendGuessRunAutoPassIceId: iceId,
+    });
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.type === "rez_ice" && action.source === iceId,
+      ),
+    ).toBe(true);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: SOCIAL_ENGINEERING,
+      secretSpendGuessRun: true,
+      hiddenZoneBarrier: true,
+      targets: expect.objectContaining({
+        secretSpendGuessRunGuessCorrect: false,
+        autoPassChosenIce: true,
+      }),
+    });
+
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(state.activeSide).toBe("runner");
+    expect(state.run?.position).toEqual({ kind: "server", serverId: "rd" });
+    expect(state.run?.corpPostPassIceReturnToHq).toBeUndefined();
+    expect(state.corp.hq).toHaveLength(hqBefore);
+    expect(state.cardInstances[iceId]).toMatchObject({
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+      rezzed: false,
+    });
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.payload?.corpPostPassIceAbility === "return_passed_ice_to_hq",
+      ),
+    ).toBe(false);
+  });
+
+  it("PRO010 lets rezzed Twisty resolve after Social Engineering auto-pass", () => {
+    let state = proteusSocialEngineeringTwistyGame(
+      "proteus-pro010-social-rezzed-twisty",
+    );
+    state.corp.credits = 30;
+    const iceId = putCorpIceOnServer(state, "rd", TWISTY_PASSAGES);
+
+    state = chooseSocialEngineeringAutoPassTarget(state, iceId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    expect(state.cardInstances[iceId]?.rezzed).toBe(true);
+
+    expect(state.run?.corpPostPassIceReturnToHq).toMatchObject({
+      sourceCardInstanceId: iceId,
+      sourceDefinitionId: TWISTY_PASSAGES,
+      passedIceId: iceId,
+      serverId: "rd",
+      mode: "required_pay_or_return",
+      paymentAmount: 1,
+    });
+    const corpActions = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.corpPostPassIceAbility === "return_passed_ice_to_hq",
+    );
+    expect(
+      corpActions.map((action) => action.payload?.decision).sort(),
+    ).toEqual(["pay", "return_to_hq"]);
+
+    const returnAction = corpActions.find(
+      (action) => action.payload?.decision === "return_to_hq",
+    );
+    if (!returnAction) throw new Error("Twisty return action missing.");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === returnAction.actionId,
+    );
+
+    expect(state.corp.hq).toContain(iceId);
+    expect(state.cardInstances[iceId]?.zone).toEqual({
+      side: "corp",
+      zone: "hq",
+    });
+    const returnEvent = state.eventLog.at(-1);
+    expect(returnEvent?.visibilityClass).toBe("public");
+    expect(returnEvent?.publicPayload).toMatchObject({
+      corpPostPassIceAbility: "return_passed_ice_to_hq",
+      decision: "return_to_hq",
+      returnedToHq: true,
+      sourceDefinitionId: TWISTY_PASSAGES,
+      passedIceDefinitionId: TWISTY_PASSAGES,
+      returnedCardDefinitionId: TWISTY_PASSAGES,
+      serverLabel: "R&D",
+    });
+    const serializedReturnPayload = JSON.stringify(returnEvent?.publicPayload);
+    expect(serializedReturnPayload).not.toMatch(hiddenPayloadMarkers);
+    expect(serializedReturnPayload).not.toContain(iceId);
+  });
 
   it("PRO010 prioritizes corp lifecycle over Rasmin Bridger post-pass Fort payment", () => {
     let state = proteusSimpleCorpIceGame("proteus-pro010-rasmin-priority");
@@ -2177,7 +2429,8 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         toRunnerTurnFromCorpMain(state),
         "runner",
         (action) =>
-          action.type === "start_run" && action.payload?.serverId === "remote_1",
+          action.type === "start_run" &&
+          action.payload?.serverId === "remote_1",
       ),
     );
     state.run!.brokenSubroutineIndexes = [0];
@@ -2212,7 +2465,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
         idempotencyKey: "proteus-pro010-rasmin-corp-window-wrong-side",
       }).ok,
     ).toBe(false);
-    state = apply(state, "corp", (action) => action.actionId === corpPay.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === corpPay.actionId,
+    );
     expect(state.run?.corpPostPassIceReturnToHq).toBeUndefined();
     expect(state.run?.postPassPayOrEndRun).toBeDefined();
 
@@ -2234,7 +2491,11 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
       idempotencyKey: "proteus-pro010-rasmin-stale-runner-pay",
     });
     expect(stale.ok).toBe(false);
-    state = apply(state, "runner", (action) => action.actionId === runnerPay.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === runnerPay.actionId,
+    );
     expect(state.run?.postPassPayOrEndRun).toBeUndefined();
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       hiddenPayloadMarkers,
