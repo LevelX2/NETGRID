@@ -9899,6 +9899,15 @@ Nächstes aktives Ziel: `AI-COMPLETE-14`.
   - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
   - Verifikation: `rg -n -F 'evidence.split(":").includes' ...`, `rg -n -F 'issues.includes' ...`, `rg -n -F '["low", "medium", "high"].includes' ...` und `rg -n -F 'segments.includes(' ...` ohne Treffer in `packages/ai/src/actions/action-semantic-invariants.ts`.
 
+- `AI-COMPLETE-15` dreihundertvierunddreißigster Label-Fallback-Rückbau-Schnitt:
+  - `packages/ai/src/actions/action-source-binding.ts` bindet Ability-Binding-pflichtige ActionTypes über ein lokales Set statt direkter `.includes(...)`-Prüfung.
+  - Strukturierte ActionTypes bleiben exakt; substring-nahe Typen erzeugen keinen `ability_unresolved`-Pflichtpfad.
+  - `action-source-binding.test.ts` sichert exakte Ability-Binding-Anforderung für `break_subroutine` gegenüber einem Rauschtyp.
+  - Status bleibt `IN_PROGRESS`, weil weitere direkte Membership-Cluster und Text-/Regex-Heuristiken auf strukturierte Ownership geprüft und gegebenenfalls in Folgepaketen abgebaut werden müssen.
+  - Verifikation: `corepack pnpm exec vitest run --maxWorkers=1 --testTimeout=30000 src/actions/action-source-binding.test.ts` grün, 1 Datei, 1 Test.
+  - Verifikation: `corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit` grün.
+  - Verifikation: `rg -n '\]\.includes\(action\.type\)|includes\(action\.type\)' packages/ai/src/actions/action-source-binding.ts` ohne Treffer.
+
 ## Audit-Ledger
 
 | Audit | Status | Findings |

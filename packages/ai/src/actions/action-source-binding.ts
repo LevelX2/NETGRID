@@ -305,12 +305,13 @@ function requiresCardSource(action: LegalAction): boolean {
 }
 
 function requiresAbilityBinding(action: LegalAction): boolean {
-  return [
+  const abilityBindingActionTypeSet = new Set([
     "activated_card_ability",
     "trigger_ability",
     "pump_breaker",
     "break_subroutine",
-  ].includes(action.type);
+  ]);
+  return abilityBindingActionTypeSet.has(action.type);
 }
 
 function updateSourceAbilityGates(
