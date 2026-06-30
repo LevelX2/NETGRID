@@ -359,8 +359,12 @@ function resolveTraceCorpBid(
     state,
     "runner",
     trace.traceId,
-    runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
+    runnerTraceLinkCreditCapacity > 0 && runnerSupportCreditCapacity > 0
       ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits + ${runnerSupportCreditCapacity} Support verfügbar)`
+      : runnerTraceLinkCreditCapacity > 0
+        ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
+        : runnerSupportCreditCapacity > 0
+          ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerSupportCreditCapacity} Support verfügbar)`
       : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
     runnerBidCapacity,
     runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
@@ -444,8 +448,12 @@ function openTraceRunnerBidChoice(
     state,
     "runner",
     trace.traceId,
-    runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
+    runnerTraceLinkCreditCapacity > 0 && runnerSupportCreditCapacity > 0
       ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits + ${runnerSupportCreditCapacity} Support verfügbar)`
+      : runnerTraceLinkCreditCapacity > 0
+        ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
+        : runnerSupportCreditCapacity > 0
+          ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerSupportCreditCapacity} Support verfügbar)`
       : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
     runnerBidCapacity,
     runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0

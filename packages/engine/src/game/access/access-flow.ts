@@ -731,6 +731,8 @@ function trashAccessedCard(
       })
     )
       return { handled: true, stateChanged: true };
+    if (host.state.runner.credits < expectedCost)
+      throw new Error("Runner kann die Hidden-Resource-Kosten nicht bezahlen.");
     closeRunnerCostPenaltySupportWindowForPayment(
       host.state,
       legalAction!,

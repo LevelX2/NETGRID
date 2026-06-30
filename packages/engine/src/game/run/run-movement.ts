@@ -259,7 +259,11 @@ export function jackOutRunner(
     legalAction,
     jackOutPayload,
   );
-  if (payment.handled && payment.paid === false) {
+  if (
+    payment.handled &&
+    payment.paid === false &&
+    host.state.runnerCostPenaltySupportWindow
+  ) {
     return {
       handled: true,
       resolvedPayload: payment.resolvedPayload,

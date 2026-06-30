@@ -171,7 +171,7 @@ Commit-Message: `docs(engine): record runner payment support completion`.
 - Gemeinsamer Kern: `runner-payment-support.ts` kapselt Support-Kapazität, Runner-Credit-Ziel, Fensteröffnung, Fensterschließung und Pending-Choice-Synchronisierung.
 - Angebundene Pfade: Runner-Install-Reoffer, Runner-Events, einfache Runner-Pool-Trigger, Access-Steal-/Trashkosten, Run-Start-Tax, laufende Run-/Icebreaker-/Pay-or-End-Kosten und Runner-Trace-Bids.
 - Chiba Bank Account nutzt jetzt `trash_source` statt `tap_source` und wird nach Support-Nutzung in den Runner-Heap gelegt.
-- Verifiziert: `pnpm --filter @netgrid/engine typecheck`; `vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts src/game/trace/trace-orchestration.test.ts src/game/run/run-duration-payment.test.ts src/game/run/start-run-action-execution.test.ts src/game/run/runner-breaker-action-execution.test.ts`.
+- Verifiziert: `pnpm --filter @netgrid/engine typecheck`; `vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts src/game/trace/trace-orchestration.test.ts src/game/run/run-duration-payment.test.ts src/game/run/start-run-action-execution.test.ts src/game/run/runner-breaker-action-execution.test.ts`; kompletter Engine-Testlauf `pnpm --filter @netgrid/engine test` mit 173 Testdateien und 1535 Tests.
 
 ## Worktree-, Git- und Integrationsregeln
 
