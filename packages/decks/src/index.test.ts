@@ -49,6 +49,12 @@ const profile130 = (profilesData130.profiles as DeckFormatProfile[]).find(
 const profileProteus = (profilesData130.profiles as DeckFormatProfile[]).find(
   (candidate) => candidate.profileId === "netgrid_private_local_proteus_playtest_v1",
 )!;
+const profileClassic = (profilesData130.profiles as DeckFormatProfile[]).find(
+  (candidate) => candidate.profileId === "netgrid_private_local_classic_playtest_v1",
+)!;
+const profileClassicProteus = (profilesData130.profiles as DeckFormatProfile[]).find(
+  (candidate) => candidate.profileId === "netgrid_private_local_classic_proteus_playtest_v1",
+)!;
 const snapshots08 = snapshotsData08.snapshots as DeckSnapshot[];
 const context08 = { cardsById: cardsById08, profile: profile08 };
 
@@ -283,6 +289,20 @@ describe("deck validation and snapshots", () => {
         (entry) => runtimeCardsById[entry.cardId]?.statuses.ai_supported === true,
       ),
     ).toBe(true);
+  });
+
+  it("loads additive Classic format profiles without enabling Classic-only play", () => {
+    const classicRunnerIdentityRules = profileClassic.identityRules?.runner.runner_identity_001;
+    const classicProteusCorpIdentityRules = profileClassicProteus.identityRules?.corp.corp_identity_001;
+
+    expect(profileClassic.cardPoolVersion).toBe("private-local-onr-v1-plus-classic-playtest");
+    expect(classicRunnerIdentityRules).toBeDefined();
+    expect(classicRunnerIdentityRules?.allowedFactions).toEqual(["neutral_demo", "onr1996_neutral", "onr_classic"]);
+    expect(profileClassicProteus.cardPoolVersion).toBe("private-local-onr-v1-plus-classic-proteus-playtest");
+    expect(classicProteusCorpIdentityRules).toBeDefined();
+    expect(classicProteusCorpIdentityRules?.allowedFactions).toEqual(["neutral_demo", "onr1996_neutral", "onr_classic", "onr_proteus"]);
+    expect(profileClassic.allowedIdentityCards.runner).toEqual(["runner_identity_001"]);
+    expect(profileClassicProteus.allowedIdentityCards.corp).toEqual(["corp_identity_001"]);
   });
 
   it("validates the versioned King of the Road Runner AI snapshot from the local deck shape", () => {

@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
 import { simulateAiGame } from "@netgrid/ai";
+import type { ApiMatchCardPool } from "@netgrid/shared";
 import { createConnectionAuditLoggerFromEnv, noopConnectionAuditLogger, type ConnectionAuditLogger } from "./connection-audit";
 import {
   JsonFileMatchStorage,
@@ -849,7 +850,7 @@ async function routeHttp(
         const nextSettings: Parameters<MultiplayerService["createMatch"]>[0]["settings"] = {};
         nextSettings.agendaPointsToWin = 7;
         if (settings.matchFormat === "rules_match" || settings.matchFormat === "two_game_side_swap") nextSettings.matchFormat = settings.matchFormat;
-        if (settings.cardPool === "originalset" || settings.cardPool === "originalset_proteus") nextSettings.cardPool = settings.cardPool;
+        if (isMatchCardPool(settings.cardPool)) nextSettings.cardPool = settings.cardPool;
         if (settings.playerClock && typeof settings.playerClock === "object") {
           const playerClock = settings.playerClock as Record<string, unknown>;
           nextSettings.playerClock = {
@@ -881,7 +882,8 @@ async function routeHttp(
       const deckSelection = deckSelectionFromBody(body);
       if (Object.keys(deckSelection).length > 0) {
         const aiDeckPolicy = aiDeckPolicyFromValue(body.aiDeckPolicy);
-        const cardPool = body.settings && typeof body.settings === "object" && (body.settings as Record<string, unknown>).cardPool === "originalset_proteus" ? "originalset_proteus" : "originalset";
+        const requestedCardPool = body.settings && typeof body.settings === "object" ? (body.settings as Record<string, unknown>).cardPool : undefined;
+        const cardPool = isMatchCardPool(requestedCardPool) ? requestedCardPool : "originalset";
         const deckSetup = resolveDeckSetup(deckSelection, { seed: config.seed ?? "ai-vs-ai-smoke", ...(aiDeckPolicy ? { aiDeckPolicy } : {}), cardPool });
         config.runnerDeck = deckSetup.runnerDeck;
         config.corpDeck = deckSetup.corpDeck;
@@ -1403,6 +1405,10 @@ function isAiPacingMode(value: unknown): value is NonNullable<Parameters<Multipl
 
 function isAiDecisionTraceMode(value: unknown): value is NonNullable<Parameters<MultiplayerService["createMatch"]>[0]["aiTraceMode"]> {
   return value === "summary" || value === "detailed";
+}
+
+function isMatchCardPool(value: unknown): value is ApiMatchCardPool {
+  return value === "originalset" || value === "originalset_classic" || value === "originalset_proteus" || value === "originalset_classic_proteus";
 }
 
 function replayPerspectiveFromParam(value: string | null): ReplayPerspective | undefined {

@@ -51,7 +51,7 @@ Diese Datei hält lokale Regelentscheidungen für die vollständige Classic-Impl
 | --- | --- | --- |
 | CLASSIC-00 | completed | Prozess, Inventar und lokale Regelentscheidungen sind angelegt. |
 | CLASSIC-01 | completed | Classic-Fallback, leere Registry-Foundation und Drift-Guard sind angelegt. |
-| CLASSIC-02 | pending | Additive Kartenpool-/Format-/Matchstart-Auswahl. |
+| CLASSIC-02 | completed | Additive Kartenpool-/Format-/Matchstart-Auswahl für Originalset, Originalset+Classic, Originalset+Protheus und Originalset+Classic+Protheus ist umgesetzt und serverseitig revalidiert. |
 | CLASSIC-03 | pending | Low-risk Economy/Draw/Double Basics. |
 | CLASSIC-04 | pending | Runner-Programme und Breaker. |
 | CLASSIC-05 | pending | Corp ICE Baseline und Noisy/Sleepy. |

@@ -2848,7 +2848,7 @@ function normalizeMatchFormat(matchFormat: MatchFormat | undefined): MatchFormat
 }
 
 function normalizeMatchCardPool(cardPool: MatchCardPool | undefined): MatchCardPool {
-  if (cardPool === "originalset_proteus") return "originalset_proteus";
+  if (cardPool === "originalset_classic" || cardPool === "originalset_proteus" || cardPool === "originalset_classic_proteus") return cardPool;
   return "originalset";
 }
 

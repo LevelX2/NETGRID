@@ -3210,6 +3210,23 @@ describe("MVP 0.2 multiplayer service", () => {
       })
     ).rejects.toThrow("deck_snapshot_card_pool_mismatch");
 
+    await expect(
+      service.createMatch({
+        hostSide: "corp",
+        seed: "mp-proteus-blocked-classic-only",
+        runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_classic" }
+      })
+    ).rejects.toThrow("deck_snapshot_card_pool_mismatch");
+
+    const classicPoolCreated = await service.createMatch({
+      hostSide: "corp",
+      seed: "mp-classic-pool-default-decks",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_classic" }
+    });
+    expect((await service.loadForTest(classicPoolCreated.matchId))?.match.settings.cardPool).toBe("originalset_classic");
+
     const created = await service.createMatch({
       hostSide: "corp",
       seed: "mp-proteus-allowed",
@@ -3223,6 +3240,15 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(created)).not.toContain("onr_proteus_084_crumble");
     const record = await service.loadForTest(created.matchId);
     expect(record?.match.settings.cardPool).toBe("originalset_proteus");
+
+    const combinedCreated = await service.createMatch({
+      hostSide: "corp",
+      seed: "mp-classic-proteus-allowed",
+      runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+      corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_classic_proteus" }
+    });
+    expect((await service.loadForTest(combinedCreated.matchId))?.match.settings.cardPool).toBe("originalset_classic_proteus");
 
     const proteusAiCreated = await service.createMatch({
       hostSide: "corp",

@@ -201,11 +201,11 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
       legacySignalCounts: { "role:program": 1 },
       warnings: [],
       source: {
-        mode: "diagnostic_only",
+        mode: "ai_internal_strategy_profile",
         strategyGoals: "data/ai/strategy-goals-v1.json",
         compiledHints: "data/ai/ai-card-hints-compiled.json",
         inspectorIndex: "data/ai/ai-hint-inspector-index.json",
-        plannerEffect: "none",
+        plannerEffect: "strategic_intent_input",
       },
     };
 

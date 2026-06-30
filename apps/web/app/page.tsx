@@ -42,7 +42,6 @@ import type {
   ApiLifecycleResultSummary,
   ApiLobbyParticipantPayload,
   ApiLobbyPayload,
-  ApiMatchFormat,
   ApiMatchCardPool,
   ApiMatchStartLobbyPayload,
   ApiMatchStatus,
@@ -115,6 +114,7 @@ import {
   parseJoinLinkInput,
   type HumanAiSideSelection,
   type HumanSideSelection,
+  type MatchFormatSelection,
   type PlayMode
 } from "./match-start";
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
@@ -242,15 +242,10 @@ import {
 import {
   DEFAULT_CORP_SNAPSHOT_ID,
   DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
-  DEFAULT_DECK_CARD_POOL_VERSION,
-  DEFAULT_DECK_FORMAT_PROFILE_ID,
-  DEFAULT_DECK_FORMAT_PROFILE_VERSION,
   DEFAULT_IDENTITY_BY_SIDE,
   DEFAULT_RUNNER_SNAPSHOT_ID,
-  PROTEUS_DECK_CARD_POOL_VERSION,
-  PROTEUS_DECK_FORMAT_PROFILE_ID,
-  PROTEUS_DECK_FORMAT_PROFILE_VERSION,
   catalogCardAllowedForDeckEditor,
+  deckProfileForMatchCardPool,
   editableDeckAllowedForMatchCardPool,
   snapshotAllowedForMatchCardPool
 } from "../features/decks/deck-match-filters";
@@ -384,7 +379,7 @@ const APP_WORDMARK_SRC = `/brand/netgrid-wordmark-cyber-v1.png?v=${APP_BRAND_ASS
 
 type MatchStatus = ApiMatchStatus;
 type GameMode = ApiClientGameMode;
-type MatchFormat = ApiMatchFormat;
+type MatchFormat = MatchFormatSelection;
 type MatchCardPool = ApiMatchCardPool;
 type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy = "fixed" | "selected" | "seeded_random" | "same_as_participant_a";
@@ -2686,7 +2681,7 @@ export default function Page() {
   const createEmptyDeck = (side: Side) => {
     const now = new Date().toISOString();
     const templateIdentity = deckTemplates.find((candidate) => candidate.side === side)?.identityCardId;
-    const useProteusProfile = matchCardPool === "originalset_proteus";
+    const deckProfile = deckProfileForMatchCardPool(matchCardPool);
     const deck: EditableDeck = {
       deckId: `local_${side}_${runtimeRandomId().slice(0, 8)}`,
       deckVersion: "0.6.0-local",
@@ -2694,9 +2689,9 @@ export default function Page() {
       side,
       identityCardId: templateIdentity ?? DEFAULT_IDENTITY_BY_SIDE[side],
       cardPoolSnapshotId: DEFAULT_DECK_CARD_POOL_SNAPSHOT_ID,
-      cardPoolVersion: useProteusProfile ? PROTEUS_DECK_CARD_POOL_VERSION : DEFAULT_DECK_CARD_POOL_VERSION,
-      formatProfileId: useProteusProfile ? PROTEUS_DECK_FORMAT_PROFILE_ID : DEFAULT_DECK_FORMAT_PROFILE_ID,
-      formatProfileVersion: useProteusProfile ? PROTEUS_DECK_FORMAT_PROFILE_VERSION : DEFAULT_DECK_FORMAT_PROFILE_VERSION,
+      cardPoolVersion: deckProfile.cardPoolVersion,
+      formatProfileId: deckProfile.formatProfileId,
+      formatProfileVersion: deckProfile.formatProfileVersion,
       validationStatus: "needs_revalidation",
       cards: [],
       createdAt: now,

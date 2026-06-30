@@ -157,6 +157,12 @@ Ein Paket stoppt, wenn eine Änderung verdeckte Kartendaten in öffentliche oder
 - Bei Status-/Manifeständerungen: Guard gegen Kartendaten, Supportmanifest, Registry, resolverRefs, AI-Hints und SzenarioRefs.
 - Bei finalem Gate: mindestens `corepack pnpm typecheck`, relevante Package-Tests, workspace tests soweit praktikabel, `corepack pnpm lint`/`corepack pnpm build` soweit für den geänderten Umfang nötig, plus `git diff --check`.
 
+## Paket-Verify-Log
+
+| Paket | Datum | Ergebnis | Kommandos |
+| --- | --- | --- | --- |
+| CLASSIC-02 | 2026-06-30 | grün | `node -e "JSON.parse(require('fs').readFileSync('data/decks/deck-format-profiles-1.3.0.json','utf8'))"`, `corepack pnpm --filter @netgrid/shared typecheck`, `corepack pnpm --filter @netgrid/decks typecheck`, `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/web typecheck`, `corepack pnpm --filter @netgrid/decks exec vitest run src/index.test.ts`, `corepack pnpm --filter @netgrid/web exec vitest run app/match-start.test.ts app/match-start-storage.test.ts app/deck-match-filters.test.ts app/api/decks/strategy-profile/strategy-profile-data.test.ts app/deck-strategy-profile-ui.test.ts`, `corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts -t "enforces the selected match card pool"`, `git diff --check` |
+
 ## Worktree-, Git- und Integrationsregeln
 
 - Arbeits-Worktree: `C:\Projekte\NETGRID_CLASSIC_FULL_CARD_IMPLEMENTATION`.

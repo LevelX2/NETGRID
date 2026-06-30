@@ -156,7 +156,7 @@ export function buildDeckStrategyProfileViewer(
       aggregation: "AI006 strategy aggregation",
       profileSchemaVersion: profile.schemaVersion,
       profileTaskId: profile.taskId,
-      plannerEffect: profile.source.plannerEffect,
+      plannerEffect: "none",
       deckHash: snapshot.deckHash,
     },
     diagnosticNotice:

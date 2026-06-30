@@ -1,4 +1,4 @@
-import type { AiDeckPolicySelection, HumanAiSideSelection, HumanSideSelection, MatchCardPoolSelection, MatchFormatSelection, PlayMode } from "./match-start";
+import { MATCH_CARD_POOL_OPTIONS, type AiDeckPolicySelection, type HumanAiSideSelection, type HumanSideSelection, type MatchCardPoolSelection, type MatchFormatSelection, type PlayMode } from "./match-start";
 
 export type MatchStartMode = "host" | "join";
 export type MatchStartDeckSource = "snapshot" | "local";
@@ -109,7 +109,7 @@ function isMatchFormatSelection(value: unknown): value is MatchFormatSelection {
 }
 
 function isMatchCardPoolSelection(value: unknown): value is MatchCardPoolSelection {
-  return value === "originalset" || value === "originalset_proteus";
+  return typeof value === "string" && (MATCH_CARD_POOL_OPTIONS as readonly string[]).includes(value);
 }
 
 function isMatchStartAiDifficulty(value: unknown): value is MatchStartAiDifficulty {

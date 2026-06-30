@@ -5,7 +5,8 @@ export type HumanSideSelection = "runner" | "corp" | "random";
 export type HumanAiSideSelection = "runner" | "corp" | "random";
 export type TechnicalMatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
 export type MatchFormatSelection = "rules_match" | "two_game_side_swap";
-export type MatchCardPoolSelection = "originalset" | "originalset_proteus";
+export const MATCH_CARD_POOL_OPTIONS = ["originalset", "originalset_classic", "originalset_proteus", "originalset_classic_proteus"] as const;
+export type MatchCardPoolSelection = (typeof MATCH_CARD_POOL_OPTIONS)[number];
 export type AiDeckPolicySelection = "selected" | "fixed" | "seeded_random" | "same_as_participant_a";
 
 export type DerivedMatchStart = {
@@ -76,8 +77,17 @@ export function matchFormatCardLabel(format: MatchFormatSelection): { title: str
 }
 
 export function matchCardPoolCardLabel(cardPool: MatchCardPoolSelection): { title: string; description: string } {
-  if (cardPool === "originalset_proteus") return { title: "Originalset & Protheus", description: "Alle Protheus-Karten sind im Matchstart legal" };
-  return { title: "Nur Originalset", description: "Protheus-Decks werden nicht zugelassen" };
+  if (cardPool === "originalset_classic") return { title: "Originalset & Classic", description: "Classic wird als Zusatzset zugelassen" };
+  if (cardPool === "originalset_proteus") return { title: "Originalset & Protheus", description: "Protheus wird als Zusatzset zugelassen" };
+  if (cardPool === "originalset_classic_proteus") return { title: "Originalset & Classic & Protheus", description: "Beide Zusatzsets werden zugelassen" };
+  return { title: "Nur Originalset", description: "Zusatzsets werden nicht zugelassen" };
+}
+
+export function matchCardPoolSummaryLabel(cardPool: MatchCardPoolSelection | undefined): string {
+  if (cardPool === "originalset_classic") return "Kartenpool: Originalset & Classic";
+  if (cardPool === "originalset_proteus") return "Kartenpool: Originalset & Protheus";
+  if (cardPool === "originalset_classic_proteus") return "Kartenpool: Originalset & Classic & Protheus";
+  return "Kartenpool: nur Originalset";
 }
 
 export function parseJoinLinkInput(input: string): { matchId: string; joinToken: string } | null {
@@ -105,7 +115,7 @@ export function matchStartSummary(input: {
 }): string[] {
   const playMode = playModeCardLabel(input.playMode).title;
   const format = input.matchFormat === "two_game_side_swap" ? "Matchserie mit Seitenwechsel" : "Regelmatch bis 7 Agendapunkte";
-  const cardPool = input.matchCardPool === "originalset_proteus" ? "Kartenpool: Originalset & Protheus" : "Kartenpool: nur Originalset";
+  const cardPool = matchCardPoolSummaryLabel(input.matchCardPool);
   const side =
     input.playMode === "human_vs_human"
       ? input.humanSideSelection === "random"
