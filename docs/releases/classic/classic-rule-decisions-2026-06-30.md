@@ -1,6 +1,6 @@
 # Classic Rule Decisions
 
-Status: `active`
+Status: `complete`
 
 Diese Datei hält lokale Regelentscheidungen für die vollständige Classic-Implementierung fest. Sie dient als Entscheidungsschicht für Fälle, in denen `data/cards/classic-cards.json` eindeutig genug für eine lokale Umsetzung ist, aber bestehende Engine-Mechaniken noch generisch geschnitten werden müssen.
 
@@ -65,8 +65,8 @@ Diese Datei hält lokale Regelentscheidungen für die vollständige Classic-Impl
 | CLASSIC-04 | completed | Early Worm, Matador, MS-todon, Psychic Friend, Rent-I-Con, Schematics Search Engine und Superglue sind implementiert, getestet und AI-/Scenario-referenziert. |
 | CLASSIC-05 | completed | Baskerville, Bolter Swarm, Brain Drain, Deadeye, Imperial Guard und Puzzle sind implementiert, getestet und AI-/Scenario-referenziert. |
 | CLASSIC-06 | completed | Dumpster, Entrapment, Glacier, Trapdoor und Vortex sind implementiert, getestet und AI-/Scenario-referenziert. |
-| CLASSIC-07 | pending | Classic Agendas. |
-| CLASSIC-08 | pending | Corp Assets/Upgrades/Ambush. |
-| CLASSIC-09 | pending | Runner Events/Resources/Hardware und Badtimes. |
-| CLASSIC-10 | pending | AI und Deckspielbarkeit. |
-| CLASSIC-11 | pending | Final Completion Gate, lokaler main-Merge und Cleanup. |
+| CLASSIC-07 | completed | Data Fort Remapping, Superserum, Unlisted Research Lab und Theorem Proof sind implementiert, getestet und AI-/Scenario-referenziert. |
+| CLASSIC-08 | completed | Indiscriminate Response Team, London City Grid, Satellite Monitors, Self-Destruct, Shock Treatment, Sterdroid, Strategic Planning Group und Street Enforcer sind implementiert, getestet und AI-/Scenario-referenziert. |
+| CLASSIC-09 | completed | Runner Events/Resources/Hardware und Badtimes sind implementiert, getestet und AI-/Scenario-referenziert. |
+| CLASSIC-10 | completed | Active/compiled AI-Hints, zentrales AI-Approval-Scenario, Classic-AI-Decksnapshots und seeded AI-Deckpool sind aktualisiert. |
+| CLASSIC-11 | completed | Final Completion Gate ist grün; der Arbeitsbranch ist für lokalen Merge nach `main` vorbereitet. |
