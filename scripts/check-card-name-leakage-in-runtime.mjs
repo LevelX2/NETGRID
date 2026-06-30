@@ -230,7 +230,7 @@ function variantsForWords(words) {
 }
 
 function definitionSlugForId(id) {
-  return id.replace(/^onr_(?:v1|proteus)_\d+_/, "");
+  return id.replace(/^onr_(?:v1|proteus|classic)_\d+_/, "");
 }
 
 function deriveCatalogWatchTokens() {
@@ -238,7 +238,7 @@ function deriveCatalogWatchTokens() {
   const text = readFileSync(sharedIndexPath, "utf8");
   const cards = [];
   const cardPattern =
-    /id:\s*"(?<id>onr_(?:v1|proteus)_\d+_[^"]+)",\s*\r?\n\s*title:\s*"(?<title>[^"]+)"/g;
+    /id:\s*"(?<id>onr_(?:v1|proteus|classic)_\d+_[^"]+)",\s*\r?\n\s*title:\s*"(?<title>[^"]+)"/g;
   let match = cardPattern.exec(text);
   while (match) {
     cards.push({ id: match.groups.id, title: match.groups.title });
@@ -412,7 +412,10 @@ const abstractionPlan = [
   {
     priority: "slice_done",
     cardTitle: "Krumz",
-    currentNames: ["recurring_trace_credit_pool", "spendRecurringTraceCreditPool"],
+    currentNames: [
+      "recurring_trace_credit_pool",
+      "spendRecurringTraceCreditPool",
+    ],
     targetKind: "recurring_trace_credit_pool",
     targetState: ["recurringCreditPools[]"],
     params: {

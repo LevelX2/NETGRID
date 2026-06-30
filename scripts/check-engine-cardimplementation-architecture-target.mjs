@@ -25,6 +25,7 @@ const tsNoCheckScopes = [
 const runtimeEscapeScopes = tsNoCheckScopes;
 
 const allowedCardNameContexts = [
+  "packages/engine/src/card-implementations/classic/",
   "packages/engine/src/card-implementations/onr-v1/",
   "packages/engine/src/card-implementations/proteus/",
   "packages/engine/src/card-implementations/subregistries/",
@@ -51,7 +52,8 @@ const knownCardSpecificRuntimeTokens = [
 const roleLineLimits = [
   {
     name: "registry aggregator",
-    match: (file) => file.includes("/card-implementations/") && file.includes("registr"),
+    match: (file) =>
+      file.includes("/card-implementations/") && file.includes("registr"),
     limit: 220,
   },
   {
@@ -121,7 +123,11 @@ function isTestOrFixture(file) {
 
 function isCommentOnly(line) {
   const trimmed = line.trim();
-  return trimmed.startsWith("//") || trimmed.startsWith("*") || trimmed.startsWith("/*");
+  return (
+    trimmed.startsWith("//") ||
+    trimmed.startsWith("*") ||
+    trimmed.startsWith("/*")
+  );
 }
 
 function isCardImplementationFile(file) {
@@ -131,7 +137,8 @@ function isCardImplementationFile(file) {
 function isCatalogOrAllowedCardContext(file, line) {
   if (isTestOrFixture(file)) return true;
   if (isCardImplementationFile(file)) return true;
-  if (file === "packages/engine/src/card-implementations/coverage.ts") return true;
+  if (file === "packages/engine/src/card-implementations/coverage.ts")
+    return true;
   if (file === "packages/shared/src/index.ts") {
     return (
       line.includes("id:") ||
@@ -141,11 +148,15 @@ function isCatalogOrAllowedCardContext(file, line) {
       line.includes("mechanics:")
     );
   }
-  if (file.includes("/card-implementations/") && line.includes("cardDefinitionId")) {
+  if (
+    file.includes("/card-implementations/") &&
+    line.includes("cardDefinitionId")
+  ) {
     return true;
   }
   if (line.includes("cardDefinitionId:")) return true;
-  if (line.includes("from \"./") && file.includes("/card-implementations/")) return true;
+  if (line.includes('from "./') && file.includes("/card-implementations/"))
+    return true;
   return isCommentOnly(line);
 }
 
@@ -162,7 +173,9 @@ function camelCase(words) {
   return words
     .map((word, index) => {
       const lower = word.toLowerCase();
-      return index === 0 ? lower : `${lower[0]?.toUpperCase() ?? ""}${lower.slice(1)}`;
+      return index === 0
+        ? lower
+        : `${lower[0]?.toUpperCase() ?? ""}${lower.slice(1)}`;
     })
     .join("");
 }
@@ -206,25 +219,29 @@ function variantsForWords(words) {
   variants.add(camel);
   variants.add(upperFirst(camel));
   if (lowerWords[0] === "the" && lowerWords.length > 1) {
-    for (const variant of variantsForWords(words.slice(1))) variants.add(variant);
+    for (const variant of variantsForWords(words.slice(1)))
+      variants.add(variant);
   }
   return variants;
 }
 
 function definitionSlugForId(id) {
-  return id.replace(/^onr_(?:v1|proteus)_\d+_/, "");
+  return id.replace(/^onr_(?:v1|proteus|classic)_\d+_/, "");
 }
 
 function deriveCardNameTokens(sources) {
-  const shared = sources.find((source) => source.file === "packages/shared/src/index.ts");
+  const shared = sources.find(
+    (source) => source.file === "packages/shared/src/index.ts",
+  );
   const tokens = new Map();
   for (const token of knownCardSpecificRuntimeTokens) {
     tokens.set(token, { token, title: "known card-specific runtime token" });
   }
-  if (!shared) return [...tokens.values()].sort((a, b) => a.token.localeCompare(b.token));
+  if (!shared)
+    return [...tokens.values()].sort((a, b) => a.token.localeCompare(b.token));
 
   const pattern =
-    /id:\s*"(?<id>onr_(?:v1|proteus)_\d+_[^"]+)",\s*\r?\n\s*title:\s*"(?<title>[^"]+)"/g;
+    /id:\s*"(?<id>onr_(?:v1|proteus|classic)_\d+_[^"]+)",\s*\r?\n\s*title:\s*"(?<title>[^"]+)"/g;
   let match = pattern.exec(shared.text);
   while (match) {
     const id = match.groups.id;
@@ -245,11 +262,18 @@ function deriveCardNameTokens(sources) {
 function collectTsNoCheckFindings(sources) {
   const findings = [];
   for (const { file, text } of sources) {
-    if (!startsWithAny(file, tsNoCheckScopes) || isTestOrFixture(file)) continue;
+    if (!startsWithAny(file, tsNoCheckScopes) || isTestOrFixture(file))
+      continue;
     const regex = /@ts-nocheck/g;
     let match = regex.exec(text);
     while (match) {
-      pushFinding(findings, file, lineNumber(text, match.index), "@ts-nocheck in productive architecture scope", snippet(text, match.index));
+      pushFinding(
+        findings,
+        file,
+        lineNumber(text, match.index),
+        "@ts-nocheck in productive architecture scope",
+        snippet(text, match.index),
+      );
       match = regex.exec(text);
     }
   }
@@ -261,7 +285,8 @@ function collectRuntimeEscapeFindings(sources) {
   const patterns = [
     {
       message: "open string index signature for runtime dependencies",
-      regex: /\[[A-Za-z_$][A-Za-z0-9_$]*:\s*string\]\s*:\s*(?:unknown|any|RuntimeCallable|[^;{}]+)/g,
+      regex:
+        /\[[A-Za-z_$][A-Za-z0-9_$]*:\s*string\]\s*:\s*(?:unknown|any|RuntimeCallable|[^;{}]+)/g,
     },
     {
       message: "Record<string, unknown> runtime dependency bag",
@@ -277,11 +302,13 @@ function collectRuntimeEscapeFindings(sources) {
     },
     {
       message: "general callable runtime bag",
-      regex: /(?:RuntimeCallable|CallableBag|FunctionBag)|\(\s*\.\.\.[^)]*:\s*(?:unknown|any)\[\]\s*\)\s*=>\s*(?:unknown|any)/g,
+      regex:
+        /(?:RuntimeCallable|CallableBag|FunctionBag)|\(\s*\.\.\.[^)]*:\s*(?:unknown|any)\[\]\s*\)\s*=>\s*(?:unknown|any)/g,
     },
     {
       message: "dynamic string property resolution",
-      regex: /\[[A-Za-z_$][A-Za-z0-9_$]*\s+as\s+keyof|\[[A-Za-z_$][A-Za-z0-9_$]*\]\s*(?:\(|;|,|\?|\.)/g,
+      regex:
+        /\[[A-Za-z_$][A-Za-z0-9_$]*\s+as\s+keyof|\[[A-Za-z_$][A-Za-z0-9_$]*\]\s*(?:\(|;|,|\?|\.)/g,
       requiresRuntimeContext: true,
     },
     {
@@ -290,7 +317,8 @@ function collectRuntimeEscapeFindings(sources) {
     },
     {
       message: "general runtime member resolver",
-      regex: /\bresolveRuntimeMember\b|\blookupCapability\b|\bresolveCapability\b/g,
+      regex:
+        /\bresolveRuntimeMember\b|\blookupCapability\b|\bresolveCapability\b/g,
     },
     {
       message: "broad cast bypasses runtime contract",
@@ -299,19 +327,28 @@ function collectRuntimeEscapeFindings(sources) {
   ];
 
   for (const { file, text } of sources) {
-    if (isTestOrFixture(file) || !startsWithAny(file, runtimeEscapeScopes)) continue;
+    if (isTestOrFixture(file) || !startsWithAny(file, runtimeEscapeScopes))
+      continue;
     for (const pattern of patterns) {
       let match = pattern.regex.exec(text);
       while (match) {
         const detail = snippet(text, match.index);
         if (
           pattern.requiresRuntimeContext &&
-          !/\b(runtime|deps|capabilit|member|lookup|resolve|binding)\b/i.test(detail)
+          !/\b(runtime|deps|capabilit|member|lookup|resolve|binding)\b/i.test(
+            detail,
+          )
         ) {
           match = pattern.regex.exec(text);
           continue;
         }
-        pushFinding(findings, file, lineNumber(text, match.index), pattern.message, detail);
+        pushFinding(
+          findings,
+          file,
+          lineNumber(text, match.index),
+          pattern.message,
+          detail,
+        );
         match = pattern.regex.exec(text);
       }
     }
@@ -321,23 +358,27 @@ function collectRuntimeEscapeFindings(sources) {
 
 function effectKindsByTypeName(sources) {
   const definition = sources.find(
-    (source) => source.file === "packages/engine/src/ability-engine/definition-types.ts",
+    (source) =>
+      source.file === "packages/engine/src/ability-engine/definition-types.ts",
   );
   if (!definition) return new Map();
-  const union = /export type CardEffectImplementation =(?<body>[\s\S]*?);/m.exec(
-    definition.text,
-  )?.groups?.body;
+  const union =
+    /export type CardEffectImplementation =(?<body>[\s\S]*?);/m.exec(
+      definition.text,
+    )?.groups?.body;
   if (!union) return new Map();
-  const typeNames = [...union.matchAll(/\|\s*(?<name>[A-Za-z0-9]+EffectImplementation)\b/g)].map(
-    (match) => match.groups.name,
-  );
+  const typeNames = [
+    ...union.matchAll(/\|\s*(?<name>[A-Za-z0-9]+EffectImplementation)\b/g),
+  ].map((match) => match.groups.name);
   const result = new Map();
   for (const typeName of typeNames) {
     const body = new RegExp(
       `export type ${typeName} =(?<body>[\\s\\S]*?);\\r?\\n`,
       "m",
     ).exec(definition.text)?.groups?.body;
-    const kind = body ? /kind:\s*"(?<kind>[^"]+)"/.exec(body)?.groups?.kind : undefined;
+    const kind = body
+      ? /kind:\s*"(?<kind>[^"]+)"/.exec(body)?.groups?.kind
+      : undefined;
     if (kind) result.set(typeName, kind);
   }
   return result;
@@ -346,15 +387,27 @@ function effectKindsByTypeName(sources) {
 function collectEffectFamilyFindings(sources) {
   const findings = [];
   const familySources = sources.filter((source) =>
-    source.file.startsWith("packages/engine/src/ability-engine/effect-families/"),
+    source.file.startsWith(
+      "packages/engine/src/ability-engine/effect-families/",
+    ),
   );
   for (const { file, text } of familySources) {
     const basename = file.split("/").at(-1) ?? file;
     if (/context-effects(?:-part-\d+)?\.ts$/.test(basename)) {
-      pushFinding(findings, file, 1, "numbered or catch-all context effect family", basename);
+      pushFinding(
+        findings,
+        file,
+        1,
+        "numbered or catch-all context effect family",
+        basename,
+      );
     }
-    const acceptedKindMatches = [...text.matchAll(/case\s+"([^"]+)"|kind\s*===\s*"([^"]+)"/g)];
-    const uniqueKinds = new Set(acceptedKindMatches.map((match) => match[1] ?? match[2]));
+    const acceptedKindMatches = [
+      ...text.matchAll(/case\s+"([^"]+)"|kind\s*===\s*"([^"]+)"/g),
+    ];
+    const uniqueKinds = new Set(
+      acceptedKindMatches.map((match) => match[1] ?? match[2]),
+    );
     if (uniqueKinds.size > 12) {
       pushFinding(
         findings,
@@ -367,10 +420,15 @@ function collectEffectFamilyFindings(sources) {
   }
 
   const interpreter = sources.find(
-    (source) => source.file === "packages/engine/src/ability-engine/effect-interpreter.ts",
+    (source) =>
+      source.file ===
+      "packages/engine/src/ability-engine/effect-interpreter.ts",
   );
   if (interpreter) {
-    for (const regex of [/switch\s*\(\s*effect\.kind\s*\)/g, /\bcase\s+"[^"]+"/g]) {
+    for (const regex of [
+      /switch\s*\(\s*effect\.kind\s*\)/g,
+      /\bcase\s+"[^"]+"/g,
+    ]) {
       let match = regex.exec(interpreter.text);
       while (match) {
         pushFinding(
@@ -425,7 +483,8 @@ function collectCardSpecificRuntimeNameFindings(sources) {
   const productionSources = sources.filter(
     ({ file }) =>
       !isTestOrFixture(file) &&
-      file !== "scripts/check-engine-cardimplementation-architecture-target.mjs",
+      file !==
+        "scripts/check-engine-cardimplementation-architecture-target.mjs",
   );
 
   for (const { file, text } of productionSources) {
@@ -473,16 +532,21 @@ function collectCardIdBehaviorFindings(sources) {
   const patterns = [
     {
       message: "card-id set or constant can control behavior",
-      regex: /\b[A-Z][A-Z0-9_]*(?:_CARD_ID|_CARD_IDS|_DEFINITION_ID|_DEFINITION_IDS)\b|\bnew\s+Set\s*<\s*[^>]*CardDefinitionId[^>]*>\s*\(/g,
+      regex:
+        /\b[A-Z][A-Z0-9_]*(?:_CARD_ID|_CARD_IDS|_DEFINITION_ID|_DEFINITION_IDS)\b|\bnew\s+Set\s*<\s*[^>]*CardDefinitionId[^>]*>\s*\(/g,
     },
     {
       message: "direct ONR/Proteus definition id in productive rule path",
-      regex: /["']onr_(?:v1|proteus)_\d+_[^"']+["']/g,
+      regex: /["']onr_(?:v1|proteus|classic)_\d+_[^"']+["']/g,
     },
   ];
   for (const { file, text } of sources) {
     if (isTestOrFixture(file) || isCardImplementationFile(file)) continue;
-    if (file.includes("/compatibility/") || file.includes("payload-compatibility")) continue;
+    if (
+      file.includes("/compatibility/") ||
+      file.includes("payload-compatibility")
+    )
+      continue;
     if (
       !(
         file.startsWith("packages/engine/src/game/") ||
@@ -499,7 +563,13 @@ function collectCardIdBehaviorFindings(sources) {
       while (match) {
         const line = lineText(text, lineNumber(text, match.index));
         if (!isCatalogOrAllowedCardContext(file, line)) {
-          pushFinding(findings, file, lineNumber(text, match.index), pattern.message, line);
+          pushFinding(
+            findings,
+            file,
+            lineNumber(text, match.index),
+            pattern.message,
+            line,
+          );
         }
         match = pattern.regex.exec(text);
       }
@@ -514,10 +584,18 @@ function collectRegistryFindings(sources) {
     if (!file.startsWith("packages/engine/src/card-implementations/")) continue;
     const basename = file.split("/").at(-1) ?? file;
     if (/all-card-implementations\.(?:ts|js|mjs)$/.test(basename)) {
-      pushFinding(findings, file, 1, "registry replacement monolith is forbidden", basename);
+      pushFinding(
+        findings,
+        file,
+        1,
+        "registry replacement monolith is forbidden",
+        basename,
+      );
     }
     const directCardImports = [
-      ...text.matchAll(/from\s+["'](?:\.\.\/)*((?:onr-v1|proteus)\/[^"']+)["']/g),
+      ...text.matchAll(
+        /from\s+["'](?:\.\.\/)*((?:classic|onr-v1|proteus)\/[^"']+)["']/g,
+      ),
     ].filter((match) => match[1].split("/").length >= 4);
     if (directCardImports.length > 20) {
       pushFinding(
@@ -610,7 +688,11 @@ const IDS = new Set<CardDefinitionId>([SOME_CARD_ID]);
     },
     {
       file: "packages/engine/src/card-implementations/subregistries/all-card-implementations.ts",
-      text: Array.from({ length: 25 }, (_, index) => `import { card${index} } from "../onr-v1/corp/assets/card-${index}";`).join("\n"),
+      text: Array.from(
+        { length: 25 },
+        (_, index) =>
+          `import { card${index} } from "../onr-v1/corp/assets/card-${index}";`,
+      ).join("\n"),
     },
     {
       file: "scripts/synthetic-ai-semantic-check.mjs",
@@ -621,7 +703,10 @@ const IDS = new Set<CardDefinitionId>([SOME_CARD_ID]);
   const required = new Map([
     ["@ts-nocheck in productive architecture scope", "@ts-nocheck"],
     ["runtime escape hatches removed", "runtime escape hatch"],
-    ["effect families are domain-owned and exhaustive", "context effect family"],
+    [
+      "effect families are domain-owned and exhaustive",
+      "context effect family",
+    ],
     ["card-specific productive runtime names", "card-specific runtime name"],
     ["active card-id rule decisions removed", "card-id rule decision"],
     ["registry uses real grouped registries", "all-card registry monolith"],
@@ -632,7 +717,9 @@ const IDS = new Set<CardDefinitionId>([SOME_CARD_ID]);
     if (!check || check.findings.length === 0) failures.push(label);
   }
   if (failures.length > 0) {
-    console.error(`Architecture guard self-test failed: ${failures.join(", ")}`);
+    console.error(
+      `Architecture guard self-test failed: ${failures.join(", ")}`,
+    );
     process.exit(1);
   }
   console.log("Architecture guard self-test passed.");
@@ -663,7 +750,9 @@ function runCheck() {
   if (failingChecks.length > 0) {
     process.exitCode = 1;
   } else {
-    console.log("\n[PASS] Engine CardImplementation architecture target reached.");
+    console.log(
+      "\n[PASS] Engine CardImplementation architecture target reached.",
+    );
   }
 }
 

@@ -1,4 +1,5 @@
 import type { CardImplementationDefinition } from "../types";
+import { CLASSIC_CARD_IMPLEMENTATIONS } from "./classic-card-implementations";
 import { CARD_IMPLEMENTATION_GROUP_001 } from "./card-implementation-group-001";
 import { CARD_IMPLEMENTATION_GROUP_002 } from "./card-implementation-group-002";
 import { CARD_IMPLEMENTATION_GROUP_003 } from "./card-implementation-group-003";
@@ -28,6 +29,7 @@ import { CARD_IMPLEMENTATION_GROUP_026 } from "./card-implementation-group-026";
 import { CARD_IMPLEMENTATION_GROUP_027 } from "./card-implementation-group-027";
 
 export const CARD_IMPLEMENTATION_CATALOG = [
+  ...CLASSIC_CARD_IMPLEMENTATIONS,
   ...CARD_IMPLEMENTATION_GROUP_001,
   ...CARD_IMPLEMENTATION_GROUP_002,
   ...CARD_IMPLEMENTATION_GROUP_003,

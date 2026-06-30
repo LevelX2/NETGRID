@@ -3,6 +3,7 @@ export {
   type LegacyAbilityPayloadField,
 } from "./ability-payload";
 import proteusCardsData from "../../../data/cards/proteus-cards.json";
+import classicCardsData from "../../../data/cards/classic-cards.json";
 export type {
   ApiAiPacingMode,
   ApiAiTurnPresentationState,
@@ -7811,7 +7812,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] For the remainder of the run, Runner must pay 2 when encountering a piece of ice, in addition to any other costs, or end the run.",
     subroutines: [
-      onrSetRunEncounterTax("catalog_onr_v1_222_ball_and_chain_encounter_tax", 2),
+      onrSetRunEncounterTax(
+        "catalog_onr_v1_222_ball_and_chain_encounter_tax",
+        2,
+      ),
     ],
     mechanics: ["encounter_tax", "run_modifier"],
   }),
@@ -7857,7 +7861,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] For the remainder of the run, all further ice is encountered at +2 strength.",
     subroutines: [
-      onrSetRunFutureStrengthBonus("catalog_onr_v1_225_canis_major_future_strength", 2),
+      onrSetRunFutureStrengthBonus(
+        "catalog_onr_v1_225_canis_major_future_strength",
+        2,
+      ),
     ],
     mechanics: ["encounter_ice_strength_bonus", "run_modifier"],
   }),
@@ -7870,7 +7877,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] For the remainder of the run, all further ice is encountered at +1 strength.",
     subroutines: [
-      onrSetRunFutureStrengthBonus("catalog_onr_v1_226_canis_minor_future_strength", 1),
+      onrSetRunFutureStrengthBonus(
+        "catalog_onr_v1_226_canis_minor_future_strength",
+        1,
+      ),
     ],
     mechanics: ["encounter_ice_strength_bonus", "run_modifier"],
   }),
@@ -7900,7 +7910,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "[Subroutine] Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter.",
     subroutines: [
       {
-        ...onrSetNextEncounterLock("catalog_onr_v1_268_shock_r_next_encounter_lock"),
+        ...onrSetNextEncounterLock(
+          "catalog_onr_v1_268_shock_r_next_encounter_lock",
+        ),
         breakTags: ["stun"],
       },
     ],
@@ -8132,7 +8144,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] Runner cannot make runs with their next six actions.\n[Subroutine] End the run.",
     subroutines: [
-      onrSetRunnerRunLockActions("catalog_onr_v1_247_haunting_inquisition_run_lock", 6),
+      onrSetRunnerRunLockActions(
+        "catalog_onr_v1_247_haunting_inquisition_run_lock",
+        6,
+      ),
       onrEtr("catalog_onr_v1_247_haunting_inquisition_etr"),
     ],
     mechanics: [
@@ -8168,7 +8183,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 1,
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [
-      onrTrashInstalledProgram("catalog_onr_v1_250_ice_pick_willie_trash_program"),
+      onrTrashInstalledProgram(
+        "catalog_onr_v1_250_ice_pick_willie_trash_program",
+      ),
       onrEtr("catalog_onr_v1_250_ice_pick_willie_etr"),
     ],
     mechanics: ["trash_installed_program", "end_the_run"],
@@ -8351,7 +8368,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 4,
     rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [
-      onrTrashInstalledProgram("catalog_onr_v1_267_sentinels_prime_trash_program"),
+      onrTrashInstalledProgram(
+        "catalog_onr_v1_267_sentinels_prime_trash_program",
+      ),
       onrEtr("catalog_onr_v1_267_sentinels_prime_etr"),
     ],
     mechanics: ["uninstall_runner_program", "end_the_run"],
@@ -8389,7 +8408,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "[Subroutine] End the run, and Runner forgoes his or her next action.",
     subroutines: [
       {
-        ...onrSetRunnerForgoNextAction("catalog_onr_v1_271_tko_2_0_forgo_next_action"),
+        ...onrSetRunnerForgoNextAction(
+          "catalog_onr_v1_271_tko_2_0_forgo_next_action",
+        ),
         breakTags: ["knockout"],
       },
       onrEtr("catalog_onr_v1_271_tko_2_0_etr"),
@@ -8418,7 +8439,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText:
       "[Subroutine] For the remainder of the run, each later encountered ice gains an additional end-the-run subroutine.",
     subroutines: [
-      onrSetRunFutureEndTheRunSubroutine("catalog_onr_v1_274_tutor_future_end_the_run"),
+      onrSetRunFutureEndTheRunSubroutine(
+        "catalog_onr_v1_274_tutor_future_end_the_run",
+      ),
     ],
     mechanics: ["run_modifier", "end_the_run", "per_card_longtail"],
   }),
@@ -9328,7 +9351,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subroutines: [
       onrCoreDamage("catalog_onr_v1_255_mastiff_core_damage", 1),
       onrNetDamage("catalog_onr_v1_255_mastiff_net_damage", 1),
-      onrSetRunFutureStrengthBonus("catalog_onr_v1_255_mastiff_strength_bonus", 1),
+      onrSetRunFutureStrengthBonus(
+        "catalog_onr_v1_255_mastiff_strength_bonus",
+        1,
+      ),
       {
         id: "onr_v1_255_mastiff_trace",
         type: "initiate_trace",
@@ -11731,11 +11757,12 @@ export const DEMO_CARDS: CardDefinition[] = [
 
 export const DEMO_CARDS_BY_ID: Record<CardDefinitionId, CardDefinition> =
   Object.fromEntries([
+    ...classicCatalogFallbackCards().map((card) => [card.id, card] as const),
     ...proteusCatalogFallbackCards().map((card) => [card.id, card] as const),
     ...DEMO_CARDS.map((card) => [card.id, card] as const),
   ]);
 
-type ProteusCatalogCard = {
+type CatalogFallbackCard = {
   cardId: string;
   title: string;
   side: Side;
@@ -11754,8 +11781,25 @@ type ProteusCatalogCard = {
   text?: string;
 };
 
+function classicCatalogFallbackCards(): CardDefinition[] {
+  return catalogFallbackCards(
+    classicCardsData.cards as CatalogFallbackCard[],
+    "classic_catalog_fallback",
+  );
+}
+
 function proteusCatalogFallbackCards(): CardDefinition[] {
-  return (proteusCardsData.cards as ProteusCatalogCard[]).map((card) => {
+  return catalogFallbackCards(
+    proteusCardsData.cards as CatalogFallbackCard[],
+    "proteus_catalog_fallback",
+  );
+}
+
+function catalogFallbackCards(
+  cards: CatalogFallbackCard[],
+  mechanic: string,
+): CardDefinition[] {
+  return cards.map((card) => {
     const numeric = card.numeric ?? {};
     return {
       id: card.cardId,
@@ -11773,7 +11817,7 @@ function proteusCatalogFallbackCards(): CardDefinition[] {
       ...numberField("advancementRequirement", numeric.advancementRequirement),
       ...numberField("agendaPoints", numeric.agendaPoints),
       rulesText: card.text ?? "",
-      mechanics: ["proteus_catalog_fallback"],
+      mechanics: [mechanic],
     };
   });
 }

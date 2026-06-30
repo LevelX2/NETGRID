@@ -50,7 +50,7 @@ Diese Datei hält lokale Regelentscheidungen für die vollständige Classic-Impl
 | Paket | Status | Bemerkung |
 | --- | --- | --- |
 | CLASSIC-00 | completed | Prozess, Inventar und lokale Regelentscheidungen sind angelegt. |
-| CLASSIC-01 | pending | Foundation, Registry und Guards. |
+| CLASSIC-01 | completed | Classic-Fallback, leere Registry-Foundation und Drift-Guard sind angelegt. |
 | CLASSIC-02 | pending | Additive Kartenpool-/Format-/Matchstart-Auswahl. |
 | CLASSIC-03 | pending | Low-risk Economy/Draw/Double Basics. |
 | CLASSIC-04 | pending | Runner-Programme und Breaker. |
