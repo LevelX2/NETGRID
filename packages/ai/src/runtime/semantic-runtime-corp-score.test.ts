@@ -274,7 +274,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_board_triage_mismatch",
-          value: -4200,
+          value: -84,
           reason: expect.stringContaining("triage_primary:score_now"),
         }),
         expect.objectContaining({
@@ -591,7 +591,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_board_triage_alignment",
-          value: 1200,
+          value: 24,
           reason: expect.stringContaining("triage_target:remote_1"),
         }),
       ]),
@@ -940,7 +940,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     ).toBeGreaterThan(totalScore(installComponents));
   });
 
-  it("penalizes draw economy operations during deckout agenda flood", () => {
+  it("marks draw economy operations as mismatches during deckout agenda flood", () => {
     const dayShift = corpAction(
       "play-day-shift",
       "play_operation",
@@ -1007,15 +1007,22 @@ describe("semanticRuntimeCorpScoreComponents", () => {
         expect.objectContaining({ key: "corp_operation_burst_economy" }),
         expect.objectContaining({
           key: "corp_board_triage_mismatch",
-          value: -4200,
+          value: -84,
           reason: expect.stringContaining(
             "triage_primary:force_scoreline_clock",
           ),
         }),
       ]),
     );
-    expect(totalScore(installComponents)).toBeGreaterThan(
-      totalScore(drawComponents),
+    expect(installComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining(
+            "triage_primary:force_scoreline_clock",
+          ),
+        }),
+      ]),
     );
   });
 

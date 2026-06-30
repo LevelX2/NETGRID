@@ -317,7 +317,7 @@ export function semanticRuntimeCorpBoardTriageActionComponent<
     return {
       key: "corp_board_triage_alignment",
       label: "Corp-Board-Triage",
-      value: rawValue,
+      value: normalizedValue,
       reason: triageReason(
         triage,
         action,
@@ -337,7 +337,7 @@ export function semanticRuntimeCorpBoardTriageActionComponent<
     return {
       key: "corp_board_triage_mismatch",
       label: "Corp-Board-Triage",
-      value: rawValue,
+      value: normalizedValue,
       reason: triageReason(
         triage,
         action,
