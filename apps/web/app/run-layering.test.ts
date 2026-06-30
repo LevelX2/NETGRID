@@ -55,5 +55,7 @@ describe("run window layering", () => {
     expect(selectorBlock(".accessRevealBody")).toContain("grid-template-columns: minmax(220px, 292px) minmax(150px, 180px)");
     expect(selectorBlock(".accessRevealCard")).toContain("width: min(292px, 100%)");
     expect(selectorBlock(".accessRevealActions .button")).toContain("border-radius: 999px");
+    expect(selectorBlock(".accessRevealActionButton")).toContain("height: auto");
+    expect(selectorBlock(".accessRevealActionButton")).toContain("grid-template-columns: auto minmax(0, 1fr) auto");
   });
 });

@@ -8497,6 +8497,33 @@ select {
   border-radius: 999px;
 }
 
+.accessRevealActionButton {
+  height: auto;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  text-align: center;
+}
+
+.accessRevealActionButton > svg {
+  justify-self: end;
+  flex: 0 0 auto;
+}
+
+.accessRevealActionLabel {
+  min-width: 0;
+  line-height: 1.18;
+  overflow-wrap: anywhere;
+}
+
+.accessRevealActionButton .costChips {
+  margin-left: 0;
+  flex-wrap: nowrap;
+}
+
 .exposeReviewPanel {
   gap: 16px;
 }

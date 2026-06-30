@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { LegalAction, Side } from "@netgrid/shared";
-import { accessDecisionLabel, accessRevealActionGroups } from "./access-reveal-ui";
+import { accessDecisionDisplayLabel, accessDecisionLabel, accessRevealActionGroups } from "./access-reveal-ui";
 
 describe("access reveal UI helpers", () => {
   it("keeps R&D access actions limited to the provided legal actions", () => {
@@ -54,6 +54,7 @@ describe("access reveal UI helpers", () => {
     expect(accessDecisionLabel(steal, "Remote 1")).toBe(
       "5 Credits wegen Red Herrings bezahlen und Agenda aus Remote 1 stehlen"
     );
+    expect(accessDecisionDisplayLabel(steal, "Remote 1")).toBe("Zahlen & stehlen");
   });
 
   it("labels free access trash actions as free", () => {

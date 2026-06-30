@@ -30,6 +30,11 @@ export function accessDecisionLabel(action: LegalAction, serverLabel?: string): 
   return normalizeVisibleTerms(action.label);
 }
 
+export function accessDecisionDisplayLabel(action: LegalAction, serverLabel?: string): string {
+  if (action.type === "steal_agenda" && stealCostPaymentLabel(action.payload)) return "Zahlen & stehlen";
+  return accessDecisionLabel(action, serverLabel);
+}
+
 function accessDecisionContextLabel(serverLabel: string | undefined): string | null {
   if (!serverLabel) return null;
   const label = normalizeVisibleTerms(serverLabel.trim());

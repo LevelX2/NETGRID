@@ -1,7 +1,7 @@
 import { Award as AgendaIcon, Check, Trash2, X } from "lucide-react";
 import type { LegalAction, Side } from "@netgrid/shared";
 
-import { accessDecisionLabel, accessRevealActionGroups } from "../../app/access-reveal-ui";
+import { accessDecisionDisplayLabel, accessDecisionLabel, accessRevealActionGroups } from "../../app/access-reveal-ui";
 import { CardView } from "../cards/CardView";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
@@ -103,23 +103,34 @@ export function AccessRevealModal({
             {reveal.followupStatus ? <p className="accessRevealStatus">{reveal.followupStatus}</p> : null}
             <p className="accessRevealStatus">{reveal.trashStatus}</p>
             <div className="accessRevealActions">
-              {primaryActions.map((action) => (
-                <button className={`button primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`} key={action.actionId} onClick={() => runAction(action)} disabled={disabled}>
-                  {action.type === "trash_accessed_card" || action.type === "trash_resource" ? <Trash2 size={15} /> : <AgendaIcon size={15} />}
-                  {accessDecisionLabel(action, reveal.serverLabel)}
-                  <CostChips action={action} />
-                </button>
-              ))}
+              {primaryActions.map((action) => {
+                const label = accessDecisionLabel(action, reveal.serverLabel);
+                const displayLabel = accessDecisionDisplayLabel(action, reveal.serverLabel);
+                return (
+                  <button
+                    className={`button accessRevealActionButton primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`}
+                    key={action.actionId}
+                    onClick={() => runAction(action)}
+                    disabled={disabled}
+                    aria-label={label}
+                    title={label}
+                  >
+                    {action.type === "trash_accessed_card" || action.type === "trash_resource" ? <Trash2 size={15} /> : <AgendaIcon size={15} />}
+                    <span className="accessRevealActionLabel">{displayLabel}</span>
+                    <CostChips action={action} />
+                  </button>
+                );
+              })}
               {declineAction ? (
-                <button className="button" onClick={() => runAction(declineAction)} disabled={disabled}>
+                <button className="button accessRevealActionButton" onClick={() => runAction(declineAction)} disabled={disabled}>
                   <Check size={15} />
-                  {accessDecisionLabel(declineAction, reveal.serverLabel)}
+                  <span className="accessRevealActionLabel">{accessDecisionLabel(declineAction, reveal.serverLabel)}</span>
                 </button>
               ) : null}
               {reveal.actions.length === 0 ? (
-                <button className="button" onClick={onDismiss}>
+                <button className="button accessRevealActionButton" onClick={onDismiss}>
                   <Check size={15} />
-                  {reveal.dismissLabel ?? "OK"}
+                  <span className="accessRevealActionLabel">{reveal.dismissLabel ?? "OK"}</span>
                 </button>
               ) : null}
             </div>
