@@ -76,7 +76,7 @@ describe("groupChronicleEntriesForRender", () => {
     );
   });
 
-  it("renders Runner-virus purge before its paid action-debt entries", () => {
+  it("keeps Runner-virus purge first when reading the newest-first display bottom-up", () => {
     const ordered = orderChronicleEntriesForDisplay([
       debtEntry("evt_end_turn", "end_turn"),
       debtEntry("evt_forgo_3", "forgo_action", 3),
@@ -88,10 +88,10 @@ describe("groupChronicleEntriesForRender", () => {
 
     expect(ordered.map((item) => item.item?.id)).toEqual([
       "evt_end_turn",
-      "evt_purge",
-      "evt_forgo_1",
-      "evt_forgo_2",
       "evt_forgo_3",
+      "evt_forgo_2",
+      "evt_forgo_1",
+      "evt_purge",
       "evt_gain",
     ]);
   });

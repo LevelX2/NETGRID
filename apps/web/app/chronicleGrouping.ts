@@ -92,8 +92,8 @@ export function orderChronicleEntriesForDisplay<
     ];
     const insertionIndex = Math.min(...blockIndexes);
     blocks.set(insertionIndex, [
+      ...relatedIndexes.map((item) => item.candidate).reverse(),
       entry,
-      ...relatedIndexes.map((item) => item.candidate),
     ]);
     consumed.add(index);
     for (const item of relatedIndexes) consumed.add(item.candidateIndex);
