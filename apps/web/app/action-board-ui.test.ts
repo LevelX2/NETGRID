@@ -1989,6 +1989,44 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionButtonLabel(removeLock)).toBe("Run-Sperre für 2 Credits entfernen");
   });
 
+  it("keeps Runner status counter removal visible with normal Runner actions", () => {
+    const removeDoppelgangerCounter = legalAction(
+      "runner",
+      "trigger_ability",
+      "runner_identity",
+      "Doppelganger-Counter entfernen",
+      {
+        cardId: "runner_identity",
+        runnerAbility: "remove_runner_trace_counter",
+        counterType: "link_reduction_counter",
+        removeCounterAmount: 1,
+        counterRemoveCreditCost: 4
+      },
+      "runner_action.main"
+    );
+    const removeCryingCounter = legalAction(
+      "runner",
+      "gain_credit",
+      "runner_identity",
+      "Crying-Counter entfernen",
+      {
+        cardId: "runner_identity",
+        runnerAbility: "remove_crying_counter",
+        counterType: "crying",
+        removeCounterAmount: 1,
+        counterRemoveCreditCost: 2
+      },
+      "runner_action.main"
+    );
+
+    const split = splitLegalActions([removeDoppelgangerCounter, removeCryingCounter]);
+
+    expect(split.primaryActions).toEqual([removeDoppelgangerCounter, removeCryingCounter]);
+    expect(split.contextualActions).toEqual([]);
+    expect(actionButtonLabel(removeDoppelgangerCounter)).toBe("Doppelganger-Counter entfernen");
+    expect(actionButtonLabel(removeCryingCounter)).toBe("Crying-Counter entfernen");
+  });
+
   it("warns and keeps contextless contextual actions visible", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     try {
