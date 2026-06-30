@@ -331,6 +331,76 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     expect(installIceScore(huntingPack, "remote_1", input)).toBe(450);
   });
 
+  it("maintains an existing empty two-ice scoring remote when agendas are in HQ", () => {
+    const etrIce = corpCard("third-remote-wall", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 2,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: true,
+      credits: 6,
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        { id: "archives", label: "Archives", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [
+            corpCard("remote-wall-1", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+            corpCard("remote-wall-2", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+          ],
+          root: [],
+        },
+      ],
+    });
+
+    expect(installIceScore(etrIce, "remote_1", input)).toBe(850);
+  });
+
+  it("does not keep adding generic ICE once the empty scoring remote already has three ICE", () => {
+    const etrIce = corpCard("fourth-remote-wall", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 2,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: true,
+      credits: 6,
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        { id: "archives", label: "Archives", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [
+            corpCard("remote-wall-1", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+            corpCard("remote-wall-2", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+            corpCard("remote-wall-3", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+          ],
+          root: [],
+        },
+      ],
+    });
+
+    expect(installIceScore(etrIce, "remote_1", input)).toBeLessThan(0);
+  });
+
   it("downranks advancement-counter remote support without scoreline context", () => {
     const raymond = corpCard("raymond", "upgrade", {
       definitionId: "onr_proteus_071_raymond-ellison",
