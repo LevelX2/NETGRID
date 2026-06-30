@@ -196,6 +196,8 @@ function hostFor(
     hiddenZone: {
       startCorpArchivesToHqChoice: (_legalAction, sourceCardId) =>
         calls.push(`archivesToHq:${sourceCardId}`),
+      startCorpHqCardToRdChoice: (_legalAction, sourceCardId) =>
+        calls.push(`hqToRd:${sourceCardId}`),
       startCorpRdTopReorderChoice: (_legalAction, sourceCardId) =>
         calls.push(`rdReorder:${sourceCardId}`),
       resolveConcealAndReorderInstalledIce: () => calls.push("newBlood"),
@@ -367,5 +369,40 @@ describe("corp-operation-resolution", () => {
       traceSuccessTargetCardId: RESOURCE_ID,
       traceSuccessTargetDefinitionId: RUNNER_RESOURCE_DEFINITION_ID,
     });
+  });
+
+  it("builds two-click Classic double operation actions", () => {
+    const targetState = state();
+    targetState.corp.hq = [OPERATION_ID];
+    targetState.corp.rd = ["rd_1" as CardInstanceId];
+    targetState.cardInstances[OPERATION_ID] = instance(
+      OPERATION_ID,
+      "onr_classic_017_corporate-shuffle",
+      {
+        owner: "corp",
+        controller: "corp",
+        zone: { side: "corp", zone: "hq" },
+      },
+    );
+    const cardDefinition = definition("onr_classic_017_corporate-shuffle", {
+      title: "Corporate Shuffle",
+      cost: 0,
+    });
+    const host = hostFor(targetState);
+
+    const actions = cardImplementationOperationLegalActions(
+      host,
+      OPERATION_ID,
+      cardDefinition,
+    );
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]?.costs).toEqual([{ clicks: 2, credits: 0 }]);
+
+    targetState.corp.clicks = 1;
+    expect(canPlayCorpOperation(host, cardDefinition)).toBe(false);
+    expect(
+      cardImplementationOperationLegalActions(host, OPERATION_ID, cardDefinition),
+    ).toEqual([]);
   });
 });

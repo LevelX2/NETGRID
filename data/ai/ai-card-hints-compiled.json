@@ -40218,6 +40218,148 @@
         "confidence": "low",
         "needsHumanReview": true
       }
+    },
+    {
+      "cardId": "onr_classic_017_corporate-shuffle",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": ["operation", "draw", "hq_to_rd_shuffle", "hidden_zone"],
+      "planRoles": ["find_economy", "reload_hq"],
+      "requiredMechanics": ["play_operation", "draw_cards", "shuffle_hq_to_rd"],
+      "valueHints": {
+        "cardVelocity": 3,
+        "utility": 2
+      },
+      "riskTags": ["hidden_zone", "double_action"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_018_reclamation-project",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": ["operation", "archives_recursion", "ice_recovery", "hidden_zone"],
+      "planRoles": ["recover_defense"],
+      "requiredMechanics": ["play_operation", "archives_to_hq", "reveal"],
+      "valueHints": {
+        "defense": 2,
+        "recursion": 3
+      },
+      "riskTags": ["hidden_zone", "double_action"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_037_finders-keepers",
+      "side": "runner",
+      "cardType": "event",
+      "roles": ["event", "economy", "deterministic_random"],
+      "planRoles": ["build_economy"],
+      "requiredMechanics": ["play_event", "random_die_resolution", "gain_credits"],
+      "valueHints": {
+        "economy": 3
+      },
+      "riskTags": ["deterministic_random"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_040_meat-upgrade",
+      "side": "runner",
+      "cardType": "event",
+      "roles": ["event", "tag_removal", "draw"],
+      "planRoles": ["recover_from_tags", "build_hand"],
+      "requiredMechanics": ["play_event", "remove_tags", "draw_cards"],
+      "valueHints": {
+        "tagSafety": 3,
+        "cardVelocity": 2
+      },
+      "riskTags": ["double_action", "tag"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_041_networking",
+      "side": "runner",
+      "cardType": "event",
+      "roles": ["event", "economy", "double_action"],
+      "planRoles": ["build_economy"],
+      "requiredMechanics": ["play_event", "gain_credits"],
+      "valueHints": {
+        "economy": 4
+      },
+      "riskTags": ["double_action"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_042_panzer-run",
+      "side": "runner",
+      "cardType": "event",
+      "roles": ["event", "economy", "draw", "double_action"],
+      "planRoles": ["build_economy", "build_hand"],
+      "requiredMechanics": ["play_event", "gain_credits", "draw_cards"],
+      "valueHints": {
+        "economy": 2,
+        "cardVelocity": 2
+      },
+      "riskTags": ["double_action"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
     }
   ]
 }

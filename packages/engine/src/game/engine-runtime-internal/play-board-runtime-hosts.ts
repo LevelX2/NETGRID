@@ -270,6 +270,7 @@ import {
 import {
   handleHiddenZoneNonSearchChoice,
   startCorpArchivesToHqChoice,
+  startCorpHqCardToRdChoice,
   startCorpDiscardHqWithRetainPaymentChoice,
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
@@ -865,6 +866,11 @@ export function createPlayBoardRuntimeHosts(
       hiddenZone: {
         startCorpArchivesToHqChoice: (legalAction, sourceCardId) =>
           startCorpArchivesToHqChoice(
+            hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+            sourceCardId,
+          ),
+        startCorpHqCardToRdChoice: (legalAction, sourceCardId) =>
+          startCorpHqCardToRdChoice(
             hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
             sourceCardId,
           ),

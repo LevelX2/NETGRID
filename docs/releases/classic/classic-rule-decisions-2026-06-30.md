@@ -44,6 +44,9 @@ Diese Datei hält lokale Regelentscheidungen für die vollständige Classic-Impl
 | Hidden Resources | Executive File Clerk und Sandbox Dig werden wie bestehende Hidden-Resources face-down installiert und face-up getrasht. Ihre Aktivierungen geben nur dem Runner private Look-Informationen. |
 | Trace Auto-success | Crash Space ersetzt Runner-Trace-Verhalten: alle Trace-Versuche sind automatisch erfolgreich und geben zusätzlich einen Tag. Dies erzeugt keine neuen Corp-Entscheidungen außerhalb bestehender Trace-LegalActions. |
 | Action Debt | Vintage Camaro modelliert "Forgo your next action" als Runner-Action-Debt, die die nächste verfügbare Runner-Aktion verbraucht oder reduziert, bevor normale Aktionen genutzt werden. |
+| Corporate Shuffle | Die Double-Operation zieht zuerst bis zu fünf Karten aus R&D, erzeugt öffentliche Draw-Counts und startet danach eine private HQ-Choice. Die gewählte HQ-Karte wird verdeckt in R&D gemischt; PublicEvents enthalten weder CardInstanceId noch Kartentitel. |
+| Reclamation Project | Die Double-Operation verwendet den generischen Archives-to-HQ-Choice-Pfad mit ICE-Filter und Multi-Select. Die nach HQ genommenen ICE-Karten werden Runner-seitig als Definitionen/Titel offengelegt, weil der Kartentext die Auswahl aus Archives zeigt. |
+| Finders Keepers | Die drei Würfel werden direkt über deterministische `v1921.die.*`-RandomRecords geworfen. Der öffentliche Payload enthält nur Wurfergebnisse, Summe und Counterstand, keine verdeckten Zoneninformationen. |
 
 ## Paketstatus
 
@@ -52,7 +55,7 @@ Diese Datei hält lokale Regelentscheidungen für die vollständige Classic-Impl
 | CLASSIC-00 | completed | Prozess, Inventar und lokale Regelentscheidungen sind angelegt. |
 | CLASSIC-01 | completed | Classic-Fallback, leere Registry-Foundation und Drift-Guard sind angelegt. |
 | CLASSIC-02 | completed | Additive Kartenpool-/Format-/Matchstart-Auswahl für Originalset, Originalset+Classic, Originalset+Protheus und Originalset+Classic+Protheus ist umgesetzt und serverseitig revalidiert. |
-| CLASSIC-03 | pending | Low-risk Economy/Draw/Double Basics. |
+| CLASSIC-03 | completed | Corporate Shuffle, Reclamation Project, Finders Keepers, Meat Upgrade, Networking und Panzer Run sind implementiert, getestet und AI-/Scenario-referenziert. |
 | CLASSIC-04 | pending | Runner-Programme und Breaker. |
 | CLASSIC-05 | pending | Corp ICE Baseline und Noisy/Sleepy. |
 | CLASSIC-06 | pending | Deflector/Run-Redirect/Glacier. |

@@ -1475,6 +1475,83 @@ describe("CardImplementation definition descriptors", () => {
     ).toBe("implemented");
   });
 
+  it("describes CLASSIC-03 simple operation and event implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_classic_017_corporate-shuffle")
+        ?.corpUtility,
+    ).toEqual({
+      kind: "draw_corp_cards_then_shuffle_hq_card_into_rd",
+      drawCount: 5,
+      playCost: { kind: "printed", additionalClicks: 1 },
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_018_reclamation-project")
+        ?.corpUtility,
+    ).toEqual({
+      kind: "corp_archives_to_hq",
+      filter: { cardType: "ice" },
+      maxSelections: "all",
+      revealToRunner: true,
+      playCost: { kind: "printed", additionalClicks: 1 },
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_037_finders-keepers")
+        ?.runnerEventLongtail,
+    ).toEqual({
+      kind: "three_dice_gain_credits",
+      dieFaces: 6,
+      diceCount: 3,
+      recipient: "runner",
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_040_meat-upgrade")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "on_play",
+      costs: { kind: "printed", additionalClicks: 1 },
+      effects: [
+        { kind: "remove_tags", mode: "up_to_amount", amount: 2 },
+        { kind: "draw_cards", amount: 3 },
+      ],
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_041_networking")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "on_play",
+      costs: { kind: "printed", additionalClicks: 1 },
+      effects: [{ kind: "gain_credits", amount: 9 }],
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_042_panzer-run")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "on_play",
+      costs: { kind: "printed", additionalClicks: 1 },
+      effects: [
+        { kind: "gain_credits", amount: 4 },
+        { kind: "draw_cards", amount: 2 },
+      ],
+    });
+
+    for (const definitionId of [
+      "onr_classic_017_corporate-shuffle",
+      "onr_classic_018_reclamation-project",
+      "onr_classic_037_finders-keepers",
+      "onr_classic_040_meat-upgrade",
+      "onr_classic_041_networking",
+      "onr_classic_042_panzer-run",
+    ]) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes Proteus Phase 5b runner protection programs", () => {
     expect(
       cardImplementationForDefinitionId(

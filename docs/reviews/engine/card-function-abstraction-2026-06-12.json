@@ -2393,7 +2393,7 @@
     },
     {
       "path": "packages/engine/src/game/engine-runtime-internal/play-board-runtime-hosts.ts",
-      "line": 610,
+      "line": 611,
       "column": 3,
       "token": "CODE_VIRAL_CACHE",
       "cardTitle": "Code Viral Cache",
@@ -2580,7 +2580,7 @@
     },
     {
       "path": "packages/engine/src/game/hidden-zone/nonsearch-choice-handlers.test.ts",
-      "line": 23,
+      "line": 25,
       "column": 19,
       "token": "social_engineering",
       "cardTitle": "Social Engineering",
@@ -2657,7 +2657,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.test.ts",
-      "line": 299,
+      "line": 350,
       "column": 32,
       "token": "quest_for_cattekin",
       "cardTitle": "Quest for Cattekin",
@@ -2668,7 +2668,7 @@
     },
     {
       "path": "packages/engine/src/game/turn/runner-main-actions.test.ts",
-      "line": 302,
+      "line": 353,
       "column": 26,
       "token": "shell_traders",
       "cardTitle": "Shell Traders",

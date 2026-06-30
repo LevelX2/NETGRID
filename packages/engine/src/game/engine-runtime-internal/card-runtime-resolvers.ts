@@ -672,6 +672,7 @@ import {
   resolveActivatedCardImplementationAbility,
   resolveCardImplementationEndOfRunnerTurnAction,
 } from "../../ability-engine/card-implementation-runtime";
+import { isPrintedCostOnPlayAbility } from "../../ability-engine/card-implementation-runtime-shared";
 import type {
   ActivatedCardAbilityImplementation,
   CardCorpUtilityImplementation,
@@ -1515,6 +1516,12 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
                 longtail,
               ),
           };
+        case "three_dice_gain_credits":
+          return {
+            name: "card_implementation_runner_event_three_dice_gain_credits",
+            resolve: (state, legalAction) =>
+              resolveThreeDiceGainCreditsEvent(state, legalAction, definition.id),
+          };
         case "trash_installed_runner_connections_then_add_bad_publicity":
           return {
             name: "card_implementation_runner_event_trash_installed_runner_connections_then_add_bad_publicity",
@@ -1596,15 +1603,38 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     return undefined;
   }
 
+  function resolveThreeDiceGainCreditsEvent(
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinitionId,
+  ): void {
+    const rolls = [0, 1, 2].map((index) =>
+      rollDeterministicDie(
+        state,
+        `v1921.die.${sourceDefinitionId}.three_dice.${index + 1}`,
+      ),
+    );
+    const gainedCredits = rolls.reduce((sum, roll) => sum + roll, 0);
+    credits(state, "runner", gainedCredits);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1921RunnerEventAbility: "three_dice_gain_credits",
+      sourceDefinitionId,
+      randomDiceLoopRolls: rolls.join(","),
+      randomDiceLoopRolledDice: rolls.length,
+      randomDiceLoopComplete: true,
+      gainedCredits,
+      runnerCreditsAfter: state.runner.credits,
+      randomCounterAfter: state.randomCounter,
+    };
+  }
+
   function printedCostCardImplementationMakeRunEffect(
     definition: CardDefinition,
   ): MakeRunEffectImplementation | undefined {
     const ability = cardImplementationForDefinitionId(
       definition.id,
-    )?.abilities?.find(
-      (candidate) =>
-        candidate.kind === "on_play" && candidate.costs === "printed",
-    );
+    )?.abilities?.find(isPrintedCostOnPlayAbility);
     return ability?.effects.find(
       (effect): effect is MakeRunEffectImplementation =>
         effect.kind === "make_run",

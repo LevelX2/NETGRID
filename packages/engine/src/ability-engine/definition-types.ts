@@ -57,7 +57,14 @@ export type CardInstallTargetBindingImplementation = {
   visibility: Extract<EventVisibilityClass, "public">;
 };
 
-export type CardCorpUtilityImplementation =
+export type CardCorpUtilityPlayCostImplementation = {
+  playCost?: {
+    kind: "printed";
+    additionalClicks: 1;
+  };
+};
+
+export type CardCorpUtilityImplementation = (
   | {
       kind: "gain_restricted_install_actions";
       amount: 3;
@@ -66,6 +73,16 @@ export type CardCorpUtilityImplementation =
     }
   | {
       kind: "corp_archives_to_hq";
+      filter?: {
+        cardType: Extract<CardType, "ice">;
+      };
+      maxSelections?: 1 | "all";
+      revealToRunner?: true;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "draw_corp_cards_then_shuffle_hq_card_into_rd";
+      drawCount: 5;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
@@ -197,7 +214,8 @@ export type CardCorpUtilityImplementation =
       amount: number;
       timing: "successful_meat_damage";
       visibility: Extract<EventVisibilityClass, "public">;
-    };
+    }
+) & CardCorpUtilityPlayCostImplementation;
 
 export type CardHiddenReplacementLongtailImplementation =
   | {
@@ -660,6 +678,13 @@ export type CardRunnerEventLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "three_dice_gain_credits";
+      dieFaces: 6;
+      diceCount: 3;
+      recipient: "runner";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "grip_install_program_or_hardware_with_temporary_credits";
       temporaryCredits: 3;
       allowedTypes: readonly Extract<CardType, "program" | "hardware">[];
@@ -942,9 +967,16 @@ export type CardLifecycleTriggeredAbilityImplementation = {
   effects: readonly CardEffectImplementation[];
 };
 
+export type OnPlayCardAbilityCostImplementation =
+  | "printed"
+  | {
+      kind: "printed";
+      additionalClicks: 1;
+    };
+
 export type OnPlayCardAbilityImplementation = {
   kind: "on_play";
-  costs: "printed";
+  costs: OnPlayCardAbilityCostImplementation;
   condition?: CardConditionImplementation;
   effects: CardEffectImplementation[];
 };

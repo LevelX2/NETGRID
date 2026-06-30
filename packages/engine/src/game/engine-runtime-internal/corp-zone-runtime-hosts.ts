@@ -556,7 +556,7 @@ export function createCorpZoneRuntimeHosts(
     state: GameState,
     cardId: CardInstanceId,
     sourceDefinitionId: CardDefinitionId,
-    reason: "lifecycle" | "access",
+    reason: "lifecycle" | "access" | "operation",
   ): { publicPayload: Record<string, string | number | boolean> } {
     const instance = mustInstance(state.cardInstances, cardId);
     if (instance.owner !== "corp")

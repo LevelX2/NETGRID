@@ -6,16 +6,31 @@ import type {
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime-dependency-types";
 import type {
+  CardAbilityImplementation,
   CardConditionImplementation,
   OnPlayCardAbilityImplementation,
 } from "./definition-types";
+
+export function isPrintedCostOnPlayAbility(
+  ability: CardAbilityImplementation,
+): ability is OnPlayCardAbilityImplementation {
+  return (
+    ability.kind === "on_play" &&
+    (ability.costs === "printed" || ability.costs.kind === "printed")
+  );
+}
+
+export function onPlayCardImplementationClickCost(
+  ability: OnPlayCardAbilityImplementation,
+): number {
+  return ability.costs === "printed" ? 1 : 1 + ability.costs.additionalClicks;
+}
 
 export function printedCostOnPlayImplementation(
   definition: CardDefinition,
 ): OnPlayCardAbilityImplementation | undefined {
   return cardImplementationForDefinitionId(definition.id)?.abilities?.find(
-    (ability): ability is OnPlayCardAbilityImplementation =>
-      ability.kind === "on_play" && ability.costs === "printed",
+    isPrintedCostOnPlayAbility,
   );
 }
 

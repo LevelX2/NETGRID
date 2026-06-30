@@ -1949,6 +1949,7 @@ export function publicContextForAction(
       "randomDiceLoopQueuedBeforeRolls",
       "randomDiceLoopQueuedAfterRolls",
       "randomDiceLoopRemainingDice",
+      "gainedCredits",
       "runnerCreditsAfter",
     ]) {
       const value = legalAction.payload[key];
