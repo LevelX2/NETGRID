@@ -168,7 +168,10 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
   const centralPressureSeverity = centralPressure
     ? centralTriageSeverity(pressureInput, centralPressure)
     : undefined;
-  if (centralPressure && centralPressureSeverity === "critical") {
+  if (
+    centralPressure?.serverId === "rd" &&
+    centralPressureSeverity === "critical"
+  ) {
     return centralPressureTriage(
       centralPressure,
       centralPressureSeverity,

@@ -398,7 +398,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_board_triage_mismatch",
-          value: -84,
+          value: -3200,
           reason: expect.stringContaining("triage_primary:score_now"),
         }),
         expect.objectContaining({
@@ -1131,7 +1131,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
         expect.objectContaining({ key: "corp_operation_burst_economy" }),
         expect.objectContaining({
           key: "corp_board_triage_mismatch",
-          value: -84,
+          value: -2400,
           reason: expect.stringContaining(
             "triage_primary:force_scoreline_clock",
           ),
