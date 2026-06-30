@@ -10,13 +10,13 @@ import {
   cardChoiceReadonlyConfirmationOptionId,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
-  newBloodReorderTargetLabel,
   newBloodReorderTargetSequenceHint,
   runnerProgramInstallTrashChoiceInfo,
 } from "../../app/action-board-ui";
 import { CardView } from "../cards/CardView";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
 import { type CardDisplayMode } from "../settings/settings-model";
+import { cardChoiceOrderBadge, isRunnerStackTopChooseOneArrangeRestChoice } from "./card-choice-order-badge";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
@@ -303,24 +303,6 @@ function cardChoiceSubmitLabel(choice: VisibleChoice, selectedCount: number): st
   return `${selectedCount} Karten übernehmen`;
 }
 
-function cardChoiceOrderBadge(choice: VisibleChoice, selectionIndex: number): { label: string; ariaLabel: string } {
-  if (isRunnerStackTopChooseOneArrangeRestChoice(choice) && selectionIndex === 0) {
-    return { label: "Grip", ariaLabel: "Erste Auswahl: in den Grip nehmen" };
-  }
-  const newBloodTarget = newBloodReorderTargetLabel(choice, selectionIndex);
-  if (newBloodTarget) {
-    return {
-      label: newBloodTarget,
-      ariaLabel: `Zielslot ${selectionIndex + 1}: ${newBloodTarget}`,
-    };
-  }
-  const position = selectionIndex + 1;
-  return {
-    label: String(position),
-    ariaLabel: `Auswahlposition ${position}`,
-  };
-}
-
 function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   const newBloodHint = newBloodReorderTargetSequenceHint(choice);
   if (newBloodHint) return newBloodHint;
@@ -330,7 +312,7 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
     return "Nach der Bestätigung wählt der Runner ein gezeigtes installierbares Programm; wenn keines installierbar ist, wird der Stack gemischt.";
   }
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) {
-    return "Die erste gewählte Karte geht in den Grip; danach bilden die übrigen gewählten Karten in Auswahlreihenfolge die neue Stack-Spitze.";
+    return "Die Nummern zeigen die Auswahlreihenfolge: 1 geht in den Grip; 2 ist danach die neue Stack-Spitze, 3 die zweite Stack-Karte usw.";
   }
   if (choice.source.includes("self_modifying_code_free_mu")) {
     return "Die gewählten installierten Programme werden getrasht; danach wird das vorgezeigte Programm installiert.";
@@ -351,11 +333,4 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   if (choice.source.includes("arrange_stack")) return "Die gewählte Reihenfolge wird für den Stack übernommen.";
   if (choice.source.includes("search_trash")) return "Die gewählte Karte wird aus dem Heap in den Grip genommen.";
   return null;
-}
-
-function isRunnerStackTopChooseOneArrangeRestChoice(choice: VisibleChoice): boolean {
-  return (
-    choice.source.startsWith("v1922.runner_stack_top5_choose_one_arrange_rest") ||
-    choice.source.startsWith("p3_37.runner_stack_top5_choose_one_arrange_rest")
-  );
 }
