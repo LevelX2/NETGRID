@@ -26,6 +26,10 @@ export type PlayCardExecutionHost = {
   payment: {
     spendClick: (side: "corp" | "runner") => void;
     spendCredits: (side: "corp" | "runner", amount: number) => void;
+    spendRunnerEventCredits?: (
+      amount: number,
+      legalAction?: LegalAction,
+    ) => void;
   };
   events: {
     runnerEventResolver: (definition: CardDefinition) => PlayCardResolver | undefined;
@@ -96,7 +100,10 @@ function executePlayEventAction(
       throw new Error("Die Event-Klickkosten sind nicht mehr gueltig.");
   }
   spendPlayClicks(host, "runner", legalAction.costs[0]?.clicks ?? 1);
-  host.payment.spendCredits("runner", legalAction.costs[0]?.credits ?? 0);
+  const creditCost = legalAction.costs[0]?.credits ?? 0;
+  if (host.payment.spendRunnerEventCredits)
+    host.payment.spendRunnerEventCredits(creditCost, legalAction);
+  else host.payment.spendCredits("runner", creditCost);
   host.zones.removeFromAllZones(cardId);
   host.state.runner.heap.push(cardId);
   host.state.cardInstances[cardId] = {

@@ -11,6 +11,7 @@ import {
   onPlayCardImplementationClickCost,
 } from "../../ability-engine/card-implementation-runtime-shared";
 import { expandRunnerProgramInstallPaymentActions } from "../install/runner-program-install-payment";
+import { restrictedHostedCredits } from "../run/run-duration-payment";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -657,7 +658,8 @@ export function buildRunnerMainActions(
     if (
       hasClicks &&
       definition.type === "event" &&
-      state.runner.credits >= (definition.cost ?? 0)
+      state.runner.credits + restrictedHostedCredits(state, "play_events") >=
+        (definition.cost ?? 0)
     ) {
       const canPlayCardImplementation = canPlayPrintedCostOnPlayImplementation(
         cardImplementationRuntimeDeps,
@@ -700,6 +702,19 @@ export function buildRunnerMainActions(
         !resolver.canPlay(state)
       )
         continue;
+      if (!canPlayCardImplementation && resolver?.legalActions) {
+        actions.push(
+          ...resolver.legalActions({
+            state,
+            cardId: id,
+            definition,
+            buildAction: action,
+            clickCost: playEventClickCost,
+            creditCost: definition.cost ?? 0,
+          }),
+        );
+        continue;
+      }
       if (!canPlayCardImplementation && resolver?.requiresServer) {
         for (const server of state.corp.servers) {
           if (

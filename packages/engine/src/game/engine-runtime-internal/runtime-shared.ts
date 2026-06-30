@@ -68,6 +68,14 @@ export type RunnerEventResolver = {
   requiresServer?: boolean;
   canPlay?: (state: GameState) => boolean;
   canPlayForServer?: (state: GameState, serverId: ServerId) => boolean;
+  legalActions?: (input: {
+    state: GameState;
+    cardId: CardInstanceId;
+    definition: CardDefinition;
+    buildAction: (...args: any[]) => LegalAction;
+    clickCost: number;
+    creditCost: number;
+  }) => LegalAction[];
   resolve: (state: GameState, legalAction: LegalAction) => void;
 };
 export type BreakSubroutineCostBreakdown = {

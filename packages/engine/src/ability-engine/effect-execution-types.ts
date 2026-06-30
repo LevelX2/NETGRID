@@ -266,7 +266,15 @@ export type CardEffectMakeRunOptions = {
     | "private_look_top_rd"
     | "archives_faceup_to_rd"
     | "trash_rezzed_ice_on_fort_and_tag_runner"
-    | "runner_gain_agenda_point";
+    | "runner_gain_agenda_point"
+    | "reveal_rd_until_agenda_store_in_hq";
+  conditionalAccessBonus?: {
+    kind: "no_noisy_icebreaker_or_trace";
+    amount: number;
+  };
+  corpRezCostSurcharge?: {
+    kind: "matching_printed_rez_cost";
+  };
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;

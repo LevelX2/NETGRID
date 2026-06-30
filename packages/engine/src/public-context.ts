@@ -690,6 +690,38 @@ export function publicContextForAction(
       "trashedHardwareCount",
       "trashedHardwareDefinitionIds",
       "runnerRunAttemptsLastTurn",
+      "classicCorpUtilityAbility",
+      "temporaryRunnerMemoryLimitReduction",
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
+  if (legalAction.type === "play_event") {
+    for (const key of [
+      "runnerEventAbility",
+      "xValue",
+      "damageCannotBePrevented",
+      "damageType",
+      "damageAmount",
+      "cardsTrashed",
+      "coreDamageAfter",
+      "runnerMaxHandSizeAfter",
+      "flatline",
+      "gainedCredits",
+      "runnerCreditsAfter",
+      "hostedCreditsSpent",
+      "hostedCreditSourceDefinitionIds",
+      "normalCreditsSpent",
+      "corruptedAgendaCount",
+      "corruptedAgendaDefinitionIds",
+      "agendaPointsLost",
+      "corpBonusAgendaPointsAfter",
+      "tagsAdded",
+      "runnerTagsAfter",
+      "specialZone",
+      "specialZoneVisibility",
+      "sourceDefinitionId",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;

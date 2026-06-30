@@ -42,6 +42,22 @@ export function startRunForCardImplementation(
               options.successfulRunAccessReplacement,
           }
         : {}),
+      ...(options.conditionalAccessBonus !== undefined
+        ? {
+            conditionalAccessBonus: {
+              ...options.conditionalAccessBonus,
+              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+            },
+          }
+        : {}),
+      ...(options.corpRezCostSurcharge !== undefined
+        ? {
+            corpRezCostSurcharge: {
+              ...options.corpRezCostSurcharge,
+              sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+            },
+          }
+        : {}),
       ...(options.successfulRunCreditLoss !== undefined
         ? { successfulRunCreditLoss: options.successfulRunCreditLoss }
         : {}),

@@ -594,7 +594,11 @@ function restrictedHostedCreditSourceMatchesUse(
       : accessedDefinition.type === "upgrade";
   }
   if (use === "install_programs") return options.installCardType === "program";
-  return use === "increase_link" || use === "remove_tags";
+  return (
+    use === "increase_link" ||
+    use === "remove_tags" ||
+    use === "play_events"
+  );
 }
 
 function hasStealthPaymentBlockOnServer(

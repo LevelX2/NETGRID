@@ -1319,6 +1319,7 @@ function endTurn(
     flags.stolenAgendaAdvancementCountersLastTurn =
       flags.stolenAgendaAdvancementCountersThisTurn ?? 0;
     flags.stoleAgendaThisTurn = false;
+    flags.stolenAgendaIdsThisTurn = [];
     flags.stolenAgendaAdvancementCountersThisTurn = 0;
     flags.runnerReceivedTagThisTurn = false;
     flags.stoleResearchAgendaThisTurn = false;
@@ -1351,6 +1352,7 @@ function endTurn(
     ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   }
   clearTemporaryIceStrengthModifiersUntilEndOfTurn(state, legalAction);
+  clearTemporaryRunnerMemoryLimitModifiersUntilEndOfTurn(state, legalAction);
   delete state.cancelledDamagePreventionSourceIdsUntilEndOfTurn;
   startDiscardPhase(state, side, legalAction);
 }
@@ -1392,6 +1394,30 @@ function clearTemporaryIceStrengthModifiersUntilEndOfTurn(
     temporaryIceStrengthRemoved: removedAmount,
     temporaryIceStrengthTargetDefinitionIds:
       affectedDefinitionIds.sort().join(","),
+  };
+}
+
+function clearTemporaryRunnerMemoryLimitModifiersUntilEndOfTurn(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const modifiers =
+    state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn ?? [];
+  if (modifiers.length === 0) return;
+  const currentSerial = currentTurnSerial(state);
+  const remaining = modifiers.filter(
+    (modifier) => modifier.turnSerial > currentSerial,
+  );
+  const removedAmount = modifiers
+    .filter((modifier) => modifier.turnSerial <= currentSerial)
+    .reduce((sum, modifier) => sum + Math.max(0, Math.floor(modifier.amount)), 0);
+  if (remaining.length > 0)
+    state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn = remaining;
+  else delete state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn;
+  if (removedAmount <= 0) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    temporaryRunnerMemoryLimitReductionRemoved: removedAmount,
   };
 }
 
@@ -2223,6 +2249,7 @@ function startRunnerTurn(
   const flags = ensureRunnerTurnFlags(state);
   flags.stoleAgendaThisTurn = false;
   flags.stoleAgendaLastTurn = false;
+  flags.stolenAgendaIdsThisTurn = [];
   flags.stolenAgendaAdvancementCountersThisTurn = 0;
   flags.stolenAgendaAdvancementCountersLastTurn = 0;
   flags.runnerReceivedTagThisTurn = false;
@@ -2775,7 +2802,12 @@ function applyStartTurnRandomEffectTables(
   state: GameState,
   effects?: AutomaticEffectCollector,
 ): void {
-  for (const sourceId of state.runner.rig.resources.slice().sort()) {
+  for (const sourceId of [
+    ...state.runner.rig.resources,
+    ...state.runner.rig.hardware,
+  ]
+    .slice()
+    .sort()) {
     const sourceDefinitionId = definitionFor(state, sourceId).id;
     const implementation = runnerUtilityLongtailImplementationForCard(
       state,

@@ -15,6 +15,7 @@ import type {
   ActivatedCardAbilityImplementation,
   IncreaseTraceLinkEffectImplementation,
 } from "../../ability-engine/definition-types";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { selectedChoiceIds } from "../choices/choice-validation";
 import {
   assertPostBidLinkPaymentValid,
@@ -577,6 +578,31 @@ function finishTraceRunnerBid(
     traceStrength,
     runnerStrength,
   };
+  const crashSpaceSource = traceAutoSuccessSource(host);
+  if (crashSpaceSource) {
+    const forcedTrace = forceTraceSuccessful(postBidTrace);
+    const extraPayload = applyTraceAutoSuccessAdditionalTag(
+      host,
+      crashSpaceSource,
+    );
+    if (!state.run) {
+      completeTraceWithoutRun(host, forcedTrace, "runner_bid", legalAction, {
+        runnerLinkFallback: runnerLink,
+        extraPayload: { ...tracePaymentPayload, ...extraPayload },
+        deletePendingChoice: true,
+      });
+      return;
+    }
+    host.run.applyPrintedTraceSuccessFollowups({
+      trace: forcedTrace,
+      traceStep: "runner_bid",
+      legalAction,
+      runnerLinkFallback: runnerLink,
+      extraPayload: { ...tracePaymentPayload, ...extraPayload },
+      deletePendingChoice: true,
+    });
+    return;
+  }
   if (startTracePostBidLinkChoice(host, postBidTrace)) {
     state.trace = postBidTrace;
     legalAction.payload = {
@@ -906,6 +932,31 @@ function completeTraceAfterPostBidLink(
   trace: CurrentTrace,
   legalAction: LegalAction,
 ): void {
+  const crashSpaceSource = traceAutoSuccessSource(host);
+  if (crashSpaceSource) {
+    const forcedTrace = forceTraceSuccessful(trace);
+    const extraPayload = applyTraceAutoSuccessAdditionalTag(
+      host,
+      crashSpaceSource,
+    );
+    if (!host.state.run) {
+      completeTraceWithoutRun(host, forcedTrace, "post_bid_link", legalAction, {
+        runnerLinkFallback: calculateRunnerLink(host),
+        extraPayload,
+        deletePendingChoice: true,
+      });
+      return;
+    }
+    host.run.applyPrintedTraceSuccessFollowups({
+      trace: forcedTrace,
+      traceStep: "post_bid_link",
+      legalAction,
+      runnerLinkFallback: calculateRunnerLink(host),
+      extraPayload,
+      deletePendingChoice: true,
+    });
+    return;
+  }
   if (startTraceSuccessCancelChoice(host, trace)) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -929,6 +980,51 @@ function completeTraceAfterPostBidLink(
     legalAction,
     runnerLinkFallback: calculateRunnerLink(host),
   });
+}
+
+function traceAutoSuccessSource(
+  host: TraceOrchestrationHost,
+): { cardId: CardInstanceId; definitionId: CardDefinitionId } | undefined {
+  for (const cardId of host.cards.runnerInstalledCardIds().slice().sort()) {
+    const definition = host.cards.definitionFor(cardId);
+    if (
+      cardImplementationForDefinitionId(definition.id)?.runnerUtilityLongtail
+        ?.kind === "trace_attempts_auto_success_add_tag"
+    )
+      return { cardId, definitionId: definition.id };
+  }
+  return undefined;
+}
+
+function forceTraceSuccessful(trace: CurrentTrace): CurrentTrace {
+  const result = describeTraceResultFromTrace(trace);
+  const forcedTraceStrength = Math.max(
+    result.corpTraceStrength,
+    result.runnerTraceStrength + 1,
+  );
+  return {
+    ...trace,
+    traceStrength: forcedTraceStrength,
+    runnerStrength: result.runnerTraceStrength,
+  };
+}
+
+function applyTraceAutoSuccessAdditionalTag(
+  host: TraceOrchestrationHost,
+  source: { cardId: CardInstanceId; definitionId: CardDefinitionId },
+): Record<string, string | number | boolean> {
+  host.state.runner.tags += 1;
+  host.state.runnerTurnFlags ??= {
+    stoleAgendaThisTurn: false,
+    stoleAgendaLastTurn: false,
+  };
+  host.state.runnerTurnFlags.runnerReceivedTagThisTurn = true;
+  return {
+    traceAutoSuccessSourceCardId: source.cardId,
+    traceAutoSuccessSourceDefinitionId: source.definitionId,
+    traceAutoSuccessAdditionalTagsAdded: 1,
+    runnerTagsAfterTraceAutoSuccess: host.state.runner.tags,
+  };
 }
 
 function completeTraceWithoutRun(

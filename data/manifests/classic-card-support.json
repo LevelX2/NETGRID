@@ -459,24 +459,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_016_badtimes",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_016_badtimes",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_017_corporate-shuffle",
@@ -995,24 +999,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_034_boostergang-connections",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_034_boostergang-connections",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_035_corruption",
@@ -1021,24 +1029,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_035_corruption",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_035_corruption",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_036_do-the-drine",
@@ -1047,24 +1059,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_036_do-the-drine",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_036_do-the-drine",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_037_finders-keepers",
@@ -1103,24 +1119,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_038_gypsytm-schedule-analyzer",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_038_gypsytm-schedule-analyzer",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_039_library-search",
@@ -1129,24 +1149,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_039_library-search",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_039_library-search",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_040_meat-upgrade",
@@ -1245,24 +1269,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_043_running-interference",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_043_running-interference",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_044_crash-space",
@@ -1271,24 +1299,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_044_crash-space",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_044_crash-space",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_045_elena-laskova",
@@ -1297,24 +1329,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_045_elena-laskova",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_045_elena-laskova",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_046_executive-file-clerk",
@@ -1323,24 +1359,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_046_executive-file-clerk",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_046_executive-file-clerk",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_047_little-black-box",
@@ -1349,24 +1389,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_047_little-black-box",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_047_little-black-box",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
@@ -1375,24 +1419,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_048_omnitech-spinal-tap-cybermodem",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_048_omnitech-spinal-tap-cybermodem",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_049_omnitech-wet-drive",
@@ -1401,24 +1449,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_049_omnitech-wet-drive",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_049_omnitech-wet-drive",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_050_sandbox-dig",
@@ -1427,24 +1479,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_050_sandbox-dig",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_050_sandbox-dig",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_051_vintage-camaro",
@@ -1453,24 +1509,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_051_vintage-camaro",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_051_vintage-camaro",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_052_zetatech-portastation",
@@ -1479,24 +1539,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_052_zetatech-portastation",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_052_zetatech-portastation",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     }
   ]
 }

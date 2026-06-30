@@ -376,6 +376,7 @@ export function startTraceFromPrintedSubroutine(
     throw new Error("Dieser Trace-Effekt ist nicht freigegeben.");
 
   const run = mustRun(state);
+  run.traceAttemptedThisRun = true;
   if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
     run.resolvedSubroutineIndexes.push(subroutineIndex);
   const sourceDefinition = host.callbacks.definitionFor(sourceCardInstanceId);

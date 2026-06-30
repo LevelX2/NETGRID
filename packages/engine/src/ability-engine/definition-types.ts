@@ -110,6 +110,13 @@ export type CardCorpUtilityImplementation = (
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "runner_memory_limit_modifier_until_end_of_turn";
+      operation: "reduce";
+      amount: number;
+      condition: "runner_tagged";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "shuffle_hq_into_rd_then_draw_same_count";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
@@ -315,6 +322,20 @@ export type CardRunnerUtilityLongtailImplementation =
   | {
       kind: "field_reporter_end_turn_rezzed_ice_payout";
       amountPerRezzedIce: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "first_prep_credit_gain_bonus";
+      amount: 1;
+      limit: "once_per_prep";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "trace_attempts_auto_success_add_tag";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "base_memory_equals_grip_count";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -770,6 +791,29 @@ export type CardRunnerEventLongtailImplementation =
       count: 2;
       badPublicity: 1;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "trash_grip_search_stack_to_grip_equal_count";
+      shuffleAfterwards: true;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "runner_corruption_agenda_point_transfer";
+      creditsPerAgendaPoint: 10;
+      tagRunner: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "do_the_drine_unpreventable_core_damage_for_credits";
+      creditsPerDamage: 4;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "library_search_run";
+      accessBonus: 2;
+      allowedServers: readonly Extract<ServerId, "hq" | "rd">[];
+      condition: "no_noisy_icebreaker_or_trace";
+      visibility: Extract<EventVisibilityClass, "public">;
     };
 
 export type CardVirusCounterKindImplementation =
@@ -1816,7 +1860,15 @@ export type MakeRunEffectImplementation = {
     | "private_look_top_rd"
     | "archives_faceup_to_rd"
     | "trash_rezzed_ice_on_fort_and_tag_runner"
-    | "runner_gain_agenda_point";
+    | "runner_gain_agenda_point"
+    | "reveal_rd_until_agenda_store_in_hq";
+  conditionalAccessBonus?: {
+    kind: "no_noisy_icebreaker_or_trace";
+    amount: number;
+  };
+  corpRezCostSurcharge?: {
+    kind: "matching_printed_rez_cost";
+  };
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;
@@ -2227,7 +2279,8 @@ export type RestrictedHostedCreditUse =
   | "trash_nodes"
   | "trash_upgrades"
   | "install_programs"
-  | "remove_tags";
+  | "remove_tags"
+  | "play_events";
 
 export type RestrictedHostedCreditSourceImplementation = {
   capacity: number;
@@ -2324,6 +2377,10 @@ export type CardTagPreventionSourceImplementation = {
       }
     | {
         kind: "credit_and_tap_source";
+        amount: number;
+      }
+    | {
+        kind: "credit_and_forgo_next_action";
         amount: number;
       };
   priority: number;

@@ -85,6 +85,7 @@ export function ensureRunnerTurnFlags(
   const flags = (state.runnerTurnFlags ??= {
     stoleAgendaThisTurn: false,
     stoleAgendaLastTurn: false,
+    stolenAgendaIdsThisTurn: [],
     stolenAgendaAdvancementCountersThisTurn: 0,
     stolenAgendaAdvancementCountersLastTurn: 0,
     runnerReceivedTagThisTurn: false,
@@ -118,6 +119,7 @@ export function ensureRunnerTurnFlags(
     successfulRunExtraRunPending: false,
     successfulRunExtraRunUsedThisTurn: false,
   });
+  flags.stolenAgendaIdsThisTurn ??= [];
   flags.stolenAgendaAdvancementCountersThisTurn ??= 0;
   flags.stolenAgendaAdvancementCountersLastTurn ??= 0;
   flags.runnerReceivedTagThisTurn ??= false;

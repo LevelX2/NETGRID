@@ -464,6 +464,8 @@ export function canPlayCorpUtilityOperation(
         host.state.corp.credits > 0 &&
         host.operations.hardwareTrashByCounterEligibleHardwareIds().length > 0
       );
+    case "runner_memory_limit_modifier_until_end_of_turn":
+      return host.state.runner.tags > 0;
     default:
       return false;
   }
@@ -541,6 +543,34 @@ export function resolveCorpUtilityOperation(
         futureActionTurns: x,
         corpCreditForfeitAdded: x,
         corpCreditForfeitRemaining: remainingDebt,
+      };
+      return;
+    }
+    case "runner_memory_limit_modifier_until_end_of_turn": {
+      if (!canPlayCorpUtilityOperation(host, definition, utility)) {
+        throw new Error("Badtimes braucht einen getaggten Runner.");
+      }
+      const sourceCardId = sourceCardIdFromAction(legalAction);
+      if (!sourceCardId)
+        throw new Error("Badtimes braucht eine Quellenkarte.");
+      const amount = Math.max(0, Math.floor(utility.amount));
+      if (amount <= 0)
+        throw new Error("Badtimes-MU-Reduktion ist ungueltig.");
+      host.state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn = [
+        ...(host.state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn ?? []),
+        {
+          sourceCardInstanceId: sourceCardId,
+          sourceDefinitionId: definition.id,
+          amount,
+          turnSerial: Math.max(0, Math.floor(host.state.turnSerial ?? 0)),
+          expires: "turn_end",
+        },
+      ];
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        classicCorpUtilityAbility:
+          "runner_memory_limit_modifier_until_end_of_turn",
+        temporaryRunnerMemoryLimitReduction: amount,
       };
       return;
     }

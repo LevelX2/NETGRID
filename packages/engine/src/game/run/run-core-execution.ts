@@ -23,6 +23,8 @@ export type StartRunOptions = Pick<
   | "grantBonusRunOnFinish"
   | "accessServerOverride"
   | "successfulRunAccessReplacement"
+  | "conditionalAccessBonus"
+  | "corpRezCostSurcharge"
   | "successfulRunCreditLoss"
   | "successfulRunRunnerTagGain"
   | "successfulRunCorpDraw"
@@ -150,6 +152,20 @@ export function startRun(
       ? {
           successfulRunAccessReplacement:
             options.successfulRunAccessReplacement,
+        }
+      : {}),
+    ...(options?.conditionalAccessBonus
+      ? {
+          conditionalAccessBonus: {
+            ...options.conditionalAccessBonus,
+          },
+        }
+      : {}),
+    ...(options?.corpRezCostSurcharge
+      ? {
+          corpRezCostSurcharge: {
+            ...options.corpRezCostSurcharge,
+          },
         }
       : {}),
     ...(options?.successfulRunCreditLoss && options.successfulRunCreditLoss > 0

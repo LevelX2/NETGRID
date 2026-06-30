@@ -640,6 +640,9 @@ function stealAgenda(
       stateChanged: true,
     };
   }
+  flags.stolenAgendaIdsThisTurn = [
+    ...new Set([...(flags.stolenAgendaIdsThisTurn ?? []), cardId as CardInstanceId]),
+  ];
   host.state.runner.scoreArea.push(cardId as CardInstanceId);
   host.state.cardInstances[cardId] = {
     ...host.cards.cardInstanceFor(cardId as CardInstanceId),

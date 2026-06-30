@@ -74,7 +74,12 @@ function cardImplementationCorpHandSizeVirusReduction(state: GameState): number 
  * here to avoid double counting in card data.
  */
 export function runnerMemoryLimit(state: GameState): number {
-  return state.runner.memoryLimit + cardImplementationMemoryUnitModifier(state);
+  return Math.max(
+    0,
+    runnerBaseMemoryLimit(state) +
+      cardImplementationMemoryUnitModifier(state) +
+      temporaryRunnerMemoryLimitModifier(state),
+  );
 }
 
 /**
@@ -165,6 +170,26 @@ function cardImplementationMemoryUnitModifier(state: GameState): number {
         ),
       0,
     );
+}
+
+function runnerBaseMemoryLimit(state: GameState): number {
+  return state.runner.rig.hardware.some((cardId) => {
+    const definitionId = state.cardInstances[cardId]?.definitionId;
+    return (
+      definitionId &&
+      cardImplementationForDefinitionId(definitionId)?.runnerUtilityLongtail
+        ?.kind === "base_memory_equals_grip_count"
+    );
+  })
+    ? state.runner.grip.length
+    : state.runner.memoryLimit;
+}
+
+function temporaryRunnerMemoryLimitModifier(state: GameState): number {
+  return (state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn ?? []).reduce(
+    (sum, modifier) => sum - Math.max(0, Math.floor(modifier.amount)),
+    0,
+  );
 }
 
 function cardImplementationAgendaDifficultyModifier(

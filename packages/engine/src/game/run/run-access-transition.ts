@@ -106,7 +106,7 @@ export function enterAccessFromSuccessfulRun(
   host: RunAccessTransitionHost,
   legalAction?: LegalAction,
 ): RunAccessTransitionResult {
-  const run = mustRun(host);
+  let run = mustRun(host);
   if (startSuccessfulRunInterventionChoice(host, run, legalAction))
     return { handled: true, stateChanged: true, ...resolvedPayloadFor(legalAction) };
   markSuccessfulRunForTurn(host, run);
@@ -175,6 +175,21 @@ export function enterAccessFromSuccessfulRun(
       ...resolvedPayloadFor(legalAction),
     };
   }
+  if (
+    run.successfulRunAccessReplacement ===
+    "reveal_rd_until_agenda_store_in_hq"
+  ) {
+    applyRevealRdUntilAgendaStoreInHqReplacement(host, run, legalAction);
+    host.run.finishRun(true, legalAction);
+    return {
+      handled: true,
+      accessSkipped: true,
+      replacementApplied: "reveal_rd_until_agenda_store_in_hq",
+      runFinished: true,
+      stateChanged: true,
+      ...resolvedPayloadFor(legalAction),
+    };
+  }
   const microtechSourceId =
     host.access.findPreAccessTopRdReorderSource(run);
   if (microtechSourceId) {
@@ -190,6 +205,7 @@ export function enterAccessFromSuccessfulRun(
       ...resolvedPayloadFor(legalAction),
     };
   }
+  run = applyConditionalAccessBonus(host, run, legalAction);
   const accessServerId = run.accessServerOverride ?? run.attackedServerId;
   if (
     !run.hiddenRunnerResourceAccessStartWindowClosed &&
@@ -522,6 +538,93 @@ function applySuccessfulRunAccessReplacement(
       ...sourcePayloadForSuccessfulRunReplacement(run),
     };
   }
+}
+
+function applyRevealRdUntilAgendaStoreInHqReplacement(
+  host: RunAccessTransitionHost,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): void {
+  const revealedIds: CardInstanceId[] = [];
+  let agendaId: CardInstanceId | undefined;
+  while (host.state.corp.rd.length > 0) {
+    const cardId = host.state.corp.rd.shift()!;
+    revealedIds.push(cardId);
+    if (host.cards.definitionFor(cardId).type === "agenda") {
+      agendaId = cardId;
+      break;
+    }
+  }
+  const revealedNonAgendaIds = revealedIds.filter((cardId) => cardId !== agendaId);
+  if (agendaId) {
+    host.state.corp.hq.push(agendaId);
+    host.state.cardInstances[agendaId] = {
+      ...host.cards.cardInstanceFor(agendaId),
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "hq" },
+    };
+  }
+  const shuffledRd = host.rng.shuffleStateIds(
+    [...host.state.corp.rd, ...revealedNonAgendaIds],
+    `successful_run.reveal_rd_until_agenda.${run.runId}`,
+  );
+  host.state.corp.rd = shuffledRd;
+  for (const cardId of shuffledRd) {
+    host.state.cardInstances[cardId] = {
+      ...host.cards.cardInstanceFor(cardId),
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "rd" },
+    };
+  }
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+      revealedCount: revealedIds.length,
+      agendaStoredInHq: Boolean(agendaId),
+      ...(agendaId
+        ? { storedAgendaDefinitionId: host.cards.definitionFor(agendaId).id }
+        : {}),
+      shuffledIntoRdCount: revealedNonAgendaIds.length,
+      hiddenZoneBarrier: true,
+      randomCounterAfter: host.state.randomCounter,
+      ...sourcePayloadForSuccessfulRunReplacement(run),
+    };
+  }
+}
+
+function applyConditionalAccessBonus(
+  host: RunAccessTransitionHost,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): ActiveRun {
+  const bonus = run.conditionalAccessBonus;
+  if (!bonus || run.conditionalAccessBonusApplied) return run;
+  const qualifies =
+    bonus.kind === "no_noisy_icebreaker_or_trace" &&
+    run.usedNoisyIcebreakerThisRun !== true &&
+    run.traceAttemptedThisRun !== true;
+  const amount = qualifies ? Math.max(0, Math.floor(bonus.amount)) : 0;
+  const updated: ActiveRun = {
+    ...run,
+    accessCount: Math.max(1, Math.floor(run.accessCount ?? 1)) + amount,
+    conditionalAccessBonusApplied: true,
+  };
+  host.state.run = updated;
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      conditionalAccessBonusKind: bonus.kind,
+      conditionalAccessBonusApplied: qualifies,
+      additionalAccessCount: amount,
+      effectiveAccessCountAfterConditionalBonus:
+        Math.max(1, Math.floor(updated.accessCount ?? 1)),
+      sourceDefinitionId: bonus.sourceDefinitionId,
+    };
+  }
+  return updated;
 }
 
 function startSuccessfulRunCreditLossSpendChoice(

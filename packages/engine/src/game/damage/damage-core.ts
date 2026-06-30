@@ -1201,6 +1201,8 @@ function cardImplementationTagPreventionSourceCanPay(
       state.runner.credits >= source.cost.amount &&
       state.cardInstances[cardId]?.tapped !== true
     );
+  if (source.cost.kind === "credit_and_forgo_next_action")
+    return state.runner.credits >= source.cost.amount;
   return state.runner.credits >= source.cost.amount;
 }
 
@@ -2903,6 +2905,15 @@ function applyRuntimeTagPreventionCost(
       paidCredits: source.cost.amount,
       runnerCreditsAfter: state.runner.credits,
       sourceTapped: true,
+    };
+  }
+  if (source.cost.kind === "credit_and_forgo_next_action") {
+    spendCredits(state, "runner", source.cost.amount);
+    addRunnerFutureActionDebt(state, 1);
+    return {
+      paidCredits: source.cost.amount,
+      runnerCreditsAfter: state.runner.credits,
+      runnerForgoNextActions: 1,
     };
   }
   spendCredits(state, "runner", source.cost.amount);

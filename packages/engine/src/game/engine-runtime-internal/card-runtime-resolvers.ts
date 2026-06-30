@@ -1570,6 +1570,80 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
                 definition,
               ),
           };
+        case "trash_grip_search_stack_to_grip_equal_count":
+          return {
+            name: "card_implementation_runner_event_trash_grip_search_stack_to_grip_equal_count",
+            canPlay: (state) => state.runner.grip.length > 0,
+            resolve: (state, legalAction) =>
+              resolveTrashGripSearchStackToGripEvent(
+                state,
+                legalAction,
+                definition.id,
+              ),
+          };
+        case "runner_corruption_agenda_point_transfer":
+          return {
+            name: "card_implementation_runner_event_corruption_agenda_point_transfer",
+            canPlay: canPlayRunnerCorruption,
+            resolve: (state, legalAction) =>
+              resolveRunnerCorruptionEvent(
+                state,
+                legalAction,
+                definition.id,
+                longtail,
+              ),
+          };
+        case "do_the_drine_unpreventable_core_damage_for_credits":
+          return {
+            name: "card_implementation_runner_event_do_the_drine",
+            canPlay: (state) => maxDoTheDrineDamage(state) > 0,
+            legalActions: ({
+              state,
+              cardId,
+              definition: eventDefinition,
+              buildAction,
+              clickCost,
+              creditCost,
+            }) => {
+              const maxDamage = maxDoTheDrineDamage(state, cardId);
+              const actions: LegalAction[] = [];
+              for (let amount = 1; amount <= maxDamage; amount += 1) {
+                actions.push(
+                  buildAction(
+                    state,
+                    "runner",
+                    "play_event",
+                    `${eventDefinition.title}: ${amount} Core Damage`,
+                    cardId,
+                    [{ clicks: clickCost, credits: creditCost }],
+                    { cardId, xValue: amount },
+                  ),
+                );
+              }
+              return actions;
+            },
+            resolve: (state, legalAction) =>
+              resolveDoTheDrineEvent(
+                state,
+                legalAction,
+                definition.id,
+                longtail,
+              ),
+          };
+        case "library_search_run":
+          return {
+            name: "card_implementation_runner_event_library_search_run",
+            requiresServer: true,
+            canPlayForServer: (_state, serverId) =>
+              longtail.allowedServers.includes(serverId as Extract<ServerId, "hq" | "rd">),
+            resolve: (state, legalAction) =>
+              resolveLibrarySearchRunEvent(
+                state,
+                legalAction,
+                definition,
+                longtail,
+              ),
+          };
         default: {
           const unknown = longtail as { kind?: string };
           throw new Error(
@@ -1601,6 +1675,221 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
       };
     }
     return undefined;
+  }
+
+  function resolveTrashGripSearchStackToGripEvent(
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinitionId,
+  ): void {
+    const sourceCardId = runnerEventSourceCardId(state, legalAction);
+    const trashedIds = state.runner.grip.slice();
+    for (const cardId of trashedIds) {
+      removeFromAllZones(state, cardId);
+      state.runner.heap.push(cardId);
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        faceup: true,
+        zone: { side: "runner", zone: "heap" },
+      };
+    }
+    const takenIds = state.runner.stack.slice(0, trashedIds.length);
+    for (const cardId of takenIds) {
+      removeFromAllZones(state, cardId);
+      state.runner.grip.push(cardId);
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        faceup: false,
+        zone: { side: "runner", zone: "grip" },
+      };
+    }
+    shuffleRunnerStack(state);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runnerEventAbility: "trash_grip_search_stack_to_grip_equal_count",
+      sourceDefinitionId,
+      cardId: sourceCardId,
+      trashedCount: trashedIds.length,
+      searchedCount: takenIds.length,
+      movedToGripCount: takenIds.length,
+      stackShuffled: true,
+      hiddenZoneBarrier: true,
+      randomCounterAfter: state.randomCounter,
+    };
+  }
+
+  function canPlayRunnerCorruption(state: GameState): boolean {
+    return runnerCorruptionAgendaIds(state).length > 0;
+  }
+
+  function runnerCorruptionAgendaIds(state: GameState): CardInstanceId[] {
+    const stolenIds = new Set(state.runnerTurnFlags?.stolenAgendaIdsThisTurn ?? []);
+    return state.runner.scoreArea
+      .filter((cardId) => stolenIds.has(cardId))
+      .filter((cardId) => definitionFor(state, cardId).type === "agenda");
+  }
+
+  function resolveRunnerCorruptionEvent(
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinitionId,
+    longtail: Extract<
+      CardRunnerEventLongtailImplementation,
+      { kind: "runner_corruption_agenda_point_transfer" }
+    >,
+  ): void {
+    const agendaIds = runnerCorruptionAgendaIds(state);
+    if (agendaIds.length === 0)
+      throw new Error("Corruption braucht in diesem Zug gestohlene Agenden.");
+    let agendaPointsLost = 0;
+    const agendaDefinitionIds: CardDefinitionId[] = [];
+    for (const agendaId of agendaIds) {
+      agendaPointsLost += agendaPointsForScoredCard(state, agendaId);
+      agendaDefinitionIds.push(definitionFor(state, agendaId).id);
+      removeFromAllZones(state, agendaId);
+      ensureSpecialZones(state).removedFromGame.push(agendaId);
+      state.cardInstances[agendaId] = {
+        ...mustInstance(state.cardInstances, agendaId),
+        faceup: true,
+        rezzed: true,
+        zone: {
+          side: "special",
+          zone: "removed_from_game",
+          visibility: "public",
+        },
+      };
+    }
+    state.corpBonusAgendaPoints =
+      Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0)) +
+      agendaPointsLost;
+    const gainedCredits =
+      agendaPointsLost * Math.max(0, Math.floor(longtail.creditsPerAgendaPoint));
+    if (gainedCredits > 0) credits(state, "runner", gainedCredits);
+    const tagsBefore = state.runner.tags;
+    if (longtail.tagRunner > 0)
+      addRunnerTagsWithPrevention(
+        state,
+        legalAction,
+        longtail.tagRunner,
+        "classic_corruption",
+      );
+    if (state.runnerTurnFlags)
+      state.runnerTurnFlags.stolenAgendaIdsThisTurn = (
+        state.runnerTurnFlags.stolenAgendaIdsThisTurn ?? []
+      ).filter((cardId) => !agendaIds.includes(cardId));
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runnerEventAbility: "runner_corruption_agenda_point_transfer",
+      sourceDefinitionId,
+      corruptedAgendaCount: agendaIds.length,
+      corruptedAgendaDefinitionIds: agendaDefinitionIds.sort().join(","),
+      agendaPointsLost,
+      corpBonusAgendaPointsAfter: state.corpBonusAgendaPoints,
+      gainedCredits,
+      runnerCreditsAfter: state.runner.credits,
+      tagsAdded: Math.max(0, state.runner.tags - tagsBefore),
+      runnerTagsAfter: state.runner.tags,
+      specialZone: "removed_from_game",
+      specialZoneVisibility: "public",
+    };
+  }
+
+  function maxDoTheDrineDamage(
+    state: GameState,
+    sourceCardId?: CardInstanceId,
+  ): number {
+    const sourceInGrip =
+      sourceCardId !== undefined && state.runner.grip.includes(sourceCardId)
+        ? 1
+        : 0;
+    const gripAfterPlay = state.runner.grip.length - sourceInGrip;
+    return Math.max(
+      0,
+      Math.min(gripAfterPlay - 1, maxHandSize(state, "runner")),
+    );
+  }
+
+  function resolveDoTheDrineEvent(
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinitionId,
+    longtail: Extract<
+      CardRunnerEventLongtailImplementation,
+      { kind: "do_the_drine_unpreventable_core_damage_for_credits" }
+    >,
+  ): void {
+    const amount = Number(legalAction.payload?.xValue ?? 0);
+    const maxDamage = maxDoTheDrineDamage(state);
+    if (!Number.isInteger(amount) || amount <= 0 || amount > maxDamage)
+      throw new Error("Do the Drine-Damage ist nicht legal.");
+    const summary = doDamage(state, {
+      damageId: `runner_event.${sourceDefinitionId}.core.${state.stateVersion + 1}`,
+      damageType: "core",
+      amount,
+      source: `runner_event:${sourceDefinitionId}`,
+    });
+    const gainedCredits =
+      amount * Math.max(0, Math.floor(longtail.creditsPerDamage));
+    if (gainedCredits > 0) credits(state, "runner", gainedCredits);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runnerEventAbility: "do_the_drine_unpreventable_core_damage_for_credits",
+      sourceDefinitionId,
+      xValue: amount,
+      damageCannotBePrevented: true,
+      damageType: summary.damageType,
+      damageAmount: summary.amount,
+      cardsTrashed: summary.cardsTrashed,
+      coreDamageAfter: summary.coreDamageAfter ?? state.runner.coreDamage,
+      ...(summary.runnerMaxHandSizeAfter !== undefined
+        ? { runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter }
+        : {}),
+      flatline: summary.flatline,
+      gainedCredits,
+      runnerCreditsAfter: state.runner.credits,
+    };
+  }
+
+  function resolveLibrarySearchRunEvent(
+    state: GameState,
+    legalAction: LegalAction,
+    definition: CardDefinition,
+    longtail: Extract<
+      CardRunnerEventLongtailImplementation,
+      { kind: "library_search_run" }
+    >,
+  ): void {
+    const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
+      ServerId,
+      "new_remote"
+    >;
+    if (
+      !longtail.allowedServers.includes(
+        serverId as Extract<ServerId, "hq" | "rd">,
+      )
+    )
+      throw new Error("Library Search kann nur auf HQ oder R&D laufen.");
+    const sourceCardId = runnerEventSourceCardId(state, legalAction);
+    startRun(state, serverId, undefined, 1, {
+      successfulRunSourceCardId: sourceCardId,
+      successfulRunSourceDefinitionId: definition.id,
+      successfulRunSourceTitle: definition.title,
+      conditionalAccessBonus: {
+        kind: longtail.condition,
+        amount: longtail.accessBonus,
+        sourceDefinitionId: definition.id,
+      },
+    }, legalAction);
+  }
+
+  function runnerEventSourceCardId(
+    state: GameState,
+    legalAction: LegalAction,
+  ): CardInstanceId {
+    const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+    if (!sourceCardId || !state.cardInstances[sourceCardId])
+      throw new Error("Runner-Event braucht eine gueltige Quellenkarte.");
+    return sourceCardId;
   }
 
   function resolveThreeDiceGainCreditsEvent(

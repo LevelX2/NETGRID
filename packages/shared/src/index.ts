@@ -1013,7 +1013,19 @@ export type RunState = {
     | "private_look_top_rd"
     | "archives_faceup_to_rd"
     | "trash_rezzed_ice_on_fort_and_tag_runner"
-    | "runner_gain_agenda_point";
+    | "runner_gain_agenda_point"
+    | "reveal_rd_until_agenda_store_in_hq";
+  conditionalAccessBonus?: {
+    kind: "no_noisy_icebreaker_or_trace";
+    amount: number;
+    sourceDefinitionId: CardDefinitionId;
+  };
+  conditionalAccessBonusApplied?: boolean;
+  corpRezCostSurcharge?: {
+    kind: "matching_printed_rez_cost";
+    sourceDefinitionId: CardDefinitionId;
+  };
+  traceAttemptedThisRun?: boolean;
   badPublicityRunAftermath?:
     | {
         kind: "successful_run_draw_event";
@@ -1411,6 +1423,13 @@ export type GameState = {
     turnSerial: number;
     expires: "turn_end";
   }>;
+  temporaryRunnerMemoryLimitModifiersUntilEndOfTurn?: Array<{
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    amount: number;
+    turnSerial: number;
+    expires: "turn_end";
+  }>;
   secretSpendComparison?: {
     source: "secret_spend_compare";
     runId: string;
@@ -1455,6 +1474,7 @@ export type GameState = {
   runnerTurnFlags?: {
     stoleAgendaThisTurn: boolean;
     stoleAgendaLastTurn: boolean;
+    stolenAgendaIdsThisTurn?: CardInstanceId[];
     stolenAgendaAdvancementCountersThisTurn?: number;
     stolenAgendaAdvancementCountersLastTurn?: number;
     runnerReceivedTagThisTurn?: boolean;
@@ -1665,7 +1685,8 @@ export type CounterCreditUse =
   | "trash_nodes"
   | "trash_upgrades"
   | "install_programs"
-  | "remove_tags";
+  | "remove_tags"
+  | "play_events";
 
 export type CounterCreditPoolKind =
   | "stored_credit"

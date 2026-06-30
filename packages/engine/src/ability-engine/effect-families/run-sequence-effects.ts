@@ -78,6 +78,12 @@ export function executeRunSequenceEffect(
                 effect.successfulRunAccessReplacement,
             }
           : {}),
+        ...(effect.conditionalAccessBonus !== undefined
+          ? { conditionalAccessBonus: effect.conditionalAccessBonus }
+          : {}),
+        ...(effect.corpRezCostSurcharge !== undefined
+          ? { corpRezCostSurcharge: effect.corpRezCostSurcharge }
+          : {}),
         ...(effect.successfulRunCreditLoss !== undefined
           ? { successfulRunCreditLoss: effect.successfulRunCreditLoss }
           : {}),

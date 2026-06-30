@@ -428,7 +428,7 @@ export function quoteCorpRezCost(
   const discountedRezSourceDefinitionId = discountedRezSourceCardId
     ? definitionFor(state, discountedRezSourceCardId).id
     : undefined;
-  const finalCredits = discountedRezSourceCardId
+  let finalCredits = discountedRezSourceCardId
     ? Math.max(0, Math.floor(regularFinalCredits / 2))
     : regularFinalCredits;
   const agendaPointCost = selfRezAgendaPointCostForIce(definition);
@@ -470,6 +470,22 @@ export function quoteCorpRezCost(
     publicPayload.rezCostReductionAmount = baseCredits - finalCredits;
     publicPayload.rezCostPaid = finalCredits;
   }
+  const runRezSurcharge = currentRunRezSurcharge(state, baseCredits);
+  if (runRezSurcharge.amount > 0) {
+    finalCredits += runRezSurcharge.amount;
+    publicPayload.corpRezCostSurchargeAmount = runRezSurcharge.amount;
+    publicPayload.corpRezCostSurchargeSourceDefinitionId =
+      runRezSurcharge.sourceDefinitionId;
+    publicPayload.rezCostPaid = finalCredits;
+    modifiers.push({
+      sourceDefinitionId: runRezSurcharge.sourceDefinitionId,
+      label:
+        DEMO_CARDS_BY_ID[runRezSurcharge.sourceDefinitionId]?.title ??
+        runRezSurcharge.sourceDefinitionId,
+      amount: runRezSurcharge.amount,
+      kind: "increase",
+    });
+  }
   if (agendaPointCost > 0) {
     publicPayload.agendaPointCost = agendaPointCost;
     publicPayload.selfRezAdditionalCostKind = "agenda_point";
@@ -487,6 +503,19 @@ export function quoteCorpRezCost(
       state.corp.credits >= finalCredits &&
       corpAgendaPointTotalForRezCost(state) >= agendaPointCost,
     publicPayload,
+  };
+}
+
+function currentRunRezSurcharge(
+  state: GameState,
+  printedRezCost: number,
+): { amount: number; sourceDefinitionId: CardDefinitionId } {
+  const surcharge = state.run?.corpRezCostSurcharge;
+  if (surcharge?.kind !== "matching_printed_rez_cost")
+    return { amount: 0, sourceDefinitionId: "card_implementation" };
+  return {
+    amount: Math.max(0, Math.floor(printedRezCost)),
+    sourceDefinitionId: surcharge.sourceDefinitionId,
   };
 }
 

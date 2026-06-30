@@ -31,6 +31,8 @@ export type CardImplementationStartRunOptions = Pick<
   | "grantBonusRunOnFinish"
   | "accessServerOverride"
   | "successfulRunAccessReplacement"
+  | "conditionalAccessBonus"
+  | "corpRezCostSurcharge"
   | "successfulRunCreditLoss"
   | "successfulRunRunnerTagGain"
   | "successfulRunCorpDraw"
