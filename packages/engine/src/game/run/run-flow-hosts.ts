@@ -1204,6 +1204,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       cleanup: {
         cleanupEmptyRemotes: () => host.zones.cleanupEmptyRemotes(state),
+        trashRunnerInstalledProgram: (cardId) =>
+          host.zones.trashRunnerInstalledProgram(state, cardId),
       },
     };
   }

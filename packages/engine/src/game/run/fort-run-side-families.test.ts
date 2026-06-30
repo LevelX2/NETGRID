@@ -10,6 +10,7 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
+  applyOncePerRunBreakTagAndAllStealthLoss,
   applyPostBreakStealthLoss,
   clearActivityGatedFortRunMarkers,
   isActivityGatedFortRunBlocked,
@@ -379,5 +380,50 @@ describe("fort run side families", () => {
       postBreakStealthLoss: 2,
       v1922RunnerProgramAbility: "post_break_stealth_loss",
     });
+  });
+
+  it("applies MS-todon once-per-run tag and all stealth loss", () => {
+    const state = makeState();
+    const host = hostFor(state);
+    const action = {
+      side: "runner",
+      type: "break_subroutine",
+      source: "breaker_1",
+      costs: [{ credits: 1 }],
+      payload: { breakerId: "breaker_1" },
+    } as unknown as LegalAction;
+
+    const result = applyOncePerRunBreakTagAndAllStealthLoss(
+      host,
+      "breaker_1" as CardInstanceId,
+      action,
+    );
+
+    expect(result).toMatchObject({
+      handled: true,
+      stealthCreditsLost: 2,
+      sourceDefinitionId: "onr_v1_053_ramming-piston",
+      stateChanged: true,
+    });
+    expect(state.cardInstances.stealth_1?.counters?.recurring_credit).toBe(0);
+    expect(state.runner.tags).toBe(1);
+    expect(state.runnerTurnFlags?.runnerReceivedTagThisTurn).toBe(true);
+    expect(state.run?.runOnceBreakTagAndStealthLossUsedBreakerIds).toEqual([
+      "breaker_1",
+    ]);
+    expect(action.payload).toMatchObject({
+      v1922RunnerProgramAbility: "once_per_run_break_tag_and_all_stealth_loss",
+      postBreakStealthLoss: 2,
+      tagsAdded: 1,
+      runnerTagsAfter: 1,
+    });
+
+    const second = applyOncePerRunBreakTagAndAllStealthLoss(
+      host,
+      "breaker_1" as CardInstanceId,
+      action,
+    );
+    expect(second).toEqual({ handled: false });
+    expect(state.runner.tags).toBe(1);
   });
 });

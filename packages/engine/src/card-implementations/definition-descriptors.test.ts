@@ -1552,6 +1552,106 @@ describe("CardImplementation definition descriptors", () => {
     }
   });
 
+  it("describes CLASSIC-04 runner program implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_classic_027_early-worm")
+        ?.icebreakerAbilities,
+    ).toMatchObject([
+      {
+        kind: "break_subroutine",
+        cost: { kind: "credit", amount: 1 },
+        matches: { kind: "ice_subtype", subtype: "wall" },
+      },
+      {
+        kind: "increase_strength",
+        cost: { kind: "credit", amount: 2 },
+        amount: 3,
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_028_matador")
+        ?.icebreakerAbilities,
+    ).toMatchObject([
+      {
+        kind: "break_subroutine",
+        cost: { kind: "credit", amount: 1 },
+        matches: { kind: "ice_subtype", subtype: "sentry" },
+      },
+      {
+        kind: "increase_strength",
+        cost: { kind: "credit", amount: 3 },
+        amount: 5,
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_029_ms-todon")
+        ?.icebreakerAbilities?.[0],
+    ).toMatchObject({
+      kind: "break_subroutine",
+      cost: { kind: "credit", amount: 1 },
+      matches: { kind: "ice_subtype", subtype: "sentry" },
+      special: { kind: "once_per_run_break_tag_and_all_stealth_loss" },
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_030_psychic-friend")
+        ?.icebreakerAbilities,
+    ).toMatchObject([
+      {
+        kind: "break_subroutine",
+        cost: { kind: "credit", amount: 1 },
+        matches: { kind: "ice_subtype", subtype: "code_gate" },
+      },
+      {
+        kind: "increase_strength",
+        cost: { kind: "credit", amount: 2 },
+        amount: 1,
+        duration: "current_run",
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_031_rent-i-con")
+        ?.icebreakerAbilities?.[0],
+    ).toMatchObject({
+      kind: "break_subroutine",
+      cost: { kind: "credit", amount: 1 },
+      matches: { kind: "any" },
+      special: { kind: "run_end_trash_source_if_used" },
+    });
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_classic_032_schematics-search-engine",
+      )?.runnerUtilityLongtail,
+    ).toEqual({
+      kind: "hq_access_expose_all_installed_corp_cards",
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_033_superglue")
+        ?.runnerUtilityLongtail,
+    ).toEqual({
+      kind: "derez_fully_broken_passed_ice",
+      cost: { kind: "tap_source" },
+      timing: "after_passing_fully_broken_ice",
+      target: "that_ice",
+      visibility: "public",
+    });
+
+    for (const definitionId of [
+      "onr_classic_027_early-worm",
+      "onr_classic_028_matador",
+      "onr_classic_029_ms-todon",
+      "onr_classic_030_psychic-friend",
+      "onr_classic_031_rent-i-con",
+      "onr_classic_032_schematics-search-engine",
+      "onr_classic_033_superglue",
+    ]) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes Proteus Phase 5b runner protection programs", () => {
     expect(
       cardImplementationForDefinitionId(

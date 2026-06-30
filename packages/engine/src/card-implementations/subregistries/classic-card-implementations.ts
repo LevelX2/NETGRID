@@ -5,6 +5,13 @@ import { classicFindersKeepersImplementation } from "../classic/runner/events/fi
 import { classicMeatUpgradeImplementation } from "../classic/runner/events/meat-upgrade";
 import { classicNetworkingImplementation } from "../classic/runner/events/networking";
 import { classicPanzerRunImplementation } from "../classic/runner/events/panzer-run";
+import { classicEarlyWormImplementation } from "../classic/runner/programs/early-worm";
+import { classicMatadorImplementation } from "../classic/runner/programs/matador";
+import { classicMsTodonImplementation } from "../classic/runner/programs/ms-todon";
+import { classicPsychicFriendImplementation } from "../classic/runner/programs/psychic-friend";
+import { classicRentIConImplementation } from "../classic/runner/programs/rent-i-con";
+import { classicSchematicsSearchEngineImplementation } from "../classic/runner/programs/schematics-search-engine";
+import { classicSuperglueImplementation } from "../classic/runner/programs/superglue";
 
 export const CLASSIC_CARD_IMPLEMENTATIONS = [
   classicCorporateShuffleImplementation,
@@ -13,4 +20,11 @@ export const CLASSIC_CARD_IMPLEMENTATIONS = [
   classicMeatUpgradeImplementation,
   classicNetworkingImplementation,
   classicPanzerRunImplementation,
+  classicEarlyWormImplementation,
+  classicMatadorImplementation,
+  classicMsTodonImplementation,
+  classicPsychicFriendImplementation,
+  classicRentIConImplementation,
+  classicSchematicsSearchEngineImplementation,
+  classicSuperglueImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];

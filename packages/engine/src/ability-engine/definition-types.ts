@@ -273,6 +273,17 @@ export type CardRunnerUtilityLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "derez_fully_broken_passed_ice";
+      cost: { kind: "tap_source" };
+      timing: "after_passing_fully_broken_ice";
+      target: "that_ice";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "hq_access_expose_all_installed_corp_cards";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "rabbit_ice_trace_limit_reduction";
       amount: 1;
       visibility: Extract<EventVisibilityClass, "public">;
@@ -2114,6 +2125,8 @@ export type CardIcebreakerBreakSpecialImplementation =
   | { kind: "bartmoss_post_encounter_self_trash_check" }
   | { kind: "snowball_run_strength_per_successful_break" }
   | { kind: "dupre_strength_counter_and_last_fort" }
+  | { kind: "once_per_run_break_tag_and_all_stealth_loss" }
+  | { kind: "run_end_trash_source_if_used" }
   | { kind: "set_next_sentry_free_break_after_fully_breaking_wall" };
 
 export type RestrictedHostedCreditUse =

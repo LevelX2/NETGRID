@@ -349,6 +349,7 @@ import {
 import {
   handleRunEndCleanup,
   recordDupreBreakUsage,
+  recordRunEndTrashBreakerUsage,
   resetBreakerStrength,
   resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
@@ -438,6 +439,7 @@ import {
   type FortPassWindowHost,
 } from "../run/fort-pass-window";
 import {
+  applyOncePerRunBreakTagAndAllStealthLoss,
   applyPostBreakStealthLoss,
   clearActivityGatedFortRunMarkers,
   isActivityGatedFortRunBlocked,
@@ -990,6 +992,12 @@ export function createEncounterMovementRuntimeHosts(
             breakerId,
             legalAction,
           ),
+        applyOncePerRunBreakTagAndAllStealthLoss: (breakerId, legalAction) =>
+          applyOncePerRunBreakTagAndAllStealthLoss(
+            fortRunSideFamiliesHostForState(state),
+            breakerId,
+            legalAction,
+          ),
       },
       effects: {
         executeEffectCommands: (commands) =>
@@ -1007,6 +1015,8 @@ export function createEncounterMovementRuntimeHosts(
           recordDupreBreakUsage(runEndCleanupHost(state), breakerId),
         recordSnowballBreakUsage: (breakerId) =>
           recordSnowballBreakUsage(state, breakerId),
+        recordRunEndTrashBreakerUsage: (breakerId) =>
+          recordRunEndTrashBreakerUsage(runEndCleanupHost(state), breakerId),
       },
     };
   }

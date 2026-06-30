@@ -9,8 +9,10 @@ import {
 import { describe, expect, it } from "vitest";
 import {
   encounterSpecialWindowHost,
+  fullyBrokenPassedIcePostPassActions,
   markTraceLinkForceJackOutAfterEncounter,
   resolveEncounterSpecialWindowSubroutine,
+  resolveFullyBrokenPassedIceDerez,
   resolveFullyBrokenPassedIceTrash,
   resolveSecretSpendCompareChoice,
   resolveRezzedIceRewindSubroutine,
@@ -343,6 +345,74 @@ describe("encounter special windows boundary", () => {
       trashedCardDefinitionId: "onr_v1_272_too-many-doors",
       runnerCreditsAfter: 3,
       sourceAbilityExhausted: true,
+    });
+  });
+
+  it("builds and resolves Superglue post-pass derez without ending the run", () => {
+    const state = makeState();
+    state.phase = "run";
+    state.timingPoint = "run.jack_out_window";
+    state.run!.phase = "movement";
+    state.run!.fullyBrokenPassedIcePendingId = "ice_current" as CardInstanceId;
+    state.runner.rig.programs.push("superglue_1" as CardInstanceId);
+    state.cardInstances.superglue_1 = instance(
+      "superglue_1",
+      "onr_classic_033_superglue",
+      {
+        side: "runner",
+        zone: "rig",
+      },
+      { tapped: false },
+    );
+    const derezzed: CardInstanceId[] = [];
+    const host = encounterSpecialWindowHost(state, {
+      derezCorpInstalledCard: (cardId) => {
+        derezzed.push(cardId);
+        state.cardInstances[cardId] = {
+          ...state.cardInstances[cardId]!,
+          faceup: false,
+          rezzed: false,
+        };
+      },
+    });
+
+    const actions = fullyBrokenPassedIcePostPassActions(host);
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]).toMatchObject({
+      actionId: "runner.trigger_ability.superglue_1.superglue_1",
+      side: "runner",
+      type: "trigger_ability",
+      source: "superglue_1",
+      costs: [],
+      payload: {
+        cardId: "superglue_1",
+        targetIceId: "ice_current",
+        targetIceDefinitionId: "onr_v1_272_too-many-doors",
+        runnerUtilityAbility: "derez_fully_broken_passed_ice",
+        abilityKind: "derez_fully_broken_passed_ice",
+        cardImplementationTapSourceCost: true,
+      },
+    });
+
+    const result = resolveFullyBrokenPassedIceDerez(host, actions[0]!);
+
+    expect(result).toMatchObject({
+      handled: true,
+      sourceCardId: "superglue_1",
+      iceId: "ice_current",
+      paid: false,
+      iceDerezzed: true,
+      stateChanged: true,
+    });
+    expect(derezzed).toEqual(["ice_current"]);
+    expect(state.cardInstances.superglue_1?.tapped).toBe(true);
+    expect(state.run?.fullyBrokenPassedIcePendingId).toBeUndefined();
+    expect(actions[0]!.payload).toMatchObject({
+      sourceDefinitionId: "onr_classic_033_superglue",
+      derezzedCount: 1,
+      sourceTapped: true,
+      cardImplementationTapSourceCost: true,
     });
   });
 

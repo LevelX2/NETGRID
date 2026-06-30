@@ -596,6 +596,56 @@ export function applyPostBreakStealthLoss(
   };
 }
 
+export function applyOncePerRunBreakTagAndAllStealthLoss(
+  host: FortRunSideFamiliesHost,
+  breakerId: CardInstanceId,
+  legalAction: LegalAction,
+): FortRunStealthLossResult {
+  const run = host.state.run;
+  if (!run) return { handled: false };
+  const usedBreakerIds = run.runOnceBreakTagAndStealthLossUsedBreakerIds ?? [];
+  if (usedBreakerIds.includes(breakerId)) return { handled: false };
+
+  run.runOnceBreakTagAndStealthLossUsedBreakerIds = [
+    ...usedBreakerIds,
+    breakerId,
+  ].sort();
+
+  let spent = 0;
+  for (const { cardId, available } of runnerStealthRecurringCreditSources(
+    host,
+  ).sort((left, right) => left.cardId.localeCompare(right.cardId))) {
+    if (available <= 0) continue;
+    host.payment.spendHostedPaymentCredits(cardId, available);
+    spent += available;
+  }
+
+  host.state.runner.tags += 1;
+  const flags = (host.state.runnerTurnFlags ??= {
+    stoleAgendaThisTurn: false,
+    stoleAgendaLastTurn: false,
+  });
+  flags.runnerReceivedTagThisTurn = true;
+
+  const breakerDefinition = host.cards.definitionFor(breakerId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerProgramAbility: "once_per_run_break_tag_and_all_stealth_loss",
+    sourceDefinitionId: breakerDefinition.id,
+    postBreakStealthLoss: spent,
+    tagsAdded: 1,
+    runnerTagsAfter: host.state.runner.tags,
+  };
+
+  return {
+    handled: true,
+    targetProgramId: breakerId,
+    sourceDefinitionId: breakerDefinition.id,
+    stealthCreditsLost: spent,
+    stateChanged: true,
+  };
+}
+
 export function runnerStealthRecurringCreditSources(
   host: FortRunSideFamiliesHost,
 ): { cardId: CardInstanceId; available: number }[] {

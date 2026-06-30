@@ -22,6 +22,8 @@ export type RuntimeIcebreakerSpecialEffect =
   | { kind: "post_encounter_self_trash_check" }
   | { kind: "strength_bonus_per_successful_break_this_run" }
   | { kind: "run_end_add_counter_if_used_on_last_fort" }
+  | { kind: "once_per_run_break_tag_and_all_stealth_loss" }
+  | { kind: "run_end_trash_source_if_used" }
   | { kind: "set_next_sentry_free_break_after_fully_breaking_wall" };
 
 export type RuntimeIcebreakerAbility = AbilityDefinition & {
@@ -38,6 +40,8 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
     | "bartmoss_post_encounter_self_trash_check"
     | "snowball_run_strength_per_successful_break"
     | "dupre_strength_counter_and_last_fort"
+    | "once_per_run_break_tag_and_all_stealth_loss"
+    | "run_end_trash_source_if_used"
     | "set_next_sentry_free_break_after_fully_breaking_wall";
   specialEffects?: readonly RuntimeIcebreakerSpecialEffect[];
   source: "shared_card_definition" | "card_implementation";
@@ -81,6 +85,10 @@ function specialEffectsForImplementation(
       return [{ kind: "strength_bonus_per_successful_break_this_run" }];
     case "dupre_strength_counter_and_last_fort":
       return [{ kind: "run_end_add_counter_if_used_on_last_fort" }];
+    case "once_per_run_break_tag_and_all_stealth_loss":
+      return [{ kind: "once_per_run_break_tag_and_all_stealth_loss" }];
+    case "run_end_trash_source_if_used":
+      return [{ kind: "run_end_trash_source_if_used" }];
     case "set_next_sentry_free_break_after_fully_breaking_wall":
       return [{ kind: "set_next_sentry_free_break_after_fully_breaking_wall" }];
     default:

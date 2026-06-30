@@ -1165,6 +1165,8 @@ export type RunState = {
   fullyBrokenPassedIceTrashPendingId?: CardInstanceId;
   forceJackOutAfterEncounterSourceId?: CardInstanceId;
   dupreUsedBreakerIdsThisRun?: CardInstanceId[];
+  runOnceBreakTagAndStealthLossUsedBreakerIds?: CardInstanceId[];
+  runEndTrashUsedBreakerIdsThisRun?: CardInstanceId[];
   hiddenStackInstallUsedSourceIdsThisRun?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
   aardvarkInterceptionIceIds?: CardInstanceId[];

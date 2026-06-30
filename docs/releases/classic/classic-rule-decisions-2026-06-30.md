@@ -47,6 +47,11 @@ Diese Datei hält lokale Regelentscheidungen für die vollständige Classic-Impl
 | Corporate Shuffle | Die Double-Operation zieht zuerst bis zu fünf Karten aus R&D, erzeugt öffentliche Draw-Counts und startet danach eine private HQ-Choice. Die gewählte HQ-Karte wird verdeckt in R&D gemischt; PublicEvents enthalten weder CardInstanceId noch Kartentitel. |
 | Reclamation Project | Die Double-Operation verwendet den generischen Archives-to-HQ-Choice-Pfad mit ICE-Filter und Multi-Select. Die nach HQ genommenen ICE-Karten werden Runner-seitig als Definitionen/Titel offengelegt, weil der Kartentext die Auswahl aus Archives zeigt. |
 | Finders Keepers | Die drei Würfel werden direkt über deterministische `v1921.die.*`-RandomRecords geworfen. Der öffentliche Payload enthält nur Wurfergebnisse, Summe und Counterstand, keine verdeckten Zoneninformationen. |
+| Psychic Friend | Die gedruckte Dauer "until end of turn" wird in Version 0 als `current_run`-Pump modelliert, weil die bestehende Icebreaker-Dauerabstraktion Encounter- und Run-Dauer kennt. Das vermeidet einen breiten Turn-Duration-Pump-Umbau für eine isolierte Classic-Karte. |
+| MS-todon | Die erste erfolgreiche Sentry-Break-Nutzung pro Run speichert einen generischen Breaker-Usage-Marker im Run-State, entfernt ohne Choice alle verfügbaren Bits von installierten Stealth-Quellen und gibt dem Runner genau einen Tag. PublicPayload enthält nur Summen und Definitionen, keine Stealth-Quell-IDs. |
+| Rent-I-Con | Break-Nutzung markiert den Breaker generisch im Run-State; der Run-End-Cleanup prüft Installation und Special erneut und trasht die Quelle über den bestehenden Programm-Trash-Pfad. |
+| Schematics Search Engine | HQ-Access exposed alle installierten Korp-Karten über öffentliche Definitionen, Titel und Serverlabels. Der Effekt dreht oder rezzt die Karten nicht und veröffentlicht keine CardInstanceIds. |
+| Superglue | Das "just broken all subroutines" Timing nutzt das vorhandene Post-Pass-Fenster für vollständig gebrochenes ICE. Die Fähigkeit tappt die Quelle, derezzt das Ziel und beendet den Run nicht. |
 
 ## Paketstatus
 
@@ -56,7 +61,7 @@ Diese Datei hält lokale Regelentscheidungen für die vollständige Classic-Impl
 | CLASSIC-01 | completed | Classic-Fallback, leere Registry-Foundation und Drift-Guard sind angelegt. |
 | CLASSIC-02 | completed | Additive Kartenpool-/Format-/Matchstart-Auswahl für Originalset, Originalset+Classic, Originalset+Protheus und Originalset+Classic+Protheus ist umgesetzt und serverseitig revalidiert. |
 | CLASSIC-03 | completed | Corporate Shuffle, Reclamation Project, Finders Keepers, Meat Upgrade, Networking und Panzer Run sind implementiert, getestet und AI-/Scenario-referenziert. |
-| CLASSIC-04 | pending | Runner-Programme und Breaker. |
+| CLASSIC-04 | completed | Early Worm, Matador, MS-todon, Psychic Friend, Rent-I-Con, Schematics Search Engine und Superglue sind implementiert, getestet und AI-/Scenario-referenziert. |
 | CLASSIC-05 | pending | Corp ICE Baseline und Noisy/Sleepy. |
 | CLASSIC-06 | pending | Deflector/Run-Redirect/Glacier. |
 | CLASSIC-07 | pending | Classic Agendas. |

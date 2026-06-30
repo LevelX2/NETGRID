@@ -13,6 +13,7 @@ import {
   clearEncounterTemporaryTraceCredits,
   handleRunEndCleanup,
   recordDupreBreakUsage,
+  recordRunEndTrashBreakerUsage,
   resolveBrokenIceVirusCounterChoice,
   type RunEndCleanupHost,
 } from "./run-end-cleanup";
@@ -51,6 +52,7 @@ function makeHost(options: {
   tokyoSourceIds?: CardInstanceId[];
   tokyoAmount?: number;
   dupreSourceIds?: CardInstanceId[];
+  runEndTrashSourceIds?: CardInstanceId[];
   virusImplementations?: Record<string, CardVirusCounterImplementation>;
 } = {}): {
   host: RunEndCleanupHost;
@@ -138,6 +140,7 @@ function makeHost(options: {
   const legalAction = { payload: {} } as LegalAction;
   const tokyoSourceIds = new Set(options.tokyoSourceIds ?? ["tokyo"]);
   const dupreSourceIds = new Set(options.dupreSourceIds ?? ["dupre"]);
+  const runEndTrashSourceIds = new Set(options.runEndTrashSourceIds ?? []);
   const virusImplementations = options.virusImplementations ?? {};
   const host: RunEndCleanupHost = {
     state,
@@ -255,7 +258,10 @@ function makeHost(options: {
       poxCountersForServer: () => 0,
     },
     ice: {
-      icebreakerHasSpecial: (breakerId) => dupreSourceIds.has(breakerId),
+      icebreakerHasSpecial: (breakerId, special) =>
+        special === "run_end_trash_source_if_used"
+          ? runEndTrashSourceIds.has(breakerId)
+          : dupreSourceIds.has(breakerId),
     },
     virus: {
       installedRunnerVirusSourceIds: (predicate) =>
@@ -281,6 +287,12 @@ function makeHost(options: {
     cleanup: {
       cleanupEmptyRemotes: () => {
         resetBreakerStrengthCount += 1;
+      },
+      trashRunnerInstalledProgram: (cardId) => {
+        state.runner.rig.programs = state.runner.rig.programs.filter(
+          (candidate) => candidate !== cardId,
+        );
+        state.runner.heap = [...(state.runner.heap ?? []), cardId];
       },
     },
   };
@@ -844,6 +856,44 @@ describe("run end cleanup", () => {
       targetCardDefinitionId: "ice_def",
       remainingCounters: 2,
       choiceVisibility: "public",
+    });
+  });
+
+  it("records and trashes Rent-I-Con-style breakers used during the run", () => {
+    const fixture = makeHost({
+      run: {
+        runId: "run_rent",
+        attackedServerId: "remote_1",
+        phase: "movement",
+        position: { kind: "server", serverId: "remote_1" },
+      } as unknown as NonNullable<GameState["run"]>,
+      runnerPrograms: ["rent" as CardInstanceId],
+      definitions: {
+        rent_def: definition("rent_def", "program"),
+      },
+      instances: {
+        rent: instance("rent", "rent_def", { side: "runner", zone: "rig" }),
+      },
+      dupreSourceIds: [],
+      runEndTrashSourceIds: ["rent" as CardInstanceId],
+    });
+
+    recordRunEndTrashBreakerUsage(fixture.host, "rent");
+
+    expect(fixture.state.run?.runEndTrashUsedBreakerIdsThisRun).toEqual([
+      "rent",
+    ]);
+
+    const result = handleRunEndCleanup(fixture.host, false, fixture.legalAction);
+
+    expect(result.stateChanged).toBe(true);
+    expect(fixture.state.runner.rig.programs).not.toContain("rent");
+    expect(fixture.state.runner.heap).toContain("rent");
+    expect(fixture.legalAction.payload).toMatchObject({
+      v1922RunnerProgramAbility: "run_end_trash_used_breaker",
+      trashedCount: 1,
+      trashedCardDefinitionId: "rent_def",
+      publicRevealDefinitionIds: "rent_def",
     });
   });
 

@@ -436,11 +436,7 @@
       },
       "support": {
         "resolverRef": "engine:onr_classic_017_corporate-shuffle",
-        "coverage": [
-          "ai_hint",
-          "compiled_hint",
-          "scenario"
-        ],
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
         "aiHintRef": "ai-card-hints-active:onr_classic_017_corporate-shuffle",
         "scenarioRefs": [
           "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
@@ -466,11 +462,7 @@
       },
       "support": {
         "resolverRef": "engine:onr_classic_018_reclamation-project",
-        "coverage": [
-          "ai_hint",
-          "compiled_hint",
-          "scenario"
-        ],
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
         "aiHintRef": "ai-card-hints-active:onr_classic_018_reclamation-project",
         "scenarioRefs": [
           "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
@@ -693,24 +685,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_027_early-worm",
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
+        "aiHintRef": "ai-card-hints-active:onr_classic_027_early-worm",
+        "scenarioRefs": [
+          "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_028_matador",
@@ -719,24 +711,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_028_matador",
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
+        "aiHintRef": "ai-card-hints-active:onr_classic_028_matador",
+        "scenarioRefs": [
+          "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_029_ms-todon",
@@ -745,24 +737,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_029_ms-todon",
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
+        "aiHintRef": "ai-card-hints-active:onr_classic_029_ms-todon",
+        "scenarioRefs": [
+          "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_030_psychic-friend",
@@ -771,24 +763,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_030_psychic-friend",
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
+        "aiHintRef": "ai-card-hints-active:onr_classic_030_psychic-friend",
+        "scenarioRefs": [
+          "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_031_rent-i-con",
@@ -797,24 +789,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_031_rent-i-con",
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
+        "aiHintRef": "ai-card-hints-active:onr_classic_031_rent-i-con",
+        "scenarioRefs": [
+          "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_032_schematics-search-engine",
@@ -823,24 +815,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_032_schematics-search-engine",
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
+        "aiHintRef": "ai-card-hints-active:onr_classic_032_schematics-search-engine",
+        "scenarioRefs": [
+          "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_033_superglue",
@@ -849,24 +841,24 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_033_superglue",
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
+        "aiHintRef": "ai-card-hints-active:onr_classic_033_superglue",
+        "scenarioRefs": [
+          "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_034_boostergang-connections",
@@ -964,11 +956,7 @@
       },
       "support": {
         "resolverRef": "engine:onr_classic_037_finders-keepers",
-        "coverage": [
-          "ai_hint",
-          "compiled_hint",
-          "scenario"
-        ],
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
         "aiHintRef": "ai-card-hints-active:onr_classic_037_finders-keepers",
         "scenarioRefs": [
           "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
@@ -1046,11 +1034,7 @@
       },
       "support": {
         "resolverRef": "engine:onr_classic_040_meat-upgrade",
-        "coverage": [
-          "ai_hint",
-          "compiled_hint",
-          "scenario"
-        ],
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
         "aiHintRef": "ai-card-hints-active:onr_classic_040_meat-upgrade",
         "scenarioRefs": [
           "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
@@ -1076,11 +1060,7 @@
       },
       "support": {
         "resolverRef": "engine:onr_classic_041_networking",
-        "coverage": [
-          "ai_hint",
-          "compiled_hint",
-          "scenario"
-        ],
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
         "aiHintRef": "ai-card-hints-active:onr_classic_041_networking",
         "scenarioRefs": [
           "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
@@ -1106,11 +1086,7 @@
       },
       "support": {
         "resolverRef": "engine:onr_classic_042_panzer-run",
-        "coverage": [
-          "ai_hint",
-          "compiled_hint",
-          "scenario"
-        ],
+        "coverage": ["ai_hint", "compiled_hint", "scenario"],
         "aiHintRef": "ai-card-hints-active:onr_classic_042_panzer-run",
         "scenarioRefs": [
           "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"

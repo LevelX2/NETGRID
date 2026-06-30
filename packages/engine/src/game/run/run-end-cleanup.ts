@@ -138,7 +138,9 @@ export type RunEndCleanupHost = {
   ice: {
     icebreakerHasSpecial: (
       breakerId: CardInstanceId,
-      special: "dupre_strength_counter_and_last_fort",
+      special:
+        | "dupre_strength_counter_and_last_fort"
+        | "run_end_trash_source_if_used",
     ) => boolean;
   };
   virus: {
@@ -168,6 +170,7 @@ export type RunEndCleanupHost = {
   };
   cleanup: {
     cleanupEmptyRemotes: () => void;
+    trashRunnerInstalledProgram?: (cardId: CardInstanceId) => void;
   };
 };
 
@@ -377,6 +380,9 @@ export function handleRunEndCleanup(
   const spendCapShortfall = run
     ? applyRunCreditSpendCapShortfall(host, run, legalAction)
     : { handled: false, lostCredits: 0, shortfall: 0 };
+  const runEndTrash = run
+    ? applyRunEndTrashUsedBreakers(host, run, legalAction)
+    : { handled: false };
   resetBreakerStrength(host.state);
   delete host.state.run;
   host.state.phase = "runner_action_phase";
@@ -414,9 +420,61 @@ export function handleRunEndCleanup(
     ...(dupre.placedCounters !== undefined
       ? { placedCounters: dupre.placedCounters }
       : {}),
+    ...(runEndTrash.handled ? { stateChanged: true } : {}),
     ...(corpBonus.amount > 0 ? { gainedCredits: corpBonus.amount } : {}),
     ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
     stateChanged: true,
+  };
+}
+
+export function recordRunEndTrashBreakerUsage(
+  host: RunEndCleanupHost,
+  breakerId: CardInstanceId,
+): void {
+  const run = host.state.run;
+  if (!run || !host.state.runner.rig.programs.includes(breakerId)) return;
+  if (!host.ice.icebreakerHasSpecial(breakerId, "run_end_trash_source_if_used"))
+    return;
+  const usedBreakerIds = run.runEndTrashUsedBreakerIdsThisRun ?? [];
+  if (!usedBreakerIds.includes(breakerId))
+    run.runEndTrashUsedBreakerIdsThisRun = [...usedBreakerIds, breakerId].sort();
+}
+
+function applyRunEndTrashUsedBreakers(
+  host: RunEndCleanupHost,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): RunDurationCleanupResult {
+  const usedBreakerIds = [...new Set(run.runEndTrashUsedBreakerIdsThisRun ?? [])]
+    .filter((breakerId) => host.state.runner.rig.programs.includes(breakerId))
+    .filter((breakerId) =>
+      host.ice.icebreakerHasSpecial(breakerId, "run_end_trash_source_if_used"),
+    )
+    .sort();
+  if (usedBreakerIds.length === 0) return { handled: false };
+  if (!host.cleanup.trashRunnerInstalledProgram)
+    throw new Error("Run-End-Programmtrash-Callback fehlt.");
+
+  const trashedDefinitionIds: CardDefinitionId[] = [];
+  for (const breakerId of usedBreakerIds) {
+    trashedDefinitionIds.push(host.cards.definitionFor(breakerId).id);
+    host.cleanup.trashRunnerInstalledProgram(breakerId);
+  }
+  const trashedCardDefinitionId = trashedDefinitionIds[0];
+  if (!trashedCardDefinitionId) return { handled: false };
+
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1922RunnerProgramAbility: "run_end_trash_used_breaker",
+      trashedCount: trashedDefinitionIds.length,
+      trashedCardDefinitionId,
+      publicRevealDefinitionIds: trashedDefinitionIds.join(","),
+    };
+  }
+
+  return {
+    handled: true,
   };
 }
 

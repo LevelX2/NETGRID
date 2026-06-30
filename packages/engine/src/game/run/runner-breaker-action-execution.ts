@@ -83,6 +83,10 @@ export type RunnerBreakerActionExecutionHost = {
       breakerId: CardInstanceId,
       legalAction: LegalAction,
     ) => void;
+    applyOncePerRunBreakTagAndAllStealthLoss?: (
+      breakerId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
   };
   effects: {
     executeEffectCommands: (commands: EffectCommand[]) => void;
@@ -95,6 +99,7 @@ export type RunnerBreakerActionExecutionHost = {
     recordBartmossEncounterUsage: (breakerId: CardInstanceId) => void;
     recordDupreBreakUsage: (breakerId: CardInstanceId) => void;
     recordSnowballBreakUsage: (breakerId: CardInstanceId) => void;
+    recordRunEndTrashBreakerUsage?: (breakerId: CardInstanceId) => void;
   };
 };
 
@@ -214,7 +219,7 @@ function executeBreakSubroutineAction(
       (breakAbility?.count ?? 1) > 1)
   ) {
     host.breaker.resolveMultiBreakSubroutinesAction(breakerId, legalAction);
-    recordBreakerSpecialEffects(host, breakerId, breakAbility);
+    recordBreakerSpecialEffects(host, breakerId, breakAbility, legalAction);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
     return;
   }
@@ -275,7 +280,7 @@ function executeBreakSubroutineAction(
   ]);
   if (breakerId) {
     host.fort.applyPostBreakStealthLoss(breakerId, legalAction);
-    recordBreakerSpecialEffects(host, breakerId, breakAbility);
+    recordBreakerSpecialEffects(host, breakerId, breakAbility, legalAction);
     recordNextSentryFreeBreakIfEarned(host, breakerId, breakAbility);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
   }
@@ -285,6 +290,7 @@ function recordBreakerSpecialEffects(
   host: RunnerBreakerActionExecutionHost,
   breakerId: CardInstanceId,
   breakAbility: RuntimeIcebreakerAbility | undefined,
+  legalAction: LegalAction,
 ): void {
   for (const effect of breakAbility?.specialEffects ?? []) {
     switch (effect.kind) {
@@ -296,6 +302,15 @@ function recordBreakerSpecialEffects(
         break;
       case "strength_bonus_per_successful_break_this_run":
         host.tracking.recordSnowballBreakUsage(breakerId);
+        break;
+      case "once_per_run_break_tag_and_all_stealth_loss":
+        host.fort.applyOncePerRunBreakTagAndAllStealthLoss?.(
+          breakerId,
+          legalAction,
+        );
+        break;
+      case "run_end_trash_source_if_used":
+        host.tracking.recordRunEndTrashBreakerUsage?.(breakerId);
         break;
       default:
         break;

@@ -28599,6 +28599,205 @@
         "confidence": "low",
         "needsHumanReview": true
       }
+    },
+    {
+      "cardId": "onr_classic_027_early-worm",
+      "side": "runner",
+      "cardType": "program",
+      "roles": ["program", "icebreaker", "wall_breaker"],
+      "planRoles": ["break_ice"],
+      "requiredMechanics": [
+        "install_program",
+        "break_wall_subroutine",
+        "pump_icebreaker_strength"
+      ],
+      "valueHints": {
+        "breaker": 2,
+        "efficiency": 2
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_028_matador",
+      "side": "runner",
+      "cardType": "program",
+      "roles": ["program", "icebreaker", "sentry_breaker"],
+      "planRoles": ["break_ice"],
+      "requiredMechanics": [
+        "install_program",
+        "break_sentry_subroutine",
+        "pump_icebreaker_strength"
+      ],
+      "valueHints": {
+        "breaker": 2,
+        "burstStrength": 3
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_029_ms-todon",
+      "side": "runner",
+      "cardType": "program",
+      "roles": ["program", "icebreaker", "sentry_breaker", "noisy"],
+      "planRoles": ["break_ice"],
+      "requiredMechanics": [
+        "install_program",
+        "break_sentry_subroutine",
+        "pump_icebreaker_strength",
+        "tag_self",
+        "stealth_credit_loss"
+      ],
+      "valueHints": {
+        "breaker": 2,
+        "efficiency": 2
+      },
+      "riskTags": ["noisy", "tag_risk", "stealth_loss"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_030_psychic-friend",
+      "side": "runner",
+      "cardType": "program",
+      "roles": ["program", "icebreaker", "code_gate_breaker"],
+      "planRoles": ["break_ice"],
+      "requiredMechanics": [
+        "install_program",
+        "break_code_gate_subroutine",
+        "pump_icebreaker_strength",
+        "run_duration_strength"
+      ],
+      "valueHints": {
+        "breaker": 2,
+        "runPressure": 2
+      },
+      "riskTags": ["run_duration_strength"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_031_rent-i-con",
+      "side": "runner",
+      "cardType": "program",
+      "roles": ["program", "icebreaker", "universal_breaker", "self_trash"],
+      "planRoles": ["break_ice"],
+      "requiredMechanics": [
+        "install_program",
+        "break_any_subroutine",
+        "pump_icebreaker_strength",
+        "run_end_self_trash"
+      ],
+      "valueHints": {
+        "breaker": 2,
+        "emergencyBreaker": 3
+      },
+      "riskTags": ["self_trash"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_032_schematics-search-engine",
+      "side": "runner",
+      "cardType": "program",
+      "roles": ["program", "information", "expose", "hq_access"],
+      "planRoles": ["information_gain"],
+      "requiredMechanics": [
+        "install_program",
+        "hq_access_trigger",
+        "expose_installed_corp_cards"
+      ],
+      "valueHints": {
+        "information": 3
+      },
+      "riskTags": ["public_reveal"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_033_superglue",
+      "side": "runner",
+      "cardType": "program",
+      "roles": ["program", "derez", "fully_broken_ice", "tap_source"],
+      "planRoles": ["tempo_control"],
+      "requiredMechanics": [
+        "install_program",
+        "fully_break_ice_window",
+        "tap_source",
+        "derez_ice"
+      ],
+      "valueHints": {
+        "tempo": 3
+      },
+      "riskTags": ["timing_window", "tap_source"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-04-runner-program-smoke.json#classic_04_runner_program_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
     }
   ],
   "taskId": "AI022-1/AI030",
