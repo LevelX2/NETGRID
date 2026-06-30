@@ -931,6 +931,50 @@ export function agendaPointsForScoredCard(
   return Math.max(0, basePoints + bonusPoints);
 }
 
+export function scoreInstalledRunnerProgramAsAgenda(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+): { publicPayload: Record<string, string | number | boolean> } {
+  const instance = mustInstance(state.cardInstances, sourceCardId);
+  const installedProgram = instance.installedAsRunnerProgram;
+  const definition = definitionFor(state, sourceCardId);
+  if (
+    !state.runner.rig.programs.includes(sourceCardId) ||
+    !installedProgram?.scoreAsAgendaAction ||
+    definition.type !== "agenda"
+  )
+    throw new Error(
+      "Die Quelle ist kein als Runner-Programm installiertes Agenda-Programm.",
+    );
+  const memoryCost = Math.max(0, Math.floor(installedProgram.memoryCost ?? 0));
+  const {
+    installedAsRunnerProgram: _installedAsRunnerProgram,
+    hostedOn: _hostedOn,
+    ...scoredInstance
+  } = instance;
+  void _installedAsRunnerProgram;
+  void _hostedOn;
+  removeFromAllZones(state, sourceCardId);
+  state.runner.memoryUsed = Math.max(0, state.runner.memoryUsed - memoryCost);
+  state.runner.scoreArea.push(sourceCardId);
+  state.cardInstances[sourceCardId] = {
+    ...scoredInstance,
+    controller: "runner",
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "scoreArea" },
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    scoredSourceAsAgenda: true,
+    sourceDefinitionId: definition.id,
+    scoredAgendaPointValue: agendaPointsForScoredCard(state, sourceCardId),
+    runnerMemoryUsedAfter: state.runner.memoryUsed,
+  };
+  return { publicPayload: legalAction.payload };
+}
+
 export function pickRunnerAgendaForAgendaPointCost(
   state: GameState,
 ): CardInstanceId | undefined {

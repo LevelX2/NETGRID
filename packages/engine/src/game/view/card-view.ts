@@ -386,6 +386,7 @@ function restrictedPoolDisplayLabel(
   if (uses.includes("increase_link")) return "Link-Bits";
   if (uses.includes("install_programs")) return "Installations-Bits";
   if (uses.includes("remove_tags")) return "Tag-Entfernungs-Bits";
+  if (uses.includes("play_events")) return "Prep-Bits";
   if (uses.includes("trash_nodes") || uses.includes("trash_upgrades"))
     return "Trash-Bits";
   if (
@@ -489,6 +490,14 @@ function specialCounterDisplays(
       label: "Data-Raven-Counter",
       ariaLabelName: "Data-Raven-Counter",
       counterType: "trace_tag_counter",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.baskerville, {
+      id: "baskerville",
+      displayKind: "trace",
+      label: "Baskerville-Counter",
+      ariaLabelName: "Baskerville-Counter",
+      counterType: "baskerville",
       usageHint: "status_marker",
     }),
     ...singleCounterDisplay(counters.cerberus, {

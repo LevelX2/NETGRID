@@ -177,6 +177,7 @@ function hostFor(
       startAardvarkInterceptionChoice: (_breakerId, actionType) =>
         calls.push(`aardvark:${actionType}`),
       applyPostBreakStealthLoss: () => calls.push("stealthLoss"),
+      applyOncePerRunBreakTagAndAllStealthLoss: () => calls.push("msTodon"),
     },
     effects: {
       executeEffectCommands: (commands) =>
@@ -204,6 +205,7 @@ function hostFor(
       recordBartmossEncounterUsage: () => calls.push("bartmoss"),
       recordDupreBreakUsage: () => calls.push("dupre"),
       recordSnowballBreakUsage: () => calls.push("snowball"),
+      recordRunEndTrashBreakerUsage: () => calls.push("rentICon"),
     },
   };
 
@@ -259,6 +261,32 @@ describe("runner-breaker-action-execution", () => {
     expect(calls).toEqual([
       `spend:1:${BREAKER_ID}`,
       "effect:change_breaker_strength:2",
+    ]);
+  });
+
+  it("records noisy icebreaker use on accepted breaker actions", () => {
+    const calls: string[] = [];
+    const targetState = state();
+    const action = legalAction("pump_breaker", { breakerId: BREAKER_ID });
+
+    handleRunnerBreakerActionExecution(
+      hostFor(targetState, calls, {
+        cards: {
+          effectiveSubtypesForCard: (cardId) =>
+            cardId === BREAKER_ID ? ["noisy"] : [],
+        },
+      }),
+      action,
+    );
+
+    expect(targetState.run?.usedNoisyIcebreakerThisRun).toBe(true);
+    expect(action.payload).toMatchObject({
+      noisyIcebreakerUsedThisRun: true,
+      noisyIcebreakerDefinitionId: "breaker_definition",
+    });
+    expect(calls).toEqual([
+      `spend:1:${BREAKER_ID}`,
+      "effect:change_breaker_strength:1",
     ]);
   });
 
@@ -374,6 +402,58 @@ describe("runner-breaker-action-execution", () => {
       "effect:break_subroutine:0",
       "stealthLoss",
       "dupre",
+    ]);
+
+    const msTodonCalls: string[] = [];
+    handleRunnerBreakerActionExecution(
+      hostFor(state(), msTodonCalls, {
+        breaker: {
+          breakAbilityForLegalAction: () =>
+            ({
+              type: "break_subroutine",
+              specialEffects: [
+                { kind: "once_per_run_break_tag_and_all_stealth_loss" },
+              ],
+            }) as unknown as RuntimeIcebreakerAbility,
+        },
+      }),
+      legalAction("break_subroutine", {
+        breakerId: BREAKER_ID,
+        subroutineIndex: 0,
+      }),
+    );
+
+    expect(msTodonCalls).toEqual([
+      "assertCost",
+      `spend:1:${BREAKER_ID}`,
+      "effect:break_subroutine:0",
+      "stealthLoss",
+      "msTodon",
+    ]);
+
+    const rentIConCalls: string[] = [];
+    handleRunnerBreakerActionExecution(
+      hostFor(state(), rentIConCalls, {
+        breaker: {
+          breakAbilityForLegalAction: () =>
+            ({
+              type: "break_subroutine",
+              specialEffects: [{ kind: "run_end_trash_source_if_used" }],
+            }) as unknown as RuntimeIcebreakerAbility,
+        },
+      }),
+      legalAction("break_subroutine", {
+        breakerId: BREAKER_ID,
+        subroutineIndex: 0,
+      }),
+    );
+
+    expect(rentIConCalls).toEqual([
+      "assertCost",
+      `spend:1:${BREAKER_ID}`,
+      "effect:break_subroutine:0",
+      "stealthLoss",
+      "rentICon",
     ]);
   });
 

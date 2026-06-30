@@ -13,12 +13,15 @@ import {
   type DeckValidationContext,
   type EditableDeck
 } from "@netgrid/decks";
+import type { ApiMatchCardPool } from "@netgrid/shared";
 import { createRuntimeCardsById } from "../card-pool-runtime";
 
 const profiles = [...(profilesData.profiles as DeckFormatProfile[]), ...(profilesData130.profiles as DeckFormatProfile[])];
 const profile = profiles.find((candidate) => candidate.profileId === "local-demo-v0.8") ?? profiles[0]!;
 const privateLocalProfile = profiles.find((candidate) => candidate.profileId === "netgrid_private_local_v1");
+const classicPlaytestProfile = profiles.find((candidate) => candidate.profileId === "netgrid_private_local_classic_playtest_v1");
 const proteusPlaytestProfile = profiles.find((candidate) => candidate.profileId === "netgrid_private_local_proteus_playtest_v1");
+const classicProteusPlaytestProfile = profiles.find((candidate) => candidate.profileId === "netgrid_private_local_classic_proteus_playtest_v1");
 const templates = templatesData.templates as DeckTemplate[];
 const snapshots = snapshotsData.snapshots as DeckSnapshot[];
 
@@ -43,7 +46,7 @@ export function deckSnapshotsResponse() {
   });
 }
 
-export function deckValidationResponse(deck: EditableDeck, options: { matchCardPool?: "originalset" | "originalset_proteus" } = {}) {
+export function deckValidationResponse(deck: EditableDeck, options: { matchCardPool?: ApiMatchCardPool } = {}) {
   const deckForValidation = deckForMatchCardPool(deck, options.matchCardPool);
   const selectedProfile = profiles.find((candidate) => candidate.profileId === deckForValidation.formatProfileId);
   if (!selectedProfile) {
@@ -67,9 +70,9 @@ export function deckValidationResponse(deck: EditableDeck, options: { matchCardP
   });
 }
 
-function deckForMatchCardPool(deck: EditableDeck, matchCardPool: "originalset" | "originalset_proteus" | undefined): EditableDeck {
+function deckForMatchCardPool(deck: EditableDeck, matchCardPool: ApiMatchCardPool | undefined): EditableDeck {
   if (!matchCardPool) return deck;
-  const selectedProfile = matchCardPool === "originalset_proteus" ? proteusPlaytestProfile : privateLocalProfile;
+  const selectedProfile = profileForMatchCardPool(matchCardPool);
   if (!selectedProfile) return deck;
   return {
     ...deck,
@@ -78,6 +81,13 @@ function deckForMatchCardPool(deck: EditableDeck, matchCardPool: "originalset" |
     formatProfileId: selectedProfile.profileId,
     ...(selectedProfile.version ? { formatProfileVersion: selectedProfile.version } : {})
   };
+}
+
+function profileForMatchCardPool(matchCardPool: ApiMatchCardPool): DeckFormatProfile | undefined {
+  if (matchCardPool === "originalset_classic") return classicPlaytestProfile;
+  if (matchCardPool === "originalset_proteus") return proteusPlaytestProfile;
+  if (matchCardPool === "originalset_classic_proteus") return classicProteusPlaytestProfile;
+  return privateLocalProfile;
 }
 
 function safeDeckPayload(payload: unknown) {

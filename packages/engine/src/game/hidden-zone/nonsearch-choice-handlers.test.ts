@@ -9,10 +9,12 @@ import type {
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
+import type { CardCorpUtilityImplementation } from "../../ability-engine/definition-types";
 import { describe, expect, it } from "vitest";
 import {
   handleHiddenZoneNonSearchChoice,
   startCorpArchivesToHqChoice,
+  startCorpHqCardToRdChoice,
   startRunnerGripTrashForCreditsChoice,
   startSecretSpendGuessThenTargetedBypassRunHideChoice,
   startCorpHqRetainPaymentChoice,
@@ -91,6 +93,7 @@ function makeHost(input: {
   playerAction?: PlayerAction;
   definitions?: Record<string, CardDefinition>;
   instances?: Record<string, CardInstance>;
+  corpUtilities?: Record<string, CardCorpUtilityImplementation>;
   runStartCalls?: Array<{ serverId: string; iceId: CardInstanceId }>;
 } = {}): HiddenZoneNonSearchChoiceHandlerHost {
   const definitions = {
@@ -159,7 +162,9 @@ function makeHost(input: {
     },
     cards: {
       definitionFor: (cardId) => definitions[cardId] ?? definition(cardId),
-      hasCorpUtilityKind: () => false,
+      corpUtilityForCard: (cardId) => input.corpUtilities?.[cardId],
+      hasCorpUtilityKind: (cardId, kind) =>
+        input.corpUtilities?.[cardId]?.kind === kind,
       mustInstance: (cardId) => {
         const found = cardInstances[cardId];
         if (!found) throw new Error(`missing instance ${cardId}`);
@@ -210,6 +215,25 @@ function makeHost(input: {
       gainRunnerCredits: (amount) => {
         state.runner.credits += amount;
       },
+      shuffleCorpCardIntoRd: (cardId, sourceDefinitionId) => {
+        state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
+        state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
+        state.corp.rd.push(cardId);
+        state.cardInstances[cardId] = {
+          ...state.cardInstances[cardId],
+          faceup: false,
+          rezzed: false,
+          zone: { side: "corp", zone: "rd" },
+        } as CardInstance;
+        return {
+          publicPayload: {
+            hiddenZoneBarrier: true,
+            hiddenZoneAction: "shuffle_source_into_corp_rd",
+            movedCardCount: 1,
+            sourceDefinitionId,
+          },
+        };
+      },
       startRunWithAutoPass: (serverId, iceId) => {
         input.runStartCalls?.push({ serverId, iceId });
       },
@@ -233,6 +257,92 @@ describe("hidden-zone nonsearch choice handlers", () => {
     expect(host.state.corp.hq).toEqual([archived]);
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "v1922_corp_archives_to_hq",
+      movedCount: 1,
+    });
+    expect(host.legalAction.payload).not.toHaveProperty("movedCardId");
+  });
+
+  it("filters Reclamation Project to Archives ICE and reveals selected definitions", () => {
+    const ice1 = "ice_1" as CardInstanceId;
+    const ice2 = "ice_2" as CardInstanceId;
+    const asset = "asset_1" as CardInstanceId;
+    const host = makeHost({
+      corpArchives: [sourceId, ice1, asset, ice2],
+      definitions: {
+        [sourceId]: definition(
+          "onr_classic_018_reclamation-project",
+          "operation",
+          "Reclamation Project",
+        ),
+        [ice1]: definition("classic_ice_1", "ice", "Classic ICE 1"),
+        [ice2]: definition("classic_ice_2", "ice", "Classic ICE 2"),
+        [asset]: definition("classic_asset_1", "asset", "Classic Asset"),
+      },
+      corpUtilities: {
+        [sourceId]: {
+          kind: "corp_archives_to_hq",
+          filter: { cardType: "ice" },
+          maxSelections: "all",
+          revealToRunner: true,
+          playCost: { kind: "printed", additionalClicks: 1 },
+          visibility: "hidden_info_barrier",
+        },
+      },
+    });
+
+    startCorpArchivesToHqChoice(host, sourceId);
+    expect(host.state.pendingChoice?.options.map((option) => option.value)).toEqual([
+      ice1,
+      ice2,
+    ]);
+    expect(host.state.pendingChoice?.maxSelections).toBe(2);
+
+    host.playerAction = playerAction([`card_${ice1}`, `card_${ice2}`]);
+    const result = handleHiddenZoneNonSearchChoice(host);
+
+    expect(result.handled).toBe(true);
+    expect(host.state.corp.archives).toEqual([sourceId, asset]);
+    expect(host.state.corp.hq).toEqual([ice1, ice2]);
+    expect(host.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "v1922_corp_archives_to_hq",
+      movedCount: 2,
+      archivesRevealCount: 2,
+      archivesRevealDefinitionIds: "classic_ice_1,classic_ice_2",
+    });
+  });
+
+  it("moves the selected Corporate Shuffle HQ card into R&D behind a hidden barrier", () => {
+    const hqCard = "hq_card_1" as CardInstanceId;
+    const host = makeHost({
+      corpHq: [hqCard],
+      definitions: {
+        [sourceId]: definition(
+          "onr_classic_017_corporate-shuffle",
+          "operation",
+          "Corporate Shuffle",
+        ),
+        [hqCard]: definition("classic_hq_card", "operation", "HQ Card"),
+      },
+      corpUtilities: {
+        [sourceId]: {
+          kind: "draw_corp_cards_then_shuffle_hq_card_into_rd",
+          drawCount: 5,
+          playCost: { kind: "printed", additionalClicks: 1 },
+          visibility: "hidden_info_barrier",
+        },
+      },
+    });
+
+    startCorpHqCardToRdChoice(host, sourceId);
+    host.playerAction = playerAction([`card_${hqCard}`]);
+    const result = handleHiddenZoneNonSearchChoice(host);
+
+    expect(result.handled).toBe(true);
+    expect(host.state.corp.hq).toEqual([]);
+    expect(host.state.corp.rd).toEqual([hqCard]);
+    expect(host.legalAction.payload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
       movedCount: 1,
     });
     expect(host.legalAction.payload).not.toHaveProperty("movedCardId");

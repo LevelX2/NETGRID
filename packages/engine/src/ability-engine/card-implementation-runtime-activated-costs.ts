@@ -90,7 +90,7 @@ export function advancementCounterCostForActivatedAbility(
 
 export function sourceCounterCostsForActivatedAbility(
   ability: ActivatedCardAbilityImplementation,
-): Array<{ counterType: Extract<CounterType, "boon">; amount: number }> {
+): Array<{ counterType: Extract<CounterType, "boon" | "remap">; amount: number }> {
   return ability.costs
     .filter((cost) => cost.kind === "source_counter")
     .map((cost) => ({

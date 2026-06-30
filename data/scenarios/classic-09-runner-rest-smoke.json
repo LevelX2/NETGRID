@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "classic-09-runner-rest-smoke",
+  "release": "CLASSIC-09 Remaining Runner Cards and Badtimes",
+  "status": "package",
+  "coversCards": [
+    "onr_classic_016_badtimes",
+    "onr_classic_034_boostergang-connections",
+    "onr_classic_035_corruption",
+    "onr_classic_036_do-the-drine",
+    "onr_classic_038_gypsytm-schedule-analyzer",
+    "onr_classic_039_library-search",
+    "onr_classic_043_running-interference",
+    "onr_classic_044_crash-space",
+    "onr_classic_045_elena-laskova",
+    "onr_classic_046_executive-file-clerk",
+    "onr_classic_047_little-black-box",
+    "onr_classic_048_omnitech-spinal-tap-cybermodem",
+    "onr_classic_049_omnitech-wet-drive",
+    "onr_classic_050_sandbox-dig",
+    "onr_classic_051_vintage-camaro",
+    "onr_classic_052_zetatech-portastation"
+  ],
+  "scenarios": [
+    {
+      "id": "classic_09_runner_rest_smoke",
+      "side": "both",
+      "coversCards": [
+        "onr_classic_016_badtimes",
+        "onr_classic_034_boostergang-connections",
+        "onr_classic_035_corruption",
+        "onr_classic_036_do-the-drine",
+        "onr_classic_038_gypsytm-schedule-analyzer",
+        "onr_classic_039_library-search",
+        "onr_classic_043_running-interference",
+        "onr_classic_044_crash-space",
+        "onr_classic_045_elena-laskova",
+        "onr_classic_046_executive-file-clerk",
+        "onr_classic_047_little-black-box",
+        "onr_classic_048_omnitech-spinal-tap-cybermodem",
+        "onr_classic_049_omnitech-wet-drive",
+        "onr_classic_050_sandbox-dig",
+        "onr_classic_051_vintage-camaro",
+        "onr_classic_052_zetatech-portastation"
+      ],
+      "assertions": [
+        "Badtimes temporarily lowers Runner memory, forces illegal hosted programs to be trashed, and restores the memory limit at the next discard phase.",
+        "Boostergang Connections grants the implemented successful-run credit bonus for the rest of the Runner turn.",
+        "Corruption is legal only after a stolen agenda this turn and moves a Corp-scored agenda to the Runner score area through public agenda state.",
+        "Do the Drine exposes a deterministic Runner choice between credits and cards.",
+        "Gypsy Schedule Analyzer replaces a successful R&D access with reveal-until-agenda handling and moves the agenda to HQ without leaking unrevealed R&D order.",
+        "Library Search grants its conditional additional HQ access only when the grip-size condition is satisfied.",
+        "Running Interference applies its run-duration Corp rez surcharge.",
+        "Crash Space handles trace/tag prevention through the implemented trash-source response.",
+        "Elena Laskova and Executive File Clerk provide trace and tag-control modifiers from installed Runner resources.",
+        "Little Black Box, Omnitech Spinal Tap Cybermodem, Omnitech Wet Drive, Sandbox Dig, Vintage Camaro and Zetatech Portastation expose only implemented public hardware/resource effects."
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "hidden_zone_barrier",
+        "random_counter_replay_required",
+        "public_payload_only",
+        "no_card_instance_id_leak",
+        "statehash_replay_required"
+      ]
+    }
+  ]
+}

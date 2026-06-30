@@ -63,6 +63,26 @@
         "tag_ops_control",
         "series_safe"
       ]
+    },
+    {
+      "snapshotId": "classic_runner_ai_snapshot_v1",
+      "side": "runner",
+      "tags": [
+        "classic",
+        "runner_ai_safe",
+        "normal",
+        "series_safe"
+      ]
+    },
+    {
+      "snapshotId": "classic_corp_ai_snapshot_v1",
+      "side": "corp",
+      "tags": [
+        "classic",
+        "corp_ai_safe",
+        "normal",
+        "series_safe"
+      ]
     }
   ]
 }

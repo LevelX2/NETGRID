@@ -101,4 +101,9 @@ export type CardImplementationRuntimeCoreDependencies = {
     serverId: Exclude<ServerId, "new_remote">,
     options: CardEffectMakeRunOptions,
   ) => CardEffectMakeRunResult;
+  finishRun: (
+    state: GameState,
+    legalAction: LegalAction,
+    successful: boolean,
+  ) => { publicPayload: Record<string, string | number | boolean> };
 };

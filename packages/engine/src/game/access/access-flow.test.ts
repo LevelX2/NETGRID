@@ -310,6 +310,85 @@ describe("access flow execution", () => {
     });
   });
 
+  it("exposes installed corp cards when Schematics Search Engine accesses HQ", () => {
+    const { host, state, effects } = makeHost({
+      run: {
+        runId: "run_1",
+        attackedServerId: "hq",
+      } as unknown as NonNullable<GameState["run"]>,
+      definitions: {
+        hqCard: definition("hq_card_def", "operation"),
+        asset: definition("asset_def", "asset", 3),
+        ice: definition("ice_def", "ice"),
+        schematics: definition(
+          "onr_classic_032_schematics-search-engine",
+          "program",
+        ),
+      },
+      instances: {
+        hq_card: instance("hq_card", "hq_card_def", { side: "corp", zone: "hq" }),
+        asset: instance("asset", "asset_def", {
+          side: "corp",
+          zone: "serverRoot",
+          serverId: "remote_1",
+        } as CardInstance["zone"]),
+        ice: instance("ice", "ice_def", {
+          side: "corp",
+          zone: "serverIce",
+          serverId: "remote_1",
+        } as CardInstance["zone"]),
+        schematics: {
+          id: "schematics" as CardInstanceId,
+          instanceId: "schematics" as CardInstanceId,
+          definitionId:
+            "onr_classic_032_schematics-search-engine" as CardDefinitionId,
+          owner: "runner",
+          controller: "runner",
+          zone: { side: "runner", zone: "rig" },
+          faceup: true,
+          rezzed: true,
+          advancementCounters: 0,
+        } as unknown as CardInstance,
+      },
+      corpHq: ["hq_card"],
+      servers: [
+        { id: "remote_1", ice: ["ice"], root: ["asset"] },
+        { id: "rd", ice: [], root: [] },
+        { id: "hq", ice: [], root: [] },
+        { id: "archives", ice: [], root: [] },
+      ] as unknown as CorpServer[],
+    });
+    state.runner.rig.programs = ["schematics" as CardInstanceId];
+    const legalAction = {
+      side: "runner",
+      type: "access_card",
+      actionId: "runner.access_card",
+      label: "Access",
+      source: "run",
+    } as unknown as LegalAction;
+
+    const result = handleAccessExecution(host, legalAction);
+
+    expect(result).toMatchObject({
+      handled: true,
+      accessedCardId: "hq_card",
+      serverId: "hq",
+      stateChanged: true,
+    });
+    expect(effects).toEqual(["hq_card"]);
+    expect(legalAction.payload).toMatchObject({
+      accessedCardId: "hq_card",
+      serverId: "hq",
+      runnerUtilityAbility: "hq_access_expose_all_installed_corp_cards",
+      publicRevealKind: "expose",
+      sourceDefinitionId: "onr_classic_032_schematics-search-engine",
+      revealedCount: 2,
+      publicRevealDefinitionIds: "asset_def,ice_def",
+      publicRevealTitles: "asset_def,ice_def",
+      exposedServerLabels: "remote_1 root,remote_1 ICE 1",
+    });
+  });
+
   it("steals an accessed agenda after revalidating the current steal cost", () => {
     const { host, state, spentRunnerCredits, finishedRuns } = makeHost({
       run: {

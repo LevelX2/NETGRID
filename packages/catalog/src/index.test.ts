@@ -303,26 +303,44 @@ describe("card set support catalog source", () => {
     }
   });
 
-  it("imports Classic as catalog-visible but blocked planning data", () => {
+  it("promotes Classic for Human-vs-Human deck legality and AI support", () => {
+    const cardsById = createRuntimeCardsById();
     const classicCards = Object.values(createRuntimeCardsById()).filter(
       (card) => card.catalogCardId.startsWith("onr_classic_"),
     );
-    expect(classicCards).toHaveLength(52);
+    expect(CLASSIC_CARD_IDS).toHaveLength(52);
+    expect(classicCards).toHaveLength(CLASSIC_CARD_IDS.length);
     expect(classicCards.every((card) => card.setId === "classic")).toBe(true);
-    expect(classicCards.every((card) => card.statuses.catalog_ready)).toBe(
-      true,
+    for (const cardId of CLASSIC_CARD_IDS) {
+      expect(cardsById[cardId]?.statuses, cardId).toMatchObject({
+        catalog_ready: true,
+        implemented: true,
+        engine_supported: true,
+        playable: true,
+        human_playable: true,
+        deck_legal: true,
+        format_legal: true,
+        ai_supported: true,
+        blocked: false,
+      });
+    }
+    const activeHintsById = new Map(
+      activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
     );
-    expect(classicCards.every((card) => card.statuses.blocked)).toBe(true);
-    expect(classicCards.every((card) => !card.statuses.human_playable)).toBe(
-      true,
+    const compiledHintsById = new Map(
+      compiledAiHintsData.cards.map((hint) => [hint.cardId, hint]),
     );
-    expect(classicCards.every((card) => !card.statuses.deck_legal)).toBe(true);
+    for (const cardId of CLASSIC_CARD_IDS) {
+      expect(activeHintsById.get(cardId)?.aiSupportStatus, cardId).toBe(
+        "ai_supported",
+      );
+      expect(compiledHintsById.has(cardId), cardId).toBe(true);
+    }
     expect(
-      createRuntimeCardsById()["onr_classic_001_data-fort-remapping"]?.rarity
-        ?.code,
+      cardsById["onr_classic_001_data-fort-remapping"]?.rarity?.code,
     ).toBe("common");
     expect(
-      createRuntimeCardsById()["onr_classic_052_zetatech-portastation"]?.title,
+      cardsById["onr_classic_052_zetatech-portastation"]?.title,
     ).toBe("Zetatech Portastation");
   });
 

@@ -18,6 +18,8 @@ export type ScoredAgendaFlowHost = {
     | "corp"
     | "cardInstances"
     | "pendingChoice"
+    | "purgeableRunnerVirusCounters"
+    | "corpRunnerVirusCounterPreventionCharges"
     | "stateVersion"
     | "phase"
     | "activeSide"
@@ -50,12 +52,12 @@ export type ScoredAgendaFlowHost = {
     ) => void;
     addCardCounter: (
       cardId: CardInstanceId,
-      counterType: "boon" | "mark",
+      counterType: "boon" | "mark" | "remap",
       amount: number,
     ) => void;
     cardCounter: (
       cardId: CardInstanceId,
-      counterType: "boon" | "mark",
+      counterType: "boon" | "mark" | "remap",
     ) => number;
   };
   credits: {

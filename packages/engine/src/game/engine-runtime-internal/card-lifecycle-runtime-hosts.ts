@@ -1027,6 +1027,7 @@ export function createCardLifecycleRuntimeHosts(
     definition: CardDefinition,
     legalAction: LegalAction,
   ): void {
+    applyFirstPrepCreditGainBonus(state, definition, legalAction);
     const effects = onPlayCardImplementationEffects(definition);
     const remoteServerTrashTagSequenceEffect = effects.find(
       (effect) =>
@@ -1061,6 +1062,52 @@ export function createCardLifecycleRuntimeHosts(
         runnerTagsAfter: state.runner.tags,
       };
     }
+  }
+
+  function applyFirstPrepCreditGainBonus(
+    state: GameState,
+    definition: CardDefinition,
+    legalAction: LegalAction,
+  ): void {
+    if (definition.type !== "event") return;
+    const gainedCredits = Math.max(
+      0,
+      Math.floor(Number(legalAction.payload?.gainedCredits ?? 0)),
+    );
+    if (gainedCredits <= 0) return;
+    const sourceIds = state.runner.rig.resources
+      .slice()
+      .sort()
+      .filter((cardId) => {
+        const sourceDefinitionId = state.cardInstances[cardId]?.definitionId;
+        return (
+          sourceDefinitionId &&
+          cardImplementationForDefinitionId(sourceDefinitionId)
+            ?.runnerUtilityLongtail?.kind === "first_prep_credit_gain_bonus"
+        );
+      });
+    if (sourceIds.length === 0) return;
+    let bonus = 0;
+    const sourceDefinitionIds: CardDefinitionId[] = [];
+    for (const sourceId of sourceIds) {
+      const sourceDefinitionId = state.cardInstances[sourceId]!.definitionId;
+      const implementation =
+        cardImplementationForDefinitionId(sourceDefinitionId)
+          ?.runnerUtilityLongtail;
+      if (implementation?.kind !== "first_prep_credit_gain_bonus") continue;
+      bonus += Math.max(0, Math.floor(implementation.amount));
+      sourceDefinitionIds.push(sourceDefinitionId);
+    }
+    if (bonus <= 0) return;
+    state.runner.credits += bonus;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      firstPrepCreditGainBonus: bonus,
+      firstPrepCreditGainBonusSourceDefinitionIds:
+        sourceDefinitionIds.sort().join(","),
+      gainedCredits: gainedCredits + bonus,
+      runnerCreditsAfter: state.runner.credits,
+    };
   }
 
   function resolveRunnerGripHeapStackShuffleDrawEvent(

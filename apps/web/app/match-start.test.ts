@@ -48,8 +48,10 @@ describe("V1.0.4 match start derivation", () => {
     expect(playModeCardLabel("ai_vs_ai")).toEqual({ title: "Simulation", description: "KI gegen KI zum Beobachten und Testen" });
     expect(matchFormatCardLabel("rules_match")).toEqual({ title: "Regelmatch", description: "7 Agendapunkte, ein Spiel" });
     expect(matchFormatCardLabel("two_game_side_swap")).toEqual({ title: "Matchserie", description: "Zwei Spiele mit Seitenwechsel" });
-    expect(matchCardPoolCardLabel("originalset")).toEqual({ title: "Nur Originalset", description: "Protheus-Decks werden nicht zugelassen" });
-    expect(matchCardPoolCardLabel("originalset_proteus")).toEqual({ title: "Originalset & Protheus", description: "Alle Protheus-Karten sind im Matchstart legal" });
+    expect(matchCardPoolCardLabel("originalset")).toEqual({ title: "Nur Originalset", description: "Zusatzsets werden nicht zugelassen" });
+    expect(matchCardPoolCardLabel("originalset_classic")).toEqual({ title: "Originalset & Classic", description: "Classic wird als Zusatzset zugelassen" });
+    expect(matchCardPoolCardLabel("originalset_proteus")).toEqual({ title: "Originalset & Protheus", description: "Protheus wird als Zusatzset zugelassen" });
+    expect(matchCardPoolCardLabel("originalset_classic_proteus")).toEqual({ title: "Originalset & Classic & Protheus", description: "Beide Zusatzsets werden zugelassen" });
   });
 
   it("parses Join-Links and ignores unknown query parameters", () => {
@@ -69,7 +71,7 @@ describe("V1.0.4 match start derivation", () => {
     const summary = matchStartSummary({
       playMode: "human_vs_human",
       matchFormat: "rules_match",
-      matchCardPool: "originalset_proteus",
+      matchCardPool: "originalset_classic_proteus",
       humanSideSelection: "random",
       humanAiSideSelection: "random"
     });
@@ -77,7 +79,7 @@ describe("V1.0.4 match start derivation", () => {
     expect(summary).toContain("Privates Duell");
     expect(summary).toContain("Seite wird ausgelost");
     expect(summary).toContain("Regelmatch bis 7 Agendapunkte");
-    expect(summary).toContain("Kartenpool: Originalset & Protheus");
+    expect(summary).toContain("Kartenpool: Originalset & Classic & Protheus");
     expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
   });
 

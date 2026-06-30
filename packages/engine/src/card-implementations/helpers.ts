@@ -5,6 +5,8 @@ import type {
   CardIcebreakerBreakMatcherImplementation,
   CardLifecycleTriggeredAbilityImplementation,
   CardPrintedSubroutineImplementation,
+  CardSelfRezAdditionalCostImplementation,
+  CardSelfRezCostModifierImplementation,
   CardTraceSuccessEffectImplementation,
   RestrictedHostedCreditSourceImplementation,
   RestrictedHostedCreditUse,
@@ -96,6 +98,49 @@ export function brainDamageSubroutine(
     amount,
     preventable: true,
     text: `*Do ${amount} brain damage.`,
+  };
+}
+
+export function noisyIcebreakerSelfRezReduction(
+  amount: number,
+): readonly CardSelfRezCostModifierImplementation[] {
+  return [
+    {
+      kind: "self_rez_cost_reduction_during_run_after_noisy_icebreaker",
+      amount,
+      visibility: "public",
+    },
+  ];
+}
+
+export function agendaPointSelfRezCost(
+  amount: number,
+): readonly CardSelfRezAdditionalCostImplementation[] {
+  return [
+    {
+      kind: "agenda_point",
+      amount,
+      visibility: "public",
+    },
+  ];
+}
+
+export function deflectRunSubroutine(input: {
+  target: "archives" | "any_data_fort" | "subsidiary_data_fort";
+  cost?: number;
+  autoBreakIfNoTarget?: true;
+  text: string;
+}): CardPrintedSubroutineImplementation {
+  return {
+    kind: "deflect_run",
+    target: input.target,
+    ...(input.cost !== undefined
+      ? { cost: { kind: "credit", amount: input.cost } }
+      : {}),
+    ...(input.autoBreakIfNoTarget
+      ? { autoBreakIfNoTarget: input.autoBreakIfNoTarget }
+      : {}),
+    text: input.text,
   };
 }
 

@@ -23,6 +23,8 @@ export type StartRunOptions = Pick<
   | "grantBonusRunOnFinish"
   | "accessServerOverride"
   | "successfulRunAccessReplacement"
+  | "conditionalAccessBonus"
+  | "corpRezCostSurcharge"
   | "successfulRunCreditLoss"
   | "successfulRunRunnerTagGain"
   | "successfulRunCorpDraw"
@@ -62,6 +64,9 @@ export type RunCoreExecutionHost = {
   };
   run: {
     movementHost: () => RunMovementHost;
+    corpDuringRunCardImplementationLegalActions?: (
+      state: GameState,
+    ) => LegalAction[];
   };
   rules: {
     isV099OrLater: () => boolean;
@@ -147,6 +152,20 @@ export function startRun(
       ? {
           successfulRunAccessReplacement:
             options.successfulRunAccessReplacement,
+        }
+      : {}),
+    ...(options?.conditionalAccessBonus
+      ? {
+          conditionalAccessBonus: {
+            ...options.conditionalAccessBonus,
+          },
+        }
+      : {}),
+    ...(options?.corpRezCostSurcharge
+      ? {
+          corpRezCostSurcharge: {
+            ...options.corpRezCostSurcharge,
+          },
         }
       : {}),
     ...(options?.successfulRunCreditLoss && options.successfulRunCreditLoss > 0
@@ -292,7 +311,11 @@ function openServerMovementWindowBeforeAccess(
 ): boolean {
   const movementHost = host.run.movementHost();
   if (!movementHost.rules.isV097OrLater()) return false;
-  if (!movementHost.rules.corpRunRootRezActionsAvailable()) return false;
+  const hasCorpWindowActions =
+    movementHost.rules.corpRunRootRezActionsAvailable() ||
+    (host.run.corpDuringRunCardImplementationLegalActions?.(host.state)
+      .length ?? 0) > 0;
+  if (!hasCorpWindowActions) return false;
   const run = host.state.run;
   if (!run) return false;
   host.state.run = {

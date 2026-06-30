@@ -1364,6 +1364,7 @@ export function configureFlowRuntimeBootstrap({
       },
       misc: {
         drawCorpCards,
+        drawRunnerCards,
         awardRunnerEventAgendaPoint,
         activeObligationCount,
         addActiveObligation,

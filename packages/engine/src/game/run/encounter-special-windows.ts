@@ -422,7 +422,7 @@ export function fullyBrokenPassedIcePostPassActions(
     ...state.runner.rig.programs,
     ...(run.successfulRunSourceCardId ? [run.successfulRunSourceCardId] : []),
   ];
-  return [...new Set(sourceIds)]
+  const derezAndEndRunActions = [...new Set(sourceIds)]
     .filter((cardId) => fullyBrokenPassedIceDerezImplementationForCard(state, cardId))
     .filter((cardId) => {
       const implementation = fullyBrokenPassedIceDerezImplementationForCard(
@@ -456,6 +456,32 @@ export function fullyBrokenPassedIcePostPassActions(
         },
       );
     });
+  const derezOnlyActions = state.runner.rig.programs
+    .filter((cardId) =>
+      fullyBrokenPassedIceDerezOnlyImplementationForCard(state, cardId),
+    )
+    .filter((cardId) => state.cardInstances[cardId]?.tapped !== true)
+    .sort()
+    .map((sourceCardId) => {
+      const sourceDefinition = definitionFor(state, sourceCardId);
+      return buildLegalAction(
+        state,
+        "runner",
+        "trigger_ability",
+        `${sourceDefinition.title}: ICE derezzen`,
+        sourceCardId,
+        [],
+        {
+          cardId: sourceCardId,
+          targetIceId,
+          targetIceDefinitionId: targetDefinition.id,
+          runnerUtilityAbility: "derez_fully_broken_passed_ice",
+          abilityKind: "derez_fully_broken_passed_ice",
+          cardImplementationTapSourceCost: true,
+        },
+      );
+    });
+  return [...derezAndEndRunActions, ...derezOnlyActions];
 }
 
 export function resolveFullyBrokenPassedIceDerezAndEndRun(
@@ -523,6 +549,70 @@ export function resolveFullyBrokenPassedIceDerezAndEndRun(
     paid: amount > 0,
     iceDerezzed: true,
     runShouldEnd: true,
+    stateChanged: true,
+  };
+}
+
+export function resolveFullyBrokenPassedIceDerez(
+  host: EncounterSpecialWindowHost,
+  legalAction: LegalAction,
+): FullyBrokenPassedIceWindowResult {
+  const state = host.state;
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf diese Post-Pass-Faehigkeit nutzen.");
+  const run = mustRun(state);
+  if (run.phase !== "movement")
+    throw new Error("Die Post-Pass-Faehigkeit ist nur nach dem Passieren von ICE legal.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const targetIceId = String(legalAction.payload?.targetIceId ?? "") as CardInstanceId;
+  if (!state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Die Post-Pass-Quelle ist nicht installiert.");
+  if (state.cardInstances[sourceCardId]?.tapped === true)
+    throw new Error("Die Post-Pass-Quelle ist bereits getappt.");
+  if (!fullyBrokenPassedIceDerezOnlyImplementationForCard(state, sourceCardId))
+    throw new Error("Die Post-Pass-Faehigkeit passt nicht zur Karte.");
+  if (
+    !targetIceId ||
+    run.fullyBrokenPassedIcePendingId !== targetIceId ||
+    !run.fullyBrokenIceIds?.includes(targetIceId) ||
+    !rezzedInstalledIceIds(state).includes(targetIceId)
+  )
+    throw new Error("Das Post-Pass-ICE-Ziel ist nicht legal.");
+  const targetDefinitionId = definitionFor(state, targetIceId).id;
+  if (!host.callbacks?.derezCorpInstalledCard)
+    throw new Error("Corp-Derez-Callback fehlt.");
+  host.callbacks.derezCorpInstalledCard(targetIceId);
+  const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
+  state.cardInstances[sourceCardId] = {
+    ...sourceInstance,
+    faceup: true,
+    rezzed: true,
+    tapped: true,
+  };
+  const {
+    fullyBrokenPassedIcePendingId: _fullyBrokenPassedIcePendingId,
+    ...runWithoutPending
+  } = run;
+  void _fullyBrokenPassedIcePendingId;
+  if (state.run) state.run = runWithoutPending;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runnerUtilityAbility: "derez_fully_broken_passed_ice",
+    abilityKind: "derez_fully_broken_passed_ice",
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    targetIceDefinitionId: targetDefinitionId,
+    targetCardDefinitionId: targetDefinitionId,
+    derezzedCount: 1,
+    sourceTapped: true,
+    cardImplementationTapSourceCost: true,
+  };
+  return {
+    handled: true,
+    sourceCardId,
+    iceId: targetIceId,
+    paymentAmount: 0,
+    paid: false,
+    iceDerezzed: true,
     stateChanged: true,
   };
 }
@@ -738,6 +828,26 @@ function fullyBrokenPassedIceDerezImplementationForCard(
     definitionFor(state, cardId).id,
   )?.runnerUtilityLongtail;
   return implementation?.kind === "derez_fully_broken_passed_ice_and_end_run"
+    ? implementation
+    : undefined;
+}
+
+function fullyBrokenPassedIceDerezOnlyImplementationForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+):
+  | {
+      kind: "derez_fully_broken_passed_ice";
+      cost: { kind: "tap_source" };
+      timing: "after_passing_fully_broken_ice";
+      target: "that_ice";
+      visibility: "public";
+    }
+  | undefined {
+  const implementation = cardImplementationForDefinitionId(
+    definitionFor(state, cardId).id,
+  )?.runnerUtilityLongtail;
+  return implementation?.kind === "derez_fully_broken_passed_ice"
     ? implementation
     : undefined;
 }

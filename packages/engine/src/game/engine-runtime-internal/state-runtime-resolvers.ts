@@ -1425,11 +1425,13 @@ function addVirusCounterWithCounterPrevention(
   let added = 0;
   let prevented = 0;
   let creditsPaid = 0;
+  let preventionChargesSpent = 0;
   for (let index = 0; index < amount; index += 1) {
     const prevention = preventOneVirusCounterWithCounterPrevention(state);
     if (prevention.prevented) {
       prevented += 1;
       creditsPaid += prevention.creditsPaid;
+      preventionChargesSpent += prevention.preventionChargesSpent;
       continue;
     }
     addCardCounter(state, targetCardId, "virus", 1);
@@ -1440,6 +1442,9 @@ function addVirusCounterWithCounterPrevention(
       ...(legalAction.payload ?? {}),
       virusCounterAvoided: prevented,
       counterPreventionCreditsPaid: creditsPaid,
+      runnerVirusCounterPreventionChargesSpent: preventionChargesSpent,
+      corpRunnerVirusCounterPreventionChargesAfter:
+        state.corpRunnerVirusCounterPreventionCharges ?? 0,
       corpCreditsAfter: state.corp.credits,
     };
   }
@@ -1448,7 +1453,26 @@ function addVirusCounterWithCounterPrevention(
 
 function preventOneVirusCounterWithCounterPrevention(
   state: GameState,
-): { prevented: boolean; creditsPaid: number } {
+): {
+  prevented: boolean;
+  creditsPaid: number;
+  preventionChargesSpent: number;
+} {
+  const storedCharges = Math.max(
+    0,
+    Math.floor(state.corpRunnerVirusCounterPreventionCharges ?? 0),
+  );
+  if (storedCharges > 0) {
+    const remaining = storedCharges - 1;
+    if (remaining > 0)
+      state.corpRunnerVirusCounterPreventionCharges = remaining;
+    else delete state.corpRunnerVirusCounterPreventionCharges;
+    return {
+      prevented: true,
+      creditsPaid: 0,
+      preventionChargesSpent: 1,
+    };
+  }
   const flags = ensureCorpTurnFlags(state);
   const sourceId = rezzedCorpRootCardIds(state)
     .filter((cardId: CardInstanceId) =>
@@ -1462,13 +1486,14 @@ function preventOneVirusCounterWithCounterPrevention(
         ),
     )
     .sort()[0];
-  if (!sourceId || state.corp.credits < 1) return { prevented: false, creditsPaid: 0 };
+  if (!sourceId || state.corp.credits < 1)
+    return { prevented: false, creditsPaid: 0, preventionChargesSpent: 0 };
   state.corp.credits -= 1;
   flags.counterPreventionUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
     flags.counterPreventionUsedSourceIdsThisTurn,
     sourceId,
   );
-  return { prevented: true, creditsPaid: 1 };
+  return { prevented: true, creditsPaid: 1, preventionChargesSpent: 0 };
 }
 
 function addVisibleCardCounter(

@@ -71,6 +71,15 @@ export type SuccessfulRunInterventionHost = {
       amount: number,
     ) => void;
   };
+  runnerCards: {
+    shuffleGripIntoStack: (purpose: string) => number;
+    drawCards: (amount: number) => {
+      drawnCount: number;
+      drawTaxSourceCount: number;
+      drawTaxCreditsPaid: number;
+      drawTaxTagsAdded: number;
+    };
+  };
   runner: {
     ensureTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
   };
@@ -966,6 +975,8 @@ export function applyDirectSuccessfulRunTriggers(
   host: SuccessfulRunInterventionHost,
   legalAction?: LegalAction,
 ): SuccessfulRunFollowupExecutionResult {
+  const responseTeamResult =
+    applyCorpShuffleRunnerGripAfterSuccessfulRun(host, legalAction);
   const karlSources = host.state.runner.rig.resources
     .slice()
     .sort()
@@ -975,7 +986,6 @@ export function applyDirectSuccessfulRunTriggers(
           host.cards.definitionFor(cardId).id,
         ) === "successful_run_credit_resource",
     );
-  if (karlSources.length === 0) return { handled: false };
   let gainedCredits = 0;
   const sourceDefinitionIds: CardDefinitionId[] = [];
   for (const sourceId of karlSources) {
@@ -987,8 +997,7 @@ export function applyDirectSuccessfulRunTriggers(
     gainedCredits += implementation.amount;
     sourceDefinitionIds.push(host.cards.definitionFor(sourceId).id);
   }
-  if (gainedCredits <= 0) return { handled: false };
-  if (legalAction) {
+  if (gainedCredits > 0 && legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       successfulRunRunnerCreditGain:
@@ -1003,9 +1012,78 @@ export function applyDirectSuccessfulRunTriggers(
       runnerCreditsAfter: host.state.runner.credits,
     };
   }
+  if (!responseTeamResult.handled && gainedCredits <= 0) return { handled: false };
   return {
     handled: true,
-    creditsGained: gainedCredits,
+    ...(gainedCredits > 0 ? { creditsGained: gainedCredits } : {}),
+    stateChanged: true,
+    ...resolvedPayloadFor(legalAction),
+  };
+}
+
+function applyCorpShuffleRunnerGripAfterSuccessfulRun(
+  host: SuccessfulRunInterventionHost,
+  legalAction?: LegalAction,
+): SuccessfulRunFollowupExecutionResult {
+  const run = host.state.run;
+  if (!run) return { handled: false };
+  const sourceIds = host.state.corp.servers
+    .flatMap((server) => server.root)
+    .filter((cardId): cardId is CardInstanceId => {
+      const instance = host.state.cardInstances[cardId];
+      if (
+        !instance ||
+        instance.controller !== "corp" ||
+        instance.rezzed !== true ||
+        instance.zone.side !== "corp" ||
+        instance.zone.zone !== "serverRoot"
+      )
+        return false;
+      return (
+        cardImplementationForDefinitionId(instance.definitionId as CardDefinitionId)
+          ?.successfulRunFollowups?.some(
+            (followup) =>
+              followup.kind ===
+              "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count",
+          ) === true
+      );
+    })
+    .sort();
+  if (sourceIds.length === 0 || host.state.runner.grip.length === 0)
+    return { handled: false };
+
+  let totalShuffled = 0;
+  let totalDrawn = 0;
+  const sourceDefinitionIds: CardDefinitionId[] = [];
+  for (const sourceId of sourceIds) {
+    const gripCount = host.state.runner.grip.length;
+    if (gripCount <= 0) continue;
+    const sourceDefinitionId = host.cards.definitionFor(sourceId).id;
+    const shuffledCount = host.runnerCards.shuffleGripIntoStack(
+      `classic.indiscriminate_response_team.${run.runId}.${sourceId}.${host.state.stateVersion}`,
+    );
+    if (shuffledCount <= 0) continue;
+    const drawSummary = host.runnerCards.drawCards(shuffledCount);
+    totalShuffled += shuffledCount;
+    totalDrawn += drawSummary.drawnCount;
+    sourceDefinitionIds.push(sourceDefinitionId);
+  }
+  if (totalShuffled <= 0) return { handled: false };
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      classicIndiscriminateResponseTeam: true,
+      runnerGripShuffledIntoStackCount: totalShuffled,
+      runnerCardsDrawnAfterGripShuffle: totalDrawn,
+      runnerGripAfter: host.state.runner.grip.length,
+      runnerStackAfter: host.state.runner.stack.length,
+      classicIndiscriminateResponseTeamSourceDefinitionIds: sourceDefinitionIds
+        .sort()
+        .join(","),
+    };
+  }
+  return {
+    handled: true,
     stateChanged: true,
     ...resolvedPayloadFor(legalAction),
   };

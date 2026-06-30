@@ -29,6 +29,7 @@ export type RunFortTriggerExecutionHost = {
     resolveFullyBrokenPassedIceDerezAndEndRun: (
       legalAction: LegalAction,
     ) => void;
+    resolveFullyBrokenPassedIceDerez?: (legalAction: LegalAction) => void;
     resolveFullyBrokenPassedIceTrash: (legalAction: LegalAction) => void;
     resolveFortPassAdvancementWindow: (legalAction: LegalAction) => void;
     resolveStartRunIceRepositionWindow: (legalAction: LegalAction) => void;
@@ -61,6 +62,15 @@ export function handleRunFortTriggerExecution(
     "derez_fully_broken_passed_ice_and_end_run"
   ) {
     host.run.resolveFullyBrokenPassedIceDerezAndEndRun(legalAction);
+    return handled(legalAction);
+  }
+  if (
+    legalAction.payload?.runnerUtilityAbility ===
+    "derez_fully_broken_passed_ice"
+  ) {
+    if (!host.run.resolveFullyBrokenPassedIceDerez)
+      throw new Error("Post-Pass-Derez-Resolver fehlt.");
+    host.run.resolveFullyBrokenPassedIceDerez(legalAction);
     return handled(legalAction);
   }
   if (

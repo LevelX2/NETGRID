@@ -28,6 +28,12 @@ export function printedSubroutineDefinitionForImplementation(
       type: "end_the_run",
     };
   }
+  if (subroutine.kind === "end_the_run_and_trash_source_at_end_of_turn") {
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "end_the_run_and_trash_source_at_end_of_turn",
+    };
+  }
   if (subroutine.kind === "end_the_run_unless_runner_pays") {
     return {
       id: printedSubroutineId(definition, index, subroutine),
@@ -207,6 +213,23 @@ export function printedSubroutineDefinitionForImplementation(
       ...(breakTags.length ? { breakTags } : {}),
     };
   }
+  if (subroutine.kind === "deflect_run") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    const cost =
+      subroutine.cost?.kind === "credit"
+        ? Math.max(0, Math.floor(subroutine.cost.amount))
+        : undefined;
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "deflect_run",
+      deflectorTarget: subroutine.target,
+      ...(cost !== undefined ? { deflectorCost: cost } : {}),
+      ...(subroutine.autoBreakIfNoTarget
+        ? { deflectorAutoBreakIfNoTarget: true }
+        : {}),
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
   if (subroutine.kind === "damage") {
     if (subroutine.preventable !== true)
       throw new Error("Unsupported unpreventable printed damage subroutine.");
@@ -216,6 +239,29 @@ export function printedSubroutineDefinitionForImplementation(
     return {
       id: printedSubroutineId(definition, index, subroutine),
       type: "do_damage",
+      damageType: subroutine.damageType === "brain" ? "core" : "net",
+      amount,
+    };
+  }
+  if (subroutine.kind === "random_damage") {
+    if (subroutine.preventable !== true)
+      throw new Error("Unsupported unpreventable printed random damage subroutine.");
+    if (subroutine.dieFaces !== 6)
+      throw new Error("Printed random damage supports only six-sided dice.");
+    const amount = Math.max(0, Math.floor(subroutine.amount));
+    if (amount <= 0)
+      throw new Error("Printed random damage subroutines require a positive amount.");
+    const damageOnResults = [...new Set(subroutine.damageOnResults)]
+      .map((result) => Math.floor(result))
+      .filter((result) => result >= 1 && result <= subroutine.dieFaces)
+      .sort((left, right) => left - right);
+    if (damageOnResults.length === 0)
+      throw new Error("Printed random damage subroutines require die results.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "random_damage",
+      dieFaces: subroutine.dieFaces,
+      damageOnResults,
       damageType: subroutine.damageType === "brain" ? "core" : "net",
       amount,
     };

@@ -3,6 +3,7 @@ import type {
   CardAbilityImplementation,
   CardAccessEffectImplementation,
   CardAccessHookImplementation,
+  CardAgendaAccessReplacementImplementation,
   CardCorpUtilityImplementation,
   CardCorpTrashInstalledRunnerSourceImplementation,
   CardDamagePreventionSourceImplementation,
@@ -26,6 +27,8 @@ import type {
   CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
   CardScoredAgendaImplementation,
+  CardSelfRezAdditionalCostImplementation,
+  CardSelfRezCostModifierImplementation,
   CardSelfStealCostImplementation,
   CardSuccessfulRunFollowupImplementation,
   CardTagPreventionSourceImplementation,
@@ -45,6 +48,8 @@ export type CardImplementationDefinition = {
     while: "installed_before_and_after_rez";
   };
   printedSubroutines?: readonly CardPrintedSubroutineImplementation[];
+  selfRezCostModifiers?: readonly CardSelfRezCostModifierImplementation[];
+  selfRezAdditionalCosts?: readonly CardSelfRezAdditionalCostImplementation[];
   iceEncounter?: CardIceEncounterImplementation;
   icebreakerAbilities?: readonly CardIcebreakerAbilityImplementation[];
   hostedProgramCapacity?: HostedProgramCapacityImplementation;
@@ -52,6 +57,7 @@ export type CardImplementationDefinition = {
   modifiers?: CardModifierImplementation[];
   selfStealCosts?: readonly CardSelfStealCostImplementation[];
   abilities?: CardAbilityImplementation[];
+  agendaAccessReplacement?: CardAgendaAccessReplacementImplementation;
   accessEffects?: readonly CardAccessEffectImplementation[];
   accessHooks?: readonly CardAccessHookImplementation[];
   lifecycle?: CardLifecycleImplementation;

@@ -3,6 +3,7 @@ import { executeAgendaHandDisruptionEffect } from "./agenda-hand-disruption-effe
 import { executeEncounterTraceMovementEffect } from "./encounter-trace-movement-effects";
 import { executeHiddenInformationEffect } from "./hidden-information-effects";
 import { executeHiddenZoneResourceEffect } from "./hidden-zone-resource-effects";
+import { executeIceStrengthEffect } from "./ice-strength-effects";
 import { executeResourceCostLinkEffect } from "./resource-cost-link-effects";
 import { executeRunSequenceEffect } from "./run-sequence-effects";
 import { executeSearchRunEffect } from "./search-run-effects";
@@ -15,6 +16,7 @@ export function executeContextualEffect(input: CardEffectFamilyInput): void {
     executeHiddenInformationEffect(input) ||
     executeSearchRunEffect(input) ||
     executeHiddenZoneResourceEffect(input) ||
+    executeIceStrengthEffect(input) ||
     executeResourceCostLinkEffect(input)
   )
     return;

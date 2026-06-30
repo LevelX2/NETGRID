@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "classic-08-corp-assets-upgrades-smoke",
+  "release": "CLASSIC-08 Corp Assets/Upgrades/Ambush",
+  "status": "package",
+  "coversCards": [
+    "onr_classic_019_indiscriminate-response-team",
+    "onr_classic_020_london-city-grid",
+    "onr_classic_021_satellite-monitors",
+    "onr_classic_022_self-destruct",
+    "onr_classic_023_shock-treatment",
+    "onr_classic_024_sterdroid",
+    "onr_classic_025_strategic-planning-group",
+    "onr_classic_026_street-enforcer"
+  ],
+  "scenarios": [
+    {
+      "id": "classic_08_corp_assets_upgrades_smoke",
+      "side": "corp",
+      "coversCards": [
+        "onr_classic_019_indiscriminate-response-team",
+        "onr_classic_020_london-city-grid",
+        "onr_classic_021_satellite-monitors",
+        "onr_classic_022_self-destruct",
+        "onr_classic_023_shock-treatment",
+        "onr_classic_024_sterdroid",
+        "onr_classic_025_strategic-planning-group",
+        "onr_classic_026_street-enforcer"
+      ],
+      "assertions": [
+        "Indiscriminate Response Team shuffles Runner's grip into the stack after a successful run and draws the same number of cards without exposing hidden card identities.",
+        "London City Grid is a region upgrade and increases the cost of noisy icebreaker subroutine use by one during runs on its fort.",
+        "Satellite Monitors rolls one deterministic die per Runner run attempt from the previous turn and gives one tag for each roll of 1.",
+        "Self-Destruct can be installed only in a subsidiary data fort and, when accessed, taps itself, trashes other installed cards in that fort, and deals matching Net damage.",
+        "Shock Treatment trashes all installed Runner hardware and two installed programs on access only when Runner has at least four tags.",
+        "Sterdroid spends three credits, taps, targets a rezzed installed ICE, and doubles its strength until end of turn with a cap of 10.",
+        "Strategic Planning Group draws one extra Corp card whenever the Corp draws and bottoms one drawn card while preserving hidden R&D/HQ information.",
+        "Street Enforcer taxes each run on its fort by Runner's current tag count."
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "hidden_zone_barrier",
+        "random_counter_replay_required",
+        "public_payload_only",
+        "no_card_instance_id_leak",
+        "statehash_replay_required"
+      ]
+    }
+  ]
+}

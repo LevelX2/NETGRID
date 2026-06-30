@@ -106,16 +106,38 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     }
     const definition = definitionFor(state, cardId);
     const instance = mustInstance(state.cardInstances, cardId);
-    const { hostedOn: _hostedOn, ...withoutHost } = instance;
+    const usesMemory = runnerProgramUsesMemory(state, cardId);
+    const memoryCost = runnerInstalledProgramMemoryCost(state, cardId);
+    const {
+      hostedOn: _hostedOn,
+      installedAsRunnerProgram: _installedAsRunnerProgram,
+      ...withoutHost
+    } = instance;
     void _hostedOn;
-    removeFromAllZones(state, cardId);
-    state.runner.heap.push(cardId);
-    if (runnerProgramUsesMemory(state, cardId)) {
+    void _installedAsRunnerProgram;
+    if (usesMemory) {
       state.runner.memoryUsed = Math.max(
         0,
-        state.runner.memoryUsed - (definition.memoryCost ?? 0),
+        state.runner.memoryUsed - memoryCost,
       );
     }
+    removeFromAllZones(state, cardId);
+    if (instance.installedAsRunnerProgram?.removeFromGameOnLeavePlay) {
+      removedFromGameZone(state).push(cardId);
+      state.cardInstances[cardId] = {
+        ...withoutHost,
+        faceup: true,
+        rezzed: true,
+        zone: {
+          side: "special",
+          zone: "removed_from_game",
+          visibility: "public",
+        },
+      };
+      clearCardCounters(state, cardId);
+      return;
+    }
+    state.runner.heap.push(cardId);
     state.cardInstances[cardId] = {
       ...withoutHost,
       faceup: true,
@@ -174,13 +196,37 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
     return true;
   }
 
+  function runnerInstalledProgramMemoryCost(
+    state: GameState,
+    cardId: CardInstanceId,
+  ): number {
+    const instance = mustInstance(state.cardInstances, cardId);
+    if (instance.installedAsRunnerProgram)
+      return Math.max(
+        0,
+        Math.floor(instance.installedAsRunnerProgram.memoryCost ?? 0),
+      );
+    return Math.max(0, Math.floor(definitionFor(state, cardId).memoryCost ?? 0));
+  }
+
+  function removedFromGameZone(state: GameState): CardInstanceId[] {
+    state.specialZones ??= { setAside: [], removedFromGame: [] };
+    state.specialZones.removedFromGame ??= [];
+    return state.specialZones.removedFromGame;
+  }
+
   function trashRunnerInstalledCardToHeap(
     state: GameState,
     cardId: CardInstanceId,
     legalAction?: LegalAction,
   ): void {
     const definition = definitionFor(state, cardId);
-    if (definition.type === "program") {
+    const sourceInstance = mustInstance(state.cardInstances, cardId);
+    if (
+      definition.type === "program" ||
+      (state.runner.rig.programs.includes(cardId) &&
+        sourceInstance.installedAsRunnerProgram)
+    ) {
       trashRunnerInstalledProgram(state, cardId);
       return;
     }
@@ -204,8 +250,8 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
       if (hostedDefinition.type === "program")
         trashRunnerInstalledProgram(state, hostedId);
     }
-    const instance = mustInstance(state.cardInstances, cardId);
-    const { hostedOn: _hostedOn, ...withoutHost } = instance;
+    const instanceAfterLifecycle = mustInstance(state.cardInstances, cardId);
+    const { hostedOn: _hostedOn, ...withoutHost } = instanceAfterLifecycle;
     void _hostedOn;
     removeFromAllZones(state, cardId);
     if (
@@ -233,14 +279,39 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
   ): void {
     const definition = definitionFor(state, cardId);
     if (!runnerInstalledCardIds(state).includes(cardId)) return;
-    if (
-      definition.type === "program" &&
-      runnerProgramUsesMemory(state, cardId)
-    ) {
+    const sourceInstance = mustInstance(state.cardInstances, cardId);
+    const memoryCost = runnerInstalledProgramMemoryCost(state, cardId);
+    if (runnerProgramUsesMemory(state, cardId)) {
       state.runner.memoryUsed = Math.max(
         0,
-        state.runner.memoryUsed - (definition.memoryCost ?? 0),
+        state.runner.memoryUsed - memoryCost,
       );
+    }
+    if (
+      state.runner.rig.programs.includes(cardId) &&
+      sourceInstance.installedAsRunnerProgram?.removeFromGameOnLeavePlay
+    ) {
+      const {
+        hostedOn: _hostedOn,
+        installedAsRunnerProgram: _installedAsRunnerProgram,
+        ...withoutHost
+      } = sourceInstance;
+      void _hostedOn;
+      void _installedAsRunnerProgram;
+      removeFromAllZones(state, cardId);
+      removedFromGameZone(state).push(cardId);
+      state.cardInstances[cardId] = {
+        ...withoutHost,
+        faceup: true,
+        rezzed: true,
+        zone: {
+          side: "special",
+          zone: "removed_from_game",
+          visibility: "public",
+        },
+      };
+      clearCardCounters(state, cardId);
+      return;
     }
     if (
       definition.type === "hardware" &&
@@ -251,8 +322,8 @@ export function createLifecycleRuntime(deps: RuntimeDeps) {
         0,
         state.runner.memoryLimit - (definition.memoryLimitBonus ?? 0),
       );
-    const instance = mustInstance(state.cardInstances, cardId);
-    const { hostedOn: _hostedOn, ...withoutHost } = instance;
+    const instanceAfterLifecycle = mustInstance(state.cardInstances, cardId);
+    const { hostedOn: _hostedOn, ...withoutHost } = instanceAfterLifecycle;
     void _hostedOn;
     removeFromAllZones(state, cardId);
     state.runner.grip.push(cardId);

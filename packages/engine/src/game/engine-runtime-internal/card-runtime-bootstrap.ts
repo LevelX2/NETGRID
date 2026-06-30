@@ -731,8 +731,10 @@ const { abilityMetadata, accessEffectHandlerHost, accessFlowHost, activeObligati
 import {
   cloneState,
   corpScoredBlackOpsAgendaLastTurn,
+  finishRun,
   resolveRunnerLastTurnInstalledResourceTargetId,
   runnerStoleAgendaSubtypeThisTurn,
+  scoreInstalledRunnerProgramAsAgenda,
 } from "./runtime-bootstrap-support";
 export function configureCardRuntimeBootstrap() {
   // CardImplementation effect adapters are the mutation boundary for effects that
@@ -1072,6 +1074,57 @@ export function configureCardRuntimeBootstrap() {
     applyRunWindowPayloadPatch(legalAction, payload);
     return { publicPayload: payload };
   }
+
+  function doubleChosenIceStrengthUntilEndOfTurn(
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinitionId,
+    targetIceId: CardInstanceId,
+    maxStrength: number,
+  ): { publicPayload: Record<string, string | number | boolean> } {
+    const target = mustInstance(state.cardInstances, targetIceId);
+    const targetDefinition = definitionFor(state, targetIceId);
+    if (
+      target.controller !== "corp" ||
+      target.zone.side !== "corp" ||
+      target.zone.zone !== "serverIce" ||
+      targetDefinition.type !== "ice" ||
+      !target.rezzed
+    )
+      throw new Error("Sterdroid braucht ein gerezztes installiertes ICE.");
+    const currentStrength = iceStrengthFor(state, targetIceId);
+    const cappedStrength = Math.min(maxStrength, currentStrength * 2);
+    const amount = Math.max(0, cappedStrength - currentStrength);
+    if (amount > 0) {
+      state.cardInstances[targetIceId] = {
+        ...target,
+        strengthModifier: target.strengthModifier + amount,
+      };
+      state.temporaryIceStrengthModifiersUntilEndOfTurn = [
+        ...(state.temporaryIceStrengthModifiersUntilEndOfTurn ?? []),
+        {
+          sourceCardInstanceId: sourceCardId,
+          sourceDefinitionId,
+          targetIceId,
+          amount,
+          turnSerial: Math.max(0, Math.floor(state.turnSerial ?? 0)),
+          expires: "turn_end",
+        },
+      ];
+    }
+    const payload = {
+      sourceDefinitionId,
+      targetCardDefinitionId: targetDefinition.id,
+      iceStrengthBefore: currentStrength,
+      iceStrengthAfter: currentStrength + amount,
+      iceStrengthBonusApplied: amount,
+      iceStrengthMaxCap: maxStrength,
+    };
+    legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+    return { publicPayload: payload };
+  }
+
   function legalFortReplacementHqCardIds(
     state: GameState,
     server: CorpServer,
@@ -1411,6 +1464,8 @@ export function configureCardRuntimeBootstrap() {
       run: {
         startRun: (state, serverId, accessCount, options, legalAction) =>
           startRun(state, serverId, undefined, accessCount, options, legalAction),
+        finishRun: (state, legalAction, successful) =>
+          finishRun(state, successful, legalAction),
       },
       hiddenZone: {
         runtimeDepsHost: hiddenZoneRuntimeDepsHost(),
@@ -1442,6 +1497,7 @@ export function configureCardRuntimeBootstrap() {
         trashCorpInstalledCardsInSourceServer:
           trashCorpInstalledCardsInScoredSourceServer,
         awardRunnerEventAgendaPoint,
+        scoreSourceAsAgenda: scoreInstalledRunnerProgramAsAgenda,
         discardRandomCorpHqCards: (state, sourceDefinitionId, count) =>
           discardRandomCorpHqCards(
             state,
@@ -1459,6 +1515,7 @@ export function configureCardRuntimeBootstrap() {
         passCurrentEncounteredIce,
         rezInstalledIceWithLifecycleCounters,
         replaceFortCardsFromHq,
+        doubleChosenIceStrengthUntilEndOfTurn,
         trashTopCorpRdCards,
         rezCostForCard,
         startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice,

@@ -17,6 +17,7 @@ import {
 } from "./encounter-resolution";
 import {
   resolvePrintedDamageSubroutine,
+  resolvePrintedRandomDamageSubroutine,
   startTraceFromPrintedSubroutine,
   type EncounterPrintedEffectHost,
 } from "./encounter-printed-effects";
@@ -153,6 +154,20 @@ export function continueRun(
       if (damageResult.suspended) return;
       if (state.winner) return;
     }
+    if (subroutine.type === "random_damage") {
+      const damageResult = resolvePrintedRandomDamageSubroutine(
+        host.encounter.printedEffectHost(legalAction),
+        {
+          definition,
+          subroutine,
+          subroutineIndex: index,
+          damageSummaries,
+          legalAction,
+        },
+      );
+      if (damageResult.suspended) return;
+      if (state.winner) return;
+    }
     const nonTraceResult = resolveEncounterPrintedNonTraceEffect(
       printedNonTraceHost,
       {
@@ -165,6 +180,7 @@ export function continueRun(
       },
     );
     if (nonTraceResult.suspended) return;
+    if (nonTraceResult.runRedirected) return;
     if (nonTraceResult.runShouldEnd) ended = true;
     const specialWindow = resolveEncounterSpecialWindowSubroutine(
       host.encounter.specialWindowHost(),

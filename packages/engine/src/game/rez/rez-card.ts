@@ -8,7 +8,11 @@ import {
   type Side,
 } from "@netgrid/shared";
 import { costQuotePublicPayload, type CostQuote } from "../payment";
-import type { CardVariableRezImplementation } from "../../ability-engine/definition-types";
+import type {
+  CardSelfRezAdditionalCostImplementation,
+  CardVariableRezImplementation,
+} from "../../ability-engine/definition-types";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 
 type CorpAgendaPointCostResult = {
   paidPoints: number;
@@ -161,6 +165,33 @@ export function rezCard(
         : {}),
     };
   }
+  const selfAgendaPointCost = selfRezAgendaPointCostForDefinition(definition);
+  if (selfAgendaPointCost > 0) {
+    if (!legalAction)
+      throw new Error("Self-Rez-Agenda-Punkt-Kosten brauchen eine LegalAction.");
+    const agendaCost = Number(legalAction.payload?.agendaPointCost ?? 0);
+    if (!Number.isInteger(agendaCost) || agendaCost !== selfAgendaPointCost)
+      throw new Error("Self-Rez-Agenda-Punkt-Kosten sind nicht mehr gueltig.");
+    const costResult = host.corp.spendCorpAgendaPointCost(agendaCost);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      agendaPointCost: agendaCost,
+      agendaPointCostPaid: costResult.paidPoints,
+      selfRezAdditionalCostKind: "agenda_point",
+      ...(costResult.bonusPointsSpent > 0
+        ? { corpBonusAgendaPointsSpent: costResult.bonusPointsSpent }
+        : {}),
+      ...(costResult.forfeitedAgendaDefinitionIds.length > 0
+        ? {
+            forfeitedAgendaDefinitionIds:
+              costResult.forfeitedAgendaDefinitionIds.join(","),
+            specialZone: "removed_from_game",
+            specialZoneVisibility: "public",
+            specialZoneReason: "self_rez_agenda_point_cost",
+          }
+        : {}),
+    };
+  }
   host.payment.spendCredits("corp", creditCost);
   state.cardInstances[cardId] = {
     ...host.cards.mustInstance(cardId),
@@ -226,6 +257,20 @@ export function rezCard(
   if (host.run.handlePostIceRezContinuation?.(cardId, legalAction))
     return;
   host.run.beginEncounter(cardId, legalAction);
+}
+
+function selfRezAdditionalCostsForDefinition(
+  definition: CardDefinition,
+): readonly CardSelfRezAdditionalCostImplementation[] {
+  if (definition.type !== "ice") return [];
+  return cardImplementationForDefinitionId(definition.id)
+    ?.selfRezAdditionalCosts ?? [];
+}
+
+function selfRezAgendaPointCostForDefinition(definition: CardDefinition): number {
+  return selfRezAdditionalCostsForDefinition(definition)
+    .filter((cost) => cost.kind === "agenda_point" && cost.visibility === "public")
+    .reduce((sum, cost) => sum + Math.max(0, Math.floor(cost.amount)), 0);
 }
 
 function normalizeSubtypeLabel(subtype: string): string {

@@ -6,6 +6,8 @@ import {
   humanAiSideLabel,
   type HumanAiSideSelection,
   type HumanSideSelection,
+  type MatchCardPoolSelection,
+  type MatchFormatSelection,
   type PlayMode
 } from "../../app/match-start";
 import type {
@@ -111,8 +113,8 @@ export function MatchHostConsole({
   onSelectedParticipantBCorpLocalDeckId
 }: {
   playMode: PlayMode;
-  matchFormat: string;
-  matchCardPool: string;
+  matchFormat: MatchFormatSelection;
+  matchCardPool: MatchCardPoolSelection;
   displayName: string;
   isHumanVsAi: boolean;
   humanAiSideSelection: HumanAiSideSelection;
@@ -155,8 +157,8 @@ export function MatchHostConsole({
   visibleDeckMetadataEntries: Array<{ label: string; metadata: { deckName: string } | undefined }>;
   simulation: AiSimulationSummary | null;
   onPlayMode(mode: PlayMode): void;
-  onMatchFormat(format: "rules_match" | "two_game_side_swap"): void;
-  onMatchCardPool(cardPool: "originalset" | "originalset_proteus"): void;
+  onMatchFormat(format: MatchFormatSelection): void;
+  onMatchCardPool(cardPool: MatchCardPoolSelection): void;
   onDisplayName(value: string): void;
   onHumanAiSideSelection(selection: HumanAiSideSelection): void;
   onRunnerDifficulty(difficulty: AiDifficulty): void;

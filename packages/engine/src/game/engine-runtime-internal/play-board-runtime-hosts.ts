@@ -270,6 +270,7 @@ import {
 import {
   handleHiddenZoneNonSearchChoice,
   startCorpArchivesToHqChoice,
+  startCorpHqCardToRdChoice,
   startCorpDiscardHqWithRetainPaymentChoice,
   startRunnerGripTrashForCreditsChoice,
   startRunnerInstalledTrashForCreditsChoice,
@@ -730,6 +731,31 @@ export function createPlayBoardRuntimeHosts(
       payment: {
         spendClick: (side) => spendClick(state, side),
         spendCredits: (side, amount) => spendCredits(state, side, amount),
+        spendRunnerEventCredits: (amount, legalAction) => {
+          const requested = Math.max(0, Math.floor(amount));
+          const restricted = spendRestrictedHostedCredits(
+            state,
+            "play_events",
+            requested,
+          );
+          const normalCreditsSpent = Math.max(0, requested - restricted.spent);
+          if (normalCreditsSpent > 0)
+            spendCredits(state, "runner", normalCreditsSpent);
+          if (legalAction) {
+            legalAction.payload = {
+              ...(legalAction.payload ?? {}),
+              ...(restricted.spent > 0
+                ? {
+                    hostedCreditsSpent: restricted.spent,
+                    hostedCreditSourceDefinitionIds:
+                      restricted.sourceDefinitionIds.join(","),
+                  }
+                : {}),
+              normalCreditsSpent,
+              runnerCreditsAfter: state.runner.credits,
+            };
+          }
+        },
       },
       events: {
         runnerEventResolver: (definition) =>
@@ -865,6 +891,11 @@ export function createPlayBoardRuntimeHosts(
       hiddenZone: {
         startCorpArchivesToHqChoice: (legalAction, sourceCardId) =>
           startCorpArchivesToHqChoice(
+            hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
+            sourceCardId,
+          ),
+        startCorpHqCardToRdChoice: (legalAction, sourceCardId) =>
+          startCorpHqCardToRdChoice(
             hiddenZoneNonSearchChoiceHandlerHost(state, legalAction),
             sourceCardId,
           ),

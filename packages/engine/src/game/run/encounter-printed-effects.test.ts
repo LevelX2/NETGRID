@@ -14,6 +14,7 @@ import {
   applyPrintedTraceSuccessFollowups,
   encounterPrintedEffectHost,
   resolvePrintedDamageSubroutine,
+  resolvePrintedRandomDamageSubroutine,
   startTraceFromPrintedSubroutine,
   type EncounterPrintedEffectHost,
 } from "./encounter-printed-effects";
@@ -288,6 +289,83 @@ describe("encounter printed effects boundary", () => {
         amount: 2,
       }),
     ]);
+  });
+
+  it("rolls printed random damage deterministically and misses without damage", () => {
+    const state = makeState();
+    const legalAction = { payload: {} } as LegalAction;
+    const summaries: DamageSummary[] = [];
+
+    const result = resolvePrintedRandomDamageSubroutine(
+      makeHost(state, legalAction, { rollDie: () => 4 }),
+      {
+        definition: definitionFor("ice_1" as CardInstanceId),
+        subroutine: {
+          id: "random_core_damage",
+          type: "random_damage",
+          damageType: "core",
+          dieFaces: 6,
+          damageOnResults: [1],
+          amount: 3,
+        } as SubroutineDefinition,
+        subroutineIndex: 0,
+        damageSummaries: summaries,
+        legalAction,
+      },
+    );
+
+    expect(result).toMatchObject({
+      handled: true,
+      dieRoll: 4,
+      damageType: "core",
+      damageAmount: 0,
+    });
+    expect(summaries).toHaveLength(0);
+    expect(state.run?.resolvedSubroutineIndexes).toContain(0);
+    expect(legalAction.payload).toMatchObject({
+      printedRandomDamageDieRoll: 4,
+      printedRandomDamageApplies: false,
+      printedRandomDamageResults: "1",
+    });
+  });
+
+  it("rolls printed random damage deterministically and applies damage on matching results", () => {
+    const state = makeState();
+    const legalAction = { payload: {} } as LegalAction;
+    const summaries: DamageSummary[] = [];
+
+    const result = resolvePrintedRandomDamageSubroutine(
+      makeHost(state, legalAction, { rollDie: () => 1 }),
+      {
+        definition: definitionFor("ice_1" as CardInstanceId),
+        subroutine: {
+          id: "random_core_damage",
+          type: "random_damage",
+          damageType: "core",
+          dieFaces: 6,
+          damageOnResults: [1],
+          amount: 3,
+        } as SubroutineDefinition,
+        subroutineIndex: 0,
+        damageSummaries: summaries,
+        legalAction,
+      },
+    );
+
+    expect(result).toMatchObject({
+      handled: true,
+      dieRoll: 1,
+      damageType: "core",
+      damageAmount: 3,
+    });
+    expect(summaries).toHaveLength(1);
+    expect(legalAction.payload).toMatchObject({
+      printedRandomDamageDieRoll: 1,
+      printedRandomDamageApplies: true,
+      damageResolved: true,
+      damageType: "core",
+      damageAmount: 3,
+    });
   });
 
   it("resolves zero printed damage without opening a damage event", () => {

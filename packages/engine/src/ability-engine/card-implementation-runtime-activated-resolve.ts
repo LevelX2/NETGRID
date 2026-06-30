@@ -81,6 +81,8 @@ export function resolveActivatedCardImplementationAbility(
       }),
       startRun: (serverId, options) =>
         deps.startRun(state, legalAction, serverId, options),
+      endRun: (successful) =>
+        deps.finishRun(state, legalAction, successful),
       chosenRunServerId: () =>
         String(legalAction.payload?.serverId ?? "") as Exclude<
           ServerId,
@@ -304,6 +306,8 @@ export function resolveActivatedCardImplementationAbility(
       },
       addCurrentRunAccessCount: (server, amount) =>
         deps.addCurrentRunAccessCount(state, server, amount),
+      scoreSourceAsAgenda: () =>
+        deps.scoreSourceAsAgenda(state, legalAction, match.cardId),
       passCurrentEncounteredIce: (subtypeRequired) =>
         deps.passCurrentEncounteredIce(state, legalAction, subtypeRequired),
       rezInstalledIceWithLifecycleCounters: (input) =>
@@ -320,6 +324,15 @@ export function resolveActivatedCardImplementationAbility(
           legalAction,
           match.cardId,
           match.definition.id,
+        ),
+      doubleChosenIceStrengthUntilEndOfTurn: (targetIceId, maxStrength) =>
+        deps.doubleChosenIceStrengthUntilEndOfTurn(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          targetIceId,
+          maxStrength,
         ),
     },
     match.ability.effects,

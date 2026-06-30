@@ -119,6 +119,15 @@ export function handleAccessExecution(
     case "access_card":
       return accessCurrentCard(host, legalAction);
     case "steal_agenda": {
+      if (
+        legalAction.payload?.agendaAccessReplacement ===
+        "install_as_runner_program"
+      )
+        return installAccessedAgendaAsRunnerProgram(
+          host,
+          host.state.run?.accessedCardId ?? "",
+          legalAction,
+        );
       const paidCredits = revalidateStealAgendaCost(host, legalAction);
       if (paidCredits > 0) {
         if (
@@ -211,6 +220,7 @@ export function accessCurrentCard(
     revealAccessedCard(host, cardId);
     resolveAmbushOnAccessFoundation(host, cardId, legalAction);
     host.effects.executeAccessEffects(cardId, legalAction);
+    applyHqAccessExposeInstalledCorpCards(host, breach.serverId, legalAction);
     const definition = host.cards.definitionFor(cardId);
     applyPrearrangedDropAgendaAccess(host, definition, legalAction);
     applyPromisesPromisesAgendaAccess(host, cardId, definition, legalAction);
@@ -273,6 +283,7 @@ export function accessCurrentCard(
   revealAccessedCard(host, cardId);
   resolveAmbushOnAccessFoundation(host, cardId, legalAction);
   host.effects.executeAccessEffects(cardId, legalAction);
+  applyHqAccessExposeInstalledCorpCards(host, server.id, legalAction);
   const definition = host.cards.definitionFor(cardId);
   applyPrearrangedDropAgendaAccess(host, definition, legalAction);
   applyPromisesPromisesAgendaAccess(host, cardId, definition, legalAction);
@@ -350,6 +361,102 @@ function applyPromisesPromisesAgendaAccess(
     nextAgendaAccessAgendaPointConsumed: true,
     agendaPointBonusPending: 1,
   };
+}
+
+function applyHqAccessExposeInstalledCorpCards(
+  host: AccessFlowHost,
+  serverId: Exclude<ServerId, "new_remote">,
+  legalAction: LegalAction,
+): void {
+  if (serverId !== "hq") return;
+  const sourceCardId = host.state.runner.rig.programs
+    .slice()
+    .sort()
+    .find((cardId) => {
+      const sourceDefinition = host.cards.definitionFor(cardId);
+      return (
+        cardImplementationForDefinitionId(sourceDefinition.id)
+          ?.runnerUtilityLongtail?.kind ===
+        "hq_access_expose_all_installed_corp_cards"
+      );
+    });
+  if (!sourceCardId) return;
+
+  const exposedCardIds = installedCorpCardIds(host);
+  if (exposedCardIds.length === 0) return;
+
+  const existingDefinitionIds =
+    typeof legalAction.payload?.publicRevealDefinitionIds === "string" &&
+    legalAction.payload.publicRevealDefinitionIds.length > 0
+      ? legalAction.payload.publicRevealDefinitionIds.split(",")
+      : [];
+  const existingTitles =
+    typeof legalAction.payload?.publicRevealTitles === "string" &&
+    legalAction.payload.publicRevealTitles.length > 0
+      ? legalAction.payload.publicRevealTitles.split(",")
+      : [];
+  const existingLabels =
+    typeof legalAction.payload?.exposedServerLabels === "string" &&
+    legalAction.payload.exposedServerLabels.length > 0
+      ? legalAction.payload.exposedServerLabels.split(",")
+      : [];
+  const exposedDefinitions = exposedCardIds.map((cardId) =>
+    host.cards.definitionFor(cardId),
+  );
+  const sourceDefinition = host.cards.definitionFor(sourceCardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runnerUtilityAbility: "hq_access_expose_all_installed_corp_cards",
+    publicRevealKind: "expose",
+    sourceDefinitionId:
+      typeof legalAction.payload?.sourceDefinitionId === "string"
+        ? legalAction.payload.sourceDefinitionId
+        : sourceDefinition.id,
+    sourceTitle:
+      typeof legalAction.payload?.sourceTitle === "string"
+        ? legalAction.payload.sourceTitle
+        : sourceDefinition.title,
+    revealedCount:
+      Math.max(0, Math.floor(Number(legalAction.payload?.revealedCount ?? 0))) +
+      exposedDefinitions.length,
+    publicRevealDefinitionIds: [
+      ...existingDefinitionIds,
+      ...exposedDefinitions.map((definition) => definition.id),
+    ].join(","),
+    publicRevealTitles: [
+      ...existingTitles,
+      ...exposedDefinitions.map((definition) => definition.title),
+    ].join(","),
+    exposedServerLabels: [
+      ...existingLabels,
+      ...exposedCardIds.map((cardId) => installedCorpCardLabel(host, cardId)),
+    ].join(","),
+  };
+}
+
+function installedCorpCardIds(host: AccessFlowHost): CardInstanceId[] {
+  return host.state.corp.servers
+    .flatMap((server) => [...server.root, ...server.ice])
+    .filter((cardId) => host.state.cardInstances[cardId])
+    .sort();
+}
+
+function installedCorpCardLabel(
+  host: AccessFlowHost,
+  cardId: CardInstanceId,
+): string {
+  const zone = host.cards.cardInstanceFor(cardId).zone;
+  if (zone.side !== "corp") return "installed";
+  if (zone.zone === "serverRoot") {
+    const server = host.servers.mustServer(zone.serverId);
+    return `${server.label ?? server.id} root`;
+  }
+  if (zone.zone === "serverIce") {
+    const server = host.servers.mustServer(zone.serverId);
+    const index = server.ice.indexOf(cardId);
+    return `${server.label ?? server.id} ICE ${index + 1}`;
+  }
+  return "installed";
 }
 
 function revalidateStealAgendaCost(
@@ -554,6 +661,9 @@ function stealAgenda(
       stateChanged: true,
     };
   }
+  flags.stolenAgendaIdsThisTurn = [
+    ...new Set([...(flags.stolenAgendaIdsThisTurn ?? []), cardId as CardInstanceId]),
+  ];
   host.state.runner.scoreArea.push(cardId as CardInstanceId);
   host.state.cardInstances[cardId] = {
     ...host.cards.cardInstanceFor(cardId as CardInstanceId),
@@ -572,6 +682,74 @@ function stealAgenda(
   return {
     handled: true,
     stolenAgendaId: cardId as CardInstanceId,
+    runFinished: true,
+    accessFinished: true,
+    ...resolvedPayloadFor(legalAction),
+    stateChanged: true,
+  };
+}
+
+function installAccessedAgendaAsRunnerProgram(
+  host: AccessFlowHost,
+  cardId: string,
+  legalAction: LegalAction,
+): AccessExecutionResult {
+  if (!cardId) throw new Error("Keine Agenda wird accessed.");
+  const sourceCardId = cardId as CardInstanceId;
+  const run = mustRun(host);
+  attachAccessOriginPayload(legalAction, run);
+  const definition = host.cards.definitionFor(sourceCardId);
+  const replacement = cardImplementationForDefinitionId(
+    definition.id,
+  )?.agendaAccessReplacement;
+  if (
+    definition.type !== "agenda" ||
+    replacement?.kind !== "install_as_runner_program" ||
+    !replacement.scoreAsAgendaAction ||
+    !replacement.removeFromGameOnLeavePlay
+  )
+    throw new Error("Diese Agenda kann nicht als Runner-Programm installiert werden.");
+  const memoryCost = Math.max(0, Math.floor(replacement.memoryCost));
+  if (Number(legalAction.payload?.installedRunnerProgramMemoryCost) !== memoryCost)
+    throw new Error("Die Installationskosten passen nicht mehr zur Agenda.");
+  if (host.state.runner.memoryUsed + memoryCost > host.state.runner.memoryLimit)
+    throw new Error("Der Runner hat nicht genug MU fuer dieses Programm.");
+  const instance = host.cards.cardInstanceFor(sourceCardId);
+  host.zones.removeFromAllZones(sourceCardId);
+  host.state.runner.rig.programs.push(sourceCardId);
+  host.state.runner.memoryUsed += memoryCost;
+  host.state.cardInstances[sourceCardId] = {
+    ...instance,
+    controller: "runner",
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "rig" },
+    installedAsRunnerProgram: {
+      memoryCost,
+      scoreAsAgendaAction: true,
+      removeFromGameOnLeavePlay: true,
+      originalType: "agenda",
+    },
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    agendaAccessReplacement: "install_as_runner_program",
+    installedAsRunnerProgram: true,
+    installedRunnerProgramMemoryCost: memoryCost,
+    runnerMemoryUsedAfter: host.state.runner.memoryUsed,
+    sourceDefinitionId: definition.id,
+  };
+  if (host.state.run?.breach) {
+    return {
+      ...completeCurrentBreachAccess(host, "stolen", legalAction),
+      accessedCardId: sourceCardId,
+      ...resolvedPayloadFor(legalAction),
+    };
+  }
+  host.run.finishRun(true, legalAction);
+  return {
+    handled: true,
+    accessedCardId: sourceCardId,
     runFinished: true,
     accessFinished: true,
     ...resolvedPayloadFor(legalAction),

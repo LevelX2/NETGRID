@@ -304,7 +304,30 @@ function makeHost(
           ...(instance.counters ?? {}),
           [counterType]:
             Math.max(0, Math.floor(instance.counters?.[counterType] ?? 0)) +
-            amount,
+          amount,
+        };
+      },
+    },
+    runnerCards: {
+      shuffleGripIntoStack: () => {
+        const gripIds = state.runner.grip.slice();
+        state.runner.grip = [];
+        state.runner.stack = [...(state.runner.stack ?? []), ...gripIds];
+        return gripIds.length;
+      },
+      drawCards: (amount) => {
+        let drawnCount = 0;
+        for (let index = 0; index < amount; index += 1) {
+          const cardId = state.runner.stack.shift();
+          if (!cardId) break;
+          state.runner.grip.push(cardId);
+          drawnCount += 1;
+        }
+        return {
+          drawnCount,
+          drawTaxSourceCount: 0,
+          drawTaxCreditsPaid: 0,
+          drawTaxTagsAdded: 0,
         };
       },
     },

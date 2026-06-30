@@ -81,6 +81,7 @@ export type PendingChoiceResolutionHost = {
     successfulRunInterventionHost: HostFn<unknown>;
     resolvePostMeatDamageHiddenResourceChoice: HostFn<void>;
     resolveStartOfRunFortUtilityChoice: HostFn<void>;
+    resolveClassicDeflectorChoice: HostFn<void>;
   };
   access: {
     resolveSuccessfulRunCreditLossSpendChoice: HostFn<void>;
@@ -218,6 +219,8 @@ export function resolvePendingChoice(
     host.run.resolvePostMeatDamageHiddenResourceChoice;
   const resolveStartOfRunFortUtilityChoice =
     host.run.resolveStartOfRunFortUtilityChoice;
+  const resolveClassicDeflectorChoice =
+    host.run.resolveClassicDeflectorChoice;
   const resolveSuccessfulRunCreditLossSpendChoice =
     host.access.resolveSuccessfulRunCreditLossSpendChoice;
   const runAccessTransitionHost = host.access.runAccessTransitionHost;
@@ -265,6 +268,14 @@ export function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("corp.start_of_run_redirect")) {
     resolveStartOfRunFortUtilityChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.classic_deflector",
+    )
+  ) {
+    resolveClassicDeflectorChoice(state, legalAction, playerAction);
     return;
   }
   const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(

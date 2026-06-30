@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "classic-06-run-redirect-ice-smoke",
+  "release": "CLASSIC-06 Deflector/Run-Redirect/Glacier",
+  "status": "package",
+  "coversCards": [
+    "onr_classic_009_dumpster",
+    "onr_classic_010_entrapment",
+    "onr_classic_011_glacier",
+    "onr_classic_014_trapdoor",
+    "onr_classic_015_vortex"
+  ],
+  "scenarios": [
+    {
+      "id": "classic_06_run_redirect_ice_smoke",
+      "side": "corp",
+      "coversCards": [
+        "onr_classic_009_dumpster",
+        "onr_classic_010_entrapment",
+        "onr_classic_011_glacier",
+        "onr_classic_014_trapdoor",
+        "onr_classic_015_vortex"
+      ],
+      "assertions": [
+        "Dumpster cannot be installed on Archives and redirects the run to Archives, starting an encounter with the outermost rezzed Archives ICE or normalizing to the post-ICE jack-out window when Archives has no rezzed ICE.",
+        "Entrapment and Vortex open a Corp target choice when the two-credit Deflector cost can be paid, spend the credits on resolution, and redirect the run to the selected data fort.",
+        "Trapdoor can only be installed on HQ or R&D, redirects to a subsidiary data fort, and auto-breaks its Deflector subroutine when no subsidiary data fort target exists.",
+        "Glacier can only be installed inside a subsidiary data fort, costs one public Corp agenda point in addition to normal rez cost, and has two End-the-run subroutines.",
+        "Glacier may move to the outermost position of another data fort at the start of a run for one credit, revealing itself if unrezzed and updating the currently approached ICE when it moves to or from the attacked fort."
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "public_payload_only",
+        "no_hidden_card_data_leak",
+        "statehash_replay_required"
+      ]
+    }
+  ]
+}

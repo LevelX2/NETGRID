@@ -85,6 +85,11 @@ export type CardImplementationRuntimeExtendedDependencies = {
     sourceDefinitionId: CardDefinition["id"],
     amount: 1,
   ) => CardEffectHiddenInfoResult;
+  scoreSourceAsAgenda: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
   corpRandomDiscardFromHq: (
     state: GameState,
     sourceDefinitionId: CardDefinition["id"],
@@ -160,6 +165,14 @@ export type CardImplementationRuntimeExtendedDependencies = {
     legalAction: LegalAction,
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectHiddenInfoResult;
+  doubleChosenIceStrengthUntilEndOfTurn: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    targetIceId: CardInstanceId,
+    maxStrength: number,
   ) => CardEffectHiddenInfoResult;
   trashTopCorpRdCards: (
     state: GameState,

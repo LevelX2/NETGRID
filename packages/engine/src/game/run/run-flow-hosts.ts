@@ -210,6 +210,9 @@ export type RunFlowHost = {
     runnerDuringRunCardImplementationLegalActions: (
       state: GameState,
     ) => LegalAction[];
+    corpDuringRunCardImplementationLegalActions: (
+      state: GameState,
+    ) => LegalAction[];
     executeCardImplementationRunnerRunStartEffects: (
       state: GameState,
       legalAction?: LegalAction,
@@ -304,6 +307,7 @@ export type RunFlowHost = {
     preventOneVirusCounterWithCounterPrevention: (state: GameState) => {
       prevented: boolean;
       creditsPaid: number;
+      preventionChargesSpent: number;
     };
     poxCountersForServer: (
       state: GameState,
@@ -368,6 +372,7 @@ export type RunFlowHost = {
       state: GameState,
       baseCost: number,
       subroutineCount?: number,
+      breakerId?: CardInstanceId,
     ) => ReturnType<RunnerEncounterActionHost["costs"]["breakSubroutineCostBreakdown"]>;
     abilityMetadata: RunnerEncounterActionHost["actions"]["abilityMetadata"];
     revealCorpRdTop: (state: GameState, legalAction: LegalAction) => void;
@@ -388,6 +393,15 @@ export type RunFlowHost = {
       legalAction?: LegalAction,
     ) => void;
     drawCorpCards: (state: GameState, count: number) => void;
+    drawRunnerCards: (
+      state: GameState,
+      count: number,
+    ) => {
+      drawnCount: number;
+      drawTaxSourceCount: number;
+      drawTaxCreditsPaid: number;
+      drawTaxTagsAdded: number;
+    };
     awardRunnerEventAgendaPoint?: (
       state: GameState,
       legalAction: LegalAction,
@@ -495,6 +509,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       run: {
         movementHost: () => runMovementHostForState(state),
+        corpDuringRunCardImplementationLegalActions:
+          host.run.corpDuringRunCardImplementationLegalActions,
       },
       rules: {
         isV099OrLater: () => host.rules.isV099OrLater(state),
@@ -623,11 +639,12 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         abilityMetadata: host.effects.abilityMetadata,
       },
       costs: {
-        breakSubroutineCostBreakdown: (baseCost, subroutineCount) =>
+        breakSubroutineCostBreakdown: (baseCost, subroutineCount, breakerId) =>
           host.effects.breakSubroutineCostBreakdown(
             state,
             baseCost,
             subroutineCount,
+            breakerId,
           ),
       },
       callbacks: {
@@ -874,6 +891,25 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             amount,
           ),
       },
+      runnerCards: {
+        shuffleGripIntoStack: (purpose) => {
+          const gripIds = state.runner.grip.slice();
+          if (gripIds.length === 0) return 0;
+          state.runner.grip = [];
+          const stackIds = [...state.runner.stack, ...gripIds];
+          state.runner.stack = host.rng.shuffleStateIds(state, stackIds, purpose);
+          for (const cardId of gripIds) {
+            state.cardInstances[cardId] = {
+              ...host.cards.cardInstanceFor(state, cardId),
+              faceup: false,
+              rezzed: false,
+              zone: { side: "runner", zone: "stack" },
+            };
+          }
+          return gripIds.length;
+        },
+        drawCards: (amount) => host.callbacks.drawRunnerCards(state, amount),
+      },
       runner: {
         ensureTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),
       },
@@ -1029,6 +1065,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           title: trashedDefinition.title,
         };
       },
+      rollDie: (purpose) => host.rng.rollDie(state, purpose),
       setDamagePayload: (summary) => {
         if (legalAction) host.damage.setDamagePayload(legalAction, summary);
       },
@@ -1050,8 +1087,17 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       cards: {
         definitionFor: (cardId) => host.cards.definitionFor(state, cardId),
       },
+      servers: {
+        mustServer: (serverId) => host.servers.mustServer(state, serverId),
+        publicServerLabel: (serverId) =>
+          host.servers.publicServerLabel(state, serverId),
+      },
       encounter: {
         resolutionHost: encounterResolutionHostForState(state),
+      },
+      payment: {
+        spendCorpCredits: (amount) =>
+          host.payment.spendCredits(state, "corp", amount),
       },
       trash: {
         openRunnerInstalledTrashPreventionWindow: (
@@ -1069,6 +1115,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.zones.trashRunnerInstalledProgram(state, cardId),
       },
       choices: {
+        selectedChoiceIds: (selectedChoices) =>
+          selectedChoiceIds(selectedChoices),
         revealCorpRdTop: (actionToResolve) =>
           host.effects.revealCorpRdTop(state, actionToResolve),
         startCorpRdArrangeChoice: (input) => {
@@ -1082,6 +1130,15 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             input,
           );
         },
+      },
+      callbacks: {
+        beginEncounter: (iceId, actionToResolve) =>
+          beginEncounter(
+            encounterEntryHostForState(state),
+            iceId,
+            actionToResolve,
+          ),
+        resetBreakerStrength: () => host.ice.resetBreakerStrength(state),
       },
     });
   }
@@ -1204,6 +1261,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       cleanup: {
         cleanupEmptyRemotes: () => host.zones.cleanupEmptyRemotes(state),
+        trashRunnerInstalledProgram: (cardId) =>
+          host.zones.trashRunnerInstalledProgram(state, cardId),
       },
     };
   }

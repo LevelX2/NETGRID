@@ -10,6 +10,10 @@ import type {
   CardCorpUtilityImplementation,
   CardEffectImplementation,
 } from "../../ability-engine/definition-types";
+import {
+  isPrintedCostOnPlayAbility,
+  onPlayCardImplementationClickCost,
+} from "../../ability-engine/card-implementation-runtime-shared";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
   COUNTER_CREDIT_OPERATION_SOURCE,
@@ -99,6 +103,10 @@ export type CorpOperationResolutionHost = {
   };
   hiddenZone: {
     startCorpArchivesToHqChoice: (
+      legalAction: LegalAction,
+      sourceCardId: CardInstanceId,
+    ) => void;
+    startCorpHqCardToRdChoice: (
       legalAction: LegalAction,
       sourceCardId: CardInstanceId,
     ) => void;
@@ -354,6 +362,8 @@ export function canPlayCorpOperation(
 ): boolean {
   if (hasPrintedCostOnPlayCardImplementation(definition))
     return (
+      host.state.corp.clicks >=
+        onPlayCardImplementationClickCostForDefinition(definition) &&
       host.state.corp.credits >=
         (definition.cost ?? 0) +
           onPlayCardImplementationAdditionalOperationCost(definition) &&
@@ -361,7 +371,11 @@ export function canPlayCorpOperation(
       onPlayCardImplementationChoicesAreAvailable(host, definition)
     );
   const utility = corpUtilityImplementationForDefinition(definition.id);
-  if (utility) return canPlayCorpUtilityOperation(host, definition, utility);
+  if (utility)
+    return (
+      host.state.corp.clicks >= corpUtilityPlayClickCost(utility) &&
+      canPlayCorpUtilityOperation(host, definition, utility)
+    );
   const implementationResolver =
     cardImplementationCorpOperationResolver(host, definition);
   if (implementationResolver)
@@ -424,8 +438,18 @@ export function canPlayCorpUtilityOperation(
         const sourceCardId = host.state.corp.hq.find(
           (candidate) => definitionFor(host.state, candidate).id === _definition.id,
         );
-        return cardId !== sourceCardId;
+        if (cardId === sourceCardId) return false;
+        if (utility.filter?.cardType === "ice")
+          return definitionFor(host.state, cardId).type === "ice";
+        return true;
       });
+    case "draw_corp_cards_then_shuffle_hq_card_into_rd":
+      return (
+        host.state.corp.rd.length > 0 ||
+        host.state.corp.hq.some(
+          (cardId) => definitionFor(host.state, cardId).id !== _definition.id,
+        )
+      );
     case "corp_rd_top_reorder":
       return host.state.corp.rd.length >= 2;
     case "encounter_tag":
@@ -440,6 +464,8 @@ export function canPlayCorpUtilityOperation(
         host.state.corp.credits > 0 &&
         host.operations.hardwareTrashByCounterEligibleHardwareIds().length > 0
       );
+    case "runner_memory_limit_modifier_until_end_of_turn":
+      return host.state.runner.tags > 0;
     default:
       return false;
   }
@@ -520,11 +546,60 @@ export function resolveCorpUtilityOperation(
       };
       return;
     }
+    case "runner_memory_limit_modifier_until_end_of_turn": {
+      if (!canPlayCorpUtilityOperation(host, definition, utility)) {
+        throw new Error("Badtimes braucht einen getaggten Runner.");
+      }
+      const sourceCardId = sourceCardIdFromAction(legalAction);
+      if (!sourceCardId)
+        throw new Error("Badtimes braucht eine Quellenkarte.");
+      const amount = Math.max(0, Math.floor(utility.amount));
+      if (amount <= 0)
+        throw new Error("Badtimes-MU-Reduktion ist ungueltig.");
+      host.state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn = [
+        ...(host.state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn ?? []),
+        {
+          sourceCardInstanceId: sourceCardId,
+          sourceDefinitionId: definition.id,
+          amount,
+          turnSerial: Math.max(0, Math.floor(host.state.turnSerial ?? 0)),
+          expires: "turn_end",
+        },
+      ];
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        classicCorpUtilityAbility:
+          "runner_memory_limit_modifier_until_end_of_turn",
+        temporaryRunnerMemoryLimitReduction: amount,
+      };
+      return;
+    }
     case "corp_archives_to_hq": {
       const sourceCardId = sourceCardIdFromAction(legalAction);
       if (!sourceCardId || definitionFor(host.state, sourceCardId).id !== definition.id)
         throw new Error("Off-Site Backups fehlt als Quelle.");
       host.hiddenZone.startCorpArchivesToHqChoice(legalAction, sourceCardId);
+      return;
+    }
+    case "draw_corp_cards_then_shuffle_hq_card_into_rd": {
+      const sourceCardId = sourceCardIdFromAction(legalAction);
+      if (!sourceCardId || definitionFor(host.state, sourceCardId).id !== definition.id)
+        throw new Error("Corporate Shuffle fehlt als Quelle.");
+      const rdBefore = host.state.corp.rd.length;
+      for (let index = 0; index < utility.drawCount; index += 1) {
+        if (host.state.phase === "game_over") break;
+        host.corp.drawCorpCard();
+      }
+      const drawnCards = rdBefore - host.state.corp.rd.length;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "classic_corporate_shuffle_draw_then_hq_to_rd",
+        drawnCards,
+        corpHqAfterDraw: host.state.corp.hq.length,
+      };
+      if (host.state.phase !== "game_over")
+        host.hiddenZone.startCorpHqCardToRdChoice(legalAction, sourceCardId);
       return;
     }
     case "corp_rd_top_reorder": {
@@ -601,9 +676,26 @@ export function hasPrintedCostOnPlayCardImplementation(
 ): boolean {
   return Boolean(
     cardImplementationForDefinitionId(definition.id)?.abilities?.some(
-      (ability) => ability.kind === "on_play" && ability.costs === "printed",
+      isPrintedCostOnPlayAbility,
     ),
   );
+}
+
+export function onPlayCardImplementationClickCostForDefinition(
+  definition: CardDefinition,
+): number {
+  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.find(
+    isPrintedCostOnPlayAbility,
+  );
+  return ability ? onPlayCardImplementationClickCost(ability) : 1;
+}
+
+export function corpUtilityPlayClickCost(
+  utility: CardCorpUtilityImplementation | undefined,
+): number {
+  return utility?.playCost?.kind === "printed"
+    ? 1 + utility.playCost.additionalClicks
+    : 1;
 }
 
 export function onPlayCardImplementationAdditionalOperationCost(
@@ -659,7 +751,30 @@ export function cardImplementationOperationLegalActions(
     }
     return actions;
   }
+  const utilityClickCost = corpUtilityPlayClickCost(utility);
+  if (utility && utilityClickCost > 1) {
+    const totalCost = definition.cost ?? 0;
+    if (
+      host.state.corp.clicks < utilityClickCost ||
+      host.state.corp.credits < totalCost ||
+      !canPlayCorpUtilityOperation(host, definition, utility)
+    )
+      return [];
+    return [
+      host.actions.buildLegalAction(
+        host.state,
+        "corp",
+        "play_operation",
+        `${definition.title} spielen`,
+        cardId,
+        [{ clicks: utilityClickCost, credits: totalCost }],
+        { cardId },
+      ),
+    ];
+  }
   if (!hasPrintedCostOnPlayCardImplementation(definition)) return [];
+  const clickCost = onPlayCardImplementationClickCostForDefinition(definition);
+  if (host.state.corp.clicks < clickCost) return [];
   const additionalCost =
     onPlayCardImplementationAdditionalOperationCost(definition);
   const totalCost = (definition.cost ?? 0) + additionalCost;
@@ -684,7 +799,7 @@ export function cardImplementationOperationLegalActions(
               "play_operation",
               `${definition.title}: ${targetDefinition.title} rezzen (X=${x})`,
               cardId,
-              [{ clicks: 1, credits: totalCost }],
+              [{ clicks: clickCost, credits: totalCost }],
               {
                 cardId,
                 targetCardId,
@@ -704,7 +819,7 @@ export function cardImplementationOperationLegalActions(
             "play_operation",
             `${definition.title}: ${targetDefinition.title} rezzen`,
             cardId,
-            [{ clicks: 1, credits: totalCost }],
+            [{ clicks: clickCost, credits: totalCost }],
             {
               cardId,
               targetCardId,
@@ -728,7 +843,7 @@ export function cardImplementationOperationLegalActions(
         "play_operation",
         `${definition.title} spielen`,
         cardId,
-        [{ clicks: 1, credits: totalCost }],
+        [{ clicks: clickCost, credits: totalCost }],
         {
           cardId,
           ...(additionalCost > 0 ? { additionalTracePlayCost: additionalCost } : {}),
@@ -742,7 +857,7 @@ export function cardImplementationOperationLegalActions(
       "play_operation",
       `${definition.title} spielen`,
       cardId,
-      [{ clicks: 1, credits: totalCost }],
+      [{ clicks: clickCost, credits: totalCost }],
       {
         cardId,
         ...runnerLastTurnResourceTargetPayload(host, targetCardId),
@@ -774,7 +889,7 @@ export function onPlayCardImplementationEffects(
 ): readonly CardEffectImplementation[] {
   return (
     cardImplementationForDefinitionId(definition.id)?.abilities?.find(
-      (ability) => ability.kind === "on_play" && ability.costs === "printed",
+      isPrintedCostOnPlayAbility,
     )?.effects ?? []
   );
 }

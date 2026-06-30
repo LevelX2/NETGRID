@@ -46,7 +46,9 @@ export type ResolvedParticipantDeckSetup = Record<SeriesPlayerSlot, ResolvedPart
 
 const DEFAULT_RUNNER_SNAPSHOT_ID = "demo_runner_008_snapshot_v0_8";
 const DEFAULT_CORP_SNAPSHOT_ID = "demo_corp_008_snapshot_v0_8";
+const CLASSIC_PLAYTEST_PROFILE_ID = "netgrid_private_local_classic_playtest_v1";
 const PROTEUS_PLAYTEST_PROFILE_ID = "netgrid_private_local_proteus_playtest_v1";
+const CLASSIC_PROTEUS_PLAYTEST_PROFILE_ID = "netgrid_private_local_classic_proteus_playtest_v1";
 const cardsById = createRuntimeCardsById() as DeckValidationContext["cardsById"];
 const profiles = [...(profilesData.profiles as DeckFormatProfile[]), ...(profilesData130.profiles as DeckFormatProfile[])];
 const frozenSnapshots = snapshotsData.snapshots as DeckSnapshot[];
@@ -162,9 +164,29 @@ function resolveSnapshot(side: "runner" | "corp", supplied: DeckSnapshot | undef
 }
 
 function snapshotAllowedForCardPool(snapshot: DeckSnapshot, cardPool: MatchCardPool): boolean {
-  if (cardPool === "originalset_proteus") return true;
-  if (snapshot.formatProfileId === PROTEUS_PLAYTEST_PROFILE_ID) return false;
-  return snapshot.cards.every((entry) => !entry.cardId.startsWith("onr_proteus_"));
+  if (!profileAllowedForCardPool(snapshot.formatProfileId, cardPool)) return false;
+  return snapshot.cards.every((entry) => cardIdAllowedForCardPool(entry.cardId, cardPool));
+}
+
+function profileAllowedForCardPool(formatProfileId: string, cardPool: MatchCardPool): boolean {
+  if (formatProfileId === CLASSIC_PLAYTEST_PROFILE_ID) return cardPoolIncludesClassic(cardPool);
+  if (formatProfileId === PROTEUS_PLAYTEST_PROFILE_ID) return cardPoolIncludesProteus(cardPool);
+  if (formatProfileId === CLASSIC_PROTEUS_PLAYTEST_PROFILE_ID) return cardPoolIncludesClassic(cardPool) && cardPoolIncludesProteus(cardPool);
+  return true;
+}
+
+function cardIdAllowedForCardPool(cardId: string, cardPool: MatchCardPool): boolean {
+  if (cardId.startsWith("onr_classic_") && !cardPoolIncludesClassic(cardPool)) return false;
+  if (cardId.startsWith("onr_proteus_") && !cardPoolIncludesProteus(cardPool)) return false;
+  return true;
+}
+
+function cardPoolIncludesClassic(cardPool: MatchCardPool): boolean {
+  return cardPool === "originalset_classic" || cardPool === "originalset_classic_proteus";
+}
+
+function cardPoolIncludesProteus(cardPool: MatchCardPool): boolean {
+  return cardPool === "originalset_proteus" || cardPool === "originalset_classic_proteus";
 }
 
 function deterministicSnapshotId(side: "runner" | "corp", seed: string, salt: string): string {

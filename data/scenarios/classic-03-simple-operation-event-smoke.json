@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "classic-03-simple-operation-event-smoke",
+  "release": "CLASSIC-03 Simple Operation/Event Cards",
+  "status": "package",
+  "coversCards": [
+    "onr_classic_017_corporate-shuffle",
+    "onr_classic_018_reclamation-project",
+    "onr_classic_037_finders-keepers",
+    "onr_classic_040_meat-upgrade",
+    "onr_classic_041_networking",
+    "onr_classic_042_panzer-run"
+  ],
+  "scenarios": [
+    {
+      "id": "classic_03_simple_operation_event_smoke",
+      "side": "both",
+      "coversCards": [
+        "onr_classic_017_corporate-shuffle",
+        "onr_classic_018_reclamation-project",
+        "onr_classic_037_finders-keepers",
+        "onr_classic_040_meat-upgrade",
+        "onr_classic_041_networking",
+        "onr_classic_042_panzer-run"
+      ],
+      "assertions": [
+        "Double operation and double prep cards project LegalActions with two click costs and are not legal with only one available click.",
+        "Corporate Shuffle draws up to five Corp cards and then opens a hidden-info HQ-to-R&D shuffle choice.",
+        "Reclamation Project opens an ICE-only Archives-to-HQ choice, supports multiple selected ICE cards, and reveals selected definitions publicly.",
+        "Finders Keepers uses three deterministic die rolls, records RandomDrawRecords, and gains credits equal to the roll total.",
+        "Meat Upgrade removes up to two Runner tags and draws three cards.",
+        "Networking gains nine Runner credits.",
+        "Panzer Run gains four Runner credits and draws two cards."
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "hidden_zone_barrier",
+        "random_counter_replay_required",
+        "public_payload_only"
+      ]
+    }
+  ]
+}

@@ -78,6 +78,12 @@ export function executeRunSequenceEffect(
                 effect.successfulRunAccessReplacement,
             }
           : {}),
+        ...(effect.conditionalAccessBonus !== undefined
+          ? { conditionalAccessBonus: effect.conditionalAccessBonus }
+          : {}),
+        ...(effect.corpRezCostSurcharge !== undefined
+          ? { corpRezCostSurcharge: effect.corpRezCostSurcharge }
+          : {}),
         ...(effect.successfulRunCreditLoss !== undefined
           ? { successfulRunCreditLoss: effect.successfulRunCreditLoss }
           : {}),
@@ -146,6 +152,14 @@ export function executeRunSequenceEffect(
           : {}),
       });
       mergePublicPayload(publicPayload, runResult.publicPayload);
+      return true;
+    }
+    case "end_run": {
+      assertPublicVisibility("end_run", effect.visibility);
+      if (!context.endRun)
+        throw new Error("end_run effect requires an endRun execution context.");
+      const result = context.endRun(effect.successful);
+      mergePublicPayload(publicPayload, result.publicPayload);
       return true;
     }
     case "mark_next_agenda_access_credit_gain": {

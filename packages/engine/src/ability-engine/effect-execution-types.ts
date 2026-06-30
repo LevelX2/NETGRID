@@ -64,6 +64,7 @@ export type CardEffectExecutionContext = {
     serverId: Exclude<ServerId, "new_remote">,
     options: CardEffectMakeRunOptions,
   ) => CardEffectMakeRunResult;
+  endRun?: (successful: boolean) => CardEffectHiddenInfoResult;
   addCounterToAllInstalledRunnerIcebreakers?: (
     counterType: CounterType,
     amount: number,
@@ -75,6 +76,7 @@ export type CardEffectExecutionContext = {
     sourceCardId: CardInstanceId,
   ) => CardEffectHiddenInfoResult;
   gainRunnerEventAgendaPoint?: (amount: 1) => CardEffectHiddenInfoResult;
+  scoreSourceAsAgenda?: () => CardEffectHiddenInfoResult;
   runnerLiberatedAgendaSubtypeThisTurn?: (
     subtype: "research" | "gray_ops" | "black_ops",
   ) => boolean;
@@ -188,6 +190,10 @@ export type CardEffectExecutionContext = {
       | "rent_to_own_start_corp_turn";
   }) => CardEffectHiddenInfoResult;
   replaceFortCardsFromHq?: () => CardEffectHiddenInfoResult;
+  doubleChosenIceStrengthUntilEndOfTurn?: (
+    targetIceId: CardInstanceId,
+    maxStrength: number,
+  ) => CardEffectHiddenInfoResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -260,7 +266,15 @@ export type CardEffectMakeRunOptions = {
     | "private_look_top_rd"
     | "archives_faceup_to_rd"
     | "trash_rezzed_ice_on_fort_and_tag_runner"
-    | "runner_gain_agenda_point";
+    | "runner_gain_agenda_point"
+    | "reveal_rd_until_agenda_store_in_hq";
+  conditionalAccessBonus?: {
+    kind: "no_noisy_icebreaker_or_trace";
+    amount: number;
+  };
+  corpRezCostSurcharge?: {
+    kind: "matching_printed_rez_cost";
+  };
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;

@@ -459,6 +459,14 @@ export function createAccessFlowAdapters(
       trash: {
         trashRunnerInstalledCardToHeap: (cardId) =>
           host.zones.trashRunnerInstalledCardToHeap(state, cardId),
+        trashCorpInstalledCardToArchives: (cardId) => {
+          if (!legalAction) throw new Error("Corp-Trash-Aktion fehlt.");
+          host.zones.trashCorpInstalledCardToArchives(
+            state,
+            cardId,
+            legalAction,
+          );
+        },
         openRunnerInstalledTrashPreventionWindow: (
           targetIds,
           sourceDefinitionId,

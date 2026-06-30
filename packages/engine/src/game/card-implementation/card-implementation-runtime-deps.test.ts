@@ -122,6 +122,16 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
           runnerRunTemporaryCredits: options.runnerRunTemporaryCredits,
         } as unknown as RunState;
       },
+      finishRun: (gameState, _legalAction, successful) => {
+        calls.push(`finish_run:${successful}`);
+          delete gameState.run;
+        return {
+          publicPayload: {
+            runEnded: true,
+            runSuccessful: successful,
+          },
+        };
+      },
     },
     hiddenZone: {
       runtimeDepsHost: {
@@ -228,12 +238,23 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       trashCorpInstalledCardsInSourceServer: () => ({
         publicPayload: { trashed: true },
       }),
+      doubleChosenIceStrengthUntilEndOfTurn: () => ({
+        publicPayload: { iceStrengthAfter: 1 },
+      }),
       awardRunnerEventAgendaPoint: (_state, legalAction, id) => {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           sourceDefinitionId: id,
           agendaPointsGained: 1,
         };
+      },
+      scoreSourceAsAgenda: (_state, legalAction, sourceCardIdToScore) => {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          scoredSourceAsAgenda: true,
+          sourceCardId: sourceCardIdToScore,
+        };
+        return { publicPayload: legalAction.payload };
       },
       discardRandomCorpHqCards: (_state, _sourceDefinitionId, count) =>
         Array.from({ length: count }, (_, index) =>
@@ -296,6 +317,7 @@ describe("game card implementation runtime deps root", () => {
         "unpreventableDamageRunner",
         "startTrace",
         "startRun",
+        "finishRun",
         "startPrivateLook",
         "exposeInstalledCorpCardTargets",
         "exposeInstalledCorpCard",
@@ -340,6 +362,7 @@ describe("game card implementation runtime deps root", () => {
         "shuffleSourceIntoCorpRd",
         "trashCorpInstalledCardsInSourceServer",
         "gainRunnerEventAgendaPoint",
+        "scoreSourceAsAgenda",
         "corpRandomDiscardFromHq",
         "addHostedCredits",
         "addCountersToSource",
@@ -353,6 +376,7 @@ describe("game card implementation runtime deps root", () => {
         "startMoveAdvancementCounters",
         "rezInstalledIceWithLifecycleCounters",
         "replaceFortCardsFromHq",
+        "doubleChosenIceStrengthUntilEndOfTurn",
         "trashTopCorpRdCards",
         "rezCostForCard",
         "startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice",

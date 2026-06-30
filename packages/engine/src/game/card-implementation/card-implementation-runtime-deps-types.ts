@@ -31,6 +31,8 @@ export type CardImplementationStartRunOptions = Pick<
   | "grantBonusRunOnFinish"
   | "accessServerOverride"
   | "successfulRunAccessReplacement"
+  | "conditionalAccessBonus"
+  | "corpRezCostSurcharge"
   | "successfulRunCreditLoss"
   | "successfulRunRunnerTagGain"
   | "successfulRunCorpDraw"
@@ -85,6 +87,11 @@ export type GameCardImplementationRuntimeDepsHost = {
       options: CardImplementationStartRunOptions,
       legalAction: RuntimeLegalAction,
     ) => void;
+    finishRun: (
+      state: GameState,
+      legalAction: RuntimeLegalAction,
+      successful: boolean,
+    ) => void;
   };
   hiddenZone: {
     runtimeDepsHost: HiddenZoneRuntimeDepsHost;
@@ -105,6 +112,7 @@ export type GameCardImplementationRuntimeDepsHost = {
       legalAction: RuntimeLegalAction,
       sourceDefinitionId: CardDefinition["id"],
     ) => void;
+    scoreSourceAsAgenda: CardImplementationRuntimeDependencies["scoreSourceAsAgenda"];
     discardRandomCorpHqCards: (
       state: RuntimeState,
       sourceDefinitionId: CardDefinition["id"],
@@ -117,6 +125,7 @@ export type GameCardImplementationRuntimeDepsHost = {
     passCurrentEncounteredIce?: CardImplementationRuntimeDependencies["passCurrentEncounteredIce"];
     rezInstalledIceWithLifecycleCounters: CardImplementationRuntimeDependencies["rezInstalledIceWithLifecycleCounters"];
     replaceFortCardsFromHq: CardImplementationRuntimeDependencies["replaceFortCardsFromHq"];
+    doubleChosenIceStrengthUntilEndOfTurn: CardImplementationRuntimeDependencies["doubleChosenIceStrengthUntilEndOfTurn"];
     trashTopCorpRdCards: CardImplementationRuntimeDependencies["trashTopCorpRdCards"];
     rezCostForCard: CardImplementationRuntimeDependencies["rezCostForCard"];
     startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: CardImplementationRuntimeDependencies["startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice"];

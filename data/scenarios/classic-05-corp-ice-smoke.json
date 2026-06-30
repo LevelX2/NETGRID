@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "classic-05-corp-ice-smoke",
+  "release": "CLASSIC-05 Corp ICE Baseline und Noisy/Sleepy",
+  "status": "package",
+  "coversCards": [
+    "onr_classic_005_baskerville",
+    "onr_classic_006_bolter-swarm",
+    "onr_classic_007_brain-drain",
+    "onr_classic_008_deadeye",
+    "onr_classic_012_imperial-guard",
+    "onr_classic_013_puzzle"
+  ],
+  "scenarios": [
+    {
+      "id": "classic_05_corp_ice_smoke",
+      "side": "corp",
+      "coversCards": [
+        "onr_classic_005_baskerville",
+        "onr_classic_006_bolter-swarm",
+        "onr_classic_007_brain-drain",
+        "onr_classic_008_deadeye",
+        "onr_classic_012_imperial-guard",
+        "onr_classic_013_puzzle"
+      ],
+      "assertions": [
+        "Baskerville resolves printed Net damage, starts a Trace 5 counter effect, adds Baskerville counters on successful trace, applies two Net damage per counter at run start, and allows Runner main-action removal for three credits.",
+        "Bolter Swarm resolves four Net damage and sets the next-encounter no-break marker for the next piece of ICE encountered during the same run.",
+        "Brain Drain uses a deterministic six-sided die roll and applies three core damage only on a roll of 1.",
+        "Deadeye and Imperial Guard trash an installed Runner program, then resolve End-the-run.",
+        "Baskerville, Bolter Swarm, Deadeye and Imperial Guard reduce their own rez cost by five only after noisy Icebreaker use during the current run.",
+        "Puzzle resolves End-the-run and queues itself for a single Corp installed-card trash at the end of the Runner turn."
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "random_counter_replay_required",
+        "public_payload_only",
+        "no_hidden_card_data_leak",
+        "statehash_replay_required"
+      ]
+    }
+  ]
+}

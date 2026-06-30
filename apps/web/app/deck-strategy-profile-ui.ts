@@ -78,8 +78,8 @@ export type DeckStrategyProfileRunnerStrategicIntentViewer = {
   source: {
     label: "Abgeleitete KI-Spielabsicht";
     interpretation: "Runtime-nahe Projektion";
-    deckStrategyProfile: "diagnostic_only";
-    deckCapabilities: "ai_internal";
+    deckStrategyProfile: "ai_internal_strategy_profile" | "missing";
+    deckCapabilities: "ai_internal" | "missing";
     plannerEffect: "runtime_projection";
   };
   statusEntries: DeckStrategyProfileEntry[];

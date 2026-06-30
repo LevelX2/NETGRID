@@ -1,11 +1,17 @@
 import {
   DEMO_CARDS_BY_ID,
+  type CardDefinition,
   type CardInstanceId,
   type GameState,
   type LegalAction,
   type MultiServerSuccessSequenceState,
 } from "@netgrid/shared";
+import {
+  isPrintedCostOnPlayAbility,
+  onPlayCardImplementationClickCost,
+} from "../../ability-engine/card-implementation-runtime-shared";
 import { expandRunnerProgramInstallPaymentActions } from "../install/runner-program-install-payment";
+import { restrictedHostedCredits } from "../run/run-duration-payment";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -145,6 +151,16 @@ function runnerInstallCapabilitiesMet(
       return false;
   }
   return true;
+}
+
+function runnerEventClickCost(
+  host: RunnerMainActionGenerationHost,
+  definition: CardDefinition,
+): number {
+  const ability = host.cardImplementation
+    .cardImplementationForDefinitionId(definition.id)
+    ?.abilities?.find(isPrintedCostOnPlayAbility);
+  return ability ? onPlayCardImplementationClickCost(ability) : 1;
 }
 
 export function buildRunnerMainActions(
@@ -650,7 +666,9 @@ export function buildRunnerMainActions(
     if (
       hasClicks &&
       definition.type === "event" &&
-      state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+      state.runner.credits +
+        restrictedHostedCredits(state, "play_events") +
+        runnerCostPenaltySupportCreditCapacity(state) >=
         (definition.cost ?? 0)
     ) {
       const canPlayCardImplementation = canPlayPrintedCostOnPlayImplementation(
@@ -658,6 +676,10 @@ export function buildRunnerMainActions(
         state,
         definition,
       );
+      const playEventClickCost = canPlayCardImplementation
+        ? runnerEventClickCost(host, definition)
+        : 1;
+      if (state.runner.clicks < playEventClickCost) continue;
       const targetedEvent = cardImplementationForDefinitionId(
         definition.id,
       )?.runnerEventTargetedEffect;
@@ -690,6 +712,19 @@ export function buildRunnerMainActions(
         !resolver.canPlay(state)
       )
         continue;
+      if (!canPlayCardImplementation && resolver?.legalActions) {
+        actions.push(
+          ...resolver.legalActions({
+            state,
+            cardId: id,
+            definition,
+            buildAction: action,
+            clickCost: playEventClickCost,
+            creditCost: definition.cost ?? 0,
+          }),
+        );
+        continue;
+      }
       if (!canPlayCardImplementation && resolver?.requiresServer) {
         for (const server of state.corp.servers) {
           if (
@@ -721,7 +756,7 @@ export function buildRunnerMainActions(
               "play_event",
               `${definition.title} auf ${server.label}`,
               id,
-              [{ clicks: 1, credits: definition.cost ?? 0 }],
+              [{ clicks: playEventClickCost, credits: definition.cost ?? 0 }],
               { cardId: id, serverId: server.id, runnerEventRun: true },
             ),
           );
@@ -736,7 +771,7 @@ export function buildRunnerMainActions(
                 "play_event",
                 `${definition.title} auf ${server.label}`,
                 id,
-                [{ clicks: 1, credits: definition.cost ?? 0 }],
+                [{ clicks: playEventClickCost, credits: definition.cost ?? 0 }],
                 { cardId: id, serverId: server.id, runnerEventRun: true },
               ),
             );
@@ -750,7 +785,7 @@ export function buildRunnerMainActions(
             "play_event",
             `${definition.title} spielen`,
             id,
-            [{ clicks: 1, credits: definition.cost ?? 0 }],
+            [{ clicks: playEventClickCost, credits: definition.cost ?? 0 }],
             { cardId: id },
           ),
         );

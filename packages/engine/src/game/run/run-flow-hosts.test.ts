@@ -143,6 +143,7 @@ function hostFor(calls: string[]): RunFlowHost {
       currentEncounterSubroutines: () => [],
       runRemainderStrengthBonusForBreaker: () => 0,
       runnerDuringRunCardImplementationLegalActions: () => [],
+      corpDuringRunCardImplementationLegalActions: () => [],
       executeCardImplementationRunnerRunStartEffects: () =>
         calls.push("runStartEffects"),
       applyRunnerTraceCounterRunStartEffects: () =>
@@ -196,6 +197,7 @@ function hostFor(calls: string[]): RunFlowHost {
       preventOneVirusCounterWithCounterPrevention: () => ({
         prevented: false,
         creditsPaid: 0,
+        preventionChargesSpent: 0,
       }),
       poxCountersForServer: () => 0,
     },
@@ -241,6 +243,12 @@ function hostFor(calls: string[]): RunFlowHost {
     callbacks: {
       finishRun: (_state, successful) => calls.push(`finishRun:${successful}`),
       drawCorpCards: () => calls.push("drawCorpCards"),
+      drawRunnerCards: () => ({
+        drawnCount: 0,
+        drawTaxSourceCount: 0,
+        drawTaxCreditsPaid: 0,
+        drawTaxTagsAdded: 0,
+      }),
       activeObligationCount: () => 0,
       addActiveObligation: () => undefined,
       applyRunnerForgoNextAction: () => undefined,

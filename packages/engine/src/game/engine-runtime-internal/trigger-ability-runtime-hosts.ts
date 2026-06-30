@@ -379,6 +379,7 @@ import {
   applyPassedIceRunEndTrigger,
   isTraceLinkForceJackOutSource,
   markTraceLinkForceJackOutAfterEncounter,
+  resolveFullyBrokenPassedIceDerez as resolveFullyBrokenPassedIceDerezInRunModule,
   resolveFullyBrokenPassedIceDerezAndEndRun as resolveFullyBrokenPassedIceDerezAndEndRunInRunModule,
   resolveFullyBrokenPassedIceTrash as resolveFullyBrokenPassedIceTrashInRunModule,
   resolveSecretSpendCompareChoice as resolveSecretSpendCompareChoiceInRunModule,
@@ -790,6 +791,11 @@ export function createTriggerAbilityRuntimeHosts(
           ),
         resolveFullyBrokenPassedIceDerezAndEndRun: (legalAction) =>
           resolveFullyBrokenPassedIceDerezAndEndRunInRunModule(
+            encounterSpecialWindowHostForState(state),
+            legalAction,
+          ),
+        resolveFullyBrokenPassedIceDerez: (legalAction) =>
+          resolveFullyBrokenPassedIceDerezInRunModule(
             encounterSpecialWindowHostForState(state),
             legalAction,
           ),

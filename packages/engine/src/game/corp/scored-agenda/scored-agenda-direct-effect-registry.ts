@@ -11,6 +11,7 @@ import { applyDirectScoreEconomyEffects } from "./direct-score-economy-effects";
 import { applyOveradvanceScoreEffects } from "./overadvance-score-effects";
 import { applySequencePayloadPatch } from "./scored-agenda-sequence-types";
 import type { ScoredAgendaFlowHost } from "./scored-agenda-flow-host";
+import { clearPurgeableRunnerVirusCounters } from "../../turn/turn-basic-execution";
 
 export type ScoredAgendaDirectEffectContext = {
   host: ScoredAgendaFlowHost;
@@ -117,6 +118,35 @@ export const SCORED_AGENDA_DIRECT_EFFECT_RESOLVERS: readonly ScoredAgendaDirectE
         )
           return;
         resolveScoreCreditSwingOnScore(host, definition, legalAction, scoredAgenda);
+      },
+    },
+    {
+      id: "purge_runner_virus_counters_and_prevent_next_effect",
+      kind: "purge_runner_virus_counters_and_prevent_next",
+      mode: "agenda_kind",
+      resolveOnScore: ({ host, legalAction, scoredAgenda }) => {
+        if (
+          scoredAgenda?.kind !==
+          "purge_runner_virus_counters_and_prevent_next"
+        )
+          return;
+        const removed = clearPurgeableRunnerVirusCounters(host.state);
+        const existing = Math.max(
+          0,
+          Math.floor(host.state.corpRunnerVirusCounterPreventionCharges ?? 0),
+        );
+        host.state.corpRunnerVirusCounterPreventionCharges =
+          existing + Math.max(0, Math.floor(scoredAgenda.preventCount));
+        if (legalAction) {
+          applySequencePayloadPatch(legalAction, {
+            runnerVirusCountersPurged: removed.total,
+            runnerVirusCounterPurgeSummary: removed.publicSummary,
+            runnerVirusCounterPreventionChargesAdded:
+              scoredAgenda.preventCount,
+            corpRunnerVirusCounterPreventionChargesAfter:
+              host.state.corpRunnerVirusCounterPreventionCharges,
+          });
+        }
       },
     },
   ];

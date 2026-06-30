@@ -987,6 +987,20 @@ export function createScoredEconomyRuntimeHosts(
             cardId,
             definition,
           ),
+        pushActivatedCardImplementationRunActions: (
+          actions,
+          cardId,
+          definition,
+        ) =>
+          pushActivatedCardImplementationActionsForTiming(
+            cardImplementationRuntimeDeps,
+            state,
+            actions,
+            "corp",
+            cardId,
+            definition,
+            "corp_during_run",
+          ),
         resolveActivatedCardImplementationAbility: () => {
           if (!legalAction) return false;
           return resolveActivatedCardImplementationAbility(

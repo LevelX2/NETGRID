@@ -690,6 +690,38 @@ export function publicContextForAction(
       "trashedHardwareCount",
       "trashedHardwareDefinitionIds",
       "runnerRunAttemptsLastTurn",
+      "classicCorpUtilityAbility",
+      "temporaryRunnerMemoryLimitReduction",
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
+  if (legalAction.type === "play_event") {
+    for (const key of [
+      "runnerEventAbility",
+      "xValue",
+      "damageCannotBePrevented",
+      "damageType",
+      "damageAmount",
+      "cardsTrashed",
+      "coreDamageAfter",
+      "runnerMaxHandSizeAfter",
+      "flatline",
+      "gainedCredits",
+      "runnerCreditsAfter",
+      "hostedCreditsSpent",
+      "hostedCreditSourceDefinitionIds",
+      "normalCreditsSpent",
+      "corruptedAgendaCount",
+      "corruptedAgendaDefinitionIds",
+      "agendaPointsLost",
+      "corpBonusAgendaPointsAfter",
+      "tagsAdded",
+      "runnerTagsAfter",
+      "specialZone",
+      "specialZoneVisibility",
+      "sourceDefinitionId",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -847,6 +879,23 @@ export function publicContextForAction(
         legalAction.payload.daemonHostedTrashCount;
     if (typeof legalAction.payload.trashedInstalledCount === "number")
       context.trashedInstalledCount = legalAction.payload.trashedInstalledCount;
+    if (typeof legalAction.payload.trashedCorpInstalledCardCount === "number")
+      context.trashedCorpInstalledCardCount =
+        legalAction.payload.trashedCorpInstalledCardCount;
+    if (
+      typeof legalAction.payload.trashedInstalledRunnerHardwareCount ===
+      "number"
+    )
+      context.trashedInstalledRunnerHardwareCount =
+        legalAction.payload.trashedInstalledRunnerHardwareCount;
+    if (
+      typeof legalAction.payload.trashedInstalledRunnerProgramCount ===
+      "number"
+    )
+      context.trashedInstalledRunnerProgramCount =
+        legalAction.payload.trashedInstalledRunnerProgramCount;
+    if (typeof legalAction.payload.netDamageAmount === "number")
+      context.netDamageAmount = legalAction.payload.netDamageAmount;
     if (typeof legalAction.payload.scoredFromServerId === "string")
       context.scoredFromServerId = legalAction.payload.scoredFromServerId;
     if (typeof legalAction.payload.installedCount === "number")
@@ -1256,6 +1305,10 @@ export function publicContextForAction(
     "targetCardDefinitionId",
     "targetIceDefinitionId",
     "targetIcePositionLabel",
+    "iceStrengthBefore",
+    "iceStrengthAfter",
+    "iceStrengthBonusApplied",
+    "iceStrengthMaxCap",
     "breakSubroutineBaseCost",
     "checkedIceCount",
     "successfulRunForceRezCreditCost",
@@ -1274,6 +1327,20 @@ export function publicContextForAction(
     "serverLabel",
     "accessCount",
     "gainedAgendaPoints",
+    "targetTrashCount",
+    "hardwareTrashCount",
+    "programTrashCount",
+    "selfDestructTrashedCount",
+    "damageAmount",
+    "trashedCorpInstalledCardCount",
+    "trashedInstalledRunnerHardwareCount",
+    "trashedInstalledRunnerProgramCount",
+    "netDamageAmount",
+    "classicIndiscriminateResponseTeam",
+    "runnerGripShuffledIntoStackCount",
+    "runnerCardsDrawnAfterGripShuffle",
+    "runnerStackAfter",
+    "classicIndiscriminateResponseTeamSourceDefinitionIds",
   ]) {
     const value = legalAction.payload?.[key];
     if (value !== undefined) context[key] = value;
@@ -1949,6 +2016,7 @@ export function publicContextForAction(
       "randomDiceLoopQueuedBeforeRolls",
       "randomDiceLoopQueuedAfterRolls",
       "randomDiceLoopRemainingDice",
+      "gainedCredits",
       "runnerCreditsAfter",
     ]) {
       const value = legalAction.payload[key];
@@ -1996,6 +2064,41 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.projectZurichOveradvance === "number")
     context.projectZurichOveradvance =
       legalAction.payload.projectZurichOveradvance;
+  if (typeof legalAction.payload?.runnerVirusCountersPurged === "number")
+    context.runnerVirusCountersPurged =
+      legalAction.payload.runnerVirusCountersPurged;
+  if (typeof legalAction.payload?.runnerVirusCounterPurgeSummary === "string")
+    context.runnerVirusCounterPurgeSummary =
+      legalAction.payload.runnerVirusCounterPurgeSummary;
+  if (
+    typeof legalAction.payload?.runnerVirusCounterPreventionChargesAdded ===
+    "number"
+  )
+    context.runnerVirusCounterPreventionChargesAdded =
+      legalAction.payload.runnerVirusCounterPreventionChargesAdded;
+  if (
+    typeof legalAction.payload?.corpRunnerVirusCounterPreventionChargesAfter ===
+    "number"
+  )
+    context.corpRunnerVirusCounterPreventionChargesAfter =
+      legalAction.payload.corpRunnerVirusCounterPreventionChargesAfter;
+  if (typeof legalAction.payload?.scoredSourceAsAgenda === "boolean")
+    context.scoredSourceAsAgenda = legalAction.payload.scoredSourceAsAgenda;
+  if (typeof legalAction.payload?.scoredAgendaPointValue === "number")
+    context.scoredAgendaPointValue =
+      legalAction.payload.scoredAgendaPointValue;
+  if (typeof legalAction.payload?.runnerMemoryUsedAfter === "number")
+    context.runnerMemoryUsedAfter = legalAction.payload.runnerMemoryUsedAfter;
+  if (typeof legalAction.payload?.cardImplementationSourceCounterType === "string")
+    context.cardImplementationSourceCounterType =
+      legalAction.payload.cardImplementationSourceCounterType;
+  if (typeof legalAction.payload?.cardImplementationSourceCounterCost === "number")
+    context.cardImplementationSourceCounterCost =
+      legalAction.payload.cardImplementationSourceCounterCost;
+  if (typeof legalAction.payload?.runEnded === "boolean")
+    context.runEnded = legalAction.payload.runEnded;
+  if (typeof legalAction.payload?.runSuccessful === "boolean")
+    context.runSuccessful = legalAction.payload.runSuccessful;
   if (state.winner && state.gameEndReason)
     context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;

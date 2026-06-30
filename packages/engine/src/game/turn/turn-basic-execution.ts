@@ -315,7 +315,9 @@ function purgeableRunnerVirusBucketTotal(
   );
 }
 
-export function purgeableRunnerVirusCounterTotal(state: GameState): number {
+export function purgeableRunnerVirusCounterTotal(
+  state: Pick<GameState, "purgeableRunnerVirusCounters">,
+): number {
   const counters = state.purgeableRunnerVirusCounters;
   if (!counters) return 0;
   let total = purgeableRunnerVirusBucketTotal(counters.corp);
@@ -339,7 +341,9 @@ function compactPurgeableRunnerVirusBucket(
   return Object.keys(compact).length > 0 ? compact : undefined;
 }
 
-export function purgePurgeableRunnerVirusCounters(state: GameState): {
+export function clearPurgeableRunnerVirusCounters(
+  state: Pick<GameState, "purgeableRunnerVirusCounters">,
+): {
   total: number;
   publicSummary: string;
 } {
@@ -373,10 +377,19 @@ export function purgePurgeableRunnerVirusCounters(state: GameState): {
   }
 
   const total = purgeableRunnerVirusCounterTotal(state);
-  if (total <= 0)
-    throw new Error("Es gibt keine purgefaehigen Runner-Virus-Counter.");
+  if (total <= 0) return { total: 0, publicSummary: "" };
   delete state.purgeableRunnerVirusCounters;
   return { total, publicSummary: summary.join(";") };
+}
+
+export function purgePurgeableRunnerVirusCounters(state: GameState): {
+  total: number;
+  publicSummary: string;
+} {
+  const summary = clearPurgeableRunnerVirusCounters(state);
+  if (summary.total <= 0)
+    throw new Error("Es gibt keine purgefaehigen Runner-Virus-Counter.");
+  return summary;
 }
 
 export function purgeVirusCounters(state: GameState): number {

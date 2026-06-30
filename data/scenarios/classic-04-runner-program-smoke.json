@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "classic-04-runner-program-smoke",
+  "release": "CLASSIC-04 Runner Program Cards",
+  "status": "package",
+  "coversCards": [
+    "onr_classic_027_early-worm",
+    "onr_classic_028_matador",
+    "onr_classic_029_ms-todon",
+    "onr_classic_030_psychic-friend",
+    "onr_classic_031_rent-i-con",
+    "onr_classic_032_schematics-search-engine",
+    "onr_classic_033_superglue"
+  ],
+  "scenarios": [
+    {
+      "id": "classic_04_runner_program_smoke",
+      "side": "runner",
+      "coversCards": [
+        "onr_classic_027_early-worm",
+        "onr_classic_028_matador",
+        "onr_classic_029_ms-todon",
+        "onr_classic_030_psychic-friend",
+        "onr_classic_031_rent-i-con",
+        "onr_classic_032_schematics-search-engine",
+        "onr_classic_033_superglue"
+      ],
+      "assertions": [
+        "Early Worm breaks wall subroutines for one credit and pumps plus three strength for two credits.",
+        "Matador breaks sentry subroutines for one credit and pumps plus five strength for three credits.",
+        "MS-todon breaks sentry subroutines, pumps normally, and only once per run loses all stealth bits and receives one tag after a successful break.",
+        "Psychic Friend breaks code gate subroutines and its pump bonus persists for the current run.",
+        "Rent-I-Con breaks any ice subroutine and trashes itself at the end of a run in which it was used.",
+        "Schematics Search Engine exposes all installed Corp cards whenever the Runner accesses cards from HQ without leaking CardInstanceIds.",
+        "Superglue offers a post-pass action only after all subroutines of the passed ICE are broken, taps itself, derezzes that ICE, and does not end the run."
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "public_payload_only",
+        "no_card_instance_id_leak",
+        "statehash_replay_required"
+      ]
+    }
+  ]
+}

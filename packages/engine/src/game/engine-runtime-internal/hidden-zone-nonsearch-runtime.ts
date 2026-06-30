@@ -231,6 +231,9 @@ export function createHiddenZoneNonSearchRuntime(
       },
       cards: {
         definitionFor: (cardId) => definitionFor(state, cardId),
+        corpUtilityForCard: (cardId) =>
+          cardImplementationForDefinitionId(definitionFor(state, cardId).id)
+            ?.corpUtility,
         hasCorpUtilityKind: (cardId, kind) =>
           hasCorpUtilityKind(
             state,
@@ -263,6 +266,8 @@ export function createHiddenZoneNonSearchRuntime(
         hasSuccessfulHqRunThisTurn: () => hasSuccessfulHqRunThisTurn(state),
         spendCorpCredits: (amount) => spendCredits(state, "corp", amount),
         gainRunnerCredits: (amount) => credits(state, "runner", amount),
+        shuffleCorpCardIntoRd: (cardId, sourceDefinitionId) =>
+          shuffleCorpCardIntoRd(state, cardId, sourceDefinitionId, "operation"),
         startRunWithAutoPass: (serverId, iceId) =>
           startRun(
             state,

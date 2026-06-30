@@ -1,5 +1,6 @@
-import type { GameState, LegalAction } from "@netgrid/shared";
+import type { CardInstanceId, GameState, LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { createGame } from "../create-game";
 import { buildLegalAction } from "./action-builders";
 import {
@@ -118,6 +119,56 @@ describe("runner main action generation", () => {
       },
     });
     expect(actions[0]?.actionId).toBe("runner.start_run.rd");
+  });
+
+  it("requires two clicks for Classic double prep events", () => {
+    const eventCardId = "classic_networking_1" as CardInstanceId;
+    const state = minimalRunnerMainState("classic-03-runner-double-prep");
+    state.runner.grip = [eventCardId];
+    state.cardInstances[eventCardId] = {
+      id: eventCardId,
+      instanceId: eventCardId,
+      definitionId: "onr_classic_041_networking",
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "grip" },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    } as never;
+    const host = testRunnerMainHost(state);
+    host.cards.definitionFor = () =>
+      ({
+        id: "onr_classic_041_networking",
+        title: "Networking",
+        side: "runner",
+        type: "event",
+        cost: 0,
+      }) as never;
+    host.cards.isUniqueCard = () => false;
+    host.cards.hasInstalledUniqueCardDefinition = () => false;
+    host.cardImplementation.cardImplementationForDefinitionId = (definitionId) =>
+      cardImplementationForDefinitionId(definitionId);
+    host.cardImplementation.canPlayPrintedCostOnPlayImplementation = () => true;
+
+    state.runner.clicks = 1;
+    expect(
+      buildRunnerMainActions(host).some(
+        (candidate) =>
+          candidate.type === "play_event" &&
+          candidate.payload?.cardId === eventCardId,
+      ),
+    ).toBe(false);
+
+    state.runner.clicks = 2;
+    const action = buildRunnerMainActions(host).find(
+      (candidate) =>
+        candidate.type === "play_event" &&
+        candidate.payload?.cardId === eventCardId,
+    );
+
+    expect(action?.costs).toEqual([{ clicks: 2, credits: 0 }]);
   });
 
   it("offers only a deterministic sequence-failure action when the next data fort cannot be run", () => {

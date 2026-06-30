@@ -85,6 +85,10 @@ export type RunnerBreakerActionExecutionHost = {
       breakerId: CardInstanceId,
       legalAction: LegalAction,
     ) => void;
+    applyOncePerRunBreakTagAndAllStealthLoss?: (
+      breakerId: CardInstanceId,
+      legalAction: LegalAction,
+    ) => void;
   };
   effects: {
     executeEffectCommands: (commands: EffectCommand[]) => void;
@@ -97,6 +101,7 @@ export type RunnerBreakerActionExecutionHost = {
     recordBartmossEncounterUsage: (breakerId: CardInstanceId) => void;
     recordDupreBreakUsage: (breakerId: CardInstanceId) => void;
     recordSnowballBreakUsage: (breakerId: CardInstanceId) => void;
+    recordRunEndTrashBreakerUsage?: (breakerId: CardInstanceId) => void;
   };
 };
 
@@ -144,6 +149,7 @@ function executePumpBreakerAction(
     legalAction,
   );
   if (payment.handled && payment.paid === false) return;
+  if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
   if (breakerId && host.fort.shouldOpenAardvarkInterception(breakerId)) {
     host.fort.startAardvarkInterceptionChoice(
       breakerId,
@@ -218,7 +224,8 @@ function executeBreakSubroutineAction(
       (breakAbility?.count ?? 1) > 1)
   ) {
     host.breaker.resolveMultiBreakSubroutinesAction(breakerId, legalAction);
-    recordBreakerSpecialEffects(host, breakerId, breakAbility);
+    recordNoisyIcebreakerUse(host, breakerId, legalAction);
+    recordBreakerSpecialEffects(host, breakerId, breakAbility, legalAction);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
     return;
   }
@@ -241,6 +248,7 @@ function executeBreakSubroutineAction(
       currentSubroutine,
       legalAction,
     );
+    if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
     return;
   }
   host.breaker.assertBreakSubroutineCostQuoteValid(
@@ -254,6 +262,7 @@ function executeBreakSubroutineAction(
     legalAction,
   );
   if (payment.handled && payment.paid === false) return;
+  if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
   if (breakerId && host.fort.shouldOpenAardvarkInterception(breakerId)) {
     host.fort.startAardvarkInterceptionChoice(
       breakerId,
@@ -281,7 +290,7 @@ function executeBreakSubroutineAction(
   ]);
   if (breakerId) {
     host.fort.applyPostBreakStealthLoss(breakerId, legalAction);
-    recordBreakerSpecialEffects(host, breakerId, breakAbility);
+    recordBreakerSpecialEffects(host, breakerId, breakAbility, legalAction);
     recordNextSentryFreeBreakIfEarned(host, breakerId, breakAbility);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
   }
@@ -291,6 +300,7 @@ function recordBreakerSpecialEffects(
   host: RunnerBreakerActionExecutionHost,
   breakerId: CardInstanceId,
   breakAbility: RuntimeIcebreakerAbility | undefined,
+  legalAction: LegalAction,
 ): void {
   for (const effect of breakAbility?.specialEffects ?? []) {
     switch (effect.kind) {
@@ -303,10 +313,41 @@ function recordBreakerSpecialEffects(
       case "strength_bonus_per_successful_break_this_run":
         host.tracking.recordSnowballBreakUsage(breakerId);
         break;
+      case "once_per_run_break_tag_and_all_stealth_loss":
+        host.fort.applyOncePerRunBreakTagAndAllStealthLoss?.(
+          breakerId,
+          legalAction,
+        );
+        break;
+      case "run_end_trash_source_if_used":
+        host.tracking.recordRunEndTrashBreakerUsage?.(breakerId);
+        break;
       default:
         break;
     }
   }
+}
+
+function recordNoisyIcebreakerUse(
+  host: RunnerBreakerActionExecutionHost,
+  breakerId: CardInstanceId,
+  legalAction: LegalAction,
+): void {
+  const run = host.state.run;
+  if (!run) return;
+  const definition = host.cards.definitionFor(breakerId);
+  if (
+    !host.cards
+      .effectiveSubtypesForCard(breakerId, definition)
+      .includes("noisy")
+  )
+    return;
+  run.usedNoisyIcebreakerThisRun = true;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    noisyIcebreakerUsedThisRun: true,
+    noisyIcebreakerDefinitionId: definition.id,
+  };
 }
 
 function resolveNextSentryFreeBreakAction(

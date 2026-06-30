@@ -11,9 +11,14 @@ import type {
   ServerId,
   Side,
 } from "@netgrid/shared";
+import type { CardCorpUtilityImplementation } from "../../ability-engine/definition-types";
 import { isSecretSpendGuessTargetedBypassRunChoiceSource } from "../../compatibility/payload-compatibility";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
+type CorpArchivesToHqUtility = Extract<
+  CardCorpUtilityImplementation,
+  { kind: "corp_archives_to_hq" }
+>;
 
 export type NonSearchInstalledIceSlot = {
   server: CorpServer;
@@ -41,6 +46,9 @@ export type HiddenZoneNonSearchChoiceHandlerHost = {
   };
   cards: {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
+    corpUtilityForCard?: (
+      cardId: CardInstanceId,
+    ) => CardCorpUtilityImplementation | undefined;
     hasCorpUtilityKind: (cardId: CardInstanceId, kind: string) => boolean;
     mustInstance: (cardId: CardInstanceId) => CardInstance;
     installedResourceTrashCreditGain: (cardId: CardInstanceId) => number;
@@ -62,6 +70,10 @@ export type HiddenZoneNonSearchChoiceHandlerHost = {
     hasSuccessfulHqRunThisTurn: () => boolean;
     spendCorpCredits: (amount: number) => void;
     gainRunnerCredits: (amount: number) => void;
+    shuffleCorpCardIntoRd?: (
+      cardId: CardInstanceId,
+      sourceDefinitionId: CardDefinitionId,
+    ) => { publicPayload: HiddenZonePayload };
     startRunWithAutoPass: (
       serverId: Exclude<ServerId, "new_remote">,
       iceId: CardInstanceId,
@@ -89,6 +101,8 @@ export function handleHiddenZoneNonSearchChoice(
   const source = host.state.pendingChoice?.source ?? "";
   if (source.startsWith("v1922.corp_archives_to_hq"))
     return resolveCorpArchivesToHqChoice(host);
+  if (source.startsWith("classic.corporate_shuffle_hq_to_rd"))
+    return resolveCorpHqCardToRdChoice(host);
   if (source.startsWith("runner.successful_hq_run_corp_pay_to_retain_hq"))
     return resolveCorpHqRetainPaymentChoice(host);
   if (
@@ -115,17 +129,62 @@ export function startCorpArchivesToHqChoice(
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   if (!isCorpArchivesToHqSource(host, sourceCardId))
     throw new Error("Die Archives-Quelle ist nicht Off-Site Backups.");
+  const utility = corpArchivesToHqUtility(host, sourceCardId);
   const archiveCards = host.state.corp.archives.filter(
-    (cardId) => cardId !== sourceCardId,
+    (cardId) =>
+      cardId !== sourceCardId &&
+      corpArchivesToHqFilterMatches(host, cardId, utility),
   );
   if (archiveCards.length === 0) throw new Error("Archives ist leer.");
+  const maxSelections =
+    utility?.maxSelections === "all" ? archiveCards.length : 1;
   host.state.pendingChoice = {
     choiceId: `v1922_corp_archives_to_hq_${host.state.stateVersion + 1}`,
     side: "corp",
     source: `v1922.corp_archives_to_hq:${sourceCardId}:${host.state.stateVersion + 1}`,
-    prompt: "Archives-Karte nach HQ nehmen",
+    prompt:
+      utility?.filter?.cardType === "ice"
+        ? "ICE-Karten aus Archives nach HQ nehmen"
+        : "Archives-Karte nach HQ nehmen",
     kind: "select_cards",
     options: archiveCards.map((cardId) => {
+      const definition = host.cards.definitionFor(cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: 1,
+    maxSelections,
+    stateVersion: host.state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_corp_archives_to_hq",
+    eligibleCount: archiveCards.length,
+  };
+}
+
+export function startCorpHqCardToRdChoice(
+  host: HiddenZoneNonSearchChoiceHandlerHost,
+  sourceCardId: CardInstanceId,
+): void {
+  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (
+    !host.cards.hasCorpUtilityKind(
+      sourceCardId,
+      "draw_corp_cards_then_shuffle_hq_card_into_rd",
+    )
+  )
+    throw new Error("Die HQ-zu-R&D-Quelle ist nicht Corporate Shuffle.");
+  if (host.state.corp.hq.length === 0)
+    throw new Error("HQ enthaelt keine Karte fuer Corporate Shuffle.");
+  host.state.pendingChoice = {
+    choiceId: `classic_corporate_shuffle_hq_to_rd_${host.state.stateVersion + 1}`,
+    side: "corp",
+    source: `classic.corporate_shuffle_hq_to_rd:${sourceCardId}:${host.state.stateVersion + 1}`,
+    prompt: "HQ-Karte in R&D mischen",
+    kind: "select_cards",
+    options: host.state.corp.hq.map((cardId) => {
       const definition = host.cards.definitionFor(cardId);
       return { id: `card_${cardId}`, label: definition.title, value: cardId };
     }),
@@ -137,8 +196,8 @@ export function startCorpArchivesToHqChoice(
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_corp_archives_to_hq",
-    eligibleCount: archiveCards.length,
+    hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
+    eligibleCount: host.state.corp.hq.length,
   };
 }
 
@@ -403,23 +462,89 @@ function resolveCorpArchivesToHqChoice(
     throw new Error(
       "Die V1.9.22-Archives-Choice gehoert nicht zu Off-Site Backups.",
     );
-  const selectedId = selectedChoiceCardIds(choice, requirePlayerAction(host))[0];
-  if (!selectedId || !host.state.corp.archives.includes(selectedId))
-    throw new Error("Die gewaehlte Archives-Karte ist ungueltig.");
+  const utility = corpArchivesToHqUtility(host, sourceCardId);
+  const selectedIds = selectedChoiceCardIds(choice, requirePlayerAction(host));
+  const selectedSet = new Set(selectedIds);
+  const maxSelections = utility?.maxSelections === "all" ? Infinity : 1;
+  if (
+    selectedIds.length === 0 ||
+    selectedIds.length > maxSelections ||
+    selectedSet.size !== selectedIds.length ||
+    selectedIds.some(
+      (cardId) =>
+        !host.state.corp.archives.includes(cardId) ||
+        !corpArchivesToHqFilterMatches(host, cardId, utility),
+    )
+  )
+    throw new Error("Die gewaehlten Archives-Karten sind ungueltig.");
   host.state.corp.archives = host.state.corp.archives.filter(
-    (cardId) => cardId !== selectedId,
+    (cardId) => !selectedSet.has(cardId),
   );
-  host.state.corp.hq.unshift(selectedId);
-  host.state.cardInstances[selectedId] = {
-    ...host.cards.mustInstance(selectedId),
-    zone: { side: "corp", zone: "hq" },
-    faceup: false,
-    rezzed: false,
-  };
+  for (const selectedId of selectedIds.slice().reverse()) {
+    host.state.corp.hq.unshift(selectedId);
+    host.state.cardInstances[selectedId] = {
+      ...host.cards.mustInstance(selectedId),
+      zone: { side: "corp", zone: "hq" },
+      faceup: false,
+      rezzed: false,
+    };
+  }
   delete host.state.pendingChoice;
   const payload = {
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_corp_archives_to_hq",
+    movedCount: selectedIds.length,
+    ...(utility?.revealToRunner
+      ? {
+          archivesRevealCount: selectedIds.length,
+          archivesRevealDefinitionIds: selectedIds
+            .map((cardId) => host.cards.definitionFor(cardId).id)
+            .join(","),
+          archivesRevealTitles: selectedIds
+            .map((cardId) => host.cards.definitionFor(cardId).title)
+            .join(", "),
+        }
+      : {}),
+  };
+  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
+  return {
+    handled: true,
+    stateChanged: true,
+    movedCardIds: selectedIds,
+    resolvedPayload: payload,
+  };
+}
+
+function resolveCorpHqCardToRdChoice(
+  host: HiddenZoneNonSearchChoiceHandlerHost,
+): HiddenZoneNonSearchChoiceHandlerResult {
+  const choice = host.state.pendingChoice;
+  if (!choice || !choice.source.startsWith("classic.corporate_shuffle_hq_to_rd"))
+    throw new Error("Es ist keine Corporate-Shuffle-HQ-Choice offen.");
+  const [, sourceCardId] = choice.source.split(":");
+  if (
+    !sourceCardId ||
+    !host.cards.hasCorpUtilityKind(
+      sourceCardId,
+      "draw_corp_cards_then_shuffle_hq_card_into_rd",
+    )
+  )
+    throw new Error("Die Corporate-Shuffle-Choice gehoert nicht zur Karte.");
+  const selectedId = selectedChoiceCardIds(choice, requirePlayerAction(host))[0];
+  if (!selectedId || !host.state.corp.hq.includes(selectedId))
+    throw new Error("Die gewaehlte HQ-Karte ist ungueltig.");
+  const sourceDefinitionId = host.cards.definitionFor(sourceCardId).id;
+  const shuffleResult = host.callbacks.shuffleCorpCardIntoRd?.(
+    selectedId,
+    sourceDefinitionId,
+  );
+  if (!shuffleResult)
+    throw new Error("Corporate Shuffle kann keine HQ-Karte in R&D mischen.");
+  delete host.state.pendingChoice;
+  const payload = {
+    ...shuffleResult.publicPayload,
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "classic_corporate_shuffle_hq_to_rd",
     movedCount: 1,
   };
   host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...payload };
@@ -892,8 +1017,26 @@ function isCorpArchivesToHqSource(
   return (
     host.cards.definitionFor(sourceCardId).id ===
       host.constants.corpArchivesToHqOperationCardId ||
-    host.cards.hasCorpUtilityKind(sourceCardId, "corp_archives_to_hq")
+      host.cards.hasCorpUtilityKind(sourceCardId, "corp_archives_to_hq")
   );
+}
+
+function corpArchivesToHqUtility(
+  host: HiddenZoneNonSearchChoiceHandlerHost,
+  sourceCardId: CardInstanceId,
+): CorpArchivesToHqUtility | undefined {
+  const utility = host.cards.corpUtilityForCard?.(sourceCardId);
+  return utility?.kind === "corp_archives_to_hq" ? utility : undefined;
+}
+
+function corpArchivesToHqFilterMatches(
+  host: HiddenZoneNonSearchChoiceHandlerHost,
+  cardId: CardInstanceId,
+  utility: CorpArchivesToHqUtility | undefined,
+): boolean {
+  if (utility?.filter?.cardType === "ice")
+    return host.cards.definitionFor(cardId).type === "ice";
+  return true;
 }
 
 function selectedChoiceCardIds(

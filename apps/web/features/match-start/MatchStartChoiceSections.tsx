@@ -3,6 +3,7 @@
 import { Activity, Bot, Flag, Layers3, Link2 } from "lucide-react";
 
 import {
+  MATCH_CARD_POOL_OPTIONS,
   matchCardPoolCardLabel,
   matchFormatCardLabel,
   playModeCardLabel,
@@ -20,8 +21,8 @@ export function MatchStartChoiceSections({
   onMatchCardPool
 }: {
   playMode: PlayMode;
-  matchFormat: string;
-  matchCardPool: string;
+  matchFormat: MatchFormatSelection;
+  matchCardPool: MatchCardPoolSelection;
   onPlayMode(mode: PlayMode): void;
   onMatchFormat(format: MatchFormatSelection): void;
   onMatchCardPool(cardPool: MatchCardPoolSelection): void;
@@ -80,7 +81,7 @@ export function MatchStartChoiceSections({
       <section className="matchStartSection" aria-label="Kartenpool">
         <p className="eyebrow">Kartenpool</p>
         <div className="choiceCardGrid formatCards">
-          {(["originalset", "originalset_proteus"] as MatchCardPoolSelection[]).map((option) => {
+          {MATCH_CARD_POOL_OPTIONS.map((option) => {
             const label = matchCardPoolCardLabel(option);
             return (
               <button
@@ -89,7 +90,7 @@ export function MatchStartChoiceSections({
                 onClick={() => onMatchCardPool(option)}
                 type="button"
                 aria-pressed={matchCardPool === option}
-                data-testid={option === "originalset" ? "match-card-pool-originalset" : "match-card-pool-originalset-proteus"}
+                data-testid={`match-card-pool-${option.replaceAll("_", "-")}`}
               >
                 <Layers3 size={18} />
                 <span>

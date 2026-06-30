@@ -156,6 +156,16 @@ function makeHost(input: HostInput = {}) {
           } as LegalAction);
         }
       },
+      pushActivatedCardImplementationRunActions: (actions, cardId) => {
+        calls.pushed.push(cardId);
+        if (cardId === input.activatedSourceId) {
+          actions.push({
+            side: "corp",
+            type: "activated_card_ability",
+            abilityRef: { sourceCardInstanceId: cardId, abilityId: "a1" },
+          } as LegalAction);
+        }
+      },
       resolveActivatedCardImplementationAbility: () => {
         calls.activated += 1;
         return true;

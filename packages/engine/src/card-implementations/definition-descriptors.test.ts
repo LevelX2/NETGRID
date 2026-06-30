@@ -1475,6 +1475,287 @@ describe("CardImplementation definition descriptors", () => {
     ).toBe("implemented");
   });
 
+  it("describes CLASSIC-03 simple operation and event implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_classic_017_corporate-shuffle")
+        ?.corpUtility,
+    ).toEqual({
+      kind: "draw_corp_cards_then_shuffle_hq_card_into_rd",
+      drawCount: 5,
+      playCost: { kind: "printed", additionalClicks: 1 },
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_018_reclamation-project")
+        ?.corpUtility,
+    ).toEqual({
+      kind: "corp_archives_to_hq",
+      filter: { cardType: "ice" },
+      maxSelections: "all",
+      revealToRunner: true,
+      playCost: { kind: "printed", additionalClicks: 1 },
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_037_finders-keepers")
+        ?.runnerEventLongtail,
+    ).toEqual({
+      kind: "three_dice_gain_credits",
+      dieFaces: 6,
+      diceCount: 3,
+      recipient: "runner",
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_040_meat-upgrade")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "on_play",
+      costs: { kind: "printed", additionalClicks: 1 },
+      effects: [
+        { kind: "remove_tags", mode: "up_to_amount", amount: 2 },
+        { kind: "draw_cards", amount: 3 },
+      ],
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_041_networking")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "on_play",
+      costs: { kind: "printed", additionalClicks: 1 },
+      effects: [{ kind: "gain_credits", amount: 9 }],
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_042_panzer-run")
+        ?.abilities?.[0],
+    ).toMatchObject({
+      kind: "on_play",
+      costs: { kind: "printed", additionalClicks: 1 },
+      effects: [
+        { kind: "gain_credits", amount: 4 },
+        { kind: "draw_cards", amount: 2 },
+      ],
+    });
+
+    for (const definitionId of [
+      "onr_classic_017_corporate-shuffle",
+      "onr_classic_018_reclamation-project",
+      "onr_classic_037_finders-keepers",
+      "onr_classic_040_meat-upgrade",
+      "onr_classic_041_networking",
+      "onr_classic_042_panzer-run",
+    ]) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+  });
+
+  it("describes CLASSIC-04 runner program implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_classic_027_early-worm")
+        ?.icebreakerAbilities,
+    ).toMatchObject([
+      {
+        kind: "break_subroutine",
+        cost: { kind: "credit", amount: 1 },
+        matches: { kind: "ice_subtype", subtype: "wall" },
+      },
+      {
+        kind: "increase_strength",
+        cost: { kind: "credit", amount: 2 },
+        amount: 3,
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_028_matador")
+        ?.icebreakerAbilities,
+    ).toMatchObject([
+      {
+        kind: "break_subroutine",
+        cost: { kind: "credit", amount: 1 },
+        matches: { kind: "ice_subtype", subtype: "sentry" },
+      },
+      {
+        kind: "increase_strength",
+        cost: { kind: "credit", amount: 3 },
+        amount: 5,
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_029_ms-todon")
+        ?.icebreakerAbilities?.[0],
+    ).toMatchObject({
+      kind: "break_subroutine",
+      cost: { kind: "credit", amount: 1 },
+      matches: { kind: "ice_subtype", subtype: "sentry" },
+      special: { kind: "once_per_run_break_tag_and_all_stealth_loss" },
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_030_psychic-friend")
+        ?.icebreakerAbilities,
+    ).toMatchObject([
+      {
+        kind: "break_subroutine",
+        cost: { kind: "credit", amount: 1 },
+        matches: { kind: "ice_subtype", subtype: "code_gate" },
+      },
+      {
+        kind: "increase_strength",
+        cost: { kind: "credit", amount: 2 },
+        amount: 1,
+        duration: "current_run",
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_031_rent-i-con")
+        ?.icebreakerAbilities?.[0],
+    ).toMatchObject({
+      kind: "break_subroutine",
+      cost: { kind: "credit", amount: 1 },
+      matches: { kind: "any" },
+      special: { kind: "run_end_trash_source_if_used" },
+    });
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_classic_032_schematics-search-engine",
+      )?.runnerUtilityLongtail,
+    ).toEqual({
+      kind: "hq_access_expose_all_installed_corp_cards",
+      visibility: "public",
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_classic_033_superglue")
+        ?.runnerUtilityLongtail,
+    ).toEqual({
+      kind: "derez_fully_broken_passed_ice",
+      cost: { kind: "tap_source" },
+      timing: "after_passing_fully_broken_ice",
+      target: "that_ice",
+      visibility: "public",
+    });
+
+    for (const definitionId of [
+      "onr_classic_027_early-worm",
+      "onr_classic_028_matador",
+      "onr_classic_029_ms-todon",
+      "onr_classic_030_psychic-friend",
+      "onr_classic_031_rent-i-con",
+      "onr_classic_032_schematics-search-engine",
+      "onr_classic_033_superglue",
+    ]) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+  });
+
+  it("describes CLASSIC-05 Corp ICE baseline implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_classic_005_baskerville")
+        ?.selfRezCostModifiers,
+    ).toEqual([
+      {
+        kind: "self_rez_cost_reduction_during_run_after_noisy_icebreaker",
+        amount: 5,
+        visibility: "public",
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_005_baskerville")
+        ?.printedSubroutines,
+    ).toMatchObject([
+      { kind: "damage", damageType: "net", amount: 2 },
+      {
+        kind: "trace",
+        baseTraceStrength: 5,
+        onSuccess: [
+          {
+            kind: "add_counter",
+            recipient: "runner",
+            counterType: "baskerville",
+            amount: 1,
+          },
+        ],
+      },
+      { kind: "end_the_run" },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_005_baskerville")
+        ?.runnerCounterEffects,
+    ).toEqual([
+      {
+        counterType: "baskerville",
+        removeCost: 3,
+        runStart: {
+          kind: "damage",
+          damageType: "net",
+          amountPerCounter: 2,
+          preventable: true,
+          visibility: "public",
+        },
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_006_bolter-swarm")
+        ?.printedSubroutines,
+    ).toMatchObject([
+      { kind: "damage", damageType: "net", amount: 4 },
+      { kind: "prohibit_break_next_ice" },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_007_brain-drain")
+        ?.printedSubroutines,
+    ).toEqual([
+      {
+        kind: "random_damage",
+        dieFaces: 6,
+        damageOnResults: [1],
+        damageType: "brain",
+        amount: 3,
+        preventable: true,
+        text: "*Roll a die. On a 1, do 3 brain damage.",
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_008_deadeye")
+        ?.printedSubroutines,
+    ).toMatchObject([{ kind: "trash_program" }, { kind: "end_the_run" }]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_012_imperial-guard")
+        ?.printedSubroutines,
+    ).toMatchObject([{ kind: "trash_program" }, { kind: "end_the_run" }]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_013_puzzle")
+        ?.printedSubroutines,
+    ).toEqual([
+      {
+        kind: "end_the_run_and_trash_source_at_end_of_turn",
+        text: "*End the run, and trash Puzzle at end of turn.",
+      },
+      {
+        kind: "end_the_run_and_trash_source_at_end_of_turn",
+        text: "*End the run, and trash Puzzle at end of turn.",
+      },
+    ]);
+
+    for (const definitionId of [
+      "onr_classic_005_baskerville",
+      "onr_classic_006_bolter-swarm",
+      "onr_classic_007_brain-drain",
+      "onr_classic_008_deadeye",
+      "onr_classic_012_imperial-guard",
+      "onr_classic_013_puzzle",
+    ]) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes Proteus Phase 5b runner protection programs", () => {
     expect(
       cardImplementationForDefinitionId(

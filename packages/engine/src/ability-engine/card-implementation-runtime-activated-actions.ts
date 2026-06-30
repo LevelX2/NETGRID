@@ -14,9 +14,11 @@ import {
 import {
   activatedAbilityPayload,
   copySameFortIceSubroutineEffect,
+  doubleChosenIceStrengthEffect,
   exposeInstalledCardEffect,
   moveTopTrashToGripEffect,
   ownRezzedIceTargetIds,
+  rezzedInstalledIceTargetIds,
   sameFortSubroutineTargets,
   trashOwnRezzedIceForCreditsEffect,
 } from "./card-implementation-runtime-activated-targets";
@@ -190,6 +192,28 @@ export function pushActivatedCardImplementationActionsForTiming(
               targetDefinitionId: target.iceDefinition.id,
               subroutineIndex: target.subroutineIndex,
               subroutineId: target.subroutineId,
+            },
+          ),
+        );
+      }
+      continue;
+    }
+    const doubleIceStrengthEffect = doubleChosenIceStrengthEffect(ability);
+    if (doubleIceStrengthEffect) {
+      for (const targetCardId of rezzedInstalledIceTargetIds(state)) {
+        const targetDefinition = deps.definitionFor(state, targetCardId);
+        actions.push(
+          deps.createAction(
+            state,
+            side,
+            "activated_card_ability",
+            `${definition.title}: ${targetDefinition.title} stärken`,
+            sourceCardId,
+            activatedAbilityLegalActionCosts(ability),
+            {
+              ...activatedAbilityPayload(sourceCardId, ability, index),
+              targetCardId,
+              targetDefinitionId: targetDefinition.id,
             },
           ),
         );

@@ -172,49 +172,103 @@ export function buildStartRunIceRepositionActions(
   if (run.attackedServerId !== server.id) return [];
   if (run.phase !== "approach_ice" || run.position.kind !== "ice") return [];
   if (run.position.iceIndex !== outermostIceIndex(server)) return [];
-  if (server.ice.length < 2) return [];
   const used = new Set(run.iceRepositionUsedSourceIdsThisRun ?? []);
-  return server.ice
-    .map((sourceCardId, sourceIceIndex) => ({ sourceCardId, sourceIceIndex }))
-    .filter(({ sourceCardId }) => !used.has(sourceCardId))
-    .filter(({ sourceCardId }) =>
-      isStartRunIceRepositionSource(host, sourceCardId),
-    )
-    .flatMap(({ sourceCardId, sourceIceIndex }) => {
+  const sameFortActions =
+    server.ice.length < 2
+      ? []
+      : server.ice
+          .map((sourceCardId, sourceIceIndex) => ({
+            sourceCardId,
+            sourceIceIndex,
+          }))
+          .filter(({ sourceCardId }) => !used.has(sourceCardId))
+          .filter(({ sourceCardId }) =>
+            Boolean(
+              fortRunWindowImplementationForCard(
+                host,
+                sourceCardId,
+                "move_self_to_different_position_on_same_fort",
+              ),
+            ),
+          )
+          .flatMap(({ sourceCardId, sourceIceIndex }) => {
+            const implementation = fortRunWindowImplementationForCard(
+              host,
+              sourceCardId,
+              "move_self_to_different_position_on_same_fort",
+            );
+            if (!implementation) return [];
+            const cost = Math.max(0, Math.floor(implementation.cost.amount));
+            if (host.state.corp.credits < cost) return [];
+            const definition = host.cards.definitionFor(sourceCardId);
+            return server.ice
+              .map((_cardId, targetIceIndex) => targetIceIndex)
+              .filter((targetIceIndex) => targetIceIndex !== sourceIceIndex)
+              .map((targetIceIndex) =>
+                buildLegalAction(
+                  host.state,
+                  "corp",
+                  "trigger_ability",
+                  `${definition.title}: ICE in ${server.label} bewegen`,
+                  sourceCardId,
+                  cost > 0 ? [{ credits: cost }] : [],
+                  {
+                    cardId: sourceCardId,
+                    sourceDefinitionId: definition.id,
+                    serverId: server.id,
+                    serverLabel: server.label,
+                    sourceIceIndex,
+                    targetIceIndex,
+                    creditCost: cost,
+                    fortRunWindowAbility:
+                      "move_self_to_different_position_on_same_fort",
+                  },
+                ),
+              );
+          });
+  const otherFortActions = host.state.corp.servers.flatMap((sourceServer) =>
+    sourceServer.ice
+      .map((sourceCardId, sourceIceIndex) => ({ sourceCardId, sourceIceIndex }))
+      .filter(({ sourceCardId }) => !used.has(sourceCardId))
+      .flatMap(({ sourceCardId, sourceIceIndex }) => {
       const implementation = fortRunWindowImplementationForCard(
         host,
         sourceCardId,
-        "move_self_to_different_position_on_same_fort",
+        "move_self_to_outermost_position_on_other_fort",
       );
       if (!implementation) return [];
       const cost = Math.max(0, Math.floor(implementation.cost.amount));
       if (host.state.corp.credits < cost) return [];
       const definition = host.cards.definitionFor(sourceCardId);
-      return server.ice
-        .map((_cardId, targetIceIndex) => targetIceIndex)
-        .filter((targetIceIndex) => targetIceIndex !== sourceIceIndex)
-        .map((targetIceIndex) =>
+      return host.state.corp.servers
+        .filter((targetServer) => targetServer.id !== sourceServer.id)
+        .map((targetServer) =>
           buildLegalAction(
             host.state,
             "corp",
             "trigger_ability",
-            `${definition.title}: ICE in ${server.label} bewegen`,
+            `${definition.title}: ICE nach ${targetServer.label} bewegen`,
             sourceCardId,
             cost > 0 ? [{ credits: cost }] : [],
             {
               cardId: sourceCardId,
               sourceDefinitionId: definition.id,
-              serverId: server.id,
-              serverLabel: server.label,
+              serverId: sourceServer.id,
+              sourceServerId: sourceServer.id,
+              sourceServerLabel: sourceServer.label,
+              targetServerId: targetServer.id,
+              targetServerLabel: targetServer.label,
               sourceIceIndex,
-              targetIceIndex,
+              targetIceIndex: targetServer.ice.length,
               creditCost: cost,
               fortRunWindowAbility:
-                "move_self_to_different_position_on_same_fort",
+                "move_self_to_outermost_position_on_other_fort",
             },
           ),
         );
-    });
+      }),
+  );
+  return [...sameFortActions, ...otherFortActions];
 }
 
 export function resolveFortPassAdvancementWindow(
@@ -314,6 +368,11 @@ export function resolveStartRunIceRepositionWindow(
   const run = mustRun(host.state);
   if (run.phase !== "approach_ice" || run.position.kind !== "ice")
     throw new Error("Runner ist nicht am Run-Start eines ICE-Forts.");
+  if (
+    legalAction.payload?.fortRunWindowAbility ===
+    "move_self_to_outermost_position_on_other_fort"
+  )
+    return resolveStartRunOtherFortIceMove(host, legalAction, run);
   const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
     ServerId,
     "new_remote"
@@ -418,6 +477,159 @@ export function resolveStartRunIceRepositionWindow(
     resolvedPayload: legalAction.payload,
     stateChanged: true,
   };
+}
+
+function resolveStartRunOtherFortIceMove(
+  host: FortPassWindowHost,
+  legalAction: LegalAction,
+  run: ActiveRun,
+): RunIceRepositionWindowResult {
+  const attackedServer = host.servers.mustServer(run.attackedServerId);
+  if (
+    run.position.kind !== "ice" ||
+    run.position.serverId !== attackedServer.id ||
+    run.position.iceIndex !== outermostIceIndex(attackedServer)
+  )
+    throw new Error("ICE-Bewegung ist nur am Start des Runs legal.");
+  const sourceServerId = String(legalAction.payload?.sourceServerId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  const targetServerId = String(legalAction.payload?.targetServerId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  if (!sourceServerId || !targetServerId || sourceServerId === targetServerId)
+    throw new Error("Die ICE-Bewegungsserver sind nicht legal.");
+  const sourceServer = host.servers.mustServer(sourceServerId);
+  const targetServer = host.servers.mustServer(targetServerId);
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
+  const sourceIceIndex = Number(legalAction.payload?.sourceIceIndex ?? -1);
+  if (
+    !Number.isInteger(sourceIceIndex) ||
+    sourceIceIndex < 0 ||
+    sourceServer.ice[sourceIceIndex] !== sourceCardId
+  )
+    throw new Error("Die ICE-Quellposition ist nicht mehr legal.");
+  if (run.iceRepositionUsedSourceIdsThisRun?.includes(sourceCardId))
+    throw new Error(
+      "Diese ICE-Bewegungsquelle wurde in diesem Run bereits genutzt.",
+    );
+  const implementation = fortRunWindowImplementationForCard(
+    host,
+    sourceCardId,
+    "move_self_to_outermost_position_on_other_fort",
+  );
+  if (!implementation)
+    throw new Error("Die ICE-Quelle hat keine passende Bewegungsfaehigkeit.");
+  const cost = Math.max(0, Math.floor(implementation.cost.amount));
+  if (creditCostForAction(legalAction) !== cost)
+    throw new Error("Die ICE-Bewegungskosten passen nicht mehr.");
+  host.payment.spendCorpCredits(cost);
+  const sourceInstance = host.cards.cardInstanceFor(sourceCardId);
+  const wasRevealed = sourceInstance.faceup || sourceInstance.rezzed;
+  const [movedIceId] = sourceServer.ice.splice(sourceIceIndex, 1);
+  if (movedIceId !== sourceCardId)
+    throw new Error("Die ICE-Quellposition ist nicht mehr stabil.");
+  targetServer.ice.push(sourceCardId);
+  const targetIceIndex = targetServer.ice.length - 1;
+  host.state.cardInstances[sourceCardId] = {
+    ...sourceInstance,
+    ...(implementation.revealIfUnrezzed && !sourceInstance.rezzed
+      ? { faceup: true }
+      : {}),
+    zone: { side: "corp", zone: "serverIce", serverId: targetServer.id },
+  };
+  refreshRunApproachAfterOtherFortIceMove(
+    host,
+    run,
+    sourceCardId,
+    sourceServer,
+    targetServer,
+  );
+  run.iceRepositionUsedSourceIdsThisRun = [
+    ...(run.iceRepositionUsedSourceIdsThisRun ?? []),
+    sourceCardId,
+  ].sort();
+  host.state.activeSide = "corp";
+  const revealPayload =
+    !wasRevealed && implementation.revealIfUnrezzed
+      ? {
+          publicRevealDefinitionId: host.cards.definitionFor(sourceCardId).id,
+        }
+      : {};
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
+    serverLabel: targetServer.label,
+    sourceServerId,
+    sourceServerLabel: sourceServer.label,
+    targetServerId,
+    targetServerLabel: targetServer.label,
+    movedIceCount: 1,
+    sourceIceIndex,
+    targetIceIndex,
+    revealedSource: !wasRevealed && implementation.revealIfUnrezzed,
+    ...revealPayload,
+    corpCreditsAfter: host.state.corp.credits,
+  };
+  return {
+    handled: true,
+    sourceCardId,
+    sourceDefinitionId: host.cards.definitionFor(sourceCardId).id,
+    serverId: targetServer.id,
+    serverLabel: targetServer.label,
+    selectedIceId: sourceCardId,
+    iceOrderChanged: true,
+    resolvedPayload: legalAction.payload,
+    stateChanged: true,
+  };
+}
+
+function refreshRunApproachAfterOtherFortIceMove(
+  host: FortPassWindowHost,
+  run: ActiveRun,
+  movedIceId: CardInstanceId,
+  sourceServer: CorpServer,
+  targetServer: CorpServer,
+): void {
+  if (targetServer.id === run.attackedServerId) {
+    const newApproachIndex = outermostIceIndex(targetServer);
+    run.position = {
+      kind: "ice",
+      serverId: targetServer.id,
+      iceIndex: newApproachIndex,
+    };
+    run.approachedIceId = movedIceId;
+    delete run.encounteredIceId;
+    host.state.timingPoint = "run.approach_ice";
+    return;
+  }
+  if (sourceServer.id !== run.attackedServerId) return;
+  if (sourceServer.ice.length === 0) {
+    run.phase = "movement";
+    run.position = { kind: "server", serverId: sourceServer.id };
+    delete run.approachedIceId;
+    delete run.encounteredIceId;
+    host.state.timingPoint = "run.jack_out_window";
+    host.state.activeSide = "runner";
+    return;
+  }
+  const newApproachIndex = outermostIceIndex(sourceServer);
+  run.position = {
+    kind: "ice",
+    serverId: sourceServer.id,
+    iceIndex: newApproachIndex,
+  };
+  run.approachedIceId = mustArrayValue(
+    sourceServer.ice,
+    newApproachIndex,
+    "Server hat kein ICE.",
+  );
+  delete run.encounteredIceId;
+  host.state.timingPoint = "run.approach_ice";
 }
 
 export function startHqIceSwapChoice(
@@ -659,19 +871,6 @@ function isFortIceSwapSource(
       host,
       cardId,
       "swap_unrezzed_fort_ice_with_hq_ice",
-    ),
-  );
-}
-
-function isStartRunIceRepositionSource(
-  host: FortPassWindowHost,
-  cardId: CardInstanceId,
-): boolean {
-  return Boolean(
-    fortRunWindowImplementationForCard(
-      host,
-      cardId,
-      "move_self_to_different_position_on_same_fort",
     ),
   );
 }

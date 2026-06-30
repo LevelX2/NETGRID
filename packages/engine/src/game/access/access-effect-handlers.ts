@@ -121,6 +121,7 @@ export type AccessEffectHandlerHost = {
   };
   trash: {
     trashRunnerInstalledCardToHeap: (cardId: CardInstanceId) => void;
+    trashCorpInstalledCardToArchives: (cardId: CardInstanceId) => void;
     openRunnerInstalledTrashPreventionWindow: (
       targetIds: CardInstanceId[],
       sourceDefinitionId: CardDefinitionId,
@@ -417,6 +418,8 @@ function accessConditionMet(
   switch (condition.kind) {
     case "runner_is_tagged":
       return host.state.runner.tags > 0;
+    case "runner_tags_at_least":
+      return host.state.runner.tags >= condition.amount;
     case "source_has_advancement_counters":
       return host.cards.mustInstance(cardId).advancementCounters >= condition.minimum;
     case "source_has_hosted_credits":
@@ -484,6 +487,20 @@ function accessEffectHiddenZoneAction(
     return "proteus_return_installed_runner_programs_to_grip";
   if (effect.effects.some((step) => step.kind === "trash_installed_runner_cards"))
     return "v1919_access_ambush_trash_installed";
+  if (
+    effect.effects.some(
+      (step) => step.kind === "trash_installed_runner_hardware_and_programs",
+    )
+  )
+    return "classic_shock_treatment_access_trash";
+  if (
+    effect.effects.some(
+      (step) =>
+        step.kind ===
+        "trash_other_corp_installed_cards_in_source_server_and_damage_runner",
+    )
+  )
+    return "classic_self_destruct_access";
   if (
     effect.effects.some(
       (step) => step.kind === "damage_from_source_advancement_counters",
@@ -554,6 +571,13 @@ function resolveCardImplementationAccessEffects(
               tagConditionMet: false,
               damageSkippedReason: "runner_not_tagged",
             }
+          : effect.condition?.kind === "runner_tags_at_least"
+            ? {
+                tagConditionMet: false,
+                requiredTags: effect.condition.amount,
+                runnerTagsBefore: host.state.runner.tags,
+                damageSkippedReason: "runner_tags_below_threshold",
+              }
           : { accessEffectConditionMet: false }),
       };
       continue;
@@ -887,6 +911,29 @@ function executeCardImplementationAccessEffectStep(
       );
       return;
     }
+    case "trash_installed_runner_hardware_and_programs": {
+      trashInstalledRunnerHardwareAndProgramsForAccessEffect(
+        host,
+        definition,
+        step.hardwareAmount,
+        step.programAmount,
+        resolvedEffects,
+        index,
+      );
+      return;
+    }
+    case "trash_other_corp_installed_cards_in_source_server_and_damage_runner": {
+      trashOtherCorpInstalledCardsInSourceServerAndDamageRunner(
+        host,
+        cardId,
+        definition,
+        step.damageType,
+        step.amountPerTrashed,
+        resolvedEffects,
+        index,
+      );
+      return;
+    }
     case "reduce_current_access_queue": {
       const run = host.state.run;
       const breach = run?.breach;
@@ -1070,7 +1117,150 @@ function runnerInstalledTrashCandidatesForAccessEffect(
         (rightDefinition.memoryCost ?? 0) - (leftDefinition.memoryCost ?? 0);
       if (byMemory !== 0) return byMemory;
       return left.localeCompare(right);
+  });
+}
+
+function trashInstalledRunnerHardwareAndProgramsForAccessEffect(
+  host: AccessEffectHandlerHost,
+  sourceDefinition: CardDefinition,
+  hardwareAmount: "all",
+  programAmount: number,
+  resolvedEffects: ResolvedGameEffect[],
+  effectIndex: number,
+): void {
+  const legalAction = requireLegalAction(host);
+  const hardwareTargets =
+    hardwareAmount === "all"
+      ? runnerInstalledTrashCandidatesForAccessEffect(host, "hardware")
+      : [];
+  const programTargets = runnerInstalledTrashCandidatesForAccessEffect(
+    host,
+    "program",
+  ).slice(0, Math.max(0, Math.floor(programAmount)));
+  const selectedTargetIds = [...hardwareTargets, ...programTargets];
+  if (selectedTargetIds.length === 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneAction: "v1919_access_ambush_no_target",
+      trashedCount: 0,
+      hardwareTrashCount: 0,
+      programTrashCount: 0,
+      accessEffectNoTarget: true,
+    };
+    return;
+  }
+  if (
+    host.trash.openRunnerInstalledTrashPreventionWindow(
+      selectedTargetIds,
+      sourceDefinition.id,
+    )
+  )
+    return;
+  for (const targetId of selectedTargetIds) {
+    host.trash.trashRunnerInstalledCardToHeap(targetId);
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    targetTrashCount: selectedTargetIds.length,
+    trashedCount: selectedTargetIds.length,
+    hardwareTrashCount: hardwareTargets.length,
+    programTrashCount: programTargets.length,
+  };
+  resolvedEffects.push({
+    effectId: `${sourceDefinition.id}.access_effect.${effectIndex}.trash_installed_runner_hardware_and_programs`,
+    kind: "trash_card",
+    visibility: "hidden_info_barrier",
+    side: "runner",
+    amount: selectedTargetIds.length,
+    reason: "access_effect",
+    sourceDefinitionId: sourceDefinition.id,
+    sourceTitle: sourceDefinition.title,
+  });
+}
+
+function trashOtherCorpInstalledCardsInSourceServerAndDamageRunner(
+  host: AccessEffectHandlerHost,
+  sourceCardId: CardInstanceId,
+  sourceDefinition: CardDefinition,
+  damageType: Extract<DamageType, "net">,
+  amountPerTrashed: 1,
+  resolvedEffects: ResolvedGameEffect[],
+  effectIndex: number,
+): void {
+  const legalAction = requireLegalAction(host);
+  const sourceInstance = host.cards.mustInstance(sourceCardId);
+  const serverId =
+    sourceInstance.zone.side === "corp" &&
+    (sourceInstance.zone.zone === "serverRoot" ||
+      sourceInstance.zone.zone === "serverIce")
+      ? sourceInstance.zone.serverId
+      : undefined;
+  if (!serverId) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      selfDestructSkippedReason: "source_not_installed_in_server",
+    };
+    return;
+  }
+  const server = host.state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server) throw new Error("Self-Destruct-Server fehlt.");
+  const targetIds = [...server.root, ...server.ice]
+    .filter((targetId) => targetId !== sourceCardId)
+    .sort();
+  if (targetIds.length === 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      selfDestructSourceTapped: true,
+      selfDestructTrashedCount: 0,
+      damageAmount: 0,
+    };
+    host.cards.mustInstance(sourceCardId).tapped = true;
+    return;
+  }
+  host.cards.mustInstance(sourceCardId).tapped = true;
+  let trashedCount = 0;
+  for (const targetId of targetIds) {
+    const before = host.state.corp.archives.length;
+    host.trash.trashCorpInstalledCardToArchives(targetId);
+    if (host.state.corp.archives.length > before) trashedCount += 1;
+  }
+  const damageAmount = trashedCount * amountPerTrashed;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    selfDestructSourceTapped: true,
+    selfDestructTrashedCount: trashedCount,
+    damageType,
+    damageAmount,
+  };
+  if (damageAmount > 0) {
+    host.damage.resolveDamageOperation(damageType, damageAmount, sourceDefinition.id);
+  }
+  resolvedEffects.push({
+    effectId: `${sourceDefinition.id}.access_effect.${effectIndex}.trash_other_corp_installed_cards_in_source_server_and_damage_runner`,
+    kind: "trash_card",
+    visibility: "hidden_info_barrier",
+    side: "corp",
+    amount: trashedCount,
+    reason: "access_effect",
+    sourceDefinitionId: sourceDefinition.id,
+    sourceTitle: sourceDefinition.title,
+  });
+  if (legalAction.payload?.damageResolved === true) {
+    resolvedEffects.push({
+      effectId: accessEffectId(sourceDefinition, sourceCardId, effectIndex, "self_destruct_damage"),
+      kind: "damage",
+      visibility: "hidden_info_barrier",
+      side: "runner",
+      amount: Number(legalAction.payload.damageAmount ?? damageAmount),
+      damageType,
+      cardsTrashed: Number(legalAction.payload.cardsTrashed ?? 0),
+      reason: "access_effect",
+      sourceDefinitionId: sourceDefinition.id,
+      sourceTitle: sourceDefinition.title,
     });
+  }
 }
 
 function trashRunnerInstalledTargetsForAccessEffect(

@@ -258,6 +258,9 @@ function pendingChoiceHost(
       resolveStartOfRunFortUtilityChoice: unexpected(
         "resolveStartOfRunFortUtilityChoice",
       ),
+      resolveClassicDeflectorChoice: unexpected(
+        "resolveClassicDeflectorChoice",
+      ),
     },
     access: {
       resolveSuccessfulRunCreditLossSpendChoice: unexpected("resolveSuccessfulRunCreditLossSpendChoice"),
