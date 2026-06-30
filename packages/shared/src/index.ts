@@ -1726,6 +1726,8 @@ export type VisibleCard = {
   counters?: Partial<Record<CounterType, number>>;
   counterDisplays?: CounterDisplay[];
   tapped?: boolean;
+  concealed?: boolean;
+  hiddenRunnerResource?: boolean;
   hostedOn?: CardInstanceId;
   hostedOnLabel?: string;
   selectedServerId?: Exclude<ServerId, "new_remote">;

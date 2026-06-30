@@ -1,4 +1,4 @@
-import { Check, Clipboard, Crosshair, Eye, Play, Plus, Trash2 } from "lucide-react";
+import { Check, Clipboard, Crosshair, Eye, EyeOff, Play, Plus, Trash2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
@@ -18,6 +18,7 @@ import {
   inactiveCardZoneAriaSuffix,
   inactiveCardZoneBadgeLabel,
   inactiveCardZoneClassName,
+  isConcealedRunnerResourceCard,
   type IceModifierBadgeView,
   type InactiveCardZone
 } from "../../app/action-board-ui";
@@ -141,6 +142,9 @@ export function CardView({
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
   const hiddenBackClass = forceCardBack ? ` hiddenBack ${forceCardBack}HiddenBack forcedCardBack` : !card.known && hiddenSide ? ` hiddenBack ${hiddenSide}HiddenBack` : "";
+  const concealedRunnerResource = isConcealedRunnerResourceCard(card);
+  const knownConcealedRunnerResource = card.known && concealedRunnerResource && !forceCardBack;
+  const concealedRunnerResourceClass = knownConcealedRunnerResource ? " concealedRunnerResource" : "";
   const archiveFacedownClass = archiveFacedown ? " archiveFacedown" : "";
   const inactiveZoneClass = inactiveZone ? ` inactiveZoneCard ${inactiveCardZoneClassName(inactiveZone)}` : "";
   const inactiveZoneBadge = inactiveZone ? inactiveCardZoneBadgeLabel(inactiveZone) : null;
@@ -201,7 +205,8 @@ export function CardView({
   const scoreStateAriaSuffix = scoreStateBadges.map((badge) => `${badge.value}: ${badge.label}`).join(", ");
   const tappedAriaSuffix = tapped ? "getappt" : "";
   const iceStrengthAriaSuffix = iceStrength !== null ? `Stärke ${iceStrength}` : "";
-  const cardStateAriaText = [tappedAriaSuffix, iceStrengthAriaSuffix, counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
+  const concealedRunnerResourceAriaSuffix = knownConcealedRunnerResource ? "verdeckte Runner-Resource, für die Korp nicht aufgedeckt" : "";
+  const cardStateAriaText = [tappedAriaSuffix, concealedRunnerResourceAriaSuffix, iceStrengthAriaSuffix, counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
   const cardStateAria = cardStateAriaText ? `, ${cardStateAriaText}` : "";
   const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
@@ -526,7 +531,7 @@ export function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${tapped ? " tappedCard" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${concealedRunnerResourceClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${tapped ? " tappedCard" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -572,6 +577,7 @@ export function CardView({
         title={nativeTitle}
         data-testid={onSelect ? "card-choice-card" : card.known ? "known-card" : "hidden-card"}
         data-known={card.known ? "true" : "false"}
+        data-concealed-runner-resource={concealedRunnerResource ? "true" : undefined}
         data-archive-facedown={archiveFacedown ? "true" : undefined}
         data-inactive-zone={inactiveZone}
       >
@@ -609,6 +615,12 @@ export function CardView({
           <span className="cardInactiveZoneBadge" aria-hidden="true">
             {inactiveZone === "heap" ? <Trash2 size={10} strokeWidth={2.4} /> : <Clipboard size={10} strokeWidth={2.4} />}
             <span>{inactiveZoneBadge}</span>
+          </span>
+        ) : null}
+        {knownConcealedRunnerResource ? (
+          <span className="cardConcealedBadge" aria-hidden="true" title="Für die Korp verdeckt">
+            <EyeOff size={10} strokeWidth={2.5} />
+            <span>Verdeckt</span>
           </span>
         ) : null}
         {tapped ? (

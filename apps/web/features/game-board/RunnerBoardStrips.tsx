@@ -270,6 +270,7 @@ export function RunnerRigStrip({
                         card={displayCard}
                         compact
                         displayMode={displayMode}
+                        {...(card.known ? {} : { hiddenSide: "runner" as const })}
                         selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
                         actions={cardActionsForRig(card)}
                         actionDisabled={actionDisabled}

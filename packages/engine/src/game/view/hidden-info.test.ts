@@ -207,12 +207,16 @@ describe("Proteus Hidden-Resource Foundation Harness", () => {
         title: hiddenResourceTitle,
         type: "resource",
         subtypes: ["hidden"],
+        concealed: true,
+        hiddenRunnerResource: true,
       }),
     );
     expect(getPlayerView(state, "corp").opponent.rig).toContainEqual(
       expect.objectContaining({
         instanceId: hiddenSlotId,
         known: false,
+        concealed: true,
+        hiddenRunnerResource: true,
         type: "resource",
         subtypes: ["hidden_runner_resource"],
         owner: "runner",

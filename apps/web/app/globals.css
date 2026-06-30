@@ -6603,6 +6603,20 @@ select {
   filter: saturate(0.88) brightness(0.96);
 }
 
+.card.concealedRunnerResource {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--runner), var(--line) 38%);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, var(--runner), transparent 64%),
+    0 0 0 1px rgb(0 0 0 / 0.12);
+}
+
+.card.concealedRunnerResource.withImage .cardImage,
+.card.concealedRunnerResource.withImage .hardwareImageOverlay,
+.card.concealedRunnerResource.withImage .operationImageOverlay {
+  filter: saturate(0.84) brightness(0.88);
+}
+
 .card.hidden {
   background: var(--card-hidden-art-bg);
 }
@@ -6746,6 +6760,51 @@ select {
   font-size: 7px;
 }
 
+.cardConcealedBadge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 46;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  max-width: calc(100% - 14px);
+  min-height: 18px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--runner), white 36%);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 28% 18%, rgb(255 255 255 / 0.26), transparent 34%),
+    linear-gradient(135deg, color-mix(in srgb, var(--runner), black 18%), rgb(14 18 24 / 0.9));
+  color: white;
+  box-shadow:
+    0 2px 7px rgb(0 0 0 / 0.32),
+    inset 0 0 0 1px rgb(255 255 255 / 0.08);
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  overflow: hidden;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.48);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cardConcealedBadge svg {
+  flex: 0 0 auto;
+}
+
+.card.withImage .cardConcealedBadge {
+  top: clamp(4px, 2.4cqw, 10px);
+  left: clamp(4px, 2.4cqw, 10px);
+  min-height: clamp(12px, 5.2cqw, 22px);
+  padding: clamp(1px, 0.65cqw, 3px) clamp(4px, 2.2cqw, 8px);
+  font-size: clamp(6px, 2.45cqw, 10px);
+}
+
 .cardTappedBadge {
   position: absolute;
   top: 6px;
@@ -6801,6 +6860,8 @@ select {
 
 .card.hiddenBack .cardSetBadge,
 .card.hidden .cardSetBadge,
+.card.hiddenBack .cardConcealedBadge,
+.card.hidden .cardConcealedBadge,
 .card.hiddenBack .cardTappedBadge,
 .card.hidden .cardTappedBadge,
 .card.hiddenBack .cardImageSetBadge,

@@ -53,6 +53,7 @@ function visibleKnownCardWithReferenceViewer(
 ): VisibleCard {
   const definition = definitionFor(state, id);
   const instance = mustInstance(state.cardInstances, id);
+  const concealedHiddenRunnerResource = isConcealedRunnerResource(state, id);
   const runRemainderStrengthBonus =
     definition.type === "program"
       ? runRemainderStrengthBonusForBreaker(state.run, id)
@@ -127,6 +128,9 @@ function visibleKnownCardWithReferenceViewer(
     ...visibleCountersField(visibleCountersForKnownCard(definition, instance)),
     ...counterDisplaysField(counterDisplaysForKnownCard(definition, instance)),
     ...(instance.tapped ? { tapped: true } : {}),
+    ...(concealedHiddenRunnerResource
+      ? { concealed: true, hiddenRunnerResource: true }
+      : {}),
     ...(instance.hostedOn
       ? {
           hostedOn: instance.hostedOn,
@@ -833,6 +837,8 @@ export function visibleRunnerRigCardForViewer(
   return {
     instanceId: hiddenRunnerResourceSlotId(id),
     known: false,
+    concealed: true,
+    hiddenRunnerResource: true,
     type: "resource",
     subtypes: ["hidden_runner_resource"],
     rezzed: false,

@@ -327,6 +327,17 @@ export function counterDisplaysForRendering(card: Pick<VisibleCard, "counterDisp
   );
 }
 
+export function isConcealedRunnerResourceCard(
+  card: Pick<VisibleCard, "concealed" | "hiddenRunnerResource" | "type" | "subtypes">,
+): boolean {
+  if (card.concealed !== true) return false;
+  if (card.hiddenRunnerResource === true) return true;
+  return (
+    card.type === "resource" &&
+    (card.subtypes ?? []).includes("hidden_runner_resource")
+  );
+}
+
 export function selectedSubtypeDetailLabel(card: Pick<VisibleCard, "selectedSubtypeLabel">): string | null {
   if (!card.selectedSubtypeLabel) return null;
   return `Gewählter Typ: ${card.selectedSubtypeLabel}`;
