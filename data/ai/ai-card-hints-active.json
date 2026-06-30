@@ -29444,6 +29444,755 @@
         "confidence": "low",
         "needsHumanReview": true
       }
+    },
+    {
+      "cardId": "onr_classic_001_data-fort-remapping",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda",
+        "fort_reconfigure",
+        "advanceable"
+      ],
+      "planRoles": [
+        "score_agenda",
+        "improve_scoring_remote"
+      ],
+      "requiredMechanics": [
+        "score_agenda",
+        "fort_selection",
+        "move_installed_card"
+      ],
+      "valueHints": {
+        "agendaPoints": 2,
+        "tempo": 2,
+        "runControl": 2
+      },
+      "riskTags": [
+        "board_reposition"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_002_superserum",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda",
+        "tag_pressure",
+        "damage"
+      ],
+      "planRoles": [
+        "score_agenda",
+        "pressure_tagged_runner"
+      ],
+      "requiredMechanics": [
+        "score_agenda",
+        "runner_tags",
+        "flat_damage"
+      ],
+      "valueHints": {
+        "agendaPoints": 2,
+        "damageThreat": 3,
+        "tagPunish": 2
+      },
+      "riskTags": [
+        "tag_synergy",
+        "damage"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_003_unlisted-research-lab",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda",
+        "draw",
+        "action_economy"
+      ],
+      "planRoles": [
+        "score_agenda",
+        "build_hand"
+      ],
+      "requiredMechanics": [
+        "score_agenda",
+        "start_turn_trigger",
+        "draw_cards",
+        "extra_actions"
+      ],
+      "valueHints": {
+        "agendaPoints": 2,
+        "cardVelocity": 3,
+        "tempo": 2
+      },
+      "riskTags": [
+        "start_turn_trigger"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_004_theorem-proof",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda",
+        "run_tax",
+        "global_modifier"
+      ],
+      "planRoles": [
+        "score_agenda",
+        "tax_runs"
+      ],
+      "requiredMechanics": [
+        "score_agenda",
+        "global_run_cost_modifier",
+        "agenda_counters"
+      ],
+      "valueHints": {
+        "agendaPoints": 3,
+        "tax": 3,
+        "defense": 2
+      },
+      "riskTags": [
+        "global_modifier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_016_badtimes",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation",
+        "memory_pressure",
+        "program_trash"
+      ],
+      "planRoles": [
+        "disrupt_runner_rig"
+      ],
+      "requiredMechanics": [
+        "play_operation",
+        "temporary_memory_limit_modifier",
+        "trash_installed_program"
+      ],
+      "valueHints": {
+        "disruption": 4,
+        "programPressure": 4
+      },
+      "riskTags": [
+        "memory_pressure",
+        "program_trash"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_034_boostergang-connections",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_economy",
+        "multi_run"
+      ],
+      "planRoles": [
+        "pressure_centrals",
+        "build_economy"
+      ],
+      "requiredMechanics": [
+        "play_event",
+        "run_success_trigger",
+        "gain_credits",
+        "turn_duration_effect"
+      ],
+      "valueHints": {
+        "runPressure": 3,
+        "economy": 3
+      },
+      "riskTags": [
+        "run_success_dependency"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_035_corruption",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "agenda_steal_followup",
+        "corp_score_area_disruption"
+      ],
+      "planRoles": [
+        "punish_recent_score"
+      ],
+      "requiredMechanics": [
+        "play_event",
+        "recent_stolen_agenda_gate",
+        "score_area_transfer"
+      ],
+      "valueHints": {
+        "agendaPressure": 4,
+        "tempo": 2
+      },
+      "riskTags": [
+        "agenda_transfer",
+        "conditional_play"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_036_do-the-drine",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "choice",
+        "economy_or_draw"
+      ],
+      "planRoles": [
+        "build_economy",
+        "build_hand"
+      ],
+      "requiredMechanics": [
+        "play_event",
+        "runner_choice",
+        "gain_credits",
+        "draw_cards"
+      ],
+      "valueHints": {
+        "economy": 2,
+        "cardVelocity": 2
+      },
+      "riskTags": [
+        "choice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "rd_access_replacement",
+        "agenda_search"
+      ],
+      "planRoles": [
+        "pressure_rd",
+        "agenda_pressure"
+      ],
+      "requiredMechanics": [
+        "play_event",
+        "successful_run_access_replacement",
+        "reveal_cards_until_agenda",
+        "move_card_to_hq"
+      ],
+      "valueHints": {
+        "runPressure": 4,
+        "information": 3
+      },
+      "riskTags": [
+        "hidden_zone",
+        "rd_reveal",
+        "access_replacement"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_039_library-search",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "conditional_access_bonus",
+        "hq_access"
+      ],
+      "planRoles": [
+        "pressure_hq"
+      ],
+      "requiredMechanics": [
+        "play_event",
+        "successful_run_bonus_access",
+        "hand_size_condition"
+      ],
+      "valueHints": {
+        "runPressure": 3,
+        "accessPressure": 3
+      },
+      "riskTags": [
+        "conditional_access",
+        "hidden_zone"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_043_running-interference",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "rez_tax",
+        "run_support"
+      ],
+      "planRoles": [
+        "pressure_remote",
+        "tax_corp_rez"
+      ],
+      "requiredMechanics": [
+        "play_event",
+        "run_duration_rez_cost_surcharge"
+      ],
+      "valueHints": {
+        "runPressure": 3,
+        "tax": 2
+      },
+      "riskTags": [
+        "run_cost_modifier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_044_crash-space",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource",
+        "trace_safety",
+        "tag_control"
+      ],
+      "planRoles": [
+        "protect_against_trace",
+        "recover_from_tags"
+      ],
+      "requiredMechanics": [
+        "install_resource",
+        "trace_attempt_reaction",
+        "trash_source",
+        "remove_tags"
+      ],
+      "valueHints": {
+        "tagSafety": 4,
+        "traceSafety": 3
+      },
+      "riskTags": [
+        "trash_source",
+        "trace"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_045_elena-laskova",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource",
+        "link",
+        "trace_safety"
+      ],
+      "planRoles": [
+        "protect_against_trace"
+      ],
+      "requiredMechanics": [
+        "install_resource",
+        "link_modifier",
+        "ice_trace_scope"
+      ],
+      "valueHints": {
+        "traceSafety": 3
+      },
+      "riskTags": [
+        "link_modifier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_046_executive-file-clerk",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource",
+        "tag_cost_reduction"
+      ],
+      "planRoles": [
+        "recover_from_tags"
+      ],
+      "requiredMechanics": [
+        "install_resource",
+        "tag_remove_cost_modifier"
+      ],
+      "valueHints": {
+        "tagSafety": 3,
+        "economy": 2
+      },
+      "riskTags": [
+        "tag_synergy"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_047_little-black-box",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware",
+        "access_pressure",
+        "central_access"
+      ],
+      "planRoles": [
+        "pressure_centrals"
+      ],
+      "requiredMechanics": [
+        "install_hardware",
+        "successful_run_bonus_access",
+        "central_access_bonus"
+      ],
+      "valueHints": {
+        "accessPressure": 3,
+        "runPressure": 3
+      },
+      "riskTags": [
+        "hidden_zone",
+        "access_bonus"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware",
+        "deck_manipulation",
+        "card_velocity"
+      ],
+      "planRoles": [
+        "build_hand",
+        "rig_setup"
+      ],
+      "requiredMechanics": [
+        "install_hardware",
+        "top_stack_look",
+        "trash_top_stack",
+        "draw_cards"
+      ],
+      "valueHints": {
+        "cardVelocity": 3,
+        "information": 2
+      },
+      "riskTags": [
+        "hidden_zone",
+        "self_mill"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_049_omnitech-wet-drive",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware",
+        "memory",
+        "hand_size_scaling"
+      ],
+      "planRoles": [
+        "rig_setup"
+      ],
+      "requiredMechanics": [
+        "install_hardware",
+        "memory_limit_from_grip_size"
+      ],
+      "valueHints": {
+        "memory": 4,
+        "rigSupport": 3
+      },
+      "riskTags": [
+        "dynamic_memory"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_050_sandbox-dig",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource",
+        "prep_bonus",
+        "run_support"
+      ],
+      "planRoles": [
+        "pressure_remote",
+        "build_economy"
+      ],
+      "requiredMechanics": [
+        "install_resource",
+        "prep_action_credit_bonus",
+        "successful_run_trigger"
+      ],
+      "valueHints": {
+        "economy": 2,
+        "runPressure": 2
+      },
+      "riskTags": [
+        "turn_first_prep"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_051_vintage-camaro",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware",
+        "tag_prevention",
+        "future_action_cost"
+      ],
+      "planRoles": [
+        "avoid_tags"
+      ],
+      "requiredMechanics": [
+        "install_hardware",
+        "prevent_tag",
+        "future_action_debt"
+      ],
+      "valueHints": {
+        "tagSafety": 4,
+        "tempo": 2
+      },
+      "riskTags": [
+        "future_action_debt",
+        "tag_prevention"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_052_zetatech-portastation",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware",
+        "event_credit_host",
+        "economy"
+      ],
+      "planRoles": [
+        "build_economy",
+        "event_pressure"
+      ],
+      "requiredMechanics": [
+        "install_hardware",
+        "hosted_counters",
+        "restricted_credit_pool",
+        "play_event_payment"
+      ],
+      "valueHints": {
+        "economy": 3,
+        "eventSupport": 3
+      },
+      "riskTags": [
+        "hosted_counters",
+        "restricted_credits"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
     }
   ],
   "taskId": "AI022-1/AI030",

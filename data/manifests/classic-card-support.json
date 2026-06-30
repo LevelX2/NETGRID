@@ -27,7 +27,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_001_data-fort-remapping",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-agendas.test.ts#Classic Agenda Implementation Smokes"
+          "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
         ]
       },
       "blockReasons": []
@@ -57,7 +57,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_002_superserum",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-agendas.test.ts#Classic Agenda Implementation Smokes"
+          "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
         ]
       },
       "blockReasons": []
@@ -87,7 +87,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_003_unlisted-research-lab",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-agendas.test.ts#Classic Agenda Implementation Smokes"
+          "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
         ]
       },
       "blockReasons": []
@@ -117,7 +117,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_004_theorem-proof",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-agendas.test.ts#Classic Agenda Implementation Smokes"
+          "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
         ]
       },
       "blockReasons": []
@@ -477,7 +477,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_016_badtimes",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1017,7 +1017,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_034_boostergang-connections",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1047,7 +1047,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_035_corruption",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1077,7 +1077,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_036_do-the-drine",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1137,7 +1137,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_038_gypsytm-schedule-analyzer",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1167,7 +1167,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_039_library-search",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1287,7 +1287,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_043_running-interference",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1317,7 +1317,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_044_crash-space",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1347,7 +1347,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_045_elena-laskova",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1377,7 +1377,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_046_executive-file-clerk",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1407,7 +1407,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_047_little-black-box",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1437,7 +1437,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_048_omnitech-spinal-tap-cybermodem",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1467,7 +1467,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_049_omnitech-wet-drive",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1497,7 +1497,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_050_sandbox-dig",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1527,7 +1527,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_051_vintage-camaro",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []
@@ -1557,7 +1557,7 @@
         ],
         "aiHintRef": "ai-card-hints-active:onr_classic_052_zetatech-portastation",
         "scenarioRefs": [
-          "packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts#Classic Runner Rest Card Implementation Smokes"
+          "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
         ]
       },
       "blockReasons": []

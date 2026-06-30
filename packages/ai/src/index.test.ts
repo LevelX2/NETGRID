@@ -28041,6 +28041,44 @@ describe("MVP 0.3 AI simulation harness", () => {
     }
   });
 
+  it("includes Classic AI snapshots in the seeded AI deck pool", () => {
+    const snapshots = snapshotsData08.snapshots as Array<{
+      deckSnapshotId: string;
+      side: "runner" | "corp";
+      cards: Array<{ cardId: string; quantity: number }>;
+    }>;
+    const runtimeCardsById = createRuntimeCardsById();
+    const classicEntries = aiDeckPoolData.entries.filter((entry) =>
+      entry.tags.includes("classic"),
+    );
+
+    expect(classicEntries.map((entry) => entry.snapshotId).sort()).toEqual([
+      "classic_corp_ai_snapshot_v1",
+      "classic_runner_ai_snapshot_v1",
+    ]);
+    for (const entry of classicEntries) {
+      const snapshot = snapshots.find(
+        (candidate) => candidate.deckSnapshotId === entry.snapshotId,
+      );
+      expect(snapshot, entry.snapshotId).toBeDefined();
+      expect(snapshot?.side, entry.snapshotId).toBe(entry.side);
+      expect(
+        snapshot?.cards.reduce((sum, card) => sum + card.quantity, 0),
+        entry.snapshotId,
+      ).toBe(45);
+      expect(
+        snapshot?.cards.some((card) => card.cardId.startsWith("onr_classic_")),
+        entry.snapshotId,
+      ).toBe(true);
+      for (const card of snapshot?.cards ?? []) {
+        expect(
+          runtimeCardsById[card.cardId]?.statuses.ai_supported,
+          card.cardId,
+        ).toBe(true);
+      }
+    }
+  });
+
   it("marks every active support AI group as AI-supported for custom AI deckbuilding", () => {
     const runtimeCardsById = createRuntimeCardsById();
     const groupCardIds = ACTIVE_CARD_SUPPORT_AI_GROUPS.flatMap(

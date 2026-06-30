@@ -291,7 +291,7 @@ describe("deck validation and snapshots", () => {
     ).toBe(true);
   });
 
-  it("loads additive Classic format profiles without enabling Classic-only play", () => {
+  it("loads additive Classic format profiles for Classic AI play", () => {
     const classicRunnerIdentityRules = profileClassic.identityRules?.runner.runner_identity_001;
     const classicProteusCorpIdentityRules = profileClassicProteus.identityRules?.corp.corp_identity_001;
 
@@ -303,6 +303,8 @@ describe("deck validation and snapshots", () => {
     expect(classicProteusCorpIdentityRules?.allowedFactions).toEqual(["neutral_demo", "onr1996_neutral", "onr_classic", "onr_proteus"]);
     expect(profileClassic.allowedIdentityCards.runner).toEqual(["runner_identity_001"]);
     expect(profileClassicProteus.allowedIdentityCards.corp).toEqual(["corp_identity_001"]);
+    expect(profileClassic.minimumDeckCards).toEqual({ runner: 45, corp: 45 });
+    expect(profileClassic.ai?.requireAiSupportedForAiDecks).toBe(true);
   });
 
   it("validates the versioned King of the Road Runner AI snapshot from the local deck shape", () => {
@@ -429,6 +431,55 @@ describe("deck validation and snapshots", () => {
     ).toBe(true);
     expect(
       corpVariant.cards.every(
+        (entry) =>
+          runtimeCardsById[entry.cardId]?.statuses.ai_supported === true,
+      ),
+    ).toBe(true);
+  });
+
+  it("validates the Classic AI snapshots for both sides", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    const contextClassic = { cardsById: runtimeCardsById, profile: profileClassic };
+    const runner = snapshots08.find(
+      (candidate) => candidate.deckSnapshotId === "classic_runner_ai_snapshot_v1",
+    )!;
+    const corp = snapshots08.find(
+      (candidate) => candidate.deckSnapshotId === "classic_corp_ai_snapshot_v1",
+    )!;
+
+    expect(runner.name).toBe("Classic Runner AI - Toolbox Pressure");
+    expect(corp.name).toBe("Classic Corp AI - Agenda Tax Control");
+    expect(validateDeckSnapshot(runner, contextClassic)).toMatchObject({
+      ok: true,
+      errors: [],
+    });
+    expect(validateDeckSnapshot(corp, contextClassic)).toMatchObject({
+      ok: true,
+      errors: [],
+    });
+    expect(computeDeckHash(runner)).toBe("fnv1a:f187f2e2");
+    expect(computeDeckHash(corp)).toBe("fnv1a:659bdf52");
+    expect(runner.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(
+      45,
+    );
+    expect(corp.cards.reduce((sum, entry) => sum + entry.quantity, 0)).toBe(
+      45,
+    );
+    expect(corp.validation.agendaPoints).toBeGreaterThanOrEqual(7);
+    expect(
+      runner.cards.every((entry) => entry.cardId.startsWith("onr_classic_")),
+    ).toBe(true);
+    expect(
+      corp.cards.every((entry) => entry.cardId.startsWith("onr_classic_")),
+    ).toBe(true);
+    expect(
+      runner.cards.every(
+        (entry) =>
+          runtimeCardsById[entry.cardId]?.statuses.ai_supported === true,
+      ),
+    ).toBe(true);
+    expect(
+      corp.cards.every(
         (entry) =>
           runtimeCardsById[entry.cardId]?.statuses.ai_supported === true,
       ),

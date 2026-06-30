@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "classic-07-agenda-smoke",
+  "release": "CLASSIC-07 Corp Agendas",
+  "status": "package",
+  "coversCards": [
+    "onr_classic_001_data-fort-remapping",
+    "onr_classic_002_superserum",
+    "onr_classic_003_unlisted-research-lab",
+    "onr_classic_004_theorem-proof"
+  ],
+  "scenarios": [
+    {
+      "id": "classic_07_agenda_smoke",
+      "side": "corp",
+      "coversCards": [
+        "onr_classic_001_data-fort-remapping",
+        "onr_classic_002_superserum",
+        "onr_classic_003_unlisted-research-lab",
+        "onr_classic_004_theorem-proof"
+      ],
+      "assertions": [
+        "Data Fort Remapping scores as a two-point agenda and opens the implemented fort-remap choice without exposing hidden HQ or R&D card identities.",
+        "Superserum scores as a two-point agenda and applies its implemented tag and damage pressure through LegalActions-only resolution.",
+        "Unlisted Research Lab scores as a two-point agenda and resolves its start-turn card velocity and action economy from public agenda state.",
+        "Theorem Proof scores as a three-point agenda and applies its implemented run-tax modifier from scored agenda state."
+      ],
+      "sideSafetyAssertions": [
+        "legal_actions_only",
+        "hidden_zone_barrier",
+        "public_payload_only",
+        "no_card_instance_id_leak",
+        "statehash_replay_required"
+      ]
+    }
+  ]
+}
