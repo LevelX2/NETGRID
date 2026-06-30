@@ -1507,10 +1507,7 @@ export function formatChronicleEvent(
                 subject,
                 `${agendaRevealCountText(revealedCount)} aus HQ durch ${source} vorgezeigt und ${creditText(gainedCredits)} erhalten`,
               )
-            : phrase(
-                subject,
-                `keine Agenda aus HQ durch ${source} vorgezeigt`,
-              );
+            : phrase(subject, `keine Agenda aus HQ durch ${source} vorgezeigt`);
         description =
           revealedTitles.length > 0
             ? `Gezeigt: ${revealedTitles.join(", ")}. Timing: Start-of-turn.`
@@ -2777,6 +2774,64 @@ export function formatChronicleEvent(
         ...(removed && removed > 0
           ? [`${removed} entfernt`]
           : ["Alle Virus-Counter"]),
+      );
+      break;
+    }
+    case "purge_runner_virus_counters": {
+      const removed = numberValue(payload.purgedRunnerVirusCounters);
+      const debt = numberValue(payload.actionDebtAdded) ?? 3;
+      const summaryParts = purgeableRunnerVirusCounterSummaryParts(payload);
+      const mustVerb = subject === "Du" ? "musst" : "muss";
+      category = "danger";
+      importance = "important";
+      visibility = "public";
+      title = `${phrase(
+        subject,
+        removed && removed > 0
+          ? `${removed} Runner-Virus-Counter entfernt`
+          : "Runner-Virus-Counter entfernt",
+      )} und ${mustVerb} ${actionCountText(debt)} aussetzen`;
+      description = `${summaryParts.length > 0 ? `Entfernt: ${joinChronicleParts(summaryParts)}. ` : ""}${subject} ${mustVerb} dafür die nächsten ${actionCountText(debt)} aussetzen.`;
+      chips.push(
+        "Runner-Virus-Purge",
+        `${actionCountText(debt)} Schuld`,
+        ...(removed && removed > 0
+          ? [`${removed} entfernt`]
+          : ["Runner-Virus-Counter"]),
+        ...summaryParts.slice(0, 3),
+      );
+      break;
+    }
+    case "forgo_action": {
+      const paid = numberValue(payload.actionDebtPaid) ?? 1;
+      const debtBefore = numberValue(payload.corpActionDebtTotalBefore);
+      const debtAfter = numberValue(payload.corpActionDebtTotalAfter);
+      const totalDebt =
+        actionUse && debtBefore !== undefined
+          ? actionUse.start + debtBefore - 1
+          : undefined;
+      const progress =
+        actionUse && totalDebt !== undefined
+          ? `Aktion ${actionUse.start} von ${totalDebt}`
+          : actionCountText(paid);
+      category = "danger";
+      visibility = "public";
+      title = `${subject} setzt ${progress} aus`;
+      description =
+        debtAfter === undefined
+          ? undefined
+          : debtAfter > 0
+            ? `Aktionsschuld: noch ${actionCountText(debtAfter)} offen.`
+            : "Die Aktionsschuld ist vollständig abgetragen.";
+      chips.push(
+        "Aktionsschuld",
+        "Ausgesetzt",
+        ...(actionUse && totalDebt !== undefined
+          ? [`${actionUse.start}/${totalDebt}`]
+          : [`-${paid} Aktion${paid === 1 ? "" : "en"}`]),
+        ...(debtAfter !== undefined
+          ? [debtAfter > 0 ? `${debtAfter} offen` : "Schuld beglichen"]
+          : []),
       );
       break;
     }
@@ -4673,6 +4728,27 @@ function joinChronicleParts(parts: string[]): string | undefined {
   if (parts.length === 0) return undefined;
   if (parts.length === 1) return parts[0];
   return `${parts.slice(0, -1).join(", ")} und ${parts[parts.length - 1]}`;
+}
+
+function actionCountText(amount: number): string {
+  return `${amount} Aktion${amount === 1 ? "" : "en"}`;
+}
+
+function purgeableRunnerVirusCounterSummaryParts(
+  payload: Record<string, unknown>,
+): string[] {
+  const summary = stringValue(payload.purgedCounterSummary);
+  if (!summary) return [];
+  return summary
+    .split(";")
+    .map((part) => part.trim())
+    .flatMap((part) => {
+      const match = part.match(/:([a-z_]+)=(\d+)$/);
+      const counterType = match?.[1];
+      const amount = Number(match?.[2]);
+      if (!counterType || !Number.isInteger(amount) || amount <= 0) return [];
+      return [`${amount} ${counterLabel(counterType)}`];
+    });
 }
 
 function securityPurgeChronicleSummary(

@@ -31,8 +31,12 @@ const ACTION_TYPES = [
   "access_card",
   "steal_agenda",
   "trash_accessed_card",
+  "trash_resource",
   "decline_trash",
   "remove_tag",
+  "purge_virus_counters",
+  "purge_runner_virus_counters",
+  "forgo_action",
   "move_to_set_aside",
   "move_to_removed_from_game",
   "return_from_set_aside",
@@ -5126,6 +5130,96 @@ describe("formatChronicleEvent", () => {
     expect(multi.chips).toEqual(
       expect.arrayContaining(["Purge", "3 Aktionen", "4 entfernt"]),
     );
+  });
+
+  it("describes Proteus Runner-virus purge and action-debt payments", () => {
+    const purge = formatChronicleEvent(
+      makeEvent("purge_runner_virus_counters", {
+        actor: "corp",
+        purgeModel: "future_action_debt",
+        purgedCounterType: "runner_virus",
+        purgedRunnerVirusCounters: 3,
+        purgedCounterSummary: "corp:garbage=2;corp:highlighter=1",
+        actionDebtAdded: 3,
+        corpActionDebtTotalAfter: 3,
+      }),
+      "runner",
+    );
+    const ownPurge = formatChronicleEvent(
+      makeEvent("purge_runner_virus_counters", {
+        actor: "corp",
+        purgedRunnerVirusCounters: 2,
+        purgedCounterSummary: "corp:garbage=2",
+        actionDebtAdded: 3,
+      }),
+      "corp",
+    );
+    const firstDebtAction = formatChronicleEvent(
+      makeEvent("forgo_action", {
+        actor: "corp",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 1,
+        turnActionOrdinalEnd: 1,
+        actionDebtPaid: 1,
+        corpActionDebtTotalBefore: 3,
+        corpActionDebtTotalAfter: 2,
+      }),
+      "runner",
+    );
+    const finalDebtAction = formatChronicleEvent(
+      makeEvent("forgo_action", {
+        actor: "corp",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 3,
+        turnActionOrdinalEnd: 3,
+        actionDebtPaid: 1,
+        corpActionDebtTotalBefore: 1,
+        corpActionDebtTotalAfter: 0,
+      }),
+      "runner",
+    );
+
+    expect(purge.title).toBe(
+      "Die Korp hat 3 Runner-Virus-Counter entfernt und muss 3 Aktionen aussetzen.",
+    );
+    expect(purge.description).toBe(
+      "Entfernt: 2 Garbage-Counter und 1 Highlighter-Counter. Die Korp muss dafür die nächsten 3 Aktionen aussetzen.",
+    );
+    expect(purge.chips).toEqual(
+      expect.arrayContaining([
+        "Runner-Virus-Purge",
+        "3 Aktionen Schuld",
+        "3 entfernt",
+        "2 Garbage-Counter",
+      ]),
+    );
+    expect(ownPurge.title).toBe(
+      "Du hast 2 Runner-Virus-Counter entfernt und musst 3 Aktionen aussetzen.",
+    );
+    expect(ownPurge.description).toBe(
+      "Entfernt: 2 Garbage-Counter. Du musst dafür die nächsten 3 Aktionen aussetzen.",
+    );
+    expect(firstDebtAction.title).toBe("Die Korp setzt Aktion 1 von 3 aus.");
+    expect(firstDebtAction.description).toBe(
+      "Aktionsschuld: noch 2 Aktionen offen.",
+    );
+    expect(firstDebtAction.actionUse).toMatchObject({
+      label: "1",
+      title: "1. Aktion in diesem Zug",
+      clicks: 1,
+    });
+    expect(firstDebtAction.chips).toEqual(
+      expect.arrayContaining(["Aktionsschuld", "Ausgesetzt", "1/3", "2 offen"]),
+    );
+    expect(finalDebtAction.title).toBe("Die Korp setzt Aktion 3 von 3 aus.");
+    expect(finalDebtAction.description).toBe(
+      "Die Aktionsschuld ist vollständig abgetragen.",
+    );
+    expect(finalDebtAction.actionUse).toMatchObject({
+      label: "3",
+      title: "3. Aktion in diesem Zug",
+    });
+    expect(finalDebtAction.chips).toContain("Schuld beglichen");
   });
 
   it("derives chronicle action numbers across extra actions when payload ordinals reset", () => {
