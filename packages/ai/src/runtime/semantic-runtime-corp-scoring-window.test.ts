@@ -917,6 +917,76 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     );
   });
 
+  it("does not promote Bug Zapper plus Mastermind to durable protection without stable outside support", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 6,
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            bugZapperIce("bug-zapper"),
+            mastermindIce("mastermind"),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment?.windowKind).not.toBe("durable");
+    expect(assessment).toMatchObject({
+      windowKind: "temporary_safe",
+      affordableDurableRelevantIceCount: 0,
+      dynamicProtectionWeaknessCount: 2,
+    });
+  });
+
+  it("treats static ICE added to a dynamic-only remote as a concrete scoring-window improvement", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const iceToInstall = wallIce("static-remote-wall", { rezCost: 2 });
+    const action = corpAction(
+      "install-static-remote-ice",
+      "install_card",
+      {
+        placement: "ice",
+        serverId: "remote_1",
+      },
+      iceToInstall.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 6,
+        hq: [agenda, iceToInstall],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            bugZapperIce("bug-zapper"),
+            mastermindIce("mastermind"),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "temporary_safe",
+      recommendedNextStep: "build_remote_ice",
+      affordableDurableRelevantIceCount: 1,
+      dynamicProtectionWeaknessCount: 2,
+    });
+  });
+
   it("marks solo Dog Pile unsafe when visible killer coverage and credits can access", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(
@@ -1343,6 +1413,34 @@ function dogPileIce(instanceId: string): VisibleCard {
     known: true,
     type: "ice",
     definitionId: "onr_proteus_021_dog-pile",
+    subtypes: ["Sentry"],
+    rezzed: false,
+    rezCost: 2,
+    owner: "corp",
+  } as VisibleCard;
+}
+
+function bugZapperIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "ice",
+    title: "Bug Zapper",
+    definitionId: "onr_proteus_012_bug-zapper",
+    subtypes: ["Sentry"],
+    rezzed: false,
+    rezCost: 2,
+    owner: "corp",
+  } as VisibleCard;
+}
+
+function mastermindIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "ice",
+    title: "Mastermind",
+    definitionId: "onr_proteus_030_mastermind",
     subtypes: ["Sentry"],
     rezzed: false,
     rezCost: 2,

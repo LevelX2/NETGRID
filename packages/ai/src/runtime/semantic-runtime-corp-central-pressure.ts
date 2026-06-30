@@ -16,6 +16,7 @@ export type CorpCentralPressureAssessment = {
   runOrAccessEvents: number;
   successfulAccessEvents: number;
   visibleMultiaccess: boolean;
+  visibleVirusPressure: boolean;
   eventMultiaccess: boolean;
   runnerRunCredits: number;
   hqAgendaExposure: boolean;
@@ -49,6 +50,10 @@ export function semanticRuntimeCorpCentralPressureAssessment(
     centralEventHasMultiaccess(event),
   );
   const visibleMultiaccess = visibleRunnerCentralMultiaccess(input, serverId);
+  const visibleVirusPressure = visibleRunnerCentralVirusPressure(
+    input,
+    serverId,
+  );
   const runnerRunCredits =
     input.playerView.opponent.credits +
     visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? []);
@@ -61,13 +66,17 @@ export function semanticRuntimeCorpCentralPressureAssessment(
     runOrAccessEvents / 4 +
       successfulAccessEvents / 5 +
       (visibleMultiaccess ? 0.35 : 0) +
+      (visibleVirusPressure ? 0.25 : 0) +
       (eventMultiaccess ? 0.2 : 0) +
       (runnerRunCredits >= 6 ? 0.1 : 0),
   );
   const active =
     hqAgendaExposure ||
     pressure >= (serverId === "rd" ? 0.45 : 0.55) ||
-    (visibleMultiaccess && runnerRunCredits >= (serverId === "rd" ? 2 : 1));
+    (visibleMultiaccess && runnerRunCredits >= (serverId === "rd" ? 2 : 1)) ||
+    (serverId === "rd" &&
+      visibleVirusPressure &&
+      (runnerRunCredits >= 1 || runOrAccessEvents > 0));
 
   return {
     serverId,
@@ -76,6 +85,7 @@ export function semanticRuntimeCorpCentralPressureAssessment(
     runOrAccessEvents,
     successfulAccessEvents,
     visibleMultiaccess,
+    visibleVirusPressure,
     eventMultiaccess,
     runnerRunCredits,
     hqAgendaExposure,
@@ -84,6 +94,7 @@ export function semanticRuntimeCorpCentralPressureAssessment(
       `corp_central_pressure_events:${runOrAccessEvents}`,
       `corp_central_successful_access_events:${successfulAccessEvents}`,
       `corp_central_visible_multiaccess:${visibleMultiaccess}`,
+      `corp_central_visible_virus_pressure:${visibleVirusPressure}`,
       `corp_central_event_multiaccess:${eventMultiaccess}`,
       `corp_central_runner_run_credits:${runnerRunCredits}`,
       `corp_central_pressure:${pressure.toFixed(2)}`,
@@ -197,6 +208,15 @@ function visibleRunnerCentralMultiaccess(
   );
 }
 
+function visibleRunnerCentralVirusPressure(
+  input: AiDecisionInput,
+  serverId: CorpCentralServerId,
+): boolean {
+  return (input.playerView.opponent.rig ?? []).some((card) =>
+    visibleCardCreatesCentralVirusPressure(card, serverId),
+  );
+}
+
 function visibleCardProvidesCentralMultiaccess(
   card: VisibleCard,
   serverId: CorpCentralServerId,
@@ -241,6 +261,67 @@ function visibleCardProvidesCentralMultiaccess(
     tokenSet.has("rd") ||
     tokenSet.has("rnd")
   );
+}
+
+function visibleCardCreatesCentralVirusPressure(
+  card: VisibleCard,
+  serverId: CorpCentralServerId,
+): boolean {
+  if (card.known === false) return false;
+  const hint = card.definitionId
+    ? (AI_HINTS_BY_CARD.get(card.definitionId) as
+        | AiCardHintWithSignals
+        | undefined)
+    : undefined;
+  const signals = [
+    ...(hint?.roles ?? []),
+    ...(hint?.planRoles ?? []),
+    ...(hint?.tacticSignals ?? []),
+  ].map((signal) => signal.toLocaleLowerCase("en-US"));
+  const serverSignal =
+    serverId === "rd"
+      ? signals.some((signal) =>
+          signalHasAnyToken(signal, ["rnd", "rd", "r_and_d"]),
+        )
+      : signals.some((signal) => signalHasAnyToken(signal, ["hq"]));
+  const payoffSignal = signals.some((signal) =>
+    signalHasAnyToken(signal, [
+      "virus",
+      "multiaccess",
+      "free_trash",
+      "access",
+    ]),
+  );
+  if (serverSignal && payoffSignal) return true;
+
+  const text = `${card.title ?? ""} ${card.rulesText ?? ""} ${
+    card.definitionId ?? ""
+  }`.toLocaleLowerCase("en-US");
+  const tokens = visibleTextTokens(text.replace(/r&d/g, "rnd"));
+  const tokenSet = new Set(tokens);
+  const serverMention =
+    serverId === "rd"
+      ? tokenSet.has("rd") ||
+        tokenSet.has("rnd") ||
+        visibleTextHasPhrase(tokens, ["r", "d"])
+      : tokenSet.has("hq");
+  if (!serverMention) return false;
+  const counterOrVirus =
+    tokenSet.has("virus") ||
+    tokenSet.has("counter") ||
+    tokenSet.has("counters");
+  const payoff =
+    tokenSet.has("access") ||
+    tokenSet.has("trash") ||
+    tokenSet.has("additional") ||
+    tokenSet.has("multiaccess");
+  return counterOrVirus && payoff;
+}
+
+function signalHasAnyToken(signal: string, needles: readonly string[]): boolean {
+  const needleSet = new Set(needles);
+  const tokens = signal.split(/[._:-]+/).filter(Boolean);
+  return tokens.some((token) => needleSet.has(token));
 }
 
 function hintEffectsWithTarget(

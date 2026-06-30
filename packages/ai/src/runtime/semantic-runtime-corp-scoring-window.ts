@@ -1036,6 +1036,15 @@ function scoringWindowIceInstallImprovesExistingWindow(params: {
   projectedServer: CorpServerLike | undefined;
   rezBudget: ReturnType<typeof scoringWindowRezBudget>;
 }): boolean {
+  if (
+    params.existingWindow === "temporary_safe" &&
+    params.rezBudget.dynamicProtectionWeaknessCount > 0 &&
+    (params.rezBudget.affordableDurableRelevantIceCount ?? 0) > 0 &&
+    params.rezBudget.corpCanRezRelevantIce &&
+    !params.exposureAccess.runnerCanReachAccessNow
+  ) {
+    return true;
+  }
   return (
     params.existingWindow === "temporary_safe" &&
     (params.projectedServer?.ice.length ?? 0) >= 2 &&

@@ -163,6 +163,20 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     };
   }
 
+  const pressureInput = inputWithOpponentDefaults(input);
+  const centralPressure = highestPriorityTriageCentralPressure(pressureInput);
+  const centralPressureSeverity = centralPressure
+    ? centralTriageSeverity(pressureInput, centralPressure)
+    : undefined;
+  if (centralPressure && centralPressureSeverity === "critical") {
+    return centralPressureTriage(
+      centralPressure,
+      centralPressureSeverity,
+      currentCredits,
+      ["corp_board_triage_central_override:critical_before_remote"],
+    );
+  }
+
   const remoteProtection = highestPriorityScoreRemoteEntry(
     actions.filter((entry) => scoreRemoteNeedsProtection(entry)),
   );
@@ -205,49 +219,12 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     };
   }
 
-  const pressureInput = inputWithOpponentDefaults(input);
-  const hqPressure = semanticRuntimeCorpCentralPressureAssessment(
-    pressureInput,
-    "hq",
-  );
-  const rdPressure = semanticRuntimeCorpCentralPressureAssessment(
-    pressureInput,
-    "rd",
-  );
-  const acuteHqPressure = centralPressureIsTriageAcute(
-    pressureInput,
-    hqPressure,
-  )
-    ? hqPressure
-    : undefined;
-  const acuteRdPressure = centralPressureIsTriageAcute(
-    pressureInput,
-    rdPressure,
-  )
-    ? rdPressure
-    : undefined;
-  const centralPressure =
-    acuteHqPressure && acuteRdPressure
-      ? acuteHqPressure.pressure >= acuteRdPressure.pressure ||
-        acuteHqPressure.hqAgendaExposure
-        ? acuteHqPressure
-        : acuteRdPressure
-      : acuteHqPressure
-        ? acuteHqPressure
-        : acuteRdPressure
-          ? acuteRdPressure
-          : undefined;
-  if (centralPressure) {
-    return {
-      primary: centralPressure.serverId === "hq" ? "protect_hq" : "protect_rd",
-      severity: centralTriageSeverity(pressureInput, centralPressure),
-      targetServerId: centralPressure.serverId,
+  if (centralPressure && centralPressureSeverity) {
+    return centralPressureTriage(
+      centralPressure,
+      centralPressureSeverity,
       currentCredits,
-      evidence: [
-        `corp_board_triage_primary:protect_${centralPressure.serverId}`,
-        ...centralPressure.evidence,
-      ],
-    };
+    );
   }
 
   if (
@@ -490,7 +467,8 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
       if (action.type === "draw_card" && !legalEconomyActionExists(input)) {
         return "match";
       }
-      return actionPushesUnsafeScoreline(input, action, dependencies) ||
+      return actionCreatesPurgeActionDebt(action) ||
+        actionPushesUnsafeScoreline(input, action, dependencies) ||
         actionIsExpensiveNonProtection(action, actionServerId, triage)
         ? "mismatch"
         : "neutral";
@@ -1029,6 +1007,25 @@ function triageSeverityFromScoringWindow(
   return agendaSeverityToTriageSeverity(assessment.agendaStealSeverity);
 }
 
+function centralPressureTriage(
+  centralPressure: ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment>,
+  severity: CorpBoardTriageSeverity,
+  currentCredits: number,
+  extraEvidence: readonly string[] = [],
+): CorpBoardTriage {
+  return {
+    primary: centralPressure.serverId === "hq" ? "protect_hq" : "protect_rd",
+    severity,
+    targetServerId: centralPressure.serverId,
+    currentCredits,
+    evidence: [
+      `corp_board_triage_primary:protect_${centralPressure.serverId}`,
+      ...extraEvidence,
+      ...centralPressure.evidence,
+    ],
+  };
+}
+
 function agendaSeverityToTriageSeverity(
   severity: CorpScoringWindowAgendaStealSeverity | undefined,
 ): CorpBoardTriageSeverity {
@@ -1043,9 +1040,20 @@ function centralTriageSeverity(
   pressure: ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment>,
 ): CorpBoardTriageSeverity {
   if (
+    pressure.serverId === "rd" &&
+    pressure.successfulAccessEvents >= 2 &&
+    (pressure.visibleVirusPressure ||
+      pressure.visibleMultiaccess ||
+      pressure.eventMultiaccess ||
+      pressure.runOrAccessEvents >= 6)
+  ) {
+    return "critical";
+  }
+  if (
     input.playerView.opponent.agendaPoints >= 5 &&
     (pressure.hqAgendaExposure ||
       pressure.visibleMultiaccess ||
+      pressure.visibleVirusPressure ||
       pressure.eventMultiaccess ||
       pressure.successfulAccessEvents > 0)
   ) {
@@ -1063,12 +1071,43 @@ function centralPressureIsTriageAcute(
   const runnerNearWin = input.playerView.opponent.agendaPoints >= 5;
   const liveAccessSignal =
     pressure.visibleMultiaccess ||
+    pressure.visibleVirusPressure ||
     pressure.eventMultiaccess ||
     pressure.successfulAccessEvents > 0 ||
     pressure.runOrAccessEvents >= 2 ||
     pressure.runnerRunCredits >= 6;
+  if (
+    pressure.serverId === "rd" &&
+    pressure.visibleVirusPressure &&
+    pressure.runOrAccessEvents > 0
+  ) {
+    return true;
+  }
   if (pressure.hqAgendaExposure) return runnerNearWin || liveAccessSignal;
   return liveAccessSignal || pressure.pressure >= 0.7;
+}
+
+function highestPriorityTriageCentralPressure(input: AiDecisionInput):
+  | ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment>
+  | undefined {
+  const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
+  const rdPressure = semanticRuntimeCorpCentralPressureAssessment(input, "rd");
+  const acuteHqPressure = centralPressureIsTriageAcute(input, hqPressure)
+    ? hqPressure
+    : undefined;
+  const acuteRdPressure = centralPressureIsTriageAcute(input, rdPressure)
+    ? rdPressure
+    : undefined;
+  if (acuteHqPressure && acuteRdPressure) {
+    if (centralTriageSeverity(input, acuteRdPressure) === "critical") {
+      return acuteRdPressure;
+    }
+    return acuteHqPressure.pressure >= acuteRdPressure.pressure ||
+      acuteHqPressure.hqAgendaExposure
+      ? acuteHqPressure
+      : acuteRdPressure;
+  }
+  return acuteHqPressure ?? acuteRdPressure;
 }
 
 function actionProtectsServer<TConsumer extends string>(
@@ -1144,6 +1183,7 @@ function actionDelaysForcedScoreline<TConsumer extends string>(
   dependencies: CorpBoardTriageDependencies<TConsumer>,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
+  if (actionCreatesPurgeActionDebt(action)) return true;
   if (action.type === "draw_card" || action.type === "gain_credit") {
     return true;
   }
@@ -1183,6 +1223,7 @@ function actionDelaysProtectedScoreRemote<TConsumer extends string>(
   dependencies: CorpBoardTriageDependencies<TConsumer>,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
+  if (actionCreatesPurgeActionDebt(action)) return true;
   if (action.type === "end_turn") return true;
   if (action.type === "draw_card" || action.type === "gain_credit") {
     return true;
@@ -1281,6 +1322,12 @@ function actionDistractsFromCentralProtection(
   triage: CorpBoardTriage,
 ): boolean {
   if (actionServerId === triage.targetServerId) return false;
+  if (
+    actionCreatesPurgeActionDebt(action) &&
+    (triage.severity === "high" || triage.severity === "critical")
+  ) {
+    return true;
+  }
   if (actionServerId === "archives") return true;
   if (action.type === "advance_card") return true;
   if (action.type === "install_card") return true;
@@ -1288,6 +1335,10 @@ function actionDistractsFromCentralProtection(
     return action.type === "gain_credit" || action.type === "draw_card";
   }
   return false;
+}
+
+function actionCreatesPurgeActionDebt(action: LegalAction): boolean {
+  return action.type === "purge_runner_virus_counters";
 }
 
 function actionBuildsScoreRemote(
@@ -1538,7 +1589,12 @@ function corpBoardTriageMismatchComponentValue(
   normalizedValue: number,
 ): number {
   if (
-    triage.primary === "protect_score_remote" &&
+    (triage.primary === "score_now" ||
+      triage.primary === "force_scoreline_clock" ||
+      triage.primary === "protect_score_remote" ||
+      triage.primary === "fund_score_remote" ||
+      triage.primary === "protect_hq" ||
+      triage.primary === "protect_rd") &&
     (triage.severity === "critical" || triage.severity === "high")
   ) {
     return triage.severity === "critical" ? -3200 : -2400;
