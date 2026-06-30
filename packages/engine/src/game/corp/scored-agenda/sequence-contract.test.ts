@@ -145,6 +145,7 @@ describe("scored agenda sequence contract matrix", () => {
       "fixed_bonus_agenda_points_score_effect",
       "gain_credits_on_score_effect",
       "overadvance_score_effects",
+      "purge_runner_virus_counters_and_prevent_next_effect",
       "score_credit_swing_threshold_effect",
       "scored_agenda_install_rez_credit_score_effect",
     ]);

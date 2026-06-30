@@ -1584,7 +1584,6 @@ function automaticTagEffect(
     sourceTitle: publicCardTitle(sourceDefinitionId),
   };
 }
-
 function automaticTrashCardEffect(
   effectId: string,
   side: Side,
@@ -1603,7 +1602,6 @@ function automaticTrashCardEffect(
     sourceTitle: publicCardTitle(sourceDefinitionId),
   };
 }
-
 function automaticCounterChangeEffect(
   effectId: string,
   side: Side,
@@ -1626,7 +1624,6 @@ function automaticCounterChangeEffect(
     sourceTitle: publicCardTitle(sourceDefinitionId),
   };
 }
-
 function automaticStealAgendaEffect(
   effectId: string,
   cardDefinitionId: CardDefinitionId,
@@ -1646,11 +1643,9 @@ function automaticStealAgendaEffect(
     sourceTitle: publicCardTitle(sourceDefinitionId),
   };
 }
-
 function publicCardTitle(definitionId: CardDefinitionId): string {
   return DEMO_CARDS_BY_ID[definitionId]?.title ?? definitionId;
 }
-
 function applyRunnerForgoNextAction(state: GameState): void {
   if (state.runner.clicks > 0) {
     state.runner.clicks = Math.max(0, state.runner.clicks - 1);
@@ -1658,14 +1653,12 @@ function applyRunnerForgoNextAction(state: GameState): void {
   }
   addRunnerFutureActionDebt(state, 1);
 }
-
 function addRunnerFutureActionDebt(state: GameState, amount: number): void {
   if (!Number.isInteger(amount) || amount <= 0) return;
   const flags = ensureRunnerTurnFlags(state);
   flags.forgoNextActionsPending =
     Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0)) + amount;
 }
-
 function consumeRunnerFutureActionDebt(state: GameState): number {
   const flags = ensureRunnerTurnFlags(state);
   let pending = Math.max(0, Math.floor(flags.forgoNextActionsPending ?? 0));
@@ -1680,15 +1673,12 @@ function consumeRunnerFutureActionDebt(state: GameState): number {
   flags.forgoNextActionsPending = pending - consumed;
   return consumed;
 }
-
 function ensureActionEconomy(state: GameState): NonNullable<GameState["actionEconomy"]> {
   return (state.actionEconomy ??= {});
 }
-
 type ActionEconomyGrant = NonNullable<
   NonNullable<GameState["actionEconomy"]>["grants"]
 >[number];
-
 function compactActionEconomy(state: GameState): void {
   const economy = state.actionEconomy;
   if (!economy) return;
@@ -2518,7 +2508,6 @@ function applyPurgeableRunnerVirusCorpStartEffects(
     remainingCounters: pipeCounters,
   });
 }
-
 function openCorpStartTurnRestrictedActionOffers(
   state: GameState,
   effects?: AutomaticEffectCollector,
@@ -2561,7 +2550,6 @@ function openCorpStartTurnRestrictedActionOffers(
     return;
   }
 }
-
 function virusCounterDrawsAtCorpStart(state: GameState): number {
   return Object.keys(state.cardInstances).reduce((sum, cardId) => {
     const implementation = virusCounterImplementationForCard(state, cardId);
@@ -2570,14 +2558,12 @@ function virusCounterDrawsAtCorpStart(state: GameState): number {
     return sum + cardCounter(state, cardId, "virus") * start.amountPerCounter;
   }, 0);
 }
-
 function skivvissCounterTotal(state: GameState): number {
   return Object.keys(state.cardInstances).reduce((sum, cardId) => {
     if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
     return sum + cardCounter(state, cardId, "virus");
   }, 0);
 }
-
 function virusCounterCascadeTrashAtCorpStart(state: GameState): {
   amount: number;
   sourceDefinitionId?: CardDefinitionId;
@@ -2604,7 +2590,6 @@ function virusCounterCascadeTrashAtCorpStart(state: GameState): {
     sourceDefinitionId: corpCascadeCounters > 0 ? CASCADE_ID : undefined,
   } as { amount: number; sourceDefinitionId?: CardDefinitionId });
 }
-
 function trashFaceupRdCardsForCascade(
   state: GameState,
   maxCount: number,
@@ -2624,7 +2609,6 @@ function trashFaceupRdCardsForCascade(
   }
   return selected;
 }
-
 function applyRunnerStartOfTurnEffects(
   state: GameState,
   effects?: AutomaticEffectCollector,

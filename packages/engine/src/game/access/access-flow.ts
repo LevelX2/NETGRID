@@ -114,6 +114,15 @@ export function handleAccessExecution(
     case "access_card":
       return accessCurrentCard(host, legalAction);
     case "steal_agenda": {
+      if (
+        legalAction.payload?.agendaAccessReplacement ===
+        "install_as_runner_program"
+      )
+        return installAccessedAgendaAsRunnerProgram(
+          host,
+          host.state.run?.accessedCardId ?? "",
+          legalAction,
+        );
       const paidCredits = revalidateStealAgendaCost(host, legalAction);
       host.payment.spendRunnerCredits(paidCredits);
       const result = stealAgenda(
@@ -649,6 +658,74 @@ function stealAgenda(
   return {
     handled: true,
     stolenAgendaId: cardId as CardInstanceId,
+    runFinished: true,
+    accessFinished: true,
+    ...resolvedPayloadFor(legalAction),
+    stateChanged: true,
+  };
+}
+
+function installAccessedAgendaAsRunnerProgram(
+  host: AccessFlowHost,
+  cardId: string,
+  legalAction: LegalAction,
+): AccessExecutionResult {
+  if (!cardId) throw new Error("Keine Agenda wird accessed.");
+  const sourceCardId = cardId as CardInstanceId;
+  const run = mustRun(host);
+  attachAccessOriginPayload(legalAction, run);
+  const definition = host.cards.definitionFor(sourceCardId);
+  const replacement = cardImplementationForDefinitionId(
+    definition.id,
+  )?.agendaAccessReplacement;
+  if (
+    definition.type !== "agenda" ||
+    replacement?.kind !== "install_as_runner_program" ||
+    !replacement.scoreAsAgendaAction ||
+    !replacement.removeFromGameOnLeavePlay
+  )
+    throw new Error("Diese Agenda kann nicht als Runner-Programm installiert werden.");
+  const memoryCost = Math.max(0, Math.floor(replacement.memoryCost));
+  if (Number(legalAction.payload?.installedRunnerProgramMemoryCost) !== memoryCost)
+    throw new Error("Die Installationskosten passen nicht mehr zur Agenda.");
+  if (host.state.runner.memoryUsed + memoryCost > host.state.runner.memoryLimit)
+    throw new Error("Der Runner hat nicht genug MU fuer dieses Programm.");
+  const instance = host.cards.cardInstanceFor(sourceCardId);
+  host.zones.removeFromAllZones(sourceCardId);
+  host.state.runner.rig.programs.push(sourceCardId);
+  host.state.runner.memoryUsed += memoryCost;
+  host.state.cardInstances[sourceCardId] = {
+    ...instance,
+    controller: "runner",
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "rig" },
+    installedAsRunnerProgram: {
+      memoryCost,
+      scoreAsAgendaAction: true,
+      removeFromGameOnLeavePlay: true,
+      originalType: "agenda",
+    },
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    agendaAccessReplacement: "install_as_runner_program",
+    installedAsRunnerProgram: true,
+    installedRunnerProgramMemoryCost: memoryCost,
+    runnerMemoryUsedAfter: host.state.runner.memoryUsed,
+    sourceDefinitionId: definition.id,
+  };
+  if (host.state.run?.breach) {
+    return {
+      ...completeCurrentBreachAccess(host, "stolen", legalAction),
+      accessedCardId: sourceCardId,
+      ...resolvedPayloadFor(legalAction),
+    };
+  }
+  host.run.finishRun(true, legalAction);
+  return {
+    handled: true,
+    accessedCardId: sourceCardId,
     runFinished: true,
     accessFinished: true,
     ...resolvedPayloadFor(legalAction),

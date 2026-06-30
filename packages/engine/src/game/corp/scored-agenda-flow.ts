@@ -48,6 +48,7 @@ export function scoreAgenda(
   state.corp.scoreArea.push(cardId);
   state.cardInstances[cardId] = {
     ...host.cards.mustInstance(cardId),
+    controller: "corp",
     faceup: true,
     rezzed: true,
     zone: { side: "corp", zone: "scoreArea" },

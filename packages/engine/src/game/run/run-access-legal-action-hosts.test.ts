@@ -243,6 +243,7 @@ function hostFor(calls: string[]): RunAccessLegalActionHostCompositionHost {
         preventOneVirusCounterWithCounterPrevention: () => ({
           prevented: false,
           creditsPaid: 0,
+          preventionChargesSpent: 0,
         }),
         poxCountersForServer: () => 0,
         addCounterToAllInstalledRunnerIcebreakers: () => ({

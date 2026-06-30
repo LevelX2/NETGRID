@@ -64,6 +64,7 @@ export type CardEffectExecutionContext = {
     serverId: Exclude<ServerId, "new_remote">,
     options: CardEffectMakeRunOptions,
   ) => CardEffectMakeRunResult;
+  endRun?: (successful: boolean) => CardEffectHiddenInfoResult;
   addCounterToAllInstalledRunnerIcebreakers?: (
     counterType: CounterType,
     amount: number,
@@ -75,6 +76,7 @@ export type CardEffectExecutionContext = {
     sourceCardId: CardInstanceId,
   ) => CardEffectHiddenInfoResult;
   gainRunnerEventAgendaPoint?: (amount: 1) => CardEffectHiddenInfoResult;
+  scoreSourceAsAgenda?: () => CardEffectHiddenInfoResult;
   runnerLiberatedAgendaSubtypeThisTurn?: (
     subtype: "research" | "gray_ops" | "black_ops",
   ) => boolean;

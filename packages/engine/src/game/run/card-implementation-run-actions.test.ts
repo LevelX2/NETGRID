@@ -7,6 +7,7 @@ import type {
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import {
+  buildCorpDuringRunCardImplementationActions,
   buildCorpEncounterCardImplementationActions,
   buildRunnerDuringRunCardImplementationActions,
   type RunCardImplementationActionHost,
@@ -270,5 +271,64 @@ describe("corp encounter CardImplementation actions", () => {
 
     expect(calls).toEqual(["corp:ice_1:ice_definition:corp_encounter"]);
     expect(result.legalActions).toHaveLength(1);
+  });
+});
+
+describe("corp during-run CardImplementation actions", () => {
+  it("delegates scored corp agendas with corp_during_run timing", () => {
+    const state = makeState();
+    state.corp.scoreArea = [
+      "agenda_b" as CardInstanceId,
+      "agenda_a" as CardInstanceId,
+    ];
+    state.cardInstances.agenda_a = instance(
+      "agenda_a" as CardInstanceId,
+      "agenda_a_definition",
+      { zone: { side: "corp", zone: "scoreArea" } },
+    );
+    state.cardInstances.agenda_b = instance(
+      "agenda_b" as CardInstanceId,
+      "agenda_b_definition",
+      { zone: { side: "corp", zone: "scoreArea" } },
+    );
+    const calls: string[] = [];
+    const host: RunCardImplementationActionHost = {
+      state,
+      cards: {
+        cardInstanceFor: (cardId) => state.cardInstances[cardId],
+        definitionFor: (cardId) =>
+          definition(`${cardId}_definition`, `Scored ${cardId}`),
+        runnerInstalledCardIds: () => [],
+      },
+      runtime: {
+        pushActivatedActionsForTiming: (
+          legalActions,
+          side,
+          sourceCardId,
+          cardDefinition,
+          timing,
+        ) => {
+          calls.push(`${side}:${sourceCardId}:${cardDefinition.id}:${timing}`);
+          legalActions.push({
+            ...action(sourceCardId, {
+              sourceDefinitionId: cardDefinition.id,
+              cardImplementationAbilityTiming: timing,
+            }),
+            side,
+          } as LegalAction);
+        },
+      },
+    };
+
+    const result = buildCorpDuringRunCardImplementationActions(host);
+
+    expect(calls).toEqual([
+      "corp:agenda_a:agenda_a_definition:corp_during_run",
+      "corp:agenda_b:agenda_b_definition:corp_during_run",
+    ]);
+    expect(result.legalActions.map((legalAction) => legalAction.source)).toEqual([
+      "agenda_a",
+      "agenda_b",
+    ]);
   });
 });

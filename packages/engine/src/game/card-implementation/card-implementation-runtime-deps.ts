@@ -70,6 +70,15 @@ export function createGameCardImplementationRuntimeDeps(
         serverId,
         options,
       ),
+    finishRun: (state, legalAction, successful) => {
+      host.run.finishRun(state, legalAction, successful);
+      return {
+        publicPayload: {
+          runEnded: true,
+          runSuccessful: successful,
+        },
+      };
+    },
     ...createHiddenZoneCardImplementationRuntimeDeps(
       host.hiddenZone.runtimeDepsHost,
     ),
@@ -139,6 +148,7 @@ export function createGameCardImplementationRuntimeDeps(
       );
       return { publicPayload: legalAction.payload ?? {} };
     },
+    scoreSourceAsAgenda: host.callbacks.scoreSourceAsAgenda,
     corpRandomDiscardFromHq: (state, sourceDefinitionId, count) => {
       const discardedCardIds = host.callbacks.discardRandomCorpHqCards(
         state,

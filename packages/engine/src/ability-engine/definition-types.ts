@@ -361,6 +361,14 @@ export type CardAccessHookImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
+export type CardAgendaAccessReplacementImplementation = {
+  kind: "install_as_runner_program";
+  memoryCost: number;
+  scoreAsAgendaAction: true;
+  removeFromGameOnLeavePlay: true;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
 export type CardAccessZone = "installed" | "hq" | "rd" | "archives";
 
 export type CardAccessEffectImplementation = {
@@ -850,8 +858,13 @@ export type CardScoredAgendaImplementation =
     }
   | {
       kind: "add_counters_on_score";
-      counterType: Extract<CounterType, "boon">;
+      counterType: Extract<CounterType, "boon" | "remap">;
       amount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "purge_runner_virus_counters_and_prevent_next";
+      preventCount: number;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -1096,7 +1109,7 @@ export type CardAbilityCostImplementation =
     }
   | {
       kind: "source_counter";
-      counterType: Extract<CounterType, "boon">;
+      counterType: Extract<CounterType, "boon" | "remap">;
       amount: number;
       source: "source";
     }
@@ -1232,6 +1245,7 @@ export type CardEffectImplementation =
   | DamageEffectImplementation
   | TraceEffectImplementation
   | MakeRunEffectImplementation
+  | EndRunEffectImplementation
   | AddHostedCreditsEffectImplementation
   | TakeHostedCreditsEffectImplementation
   | TrashSourceWhenEmptyEffectImplementation
@@ -1258,6 +1272,7 @@ export type CardEffectImplementation =
   | ShuffleGripTrashAndStackThenDrawEffectImplementation
   | MarkPrearrangedDropEffectImplementation
   | MarkNextAgendaAccessAgendaPointEffectImplementation
+  | ScoreSourceAsAgendaEffectImplementation
   | MakeRunEachDataFortSequenceEffectImplementation
   | PayRezCostToTrashRezzedIceEffectImplementation
   | TrashRezzedIceOnLastSuccessfulRunFortEffectImplementation
@@ -1782,6 +1797,12 @@ export type MakeRunEffectImplementation = {
   visibility: EventVisibilityClass;
 };
 
+export type EndRunEffectImplementation = {
+  kind: "end_run";
+  successful: boolean;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
 export type PayRezCostToTrashRezzedIceEffectImplementation = {
   kind: "pay_rez_cost_to_trash_rezzed_ice";
   target: "chosen_rezzed_ice";
@@ -1797,6 +1818,11 @@ export type MarkPrearrangedDropEffectImplementation = {
 export type MarkNextAgendaAccessAgendaPointEffectImplementation = {
   kind: "mark_next_agenda_access_agenda_point";
   amount: 1;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type ScoreSourceAsAgendaEffectImplementation = {
+  kind: "score_source_as_agenda";
   visibility: Extract<EventVisibilityClass, "public">;
 };
 

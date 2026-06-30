@@ -180,6 +180,7 @@ export type CounterType =
   | "trauma"
   | "boon"
   | "pdca"
+  | "remap"
   | "kludge"
   | "term"
   | "drip";
@@ -911,6 +912,12 @@ export type CardInstance = {
   selectedServerId?: Exclude<ServerId, "new_remote">;
   selectedCardId?: CardInstanceId;
   selectedSubtype?: string;
+  installedAsRunnerProgram?: {
+    memoryCost: number;
+    scoreAsAgendaAction?: true;
+    removeFromGameOnLeavePlay?: true;
+    originalType?: CardType;
+  };
   variableIceState?: {
     family: "x_strength" | "paid_end_the_run_subroutines" | "alternate_subtype";
     additionalCostPaid: number;
@@ -1529,6 +1536,7 @@ export type GameState = {
     Record<Exclude<ServerId, "new_remote">, number>
   >;
   purgeableRunnerVirusCounters?: PurgeableRunnerVirusCounterState;
+  corpRunnerVirusCounterPreventionCharges?: number;
   corpActionDebt?: CorpActionDebtState;
   actionEconomy?: ActionEconomyState;
   runnerVirusPurgeWindow?: RunnerVirusPurgeWindowState;

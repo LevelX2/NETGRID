@@ -1997,6 +1997,41 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.projectZurichOveradvance === "number")
     context.projectZurichOveradvance =
       legalAction.payload.projectZurichOveradvance;
+  if (typeof legalAction.payload?.runnerVirusCountersPurged === "number")
+    context.runnerVirusCountersPurged =
+      legalAction.payload.runnerVirusCountersPurged;
+  if (typeof legalAction.payload?.runnerVirusCounterPurgeSummary === "string")
+    context.runnerVirusCounterPurgeSummary =
+      legalAction.payload.runnerVirusCounterPurgeSummary;
+  if (
+    typeof legalAction.payload?.runnerVirusCounterPreventionChargesAdded ===
+    "number"
+  )
+    context.runnerVirusCounterPreventionChargesAdded =
+      legalAction.payload.runnerVirusCounterPreventionChargesAdded;
+  if (
+    typeof legalAction.payload?.corpRunnerVirusCounterPreventionChargesAfter ===
+    "number"
+  )
+    context.corpRunnerVirusCounterPreventionChargesAfter =
+      legalAction.payload.corpRunnerVirusCounterPreventionChargesAfter;
+  if (typeof legalAction.payload?.scoredSourceAsAgenda === "boolean")
+    context.scoredSourceAsAgenda = legalAction.payload.scoredSourceAsAgenda;
+  if (typeof legalAction.payload?.scoredAgendaPointValue === "number")
+    context.scoredAgendaPointValue =
+      legalAction.payload.scoredAgendaPointValue;
+  if (typeof legalAction.payload?.runnerMemoryUsedAfter === "number")
+    context.runnerMemoryUsedAfter = legalAction.payload.runnerMemoryUsedAfter;
+  if (typeof legalAction.payload?.cardImplementationSourceCounterType === "string")
+    context.cardImplementationSourceCounterType =
+      legalAction.payload.cardImplementationSourceCounterType;
+  if (typeof legalAction.payload?.cardImplementationSourceCounterCost === "number")
+    context.cardImplementationSourceCounterCost =
+      legalAction.payload.cardImplementationSourceCounterCost;
+  if (typeof legalAction.payload?.runEnded === "boolean")
+    context.runEnded = legalAction.payload.runEnded;
+  if (typeof legalAction.payload?.runSuccessful === "boolean")
+    context.runSuccessful = legalAction.payload.runSuccessful;
   if (state.winner && state.gameEndReason)
     context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;

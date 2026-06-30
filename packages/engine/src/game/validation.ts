@@ -123,7 +123,11 @@ export function validateGameState(state: GameState): ValidationResult {
   if (state.runner.memoryUsed > runnerMemoryLimit(state))
     errors.push("Runner memory limit exceeded.");
   for (const id of state.runner.rig.programs) {
-    if (definitionFor(state, id).type !== "program")
+    const instance = state.cardInstances[id];
+    if (
+      definitionFor(state, id).type !== "program" &&
+      !instance?.installedAsRunnerProgram
+    )
       errors.push(`Runner rig program slot contains non-program ${id}.`);
   }
   for (const id of state.runner.rig.hardware) {

@@ -132,6 +132,7 @@ export type RunEndCleanupHost = {
     preventOneVirusCounterWithCounterPrevention: () => {
       prevented: boolean;
       creditsPaid: number;
+      preventionChargesSpent: number;
     };
     poxCountersForServer: (serverId: Exclude<ServerId, "new_remote">) => number;
   };
@@ -227,6 +228,75 @@ function addPurgeableRunnerVirusCounter(
   const next = purgeableRunnerVirusCounterAmount(bucket, counterType) + normalized;
   setPurgeableRunnerVirusCounterAmount(bucket, counterType, next);
   return normalized;
+}
+
+type RunnerVirusCounterPreventionSummary = {
+  added: number;
+  prevented: number;
+  creditsPaid: number;
+  preventionChargesSpent: number;
+};
+
+function applyRunnerVirusCounterPrevention(
+  host: RunEndCleanupHost,
+  amount: number,
+  legalAction?: LegalAction,
+): RunnerVirusCounterPreventionSummary {
+  const normalized = Math.max(0, Math.floor(amount));
+  let added = 0;
+  let prevented = 0;
+  let creditsPaid = 0;
+  let preventionChargesSpent = 0;
+  for (let index = 0; index < normalized; index += 1) {
+    const prevention =
+      host.counters.preventOneVirusCounterWithCounterPrevention();
+    if (prevention.prevented) {
+      prevented += 1;
+      creditsPaid += prevention.creditsPaid;
+      preventionChargesSpent += prevention.preventionChargesSpent;
+      continue;
+    }
+    added += 1;
+  }
+  if (legalAction && prevented > 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      virusCounterAvoided:
+        Number(legalAction.payload?.virusCounterAvoided ?? 0) + prevented,
+      counterPreventionCreditsPaid:
+        Number(legalAction.payload?.counterPreventionCreditsPaid ?? 0) +
+        creditsPaid,
+      runnerVirusCounterPreventionChargesSpent:
+        Number(
+          legalAction.payload?.runnerVirusCounterPreventionChargesSpent ?? 0,
+        ) + preventionChargesSpent,
+      corpRunnerVirusCounterPreventionChargesAfter:
+        host.state.corpRunnerVirusCounterPreventionCharges ?? 0,
+      corpCreditsAfter: host.state.corp.credits,
+    };
+  }
+  return { added, prevented, creditsPaid, preventionChargesSpent };
+}
+
+function addPurgeableRunnerVirusCounterWithPrevention(
+  host: RunEndCleanupHost,
+  scope:
+    | { kind: "corp" }
+    | { kind: "server"; serverId: Exclude<ServerId, "new_remote"> },
+  counterType: PurgeableRunnerVirusCounterType,
+  amount: number,
+  legalAction?: LegalAction,
+): RunnerVirusCounterPreventionSummary {
+  const summary = applyRunnerVirusCounterPrevention(host, amount, legalAction);
+  if (summary.added > 0) {
+    addPurgeableRunnerVirusCounter(
+      host.state,
+      scope,
+      counterType,
+      summary.added,
+    );
+  }
+  return summary;
 }
 
 function socketCounterTypeForServer(
@@ -970,12 +1040,14 @@ function applyV181SuccessfulRunCounterTriggers(
     ) {
       const counterType =
         implementation.counterKind as PurgeableRunnerVirusCounterType;
-      const added = addPurgeableRunnerVirusCounter(
-        host.state,
+      const counterSummary = addPurgeableRunnerVirusCounterWithPrevention(
+        host,
         { kind: "corp" },
         counterType,
         trigger.amount,
+        legalAction,
       );
+      const added = counterSummary.added;
       if (legalAction) {
         const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
         legalAction.payload = {
@@ -991,32 +1063,36 @@ function applyV181SuccessfulRunCounterTriggers(
           ),
           sourceCardDefinitionId: definition.id,
         };
-        appendRunnerVirusCounterEffect(legalAction, {
-          run,
-          sourceCardId: cardId,
-          sourceDefinitionId: definition.id,
-          sourceTitle: definition.title,
-          side: "corp",
-          counterType,
-          added,
-          remainingCounters: purgeableRunnerVirusCounterAmount(
-            host.state.purgeableRunnerVirusCounters?.corp,
+        if (added > 0) {
+          appendRunnerVirusCounterEffect(legalAction, {
+            run,
+            sourceCardId: cardId,
+            sourceDefinitionId: definition.id,
+            sourceTitle: definition.title,
+            side: "corp",
             counterType,
-          ),
-          ...(serverLabel ? { serverLabel } : {}),
-        });
+            added,
+            remainingCounters: purgeableRunnerVirusCounterAmount(
+              host.state.purgeableRunnerVirusCounters?.corp,
+              counterType,
+            ),
+            ...(serverLabel ? { serverLabel } : {}),
+          });
+        }
       }
       continue;
     }
     if (trigger.target === "central_server_socket_counters") {
       const socketCounterType = socketCounterTypeForServer(run.attackedServerId);
       if (!socketCounterType) continue;
-      const added = addPurgeableRunnerVirusCounter(
-        host.state,
+      const counterSummary = addPurgeableRunnerVirusCounterWithPrevention(
+        host,
         { kind: "server", serverId: run.attackedServerId },
         socketCounterType,
         trigger.amount,
+        legalAction,
       );
+      const added = counterSummary.added;
       const pipeCounterAdded = convertCompleteSocketSetsToPipeCounters(host.state);
       if (legalAction) {
         legalAction.payload = {
@@ -1057,7 +1133,8 @@ function applyV181SuccessfulRunCounterTriggers(
         };
         const socketServerLabel = host.servers.publicServerLabel(run.attackedServerId);
         if (socketServerLabel) socketEffectInput.serverLabel = socketServerLabel;
-        appendRunnerVirusCounterEffect(legalAction, socketEffectInput);
+        if (added > 0)
+          appendRunnerVirusCounterEffect(legalAction, socketEffectInput);
         if (pipeCounterAdded > 0) {
           appendRunnerVirusCounterEffect(legalAction, {
             run,
@@ -1110,9 +1187,12 @@ function applyV181SuccessfulRunCounterTriggers(
     const serverId = run.attackedServerId;
     if (implementation.counterKind === "pox") {
       const current = host.counters.poxCountersForServer(serverId);
-      const added = host.counters.preventOneVirusCounterWithCounterPrevention().prevented
-        ? 0
-        : trigger.amount;
+      const counterSummary = applyRunnerVirusCounterPrevention(
+        host,
+        trigger.amount,
+        legalAction,
+      );
+      const added = counterSummary.added;
       host.state.poxCountersByServer = {
         ...(host.state.poxCountersByServer ?? {}),
         [serverId]: current + added,
@@ -1137,9 +1217,12 @@ function applyV181SuccessfulRunCounterTriggers(
         0,
         Math.floor(host.state.serverAgendaCostCountersByServer?.[serverId] ?? 0),
       );
-      const added = host.counters.preventOneVirusCounterWithCounterPrevention().prevented
-        ? 0
-        : trigger.amount;
+      const counterSummary = applyRunnerVirusCounterPrevention(
+        host,
+        trigger.amount,
+        legalAction,
+      );
+      const added = counterSummary.added;
       host.state.serverAgendaCostCountersByServer = {
         ...(host.state.serverAgendaCostCountersByServer ?? {}),
         [serverId]: current + added,

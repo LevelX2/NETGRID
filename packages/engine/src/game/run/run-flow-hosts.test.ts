@@ -143,6 +143,7 @@ function hostFor(calls: string[]): RunFlowHost {
       currentEncounterSubroutines: () => [],
       runRemainderStrengthBonusForBreaker: () => 0,
       runnerDuringRunCardImplementationLegalActions: () => [],
+      corpDuringRunCardImplementationLegalActions: () => [],
       executeCardImplementationRunnerRunStartEffects: () =>
         calls.push("runStartEffects"),
       applyRunnerTraceCounterRunStartEffects: () =>
@@ -196,6 +197,7 @@ function hostFor(calls: string[]): RunFlowHost {
       preventOneVirusCounterWithCounterPrevention: () => ({
         prevented: false,
         creditsPaid: 0,
+        preventionChargesSpent: 0,
       }),
       poxCountersForServer: () => 0,
     },

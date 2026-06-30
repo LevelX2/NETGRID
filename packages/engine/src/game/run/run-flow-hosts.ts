@@ -210,6 +210,9 @@ export type RunFlowHost = {
     runnerDuringRunCardImplementationLegalActions: (
       state: GameState,
     ) => LegalAction[];
+    corpDuringRunCardImplementationLegalActions: (
+      state: GameState,
+    ) => LegalAction[];
     executeCardImplementationRunnerRunStartEffects: (
       state: GameState,
       legalAction?: LegalAction,
@@ -304,6 +307,7 @@ export type RunFlowHost = {
     preventOneVirusCounterWithCounterPrevention: (state: GameState) => {
       prevented: boolean;
       creditsPaid: number;
+      preventionChargesSpent: number;
     };
     poxCountersForServer: (
       state: GameState,
@@ -495,6 +499,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       },
       run: {
         movementHost: () => runMovementHostForState(state),
+        corpDuringRunCardImplementationLegalActions:
+          host.run.corpDuringRunCardImplementationLegalActions,
       },
       rules: {
         isV099OrLater: () => host.rules.isV099OrLater(state),

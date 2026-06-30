@@ -169,12 +169,24 @@ function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
     .sort();
 }
 
+function scoredCorpAgendaIds(state: GameState): CardInstanceId[] {
+  return state.corp.scoreArea
+    .filter((cardId): cardId is CardInstanceId => {
+      const instance = state.cardInstances[cardId];
+      return Boolean(instance && instance.controller === "corp");
+    })
+    .sort();
+}
+
 export function buildCorpDuringRunCardImplementationActions(
   host: RunCardImplementationActionHost,
 ): RunCardImplementationActionBuildResult {
   if (!host.state.run) return { handled: true, legalActions: [] };
   const legalActions: LegalAction[] = [];
-  for (const cardId of rezzedCorpRootCardIds(host.state)) {
+  for (const cardId of [
+    ...rezzedCorpRootCardIds(host.state),
+    ...scoredCorpAgendaIds(host.state),
+  ]) {
     host.runtime.pushActivatedActionsForTiming(
       legalActions,
       "corp",

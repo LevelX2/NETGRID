@@ -4,7 +4,10 @@ import {
   type AccessFlowAdapters,
   type AccessFlowCompositionHost,
 } from "../access/access-flow-hosts";
-import { buildRunnerDuringRunCardImplementationActions } from "./card-implementation-run-actions";
+import {
+  buildCorpDuringRunCardImplementationActions,
+  buildRunnerDuringRunCardImplementationActions,
+} from "./card-implementation-run-actions";
 import { buildRevealedStackProgramInstallRunActions } from "./encounter-actions";
 import {
   createRunFlowAdapters,
@@ -26,7 +29,8 @@ export type RunAccessLegalActionHostCompositionHost = {
   servers: RunFlowHost["servers"];
   run: Omit<
     RunFlowHost["run"],
-    "runnerDuringRunCardImplementationLegalActions"
+    | "runnerDuringRunCardImplementationLegalActions"
+    | "corpDuringRunCardImplementationLegalActions"
   > & {
     finishRun: RunFlowHost["callbacks"]["finishRun"];
     successfulRunInterventionHost: StateHostFn<SuccessfulRunInterventionHost>;
@@ -123,6 +127,10 @@ export function createRunAccessLegalActionHostComposition(
         run.runRemainderStrengthBonusForBreaker,
       runnerDuringRunCardImplementationLegalActions: (state) =>
         buildRunnerDuringRunCardImplementationActions(
+          cardImplementation.runCardImplementationActionHost(state),
+        ).legalActions,
+      corpDuringRunCardImplementationLegalActions: (state) =>
+        buildCorpDuringRunCardImplementationActions(
           cardImplementation.runCardImplementationActionHost(state),
         ).legalActions,
       executeCardImplementationRunnerRunStartEffects:

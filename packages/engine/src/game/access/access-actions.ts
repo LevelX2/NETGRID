@@ -116,6 +116,44 @@ export function buildRunnerAccessActions(
   const freeTrashEnabled = freeTrashSource.enabled;
   const accessedFromArchives = isCurrentAccessFromArchives(host, run);
   if (definition.type === "agenda") {
+    const accessReplacement = agendaAccessReplacementForDefinition(definition);
+    if (accessReplacement?.kind === "install_as_runner_program") {
+      const legalActions: LegalAction[] = [];
+      if (
+        host.state.runner.memoryUsed + accessReplacement.memoryCost <=
+        host.state.runner.memoryLimit
+      ) {
+        legalActions.push(
+          host.actions.buildLegalAction(
+            "runner",
+            "steal_agenda",
+            `${definition.title} als Programm installieren`,
+            run.accessedCardId,
+            [],
+            {
+              cardId: run.accessedCardId,
+              agendaAccessReplacement: "install_as_runner_program",
+              installedRunnerProgramMemoryCost: accessReplacement.memoryCost,
+            },
+          ),
+        );
+      }
+      legalActions.push(
+        host.actions.buildLegalAction(
+          "runner",
+          "decline_trash",
+          `${definition.title} nicht installieren`,
+          "game_rule",
+          [],
+          {
+            cardId: run.accessedCardId,
+            agendaAccessReplacement: "declined_install_as_runner_program",
+            installedRunnerProgramMemoryCost: accessReplacement.memoryCost,
+          },
+        ),
+      );
+      return { handled: true, legalActions };
+    }
     const accessServerId =
       run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
     const stealCostQuote = quoteStealCostForAccessedAgenda(
@@ -314,6 +352,14 @@ export function buildRunnerAccessActions(
       ),
     ],
   };
+}
+
+function agendaAccessReplacementForDefinition(definition: CardDefinition):
+  | NonNullable<
+      ReturnType<typeof cardImplementationForDefinitionId>
+    >["agendaAccessReplacement"]
+  | undefined {
+  return cardImplementationForDefinitionId(definition.id)?.agendaAccessReplacement;
 }
 
 function hiddenResourceCurrentAccessTrashActions(

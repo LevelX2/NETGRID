@@ -9,6 +9,7 @@
 import type { GameState, ResolvedGameEffect } from "@netgrid/shared";
 import type { CardEffectImplementation } from "./definition-types";
 import { executeAdvancementEffect } from "./effect-families/advancement-effects";
+import { executeAgendaScoringEffect } from "./effect-families/agenda-scoring-effects";
 import { executeBadPublicityEffect } from "./effect-families/bad-publicity-effects";
 import { executeContextualEffect } from "./effect-families/contextual-effect-dispatch";
 import { executeCounterEffect } from "./effect-families/counter-effects";
@@ -114,6 +115,8 @@ export function executeCardImplementationEffects(
       executeDamageEffect(familyInput)
     )
       return;
+
+    if (executeAgendaScoringEffect(familyInput)) return;
 
     executeContextualEffect(familyInput);
   });

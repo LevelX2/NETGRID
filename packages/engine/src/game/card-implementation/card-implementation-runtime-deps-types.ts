@@ -85,6 +85,11 @@ export type GameCardImplementationRuntimeDepsHost = {
       options: CardImplementationStartRunOptions,
       legalAction: RuntimeLegalAction,
     ) => void;
+    finishRun: (
+      state: GameState,
+      legalAction: RuntimeLegalAction,
+      successful: boolean,
+    ) => void;
   };
   hiddenZone: {
     runtimeDepsHost: HiddenZoneRuntimeDepsHost;
@@ -105,6 +110,7 @@ export type GameCardImplementationRuntimeDepsHost = {
       legalAction: RuntimeLegalAction,
       sourceDefinitionId: CardDefinition["id"],
     ) => void;
+    scoreSourceAsAgenda: CardImplementationRuntimeDependencies["scoreSourceAsAgenda"];
     discardRandomCorpHqCards: (
       state: RuntimeState,
       sourceDefinitionId: CardDefinition["id"],

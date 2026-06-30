@@ -3,6 +3,7 @@ import type {
   CardAbilityImplementation,
   CardAccessEffectImplementation,
   CardAccessHookImplementation,
+  CardAgendaAccessReplacementImplementation,
   CardCorpUtilityImplementation,
   CardCorpTrashInstalledRunnerSourceImplementation,
   CardDamagePreventionSourceImplementation,
@@ -56,6 +57,7 @@ export type CardImplementationDefinition = {
   modifiers?: CardModifierImplementation[];
   selfStealCosts?: readonly CardSelfStealCostImplementation[];
   abilities?: CardAbilityImplementation[];
+  agendaAccessReplacement?: CardAgendaAccessReplacementImplementation;
   accessEffects?: readonly CardAccessEffectImplementation[];
   accessHooks?: readonly CardAccessHookImplementation[];
   lifecycle?: CardLifecycleImplementation;

@@ -254,6 +254,7 @@ function makeHost(options: {
       preventOneVirusCounterWithCounterPrevention: () => ({
         prevented: false,
         creditsPaid: 0,
+        preventionChargesSpent: 0,
       }),
       poxCountersForServer: () => 0,
     },
@@ -680,6 +681,104 @@ describe("run end cleanup", () => {
       counterDelta: 1,
       counterTotalAfter: 1,
       sourceCardDefinitionId: "onr_proteus_094_scaldan",
+    });
+  });
+
+  it("spends Superserum-style prevention charges before adding purgeable counters", () => {
+    const fixture = makeHost({
+      run: {
+        runId: "run_superserum_charges",
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+      } as unknown as NonNullable<GameState["run"]>,
+      runnerPrograms: ["cascade", "highlighter", "garbage"],
+      instances: {
+        cascade: instance(
+          "cascade",
+          "onr_v1_010_cascade",
+          { side: "runner", zone: "rig" },
+          { faceup: true, rezzed: true },
+        ),
+        highlighter: instance(
+          "highlighter",
+          "onr_proteus_090_highlighter",
+          { side: "runner", zone: "rig" },
+          { faceup: true, rezzed: true },
+        ),
+        garbage: instance(
+          "garbage",
+          "onr_proteus_089_garbage-in",
+          { side: "runner", zone: "rig" },
+          { faceup: true, rezzed: true },
+        ),
+      },
+      definitions: {
+        onr_v1_010_cascade: definition("onr_v1_010_cascade", "program"),
+        onr_proteus_090_highlighter: definition(
+          "onr_proteus_090_highlighter",
+          "program",
+        ),
+        "onr_proteus_089_garbage-in": definition(
+          "onr_proteus_089_garbage-in",
+          "program",
+        ),
+      },
+      virusImplementations: {
+        cascade: {
+          counterKind: "cascade",
+          addOnSuccessfulRun: {
+            server: "rd",
+            target: "corp_purgeable_runner_virus_counter",
+            amount: 1,
+            visibility: "public",
+          },
+        },
+        highlighter: {
+          counterKind: "highlighter",
+          addOnSuccessfulRun: {
+            server: "rd",
+            target: "corp_purgeable_runner_virus_counter",
+            amount: 1,
+            visibility: "public",
+          },
+        },
+        garbage: {
+          counterKind: "garbage",
+          addOnSuccessfulRun: {
+            server: "rd",
+            target: "corp_purgeable_runner_virus_counter",
+            amount: 1,
+            visibility: "public",
+          },
+        },
+      },
+    });
+    fixture.state.corpRunnerVirusCounterPreventionCharges = 2;
+    fixture.host.counters.preventOneVirusCounterWithCounterPrevention = () => {
+      const remaining = Math.max(
+        0,
+        Math.floor(fixture.state.corpRunnerVirusCounterPreventionCharges ?? 0),
+      );
+      if (remaining <= 0)
+        return { prevented: false, creditsPaid: 0, preventionChargesSpent: 0 };
+      fixture.state.corpRunnerVirusCounterPreventionCharges = remaining - 1;
+      return { prevented: true, creditsPaid: 0, preventionChargesSpent: 1 };
+    };
+
+    handleRunEndCleanup(fixture.host, true, fixture.legalAction);
+
+    expect(fixture.state.corpRunnerVirusCounterPreventionCharges).toBe(0);
+    expect(fixture.state.purgeableRunnerVirusCounters?.corp).toMatchObject({
+      garbage: 1,
+    });
+    expect(fixture.legalAction.payload).toMatchObject({
+      virusCounterAvoided: 2,
+      runnerVirusCounterPreventionChargesSpent: 2,
+      corpRunnerVirusCounterPreventionChargesAfter: 0,
+      counterType: "garbage",
+      counterDelta: 1,
+      counterTotalAfter: 1,
     });
   });
 

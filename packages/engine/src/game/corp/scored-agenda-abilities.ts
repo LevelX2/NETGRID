@@ -20,6 +20,7 @@ export type ScoredAgendaAbilityHost = {
     | "phase"
     | "activeSide"
     | "corpTurnFlags"
+    | "run"
   >;
   legalAction?: LegalAction;
   cards: {
@@ -85,6 +86,11 @@ export type ScoredAgendaAbilityHost = {
       cardId: CardInstanceId,
       definition: CardDefinition,
     ) => void;
+    pushActivatedCardImplementationRunActions: (
+      actions: LegalAction[],
+      cardId: CardInstanceId,
+      definition: CardDefinition,
+    ) => void;
     resolveActivatedCardImplementationAbility: () => boolean;
     revealCorpRdTop: () => void;
     resolveHqArchivesShuffleDraw: (sourceCardId: CardInstanceId) => void;
@@ -130,6 +136,13 @@ export function buildScoredAgendaAbilityActionsForCard(
     agendaId,
     definition,
   );
+  if (host.state.run) {
+    host.callbacks.pushActivatedCardImplementationRunActions(
+      actions,
+      agendaId,
+      definition,
+    );
+  }
   if (
     host.cards.scoredAgendaKindForDefinition(definition) ===
     "tagged_runner_meat_damage_reduce_hand_size_on_success"

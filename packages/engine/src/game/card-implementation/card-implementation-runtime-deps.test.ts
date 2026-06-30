@@ -122,6 +122,16 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
           runnerRunTemporaryCredits: options.runnerRunTemporaryCredits,
         } as unknown as RunState;
       },
+      finishRun: (gameState, _legalAction, successful) => {
+        calls.push(`finish_run:${successful}`);
+          delete gameState.run;
+        return {
+          publicPayload: {
+            runEnded: true,
+            runSuccessful: successful,
+          },
+        };
+      },
     },
     hiddenZone: {
       runtimeDepsHost: {
@@ -235,6 +245,14 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
           agendaPointsGained: 1,
         };
       },
+      scoreSourceAsAgenda: (_state, legalAction, sourceCardIdToScore) => {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          scoredSourceAsAgenda: true,
+          sourceCardId: sourceCardIdToScore,
+        };
+        return { publicPayload: legalAction.payload };
+      },
       discardRandomCorpHqCards: (_state, _sourceDefinitionId, count) =>
         Array.from({ length: count }, (_, index) =>
           `discarded_${index}` as CardInstanceId,
@@ -296,6 +314,7 @@ describe("game card implementation runtime deps root", () => {
         "unpreventableDamageRunner",
         "startTrace",
         "startRun",
+        "finishRun",
         "startPrivateLook",
         "exposeInstalledCorpCardTargets",
         "exposeInstalledCorpCard",
@@ -340,6 +359,7 @@ describe("game card implementation runtime deps root", () => {
         "shuffleSourceIntoCorpRd",
         "trashCorpInstalledCardsInSourceServer",
         "gainRunnerEventAgendaPoint",
+        "scoreSourceAsAgenda",
         "corpRandomDiscardFromHq",
         "addHostedCredits",
         "addCountersToSource",

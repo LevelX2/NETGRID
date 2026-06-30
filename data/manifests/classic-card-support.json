@@ -9,24 +9,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_001_data-fort-remapping",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_001_data-fort-remapping",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-agendas.test.ts#Classic Agenda Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_002_superserum",
@@ -35,24 +39,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_002_superserum",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_002_superserum",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-agendas.test.ts#Classic Agenda Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_003_unlisted-research-lab",
@@ -61,24 +69,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_003_unlisted-research-lab",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_003_unlisted-research-lab",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-agendas.test.ts#Classic Agenda Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_004_theorem-proof",
@@ -87,24 +99,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_004_theorem-proof",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_004_theorem-proof",
+        "scenarioRefs": [
+          "packages/engine/src/index-tests/mechanics/classic-agendas.test.ts#Classic Agenda Implementation Smokes"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_005_baskerville",
