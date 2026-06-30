@@ -145,6 +145,7 @@ function executePumpBreakerAction(
     legalAction.costs[0]?.credits ?? 1,
     breakerId,
   );
+  if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
   if (breakerId && host.fort.shouldOpenAardvarkInterception(breakerId)) {
     host.fort.startAardvarkInterceptionChoice(
       breakerId,
@@ -219,6 +220,7 @@ function executeBreakSubroutineAction(
       (breakAbility?.count ?? 1) > 1)
   ) {
     host.breaker.resolveMultiBreakSubroutinesAction(breakerId, legalAction);
+    recordNoisyIcebreakerUse(host, breakerId, legalAction);
     recordBreakerSpecialEffects(host, breakerId, breakAbility, legalAction);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
     return;
@@ -242,6 +244,7 @@ function executeBreakSubroutineAction(
       currentSubroutine,
       legalAction,
     );
+    if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
     return;
   }
   host.breaker.assertBreakSubroutineCostQuoteValid(
@@ -253,6 +256,7 @@ function executeBreakSubroutineAction(
     legalAction.costs[0]?.credits ?? 1,
     breakerId,
   );
+  if (breakerId) recordNoisyIcebreakerUse(host, breakerId, legalAction);
   if (breakerId && host.fort.shouldOpenAardvarkInterception(breakerId)) {
     host.fort.startAardvarkInterceptionChoice(
       breakerId,
@@ -316,6 +320,28 @@ function recordBreakerSpecialEffects(
         break;
     }
   }
+}
+
+function recordNoisyIcebreakerUse(
+  host: RunnerBreakerActionExecutionHost,
+  breakerId: CardInstanceId,
+  legalAction: LegalAction,
+): void {
+  const run = host.state.run;
+  if (!run) return;
+  const definition = host.cards.definitionFor(breakerId);
+  if (
+    !host.cards
+      .effectiveSubtypesForCard(breakerId, definition)
+      .includes("noisy")
+  )
+    return;
+  run.usedNoisyIcebreakerThisRun = true;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    noisyIcebreakerUsedThisRun: true,
+    noisyIcebreakerDefinitionId: definition.id,
+  };
 }
 
 function resolveNextSentryFreeBreakAction(

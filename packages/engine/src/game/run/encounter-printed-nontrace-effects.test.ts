@@ -247,6 +247,45 @@ describe("encounter printed non-trace effects boundary", () => {
     ]);
   });
 
+  it("schedules end-of-turn trash for printed Puzzle-style end-run subroutines", () => {
+    const state = makeState();
+    const legalAction = { payload: {} } as LegalAction;
+
+    const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
+      definition: definition("onr_classic_013_puzzle", "Puzzle", "ice"),
+      subroutine: {
+        id: "puzzle_etr_trash",
+        type: "end_the_run_and_trash_source_at_end_of_turn",
+      } as SubroutineDefinition,
+      subroutineIndex: 0,
+      legalAction,
+    });
+
+    expect(result).toMatchObject({
+      handled: true,
+      runShouldEnd: true,
+      sourceDefinitionId: "onr_classic_013_puzzle",
+      iceId: "ice_1",
+      stateChanged: true,
+    });
+    expect(state.runnerTurnFlags?.delayedCorpInstalledCardTrashAtTurnEndIds).toEqual([
+      "ice_1",
+    ]);
+    expect(legalAction.payload).toMatchObject({
+      delayedCorpInstalledCardTrashAtTurnEnd: true,
+      delayedCorpInstalledCardTrashAtTurnEndId: "ice_1",
+      sourceDefinitionId: "onr_classic_013_puzzle",
+    });
+    expect(legalAction.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: "onr_classic_013_puzzle",
+        subroutineType: "end_the_run_and_trash_source_at_end_of_turn",
+        endedRun: true,
+      }),
+    ]);
+  });
+
   it("preserves pay-or-end-run resolved effects for paid and unpaid subroutines", () => {
     const state = makeState();
     const legalAction = { payload: {} } as LegalAction;

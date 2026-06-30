@@ -1,4 +1,10 @@
 import type { CardImplementationDefinition } from "../types";
+import { classicBaskervilleImplementation } from "../classic/corp/ice/baskerville";
+import { classicBolterSwarmImplementation } from "../classic/corp/ice/bolter-swarm";
+import { classicBrainDrainImplementation } from "../classic/corp/ice/brain-drain";
+import { classicDeadeyeImplementation } from "../classic/corp/ice/deadeye";
+import { classicImperialGuardImplementation } from "../classic/corp/ice/imperial-guard";
+import { classicPuzzleImplementation } from "../classic/corp/ice/puzzle";
 import { classicCorporateShuffleImplementation } from "../classic/corp/operations/corporate-shuffle";
 import { classicReclamationProjectImplementation } from "../classic/corp/operations/reclamation-project";
 import { classicFindersKeepersImplementation } from "../classic/runner/events/finders-keepers";
@@ -14,6 +20,12 @@ import { classicSchematicsSearchEngineImplementation } from "../classic/runner/p
 import { classicSuperglueImplementation } from "../classic/runner/programs/superglue";
 
 export const CLASSIC_CARD_IMPLEMENTATIONS = [
+  classicBaskervilleImplementation,
+  classicBolterSwarmImplementation,
+  classicBrainDrainImplementation,
+  classicDeadeyeImplementation,
+  classicImperialGuardImplementation,
+  classicPuzzleImplementation,
   classicCorporateShuffleImplementation,
   classicReclamationProjectImplementation,
   classicFindersKeepersImplementation,

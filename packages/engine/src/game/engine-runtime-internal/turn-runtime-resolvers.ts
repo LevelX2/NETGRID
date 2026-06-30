@@ -1269,6 +1269,34 @@ function resolveDelayedEndTurnDamageEffects(state: GameState, legalAction: Legal
   );
 }
 
+function resolveDelayedCorpInstalledTrashAtEndOfRunnerTurn(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const flags = ensureRunnerTurnFlags(state);
+  const pendingIds = [
+    ...new Set(flags.delayedCorpInstalledCardTrashAtTurnEndIds ?? []),
+  ].sort();
+  if (pendingIds.length === 0) return;
+  delete flags.delayedCorpInstalledCardTrashAtTurnEndIds;
+  const trashedDefinitionIds: CardDefinitionId[] = [];
+  for (const cardId of pendingIds) {
+    const instance = state.cardInstances[cardId];
+    if (!instance || instance.zone.side !== "corp") continue;
+    if (instance.zone.zone !== "serverIce" && instance.zone.zone !== "serverRoot")
+      continue;
+    trashedDefinitionIds.push(definitionFor(state, cardId).id);
+    trashCorpInstalledCardToArchives(state, cardId, legalAction);
+  }
+  if (trashedDefinitionIds.length === 0) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    corpInstalledCardsTrashedAtTurnEnd: trashedDefinitionIds.length,
+    corpInstalledCardTrashAtTurnEndDefinitionIds:
+      trashedDefinitionIds.sort().join(","),
+  };
+}
+
 function endTurn(
   state: GameState,
   side: Side,
@@ -1283,6 +1311,7 @@ function endTurn(
     if (state.winner) return;
     resolveFieldReporterEndOfRunnerTurn(state, legalAction);
     resolveDelayedEndTurnDamageEffects(state, legalAction);
+    resolveDelayedCorpInstalledTrashAtEndOfRunnerTurn(state, legalAction);
     resolveEndTurnTagIfRunnerReceivedTag(state, legalAction);
     resolveTemporaryProgramInstallReturns(state, legalAction);
     const flags = ensureRunnerTurnFlags(state);

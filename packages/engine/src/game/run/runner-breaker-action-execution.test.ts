@@ -262,6 +262,32 @@ describe("runner-breaker-action-execution", () => {
     ]);
   });
 
+  it("records noisy icebreaker use on accepted breaker actions", () => {
+    const calls: string[] = [];
+    const targetState = state();
+    const action = legalAction("pump_breaker", { breakerId: BREAKER_ID });
+
+    handleRunnerBreakerActionExecution(
+      hostFor(targetState, calls, {
+        cards: {
+          effectiveSubtypesForCard: (cardId) =>
+            cardId === BREAKER_ID ? ["noisy"] : [],
+        },
+      }),
+      action,
+    );
+
+    expect(targetState.run?.usedNoisyIcebreakerThisRun).toBe(true);
+    expect(action.payload).toMatchObject({
+      noisyIcebreakerUsedThisRun: true,
+      noisyIcebreakerDefinitionId: "breaker_definition",
+    });
+    expect(calls).toEqual([
+      `spend:1:${BREAKER_ID}`,
+      "effect:change_breaker_strength:1",
+    ]);
+  });
+
   it("keeps current-run strength bonus payload and optional run end stable", () => {
     const calls: string[] = [];
     const targetState = state();

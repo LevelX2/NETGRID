@@ -75,6 +75,7 @@ export type EncounterPrintedEffectHost = {
     resolveTrashInstalledProgramSubroutine: (
       legalAction?: LegalAction,
     ) => { definitionId: string; title: string } | undefined;
+    rollDie?: (purpose: string) => number;
     setDamagePayload: (summary: DamageSummary) => void;
     supportsTraceSuccessEffect: (effect: TraceSuccessEffect) => boolean;
     traceBidChoice: (
@@ -96,6 +97,7 @@ export type PrintedDamageResult = EncounterPrintedEffectResult & {
   damageSummary?: DamageSummary;
   damageType?: DamageType;
   damageAmount?: number;
+  dieRoll?: number;
 };
 
 export type PrintedTraceStartResult = EncounterPrintedEffectResult & {
@@ -239,6 +241,107 @@ export function resolvePrintedDamageSubroutine(
   return {
     handled: true,
     damageSummary: summary,
+    damageType,
+    damageAmount,
+    stateChanged: true,
+  };
+}
+
+export function resolvePrintedRandomDamageSubroutine(
+  host: EncounterPrintedEffectHost,
+  options: {
+    definition: CardDefinition;
+    subroutine: SubroutineDefinition;
+    subroutineIndex: number;
+    damageSummaries: DamageSummary[];
+    legalAction?: LegalAction | undefined;
+  },
+): PrintedDamageResult {
+  if (options.subroutine.type !== "random_damage") return { handled: false };
+  const state = host.state;
+  const run = mustRun(state);
+  const { definition, subroutine, subroutineIndex, legalAction } = options;
+  const dieFaces = subroutine.dieFaces ?? 6;
+  if (dieFaces !== 6)
+    throw new Error("Gedruckter Zufallsschaden unterstützt nur W6.");
+  const dieRoll = rollDie(
+    host,
+    `printed_random_damage.${run.runId}.${run.encounteredIceId}.${subroutineIndex}`,
+  );
+  const damageOnResults = subroutine.damageOnResults ?? [1];
+  const damageApplies = damageOnResults.includes(dieRoll);
+  legalActionPayload(legalAction, {
+    printedRandomDamageDieRoll: dieRoll,
+    printedRandomDamageApplies: damageApplies,
+    printedRandomDamageResults: damageOnResults.join(","),
+  });
+  if (!damageApplies) {
+    if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
+      run.resolvedSubroutineIndexes.push(subroutineIndex);
+    appendResolvedSubroutineEffect(
+      legalAction,
+      definition,
+      subroutineIndex,
+      subroutine,
+    );
+    return {
+      handled: true,
+      dieRoll,
+      damageType: subroutine.damageType ?? "net",
+      damageAmount: 0,
+      stateChanged: true,
+    };
+  }
+
+  const damageType = subroutine.damageType ?? "net";
+  const damageAmount = Math.max(0, Math.floor(subroutine.amount ?? 1));
+  if (damageAmount <= 0) {
+    if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
+      run.resolvedSubroutineIndexes.push(subroutineIndex);
+    return {
+      handled: true,
+      dieRoll,
+      damageType,
+      damageAmount: 0,
+      stateChanged: true,
+    };
+  }
+  const event = host.callbacks.createDamageImminentEvent({
+    damageId: `${run.runId}.${run.encounteredIceId}.${subroutineIndex}.random_damage`,
+    damageType,
+    amount: damageAmount,
+    source: `subroutine:${definition.id}:${subroutine.id}:random_damage`,
+  });
+  if (
+    legalAction &&
+    host.callbacks.openDamageResolutionWindow(event, legalAction)
+  ) {
+    if (!run.resolvedSubroutineIndexes.includes(subroutineIndex))
+      run.resolvedSubroutineIndexes.push(subroutineIndex);
+    return {
+      handled: true,
+      suspended: true,
+      dieRoll,
+      damageType,
+      damageAmount,
+      stateChanged: true,
+    };
+  }
+  const summary = host.callbacks.resolveDamageImminentEvent(event);
+  options.damageSummaries.push(summary);
+  appendResolvedSubroutineEffect(
+    legalAction,
+    definition,
+    subroutineIndex,
+    subroutine,
+    summary,
+  );
+  if (legalAction)
+    host.callbacks.setDamagePayload(aggregateDamageSummaries(options.damageSummaries));
+  return {
+    handled: true,
+    damageSummary: summary,
+    dieRoll,
     damageType,
     damageAmount,
     stateChanged: true,
@@ -624,6 +727,24 @@ function applyTraceCounterSuccess(
 function mustRun(state: GameState): ActiveRun {
   if (!state.run) throw new Error("Es gibt keinen aktiven Run.");
   return state.run;
+}
+
+function rollDie(host: EncounterPrintedEffectHost, purpose: string): number {
+  const die = host.callbacks.rollDie?.(purpose) ?? 1;
+  if (!Number.isInteger(die) || die < 1 || die > 6)
+    throw new Error("Gedruckter Zufallsschaden hat einen ungültigen W6-Wurf.");
+  return die;
+}
+
+function legalActionPayload(
+  legalAction: LegalAction | undefined,
+  payload: NonNullable<LegalAction["payload"]>,
+): void {
+  if (!legalAction) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...payload,
+  };
 }
 
 function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {

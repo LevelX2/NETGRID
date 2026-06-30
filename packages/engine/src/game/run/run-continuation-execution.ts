@@ -17,6 +17,7 @@ import {
 } from "./encounter-resolution";
 import {
   resolvePrintedDamageSubroutine,
+  resolvePrintedRandomDamageSubroutine,
   startTraceFromPrintedSubroutine,
   type EncounterPrintedEffectHost,
 } from "./encounter-printed-effects";
@@ -141,6 +142,20 @@ export function continueRun(
     }
     if (subroutine.type === "do_damage") {
       const damageResult = resolvePrintedDamageSubroutine(
+        host.encounter.printedEffectHost(legalAction),
+        {
+          definition,
+          subroutine,
+          subroutineIndex: index,
+          damageSummaries,
+          legalAction,
+        },
+      );
+      if (damageResult.suspended) return;
+      if (state.winner) return;
+    }
+    if (subroutine.type === "random_damage") {
+      const damageResult = resolvePrintedRandomDamageSubroutine(
         host.encounter.printedEffectHost(legalAction),
         {
           definition,

@@ -221,6 +221,7 @@ export function resolveEncounterPrintedNonTraceEffect(
 
   if (
     subroutine.type === "end_the_run" ||
+    subroutine.type === "end_the_run_and_trash_source_at_end_of_turn" ||
     subroutine.type === "end_the_run_unless_runner_pays"
   )
     return resolveDirectEndRunSubroutine(host, {
@@ -403,7 +404,7 @@ function resolveDirectCorpRdReorderSubroutine(
 }
 
 function resolveDirectEndRunSubroutine(
-  _host: EncounterPrintedNonTraceHost,
+  host: EncounterPrintedNonTraceHost,
   options: {
     definition: CardDefinition;
     subroutine: SubroutineDefinition;
@@ -425,6 +426,37 @@ function resolveDirectEndRunSubroutine(
       ...options.source,
       runShouldEnd: true,
       stateChanged: false,
+    };
+  }
+  if (options.subroutine.type === "end_the_run_and_trash_source_at_end_of_turn") {
+    const sourceCardId = host.state.run?.encounteredIceId;
+    if (!sourceCardId)
+      throw new Error("End-of-turn-Trash-Subroutine benötigt Encounter-ICE.");
+    const flags = ensureRunnerTurnFlags(host.state);
+    flags.delayedCorpInstalledCardTrashAtTurnEndIds = [
+      ...new Set([
+        ...(flags.delayedCorpInstalledCardTrashAtTurnEndIds ?? []),
+        sourceCardId,
+      ]),
+    ].sort();
+    appendResolvedSubroutineEffect(
+      options.legalAction,
+      options.definition,
+      options.subroutineIndex,
+      options.subroutine,
+      undefined,
+      { endedRun: true },
+    );
+    legalActionPayload(options.legalAction, {
+      delayedCorpInstalledCardTrashAtTurnEnd: true,
+      delayedCorpInstalledCardTrashAtTurnEndId: sourceCardId,
+      sourceDefinitionId: options.definition.id,
+    });
+    return {
+      handled: true,
+      ...options.source,
+      runShouldEnd: true,
+      stateChanged: true,
     };
   }
   const amount = Math.max(0, Math.floor(options.subroutine.amount ?? 0));

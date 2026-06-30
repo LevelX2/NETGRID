@@ -487,6 +487,14 @@ function specialCounterDisplays(
       counterType: "trace_tag_counter",
       usageHint: "status_marker",
     }),
+    ...singleCounterDisplay(counters.baskerville, {
+      id: "baskerville",
+      displayKind: "trace",
+      label: "Baskerville-Counter",
+      ariaLabelName: "Baskerville-Counter",
+      counterType: "baskerville",
+      usageHint: "status_marker",
+    }),
     ...singleCounterDisplay(counters.cerberus, {
       id: "cerberus",
       displayKind: "trace",

@@ -1029,6 +1029,7 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           title: trashedDefinition.title,
         };
       },
+      rollDie: (purpose) => host.rng.rollDie(state, purpose),
       setDamagePayload: (summary) => {
         if (legalAction) host.damage.setDamagePayload(legalAction, summary);
       },

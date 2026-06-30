@@ -1671,7 +1671,10 @@ export type CardTraceSuccessEffectImplementation =
   | {
       kind: "add_counter";
       recipient: "runner";
-      counterType: Extract<CounterType, "trace_tag_counter" | "cerberus" | "mastiff">;
+      counterType: Extract<
+        CounterType,
+        "trace_tag_counter" | "baskerville" | "cerberus" | "mastiff"
+      >;
       amount: number;
       visibility: EventVisibilityClass;
     }
@@ -2270,6 +2273,10 @@ export type CardPrintedSubroutineImplementation =
       text: "*End the run.";
     }
   | {
+      kind: "end_the_run_and_trash_source_at_end_of_turn";
+      text: string;
+    }
+  | {
       kind: "end_the_run_unless_runner_pays";
       amount: number;
       text: `*End the run unless Runner pays [${number}].`;
@@ -2286,6 +2293,15 @@ export type CardPrintedSubroutineImplementation =
   | {
       kind: "damage";
       damageType: "net" | "brain";
+      amount: number;
+      preventable: true;
+      text: string;
+    }
+  | {
+      kind: "random_damage";
+      dieFaces: 6;
+      damageOnResults: readonly number[];
+      damageType: "brain";
       amount: number;
       preventable: true;
       text: string;
@@ -2399,7 +2415,12 @@ export type CardIceEncounterImplementation =
 export type RunnerTraceCounterEffectImplementation = {
   counterType: Extract<
     CounterType,
-    "trace_tag_counter" | "cerberus" | "mastiff" | "crying" | "link_reduction_counter"
+    | "trace_tag_counter"
+    | "baskerville"
+    | "cerberus"
+    | "mastiff"
+    | "crying"
+    | "link_reduction_counter"
   >;
   removeCost: number;
   startOfRunnerTurn?:
@@ -2420,4 +2441,10 @@ export type RunnerTraceCounterEffectImplementation = {
     preventable: true;
     visibility: EventVisibilityClass;
   };
+};
+
+export type CardSelfRezCostModifierImplementation = {
+  kind: "self_rez_cost_reduction_during_run_after_noisy_icebreaker";
+  amount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
 };

@@ -26,6 +26,7 @@ import type {
   CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
   CardScoredAgendaImplementation,
+  CardSelfRezCostModifierImplementation,
   CardSelfStealCostImplementation,
   CardSuccessfulRunFollowupImplementation,
   CardTagPreventionSourceImplementation,
@@ -45,6 +46,7 @@ export type CardImplementationDefinition = {
     while: "installed_before_and_after_rez";
   };
   printedSubroutines?: readonly CardPrintedSubroutineImplementation[];
+  selfRezCostModifiers?: readonly CardSelfRezCostModifierImplementation[];
   iceEncounter?: CardIceEncounterImplementation;
   icebreakerAbilities?: readonly CardIcebreakerAbilityImplementation[];
   hostedProgramCapacity?: HostedProgramCapacityImplementation;

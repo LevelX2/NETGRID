@@ -5,6 +5,7 @@ import type {
   CardIcebreakerBreakMatcherImplementation,
   CardLifecycleTriggeredAbilityImplementation,
   CardPrintedSubroutineImplementation,
+  CardSelfRezCostModifierImplementation,
   CardTraceSuccessEffectImplementation,
   RestrictedHostedCreditSourceImplementation,
   RestrictedHostedCreditUse,
@@ -97,6 +98,18 @@ export function brainDamageSubroutine(
     preventable: true,
     text: `*Do ${amount} brain damage.`,
   };
+}
+
+export function noisyIcebreakerSelfRezReduction(
+  amount: number,
+): readonly CardSelfRezCostModifierImplementation[] {
+  return [
+    {
+      kind: "self_rez_cost_reduction_during_run_after_noisy_icebreaker",
+      amount,
+      visibility: "public",
+    },
+  ];
 }
 
 export function traceTagSuccess(

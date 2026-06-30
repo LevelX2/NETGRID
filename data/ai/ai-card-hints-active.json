@@ -28798,6 +28798,256 @@
         "confidence": "low",
         "needsHumanReview": true
       }
+    },
+    {
+      "cardId": "onr_classic_005_baskerville",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "sentry",
+        "ap_damage",
+        "trace_counter",
+        "sleepy"
+      ],
+      "planRoles": [
+        "defend_fort",
+        "tax_runs"
+      ],
+      "requiredMechanics": [
+        "rez_ice",
+        "printed_subroutine_damage",
+        "trace",
+        "runner_counter",
+        "run_start_counter_damage",
+        "runner_counter_removal",
+        "sleepy_noisy_rez_discount"
+      ],
+      "valueHints": {
+        "defense": 3,
+        "damageThreat": 3,
+        "tracePressure": 2
+      },
+      "riskTags": [
+        "ap_damage",
+        "trace",
+        "runner_counter",
+        "noisy_discount"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-05-corp-ice-smoke.json#classic_05_corp_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_006_bolter-swarm",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "sentry",
+        "ap_damage",
+        "next_ice_lock",
+        "sleepy"
+      ],
+      "planRoles": [
+        "defend_fort",
+        "tax_runs"
+      ],
+      "requiredMechanics": [
+        "rez_ice",
+        "printed_subroutine_damage",
+        "next_encounter_no_break_subroutines",
+        "sleepy_noisy_rez_discount"
+      ],
+      "valueHints": {
+        "defense": 3,
+        "damageThreat": 4,
+        "tempo": 2
+      },
+      "riskTags": [
+        "ap_damage",
+        "next_encounter_lock",
+        "noisy_discount"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-05-corp-ice-smoke.json#classic_05_corp_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_007_brain-drain",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "sentry",
+        "random_damage",
+        "core_damage"
+      ],
+      "planRoles": [
+        "defend_fort"
+      ],
+      "requiredMechanics": [
+        "rez_ice",
+        "printed_random_damage",
+        "random_die_resolution",
+        "core_damage"
+      ],
+      "valueHints": {
+        "defense": 2,
+        "damageThreat": 2
+      },
+      "riskTags": [
+        "deterministic_random",
+        "core_damage"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-05-corp-ice-smoke.json#classic_05_corp_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_008_deadeye",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "sentry",
+        "program_trash",
+        "end_the_run",
+        "sleepy"
+      ],
+      "planRoles": [
+        "defend_fort",
+        "tax_runs"
+      ],
+      "requiredMechanics": [
+        "rez_ice",
+        "trash_installed_program",
+        "end_the_run",
+        "sleepy_noisy_rez_discount"
+      ],
+      "valueHints": {
+        "defense": 3,
+        "programPressure": 3
+      },
+      "riskTags": [
+        "program_trash",
+        "noisy_discount"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-05-corp-ice-smoke.json#classic_05_corp_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_012_imperial-guard",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "sentry",
+        "program_trash",
+        "end_the_run",
+        "sleepy"
+      ],
+      "planRoles": [
+        "defend_fort",
+        "tax_runs"
+      ],
+      "requiredMechanics": [
+        "rez_ice",
+        "trash_installed_program",
+        "end_the_run",
+        "sleepy_noisy_rez_discount"
+      ],
+      "valueHints": {
+        "defense": 4,
+        "programPressure": 3
+      },
+      "riskTags": [
+        "program_trash",
+        "noisy_discount"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-05-corp-ice-smoke.json#classic_05_corp_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_013_puzzle",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate",
+        "end_the_run",
+        "delayed_self_trash"
+      ],
+      "planRoles": [
+        "defend_fort",
+        "tempo_defense"
+      ],
+      "requiredMechanics": [
+        "rez_ice",
+        "end_the_run",
+        "delayed_turn_end_trash"
+      ],
+      "valueHints": {
+        "defense": 2,
+        "tempo": 2
+      },
+      "riskTags": [
+        "self_trash",
+        "turn_end_delayed_effect"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-05-corp-ice-smoke.json#classic_05_corp_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
     }
   ],
   "taskId": "AI022-1/AI030",

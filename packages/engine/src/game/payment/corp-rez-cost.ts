@@ -26,6 +26,7 @@ import type {
   CardFortRunWindowImplementation,
   CardInstallCostModifierImplementation,
   CardRezCostModifierImplementation,
+  CardSelfRezCostModifierImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import type { CostModifierQuote, CostQuote } from "./cost-quote";
@@ -46,6 +47,12 @@ type ActiveCorpInstallCostModifier = {
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
   modifier: CardInstallCostModifierImplementation;
+};
+
+type ActiveCorpSelfRezCostModifier = {
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  modifier: CardSelfRezCostModifierImplementation;
 };
 
 export type CorpInstallCostOptions = {
@@ -124,6 +131,29 @@ function activeCorpRezCostModifiersForIce(
   return matches;
 }
 
+function activeCorpSelfRezCostModifiersForIce(
+  state: GameState,
+  iceId: CardInstanceId,
+  iceDefinition: CardDefinition,
+): ActiveCorpSelfRezCostModifier[] {
+  if (iceDefinition.type !== "ice") return [];
+  if (state.run?.usedNoisyIcebreakerThisRun !== true) return [];
+  const implementation = cardImplementationForDefinitionId(iceDefinition.id);
+  return (implementation?.selfRezCostModifiers ?? [])
+    .filter(
+      (modifier) =>
+        modifier.kind ===
+          "self_rez_cost_reduction_during_run_after_noisy_icebreaker" &&
+        modifier.visibility === "public" &&
+        modifier.amount > 0,
+    )
+    .map((modifier) => ({
+      sourceCardInstanceId: iceId,
+      sourceDefinitionId: iceDefinition.id,
+      modifier,
+    }));
+}
+
 function corpInstallCostModifierAppliesToCard(
   state: GameState,
   modifier: CardInstallCostModifierImplementation,
@@ -196,10 +226,17 @@ function iceRezCostReductionFor(
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): number {
-  return activeCorpRezCostModifiersForIce(state, iceId, iceDefinition).reduce(
-    (sum, match) => sum + match.modifier.amount,
-    0,
-  );
+  const activeRootReduction = activeCorpRezCostModifiersForIce(
+    state,
+    iceId,
+    iceDefinition,
+  ).reduce((sum, match) => sum + match.modifier.amount, 0);
+  const activeSelfReduction = activeCorpSelfRezCostModifiersForIce(
+    state,
+    iceId,
+    iceDefinition,
+  ).reduce((sum, match) => sum + match.modifier.amount, 0);
+  return activeRootReduction + activeSelfReduction;
 }
 
 export function rezCostReductionSourceDefinitionIdsFor(
@@ -207,9 +244,10 @@ export function rezCostReductionSourceDefinitionIdsFor(
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): CardDefinitionId[] {
-  return activeCorpRezCostModifiersForIce(state, iceId, iceDefinition).map(
-    (match) => match.sourceDefinitionId,
-  );
+  return [
+    ...activeCorpRezCostModifiersForIce(state, iceId, iceDefinition),
+    ...activeCorpSelfRezCostModifiersForIce(state, iceId, iceDefinition),
+  ].map((match) => match.sourceDefinitionId);
 }
 
 /**
@@ -228,6 +266,20 @@ export function rezCostForCard(
 
 function corpRezCostModifierQuoteForMatch(
   match: ActiveCorpRezCostModifier,
+): CostModifierQuote {
+  const { sourceCardInstanceId, sourceDefinitionId, modifier } = match;
+  const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
+  return {
+    sourceCardInstanceId,
+    sourceDefinitionId,
+    label: sourceDefinition?.title ?? sourceDefinitionId,
+    amount: modifier.amount,
+    kind: "reduction",
+  };
+}
+
+function corpSelfRezCostModifierQuoteForMatch(
+  match: ActiveCorpSelfRezCostModifier,
 ): CostModifierQuote {
   const { sourceCardInstanceId, sourceDefinitionId, modifier } = match;
   const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
@@ -337,7 +389,14 @@ export function quoteCorpRezCost(
     definition.type === "ice"
       ? activeCorpRezCostModifiersForIce(state, iceId, definition)
       : [];
-  const existingSourceDefinitionIds = existingModifierMatches.map(
+  const selfModifierMatches =
+    definition.type === "ice"
+      ? activeCorpSelfRezCostModifiersForIce(state, iceId, definition)
+      : [];
+  const existingSourceDefinitionIds = [
+    ...existingModifierMatches,
+    ...selfModifierMatches,
+  ].map(
     (match) => match.sourceDefinitionId,
   );
   const discountedRezSourceCardId = options.discountedRezSourceCardId;
@@ -352,6 +411,11 @@ export function quoteCorpRezCost(
   };
   const modifiers = existingModifierMatches.map((match) =>
     corpRezCostModifierQuoteForMatch(match),
+  );
+  modifiers.push(
+    ...selfModifierMatches.map((match) =>
+      corpSelfRezCostModifierQuoteForMatch(match),
+    ),
   );
 
   if (discountedRezSourceCardId) {

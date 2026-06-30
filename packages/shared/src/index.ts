@@ -159,6 +159,7 @@ export type CounterType =
   | "spy"
   | "link_reduction_counter"
   | "breaker_strength_penalty"
+  | "baskerville"
   | "cerberus"
   | "trace_tag_counter"
   | "mastiff"
@@ -213,7 +214,9 @@ export type SubroutineType =
   | "runner_lose_credits"
   | "give_runner_tag"
   | "do_damage"
+  | "random_damage"
   | "initiate_trace"
+  | "end_the_run_and_trash_source_at_end_of_turn"
   | "trash_installed_program"
   | "trash_installed_program_unless_runner_pays"
   | "set_run_encounter_tax"
@@ -239,6 +242,8 @@ export type SubroutineDefinition = {
   type: SubroutineType;
   amount?: number;
   damageType?: DamageType;
+  dieFaces?: 6;
+  damageOnResults?: number[];
   baseTraceStrength?: number;
   traceBidLimit?: number;
   traceSuccessEffect?: TraceSuccessEffect;
@@ -1042,6 +1047,7 @@ export type RunState = {
   approachIceExposeViewingSourceCardId?: CardInstanceId;
   eventApproachIceExposeBeforeRez?: boolean;
   prohibitNoisyIcebreakers?: boolean;
+  usedNoisyIcebreakerThisRun?: boolean;
   runnerCreditGainOnCorpRez?: number;
   damagePreventionPool?: {
     sourceDefinitionId: CardDefinitionId;
@@ -1481,6 +1487,7 @@ export type GameState = {
       amount: number;
       preventable: boolean;
     }>;
+    delayedCorpInstalledCardTrashAtTurnEndIds?: CardInstanceId[];
     persistentModifiers?: Array<{
       sourceCardInstanceId: CardInstanceId;
       sourceDefinitionId: CardDefinitionId;

@@ -1652,6 +1652,110 @@ describe("CardImplementation definition descriptors", () => {
     }
   });
 
+  it("describes CLASSIC-05 Corp ICE baseline implementations", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_classic_005_baskerville")
+        ?.selfRezCostModifiers,
+    ).toEqual([
+      {
+        kind: "self_rez_cost_reduction_during_run_after_noisy_icebreaker",
+        amount: 5,
+        visibility: "public",
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_005_baskerville")
+        ?.printedSubroutines,
+    ).toMatchObject([
+      { kind: "damage", damageType: "net", amount: 2 },
+      {
+        kind: "trace",
+        baseTraceStrength: 5,
+        onSuccess: [
+          {
+            kind: "add_counter",
+            recipient: "runner",
+            counterType: "baskerville",
+            amount: 1,
+          },
+        ],
+      },
+      { kind: "end_the_run" },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_005_baskerville")
+        ?.runnerCounterEffects,
+    ).toEqual([
+      {
+        counterType: "baskerville",
+        removeCost: 3,
+        runStart: {
+          kind: "damage",
+          damageType: "net",
+          amountPerCounter: 2,
+          preventable: true,
+          visibility: "public",
+        },
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_006_bolter-swarm")
+        ?.printedSubroutines,
+    ).toMatchObject([
+      { kind: "damage", damageType: "net", amount: 4 },
+      { kind: "prohibit_break_next_ice" },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_007_brain-drain")
+        ?.printedSubroutines,
+    ).toEqual([
+      {
+        kind: "random_damage",
+        dieFaces: 6,
+        damageOnResults: [1],
+        damageType: "brain",
+        amount: 3,
+        preventable: true,
+        text: "*Roll a die. On a 1, do 3 brain damage.",
+      },
+    ]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_008_deadeye")
+        ?.printedSubroutines,
+    ).toMatchObject([{ kind: "trash_program" }, { kind: "end_the_run" }]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_012_imperial-guard")
+        ?.printedSubroutines,
+    ).toMatchObject([{ kind: "trash_program" }, { kind: "end_the_run" }]);
+    expect(
+      cardImplementationForDefinitionId("onr_classic_013_puzzle")
+        ?.printedSubroutines,
+    ).toEqual([
+      {
+        kind: "end_the_run_and_trash_source_at_end_of_turn",
+        text: "*End the run, and trash Puzzle at end of turn.",
+      },
+      {
+        kind: "end_the_run_and_trash_source_at_end_of_turn",
+        text: "*End the run, and trash Puzzle at end of turn.",
+      },
+    ]);
+
+    for (const definitionId of [
+      "onr_classic_005_baskerville",
+      "onr_classic_006_bolter-swarm",
+      "onr_classic_007_brain-drain",
+      "onr_classic_008_deadeye",
+      "onr_classic_012_imperial-guard",
+      "onr_classic_013_puzzle",
+    ]) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes Proteus Phase 5b runner protection programs", () => {
     expect(
       cardImplementationForDefinitionId(
