@@ -1,4 +1,4 @@
-import { Check, Clipboard, Crosshair, Eye, EyeOff, Play, Plus, Trash2 } from "lucide-react";
+import { Check, Clipboard, Crosshair, Eye, Play, Plus, Trash2 } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
@@ -615,12 +615,6 @@ export function CardView({
           <span className="cardInactiveZoneBadge" aria-hidden="true">
             {inactiveZone === "heap" ? <Trash2 size={10} strokeWidth={2.4} /> : <Clipboard size={10} strokeWidth={2.4} />}
             <span>{inactiveZoneBadge}</span>
-          </span>
-        ) : null}
-        {knownConcealedRunnerResource ? (
-          <span className="cardConcealedBadge" aria-hidden="true" title="Für die Korp verdeckt">
-            <EyeOff size={10} strokeWidth={2.5} />
-            <span>Verdeckt</span>
           </span>
         ) : null}
         {tapped ? (
