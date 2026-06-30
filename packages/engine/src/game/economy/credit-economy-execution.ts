@@ -7,6 +7,10 @@ import type {
   LegalAction,
   Side,
 } from "@netgrid/shared";
+import {
+  closeRunnerCostPenaltySupportWindowForPayment,
+  openRunnerCostPenaltySupportWindow,
+} from "../payment/runner-payment-support";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -176,6 +180,23 @@ export function handleCreditEconomyExecution(
   if (legalAction.type !== "gain_credit") return { handled: false };
 
   const { state } = host;
+  const runnerCreditCost = legalAction.costs[0]?.credits ?? 0;
+  if (legalAction.side === "runner" && runnerCreditCost > 0) {
+    if (
+      state.runner.credits < runnerCreditCost &&
+      openRunnerCostPenaltySupportWindow(state, legalAction, {
+        amount: runnerCreditCost,
+        availableWithoutSupport: state.runner.credits,
+        context: "runner_pool",
+      })
+    )
+      return handled(legalAction);
+    closeRunnerCostPenaltySupportWindowForPayment(
+      state,
+      legalAction,
+      runnerCreditCost,
+    );
+  }
   host.actions.spendClick(state, legalAction.side);
   if (host.delegates.shouldOpenCorpInstalledEconomyCreditChoice(state, legalAction)) {
     host.delegates.startCorpInstalledEconomyCreditChoice(state, legalAction);

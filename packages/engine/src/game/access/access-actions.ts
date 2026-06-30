@@ -14,6 +14,7 @@ import { quoteStealCostForAccessedAgenda } from "../../ability-engine/steal-cost
 import { quoteAccessTrashCost } from "../../ability-engine/trash-cost-modifiers";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { runnerCostPenaltySupportCreditCapacity } from "../payment/runner-payment-support";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
@@ -124,7 +125,11 @@ export function buildRunnerAccessActions(
       definition,
     );
     if (stealCostQuote.totalCost > 0) {
-      if (host.state.runner.credits < stealCostQuote.totalCost) {
+      if (
+        host.state.runner.credits +
+          runnerCostPenaltySupportCreditCapacity(host.state) <
+        stealCostQuote.totalCost
+      ) {
         return {
           handled: true,
           legalActions: [
@@ -210,7 +215,8 @@ export function buildRunnerAccessActions(
         ),
       );
     } else if (
-      availableRunnerAccessTrashCredits(host, run.accessedCardId) >=
+      availableRunnerAccessTrashCredits(host, run.accessedCardId) +
+        runnerCostPenaltySupportCreditCapacity(host.state) >=
       trashCost.totalCost
     ) {
       const upgradeTrashRecurringCreditsAvailable =
@@ -335,7 +341,12 @@ function hiddenResourceCurrentAccessTrashActions(
         cardImplementationForDefinitionId(sourceDefinition.id)?.runnerUtilityLongtail;
       if (utility?.kind !== "hidden_resource_current_access_free_trash")
         return [];
-      if (host.state.runner.credits < utility.cost.amount) return [];
+      if (
+        host.state.runner.credits +
+          runnerCostPenaltySupportCreditCapacity(host.state) <
+        utility.cost.amount
+      )
+        return [];
       return [
         host.actions.buildLegalAction(
           "runner",

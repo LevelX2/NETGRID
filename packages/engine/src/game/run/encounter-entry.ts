@@ -104,6 +104,18 @@ export function beginEncounter(
     runDurationPaymentHost(host.state),
     legalAction,
   );
+  if (
+    encounterTaxPayment.handled &&
+    encounterTaxPayment.paid === false &&
+    host.state.runnerCostPenaltySupportWindow
+  ) {
+    return {
+      handled: true,
+      iceId: encounteredIceId,
+      stateChanged: true,
+      resolvedPayload: legalAction?.payload,
+    };
+  }
   if (encounterTaxPayment.runShouldEnd) {
     host.callbacks.finishRun(false, legalAction);
     return {

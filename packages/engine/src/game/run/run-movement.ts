@@ -259,6 +259,13 @@ export function jackOutRunner(
     legalAction,
     jackOutPayload,
   );
+  if (payment.handled && payment.paid === false) {
+    return {
+      handled: true,
+      resolvedPayload: payment.resolvedPayload,
+      stateChanged: true,
+    };
+  }
   host.cleanup.finishRun(false);
   return {
     handled: true,
@@ -551,7 +558,19 @@ function resolvePostPassPayOrEndRun(
   if (String(legalAction.payload?.serverId ?? "") !== pending.serverId)
     throw new Error("Der Fort-Pass-Server passt nicht mehr.");
   if (decision === "pay") {
-    spendRunnerRunCredits(runDurationPaymentHost(host.state), amount);
+    const payment = spendRunnerRunCredits(
+      runDurationPaymentHost(host.state),
+      amount,
+      undefined,
+      legalAction,
+    );
+    if (payment.handled && payment.paid === false)
+      return {
+        handled: true,
+        postPassPaymentResolved: false,
+        resolvedPayload: legalAction.payload,
+        stateChanged: true,
+      };
     delete run.postPassPayOrEndRun;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -615,7 +634,14 @@ function resolvePostPassCancellableFutureStrength(
     const paid = Number(legalAction.payload?.paymentAmount ?? amount);
     if (!Number.isInteger(paid) || paid !== amount)
       throw new Error("Die Strength-Cancel-Kosten passen nicht mehr.");
-    spendRunnerRunCredits(runDurationPaymentHost(host.state), amount);
+    const payment = spendRunnerRunCredits(
+      runDurationPaymentHost(host.state),
+      amount,
+      undefined,
+      legalAction,
+    );
+    if (payment.handled && payment.paid === false)
+      return { handled: true, runContinues: false, stateChanged: true };
     run.futureEncounterIceStrengthBonus = Math.max(
       0,
       Math.floor(run.futureEncounterIceStrengthBonus ?? 0) -

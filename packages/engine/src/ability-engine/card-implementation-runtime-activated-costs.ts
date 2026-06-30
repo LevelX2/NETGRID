@@ -10,6 +10,7 @@ import type {
   ActivatedCardAbilityImplementation,
   CardAbilityCostImplementation,
 } from "./definition-types";
+import { syncPendingChoiceAfterRunnerCostPenaltySupport } from "../game/payment/runner-payment-support";
 
 export function assertActivatedCostAmount(
   cost: CardAbilityCostImplementation,
@@ -296,6 +297,9 @@ export function payActivatedCardImplementationCosts(
       ).publicPayload,
     );
     publicPayload.cardImplementationTopCorpRdTrashCost = topCorpRdTrashCost;
+  }
+  if (ability.timing === "runner_cost_penalty_support") {
+    syncPendingChoiceAfterRunnerCostPenaltySupport(state);
   }
   return publicPayload;
 }

@@ -1375,6 +1375,16 @@ export type GameState = {
     amountDue: number;
     kind: "cost" | "penalty";
     createdAtStateVersion: number;
+    runnerCreditTarget?: number;
+    paymentContext?:
+      | "runner_pool"
+      | "runner_install"
+      | "runner_program_install"
+      | "runner_run"
+      | "runner_run_start"
+      | "runner_access_trash"
+      | "runner_trace_bid"
+      | "runner_activated_ability";
   };
   specialZoneHarness?: SpecialZoneTestHarness;
   deckMetadata?: {

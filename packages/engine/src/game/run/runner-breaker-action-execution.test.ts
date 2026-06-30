@@ -167,8 +167,10 @@ function hostFor(
       resolveBlinkBreakSubroutineAction: () => calls.push("blink"),
     },
     payment: {
-      spendRunnerRunCredits: (amount, breakerId) =>
-        calls.push(`spend:${amount}:${breakerId ?? "none"}`),
+      spendRunnerRunCredits: (amount, breakerId) => {
+        calls.push(`spend:${amount}:${breakerId ?? "none"}`);
+        return { handled: true, paid: true, amount };
+      },
     },
     fort: {
       shouldOpenAardvarkInterception: () => false,

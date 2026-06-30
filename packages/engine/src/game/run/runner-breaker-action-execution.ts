@@ -10,6 +10,7 @@ import {
   icebreakerAbilityHasSpecialEffect,
   type RuntimeIcebreakerAbility,
 } from "../../ability-engine/icebreaker-abilities";
+import type { RunnerRunCreditSpendResult } from "./run-duration-payment";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type Subroutine = NonNullable<CardDefinition["subroutines"]>[number];
@@ -70,7 +71,8 @@ export type RunnerBreakerActionExecutionHost = {
     spendRunnerRunCredits: (
       amount: number,
       breakerId?: CardInstanceId | undefined,
-    ) => void;
+      legalAction?: LegalAction,
+    ) => RunnerRunCreditSpendResult;
   };
   fort: {
     shouldOpenAardvarkInterception: (breakerId: CardInstanceId) => boolean;
@@ -136,10 +138,12 @@ function executePumpBreakerAction(
     if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
       throw new Error("Variable Icebreaker-Pump-Kosten sind nicht mehr gueltig.");
   }
-  host.payment.spendRunnerRunCredits(
+  const payment = host.payment.spendRunnerRunCredits(
     legalAction.costs[0]?.credits ?? 1,
     breakerId,
+    legalAction,
   );
+  if (payment.handled && payment.paid === false) return;
   if (breakerId && host.fort.shouldOpenAardvarkInterception(breakerId)) {
     host.fort.startAardvarkInterceptionChoice(
       breakerId,
@@ -244,10 +248,12 @@ function executeBreakSubroutineAction(
     legalAction,
     currentSubroutine,
   );
-  host.payment.spendRunnerRunCredits(
+  const payment = host.payment.spendRunnerRunCredits(
     legalAction.costs[0]?.credits ?? 1,
     breakerId,
+    legalAction,
   );
+  if (payment.handled && payment.paid === false) return;
   if (breakerId && host.fort.shouldOpenAardvarkInterception(breakerId)) {
     host.fort.startAardvarkInterceptionChoice(
       breakerId,

@@ -6,12 +6,13 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type { StartRunOptions } from "./run-core-execution";
+import type { RunTaxPaymentResult } from "./run-duration-payment";
 
 export type StartRunActionExecutionHost = {
   state: GameState;
   payment: {
     spendRunnerClick: () => void;
-    payRunStartTaxCredits: (legalAction: LegalAction) => void;
+    payRunStartTaxCredits: (legalAction: LegalAction) => RunTaxPaymentResult;
   };
   turn: {
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
@@ -90,12 +91,17 @@ export function executeStartRunAction(
     const used = flags.runOnlyActionUsedSourceIdsThisTurn ?? [];
     if (used.includes(explicitSourceCardId))
       throw new Error("Diese Run-Aktion wurde diesen Zug bereits genutzt.");
+    runOnlyActionSourceCardId = explicitSourceCardId;
+  }
+  const taxPayment = host.payment.payRunStartTaxCredits(legalAction);
+  if (taxPayment.handled && taxPayment.paid === false) return;
+  if (legalAction.payload?.runOnlyAction === true && runOnlyActionSourceCardId) {
+    const used = flags.runOnlyActionUsedSourceIdsThisTurn ?? [];
     flags.runOnlyActionUsedSourceIdsThisTurn = [
       ...used,
-      explicitSourceCardId,
+      runOnlyActionSourceCardId,
     ].sort();
     host.state.runner.clicks += 1;
-    runOnlyActionSourceCardId = explicitSourceCardId;
   }
   if (legalAction.payload?.bonusRunNoClick === true) {
     if (legalAction.payload?.multiServerSuccessSequenceRun !== true) {
@@ -111,7 +117,6 @@ export function executeStartRunAction(
       ? { activeSequence: pendingSequence }
       : undefined;
   host.run.startRun(serverId, legalAction, startRunOptions);
-  host.payment.payRunStartTaxCredits(legalAction);
   if (legalAction.payload?.runOnlyAction === true && host.state.run) {
     if (!runOnlyActionSourceCardId)
       throw new Error("Diese Run-Aktion benoetigt eine installierte Quelle.");

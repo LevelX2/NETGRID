@@ -4,6 +4,10 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
+import {
+  closeRunnerCostPenaltySupportWindowForPayment,
+  openRunnerCostPenaltySupportWindow,
+} from "../payment/runner-payment-support";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
 
 type PlayCardResolver = {
@@ -77,8 +81,25 @@ function executePlayEventAction(
   host: PlayCardExecutionHost,
   legalAction: LegalAction,
 ): void {
+  const creditCost = legalAction.costs[0]?.credits ?? 0;
+  if (creditCost > 0) {
+    if (
+      host.state.runner.credits < creditCost &&
+      openRunnerCostPenaltySupportWindow(host.state, legalAction, {
+        amount: creditCost,
+        availableWithoutSupport: host.state.runner.credits,
+        context: "runner_pool",
+      })
+    )
+      return;
+    closeRunnerCostPenaltySupportWindowForPayment(
+      host.state,
+      legalAction,
+      creditCost,
+    );
+  }
   host.payment.spendClick("runner");
-  host.payment.spendCredits("runner", legalAction.costs[0]?.credits ?? 0);
+  host.payment.spendCredits("runner", creditCost);
   const cardId = String(legalAction.payload?.cardId) as CardInstanceId;
   const definition = definitionFor(host.state, cardId);
   host.zones.removeFromAllZones(cardId);

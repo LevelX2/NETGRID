@@ -64,6 +64,11 @@ import {
   type RunnerTracePaymentDependencies,
 } from "../payment";
 import {
+  closeRunnerCostPenaltySupportWindowForPayment as closeRunnerCostPenaltySupportWindowForPaymentHelper,
+  openRunnerCostPenaltySupportWindow as openRunnerCostPenaltySupportWindowHelper,
+  runnerCostPenaltySupportCreditCapacity as runnerPaymentSupportCreditCapacity,
+} from "../payment/runner-payment-support";
+import {
   resolvePendingChoice,
   type PendingChoiceResolutionHost,
 } from "../choices/pending-choice-resolution";
@@ -1757,38 +1762,7 @@ function runnerCanPayInstallCost(
 }
 
 function runnerCostPenaltySupportCreditCapacity(state: GameState): number {
-  let availableCredits = state.runner.credits;
-  let gainedCredits = 0;
-  for (const cardId of runnerInstalledCardIds(state).slice().sort()) {
-    const instance = state.cardInstances[cardId];
-    if (!instance || instance.tapped === true) continue;
-    const implementation = cardImplementationForDefinitionId(instance.definitionId);
-    const abilities = implementation?.abilities ?? [];
-    let bestNet = 0;
-    for (const ability of abilities) {
-      if (ability.kind !== "activated") continue;
-      if (ability.timing !== "runner_cost_penalty_support") continue;
-      if (ability.costs.some((cost) => cost.kind === "action")) continue;
-      const creditCost = ability.costs
-        .filter((cost) => cost.kind === "credit")
-        .reduce((sum, cost) => sum + cost.amount, 0);
-      if (creditCost > availableCredits) continue;
-      const creditGain = ability.effects.reduce((sum, effect) => {
-        if (
-          effect.kind !== "gain_credits" ||
-          (effect.recipient !== "runner" && effect.recipient !== "controller")
-        )
-          return sum;
-        return sum + effect.amount;
-      }, 0);
-      const net = creditGain - creditCost;
-      if (net > bestNet) bestNet = net;
-    }
-    if (bestNet <= 0) continue;
-    availableCredits += bestNet;
-    gainedCredits += bestNet;
-  }
-  return gainedCredits;
+  return runnerPaymentSupportCreditCapacity(state);
 }
 
 function openRunnerCostPenaltySupportWindow(
@@ -1797,29 +1771,14 @@ function openRunnerCostPenaltySupportWindow(
   amount: number,
   cardType: CardDefinition["type"],
 ): boolean {
-  const available = cardType === "program"
-    ? availableRunnerProgramInstallCredits(state)
-    : state.runner.credits;
-  if (
-    legalAction.side !== "runner" ||
-    amount <= 0 ||
-    available + runnerCostPenaltySupportCreditCapacity(state) < amount
-  )
-    return false;
-  state.runnerCostPenaltySupportWindow = {
-    windowId: `runner_cost_penalty_support.${state.stateVersion + 1}`,
-    originalActionId: legalAction.actionId,
-    amountDue: amount,
-    kind: "cost",
-    createdAtStateVersion: state.stateVersion,
-  };
-  state.activeSide = "runner";
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    runnerCostPenaltySupportWindowOpened: true,
-    runnerCostPenaltySupportWindowId: state.runnerCostPenaltySupportWindow.windowId,
-  };
-  return true;
+  return openRunnerCostPenaltySupportWindowHelper(state, legalAction, {
+    amount,
+    availableWithoutSupport:
+      cardType === "program"
+        ? availableRunnerProgramInstallCredits(state)
+        : state.runner.credits,
+    context: cardType === "program" ? "runner_program_install" : "runner_install",
+  });
 }
 
 function closeRunnerCostPenaltySupportWindowForPayment(
@@ -1827,19 +1786,7 @@ function closeRunnerCostPenaltySupportWindowForPayment(
   legalAction: LegalAction,
   amount: number,
 ): void {
-  const window = state.runnerCostPenaltySupportWindow;
-  if (!window) return;
-  if (
-    window.originalActionId !== legalAction.actionId ||
-    window.kind !== "cost" ||
-    window.amountDue !== amount
-  )
-    throw new Error("Das Runner-Kostenfenster passt nicht zur Zahlung.");
-  delete state.runnerCostPenaltySupportWindow;
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    runnerCostPenaltySupportWindowClosed: true,
-  };
+  closeRunnerCostPenaltySupportWindowForPaymentHelper(state, legalAction, amount);
 }
 
 function runnerRecurringCredits(state: GameState): number {

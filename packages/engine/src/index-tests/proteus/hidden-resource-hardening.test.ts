@@ -177,8 +177,20 @@ function resolveChoice(
   });
 }
 
+function supportActionFor(
+  state: GameState,
+  cardId: CardInstanceId,
+): LegalAction | undefined {
+  return getLegalActions(state, "runner").find(
+    (candidate) =>
+      candidate.payload?.cardId === cardId &&
+      candidate.payload?.cardImplementationAbilityTiming ===
+        "runner_cost_penalty_support",
+  );
+}
+
 describe("PRO011 hidden resource timing hardening", () => {
-  it("offers bank resources only in runner cost/penalty support windows and revalidates stale/tapped sources", () => {
+  it("offers bank resources only in runner cost/penalty support windows and trashes Chiba on use", () => {
     let state = runnerState("pro011-1-bank");
     state.runner.credits = 1;
     const chibaId = installHiddenResource(
@@ -229,11 +241,6 @@ describe("PRO011 hidden resource timing hardening", () => {
     const wrongSide = applyLegal(state, "corp", action!);
     expect(wrongSide.ok).toBe(false);
 
-    state.cardInstances[chibaId]!.tapped = true;
-    const tapped = applyLegal(state, "runner", action!);
-    expect(tapped.ok).toBe(false);
-    state.cardInstances[chibaId]!.tapped = false;
-
     const stale = structuredClone(state);
     stale.stateVersion += 1;
     expect(
@@ -253,10 +260,16 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(resolved.ok).toBe(true);
     state = resolved.state;
     expect(state.runner.credits).toBe(beforeCredits + 3);
-    expect(state.cardInstances[chibaId]?.tapped).toBe(true);
+    expect(state.runner.rig.resources).not.toContain(chibaId);
+    expect(state.runner.heap).toContain(chibaId);
+    expect(state.cardInstances[chibaId]?.zone).toEqual({
+      side: "runner",
+      zone: "heap",
+    });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_133_chiba-bank-account",
+      sourceTrashed: true,
     });
     const continuedInstall = getLegalActions(state, "runner").find(
       (candidate) => candidate.actionId === installAction!.actionId,
@@ -269,6 +282,172 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(state.runner.credits).toBe(0);
     expect(state.runner.clicks).toBe(3);
     expect(state.runner.rig.programs).toContain(expensiveProgramId);
+  });
+
+  it("opens cost support for runner events that exceed the normal credit pool", () => {
+    let state = runnerState("pro011-1-event-support");
+    state.runner.credits = 2;
+    const chibaId = installHiddenResource(
+      state,
+      "onr_proteus_133_chiba-bank-account",
+      "pro011_event_chiba",
+    );
+    const scoreId = addRunnerGripCard(
+      state,
+      "onr_v1_108_score",
+      "pro011_score",
+    );
+
+    const playScore = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.type === "play_event" && candidate.payload?.cardId === scoreId,
+    );
+    expect(playScore).toBeDefined();
+    const opened = applyLegal(state, "runner", playScore!);
+    expect(opened.ok).toBe(true);
+    state = opened.state;
+    expect(state.runnerCostPenaltySupportWindow).toMatchObject({
+      originalActionId: playScore!.actionId,
+      amountDue: 5,
+      runnerCreditTarget: 5,
+      paymentContext: "runner_pool",
+    });
+    expect(state.runner.heap).not.toContain(scoreId);
+
+    const support = supportActionFor(state, chibaId);
+    expect(support).toBeDefined();
+    state = applyLegal(state, "runner", support!).state;
+    expect(state.runner.credits).toBe(5);
+    expect(state.runner.heap).toContain(chibaId);
+
+    const continued = getLegalActions(state, "runner").find(
+      (candidate) => candidate.actionId === playScore!.actionId,
+    );
+    expect(continued).toBeDefined();
+    const played = applyLegal(state, "runner", continued!);
+    expect(played.ok).toBe(true);
+    state = played.state;
+    expect(state.runnerCostPenaltySupportWindow).toBeUndefined();
+    expect(state.runner.heap).toContain(scoreId);
+    expect(state.runner.credits).toBe(9);
+    expect(state.runner.clicks).toBe(3);
+  });
+
+  it("opens cost support for accessed card trash costs", () => {
+    let state = runnerState("pro011-1-access-trash-support");
+    state.runner.credits = 1;
+    const chibaId = installHiddenResource(
+      state,
+      "onr_proteus_133_chiba-bank-account",
+      "pro011_access_chiba",
+    );
+    const assetId = addCorpServerCard(
+      state,
+      "onr_v1_309_bbs-whispering-campaign",
+      "pro011_bbs_campaign",
+      "remote_1",
+      "root",
+    );
+    state.run = {
+      runId: "pro011_access_run",
+      attackedServerId: "remote_1",
+      phase: "access",
+      position: { kind: "server", serverId: "remote_1" },
+      accessedCardId: assetId,
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+    };
+    state.timingPoint = "access.resolve_card";
+    state.activeSide = "runner";
+
+    const trashAction = getLegalActions(state, "runner").find(
+      (candidate) => candidate.type === "trash_accessed_card",
+    );
+    expect(trashAction).toBeDefined();
+    const opened = applyLegal(state, "runner", trashAction!);
+    expect(opened.ok).toBe(true);
+    state = opened.state;
+    expect(state.runnerCostPenaltySupportWindow).toMatchObject({
+      originalActionId: trashAction!.actionId,
+      amountDue: 4,
+      runnerCreditTarget: 4,
+      paymentContext: "runner_access_trash",
+    });
+
+    const support = supportActionFor(state, chibaId);
+    expect(support).toBeDefined();
+    state = applyLegal(state, "runner", support!).state;
+    expect(state.runner.credits).toBe(4);
+    expect(state.runner.heap).toContain(chibaId);
+
+    const continued = getLegalActions(state, "runner").find(
+      (candidate) => candidate.actionId === trashAction!.actionId,
+    );
+    expect(continued).toBeDefined();
+    const trashed = applyLegal(state, "runner", continued!);
+    expect(trashed.ok).toBe(true);
+    state = trashed.state;
+    expect(state.runnerCostPenaltySupportWindow).toBeUndefined();
+    expect(state.runner.credits).toBe(0);
+    expect(state.corp.archives).toContain(assetId);
+  });
+
+  it("opens cost support for run-start taxes before spending the click", () => {
+    let state = runnerState("pro011-1-run-start-support");
+    state.runner.credits = 0;
+    const swissId = installHiddenResource(
+      state,
+      "onr_proteus_152_swiss-bank-account",
+      "pro011_run_swiss",
+    );
+    const taxAssetId = addCorpServerCard(
+      state,
+      "onr_v1_332_newsgroup-taunting",
+      "pro011_newsgroup",
+      "hq",
+      "root",
+    );
+    state.cardInstances[taxAssetId] = {
+      ...state.cardInstances[taxAssetId]!,
+      faceup: true,
+      rezzed: true,
+    };
+
+    const runAction = getLegalActions(state, "runner").find(
+      (candidate) =>
+        candidate.type === "start_run" && candidate.payload?.serverId === "hq",
+    );
+    expect(runAction).toBeDefined();
+    const opened = applyLegal(state, "runner", runAction!);
+    expect(opened.ok).toBe(true);
+    state = opened.state;
+    expect(state.runnerCostPenaltySupportWindow).toMatchObject({
+      originalActionId: runAction!.actionId,
+      amountDue: 1,
+      runnerCreditTarget: 1,
+      paymentContext: "runner_run_start",
+    });
+    expect(state.runner.clicks).toBe(4);
+    expect(state.run).toBeUndefined();
+
+    const support = supportActionFor(state, swissId);
+    expect(support).toBeDefined();
+    state = applyLegal(state, "runner", support!).state;
+    expect(state.runner.credits).toBe(2);
+    expect(state.cardInstances[swissId]?.tapped).toBe(true);
+
+    const continued = getLegalActions(state, "runner").find(
+      (candidate) => candidate.actionId === runAction!.actionId,
+    );
+    expect(continued).toBeDefined();
+    const started = applyLegal(state, "runner", continued!);
+    expect(started.ok).toBe(true);
+    state = started.state;
+    expect(state.runnerCostPenaltySupportWindow).toBeUndefined();
+    expect(state.runner.credits).toBe(1);
+    expect(state.runner.clicks).toBe(3);
+    expect(state.run?.attackedServerId).toBe("hq");
   });
 
   it("opens HQ/R&D Mole only at access start, increases queue size, and keeps central cards hidden before breach", () => {

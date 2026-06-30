@@ -965,11 +965,13 @@ export function createCardRuntimeDepsHosts(
     ).totalCost;
     if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
       throw new Error("Multi-Break-Kosten sind nicht mehr gueltig.");
-    spendRunnerRunCredits(
+    const payment = spendRunnerRunCredits(
       runDurationPaymentHost(state),
       expectedCost,
       breakerId,
+      legalAction,
     );
+    if (payment.handled && payment.paid === false) return;
     executeEffectCommands(
       state,
       subroutineIndexes.map((subroutineIndex) => ({

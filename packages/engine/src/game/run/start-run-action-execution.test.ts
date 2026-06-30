@@ -77,10 +77,12 @@ function hostFor(
       },
       payRunStartTaxCredits: (legalAction) => {
         calls.push(`pay_tax:${legalAction.payload?.runStartTaxCredits ?? 0}`);
+        const amount = Number(legalAction.payload?.runStartTaxCredits ?? 0);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
-          runStartTaxPaid: Number(legalAction.payload?.runStartTaxCredits ?? 0),
+          runStartTaxPaid: amount,
         };
+        return { handled: amount > 0, paid: amount > 0, amount };
       },
     },
     turn: {
@@ -149,9 +151,9 @@ describe("start-run-action-execution", () => {
     expect(gameState.run?.attackedServerId).toBe("rd");
     expect(calls).toEqual([
       "validate:rd",
+      "pay_tax:0",
       "spend_click",
       "start:rd:start_run",
-      "pay_tax:0",
     ]);
   });
 
@@ -169,7 +171,7 @@ describe("start-run-action-execution", () => {
     expect(gameState.runnerTurnFlags?.successfulRunExtraRunPending).toBe(
       false,
     );
-    expect(calls).toEqual(["validate:hq", "start:hq:start_run", "pay_tax:0"]);
+    expect(calls).toEqual(["validate:hq", "pay_tax:0", "start:hq:start_run"]);
   });
 
   it("applies direct run-only action and spending-cap payload", () => {
@@ -223,9 +225,9 @@ describe("start-run-action-execution", () => {
     });
     expect(calls).toEqual([
       "validate:hq",
+      "pay_tax:0",
       "spend_click",
       "start:hq:start_run",
-      "pay_tax:0",
     ]);
   });
 

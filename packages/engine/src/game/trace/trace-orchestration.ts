@@ -26,6 +26,9 @@ import {
   payRunnerTraceBidQuote,
   postBidLinkPaymentPublicPayload,
   quoteRunnerTraceBidPayment,
+  closeRunnerCostPenaltySupportWindowForPayment,
+  openRunnerCostPenaltySupportWindow,
+  runnerCostPenaltySupportCreditCapacity,
   runnerTracePaymentPublicPayload,
   type CorpTracePaymentDependencies,
   type RunnerTraceLinkCreditSelection,
@@ -346,15 +349,23 @@ function resolveTraceCorpBid(
     status: "runner_bid",
   };
   const runnerTraceLinkCreditCapacity = runnerTraceLinkCredits(host);
+  const runnerSupportCreditCapacity =
+    runnerCostPenaltySupportCreditCapacity(state);
+  const runnerBidCapacity =
+    state.runner.credits +
+    runnerTraceLinkCreditCapacity +
+    runnerSupportCreditCapacity;
   state.pendingChoice = traceBidChoice(
     state,
     "runner",
     trace.traceId,
-    runnerTraceLinkCreditCapacity > 0
-      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
+    runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
+      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits + ${runnerSupportCreditCapacity} Support verfügbar)`
       : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
-    state.runner.credits + runnerTraceLinkCreditCapacity,
-    runnerTraceLinkCreditCapacity > 0 ? "Gesamtbid" : "Credits",
+    runnerBidCapacity,
+    runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
+      ? "Gesamtbid"
+      : "Credits",
   );
   state.activeSide = "runner";
   legalAction.payload = {
@@ -421,17 +432,25 @@ function openTraceRunnerBidChoice(
     status: "runner_bid",
   };
   const runnerTraceLinkCreditCapacity = runnerTraceLinkCredits(host);
+  const runnerSupportCreditCapacity =
+    runnerCostPenaltySupportCreditCapacity(state);
+  const runnerBidCapacity =
+    state.runner.credits +
+    runnerTraceLinkCreditCapacity +
+    runnerSupportCreditCapacity;
   const traceStrength = trace.traceStrength ?? trace.baseTraceStrength;
   const runnerLink = trace.runnerLink ?? calculateRunnerLink(host);
   state.pendingChoice = traceBidChoice(
     state,
     "runner",
     trace.traceId,
-    runnerTraceLinkCreditCapacity > 0
-      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits verfügbar)`
+    runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
+      ? `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink}; ${state.runner.credits} Credits + ${runnerTraceLinkCreditCapacity} Link-Bits + ${runnerSupportCreditCapacity} Support verfügbar)`
       : `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
-    state.runner.credits + runnerTraceLinkCreditCapacity,
-    runnerTraceLinkCreditCapacity > 0 ? "Gesamtbid" : "Credits",
+    runnerBidCapacity,
+    runnerTraceLinkCreditCapacity > 0 || runnerSupportCreditCapacity > 0
+      ? "Gesamtbid"
+      : "Credits",
   );
   state.activeSide = "runner";
 }
@@ -531,6 +550,21 @@ function resolveTraceRunnerBid(
   }
   const bid = selectedBidAmount(state.pendingChoice, playerAction);
   if (startRunnerBidPaymentChoice(host, trace, bid, legalAction)) return;
+  const tracePaymentPreview = quoteRunnerTraceBidPayment(
+    host.payment.runnerTracePaymentDeps,
+    state,
+    bid,
+  );
+  if (
+    !tracePaymentPreview.canPay &&
+    maybeOpenRunnerTraceBidSupportWindow(
+      host,
+      legalAction,
+      bid,
+      tracePaymentPreview.traceLinkCreditsToPay,
+    )
+  )
+    return;
   const tracePaymentQuote = assertRunnerTraceBidPaymentValid(
     host.payment.runnerTracePaymentDeps,
     state,
@@ -551,6 +585,11 @@ function finishTraceRunnerBid(
     runnerBidPaymentSelection: _runnerBidPaymentSelection,
     ...traceWithoutPaymentSelection
   } = trace;
+  closeRunnerCostPenaltySupportWindowForPayment(
+    state,
+    legalAction,
+    tracePaymentQuote.normalCreditsToPay,
+  );
   const tracePaymentReceipt = payRunnerTraceBidQuote(
     host.payment.runnerTracePaymentDeps,
     state,
@@ -715,15 +754,43 @@ function resolveTraceRunnerBidPaymentChoice(
     runnerBidPaymentSelection: _finishedRunnerBidPaymentSelection,
     ...finishedTrace
   } = nextTrace;
-  state.trace = finishedTrace;
-  delete state.pendingChoice;
   const quote = quoteRunnerTraceBidPayment(
     host.payment.runnerTracePaymentDeps,
     state,
     selection.bid,
     nextSelection.allocations,
   );
+  if (
+    !quote.canPay &&
+    maybeOpenRunnerTraceBidSupportWindow(
+      host,
+      legalAction,
+      selection.bid,
+      quote.traceLinkCreditsToPay,
+    )
+  )
+    return;
+  state.trace = finishedTrace;
+  delete state.pendingChoice;
   finishTraceRunnerBid(host, legalAction, trace, selection.bid, quote);
+}
+
+function maybeOpenRunnerTraceBidSupportWindow(
+  host: TraceOrchestrationHost,
+  legalAction: LegalAction,
+  bid: number,
+  traceLinkCreditsToPay: number,
+): boolean {
+  const normalCreditsRequired = Math.max(
+    0,
+    Math.floor(bid) - Math.max(0, Math.floor(traceLinkCreditsToPay)),
+  );
+  if (host.state.runner.credits >= normalCreditsRequired) return false;
+  return openRunnerCostPenaltySupportWindow(host.state, legalAction, {
+    amount: normalCreditsRequired,
+    availableWithoutSupport: host.state.runner.credits,
+    context: "runner_trace_bid",
+  });
 }
 
 function postBidTraceLinkCandidates(

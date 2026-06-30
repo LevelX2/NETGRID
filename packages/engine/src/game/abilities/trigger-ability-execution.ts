@@ -5,6 +5,10 @@ import type {
   LegalAction,
   Side,
 } from "@netgrid/shared";
+import {
+  closeRunnerCostPenaltySupportWindowForPayment,
+  openRunnerCostPenaltySupportWindow,
+} from "../payment/runner-payment-support";
 import type {
   RunFortTriggerExecutionResult,
 } from "./run-fort-trigger-execution";
@@ -88,6 +92,23 @@ export function handleTriggerAbilityExecution(
   if (legalAction.type !== "trigger_ability") return { handled: false };
 
   const { state } = host;
+  const runnerCreditCost = legalAction.costs[0]?.credits ?? 0;
+  if (legalAction.side === "runner" && runnerCreditCost > 0) {
+    if (
+      state.runner.credits < runnerCreditCost &&
+      openRunnerCostPenaltySupportWindow(state, legalAction, {
+        amount: runnerCreditCost,
+        availableWithoutSupport: state.runner.credits,
+        context: "runner_pool",
+      })
+    )
+      return handled(legalAction);
+    closeRunnerCostPenaltySupportWindowForPayment(
+      state,
+      legalAction,
+      runnerCreditCost,
+    );
+  }
   if (legalAction.payload?.actionEconomyAbility === "accept_extra_action_offer") {
     if (!host.actionEconomy) throw new Error("Action-Economy-Host fehlt.");
     host.actionEconomy.acceptExtraActionOffer(state, legalAction);

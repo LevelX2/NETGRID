@@ -376,7 +376,7 @@ export function buildRunnerMainActions(
     }
     if (
       cardCounter(state, state.runner.identity, "crying") > 0 &&
-      state.runner.credits >= 2
+      state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >= 2
     ) {
       actions.push(
         action(
@@ -404,7 +404,11 @@ export function buildRunnerMainActions(
         0
       )
         continue;
-      if (state.runner.credits < counterEffect.removeCost) continue;
+      if (
+        state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) <
+        counterEffect.removeCost
+      )
+        continue;
       actions.push(
         action(
           state,
@@ -438,7 +442,11 @@ export function buildRunnerMainActions(
       continue;
     for (const subtype of subtypeChange.choices) {
       if (subtype === currentSubtype) continue;
-      if (state.runner.credits < subtypeChange.cost.credits) continue;
+      if (
+        state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) <
+        subtypeChange.cost.credits
+      )
+        continue;
       const costs =
         clickCost > 0 || subtypeChange.cost.credits > 0
           ? [
@@ -642,7 +650,8 @@ export function buildRunnerMainActions(
     if (
       hasClicks &&
       definition.type === "event" &&
-      state.runner.credits >= (definition.cost ?? 0)
+      state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+        (definition.cost ?? 0)
     ) {
       const canPlayCardImplementation = canPlayPrintedCostOnPlayImplementation(
         cardImplementationRuntimeDeps,
@@ -762,7 +771,8 @@ export function buildRunnerMainActions(
         !cardImplementationForDefinitionId(definition.id) &&
         definition.id !== SELF_MODIFYING_CODE_ID &&
         (definition.id !== PAID_STACK_SEARCH_RESOURCE_SOURCE ||
-          state.runner.credits >= 1) &&
+          state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+            1) &&
         (definition.id === DAILY_CREDIT_RESOURCE_SOURCE
           ? state.runner.stack.length > 0
           : state.runner.stack.some(
@@ -994,7 +1004,7 @@ export function buildRunnerMainActions(
       if (
         definition.id === JUNKYARD_BBS_ID &&
         !cardImplementationForDefinitionId(definition.id) &&
-        state.runner.credits >= 1
+        state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >= 1
       ) {
         const targetCardId = topRunnerHeapCardId(state);
         if (targetCardId) {
@@ -1047,7 +1057,10 @@ export function buildRunnerMainActions(
             }),
           );
         }
-        if (state.runner.credits >= 1) {
+        if (
+          state.runner.credits + runnerCostPenaltySupportCreditCapacity(state) >=
+          1
+        ) {
           for (const targetCardId of delayedInstallPreparedTargetIds(state)) {
             const remainingCounters = cardCounter(state, targetCardId, "shell");
             actions.push(

@@ -20,6 +20,11 @@ import {
   RUN_STRENGTH_HARDWARE_SOURCE,
   ZETATECH_SOFTWARE_INSTALLER_SOURCE,
 } from "../../mechanics/longtail-card-effects";
+import {
+  closeRunnerCostPenaltySupportWindowForPayment,
+  openRunnerCostPenaltySupportWindow,
+  runnerCostPenaltySupportCreditCapacity,
+} from "../payment/runner-payment-support";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 
@@ -267,6 +272,16 @@ export function availableRunnerRunCredits(
   host: RunDurationPaymentHost,
   breakerId?: CardInstanceId,
 ): number {
+  return (
+    availableRunnerRunCreditsWithoutSupport(host, breakerId) +
+    runnerCostPenaltySupportCreditCapacity(host.state)
+  );
+}
+
+function availableRunnerRunCreditsWithoutSupport(
+  host: RunDurationPaymentHost,
+  breakerId?: CardInstanceId,
+): number {
   const state = host.state;
   return (
     state.runner.credits +
@@ -279,16 +294,92 @@ export function availableRunnerRunCredits(
 export function availableRunnerRunStartCredits(
   host: RunDurationPaymentHost,
 ): number {
+  return (
+    availableRunnerRunStartCreditsWithoutSupport(host) +
+    runnerCostPenaltySupportCreditCapacity(host.state)
+  );
+}
+
+function availableRunnerRunStartCreditsWithoutSupport(
+  host: RunDurationPaymentHost,
+): number {
   return host.state.runner.credits + runnerRunRecurringCredits(host);
+}
+
+function spendRunnerRunStartCredits(
+  host: RunDurationPaymentHost,
+  amount: number,
+  legalAction: LegalAction,
+): RunnerRunCreditSpendResult {
+  if (amount <= 0) return { handled: false };
+  const availableWithoutSupport =
+    availableRunnerRunStartCreditsWithoutSupport(host);
+  if (
+    availableWithoutSupport < amount &&
+    openRunnerCostPenaltySupportWindow(host.state, legalAction, {
+      amount,
+      availableWithoutSupport,
+      context: "runner_run_start",
+    })
+  )
+    return { handled: true, paid: false, amount, stateChanged: true };
+  closeRunnerCostPenaltySupportWindowForPayment(host.state, legalAction, amount);
+  if (availableRunnerRunStartCreditsWithoutSupport(host) < amount)
+    throw new Error("Der Runner kann die Run-Start-Kosten nicht bezahlen.");
+  let remaining = amount;
+  let hostedCreditsSpent = 0;
+  let recurringCreditsSpent = 0;
+  for (const cardId of runnerRunRecurringCreditSourceIds(host)) {
+    if (remaining <= 0) break;
+    const available = hostedPaymentCredits(host.state, cardId);
+    const spent = Math.min(available, remaining);
+    if (spent <= 0) continue;
+    const counterType = hostedPaymentCounterTypeForSource(host.state, cardId);
+    spendHostedPaymentCredits(host.state, cardId, spent);
+    hostedCreditsSpent += spent;
+    if (counterType === "recurring_credit") recurringCreditsSpent += spent;
+    remaining -= spent;
+  }
+  spendRunnerPoolCredits(host.state, remaining);
+  return {
+    handled: true,
+    paid: true,
+    amount,
+    normalCreditsSpent: remaining,
+    hostedCreditsSpent,
+    recurringCreditsSpent,
+    stateChanged: true,
+  };
 }
 
 export function spendRunnerRunCredits(
   host: RunDurationPaymentHost,
   amount: number,
   breakerId?: CardInstanceId,
+  legalAction?: LegalAction,
 ): RunnerRunCreditSpendResult {
   if (amount <= 0) return { handled: false };
-  if (availableRunnerRunCredits(host, breakerId) < amount)
+  const availableWithoutSupport = availableRunnerRunCreditsWithoutSupport(
+    host,
+    breakerId,
+  );
+  if (
+    availableWithoutSupport < amount &&
+    legalAction &&
+    openRunnerCostPenaltySupportWindow(host.state, legalAction, {
+      amount,
+      availableWithoutSupport,
+      context: "runner_run",
+    })
+  )
+    return { handled: true, paid: false, amount, stateChanged: true };
+  if (legalAction)
+    closeRunnerCostPenaltySupportWindowForPayment(
+      host.state,
+      legalAction,
+      amount,
+    );
+  if (availableRunnerRunCreditsWithoutSupport(host, breakerId) < amount)
     throw new Error("Der Runner kann die Run-Kosten nicht bezahlen.");
   if (breakerId) recordRunActionSpendingCapSpend(host, amount);
   const run = mustRun(host.state);
@@ -382,7 +473,18 @@ export function payRunStartTaxCredits(
       sum + (Number.isInteger(cost.credits) ? (cost.credits ?? 0) : 0),
     0,
   );
-  if (taxCredits > 0) spendRunnerRunCredits(host, taxCredits);
+  const payment =
+    taxCredits > 0
+      ? spendRunnerRunStartCredits(host, taxCredits, legalAction)
+      : { handled: false, paid: false, amount: 0 };
+  if (payment.handled && payment.paid === false)
+    return {
+      handled: true,
+      paid: false,
+      amount: taxCredits,
+      stateChanged: true,
+      resolvedPayload: legalAction.payload,
+    };
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     runStartTaxPaid: taxCredits,
@@ -407,7 +509,19 @@ export function payJackOutAdditionalCost(
     0,
   );
   if (jackOutAdditionalCost > 0) {
-    spendRunnerRunCredits(host, jackOutAdditionalCost);
+    const payment = spendRunnerRunCredits(
+      host,
+      jackOutAdditionalCost,
+      undefined,
+      legalAction,
+    );
+    if (payment.handled && payment.paid === false)
+      return {
+        handled: true,
+        paid: false,
+        amount: jackOutAdditionalCost,
+        stateChanged: true,
+      };
     legalAction.payload = {
       ...payload,
       jackOutAdditionalCost,
@@ -458,7 +572,20 @@ export function payEncounterTaxForFutureIce(
       ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
     };
   }
-  spendRunnerRunCredits(host, encounterTax);
+  const payment = spendRunnerRunCredits(
+    host,
+    encounterTax,
+    undefined,
+    legalAction,
+  );
+  if (payment.handled && payment.paid === false)
+    return {
+      handled: true,
+      paid: false,
+      amount: encounterTax,
+      ...(legalAction?.payload ? { resolvedPayload: legalAction.payload } : {}),
+      stateChanged: true,
+    };
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -500,7 +627,19 @@ export function payEncounterSubroutineRunCost(
   );
   if (declaredPayment !== expectedPayment || declaredCost !== expectedPayment)
     throw new Error("Die Pay-or-End-the-Run-Kosten sind nicht mehr gueltig.");
-  spendRunnerRunCredits(host, expectedPayment);
+  const payment = spendRunnerRunCredits(
+    host,
+    expectedPayment,
+    undefined,
+    legalAction,
+  );
+  if (payment.handled && payment.paid === false)
+    return {
+      handled: true,
+      paid: false,
+      amount: expectedPayment,
+      stateChanged: true,
+    };
   return {
     handled: true,
     paid: true,

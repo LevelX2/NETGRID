@@ -148,6 +148,57 @@ describe("trace orchestration", () => {
     expect(state.pendingChoice).toBeUndefined();
   });
 
+  it("opens runner cost support when a trace bid exceeds normal credits", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const chibaId = "trace_chiba" as CardInstanceId;
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [chibaId]: {
+          ...instance(
+            chibaId,
+            "onr_proteus_133_chiba-bank-account" as CardDefinitionId,
+            "runner",
+          ),
+          faceup: false,
+          rezzed: false,
+        },
+      },
+      runnerResources: [chibaId],
+    });
+    state.runner.credits = 2;
+    state.trace = activeTrace(sourceId, sourceDefinition.id, "runner_bid", {
+      corpBid: 2,
+      traceStrength: 4,
+      runnerLink: 1,
+    });
+    state.pendingChoice = bidChoice(state, "runner", state.trace.traceId, 5);
+    const action = actionFor("runner", "resolve_choice");
+
+    resolveTraceChoice(
+      testHost(state, { [sourceDefinition.id]: sourceDefinition }),
+      action,
+      playerChoice("bid_5"),
+    );
+
+    expect(state.runnerCostPenaltySupportWindow).toMatchObject({
+      originalActionId: action.actionId,
+      amountDue: 5,
+      runnerCreditTarget: 5,
+      paymentContext: "runner_trace_bid",
+    });
+    expect(state.trace).toMatchObject({ status: "runner_bid" });
+    expect(state.trace?.runnerBid).toBeUndefined();
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: "trace:trace_1",
+    });
+    expect(action.payload).toMatchObject({
+      runnerCostPenaltySupportWindowOpened: true,
+    });
+  });
+
   it("opens post-bid link choices with structured link metadata", () => {
     const sourceId = "source_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");

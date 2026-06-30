@@ -39,6 +39,7 @@ import {
   buildRunnerMainActions,
   type RunnerMainActionGenerationHost,
 } from "./turn/runner-main-actions";
+import { runnerCostPenaltySupportOriginalActionReady } from "./payment/runner-payment-support";
 
 type HostFn<T = unknown> = () => T;
 
@@ -85,6 +86,49 @@ export function legalActionsFor(state: GameState, side: Side): LegalAction[] {
   return getLegalActions(state, side);
 }
 
+function buildRunnerActionsForCostPenaltySupportWindow(
+  host: LegalActionGenerationHost,
+): LegalAction[] {
+  const { state } = host;
+  if (state.run?.hiddenRunnerResourceAccessStartServerId)
+    return buildRunnerAccessStartCardImplementationActions(
+      host.hosts.runCardImplementationActionHost(),
+    ).legalActions;
+  if (state.pendingChoice)
+    return state.pendingChoice.side === "runner"
+      ? [host.actions.buildChoiceAction(state.pendingChoice)]
+      : [];
+  if (state.run?.postPassCancellableFutureIceStrength)
+    return buildRunnerPostPassFutureStrengthActions(host.hosts.runMovementHost());
+  if (state.run?.postPassPayOrEndRun)
+    return buildRunnerMovementActions(
+      host.hosts.runnerEncounterActionHost(),
+    ).legalActions;
+  if (state.timingPoint === "runner_action.main")
+    return buildRunnerMainActions(host.hosts.runnerMainActionGenerationHost());
+  if (state.timingPoint === "run.approach_ice") {
+    const encounterEntryHost = host.hosts.encounterEntryHost();
+    if (isApproachIceExposeViewingWindowOpen(encounterEntryHost))
+      return runnerApproachIceExposeViewingActions(encounterEntryHost);
+    if (isApproachIceExposeWindowOpen(encounterEntryHost))
+      return runnerApproachIceExposeActions(encounterEntryHost);
+    return [];
+  }
+  if (state.timingPoint === "run.encounter_ice")
+    return buildRunnerEncounterActions(
+      host.hosts.runnerEncounterActionHost(),
+    ).legalActions;
+  if (state.timingPoint === "run.jack_out_window") {
+    if (isCorpRunRootRezWindowOpen(host.hosts.runRezWindowHost())) return [];
+    return buildRunnerMovementActions(
+      host.hosts.runnerEncounterActionHost(),
+    ).legalActions;
+  }
+  if (state.timingPoint === "access.resolve_card")
+    return buildRunnerAccessActions(host.hosts.runnerAccessActionHost()).legalActions;
+  return [];
+}
+
 export function buildLegalActions(
   host: LegalActionGenerationHost,
   side: Side,
@@ -97,11 +141,11 @@ export function buildLegalActions(
           ...buildRunnerCostPenaltySupportCardImplementationActions(
             host.hosts.runCardImplementationActionHost(),
           ).legalActions,
-          ...buildRunnerMainActions(host.hosts.runnerMainActionGenerationHost()).filter(
+          ...buildRunnerActionsForCostPenaltySupportWindow(host).filter(
             (action) =>
               action.actionId ===
                 state.runnerCostPenaltySupportWindow?.originalActionId &&
-              (action.costs[0]?.credits ?? 0) <= state.runner.credits,
+              runnerCostPenaltySupportOriginalActionReady(state),
           ),
         ]
       : [];

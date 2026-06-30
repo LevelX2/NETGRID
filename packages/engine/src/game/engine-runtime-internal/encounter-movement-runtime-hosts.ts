@@ -964,11 +964,12 @@ export function createEncounterMovementRuntimeHosts(
           ),
       },
       payment: {
-        spendRunnerRunCredits: (amount, breakerId) =>
+        spendRunnerRunCredits: (amount, breakerId, legalAction) =>
           spendRunnerRunCredits(
             runDurationPaymentHost(state),
             amount,
             breakerId,
+            legalAction,
           ),
       },
       fort: {

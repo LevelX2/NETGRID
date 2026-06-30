@@ -8,7 +8,7 @@ export const proteusChibaBankAccountImplementation: CardImplementationDefinition
       timing: "runner_cost_penalty_support",
       costs: [
         { kind: "credit", amount: 1 },
-        { kind: "tap_source", amount: 1 },
+        { kind: "trash_source", amount: 1 },
       ],
       label: "Chiba Bank Account: 4 Credits nehmen",
       effects: [

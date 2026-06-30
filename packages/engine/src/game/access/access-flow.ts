@@ -13,6 +13,7 @@ import {
   type BreachStateHost,
 } from "./breach-state";
 import {
+  availableRunnerAccessTrashCredits,
   canFreeTrashCurrentAccessCard,
   effectiveAccessTrashCost,
   freeTrashAccessSourceForCurrentAccessCard,
@@ -21,6 +22,10 @@ import {
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { quoteStealCostForAccessedAgenda } from "../../ability-engine/steal-cost-modifiers";
 import { hiddenRunnerResourceRevealPayload } from "../damage/damage-core";
+import {
+  closeRunnerCostPenaltySupportWindowForPayment,
+  openRunnerCostPenaltySupportWindow,
+} from "../payment/runner-payment-support";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
@@ -115,6 +120,22 @@ export function handleAccessExecution(
       return accessCurrentCard(host, legalAction);
     case "steal_agenda": {
       const paidCredits = revalidateStealAgendaCost(host, legalAction);
+      if (paidCredits > 0) {
+        if (
+          host.state.runner.credits < paidCredits &&
+          openRunnerCostPenaltySupportWindow(host.state, legalAction, {
+            amount: paidCredits,
+            availableWithoutSupport: host.state.runner.credits,
+            context: "runner_access_trash",
+          })
+        )
+          return { handled: true, stateChanged: true };
+        closeRunnerCostPenaltySupportWindowForPayment(
+          host.state,
+          legalAction,
+          paidCredits,
+        );
+      }
       host.payment.spendRunnerCredits(paidCredits);
       const result = stealAgenda(
         host,
@@ -700,8 +721,21 @@ function trashAccessedCard(
       throw new Error("Die Hidden-Resource-Kosten sind nicht mehr gueltig.");
     if (overrideCost !== 0 || legalAction.payload?.freeAccessTrash !== true)
       throw new Error("Der Hidden-Resource-Trash ist kein gueltiger kostenloser Trash.");
-    if (host.state.runner.credits < expectedCost)
-      throw new Error("Runner kann die Hidden-Resource-Kosten nicht bezahlen.");
+    if (
+      expectedCost > 0 &&
+      host.state.runner.credits < expectedCost &&
+      openRunnerCostPenaltySupportWindow(host.state, legalAction!, {
+        amount: expectedCost,
+        availableWithoutSupport: host.state.runner.credits,
+        context: "runner_access_trash",
+      })
+    )
+      return { handled: true, stateChanged: true };
+    closeRunnerCostPenaltySupportWindowForPayment(
+      host.state,
+      legalAction!,
+      expectedCost,
+    );
     host.payment.spendRunnerCredits(expectedCost);
     const revealPayload = hiddenRunnerResourceRevealPayload(
       host.state,
@@ -721,6 +755,28 @@ function trashAccessedCard(
       hiddenZoneBarrier: true,
       hiddenZoneAction: "proteus_hidden_current_access_free_trash",
     };
+  }
+  const availableWithoutSupport = availableRunnerAccessTrashCredits(
+    host.accessActions,
+    cardId as CardInstanceId,
+  );
+  if (
+    trashCost > 0 &&
+    availableWithoutSupport < trashCost &&
+    legalAction &&
+    openRunnerCostPenaltySupportWindow(host.state, legalAction, {
+      amount: trashCost,
+      availableWithoutSupport,
+      context: "runner_access_trash",
+    })
+  )
+    return { handled: true, stateChanged: true };
+  if (legalAction) {
+    closeRunnerCostPenaltySupportWindowForPayment(
+      host.state,
+      legalAction,
+      trashCost,
+    );
   }
   const trashPayment = host.payment.spendRunnerAccessTrashCredits(
     trashCost,

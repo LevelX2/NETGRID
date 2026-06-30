@@ -1,6 +1,6 @@
 # Runner-Payment-Support-Hidden-Resources-Prozess
 
-Status: geplant im Arbeitsbranch
+Status: implementiert im Arbeitsbranch, Verifikation läuft
 Quelle/Vorgabe: Nutzerfreigabe vom 2026-06-30 zur allgemeinen Anbindung von Hidden-Resource-Credit-Support an Runner-Kosten und zur Korrektur von Chiba Bank Account als Trash-Kostenquelle.
 
 ## Zielprüfung
@@ -163,6 +163,15 @@ Commit-Message: `docs(engine): record runner payment support completion`.
 - Nach Codepaketen: mindestens paketnahe Engine-Tests.
 - Vor Merge: `pnpm --filter @netgrid/engine typecheck` und relevante Engine-Testdateien.
 - Wenn der komplette Engine-Testlauf zeitlich scheitert, muss der ausgeführte Teil dokumentiert und der Rest als offenes Risiko benannt werden.
+
+## Ergebnisstand 2026-06-30
+
+- RPS-00 ist mit Commit `e8f3213` abgeschlossen.
+- RPS-01 bis RPS-04 wurden in einem zusammenhängenden Engine-Paket umgesetzt, weil Core-Vertrag, LegalAction-Reoffer, Chiba-Trash-Korrektur und Payment-Pfade zyklisch voneinander abhängen.
+- Gemeinsamer Kern: `runner-payment-support.ts` kapselt Support-Kapazität, Runner-Credit-Ziel, Fensteröffnung, Fensterschließung und Pending-Choice-Synchronisierung.
+- Angebundene Pfade: Runner-Install-Reoffer, Runner-Events, einfache Runner-Pool-Trigger, Access-Steal-/Trashkosten, Run-Start-Tax, laufende Run-/Icebreaker-/Pay-or-End-Kosten und Runner-Trace-Bids.
+- Chiba Bank Account nutzt jetzt `trash_source` statt `tap_source` und wird nach Support-Nutzung in den Runner-Heap gelegt.
+- Verifiziert: `pnpm --filter @netgrid/engine typecheck`; `vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts src/game/trace/trace-orchestration.test.ts src/game/run/run-duration-payment.test.ts src/game/run/start-run-action-execution.test.ts src/game/run/runner-breaker-action-execution.test.ts`.
 
 ## Worktree-, Git- und Integrationsregeln
 

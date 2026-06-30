@@ -17,6 +17,14 @@ export function validateChoiceAction(
     legalAction.payload?.cardImplementationAbilityTiming === "corp_trace_window"
   )
     return undefined;
+  if (
+    choice.side === "runner" &&
+    legalAction.side === "runner" &&
+    legalAction.type === "activated_card_ability" &&
+    legalAction.payload?.cardImplementationAbilityTiming ===
+      "runner_cost_penalty_support"
+  )
+    return undefined;
   if (legalAction.type !== "resolve_choice")
     return "Solange eine Choice offen ist, sind keine anderen Aktionen legal.";
   if (playerAction.side !== choice.side)

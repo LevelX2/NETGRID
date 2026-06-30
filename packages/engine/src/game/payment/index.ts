@@ -52,3 +52,13 @@ export {
   quoteRunnerTraceBidPayment,
   runnerTracePaymentPublicPayload,
 } from "./trace-payment";
+export {
+  closeRunnerCostPenaltySupportWindowForPayment,
+  openRunnerCostPenaltySupportWindow,
+  runnerCanPayWithCostPenaltySupport,
+  runnerCostPenaltySupportCreditCapacity,
+  runnerCostPenaltySupportOriginalActionReady,
+  runnerCreditsRequiredAfterPaymentSupport,
+  runnerPoolCreditsWithCostPenaltySupport,
+  syncPendingChoiceAfterRunnerCostPenaltySupport,
+} from "./runner-payment-support";

@@ -172,11 +172,20 @@ export function preparePayOrEndRunSubroutinePayment(
       Math.floor(subroutine.amount ?? 0),
     );
   }
-  payEncounterSubroutineRunCost(
+  const payment = payEncounterSubroutineRunCost(
     runDurationPaymentHost(host.state),
     legalAction,
     expectedPayOrEndRunPayment + expectedPayOrTrashProgramPayment,
   );
+  if (payment.handled && payment.paid === false)
+    return {
+      handled: true,
+      paidPayOrEndRunIndexes: new Set<number>(),
+      payOrEndRunIndexesForThisContinue,
+      paidPayOrTrashProgramIndexes: new Set<number>(),
+      payOrTrashProgramIndexesForThisContinue,
+      stateChanged: true,
+    };
   return {
     handled: true,
     paidPayOrEndRunIndexes,
