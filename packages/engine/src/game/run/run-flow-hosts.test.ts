@@ -243,6 +243,12 @@ function hostFor(calls: string[]): RunFlowHost {
     callbacks: {
       finishRun: (_state, successful) => calls.push(`finishRun:${successful}`),
       drawCorpCards: () => calls.push("drawCorpCards"),
+      drawRunnerCards: () => ({
+        drawnCount: 0,
+        drawTaxSourceCount: 0,
+        drawTaxCreditsPaid: 0,
+        drawTaxTagsAdded: 0,
+      }),
       activeObligationCount: () => 0,
       addActiveObligation: () => undefined,
       applyRunnerForgoNextAction: () => undefined,

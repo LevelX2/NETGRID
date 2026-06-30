@@ -847,6 +847,23 @@ export function publicContextForAction(
         legalAction.payload.daemonHostedTrashCount;
     if (typeof legalAction.payload.trashedInstalledCount === "number")
       context.trashedInstalledCount = legalAction.payload.trashedInstalledCount;
+    if (typeof legalAction.payload.trashedCorpInstalledCardCount === "number")
+      context.trashedCorpInstalledCardCount =
+        legalAction.payload.trashedCorpInstalledCardCount;
+    if (
+      typeof legalAction.payload.trashedInstalledRunnerHardwareCount ===
+      "number"
+    )
+      context.trashedInstalledRunnerHardwareCount =
+        legalAction.payload.trashedInstalledRunnerHardwareCount;
+    if (
+      typeof legalAction.payload.trashedInstalledRunnerProgramCount ===
+      "number"
+    )
+      context.trashedInstalledRunnerProgramCount =
+        legalAction.payload.trashedInstalledRunnerProgramCount;
+    if (typeof legalAction.payload.netDamageAmount === "number")
+      context.netDamageAmount = legalAction.payload.netDamageAmount;
     if (typeof legalAction.payload.scoredFromServerId === "string")
       context.scoredFromServerId = legalAction.payload.scoredFromServerId;
     if (typeof legalAction.payload.installedCount === "number")
@@ -1256,6 +1273,10 @@ export function publicContextForAction(
     "targetCardDefinitionId",
     "targetIceDefinitionId",
     "targetIcePositionLabel",
+    "iceStrengthBefore",
+    "iceStrengthAfter",
+    "iceStrengthBonusApplied",
+    "iceStrengthMaxCap",
     "breakSubroutineBaseCost",
     "checkedIceCount",
     "successfulRunForceRezCreditCost",
@@ -1274,6 +1295,20 @@ export function publicContextForAction(
     "serverLabel",
     "accessCount",
     "gainedAgendaPoints",
+    "targetTrashCount",
+    "hardwareTrashCount",
+    "programTrashCount",
+    "selfDestructTrashedCount",
+    "damageAmount",
+    "trashedCorpInstalledCardCount",
+    "trashedInstalledRunnerHardwareCount",
+    "trashedInstalledRunnerProgramCount",
+    "netDamageAmount",
+    "classicIndiscriminateResponseTeam",
+    "runnerGripShuffledIntoStackCount",
+    "runnerCardsDrawnAfterGripShuffle",
+    "runnerStackAfter",
+    "classicIndiscriminateResponseTeamSourceDefinitionIds",
   ]) {
     const value = legalAction.payload?.[key];
     if (value !== undefined) context[key] = value;

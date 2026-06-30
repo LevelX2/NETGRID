@@ -185,6 +185,8 @@ export function createGameCardImplementationRuntimeDeps(
     rezInstalledIceWithLifecycleCounters:
       host.callbacks.rezInstalledIceWithLifecycleCounters,
     replaceFortCardsFromHq: host.callbacks.replaceFortCardsFromHq,
+    doubleChosenIceStrengthUntilEndOfTurn:
+      host.callbacks.doubleChosenIceStrengthUntilEndOfTurn,
     trashTopCorpRdCards: host.callbacks.trashTopCorpRdCards,
     rezCostForCard: host.callbacks.rezCostForCard,
     startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice:

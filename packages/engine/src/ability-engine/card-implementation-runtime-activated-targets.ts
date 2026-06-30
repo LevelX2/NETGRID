@@ -214,6 +214,20 @@ export function copySameFortIceSubroutineEffect(
   | undefined {
   return ability.effects.length === 1 &&
     ability.effects[0]?.kind === "copy_same_fort_ice_subroutine_for_run"
+      ? ability.effects[0]
+    : undefined;
+}
+
+export function doubleChosenIceStrengthEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<
+      CardEffectImplementation,
+      { kind: "double_chosen_ice_strength_until_end_of_turn" }
+    >
+  | undefined {
+  return ability.effects.length === 1 &&
+    ability.effects[0]?.kind === "double_chosen_ice_strength_until_end_of_turn"
     ? ability.effects[0]
     : undefined;
 }
@@ -232,6 +246,10 @@ export function ownRezzedIceTargetIds(state: GameState): CardInstanceId[] {
       );
     })
     .sort();
+}
+
+export function rezzedInstalledIceTargetIds(state: GameState): CardInstanceId[] {
+  return ownRezzedIceTargetIds(state);
 }
 
 export type SameFortSubroutineTarget = {

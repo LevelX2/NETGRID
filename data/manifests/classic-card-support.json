@@ -545,24 +545,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_019_indiscriminate-response-team",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_019_indiscriminate-response-team",
+        "scenarioRefs": [
+          "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_020_london-city-grid",
@@ -571,24 +575,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_020_london-city-grid",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_020_london-city-grid",
+        "scenarioRefs": [
+          "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_021_satellite-monitors",
@@ -597,24 +605,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_021_satellite-monitors",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_021_satellite-monitors",
+        "scenarioRefs": [
+          "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_022_self-destruct",
@@ -623,24 +635,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_022_self-destruct",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_022_self-destruct",
+        "scenarioRefs": [
+          "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_023_shock-treatment",
@@ -649,24 +665,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_023_shock-treatment",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_023_shock-treatment",
+        "scenarioRefs": [
+          "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_024_sterdroid",
@@ -675,24 +695,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_024_sterdroid",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_024_sterdroid",
+        "scenarioRefs": [
+          "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_025_strategic-planning-group",
@@ -701,24 +725,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_025_strategic-planning-group",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_025_strategic-planning-group",
+        "scenarioRefs": [
+          "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_026_street-enforcer",
@@ -727,24 +755,28 @@
         "imported": true,
         "validated": true,
         "catalog_ready": true,
-        "implemented": false,
-        "engine_supported": false,
-        "playable": false,
-        "human_playable": false,
-        "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
-        "blocked": true
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
       },
       "support": {
-        "resolverRef": null,
-        "coverage": [],
-        "aiHintRef": null,
-        "scenarioRefs": []
+        "resolverRef": "engine:onr_classic_026_street-enforcer",
+        "coverage": [
+          "ai_hint",
+          "compiled_hint",
+          "scenario"
+        ],
+        "aiHintRef": "ai-card-hints-active:onr_classic_026_street-enforcer",
+        "scenarioRefs": [
+          "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+        ]
       },
-      "blockReasons": [
-        "Classic spoiler import only: no runtime resolver, release gate, deck legality, format legality, or AI support."
-      ]
+      "blockReasons": []
     },
     {
       "cardId": "onr_classic_027_early-worm",

@@ -14,6 +14,7 @@ import type {
 import {
   activeCardImplementationModifiersForCorpRoot,
   cardDefinitionForInstance,
+  cardHasNormalizedSubtype,
   cardMatchesModifierAppliesTo,
   isPublicRezzedCorpRootModifier,
   sameServerAsSourceApplies,
@@ -41,6 +42,7 @@ function breakSubroutineCostModifierAppliesToIce(
   sourceCardInstanceId: CardInstanceId,
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
+  breakerId?: CardInstanceId,
 ): boolean {
   if (
     modifier.operation !== "increase" ||
@@ -50,6 +52,19 @@ function breakSubroutineCostModifierAppliesToIce(
     return false;
   if (!cardMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo))
     return false;
+  if (modifier.appliesToRunner) {
+    if (!breakerId) return false;
+    const breakerDefinition = cardDefinitionForInstance(state, breakerId);
+    if (breakerDefinition.type !== modifier.appliesToRunner.cardType)
+      return false;
+    if (
+      !cardHasNormalizedSubtype(
+        breakerDefinition,
+        modifier.appliesToRunner.subtype,
+      )
+    )
+      return false;
+  }
   return sameServerAsSourceApplies(
     state,
     sourceCardInstanceId,
@@ -68,6 +83,7 @@ export function quoteBreakSubroutineCostModifiers(
   state: GameState,
   iceId: CardInstanceId,
   subroutineCount = 1,
+  breakerId?: CardInstanceId,
 ): BreakSubroutineCostQuote {
   const safeSubroutineCount = Math.max(1, Math.floor(subroutineCount));
   const iceDefinition = cardDefinitionForInstance(state, iceId);
@@ -83,6 +99,7 @@ export function quoteBreakSubroutineCostModifiers(
         match.sourceCardInstanceId,
         iceId,
         iceDefinition,
+        breakerId,
       )
     )
       continue;

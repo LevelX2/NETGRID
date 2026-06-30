@@ -133,6 +133,22 @@ export type CardCorpUtilityImplementation = (
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "run_start_tax_runner_tags";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corp_start_turn_tag_roll_per_runner_run_last_turn";
+      dieFaces: 6;
+      tagOn: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corp_draw_extra_then_bottom_one";
+      extraDraw: 1;
+      bottom: "one_drawn_card";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
       kind: "recurring_trace_credit_pool";
       amount: 1;
       counterType: Extract<CounterType, "bit">;
@@ -429,6 +445,19 @@ export type CardAccessEffectStepImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
+      kind: "trash_installed_runner_hardware_and_programs";
+      hardwareAmount: "all";
+      programAmount: number;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "trash_other_corp_installed_cards_in_source_server_and_damage_runner";
+      include: "root_and_ice";
+      damageType: Extract<DamageType, "net">;
+      amountPerTrashed: 1;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
       kind: "reduce_current_access_queue";
       target: "remaining_stored_cards_in_this_fort";
       amount: 1;
@@ -478,6 +507,12 @@ export type CardSuccessfulRunFollowupImplementation =
       source: "installed_hidden_runner_resource";
       cost: { kind: "reveal_and_tap_source" };
       effect: { kind: "trash_remote_fort"; include: "root_and_ice" };
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "corp_optional_shuffle_runner_grip_into_stack_then_draw_same_count";
+      timing: "after_successful_run";
+      cost: "none";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
@@ -1020,6 +1055,7 @@ export type OnPlayCardAbilityImplementation = {
 
 export type CardConditionImplementation =
   | { kind: "runner_is_tagged" }
+  | { kind: "runner_tags_at_least"; amount: number }
   | { kind: "source_has_hosted_credits" }
   | { kind: "source_has_advancement_counters"; minimum: number }
   | { kind: "runner_attempted_run_last_turn"; minimumRuns: number }
@@ -1301,7 +1337,8 @@ export type CardEffectImplementation =
   | CopySameFortIceSubroutineForRunEffectImplementation
   | TrashOwnRezzedIceForCreditsEffectImplementation
   | FreeRezInstalledIceWithCountersEffectImplementation
-  | ReplaceFortCardsFromHqEffectImplementation;
+  | ReplaceFortCardsFromHqEffectImplementation
+  | DoubleChosenIceStrengthUntilEndOfTurnEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
@@ -1507,6 +1544,13 @@ export type ReplaceFortCardsFromHqEffectImplementation = {
   include: "root_and_ice";
   installCost: "free";
   visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type DoubleChosenIceStrengthUntilEndOfTurnEffectImplementation = {
+  kind: "double_chosen_ice_strength_until_end_of_turn";
+  target: "chosen_installed_ice";
+  maxStrength: number;
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type DrawCardsEffectImplementation = {
@@ -2086,6 +2130,10 @@ export type CardBreakSubroutineCostModifierImplementation = {
   visibility: EventVisibilityClass;
   appliesTo: {
     cardType: Extract<CardType, "ice">;
+  };
+  appliesToRunner?: {
+    cardType: Extract<CardType, "program">;
+    subtype: string;
   };
   sameServerAsSource: true;
 };

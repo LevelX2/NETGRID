@@ -325,6 +325,15 @@ export function resolveActivatedCardImplementationAbility(
           match.cardId,
           match.definition.id,
         ),
+      doubleChosenIceStrengthUntilEndOfTurn: (targetIceId, maxStrength) =>
+        deps.doubleChosenIceStrengthUntilEndOfTurn(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          targetIceId,
+          maxStrength,
+        ),
     },
     match.ability.effects,
   );

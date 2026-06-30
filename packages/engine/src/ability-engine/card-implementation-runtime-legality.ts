@@ -154,6 +154,8 @@ export function canResolveActivatedCardImplementationAbility(
       return Boolean(state.run);
     if (effect.kind === "copy_same_fort_ice_subroutine_for_run")
       return sameFortSubroutineTargets(deps, state, sourceCardId).length > 0;
+    if (effect.kind === "double_chosen_ice_strength_until_end_of_turn")
+      return ownRezzedIceTargetIds(state).length > 0;
     if (effect.kind === "gain_credits_for_runner_trash_history")
       return (
         state.runnerTurnFlags?.trashedAdvertisementThisTurn === true ||

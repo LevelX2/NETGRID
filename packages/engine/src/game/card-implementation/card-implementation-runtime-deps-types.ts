@@ -123,6 +123,7 @@ export type GameCardImplementationRuntimeDepsHost = {
     passCurrentEncounteredIce?: CardImplementationRuntimeDependencies["passCurrentEncounteredIce"];
     rezInstalledIceWithLifecycleCounters: CardImplementationRuntimeDependencies["rezInstalledIceWithLifecycleCounters"];
     replaceFortCardsFromHq: CardImplementationRuntimeDependencies["replaceFortCardsFromHq"];
+    doubleChosenIceStrengthUntilEndOfTurn: CardImplementationRuntimeDependencies["doubleChosenIceStrengthUntilEndOfTurn"];
     trashTopCorpRdCards: CardImplementationRuntimeDependencies["trashTopCorpRdCards"];
     rezCostForCard: CardImplementationRuntimeDependencies["rezCostForCard"];
     startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice: CardImplementationRuntimeDependencies["startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice"];

@@ -303,6 +303,7 @@ function makeHost(legalAction: LegalAction) {
     },
     trash: {
       trashRunnerInstalledCardToHeap: (cardId) => calls.trashed.push(cardId),
+      trashCorpInstalledCardToArchives: (cardId) => calls.trashed.push(cardId),
       openRunnerInstalledTrashPreventionWindow: () => false,
     },
   };

@@ -166,6 +166,14 @@ export type CardImplementationRuntimeExtendedDependencies = {
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinition["id"],
   ) => CardEffectHiddenInfoResult;
+  doubleChosenIceStrengthUntilEndOfTurn: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    targetIceId: CardInstanceId,
+    maxStrength: number,
+  ) => CardEffectHiddenInfoResult;
   trashTopCorpRdCards: (
     state: GameState,
     legalAction: LegalAction,

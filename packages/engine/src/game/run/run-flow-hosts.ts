@@ -372,6 +372,7 @@ export type RunFlowHost = {
       state: GameState,
       baseCost: number,
       subroutineCount?: number,
+      breakerId?: CardInstanceId,
     ) => ReturnType<RunnerEncounterActionHost["costs"]["breakSubroutineCostBreakdown"]>;
     abilityMetadata: RunnerEncounterActionHost["actions"]["abilityMetadata"];
     revealCorpRdTop: (state: GameState, legalAction: LegalAction) => void;
@@ -392,6 +393,15 @@ export type RunFlowHost = {
       legalAction?: LegalAction,
     ) => void;
     drawCorpCards: (state: GameState, count: number) => void;
+    drawRunnerCards: (
+      state: GameState,
+      count: number,
+    ) => {
+      drawnCount: number;
+      drawTaxSourceCount: number;
+      drawTaxCreditsPaid: number;
+      drawTaxTagsAdded: number;
+    };
     awardRunnerEventAgendaPoint?: (
       state: GameState,
       legalAction: LegalAction,
@@ -629,11 +639,12 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         abilityMetadata: host.effects.abilityMetadata,
       },
       costs: {
-        breakSubroutineCostBreakdown: (baseCost, subroutineCount) =>
+        breakSubroutineCostBreakdown: (baseCost, subroutineCount, breakerId) =>
           host.effects.breakSubroutineCostBreakdown(
             state,
             baseCost,
             subroutineCount,
+            breakerId,
           ),
       },
       callbacks: {
@@ -879,6 +890,25 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             counterType as CounterType,
             amount,
           ),
+      },
+      runnerCards: {
+        shuffleGripIntoStack: (purpose) => {
+          const gripIds = state.runner.grip.slice();
+          if (gripIds.length === 0) return 0;
+          state.runner.grip = [];
+          const stackIds = [...state.runner.stack, ...gripIds];
+          state.runner.stack = host.rng.shuffleStateIds(state, stackIds, purpose);
+          for (const cardId of gripIds) {
+            state.cardInstances[cardId] = {
+              ...host.cards.cardInstanceFor(state, cardId),
+              faceup: false,
+              rezzed: false,
+              zone: { side: "runner", zone: "stack" },
+            };
+          }
+          return gripIds.length;
+        },
+        drawCards: (amount) => host.callbacks.drawRunnerCards(state, amount),
       },
       runner: {
         ensureTurnFlags: () => host.turn.ensureRunnerTurnFlags(state),

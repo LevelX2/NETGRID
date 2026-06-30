@@ -775,6 +775,7 @@ export function createCardStrengthCostRuntimeServices(
     state: GameState,
     baseCost: number,
     subroutineCount = 1,
+    breakerId?: CardInstanceId,
   ): BreakSubroutineCostBreakdown {
     const run = mustRun(state);
     const encounteredIceId = run.encounteredIceId;
@@ -787,6 +788,7 @@ export function createCardStrengthCostRuntimeServices(
       state,
       encounteredIceId,
       subroutineCount,
+      breakerId,
     );
     const cardImplementationAdditionalCost =
       cardImplementationQuote.totalAdditionalCost;

@@ -962,6 +962,7 @@ export function createCardRuntimeDepsHosts(
       state,
       ability.cost.credits,
       subroutineIndexes.length,
+      breakerId,
     ).totalCost;
     if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
       throw new Error("Multi-Break-Kosten sind nicht mehr gueltig.");
@@ -1056,6 +1057,7 @@ export function createCardRuntimeDepsHosts(
       state,
       ability.cost.credits,
       1,
+      breakerId,
     ).totalCost;
     if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
       throw new Error("Break-Subroutine-Kosten sind nicht mehr gueltig.");
@@ -1252,8 +1254,19 @@ export function createCardRuntimeDepsHosts(
           RUN_TAX_UPGRADE_SOURCES.has(definitionId) &&
           !cardImplementationForDefinitionId(definitionId),
       );
+    let amount = sourceDefinitionIds.length;
+    for (const cardId of server.root.slice().sort()) {
+      const instance = mustInstance(state.cardInstances, cardId);
+      if (!instance.rezzed) continue;
+      if (!hasCorpUtilityKind(state, cardId, "run_start_tax_runner_tags"))
+        continue;
+      const tagTax = Math.max(0, Math.floor(state.runner.tags));
+      if (tagTax <= 0) continue;
+      amount += tagTax;
+      sourceDefinitionIds.push(definitionFor(state, cardId).id);
+    }
     return {
-      amount: sourceDefinitionIds.length,
+      amount,
       sourceDefinitionIds,
     };
   }

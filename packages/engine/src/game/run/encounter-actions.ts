@@ -95,6 +95,7 @@ export type RunnerEncounterActionHost = {
     breakSubroutineCostBreakdown: (
       baseCost: number,
       subroutineCount?: number,
+      breakerId?: CardInstanceId,
     ) => BreakSubroutineCostBreakdown;
   };
   callbacks: {
@@ -276,6 +277,7 @@ export function buildRunnerEncounterActions(
       const cost = host.costs.breakSubroutineCostBreakdown(
         ability.cost.credits,
         1,
+        breakerId,
       );
       return (
         host.payment.availableRunnerRunCredits(breakerId) >= cost.totalCost
@@ -324,6 +326,7 @@ export function buildRunnerEncounterActions(
         const singleBreakCost = host.costs.breakSubroutineCostBreakdown(
           breakAbility.cost.credits,
           1,
+          breakerId,
         );
         if (
           host.payment.availableRunnerRunCredits(breakerId) <
@@ -651,6 +654,7 @@ function multiBreakSubroutineActions(
     const breakCost = host.costs.breakSubroutineCostBreakdown(
       breakAbility.cost.credits,
       eligibleIndexes.length,
+      breakerId,
     );
     if (host.payment.availableRunnerRunCredits(breakerId) < breakCost.totalCost)
       return [];
@@ -699,6 +703,7 @@ function multiBreakSubroutineActions(
       const breakCost = host.costs.breakSubroutineCostBreakdown(
         breakAbility.cost.credits,
         subroutineIndexes.length,
+        breakerId,
       );
       if (
         host.payment.availableRunnerRunCredits(breakerId) < breakCost.totalCost

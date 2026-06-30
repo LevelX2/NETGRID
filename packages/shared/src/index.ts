@@ -1403,6 +1403,14 @@ export type GameState = {
   };
   run?: RunState;
   trace?: TraceState;
+  temporaryIceStrengthModifiersUntilEndOfTurn?: Array<{
+    sourceCardInstanceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    targetIceId: CardInstanceId;
+    amount: number;
+    turnSerial: number;
+    expires: "turn_end";
+  }>;
   secretSpendComparison?: {
     source: "secret_spend_compare";
     runId: string;

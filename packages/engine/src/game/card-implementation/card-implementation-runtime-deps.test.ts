@@ -238,6 +238,9 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       trashCorpInstalledCardsInSourceServer: () => ({
         publicPayload: { trashed: true },
       }),
+      doubleChosenIceStrengthUntilEndOfTurn: () => ({
+        publicPayload: { iceStrengthAfter: 1 },
+      }),
       awardRunnerEventAgendaPoint: (_state, legalAction, id) => {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -373,6 +376,7 @@ describe("game card implementation runtime deps root", () => {
         "startMoveAdvancementCounters",
         "rezInstalledIceWithLifecycleCounters",
         "replaceFortCardsFromHq",
+        "doubleChosenIceStrengthUntilEndOfTurn",
         "trashTopCorpRdCards",
         "rezCostForCard",
         "startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice",

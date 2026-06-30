@@ -28507,6 +28507,198 @@
       }
     },
     {
+      "cardId": "onr_classic_019_indiscriminate-response-team",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": ["asset", "successful_run_punishment", "grip_disruption", "stack_shuffle", "hidden_zone"],
+      "planRoles": ["punish_successful_runs", "protect_centrals"],
+      "requiredMechanics": ["successful_run_trigger", "shuffle_grip_into_stack", "draw_cards"],
+      "valueHints": {
+        "disruption": 3,
+        "defense": 2
+      },
+      "riskTags": ["hidden_zone", "successful_run"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_020_london-city-grid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": ["upgrade", "region", "run_tax", "noisy_breaker_tax"],
+      "planRoles": ["tax_remote_runs", "protect_scoring_server"],
+      "requiredMechanics": ["region_upgrade", "break_subroutine_cost_modifier", "subtype_noisy"],
+      "valueHints": {
+        "defense": 2,
+        "tax": 2
+      },
+      "riskTags": ["run_cost_modifier", "region"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_021_satellite-monitors",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": ["asset", "start_turn", "tag_punishment", "deterministic_random"],
+      "planRoles": ["punish_repeated_runs"],
+      "requiredMechanics": ["corp_start_turn", "random_die_resolution", "add_tags", "run_attempt_count"],
+      "valueHints": {
+        "tagPressure": 2,
+        "disruption": 2
+      },
+      "riskTags": ["tag", "random_effect"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_022_self-destruct",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": ["upgrade", "access_ambush", "corp_installed_trash", "net_damage"],
+      "planRoles": ["defend_subsidiary_fort"],
+      "requiredMechanics": ["access_effect", "trash_installed_corp_cards", "net_damage", "tap_source"],
+      "valueHints": {
+        "ambush": 3,
+        "damage": 2
+      },
+      "riskTags": ["hidden_zone", "net_damage", "subsidiary_only"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_023_shock-treatment",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": ["upgrade", "access_ambush", "tag_punishment", "rig_trash"],
+      "planRoles": ["punish_tagged_runner"],
+      "requiredMechanics": ["access_effect", "runner_tags_at_least", "trash_hardware", "trash_programs"],
+      "valueHints": {
+        "ambush": 3,
+        "disruption": 3
+      },
+      "riskTags": ["hidden_zone", "tag_threshold", "rig_trash"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_024_sterdroid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": ["upgrade", "ice_strength", "activated_ability", "run_defense"],
+      "planRoles": ["boost_important_ice"],
+      "requiredMechanics": ["activated_ability", "tap_source", "target_rezzed_ice", "temporary_ice_strength"],
+      "valueHints": {
+        "defense": 3,
+        "utility": 2
+      },
+      "riskTags": ["targeted_ice", "temporary_modifier"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_025_strategic-planning-group",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": ["asset", "unique", "draw_filter", "rd_bottom"],
+      "planRoles": ["improve_corp_draw_quality"],
+      "requiredMechanics": ["corp_draw_replacement", "extra_draw", "bottom_rd", "unique"],
+      "valueHints": {
+        "cardVelocity": 3,
+        "utility": 3
+      },
+      "riskTags": ["hidden_zone", "draw_replacement", "unique"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_026_street-enforcer",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": ["upgrade", "run_tax", "tag_scaling_tax", "sysop"],
+      "planRoles": ["tax_tagged_runner", "protect_scoring_server"],
+      "requiredMechanics": ["run_start_tax", "runner_tags", "same_fort"],
+      "valueHints": {
+        "tax": 3,
+        "defense": 2
+      },
+      "riskTags": ["run_cost_modifier", "tag_synergy"],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-08-corp-assets-upgrades-smoke.json#classic_08_corp_assets_upgrades_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
       "cardId": "onr_classic_037_finders-keepers",
       "side": "runner",
       "cardType": "event",

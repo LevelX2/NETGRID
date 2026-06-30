@@ -1350,8 +1350,49 @@ function endTurn(
     if (state.winner) return;
     ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   }
+  clearTemporaryIceStrengthModifiersUntilEndOfTurn(state, legalAction);
   delete state.cancelledDamagePreventionSourceIdsUntilEndOfTurn;
   startDiscardPhase(state, side, legalAction);
+}
+
+function clearTemporaryIceStrengthModifiersUntilEndOfTurn(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const modifiers = state.temporaryIceStrengthModifiersUntilEndOfTurn ?? [];
+  if (modifiers.length === 0) return;
+  const currentSerial = currentTurnSerial(state);
+  const remaining = [];
+  let removedAmount = 0;
+  const affectedDefinitionIds: CardDefinitionId[] = [];
+  for (const modifier of modifiers) {
+    if (modifier.turnSerial > currentSerial) {
+      remaining.push(modifier);
+      continue;
+    }
+    const instance = state.cardInstances[modifier.targetIceId];
+    if (instance) {
+      state.cardInstances[modifier.targetIceId] = {
+        ...instance,
+        strengthModifier: Math.max(
+          0,
+          Math.floor(instance.strengthModifier ?? 0) - modifier.amount,
+        ),
+      };
+      affectedDefinitionIds.push(definitionFor(state, modifier.targetIceId).id);
+    }
+    removedAmount += modifier.amount;
+  }
+  if (remaining.length > 0)
+    state.temporaryIceStrengthModifiersUntilEndOfTurn = remaining;
+  else delete state.temporaryIceStrengthModifiersUntilEndOfTurn;
+  if (removedAmount <= 0) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    temporaryIceStrengthRemoved: removedAmount,
+    temporaryIceStrengthTargetDefinitionIds:
+      affectedDefinitionIds.sort().join(","),
+  };
 }
 
 function resolveTemporaryProgramInstallReturns(
@@ -2397,6 +2438,44 @@ function applyCorpStartOfTurnEffects(
       );
       if (cardCounter(state, cardId, "bit") < capacity)
         setCardCounter(state, cardId, "bit", capacity);
+    }
+    if (
+      recurringTracePool?.kind ===
+      "corp_start_turn_tag_roll_per_runner_run_last_turn"
+    ) {
+      const runCount = Math.max(
+        0,
+        Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0),
+      );
+      let tagsAdded = 0;
+      const dieRolls: number[] = [];
+      for (let index = 0; index < runCount; index += 1) {
+        const randomPurpose = `classic.satellite_monitors.corp_start.${state.stateVersion}.${cardId}.${index}`;
+        const dieRoll = rollDeterministicDie(state, randomPurpose);
+        dieRolls.push(dieRoll);
+        if (dieRoll === recurringTracePool.tagOn) {
+          state.runner.tags += 1;
+          tagsAdded += 1;
+        }
+      }
+      if (runCount > 0) {
+        effects?.push({
+          effectId: `corp.start.classic.satellite_monitors.${cardId}`,
+          kind: tagsAdded > 0 ? "add_tags" : "counter_change",
+          visibility: recurringTracePool.visibility,
+          side: "runner",
+          amount: tagsAdded,
+          reason: "start_of_turn",
+          sourceDefinitionId: definitionId,
+          sourceTitle: publicCardTitle(definitionId),
+          runAttemptsLastTurn: runCount,
+          dieSize: recurringTracePool.dieFaces,
+          dieRolls: dieRolls.join(","),
+          tagsAdded,
+          runnerTagsAfter: state.runner.tags,
+          randomCounterAfter: state.randomCounter,
+        } as ResolvedGameEffect);
+      }
     }
     if (isCorpInstalledEconomyCreditSource(state, cardId)) {
       if (cardCounter(state, cardId, "recurring_credit") > 0) {

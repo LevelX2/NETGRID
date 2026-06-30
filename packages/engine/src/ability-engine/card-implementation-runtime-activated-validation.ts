@@ -12,8 +12,10 @@ import {
 } from "./card-implementation-runtime-activated-costs";
 import {
   copySameFortIceSubroutineEffect,
+  doubleChosenIceStrengthEffect,
   exposeInstalledCardEffect,
   ownRezzedIceTargetIds,
+  rezzedInstalledIceTargetIds,
   sameFortSubroutineTargetForLegalAction,
   trashOwnRezzedIceForCreditsEffect,
 } from "./card-implementation-runtime-activated-targets";
@@ -78,6 +80,17 @@ export function validateActivatedCardImplementationAbility(
   },
 ): void {
   const { cardId, ability } = match;
+  const validateChosenIceStrengthTarget = (): void => {
+    const doubleIceStrengthEffect = doubleChosenIceStrengthEffect(ability);
+    if (!doubleIceStrengthEffect) return;
+    const targetCardId = String(legalAction.payload?.targetCardId ?? "");
+    if (
+      !rezzedInstalledIceTargetIds(state).includes(
+        targetCardId as CardInstanceId,
+      )
+    )
+      throw new Error("Das ICE-Staerkeziel ist nicht mehr gueltig.");
+  };
   if (
     deps.mustInstance(state.cardInstances, cardId).controller !==
     legalAction.side
@@ -155,6 +168,7 @@ export function validateActivatedCardImplementationAbility(
       ability,
       cardId,
     );
+    validateChosenIceStrengthTarget();
     return;
   }
   if (ability.timing === "runner_cost_penalty_support") {
@@ -183,6 +197,7 @@ export function validateActivatedCardImplementationAbility(
       ability,
       cardId,
     );
+    validateChosenIceStrengthTarget();
     return;
   }
   if (ability.timing === "access_start") {
@@ -250,6 +265,7 @@ export function validateActivatedCardImplementationAbility(
       ability,
       cardId,
     );
+    validateChosenIceStrengthTarget();
     return;
   }
   if (ability.timing === "corp_trace_window") {
@@ -303,6 +319,7 @@ export function validateActivatedCardImplementationAbility(
     ability,
     cardId,
   );
+  validateChosenIceStrengthTarget();
   const trashRezzedIceEffect = trashOwnRezzedIceForCreditsEffect(ability);
   if (trashRezzedIceEffect) {
     const targetCardId = String(legalAction.payload?.targetCardId ?? "");

@@ -190,6 +190,10 @@ export type CardEffectExecutionContext = {
       | "rent_to_own_start_corp_turn";
   }) => CardEffectHiddenInfoResult;
   replaceFortCardsFromHq?: () => CardEffectHiddenInfoResult;
+  doubleChosenIceStrengthUntilEndOfTurn?: (
+    targetIceId: CardInstanceId,
+    maxStrength: number,
+  ) => CardEffectHiddenInfoResult;
 };
 
 export type CardEffectExecutionResult = {
