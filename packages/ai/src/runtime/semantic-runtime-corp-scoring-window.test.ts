@@ -106,9 +106,7 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       runnerCanContestBeforeScore: false,
       recommendedNextStep: "build_remote_ice",
     });
-    expect(assessment?.evidence).toContain(
-      "delayed_score_exposure_risk:true",
-    );
+    expect(assessment?.evidence).toContain("delayed_score_exposure_risk:true");
   });
 
   it("allows an unprotected remote install when remaining Corp clicks can close before runner exposure", () => {
@@ -344,7 +342,10 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         ownCredits: 5,
         runnerCredits: 10,
         runnerAgendaPoints: 5,
-        runnerRig: [simpleFracter("runner-fracter"), brokerResource("broker", 6)],
+        runnerRig: [
+          simpleFracter("runner-fracter"),
+          brokerResource("broker", 6),
+        ],
         hq: [agenda],
         servers: protectedCentralServers([
           remoteServer("remote_1", [
@@ -732,6 +733,44 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       corpCanRezRelevantIce: true,
       runnerCanContestNow: false,
     });
+  });
+
+  it("does not call a delayed scoreline durable when rich runner exposure only lacks visible coverage", () => {
+    const agenda = agendaCard("agenda-in-hq");
+    const action = corpAction(
+      "install-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 6,
+        runnerCredits: 10,
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            wallIce("remote-wall-1", { rezCost: 2 }),
+            wallIce("remote-wall-2", { rezCost: 2 }),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      scoreHorizon: "next_turn",
+      missingVisibleBreakerCoverage: true,
+      affordableDurableRelevantIceCount: 2,
+      recommendedNextStep: "build_remote_ice",
+    });
+    expect(assessment?.evidence).toContain("delayed_score_exposure_risk:true");
   });
 
   it("prefers funding when the Corp cannot pay the relevant remote rez", () => {
@@ -1382,7 +1421,10 @@ function simpleKiller(instanceId: string): VisibleCard {
   } as VisibleCard;
 }
 
-function brokerResource(instanceId: string, hostedCredits: number): VisibleCard {
+function brokerResource(
+  instanceId: string,
+  hostedCredits: number,
+): VisibleCard {
   return {
     instanceId,
     known: true,
@@ -1393,13 +1435,13 @@ function brokerResource(instanceId: string, hostedCredits: number): VisibleCard 
       "A: Put 3 credits from the bank on Broker. A: Take all the bits from Broker.",
     owner: "runner",
     counterDisplays: [
-        {
-          id: `${instanceId}-bits`,
-          amount: hostedCredits,
-          displayKind: "stored_credits",
-          label: "Bits",
-          ariaLabel: "Bits",
-          counterType: "bit",
+      {
+        id: `${instanceId}-bits`,
+        amount: hostedCredits,
+        displayKind: "stored_credits",
+        label: "Bits",
+        ariaLabel: "Bits",
+        counterType: "bit",
       },
     ],
   } as VisibleCard;

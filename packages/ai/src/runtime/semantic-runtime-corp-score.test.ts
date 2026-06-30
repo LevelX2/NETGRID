@@ -213,6 +213,130 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("suppresses scored-agenda economy when critical triage needs remote protection", () => {
+    const agenda = agendaCard("agenda-in-hq", 2);
+    const marineArcology = corpCard("marine-arcology", "agenda", {
+      title: "Marine Arcology",
+      definitionId: "onr_v1_206_marine-arcology",
+      rulesText: "[A], [A]: Gain 3 credits.",
+    });
+    const remoteIce = corpIce("remote-ice-in-hq", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 2,
+    });
+    const marineAbility = corpAction(
+      "marine-arcology-economy",
+      "activated_card_ability",
+      {},
+      marineArcology.instanceId,
+    );
+    marineAbility.costs = [{ clicks: 2 }];
+    const installAgenda = corpAction(
+      "install-agenda-remote-1",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      agenda.instanceId,
+    );
+    const installRemoteIce = corpAction(
+      "install-remote-ice",
+      "install_card",
+      {
+        placement: "ice",
+        serverId: "remote_1",
+      },
+      remoteIce.instanceId,
+    );
+    const input = corpInputWithHqCards(
+      6,
+      [agenda, remoteIce],
+      [marineAbility, installAgenda, installRemoteIce],
+    );
+    input.playerView.own.scoreArea = [marineArcology];
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 5,
+      credits: 9,
+    });
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-wall", { rezCost: 1, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              missingVisibleBreakerCoverage: true,
+              runnerCanReachAccessNow: true,
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealSeverity: "game_ending",
+              runnerAgendaPointsAfterSteal: 7,
+              recommendedNextStep: "build_remote_ice",
+              evidence: ["test_critical_remote_protection"],
+            })
+          : undefined,
+    };
+
+    const marineComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      marineAbility,
+      "basic_economy_draw",
+      dependencies,
+    );
+    const remoteIceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installRemoteIce,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(marineComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_activated_burst_economy",
+          value: 1890,
+        }),
+        expect.objectContaining({
+          key: "corp_board_triage_mismatch",
+          value: -3200,
+          reason: expect.stringContaining(
+            "triage_primary:protect_score_remote",
+          ),
+        }),
+      ]),
+    );
+    expect(remoteIceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining(
+            "triage_primary:protect_score_remote",
+          ),
+        }),
+      ]),
+    );
+    expect(totalScore(remoteIceComponents)).toBeGreaterThan(
+      totalScore(marineComponents),
+    );
+  });
+
   it("uses board triage so score-now beats passive economy", () => {
     const scoreAgenda = corpAction("score-agenda", "score_agenda", {
       serverId: "remote_1",

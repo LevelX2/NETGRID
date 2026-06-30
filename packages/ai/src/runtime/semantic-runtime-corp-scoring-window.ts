@@ -444,14 +444,12 @@ function scoringWindowVisibleOperationCost(card: VisibleCard): number {
 function scoringWindowVisibleCardText(card: VisibleCard): string {
   const runtimeText =
     card.definitionId !== undefined
-      ? (
-          RUNTIME_CARDS[card.definitionId] as
-            | {
-                text?: string;
-                rulesText?: string;
-              }
-            | undefined
-        )
+      ? (RUNTIME_CARDS[card.definitionId] as
+          | {
+              text?: string;
+              rulesText?: string;
+            }
+          | undefined)
       : undefined;
   const demoText =
     card.definitionId !== undefined
@@ -505,7 +503,9 @@ function scoringWindowPositiveInteger(value: string | undefined): number {
   }
 }
 
-function positiveVisibleNumber(value: number | null | undefined): number | undefined {
+function positiveVisibleNumber(
+  value: number | null | undefined,
+): number | undefined {
   return typeof value === "number" && Number.isFinite(value) && value >= 0
     ? value
     : undefined;
@@ -1010,16 +1010,23 @@ function scoringWindowDelayedScoreExposureRisk(params: {
     (params.rezBudget.affordableDurableRelevantIceCount ?? 0) < 2 ||
     !params.rezBudget.corpCanRezFullPath ||
     (params.rezBudget.dynamicProtectionWeaknessCount ?? 0) > 0;
-  if (!lightOrUnprovenRemote) return false;
   const safetyDependsOnMissingCoverage =
     params.access.missingVisibleBreakerCoverage ||
     params.exposureAccess.missingVisibleBreakerCoverage ||
     (params.exposureAccess.unmodeledIceCount > 0 &&
       params.exposureAccess.visibleRunnerIcebreakerCount === 0);
   if (!safetyDependsOnMissingCoverage) return false;
-  return (
+  const richRunnerExposure =
     params.access.visibleRunnerContestCredits >= 8 ||
-    params.exposureAccess.visibleRunnerContestCredits >= 10
+    params.exposureAccess.visibleRunnerContestCredits >= 10;
+  if (!richRunnerExposure) return false;
+  const fullRunnerExposureBeforeScore =
+    params.scoreHorizon === "next_turn" ||
+    params.scoreHorizon === "slow" ||
+    params.runnerExposureCreditActions >= 3;
+  return (
+    lightOrUnprovenRemote ||
+    (fullRunnerExposureBeforeScore && safetyDependsOnMissingCoverage)
   );
 }
 
@@ -1493,9 +1500,7 @@ function visibleRunnerStoredCreditCounterAmount(card: VisibleCard): number {
   return Math.max(counterAmount, displayAmount);
 }
 
-function visibleRunnerStoredCreditCounterKey(
-  key: string | undefined,
-): boolean {
+function visibleRunnerStoredCreditCounterKey(key: string | undefined): boolean {
   return (
     key === "bit" ||
     key === "bits" ||

@@ -135,6 +135,24 @@ export function semanticRuntimeCorpInstallRemoteScore<
       }
       return serverId === "new_remote" ? 1050 : 900;
     }
+    if (
+      !hasRoot &&
+      semanticRuntimeCorpShouldMaintainPrimaryScoreRemote(
+        input,
+        action,
+        server,
+        dependencies,
+        actionSemanticCandidate,
+      )
+    ) {
+      const sourceCard = dependencies.actionSourceCard(input, action);
+      if (
+        semanticRuntimeCorpRemoteInstallHasDynamicProtectionRisk(sourceCard)
+      ) {
+        return 350;
+      }
+      return 850;
+    }
     let score = serverId === "new_remote" ? -1600 : -900;
     if (!hasRoot) score -= Math.min(1200, emptyRemoteCount * 350);
     if (hasStabilizingAlternative) score -= 500;
@@ -662,6 +680,44 @@ export function semanticRuntimeCorpShouldBuildProtectedScoreRemote<
     semanticRuntimeCorpHasAgendaInHq(input) &&
     !semanticRuntimeCorpHasProtectedRemoteCapacity(input, dependencies)
   );
+}
+
+function semanticRuntimeCorpShouldMaintainPrimaryScoreRemote<
+  TServer extends CorpServerLike,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  server: TServer | undefined,
+  dependencies: SemanticRuntimeCorpRemoteScoreDependencies<TServer>,
+  actionSemanticCandidate?: ActionSemanticCandidate,
+): boolean {
+  if (input.side !== "corp") return false;
+  if (action.type !== "install_card" || action.payload?.placement !== "ice") {
+    return false;
+  }
+  const serverId = dependencies.actionServerId(input, action);
+  if (
+    !dependencies.isRemoteServerTarget(serverId) ||
+    serverId === "new_remote"
+  ) {
+    return false;
+  }
+  if (!server || server.root.length > 0) return false;
+  const iceCount = server.ice.length;
+  if (iceCount <= 0 || iceCount >= 3) return false;
+  if (!semanticRuntimeCorpHasAgendaInHq(input)) return false;
+  if (
+    input.playerView.own.credits <
+    semanticRuntimeCorpRemoteActionCreditCost(
+      dependencies,
+      action,
+      actionSemanticCandidate,
+    ) +
+      2
+  ) {
+    return false;
+  }
+  return true;
 }
 
 function semanticRuntimeCorpRemoteActionCreditCost<
