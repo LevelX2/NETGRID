@@ -180,6 +180,7 @@ export function continueRun(
       },
     );
     if (nonTraceResult.suspended) return;
+    if (nonTraceResult.runRedirected) return;
     if (nonTraceResult.runShouldEnd) ended = true;
     const specialWindow = resolveEncounterSpecialWindowSubroutine(
       host.encounter.specialWindowHost(),

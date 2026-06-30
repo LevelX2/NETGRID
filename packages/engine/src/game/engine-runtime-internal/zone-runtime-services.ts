@@ -59,6 +59,7 @@ import {
   type CorpTracePaymentDependencies,
   type RunnerTracePaymentDependencies,
 } from "../payment";
+import { assertCorpIceInstallAllowed } from "../install/corp-ice-install-restrictions";
 import {
   resolvePendingChoice,
   type PendingChoiceResolutionHost,
@@ -800,11 +801,16 @@ export function createZoneRuntimeServices(deps: RuntimeDeps) {
       throw new Error("Corp-ICE-Installkosten gelten nur fuer ICE.");
     const serverId = legalAction.payload?.serverId;
     if (serverId === "new_remote") {
+      assertCorpIceInstallAllowed(definition, {
+        id: "new_remote",
+        kind: "remote",
+      });
       if ((legalAction.costs[0]?.credits ?? 0) !== 0)
         throw new Error("Corp-ICE-Installkosten sind nicht mehr gueltig.");
       return undefined;
     }
     const server = mustServer(state, String(serverId));
+    assertCorpIceInstallAllowed(definition, server);
     const additionalCost = corpIceInstallAdditionalCost(state, server.id);
     const quote = quoteCorpIceInstallCost(state, cardId, server, {
       additionalCredits: additionalCost,

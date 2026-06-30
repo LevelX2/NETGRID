@@ -569,6 +569,15 @@ export type CardFortRunWindowImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
+      kind: "move_self_to_outermost_position_on_other_fort";
+      timing: "start_of_run";
+      cost: { kind: "credit"; amount: number };
+      target: "outermost_position_on_other_data_fort";
+      revealIfUnrezzed: true;
+      limit: "once_per_run_per_source";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
       kind: "can_run_fort_only_if_last_corp_turn_activity_on_fort";
       timing: "run_start_legal";
       activity: "corp_installed_or_advanced_inside_or_on_fort_during_last_turn";
@@ -605,6 +614,10 @@ export type CardInstallCapabilityImplementation =
     }
   | {
       kind: "install_only_in_hq_or_rd";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "install_not_on_archives";
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -2393,6 +2406,14 @@ export type CardPrintedSubroutineImplementation =
       onSuccess: readonly CardTraceSuccessEffectImplementation[];
       text: string;
       breakTags?: readonly string[];
+    }
+  | {
+      kind: "deflect_run";
+      target: "archives" | "any_data_fort" | "subsidiary_data_fort";
+      cost?: { kind: "credit"; amount: number };
+      autoBreakIfNoTarget?: true;
+      text: string;
+      breakTags?: readonly string[];
     };
 
 export type CardIceEncounterImplementation =
@@ -2445,6 +2466,12 @@ export type RunnerTraceCounterEffectImplementation = {
 
 export type CardSelfRezCostModifierImplementation = {
   kind: "self_rez_cost_reduction_during_run_after_noisy_icebreaker";
+  amount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type CardSelfRezAdditionalCostImplementation = {
+  kind: "agenda_point";
   amount: number;
   visibility: Extract<EventVisibilityClass, "public">;
 };

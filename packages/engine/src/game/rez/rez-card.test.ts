@@ -116,6 +116,39 @@ describe("rez card execution", () => {
     });
   });
 
+  it("spends Glacier's public agenda-point self-rez cost", () => {
+    const glacierId = "glacier" as CardInstanceId;
+    const glacierDefinition = definition("onr_classic_011_glacier", "ice", {
+      rezCost: 0,
+    });
+    const state = minimalState({
+      cardInstances: {
+        [glacierId]: instance(glacierId, glacierDefinition.id, "serverIce"),
+      },
+    });
+    state.corpBonusAgendaPoints = 1;
+    const action = rezAction(glacierId, { agendaPointCost: 1 });
+
+    rezCard(
+      testHost(state, { [glacierDefinition.id]: glacierDefinition }),
+      glacierId,
+      false,
+      action,
+    );
+
+    expect(state.corpBonusAgendaPoints).toBe(0);
+    expect(state.cardInstances[glacierId]).toMatchObject({
+      rezzed: true,
+      faceup: true,
+    });
+    expect(action.payload).toMatchObject({
+      agendaPointCost: 1,
+      agendaPointCostPaid: 1,
+      selfRezAdditionalCostKind: "agenda_point",
+      corpBonusAgendaPointsSpent: 1,
+    });
+  });
+
   it("preserves Paris trace-pool counter payloads", () => {
     const upgradeId = "paris" as CardInstanceId;
     const upgradeDefinition = definition("paris_def", "upgrade", { rezCost: 1 });

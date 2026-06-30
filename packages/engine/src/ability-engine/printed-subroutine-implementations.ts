@@ -213,6 +213,23 @@ export function printedSubroutineDefinitionForImplementation(
       ...(breakTags.length ? { breakTags } : {}),
     };
   }
+  if (subroutine.kind === "deflect_run") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    const cost =
+      subroutine.cost?.kind === "credit"
+        ? Math.max(0, Math.floor(subroutine.cost.amount))
+        : undefined;
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "deflect_run",
+      deflectorTarget: subroutine.target,
+      ...(cost !== undefined ? { deflectorCost: cost } : {}),
+      ...(subroutine.autoBreakIfNoTarget
+        ? { deflectorAutoBreakIfNoTarget: true }
+        : {}),
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
   if (subroutine.kind === "damage") {
     if (subroutine.preventable !== true)
       throw new Error("Unsupported unpreventable printed damage subroutine.");

@@ -107,6 +107,38 @@ describe("install card execution", () => {
     });
   });
 
+  it("rejects illegal Classic Corp ICE placement before spending or moving the card", () => {
+    const iceId = "dumpster" as CardInstanceId;
+    const iceDefinition = definition("onr_classic_009_dumpster", "ice");
+    const state = minimalState({
+      cardInstances: {
+        [iceId]: instance(iceId, iceDefinition.id, "corp", "hq"),
+      },
+      corpHq: [iceId],
+    });
+    state.corp.servers.push({
+      id: "archives",
+      kind: "archives",
+      label: "Archives",
+      ice: [],
+      root: [],
+    });
+    const action = installAction("corp", iceId, {
+      placement: "ice",
+      serverId: "archives",
+    });
+
+    expect(() =>
+      installCard(testHost(state, { [iceDefinition.id]: iceDefinition }), action),
+    ).toThrow("Dieses ICE darf nicht auf diesem Fort installiert werden.");
+    expect(state.corp.clicks).toBe(3);
+    expect(state.corp.hq).toEqual([iceId]);
+    expect(state.corp.archives).toEqual([]);
+    expect(state.cardInstances[iceId]).toMatchObject({
+      zone: { side: "corp", zone: "hq" },
+    });
+  });
+
   it("delegates Corp root region replacement to the host", () => {
     const regionId = "region_1" as CardInstanceId;
     const regionDefinition = definition("region_def", "upgrade", {

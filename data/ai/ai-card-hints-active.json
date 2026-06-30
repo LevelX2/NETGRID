@@ -29048,6 +29048,210 @@
         "confidence": "low",
         "needsHumanReview": true
       }
+    },
+    {
+      "cardId": "onr_classic_009_dumpster",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate",
+        "deflector",
+        "archives_redirect"
+      ],
+      "planRoles": [
+        "defend_fort",
+        "redirect_runs"
+      ],
+      "requiredMechanics": [
+        "install_restriction",
+        "deflect_run",
+        "encounter_reposition"
+      ],
+      "valueHints": {
+        "defense": 2,
+        "runControl": 3
+      },
+      "riskTags": [
+        "run_redirect",
+        "archives_only_target",
+        "install_restriction"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-06-run-redirect-ice-smoke.json#classic_06_run_redirect_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_010_entrapment",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate",
+        "deflector",
+        "paid_redirect"
+      ],
+      "planRoles": [
+        "defend_fort",
+        "redirect_runs"
+      ],
+      "requiredMechanics": [
+        "paid_subroutine_choice",
+        "deflect_run",
+        "encounter_reposition"
+      ],
+      "valueHints": {
+        "defense": 2,
+        "runControl": 3
+      },
+      "riskTags": [
+        "run_redirect",
+        "corp_credit_cost",
+        "target_fort_choice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-06-run-redirect-ice-smoke.json#classic_06_run_redirect_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_011_glacier",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "wall",
+        "end_the_run",
+        "mobile_ice"
+      ],
+      "planRoles": [
+        "defend_fort",
+        "tax_runs",
+        "redirect_runs"
+      ],
+      "requiredMechanics": [
+        "install_restriction",
+        "rez_ice",
+        "agenda_point_rez_cost",
+        "end_the_run",
+        "start_run_ice_move"
+      ],
+      "valueHints": {
+        "defense": 4,
+        "runControl": 2
+      },
+      "riskTags": [
+        "agenda_point_cost",
+        "start_run_reposition",
+        "install_restriction"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-06-run-redirect-ice-smoke.json#classic_06_run_redirect_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_014_trapdoor",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate",
+        "deflector",
+        "remote_redirect"
+      ],
+      "planRoles": [
+        "defend_fort",
+        "redirect_runs"
+      ],
+      "requiredMechanics": [
+        "install_restriction",
+        "deflect_run",
+        "encounter_reposition",
+        "auto_break_without_target"
+      ],
+      "valueHints": {
+        "defense": 2,
+        "runControl": 3
+      },
+      "riskTags": [
+        "run_redirect",
+        "subsidiary_target_only",
+        "install_restriction"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-06-run-redirect-ice-smoke.json#classic_06_run_redirect_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_classic_015_vortex",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "code_gate",
+        "deflector",
+        "paid_redirect"
+      ],
+      "planRoles": [
+        "defend_fort",
+        "redirect_runs"
+      ],
+      "requiredMechanics": [
+        "paid_subroutine_choice",
+        "deflect_run",
+        "encounter_reposition"
+      ],
+      "valueHints": {
+        "defense": 3,
+        "runControl": 3
+      },
+      "riskTags": [
+        "run_redirect",
+        "corp_credit_cost",
+        "target_fort_choice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/classic-06-run-redirect-ice-smoke.json#classic_06_run_redirect_ice_smoke"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
     }
   ],
   "taskId": "AI022-1/AI030",

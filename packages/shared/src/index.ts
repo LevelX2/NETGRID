@@ -235,6 +235,7 @@ export type SubroutineType =
   | "secret_spend_compare_end_run_unless_corp_spent_at_least_runner"
   | "reveal_corp_rd_top"
   | "reorder_corp_rd_top2"
+  | "deflect_run"
   | "rewind_run_to_rezzed_ice_by_die";
 
 export type SubroutineDefinition = {
@@ -249,6 +250,9 @@ export type SubroutineDefinition = {
   traceSuccessEffect?: TraceSuccessEffect;
   runFutureStrengthCancelPaymentAmount?: number;
   requiresSuccessfulTraceSubroutineIndex?: number;
+  deflectorTarget?: "archives" | "any_data_fort" | "subsidiary_data_fort";
+  deflectorCost?: number;
+  deflectorAutoBreakIfNoTarget?: boolean;
   breakTags?: string[];
 };
 

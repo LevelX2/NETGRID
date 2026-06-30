@@ -5,6 +5,7 @@ import type {
   CardIcebreakerBreakMatcherImplementation,
   CardLifecycleTriggeredAbilityImplementation,
   CardPrintedSubroutineImplementation,
+  CardSelfRezAdditionalCostImplementation,
   CardSelfRezCostModifierImplementation,
   CardTraceSuccessEffectImplementation,
   RestrictedHostedCreditSourceImplementation,
@@ -110,6 +111,37 @@ export function noisyIcebreakerSelfRezReduction(
       visibility: "public",
     },
   ];
+}
+
+export function agendaPointSelfRezCost(
+  amount: number,
+): readonly CardSelfRezAdditionalCostImplementation[] {
+  return [
+    {
+      kind: "agenda_point",
+      amount,
+      visibility: "public",
+    },
+  ];
+}
+
+export function deflectRunSubroutine(input: {
+  target: "archives" | "any_data_fort" | "subsidiary_data_fort";
+  cost?: number;
+  autoBreakIfNoTarget?: true;
+  text: string;
+}): CardPrintedSubroutineImplementation {
+  return {
+    kind: "deflect_run",
+    target: input.target,
+    ...(input.cost !== undefined
+      ? { cost: { kind: "credit", amount: input.cost } }
+      : {}),
+    ...(input.autoBreakIfNoTarget
+      ? { autoBreakIfNoTarget: input.autoBreakIfNoTarget }
+      : {}),
+    text: input.text,
+  };
 }
 
 export function traceTagSuccess(

@@ -64,7 +64,7 @@ Diese Datei hält lokale Regelentscheidungen für die vollständige Classic-Impl
 | CLASSIC-03 | completed | Corporate Shuffle, Reclamation Project, Finders Keepers, Meat Upgrade, Networking und Panzer Run sind implementiert, getestet und AI-/Scenario-referenziert. |
 | CLASSIC-04 | completed | Early Worm, Matador, MS-todon, Psychic Friend, Rent-I-Con, Schematics Search Engine und Superglue sind implementiert, getestet und AI-/Scenario-referenziert. |
 | CLASSIC-05 | completed | Baskerville, Bolter Swarm, Brain Drain, Deadeye, Imperial Guard und Puzzle sind implementiert, getestet und AI-/Scenario-referenziert. |
-| CLASSIC-06 | pending | Deflector/Run-Redirect/Glacier. |
+| CLASSIC-06 | completed | Dumpster, Entrapment, Glacier, Trapdoor und Vortex sind implementiert, getestet und AI-/Scenario-referenziert. |
 | CLASSIC-07 | pending | Classic Agendas. |
 | CLASSIC-08 | pending | Corp Assets/Upgrades/Ambush. |
 | CLASSIC-09 | pending | Runner Events/Resources/Hardware und Badtimes. |

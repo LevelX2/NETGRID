@@ -172,6 +172,10 @@ function definitionsFor(state: GameState): Record<string, CardDefinition> {
       "onr_proteus_033_mobile-barricade",
       { type: "ice", title: "Mobile Barricade" },
     ),
+    "onr_classic_011_glacier": definition("onr_classic_011_glacier", {
+      type: "ice",
+      title: "Glacier",
+    }),
   };
   for (const card of Object.values(state.cardInstances)) {
     definitions[card.definitionId] ??= definition(card.definitionId);
@@ -402,6 +406,82 @@ describe("fort pass window", () => {
       publicRevealDefinitionId: "onr_proteus_033_mobile-barricade",
       revealedSource: true,
       newApproachIceRevealed: false,
+      corpCreditsAfter: 7,
+    });
+  });
+
+  it("moves unrezzed Glacier to the outermost position of another fort at run start", () => {
+    const state = makeState({
+      timingPoint: "run.approach_ice",
+      phase: "approach_ice",
+      positionKind: "ice",
+      positionIceIndex: 1,
+    });
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: ["glacier" as CardInstanceId],
+      root: [],
+    });
+    state.cardInstances.glacier = instance("glacier", "onr_classic_011_glacier", {
+      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      faceup: false,
+      rezzed: false,
+    });
+    const host = hostFor(state);
+    const server = host.servers.mustServer("rd");
+    const run = state.run!;
+
+    const glacierAction = buildStartRunIceRepositionActions(host, run, server)
+      .find(
+        (candidate) =>
+          candidate.payload?.fortRunWindowAbility ===
+            "move_self_to_outermost_position_on_other_fort" &&
+          candidate.payload?.targetServerId === "rd",
+      );
+
+    expect(glacierAction?.payload).toMatchObject({
+      cardId: "glacier",
+      sourceDefinitionId: "onr_classic_011_glacier",
+      sourceServerId: "remote_1",
+      targetServerId: "rd",
+      sourceIceIndex: 0,
+      targetIceIndex: 2,
+      creditCost: 1,
+    });
+
+    const result = resolveStartRunIceRepositionWindow(host, glacierAction!);
+
+    expect(result).toMatchObject({
+      handled: true,
+      iceOrderChanged: true,
+      selectedIceId: "glacier",
+      sourceDefinitionId: "onr_classic_011_glacier",
+      serverId: "rd",
+    });
+    expect(host.servers.mustServer("remote_1").ice).toEqual([]);
+    expect(host.servers.mustServer("rd").ice).toEqual([
+      "ice_inner",
+      "ice_outer",
+      "glacier",
+    ]);
+    expect(state.cardInstances.glacier?.zone).toEqual({
+      side: "corp",
+      zone: "serverIce",
+      serverId: "rd",
+    });
+    expect(state.cardInstances.glacier?.faceup).toBe(true);
+    expect(state.run?.position).toEqual({
+      kind: "ice",
+      serverId: "rd",
+      iceIndex: 2,
+    });
+    expect(state.run?.approachedIceId).toBe("glacier");
+    expect(state.corp.credits).toBe(7);
+    expect(glacierAction?.payload).toMatchObject({
+      publicRevealDefinitionId: "onr_classic_011_glacier",
+      revealedSource: true,
       corpCreditsAfter: 7,
     });
   });

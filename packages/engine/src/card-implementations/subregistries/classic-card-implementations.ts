@@ -1,42 +1,12 @@
 import type { CardImplementationDefinition } from "../types";
-import { classicBaskervilleImplementation } from "../classic/corp/ice/baskerville";
-import { classicBolterSwarmImplementation } from "../classic/corp/ice/bolter-swarm";
-import { classicBrainDrainImplementation } from "../classic/corp/ice/brain-drain";
-import { classicDeadeyeImplementation } from "../classic/corp/ice/deadeye";
-import { classicImperialGuardImplementation } from "../classic/corp/ice/imperial-guard";
-import { classicPuzzleImplementation } from "../classic/corp/ice/puzzle";
-import { classicCorporateShuffleImplementation } from "../classic/corp/operations/corporate-shuffle";
-import { classicReclamationProjectImplementation } from "../classic/corp/operations/reclamation-project";
-import { classicFindersKeepersImplementation } from "../classic/runner/events/finders-keepers";
-import { classicMeatUpgradeImplementation } from "../classic/runner/events/meat-upgrade";
-import { classicNetworkingImplementation } from "../classic/runner/events/networking";
-import { classicPanzerRunImplementation } from "../classic/runner/events/panzer-run";
-import { classicEarlyWormImplementation } from "../classic/runner/programs/early-worm";
-import { classicMatadorImplementation } from "../classic/runner/programs/matador";
-import { classicMsTodonImplementation } from "../classic/runner/programs/ms-todon";
-import { classicPsychicFriendImplementation } from "../classic/runner/programs/psychic-friend";
-import { classicRentIConImplementation } from "../classic/runner/programs/rent-i-con";
-import { classicSchematicsSearchEngineImplementation } from "../classic/runner/programs/schematics-search-engine";
-import { classicSuperglueImplementation } from "../classic/runner/programs/superglue";
+import { CLASSIC_CORP_ICE_IMPLEMENTATIONS } from "./classic-corp-ice-implementations";
+import { CLASSIC_CORP_OPERATION_IMPLEMENTATIONS } from "./classic-corp-operation-implementations";
+import { CLASSIC_RUNNER_EVENT_IMPLEMENTATIONS } from "./classic-runner-event-implementations";
+import { CLASSIC_RUNNER_PROGRAM_IMPLEMENTATIONS } from "./classic-runner-program-implementations";
 
 export const CLASSIC_CARD_IMPLEMENTATIONS = [
-  classicBaskervilleImplementation,
-  classicBolterSwarmImplementation,
-  classicBrainDrainImplementation,
-  classicDeadeyeImplementation,
-  classicImperialGuardImplementation,
-  classicPuzzleImplementation,
-  classicCorporateShuffleImplementation,
-  classicReclamationProjectImplementation,
-  classicFindersKeepersImplementation,
-  classicMeatUpgradeImplementation,
-  classicNetworkingImplementation,
-  classicPanzerRunImplementation,
-  classicEarlyWormImplementation,
-  classicMatadorImplementation,
-  classicMsTodonImplementation,
-  classicPsychicFriendImplementation,
-  classicRentIConImplementation,
-  classicSchematicsSearchEngineImplementation,
-  classicSuperglueImplementation,
+  ...CLASSIC_CORP_ICE_IMPLEMENTATIONS,
+  ...CLASSIC_CORP_OPERATION_IMPLEMENTATIONS,
+  ...CLASSIC_RUNNER_EVENT_IMPLEMENTATIONS,
+  ...CLASSIC_RUNNER_PROGRAM_IMPLEMENTATIONS,
 ] as const satisfies readonly CardImplementationDefinition[];

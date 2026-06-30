@@ -26,6 +26,7 @@ import type {
   CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
   CardScoredAgendaImplementation,
+  CardSelfRezAdditionalCostImplementation,
   CardSelfRezCostModifierImplementation,
   CardSelfStealCostImplementation,
   CardSuccessfulRunFollowupImplementation,
@@ -47,6 +48,7 @@ export type CardImplementationDefinition = {
   };
   printedSubroutines?: readonly CardPrintedSubroutineImplementation[];
   selfRezCostModifiers?: readonly CardSelfRezCostModifierImplementation[];
+  selfRezAdditionalCosts?: readonly CardSelfRezAdditionalCostImplementation[];
   iceEncounter?: CardIceEncounterImplementation;
   icebreakerAbilities?: readonly CardIcebreakerAbilityImplementation[];
   hostedProgramCapacity?: HostedProgramCapacityImplementation;

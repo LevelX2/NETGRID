@@ -19,6 +19,7 @@ import type {
   Side,
 } from "./runtime-shared";
 import type { ChoiceHiddenZoneRuntimeLinks } from "./choice-hidden-zone-runtime-links";
+import { resolveClassicDeflectorChoice as resolveClassicDeflectorChoiceInRunModule } from "../run/encounter-printed-nontrace-effects";
 
 export function createPendingChoiceRuntimeHosts(
   deps: RuntimeDeps,
@@ -68,6 +69,7 @@ export function createPendingChoiceRuntimeHosts(
     definitionFor,
     discardRandomCorpHqCards,
     drawCorpCards,
+    encounterPrintedNonTraceHostForState,
     encounterResolutionHostForState,
     encounterSpecialWindowHostForState,
     ensureRunnerTurnFlags,
@@ -619,6 +621,18 @@ export function createPendingChoiceRuntimeHosts(
     throw new Error("Es ist kein Start-of-run-Fort-Utility-Fenster offen.");
   }
 
+  function resolveClassicDeflectorChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    resolveClassicDeflectorChoiceInRunModule(
+      encounterPrintedNonTraceHostForState(state, legalAction),
+      legalAction,
+      playerAction,
+    );
+  }
+
   function pendingChoiceResolutionHost(
     state: GameState,
   ): PendingChoiceResolutionHost {
@@ -706,6 +720,7 @@ export function createPendingChoiceRuntimeHosts(
         successfulRunInterventionHost,
         resolvePostMeatDamageHiddenResourceChoice,
         resolveStartOfRunFortUtilityChoice,
+        resolveClassicDeflectorChoice,
       },
       access: {
         resolveSuccessfulRunCreditLossSpendChoice,

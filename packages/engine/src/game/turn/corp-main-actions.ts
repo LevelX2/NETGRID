@@ -1,4 +1,5 @@
 import type { GameState, LegalAction } from "@netgrid/shared";
+import { canInstallCorpIceInServer } from "../install/corp-ice-install-restrictions";
 
 type HostFn<T = unknown> = (...args: any[]) => T;
 
@@ -470,9 +471,16 @@ export function buildCorpMainActions(
       );
     }
     if (definition.type === "ice") {
-      if (!newDataFortCreationLocked)
+      if (
+        !newDataFortCreationLocked &&
+        canInstallCorpIceInServer(definition, {
+          id: "new_remote",
+          kind: "remote",
+        })
+      )
         actions.push(buildCorpNewRemoteIceInstallAction(state, id));
       for (const server of state.corp.servers) {
+        if (!canInstallCorpIceInServer(definition, server)) continue;
         const {
           baseCost,
           additionalCost,

@@ -26,6 +26,7 @@ import type {
   CardFortRunWindowImplementation,
   CardInstallCostModifierImplementation,
   CardRezCostModifierImplementation,
+  CardSelfRezAdditionalCostImplementation,
   CardSelfRezCostModifierImplementation,
 } from "../../ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -152,6 +153,30 @@ function activeCorpSelfRezCostModifiersForIce(
       sourceDefinitionId: iceDefinition.id,
       modifier,
     }));
+}
+
+function selfRezAdditionalCostsForIce(
+  definition: CardDefinition,
+): readonly CardSelfRezAdditionalCostImplementation[] {
+  if (definition.type !== "ice") return [];
+  return cardImplementationForDefinitionId(definition.id)
+    ?.selfRezAdditionalCosts ?? [];
+}
+
+function selfRezAgendaPointCostForIce(definition: CardDefinition): number {
+  return selfRezAdditionalCostsForIce(definition)
+    .filter((cost) => cost.kind === "agenda_point" && cost.visibility === "public")
+    .reduce((sum, cost) => sum + Math.max(0, Math.floor(cost.amount)), 0);
+}
+
+function corpAgendaPointTotalForRezCost(state: GameState): number {
+  const bonusPoints = Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0));
+  const scoredPoints = state.corp.scoreArea.reduce((sum, cardId) => {
+    const definitionId = state.cardInstances[cardId]?.definitionId;
+    if (!definitionId) return sum;
+    return sum + Math.max(0, Math.floor(DEMO_CARDS_BY_ID[definitionId]?.agendaPoints ?? 0));
+  }, 0);
+  return bonusPoints + scoredPoints;
 }
 
 function corpInstallCostModifierAppliesToCard(
@@ -406,6 +431,7 @@ export function quoteCorpRezCost(
   const finalCredits = discountedRezSourceCardId
     ? Math.max(0, Math.floor(regularFinalCredits / 2))
     : regularFinalCredits;
+  const agendaPointCost = selfRezAgendaPointCostForIce(definition);
   const publicPayload: NonNullable<LegalAction["payload"]> = {
     cardId: iceId,
   };
@@ -444,6 +470,10 @@ export function quoteCorpRezCost(
     publicPayload.rezCostReductionAmount = baseCredits - finalCredits;
     publicPayload.rezCostPaid = finalCredits;
   }
+  if (agendaPointCost > 0) {
+    publicPayload.agendaPointCost = agendaPointCost;
+    publicPayload.selfRezAdditionalCostKind = "agenda_point";
+  }
 
   return {
     purpose: "corp_rez",
@@ -453,7 +483,9 @@ export function quoteCorpRezCost(
     finalCredits,
     costs: [{ credits: finalCredits }],
     modifiers,
-    canPay: state.corp.credits >= finalCredits,
+    canPay:
+      state.corp.credits >= finalCredits &&
+      corpAgendaPointTotalForRezCost(state) >= agendaPointCost,
     publicPayload,
   };
 }
@@ -541,5 +573,12 @@ export function assertCorpRezCostQuoteValid(
   if (!quote.canPay) throw new Error("Corp kann die Rez-Kosten nicht zahlen.");
   if ((legalAction.costs[0]?.credits ?? 0) !== quote.finalCredits)
     throw new Error("Corp-Rez-Kosten sind nicht mehr gueltig.");
+  const quotedAgendaPointCost = Number(quote.publicPayload.agendaPointCost ?? 0);
+  const actionAgendaPointCost = Number(legalAction.payload?.agendaPointCost ?? 0);
+  if (
+    !Number.isInteger(actionAgendaPointCost) ||
+    actionAgendaPointCost !== quotedAgendaPointCost
+  )
+    throw new Error("Corp-Rez-Agenda-Punkt-Kosten sind nicht mehr gueltig.");
   return quote;
 }

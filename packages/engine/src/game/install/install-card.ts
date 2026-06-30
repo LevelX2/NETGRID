@@ -16,6 +16,7 @@ import {
 } from "../../mechanics/damage-prevention";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import { costQuotePublicPayload, type CostQuote } from "../payment";
+import { assertCorpIceInstallAllowed } from "./corp-ice-install-restrictions";
 import {
   purgeableRunnerVirusCounterAmount,
   setPurgeableRunnerVirusCounterAmount,
@@ -205,6 +206,20 @@ export function installCard(
     legalAction.payload?.serverId === "new_remote"
   ) {
     host.servers.assertCorpCanCreateNewDataFort();
+  }
+  if (
+    legalAction.side === "corp" &&
+    definition.type === "ice" &&
+    legalAction.payload?.placement === "ice"
+  ) {
+    const server =
+      legalAction.payload?.serverId === "new_remote"
+        ? undefined
+        : host.servers.mustServer(String(legalAction.payload?.serverId));
+    assertCorpIceInstallAllowed(
+      definition,
+      server ?? { id: "new_remote", kind: "remote" },
+    );
   }
   const runnerInstallCostsPrepaid =
     legalAction.payload?.runnerProgramTrashBeforeInstallCostsPrepaid === true;
@@ -564,13 +579,18 @@ function installCorpCard(
   corpIceInstallQuote: CostQuote | undefined,
 ): void {
   const { state } = host;
-  host.zones.removeFromAllZones(cardId);
   const placement = legalAction.payload?.placement;
   if (placement === "ice") {
     const server =
       legalAction.payload?.serverId === "new_remote"
-        ? host.servers.createRemote()
+        ? undefined
         : host.servers.mustServer(String(legalAction.payload?.serverId));
+    assertCorpIceInstallAllowed(
+      definition,
+      server ?? { id: "new_remote", kind: "remote" },
+    );
+    host.zones.removeFromAllZones(cardId);
+    const installServer = server ?? host.servers.createRemote();
     if (corpIceInstallQuote) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -581,19 +601,20 @@ function installCorpCard(
       "corp",
       corpIceInstallQuote?.finalCredits ?? legalAction.costs[0]?.credits ?? 0,
     );
-    server.ice.push(cardId);
+    installServer.ice.push(cardId);
     state.cardInstances[cardId] = {
       ...host.cards.mustInstance(cardId),
       faceup: false,
       rezzed: false,
-      zone: { side: "corp", zone: "serverIce", serverId: server.id },
+      zone: { side: "corp", zone: "serverIce", serverId: installServer.id },
     };
-    host.servers.markFortActivityForRunGate(server.id, legalAction);
+    host.servers.markFortActivityForRunGate(installServer.id, legalAction);
     host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
     applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
     return;
   }
 
+  host.zones.removeFromAllZones(cardId);
   const server =
     legalAction.payload?.serverId === "new_remote"
       ? host.servers.createRemote()

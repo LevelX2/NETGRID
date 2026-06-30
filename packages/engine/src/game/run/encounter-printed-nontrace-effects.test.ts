@@ -4,12 +4,14 @@ import {
   type CardInstanceId,
   type GameState,
   type LegalAction,
+  type PlayerAction,
   type SubroutineDefinition,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import { encounterResolutionHost } from "./encounter-resolution";
 import {
   encounterPrintedNonTraceHost,
+  resolveClassicDeflectorChoice,
   resolveDirectTrashProgramSubroutine,
   resolveEncounterPrintedNonTraceEffect,
   type EncounterPrintedNonTraceHost,
@@ -152,6 +154,11 @@ function makeHost(
     rd_card_2: definition("rd_card_2", "R&D Card 2", "operation"),
     ...(options.definitions ?? {}),
   };
+  const mustServer = (serverId: string) => {
+    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    if (!server) throw new Error(`missing server ${serverId}`);
+    return server;
+  };
   const definitionFor = (cardId: CardInstanceId): CardDefinition => {
     const instance = state.cardInstances[cardId];
     const found = instance ? definitions[instance.definitionId] : undefined;
@@ -160,6 +167,10 @@ function makeHost(
   };
   return encounterPrintedNonTraceHost(state, {
     cards: { definitionFor },
+    servers: {
+      mustServer,
+      publicServerLabel: (serverId) => String(serverId).toUpperCase(),
+    },
     encounter: {
       resolutionHost: encounterResolutionHost(state, {
         applyRunnerForgoNextAction:
@@ -173,6 +184,11 @@ function makeHost(
               (state.runnerTurnFlags.forgoNextActionsPending ?? 0) + 1;
           }),
       }),
+    },
+    payment: {
+      spendCorpCredits: (amount) => {
+        state.corp.credits -= amount;
+      },
     },
     trash: {
       openRunnerInstalledTrashPreventionWindow: (_targetIds, source) => {
@@ -191,6 +207,8 @@ function makeHost(
       },
     },
     choices: {
+      selectedChoiceIds: (selectedChoices) =>
+        ((selectedChoices?.optionIds ?? []) as string[]),
       revealCorpRdTop:
         options.revealCorpRdTop ??
         ((legalAction) => {
@@ -215,6 +233,9 @@ function makeHost(
             visibility: "hidden_info_barrier",
           };
         }),
+    },
+    callbacks: {
+      resetBreakerStrength: () => undefined,
     },
   });
 }
@@ -503,5 +524,185 @@ describe("encounter printed non-trace effects boundary", () => {
       visibility: "hidden_info_barrier",
     });
     expect(state.run?.resolvedSubroutineIndexes).toEqual([2]);
+  });
+
+  it("redirects a fixed Deflector target to the outermost rezzed ICE", () => {
+    const state = makeState();
+    state.corp.servers.find((server) => server.id === "archives")!.ice = [
+      "archives_inner" as CardInstanceId,
+      "archives_outer" as CardInstanceId,
+    ];
+    state.cardInstances.archives_inner = instance(
+      "archives_inner",
+      "archives_ice",
+      { side: "corp", zone: "serverIce", serverId: "archives" },
+      { rezzed: false, faceup: false },
+    );
+    state.cardInstances.archives_outer = instance(
+      "archives_outer",
+      "archives_ice",
+      { side: "corp", zone: "serverIce", serverId: "archives" },
+      { rezzed: true, faceup: true },
+    );
+    const legalAction = { payload: {} } as LegalAction;
+
+    const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
+      definition: definition("onr_classic_009_dumpster", "Dumpster", "ice"),
+      subroutine: {
+        id: "dumpster_deflect",
+        type: "deflect_run",
+        deflectorTarget: "archives",
+      } as SubroutineDefinition,
+      subroutineIndex: 0,
+      legalAction,
+    });
+
+    expect(result).toMatchObject({ handled: true, runRedirected: true });
+    expect(state.run).toMatchObject({
+      attackedServerId: "archives",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "archives", iceIndex: 1 },
+      encounteredIceId: "archives_outer",
+      jackOutLockedUntilEncounterEnds: true,
+    });
+    expect(legalAction.payload).toMatchObject({
+      classicDeflector: true,
+      deflectedRun: true,
+      redirectedServerId: "archives",
+      redirectedToIceId: "archives_outer",
+      redirectedToRezzedIce: true,
+    });
+  });
+
+  it("moves a Deflector target with no rezzed ICE to the server jack-out window", () => {
+    const state = makeState();
+    state.corp.servers.find((server) => server.id === "archives")!.ice = [
+      "archives_inner" as CardInstanceId,
+    ];
+    state.cardInstances.archives_inner = instance(
+      "archives_inner",
+      "archives_ice",
+      { side: "corp", zone: "serverIce", serverId: "archives" },
+      { rezzed: false, faceup: false },
+    );
+    const legalAction = { payload: {} } as LegalAction;
+
+    const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
+      definition: definition("onr_classic_009_dumpster", "Dumpster", "ice"),
+      subroutine: {
+        id: "dumpster_deflect",
+        type: "deflect_run",
+        deflectorTarget: "archives",
+      } as SubroutineDefinition,
+      subroutineIndex: 0,
+      legalAction,
+    });
+
+    expect(result).toMatchObject({ handled: true, runRedirected: true });
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(state.run).toMatchObject({
+      attackedServerId: "archives",
+      phase: "movement",
+      position: { kind: "server", serverId: "archives" },
+      lastPassedIceId: "archives_inner",
+    });
+    expect(state.run?.encounteredIceId).toBeUndefined();
+    expect(legalAction.payload).toMatchObject({
+      redirectedToRezzedIce: false,
+      lastPassedIceId: "archives_inner",
+    });
+  });
+
+  it("opens and resolves a paid Deflector target choice", () => {
+    const state = makeState();
+    state.cardInstances.ice_1!.definitionId = "onr_classic_010_entrapment";
+    const entrapmentDefinition = definition(
+      "onr_classic_010_entrapment",
+      "Entrapment",
+      "ice",
+    );
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: ["remote_outer" as CardInstanceId],
+      root: [],
+    });
+    state.cardInstances.remote_outer = instance(
+      "remote_outer",
+      "remote_ice",
+      { side: "corp", zone: "serverIce", serverId: "remote_1" },
+      { rezzed: true, faceup: true },
+    );
+    const legalAction = { payload: {} } as LegalAction;
+    const host = makeHost(state, {
+      definitions: { [entrapmentDefinition.id]: entrapmentDefinition },
+    });
+
+    const opened = resolveEncounterPrintedNonTraceEffect(host, {
+      definition: entrapmentDefinition,
+      subroutine: {
+        id: "entrapment_deflect",
+        type: "deflect_run",
+        deflectorTarget: "any_data_fort",
+        deflectorCost: 2,
+      } as SubroutineDefinition,
+      subroutineIndex: 0,
+      legalAction,
+    });
+
+    expect(opened).toMatchObject({ handled: true, suspended: true });
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      visibility: "public",
+      minSelections: 1,
+      maxSelections: 1,
+    });
+
+    resolveClassicDeflectorChoice(
+      host,
+      { payload: {} } as LegalAction,
+      {
+        matchId: "match_1",
+        side: "corp",
+        actionId: "choice",
+        clientKnownStateVersion: 10,
+        selectedChoices: { optionIds: ["server_remote_1"] },
+      } as PlayerAction,
+    );
+
+    expect(state.corp.credits).toBe(2);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.run).toMatchObject({
+      attackedServerId: "remote_1",
+      phase: "encounter_ice",
+      encounteredIceId: "remote_outer",
+      jackOutLockedUntilEncounterEnds: true,
+    });
+  });
+
+  it("auto-breaks Trapdoor-style Deflectors when there are no subsidiary data forts", () => {
+    const state = makeState();
+    const legalAction = { payload: {} } as LegalAction;
+    const result = resolveEncounterPrintedNonTraceEffect(makeHost(state), {
+      definition: definition("onr_classic_014_trapdoor", "Trapdoor", "ice"),
+      subroutine: {
+        id: "trapdoor_deflect",
+        type: "deflect_run",
+        deflectorTarget: "subsidiary_data_fort",
+        deflectorAutoBreakIfNoTarget: true,
+      } as SubroutineDefinition,
+      subroutineIndex: 0,
+      legalAction,
+    });
+
+    expect(result).toMatchObject({ handled: true, stateChanged: false });
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.run?.resolvedSubroutineIndexes).toEqual([0]);
+    expect(legalAction.payload).toMatchObject({
+      classicDeflector: true,
+      deflectedRun: false,
+      deflectorAutoBroken: true,
+    });
   });
 });

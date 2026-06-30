@@ -1051,8 +1051,17 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       cards: {
         definitionFor: (cardId) => host.cards.definitionFor(state, cardId),
       },
+      servers: {
+        mustServer: (serverId) => host.servers.mustServer(state, serverId),
+        publicServerLabel: (serverId) =>
+          host.servers.publicServerLabel(state, serverId),
+      },
       encounter: {
         resolutionHost: encounterResolutionHostForState(state),
+      },
+      payment: {
+        spendCorpCredits: (amount) =>
+          host.payment.spendCredits(state, "corp", amount),
       },
       trash: {
         openRunnerInstalledTrashPreventionWindow: (
@@ -1070,6 +1079,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
           host.zones.trashRunnerInstalledProgram(state, cardId),
       },
       choices: {
+        selectedChoiceIds: (selectedChoices) =>
+          selectedChoiceIds(selectedChoices),
         revealCorpRdTop: (actionToResolve) =>
           host.effects.revealCorpRdTop(state, actionToResolve),
         startCorpRdArrangeChoice: (input) => {
@@ -1083,6 +1094,15 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
             input,
           );
         },
+      },
+      callbacks: {
+        beginEncounter: (iceId, actionToResolve) =>
+          beginEncounter(
+            encounterEntryHostForState(state),
+            iceId,
+            actionToResolve,
+          ),
+        resetBreakerStrength: () => host.ice.resetBreakerStrength(state),
       },
     });
   }

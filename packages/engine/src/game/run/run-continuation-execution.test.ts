@@ -182,8 +182,17 @@ function hostFor(
       definitionFor: (cardId) =>
         definitionForId(cardInstanceFor(cardId).definitionId, subroutines),
     },
+    servers: {
+      mustServer,
+      publicServerLabel: (serverId) => mustServer(serverId).label,
+    },
     encounter: {
       resolutionHost: resolutionHost(),
+    },
+    payment: {
+      spendCorpCredits: (amount) => {
+        state.corp.credits -= amount;
+      },
     },
     trash: {
       openRunnerInstalledTrashPreventionWindow: () => false,
@@ -191,8 +200,13 @@ function hostFor(
         calls.push(`trashProgram:${cardId}`),
     },
     choices: {
+      selectedChoiceIds: (selectedChoices) =>
+        ((selectedChoices?.optionIds ?? []) as string[]),
       revealCorpRdTop: () => calls.push("revealCorpRdTop"),
       startCorpRdArrangeChoice: () => calls.push("startCorpRdArrangeChoice"),
+    },
+    callbacks: {
+      resetBreakerStrength: () => calls.push("resetBreakerStrength"),
     },
   });
   const movementHost = (): RunMovementHost => ({

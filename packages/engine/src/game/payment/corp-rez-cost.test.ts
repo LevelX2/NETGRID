@@ -13,6 +13,8 @@ import {
 
 const BASKERVILLE_ID = "baskerville_1" as CardInstanceId;
 const BASKERVILLE_DEFINITION_ID = "onr_classic_005_baskerville";
+const GLACIER_ID = "glacier_1" as CardInstanceId;
+const GLACIER_DEFINITION_ID = "onr_classic_011_glacier";
 
 function makeState(noisyUsed = false): GameState {
   return {
@@ -73,6 +75,15 @@ function makeState(noisyUsed = false): GameState {
         faceup: false,
         rezzed: false,
       } as unknown as CardInstance,
+      [GLACIER_ID]: {
+        id: GLACIER_ID,
+        definitionId: GLACIER_DEFINITION_ID,
+        owner: "corp",
+        controller: "corp",
+        zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+        faceup: false,
+        rezzed: false,
+      } as unknown as CardInstance,
     },
     eventLog: [],
     winner: null,
@@ -125,5 +136,33 @@ describe("corp rez costs", () => {
         DEMO_CARDS_BY_ID[BASKERVILLE_DEFINITION_ID]!,
       ),
     ).toEqual([BASKERVILLE_DEFINITION_ID]);
+  });
+
+  it("requires Glacier's public agenda-point self-rez cost in the rez quote", () => {
+    const state = makeState(false);
+    state.run!.approachedIceId = GLACIER_ID;
+    state.corp.servers[0]!.ice = [GLACIER_ID];
+
+    const blockedQuote = quoteCorpRezCost(state, GLACIER_ID);
+    expect(blockedQuote).toMatchObject({
+      finalCredits: 0,
+      costs: [{ credits: 0 }],
+      canPay: false,
+      publicPayload: {
+        cardId: GLACIER_ID,
+        agendaPointCost: 1,
+        selfRezAdditionalCostKind: "agenda_point",
+      },
+    });
+
+    state.corpBonusAgendaPoints = 1;
+    const payableQuote = quoteCorpRezCost(state, GLACIER_ID);
+    expect(payableQuote).toMatchObject({
+      canPay: true,
+      publicPayload: {
+        agendaPointCost: 1,
+        selfRezAdditionalCostKind: "agenda_point",
+      },
+    });
   });
 });
