@@ -334,10 +334,14 @@ export function semanticRuntimeCorpBoardTriageActionComponent<
         ? TRIAGE_MISMATCH_MEDIUM
         : TRIAGE_MISMATCH_HIGH;
     const normalizedValue = normalizedCorpBoardTriageValue(rawValue);
+    const componentValue = corpBoardTriageMismatchComponentValue(
+      triage,
+      normalizedValue,
+    );
     return {
       key: "corp_board_triage_mismatch",
       label: "Corp-Board-Triage",
-      value: normalizedValue,
+      value: componentValue,
       reason: triageReason(
         triage,
         action,
@@ -345,6 +349,7 @@ export function semanticRuntimeCorpBoardTriageActionComponent<
         "mismatch",
         rawValue,
         normalizedValue,
+        componentValue,
       ),
     };
   }
@@ -460,7 +465,15 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         return "mismatch";
       }
       return actionPushesUnsafeScoreline(input, action, dependencies) ||
-        actionIsOffTargetInstall(action, actionServerId, triage)
+        actionIsOffTargetInstall(action, actionServerId, triage) ||
+        actionDelaysProtectedScoreRemote(
+          input,
+          action,
+          actionServerId,
+          triage,
+          dependencies,
+          actionSemanticCandidate,
+        )
         ? "mismatch"
         : "neutral";
     case "fund_score_remote":
@@ -1162,6 +1175,44 @@ function actionDelaysForcedScoreline<TConsumer extends string>(
   return false;
 }
 
+function actionDelaysProtectedScoreRemote<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  actionServerId: string | undefined,
+  triage: CorpBoardTriage,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): boolean {
+  if (action.type === "end_turn") return true;
+  if (action.type === "draw_card" || action.type === "gain_credit") {
+    return true;
+  }
+  if (actionServerId === "archives") return true;
+  if (action.type === "install_card") {
+    if (actionServerId !== triage.targetServerId) return true;
+    return action.payload?.placement !== "ice";
+  }
+  if (action.type === "rez_ice") {
+    return actionServerId !== triage.targetServerId;
+  }
+  if (
+    action.type === "play_operation" ||
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability"
+  ) {
+    if (actionAcceleratesScoreline(actionSemanticCandidate)) return false;
+    return (
+      actionProvidesEconomy(
+        input,
+        action,
+        dependencies,
+        actionSemanticCandidate,
+      ) || actionHasVisibleDrawSource(input, action, actionSemanticCandidate)
+    );
+  }
+  return false;
+}
+
 function actionHasVisibleDrawSource(
   input: AiDecisionInput,
   action: LegalAction,
@@ -1449,6 +1500,7 @@ function triageReason(
   alignment: "match" | "mismatch" | "neutral",
   rawValue = 0,
   normalizedValue = 0,
+  componentValue = normalizedValue,
 ): string {
   return [
     `triage_primary:${triage.primary}`,
@@ -1476,8 +1528,22 @@ function triageReason(
     `triage_alignment:${alignment}`,
     `triage_raw_value:${rawValue}`,
     `triage_normalized_value:${normalizedValue}`,
+    `triage_component_value:${componentValue}`,
     ...triage.evidence.slice(0, 12),
   ].join("|");
+}
+
+function corpBoardTriageMismatchComponentValue(
+  triage: CorpBoardTriage,
+  normalizedValue: number,
+): number {
+  if (
+    triage.primary === "protect_score_remote" &&
+    (triage.severity === "critical" || triage.severity === "high")
+  ) {
+    return triage.severity === "critical" ? -3200 : -2400;
+  }
+  return normalizedValue;
 }
 
 export function normalizedCorpBoardTriageValue(rawValue: number): number {
