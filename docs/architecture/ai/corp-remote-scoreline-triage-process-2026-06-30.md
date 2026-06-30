@@ -2,7 +2,7 @@
 
 ## Status
 
-in_progress
+complete
 
 ## Quelle
 
@@ -40,13 +40,16 @@ Die Corp-KI soll nach einer erfolgreichen frühen Remote-Scoreline das bestehend
 Ziel: Match-Evidence und Prozessvertrag dokumentieren.
 
 Kernartefakte:
+
 - `docs/architecture/ai/corp-remote-scoreline-triage-process-2026-06-30.md`
 - `docs/reviews/ai/corp-remote-scoreline-triage-evidence-2026-06-30.md`
 
 Checks:
+
 - `git diff --check`
 
 Commit:
+
 - `docs(ai): record corp remote scoreline triage process`
 
 ### Paket 2: Runtime-Fix
@@ -54,15 +57,18 @@ Commit:
 Ziel: Scoreline-Exposure, Remote-Erhalt und Triage-Alignment korrigieren.
 
 Kernartefakte:
+
 - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.ts`
 - `packages/ai/src/runtime/semantic-runtime-corp-remote-score.ts`
 - `packages/ai/src/runtime/semantic-runtime-corp-board-triage.ts`
 
 Checks:
+
 - fokussierte Runtime-Tests
 - `git diff --check`
 
 Commit:
+
 - `fix(ai): strengthen corp remote scoreline triage`
 
 ### Paket 3: Regressionen
@@ -70,16 +76,19 @@ Commit:
 Ziel: Die neuen Entscheidungsgrenzen mit gezielten Tests sichern.
 
 Kernartefakte:
+
 - `packages/ai/src/runtime/semantic-runtime-corp-score.test.ts`
 - `packages/ai/src/runtime/semantic-runtime-corp-scoring-window.test.ts`
 - `packages/ai/src/runtime/semantic-runtime-corp-remote-score.test.ts`
 
 Checks:
+
 - fokussierte Vitest-Dateien
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
 Commit:
+
 - `test(ai): cover corp remote scoreline triage regressions`
 
 ### Paket 4: Abschluss und Integration
@@ -87,16 +96,19 @@ Commit:
 Ziel: Final-Report, Wissenslog, breitere AI-Checks und lokaler Merge nach `main`.
 
 Kernartefakte:
+
 - `docs/reviews/ai/corp-remote-scoreline-triage-final-report-2026-06-30.md`
 - `KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md`
 
 Checks:
+
 - `corepack pnpm --filter @netgrid/ai test`
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 - finaler Main-Status
 
 Commit:
+
 - `docs(ai): close corp remote scoreline triage review`
 
 ## Fehlerbehandlung

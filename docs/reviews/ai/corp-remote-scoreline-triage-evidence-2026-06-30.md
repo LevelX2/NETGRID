@@ -21,6 +21,7 @@ Der Debug bewertet die Remote-Aktion als `window_kind:durable`, `score_horizon:n
 Bis `sv104` scored die Corp drei Agendas über Remote 1. Danach bleibt Remote 1 mit zwei rezzed ICE leer. Ab `sv130` dominieren `Marine Arcology`, HQ-ICE und R&D-ICE.
 
 Beispiele:
+
 - `sv130/sv131`: `Marine Arcology` und R&D-ICE gewinnen; Remote-1-ICE liegt nur auf Rängen 16 bis 20 mit `corp_install_remote_context:-1750`.
 - `sv188/sv189` bis `sv235/sv236`: wiederholtes HQ-ICE trotz leerer Remote-1-Scorebasis.
 - `sv243` bis `sv298`: Agendas und Advancement-Operations liegen in HQ, aber Scoreline-Installationen sind stark negativ bewertet.
@@ -30,6 +31,7 @@ Beispiele:
 Späte Entscheidungen enthalten `triage_primary:protect_score_remote`, teils mit `severity:critical` und `target:remote_1`. Trotzdem gewinnen Economy- oder Central-Aktionen.
 
 Beispiele:
+
 - `sv278/sv279`: `Marine Arcology` gewinnt bei `protect_score_remote critical`.
 - `sv279/sv280`: R&D-ICE gewinnt trotz `protect_score_remote critical`.
 - `sv296/sv297`: `Marine Arcology` gewinnt, Remote-1-Aktionen bleiben neutral oder stark negativ.
