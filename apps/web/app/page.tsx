@@ -1191,7 +1191,10 @@ export default function Page() {
   const aiTurnPresentation = effectiveAiTurnPresentation(payload);
   const hasPendingAiCue = currentActionCue?.source === "ai" || actionCueQueue.some((cue) => cue.source === "ai");
   const aiPacingFallbackDelay = aiPacingFallbackDelayMs(localAiPacingMode, hasPendingAiCue);
-  const showAiPacingFallbackControls = Boolean(aiTurnPresentation?.canAdvanceAi && !payload?.winner && aiPacingFallbackDelay !== null && (aiPacingFallbackDelay === 0 || aiPacingFallbackVisible));
+  const resultSummary = payload?.resultSummary ?? null;
+  const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
+  const matchEnded = Boolean(payload?.winner || resultSummary || payload?.matchStatus === "finished" || payload?.matchStatus === "forfeited");
+  const showAiPacingFallbackControls = Boolean(aiTurnPresentation?.canAdvanceAi && !matchEnded && aiPacingFallbackDelay !== null && (aiPacingFallbackDelay === 0 || aiPacingFallbackVisible));
   const startSummary = matchStartSummary({
     playMode,
     matchFormat: matchFormat === "two_game_side_swap" ? "two_game_side_swap" : "rules_match",
@@ -1361,14 +1364,12 @@ export default function Page() {
   const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, payload.eventTail, latestAccessRevealEvent) : null;
   const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, payload.eventTail) : null;
   const accessReveal = hqAgendaReveal ?? archivesReveal ?? currentAccessReveal ?? retainedEventAccessReveal;
-  const showAccessReveal = Boolean(accessReveal && !dismissedAccessEventIds.includes(accessReveal.eventId));
+  const showAccessReveal = Boolean(accessReveal && !matchEnded && !dismissedAccessEventIds.includes(accessReveal.eventId));
   const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
   const exposeReview = payload ? exposeReviewFromLatestEvent(exposeReviewEvent ?? undefined, catalogDetailsById, payload.side) : null;
   const viewedApproachIceId = approachIceExposeViewingIceId(payload?.legalActions ?? []);
   const viewedInstalledExposeCardId = installedCorpExposeReviewCardId(activeView?.pendingChoice);
-  const showExposeReview = Boolean(exposeReview && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal && !viewedApproachIceId && !viewedInstalledExposeCardId);
-  const resultSummary = payload?.resultSummary ?? null;
-  const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
+  const showExposeReview = Boolean(exposeReview && !matchEnded && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal && !viewedApproachIceId && !viewedInstalledExposeCardId);
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
   const canReturnToStart = Boolean(payload && (resultSummary || payload.winner || payload.matchStatus === "finished" || payload.matchStatus === "forfeited"));
   const canStartNextSeriesGame = Boolean(resultSummary?.series?.nextAvailable);
@@ -1421,7 +1422,7 @@ export default function Page() {
   }, [activeMatchIsGame, payload?.matchId, topbarHeightPx, topbarStickyEnabled]);
 
   const activeCueHighlight = currentActionCue?.highlight ?? null;
-  const hasDecisionCue = Boolean(currentActionCue?.requiresLocalAttention || activeView?.pendingChoice || (activeView?.activeSide === activeView?.side && payload?.legalActions.length));
+  const hasDecisionCue = Boolean(!matchEnded && (currentActionCue?.requiresLocalAttention || activeView?.pendingChoice || (activeView?.activeSide === activeView?.side && payload?.legalActions.length)));
   const legalActionSplit = useMemo(() => splitLegalActions(payload?.legalActions ?? []), [payload?.legalActions]);
   const runActions = useMemo(() => (activeView ? runWindowActions(activeView, payload?.legalActions ?? []) : []), [activeView, payload?.legalActions]);
   const selectedPanelContext = selectedActionContext?.kind === "server" ? selectedActionContext : null;
@@ -1430,7 +1431,7 @@ export default function Page() {
   const floatingPanelPrimaryActions = activeView?.run ? legalActionSplit.primaryActions.filter((action) => !runActionIds.has(action.actionId)) : legalActionSplit.primaryActions;
   const floatingPanelContextualActions = activeView?.run ? selectedPanelContextActions.filter((action) => !runActionIds.has(action.actionId)) : selectedPanelContextActions;
   const floatingPanelNeededDuringRun = Boolean(activeView?.run && (activeView.pendingChoice || floatingPanelPrimaryActions.length > 0 || floatingPanelContextualActions.length > 0));
-  const showFloatingActionPanel = Boolean(activeMatchIsGame && activeView && actionPanelMode === "floating" && (!activeView.run || floatingPanelNeededDuringRun));
+  const showFloatingActionPanel = Boolean(activeMatchIsGame && !matchEnded && activeView && actionPanelMode === "floating" && (!activeView.run || floatingPanelNeededDuringRun));
   const aiDecisionDebugMatchId = activeMatchIsGame && session && payload ? session.matchId : "";
   const showAiDecisionDebugOverlay = Boolean(activeMatchIsGame && aiDecisionDebugOverlayEnabled && session);
   const floatingPanelHasHiddenContextActions = Boolean(!activeView?.run && legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card");
@@ -1606,6 +1607,17 @@ export default function Page() {
   }, [activeView, payload?.winner, selectedActionContext]);
 
   useEffect(() => {
+    if (!matchEnded) return;
+    setSelectedActionContext(null);
+    setFocusedCard(null);
+    setScoreAreaOverlays((current) => (current.runner || current.corp ? { runner: false, corp: false } : current));
+    setActionCueQueue([]);
+    setCurrentActionCue(null);
+    setDamageImpactQueue([]);
+    setCurrentDamageImpact(null);
+  }, [matchEnded, resultKey]);
+
+  useEffect(() => {
     if (selectedActionContext?.kind !== "card") return;
     const closeCardActionMenu = (event: PointerEvent) => {
       if (isCardActionSurfaceTarget(event.target)) return;
@@ -1743,6 +1755,10 @@ export default function Page() {
       lastSeenCueEventIdRef.current = latestId;
       return;
     }
+    if (matchEnded) {
+      lastSeenCueEventIdRef.current = latestId;
+      return;
+    }
     const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
     const contextByEventId = chronicleContextByEventId(payload.playerView.publicEvents, catalogDetailsById, { preferGermanCardImages });
     const cues = actionCuesEnabled
@@ -1775,7 +1791,7 @@ export default function Page() {
       const sound = actionSoundForActionType(actionType, item.visibility);
       if (sound) playActionCueSound(sound, audioVolume, actionSoundCountForAction(actionType, event.publicPayload));
     }
-  }, [actionCuesEnabled, automaticEffectCuesEnabled, audioEnabled, audioVolume, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById, preferGermanCardImages]);
+  }, [actionCuesEnabled, automaticEffectCuesEnabled, audioEnabled, audioVolume, matchEnded, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById, preferGermanCardImages]);
 
   useEffect(() => {
     if (currentActionCue || actionCueQueue.length === 0) return;
@@ -3426,14 +3442,14 @@ export default function Page() {
         onRequest={requestUndo}
         onResolve={resolveUndo}
       />
-      {activeMatchIsGame ? (
+      {activeMatchIsGame && !matchEnded ? (
       <DamageImpactOverlay
         cue={currentDamageImpact}
         queued={damageImpactQueue.length}
         onDismiss={() => setCurrentDamageImpact(null)}
       />
       ) : null}
-      {activeMatchIsGame ? (
+      {activeMatchIsGame && !matchEnded ? (
       <OpponentActionOverlay
         cue={currentActionCue}
         queued={actionCueQueue.length}
@@ -3461,7 +3477,7 @@ export default function Page() {
         }}
       />
       ) : null}
-      {activeMatchIsGame && activeView?.run ? (
+      {activeMatchIsGame && !matchEnded && activeView?.run ? (
         <RunTimelineOverlay
           view={activeView}
           legalActions={payload.legalActions}
