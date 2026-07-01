@@ -60,6 +60,22 @@ function installHiddenResource(
   return cardId;
 }
 
+function expectHiddenResourceTrashed(
+  state: GameState,
+  cardId: CardInstanceId,
+  definitionId: CardDefinitionId,
+): void {
+  expect(state.runner.rig.resources).not.toContain(cardId);
+  expect(state.runner.heap).toContain(cardId);
+  expect(state.cardInstances[cardId]).toMatchObject({
+    definitionId,
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "heap" },
+  });
+  expect(state.cardInstances[cardId]?.tapped).not.toBe(true);
+}
+
 function addRunnerGripCard(
   state: GameState,
   definitionId: CardDefinitionId,
@@ -435,7 +451,11 @@ describe("PRO011 hidden resource timing hardening", () => {
     expect(support).toBeDefined();
     state = applyLegal(state, "runner", support!).state;
     expect(state.runner.credits).toBe(2);
-    expect(state.cardInstances[swissId]?.tapped).toBe(true);
+    expectHiddenResourceTrashed(
+      state,
+      swissId,
+      "onr_proteus_152_swiss-bank-account",
+    );
 
     const continued = getLegalActions(state, "runner").find(
       (candidate) => candidate.actionId === runAction!.actionId,
@@ -587,7 +607,7 @@ describe("PRO011 hidden resource timing hardening", () => {
 });
 
 describe("PRO012 hidden resource prevention and sabotage", () => {
-  it("PRO012 Bolt-Hole prevents only Meat Damage, caps at two damage, reveals/taps without Corp-view leaks, and replays", () => {
+  it("PRO012 Bolt-Hole prevents only Meat Damage, caps at two damage, reveals/trashes without Corp-view leaks, and replays", () => {
     let state = runnerState("pro012-bolt-hole");
     const boltId = installHiddenResource(
       state,
@@ -654,15 +674,15 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     const result = resolveChoice(state, "runner", optionId);
     expect(result.ok).toBe(true);
     state = result.state;
-    expect(state.cardInstances[boltId]?.tapped).toBe(true);
-    expect(state.cardInstances[boltId]?.faceup).toBe(true);
-    expect(state.runner.heap).toHaveLength(before.runner.heap.length + 1);
+    expectHiddenResourceTrashed(state, boltId, "onr_proteus_132_bolt-hole");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationOutcome: "partially_prevented",
       preventedAmount: 2,
       damageAmount: 1,
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_132_bolt-hole",
+      sourceTrashed: true,
+      trashedCardDefinitionId: "onr_proteus_132_bolt-hole",
     });
     const replay = replayEvents(
       before,
@@ -672,7 +692,7 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("PRO012 Expendable Family Member pays one credit plus tap for tag prevention and revalidates credits", () => {
+  it("PRO012 Expendable Family Member pays one credit plus trash for tag prevention and revalidates credits", () => {
     let state = runnerState("pro012-expendable");
     state.runner.credits = 1;
     const expendableId = installHiddenResource(
@@ -714,16 +734,22 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     state = result.state;
     expect(state.runner.credits).toBe(0);
     expect(state.runner.tags).toBe(0);
-    expect(state.cardInstances[expendableId]?.tapped).toBe(true);
+    expectHiddenResourceTrashed(
+      state,
+      expendableId,
+      "onr_proteus_140_expendable-family-member",
+    );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationOutcome: "avoided",
       paidCredits: 1,
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_140_expendable-family-member",
+      sourceTrashed: true,
+      trashedCardDefinitionId: "onr_proteus_140_expendable-family-member",
     });
   });
 
-  it("PRO012 Credit Subversion, Death from Above, and Mercenary enforce timing, targets, reveal, and tap", () => {
+  it("PRO012 Credit Subversion, Death from Above, and Mercenary enforce timing, targets, reveal, and trash", () => {
     let creditState = runnerState("pro012-credit-subversion");
     const creditSourceId = installHiddenResource(
       creditState,
@@ -799,11 +825,17 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(result.ok).toBe(true);
     creditState = result.state;
     expect(creditState.corp.credits).toBe(0);
-    expect(creditState.cardInstances[creditSourceId]?.tapped).toBe(true);
+    expectHiddenResourceTrashed(
+      creditState,
+      creditSourceId,
+      "onr_proteus_136_credit-subversion",
+    );
     expect(creditState.eventLog.at(-1)?.publicPayload).toMatchObject({
       creditLoss: 2,
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_136_credit-subversion",
+      sourceTrashed: true,
+      trashedCardDefinitionId: "onr_proteus_136_credit-subversion",
     });
     const creditPublicPayload =
       creditState.eventLog.at(-1)?.publicPayload ?? {};
@@ -830,11 +862,9 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     );
     expect(
       getPlayerView(creditState, "corp").opponent.rig?.some(
-        (card) =>
-          card.known &&
-          card.definitionId === "onr_proteus_136_credit-subversion",
+        (card) => card.definitionId === "onr_proteus_136_credit-subversion",
       ),
-    ).toBe(true);
+    ).toBe(false);
     const creditReplay = replayEvents(
       creditReplayInitial,
       creditState.eventLog.slice(creditReplayStart),
@@ -941,7 +971,11 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     result = applyLegal(deathState, "runner", deathAction!);
     expect(result.ok).toBe(true);
     deathState = result.state;
-    expect(deathState.cardInstances[deathSourceId]?.tapped).toBe(true);
+    expectHiddenResourceTrashed(
+      deathState,
+      deathSourceId,
+      "onr_proteus_137_death-from-above",
+    );
     expect(deathState.corp.archives).toEqual(
       expect.arrayContaining([assetId, upgradeId, iceId]),
     );
@@ -952,6 +986,8 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       trashedCount: 3,
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_137_death-from-above",
+      sourceTrashed: true,
+      trashedCardDefinitionId: "onr_proteus_137_death-from-above",
     });
     const deathPublicPayload = deathState.eventLog.at(-1)?.publicPayload ?? {};
     expect(deathPublicPayload).toMatchObject({
@@ -1090,11 +1126,17 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(result.ok).toBe(true);
     mercenaryState = result.state;
     expect(mercenaryState.runner.credits).toBe(0);
-    expect(mercenaryState.cardInstances[mercenaryId]?.tapped).toBe(true);
+    expectHiddenResourceTrashed(
+      mercenaryState,
+      mercenaryId,
+      "onr_proteus_145_mercenary-subcontract",
+    );
     expect(mercenaryState.corp.archives).toContain(operationId);
     expect(mercenaryState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_145_mercenary-subcontract",
+      sourceTrashed: true,
+      trashedCardDefinitionId: "onr_proteus_145_mercenary-subcontract",
       hiddenZoneAction: "proteus_hidden_current_access_free_trash",
     });
 
@@ -1180,7 +1222,11 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     state = result.state;
     expect(state.trace).toBeUndefined();
     expect(state.runner.credits).toBe(0);
-    expect(state.cardInstances[backDoorId]?.tapped).toBe(true);
+    expectHiddenResourceTrashed(
+      state,
+      backDoorId,
+      "onr_proteus_129_back-door-to-netwatch",
+    );
     expect(state.corp.badPublicity).toBe(7);
     expect(state.winner).toBe("runner");
     expect(state.gameEndReason).toBe("bad_publicity_7");
@@ -1188,6 +1234,8 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
       traceEffectCanceled: true,
       hiddenRunnerResourceRevealed: true,
       publicRevealDefinitionId: "onr_proteus_129_back-door-to-netwatch",
+      sourceTrashed: true,
+      trashedCardDefinitionId: "onr_proteus_129_back-door-to-netwatch",
       badPublicityAdded: 1,
     });
     const replay = replayEvents(
@@ -1297,13 +1345,19 @@ describe("PRO012 hidden resource prevention and sabotage", () => {
     expect(result.ok).toBe(true);
     state = result.state;
     expect(state.pendingChoice).toBeUndefined();
-    expect(state.cardInstances[rumbleId]?.tapped).toBe(true);
+    expectHiddenResourceTrashed(
+      state,
+      rumbleId,
+      "onr_proteus_141_get-ready-to-rumble",
+    );
     expect(state.corp.hq).toHaveLength(hqCountBefore - 2);
     expect(state.corp.archives).toHaveLength(archivesCountBefore + 2);
     expect(state.randomCounter).toBe(randomBefore + 3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenResourcePostMeatDamageDecision: "apply",
       hiddenRunnerResourceRevealed: true,
+      sourceTrashed: true,
+      trashedCardDefinitionId: "onr_proteus_141_get-ready-to-rumble",
       discardedHqCount: 2,
     });
     const replay = replayEvents(

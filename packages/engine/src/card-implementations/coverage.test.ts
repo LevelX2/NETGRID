@@ -2519,7 +2519,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       expect.objectContaining({
         protectsCardTypes: ["resource"],
         excludesSelf: true,
-        cost: { kind: "tap_source" },
+        cost: { kind: "trash_source" },
       }),
     );
   });
@@ -2556,7 +2556,7 @@ describe("CardImplementation coverage and registry invariants", () => {
       expect.objectContaining({
         damageTypes: ["meat"],
         amount: 2,
-        cost: { kind: "tap_source" },
+        cost: { kind: "trash_source" },
       }),
     );
     expect(
@@ -2566,7 +2566,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     ).toContainEqual(
       expect.objectContaining({
         amount: 1,
-        cost: { kind: "credit_and_tap_source", amount: 1 },
+        cost: { kind: "credit_and_trash_source", amount: 1 },
       }),
     );
     expect(
@@ -2575,7 +2575,7 @@ describe("CardImplementation coverage and registry invariants", () => {
     ).toContainEqual(
       expect.objectContaining({
         timing: "trace_post_bid_link_window",
-        costs: [{ kind: "tap_source", amount: 1 }],
+        costs: [{ kind: "trash_source", amount: 1 }],
       }),
     );
   });

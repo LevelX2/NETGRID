@@ -929,6 +929,28 @@ function testHost(
     trace: {
       supportsTraceSuccessEffect: () => true,
     },
+    zones: {
+      trashRunnerInstalledCardToHeap: (cardId) => {
+        const card = state.cardInstances[cardId];
+        if (!card) return;
+        state.runner.rig.programs = state.runner.rig.programs.filter(
+          (candidate) => candidate !== cardId,
+        );
+        state.runner.rig.hardware = state.runner.rig.hardware.filter(
+          (candidate) => candidate !== cardId,
+        );
+        state.runner.rig.resources = state.runner.rig.resources.filter(
+          (candidate) => candidate !== cardId,
+        );
+        state.runner.heap.push(cardId);
+        state.cardInstances[cardId] = {
+          ...card,
+          faceup: true,
+          rezzed: true,
+          zone: { side: "runner", zone: "heap" },
+        };
+      },
+    },
     callbacks: {
       sanitizeId: (value) => value.replace(/[^a-z0-9_]+/gi, "_"),
       addCorpTraceCounterPoolCounters: () => 0,

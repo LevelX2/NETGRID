@@ -212,6 +212,7 @@ function makeHost(
     runner: {
       credits: 5,
       tags: 0,
+      heap: [],
       rig: {
         programs: ["false_echo", "netspace", "i_spy", "armageddon"],
         hardware: ["bodyweight"],
@@ -354,6 +355,15 @@ function makeHost(
     },
     zones: {
       removeFromAllZones: (cardId) => {
+        state.runner.rig.programs = state.runner.rig.programs.filter(
+          (candidate) => candidate !== cardId,
+        );
+        state.runner.rig.hardware = state.runner.rig.hardware.filter(
+          (candidate) => candidate !== cardId,
+        );
+        state.runner.rig.resources = state.runner.rig.resources.filter(
+          (candidate) => candidate !== cardId,
+        );
         state.corp.hq = state.corp.hq.filter(
           (candidate) => candidate !== cardId,
         );
@@ -372,9 +382,14 @@ function makeHost(
       },
       trashRunnerInstalledCardToHeap: (cardId) => {
         trashedRunnerIds.push(cardId);
-        state.runner.rig.programs = state.runner.rig.programs.filter(
-          (candidate) => candidate !== cardId,
-        );
+        host.zones.removeFromAllZones(cardId);
+        state.runner.heap.push(cardId);
+        cardInstances[cardId] = {
+          ...cardInstances[cardId]!,
+          faceup: true,
+          rezzed: true,
+          zone: { side: "runner", zone: "heap" },
+        };
       },
     },
     encounter: {
@@ -706,6 +721,7 @@ describe("successful run interventions", () => {
     expect(fixture.state.cardInstances.credit_subversion?.tapped).not.toBe(
       true,
     );
+    expect(fixture.state.runner.heap).not.toContain("credit_subversion");
 
     const legacyFixture = makeHost();
     configureSuccessfulRunDamageCoreHost(legacyFixture);
@@ -735,7 +751,19 @@ describe("successful run interventions", () => {
     } as LegalAction);
 
     expect(result.handled).toBe(true);
-    expect(legacyFixture.state.cardInstances.credit_subversion?.tapped).toBe(
+    expect(legacyFixture.trashedRunnerIds).toEqual(["credit_subversion"]);
+    expect(legacyFixture.state.runner.rig.resources).not.toContain(
+      "credit_subversion",
+    );
+    expect(legacyFixture.state.runner.heap).toContain("credit_subversion");
+    expect(legacyFixture.state.cardInstances.credit_subversion?.zone).toEqual({
+      side: "runner",
+      zone: "heap",
+    });
+    expect(legacyFixture.state.cardInstances.credit_subversion?.faceup).toBe(
+      true,
+    );
+    expect(legacyFixture.state.cardInstances.credit_subversion?.tapped).not.toBe(
       true,
     );
   });

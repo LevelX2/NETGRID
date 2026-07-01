@@ -105,6 +105,7 @@ function makeHost(options: {
     runner: {
       credits: options.runnerCredits ?? 10,
       scoreArea: options.runnerScoreArea ?? [],
+      heap: [],
       rig: { programs: [], hardware: [], resources: [] },
     },
     corp: {
@@ -212,6 +213,9 @@ function makeHost(options: {
     zones: {
       removeFromAllZones: (cardId) => {
         state.runner.scoreArea = state.runner.scoreArea.filter((id) => id !== cardId);
+        state.runner.rig.resources = state.runner.rig.resources.filter(
+          (id) => id !== cardId,
+        );
         state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
         state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
         state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
@@ -219,6 +223,20 @@ function makeHost(options: {
           server.root = server.root.filter((id) => id !== cardId);
           server.ice = server.ice.filter((id) => id !== cardId);
         }
+      },
+      trashRunnerInstalledCardToHeap: (cardId) => {
+        const card = state.cardInstances[cardId];
+        if (!card) return;
+        state.runner.rig.resources = state.runner.rig.resources.filter(
+          (id) => id !== cardId,
+        );
+        state.runner.heap.push(cardId);
+        state.cardInstances[cardId] = {
+          ...card,
+          faceup: true,
+          rezzed: true,
+          zone: { side: "runner", zone: "heap" },
+        };
       },
       ensureSpecialZones: () => {
         state.specialZones ??= { setAside: [], removedFromGame: [] };
@@ -547,10 +565,17 @@ describe("access flow execution", () => {
     expect(trashPayments).toEqual([{ amount: 0, cardId: "operation" }]);
     expect(trashedCards).toEqual(["operation"]);
     expect(state.runner.credits).toBe(6);
-    expect(state.cardInstances.mercenary?.tapped).toBe(true);
+    expect(state.runner.rig.resources).not.toContain("mercenary");
+    expect(state.runner.heap).toContain("mercenary");
+    expect(state.cardInstances.mercenary?.tapped).not.toBe(true);
     expect(state.cardInstances.mercenary?.faceup).toBe(true);
+    expect(state.cardInstances.mercenary?.zone).toEqual({
+      side: "runner",
+      zone: "heap",
+    });
     expect(legalAction.payload).toMatchObject({
-      sourceTapped: true,
+      sourceTrashed: true,
+      trashedCardDefinitionId: "onr_proteus_145_mercenary-subcontract",
       hiddenZoneAction: "proteus_hidden_current_access_free_trash",
     });
 

@@ -1,6 +1,6 @@
 # Hidden-Resource-Trash-Cost-Correction-Prozess
 
-Status: in Umsetzung
+Status: Codepakete verifiziert, lokale Integration offen
 Quelle/Vorgabe: Nutzerbeobachtung vom 2026-07-01 zu `Credit Subversion` und anschließende Freigabe, Hidden Resources mit `[T]`/Trash-Symbol regelkonform zu korrigieren.
 
 ## Zielprüfung
@@ -67,6 +67,8 @@ Der Prozess korrigiert die Hidden-Resource-Semantik für alle aktiven Hidden Res
 5. `verified`: Paketchecks und Abschlusschecks sind grün oder mit Risiko dokumentiert.
 6. `merged`: Arbeitsbranch ist lokal nach `main` integriert und Worktree entfernt.
 
+Aktueller Stand 2026-07-01: HRTC-00 bis HRTC-02 sind umgesetzt. Der fokussierte Engine-Typecheck und die betroffenen Regressionstests sind grün. Der breite Engine-Testlauf ist nicht vollständig grün wegen unveränderter bestehender Fehler in Runtime-Modulgrößen-Gates und `draw-random.test.ts`; die Hidden-Resource-Coverage-Fehler aus diesem Prozess sind behoben.
+
 ## Paketfolge
 
 ### HRTC-00 Prozessartefakt
@@ -95,6 +97,8 @@ Tests/Checks: paketnahe Engine-Tests, `git diff --check`.
 Done-Gate: betroffene Kostenpfade kompilieren und fokussierte Tests laufen grün.
 Commit-Message: `fix(engine): trash hidden resources on use`.
 
+Ergebnis: Successful-Run-Primitive, Trace-Cancel/-Link, Access-Trash, post-Meat-Damage-Reaktion, Tag-/Damage-/Trash-Prevention und aktivierte CardImplementation-Kosten zahlen die betroffenen Hidden-Resource-`[T]`-Kosten als Source-Trash. Die Proteus- und Classic-Hidden-Resource-Definitionen wurden entsprechend von Tap auf Trash umgestellt.
+
 ### HRTC-02 Regressionstests und Dokumentationsstand
 
 Ziel: Die korrigierte Semantik ist gegen Regressionen abgesichert und der Projektstatus kennt den Fix.
@@ -110,6 +114,12 @@ Kernartefakte: `packages/engine/src/index-tests/proteus/hidden-resource-hardenin
 Tests/Checks: fokussierte Engine-Tests, `pnpm --filter @netgrid/engine typecheck`, `git diff --check`.
 Done-Gate: Tests und Typecheck grün; Dokumentationsstand committed.
 Commit-Message: `test(engine): harden hidden resource trash behavior`.
+
+Verifikation 2026-07-01:
+
+- `corepack pnpm --filter @netgrid/engine typecheck`: grün.
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/coverage.test.ts src/game/access/access-flow.test.ts src/game/access/access-actions.test.ts src/game/card-implementation/trace-runtime-deps.test.ts src/game/run/successful-run-interventions.test.ts src/game/trace/trace-orchestration.test.ts src/index-tests/proteus/hidden-resource-hardening.test.ts`: grün, 96 Tests bestanden.
+- `corepack pnpm --filter @netgrid/engine test`: rot mit 3 unveränderten Restfehlern außerhalb dieses Pakets: `card-runtime-bootstrap.ts` und `turn-runtime-resolvers.ts` überschreiten bestehende Runtime-Modulgrößen-Gates; `draw-random.test.ts` trifft einen bestehenden Fixture-Fehler bei fehlendem `state.corp.servers`.
 
 ### HRTC-03 Abschlussprüfung und lokale Integration
 

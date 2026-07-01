@@ -129,6 +129,9 @@ function host(): TraceRuntimeDepsHost {
         trace: {
           supportsTraceSuccessEffect: () => true,
         },
+        zones: {
+          trashRunnerInstalledCardToHeap: () => undefined,
+        },
         callbacks: {
           sanitizeId: (value) => value.replace(/[^a-zA-Z0-9_.-]/g, "_"),
           addCorpTraceCounterPoolCounters: () => 0,
