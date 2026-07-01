@@ -28757,14 +28757,14 @@
       "side": "runner",
       "cardType": "event",
       "roles": ["event", "economy", "deterministic_random"],
-      "planRoles": ["build_economy"],
+      "planRoles": ["find_economy"],
       "requiredMechanics": [
         "play_event",
         "random_die_resolution",
         "gain_credits"
       ],
       "valueHints": {
-        "economy": 3
+        "economy": 4
       },
       "riskTags": ["deterministic_random"],
       "aiSupportStatus": "ai_supported",
@@ -28773,43 +28773,111 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 10,
+          "target": "three_dice_credit_gain_expected_value",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_action"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "reserveRisk": "low",
+        "opportunityCost": "low"
+      },
+      "manualNotes": [
+        "CLASSIC-AI-02: Three six-sided dice average 10.5 credits; hint amount uses rounded expected value for ranking while runtime remains seeded/deterministic."
+      ]
     },
     {
       "cardId": "onr_classic_040_meat-upgrade",
       "side": "runner",
       "cardType": "event",
       "roles": ["event", "tag_removal", "draw"],
-      "planRoles": ["recover_from_tags", "build_hand"],
-      "requiredMechanics": ["play_event", "remove_tags", "draw_cards"],
+      "planRoles": ["recover_from_tags", "draw_for_answers"],
+      "requiredMechanics": [
+        "play_event",
+        "remove_tags",
+        "draw_cards",
+        "double_action_cost"
+      ],
       "valueHints": {
-        "tagSafety": 3,
-        "cardVelocity": 2
+        "tagSafety": 4,
+        "cardVelocity": 3
       },
-      "riskTags": ["double_action", "tag"],
+      "riskTags": ["double_action", "tag_clear_timing"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "tag_prevention",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "tags",
+          "amount": 2,
+          "target": "remove_tags",
+          "finite": true
+        },
+        {
+          "kind": "draw",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "cards",
+          "amount": 3,
+          "target": "draw",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_action"
+        }
+      ],
+      "costProfile": {
+        "clicks": 2,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "lineSupport": ["runner.survival_defense"],
+      "strategicRole": ["defensive_tool"],
+      "manualNotes": [
+        "CLASSIC-AI-02: Double prep removes up to two tags and draws three; survival anchor is defensive, not a primary pressure plan."
+      ]
     },
     {
       "cardId": "onr_classic_041_networking",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "economy", "double_action"],
-      "planRoles": ["build_economy"],
-      "requiredMechanics": ["play_event", "gain_credits"],
+      "roles": ["event", "economy"],
+      "planRoles": ["find_economy"],
+      "requiredMechanics": ["play_event", "gain_credits", "double_action_cost"],
       "valueHints": {
         "economy": 4
       },
@@ -28820,22 +28888,53 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 9,
+          "target": "burst_credit",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_action"
+        }
+      ],
+      "costProfile": {
+        "clicks": 2,
+        "reserveRisk": "low",
+        "opportunityCost": "medium"
+      },
+      "manualNotes": [
+        "CLASSIC-AI-02: Pure double-action economy; valuable for credit curve but intentionally no pressure anchor."
+      ]
     },
     {
       "cardId": "onr_classic_042_panzer-run",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "economy", "draw", "double_action"],
-      "planRoles": ["build_economy", "build_hand"],
-      "requiredMechanics": ["play_event", "gain_credits", "draw_cards"],
+      "roles": ["event", "economy", "draw"],
+      "planRoles": ["find_economy", "draw_for_answers"],
+      "requiredMechanics": [
+        "play_event",
+        "gain_credits",
+        "draw_cards",
+        "double_action_cost"
+      ],
       "valueHints": {
         "economy": 2,
-        "cardVelocity": 2
+        "cardVelocity": 3
       },
       "riskTags": ["double_action"],
       "aiSupportStatus": "ai_supported",
@@ -28844,11 +28943,46 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 4,
+          "target": "burst_credit",
+          "finite": true
+        },
+        {
+          "kind": "draw",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "cards",
+          "amount": 2,
+          "target": "draw",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_action"
+        }
+      ],
+      "costProfile": {
+        "clicks": 2,
+        "reserveRisk": "low",
+        "opportunityCost": "medium"
+      },
+      "manualNotes": [
+        "CLASSIC-AI-02: Double prep mixes modest credits with hand refill; no strategic line anchor because payoff is generic setup velocity."
+      ]
     },
     {
       "cardId": "onr_classic_027_early-worm",
@@ -29808,168 +29942,544 @@
       "cardId": "onr_classic_034_boostergang-connections",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "run_economy", "multi_run"],
-      "planRoles": ["pressure_centrals", "build_economy"],
+      "roles": ["event", "stack_search", "setup"],
+      "planRoles": ["recover_key_card", "repair_setup"],
       "requiredMechanics": [
         "play_event",
-        "run_success_trigger",
-        "gain_credits",
-        "turn_duration_effect"
+        "trash_grip",
+        "search_stack",
+        "shuffle_stack"
       ],
       "valueHints": {
-        "runPressure": 3,
-        "economy": 3
+        "setupConsistency": 4,
+        "cardSelection": 4
       },
-      "riskTags": ["run_success_dependency"],
+      "riskTags": [
+        "grip_trash",
+        "hidden_zone_projection",
+        "high_opportunity_cost"
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "search",
+          "timing": "action",
+          "scope": "stack",
+          "resource": "cards",
+          "target": "stack_card_search",
+          "finite": true
+        },
+        {
+          "kind": "zone_shuffle",
+          "timing": "action",
+          "scope": "stack",
+          "resource": "cards",
+          "target": "shuffle_after_search",
+          "finite": true
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "cards",
+          "target": "trash_grip_as_search_cost",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_grip_card"
+        },
+        {
+          "kind": "requires_stack_search"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "reserveRisk": "high",
+        "opportunityCost": "high"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "choose_stack_cards_after_grip_trash",
+          "preferences": [
+            "program_repairs_missing_coverage",
+            "program_affordable_after_install"
+          ],
+          "avoid": ["hidden_info_dependent_choice", "low_value_program"],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "lineSupport": ["runner.search.breaker"],
+      "strategicRole": ["enabler"],
+      "manualNotes": [
+        "CLASSIC-AI-02: Implemented as grip trash into same-count stack search, not as a successful-run credit bonus. AI evaluation must not project unknown stack contents; legal search options remain controller-known only."
+      ]
     },
     {
       "cardId": "onr_classic_035_corruption",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "agenda_steal_followup", "corp_score_area_disruption"],
-      "planRoles": ["punish_recent_score"],
+      "roles": [
+        "event",
+        "agenda_steal_followup",
+        "high_risk_economy",
+        "tag_self"
+      ],
+      "planRoles": ["convert_recent_agenda_points_to_economy"],
       "requiredMechanics": [
         "play_event",
         "recent_stolen_agenda_gate",
-        "score_area_transfer"
+        "score_area_transfer",
+        "gain_credits",
+        "take_tag"
       ],
       "valueHints": {
-        "agendaPressure": 4,
-        "tempo": 2
+        "economy": 5,
+        "agendaPressure": -4,
+        "tagSafety": -2
       },
-      "riskTags": ["agenda_transfer", "conditional_play"],
+      "riskTags": [
+        "agenda_transfer",
+        "conditional_play",
+        "tag_self",
+        "high_opportunity_cost"
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 10,
+          "target": "credits_per_agenda_point_lost",
+          "finite": true
+        },
+        {
+          "kind": "tag",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "tags",
+          "amount": 1,
+          "target": "self_tag_after_agenda_transfer",
+          "finite": true
+        },
+        {
+          "kind": "run_tax",
+          "timing": "action",
+          "scope": "score_area",
+          "target": "agenda_points_given_to_corp",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_stolen_agenda_last_turn"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "reserveRisk": "high",
+        "opportunityCost": "high"
+      },
+      "manualNotes": [
+        "CLASSIC-AI-02: Economy burst is only attractive when immediate credits outweigh lost agenda points and self-tag risk; no strategic line anchor because it spends win progress."
+      ]
     },
     {
       "cardId": "onr_classic_036_do-the-drine",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "choice", "economy_or_draw"],
-      "planRoles": ["build_economy", "build_hand"],
+      "roles": ["event", "brain_damage_economy", "high_risk_economy", "choice"],
+      "planRoles": ["emergency_economy"],
       "requiredMechanics": [
         "play_event",
         "runner_choice",
-        "gain_credits",
-        "draw_cards"
+        "brain_damage",
+        "gain_credits"
       ],
       "valueHints": {
-        "economy": 2,
-        "cardVelocity": 2
+        "economy": 4,
+        "tagSafety": 0
       },
-      "riskTags": ["choice"],
+      "riskTags": [
+        "brain_damage",
+        "unpreventable_damage",
+        "flatline_risk",
+        "high_opportunity_cost"
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 4,
+          "target": "credits_per_self_brain_damage",
+          "finite": true
+        },
+        {
+          "kind": "damage",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "brain_damage",
+          "target": "self_unpreventable_brain_damage",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_action"
+        },
+        {
+          "kind": "requires_brain_damage"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "reserveRisk": "high",
+        "opportunityCost": "high"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "mode_choice",
+          "timing": "on_play",
+          "targetType": "mode_choice",
+          "purpose": "choose_safe_brain_damage_amount_for_credit_burst",
+          "preferences": ["use_choice_option_with_visible_board_payoff"],
+          "avoid": ["option_with_no_visible_current_payoff"],
+          "hiddenInfoPolicy": "legal_options_only"
+        }
+      ],
+      "strategicRole": ["emergency_tool"],
+      "manualNotes": [
+        "CLASSIC-AI-02: This is an emergency credit conversion, not draw. Choice amount must stay inside LegalActions and flatline-safe bounds."
+      ]
     },
     {
       "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "rd_access_replacement", "agenda_search"],
-      "planRoles": ["pressure_rd", "agenda_pressure"],
+      "roles": ["event", "rd_run", "rd_access_replacement", "agenda_pressure"],
+      "planRoles": ["pressure_rnd", "agenda_pressure"],
       "requiredMechanics": [
         "play_event",
+        "start_run",
         "successful_run_access_replacement",
         "reveal_cards_until_agenda",
         "move_card_to_hq"
       ],
       "valueHints": {
         "runPressure": 4,
-        "information": 3
+        "information": 4,
+        "accessPressure": 3
       },
-      "riskTags": ["hidden_zone", "rd_reveal", "access_replacement"],
+      "riskTags": [
+        "hidden_zone",
+        "rd_reveal",
+        "access_replacement",
+        "run_success_dependency"
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "rnd",
+          "target": "make_rnd_run",
+          "finite": true
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "successful_run",
+          "scope": "rnd",
+          "target": "reveal_until_agenda_store_in_hq",
+          "finite": true
+        },
+        {
+          "kind": "topdeck_info",
+          "timing": "successful_run",
+          "scope": "rnd",
+          "resource": "cards",
+          "target": "reveal_until_agenda",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_rnd_pressure"
+        },
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "replacement_target",
+          "timing": "after_successful_run",
+          "targetType": "card",
+          "purpose": "replace_rnd_access_with_reveal_until_agenda",
+          "preferences": ["high_value_accessed_card"],
+          "avoid": ["hidden_info_dependent_choice"],
+          "hiddenInfoPolicy": "current_access_only"
+        }
+      ],
+      "lineSupport": ["runner.rnd_pressure"],
+      "strategicRole": ["payoff_anchor"],
+      "manualNotes": [
+        "CLASSIC-AI-02: R&D run converts successful access into public reveal-until-agenda movement to HQ; AI can value R&D pressure without peeking at hidden R&D order."
+      ]
     },
     {
       "cardId": "onr_classic_039_library-search",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "conditional_access_bonus", "hq_access"],
-      "planRoles": ["pressure_hq"],
+      "roles": [
+        "event",
+        "multiaccess",
+        "run_event",
+        "hq_pressure",
+        "rd_pressure"
+      ],
+      "planRoles": ["pressure_hq", "pressure_rnd"],
       "requiredMechanics": [
         "play_event",
+        "start_run",
         "successful_run_bonus_access",
-        "hand_size_condition"
+        "no_noisy_icebreaker_or_trace_condition"
       ],
       "valueHints": {
-        "runPressure": 3,
-        "accessPressure": 3
+        "runPressure": 4,
+        "accessPressure": 4
       },
-      "riskTags": ["conditional_access", "hidden_zone"],
+      "riskTags": [
+        "conditional_access",
+        "run_success_dependency",
+        "noisy_breaker_restriction"
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "runner",
+          "target": "make_hq_or_rnd_run",
+          "finite": true
+        },
+        {
+          "kind": "multiaccess",
+          "timing": "successful_run",
+          "scope": "hq",
+          "resource": "cards",
+          "amount": 2,
+          "finite": true
+        },
+        {
+          "kind": "multiaccess",
+          "timing": "successful_run",
+          "scope": "rnd",
+          "resource": "cards",
+          "amount": 2,
+          "finite": true
+        },
+        {
+          "kind": "run_lock",
+          "timing": "during_run",
+          "scope": "run_path",
+          "target": "no_noisy_icebreaker_or_trace",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "server",
+          "purpose": "choose_hq_or_rnd_for_conditional_multiaccess_run",
+          "preferences": [
+            "protects_central_access_pressure",
+            "current_run_path_relevance"
+          ],
+          "avoid": ["hidden_info_dependent_choice"],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
+      "lineSupport": [
+        "runner.hq_pressure",
+        "runner.rnd_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategicRole": ["payoff_anchor"],
+      "manualNotes": [
+        "CLASSIC-AI-02: Access bonus is central-only and conditional on no noisy breaker use and no trace attempt during the run; target choice stays on legal HQ/R&D options."
+      ]
     },
     {
       "cardId": "onr_classic_043_running-interference",
       "side": "runner",
       "cardType": "event",
-      "roles": ["event", "rez_tax", "run_support"],
+      "roles": ["event", "rez_tax", "run_event"],
       "planRoles": ["pressure_remote", "tax_corp_rez"],
-      "requiredMechanics": ["play_event", "run_duration_rez_cost_surcharge"],
+      "requiredMechanics": [
+        "play_event",
+        "start_run",
+        "run_duration_rez_cost_surcharge",
+        "double_action_cost"
+      ],
       "valueHints": {
-        "runPressure": 3,
-        "tax": 2
+        "runPressure": 4,
+        "tax": 4
       },
-      "riskTags": ["run_cost_modifier"],
+      "riskTags": [
+        "run_cost_modifier",
+        "double_action",
+        "run_success_dependency"
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "runner",
+          "target": "make_chosen_server_run",
+          "finite": true
+        },
+        {
+          "kind": "run_tax",
+          "timing": "during_run",
+          "scope": "corp",
+          "resource": "credits",
+          "target": "matching_printed_rez_cost_surcharge",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "costProfile": {
+        "clicks": 2,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "server",
+          "purpose": "choose_server_for_rez_surcharge_run",
+          "preferences": [
+            "protects_agenda_remote",
+            "current_run_path_relevance",
+            "high_rez_cost_relief"
+          ],
+          "avoid": ["hidden_info_dependent_choice", "irrelevant_server_ice"],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
+      "lineSupport": ["runner.remote_contest", "runner.run_event_tempo"],
+      "strategicRole": ["tax_tool"],
+      "manualNotes": [
+        "CLASSIC-AI-02: Double run event taxes each Corp rez on the chosen legal server by its printed rez cost; best for contested remotes or expensive known run paths."
+      ]
     },
     {
       "cardId": "onr_classic_044_crash-space",
