@@ -28462,54 +28462,155 @@
       "cardId": "onr_classic_017_corporate-shuffle",
       "side": "corp",
       "cardType": "operation",
-      "roles": ["operation", "draw", "hq_to_rd_shuffle", "hidden_zone"],
-      "planRoles": ["find_economy", "reload_hq"],
-      "requiredMechanics": ["play_operation", "draw_cards", "shuffle_hq_to_rd"],
+      "roles": ["operation", "draw_operation"],
+      "planRoles": ["draw"],
+      "requiredMechanics": [
+        "play_operation",
+        "draw_cards",
+        "shuffle_hq_to_rd",
+        "double_action_cost"
+      ],
       "valueHints": {
-        "cardVelocity": 3,
+        "cardVelocity": 5,
         "utility": 2
       },
-      "riskTags": ["hidden_zone", "double_action"],
+      "riskTags": ["double_action", "hq_card_selection", "hidden_zone"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "draw.corp_draw",
+        "hq.corp_hand_refresh",
+        "rnd.corp_shuffle_hq_into_rnd"
+      ],
+      "effects": [
+        {
+          "kind": "draw",
+          "timing": "action",
+          "scope": "corp",
+          "resource": "cards",
+          "amount": 5,
+          "target": "draw.corp_draw",
+          "finite": true
+        },
+        {
+          "kind": "zone_shuffle",
+          "timing": "action",
+          "scope": "rnd",
+          "resource": "cards",
+          "amount": 1,
+          "target": "rnd.corp_shuffle_hq_into_rnd",
+          "finite": true
+        }
+      ],
+      "costProfile": {
+        "clicks": 2,
+        "credits": 0,
+        "reserveRisk": "low",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "choose_hq_card_shuffle_into_rnd",
+          "preferences": ["lowest_near_term_value", "protect_agenda_density"],
+          "avoid": ["hidden_info_dependent_choice", "next_turn_required_card"],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "lineSupport": ["corp.central_stabilize"],
+      "strategicRole": ["support_tool"]
     },
     {
       "cardId": "onr_classic_018_reclamation-project",
       "side": "corp",
       "cardType": "operation",
-      "roles": [
-        "operation",
-        "archives_recursion",
-        "ice_recovery",
-        "hidden_zone"
+      "roles": ["operation", "ice_recovery"],
+      "planRoles": ["ice_recovery"],
+      "requiredMechanics": [
+        "play_operation",
+        "archives_to_hq",
+        "reveal",
+        "double_action_cost"
       ],
-      "planRoles": ["recover_defense"],
-      "requiredMechanics": ["play_operation", "archives_to_hq", "reveal"],
       "valueHints": {
-        "defense": 2,
+        "defense": 3,
         "recursion": 3
       },
-      "riskTags": ["hidden_zone", "double_action"],
+      "riskTags": ["archives_dependency", "double_action", "reveal_to_runner"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-03-simple-operation-event-smoke.json#classic_03_simple_operation_event_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": ["archives.corp_recovery", "ice.recovery"],
+      "effects": [
+        {
+          "kind": "card_recovery",
+          "timing": "action",
+          "scope": "archives",
+          "resource": "cards",
+          "target": "archives.corp_recovery",
+          "finite": true
+        },
+        {
+          "kind": "search",
+          "timing": "action",
+          "scope": "archives",
+          "resource": "cards",
+          "target": "ice_recovery",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_archives_card"
+        }
+      ],
+      "costProfile": {
+        "clicks": 2,
+        "credits": 0,
+        "reserveRisk": "low",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "recover_archives_ice_to_hq",
+          "preferences": [
+            "protects_agenda_remote",
+            "protects_central_access_pressure"
+          ],
+          "avoid": ["hidden_info_dependent_choice", "low_impact_ice"],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "lineSupport": ["corp.ice_tax_glacier"],
+      "strategicRole": ["support_tool"]
     },
     {
       "cardId": "onr_classic_019_indiscriminate-response-team",
@@ -29801,72 +29902,147 @@
       "cardId": "onr_classic_001_data-fort-remapping",
       "side": "corp",
       "cardType": "agenda",
-      "roles": ["agenda", "fort_reconfigure", "advanceable"],
-      "planRoles": ["score_agenda", "improve_scoring_remote"],
+      "roles": ["agenda", "advanceable", "run_defense", "counter"],
+      "planRoles": ["score_agenda"],
       "requiredMechanics": [
         "score_agenda",
-        "fort_selection",
-        "move_installed_card"
+        "scored_counter",
+        "corp_during_run_paid_ability",
+        "end_run"
       ],
       "valueHints": {
         "agendaPoints": 2,
-        "tempo": 2,
-        "runControl": 2
+        "defense": 3,
+        "runControl": 4
       },
-      "riskTags": ["board_reposition"],
+      "riskTags": ["public_counter", "scored_counter", "single_use"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": ["score.action_counter_bank"],
+      "effects": [
+        {
+          "kind": "scored_agenda_action",
+          "timing": "when_scored",
+          "scope": "score_area",
+          "target": "score.action_counter_bank",
+          "finite": true
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "when_scored",
+          "scope": "score_area",
+          "resource": "counters",
+          "amount": 1,
+          "target": "score.action_counter_bank",
+          "finite": true
+        },
+        {
+          "kind": "etr",
+          "timing": "during_run",
+          "scope": "run_path",
+          "target": "remap_counter_end_run",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        },
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "costProfile": {
+        "counters": 1,
+        "reserveRisk": "low",
+        "opportunityCost": "low"
+      },
+      "lineSupport": ["corp.remote_scoring"],
+      "strategicRole": ["defensive_tool"]
     },
     {
       "cardId": "onr_classic_002_superserum",
       "side": "corp",
       "cardType": "agenda",
-      "roles": ["agenda", "tag_pressure", "damage"],
-      "planRoles": ["score_agenda", "pressure_tagged_runner"],
-      "requiredMechanics": ["score_agenda", "runner_tags", "flat_damage"],
+      "roles": ["agenda", "virus"],
+      "planRoles": ["score_agenda"],
+      "requiredMechanics": [
+        "score_agenda",
+        "purge_runner_virus_counters",
+        "virus_counter_prevention"
+      ],
       "valueHints": {
         "agendaPoints": 2,
-        "damageThreat": 3,
-        "tagPunish": 2
+        "defense": 2,
+        "virusPressure": 4
       },
-      "riskTags": ["tag_synergy", "damage"],
+      "riskTags": ["virus_meta", "temporary_prevention"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": ["virus.corp_counter_prevention"],
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "when_scored",
+          "scope": "runner",
+          "resource": "counters",
+          "target": "virus.corp_counter_prevention",
+          "finite": true
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "counters",
+          "amount": 2,
+          "target": "virus.corp_counter_prevention",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
+      ],
+      "lineSupport": ["corp.central_stabilize"],
+      "strategicRole": ["defensive_tool"]
     },
     {
       "cardId": "onr_classic_003_unlisted-research-lab",
       "side": "corp",
       "cardType": "agenda",
-      "roles": ["agenda", "draw", "action_economy"],
-      "planRoles": ["score_agenda", "build_hand"],
+      "roles": ["agenda", "draw"],
+      "planRoles": ["score_agenda", "draw"],
       "requiredMechanics": [
         "score_agenda",
         "start_turn_trigger",
-        "draw_cards",
-        "extra_actions"
+        "draw_cards"
       ],
       "valueHints": {
         "agendaPoints": 2,
-        "cardVelocity": 3,
-        "tempo": 2
+        "cardVelocity": 3
       },
       "riskTags": ["start_turn_trigger"],
       "aiSupportStatus": "ai_supported",
@@ -29875,68 +30051,215 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": ["score.recurring_draw", "draw.corp_draw"],
+      "effects": [
+        {
+          "kind": "draw",
+          "timing": "start_of_turn",
+          "scope": "corp",
+          "resource": "cards",
+          "amount": 1,
+          "target": "score.recurring_draw",
+          "repeatable": true
+        },
+        {
+          "kind": "draw",
+          "timing": "start_of_turn",
+          "scope": "corp",
+          "resource": "cards",
+          "amount": 1,
+          "target": "draw.corp_draw",
+          "repeatable": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        },
+        {
+          "kind": "requires_start_of_turn"
+        }
+      ],
+      "lineSupport": ["corp.remote_scoring"],
+      "strategicRole": ["engine_anchor"]
     },
     {
       "cardId": "onr_classic_004_theorem-proof",
       "side": "corp",
       "cardType": "agenda",
-      "roles": ["agenda", "run_tax", "global_modifier"],
-      "planRoles": ["score_agenda", "tax_runs"],
+      "roles": ["agenda", "access_replacement", "runner_program"],
+      "planRoles": ["score_agenda"],
       "requiredMechanics": [
         "score_agenda",
-        "global_run_cost_modifier",
-        "agenda_counters"
+        "agenda_access_replacement",
+        "install_as_runner_program",
+        "runner_score_action",
+        "remove_from_game_on_leave_play"
       ],
       "valueHints": {
         "agendaPoints": 3,
-        "tax": 3,
-        "defense": 2
+        "defense": 3,
+        "tax": 2
       },
-      "riskTags": ["global_modifier"],
+      "riskTags": [
+        "access_replacement",
+        "memory_pressure_for_runner",
+        "remove_from_game",
+        "runner_can_score_later"
+      ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-07-agenda-smoke.json#classic_07_agenda_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "access.runner_program_bounce",
+        "risk.high_difficulty_agenda"
+      ],
+      "effects": [
+        {
+          "kind": "access_replacement",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "resource": "cards",
+          "target": "access.runner_program_bounce",
+          "finite": true
+        },
+        {
+          "kind": "install",
+          "timing": "on_access",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 2,
+          "target": "runner_installs_agenda_as_program",
+          "finite": true
+        },
+        {
+          "kind": "scored_agenda_action",
+          "timing": "action",
+          "scope": "score_area",
+          "target": "score.closeout_agenda",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "memory": 2,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "replacement_target",
+          "timing": "on_access",
+          "targetType": "accessed_card",
+          "purpose": "install_theorem_proof_as_runner_program",
+          "preferences": ["current_access_only"],
+          "avoid": ["hidden_info_dependent_choice"],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "lineSupport": ["corp.remote_scoring"],
+      "strategicRole": ["scoring_tool"]
     },
     {
       "cardId": "onr_classic_016_badtimes",
       "side": "corp",
       "cardType": "operation",
-      "roles": ["operation", "memory_pressure", "program_trash"],
-      "planRoles": ["disrupt_runner_rig"],
+      "roles": [
+        "operation",
+        "memory_pressure",
+        "program_trash",
+        "tag_punishment_operation"
+      ],
+      "planRoles": ["disrupt_runner_rig", "punish_tagged_runner"],
       "requiredMechanics": [
         "play_operation",
+        "runner_is_tagged",
         "temporary_memory_limit_modifier",
-        "trash_installed_program"
+        "trash_installed_program_if_over_memory"
       ],
       "valueHints": {
         "disruption": 4,
-        "programPressure": 4
+        "programPressure": 4,
+        "tagPunish": 3
       },
-      "riskTags": ["memory_pressure", "program_trash"],
+      "riskTags": ["memory_pressure", "program_trash", "tag_condition"],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/classic-09-runner-rest-smoke.json#classic_09_runner_rest_smoke"
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": -2,
+          "target": "runner_memory_limit_modifier_until_end_of_turn",
+          "finite": true
+        },
+        {
+          "kind": "program_trash",
+          "timing": "action",
+          "scope": "installed_program",
+          "target": "memory_pressure_program_trash",
+          "finite": true
+        },
+        {
+          "kind": "tag_punish_payoff",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 2,
+          "target": "memory_pressure",
+          "finite": true
+        }
+      ],
+      "tacticSignals": ["risk.requires_tagged_runner", "tag.payoff"],
+      "conditions": [
+        {
+          "kind": "requires_runner_tagged"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "credits": 4,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "lineSupport": ["corp.tag_trace_punish"],
+      "strategicRole": ["punish_payoff"]
     },
     {
       "cardId": "onr_classic_034_boostergang-connections",
