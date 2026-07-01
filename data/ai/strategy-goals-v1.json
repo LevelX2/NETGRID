@@ -586,6 +586,125 @@
         "score_now_if_safe",
         "avoid_slow_glacier_setup"
       ]
+    },
+    {
+      "strategyId": "corp.action_tempo",
+      "side": "corp",
+      "description": "Convert scored agenda abilities or counters into extra Corp actions, action-mode flexibility, or recurring tempo that changes near-term sequencing.",
+      "detectionMode": "engine_anchor",
+      "anchorSignals": [
+        "action.corp_extra_action",
+        "action.corp_recurring_extra_action",
+        "action.corp_counter_to_extra_action",
+        "tempo.corp_recurring_action"
+      ],
+      "requiredSupport": {
+        "tempoSource": "required",
+        "economy": "recommended",
+        "scorePlan": "recommended",
+        "boardSafety": "conditional"
+      },
+      "supportWeights": {
+        "tempoSource": 0.4,
+        "economy": 0.25,
+        "scorePlan": 0.25,
+        "boardSafety": 0.1
+      },
+      "tacticalGoalHints": [
+        "bank_extra_action_counter",
+        "convert_action_when_window_open",
+        "prefer_extra_action_with_visible_payoff",
+        "avoid_random_tempo_without_board_value"
+      ]
+    },
+    {
+      "strategyId": "corp.overadvance_value",
+      "side": "corp",
+      "description": "Invest additional advancement counters into agendas whose overadvance payoff materially improves score value, recurring value, or win conversion.",
+      "detectionMode": "payoff_anchor",
+      "anchorSignals": [
+        "advance.overadvance_payoff",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
+      "requiredSupport": {
+        "advancementWindow": "required",
+        "economy": "required",
+        "scorePlan": "required",
+        "remoteSafety": "recommended"
+      },
+      "supportWeights": {
+        "advancementWindow": 0.35,
+        "economy": 0.25,
+        "scorePlan": 0.25,
+        "remoteSafety": 0.15
+      },
+      "tacticalGoalHints": [
+        "evaluate_overadvance_payoff",
+        "advance_beyond_requirement_when_safe",
+        "avoid_overadvance_without_score_window",
+        "convert_overadvance_to_closeout"
+      ]
+    },
+    {
+      "strategyId": "corp.draw_engine",
+      "side": "corp",
+      "description": "Use scored agenda draw or repeatable draw actions as a deck engine for finding ICE, economy, agendas, and follow-up pressure.",
+      "detectionMode": "engine_anchor",
+      "anchorSignals": [
+        "draw.corp_recurring",
+        "draw.corp_recurring_optional",
+        "draw.corp_action_draw",
+        "score.recurring_draw"
+      ],
+      "requiredSupport": {
+        "drawSource": "required",
+        "scorePlan": "required",
+        "economy": "recommended",
+        "safety": "conditional"
+      },
+      "supportWeights": {
+        "drawSource": 0.4,
+        "scorePlan": 0.25,
+        "economy": 0.2,
+        "safety": 0.15
+      },
+      "tacticalGoalHints": [
+        "score_draw_engine_agenda",
+        "use_draw_when_hand_quality_low",
+        "convert_draw_to_next_score_window",
+        "avoid_overdrawing_into_hq_pressure"
+      ]
+    },
+    {
+      "strategyId": "corp.deck_recycle_engine",
+      "side": "corp",
+      "description": "Recycle HQ or Archives cards into R&D and combine shuffle or draw effects into a repeatable Corp resource and agenda-density engine.",
+      "detectionMode": "engine_anchor",
+      "anchorSignals": [
+        "archives.corp_recycle_to_rnd",
+        "rnd.corp_shuffle_recycle",
+        "hq.corp_hand_to_rnd_shuffle",
+        "draw.corp_action_draw"
+      ],
+      "requiredSupport": {
+        "recycleSource": "required",
+        "drawOrShuffle": "required",
+        "agendaDensity": "recommended",
+        "economy": "recommended"
+      },
+      "supportWeights": {
+        "recycleSource": 0.35,
+        "drawOrShuffle": 0.3,
+        "agendaDensity": 0.2,
+        "economy": 0.15
+      },
+      "tacticalGoalHints": [
+        "recycle_low_value_hq_cards",
+        "shuffle_archives_value_into_rnd",
+        "draw_after_recycle_when_safe",
+        "protect_rnd_after_density_change"
+      ]
     }
   ]
 }

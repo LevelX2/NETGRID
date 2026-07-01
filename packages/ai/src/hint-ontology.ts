@@ -421,6 +421,10 @@ export const KNOWN_HINT_LINE_SUPPORT = [
   "corp.ambush_bluff",
   "corp.economy_rez_reserve",
   "corp.rush_score",
+  "corp.action_tempo",
+  "corp.overadvance_value",
+  "corp.draw_engine",
+  "corp.deck_recycle_engine",
 ] as const;
 
 export const KNOWN_HINT_OPPONENT_SIGNAL_KINDS = [

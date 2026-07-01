@@ -1,0 +1,2130 @@
+{
+  "schemaVersion": "agenda-semantic-review-v1-before",
+  "taskId": "AGENDA-SEMANTIC-REVIEW-V1",
+  "generatedAt": "2026-07-01",
+  "sourceCsv": "docs/reviews/ai/agenda-semantic-review-v1-input-2026-07-01.csv",
+  "cards": [
+    {
+      "set": "classic",
+      "cardId": "onr_classic_001_data-fort-remapping",
+      "title": "Data Fort Remapping",
+      "text": "Put a Remap counter on Data Fort Remapping when you score it. Remap Counter: End a run.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Aktuelles Signal `score.action_counter_bank` ist mechanisch falsch/zu unspezifisch: der Counter gibt keine Aktion, sondern beendet einen Run.",
+      "recommendedTacticSignals": [
+        "score.run_end_counter_bank",
+        "run.corp_end_run_counter",
+        "defense.corp_run_end_counter"
+      ],
+      "recommendedStrategySupportPairs": "corp.remote_scoring -> defensive_tool/run_end_score_window_protection (medium)",
+      "recommendedTargetOrConstraints": "kein TargetProfile nötig; Counter-Nutzung ist LegalAction-/Timing-Semantik",
+      "rationale": "Eine gescorte Agenda mit Run-End-Counter schützt Scorefenster und Remotes, ist aber kein ICE-Tax-Tool. Remote-Scoring-Anker bleibt plausibel, aber nur defensiv.",
+      "before": {
+        "tacticSignals": [
+          "score.action_counter_bank"
+        ],
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "defensive_tool",
+            "roleDetail": "remote_defense_tool",
+            "evidence": [
+              "score.action_counter_bank"
+            ],
+            "confidence": "medium",
+            "rationale": "Scored Agenda banks a run-ending counter, protecting scored remotes and remote-score conversion without becoming a pure ICE-tax card."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "classic",
+      "cardId": "onr_classic_002_superserum",
+      "title": "Superserum",
+      "text": "When you score Superserum, remove all Virus counters, and avoid receiving the next two Virus counters Runner gives to you.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Signal trennt Reset und Prävention nicht.",
+      "recommendedTacticSignals": [
+        "virus.corp_counter_clear",
+        "virus.corp_counter_prevention",
+        "defense.virus_counter_defense"
+      ],
+      "recommendedStrategySupportPairs": "corp.central_stabilize -> defensive_tool/virus_counter_defense (medium)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Die Karte stabilisiert gegen Virusdruck nach dem Score; sie ist kein Scoring-Payoff. Pair ist inhaltlich okay, sollte aber Clear + Prevention ausdrücklich zeigen.",
+      "before": {
+        "tacticSignals": [
+          "virus.corp_counter_prevention"
+        ],
+        "lineSupport": [
+          "corp.central_stabilize"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.central_stabilize",
+            "role": "defensive_tool",
+            "roleDetail": "virus_counter_defense",
+            "evidence": [
+              "virus.corp_counter_prevention"
+            ],
+            "confidence": "medium",
+            "rationale": "Virus-counter reset and prevention stabilize central pressure after scoring; the card is defensive infrastructure, not a scoring payoff."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "classic",
+      "cardId": "onr_classic_004_theorem-proof",
+      "title": "Theorem Proof",
+      "text": "If Runner accesses Theorem Proof, he or she does not score it, but instead may install it as a 2 MU program that has the ability \"A: Score Theorem Proof\" but is removed from the game if it leaves play in any other way.",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "currentIssue": "`access.runner_program_bounce`, `risk.high_difficulty_agenda` und `score.closeout_agenda` verfehlen die Perspektive. Die Agenda ist für die Corp nicht schwerer zu scoren; der Runner muss einen verzögerten, fragilen Score über MU und Aktion konvertieren.",
+      "recommendedTacticSignals": [
+        "access.corp_agenda_steal_replacement",
+        "access.corp_delayed_agenda_score",
+        "access.corp_runner_agenda_program_install",
+        "risk.runner_memory_burden",
+        "risk.fragile_delayed_score",
+        "risk.program_removal_denies_score"
+      ],
+      "recommendedStrategySupportPairs": "corp.remote_scoring -> defensive_tool/agenda_steal_friction_tool (medium)",
+      "recommendedTargetOrConstraints": "Action-Semantik muss die spätere Runner-Ability `A: Score Theorem Proof` separat erkennen; 2-MU-Programminstallation als spezieller Access-Replacement-Fall.",
+      "rationale": "Erfolgreicher Access wird nicht sofort zum Score, sondern in eine verwundbare Runner-Installation mit späterer Aktion verschoben. Das ist Steal-Friction, nicht Corp-Score-Closeout.",
+      "before": {
+        "tacticSignals": [
+          "access.runner_program_bounce",
+          "risk.high_difficulty_agenda"
+        ],
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "scoring_tool",
+            "roleDetail": "access_replacement_score_tool",
+            "evidence": [
+              "score.closeout_agenda",
+              "risk.high_difficulty_agenda",
+              "access.runner_program_bounce"
+            ],
+            "confidence": "medium",
+            "rationale": "The access replacement denies normal steal scoring and creates a difficult delayed score line, so it belongs under remote scoring as a scoring tool with high-difficulty risk."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "medium",
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "classic",
+      "cardId": "onr_classic_003_unlisted-research-lab",
+      "title": "Unlisted Research Lab",
+      "text": "Draw an additional card at the start of each of your turns.",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "currentIssue": "`corp.remote_scoring` ist überdehnt. Wiederkehrender Draw ist generische Engine/Support und nicht spezifisch Remote-Scoring.",
+      "recommendedTacticSignals": [
+        "draw.corp_recurring",
+        "score.recurring_draw"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (optional deferred: corp.value_engine / corp.draw_engine, falls solche Strategy-ID bewusst eingeführt wird)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Die Karte hilft jeder Corp-Linie nach dem Score. Ohne eigene Draw-/Value-Engine-Strategie sollte sie support-only bleiben; sonst muss Employee Empowerment konsistent auch geankert werden.",
+      "before": {
+        "tacticSignals": [
+          "score.recurring_draw",
+          "draw.corp_draw"
+        ],
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "engine_anchor",
+            "roleDetail": "scored_draw_engine",
+            "evidence": [
+              "score.recurring_draw",
+              "draw.corp_draw"
+            ],
+            "confidence": "medium",
+            "rationale": "Recurring draw after scoring turns a completed remote score into sustained follow-up pressure and supports continued remote scoring plans."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "title": "AI Chief Financial Officer",
+      "text": "[A]: Shuffle cards stored in HQ and the Archives into R&D; then draw five cards.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "`score.draw` und die Shuffle-Signale sind grob; die Karte ist eine wiederholbare HQ/Archives→R&D-Recycle- und Draw-Ability, aber ohne passende Strategy-ID.",
+      "recommendedTacticSignals": [
+        "draw.corp_action_draw",
+        "hq.corp_hand_to_rnd_shuffle",
+        "archives.corp_recycle_to_rnd",
+        "rnd.corp_shuffle_recycle"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (deferred: corp.deck_recycle_engine / corp.value_engine)",
+      "recommendedTargetOrConstraints": "Ability-ID wichtig, weil die Aktion aus einer gescorten Agenda kommt.",
+      "rationale": "Starke Engine, aber nicht automatisch Remote, Fast Advance oder Central Stabilize. Als Strategy-Anker nur sinnvoll, wenn eine eigene Deck-Recycle-/Value-Strategie eingeführt wird.",
+      "before": {
+        "tacticSignals": [
+          "score.draw",
+          "score.hq_archive_to_rnd_shuffle",
+          "score.rnd_archive_recycle"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_189_artificial-security-directors",
+      "title": "Artificial Security Directors",
+      "text": "Difficulty of Black Ops agendas is reduced by 1.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Pair ist plausibel, aber Rolle zu generisch und Subtype-Scope sollte nicht als Strategie missverstanden werden.",
+      "recommendedTacticSignals": [
+        "score.agenda_difficulty_discount",
+        "score.black_ops_difficulty_discount"
+      ],
+      "recommendedStrategySupportPairs": "corp.fast_advance -> enabler/black_ops_difficulty_enabler (medium)",
+      "recommendedTargetOrConstraints": "constraint.only_black_ops_agendas",
+      "rationale": "Subtype-Difficulty-Reduction erleichtert zukünftige Scores und kann Fast-Advance-/Scorefenster ermöglichen, trägt aber keine Black-Ops-Strategie als solche.",
+      "before": {
+        "tacticSignals": [
+          "score.agenda_difficulty_discount",
+          "score.black_ops_difficulty_discount"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "enabler",
+            "evidence": [
+              "score.agenda_difficulty_discount",
+              "score.black_ops_difficulty_discount"
+            ],
+            "confidence": "medium",
+            "rationale": "Difficulty-Reduction ist funktional Fast-Advance-Support; der Black-Ops-Subtype selbst ist kein Anker."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "title": "Bioweapons Engineering",
+      "text": "Each source of meat damage inflicts +1 meat damage.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "`engine_anchor` ist weniger präzise als Damage-Amplifier; die Karte erzeugt selbst keinen Schaden.",
+      "recommendedTacticSignals": [
+        "damage.corp_meat_damage_amplifier",
+        "score.meat_damage_amp"
+      ],
+      "recommendedStrategySupportPairs": "corp.damage_kill -> damage_amplifier/meat_damage_amp_anchor (high)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Die Karte macht vorhandene Meat-Damage-Quellen killfähiger, ist aber ohne Quellen unvollständig. DeckDoctrine sollte sie als Amplifier, nicht als Quelle zählen.",
+      "before": {
+        "tacticSignals": [
+          "score.damage_amp",
+          "score.meat_damage_amp"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "engine_anchor",
+            "roleDetail": "damage_amp_anchor",
+            "evidence": [
+              "score.meat_damage_amp",
+              "score.damage_amp"
+            ],
+            "confidence": "high",
+            "rationale": "Verstaerkt vorhandene Meat-Damage-Quellen und traegt damit echte Kill-Linien, erzeugt aber keinen Schaden allein."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "title": "Black Ice Quality Assurance",
+      "text": "All black ice has +2 strength.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Inhaltlich gut, aber Scope/Constraint sollte sauber getrennt werden.",
+      "recommendedTacticSignals": [
+        "ice.corp_strength_bonus",
+        "ice.corp_black_ice_strength_bonus",
+        "score.black_ice_strength_bonus"
+      ],
+      "recommendedStrategySupportPairs": "corp.ice_tax_glacier -> tax_tool/black_ice_tax_anchor (high)",
+      "recommendedTargetOrConstraints": "constraint.only_black_ice; kein TargetProfile, weil statischer globaler Buff",
+      "rationale": "Globaler Stärke-Buff auf Black ICE trägt ICE-Tax/Glacier. Kein Damage-Anker nur wegen Black-Ice-Kontext.",
+      "before": {
+        "tacticSignals": [
+          "ice.strength_modifier",
+          "score.black_ice_strength_bonus",
+          "score.ice_type_tax_support"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "ice_type_anchor",
+            "evidence": [
+              "score.black_ice_strength_bonus",
+              "score.ice_type_tax_support"
+            ],
+            "confidence": "high",
+            "rationale": "Black-ICE-Staerke ist ICE-Tax/Glacier-Anker; kein Damage-Anker allein aus dem Black-ICE-Kontext."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_192_corporate-boon",
+      "title": "Corporate Boon",
+      "text": "Put four Boon counters on Corporate Boon when you score it.\nBoon counter: Gain an action. Use this ability only once per turn and only during your turn.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "`score.action_gain` ist okay, aber Action-Economy sollte nicht unter Economy landen und als potenzieller Tempo-Cluster sichtbar sein.",
+      "recommendedTacticSignals": [
+        "action.corp_counter_bank",
+        "action.corp_extra_action",
+        "score.action_counter_bank",
+        "limit.once_per_turn"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (deferred: corp.action_tempo / corp.score_tempo)",
+      "recommendedTargetOrConstraints": "Self/counter cashout; keine echte Zielwahl",
+      "rationale": "Vier banked extra actions sind stark, aber ohne dokumentierte Corp-Tempo-Strategy kein Fast-Advance- oder Remote-Anker. Extra Actions können Scores unterstützen, sind aber nicht automatisch Strategie.",
+      "before": {
+        "tacticSignals": [
+          "score.action_counter_bank",
+          "score.action_gain",
+          "score.agenda_action"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "text": "Put 15 from the bank on Corporate Coup when you score it.\n[A]: Take 3 from Corporate Coup, if it has any bits.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Support-only ist richtig; Signalnamen sollten Credit-Economy statt generisches Agenda-Action betonen.",
+      "recommendedTacticSignals": [
+        "economy.corp_counter_bank",
+        "economy.corp_counter_cashout_action",
+        "score.economy_counter_bank",
+        "score.agenda_action"
+      ],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "Self/counter cashout",
+      "rationale": "Banked Credits nach Score sind starke Economy, aber reine Economy erzeugt keinen Strategieanker.",
+      "before": {
+        "tacticSignals": [
+          "score.agenda_action",
+          "score.economy_action",
+          "score.economy_counter_bank"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_194_corporate-downsizing",
+      "title": "Corporate Downsizing",
+      "text": "When you score Corporate Downsizing, show to Runner any number of agenda cards stored in HQ. Gain bits equal to twice the combined agenda points of these cards; then shuffle them into R&D.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Aktuell fehlt ein möglicher Central-Stabilize-Anker; die Karte reduziert HQ-Agenda-Dichte und gibt Credits.",
+      "recommendedTacticSignals": [
+        "economy.corp_agenda_reveal_burst",
+        "hq.corp_agenda_density_reduction",
+        "rnd.corp_agenda_shuffle_from_hq",
+        "score.hq_agenda_reveal",
+        "score.hq_agenda_shuffle"
+      ],
+      "recommendedStrategySupportPairs": "corp.central_stabilize -> defensive_tool/hq_agenda_flood_cleanup (medium)",
+      "recommendedTargetOrConstraints": "Choice: any number of agenda cards in HQ; side-safe, weil eigene HQ-Karten.",
+      "rationale": "Der Effekt ist nicht nur Economy: er räumt Agendas aus HQ und stabilisiert gegen HQ-Steals. Wegen Konditionalität medium.",
+      "before": {
+        "tacticSignals": [
+          "score.economy_conditional_burst",
+          "score.hq_agenda_reveal",
+          "score.hq_agenda_shuffle"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_195_corporate-retreat",
+      "title": "Corporate Retreat",
+      "text": "You lose the following ability as soon as you rez or install any card. A: Gain [2].",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Support-only ist richtig; Risiko/Constraint sollte deutlicher sein.",
+      "recommendedTacticSignals": [
+        "economy.corp_credit_action",
+        "score.agenda_action",
+        "risk.loses_ability_on_install_or_rez"
+      ],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "constraint.ability_lost_on_install_or_rez",
+      "rationale": "Die Karte ist riskante, langsame Economy. Kein Strategieanker, weil der Nutzen generisch ist und der Drawback stark einschränkt.",
+      "before": {
+        "tacticSignals": [
+          "risk.loses_ability_on_install_or_rez",
+          "score.agenda_action",
+          "score.economy_action"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_196_corporate-war",
+      "title": "Corporate War",
+      "text": "If you have 12 or more bits in your pool when you score Corporate War, gain 12; otherwise, lose all bits.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Support-only ist richtig; Schwellwert und Crash-Risiko sind zentral.",
+      "recommendedTacticSignals": [
+        "economy.corp_threshold_burst",
+        "score.economy_conditional_burst",
+        "risk.requires_corp_credit_threshold",
+        "risk.economy_crash_on_score"
+      ],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "condition.corp_credits_at_score_at_least_12",
+      "rationale": "Reiner Economy-Swing mit hartem Risiko. Kein Fast-Advance-Anker nur wegen viel Geld.",
+      "before": {
+        "tacticSignals": [
+          "risk.economy_crash_on_score",
+          "risk.requires_corp_credit_threshold",
+          "score.economy_conditional_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_197_data-fort-reclamation",
+      "title": "Data Fort Reclamation",
+      "text": "Gain [10] and choose up to four cards stored in HQ when you score Data Fort Reclamation. Create a new data fort using the cards chosen. Install the cards one at a time; you may rez them when you install them. Then, return to the bank any of the [10] not spent.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Pair ist gut; Signale und Target/Sequence-Gap sollten präziser werden.",
+      "recommendedTacticSignals": [
+        "install.corp_new_remote_fort_from_hq",
+        "economy.corp_install_rez_budget",
+        "score.remote_fort_creation",
+        "score.remote_install_budget"
+      ],
+      "recommendedStrategySupportPairs": "corp.remote_scoring -> engine_anchor/remote_setup_engine (high)",
+      "recommendedTargetOrConstraints": "TargetProfile nötig: bis zu vier HQ-Karten wählen, Install-Reihenfolge, optional rezzen, Budget-Nutzung.",
+      "rationale": "Das ist eine echte Remote-Setup-Engine nach Score. Der Report liegt hier fachlich richtig; nur Zielwahl/Sequenz müssen nachgezogen werden.",
+      "before": {
+        "tacticSignals": [
+          "score.remote_fort_creation",
+          "score.remote_install_budget"
+        ],
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "engine_anchor",
+            "roleDetail": "remote_setup_engine",
+            "evidence": [
+              "score.remote_fort_creation",
+              "score.remote_install_budget"
+            ],
+            "confidence": "high",
+            "rationale": "Echte Remote-Setup-Engine, aber Zielwahl/Install-Sequenz passt nicht in TargetProfile V1."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_198_detroit-police-contract",
+      "title": "Detroit Police Contract",
+      "text": "Put [12] from the bank on Detroit Police Contract when you score it. Take [2] from Detroit Police Contract, if it has any bits, at the start of each of your turns.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Support-only ist richtig; Counterbank/Recurring Economy präzisieren.",
+      "recommendedTacticSignals": [
+        "economy.corp_recurring_counter_bank",
+        "economy.corp_start_turn_payout",
+        "score.economy_counter_bank"
+      ],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "Self counter bank; keine Zielwahl",
+      "rationale": "Recurring Credits sind nützlich, aber generische Economy bleibt support-only.",
+      "before": {
+        "tacticSignals": [
+          "score.economy_counter_bank",
+          "score.economy_recurring"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "text": "You may choose to draw an additional card at the start of each of your turns. [A]: Draw two cards.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Support-only ist richtig; zeigt aber, warum Unlisted Research Lab nicht remote_scoring sein sollte.",
+      "recommendedTacticSignals": [
+        "draw.corp_recurring_optional",
+        "draw.corp_action_draw",
+        "score.recurring_draw",
+        "score.agenda_action"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (deferred: corp.draw_engine / corp.value_engine)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Wiederholbarer Draw ist stark, aber generisch. Ohne eigene Draw-Engine-Strategy kein Strategieanker.",
+      "before": {
+        "tacticSignals": [
+          "score.agenda_action",
+          "score.draw",
+          "score.recurring_draw"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_200_encryption-breakthrough",
+      "title": "Encryption Breakthrough",
+      "text": "All code gates have +1 strength. When you score Encryption Breakthrough, reveal as many code gates as you wish. Then, gain 1 for each revealed or rezzed code gate.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Pair ist richtig; Scope/Reveal-Economy trennen.",
+      "recommendedTacticSignals": [
+        "ice.corp_code_gate_strength_bonus",
+        "ice.corp_strength_bonus",
+        "economy.corp_ice_type_reveal_burst",
+        "score.code_gate_strength_bonus",
+        "score.ice_type_tax_support"
+      ],
+      "recommendedStrategySupportPairs": "corp.ice_tax_glacier -> tax_tool/code_gate_tax_anchor (high)",
+      "recommendedTargetOrConstraints": "constraint.only_code_gates; kein TargetProfile für globalen Buff",
+      "rationale": "Code-Gate-Buff trägt ICE-Tax. Reveal-Economy ist Supporting Evidence, nicht der Ankergrund.",
+      "before": {
+        "tacticSignals": [
+          "ice.strength_modifier",
+          "score.code_gate_strength_bonus",
+          "score.ice_type_reveal_economy",
+          "score.ice_type_tax_support"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "ice_type_anchor",
+            "evidence": [
+              "score.code_gate_strength_bonus",
+              "score.ice_type_tax_support"
+            ],
+            "confidence": "high",
+            "rationale": "Code-Gate-Buff traegt ICE-Tax; Reveal-Economy bleibt Support."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_201_executive-extraction",
+      "title": "Executive Extraction",
+      "text": "Difficulty of Gray Ops agendas is reduced by 1.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Wie Artificial Security Directors: Rolle genauer, Subtype nicht als Strategie.",
+      "recommendedTacticSignals": [
+        "score.agenda_difficulty_discount",
+        "score.gray_ops_difficulty_discount"
+      ],
+      "recommendedStrategySupportPairs": "corp.fast_advance -> enabler/gray_ops_difficulty_enabler (medium)",
+      "recommendedTargetOrConstraints": "constraint.only_gray_ops_agendas",
+      "rationale": "Difficulty-Reduction erleichtert zukünftige Scores; Gray Ops bleibt Scope, keine Strategie.",
+      "before": {
+        "tacticSignals": [
+          "score.agenda_difficulty_discount",
+          "score.gray_ops_difficulty_discount"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "enabler",
+            "evidence": [
+              "score.agenda_difficulty_discount",
+              "score.gray_ops_difficulty_discount"
+            ],
+            "confidence": "medium",
+            "rationale": "Difficulty-Reduction ist Fast-Advance-Support; Gray-Ops-Subtype allein bleibt kein Strategieanker."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_202_genetics-visionary-acquisition",
+      "title": "Genetics-Visionary Acquisition",
+      "text": "Difficulty of Research agendas is reduced by 1.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Wie die anderen Discount-Agendas: Rolle genauer, Subtype nicht als Strategie.",
+      "recommendedTacticSignals": [
+        "score.agenda_difficulty_discount",
+        "score.research_difficulty_discount"
+      ],
+      "recommendedStrategySupportPairs": "corp.fast_advance -> enabler/research_difficulty_enabler (medium)",
+      "recommendedTargetOrConstraints": "constraint.only_research_agendas",
+      "rationale": "Research-Difficulty-Reduction ist Score-Enabler. Nicht aus Research-Subtype eine eigene Strategie ableiten.",
+      "before": {
+        "tacticSignals": [
+          "score.agenda_difficulty_discount",
+          "score.research_difficulty_discount"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "enabler",
+            "evidence": [
+              "score.agenda_difficulty_discount",
+              "score.research_difficulty_discount"
+            ],
+            "confidence": "medium",
+            "rationale": "Research-Difficulty-Reduction ermoeglicht Fast-Advance-Linien, nicht Research als Subtyp."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_203_hostile-takeover",
+      "title": "Hostile Takeover",
+      "text": "Gain 5 credits when scored.",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "currentIssue": "Einordnung ist korrekt: einfache Economy, kein Anker.",
+      "recommendedTacticSignals": [
+        "economy.corp_credit_burst",
+        "score.economy_burst"
+      ],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "5 Credits beim Score sind generischer Support und tragen keine Decklinie direkt.",
+      "before": {
+        "tacticSignals": [
+          "score.economy_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_204_ice-transmutation",
+      "title": "Ice Transmutation",
+      "text": "Choose a piece of rezzed ice when you score Ice Transmutation. That ice now has +1 strength, and each subroutine on it is repeated once. Treat this as if each repeated subroutine appeared immediately after the original subroutine.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Pair ist richtig; TargetProfile sollte explizit werden.",
+      "recommendedTacticSignals": [
+        "ice.corp_strength_bonus_chosen",
+        "ice.corp_subroutine_repeat",
+        "score.chosen_ice_strength_bonus",
+        "score.repeat_ice_subroutines"
+      ],
+      "recommendedStrategySupportPairs": "corp.ice_tax_glacier -> payoff_anchor/ice_upgrade_payoff (high)",
+      "recommendedTargetOrConstraints": "TargetProfile nötig: Choose a rezzed ICE; priorisiere sichtbares, zentrales oder Remote-schützendes ICE mit starken Subroutinen.",
+      "rationale": "Permanenter gezielter ICE-Upgrade-Payoff ist klarer ICE-Tax/Glacier-Anker.",
+      "before": {
+        "tacticSignals": [
+          "ice.strength_modifier",
+          "ice.subroutine_modifier",
+          "score.chosen_ice_strength_bonus",
+          "score.repeat_ice_subroutines"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "payoff_anchor",
+            "roleDetail": "ice_upgrade_payoff",
+            "evidence": [
+              "score.chosen_ice_strength_bonus",
+              "score.repeat_ice_subroutines"
+            ],
+            "confidence": "high",
+            "rationale": "Gezielter ICE-Upgrade-Payoff; TargetProfile V1 waere moeglich, bleibt aber read-only Kandidat."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_205_main-office-relocation",
+      "title": "Main-Office Relocation",
+      "text": "Hand size +2.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Support-only ist richtig; Signal kann zusätzlich außerhalb score.* präzisiert werden.",
+      "recommendedTacticSignals": [
+        "setup.corp_hand_size",
+        "score.hand_size"
+      ],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Handsize ist generischer Setup-/Stabilitätsnutzen. Kein Strategieanker.",
+      "before": {
+        "tacticSignals": [
+          "score.hand_size"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_206_marine-arcology",
+      "title": "Marine Arcology",
+      "text": "A, A: Gain [3].",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Support-only ist richtig; Zwei-Aktions-Credit-Gain sollte als ineffiziente Action-Economy sichtbar sein.",
+      "recommendedTacticSignals": [
+        "economy.corp_two_action_credit_gain",
+        "score.agenda_action"
+      ],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "A,A für 3 Credits ist generische Economy. Keine Decklinie.",
+      "before": {
+        "tacticSignals": [
+          "score.agenda_action",
+          "score.economy_action"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "text": "[A]: Trace 2 - If trace is successful, give Runner a tag.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "`engine_anchor/tag_source` ist zu generisch; Trace-Tag-Quelle muss von Payoff und Trace-Credit getrennt werden.",
+      "recommendedTacticSignals": [
+        "trace.corp_source",
+        "tag.corp_trace_tag_source",
+        "condition.trace_success",
+        "score.trace_tag_source"
+      ],
+      "recommendedStrategySupportPairs": "corp.tag_trace_punish -> trace_tag_source (high; trace_base=2 als Bewertungsmetadatum)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Wiederholbare Trace→Tag-Ability ist Tag-Quelle, kein Payoff. Geringe Trace-Stärke betrifft Action-Scoring, nicht die Rollenklasse.",
+      "before": {
+        "tacticSignals": [
+          "score.tag_source",
+          "score.trace_tag_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "engine_anchor",
+            "roleDetail": "tag_source",
+            "evidence": [
+              "score.trace_tag_source",
+              "score.tag_source"
+            ],
+            "confidence": "high",
+            "rationale": "Trace-Tag-Quelle, getrennt von Tag-Payoff."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "text": "[A]: Do 1 meat damage. Use this ability only if Runner is tagged.",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "currentIssue": "`corp.tag_trace_punish -> punish_payoff` mit Evidence nur `risk.requires_tagged_runner` ist zu grob; Conditions sind keine Primärevidenz.",
+      "recommendedTacticSignals": [
+        "damage.corp_tagged_meat_payoff",
+        "damage.corp_meat_damage_source",
+        "tag.corp_tagged_runner_payoff",
+        "condition.requires_tagged_runner"
+      ],
+      "recommendedStrategySupportPairs": "corp.damage_kill -> tagged_meat_damage_payoff (high); corp.tag_trace_punish -> tagged_runner_punish_payoff (high)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Die Karte nutzt Tags als Bedingung und verursacht Meat Damage. Sie ist keine Tagquelle, sondern Payoff für Tag-/Damage-Linien.",
+      "before": {
+        "tacticSignals": [
+          "damage.payoff",
+          "risk.requires_tagged_runner",
+          "score.meat_damage_source",
+          "score.tagged_meat_damage_payoff",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "damage_payoff",
+            "evidence": [
+              "score.tagged_meat_damage_payoff",
+              "score.meat_damage_source"
+            ],
+            "confidence": "high",
+            "rationale": "Tagged Meat-Damage-Payoff; Tag-Quelle und Payoff bleiben getrennt."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "evidence": [
+              "risk.requires_tagged_runner"
+            ],
+            "confidence": "high",
+            "rationale": "Tagged Meat-Damage-Payoff; Tag-Quelle und Payoff bleiben getrennt."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_209_political-coup",
+      "title": "Political Coup",
+      "text": "Put 12 from the bank on Political Coup when you score it.\n[A]: Take 3 from Political Coup, if it has any bits.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Support-only ist richtig; analog Corporate Coup.",
+      "recommendedTacticSignals": [
+        "economy.corp_counter_bank",
+        "economy.corp_counter_cashout_action",
+        "score.economy_counter_bank",
+        "score.agenda_action"
+      ],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "Self/counter cashout",
+      "rationale": "Banked Credits nach Score sind Economy-Support, keine Strategie.",
+      "before": {
+        "tacticSignals": [
+          "score.agenda_action",
+          "score.economy_action",
+          "score.economy_counter_bank"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "text": "A: Gain [3].",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Es fehlt ein High-Agenda-Value-Signal; die Action-Economy allein unterschlägt, dass die Karte 6 Punkte wert ist. Trotzdem nicht automatisch Strategieanker.",
+      "recommendedTacticSignals": [
+        "score.high_agenda_value",
+        "score.vanilla_points",
+        "economy.corp_credit_action",
+        "score.agenda_action"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (optional candidate: corp.remote_scoring -> win_condition/large_agenda_closeout, nur falls hohe gedruckte Agenda-Punkte als Anker zählen sollen)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Die eigentliche strategische Relevanz ist der 6-Punkte-Score, nicht A: Gain 3. Als generelle Regel sollte `score.high_agenda_value` aber nicht automatisch Remote-Scoring erzeugen, sonst würden vanilla große Agendas zu Strategieankern.",
+      "before": {
+        "tacticSignals": [
+          "score.agenda_action",
+          "score.economy_action"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_211_polymer-breakthrough",
+      "title": "Polymer Breakthrough",
+      "text": "Gain 1 at the start of each of your turns.",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "currentIssue": "Einordnung korrekt: recurring Economy, kein Anker.",
+      "recommendedTacticSignals": [
+        "economy.corp_recurring_credit",
+        "score.economy_recurring"
+      ],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Einfache wiederkehrende Credits sind Support-only.",
+      "before": {
+        "tacticSignals": [
+          "score.economy_recurring"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_212_priority-requisition",
+      "title": "Priority Requisition",
+      "text": "You may rez a piece of ice, at no cost, when you score Priority Requisition.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "currentIssue": "Pairs sind plausibel, aber `scoring_tool` ist unscharf; TargetProfile für ICE-Auswahl fehlt.",
+      "recommendedTacticSignals": [
+        "ice.corp_free_rez_on_score",
+        "score.free_rez_ice"
+      ],
+      "recommendedStrategySupportPairs": "corp.ice_tax_glacier -> payoff_anchor/free_rez_ice_payoff (high); corp.remote_scoring -> score_window_payoff/free_rez_remote_defense (medium)",
+      "recommendedTargetOrConstraints": "TargetProfile nötig: choose a piece of ICE; priorisiere teures, relevantes, bisher unrezzed ICE auf gefährdetem Server/Scoring-Remote.",
+      "rationale": "Free Rez ist ein echter ICE-Tax-Payoff und kann ein Scorefenster absichern. Kein Credit-Economy-Signal.",
+      "before": {
+        "tacticSignals": [
+          "score.free_rez_ice"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "scoring_tool",
+            "roleDetail": "tempo_payoff",
+            "evidence": [
+              "score.free_rez_ice"
+            ],
+            "confidence": "high",
+            "rationale": "Free-rez-payoff stuetzt ICE-Tax und Scoring-Window; nicht Economy-Reserve."
+          },
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "scoring_tool",
+            "roleDetail": "score_window_payoff",
+            "evidence": [
+              "score.free_rez_ice"
+            ],
+            "confidence": "medium",
+            "rationale": "Free-rez-payoff stuetzt ICE-Tax und Scoring-Window; nicht Economy-Reserve."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_213_private-cybernet-police",
+      "title": "Private Cybernet Police",
+      "text": "[A]: Trace 5 - If trace is successful, give Runner a tag.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Wie Netwatch, aber stärkerer Trace; Rolle muss `trace_tag_source` heißen.",
+      "recommendedTacticSignals": [
+        "trace.corp_source",
+        "tag.corp_trace_tag_source",
+        "condition.trace_success",
+        "score.trace_tag_source"
+      ],
+      "recommendedStrategySupportPairs": "corp.tag_trace_punish -> trace_tag_source (high; trace_base=5 als Bewertungsmetadatum)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Repeatable Trace 5→Tag ist klare Tag-Quelle, kein Payoff.",
+      "before": {
+        "tacticSignals": [
+          "score.tag_source",
+          "score.trace_tag_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "engine_anchor",
+            "roleDetail": "tag_source",
+            "evidence": [
+              "score.trace_tag_source",
+              "score.tag_source"
+            ],
+            "confidence": "high",
+            "rationale": "Trace-Tag-Quelle, getrennt von Payoff."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_214_project-babylon",
+      "title": "Project Babylon",
+      "text": "Score 1 additional agenda point for every two advancement counters over Project Babylon's difficulty that are on Project Babylon when you score it.",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "currentIssue": "Der Report lässt die Karte support-only, obwohl sie ein skalierender Agenda-Punkte-/Closeout-Payoff ist.",
+      "recommendedTacticSignals": [
+        "score.conditional_bonus_agenda_points",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling",
+        "advance.overadvance_payoff",
+        "risk.overadvance_investment"
+      ],
+      "recommendedStrategySupportPairs": "corp.remote_scoring -> win_condition/overadvance_agenda_point_payoff (medium)",
+      "recommendedTargetOrConstraints": "keins; Overadvance-Bewertung braucht Boardstate/Scorefenster, aber keine Zielwahl.",
+      "rationale": "Bonus-Agenda-Punkte durch Overadvance sind ein echter Score-/Closeout-Payoff. Nicht Fast Advance, aber Remote-/Overadvance-Scoreplan.",
+      "before": {
+        "tacticSignals": [
+          "score.conditional_bonus_agenda_points",
+          "score.overadvance_bonus",
+          "score.overadvance_scaling"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_215_security-net-optimization",
+      "title": "Security Net Optimization",
+      "text": "Choose a fort when scored. Ice installed on that fort gets +1 strength.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "currentIssue": "Pairs sind plausibel; TargetProfile muss die Fort-Wahl modellieren.",
+      "recommendedTacticSignals": [
+        "ice.corp_fort_strength_bonus",
+        "ice.corp_strength_bonus",
+        "score.fort_ice_strength_bonus"
+      ],
+      "recommendedStrategySupportPairs": "corp.ice_tax_glacier -> tax_tool/fort_tax_anchor (high); corp.remote_scoring -> defensive_tool/remote_defense_anchor (medium)",
+      "recommendedTargetOrConstraints": "TargetProfile nötig: choose a fort; priorisiere scoring remote oder stark contestete zentrale Forts je Boardstate.",
+      "rationale": "Fortbezogener ICE-Buff trägt ICE-Tax; Remote-Pair nur dann mittelbar, wenn der gewählte Fort ein Scoring-/Schutzserver ist.",
+      "before": {
+        "tacticSignals": [
+          "ice.strength_modifier",
+          "score.fort_ice_strength_bonus"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "fort_tax_anchor",
+            "evidence": [
+              "score.fort_ice_strength_bonus"
+            ],
+            "confidence": "high",
+            "rationale": "Fortbezogener ICE-Buff traegt ICE-Tax und Remote-Defense."
+          },
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "tax_tool",
+            "roleDetail": "remote_defense_anchor",
+            "evidence": [
+              "score.fort_ice_strength_bonus"
+            ],
+            "confidence": "medium",
+            "rationale": "Fortbezogener ICE-Buff traegt ICE-Tax und Remote-Defense."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_216_security-purge",
+      "title": "Security Purge",
+      "text": "Show the top three cards of R&D to Runner when you score Security Purge. If any of those cards are ice, install and rez them, at no cost. Trash the rest of those cards.",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "currentIssue": "`access.rnd_reveal_requirement` ist falsch gerichtet; Remote-Scoring-Pair ist zu indirekt. Außerdem fehlt das Trash-Risiko für Nicht-ICE.",
+      "recommendedTacticSignals": [
+        "info.corp_reveal_top_rnd_to_runner",
+        "install.corp_rnd_ice_install",
+        "ice.corp_free_rez",
+        "score.free_install_and_rez_ice",
+        "risk.trash_revealed_non_ice"
+      ],
+      "recommendedStrategySupportPairs": "corp.ice_tax_glacier -> setup_payoff/free_install_rez_ice (medium); entferne corp.remote_scoring-Pair",
+      "recommendedTargetOrConstraints": "TargetProfile/Sequence nötig: installiere/rezzed ICE aus R&D; Server/Position wählen; Non-ICE werden getrasht.",
+      "rationale": "Die Karte baut ICE-Board auf und unterstützt Glacier. Remote-Scoring ist nur möglicher Verwendungsort, nicht primärer Strategieanker.",
+      "before": {
+        "tacticSignals": [
+          "access.rnd_reveal_requirement",
+          "score.free_install_and_rez_ice",
+          "score.rnd_install_and_rez",
+          "score.rnd_reveal"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "scoring_tool",
+            "roleDetail": "setup_payoff",
+            "evidence": [
+              "score.free_install_and_rez_ice",
+              "score.rnd_install_and_rez"
+            ],
+            "confidence": "medium",
+            "rationale": "R&D-Reveal plus free install/rez ist Setup-Payoff; Sequenzzielwahl bleibt schema gap."
+          },
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "scoring_tool",
+            "roleDetail": "setup_payoff",
+            "evidence": [
+              "score.free_install_and_rez_ice",
+              "score.rnd_install_and_rez"
+            ],
+            "confidence": "medium",
+            "rationale": "R&D-Reveal plus free install/rez ist Setup-Payoff; Sequenzzielwahl bleibt schema gap."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "text": "[A]: Do 2 meat damage. Use this ability only if Runner is tagged.",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "currentIssue": "Wie On-Call Solo Team; Rolle und Evidenz präzisieren.",
+      "recommendedTacticSignals": [
+        "damage.corp_tagged_meat_payoff",
+        "damage.corp_meat_damage_source",
+        "tag.corp_tagged_runner_payoff",
+        "condition.requires_tagged_runner"
+      ],
+      "recommendedStrategySupportPairs": "corp.damage_kill -> tagged_meat_damage_payoff (high); corp.tag_trace_punish -> tagged_runner_punish_payoff (high)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "2 Meat Damage pro Aktion ist klarer tagged Runner Damage-Payoff. Keine Tagquelle.",
+      "before": {
+        "tacticSignals": [
+          "damage.payoff",
+          "risk.requires_tagged_runner",
+          "score.meat_damage_source",
+          "score.tagged_meat_damage_payoff",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "damage_payoff",
+            "evidence": [
+              "score.tagged_meat_damage_payoff",
+              "score.meat_damage_source"
+            ],
+            "confidence": "high",
+            "rationale": "Staerkerer Tagged Meat-Damage-Payoff; Tag-Quelle bleibt externe Bedingung."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "evidence": [
+              "risk.requires_tagged_runner"
+            ],
+            "confidence": "high",
+            "rationale": "Staerkerer Tagged Meat-Damage-Payoff; Tag-Quelle bleibt externe Bedingung."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_218_subsidiary-branch",
+      "title": "Subsidiary Branch",
+      "text": "Gain an action during each of your turns.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Support-only ist nach aktueller Taxonomie vertretbar, aber das Signal sollte Action-Tempo statt Score/Recurring-Gemisch sein.",
+      "recommendedTacticSignals": [
+        "action.corp_recurring_extra_action",
+        "tempo.corp_recurring_action",
+        "score.recurring_extra_action"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (deferred: corp.action_tempo / corp.score_tempo)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Dauerhafte zusätzliche Aktionen sind stark und deckprägend, aber laut aktueller Leitlinie nicht automatisch Fast Advance/Remote. Es fehlt wahrscheinlich eine eigene Action-Tempo-Strategy.",
+      "before": {
+        "tacticSignals": [
+          "score.recurring_extra_action"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "title": "Superior Net Barriers",
+      "text": "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain 1 for each revealed or rezzed wall.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "currentIssue": "Pair ist richtig; Scope/Reveal-Economy trennen.",
+      "recommendedTacticSignals": [
+        "ice.corp_wall_strength_bonus",
+        "ice.corp_strength_bonus",
+        "economy.corp_ice_type_reveal_burst",
+        "score.wall_strength_bonus",
+        "score.ice_type_tax_support"
+      ],
+      "recommendedStrategySupportPairs": "corp.ice_tax_glacier -> tax_tool/wall_tax_anchor (high)",
+      "recommendedTargetOrConstraints": "constraint.only_walls; kein TargetProfile für globalen Buff",
+      "rationale": "Wall-Buff trägt ICE-Tax/Glacier. Reveal-Economy bleibt Supporting Evidence.",
+      "before": {
+        "tacticSignals": [
+          "ice.strength_modifier",
+          "score.ice_type_reveal_economy",
+          "score.ice_type_tax_support",
+          "score.wall_strength_bonus"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "ice_type_anchor",
+            "evidence": [
+              "score.wall_strength_bonus",
+              "score.ice_type_tax_support"
+            ],
+            "confidence": "high",
+            "rationale": "Wall-Buff traegt ICE-Tax; Reveal-Economy bleibt Support."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_220_tycho-extension",
+      "title": "Tycho Extension",
+      "text": "No additional ability.",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "currentIssue": "Einordnung als support-only/vanilla high value ist konsistent, sofern hohe gedruckte Punkte nicht automatisch Strategieanker erzeugen.",
+      "recommendedTacticSignals": [
+        "score.high_agenda_value",
+        "score.vanilla_points"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (policy candidate: large_agenda_closeout, falls große gedruckte Agendas strategisch zählen sollen)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Keine Fähigkeit. Die Punktezahl ist wichtig für Bewertung, sollte aber nicht automatisch Remote-Scoring-Anker sein.",
+      "before": {
+        "tacticSignals": [
+          "score.high_agenda_value",
+          "score.vanilla_points"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_001_ai-board-member",
+      "title": "AI Board Member",
+      "text": "You may gain an action during each of your turns. At the start of each of your turns, roll a die to see what the action will be for that turn, and then decide whether to take it. On a 1, you may use the action only to install a card; on a 2 or 3, only to gain 1; on a 4, 5, or 6, only to draw a card.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Support-only ist vertretbar; Signal sollte Random-Action-Modus und Extra-Action-Typen trennen.",
+      "recommendedTacticSignals": [
+        "action.corp_random_recurring_extra_action",
+        "risk.random_action_mode",
+        "action.corp_install_only_action",
+        "economy.corp_credit_action",
+        "draw.corp_draw_action"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (deferred: corp.action_tempo / corp.score_tempo)",
+      "recommendedTargetOrConstraints": "Random mode resolution; keine Zielwahl außer Folgeaktion.",
+      "rationale": "Recurring Extra Action ist potenziell deckprägend, aber zufällig und nicht automatisch Fast Advance/Remote. Eigene Tempo-Strategie wäre sauberer.",
+      "before": {
+        "tacticSignals": [
+          "risk.random_action",
+          "score.random_extra_action"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_002_charity-takeover",
+      "title": "Charity Takeover",
+      "text": "Gain [9] and 1 Bad Publicity point. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Support-only ist richtig; Bad Publicity ist aus Corp-Sicht primär Risiko, nicht positives Score-Signal.",
+      "recommendedTacticSignals": [
+        "economy.corp_credit_burst",
+        "risk.bad_publicity_gain",
+        "risk.bad_publicity_loss_condition",
+        "score.economy_burst"
+      ],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "condition.corp_bad_publicity_threshold_7_loss",
+      "rationale": "9 Credits sind einfache Economy mit hartem Bad-Publicity-Drawback. Keine Bad-Publicity-Strategy und kein Remote/Fast-Advance-Anker.",
+      "before": {
+        "tacticSignals": [
+          "risk.bad_publicity",
+          "risk.loss_condition",
+          "score.bad_publicity_gain",
+          "score.bad_publicity_win_risk",
+          "score.economy_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "title": "Corporate Headhunters",
+      "text": "Whenever Corporate Headhunters successfully does damage, Runner 's hand size is reduced by 1. A: Do 1 meat damage. Use this ability only if Runner is tagged.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Grundzuordnung stimmt, aber Rolle sollte spezifisch `tagged_meat_damage_engine` heißen; Condition nicht als Primärevidenz.",
+      "recommendedTacticSignals": [
+        "damage.corp_tagged_meat_payoff",
+        "damage.corp_meat_damage_source",
+        "damage.corp_hand_size_pressure_on_successful_damage",
+        "tag.corp_tagged_runner_payoff",
+        "condition.requires_tagged_runner"
+      ],
+      "recommendedStrategySupportPairs": "corp.damage_kill -> damage_engine/tagged_meat_hand_size_pressure (high); corp.tag_trace_punish -> tagged_runner_punish_payoff (high)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Die Karte ist Kill-Engine: sie macht getaggten Schaden und reduziert zusätzlich Runner-Handgröße bei erfolgreichem Damage. Keine Brain-Damage-Semantik.",
+      "before": {
+        "tacticSignals": [
+          "damage.payoff",
+          "risk.requires_tagged_runner",
+          "score.hand_size_pressure",
+          "score.meat_damage_source",
+          "score.tagged_meat_damage_payoff",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "damage_engine",
+            "evidence": [
+              "score.tagged_meat_damage_payoff",
+              "score.meat_damage_source",
+              "score.hand_size_pressure"
+            ],
+            "confidence": "high",
+            "rationale": "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "evidence": [
+              "risk.requires_tagged_runner"
+            ],
+            "confidence": "high",
+            "rationale": "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_004_fetal-ai",
+      "title": "Fetal AI",
+      "text": "When Runner accesses Fetal AI, do 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses Fetal AI from the Archives. If Fetal AI is accessed from R&D, Runner must show it to you. Runner must pay 2 to steal Fetal AI, in addition to any other costs.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Grundrichtung stimmt, aber Signale sollten corp-seitig und damage-typ-präzise sein.",
+      "recommendedTacticSignals": [
+        "access.corp_net_damage_ambush",
+        "access.corp_agenda_steal_tax",
+        "access.archives_safe_exception",
+        "access.rnd_reveal_requirement",
+        "damage.corp_net_damage_access_punish"
+      ],
+      "recommendedStrategySupportPairs": "corp.damage_kill -> access_punish/net_damage_steal_tax (high); corp.ambush_bluff -> access_punish/agenda_net_damage_ambush (high)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Net-Damage beim Access plus Steal-Tax ist konkreter Access-Punish. `damage.payoff` darf nur Oberklasse sein.",
+      "before": {
+        "tacticSignals": [
+          "access.agenda_ambush",
+          "access.agenda_net_damage",
+          "access.agenda_steal_tax",
+          "access.archives_safe_exception",
+          "access.rnd_reveal_requirement",
+          "damage.payoff",
+          "score.net_damage_access_punish"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "access_punish",
+            "evidence": [
+              "access.agenda_net_damage",
+              "score.net_damage_access_punish"
+            ],
+            "confidence": "high",
+            "rationale": "Access-Ambush mit Net-Damage und Steal-Tax; keine Runner-seitige verdeckte Semantik vor Access/Revealed."
+          },
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "roleDetail": "access_punish",
+            "evidence": [
+              "access.agenda_ambush",
+              "access.agenda_steal_tax"
+            ],
+            "confidence": "high",
+            "rationale": "Access-Ambush mit Net-Damage und Steal-Tax; keine Runner-seitige verdeckte Semantik vor Access/Revealed."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_005_marked-accounts",
+      "title": "Marked Accounts",
+      "text": "When Runner accesses Marked Accounts, give Runner a tag, even if it is not installed. If Marked Accounts is accessed from R&D, Runner must show it to you.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Grundrichtung stimmt; `access.agenda_tag` sollte als Corp Access-Tag-Ambush präzisiert werden.",
+      "recommendedTacticSignals": [
+        "access.corp_tag_ambush",
+        "access.rnd_reveal_requirement",
+        "tag.corp_access_tag_source"
+      ],
+      "recommendedStrategySupportPairs": "corp.tag_trace_punish -> access_tag_source (high); corp.ambush_bluff -> access_punish/access_tag_ambush (medium)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Access-Tag ist Tagquelle und Ambush-Punish, aber kein persistenter Tag-Source und kein Payoff.",
+      "before": {
+        "tacticSignals": [
+          "access.agenda_ambush",
+          "access.agenda_tag",
+          "access.rnd_reveal_requirement",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "engine_anchor",
+            "roleDetail": "access_tag_source",
+            "evidence": [
+              "access.agenda_tag"
+            ],
+            "confidence": "high",
+            "rationale": "Access-Tag-Quelle; Tag-source und spaetere Payoffs bleiben getrennt."
+          },
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "engine_anchor",
+            "roleDetail": "access_punish",
+            "evidence": [
+              "access.agenda_ambush",
+              "access.agenda_tag"
+            ],
+            "confidence": "medium",
+            "rationale": "Access-Tag-Quelle; Tag-source und spaetere Payoffs bleiben getrennt."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "title": "Please Don't Choke Anyone",
+      "text": "For each 1 damage you successfully do, you may choose instead to prevent that damage and put a PDCA counter on Please Don't Choke Anyone. PDCA counter: Gain an action. Use this ability only once per turn and only during your turn.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Support-only ist vertretbar, aber die Karte hat eine erkennbare Damage→Action-Conversion, die als Taxonomie-Gap markiert werden sollte.",
+      "recommendedTacticSignals": [
+        "damage.corp_prevent_own_damage_for_counter",
+        "action.corp_damage_conversion_counter_bank",
+        "action.corp_counter_to_extra_action",
+        "limit.once_per_turn"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (deferred: corp.action_tempo / corp.damage_conversion_tempo)",
+      "recommendedTargetOrConstraints": "Conversion trigger on successful damage; keine klassische Zielwahl",
+      "rationale": "Die Karte nutzt Damage-Quellen, verhindert den Schaden aber. Daher kein Damage-Kill-Payoff, sondern alternative Tempo-Engine.",
+      "before": {
+        "tacticSignals": [
+          "score.action_counter_bank",
+          "score.damage_conversion_action_engine"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_007_project-venice",
+      "title": "Project Venice",
+      "text": "For every three advancement counters over Project Venice 's difficulty that are on Project Venice when you score it, gain an action during each of your turns.",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "currentIssue": "Support-only ist vertretbar, aber Overadvance-Payoff und Action-Tempo sollten klarer sein.",
+      "recommendedTacticSignals": [
+        "advance.overadvance_payoff",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling",
+        "action.corp_recurring_extra_action"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (deferred: corp.overadvance_value / corp.action_tempo)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Recurring Extra Actions aus Overadvance sind ein starker Payoff, aber ohne eigene Overadvance-/Tempo-Strategie sollte kein Fast-Advance-Anker erzwungen werden.",
+      "before": {
+        "tacticSignals": [
+          "score.overadvance_bonus",
+          "score.overadvance_scaling",
+          "score.recurring_extra_action"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_008_project-zurich",
+      "title": "Project Zurich",
+      "text": "For every two advancement counters over Project Zurich 's difficulty that are on Project Zurich when you score it, gain 1 at the start of each of your turns.",
+      "reviewStatus": "ändern",
+      "priority": "low",
+      "currentIssue": "Support-only ist vertretbar; Overadvance-Payoff und Economy sauber trennen.",
+      "recommendedTacticSignals": [
+        "advance.overadvance_payoff",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling",
+        "economy.corp_recurring_credit"
+      ],
+      "recommendedStrategySupportPairs": "_keine_ (deferred: corp.overadvance_value)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Overadvance erzeugt recurring Economy. Das ist Value-Support, aber ohne eigene Overadvance-Strategy kein Strategieanker.",
+      "before": {
+        "tacticSignals": [
+          "score.economy_recurring",
+          "score.overadvance_bonus",
+          "score.overadvance_scaling"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "title": "Viral Breeding Ground",
+      "text": "When you score Breeding Ground, trash all cards installed in or on the fort Breeding Ground was installed in. When Runner accesses Breeding Ground, choose up to two programs for each advancement counter on Breeding Ground; Runner brings those programs into his or her hand.",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "currentIssue": "`access.runner_program_bounce` muss corp-seitig präzisiert werden; `score.fort_trash_on_score` ist eher eigenes Fort-Trash-Risiko/Drawback.",
+      "recommendedTacticSignals": [
+        "access.corp_runner_program_bounce",
+        "access.corp_program_disruption",
+        "access.agenda_ambush",
+        "score.own_fort_trash_on_score",
+        "risk.trash_own_fort_on_score"
+      ],
+      "recommendedStrategySupportPairs": "corp.ambush_bluff -> access_punish/program_bounce_ambush (medium)",
+      "recommendedTargetOrConstraints": "TargetProfile nötig: choose up to two programs per advancement counter; eigene Score-Resolution trashing in/on fort beachten.",
+      "rationale": "Access-Punish ist Programmbounce, nicht Damage. Der Score-Effekt zerstört eigene Fort-Karten und darf nicht als positiver Remote-Setup-Anker gelesen werden.",
+      "before": {
+        "tacticSignals": [
+          "access.agenda_ambush",
+          "access.runner_program_bounce",
+          "access.runner_program_disruption",
+          "score.fort_trash_on_score"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "roleDetail": "access_punish",
+            "evidence": [
+              "access.agenda_ambush",
+              "access.runner_program_disruption"
+            ],
+            "confidence": "medium",
+            "rationale": "Programmbounce/-Disruption ist Access-Punish, kein Damage-Kill; Access-Zielwahl bleibt schema gap."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_010_world-domination",
+      "title": "World Domination",
+      "text": "Score an additional 4 agenda points when you score World Domination.",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "currentIssue": "Grundzuordnung stimmt; Risiko sollte als Corp-Advancement-Investment, nicht unspezifisch „high difficulty agenda“ beschrieben werden.",
+      "recommendedTacticSignals": [
+        "score.bonus_agenda_points",
+        "score.closeout_agenda",
+        "risk.large_advancement_investment",
+        "risk.high_difficulty_agenda"
+      ],
+      "recommendedStrategySupportPairs": "corp.remote_scoring -> win_condition/one_card_score_closeout (medium)",
+      "recommendedTargetOrConstraints": "keins",
+      "rationale": "Die Karte ist eine klare Win-Condition, aber der riesige Advance-Aufwand senkt die praktische Confidence. Nicht Fast Advance.",
+      "before": {
+        "tacticSignals": [
+          "risk.high_difficulty_agenda",
+          "score.bonus_agenda_points",
+          "score.closeout_agenda"
+        ],
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "win_condition",
+            "evidence": [
+              "score.bonus_agenda_points",
+              "score.closeout_agenda"
+            ],
+            "confidence": "medium",
+            "rationale": "Extrem hoher Score-Payoff ist Closeout/Win-Condition, aber wegen Difficulty kein Fast-Advance-Anker."
+          }
+        ],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        }
+      }
+    },
+    {
+      "set": "testset",
+      "cardId": "v08_project_agenda",
+      "title": "Project Agenda",
+      "text": "",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "currentIssue": "Fixture ohne Fähigkeit; nicht produktiv aggregieren.",
+      "recommendedTacticSignals": [],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "testOnly/fixtureOnly markieren; no_signal_reason=vanilla_fixture",
+      "rationale": "Keine Semantik nötig außer Test-/Fixture-Trennung.",
+      "before": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "low"
+        }
+      }
+    },
+    {
+      "set": "testset",
+      "cardId": "simple_agenda",
+      "title": "Simple Agenda",
+      "text": "",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "currentIssue": "Fixture ohne Fähigkeit; nicht produktiv aggregieren.",
+      "recommendedTacticSignals": [],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "testOnly/fixtureOnly markieren; no_signal_reason=vanilla_fixture",
+      "rationale": "Keine Semantik nötig außer Test-/Fixture-Trennung.",
+      "before": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "low"
+        }
+      }
+    },
+    {
+      "set": "testset",
+      "cardId": "simple_priority_agenda",
+      "title": "Simple Priority Agenda",
+      "text": "",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "currentIssue": "Fixture ohne Fähigkeit; nicht produktiv aggregieren.",
+      "recommendedTacticSignals": [],
+      "recommendedStrategySupportPairs": "_keine_",
+      "recommendedTargetOrConstraints": "testOnly/fixtureOnly markieren; no_signal_reason=vanilla_fixture",
+      "rationale": "Keine Semantik nötig außer Test-/Fixture-Trennung.",
+      "before": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "low"
+        }
+      }
+    }
+  ]
+}
