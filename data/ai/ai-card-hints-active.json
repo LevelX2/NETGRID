@@ -29573,8 +29573,15 @@
       "cardId": "onr_classic_005_baskerville",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "sentry", "ap_damage", "trace_counter", "sleepy"],
-      "planRoles": ["defend_fort", "tax_runs"],
+      "roles": [
+        "ice",
+        "sentry_ice",
+        "ap_ice",
+        "damage",
+        "damage_ice",
+        "etr_ice"
+      ],
+      "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
       "requiredMechanics": [
         "rez_ice",
         "printed_subroutine_damage",
@@ -29587,7 +29594,8 @@
       "valueHints": {
         "defense": 3,
         "damageThreat": 3,
-        "tracePressure": 2
+        "tracePressure": 2,
+        "runControl": 3
       },
       "riskTags": ["ap_damage", "trace", "runner_counter", "noisy_discount"],
       "aiSupportStatus": "ai_supported",
@@ -29596,18 +29604,101 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "corp_ice.rez_economy",
+        "corp_ice.trace_source",
+        "damage.payoff",
+        "tax.runner_persistent",
+        "trace.source"
+      ],
+      "effects": [
+        {
+          "kind": "damage",
+          "timing": "encounter",
+          "scope": "runner",
+          "resource": "damage",
+          "amount": 2,
+          "target": "corp_ice.net_damage",
+          "finite": true
+        },
+        {
+          "kind": "trace",
+          "timing": "encounter",
+          "scope": "runner",
+          "amount": 5,
+          "target": "trace.source",
+          "finite": true
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "trace_success",
+          "scope": "runner",
+          "resource": "counters",
+          "amount": 1,
+          "target": "baskerville_counter_run_start_net_damage",
+          "repeatable": true
+        },
+        {
+          "kind": "etr",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "corp_ice.end_run",
+          "finite": true
+        },
+        {
+          "kind": "rez_discount",
+          "timing": "during_run",
+          "scope": "corp",
+          "resource": "credits",
+          "amount": 5,
+          "target": "noisy_icebreaker_self_rez_discount",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        },
+        {
+          "kind": "requires_trace_success"
+        }
+      ],
+      "costProfile": {
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "lineSupport": ["corp.damage_kill", "corp.ice_tax_glacier"],
+      "strategicRole": ["punish_payoff", "tax_tool"],
+      "manualNotes": [
+        "CLASSIC-AI-05: Trace success creates a public Baskerville counter; do not model it as tag payoff."
+      ]
     },
     {
       "cardId": "onr_classic_006_bolter-swarm",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "sentry", "ap_damage", "next_ice_lock", "sleepy"],
-      "planRoles": ["defend_fort", "tax_runs"],
+      "roles": [
+        "ice",
+        "sentry_ice",
+        "ap_ice",
+        "damage",
+        "damage_ice",
+        "run_lock_ice"
+      ],
+      "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
       "requiredMechanics": [
         "rez_ice",
         "printed_subroutine_damage",
@@ -29617,7 +29708,8 @@
       "valueHints": {
         "defense": 3,
         "damageThreat": 4,
-        "tempo": 2
+        "tempo": 2,
+        "runControl": 3
       },
       "riskTags": ["ap_damage", "next_encounter_lock", "noisy_discount"],
       "aiSupportStatus": "ai_supported",
@@ -29626,18 +29718,68 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "corp_ice.next_ice_break_lock",
+        "corp_ice.rez_economy",
+        "corp_ice.run_lock",
+        "damage.payoff"
+      ],
+      "effects": [
+        {
+          "kind": "damage",
+          "timing": "encounter",
+          "scope": "runner",
+          "resource": "damage",
+          "amount": 4,
+          "target": "corp_ice.net_damage",
+          "finite": true
+        },
+        {
+          "kind": "future_encounter_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "corp_ice.next_ice_break_lock",
+          "finite": true
+        },
+        {
+          "kind": "rez_discount",
+          "timing": "during_run",
+          "scope": "corp",
+          "resource": "credits",
+          "amount": 5,
+          "target": "noisy_icebreaker_self_rez_discount",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_remaining_ice"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ],
+      "lineSupport": ["corp.damage_kill", "corp.ice_tax_glacier"],
+      "strategicRole": ["punish_payoff", "tax_tool"]
     },
     {
       "cardId": "onr_classic_007_brain-drain",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "sentry", "random_damage", "core_damage"],
-      "planRoles": ["defend_fort"],
+      "roles": ["ice", "sentry_ice", "ap_ice", "damage", "core_damage_ice"],
+      "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
       "requiredMechanics": [
         "rez_ice",
         "printed_random_damage",
@@ -29655,18 +29797,50 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.random_or_guessing",
+        "damage.payoff"
+      ],
+      "effects": [
+        {
+          "kind": "damage",
+          "timing": "encounter",
+          "scope": "runner",
+          "resource": "damage",
+          "amount": 3,
+          "target": "corp_ice.brain_damage",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ],
+      "lineSupport": ["corp.damage_kill"],
+      "strategicRole": ["punish_payoff"],
+      "manualNotes": [
+        "CLASSIC-AI-05: Random damage is deterministic through engine RNG; value is high-impact but probabilistic."
+      ]
     },
     {
       "cardId": "onr_classic_008_deadeye",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "sentry", "program_trash", "end_the_run", "sleepy"],
-      "planRoles": ["defend_fort", "tax_runs"],
+      "roles": ["ice", "sentry_ice", "program_trash_ice", "etr_ice"],
+      "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
       "requiredMechanics": [
         "rez_ice",
         "trash_installed_program",
@@ -29684,18 +29858,79 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash",
+        "corp_ice.rez_economy"
+      ],
+      "effects": [
+        {
+          "kind": "program_trash",
+          "timing": "encounter",
+          "scope": "installed_program",
+          "target": "corp_ice.program_trash",
+          "finite": true
+        },
+        {
+          "kind": "etr",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "corp_ice.end_run",
+          "finite": true
+        },
+        {
+          "kind": "rez_discount",
+          "timing": "during_run",
+          "scope": "corp",
+          "resource": "credits",
+          "amount": 5,
+          "target": "noisy_icebreaker_self_rez_discount",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        },
+        {
+          "kind": "requires_installed_program"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "subroutine_resolution",
+          "targetType": "program",
+          "purpose": "trash_high_value_installed_program",
+          "preferences": [
+            "breaker_covers_current_server",
+            "high_install_cost_or_memory",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": ["hidden_info_dependent_choice", "low_value_program"],
+          "hiddenInfoPolicy": "visible_or_known_only"
+        }
+      ],
+      "lineSupport": ["corp.ice_tax_glacier"],
+      "strategicRole": ["tax_tool"]
     },
     {
       "cardId": "onr_classic_012_imperial-guard",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "sentry", "program_trash", "end_the_run", "sleepy"],
-      "planRoles": ["defend_fort", "tax_runs"],
+      "roles": ["ice", "sentry_ice", "program_trash_ice", "etr_ice"],
+      "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
       "requiredMechanics": [
         "rez_ice",
         "trash_installed_program",
@@ -29713,18 +29948,79 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash",
+        "corp_ice.rez_economy"
+      ],
+      "effects": [
+        {
+          "kind": "program_trash",
+          "timing": "encounter",
+          "scope": "installed_program",
+          "target": "corp_ice.program_trash",
+          "finite": true
+        },
+        {
+          "kind": "etr",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "corp_ice.end_run",
+          "finite": true
+        },
+        {
+          "kind": "rez_discount",
+          "timing": "during_run",
+          "scope": "corp",
+          "resource": "credits",
+          "amount": 5,
+          "target": "noisy_icebreaker_self_rez_discount",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        },
+        {
+          "kind": "requires_installed_program"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "subroutine_resolution",
+          "targetType": "program",
+          "purpose": "trash_high_value_installed_program",
+          "preferences": [
+            "breaker_covers_current_server",
+            "high_install_cost_or_memory",
+            "central_or_remote_plan_enabler"
+          ],
+          "avoid": ["hidden_info_dependent_choice", "low_value_program"],
+          "hiddenInfoPolicy": "visible_or_known_only"
+        }
+      ],
+      "lineSupport": ["corp.ice_tax_glacier"],
+      "strategicRole": ["tax_tool"]
     },
     {
       "cardId": "onr_classic_013_puzzle",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "code_gate", "end_the_run", "delayed_self_trash"],
-      "planRoles": ["defend_fort", "tempo_defense"],
+      "roles": ["ice", "code_gate_ice", "etr_ice", "taxing_ice"],
+      "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
       "requiredMechanics": ["rez_ice", "end_the_run", "delayed_turn_end_trash"],
       "valueHints": {
         "defense": 2,
@@ -29737,18 +30033,59 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "effects": [
+        {
+          "kind": "etr",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "corp_ice.end_run",
+          "finite": true
+        },
+        {
+          "kind": "etr",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "corp_ice.multi_end_run",
+          "finite": true
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "end_of_turn",
+          "scope": "corp",
+          "resource": "cards",
+          "target": "trash_source_at_end_of_turn",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ],
+      "lineSupport": ["corp.ice_tax_glacier"],
+      "strategicRole": ["tax_tool"]
     },
     {
       "cardId": "onr_classic_009_dumpster",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "code_gate", "deflector", "archives_redirect"],
-      "planRoles": ["defend_fort", "redirect_runs"],
+      "roles": ["ice", "code_gate_ice", "taxing_ice"],
+      "planRoles": ["protect_hq", "protect_rnd"],
       "requiredMechanics": [
         "install_restriction",
         "deflect_run",
@@ -29769,18 +30106,60 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.other_utility",
+        "run.corp_redirect"
+      ],
+      "effects": [
+        {
+          "kind": "run_lock",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "run.corp_redirect",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_rezzed_ice"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "subroutine_resolution",
+          "targetType": "server",
+          "purpose": "redirect_run_to_archives_outermost_rezzed_ice",
+          "preferences": [
+            "reduces_current_run_payoff",
+            "adds_relevant_encounter_tax",
+            "protects_central_access_pressure"
+          ],
+          "avoid": ["hidden_info_dependent_choice", "no_rezzed_ice_target"],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
+      "lineSupport": ["corp.central_stabilize", "corp.ice_tax_glacier"],
+      "strategicRole": ["defensive_tool", "tax_tool"]
     },
     {
       "cardId": "onr_classic_010_entrapment",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "code_gate", "deflector", "paid_redirect"],
-      "planRoles": ["defend_fort", "redirect_runs"],
+      "roles": ["ice", "code_gate_ice", "taxing_ice"],
+      "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
       "requiredMechanics": [
         "paid_subroutine_choice",
         "deflect_run",
@@ -29797,18 +30176,68 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.other_utility",
+        "corp_ice.runner_pay_or_end_run",
+        "run.corp_redirect"
+      ],
+      "effects": [
+        {
+          "kind": "run_lock",
+          "timing": "encounter",
+          "scope": "run_path",
+          "resource": "credits",
+          "amount": 2,
+          "target": "run.corp_redirect",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_corp_credits_threshold"
+        }
+      ],
+      "costProfile": {
+        "credits": 2,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "subroutine_resolution",
+          "targetType": "server",
+          "purpose": "redirect_run_to_best_data_fort",
+          "preferences": [
+            "protects_agenda_remote",
+            "protects_central_access_pressure",
+            "adds_relevant_encounter_tax"
+          ],
+          "avoid": ["hidden_info_dependent_choice", "no_rezzed_ice_target"],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
+      "lineSupport": ["corp.ice_tax_glacier", "corp.remote_scoring"],
+      "strategicRole": ["defensive_tool", "tax_tool"]
     },
     {
       "cardId": "onr_classic_011_glacier",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "wall", "end_the_run", "mobile_ice"],
-      "planRoles": ["defend_fort", "tax_runs", "redirect_runs"],
+      "roles": ["ice", "barrier_ice", "etr_ice", "taxing_ice"],
+      "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
       "requiredMechanics": [
         "install_restriction",
         "rez_ice",
@@ -29818,7 +30247,7 @@
       ],
       "valueHints": {
         "defense": 4,
-        "runControl": 2
+        "runControl": 4
       },
       "riskTags": [
         "agenda_point_cost",
@@ -29831,18 +30260,91 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.mobile_position_change",
+        "corp_ice.multi_end_run",
+        "ice.etr"
+      ],
+      "effects": [
+        {
+          "kind": "etr",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "corp_ice.end_run",
+          "finite": true
+        },
+        {
+          "kind": "etr",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "corp_ice.multi_end_run",
+          "finite": true
+        },
+        {
+          "kind": "future_encounter_effect",
+          "timing": "start_of_run",
+          "scope": "run_path",
+          "target": "move_self_to_outermost_position_on_other_fort",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        },
+        {
+          "kind": "requires_installed_ice"
+        }
+      ],
+      "costProfile": {
+        "credits": 1,
+        "agendaPoints": 1,
+        "reserveRisk": "high",
+        "opportunityCost": "high"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "start_of_run",
+          "targetType": "ice_position",
+          "purpose": "move_mobile_ice_to_relevant_server_position",
+          "preferences": [
+            "protects_agenda_remote",
+            "protects_central_access_pressure",
+            "current_run_path_relevance"
+          ],
+          "avoid": ["hidden_info_dependent_choice", "irrelevant_server_ice"],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "lineSupport": [
+        "corp.central_stabilize",
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "strategicRole": ["defensive_tool", "tax_tool"],
+      "manualNotes": [
+        "CLASSIC-AI-05: Reposition may reveal unrezzed Glacier and costs 1 credit; rez also costs 1 agenda point."
+      ]
     },
     {
       "cardId": "onr_classic_014_trapdoor",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "code_gate", "deflector", "remote_redirect"],
-      "planRoles": ["defend_fort", "redirect_runs"],
+      "roles": ["ice", "code_gate_ice", "taxing_ice"],
+      "planRoles": ["protect_hq", "protect_rnd"],
       "requiredMechanics": [
         "install_restriction",
         "deflect_run",
@@ -29864,18 +30366,63 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.other_utility",
+        "run.corp_redirect"
+      ],
+      "effects": [
+        {
+          "kind": "run_lock",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "run.corp_redirect",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_remote_server"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "subroutine_resolution",
+          "targetType": "server",
+          "purpose": "redirect_central_run_to_subsidiary_fort",
+          "preferences": [
+            "protects_central_access_pressure",
+            "adds_relevant_encounter_tax",
+            "protects_agenda_remote"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice",
+            "no_subsidiary_fort_target"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
+      "lineSupport": ["corp.central_stabilize", "corp.ice_tax_glacier"],
+      "strategicRole": ["defensive_tool", "tax_tool"]
     },
     {
       "cardId": "onr_classic_015_vortex",
       "side": "corp",
       "cardType": "ice",
-      "roles": ["ice", "code_gate", "deflector", "paid_redirect"],
-      "planRoles": ["defend_fort", "redirect_runs"],
+      "roles": ["ice", "code_gate_ice", "taxing_ice"],
+      "planRoles": ["build_scoring_remote", "protect_hq", "protect_rnd"],
       "requiredMechanics": [
         "paid_subroutine_choice",
         "deflect_run",
@@ -29892,11 +30439,61 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.other_utility",
+        "corp_ice.runner_pay_or_end_run",
+        "run.corp_redirect"
+      ],
+      "effects": [
+        {
+          "kind": "run_lock",
+          "timing": "encounter",
+          "scope": "run_path",
+          "resource": "credits",
+          "amount": 2,
+          "target": "run.corp_redirect",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_corp_credits_threshold"
+        }
+      ],
+      "costProfile": {
+        "credits": 2,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "subroutine_resolution",
+          "targetType": "server",
+          "purpose": "redirect_run_to_best_data_fort",
+          "preferences": [
+            "protects_agenda_remote",
+            "protects_central_access_pressure",
+            "adds_relevant_encounter_tax"
+          ],
+          "avoid": ["hidden_info_dependent_choice", "no_rezzed_ice_target"],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
+      ],
+      "lineSupport": ["corp.ice_tax_glacier", "corp.remote_scoring"],
+      "strategicRole": ["defensive_tool", "tax_tool"]
     },
     {
       "cardId": "onr_classic_001_data-fort-remapping",
