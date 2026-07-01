@@ -97,7 +97,7 @@ export function hiddenSuccessfulRunBeforeAccessEffect(
     timing: "immediately_after_successful_run_before_access",
     server: input.server,
     source: "installed_hidden_runner_resource",
-    cost: { kind: "reveal_and_tap_source" },
+    cost: { kind: "reveal_and_trash_source" },
     effect: input.effect,
     visibility: "hidden_info_barrier",
   } as SuccessfulRunBeforeAccessEffect;

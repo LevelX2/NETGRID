@@ -6,7 +6,7 @@ export const proteusSwissBankAccountImplementation: CardImplementationDefinition
     {
       kind: "activated",
       timing: "runner_cost_penalty_support",
-      costs: [{ kind: "tap_source", amount: 1 }],
+      costs: [{ kind: "trash_source", amount: 1 }],
       label: "Swiss Bank Account: 2 Credits nehmen",
       effects: [
         {
@@ -22,7 +22,7 @@ export const proteusSwissBankAccountImplementation: CardImplementationDefinition
       timing: "runner_cost_penalty_support",
       costs: [
         { kind: "credit", amount: 3 },
-        { kind: "tap_source", amount: 1 },
+        { kind: "trash_source", amount: 1 },
       ],
       label: "Swiss Bank Account: 6 Credits nehmen",
       effects: [

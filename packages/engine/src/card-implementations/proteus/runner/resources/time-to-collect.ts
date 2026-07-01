@@ -9,7 +9,7 @@ export const proteusTimeToCollectImplementation: CardImplementationDefinition = 
       excludesSelf: true,
       activeOnlyDuring: "corp_turn",
       mode: "one_or_more_simultaneous",
-      cost: { kind: "tap_source" },
+      cost: { kind: "trash_source" },
       priority: 30,
       visibility: "public",
     },

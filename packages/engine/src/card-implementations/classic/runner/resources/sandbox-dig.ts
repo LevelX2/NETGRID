@@ -10,7 +10,7 @@ export const classicSandboxDigImplementation: CardImplementationDefinition = {
       timing: "runner_main",
       costs: [
         { kind: "credit", amount: 3 },
-        { kind: "tap_source", amount: 1 },
+        { kind: "trash_source", amount: 1 },
       ],
       label: "Sandbox Dig: R&D-Spitze ansehen",
       effects: [

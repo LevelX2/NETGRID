@@ -6,7 +6,7 @@ export const proteusWiredSwitchboardImplementation: CardImplementationDefinition
     {
       kind: "activated",
       timing: "trace_post_bid_link_window",
-      costs: [{ kind: "tap_source", amount: 1 }],
+      costs: [{ kind: "trash_source", amount: 1 }],
       limit: { kind: "once_per_trace_per_source", scope: "source" },
       label: "Wired Switchboard: +3 Link",
       effects: [

@@ -60,6 +60,7 @@ type TracePostBidLinkCandidate = {
   linkDelta: number;
   creditCost: number;
   tapSource: boolean;
+  trashSource: boolean;
   limitOncePerTrace: boolean;
   rewardCreditsOnAvoidTrace?: number;
 };
@@ -130,6 +131,12 @@ export type TraceOrchestrationHost = {
   };
   trace: {
     supportsTraceSuccessEffect: (effect: TraceSuccessEffect) => boolean;
+  };
+  zones: {
+    trashRunnerInstalledCardToHeap: (
+      cardId: CardInstanceId,
+      legalAction?: LegalAction,
+    ) => void;
   };
   callbacks: {
     sanitizeId: (value: string) => string;
@@ -868,6 +875,7 @@ function postBidTraceLinkCandidates(
         linkDelta: effect.amount,
         creditCost,
         tapSource: traceCost.tapSource,
+        trashSource: traceCost.trashSource,
         limitOncePerTrace,
         ...(effect.rewardCreditsOnAvoidTrace
           ? { rewardCreditsOnAvoidTrace: effect.rewardCreditsOnAvoidTrace }
@@ -944,9 +952,12 @@ function resolveTracePostBidLinkChoice(
       paymentQuote,
     );
     const paymentPayload = postBidLinkPaymentPublicPayload(paymentReceipt);
-    const tapPayload = candidate.tapSource
-      ? tapTraceSource(host, candidate.cardId)
-      : {};
+    const sourceCostPayload = payTraceSourceCost(
+      host,
+      candidate.cardId,
+      candidate,
+      legalAction,
+    );
     if (state.run)
       host.run.markTraceLinkForceJackOutAfterEncounter(
         candidate.cardId,
@@ -987,7 +998,7 @@ function resolveTracePostBidLinkChoice(
       postBidTraceLinkSourceDefinitionId: candidate.definitionId,
       postBidTraceLinkCostPaid: candidate.creditCost,
       ...paymentPayload,
-      ...tapPayload,
+      ...sourceCostPayload,
       postBidTraceLinkDelta: candidate.linkDelta,
       postBidTraceLinkBonus: nextTrace.postBidLinkBonus ?? 0,
       runnerLink: nextTrace.runnerLink ?? 0,
@@ -1223,19 +1234,15 @@ function traceSuccessCancelCandidates(
   const candidates: TracePostBidLinkCandidate[] = [];
   for (const cardId of host.cards.runnerInstalledCardIds().sort()) {
     const instance = host.state.cardInstances[cardId];
-    if (
-      !instance ||
-      instance.controller !== "runner" ||
-      instance.tapped === true
-    )
-      continue;
+    if (!instance || instance.controller !== "runner") continue;
     const definition = host.cards.definitionFor(cardId);
     for (const { ability } of host.cards.activatedTraceAbilities(
       definition,
       "trace_success_cancel_window",
     )) {
       const traceCost = costForTraceAbility(ability);
-      if (!traceCost.tapSource) continue;
+      if (!traceCost.tapSource && !traceCost.trashSource) continue;
+      if (traceCost.tapSource && instance.tapped === true) continue;
       if (host.state.runner.credits < traceCost.creditCost) continue;
       candidates.push({
         cardId,
@@ -1243,7 +1250,8 @@ function traceSuccessCancelCandidates(
         label: definition.title,
         linkDelta: 0,
         creditCost: traceCost.creditCost,
-        tapSource: true,
+        tapSource: traceCost.tapSource,
+        trashSource: traceCost.trashSource,
         limitOncePerTrace: false,
       });
     }
@@ -1323,7 +1331,12 @@ function resolveTraceSuccessCancelChoice(
   if (host.state.runner.credits < candidate.creditCost)
     throw new Error("Der Runner kann die Trace-Cancel-Kosten nicht bezahlen.");
   host.payment.spendRunnerCredits(candidate.creditCost);
-  const tapPayload = tapTraceSource(host, candidate.cardId);
+  const sourceCostPayload = payTraceSourceCost(
+    host,
+    candidate.cardId,
+    candidate,
+    legalAction,
+  );
   const addsBadPublicity = traceEffectHasNonTagComponent(trace.successEffect);
   if (addsBadPublicity) host.state.corp.badPublicity += 1;
   delete host.state.pendingChoice;
@@ -1344,7 +1357,7 @@ function resolveTraceSuccessCancelChoice(
     traceEffectCanceled: true,
     traceSuccessful: true,
     traceSuccessCancelCostPaid: candidate.creditCost,
-    ...tapPayload,
+    ...sourceCostPayload,
     ...(addsBadPublicity
       ? {
           badPublicityAdded: 1,
@@ -1506,36 +1519,60 @@ export function calculateRunnerLink(host: TraceOrchestrationHost): number {
 function costForTraceAbility(ability: ActivatedCardAbilityImplementation): {
   creditCost: number;
   tapSource: boolean;
+  trashSource: boolean;
 } {
   const creditCosts = ability.costs.filter((cost) => cost.kind === "credit");
   const tapCosts = ability.costs.filter((cost) => cost.kind === "tap_source");
+  const trashCosts = ability.costs.filter(
+    (cost) => cost.kind === "trash_source",
+  );
   if (
-    ability.costs.length !== creditCosts.length + tapCosts.length ||
+    ability.costs.length !==
+      creditCosts.length + tapCosts.length + trashCosts.length ||
     creditCosts.length > 1 ||
-    tapCosts.length > 1 ||
-    (creditCosts.length === 0 && tapCosts.length === 0) ||
+    tapCosts.length + trashCosts.length > 1 ||
+    (creditCosts.length === 0 &&
+      tapCosts.length === 0 &&
+      trashCosts.length === 0) ||
     !Number.isInteger(creditCosts[0]?.amount ?? 0) ||
     (creditCosts[0]?.amount ?? 0) < 0 ||
-    (tapCosts[0] && tapCosts[0].amount !== 1)
+    (tapCosts[0] && tapCosts[0].amount !== 1) ||
+    (trashCosts[0] && trashCosts[0].amount !== 1)
   ) {
     throw new Error(
-      "Trace CardImplementation ability supports nonnegative credit and optional tap_source costs.",
+      "Trace CardImplementation ability supports nonnegative credit and optional source costs.",
     );
   }
   return {
     creditCost: creditCosts[0]?.amount ?? 0,
     tapSource: tapCosts.length === 1,
+    trashSource: trashCosts.length === 1,
   };
 }
 
-function tapTraceSource(
+function payTraceSourceCost(
   host: TraceOrchestrationHost,
   cardId: CardInstanceId,
+  candidate: Pick<TracePostBidLinkCandidate, "tapSource" | "trashSource">,
+  legalAction: LegalAction,
 ): Record<string, string | number | boolean> {
+  if (!candidate.tapSource && !candidate.trashSource) return {};
   const instance = host.state.cardInstances[cardId];
-  if (!instance || instance.tapped === true)
+  if (!instance || instance.controller !== "runner")
+    throw new Error("Die Trace-Quelle ist nicht installiert.");
+  if (!host.cards.runnerInstalledCardIds().includes(cardId))
+    throw new Error("Die Trace-Quelle ist nicht installiert.");
+  if (candidate.tapSource && instance.tapped === true)
     throw new Error("Die Trace-Link-Quelle ist bereits getappt.");
   const payload = hiddenRunnerResourceRevealPayload(host.state, cardId);
+  if (candidate.trashSource) {
+    host.zones.trashRunnerInstalledCardToHeap(cardId, legalAction);
+    return {
+      ...payload,
+      sourceTrashed: true,
+      trashedCardDefinitionId: host.cards.definitionFor(cardId).id,
+    };
+  }
   host.state.cardInstances[cardId] = {
     ...instance,
     faceup: true,

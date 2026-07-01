@@ -1203,7 +1203,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
       .sort()
       .flatMap((cardId) => {
         const instance = state.cardInstances[cardId];
-        if (!instance || instance.tapped === true) return [];
+        if (!instance) return [];
         const definition = definitionFor(state, cardId);
         const implementation = runnerUtilityLongtailImplementationForCard(
           state,
@@ -1214,6 +1214,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
           "hidden_resource_post_meat_damage_random_hq_discard"
         )
           return [];
+        if (implementation.cost.kind !== "trash_source") return [];
         const amount = Math.max(0, Math.floor(implementation.amount));
         if (amount <= 0) return [];
         return [
@@ -1259,17 +1260,11 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     );
     if (!candidate)
       throw new Error("Diese Hidden-Resource-Reaktion ist nicht legal.");
-    const sourceInstance = mustInstance(state.cardInstances, candidate.cardId);
     const revealPayload = hiddenRunnerResourceRevealPayload(
       state,
       candidate.cardId,
     );
-    state.cardInstances[candidate.cardId] = {
-      ...sourceInstance,
-      faceup: true,
-      rezzed: true,
-      tapped: true,
-    };
+    trashRunnerInstalledCardToHeap(state, candidate.cardId, legalAction);
     const discardedIds = randomCorpHqDiscard(
       state,
       candidate.amount,
@@ -1281,7 +1276,8 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
       hiddenResourcePostMeatDamageDecision: "apply",
       sourceDefinitionId: candidate.definitionId,
       ...revealPayload,
-      sourceTapped: true,
+      sourceTrashed: true,
+      trashedCardDefinitionId: candidate.definitionId,
       discardedHqCount: discardedIds.length,
       corpHqAfter: state.corp.hq.length,
       randomCounterAfter: state.randomCounter,

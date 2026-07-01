@@ -6,7 +6,7 @@ export const proteusExpendableFamilyMemberImplementation: CardImplementationDefi
     {
       kind: "avoid_tag",
       amount: 1,
-      cost: { kind: "credit_and_tap_source", amount: 1 },
+      cost: { kind: "credit_and_trash_source", amount: 1 },
       priority: 118,
       visibility: "public",
     },

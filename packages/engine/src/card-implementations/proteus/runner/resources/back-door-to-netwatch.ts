@@ -8,7 +8,7 @@ export const proteusBackDoorToNetwatchImplementation: CardImplementationDefiniti
       timing: "trace_success_cancel_window",
       costs: [
         { kind: "credit", amount: 3 },
-        { kind: "tap_source", amount: 1 },
+        { kind: "trash_source", amount: 1 },
       ],
       label: "Back Door to Netwatch: Trace-Effekt canceln",
       effects: [],

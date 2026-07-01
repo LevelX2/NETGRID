@@ -8,7 +8,7 @@ export const proteusHqMoleImplementation: CardImplementationDefinition = {
       timing: "access_start",
       costs: [
         { kind: "credit", amount: 4 },
-        { kind: "tap_source", amount: 1 },
+        { kind: "trash_source", amount: 1 },
       ],
       condition: { kind: "current_run_server", server: "hq" },
       label: "HQ Mole: zwei zusaetzliche HQ-Karten accessen",

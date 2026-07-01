@@ -380,13 +380,12 @@ function hiddenResourceCurrentAccessTrashActions(
     .slice()
     .sort()
     .flatMap((sourceCardId) => {
-      const sourceInstance = host.cards.cardInstanceFor(sourceCardId);
-      if (sourceInstance.tapped === true) return [];
       const sourceDefinition = host.cards.definitionFor(sourceCardId);
       const utility =
         cardImplementationForDefinitionId(sourceDefinition.id)?.runnerUtilityLongtail;
       if (utility?.kind !== "hidden_resource_current_access_free_trash")
         return [];
+      if (utility.cost.kind !== "credit_and_trash_source") return [];
       if (
         host.state.runner.credits +
           runnerCostPenaltySupportCreditCapacity(host.state) <

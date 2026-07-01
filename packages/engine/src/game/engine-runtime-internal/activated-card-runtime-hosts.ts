@@ -709,6 +709,7 @@ export function createActivatedCardRuntimeHosts(
     sanitizeId,
     scoredAgendaAbilityHost,
     traceCounterEffectDefinitionFor,
+    trashRunnerInstalledCardToHeap,
   } = deps;
 
   function traceOrchestrationHost(state: GameState): TraceOrchestrationHost {
@@ -789,6 +790,10 @@ export function createActivatedCardRuntimeHosts(
             effect,
             traceCounterEffectDefinitionFor,
           ),
+      },
+      zones: {
+        trashRunnerInstalledCardToHeap: (cardId, legalAction) =>
+          trashRunnerInstalledCardToHeap(state, cardId, legalAction),
       },
       callbacks: {
         sanitizeId,

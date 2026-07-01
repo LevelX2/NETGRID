@@ -8,7 +8,7 @@ export const proteusLiberatedSavingsAccountImplementation: CardImplementationDef
       timing: "runner_cost_penalty_support",
       costs: [
         { kind: "credit", amount: 7 },
-        { kind: "tap_source", amount: 1 },
+        { kind: "trash_source", amount: 1 },
       ],
       label: "Liberated Savings Account: 11 Credits nehmen",
       effects: [

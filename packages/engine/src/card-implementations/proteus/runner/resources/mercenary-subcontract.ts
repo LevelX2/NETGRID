@@ -4,7 +4,7 @@ export const proteusMercenarySubcontractImplementation: CardImplementationDefini
   cardDefinitionId: "onr_proteus_145_mercenary-subcontract",
   runnerUtilityLongtail: {
     kind: "hidden_resource_current_access_free_trash",
-    cost: { kind: "credit_and_tap_source", amount: 4 },
+    cost: { kind: "credit_and_trash_source", amount: 4 },
     target: "current_accessed_cards",
     visibility: "hidden_info_barrier",
   },

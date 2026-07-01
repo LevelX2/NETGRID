@@ -1196,6 +1196,8 @@ function cardImplementationTagPreventionSourceCanPay(
 ): boolean {
   if (!runnerInstalledCardIds(state).includes(cardId)) return false;
   if (source.cost.kind === "trash_source") return true;
+  if (source.cost.kind === "credit_and_trash_source")
+    return state.runner.credits >= source.cost.amount;
   if (source.cost.kind === "credit_and_tap_source")
     return (
       state.runner.credits >= source.cost.amount &&
@@ -2884,6 +2886,21 @@ function applyRuntimeTagPreventionCost(
     trashRunnerInstalledCardToHeap(state, sourceCardId);
     return {
       ...hiddenRevealPayload,
+      sourceTrashed: true,
+      trashedCardDefinitionId: definition.id,
+    };
+  }
+  if (source.cost.kind === "credit_and_trash_source") {
+    const hiddenRevealPayload = hiddenRunnerResourceRevealPayload(
+      state,
+      sourceCardId,
+    );
+    spendCredits(state, "runner", source.cost.amount);
+    trashRunnerInstalledCardToHeap(state, sourceCardId);
+    return {
+      ...hiddenRevealPayload,
+      paidCredits: source.cost.amount,
+      runnerCreditsAfter: state.runner.credits,
       sourceTrashed: true,
       trashedCardDefinitionId: definition.id,
     };

@@ -7,7 +7,7 @@ export const proteusBoltHoleImplementation: CardImplementationDefinition = {
       kind: "damage_prevention",
       damageTypes: ["meat"],
       amount: 2,
-      cost: { kind: "tap_source" },
+      cost: { kind: "trash_source" },
       priority: 118,
       visibility: "public",
     },

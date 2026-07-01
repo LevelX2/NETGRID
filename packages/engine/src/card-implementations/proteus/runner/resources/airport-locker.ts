@@ -9,7 +9,7 @@ export const proteusAirportLockerImplementation: CardImplementationDefinition = 
       timing: "during_run",
       costs: [
         { kind: "credit", amount: 5 },
-        { kind: "tap_source", amount: 1 },
+        { kind: "trash_source", amount: 1 },
       ],
       condition: { kind: "current_encounter_ice" },
       label: "Airport Locker: Programm aus dem Stack installieren",

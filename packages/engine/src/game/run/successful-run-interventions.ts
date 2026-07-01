@@ -126,7 +126,7 @@ function hqCorpLoseCreditsBeforeAccessEffect(
       followup.server === "hq" &&
       followup.effect.kind === "corp_lose_credits" &&
       followup.source === "installed_hidden_runner_resource" &&
-      followup.cost.kind === "reveal_and_tap_source",
+      followup.cost.kind === "reveal_and_trash_source",
   );
 }
 
@@ -150,7 +150,7 @@ function remoteTrashFortBeforeAccessEffect(
       followup.effect.kind === "trash_remote_fort" &&
       followup.effect.include === "root_and_ice" &&
       followup.source === "installed_hidden_runner_resource" &&
-      followup.cost.kind === "reveal_and_tap_source",
+      followup.cost.kind === "reveal_and_trash_source",
   );
 }
 
@@ -164,7 +164,7 @@ function successfulRunBeforeAccessEffectByEffectKind(
       followup.kind === "successful_run_before_access_effect" &&
       followup.timing === "immediately_after_successful_run_before_access" &&
       followup.source === "installed_hidden_runner_resource" &&
-      followup.cost.kind === "reveal_and_tap_source" &&
+      followup.cost.kind === "reveal_and_trash_source" &&
       followup.effect.kind === effectKind,
   );
   if (abilityKey) {
@@ -300,8 +300,7 @@ export function buildSuccessfulRunFollowupActions(
     if (
       hqCreditLossFollowup &&
       run.attackedServerId === "hq" &&
-      host.state.runner.rig.resources.includes(sourceCardId) &&
-      host.cards.cardInstanceFor(sourceCardId).tapped !== true
+      host.state.runner.rig.resources.includes(sourceCardId)
     ) {
       actions.push(
         host.actions.createRunnerTriggerAction(
@@ -330,8 +329,7 @@ export function buildSuccessfulRunFollowupActions(
     if (
       remoteTrashFortFollowup &&
       host.servers.mustServer(run.attackedServerId).kind === "remote" &&
-      host.state.runner.rig.resources.includes(sourceCardId) &&
-      host.cards.cardInstanceFor(sourceCardId).tapped !== true
+      host.state.runner.rig.resources.includes(sourceCardId)
     ) {
       const server = host.servers.mustServer(run.attackedServerId);
       const targetCount = server.root.length + server.ice.length;
@@ -499,9 +497,10 @@ export function resolveSuccessfulRunFollowupAbility(
   return { handled: false };
 }
 
-function revealAndTapHiddenResourceSource(
+function revealAndTrashHiddenResourceSource(
   host: SuccessfulRunInterventionHost,
   sourceCardId: CardInstanceId,
+  legalAction: LegalAction,
 ): Record<string, unknown> {
   const instance = host.cards.cardInstanceFor(sourceCardId);
   if (
@@ -509,16 +508,13 @@ function revealAndTapHiddenResourceSource(
     instance.controller !== "runner"
   )
     throw new Error("Die Hidden-Resource-Quelle ist nicht installiert.");
-  if (instance.tapped === true)
-    throw new Error("Die Hidden-Resource-Quelle ist bereits getappt.");
   const payload = hiddenRunnerResourceRevealPayload(host.state, sourceCardId);
-  host.state.cardInstances[sourceCardId] = {
-    ...instance,
-    faceup: true,
-    rezzed: true,
-    tapped: true,
+  host.zones.trashRunnerInstalledCardToHeap(sourceCardId, legalAction);
+  return {
+    ...payload,
+    sourceTrashed: true,
+    trashedCardDefinitionId: host.cards.definitionFor(sourceCardId).id,
   };
-  return { ...payload, sourceTapped: true };
 }
 
 function resolveHiddenSuccessfulRunBeforeAccessEffect(
@@ -569,7 +565,11 @@ function resolveHiddenSuccessfulRunBeforeAccessEffect(
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceCardId))
     throw new Error("Diese Successful-Run-Faehigkeit wurde bereits genutzt.");
-  const revealPayload = revealAndTapHiddenResourceSource(host, sourceCardId);
+  const revealPayload = revealAndTrashHiddenResourceSource(
+    host,
+    sourceCardId,
+    legalAction,
+  );
   if (
     followup.server === "remote" &&
     followup.effect.kind === "trash_remote_fort"

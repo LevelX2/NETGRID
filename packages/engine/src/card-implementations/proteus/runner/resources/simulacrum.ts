@@ -6,7 +6,7 @@ export const proteusSimulacrumImplementation: CardImplementationDefinition = {
     {
       kind: "activated",
       timing: "during_run",
-      costs: [{ kind: "tap_source", amount: 1 }],
+      costs: [{ kind: "trash_source", amount: 1 }],
       condition: { kind: "current_encounter_ice_subtype", subtype: "ap" },
       label: "Simulacrum: AP-ICE passieren",
       effects: [

@@ -374,13 +374,13 @@ export type CardRunnerUtilityLongtailImplementation =
     }
   | {
       kind: "hidden_resource_current_access_free_trash";
-      cost: { kind: "credit_and_tap_source"; amount: number };
+      cost: { kind: "credit_and_trash_source"; amount: number };
       target: "current_accessed_cards";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
       kind: "hidden_resource_post_meat_damage_random_hq_discard";
-      cost: { kind: "tap_source" };
+      cost: { kind: "trash_source" };
       amount: number;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
@@ -516,7 +516,7 @@ export type CardSuccessfulRunFollowupImplementation =
       timing: "immediately_after_successful_run_before_access";
       server: "hq";
       source: "installed_hidden_runner_resource";
-      cost: { kind: "reveal_and_tap_source" };
+      cost: { kind: "reveal_and_trash_source" };
       effect: { kind: "corp_lose_credits"; amount: number };
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
@@ -526,7 +526,7 @@ export type CardSuccessfulRunFollowupImplementation =
       timing: "immediately_after_successful_run_before_access";
       server: "remote";
       source: "installed_hidden_runner_resource";
-      cost: { kind: "reveal_and_tap_source" };
+      cost: { kind: "reveal_and_trash_source" };
       effect: { kind: "trash_remote_fort"; include: "root_and_ice" };
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
@@ -2377,6 +2377,10 @@ export type CardTagPreventionSourceImplementation = {
       }
     | {
         kind: "credit_and_tap_source";
+        amount: number;
+      }
+    | {
+        kind: "credit_and_trash_source";
         amount: number;
       }
     | {

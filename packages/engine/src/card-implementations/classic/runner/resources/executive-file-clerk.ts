@@ -11,7 +11,7 @@ export const classicExecutiveFileClerkImplementation: CardImplementationDefiniti
         timing: "runner_main",
         costs: [
           { kind: "credit", amount: 2 },
-          { kind: "tap_source", amount: 1 },
+          { kind: "trash_source", amount: 1 },
         ],
         label: "Executive File Clerk: HQ ansehen",
         effects: [

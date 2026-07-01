@@ -299,6 +299,8 @@ export function createAccessFlowAdapters(
       zones: {
         removeFromAllZones: (cardId) =>
           host.zones.removeFromAllZones(state, cardId),
+        trashRunnerInstalledCardToHeap: (cardId) =>
+          host.zones.trashRunnerInstalledCardToHeap(state, cardId),
         ensureSpecialZones: () => host.zones.ensureSpecialZones(state),
       },
       payment: {

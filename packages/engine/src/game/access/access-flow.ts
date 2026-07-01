@@ -53,6 +53,7 @@ export type AccessFlowHost = {
   };
   zones: {
     removeFromAllZones: (cardId: CardInstanceId) => void;
+    trashRunnerInstalledCardToHeap: (cardId: CardInstanceId) => void;
     ensureSpecialZones: () => SpecialZoneState;
   };
   payment: {
@@ -885,14 +886,12 @@ function trashAccessedCard(
       !host.state.runner.rig.resources.includes(hiddenResourceSourceCardId)
     )
       throw new Error("Die Mercenary-Subcontract-Quelle ist nicht installiert.");
-    if (sourceInstance.tapped === true)
-      throw new Error("Die Mercenary-Subcontract-Quelle ist bereits getappt.");
     const sourceDefinition = host.cards.definitionFor(hiddenResourceSourceCardId);
     const utility =
       cardImplementationForDefinitionId(sourceDefinition.id)?.runnerUtilityLongtail;
     if (utility?.kind !== "hidden_resource_current_access_free_trash")
       throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Quelle.");
-    if (utility.cost.kind !== "credit_and_tap_source")
+    if (utility.cost.kind !== "credit_and_trash_source")
       throw new Error("Die Hidden-Resource-Kosten passen nicht zur Quelle.");
     const expectedCost = Math.max(0, Math.floor(utility.cost.amount));
     if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
@@ -921,17 +920,12 @@ function trashAccessedCard(
       host.state,
       hiddenResourceSourceCardId,
     );
-    host.state.cardInstances[hiddenResourceSourceCardId] = {
-      ...sourceInstance,
-      faceup: true,
-      rezzed: true,
-      tapped: true,
-    };
+    host.zones.trashRunnerInstalledCardToHeap(hiddenResourceSourceCardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       ...revealPayload,
-      cardImplementationTapSourceCost: true,
-      sourceTapped: true,
+      sourceTrashed: true,
+      trashedCardDefinitionId: sourceDefinition.id,
       hiddenZoneBarrier: true,
       hiddenZoneAction: "proteus_hidden_current_access_free_trash",
     };
