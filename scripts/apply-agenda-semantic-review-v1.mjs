@@ -488,7 +488,7 @@ function buildPairsForRow(row, tacticSignals) {
 function parsePairField(value) {
   if (!value || value.startsWith("_keine_")) return [];
   const pairs = [];
-  for (const part of value.split(";")) {
+  for (const part of splitTopLevelSemicolon(value)) {
     const item = part.trim();
     if (!item || item.startsWith("entferne ")) continue;
     const match = item.match(
@@ -504,6 +504,24 @@ function parsePairField(value) {
     });
   }
   return pairs;
+}
+
+function splitTopLevelSemicolon(value) {
+  const parts = [];
+  let current = "";
+  let depth = 0;
+  for (const char of value) {
+    if (char === "(") depth += 1;
+    if (char === ")" && depth > 0) depth -= 1;
+    if (char === ";" && depth === 0) {
+      parts.push(current);
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  if (current.trim().length > 0) parts.push(current);
+  return parts;
 }
 
 function normalizePair(rawPair) {
