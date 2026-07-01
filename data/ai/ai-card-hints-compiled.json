@@ -42716,26 +42716,31 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "trace_safety",
-        "tag_control"
+        "economy",
+        "tag_self",
+        "trace"
       ],
       "planRoles": [
-        "protect_against_trace",
-        "recover_from_tags"
+        "find_economy"
       ],
       "requiredMechanics": [
         "install_resource",
-        "trace_attempt_reaction",
+        "start_of_turn_credit",
+        "trace_attempt_modifier",
+        "take_tag",
         "trash_source",
-        "remove_tags"
+        "leave_play_credit_loss"
       ],
       "valueHints": {
-        "tagSafety": 4,
-        "traceSafety": 3
+        "economy": 2,
+        "tagSafety": -3,
+        "traceSafety": -3
       },
       "riskTags": [
-        "trash_source",
-        "trace"
+        "trace_liability",
+        "tag_self",
+        "leave_play_credit_loss",
+        "unique_resource"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -42743,11 +42748,73 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "risk.self_tag",
+        "risk.leaves_play_loss"
+      ],
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "start_of_turn",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 1,
+          "target": "economy.turn_start_credit",
+          "repeatable": true
+        },
+        {
+          "kind": "trace",
+          "timing": "trace_window",
+          "scope": "trace",
+          "target": "runner_trace_attempts_auto_success",
+          "repeatable": true
+        },
+        {
+          "kind": "tag",
+          "timing": "trace_success",
+          "scope": "runner",
+          "resource": "tags",
+          "amount": 1,
+          "target": "self_tag_after_trace",
+          "repeatable": true
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "on_leave_play",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 2,
+          "target": "risk.leaves_play_loss",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_start_of_turn"
+        },
+        {
+          "kind": "requires_trace_attempt"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "credits": 2,
+        "reserveRisk": "medium",
+        "opportunityCost": "high"
+      },
+      "strategicRole": [
+        "support_tool"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-03: Start-turn credit is real economy, but trace auto-success plus extra self-tag is a liability. This is not trace defense and receives no survival anchor."
+      ]
     },
     {
       "cardId": "onr_classic_045_elena-laskova",
@@ -42755,22 +42822,23 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "link",
-        "trace_safety"
+        "economy"
       ],
       "planRoles": [
-        "protect_against_trace"
+        "find_economy"
       ],
       "requiredMechanics": [
         "install_resource",
-        "link_modifier",
-        "ice_trace_scope"
+        "prep_credit_gain_bonus",
+        "unique_resource"
       ],
       "valueHints": {
-        "traceSafety": 3
+        "economy": 2,
+        "eventSupport": 2
       },
       "riskTags": [
-        "link_modifier"
+        "prep_dependency",
+        "unique_resource"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -42778,11 +42846,41 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 1,
+          "target": "economy.conditional_burst_credit",
+          "repeatable": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_action"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "credits": 3,
+        "reserveRisk": "low",
+        "opportunityCost": "medium"
+      },
+      "strategicRole": [
+        "support_tool"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-03: Elena boosts the first credit gain from each prep; previous link/trace hints were stale and intentionally removed."
+      ]
     },
     {
       "cardId": "onr_classic_046_executive-file-clerk",
@@ -42790,21 +42888,24 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "tag_cost_reduction"
+        "hq_access"
       ],
       "planRoles": [
-        "recover_from_tags"
+        "pressure_hq"
       ],
       "requiredMechanics": [
         "install_resource",
-        "tag_remove_cost_modifier"
+        "paid_tap_ability",
+        "private_hq_look"
       ],
       "valueHints": {
-        "tagSafety": 3,
-        "economy": 2
+        "information": 4,
+        "runPressure": 2
       },
       "riskTags": [
-        "tag_synergy"
+        "hidden_zone",
+        "tap_source",
+        "credit_cost"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -42812,11 +42913,62 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "hq_info",
+          "timing": "action",
+          "scope": "hq",
+          "resource": "cards",
+          "target": "full_reveal",
+          "repeatable": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_action"
+        },
+        {
+          "kind": "requires_hq_pressure"
+        }
+      ],
+      "costProfile": {
+        "clicks": 0,
+        "credits": 2,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "private_hq_full_information",
+          "preferences": [
+            "use_choice_option_with_visible_board_payoff"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "lineSupport": [
+        "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-03: Paid hidden-resource ability gives the Runner private HQ information. It may support HQ pressure, but AI inputs must keep the information controller-private and must not expose HQ contents publicly."
+      ]
     },
     {
       "cardId": "onr_classic_047_little-black-box",
@@ -42824,24 +42976,33 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "access_pressure",
-        "central_access"
+        "deck",
+        "memory",
+        "damage_prevention",
+        "link"
       ],
       "planRoles": [
-        "pressure_centrals"
+        "runner_install_hardware",
+        "rig_setup"
       ],
       "requiredMechanics": [
         "install_hardware",
-        "successful_run_bonus_access",
-        "central_access_bonus"
+        "deck_unique_replacement",
+        "memory_modifier",
+        "hand_size_modifier",
+        "restricted_credit_pool",
+        "damage_prevention_turn_limit"
       ],
       "valueHints": {
-        "accessPressure": 3,
-        "runPressure": 3
+        "memory": 2,
+        "handSize": 1,
+        "traceSafety": 1,
+        "survival": 2
       },
       "riskTags": [
-        "hidden_zone",
-        "access_bonus"
+        "deck_unique",
+        "restricted_credits",
+        "damage_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -42849,11 +43010,75 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "hardware_trait",
+          "timing": "persistent",
+          "scope": "hardware",
+          "target": "deck_exclusive"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 1
+        },
+        {
+          "kind": "hand_size_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "hand_size",
+          "amount": 1
+        },
+        {
+          "kind": "recurring_economy",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 1,
+          "target": "link",
+          "repeatable": true
+        },
+        {
+          "kind": "net_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "net_damage",
+          "amount": 1
+        },
+        {
+          "kind": "brain_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "brain_damage",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "credits": 4,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "strategicRole": [
+        "support_tool"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-03: Deck/MU, hand-size, link credit and one-per-turn net/core prevention are durable support only; no direct access or pressure anchor."
+      ]
     },
     {
       "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
@@ -42861,26 +43086,36 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "deck_manipulation",
-        "card_velocity"
+        "deck",
+        "memory",
+        "recurring_credit",
+        "run_support"
       ],
       "planRoles": [
-        "build_hand",
+        "runner_install_hardware",
         "rig_setup"
       ],
       "requiredMechanics": [
         "install_hardware",
-        "top_stack_look",
-        "trash_top_stack",
-        "draw_cards"
+        "deck_unique_replacement",
+        "memory_modifier",
+        "restricted_credit_pool",
+        "random_start_turn_damage",
+        "leave_play_damage"
       ],
       "valueHints": {
-        "cardVelocity": 3,
-        "information": 2
+        "memory": 2,
+        "runSupport": 3,
+        "traceSafety": 1,
+        "survival": -3
       },
       "riskTags": [
-        "hidden_zone",
-        "self_mill"
+        "deck_unique",
+        "restricted_credits",
+        "deterministic_random",
+        "brain_damage",
+        "unpreventable_damage",
+        "leave_play_damage"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -42888,11 +43123,85 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "risk.brain_damage_self_inflicted",
+        "risk.unpreventable_brain_damage"
+      ],
+      "effects": [
+        {
+          "kind": "hardware_trait",
+          "timing": "persistent",
+          "scope": "hardware",
+          "target": "deck_exclusive"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 1
+        },
+        {
+          "kind": "recurring_economy",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 2,
+          "target": "icebreaker",
+          "repeatable": true
+        },
+        {
+          "kind": "recurring_economy",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 2,
+          "target": "link",
+          "repeatable": true
+        },
+        {
+          "kind": "damage",
+          "timing": "start_of_turn",
+          "scope": "runner",
+          "resource": "brain_damage",
+          "amount": 2,
+          "target": "self_inflicted_brain_damage",
+          "repeatable": true
+        },
+        {
+          "kind": "damage",
+          "timing": "on_leave_play",
+          "scope": "runner",
+          "resource": "brain_damage",
+          "amount": 2,
+          "target": "self_inflicted_brain_damage",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_start_of_turn"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "credits": 5,
+        "reserveRisk": "high",
+        "opportunityCost": "high"
+      },
+      "strategicRole": [
+        "support_tool"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-03: The two hosted credits are one shared pool usable for icebreaker use or link, represented as both support capabilities for doctrine visibility. Start-turn damage remains seeded/random and high risk."
+      ]
     },
     {
       "cardId": "onr_classic_049_omnitech-wet-drive",
@@ -42901,9 +43210,10 @@
       "roles": [
         "hardware",
         "memory",
-        "hand_size_scaling"
+        "setup"
       ],
       "planRoles": [
+        "runner_install_hardware",
         "rig_setup"
       ],
       "requiredMechanics": [
@@ -42915,7 +43225,8 @@
         "rigSupport": 3
       },
       "riskTags": [
-        "dynamic_memory"
+        "dynamic_memory",
+        "grip_size_dependency"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -42923,11 +43234,39 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "target": "base_memory_equals_grip_count"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_draw"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "credits": 0,
+        "reserveRisk": "low",
+        "opportunityCost": "medium"
+      },
+      "strategicRole": [
+        "support_tool"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-03: Dynamic MU scales with grip size and is rig support only; it should not be treated as access pressure by itself."
+      ]
     },
     {
       "cardId": "onr_classic_050_sandbox-dig",
@@ -42935,24 +43274,24 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "prep_bonus",
-        "run_support"
+        "rd_run_reward"
       ],
       "planRoles": [
-        "pressure_remote",
-        "build_economy"
+        "pressure_rnd"
       ],
       "requiredMechanics": [
         "install_resource",
-        "prep_action_credit_bonus",
-        "successful_run_trigger"
+        "paid_tap_ability",
+        "private_rnd_top_look"
       ],
       "valueHints": {
-        "economy": 2,
+        "information": 4,
         "runPressure": 2
       },
       "riskTags": [
-        "turn_first_prep"
+        "hidden_zone",
+        "tap_source",
+        "credit_cost"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -42960,11 +43299,63 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "topdeck_info",
+          "timing": "action",
+          "scope": "rnd",
+          "resource": "cards",
+          "amount": 3,
+          "target": "top_cards",
+          "repeatable": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_runner_action"
+        },
+        {
+          "kind": "requires_rnd_pressure"
+        }
+      ],
+      "costProfile": {
+        "clicks": 0,
+        "credits": 3,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "private_rnd_top_three_information",
+          "preferences": [
+            "use_choice_option_with_visible_board_payoff"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "lineSupport": [
+        "runner.rnd_pressure"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-03: Paid hidden-resource ability gives private top-three R&D information. It supports R&D pressure without leaking hidden R&D order outside the Runner controller view."
+      ]
     },
     {
       "cardId": "onr_classic_051_vintage-camaro",
@@ -42972,8 +43363,7 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "tag_prevention",
-        "future_action_cost"
+        "tag_prevention"
       ],
       "planRoles": [
         "avoid_tags"
@@ -42981,15 +43371,17 @@
       "requiredMechanics": [
         "install_hardware",
         "prevent_tag",
-        "future_action_debt"
+        "future_action_debt",
+        "credit_cost"
       ],
       "valueHints": {
         "tagSafety": 4,
-        "tempo": 2
+        "tempo": -2
       },
       "riskTags": [
         "future_action_debt",
-        "tag_prevention"
+        "tag_prevention",
+        "credit_cost"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -42997,11 +43389,51 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "risk.action_loss"
+      ],
+      "effects": [
+        {
+          "kind": "tag_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "tags",
+          "amount": 1,
+          "target": "avoid_tag"
+        },
+        {
+          "kind": "action_penalty",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "actions",
+          "amount": 1,
+          "target": "action_loss"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_prevention_window"
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "credits": 1,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "strategicRole": [
+        "defensive_tool"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-03: Paid tag avoidance is defensive support with future action debt; consistent with AI020 it does not by itself create a survival strategy anchor."
+      ]
     },
     {
       "cardId": "onr_classic_052_zetatech-portastation",
@@ -43013,8 +43445,7 @@
         "economy"
       ],
       "planRoles": [
-        "build_economy",
-        "event_pressure"
+        "find_economy"
       ],
       "requiredMechanics": [
         "install_hardware",
@@ -43023,7 +43454,7 @@
         "play_event_payment"
       ],
       "valueHints": {
-        "economy": 3,
+        "economy": 2,
         "eventSupport": 3
       },
       "riskTags": [
@@ -43036,11 +43467,36 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "recurring_economy",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 1,
+          "target": "play_events",
+          "repeatable": true
+        }
+      ],
+      "costProfile": {
+        "clicks": 1,
+        "credits": 3,
+        "reserveRisk": "low",
+        "opportunityCost": "medium"
+      },
+      "strategicRole": [
+        "support_tool"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-03: One recurring hosted credit is restricted to playing preps/events, so this is event-economy support and not a run-pressure anchor."
+      ]
     }
   ]
 }
