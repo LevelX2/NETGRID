@@ -9724,6 +9724,822 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "action.corp_extra_action_burst",
+      "group": "ops_v2_action_tempo_candidate",
+      "sideScope": "corp",
+      "description": "Corp gains a burst of additional actions; candidate tempo semantics only.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Overtime Incentives"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "action.corp_install_only_action_bundle",
+      "group": "ops_v2_action_tempo_candidate",
+      "sideScope": "corp",
+      "description": "Corp gains additional install-only actions.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Edgerunner, Inc., Temps"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "action.corp_recurring_extra_action_limited",
+      "group": "ops_v2_action_tempo_candidate",
+      "sideScope": "corp",
+      "description": "Corp gains a limited recurring extra-action effect with drawback.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Corporate Guard(R) Temps"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "advance.corp_distributed_counter_burst",
+      "group": "ops_v2_advancement",
+      "sideScope": "corp",
+      "description": "Corp places multiple advancement counters distributed across advanceable installed cards.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Management Shake-Up",
+        "Project Consultants",
+        "Systematic Layoffs"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "advance.corp_distributed_counter_support",
+      "group": "ops_v2_advancement",
+      "sideScope": "corp",
+      "description": "Corp places advancement counters as distributed score-window support.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Team Restructuring"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "advance.counter_reallocation",
+      "group": "ops_v2_advancement",
+      "sideScope": "corp",
+      "description": "Existing advancement counters are moved or reallocated between installed advanceable cards.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Falsified-Transactions Expert"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "condition.requires_advancement_counter",
+      "group": "ops_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires an existing advancement counter.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Falsified-Transactions Expert"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "condition.requires_installed_advanceable_card",
+      "group": "ops_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires an installed card that can legally be advanced.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Management Shake-Up",
+        "Project Consultants",
+        "Team Restructuring"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "condition.runner_attempted_multiple_runs_last_turn",
+      "group": "ops_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires Runner to have attempted multiple runs during the previous Runner turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Audit of Call Records"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "condition.runner_attempted_run_last_turn",
+      "group": "ops_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires Runner to have attempted a run during the previous Runner turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Chance Observation",
+        "Manhunt"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "condition.runner_attempted_run_this_game",
+      "group": "ops_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires Runner to have attempted a run at least once this game.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Schlaghund Pointers"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "condition.runner_installed_resource_last_turn",
+      "group": "ops_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires Runner to have installed a resource during the previous Runner turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Underworld Mole"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "condition.runner_trashed_node_last_turn",
+      "group": "ops_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires Runner to have trashed a Corp node during the previous Runner turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Data Sifters"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "damage.corp_meat_source",
+      "group": "ops_v2_damage",
+      "sideScope": "corp",
+      "description": "Corp effect is a meat-damage source.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Punitive Counterstrike",
+        "Scorched Earth",
+        "Urban Renewal"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.corp_reactive_credit_burst",
+      "group": "ops_v2_economy",
+      "sideScope": "corp",
+      "description": "Corp gains credits reactively after a prior Runner event.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Silver Lining Recovery Protocol"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.runner_credit_loss",
+      "group": "ops_v2_runner_resource_punish",
+      "sideScope": "corp",
+      "description": "Runner loses credits; this is not Corp credit economy.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Closed Accounts"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "hq.corp_card_recovery",
+      "group": "ops_v2_recovery",
+      "sideScope": "corp",
+      "description": "Corp recovers cards into HQ.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Off-Site Backups"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "hq.corp_ice_recovery",
+      "group": "ops_v2_recovery",
+      "sideScope": "corp",
+      "description": "Corp recovers ICE into HQ.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Reclamation Project"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.corp_conceal_unrezzed_ice",
+      "group": "ops_v2_ice_control",
+      "sideScope": "corp",
+      "description": "Corp conceals or resets public knowledge of unrezzed ICE order.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Shielding"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.corp_rearrange_installed_ice",
+      "group": "ops_v2_ice_control",
+      "sideScope": "corp",
+      "description": "Corp rearranges installed ICE within a fort/server.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Planning Consultants"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.corp_recovery",
+      "group": "ops_v2_recovery",
+      "sideScope": "corp",
+      "description": "Corp recovers ICE cards.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Reclamation Project"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "info.corp_hidden_ice_order_reset",
+      "group": "ops_v2_info",
+      "sideScope": "corp",
+      "description": "Corp resets or hides prior public information about ICE order.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Shielding"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "info.corp_rnd_peek",
+      "group": "ops_v2_info",
+      "sideScope": "corp",
+      "description": "Corp privately looks at cards from the top of R&D.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Planning Consultants"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "info.reveal_recovered_cards_to_runner",
+      "group": "ops_v2_info",
+      "sideScope": "corp",
+      "description": "Recovered cards are revealed to Runner as part of effect resolution.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Reclamation Project"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "install.corp_action_bundle",
+      "group": "ops_v2_action_tempo_candidate",
+      "sideScope": "corp",
+      "description": "Additional actions are constrained to install actions.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Edgerunner, Inc., Temps"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "resource.runner_recent_install_trash",
+      "group": "ops_v2_runner_resource_punish",
+      "sideScope": "corp",
+      "description": "Corp trashes a Runner resource installed during the recent qualifying window.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Underworld Mole"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.deferred_rez_payment_liability",
+      "group": "ops_v2_risk",
+      "sideScope": "corp",
+      "description": "Free or discounted rez creates a deferred payment liability.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Rent-to-Own Contract"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.double_operation_action_cost",
+      "group": "ops_v2_risk",
+      "sideScope": "corp",
+      "description": "Double operation requires two consecutive actions instead of one.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Corporate Shuffle",
+        "Reclamation Project"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.extra_trace_cost",
+      "group": "ops_v2_risk",
+      "sideScope": "corp",
+      "description": "Trace source carries extra cost or payment burden.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Schlaghund Pointers"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.future_forfeit_drawback",
+      "group": "ops_v2_risk",
+      "sideScope": "corp",
+      "description": "Future gain or score may be forfeited as drawback.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Corporate Guard(R) Temps"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.program_cleanup_after_mu_loss",
+      "group": "ops_v2_risk",
+      "sideScope": "corp",
+      "description": "Memory reduction may force Runner program cleanup/trash decisions.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Badtimes"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.term_counter_payment_liability",
+      "group": "ops_v2_risk",
+      "sideScope": "corp",
+      "description": "Term counters represent ongoing or later payment liability.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Rent-to-Own Contract"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.trash_rezzed_ice_after_kludge",
+      "group": "ops_v2_risk",
+      "sideScope": "corp",
+      "description": "Temporary ICE rez effect will trash the rezzed ICE when its counters expire.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Emergency Rig"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "runner.memory_reduction",
+      "group": "ops_v2_runner_rig_punish",
+      "sideScope": "corp",
+      "description": "Runner memory limit is reduced.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Badtimes"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "tag.additional_tag_source",
+      "group": "ops_v2_tag_snowball",
+      "sideScope": "corp",
+      "description": "Corp gives additional tags only after Runner is already tagged or under a qualifying tag condition.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Datapool by Zetatech",
+        "Netwatch Credit Voucher"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "tag.runner_credit_punish",
+      "group": "ops_v2_tag_payoff",
+      "sideScope": "corp",
+      "description": "Tagged-runner payoff that punishes Runner credits.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Closed Accounts"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "tag.runner_hardware_trash_payoff",
+      "group": "ops_v2_tag_payoff",
+      "sideScope": "corp",
+      "description": "Tagged-runner payoff that trashes Runner hardware.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Power Grid Overload"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "tag.runner_memory_pressure",
+      "group": "ops_v2_tag_payoff",
+      "sideScope": "corp",
+      "description": "Tagged-runner payoff that pressures Runner memory and installed programs.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Badtimes"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "tag.runner_resource_trash_payoff",
+      "group": "ops_v2_tag_payoff",
+      "sideScope": "corp",
+      "description": "Tagged-runner payoff that trashes Runner resources.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Corporate Detective Agency"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "tag.scaling_trace_margin_source",
+      "group": "ops_v2_tag_trace",
+      "sideScope": "corp",
+      "description": "Trace-tag source where tag amount scales with successful trace margin.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Manhunt"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "tag_snowball_followup",
+      "group": "ops_v2_tag_snowball",
+      "sideScope": "corp",
+      "description": "Follow-up that amplifies an existing tag state; not an initial tag source.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Datapool by Zetatech",
+        "Netwatch Credit Voucher"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "target.runner_hardware_trash",
+      "group": "ops_v2_targeting",
+      "sideScope": "corp",
+      "description": "Corp effect targets Runner hardware for trashing.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Power Grid Overload"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "target.runner_resource_trash",
+      "group": "ops_v2_targeting",
+      "sideScope": "corp",
+      "description": "Corp effect targets Runner resources for trashing.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Corporate Detective Agency",
+        "Underworld Mole"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "tempo.corp_action_burst",
+      "group": "ops_v2_action_tempo_candidate",
+      "sideScope": "corp",
+      "description": "Corp action-tempo burst candidate; not a productive Strategy ID by itself.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Overtime Incentives"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "tempo.corp_install_burst",
+      "group": "ops_v2_action_tempo_candidate",
+      "sideScope": "corp",
+      "description": "Corp install-tempo burst candidate; not a productive Strategy ID by itself.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Operations Semantic Review v2 reviewed Corp-operation hints"
+      ],
+      "examples": [
+        "Edgerunner, Inc., Temps"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     }
   ]
 }
