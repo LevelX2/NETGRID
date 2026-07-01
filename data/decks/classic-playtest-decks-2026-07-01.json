@@ -1,0 +1,211 @@
+{
+  "schemaVersion": "classic-playtest-decks-v0.1",
+  "id": "classic-playtest-decks-2026-07-01",
+  "status": "human_vs_human_and_ai_deck_legal_classic_playtest",
+  "generatedAt": "2026-07-01",
+  "copyrightNote": "Lokale Playtest-Decklisten aus vorhandenen NETGRID-Kartendaten; keine offiziellen Artworks, Logos, Frames oder Card Backs.",
+  "gateNotes": [
+    "Classic ist nach dem finalen Full-Card-Implementation-Check engine-/human-playable, deck-/formatlegal und ai_supported.",
+    "Die Decks sind fuer den Matchstart-Kartenpool Originalset & Classic gedacht und verwenden das private Formatprofil netgrid_private_local_classic_playtest_v1.",
+    "Alle vier Decks nutzen bewusst 100% Classic-Karten, damit neue Classic-Effekte ohne Originalset-Fuellkarten getestet werden koennen."
+  ],
+  "sourceDocuments": [
+    "data/cards/classic-cards.json",
+    "data/manifests/classic-card-support.json",
+    "data/decks/deck-format-profiles-1.3.0.json",
+    "docs/codex/CODEX_STATUS.md"
+  ],
+  "constraints": {
+    "minimumCardCountPerDeck": 45,
+    "maxCopiesPerCard": 3,
+    "classicMajorityRequired": true,
+    "appMatchstartLegal": true,
+    "aiSupported": true
+  },
+  "decks": [
+    {
+      "id": "classic_runner_prep_economy_pressure_2026_07_01",
+      "name": "Classic Runner - Prep Economy Pressure",
+      "side": "runner",
+      "identity": "runner_identity_001",
+      "focus": "Stabile Breaker-Basis mit viel Prep-Tempo, Kartenzugriff und verdeckter Ressourcensicherung. Das Deck testet vor allem Classic-Events, Such-/Setup-Karten und wiederholten Zentralserverdruck.",
+      "totalCards": 45,
+      "classicCards": 45,
+      "originalsetCards": 0,
+      "legalities": {
+        "appMatchstartLegal": true,
+        "aiSupported": true,
+        "reason": "Legal im privaten Classic-Playtest-Kartenpool ueber deck_legal, human_playable und netgrid_private_local_classic_playtest_v1."
+      },
+      "cards": [
+        { "id": "onr_classic_027_early-worm", "quantity": 3 },
+        { "id": "onr_classic_028_matador", "quantity": 3 },
+        { "id": "onr_classic_029_ms-todon", "quantity": 2 },
+        { "id": "onr_classic_030_psychic-friend", "quantity": 2 },
+        { "id": "onr_classic_031_rent-i-con", "quantity": 2 },
+        { "id": "onr_classic_032_schematics-search-engine", "quantity": 2 },
+        { "id": "onr_classic_033_superglue", "quantity": 3 },
+        { "id": "onr_classic_037_finders-keepers", "quantity": 3 },
+        { "id": "onr_classic_038_gypsytm-schedule-analyzer", "quantity": 2 },
+        { "id": "onr_classic_039_library-search", "quantity": 3 },
+        { "id": "onr_classic_040_meat-upgrade", "quantity": 2 },
+        { "id": "onr_classic_041_networking", "quantity": 3 },
+        { "id": "onr_classic_042_panzer-run", "quantity": 3 },
+        { "id": "onr_classic_043_running-interference", "quantity": 2 },
+        { "id": "onr_classic_045_elena-laskova", "quantity": 2 },
+        { "id": "onr_classic_046_executive-file-clerk", "quantity": 2 },
+        { "id": "onr_classic_047_little-black-box", "quantity": 1 },
+        { "id": "onr_classic_050_sandbox-dig", "quantity": 2 },
+        { "id": "onr_classic_051_vintage-camaro", "quantity": 1 },
+        { "id": "onr_classic_052_zetatech-portastation", "quantity": 2 }
+      ],
+      "playNotes": [
+        "Frueh ein gemischtes Breaker-Set installieren und dann mit Prep-Events Druck in mehreren Runs aufbauen.",
+        "Library Search und Schematics Search Engine stabilisieren die breite Classic-Kartenbasis.",
+        "Verdeckte Ressourcen nicht blind ausspielen: sie sollen zentrale Druckfenster und Sicherheitslinien ergaenzen."
+      ]
+    },
+    {
+      "id": "classic_runner_cybernetics_risk_rig_2026_07_01",
+      "name": "Classic Runner - Cybernetics Risk Rig",
+      "side": "runner",
+      "identity": "runner_identity_001",
+      "focus": "Aggressiveres Rig mit Cybernetics, Hidden-Ressourcen und Stoer-Events. Das Deck deckt fast alle Classic-Runner-Bausteine ab und testet riskantere Setup-Entscheidungen.",
+      "totalCards": 45,
+      "classicCards": 45,
+      "originalsetCards": 0,
+      "legalities": {
+        "appMatchstartLegal": true,
+        "aiSupported": true,
+        "reason": "Legal im privaten Classic-Playtest-Kartenpool ueber deck_legal, human_playable und netgrid_private_local_classic_playtest_v1."
+      },
+      "cards": [
+        { "id": "onr_classic_027_early-worm", "quantity": 2 },
+        { "id": "onr_classic_028_matador", "quantity": 2 },
+        { "id": "onr_classic_029_ms-todon", "quantity": 3 },
+        { "id": "onr_classic_030_psychic-friend", "quantity": 3 },
+        { "id": "onr_classic_031_rent-i-con", "quantity": 3 },
+        { "id": "onr_classic_032_schematics-search-engine", "quantity": 2 },
+        { "id": "onr_classic_033_superglue", "quantity": 2 },
+        { "id": "onr_classic_034_boostergang-connections", "quantity": 2 },
+        { "id": "onr_classic_035_corruption", "quantity": 2 },
+        { "id": "onr_classic_036_do-the-drine", "quantity": 2 },
+        { "id": "onr_classic_037_finders-keepers", "quantity": 2 },
+        { "id": "onr_classic_038_gypsytm-schedule-analyzer", "quantity": 2 },
+        { "id": "onr_classic_039_library-search", "quantity": 2 },
+        { "id": "onr_classic_040_meat-upgrade", "quantity": 2 },
+        { "id": "onr_classic_041_networking", "quantity": 2 },
+        { "id": "onr_classic_042_panzer-run", "quantity": 2 },
+        { "id": "onr_classic_043_running-interference", "quantity": 3 },
+        { "id": "onr_classic_044_crash-space", "quantity": 1 },
+        { "id": "onr_classic_046_executive-file-clerk", "quantity": 2 },
+        { "id": "onr_classic_048_omnitech-spinal-tap-cybermodem", "quantity": 1 },
+        { "id": "onr_classic_049_omnitech-wet-drive", "quantity": 1 },
+        { "id": "onr_classic_050_sandbox-dig", "quantity": 1 },
+        { "id": "onr_classic_052_zetatech-portastation", "quantity": 1 }
+      ],
+      "playNotes": [
+        "Das Deck will schneller Druck machen als die Prep-Economy-Variante und nimmt dafuer riskantere Installationslinien in Kauf.",
+        "Cybernetics und Hidden-Karten sollen Timingfenster schaffen, nicht nur als permanente Board-Erweiterung liegen.",
+        "Running Interference und Panzer Run zwingen die Korp in unangenehme Rez- und Schutzentscheidungen."
+      ]
+    },
+    {
+      "id": "classic_corp_superserum_control_grid_2026_07_01",
+      "name": "Classic Corp - Superserum Control Grid",
+      "side": "corp",
+      "identity": "corp_identity_001",
+      "focus": "Kontrolliertes Score-Deck um Superserum, Virusdruck-Gegenwehr, Hand-/Deck-Reset und breite ICE-Abdeckung. Die Liste ist fuer Tests des Superserum-Purge- und Prevention-Pfads gebaut.",
+      "totalCards": 45,
+      "classicCards": 45,
+      "originalsetCards": 0,
+      "agendaPoints": 17,
+      "legalities": {
+        "appMatchstartLegal": true,
+        "aiSupported": true,
+        "reason": "Legal im privaten Classic-Playtest-Kartenpool ueber deck_legal, human_playable und netgrid_private_local_classic_playtest_v1."
+      },
+      "cards": [
+        { "id": "onr_classic_001_data-fort-remapping", "quantity": 2 },
+        { "id": "onr_classic_002_superserum", "quantity": 3 },
+        { "id": "onr_classic_003_unlisted-research-lab", "quantity": 2 },
+        { "id": "onr_classic_004_theorem-proof", "quantity": 1 },
+        { "id": "onr_classic_005_baskerville", "quantity": 2 },
+        { "id": "onr_classic_006_bolter-swarm", "quantity": 2 },
+        { "id": "onr_classic_007_brain-drain", "quantity": 2 },
+        { "id": "onr_classic_008_deadeye", "quantity": 2 },
+        { "id": "onr_classic_009_dumpster", "quantity": 1 },
+        { "id": "onr_classic_010_entrapment", "quantity": 2 },
+        { "id": "onr_classic_011_glacier", "quantity": 1 },
+        { "id": "onr_classic_012_imperial-guard", "quantity": 2 },
+        { "id": "onr_classic_013_puzzle", "quantity": 2 },
+        { "id": "onr_classic_014_trapdoor", "quantity": 1 },
+        { "id": "onr_classic_015_vortex", "quantity": 2 },
+        { "id": "onr_classic_016_badtimes", "quantity": 2 },
+        { "id": "onr_classic_017_corporate-shuffle", "quantity": 3 },
+        { "id": "onr_classic_018_reclamation-project", "quantity": 2 },
+        { "id": "onr_classic_019_indiscriminate-response-team", "quantity": 2 },
+        { "id": "onr_classic_020_london-city-grid", "quantity": 1 },
+        { "id": "onr_classic_021_satellite-monitors", "quantity": 2 },
+        { "id": "onr_classic_022_self-destruct", "quantity": 1 },
+        { "id": "onr_classic_023_shock-treatment", "quantity": 1 },
+        { "id": "onr_classic_024_sterdroid", "quantity": 2 },
+        { "id": "onr_classic_025_strategic-planning-group", "quantity": 2 }
+      ],
+      "playNotes": [
+        "Superserum frueh genug als echtes Score-Ziel zeigen, damit Virus-Counter-Purge und Prevention praktisch getestet werden.",
+        "Corporate Shuffle und Reclamation Project halten lange Spiele stabil, ohne die ICE-Dichte zu stark zu senken.",
+        "Die ambush- und node-Pakete sollen Runner-Druck bestrafen, nicht jede Remote dauerhaft ueberladen."
+      ]
+    },
+    {
+      "id": "classic_corp_remote_lab_deflection_2026_07_01",
+      "name": "Classic Corp - Remote Lab Deflection",
+      "side": "corp",
+      "identity": "corp_identity_001",
+      "focus": "Remote-orientiertes Lab-Deck mit Deflector-ICE, Regions-/Upgrade-Paket und hohem Agenda-Durchsatz. Die Liste testet breiter die Classic-Korp-Assets und Upgrade-Interaktionen.",
+      "totalCards": 45,
+      "classicCards": 45,
+      "originalsetCards": 0,
+      "agendaPoints": 19,
+      "legalities": {
+        "appMatchstartLegal": true,
+        "aiSupported": true,
+        "reason": "Legal im privaten Classic-Playtest-Kartenpool ueber deck_legal, human_playable und netgrid_private_local_classic_playtest_v1."
+      },
+      "cards": [
+        { "id": "onr_classic_001_data-fort-remapping", "quantity": 3 },
+        { "id": "onr_classic_002_superserum", "quantity": 2 },
+        { "id": "onr_classic_003_unlisted-research-lab", "quantity": 3 },
+        { "id": "onr_classic_004_theorem-proof", "quantity": 1 },
+        { "id": "onr_classic_005_baskerville", "quantity": 1 },
+        { "id": "onr_classic_006_bolter-swarm", "quantity": 2 },
+        { "id": "onr_classic_007_brain-drain", "quantity": 1 },
+        { "id": "onr_classic_008_deadeye", "quantity": 2 },
+        { "id": "onr_classic_009_dumpster", "quantity": 2 },
+        { "id": "onr_classic_010_entrapment", "quantity": 3 },
+        { "id": "onr_classic_011_glacier", "quantity": 2 },
+        { "id": "onr_classic_012_imperial-guard", "quantity": 1 },
+        { "id": "onr_classic_013_puzzle", "quantity": 2 },
+        { "id": "onr_classic_014_trapdoor", "quantity": 2 },
+        { "id": "onr_classic_015_vortex", "quantity": 1 },
+        { "id": "onr_classic_016_badtimes", "quantity": 1 },
+        { "id": "onr_classic_017_corporate-shuffle", "quantity": 2 },
+        { "id": "onr_classic_018_reclamation-project", "quantity": 3 },
+        { "id": "onr_classic_019_indiscriminate-response-team", "quantity": 1 },
+        { "id": "onr_classic_020_london-city-grid", "quantity": 2 },
+        { "id": "onr_classic_021_satellite-monitors", "quantity": 2 },
+        { "id": "onr_classic_022_self-destruct", "quantity": 2 },
+        { "id": "onr_classic_023_shock-treatment", "quantity": 1 },
+        { "id": "onr_classic_024_sterdroid", "quantity": 1 },
+        { "id": "onr_classic_025_strategic-planning-group", "quantity": 1 },
+        { "id": "onr_classic_026_street-enforcer", "quantity": 1 }
+      ],
+      "playNotes": [
+        "Remote-Scoring ueber guenstige Deflector-ICE und London City Grid priorisieren.",
+        "Unlisted Research Lab und Reclamation Project geben dem Deck lange Ressourcenlinien; nicht alle Remotes gleichzeitig oeffnen.",
+        "Self-Destruct, Shock Treatment und Street Enforcer machen einzelne Remotes unangenehm, brauchen aber gezieltes Timing."
+      ]
+    }
+  ]
+}

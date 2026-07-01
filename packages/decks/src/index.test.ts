@@ -5,9 +5,11 @@ import snapshotData08 from "../../../data/card-import/card-snapshot-0.8.json";
 import profilesData from "../../../data/decks/deck-format-profiles-0.6.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import profilesData130 from "../../../data/decks/deck-format-profiles-1.3.0.json";
+import classicPlaytestDecksData from "../../../data/decks/classic-playtest-decks-2026-07-01.json";
 import templatesData from "../../../data/decks/deck-templates-0.6.json";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
+import classicEditableDecksData from "../../../docs/derived/classic-high-share-editable-decks-2026-07-01.json";
 import {
   buildEngineDeck,
   computeDeckHash,
@@ -57,6 +59,23 @@ const profileClassicProteus = (profilesData130.profiles as DeckFormatProfile[]).
 )!;
 const snapshots08 = snapshotsData08.snapshots as DeckSnapshot[];
 const context08 = { cardsById: cardsById08, profile: profile08 };
+
+type ClassicPlaytestSourceDeck = {
+  side: "runner" | "corp";
+  totalCards: number;
+  classicCards: number;
+  originalsetCards: number;
+  agendaPoints?: number;
+  legalities: { appMatchstartLegal: boolean; aiSupported: boolean };
+  cards: Array<{ id: string; quantity: number }>;
+};
+
+type ClassicEditableDeckEntry = {
+  classicCards: number;
+  originalsetCards: number;
+  classicShare: number;
+  deck: EditableDeck;
+};
 
 describe("deck validation and snapshots", () => {
   it("validates every frozen V0.6 deck snapshot", () => {
@@ -484,6 +503,54 @@ describe("deck validation and snapshots", () => {
           runtimeCardsById[entry.cardId]?.statuses.ai_supported === true,
       ),
     ).toBe(true);
+  });
+
+  it("validates the Classic high-share editable User Decks", () => {
+    const runtimeCardsById = createRuntimeCardsById();
+    const contextClassic = { cardsById: runtimeCardsById, profile: profileClassic };
+    const sourceDecks = classicPlaytestDecksData.decks as ClassicPlaytestSourceDeck[];
+    const editableDecks = classicEditableDecksData.decks as ClassicEditableDeckEntry[];
+
+    expect(sourceDecks).toHaveLength(4);
+    expect(editableDecks).toHaveLength(4);
+    expect(editableDecks.filter((entry) => entry.deck.side === "runner")).toHaveLength(2);
+    expect(editableDecks.filter((entry) => entry.deck.side === "corp")).toHaveLength(2);
+
+    for (const sourceDeck of sourceDecks) {
+      const totalCards = sourceDeck.cards.reduce((sum, entry) => sum + entry.quantity, 0);
+      const agendaPoints = sourceDeck.cards.reduce(
+        (sum, entry) => sum + (runtimeCardsById[entry.id]?.numeric.agendaPoints ?? 0) * entry.quantity,
+        0,
+      );
+      expect(totalCards).toBe(45);
+      expect(sourceDeck.totalCards).toBe(totalCards);
+      expect(sourceDeck.classicCards).toBe(45);
+      expect(sourceDeck.originalsetCards).toBe(0);
+      expect(sourceDeck.legalities.appMatchstartLegal).toBe(true);
+      expect(sourceDeck.legalities.aiSupported).toBe(true);
+      for (const entry of sourceDeck.cards) {
+        expect(entry.quantity).toBeLessThanOrEqual(3);
+        expect(entry.id.startsWith("onr_classic_")).toBe(true);
+        expect(runtimeCardsById[entry.id]?.side).toBe(sourceDeck.side);
+        expect(runtimeCardsById[entry.id]?.statuses.ai_supported).toBe(true);
+      }
+      if (sourceDeck.side === "corp") {
+        expect(sourceDeck.agendaPoints).toBe(agendaPoints);
+        expect(agendaPoints).toBeGreaterThanOrEqual(7);
+      }
+    }
+
+    for (const entry of editableDecks) {
+      const validation = validateEditableDeck(entry.deck, contextClassic);
+      expect(validation).toMatchObject({ ok: true, errors: [] });
+      expect(validation.totalCards).toBe(45);
+      expect(entry.classicCards).toBe(45);
+      expect(entry.originalsetCards).toBe(0);
+      expect(entry.classicShare).toBe(1);
+      expect(entry.deck.cardPoolVersion).toBe("private-local-onr-v1-plus-classic-playtest");
+      expect(entry.deck.formatProfileId).toBe("netgrid_private_local_classic_playtest_v1");
+      expect(entry.deck.cards.every((card) => card.cardId.startsWith("onr_classic_"))).toBe(true);
+    }
   });
 
   it("keeps V1.3.0 format legality restrictive and reports concrete safe error codes", () => {
