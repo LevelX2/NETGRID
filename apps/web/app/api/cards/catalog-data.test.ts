@@ -520,15 +520,15 @@ describe("catalog API filters", () => {
       expect.arrayContaining([
         expect.objectContaining({
           strategyId: "corp.ice_tax_glacier",
-          role: "scoring_tool",
-          roleDetail: "tempo_payoff",
+          role: "payoff_anchor",
+          roleDetail: "free_rez_ice_payoff",
           confidence: "high",
           sourceField: "strategySupportPairs",
         }),
         expect.objectContaining({
           strategyId: "corp.remote_scoring",
           role: "scoring_tool",
-          roleDetail: "score_window_payoff",
+          roleDetail: "free_rez_remote_defense",
           confidence: "medium",
           sourceField: "strategySupportPairs",
         }),

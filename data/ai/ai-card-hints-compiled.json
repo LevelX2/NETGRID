@@ -13582,11 +13582,11 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -13639,9 +13639,31 @@
         "opportunityCost": "medium"
       },
       "tacticSignals": [
-        "score.draw",
-        "score.hq_archive_to_rnd_shuffle",
-        "score.rnd_archive_recycle"
+        "draw.corp_action_draw",
+        "hq.corp_hand_to_rnd_shuffle",
+        "archives.corp_recycle_to_rnd",
+        "rnd.corp_shuffle_recycle"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.deck_recycle_engine",
+          "role": "engine_anchor",
+          "roleDetail": "scored_zone_recycle_draw_engine",
+          "evidence": [
+            "draw.corp_action_draw",
+            "hq.corp_hand_to_rnd_shuffle",
+            "archives.corp_recycle_to_rnd",
+            "rnd.corp_shuffle_recycle"
+          ],
+          "confidence": "medium",
+          "rationale": "Action draw plus HQ/Archives-to-R&D shuffle forms a reusable deck recycle engine after scoring."
+        }
+      ],
+      "lineSupport": [
+        "corp.deck_recycle_engine"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ]
     },
     {
@@ -13687,22 +13709,23 @@
         {
           "strategyId": "corp.fast_advance",
           "role": "enabler",
+          "roleDetail": "black_ops_difficulty_enabler",
           "evidence": [
             "score.agenda_difficulty_discount",
             "score.black_ops_difficulty_discount"
           ],
           "confidence": "medium",
-          "rationale": "Difficulty-Reduction ist funktional Fast-Advance-Support; der Black-Ops-Subtype selbst ist kein Anker."
+          "rationale": "Agenda Semantic Review v1 maps Artificial Security Directors to corp.fast_advance as enabler/black_ops_difficulty_enabler."
         }
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -13753,26 +13776,26 @@
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
       ],
       "tacticSignals": [
-        "score.damage_amp",
+        "damage.corp_meat_damage_amplifier",
         "score.meat_damage_amp"
       ],
       "lineSupport": [
         "corp.damage_kill"
       ],
       "strategicRole": [
-        "engine_anchor"
+        "enabler"
       ],
       "strategySupportPairs": [
         {
           "strategyId": "corp.damage_kill",
-          "role": "engine_anchor",
-          "roleDetail": "damage_amp_anchor",
+          "role": "enabler",
+          "roleDetail": "meat_damage_amp_anchor",
           "evidence": [
-            "score.meat_damage_amp",
-            "score.damage_amp"
+            "damage.corp_meat_damage_amplifier",
+            "score.meat_damage_amp"
           ],
           "confidence": "high",
-          "rationale": "Verstaerkt vorhandene Meat-Damage-Quellen und traegt damit echte Kill-Linien, erzeugt aber keinen Schaden allein."
+          "rationale": "Agenda Semantic Review v1 maps Bioweapons Engineering to corp.damage_kill as enabler/meat_damage_amp_anchor."
         }
       ],
       "quality": {
@@ -13781,8 +13804,8 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -13833,8 +13856,8 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -13870,19 +13893,20 @@
         {
           "strategyId": "corp.ice_tax_glacier",
           "role": "tax_tool",
-          "roleDetail": "ice_type_anchor",
+          "roleDetail": "black_ice_tax_anchor",
           "evidence": [
-            "score.black_ice_strength_bonus",
-            "score.ice_type_tax_support"
+            "ice.corp_strength_bonus",
+            "ice.corp_black_ice_strength_bonus",
+            "score.black_ice_strength_bonus"
           ],
           "confidence": "high",
-          "rationale": "Black-ICE-Staerke ist ICE-Tax/Glacier-Anker; kein Damage-Anker allein aus dem Black-ICE-Kontext."
+          "rationale": "Agenda Semantic Review v1 maps Black Ice Quality Assurance to corp.ice_tax_glacier as tax_tool/black_ice_tax_anchor."
         }
       ],
       "tacticSignals": [
-        "ice.strength_modifier",
-        "score.black_ice_strength_bonus",
-        "score.ice_type_tax_support"
+        "ice.corp_strength_bonus",
+        "ice.corp_black_ice_strength_bonus",
+        "score.black_ice_strength_bonus"
       ]
     },
     {
@@ -13916,11 +13940,11 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex",
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1",
         "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Corporate Boon extra-action ability as scored-agenda tempo"
       },
       "effects": [
@@ -13957,9 +13981,30 @@
         "opportunityCost": "low"
       },
       "tacticSignals": [
+        "action.corp_counter_bank",
+        "action.corp_extra_action",
         "score.action_counter_bank",
-        "score.action_gain",
-        "score.agenda_action"
+        "limit.once_per_turn"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.action_tempo",
+          "role": "payoff_anchor",
+          "roleDetail": "extra_action_counter_bank",
+          "evidence": [
+            "action.corp_counter_bank",
+            "action.corp_extra_action",
+            "limit.once_per_turn"
+          ],
+          "confidence": "medium",
+          "rationale": "The scored counter bank converts into extra Corp actions and belongs under action-tempo rather than remote scoring."
+        }
+      ],
+      "lineSupport": [
+        "corp.action_tempo"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
       ]
     },
     {
@@ -13999,10 +14044,10 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -14038,9 +14083,10 @@
         "opportunityCost": "low"
       },
       "tacticSignals": [
-        "score.agenda_action",
-        "score.economy_action",
-        "score.economy_counter_bank"
+        "economy.corp_counter_bank",
+        "economy.corp_counter_cashout_action",
+        "score.economy_counter_bank",
+        "score.agenda_action"
       ]
     },
     {
@@ -14079,16 +14125,39 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "score.economy_conditional_burst",
+        "economy.corp_agenda_reveal_burst",
+        "hq.corp_agenda_density_reduction",
+        "rnd.corp_agenda_shuffle_from_hq",
         "score.hq_agenda_reveal",
         "score.hq_agenda_shuffle"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.central_stabilize",
+          "role": "defensive_tool",
+          "roleDetail": "hq_agenda_flood_cleanup",
+          "evidence": [
+            "hq.corp_agenda_density_reduction",
+            "rnd.corp_agenda_shuffle_from_hq",
+            "score.hq_agenda_reveal",
+            "score.hq_agenda_shuffle"
+          ],
+          "confidence": "medium",
+          "rationale": "Agenda Semantic Review v1 maps Corporate Downsizing to corp.central_stabilize as defensive_tool/hq_agenda_flood_cleanup."
+        }
+      ],
+      "lineSupport": [
+        "corp.central_stabilize"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -14176,18 +14245,18 @@
         }
       ],
       "tacticSignals": [
-        "risk.loses_ability_on_install_or_rez",
+        "economy.corp_credit_action",
         "score.agenda_action",
-        "score.economy_action"
+        "risk.loses_ability_on_install_or_rez"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       }
     },
     {
@@ -14224,10 +14293,10 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -14253,9 +14322,10 @@
         }
       ],
       "tacticSignals": [
-        "risk.economy_crash_on_score",
+        "economy.corp_threshold_burst",
+        "score.economy_conditional_burst",
         "risk.requires_corp_credit_threshold",
-        "score.economy_conditional_burst"
+        "risk.economy_crash_on_score"
       ],
       "conditions": [
         {
@@ -14305,10 +14375,12 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
+        "install.corp_new_remote_fort_from_hq",
+        "economy.corp_install_rez_budget",
         "score.remote_fort_creation",
         "score.remote_install_budget"
       ],
@@ -14328,7 +14400,7 @@
             "score.remote_install_budget"
           ],
           "confidence": "high",
-          "rationale": "Echte Remote-Setup-Engine, aber Zielwahl/Install-Sequenz passt nicht in TargetProfile V1."
+          "rationale": "Agenda Semantic Review v1 maps Data Fort Reclamation to corp.remote_scoring as engine_anchor/remote_setup_engine."
         }
       ],
       "effects": [
@@ -14398,17 +14470,18 @@
         "data/scenarios/ai-deck-legal-v1912-smokes.json#corp_v1912_agenda_counter_economy"
       ],
       "tacticSignals": [
-        "score.economy_counter_bank",
-        "score.economy_recurring"
+        "economy.corp_recurring_counter_bank",
+        "economy.corp_start_turn_payout",
+        "score.economy_counter_bank"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -14511,16 +14584,38 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "score.agenda_action",
-        "score.draw",
-        "score.recurring_draw"
+        "draw.corp_recurring_optional",
+        "draw.corp_action_draw",
+        "score.recurring_draw",
+        "score.agenda_action"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.draw_engine",
+          "role": "engine_anchor",
+          "roleDetail": "scored_optional_draw_engine",
+          "evidence": [
+            "draw.corp_recurring_optional",
+            "draw.corp_action_draw",
+            "score.recurring_draw",
+            "score.agenda_action"
+          ],
+          "confidence": "medium",
+          "rationale": "Optional recurring scored-agenda draw is a durable draw-engine anchor when the deck can use added card velocity."
+        }
+      ],
+      "lineSupport": [
+        "corp.draw_engine"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ]
     },
     {
@@ -14556,9 +14651,10 @@
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
       ],
       "tacticSignals": [
-        "ice.strength_modifier",
+        "ice.corp_code_gate_strength_bonus",
+        "ice.corp_strength_bonus",
+        "economy.corp_ice_type_reveal_burst",
         "score.code_gate_strength_bonus",
-        "score.ice_type_reveal_economy",
         "score.ice_type_tax_support"
       ],
       "lineSupport": [
@@ -14571,13 +14667,16 @@
         {
           "strategyId": "corp.ice_tax_glacier",
           "role": "tax_tool",
-          "roleDetail": "ice_type_anchor",
+          "roleDetail": "code_gate_tax_anchor",
           "evidence": [
+            "ice.corp_code_gate_strength_bonus",
+            "ice.corp_strength_bonus",
+            "economy.corp_ice_type_reveal_burst",
             "score.code_gate_strength_bonus",
             "score.ice_type_tax_support"
           ],
           "confidence": "high",
-          "rationale": "Code-Gate-Buff traegt ICE-Tax; Reveal-Economy bleibt Support."
+          "rationale": "Agenda Semantic Review v1 maps Encryption Breakthrough to corp.ice_tax_glacier as tax_tool/code_gate_tax_anchor."
         }
       ],
       "quality": {
@@ -14586,8 +14685,8 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -14669,22 +14768,23 @@
         {
           "strategyId": "corp.fast_advance",
           "role": "enabler",
+          "roleDetail": "gray_ops_difficulty_enabler",
           "evidence": [
             "score.agenda_difficulty_discount",
             "score.gray_ops_difficulty_discount"
           ],
           "confidence": "medium",
-          "rationale": "Difficulty-Reduction ist Fast-Advance-Support; Gray-Ops-Subtype allein bleibt kein Strategieanker."
+          "rationale": "Agenda Semantic Review v1 maps Executive Extraction to corp.fast_advance as enabler/gray_ops_difficulty_enabler."
         }
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -14746,22 +14846,23 @@
         {
           "strategyId": "corp.fast_advance",
           "role": "enabler",
+          "roleDetail": "research_difficulty_enabler",
           "evidence": [
             "score.agenda_difficulty_discount",
             "score.research_difficulty_discount"
           ],
           "confidence": "medium",
-          "rationale": "Research-Difficulty-Reduction ermoeglicht Fast-Advance-Linien, nicht Research als Subtyp."
+          "rationale": "Agenda Semantic Review v1 maps Genetics-Visionary Acquisition to corp.fast_advance as enabler/research_difficulty_enabler."
         }
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -14819,8 +14920,8 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -14840,6 +14941,7 @@
         }
       ],
       "tacticSignals": [
+        "economy.corp_credit_burst",
         "score.economy_burst"
       ],
       "conditions": [
@@ -14886,12 +14988,12 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "ice.strength_modifier",
-        "ice.subroutine_modifier",
+        "ice.corp_strength_bonus_chosen",
+        "ice.corp_subroutine_repeat",
         "score.chosen_ice_strength_bonus",
         "score.repeat_ice_subroutines"
       ],
@@ -14907,11 +15009,13 @@
           "role": "payoff_anchor",
           "roleDetail": "ice_upgrade_payoff",
           "evidence": [
+            "ice.corp_strength_bonus_chosen",
+            "ice.corp_subroutine_repeat",
             "score.chosen_ice_strength_bonus",
             "score.repeat_ice_subroutines"
           ],
           "confidence": "high",
-          "rationale": "Gezielter ICE-Upgrade-Payoff; TargetProfile V1 waere moeglich, bleibt aber read-only Kandidat."
+          "rationale": "Agenda Semantic Review v1 maps Ice Transmutation to corp.ice_tax_glacier as payoff_anchor/ice_upgrade_payoff."
         }
       ],
       "effects": [
@@ -14967,16 +15071,17 @@
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
       ],
       "tacticSignals": [
+        "setup.corp_hand_size",
         "score.hand_size"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -15054,14 +15159,14 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "score.agenda_action",
-        "score.economy_action"
+        "economy.corp_two_action_credit_gain",
+        "score.agenda_action"
       ]
     },
     {
@@ -15105,8 +15210,8 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -15163,30 +15268,32 @@
         "reserveRisk": "medium",
         "opportunityCost": "medium"
       },
-      "lineSupport": [
-        "corp.tag_trace_punish"
-      ],
-      "strategicRole": [
-        "engine_anchor"
+      "tacticSignals": [
+        "trace.corp_source",
+        "tag.corp_trace_tag_source",
+        "condition.trace_success",
+        "score.trace_tag_source"
       ],
       "strategySupportPairs": [
         {
           "strategyId": "corp.tag_trace_punish",
-          "role": "engine_anchor",
-          "roleDetail": "tag_source",
+          "role": "enabler",
+          "roleDetail": "trace_tag_source",
           "evidence": [
-            "score.trace_tag_source",
-            "score.tag_source"
+            "trace.corp_source",
+            "tag.corp_trace_tag_source",
+            "condition.trace_success",
+            "score.trace_tag_source"
           ],
           "confidence": "high",
-          "rationale": "Trace-Tag-Quelle, getrennt von Tag-Payoff."
+          "rationale": "Agenda Semantic Review v1 maps Netwatch Operations Office to corp.tag_trace_punish as enabler/trace_tag_source."
         }
       ],
-      "tacticSignals": [
-        "score.tag_source",
-        "score.trace_tag_source",
-        "tag.source",
-        "trace.source"
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "enabler"
       ]
     },
     {
@@ -15283,22 +15390,24 @@
         {
           "strategyId": "corp.damage_kill",
           "role": "punish_payoff",
-          "roleDetail": "damage_payoff",
+          "roleDetail": "tagged_meat_damage_payoff",
           "evidence": [
-            "score.tagged_meat_damage_payoff",
-            "score.meat_damage_source"
+            "damage.corp_tagged_meat_payoff",
+            "damage.corp_meat_damage_source"
           ],
           "confidence": "high",
-          "rationale": "Tagged Meat-Damage-Payoff; Tag-Quelle und Payoff bleiben getrennt."
+          "rationale": "Agenda Semantic Review v1 maps On-Call Solo Team to corp.damage_kill as punish_payoff/tagged_meat_damage_payoff."
         },
         {
           "strategyId": "corp.tag_trace_punish",
           "role": "punish_payoff",
+          "roleDetail": "tagged_runner_punish_payoff",
           "evidence": [
-            "risk.requires_tagged_runner"
+            "tag.corp_tagged_runner_payoff",
+            "condition.requires_tagged_runner"
           ],
           "confidence": "high",
-          "rationale": "Tagged Meat-Damage-Payoff; Tag-Quelle und Payoff bleiben getrennt."
+          "rationale": "Agenda Semantic Review v1 maps On-Call Solo Team to corp.tag_trace_punish as punish_payoff/tagged_runner_punish_payoff."
         }
       ],
       "quality": {
@@ -15307,15 +15416,14 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "damage.payoff",
-        "risk.requires_tagged_runner",
-        "score.meat_damage_source",
-        "score.tagged_meat_damage_payoff",
-        "tag.payoff"
+        "damage.corp_tagged_meat_payoff",
+        "damage.corp_meat_damage_source",
+        "tag.corp_tagged_runner_payoff",
+        "condition.requires_tagged_runner"
       ]
     },
     {
@@ -15355,10 +15463,10 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -15401,9 +15509,10 @@
         "opportunityCost": "low"
       },
       "tacticSignals": [
-        "score.agenda_action",
-        "score.economy_action",
-        "score.economy_counter_bank"
+        "economy.corp_counter_bank",
+        "economy.corp_counter_cashout_action",
+        "score.economy_counter_bank",
+        "score.agenda_action"
       ]
     },
     {
@@ -15472,15 +15581,17 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex",
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1",
         "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Political Overthrow scored-agenda economy before basic credit"
       },
       "tacticSignals": [
-        "score.agenda_action",
-        "score.economy_action"
+        "score.high_agenda_value",
+        "score.vanilla_points",
+        "economy.corp_credit_action",
+        "score.agenda_action"
       ]
     },
     {
@@ -15516,6 +15627,7 @@
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#corp_v192_agenda_economy_and_program_trash_ice"
       ],
       "tacticSignals": [
+        "economy.corp_recurring_credit",
         "score.economy_recurring"
       ],
       "quality": {
@@ -15524,8 +15636,8 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -15587,8 +15699,8 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -15621,31 +15733,34 @@
         "corp.remote_scoring"
       ],
       "strategicRole": [
+        "payoff_anchor",
         "scoring_tool"
       ],
       "strategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
-          "role": "scoring_tool",
-          "roleDetail": "tempo_payoff",
+          "role": "payoff_anchor",
+          "roleDetail": "free_rez_ice_payoff",
           "evidence": [
+            "ice.corp_free_rez_on_score",
             "score.free_rez_ice"
           ],
           "confidence": "high",
-          "rationale": "Free-rez-payoff stuetzt ICE-Tax und Scoring-Window; nicht Economy-Reserve."
+          "rationale": "Agenda Semantic Review v1 maps Priority Requisition to corp.ice_tax_glacier as payoff_anchor/free_rez_ice_payoff."
         },
         {
           "strategyId": "corp.remote_scoring",
           "role": "scoring_tool",
-          "roleDetail": "score_window_payoff",
+          "roleDetail": "free_rez_remote_defense",
           "evidence": [
             "score.free_rez_ice"
           ],
           "confidence": "medium",
-          "rationale": "Free-rez-payoff stuetzt ICE-Tax und Scoring-Window; nicht Economy-Reserve."
+          "rationale": "Agenda Semantic Review v1 maps Priority Requisition to corp.remote_scoring as scoring_tool/free_rez_remote_defense."
         }
       ],
       "tacticSignals": [
+        "ice.corp_free_rez_on_score",
         "score.free_rez_ice"
       ],
       "conditions": [
@@ -15747,39 +15862,41 @@
         "reserveRisk": "medium",
         "opportunityCost": "medium"
       },
-      "lineSupport": [
-        "corp.tag_trace_punish"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
-      "strategicRole": [
-        "engine_anchor"
+      "tacticSignals": [
+        "trace.corp_source",
+        "tag.corp_trace_tag_source",
+        "condition.trace_success",
+        "score.trace_tag_source"
       ],
       "strategySupportPairs": [
         {
           "strategyId": "corp.tag_trace_punish",
-          "role": "engine_anchor",
-          "roleDetail": "tag_source",
+          "role": "enabler",
+          "roleDetail": "trace_tag_source",
           "evidence": [
-            "score.trace_tag_source",
-            "score.tag_source"
+            "trace.corp_source",
+            "tag.corp_trace_tag_source",
+            "condition.trace_success",
+            "score.trace_tag_source"
           ],
           "confidence": "high",
-          "rationale": "Trace-Tag-Quelle, getrennt von Payoff."
+          "rationale": "Agenda Semantic Review v1 maps Private Cybernet Police to corp.tag_trace_punish as enabler/trace_tag_source."
         }
       ],
-      "tacticSignals": [
-        "score.tag_source",
-        "score.trace_tag_source",
-        "tag.source",
-        "trace.source"
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "enabler"
       ]
     },
     {
@@ -15815,16 +15932,40 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
         "score.conditional_bonus_agenda_points",
         "score.overadvance_bonus",
-        "score.overadvance_scaling"
+        "score.overadvance_scaling",
+        "advance.overadvance_payoff",
+        "risk.overadvance_investment"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.overadvance_value",
+          "role": "win_condition",
+          "roleDetail": "overadvance_agenda_point_payoff",
+          "evidence": [
+            "score.conditional_bonus_agenda_points",
+            "score.overadvance_bonus",
+            "score.overadvance_scaling",
+            "advance.overadvance_payoff",
+            "risk.overadvance_investment"
+          ],
+          "confidence": "high",
+          "rationale": "The payoff is specifically overadvance agenda-point conversion, not generic remote scoring."
+        }
+      ],
+      "lineSupport": [
+        "corp.overadvance_value"
+      ],
+      "strategicRole": [
+        "win_condition"
       ],
       "conditions": [
         {
@@ -15870,11 +16011,12 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "ice.strength_modifier",
+        "ice.corp_fort_strength_bonus",
+        "ice.corp_strength_bonus",
         "score.fort_ice_strength_bonus"
       ],
       "lineSupport": [
@@ -15882,7 +16024,8 @@
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "tax_tool"
+        "tax_tool",
+        "defensive_tool"
       ],
       "strategySupportPairs": [
         {
@@ -15890,20 +16033,22 @@
           "role": "tax_tool",
           "roleDetail": "fort_tax_anchor",
           "evidence": [
+            "ice.corp_fort_strength_bonus",
+            "ice.corp_strength_bonus",
             "score.fort_ice_strength_bonus"
           ],
           "confidence": "high",
-          "rationale": "Fortbezogener ICE-Buff traegt ICE-Tax und Remote-Defense."
+          "rationale": "Agenda Semantic Review v1 maps Security Net Optimization to corp.ice_tax_glacier as tax_tool/fort_tax_anchor."
         },
         {
           "strategyId": "corp.remote_scoring",
-          "role": "tax_tool",
+          "role": "defensive_tool",
           "roleDetail": "remote_defense_anchor",
           "evidence": [
             "score.fort_ice_strength_bonus"
           ],
           "confidence": "medium",
-          "rationale": "Fortbezogener ICE-Buff traegt ICE-Tax und Remote-Defense."
+          "rationale": "Agenda Semantic Review v1 maps Security Net Optimization to corp.remote_scoring as defensive_tool/remote_defense_anchor."
         }
       ],
       "effects": [
@@ -15955,50 +16100,40 @@
         "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_agenda_longtail"
       ],
       "lineSupport": [
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring"
+        "corp.ice_tax_glacier"
       ],
       "strategicRole": [
-        "scoring_tool"
+        "enabler"
       ],
       "strategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
-          "role": "scoring_tool",
-          "roleDetail": "setup_payoff",
+          "role": "enabler",
+          "roleDetail": "free_install_rez_ice",
           "evidence": [
-            "score.free_install_and_rez_ice",
-            "score.rnd_install_and_rez"
+            "install.corp_rnd_ice_install",
+            "ice.corp_free_rez",
+            "score.free_install_and_rez_ice"
           ],
           "confidence": "medium",
-          "rationale": "R&D-Reveal plus free install/rez ist Setup-Payoff; Sequenzzielwahl bleibt schema gap."
-        },
-        {
-          "strategyId": "corp.remote_scoring",
-          "role": "scoring_tool",
-          "roleDetail": "setup_payoff",
-          "evidence": [
-            "score.free_install_and_rez_ice",
-            "score.rnd_install_and_rez"
-          ],
-          "confidence": "medium",
-          "rationale": "R&D-Reveal plus free install/rez ist Setup-Payoff; Sequenzzielwahl bleibt schema gap."
+          "rationale": "Review v1 removes the previous remote-scoring pair; free install/rez from R&D is an ICE-tax/glacier setup payoff."
         }
       ],
       "tacticSignals": [
-        "access.rnd_reveal_requirement",
+        "info.corp_reveal_top_rnd_to_runner",
+        "install.corp_rnd_ice_install",
+        "ice.corp_free_rez",
         "score.free_install_and_rez_ice",
-        "score.rnd_install_and_rez",
-        "score.rnd_reveal"
+        "risk.trash_revealed_non_ice"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -16126,22 +16261,24 @@
         {
           "strategyId": "corp.damage_kill",
           "role": "punish_payoff",
-          "roleDetail": "damage_payoff",
+          "roleDetail": "tagged_meat_damage_payoff",
           "evidence": [
-            "score.tagged_meat_damage_payoff",
-            "score.meat_damage_source"
+            "damage.corp_tagged_meat_payoff",
+            "damage.corp_meat_damage_source"
           ],
           "confidence": "high",
-          "rationale": "Staerkerer Tagged Meat-Damage-Payoff; Tag-Quelle bleibt externe Bedingung."
+          "rationale": "Agenda Semantic Review v1 maps Strike Force Kali to corp.damage_kill as punish_payoff/tagged_meat_damage_payoff."
         },
         {
           "strategyId": "corp.tag_trace_punish",
           "role": "punish_payoff",
+          "roleDetail": "tagged_runner_punish_payoff",
           "evidence": [
-            "risk.requires_tagged_runner"
+            "tag.corp_tagged_runner_payoff",
+            "condition.requires_tagged_runner"
           ],
           "confidence": "high",
-          "rationale": "Staerkerer Tagged Meat-Damage-Payoff; Tag-Quelle bleibt externe Bedingung."
+          "rationale": "Agenda Semantic Review v1 maps Strike Force Kali to corp.tag_trace_punish as punish_payoff/tagged_runner_punish_payoff."
         }
       ],
       "quality": {
@@ -16150,15 +16287,14 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "damage.payoff",
-        "risk.requires_tagged_runner",
-        "score.meat_damage_source",
-        "score.tagged_meat_damage_payoff",
-        "tag.payoff"
+        "damage.corp_tagged_meat_payoff",
+        "damage.corp_meat_damage_source",
+        "tag.corp_tagged_runner_payoff",
+        "condition.requires_tagged_runner"
       ]
     },
     {
@@ -16191,14 +16327,36 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
+        "action.corp_recurring_extra_action",
+        "tempo.corp_recurring_action",
         "score.recurring_extra_action"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.action_tempo",
+          "role": "engine_anchor",
+          "roleDetail": "recurring_extra_action_engine",
+          "evidence": [
+            "action.corp_recurring_extra_action",
+            "tempo.corp_recurring_action",
+            "score.recurring_extra_action"
+          ],
+          "confidence": "medium",
+          "rationale": "A recurring extra Corp action is a reusable action-tempo engine after the agenda is scored."
+        }
+      ],
+      "lineSupport": [
+        "corp.action_tempo"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "effects": [
         {
@@ -16262,8 +16420,8 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "effects": [
         {
@@ -16313,20 +16471,24 @@
         {
           "strategyId": "corp.ice_tax_glacier",
           "role": "tax_tool",
-          "roleDetail": "ice_type_anchor",
+          "roleDetail": "wall_tax_anchor",
           "evidence": [
+            "ice.corp_wall_strength_bonus",
+            "ice.corp_strength_bonus",
+            "economy.corp_ice_type_reveal_burst",
             "score.wall_strength_bonus",
             "score.ice_type_tax_support"
           ],
           "confidence": "high",
-          "rationale": "Wall-Buff traegt ICE-Tax; Reveal-Economy bleibt Support."
+          "rationale": "Agenda Semantic Review v1 maps Superior Net Barriers to corp.ice_tax_glacier as tax_tool/wall_tax_anchor."
         }
       ],
       "tacticSignals": [
-        "ice.strength_modifier",
-        "score.ice_type_reveal_economy",
-        "score.ice_type_tax_support",
-        "score.wall_strength_bonus"
+        "ice.corp_wall_strength_bonus",
+        "ice.corp_strength_bonus",
+        "economy.corp_ice_type_reveal_burst",
+        "score.wall_strength_bonus",
+        "score.ice_type_tax_support"
       ],
       "conditions": [
         {
@@ -16377,8 +16539,8 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
         "score.high_agenda_value",
@@ -28794,15 +28956,39 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "risk.random_action",
-        "score.random_extra_action"
+        "action.corp_random_recurring_extra_action",
+        "risk.random_action_mode",
+        "action.corp_install_only_action",
+        "economy.corp_credit_action",
+        "draw.corp_draw_action"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.action_tempo",
+          "role": "utility",
+          "roleDetail": "random_recurring_action_mode",
+          "evidence": [
+            "action.corp_random_recurring_extra_action",
+            "action.corp_install_only_action",
+            "economy.corp_credit_action",
+            "draw.corp_draw_action"
+          ],
+          "confidence": "medium",
+          "rationale": "Random recurring action modes create action-tempo flexibility but carry mode variance risk."
+        }
+      ],
+      "lineSupport": [
+        "corp.action_tempo"
+      ],
+      "strategicRole": [
+        "utility"
       ],
       "conditions": [
         {
@@ -28836,16 +29022,15 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "risk.bad_publicity",
-        "risk.loss_condition",
-        "score.bad_publicity_gain",
-        "score.bad_publicity_win_risk",
+        "economy.corp_credit_burst",
+        "risk.bad_publicity_gain",
+        "risk.bad_publicity_loss_condition",
         "score.economy_burst"
       ]
     },
@@ -28879,45 +29064,47 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "damage.payoff",
-        "risk.requires_tagged_runner",
-        "score.hand_size_pressure",
-        "score.meat_damage_source",
-        "score.tagged_meat_damage_payoff",
-        "tag.payoff"
+        "damage.corp_tagged_meat_payoff",
+        "damage.corp_meat_damage_source",
+        "damage.corp_hand_size_pressure_on_successful_damage",
+        "tag.corp_tagged_runner_payoff",
+        "condition.requires_tagged_runner"
       ],
       "lineSupport": [
         "corp.damage_kill",
         "corp.tag_trace_punish"
       ],
       "strategicRole": [
+        "engine_anchor",
         "punish_payoff"
       ],
       "strategySupportPairs": [
         {
           "strategyId": "corp.damage_kill",
-          "role": "punish_payoff",
-          "roleDetail": "damage_engine",
+          "role": "engine_anchor",
+          "roleDetail": "tagged_meat_hand_size_pressure",
           "evidence": [
-            "score.tagged_meat_damage_payoff",
-            "score.meat_damage_source",
-            "score.hand_size_pressure"
+            "damage.corp_tagged_meat_payoff",
+            "damage.corp_meat_damage_source",
+            "damage.corp_hand_size_pressure_on_successful_damage"
           ],
           "confidence": "high",
-          "rationale": "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert."
+          "rationale": "Agenda Semantic Review v1 maps Corporate Headhunters to corp.damage_kill as engine_anchor/tagged_meat_hand_size_pressure."
         },
         {
           "strategyId": "corp.tag_trace_punish",
           "role": "punish_payoff",
+          "roleDetail": "tagged_runner_punish_payoff",
           "evidence": [
-            "risk.requires_tagged_runner"
+            "tag.corp_tagged_runner_payoff",
+            "condition.requires_tagged_runner"
           ],
           "confidence": "high",
-          "rationale": "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert."
+          "rationale": "Agenda Semantic Review v1 maps Corporate Headhunters to corp.tag_trace_punish as punish_payoff/tagged_runner_punish_payoff."
         }
       ],
       "conditions": [
@@ -28955,8 +29142,8 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "lineSupport": [
         "corp.damage_kill",
@@ -28969,34 +29156,34 @@
         {
           "strategyId": "corp.damage_kill",
           "role": "punish_payoff",
-          "roleDetail": "access_punish",
+          "roleDetail": "net_damage_steal_tax",
           "evidence": [
-            "access.agenda_net_damage",
-            "score.net_damage_access_punish"
+            "access.corp_net_damage_ambush",
+            "damage.corp_net_damage_access_punish"
           ],
           "confidence": "high",
-          "rationale": "Access-Ambush mit Net-Damage und Steal-Tax; keine Runner-seitige verdeckte Semantik vor Access/Revealed."
+          "rationale": "Agenda Semantic Review v1 maps Fetal AI to corp.damage_kill as punish_payoff/net_damage_steal_tax."
         },
         {
           "strategyId": "corp.ambush_bluff",
           "role": "punish_payoff",
-          "roleDetail": "access_punish",
+          "roleDetail": "agenda_net_damage_ambush",
           "evidence": [
-            "access.agenda_ambush",
-            "access.agenda_steal_tax"
+            "access.corp_net_damage_ambush",
+            "access.corp_agenda_steal_tax",
+            "access.archives_safe_exception",
+            "access.rnd_reveal_requirement"
           ],
           "confidence": "high",
-          "rationale": "Access-Ambush mit Net-Damage und Steal-Tax; keine Runner-seitige verdeckte Semantik vor Access/Revealed."
+          "rationale": "Agenda Semantic Review v1 maps Fetal AI to corp.ambush_bluff as punish_payoff/agenda_net_damage_ambush."
         }
       ],
       "tacticSignals": [
-        "access.agenda_ambush",
-        "access.agenda_net_damage",
-        "access.agenda_steal_tax",
+        "access.corp_net_damage_ambush",
+        "access.corp_agenda_steal_tax",
         "access.archives_safe_exception",
         "access.rnd_reveal_requirement",
-        "damage.payoff",
-        "score.net_damage_access_punish"
+        "damage.corp_net_damage_access_punish"
       ],
       "effects": [
         {
@@ -29049,44 +29236,45 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "lineSupport": [
         "corp.tag_trace_punish",
         "corp.ambush_bluff"
       ],
       "strategicRole": [
-        "engine_anchor"
+        "enabler",
+        "punish_payoff"
       ],
       "strategySupportPairs": [
         {
           "strategyId": "corp.tag_trace_punish",
-          "role": "engine_anchor",
+          "role": "enabler",
           "roleDetail": "access_tag_source",
           "evidence": [
-            "access.agenda_tag"
+            "access.corp_tag_ambush",
+            "tag.corp_access_tag_source"
           ],
           "confidence": "high",
-          "rationale": "Access-Tag-Quelle; Tag-source und spaetere Payoffs bleiben getrennt."
+          "rationale": "Agenda Semantic Review v1 maps Marked Accounts to corp.tag_trace_punish as enabler/access_tag_source."
         },
         {
           "strategyId": "corp.ambush_bluff",
-          "role": "engine_anchor",
-          "roleDetail": "access_punish",
+          "role": "punish_payoff",
+          "roleDetail": "access_tag_ambush",
           "evidence": [
-            "access.agenda_ambush",
-            "access.agenda_tag"
+            "access.corp_tag_ambush",
+            "access.rnd_reveal_requirement"
           ],
           "confidence": "medium",
-          "rationale": "Access-Tag-Quelle; Tag-source und spaetere Payoffs bleiben getrennt."
+          "rationale": "Agenda Semantic Review v1 maps Marked Accounts to corp.ambush_bluff as punish_payoff/access_tag_ambush."
         }
       ],
       "tacticSignals": [
-        "access.agenda_ambush",
-        "access.agenda_tag",
+        "access.corp_tag_ambush",
         "access.rnd_reveal_requirement",
-        "tag.source"
+        "tag.corp_access_tag_source"
       ],
       "effects": [
         {
@@ -29129,15 +29317,37 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "score.action_counter_bank",
-        "score.damage_conversion_action_engine"
+        "damage.corp_prevent_own_damage_for_counter",
+        "action.corp_damage_conversion_counter_bank",
+        "action.corp_counter_to_extra_action",
+        "limit.once_per_turn"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.action_tempo",
+          "role": "enabler",
+          "roleDetail": "damage_conversion_extra_action_bank",
+          "evidence": [
+            "action.corp_damage_conversion_counter_bank",
+            "action.corp_counter_to_extra_action",
+            "limit.once_per_turn"
+          ],
+          "confidence": "medium",
+          "rationale": "Successful damage can be converted into a counter bank for extra actions, making the card an action-tempo enabler."
+        }
+      ],
+      "lineSupport": [
+        "corp.action_tempo"
+      ],
+      "strategicRole": [
+        "enabler"
       ],
       "conditions": [
         {
@@ -29170,16 +29380,50 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
+        "advance.overadvance_payoff",
         "score.overadvance_bonus",
         "score.overadvance_scaling",
-        "score.recurring_extra_action"
+        "action.corp_recurring_extra_action"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.overadvance_value",
+          "role": "win_condition",
+          "roleDetail": "overadvance_extra_action_payoff",
+          "evidence": [
+            "advance.overadvance_payoff",
+            "score.overadvance_bonus",
+            "score.overadvance_scaling",
+            "action.corp_recurring_extra_action"
+          ],
+          "confidence": "high",
+          "rationale": "Overadvance creates the recurring extra-action payoff, so the core strategic anchor is overadvance value."
+        },
+        {
+          "strategyId": "corp.action_tempo",
+          "role": "payoff_anchor",
+          "roleDetail": "recurring_extra_action_payoff",
+          "evidence": [
+            "action.corp_recurring_extra_action"
+          ],
+          "confidence": "medium",
+          "rationale": "The resulting recurring extra action also materially supports action-tempo sequencing."
+        }
+      ],
+      "lineSupport": [
+        "corp.overadvance_value",
+        "corp.action_tempo"
+      ],
+      "strategicRole": [
+        "win_condition",
+        "payoff_anchor"
       ],
       "conditions": [
         {
@@ -29212,16 +29456,38 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "score.economy_recurring",
+        "advance.overadvance_payoff",
         "score.overadvance_bonus",
-        "score.overadvance_scaling"
+        "score.overadvance_scaling",
+        "economy.corp_recurring_credit"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.overadvance_value",
+          "role": "payoff_anchor",
+          "roleDetail": "overadvance_recurring_credit_payoff",
+          "evidence": [
+            "advance.overadvance_payoff",
+            "score.overadvance_bonus",
+            "score.overadvance_scaling",
+            "economy.corp_recurring_credit"
+          ],
+          "confidence": "medium",
+          "rationale": "Overadvance turns extra advancement investment into recurring Corp economy value."
+        }
+      ],
+      "lineSupport": [
+        "corp.overadvance_value"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
       ],
       "conditions": [
         {
@@ -29255,16 +29521,17 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
+        "access.corp_runner_program_bounce",
+        "access.corp_program_disruption",
         "access.agenda_ambush",
-        "access.runner_program_bounce",
-        "access.runner_program_disruption",
-        "score.fort_trash_on_score"
+        "score.own_fort_trash_on_score",
+        "risk.trash_own_fort_on_score"
       ],
       "lineSupport": [
         "corp.ambush_bluff"
@@ -29276,13 +29543,16 @@
         {
           "strategyId": "corp.ambush_bluff",
           "role": "punish_payoff",
-          "roleDetail": "access_punish",
+          "roleDetail": "program_bounce_ambush",
           "evidence": [
+            "access.corp_runner_program_bounce",
+            "access.corp_program_disruption",
             "access.agenda_ambush",
-            "access.runner_program_disruption"
+            "score.own_fort_trash_on_score",
+            "risk.trash_own_fort_on_score"
           ],
           "confidence": "medium",
-          "rationale": "Programmbounce/-Disruption ist Access-Punish, kein Damage-Kill; Access-Zielwahl bleibt schema gap."
+          "rationale": "Agenda Semantic Review v1 maps Viral Breeding Ground to corp.ambush_bluff as punish_payoff/program_bounce_ambush."
         }
       ],
       "conditions": [
@@ -29317,15 +29587,16 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
-        "reviewedBy": "codex"
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "risk.high_difficulty_agenda",
         "score.bonus_agenda_points",
-        "score.closeout_agenda"
+        "score.closeout_agenda",
+        "risk.large_advancement_investment",
+        "risk.high_difficulty_agenda"
       ],
       "lineSupport": [
         "corp.remote_scoring"
@@ -29337,12 +29608,13 @@
         {
           "strategyId": "corp.remote_scoring",
           "role": "win_condition",
+          "roleDetail": "one_card_score_closeout",
           "evidence": [
             "score.bonus_agenda_points",
             "score.closeout_agenda"
           ],
           "confidence": "medium",
-          "rationale": "Extrem hoher Score-Payoff ist Closeout/Win-Condition, aber wegen Difficulty kein Fast-Advance-Anker."
+          "rationale": "Agenda Semantic Review v1 maps World Domination to corp.remote_scoring as win_condition/one_card_score_closeout."
         }
       ],
       "conditions": [
@@ -39305,10 +39577,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       }
     },
     {
@@ -39742,10 +40016,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       }
     },
     {
@@ -40446,10 +40722,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       }
     },
     {
@@ -43427,13 +43705,15 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
         "reviewedDate": "2026-07-01",
-        "reviewedBy": "codex"
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "score.action_counter_bank"
+        "score.run_end_counter_bank",
+        "run.corp_end_run_counter",
+        "defense.corp_run_end_counter"
       ],
       "effects": [
         {
@@ -43483,12 +43763,14 @@
         {
           "strategyId": "corp.remote_scoring",
           "role": "defensive_tool",
-          "roleDetail": "remote_defense_tool",
+          "roleDetail": "run_end_score_window_protection",
           "evidence": [
-            "score.action_counter_bank"
+            "score.run_end_counter_bank",
+            "run.corp_end_run_counter",
+            "defense.corp_run_end_counter"
           ],
           "confidence": "medium",
-          "rationale": "Scored Agenda banks a run-ending counter, protecting scored remotes and remote-score conversion without becoming a pure ICE-tax card."
+          "rationale": "Agenda Semantic Review v1 maps Data Fort Remapping to corp.remote_scoring as defensive_tool/run_end_score_window_protection."
         }
       ]
     },
@@ -43525,13 +43807,15 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
         "reviewedDate": "2026-07-01",
-        "reviewedBy": "codex"
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "virus.corp_counter_prevention"
+        "virus.corp_counter_clear",
+        "virus.corp_counter_prevention",
+        "defense.virus_counter_defense"
       ],
       "effects": [
         {
@@ -43569,10 +43853,12 @@
           "role": "defensive_tool",
           "roleDetail": "virus_counter_defense",
           "evidence": [
-            "virus.corp_counter_prevention"
+            "virus.corp_counter_clear",
+            "virus.corp_counter_prevention",
+            "defense.virus_counter_defense"
           ],
           "confidence": "medium",
-          "rationale": "Virus-counter reset and prevention stabilize central pressure after scoring; the card is defensive infrastructure, not a scoring payoff."
+          "rationale": "Agenda Semantic Review v1 maps Superserum to corp.central_stabilize as defensive_tool/virus_counter_defense."
         }
       ]
     },
@@ -43611,11 +43897,11 @@
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-07-01",
-        "reviewedBy": "codex"
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "score.recurring_draw",
-        "draw.corp_draw"
+        "draw.corp_recurring",
+        "score.recurring_draw"
       ],
       "effects": [
         {
@@ -43646,22 +43932,22 @@
         }
       ],
       "lineSupport": [
-        "corp.remote_scoring"
+        "corp.draw_engine"
       ],
       "strategicRole": [
         "engine_anchor"
       ],
       "strategySupportPairs": [
         {
-          "strategyId": "corp.remote_scoring",
+          "strategyId": "corp.draw_engine",
           "role": "engine_anchor",
-          "roleDetail": "scored_draw_engine",
+          "roleDetail": "scored_recurring_draw_engine",
           "evidence": [
-            "score.recurring_draw",
-            "draw.corp_draw"
+            "draw.corp_recurring",
+            "score.recurring_draw"
           ],
-          "confidence": "medium",
-          "rationale": "Recurring draw after scoring turns a completed remote score into sustained follow-up pressure and supports continued remote scoring plans."
+          "confidence": "high",
+          "rationale": "Scored recurring draw is a repeatable Corp draw engine, not generic remote-scoring support."
         }
       ]
     },
@@ -43706,11 +43992,15 @@
         "confidence": "medium",
         "needsHumanReview": false,
         "reviewedDate": "2026-07-01",
-        "reviewedBy": "codex"
+        "reviewedBy": "codex-agenda-semantic-review-v1"
       },
       "tacticSignals": [
-        "access.runner_program_bounce",
-        "risk.high_difficulty_agenda"
+        "access.corp_agenda_steal_replacement",
+        "access.corp_delayed_agenda_score",
+        "access.corp_runner_agenda_program_install",
+        "risk.runner_memory_burden",
+        "risk.fragile_delayed_score",
+        "risk.program_removal_denies_score"
       ],
       "effects": [
         {
@@ -43769,20 +44059,20 @@
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "scoring_tool"
+        "defensive_tool"
       ],
       "strategySupportPairs": [
         {
           "strategyId": "corp.remote_scoring",
-          "role": "scoring_tool",
-          "roleDetail": "access_replacement_score_tool",
+          "role": "defensive_tool",
+          "roleDetail": "agenda_steal_friction_tool",
           "evidence": [
-            "score.closeout_agenda",
-            "risk.high_difficulty_agenda",
-            "access.runner_program_bounce"
+            "access.corp_agenda_steal_replacement",
+            "risk.fragile_delayed_score",
+            "risk.program_removal_denies_score"
           ],
           "confidence": "medium",
-          "rationale": "The access replacement denies normal steal scoring and creates a difficult delayed score line, so it belongs under remote scoring as a scoring tool with high-difficulty risk."
+          "rationale": "Agenda Semantic Review v1 maps Theorem Proof to corp.remote_scoring as defensive_tool/agenda_steal_friction_tool."
         }
       ]
     },

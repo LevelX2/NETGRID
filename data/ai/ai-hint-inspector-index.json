@@ -19,10 +19,10 @@
     "cardsWithOverlays": 6,
     "cardsWithFunctionSignals": 591,
     "cardsWithStrategyAnchors": 252,
-    "cardsWithStrategySupportPairs": 25,
+    "cardsWithStrategySupportPairs": 35,
     "cardsWithWarnings": 116,
     "warningCategoryCounts": {
-      "deferred_requires_human_review": 45,
+      "deferred_requires_human_review": 42,
       "descriptor_gap": 45,
       "function_signal_descriptor_gap": 27,
       "legacy_fallback_only": 34
@@ -184,8 +184,11 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "defense.corp_run_end_counter",
+        "run.corp_end_run_counter",
         "score.action_counter_bank",
-        "score.agenda_action"
+        "score.agenda_action",
+        "score.run_end_counter_bank"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
@@ -196,20 +199,25 @@
         {
           "strategyId": "corp.remote_scoring",
           "role": "defensive_tool",
-          "roleDetail": "remote_defense_tool",
+          "roleDetail": "run_end_score_window_protection",
           "confidence": "medium",
           "evidence": [
-            "score.action_counter_bank"
+            "score.run_end_counter_bank",
+            "run.corp_end_run_counter",
+            "defense.corp_run_end_counter"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.remote_scoring",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Scored Agenda banks a run-ending counter, protecting scored remotes and remote-score conversion without becoming a pure ICE-tax card."
+          "rationale": "Agenda Semantic Review v1 maps Data Fort Remapping to corp.remote_scoring as defensive_tool/run_end_score_window_protection."
         }
       ],
       "supportingEvidenceOnly": [
+        "defense.corp_run_end_counter",
+        "run.corp_end_run_counter",
         "score.action_counter_bank",
-        "score.agenda_action"
+        "score.agenda_action",
+        "score.run_end_counter_bank"
       ],
       "lineSupportClassification": [
         {
@@ -306,6 +314,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "defense.virus_counter_defense",
+        "virus.corp_counter_clear",
         "virus.corp_counter_prevention"
       ],
       "derivedStrategyAnchors": [],
@@ -320,15 +330,19 @@
           "roleDetail": "virus_counter_defense",
           "confidence": "medium",
           "evidence": [
-            "virus.corp_counter_prevention"
+            "virus.corp_counter_clear",
+            "virus.corp_counter_prevention",
+            "defense.virus_counter_defense"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.central_stabilize",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Virus-counter reset and prevention stabilize central pressure after scoring; the card is defensive infrastructure, not a scoring payoff."
+          "rationale": "Agenda Semantic Review v1 maps Superserum to corp.central_stabilize as defensive_tool/virus_counter_defense."
         }
       ],
       "supportingEvidenceOnly": [
+        "defense.virus_counter_defense",
+        "virus.corp_counter_clear",
         "virus.corp_counter_prevention"
       ],
       "lineSupportClassification": [
@@ -411,40 +425,42 @@
       },
       "derivedFunctionSignals": [
         "draw.corp_draw",
+        "draw.corp_recurring",
         "score.recurring_draw"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
-        "corp.remote_scoring"
+        "corp.draw_engine"
       ],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [
         {
-          "strategyId": "corp.remote_scoring",
+          "strategyId": "corp.draw_engine",
           "role": "engine_anchor",
-          "roleDetail": "scored_draw_engine",
-          "confidence": "medium",
+          "roleDetail": "scored_recurring_draw_engine",
+          "confidence": "high",
           "evidence": [
-            "score.recurring_draw",
-            "draw.corp_draw"
+            "draw.corp_recurring",
+            "score.recurring_draw"
           ],
           "sourceField": "strategySupportPairs",
-          "sourceValue": "corp.remote_scoring",
+          "sourceValue": "corp.draw_engine",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Recurring draw after scoring turns a completed remote score into sustained follow-up pressure and supports continued remote scoring plans."
+          "rationale": "Scored recurring draw is a repeatable Corp draw engine, not generic remote-scoring support."
         }
       ],
       "supportingEvidenceOnly": [
         "draw.corp_draw",
+        "draw.corp_recurring",
         "score.recurring_draw"
       ],
       "lineSupportClassification": [
         {
-          "value": "corp.remote_scoring",
+          "value": "corp.draw_engine",
           "category": "exact_strategy_goal",
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.remote_scoring"
+            "corp.draw_engine"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
@@ -524,8 +540,13 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.corp_agenda_steal_replacement",
+        "access.corp_delayed_agenda_score",
+        "access.corp_runner_agenda_program_install",
         "access.runner_program_bounce",
-        "risk.high_difficulty_agenda",
+        "risk.fragile_delayed_score",
+        "risk.program_removal_denies_score",
+        "risk.runner_memory_burden",
         "score.agenda_action",
         "score.closeout_agenda"
       ],
@@ -541,23 +562,28 @@
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.remote_scoring",
-          "role": "scoring_tool",
-          "roleDetail": "access_replacement_score_tool",
+          "role": "defensive_tool",
+          "roleDetail": "agenda_steal_friction_tool",
           "confidence": "medium",
           "evidence": [
-            "score.closeout_agenda",
-            "risk.high_difficulty_agenda",
-            "access.runner_program_bounce"
+            "access.corp_agenda_steal_replacement",
+            "risk.fragile_delayed_score",
+            "risk.program_removal_denies_score"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.remote_scoring",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "The access replacement denies normal steal scoring and creates a difficult delayed score line, so it belongs under remote scoring as a scoring tool with high-difficulty risk."
+          "rationale": "Agenda Semantic Review v1 maps Theorem Proof to corp.remote_scoring as defensive_tool/agenda_steal_friction_tool."
         }
       ],
       "supportingEvidenceOnly": [
+        "access.corp_agenda_steal_replacement",
+        "access.corp_delayed_agenda_score",
+        "access.corp_runner_agenda_program_install",
         "access.runner_program_bounce",
-        "risk.high_difficulty_agenda",
+        "risk.fragile_delayed_score",
+        "risk.program_removal_denies_score",
+        "risk.runner_memory_burden",
         "score.agenda_action"
       ],
       "lineSupportClassification": [
@@ -628,10 +654,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "scoring_tool"
+          "defensive_tool"
         ],
         "validValues": [
-          "scoring_tool"
+          "defensive_tool"
         ],
         "unknownValues": []
       }
@@ -6333,18 +6359,53 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "risk.random_action",
-        "score.random_extra_action"
+        "action.corp_install_only_action",
+        "action.corp_random_recurring_extra_action",
+        "draw.corp_draw_action",
+        "economy.corp_credit_action",
+        "risk.random_action_mode"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [
-        "risk.random_action",
-        "score.random_extra_action"
+      "cardLevelStrategyAnchors": [
+        "corp.action_tempo"
       ],
-      "lineSupportClassification": [],
+      "derivedPossibleStrategyAnchors": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.action_tempo",
+          "role": "utility",
+          "roleDetail": "random_recurring_action_mode",
+          "confidence": "medium",
+          "evidence": [
+            "action.corp_random_recurring_extra_action",
+            "action.corp_install_only_action",
+            "economy.corp_credit_action",
+            "draw.corp_draw_action"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.action_tempo",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "Random recurring action modes create action-tempo flexibility but carry mode variance risk."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "action.corp_install_only_action",
+        "action.corp_random_recurring_extra_action",
+        "draw.corp_draw_action",
+        "economy.corp_credit_action",
+        "risk.random_action_mode"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.action_tempo",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.action_tempo"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -6390,8 +6451,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "utility"
+        ],
+        "validValues": [
+          "utility"
+        ],
         "unknownValues": []
       }
     },
@@ -6409,10 +6474,9 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "risk.bad_publicity",
-        "risk.loss_condition",
-        "score.bad_publicity_gain",
-        "score.bad_publicity_win_risk",
+        "economy.corp_credit_burst",
+        "risk.bad_publicity_gain",
+        "risk.bad_publicity_loss_condition",
         "score.economy_burst"
       ],
       "derivedStrategyAnchors": [],
@@ -6420,10 +6484,9 @@
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
-        "risk.bad_publicity",
-        "risk.loss_condition",
-        "score.bad_publicity_gain",
-        "score.bad_publicity_win_risk",
+        "economy.corp_credit_burst",
+        "risk.bad_publicity_gain",
+        "risk.bad_publicity_loss_condition",
         "score.economy_burst"
       ],
       "lineSupportClassification": [],
@@ -6489,12 +6552,11 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "damage.payoff",
-        "risk.requires_tagged_runner",
-        "score.hand_size_pressure",
-        "score.meat_damage_source",
-        "score.tagged_meat_damage_payoff",
-        "tag.payoff"
+        "condition.requires_tagged_runner",
+        "damage.corp_hand_size_pressure_on_successful_damage",
+        "damage.corp_meat_damage_source",
+        "damage.corp_tagged_meat_payoff",
+        "tag.corp_tagged_runner_payoff"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
@@ -6505,35 +6567,39 @@
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.damage_kill",
-          "role": "punish_payoff",
-          "roleDetail": "damage_engine",
+          "role": "engine_anchor",
+          "roleDetail": "tagged_meat_hand_size_pressure",
           "confidence": "high",
           "evidence": [
-            "score.tagged_meat_damage_payoff",
-            "score.meat_damage_source",
-            "score.hand_size_pressure"
+            "damage.corp_tagged_meat_payoff",
+            "damage.corp_meat_damage_source",
+            "damage.corp_hand_size_pressure_on_successful_damage"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.damage_kill",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert."
+          "rationale": "Agenda Semantic Review v1 maps Corporate Headhunters to corp.damage_kill as engine_anchor/tagged_meat_hand_size_pressure."
         },
         {
           "strategyId": "corp.tag_trace_punish",
           "role": "punish_payoff",
+          "roleDetail": "tagged_runner_punish_payoff",
           "confidence": "high",
           "evidence": [
-            "risk.requires_tagged_runner"
+            "tag.corp_tagged_runner_payoff",
+            "condition.requires_tagged_runner"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.tag_trace_punish",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert."
+          "rationale": "Agenda Semantic Review v1 maps Corporate Headhunters to corp.tag_trace_punish as punish_payoff/tagged_runner_punish_payoff."
         }
       ],
       "supportingEvidenceOnly": [
-        "damage.payoff",
-        "risk.requires_tagged_runner"
+        "condition.requires_tagged_runner",
+        "damage.corp_hand_size_pressure_on_successful_damage",
+        "damage.corp_meat_damage_source",
+        "tag.corp_tagged_runner_payoff"
       ],
       "lineSupportClassification": [
         {
@@ -6601,9 +6667,11 @@
       },
       "strategicRoleStatus": {
         "values": [
+          "engine_anchor",
           "punish_payoff"
         ],
         "validValues": [
+          "engine_anchor",
           "punish_payoff"
         ],
         "unknownValues": []
@@ -6623,13 +6691,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "access.agenda_ambush",
-        "access.agenda_net_damage",
-        "access.agenda_steal_tax",
         "access.archives_safe_exception",
+        "access.corp_agenda_steal_tax",
+        "access.corp_net_damage_ambush",
         "access.rnd_reveal_requirement",
-        "damage.payoff",
-        "score.net_damage_access_punish"
+        "damage.corp_net_damage_access_punish",
+        "damage.payoff"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
@@ -6641,35 +6708,39 @@
         {
           "strategyId": "corp.ambush_bluff",
           "role": "punish_payoff",
-          "roleDetail": "access_punish",
+          "roleDetail": "agenda_net_damage_ambush",
           "confidence": "high",
           "evidence": [
-            "access.agenda_ambush",
-            "access.agenda_steal_tax"
+            "access.corp_net_damage_ambush",
+            "access.corp_agenda_steal_tax",
+            "access.archives_safe_exception",
+            "access.rnd_reveal_requirement"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.ambush_bluff",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Access-Ambush mit Net-Damage und Steal-Tax; keine Runner-seitige verdeckte Semantik vor Access/Revealed."
+          "rationale": "Agenda Semantic Review v1 maps Fetal AI to corp.ambush_bluff as punish_payoff/agenda_net_damage_ambush."
         },
         {
           "strategyId": "corp.damage_kill",
           "role": "punish_payoff",
-          "roleDetail": "access_punish",
+          "roleDetail": "net_damage_steal_tax",
           "confidence": "high",
           "evidence": [
-            "access.agenda_net_damage",
-            "score.net_damage_access_punish"
+            "access.corp_net_damage_ambush",
+            "damage.corp_net_damage_access_punish"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.damage_kill",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Access-Ambush mit Net-Damage und Steal-Tax; keine Runner-seitige verdeckte Semantik vor Access/Revealed."
+          "rationale": "Agenda Semantic Review v1 maps Fetal AI to corp.damage_kill as punish_payoff/net_damage_steal_tax."
         }
       ],
       "supportingEvidenceOnly": [
         "access.archives_safe_exception",
+        "access.corp_agenda_steal_tax",
         "access.rnd_reveal_requirement",
+        "damage.corp_net_damage_access_punish",
         "damage.payoff"
       ],
       "lineSupportClassification": [
@@ -6762,9 +6833,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "access.agenda_ambush",
-        "access.agenda_tag",
+        "access.corp_tag_ambush",
         "access.rnd_reveal_requirement",
+        "tag.corp_access_tag_source",
         "tag.source"
       ],
       "derivedStrategyAnchors": [
@@ -6780,34 +6851,36 @@
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ambush_bluff",
-          "role": "engine_anchor",
-          "roleDetail": "access_punish",
+          "role": "punish_payoff",
+          "roleDetail": "access_tag_ambush",
           "confidence": "medium",
           "evidence": [
-            "access.agenda_ambush",
-            "access.agenda_tag"
+            "access.corp_tag_ambush",
+            "access.rnd_reveal_requirement"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.ambush_bluff",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Access-Tag-Quelle; Tag-source und spaetere Payoffs bleiben getrennt."
+          "rationale": "Agenda Semantic Review v1 maps Marked Accounts to corp.ambush_bluff as punish_payoff/access_tag_ambush."
         },
         {
           "strategyId": "corp.tag_trace_punish",
-          "role": "engine_anchor",
+          "role": "enabler",
           "roleDetail": "access_tag_source",
           "confidence": "high",
           "evidence": [
-            "access.agenda_tag"
+            "access.corp_tag_ambush",
+            "tag.corp_access_tag_source"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.tag_trace_punish",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Access-Tag-Quelle; Tag-source und spaetere Payoffs bleiben getrennt."
+          "rationale": "Agenda Semantic Review v1 maps Marked Accounts to corp.tag_trace_punish as enabler/access_tag_source."
         }
       ],
       "supportingEvidenceOnly": [
-        "access.rnd_reveal_requirement"
+        "access.rnd_reveal_requirement",
+        "tag.corp_access_tag_source"
       ],
       "lineSupportClassification": [
         {
@@ -6877,10 +6950,12 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "engine_anchor"
+          "enabler",
+          "punish_payoff"
         ],
         "validValues": [
-          "engine_anchor"
+          "enabler",
+          "punish_payoff"
         ],
         "unknownValues": []
       }
@@ -6899,18 +6974,50 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.action_counter_bank",
-        "score.damage_conversion_action_engine"
+        "action.corp_counter_to_extra_action",
+        "action.corp_damage_conversion_counter_bank",
+        "damage.corp_prevent_own_damage_for_counter",
+        "limit.once_per_turn"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [
-        "score.action_counter_bank",
-        "score.damage_conversion_action_engine"
+      "cardLevelStrategyAnchors": [
+        "corp.action_tempo"
       ],
-      "lineSupportClassification": [],
+      "derivedPossibleStrategyAnchors": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.action_tempo",
+          "role": "enabler",
+          "roleDetail": "damage_conversion_extra_action_bank",
+          "confidence": "medium",
+          "evidence": [
+            "action.corp_damage_conversion_counter_bank",
+            "action.corp_counter_to_extra_action",
+            "limit.once_per_turn"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.action_tempo",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "Successful damage can be converted into a counter bank for extra actions, making the card an action-tempo enabler."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "action.corp_counter_to_extra_action",
+        "action.corp_damage_conversion_counter_bank",
+        "damage.corp_prevent_own_damage_for_counter",
+        "limit.once_per_turn"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.action_tempo",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.action_tempo"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -6956,8 +7063,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "enabler"
+        ],
+        "validValues": [
+          "enabler"
+        ],
         "unknownValues": []
       }
     },
@@ -6975,20 +7086,74 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "action.corp_recurring_extra_action",
+        "advance.overadvance_payoff",
         "score.overadvance_bonus",
-        "score.overadvance_scaling",
-        "score.recurring_extra_action"
+        "score.overadvance_scaling"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [
-        "score.overadvance_bonus",
-        "score.overadvance_scaling",
-        "score.recurring_extra_action"
+      "cardLevelStrategyAnchors": [
+        "corp.action_tempo",
+        "corp.overadvance_value"
       ],
-      "lineSupportClassification": [],
+      "derivedPossibleStrategyAnchors": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.action_tempo",
+          "role": "payoff_anchor",
+          "roleDetail": "recurring_extra_action_payoff",
+          "confidence": "medium",
+          "evidence": [
+            "action.corp_recurring_extra_action"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.action_tempo",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "The resulting recurring extra action also materially supports action-tempo sequencing."
+        },
+        {
+          "strategyId": "corp.overadvance_value",
+          "role": "win_condition",
+          "roleDetail": "overadvance_extra_action_payoff",
+          "confidence": "high",
+          "evidence": [
+            "advance.overadvance_payoff",
+            "score.overadvance_bonus",
+            "score.overadvance_scaling",
+            "action.corp_recurring_extra_action"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.overadvance_value",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "Overadvance creates the recurring extra-action payoff, so the core strategic anchor is overadvance value."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "action.corp_recurring_extra_action",
+        "advance.overadvance_payoff",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.action_tempo",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.action_tempo"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "corp.overadvance_value",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.overadvance_value"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -7034,8 +7199,14 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "win_condition",
+          "payoff_anchor"
+        ],
+        "validValues": [
+          "win_condition",
+          "payoff_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -7053,20 +7224,51 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.economy_recurring",
+        "advance.overadvance_payoff",
+        "economy.corp_recurring_credit",
         "score.overadvance_bonus",
         "score.overadvance_scaling"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.overadvance_value"
+      ],
       "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.overadvance_value",
+          "role": "payoff_anchor",
+          "roleDetail": "overadvance_recurring_credit_payoff",
+          "confidence": "medium",
+          "evidence": [
+            "advance.overadvance_payoff",
+            "score.overadvance_bonus",
+            "score.overadvance_scaling",
+            "economy.corp_recurring_credit"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.overadvance_value",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "Overadvance turns extra advancement investment into recurring Corp economy value."
+        }
+      ],
       "supportingEvidenceOnly": [
-        "score.economy_recurring",
+        "advance.overadvance_payoff",
+        "economy.corp_recurring_credit",
         "score.overadvance_bonus",
         "score.overadvance_scaling"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.overadvance_value",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.overadvance_value"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -7112,8 +7314,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "payoff_anchor"
+        ],
+        "validValues": [
+          "payoff_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -7132,9 +7338,10 @@
       },
       "derivedFunctionSignals": [
         "access.agenda_ambush",
-        "access.runner_program_bounce",
-        "access.runner_program_disruption",
-        "score.fort_trash_on_score"
+        "access.corp_program_disruption",
+        "access.corp_runner_program_bounce",
+        "risk.trash_own_fort_on_score",
+        "score.own_fort_trash_on_score"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
@@ -7145,21 +7352,26 @@
         {
           "strategyId": "corp.ambush_bluff",
           "role": "punish_payoff",
-          "roleDetail": "access_punish",
+          "roleDetail": "program_bounce_ambush",
           "confidence": "medium",
           "evidence": [
+            "access.corp_runner_program_bounce",
+            "access.corp_program_disruption",
             "access.agenda_ambush",
-            "access.runner_program_disruption"
+            "score.own_fort_trash_on_score",
+            "risk.trash_own_fort_on_score"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.ambush_bluff",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Programmbounce/-Disruption ist Access-Punish, kein Damage-Kill; Access-Zielwahl bleibt schema gap."
+          "rationale": "Agenda Semantic Review v1 maps Viral Breeding Ground to corp.ambush_bluff as punish_payoff/program_bounce_ambush."
         }
       ],
       "supportingEvidenceOnly": [
-        "access.runner_program_bounce",
-        "score.fort_trash_on_score"
+        "access.corp_program_disruption",
+        "access.corp_runner_program_bounce",
+        "risk.trash_own_fort_on_score",
+        "score.own_fort_trash_on_score"
       ],
       "lineSupportClassification": [
         {
@@ -7241,6 +7453,7 @@
       },
       "derivedFunctionSignals": [
         "risk.high_difficulty_agenda",
+        "risk.large_advancement_investment",
         "score.bonus_agenda_points",
         "score.closeout_agenda"
       ],
@@ -7253,6 +7466,7 @@
         {
           "strategyId": "corp.remote_scoring",
           "role": "win_condition",
+          "roleDetail": "one_card_score_closeout",
           "confidence": "medium",
           "evidence": [
             "score.bonus_agenda_points",
@@ -7261,11 +7475,12 @@
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.remote_scoring",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Extrem hoher Score-Payoff ist Closeout/Win-Condition, aber wegen Difficulty kein Fast-Advance-Anker."
+          "rationale": "Agenda Semantic Review v1 maps World Domination to corp.remote_scoring as win_condition/one_card_score_closeout."
         }
       ],
       "supportingEvidenceOnly": [
         "risk.high_difficulty_agenda",
+        "risk.large_advancement_investment",
         "score.bonus_agenda_points"
       ],
       "lineSupportClassification": [
@@ -40945,22 +41160,53 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.agenda_action",
-        "score.draw",
-        "score.hq_archive_to_rnd_shuffle",
-        "score.rnd_archive_recycle"
+        "archives.corp_recycle_to_rnd",
+        "draw.corp_action_draw",
+        "hq.corp_hand_to_rnd_shuffle",
+        "rnd.corp_shuffle_recycle",
+        "score.agenda_action"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [
-        "score.agenda_action",
-        "score.draw",
-        "score.hq_archive_to_rnd_shuffle",
-        "score.rnd_archive_recycle"
+      "cardLevelStrategyAnchors": [
+        "corp.deck_recycle_engine"
       ],
-      "lineSupportClassification": [],
+      "derivedPossibleStrategyAnchors": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.deck_recycle_engine",
+          "role": "engine_anchor",
+          "roleDetail": "scored_zone_recycle_draw_engine",
+          "confidence": "medium",
+          "evidence": [
+            "draw.corp_action_draw",
+            "hq.corp_hand_to_rnd_shuffle",
+            "archives.corp_recycle_to_rnd",
+            "rnd.corp_shuffle_recycle"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.deck_recycle_engine",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "Action draw plus HQ/Archives-to-R&D shuffle forms a reusable deck recycle engine after scoring."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "archives.corp_recycle_to_rnd",
+        "draw.corp_action_draw",
+        "hq.corp_hand_to_rnd_shuffle",
+        "rnd.corp_shuffle_recycle",
+        "score.agenda_action"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.deck_recycle_engine",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.deck_recycle_engine"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -41040,8 +41286,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -41076,6 +41326,7 @@
         {
           "strategyId": "corp.fast_advance",
           "role": "enabler",
+          "roleDetail": "black_ops_difficulty_enabler",
           "confidence": "medium",
           "evidence": [
             "score.agenda_difficulty_discount",
@@ -41084,7 +41335,7 @@
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.fast_advance",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Difficulty-Reduction ist funktional Fast-Advance-Support; der Black-Ops-Subtype selbst ist kein Anker."
+          "rationale": "Agenda Semantic Review v1 maps Artificial Security Directors to corp.fast_advance as enabler/black_ops_difficulty_enabler."
         }
       ],
       "supportingEvidenceOnly": [
@@ -41176,7 +41427,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "score.damage_amp",
+        "damage.corp_meat_damage_amplifier",
         "score.meat_damage_amp"
       ],
       "derivedStrategyAnchors": [],
@@ -41187,20 +41438,22 @@
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.damage_kill",
-          "role": "engine_anchor",
-          "roleDetail": "damage_amp_anchor",
+          "role": "enabler",
+          "roleDetail": "meat_damage_amp_anchor",
           "confidence": "high",
           "evidence": [
-            "score.meat_damage_amp",
-            "score.damage_amp"
+            "damage.corp_meat_damage_amplifier",
+            "score.meat_damage_amp"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.damage_kill",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Verstaerkt vorhandene Meat-Damage-Quellen und traegt damit echte Kill-Linien, erzeugt aber keinen Schaden allein."
+          "rationale": "Agenda Semantic Review v1 maps Bioweapons Engineering to corp.damage_kill as enabler/meat_damage_amp_anchor."
         }
       ],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "damage.corp_meat_damage_amplifier"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.damage_kill",
@@ -41281,10 +41534,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "engine_anchor"
+          "enabler"
         ],
         "validValues": [
-          "engine_anchor"
+          "enabler"
         ],
         "unknownValues": []
       }
@@ -41303,9 +41556,10 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "ice.corp_black_ice_strength_bonus",
+        "ice.corp_strength_bonus",
         "ice.strength_modifier",
-        "score.black_ice_strength_bonus",
-        "score.ice_type_tax_support"
+        "score.black_ice_strength_bonus"
       ],
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -41320,19 +41574,23 @@
         {
           "strategyId": "corp.ice_tax_glacier",
           "role": "tax_tool",
-          "roleDetail": "ice_type_anchor",
+          "roleDetail": "black_ice_tax_anchor",
           "confidence": "high",
           "evidence": [
-            "score.black_ice_strength_bonus",
-            "score.ice_type_tax_support"
+            "ice.corp_strength_bonus",
+            "ice.corp_black_ice_strength_bonus",
+            "score.black_ice_strength_bonus"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.ice_tax_glacier",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Black-ICE-Staerke ist ICE-Tax/Glacier-Anker; kein Damage-Anker allein aus dem Black-ICE-Kontext."
+          "rationale": "Agenda Semantic Review v1 maps Black Ice Quality Assurance to corp.ice_tax_glacier as tax_tool/black_ice_tax_anchor."
         }
       ],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "ice.corp_black_ice_strength_bonus",
+        "ice.corp_strength_bonus"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.ice_tax_glacier",
@@ -41419,20 +41677,52 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "action.corp_counter_bank",
+        "action.corp_extra_action",
+        "limit.once_per_turn",
         "score.action_counter_bank",
-        "score.action_gain",
         "score.agenda_action"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.action_tempo"
+      ],
       "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.action_tempo",
+          "role": "payoff_anchor",
+          "roleDetail": "extra_action_counter_bank",
+          "confidence": "medium",
+          "evidence": [
+            "action.corp_counter_bank",
+            "action.corp_extra_action",
+            "limit.once_per_turn"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.action_tempo",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "The scored counter bank converts into extra Corp actions and belongs under action-tempo rather than remote scoring."
+        }
+      ],
       "supportingEvidenceOnly": [
+        "action.corp_counter_bank",
+        "action.corp_extra_action",
+        "limit.once_per_turn",
         "score.action_counter_bank",
-        "score.action_gain",
         "score.agenda_action"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.action_tempo",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.action_tempo"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "action",
@@ -41489,8 +41779,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "payoff_anchor"
+        ],
+        "validValues": [
+          "payoff_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -41508,9 +41802,10 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_counter_bank",
+        "economy.corp_counter_cashout_action",
         "economy.counter",
         "score.agenda_action",
-        "score.economy_action",
         "score.economy_counter_bank"
       ],
       "derivedStrategyAnchors": [],
@@ -41518,9 +41813,10 @@
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "economy.corp_counter_bank",
+        "economy.corp_counter_cashout_action",
         "economy.counter",
         "score.agenda_action",
-        "score.economy_action",
         "score.economy_counter_bank"
       ],
       "lineSupportClassification": [],
@@ -41624,22 +41920,55 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "economy.corp_agenda_reveal_burst",
         "economy.generic",
-        "score.economy_conditional_burst",
+        "hq.corp_agenda_density_reduction",
+        "rnd.corp_agenda_shuffle_from_hq",
         "score.hq_agenda_reveal",
         "score.hq_agenda_shuffle"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.central_stabilize"
+      ],
       "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.central_stabilize",
+          "role": "defensive_tool",
+          "roleDetail": "hq_agenda_flood_cleanup",
+          "confidence": "medium",
+          "evidence": [
+            "hq.corp_agenda_density_reduction",
+            "rnd.corp_agenda_shuffle_from_hq",
+            "score.hq_agenda_reveal",
+            "score.hq_agenda_shuffle"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.central_stabilize",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "Agenda Semantic Review v1 maps Corporate Downsizing to corp.central_stabilize as defensive_tool/hq_agenda_flood_cleanup."
+        }
+      ],
       "supportingEvidenceOnly": [
+        "economy.corp_agenda_reveal_burst",
         "economy.generic",
-        "score.economy_conditional_burst",
+        "hq.corp_agenda_density_reduction",
+        "rnd.corp_agenda_shuffle_from_hq",
         "score.hq_agenda_reveal",
         "score.hq_agenda_shuffle"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.central_stabilize",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -41703,8 +42032,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "defensive_tool"
+        ],
+        "validValues": [
+          "defensive_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -41722,20 +42055,20 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_action",
         "economy.generic",
         "risk.loses_ability_on_install_or_rez",
-        "score.agenda_action",
-        "score.economy_action"
+        "score.agenda_action"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "economy.corp_credit_action",
         "economy.generic",
         "risk.loses_ability_on_install_or_rez",
-        "score.agenda_action",
-        "score.economy_action"
+        "score.agenda_action"
       ],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -41816,6 +42149,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_threshold_burst",
         "economy.counter",
         "economy.generic",
         "risk.economy_crash_on_score",
@@ -41827,6 +42161,7 @@
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "economy.corp_threshold_burst",
         "economy.counter",
         "economy.generic",
         "risk.economy_crash_on_score",
@@ -41914,7 +42249,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_install_rez_budget",
         "economy.generic",
+        "install.corp_new_remote_fort_from_hq",
         "score.remote_fort_creation",
         "score.remote_install_budget"
       ],
@@ -41936,11 +42273,13 @@
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.remote_scoring",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Echte Remote-Setup-Engine, aber Zielwahl/Install-Sequenz passt nicht in TargetProfile V1."
+          "rationale": "Agenda Semantic Review v1 maps Data Fort Reclamation to corp.remote_scoring as engine_anchor/remote_setup_engine."
         }
       ],
       "supportingEvidenceOnly": [
-        "economy.generic"
+        "economy.corp_install_rez_budget",
+        "economy.generic",
+        "install.corp_new_remote_fort_from_hq"
       ],
       "lineSupportClassification": [
         {
@@ -42035,20 +42374,22 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_recurring_counter_bank",
+        "economy.corp_start_turn_payout",
         "economy.counter",
         "economy.finite_pool",
-        "score.economy_counter_bank",
-        "score.economy_recurring"
+        "score.economy_counter_bank"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "economy.corp_recurring_counter_bank",
+        "economy.corp_start_turn_payout",
         "economy.counter",
         "economy.finite_pool",
-        "score.economy_counter_bank",
-        "score.economy_recurring"
+        "score.economy_counter_bank"
       ],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -42122,20 +42463,51 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "draw.corp_action_draw",
+        "draw.corp_recurring_optional",
         "score.agenda_action",
-        "score.draw",
         "score.recurring_draw"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.draw_engine"
+      ],
       "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.draw_engine",
+          "role": "engine_anchor",
+          "roleDetail": "scored_optional_draw_engine",
+          "confidence": "medium",
+          "evidence": [
+            "draw.corp_recurring_optional",
+            "draw.corp_action_draw",
+            "score.recurring_draw",
+            "score.agenda_action"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.draw_engine",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "Optional recurring scored-agenda draw is a durable draw-engine anchor when the deck can use added card velocity."
+        }
+      ],
       "supportingEvidenceOnly": [
+        "draw.corp_action_draw",
+        "draw.corp_recurring_optional",
         "score.agenda_action",
-        "score.draw",
         "score.recurring_draw"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.draw_engine",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.draw_engine"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -42190,8 +42562,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -42209,10 +42585,12 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "economy.corp_ice_type_reveal_burst",
         "economy.generic",
+        "ice.corp_code_gate_strength_bonus",
+        "ice.corp_strength_bonus",
         "ice.strength_modifier",
         "score.code_gate_strength_bonus",
-        "score.ice_type_reveal_economy",
         "score.ice_type_tax_support"
       ],
       "derivedStrategyAnchors": [
@@ -42228,21 +42606,26 @@
         {
           "strategyId": "corp.ice_tax_glacier",
           "role": "tax_tool",
-          "roleDetail": "ice_type_anchor",
+          "roleDetail": "code_gate_tax_anchor",
           "confidence": "high",
           "evidence": [
+            "ice.corp_code_gate_strength_bonus",
+            "ice.corp_strength_bonus",
+            "economy.corp_ice_type_reveal_burst",
             "score.code_gate_strength_bonus",
             "score.ice_type_tax_support"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.ice_tax_glacier",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Code-Gate-Buff traegt ICE-Tax; Reveal-Economy bleibt Support."
+          "rationale": "Agenda Semantic Review v1 maps Encryption Breakthrough to corp.ice_tax_glacier as tax_tool/code_gate_tax_anchor."
         }
       ],
       "supportingEvidenceOnly": [
+        "economy.corp_ice_type_reveal_burst",
         "economy.generic",
-        "score.ice_type_reveal_economy"
+        "ice.corp_code_gate_strength_bonus",
+        "ice.corp_strength_bonus"
       ],
       "lineSupportClassification": [
         {
@@ -42363,6 +42746,7 @@
         {
           "strategyId": "corp.fast_advance",
           "role": "enabler",
+          "roleDetail": "gray_ops_difficulty_enabler",
           "confidence": "medium",
           "evidence": [
             "score.agenda_difficulty_discount",
@@ -42371,7 +42755,7 @@
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.fast_advance",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Difficulty-Reduction ist Fast-Advance-Support; Gray-Ops-Subtype allein bleibt kein Strategieanker."
+          "rationale": "Agenda Semantic Review v1 maps Executive Extraction to corp.fast_advance as enabler/gray_ops_difficulty_enabler."
         }
       ],
       "supportingEvidenceOnly": [
@@ -42496,6 +42880,7 @@
         {
           "strategyId": "corp.fast_advance",
           "role": "enabler",
+          "roleDetail": "research_difficulty_enabler",
           "confidence": "medium",
           "evidence": [
             "score.agenda_difficulty_discount",
@@ -42504,7 +42889,7 @@
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.fast_advance",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Research-Difficulty-Reduction ermoeglicht Fast-Advance-Linien, nicht Research als Subtyp."
+          "rationale": "Agenda Semantic Review v1 maps Genetics-Visionary Acquisition to corp.fast_advance as enabler/research_difficulty_enabler."
         }
       ],
       "supportingEvidenceOnly": [
@@ -42596,6 +42981,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_burst",
         "economy.generic",
         "score.economy_burst"
       ],
@@ -42604,6 +42990,7 @@
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "economy.corp_credit_burst",
         "economy.generic",
         "score.economy_burst"
       ],
@@ -42690,6 +43077,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "ice.corp_strength_bonus_chosen",
+        "ice.corp_subroutine_repeat",
         "ice.strength_modifier",
         "ice.subroutine_modifier",
         "score.chosen_ice_strength_bonus",
@@ -42711,16 +43100,20 @@
           "roleDetail": "ice_upgrade_payoff",
           "confidence": "high",
           "evidence": [
+            "ice.corp_strength_bonus_chosen",
+            "ice.corp_subroutine_repeat",
             "score.chosen_ice_strength_bonus",
             "score.repeat_ice_subroutines"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.ice_tax_glacier",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Gezielter ICE-Upgrade-Payoff; TargetProfile V1 waere moeglich, bleibt aber read-only Kandidat."
+          "rationale": "Agenda Semantic Review v1 maps Ice Transmutation to corp.ice_tax_glacier as payoff_anchor/ice_upgrade_payoff."
         }
       ],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "ice.corp_strength_bonus_chosen"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.ice_tax_glacier",
@@ -42807,14 +43200,16 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.hand_size"
+        "score.hand_size",
+        "setup.corp_hand_size"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
-        "score.hand_size"
+        "score.hand_size",
+        "setup.corp_hand_size"
       ],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -42886,18 +43281,18 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_two_action_credit_gain",
         "economy.generic",
-        "score.agenda_action",
-        "score.economy_action"
+        "score.agenda_action"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "economy.corp_two_action_credit_gain",
         "economy.generic",
-        "score.agenda_action",
-        "score.economy_action"
+        "score.agenda_action"
       ],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -42982,10 +43377,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.trace_success",
         "score.agenda_action",
-        "score.tag_source",
         "score.trace_tag_source",
+        "tag.corp_trace_tag_source",
         "tag.source",
+        "trace.corp_source",
         "trace.source"
       ],
       "derivedStrategyAnchors": [
@@ -43000,21 +43397,26 @@
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.tag_trace_punish",
-          "role": "engine_anchor",
-          "roleDetail": "tag_source",
+          "role": "enabler",
+          "roleDetail": "trace_tag_source",
           "confidence": "high",
           "evidence": [
-            "score.trace_tag_source",
-            "score.tag_source"
+            "trace.corp_source",
+            "tag.corp_trace_tag_source",
+            "condition.trace_success",
+            "score.trace_tag_source"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.tag_trace_punish",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Trace-Tag-Quelle, getrennt von Tag-Payoff."
+          "rationale": "Agenda Semantic Review v1 maps Netwatch Operations Office to corp.tag_trace_punish as enabler/trace_tag_source."
         }
       ],
       "supportingEvidenceOnly": [
-        "score.agenda_action"
+        "condition.trace_success",
+        "score.agenda_action",
+        "tag.corp_trace_tag_source",
+        "trace.corp_source"
       ],
       "lineSupportClassification": [
         {
@@ -43109,10 +43511,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "engine_anchor"
+          "enabler"
         ],
         "validValues": [
-          "engine_anchor"
+          "enabler"
         ],
         "unknownValues": []
       }
@@ -43131,11 +43533,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.requires_tagged_runner",
+        "damage.corp_meat_damage_source",
+        "damage.corp_tagged_meat_payoff",
         "damage.payoff",
-        "risk.requires_tagged_runner",
         "score.agenda_action",
-        "score.meat_damage_source",
-        "score.tagged_meat_damage_payoff",
+        "tag.corp_tagged_runner_payoff",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -43152,34 +43555,38 @@
         {
           "strategyId": "corp.damage_kill",
           "role": "punish_payoff",
-          "roleDetail": "damage_payoff",
+          "roleDetail": "tagged_meat_damage_payoff",
           "confidence": "high",
           "evidence": [
-            "score.tagged_meat_damage_payoff",
-            "score.meat_damage_source"
+            "damage.corp_tagged_meat_payoff",
+            "damage.corp_meat_damage_source"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.damage_kill",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Tagged Meat-Damage-Payoff; Tag-Quelle und Payoff bleiben getrennt."
+          "rationale": "Agenda Semantic Review v1 maps On-Call Solo Team to corp.damage_kill as punish_payoff/tagged_meat_damage_payoff."
         },
         {
           "strategyId": "corp.tag_trace_punish",
           "role": "punish_payoff",
+          "roleDetail": "tagged_runner_punish_payoff",
           "confidence": "high",
           "evidence": [
-            "risk.requires_tagged_runner"
+            "tag.corp_tagged_runner_payoff",
+            "condition.requires_tagged_runner"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.tag_trace_punish",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Tagged Meat-Damage-Payoff; Tag-Quelle und Payoff bleiben getrennt."
+          "rationale": "Agenda Semantic Review v1 maps On-Call Solo Team to corp.tag_trace_punish as punish_payoff/tagged_runner_punish_payoff."
         }
       ],
       "supportingEvidenceOnly": [
+        "condition.requires_tagged_runner",
+        "damage.corp_meat_damage_source",
         "damage.payoff",
-        "risk.requires_tagged_runner",
-        "score.agenda_action"
+        "score.agenda_action",
+        "tag.corp_tagged_runner_payoff"
       ],
       "lineSupportClassification": [
         {
@@ -43298,10 +43705,11 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_counter_bank",
+        "economy.corp_counter_cashout_action",
         "economy.counter",
         "economy.finite_pool",
         "score.agenda_action",
-        "score.economy_action",
         "score.economy_counter_bank"
       ],
       "derivedStrategyAnchors": [],
@@ -43309,10 +43717,11 @@
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "economy.corp_counter_bank",
+        "economy.corp_counter_cashout_action",
         "economy.counter",
         "economy.finite_pool",
         "score.agenda_action",
-        "score.economy_action",
         "score.economy_counter_bank"
       ],
       "lineSupportClassification": [],
@@ -43416,18 +43825,22 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_action",
         "economy.generic",
         "score.agenda_action",
-        "score.economy_action"
+        "score.high_agenda_value",
+        "score.vanilla_points"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "economy.corp_credit_action",
         "economy.generic",
         "score.agenda_action",
-        "score.economy_action"
+        "score.high_agenda_value",
+        "score.vanilla_points"
       ],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -43512,6 +43925,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_recurring_credit",
         "economy.generic",
         "score.economy_recurring"
       ],
@@ -43520,6 +43934,7 @@
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "economy.corp_recurring_credit",
         "economy.generic",
         "score.economy_recurring"
       ],
@@ -43614,6 +44029,7 @@
       },
       "derivedFunctionSignals": [
         "economy.rez_discount",
+        "ice.corp_free_rez_on_score",
         "score.free_rez_ice"
       ],
       "derivedStrategyAnchors": [
@@ -43629,21 +44045,22 @@
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
-          "role": "scoring_tool",
-          "roleDetail": "tempo_payoff",
+          "role": "payoff_anchor",
+          "roleDetail": "free_rez_ice_payoff",
           "confidence": "high",
           "evidence": [
+            "ice.corp_free_rez_on_score",
             "score.free_rez_ice"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.ice_tax_glacier",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Free-rez-payoff stuetzt ICE-Tax und Scoring-Window; nicht Economy-Reserve."
+          "rationale": "Agenda Semantic Review v1 maps Priority Requisition to corp.ice_tax_glacier as payoff_anchor/free_rez_ice_payoff."
         },
         {
           "strategyId": "corp.remote_scoring",
           "role": "scoring_tool",
-          "roleDetail": "score_window_payoff",
+          "roleDetail": "free_rez_remote_defense",
           "confidence": "medium",
           "evidence": [
             "score.free_rez_ice"
@@ -43651,10 +44068,12 @@
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.remote_scoring",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Free-rez-payoff stuetzt ICE-Tax und Scoring-Window; nicht Economy-Reserve."
+          "rationale": "Agenda Semantic Review v1 maps Priority Requisition to corp.remote_scoring as scoring_tool/free_rez_remote_defense."
         }
       ],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "ice.corp_free_rez_on_score"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.ice_tax_glacier",
@@ -43778,9 +44197,11 @@
       },
       "strategicRoleStatus": {
         "values": [
+          "payoff_anchor",
           "scoring_tool"
         ],
         "validValues": [
+          "payoff_anchor",
           "scoring_tool"
         ],
         "unknownValues": []
@@ -43800,10 +44221,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.trace_success",
         "score.agenda_action",
-        "score.tag_source",
         "score.trace_tag_source",
+        "tag.corp_trace_tag_source",
         "tag.source",
+        "trace.corp_source",
         "trace.source"
       ],
       "derivedStrategyAnchors": [
@@ -43818,21 +44241,26 @@
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.tag_trace_punish",
-          "role": "engine_anchor",
-          "roleDetail": "tag_source",
+          "role": "enabler",
+          "roleDetail": "trace_tag_source",
           "confidence": "high",
           "evidence": [
-            "score.trace_tag_source",
-            "score.tag_source"
+            "trace.corp_source",
+            "tag.corp_trace_tag_source",
+            "condition.trace_success",
+            "score.trace_tag_source"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.tag_trace_punish",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Trace-Tag-Quelle, getrennt von Payoff."
+          "rationale": "Agenda Semantic Review v1 maps Private Cybernet Police to corp.tag_trace_punish as enabler/trace_tag_source."
         }
       ],
       "supportingEvidenceOnly": [
-        "score.agenda_action"
+        "condition.trace_success",
+        "score.agenda_action",
+        "tag.corp_trace_tag_source",
+        "trace.corp_source"
       ],
       "lineSupportClassification": [
         {
@@ -43927,10 +44355,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "engine_anchor"
+          "enabler"
         ],
         "validValues": [
-          "engine_anchor"
+          "enabler"
         ],
         "unknownValues": []
       }
@@ -43949,20 +44377,54 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "advance.overadvance_payoff",
+        "risk.overadvance_investment",
         "score.conditional_bonus_agenda_points",
         "score.overadvance_bonus",
         "score.overadvance_scaling"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.overadvance_value"
+      ],
       "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.overadvance_value",
+          "role": "win_condition",
+          "roleDetail": "overadvance_agenda_point_payoff",
+          "confidence": "high",
+          "evidence": [
+            "score.conditional_bonus_agenda_points",
+            "score.overadvance_bonus",
+            "score.overadvance_scaling",
+            "advance.overadvance_payoff",
+            "risk.overadvance_investment"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.overadvance_value",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "The payoff is specifically overadvance agenda-point conversion, not generic remote scoring."
+        }
+      ],
       "supportingEvidenceOnly": [
+        "advance.overadvance_payoff",
+        "risk.overadvance_investment",
         "score.conditional_bonus_agenda_points",
         "score.overadvance_bonus",
         "score.overadvance_scaling"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.overadvance_value",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.overadvance_value"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -44031,8 +44493,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "win_condition"
+        ],
+        "validValues": [
+          "win_condition"
+        ],
         "unknownValues": []
       }
     },
@@ -44050,7 +44516,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "ice.strength_modifier",
+        "ice.corp_fort_strength_bonus",
+        "ice.corp_strength_bonus",
         "score.fort_ice_strength_bonus"
       ],
       "derivedStrategyAnchors": [],
@@ -44066,16 +44533,18 @@
           "roleDetail": "fort_tax_anchor",
           "confidence": "high",
           "evidence": [
+            "ice.corp_fort_strength_bonus",
+            "ice.corp_strength_bonus",
             "score.fort_ice_strength_bonus"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.ice_tax_glacier",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Fortbezogener ICE-Buff traegt ICE-Tax und Remote-Defense."
+          "rationale": "Agenda Semantic Review v1 maps Security Net Optimization to corp.ice_tax_glacier as tax_tool/fort_tax_anchor."
         },
         {
           "strategyId": "corp.remote_scoring",
-          "role": "tax_tool",
+          "role": "defensive_tool",
           "roleDetail": "remote_defense_anchor",
           "confidence": "medium",
           "evidence": [
@@ -44084,10 +44553,13 @@
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.remote_scoring",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Fortbezogener ICE-Buff traegt ICE-Tax und Remote-Defense."
+          "rationale": "Agenda Semantic Review v1 maps Security Net Optimization to corp.remote_scoring as defensive_tool/remote_defense_anchor."
         }
       ],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "ice.corp_fort_strength_bonus",
+        "ice.corp_strength_bonus"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.ice_tax_glacier",
@@ -44179,10 +44651,12 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "tax_tool"
+          "tax_tool",
+          "defensive_tool"
         ],
         "validValues": [
-          "tax_tool"
+          "tax_tool",
+          "defensive_tool"
         ],
         "unknownValues": []
       }
@@ -44201,18 +44675,18 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "access.rnd_reveal_requirement",
         "economy.rez_discount",
-        "score.free_install_and_rez_ice",
-        "score.rnd_install_and_rez",
-        "score.rnd_reveal"
+        "ice.corp_free_rez",
+        "info.corp_reveal_top_rnd_to_runner",
+        "install.corp_rnd_ice_install",
+        "risk.trash_revealed_non_ice",
+        "score.free_install_and_rez_ice"
       ],
       "derivedStrategyAnchors": [
         "corp.economy_rez_reserve"
       ],
       "cardLevelStrategyAnchors": [
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring"
+        "corp.ice_tax_glacier"
       ],
       "derivedPossibleStrategyAnchors": [
         "corp.economy_rez_reserve"
@@ -44220,36 +44694,24 @@
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
-          "role": "scoring_tool",
-          "roleDetail": "setup_payoff",
+          "role": "enabler",
+          "roleDetail": "free_install_rez_ice",
           "confidence": "medium",
           "evidence": [
-            "score.free_install_and_rez_ice",
-            "score.rnd_install_and_rez"
+            "install.corp_rnd_ice_install",
+            "ice.corp_free_rez",
+            "score.free_install_and_rez_ice"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.ice_tax_glacier",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "R&D-Reveal plus free install/rez ist Setup-Payoff; Sequenzzielwahl bleibt schema gap."
-        },
-        {
-          "strategyId": "corp.remote_scoring",
-          "role": "scoring_tool",
-          "roleDetail": "setup_payoff",
-          "confidence": "medium",
-          "evidence": [
-            "score.free_install_and_rez_ice",
-            "score.rnd_install_and_rez"
-          ],
-          "sourceField": "strategySupportPairs",
-          "sourceValue": "corp.remote_scoring",
-          "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "R&D-Reveal plus free install/rez ist Setup-Payoff; Sequenzzielwahl bleibt schema gap."
+          "rationale": "Review v1 removes the previous remote-scoring pair; free install/rez from R&D is an ICE-tax/glacier setup payoff."
         }
       ],
       "supportingEvidenceOnly": [
-        "access.rnd_reveal_requirement",
-        "score.rnd_reveal"
+        "info.corp_reveal_top_rnd_to_runner",
+        "install.corp_rnd_ice_install",
+        "risk.trash_revealed_non_ice"
       ],
       "lineSupportClassification": [
         {
@@ -44258,15 +44720,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.remote_scoring",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.remote_scoring"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
@@ -44331,10 +44784,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "scoring_tool"
+          "enabler"
         ],
         "validValues": [
-          "scoring_tool"
+          "enabler"
         ],
         "unknownValues": []
       }
@@ -44353,11 +44806,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.requires_tagged_runner",
+        "damage.corp_meat_damage_source",
+        "damage.corp_tagged_meat_payoff",
         "damage.payoff",
-        "risk.requires_tagged_runner",
         "score.agenda_action",
-        "score.meat_damage_source",
-        "score.tagged_meat_damage_payoff",
+        "tag.corp_tagged_runner_payoff",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -44374,34 +44828,38 @@
         {
           "strategyId": "corp.damage_kill",
           "role": "punish_payoff",
-          "roleDetail": "damage_payoff",
+          "roleDetail": "tagged_meat_damage_payoff",
           "confidence": "high",
           "evidence": [
-            "score.tagged_meat_damage_payoff",
-            "score.meat_damage_source"
+            "damage.corp_tagged_meat_payoff",
+            "damage.corp_meat_damage_source"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.damage_kill",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Staerkerer Tagged Meat-Damage-Payoff; Tag-Quelle bleibt externe Bedingung."
+          "rationale": "Agenda Semantic Review v1 maps Strike Force Kali to corp.damage_kill as punish_payoff/tagged_meat_damage_payoff."
         },
         {
           "strategyId": "corp.tag_trace_punish",
           "role": "punish_payoff",
+          "roleDetail": "tagged_runner_punish_payoff",
           "confidence": "high",
           "evidence": [
-            "risk.requires_tagged_runner"
+            "tag.corp_tagged_runner_payoff",
+            "condition.requires_tagged_runner"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.tag_trace_punish",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Staerkerer Tagged Meat-Damage-Payoff; Tag-Quelle bleibt externe Bedingung."
+          "rationale": "Agenda Semantic Review v1 maps Strike Force Kali to corp.tag_trace_punish as punish_payoff/tagged_runner_punish_payoff."
         }
       ],
       "supportingEvidenceOnly": [
+        "condition.requires_tagged_runner",
+        "damage.corp_meat_damage_source",
         "damage.payoff",
-        "risk.requires_tagged_runner",
-        "score.agenda_action"
+        "score.agenda_action",
+        "tag.corp_tagged_runner_payoff"
       ],
       "lineSupportClassification": [
         {
@@ -44520,16 +44978,48 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.recurring_extra_action"
+        "action.corp_recurring_extra_action",
+        "score.recurring_extra_action",
+        "tempo.corp_recurring_action"
       ],
       "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [
-        "score.recurring_extra_action"
+      "cardLevelStrategyAnchors": [
+        "corp.action_tempo"
       ],
-      "lineSupportClassification": [],
+      "derivedPossibleStrategyAnchors": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.action_tempo",
+          "role": "engine_anchor",
+          "roleDetail": "recurring_extra_action_engine",
+          "confidence": "medium",
+          "evidence": [
+            "action.corp_recurring_extra_action",
+            "tempo.corp_recurring_action",
+            "score.recurring_extra_action"
+          ],
+          "sourceField": "strategySupportPairs",
+          "sourceValue": "corp.action_tempo",
+          "triageCategory": "explicit_strategy_support_pair",
+          "rationale": "A recurring extra Corp action is a reusable action-tempo engine after the agenda is scored."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "action.corp_recurring_extra_action",
+        "score.recurring_extra_action",
+        "tempo.corp_recurring_action"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.action_tempo",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.action_tempo"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "action",
@@ -44582,8 +45072,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -44601,9 +45095,11 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_ice_type_reveal_burst",
         "economy.generic",
+        "ice.corp_strength_bonus",
+        "ice.corp_wall_strength_bonus",
         "ice.strength_modifier",
-        "score.ice_type_reveal_economy",
         "score.ice_type_tax_support",
         "score.wall_strength_bonus"
       ],
@@ -44620,21 +45116,26 @@
         {
           "strategyId": "corp.ice_tax_glacier",
           "role": "tax_tool",
-          "roleDetail": "ice_type_anchor",
+          "roleDetail": "wall_tax_anchor",
           "confidence": "high",
           "evidence": [
+            "ice.corp_wall_strength_bonus",
+            "ice.corp_strength_bonus",
+            "economy.corp_ice_type_reveal_burst",
             "score.wall_strength_bonus",
             "score.ice_type_tax_support"
           ],
           "sourceField": "strategySupportPairs",
           "sourceValue": "corp.ice_tax_glacier",
           "triageCategory": "explicit_strategy_support_pair",
-          "rationale": "Wall-Buff traegt ICE-Tax; Reveal-Economy bleibt Support."
+          "rationale": "Agenda Semantic Review v1 maps Superior Net Barriers to corp.ice_tax_glacier as tax_tool/wall_tax_anchor."
         }
       ],
       "supportingEvidenceOnly": [
+        "economy.corp_ice_type_reveal_burst",
         "economy.generic",
-        "score.ice_type_reveal_economy"
+        "ice.corp_strength_bonus",
+        "ice.corp_wall_strength_bonus"
       ],
       "lineSupportClassification": [
         {
@@ -63040,7 +63541,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
@@ -63100,7 +63601,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],
@@ -63827,7 +64327,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
@@ -63864,7 +64364,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],
@@ -65141,7 +65640,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
@@ -65178,7 +65677,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],

@@ -207,12 +207,13 @@ describe("AI005 hint inspector index", () => {
         expect.objectContaining({
           strategyId: "corp.damage_kill",
           role: "punish_payoff",
-          roleDetail: "damage_payoff",
+          roleDetail: "tagged_meat_damage_payoff",
           sourceField: "strategySupportPairs",
         }),
         expect.objectContaining({
           strategyId: "corp.tag_trace_punish",
           role: "punish_payoff",
+          roleDetail: "tagged_runner_punish_payoff",
           sourceField: "strategySupportPairs",
         }),
       ]),
@@ -221,14 +222,14 @@ describe("AI005 hint inspector index", () => {
       expect.arrayContaining([
         expect.objectContaining({
           strategyId: "corp.ice_tax_glacier",
-          role: "scoring_tool",
-          roleDetail: "tempo_payoff",
+          role: "payoff_anchor",
+          roleDetail: "free_rez_ice_payoff",
           confidence: "high",
         }),
         expect.objectContaining({
           strategyId: "corp.remote_scoring",
           role: "scoring_tool",
-          roleDetail: "score_window_payoff",
+          roleDetail: "free_rez_remote_defense",
           confidence: "medium",
         }),
       ]),
