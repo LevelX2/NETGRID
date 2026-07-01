@@ -52,6 +52,14 @@ type CatalogDetailAiInspector = {
       } | null;
       functionSignals: string[];
       strategyAnchors: string[];
+      strategySupportPairs: Array<{
+        strategyId: string;
+        role?: string;
+        roleDetail?: string;
+        confidence?: string;
+        evidence?: string[];
+        sourceField?: string;
+      }>;
       lineSupport: {
         values: string[];
         classification: Array<{
@@ -66,7 +74,10 @@ type CatalogDetailAiInspector = {
         roles: string[];
         planRoles: string[];
         rolesClassification: Array<{ value: string; triageCategory: string }>;
-        planRolesClassification: Array<{ value: string; triageCategory: string }>;
+        planRolesClassification: Array<{
+          value: string;
+          triageCategory: string;
+        }>;
       };
       warnings: {
         categories: string[];
@@ -199,7 +210,7 @@ const CATALOG_AI_HINT_EXPECTATIONS = [
     title: "exposes trace and tag enabler hints",
     cardId: "onr_v1_306_trojan-horse",
     roles: ["tag_enabler"],
-    planRoles: ["recover_economy"],
+    planRoles: ["punish_tagged_runner", "bait_runner"],
     scenarioRefs: [
       "data/scenarios/ai-corp-tag-approval-slice-smokes.json#trojan_horse_after_agenda_theft",
     ],
@@ -456,7 +467,8 @@ describe("catalog API filters", () => {
     const inspector = body.card.aiInspector;
 
     expect(inspector).not.toBeNull();
-    if (!inspector) throw new Error("Missing AI inspector for onr_v1_002_ai-boon");
+    if (!inspector)
+      throw new Error("Missing AI inspector for onr_v1_002_ai-boon");
     expect(inspector.schemaVersion).toBe("ai-hint-inspector-index-v1");
     expect(inspector.supportStatus).toMatchObject({
       aiSupportStatus: "ai_supported",
@@ -470,6 +482,7 @@ describe("catalog API filters", () => {
       "sentry",
     );
     expect(inspector.functionSignals).toContain("breaker.sentry");
+    expect(inspector.strategySupportPairs).toEqual([]);
     expect(inspector.lineSupport.values).toEqual([]);
     expect(inspector.lineSupport.classification).toEqual([]);
     expect(inspector.legacyRoles.planRolesClassification).toEqual(
@@ -494,6 +507,35 @@ describe("catalog API filters", () => {
     );
   });
 
+  it("exposes explicit Agenda strategy support pairs through the inspector API", () => {
+    const response = catalogDetailResponse("onr_v1_212_priority-requisition");
+    expect(response.status).toBe(200);
+    const body = response.body as CatalogDetailAiInspector;
+    const inspector = body.card.aiInspector;
+
+    expect(inspector).not.toBeNull();
+    if (!inspector)
+      throw new Error("Missing AI inspector for Priority Requisition");
+    expect(inspector.strategySupportPairs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          strategyId: "corp.ice_tax_glacier",
+          role: "scoring_tool",
+          roleDetail: "tempo_payoff",
+          confidence: "high",
+          sourceField: "strategySupportPairs",
+        }),
+        expect.objectContaining({
+          strategyId: "corp.remote_scoring",
+          role: "scoring_tool",
+          roleDetail: "score_window_payoff",
+          confidence: "medium",
+          sourceField: "strategySupportPairs",
+        }),
+      ]),
+    );
+  });
+
   it("exposes generated remoteRole facts and descriptor-gap warnings in the inspector", () => {
     const remoteResponse = catalogDetailResponse("onr_v1_012_clown");
     expect(remoteResponse.status).toBe(200);
@@ -501,9 +543,9 @@ describe("catalog API filters", () => {
     expect(remoteBody.card.aiInspector?.supportStatus.generatedFactsFound).toBe(
       true,
     );
-    expect(remoteBody.card.aiInspector?.mechanicalFacts?.remoteRole).toMatchObject(
-      { kind: "ice_modifier" },
-    );
+    expect(
+      remoteBody.card.aiInspector?.mechanicalFacts?.remoteRole,
+    ).toMatchObject({ kind: "ice_modifier" });
 
     const gapResponse = catalogDetailResponse("onr_v1_017_deep-thought");
     expect(gapResponse.status).toBe(200);
@@ -556,7 +598,7 @@ describe("catalog API filters", () => {
     );
 
     const blockedResponse = catalogListResponse(
-      new URLSearchParams("status=blocked&q=Baskerville"),
+      new URLSearchParams("status=blocked&q=Catalog%20Preview%20Resource"),
     );
     expect(blockedResponse.status).toBe(200);
     const blockedBody = blockedResponse.body as {
@@ -568,7 +610,7 @@ describe("catalog API filters", () => {
     expect(blockedBody.cards).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          catalogCardId: "onr_classic_005_baskerville",
+          catalogCardId: "catalog_preview_resource_001",
           aiInspectorSummary: null,
         }),
       ]),
@@ -622,10 +664,7 @@ describe("catalog API filters", () => {
       },
       {
         cardId: "onr_v1_320_encoder-inc",
-        contains: [
-          "cost 1 less to rez",
-          'additional "End the run" subroutine',
-        ],
+        contains: ["cost 1 less to rez", 'additional "End the run" subroutine'],
         notContains: ["cost 2 less to rez"],
       },
       {
@@ -830,7 +869,10 @@ describe("catalog API filters", () => {
       },
       {
         cardId: "onr_v1_187_wilson-weeflerunner-apprentice",
-        catalogContains: ["gain an action", "Prevent any amount of meat damage"],
+        catalogContains: [
+          "gain an action",
+          "Prevent any amount of meat damage",
+        ],
         sharedContains: ["gain an action", "Prevent any amount of meat damage"],
         notContains: ["prevent 1 meat damage"],
       },
@@ -950,7 +992,9 @@ describe("catalog API filters", () => {
       {
         cardId: "onr_v1_155_code-viral-cache",
         catalogContains: ["two counters of your choice are not removed"],
-        sharedContains: ["choose up to two Virus counters that are not removed"],
+        sharedContains: [
+          "choose up to two Virus counters that are not removed",
+        ],
         notContains: [],
       },
       {
@@ -1034,8 +1078,14 @@ describe("catalog API filters", () => {
       },
       {
         cardId: "onr_v1_010_cascade",
-        catalogContains: ["Cascade counter", "trash faceup one card stored in R&D"],
-        sharedContains: ["Cascade counter", "trash faceup one card stored in R&D"],
+        catalogContains: [
+          "Cascade counter",
+          "trash faceup one card stored in R&D",
+        ],
+        sharedContains: [
+          "Cascade counter",
+          "trash faceup one card stored in R&D",
+        ],
       },
       {
         cardId: "onr_v1_017_deep-thought",

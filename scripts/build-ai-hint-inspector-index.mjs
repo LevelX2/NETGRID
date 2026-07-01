@@ -146,12 +146,25 @@ export function buildAiHintInspectorIndex(options = {}) {
         lineSupportTriageByCardId.get(hint.cardId) ?? [],
         strategyIds,
       );
+      const explicitStrategySupportPairs = reviewedStrategySupportPairsFromHint(
+        {
+          hint,
+          strategyIds,
+          strategicRoleIds,
+        },
+      );
       const descriptorGaps = descriptorGapsForCard({
         descriptorGapTriage,
         values: [
           ...(hint.roles ?? []),
           ...(hint.planRoles ?? []),
           ...(hint.lineSupport ?? []),
+          ...explicitStrategySupportPairs.flatMap((pair) => [
+            pair.strategyId,
+            pair.role,
+            pair.roleDetail,
+            ...(pair.evidence ?? []),
+          ]),
           ...functionSignals.signals,
           ...functionSignals.anchorStrategyIds,
         ],
@@ -175,10 +188,12 @@ export function buildAiHintInspectorIndex(options = {}) {
       });
       const derivedPossibleStrategyAnchors = functionSignals.anchorStrategyIds;
       const reviewedStrategySupportPairs =
-        reviewedStrategySupportPairsFromLineSupport({
-          lineSupportClassification,
-          strategyIds,
-        });
+        explicitStrategySupportPairs.length > 0
+          ? explicitStrategySupportPairs
+          : reviewedStrategySupportPairsFromLineSupport({
+              lineSupportClassification,
+              strategyIds,
+            });
       const supportingEvidenceOnly = supportingEvidenceOnlyForHint({
         hint,
         functionSignals,
@@ -203,7 +218,10 @@ export function buildAiHintInspectorIndex(options = {}) {
         },
         derivedFunctionSignals: inspectorFunctionSignals,
         derivedStrategyAnchors: functionSignals.anchorStrategyIds,
-        cardLevelStrategyAnchors,
+        cardLevelStrategyAnchors: sortedUnique([
+          ...cardLevelStrategyAnchors,
+          ...explicitStrategySupportPairs.map((pair) => pair.strategyId),
+        ]),
         derivedPossibleStrategyAnchors,
         reviewedStrategySupportPairs,
         supportingEvidenceOnly,
@@ -266,6 +284,11 @@ export function buildAiHintInspectorIndex(options = {}) {
       ).length,
       cardsWithStrategyAnchors: cards.filter(
         (card) => card.derivedStrategyAnchors.length > 0,
+      ).length,
+      cardsWithStrategySupportPairs: cards.filter((card) =>
+        (card.reviewedStrategySupportPairs ?? []).some(
+          (pair) => pair.sourceField === "strategySupportPairs",
+        ),
       ).length,
       cardsWithWarnings: cards.filter(
         (card) => card.warningCategories.length > 0,
@@ -389,6 +412,48 @@ function reviewedStrategySupportPairsFromLineSupport({
       (left, right) =>
         left.strategyId.localeCompare(right.strategyId) ||
         left.sourceValue.localeCompare(right.sourceValue),
+    );
+}
+
+function reviewedStrategySupportPairsFromHint({
+  hint,
+  strategyIds,
+  strategicRoleIds,
+}) {
+  return (hint.strategySupportPairs ?? [])
+    .filter(
+      (pair) =>
+        pair &&
+        typeof pair.strategyId === "string" &&
+        strategyIds.has(pair.strategyId) &&
+        typeof pair.role === "string" &&
+        strategicRoleIds.has(pair.role),
+    )
+    .map((pair) =>
+      removeUndefined({
+        strategyId: pair.strategyId,
+        role: pair.role,
+        roleDetail:
+          typeof pair.roleDetail === "string" ? pair.roleDetail : undefined,
+        confidence:
+          typeof pair.confidence === "string" ? pair.confidence : undefined,
+        evidence: Array.isArray(pair.evidence)
+          ? pair.evidence.filter((entry) => typeof entry === "string")
+          : [],
+        sourceField: "strategySupportPairs",
+        sourceValue: pair.strategyId,
+        triageCategory: "explicit_strategy_support_pair",
+        rationale:
+          typeof pair.rationale === "string"
+            ? pair.rationale
+            : "Explicit strategySupportPairs entry from the active hint.",
+      }),
+    )
+    .sort(
+      (left, right) =>
+        left.strategyId.localeCompare(right.strategyId) ||
+        (left.role ?? "").localeCompare(right.role ?? "") ||
+        (left.roleDetail ?? "").localeCompare(right.roleDetail ?? ""),
     );
 }
 

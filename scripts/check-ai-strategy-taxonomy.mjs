@@ -40,6 +40,11 @@ const VALID_SUPPORT_VALUES = new Set([
   "conditional",
   "meta_dependent",
 ]);
+const VALID_STRATEGY_SUPPORT_PAIR_CONFIDENCE = new Set([
+  "low",
+  "medium",
+  "high",
+]);
 const VALID_RULE_SOURCES = new Set([
   "effects",
   "conditions",
@@ -61,11 +66,7 @@ const VALID_RULE_GATE_FIELDS = new Set([
   "breakerProfileCoverage",
   "breakerProfileRestrictionAbsent",
 ]);
-const VALID_TACTIC_SIGNAL_SIDE_SCOPES = new Set([
-  "runner",
-  "corp",
-  "neutral",
-]);
+const VALID_TACTIC_SIGNAL_SIDE_SCOPES = new Set(["runner", "corp", "neutral"]);
 const ACCESS_BLOCKING_BREAKER_RESTRICTIONS = new Set([
   "not_access_enabling_breaker",
   "not_reachability_coverage",
@@ -162,7 +163,8 @@ const LINE_SUPPORT_MAPPINGS = {
   fast_advance_or_counter_ops: {
     category: "alias_to_strategy_goal",
     mapsTo: ["corp.fast_advance"],
-    rationale: "Counter-operation details are support facts under fast advance.",
+    rationale:
+      "Counter-operation details are support facts under fast advance.",
   },
   tag_trace_punish: {
     category: "exact_strategy_goal",
@@ -321,11 +323,13 @@ const ROLE_PLAN_ROLE_TRIAGE = {
   },
   bit_depot: {
     category: "function_signal_only",
-    rationale: "Legacy bit/credit storage vocabulary; economy function context only.",
+    rationale:
+      "Legacy bit/credit storage vocabulary; economy function context only.",
   },
   bit_pool: {
     category: "function_signal_only",
-    rationale: "Legacy bit/credit pool vocabulary; economy function context only.",
+    rationale:
+      "Legacy bit/credit pool vocabulary; economy function context only.",
   },
   black_ops: {
     category: "legacy_role_only",
@@ -333,7 +337,8 @@ const ROLE_PLAN_ROLE_TRIAGE = {
   },
   break_walls: {
     category: "function_signal_only",
-    rationale: "Breaker coverage intent; kept as function context, not a strategy anchor.",
+    rationale:
+      "Breaker coverage intent; kept as function context, not a strategy anchor.",
   },
   city_grid: {
     category: "legacy_role_only",
@@ -365,7 +370,8 @@ const ROLE_PLAN_ROLE_TRIAGE = {
   },
   etr_tax: {
     category: "function_signal_only",
-    rationale: "End-the-run tax descriptor; covered by ICE/tax function signals.",
+    rationale:
+      "End-the-run tax descriptor; covered by ICE/tax function signals.",
   },
   expose: {
     category: "function_signal_only",
@@ -417,7 +423,8 @@ const ROLE_PLAN_ROLE_TRIAGE = {
   },
   modifier: {
     category: "function_signal_only",
-    rationale: "Generic modifier context; requires structured source fields for derivation.",
+    rationale:
+      "Generic modifier context; requires structured source fields for derivation.",
   },
   noisy: {
     category: "remove_or_deprecate",
@@ -476,7 +483,8 @@ const ROLE_PLAN_ROLE_TRIAGE = {
   },
   server_defense: {
     category: "function_signal_only",
-    rationale: "Broad server protection context; use structured remote/ICE descriptors.",
+    rationale:
+      "Broad server protection context; use structured remote/ICE descriptors.",
   },
   server_development: {
     category: "descriptor_gap",
@@ -541,7 +549,10 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     repoRoot,
     FUNCTION_SIGNAL_DERIVATION_PATH,
   );
-  const tacticSignalCatalogData = readJson(repoRoot, TACTIC_SIGNAL_CATALOG_PATH);
+  const tacticSignalCatalogData = readJson(
+    repoRoot,
+    TACTIC_SIGNAL_CATALOG_PATH,
+  );
 
   const hardErrors = [];
   const warnings = [];
@@ -580,16 +591,8 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     hardErrors,
     warnings,
   );
-  validateHiddenInfoKeys(
-    strategyGoalsData,
-    STRATEGY_GOALS_PATH,
-    hardErrors,
-  );
-  validateHiddenInfoKeys(
-    strategicRolesData,
-    STRATEGIC_ROLES_PATH,
-    hardErrors,
-  );
+  validateHiddenInfoKeys(strategyGoalsData, STRATEGY_GOALS_PATH, hardErrors);
+  validateHiddenInfoKeys(strategicRolesData, STRATEGIC_ROLES_PATH, hardErrors);
   validateHiddenInfoKeys(
     functionDerivationData,
     FUNCTION_SIGNAL_DERIVATION_PATH,
@@ -600,16 +603,8 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     TACTIC_SIGNAL_CATALOG_PATH,
     hardErrors,
   );
-  validateNoManualFunctionTags(
-    activeHints,
-    ACTIVE_HINTS_PATH,
-    hardErrors,
-  );
-  validateNoManualFunctionTags(
-    compiledHints,
-    COMPILED_HINTS_PATH,
-    hardErrors,
-  );
+  validateNoManualFunctionTags(activeHints, ACTIVE_HINTS_PATH, hardErrors);
+  validateNoManualFunctionTags(compiledHints, COMPILED_HINTS_PATH, hardErrors);
   validateOpponentSignals(activeHints, ACTIVE_HINTS_PATH, hardErrors);
   validateOpponentSignals(compiledHints, COMPILED_HINTS_PATH, hardErrors);
   validateHiddenInfoKeys(activeHints, ACTIVE_HINTS_PATH, hardErrors);
@@ -638,11 +633,29 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     strategicRoleIds,
     hardErrors,
   );
+  validateStrategySupportPairsIfPresent(
+    activeHints,
+    ACTIVE_HINTS_PATH,
+    strategyIds,
+    strategicRoleIds,
+    new Set([...functionSignalIds, ...tacticSignalIds]),
+    hardErrors,
+  );
+  validateStrategySupportPairsIfPresent(
+    compiledHints,
+    COMPILED_HINTS_PATH,
+    strategyIds,
+    strategicRoleIds,
+    new Set([...functionSignalIds, ...tacticSignalIds]),
+    hardErrors,
+  );
 
   const activeCards = activeHints.cards ?? [];
   const compiledCards = compiledHints.cards ?? [];
   const activeCardIds = sortedUnique(activeCards.map((card) => card.cardId));
-  const compiledCardIds = sortedUnique(compiledCards.map((card) => card.cardId));
+  const compiledCardIds = sortedUnique(
+    compiledCards.map((card) => card.cardId),
+  );
   const sameCardIdSet = sameStringArray(activeCardIds, compiledCardIds);
   if (!sameCardIdSet) {
     hardErrors.push({
@@ -762,10 +775,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     warnings.push({
       kind: "unknown_role_or_planRole_values_warn_only",
       count: unknownRoleValues.length,
-      occurrences: unknownRoleValues.reduce(
-        (sum, item) => sum + item.count,
-        0,
-      ),
+      occurrences: unknownRoleValues.reduce((sum, item) => sum + item.count, 0),
       message:
         "Some existing roles or planRoles are unmapped in the AI003 contract report.",
       items: unknownRoleValues,
@@ -791,7 +801,10 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     generatedAt: GENERATED_AT,
     status: hardErrors.length === 0 ? "pass_with_warnings" : "fail",
     hardErrorCount: hardErrors.length,
-    warningCount: warnings.reduce((sum, warning) => sum + itemCount(warning), 0),
+    warningCount: warnings.reduce(
+      (sum, warning) => sum + itemCount(warning),
+      0,
+    ),
     source: {
       activeHintsPath: ACTIVE_HINTS_PATH,
       compiledHintsPath: COMPILED_HINTS_PATH,
@@ -888,8 +901,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     },
     functionSignals: {
       derivedSignalCounts: functionSignalSummary.signalCounts,
-      derivedStrategyAnchorCounts:
-        functionSignalSummary.strategyAnchorCounts,
+      derivedStrategyAnchorCounts: functionSignalSummary.strategyAnchorCounts,
       totalDerivedStrategyAnchors:
         functionSignalSummary.totalStrategyAnchorCount,
       cardsWithDerivedSignals: functionSignalSummary.cardsWithSignals,
@@ -957,7 +969,11 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
   return { report, aliasReport };
 }
 
-function buildAliasReport({ valueInventories, strategyIds, functionSignalIds }) {
+function buildAliasReport({
+  valueInventories,
+  strategyIds,
+  functionSignalIds,
+}) {
   const roles = mapInventoryValues(
     "roles",
     valueInventories.roles,
@@ -1062,12 +1078,7 @@ function mapInventoryValues(field, entries, strategyIds, functionSignalIds) {
   });
 }
 
-function classifyExistingValue(
-  field,
-  value,
-  strategyIds,
-  functionSignalIds,
-) {
+function classifyExistingValue(field, value, strategyIds, functionSignalIds) {
   if (strategyIds.has(value)) {
     return {
       category: "exact_strategy_goal",
@@ -1089,7 +1100,10 @@ function classifyExistingValue(
     };
   }
 
-  if ((field === "roles" || field === "planRoles") && ROLE_PLAN_ROLE_TRIAGE[value]) {
+  if (
+    (field === "roles" || field === "planRoles") &&
+    ROLE_PLAN_ROLE_TRIAGE[value]
+  ) {
     return {
       category: ROLE_PLAN_ROLE_TRIAGE[value].category,
       triageCategory: ROLE_PLAN_ROLE_TRIAGE[value].category,
@@ -1208,11 +1222,16 @@ function classifyLineSupportForCard(value, hint, strategyIds) {
       ...base,
       triageCategory: "deferred_requires_human_review",
       mapsTo: mapping.mapsTo ?? [],
-      rationale: "Card is already flagged for human review; do not batch-migrate.",
+      rationale:
+        "Card is already flagged for human review; do not batch-migrate.",
     };
   }
-  const effectKinds = new Set((hint.effects ?? []).map((effect) => effect.kind));
-  const effectScopes = new Set((hint.effects ?? []).map((effect) => effect.scope));
+  const effectKinds = new Set(
+    (hint.effects ?? []).map((effect) => effect.kind),
+  );
+  const effectScopes = new Set(
+    (hint.effects ?? []).map((effect) => effect.scope),
+  );
   const roles = new Set([...(hint.roles ?? []), ...(hint.planRoles ?? [])]);
   if (
     value === "remote_contest" &&
@@ -1257,7 +1276,9 @@ function classifyLineSupportForCard(value, hint, strategyIds) {
   }
   if (
     value === "early_rnd_pressure" &&
-    (effectScopes.has("rnd") || roles.has("pressure_rnd") || roles.has("rd_run"))
+    (effectScopes.has("rnd") ||
+      roles.has("pressure_rnd") ||
+      roles.has("rd_run"))
   ) {
     return {
       ...base,
@@ -1306,8 +1327,8 @@ function classifyLineSupportForCard(value, hint, strategyIds) {
   }
   return {
     ...base,
-    triageCategory:
-      withLineSupportTriageCategory(value, mapping).triageCategory,
+    triageCategory: withLineSupportTriageCategory(value, mapping)
+      .triageCategory,
     mapsTo: mapping.mapsTo ?? [],
     rationale: mapping.rationale,
   };
@@ -1416,14 +1437,17 @@ function ruleMatchesHint(rule, hint) {
     );
   }
   if (rule.source === "conditions") {
-    return (hint.conditions ?? []).some((condition) =>
-      matchRecord(condition, rule.match) &&
-      ruleGatesMatch(rule, hint, undefined),
+    return (hint.conditions ?? []).some(
+      (condition) =>
+        matchRecord(condition, rule.match) &&
+        ruleGatesMatch(rule, hint, undefined),
     );
   }
   if (rule.source === "breakerProfile") {
-    return matchRecord(hint.breakerProfile, rule.match) &&
-      ruleGatesMatch(rule, hint, undefined);
+    return (
+      matchRecord(hint.breakerProfile, rule.match) &&
+      ruleGatesMatch(rule, hint, undefined)
+    );
   }
   if (rule.source === "breakerProfile.coverage") {
     const coverage = rule.match?.coverage;
@@ -1453,15 +1477,19 @@ function ruleMatchesHint(rule, hint) {
     );
   }
   if (rule.source === "remoteRole") {
-    return matchRecord(hint.remoteRole, rule.match) &&
-      ruleGatesMatch(rule, hint, undefined);
+    return (
+      matchRecord(hint.remoteRole, rule.match) &&
+      ruleGatesMatch(rule, hint, undefined)
+    );
   }
   return false;
 }
 
 function ruleBaseMatchesHint(rule, hint) {
   if (rule.source === "effects") {
-    return (hint.effects ?? []).some((effect) => matchRecord(effect, rule.match));
+    return (hint.effects ?? []).some((effect) =>
+      matchRecord(effect, rule.match),
+    );
   }
   if (rule.source === "conditions") {
     return (hint.conditions ?? []).some((condition) =>
@@ -1495,7 +1523,8 @@ function ruleBaseMatchesHint(rule, hint) {
       hint.breakerProfile.sideEffects.includes(sideEffect)
     );
   }
-  if (rule.source === "remoteRole") return matchRecord(hint.remoteRole, rule.match);
+  if (rule.source === "remoteRole")
+    return matchRecord(hint.remoteRole, rule.match);
   return false;
 }
 
@@ -1516,7 +1545,9 @@ function ruleGatesMatch(rule, hint, effect) {
   if (!matchesGateValue(effect?.beneficiary, gates.beneficiary)) return false;
   if (!matchesGateValue(hint.remoteRole?.kind, gates.remoteRole)) return false;
   if (gates.remoteRoleStrategyDerivationAbsent !== undefined) {
-    const forbidden = normalizeGateValues(gates.remoteRoleStrategyDerivationAbsent);
+    const forbidden = normalizeGateValues(
+      gates.remoteRoleStrategyDerivationAbsent,
+    );
     if (
       forbidden.length === 0 ||
       (hint.remoteRole?.strategyDerivation !== undefined &&
@@ -1538,7 +1569,9 @@ function ruleGatesMatch(rule, hint, effect) {
     }
   }
   if (gates.breakerProfileRestrictionAbsent !== undefined) {
-    const forbidden = normalizeGateValues(gates.breakerProfileRestrictionAbsent);
+    const forbidden = normalizeGateValues(
+      gates.breakerProfileRestrictionAbsent,
+    );
     const restrictions = hint.breakerProfile?.restrictions;
     if (
       forbidden.length === 0 ||
@@ -2160,7 +2193,8 @@ function validateTacticSignalCatalog(
       errors.push({
         kind: "forbidden_static_anti_ice_signal",
         path: `${basePath}.signalId`,
-        message: "anti.ice.* is too broad and must not be a static tactic signal.",
+        message:
+          "anti.ice.* is too broad and must not be a static tactic signal.",
       });
     } else if (ids.has(signal.signalId)) {
       errors.push({
@@ -2188,7 +2222,11 @@ function validateTacticSignalCatalog(
         message: "sideScope must be runner, corp or neutral.",
       });
     }
-    for (const field of ["supportOnly", "mayAnchorStrategy", "targetProfileRelevant"]) {
+    for (const field of [
+      "supportOnly",
+      "mayAnchorStrategy",
+      "targetProfileRelevant",
+    ]) {
       if (typeof signal[field] !== "boolean") {
         errors.push({
           kind: "invalid_tactic_signal_boolean",
@@ -2227,7 +2265,8 @@ function validateTacticSignalCatalog(
         errors.push({
           kind: "support_only_signal_has_anchor",
           path: `${basePath}.allowedStrategyAnchors`,
-          message: "supportOnly signals must not list allowed strategy anchors.",
+          message:
+            "supportOnly signals must not list allowed strategy anchors.",
         });
       }
     }
@@ -2256,7 +2295,9 @@ function validateTacticSignalCatalog(
     });
   }
 
-  const dormantSignals = [...ids].filter((signalId) => !anchorsBySignal.has(signalId));
+  const dormantSignals = [...ids].filter(
+    (signalId) => !anchorsBySignal.has(signalId),
+  );
   if (dormantSignals.length > 0) {
     warnings.push({
       kind: "dormant_tactic_signals_warn_only",
@@ -2360,8 +2401,16 @@ function validateStrategyGoals(data, errors) {
         message: "anchorSignals must be a string array.",
       });
     }
-    validateSupportMap(goal.requiredSupport, `${basePath}.requiredSupport`, errors);
-    validateWeightMap(goal.supportWeights, `${basePath}.supportWeights`, errors);
+    validateSupportMap(
+      goal.requiredSupport,
+      `${basePath}.requiredSupport`,
+      errors,
+    );
+    validateWeightMap(
+      goal.supportWeights,
+      `${basePath}.supportWeights`,
+      errors,
+    );
     if (!isStringArray(goal.tacticalGoalHints)) {
       errors.push({
         kind: "invalid_tactical_goal_hints",
@@ -2436,7 +2485,10 @@ function validateFunctionDerivation(data, strategyIds, errors, warnings) {
       });
       continue;
     }
-    if (typeof rule.signalId !== "string" || !/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(rule.signalId)) {
+    if (
+      typeof rule.signalId !== "string" ||
+      !/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(rule.signalId)
+    ) {
       errors.push({
         kind: "invalid_function_signal_id",
         path: `${basePath}.signalId`,
@@ -2528,7 +2580,8 @@ function validateStrategyAnchorGates(rule, basePath, errors, warnings) {
       });
     }
   }
-  const matchHasScope = isRecord(rule.match) && typeof rule.match.scope === "string";
+  const matchHasScope =
+    isRecord(rule.match) && typeof rule.match.scope === "string";
   const gatesHaveEffectScope =
     normalizeGateValues(rule.gates?.effectScope).length > 0;
   if (rule.source === "effects" && !matchHasScope && !gatesHaveEffectScope) {
@@ -2679,7 +2732,7 @@ function validateLineSupportValues(data, sourcePath, strategyIds, errors) {
       }
       const mappedStrategyIds = isNormalizedStrategy
         ? [value]
-        : legacyMapping.mapsTo ?? [];
+        : (legacyMapping.mapsTo ?? []);
       const mappedSides = sortedUnique(mappedStrategyIds.map(strategySide));
       if (
         mappedSides.length > 0 &&
@@ -2697,7 +2750,12 @@ function validateLineSupportValues(data, sourcePath, strategyIds, errors) {
   }
 }
 
-function validateStrategicRoleIfPresent(data, sourcePath, strategicRoleIds, errors) {
+function validateStrategicRoleIfPresent(
+  data,
+  sourcePath,
+  strategicRoleIds,
+  errors,
+) {
   for (const [cardIndex, hint] of (data.cards ?? []).entries()) {
     if (hint.strategicRole === undefined) continue;
     if (!isStringArray(hint.strategicRole)) {
@@ -2716,6 +2774,151 @@ function validateStrategicRoleIfPresent(data, sourcePath, strategicRoleIds, erro
           message: `Unknown strategicRole value ${role}.`,
         });
       }
+    }
+  }
+}
+
+function validateStrategySupportPairsIfPresent(
+  data,
+  sourcePath,
+  strategyIds,
+  strategicRoleIds,
+  evidenceIds,
+  errors,
+) {
+  for (const [cardIndex, hint] of (data.cards ?? []).entries()) {
+    if (hint.strategySupportPairs === undefined) continue;
+    const pairPath = `${sourcePath}.cards[${cardIndex}].strategySupportPairs`;
+    if (!Array.isArray(hint.strategySupportPairs)) {
+      errors.push({
+        kind: "invalid_strategySupportPairs_shape",
+        path: pairPath,
+        cardId: hint.cardId,
+        message: "strategySupportPairs must be an array when present.",
+      });
+      continue;
+    }
+    const lineSupport = new Set(hint.lineSupport ?? []);
+    const strategicRole = new Set(hint.strategicRole ?? []);
+    const seenPairs = new Set();
+    for (const [pairIndex, pair] of hint.strategySupportPairs.entries()) {
+      const currentPath = `${pairPath}[${pairIndex}]`;
+      if (!isRecord(pair)) {
+        errors.push({
+          kind: "invalid_strategySupportPair_shape",
+          path: currentPath,
+          cardId: hint.cardId,
+          message: "Each strategySupportPair must be an object.",
+        });
+        continue;
+      }
+      if (
+        typeof pair.strategyId !== "string" ||
+        !strategyIds.has(pair.strategyId)
+      ) {
+        errors.push({
+          kind: "unknown_strategySupportPair_strategy",
+          path: `${currentPath}.strategyId`,
+          cardId: hint.cardId,
+          message: `Unknown strategySupportPair strategyId ${String(pair.strategyId)}.`,
+        });
+      } else {
+        const side = strategySide(pair.strategyId);
+        if (typeof hint.side === "string" && side && side !== hint.side) {
+          errors.push({
+            kind: "strategySupportPair_side_mismatch",
+            path: `${currentPath}.strategyId`,
+            cardId: hint.cardId,
+            message: `strategySupportPair strategyId ${pair.strategyId} has side ${side} but card side is ${hint.side}.`,
+          });
+        }
+        if (!lineSupport.has(pair.strategyId)) {
+          errors.push({
+            kind: "strategySupportPair_missing_lineSupport_anchor",
+            path: `${currentPath}.strategyId`,
+            cardId: hint.cardId,
+            message: `strategySupportPair strategyId ${pair.strategyId} must also be present in lineSupport during the compatibility pilot.`,
+          });
+        }
+      }
+      if (typeof pair.role !== "string" || !strategicRoleIds.has(pair.role)) {
+        errors.push({
+          kind: "unknown_strategySupportPair_role",
+          path: `${currentPath}.role`,
+          cardId: hint.cardId,
+          message: `Unknown strategySupportPair role ${String(pair.role)}.`,
+        });
+      } else if (!strategicRole.has(pair.role)) {
+        errors.push({
+          kind: "strategySupportPair_role_not_summarized",
+          path: `${currentPath}.role`,
+          cardId: hint.cardId,
+          message: `strategySupportPair role ${pair.role} must also be present in strategicRole during the compatibility pilot.`,
+        });
+      }
+      if (
+        pair.roleDetail !== undefined &&
+        (typeof pair.roleDetail !== "string" ||
+          !/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)*$/.test(pair.roleDetail))
+      ) {
+        errors.push({
+          kind: "invalid_strategySupportPair_roleDetail",
+          path: `${currentPath}.roleDetail`,
+          cardId: hint.cardId,
+          message:
+            "strategySupportPair roleDetail must be lower_snake_case or dotted lower_snake_case.",
+        });
+      }
+      if (
+        typeof pair.confidence !== "string" ||
+        !VALID_STRATEGY_SUPPORT_PAIR_CONFIDENCE.has(pair.confidence)
+      ) {
+        errors.push({
+          kind: "invalid_strategySupportPair_confidence",
+          path: `${currentPath}.confidence`,
+          cardId: hint.cardId,
+          message: `strategySupportPair confidence must be low, medium or high; got ${String(pair.confidence)}.`,
+        });
+      }
+      if (!Array.isArray(pair.evidence) || pair.evidence.length === 0) {
+        errors.push({
+          kind: "invalid_strategySupportPair_evidence",
+          path: `${currentPath}.evidence`,
+          cardId: hint.cardId,
+          message:
+            "strategySupportPair evidence must be a non-empty string array.",
+        });
+      } else {
+        for (const evidence of pair.evidence) {
+          if (typeof evidence !== "string" || !evidenceIds.has(evidence)) {
+            errors.push({
+              kind: "unknown_strategySupportPair_evidence",
+              path: `${currentPath}.evidence`,
+              cardId: hint.cardId,
+              message: `Unknown strategySupportPair evidence ${String(evidence)}.`,
+            });
+          }
+        }
+      }
+      if (pair.rationale !== undefined && typeof pair.rationale !== "string") {
+        errors.push({
+          kind: "invalid_strategySupportPair_rationale",
+          path: `${currentPath}.rationale`,
+          cardId: hint.cardId,
+          message:
+            "strategySupportPair rationale must be a string when present.",
+        });
+      }
+      const pairKey = `${pair.strategyId}:${pair.role}:${pair.roleDetail ?? ""}`;
+      if (seenPairs.has(pairKey)) {
+        errors.push({
+          kind: "duplicate_strategySupportPair",
+          path: currentPath,
+          cardId: hint.cardId,
+          message: `Duplicate strategySupportPair ${pairKey}.`,
+        });
+      }
+      seenPairs.add(pairKey);
     }
   }
 }
@@ -2743,20 +2946,19 @@ function collectValueInventory(cards, field) {
   const entries = new Map();
   for (const hint of cards) {
     for (const value of hint[field] ?? []) {
-      const entry =
-        entries.get(value) ??
-        {
-          value,
-          count: 0,
-          examples: [],
-        };
+      const entry = entries.get(value) ?? {
+        value,
+        count: 0,
+        examples: [],
+      };
       entry.count += 1;
       if (entry.examples.length < 8) entry.examples.push(hint.cardId);
       entries.set(value, entry);
     }
   }
   return [...entries.values()].sort(
-    (left, right) => right.count - left.count || left.value.localeCompare(right.value),
+    (left, right) =>
+      right.count - left.count || left.value.localeCompare(right.value),
   );
 }
 
@@ -2816,11 +3018,16 @@ function sortObjectByKey(value) {
 }
 
 function sortedUnique(values) {
-  return [...new Set(values.filter((value) => typeof value === "string"))].sort();
+  return [
+    ...new Set(values.filter((value) => typeof value === "string")),
+  ].sort();
 }
 
 function sameStringArray(left, right) {
-  return left.length === right.length && left.every((value, index) => value === right[index]);
+  return (
+    left.length === right.length &&
+    left.every((value, index) => value === right[index])
+  );
 }
 
 function isRecord(value) {
@@ -2828,7 +3035,9 @@ function isRecord(value) {
 }
 
 function isStringArray(value) {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
+  return (
+    Array.isArray(value) && value.every((item) => typeof item === "string")
+  );
 }
 
 function parseArgs(argv) {

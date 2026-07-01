@@ -1,4 +1,9 @@
-export type AiInspectorTone = "valid" | "warning" | "danger" | "info" | "legacy";
+export type AiInspectorTone =
+  | "valid"
+  | "warning"
+  | "danger"
+  | "info"
+  | "legacy";
 
 export type CatalogAiInspectorClassification = {
   value: string;
@@ -6,6 +11,18 @@ export type CatalogAiInspectorClassification = {
   triageCategory: string;
   mapsTo: string[];
   rationale: string;
+};
+
+export type CatalogStrategySupportPair = {
+  strategyId: string;
+  role?: string;
+  roleDetail?: string;
+  confidence?: string;
+  evidence?: string[];
+  sourceField?: string;
+  sourceValue?: string;
+  triageCategory?: string;
+  rationale?: string;
 };
 
 export type CatalogAiInspector = {
@@ -39,6 +56,7 @@ export type CatalogAiInspector = {
   } | null;
   functionSignals: string[];
   strategyAnchors: string[];
+  strategySupportPairs: CatalogStrategySupportPair[];
   lineSupport: {
     values: string[];
     classification: CatalogAiInspectorClassification[];
@@ -95,17 +113,19 @@ const FORBIDDEN_RUNTIME_KEYS = [
   "planWeights",
 ];
 
-const RUNTIME_LEGACY_NOTICE = "Hinweis: Legacy-Rollen werden intern noch teilweise von der KI verwendet.";
+const RUNTIME_LEGACY_NOTICE =
+  "Hinweis: Legacy-Rollen werden intern noch teilweise von der KI verwendet.";
 const LEGACY_MIGRATION_NOTICE =
   "Diese Felder gehören zum bisherigen KI-Pfad und werden noch nicht vollständig entfernt, solange Teile der KI darauf angewiesen sind. Sie sind nicht die neue Zielsemantik.";
 const CARD_ROLE_MANIFEST_NOTICE =
   "`card-role-manifest-0.9` bleibt Runtime-/DeckDoctrine-Altbestand und ist nicht Teil der neuen Zielsemantik.";
 
-export function aiInspectorSections(inspector: CatalogAiInspector): AiInspectorSection[] {
+export function aiInspectorSections(
+  inspector: CatalogAiInspector,
+): AiInspectorSection[] {
   return [
     tacticalSignalsSection(inspector),
     strategyAnchorSection(inspector),
-    strategicRoleSection(inspector),
     checkpointsSection(inspector),
     mechanicalDetailsSection(inspector),
     qualityDetailsSection(inspector),
@@ -113,11 +133,12 @@ export function aiInspectorSections(inspector: CatalogAiInspector): AiInspectorS
   ];
 }
 
-export function defaultCollapsedAiInspectorSections(sections: AiInspectorSection[]): Record<string, boolean> {
+export function defaultCollapsedAiInspectorSections(
+  sections: AiInspectorSection[],
+): Record<string, boolean> {
   const openByDefault = new Set([
     "tacticalSignals",
     "strategyAnchors",
-    "strategicRole",
     "checkpoints",
   ]);
   return Object.fromEntries(
@@ -127,17 +148,19 @@ export function defaultCollapsedAiInspectorSections(sections: AiInspectorSection
   );
 }
 
-export function aiInspectorEntryKey(sectionKey: string, entry: AiInspectorEntry, index: number): string {
+export function aiInspectorEntryKey(
+  sectionKey: string,
+  entry: AiInspectorEntry,
+  index: number,
+): string {
   return `${sectionKey}-${index}-${entry.label}-${entry.value ?? "empty"}`;
 }
 
 export function aiInspectorToneForCategory(category: string): AiInspectorTone {
   if (
-    [
-      "normalized_strategy_id",
-      "exact_strategy_goal",
-      "ai_supported",
-    ].includes(category)
+    ["normalized_strategy_id", "exact_strategy_goal", "ai_supported"].includes(
+      category,
+    )
   ) {
     return "valid";
   }
@@ -179,7 +202,10 @@ export function containsForbiddenInspectorField(value: unknown): boolean {
   return forbiddenInspectorFields(value).length > 0;
 }
 
-export function forbiddenInspectorFields(value: unknown, found = new Set<string>()): string[] {
+export function forbiddenInspectorFields(
+  value: unknown,
+  found = new Set<string>(),
+): string[] {
   if (value === null || typeof value !== "object") return [...found].sort();
   if (Array.isArray(value)) {
     for (const item of value) forbiddenInspectorFields(item, found);
@@ -192,13 +218,20 @@ export function forbiddenInspectorFields(value: unknown, found = new Set<string>
   return [...found].sort();
 }
 
-function tacticalSignalsSection(inspector: CatalogAiInspector): AiInspectorSection {
-  const entries = stringEntries("Taktiksignal", inspector.functionSignals, "info");
+function tacticalSignalsSection(
+  inspector: CatalogAiInspector,
+): AiInspectorSection {
+  const entries = stringEntries(
+    "Taktiksignal",
+    inspector.functionSignals,
+    "info",
+  );
   if (entries.length === 0 && hasMechanicalDetails(inspector)) {
     entries.push({
       label: "Hinweis",
       value: "Keine Taktiksignale vorhanden",
-      detail: "Mechanische Daten vorhanden, aber noch keine Taktiksignale abgeleitet.",
+      detail:
+        "Mechanische Daten vorhanden, aber noch keine Taktiksignale abgeleitet.",
       tone: "warning",
     });
   }
@@ -211,7 +244,9 @@ function tacticalSignalsSection(inspector: CatalogAiInspector): AiInspectorSecti
   };
 }
 
-function strategyAnchorSection(inspector: CatalogAiInspector): AiInspectorSection {
+function strategyAnchorSection(
+  inspector: CatalogAiInspector,
+): AiInspectorSection {
   const entries = mergedStrategyAnchorEntries(inspector);
   if (entries.length === 0) {
     entries.push({
@@ -224,26 +259,19 @@ function strategyAnchorSection(inspector: CatalogAiInspector): AiInspectorSectio
     key: "strategyAnchors",
     title: "Strategieanker",
     description:
-      "Eindeutige Strategy Goals aus abgeleiteten Strategieankern und gültigem normalisiertem lineSupport.",
+      "Eindeutige Strategy Goals mit zugeordneten strategischen Rollen, wenn geprüfte Strategie/Rolle-Paare vorhanden sind.",
     entries,
   };
 }
 
-function strategicRoleSection(inspector: CatalogAiInspector): AiInspectorSection {
-  return {
-    key: "strategicRole",
-    title: "Strategische Rolle",
-    description: "Rolle der Karte innerhalb einer Strategie, falls sie als Strategieanker oder strategisches Werkzeug dient.",
-    emptyText: "Keine strategische Rolle gesetzt.",
-    entries: stringEntries("Strategische Rolle", validStrategicRoles(inspector), "valid"),
-  };
-}
-
-function qualityDetailsSection(inspector: CatalogAiInspector): AiInspectorSection {
+function qualityDetailsSection(
+  inspector: CatalogAiInspector,
+): AiInspectorSection {
   return {
     key: "qualityDetails",
     title: "Interne Qualität / Reviewdaten",
-    description: "Interne Qualitäts- und Review-Metadaten aus dem compiled Hint.",
+    description:
+      "Interne Qualitäts- und Review-Metadaten aus dem compiled Hint.",
     emptyText: "Keine internen Qualität- oder Reviewdaten vorhanden.",
     entries: qualityEntries(inspector),
   };
@@ -253,13 +281,18 @@ function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
   const entries: AiInspectorEntry[] = [];
   const support = inspector.supportStatus;
   if (!support.compiledHintFound) {
-    entries.push({ label: "Missing compiled hint", value: "missing compiled hint", tone: "danger" });
+    entries.push({
+      label: "Missing compiled hint",
+      value: "missing compiled hint",
+      tone: "danger",
+    });
   }
   entries.push(...qualityCheckpointEntries(inspector));
   if (support.mechanicalFactsFound && inspector.functionSignals.length === 0) {
     entries.push({
       label: "Taktiksignal-Lücke",
-      value: "Mechanische Daten vorhanden, aber noch keine Taktiksignale abgeleitet",
+      value:
+        "Mechanische Daten vorhanden, aber noch keine Taktiksignale abgeleitet",
       tone: "warning",
     });
   }
@@ -276,7 +309,9 @@ function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
     entries.push({
       label: "Descriptor-Gap",
       value: `Descriptor-Gap ${String(gap.gapId ?? "descriptor_gap")}`,
-      ...(typeof gap.description === "string" ? { detail: gap.description } : {}),
+      ...(typeof gap.description === "string"
+        ? { detail: gap.description }
+        : {}),
       tone: "warning",
     });
   }
@@ -307,7 +342,9 @@ function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
   };
 }
 
-function mechanicalDetailsSection(inspector: CatalogAiInspector): AiInspectorSection {
+function mechanicalDetailsSection(
+  inspector: CatalogAiInspector,
+): AiInspectorSection {
   return {
     key: "mechanicalDetails",
     title: "Herleitung / mechanische Details",
@@ -318,7 +355,9 @@ function mechanicalDetailsSection(inspector: CatalogAiInspector): AiInspectorSec
   };
 }
 
-function legacyMigrationSection(inspector: CatalogAiInspector): AiInspectorSection {
+function legacyMigrationSection(
+  inspector: CatalogAiInspector,
+): AiInspectorSection {
   const legacyCount = legacyDetailCount(inspector);
   const entries: AiInspectorEntry[] = [
     ...(legacyCount > 0
@@ -345,7 +384,11 @@ function legacyMigrationSection(inspector: CatalogAiInspector): AiInspectorSecti
       : []),
     ...compiledHintEntries(inspector),
     ...stringEntries("Legacy roles", inspector.legacyRoles.roles, "legacy"),
-    ...stringEntries("Legacy planRoles", inspector.legacyRoles.planRoles, "legacy"),
+    ...stringEntries(
+      "Legacy planRoles",
+      inspector.legacyRoles.planRoles,
+      "legacy",
+    ),
     ...inactiveLineSupportEntries(inspector.lineSupport.classification),
     ...inspector.legacyRoles.rolesClassification.map((entry) =>
       classificationEntry("Legacy roles-Klassifikation", entry),
@@ -358,8 +401,16 @@ function legacyMigrationSection(inspector: CatalogAiInspector): AiInspectorSecti
       value: formatAiInspectorLabel(category),
       tone: aiInspectorToneForCategory(category),
     })),
-    ...keyValueEntries("Legacy-Status", inspector.warnings.legacyStatus, "legacy"),
-    ...keyValueEntries("StrategicRole-Status", inspector.warnings.strategicRoleStatus, "legacy"),
+    ...keyValueEntries(
+      "Legacy-Status",
+      inspector.warnings.legacyStatus,
+      "legacy",
+    ),
+    ...keyValueEntries(
+      "StrategicRole-Status",
+      inspector.warnings.strategicRoleStatus,
+      "legacy",
+    ),
   ];
   return {
     key: "legacyDetails",
@@ -371,7 +422,9 @@ function legacyMigrationSection(inspector: CatalogAiInspector): AiInspectorSecti
   };
 }
 
-function compiledHintEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
+function compiledHintEntries(
+  inspector: CatalogAiInspector,
+): AiInspectorEntry[] {
   const hint = inspector.compiledHint;
   const entries: AiInspectorEntry[] = [
     {
@@ -381,33 +434,66 @@ function compiledHintEntries(inspector: CatalogAiInspector): AiInspectorEntry[] 
     },
   ];
   if (!hint) {
-    entries.push({ label: "Compiled Hint", value: "nicht vorhanden", tone: "danger" });
+    entries.push({
+      label: "Compiled Hint",
+      value: "nicht vorhanden",
+      tone: "danger",
+    });
     return entries;
   }
   entries.push(...stringEntries("Mechaniken", hint.requiredMechanics, "info"));
   entries.push(...keyValueEntries("Werte", hint.valueHints, "info"));
   entries.push(...stringEntries("Risiken", hint.riskTags, "warning"));
-  entries.push(...stringEntries("Szenarien", hint.scenarioRefs.map(shortScenarioRef), "info"));
+  entries.push(
+    ...stringEntries(
+      "Szenarien",
+      hint.scenarioRefs.map(shortScenarioRef),
+      "info",
+    ),
+  );
   entries.push(...stringEntries("Manual Notes", hint.manualNotes, "legacy"));
-  entries.push(...stringEntries("Strategic Notes", hint.strategicNotes, "legacy"));
-  entries.push(...stringEntries("Overlay", inspector.supportStatus.overlayFields, "info"));
+  entries.push(
+    ...stringEntries("Strategic Notes", hint.strategicNotes, "legacy"),
+  );
+  entries.push(
+    ...stringEntries("Overlay", inspector.supportStatus.overlayFields, "info"),
+  );
   return entries;
 }
 
-function mechanicalFactEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
+function mechanicalFactEntries(
+  inspector: CatalogAiInspector,
+): AiInspectorEntry[] {
   const facts = inspector.mechanicalFacts;
   const entries: AiInspectorEntry[] = [];
   if (!facts) return entries;
   entries.push(...recordListEntries("effects", facts.effects, "kind"));
   entries.push(...recordListEntries("conditions", facts.conditions, "kind"));
-  if (facts.costProfile) entries.push({ label: "costProfile", value: formatRecord(facts.costProfile), tone: "info" });
-  if (facts.breakerProfile) entries.push({ label: "breakerProfile", value: formatRecord(facts.breakerProfile), tone: "info" });
-  if (facts.remoteRole) entries.push({ label: "remoteRole", value: formatRecord(facts.remoteRole), tone: "info" });
+  if (facts.costProfile)
+    entries.push({
+      label: "costProfile",
+      value: formatRecord(facts.costProfile),
+      tone: "info",
+    });
+  if (facts.breakerProfile)
+    entries.push({
+      label: "breakerProfile",
+      value: formatRecord(facts.breakerProfile),
+      tone: "info",
+    });
+  if (facts.remoteRole)
+    entries.push({
+      label: "remoteRole",
+      value: formatRecord(facts.remoteRole),
+      tone: "info",
+    });
   entries.push(...recordListEntries("targetProfiles", facts.targetProfiles));
   return entries;
 }
 
-function mechanicalDetailsEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
+function mechanicalDetailsEntries(
+  inspector: CatalogAiInspector,
+): AiInspectorEntry[] {
   const entries = mechanicalFactEntries(inspector);
   const compiledHintsPath = inspector.source.compiledHintsPath;
   if (typeof compiledHintsPath === "string") {
@@ -420,11 +506,20 @@ function mechanicalDetailsEntries(inspector: CatalogAiInspector): AiInspectorEnt
   return entries;
 }
 
-function classificationEntry(field: string, entry: CatalogAiInspectorClassification): AiInspectorEntry {
-  const isSelfMapping = entry.mapsTo.length === 1 && entry.mapsTo[0] === entry.value;
+function classificationEntry(
+  field: string,
+  entry: CatalogAiInspectorClassification,
+): AiInspectorEntry {
+  const isSelfMapping =
+    entry.mapsTo.length === 1 && entry.mapsTo[0] === entry.value;
   const classification =
-    entry.triageCategory === "normalized_strategy_id" ? "" : ` [${entry.triageCategory}]`;
-  const mapsTo = entry.mapsTo.length > 0 && !isSelfMapping ? ` -> ${entry.mapsTo.join(", ")}` : "";
+    entry.triageCategory === "normalized_strategy_id"
+      ? ""
+      : ` [${entry.triageCategory}]`;
+  const mapsTo =
+    entry.mapsTo.length > 0 && !isSelfMapping
+      ? ` -> ${entry.mapsTo.join(", ")}`
+      : "";
   return {
     label: field,
     value: `${entry.value}${classification}${mapsTo}`,
@@ -433,30 +528,135 @@ function classificationEntry(field: string, entry: CatalogAiInspectorClassificat
   };
 }
 
-function mergedStrategyAnchorEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
-  const sources = new Map<string, { derived: boolean; lineSupport: boolean }>();
+function mergedStrategyAnchorEntries(
+  inspector: CatalogAiInspector,
+): AiInspectorEntry[] {
+  const sources = new Map<
+    string,
+    { derived: boolean; lineSupport: boolean; strategySupportPair: boolean }
+  >();
   for (const strategyId of inspector.strategyAnchors) {
-    sources.set(strategyId, { ...(sources.get(strategyId) ?? { derived: false, lineSupport: false }), derived: true });
+    sources.set(strategyId, {
+      ...(sources.get(strategyId) ?? {
+        derived: false,
+        lineSupport: false,
+        strategySupportPair: false,
+      }),
+      derived: true,
+    });
   }
   for (const entry of inspector.lineSupport.classification) {
     if (!isActiveLineSupport(entry)) continue;
-    sources.set(entry.value, { ...(sources.get(entry.value) ?? { derived: false, lineSupport: false }), lineSupport: true });
+    sources.set(entry.value, {
+      ...(sources.get(entry.value) ?? {
+        derived: false,
+        lineSupport: false,
+        strategySupportPair: false,
+      }),
+      lineSupport: true,
+    });
   }
-  return [...sources.entries()].map(([strategyId, source]) => ({
-    label: "Strategieanker",
-    value: strategyId,
-    detail: `Quelle: ${strategyAnchorSourceLabel(source)}`,
-    tone: "valid" as const,
-  }));
+  const pairsByStrategy = strategySupportPairsByStrategy(
+    inspector.strategySupportPairs,
+  );
+  for (const strategyId of pairsByStrategy.keys()) {
+    sources.set(strategyId, {
+      ...(sources.get(strategyId) ?? {
+        derived: false,
+        lineSupport: false,
+        strategySupportPair: false,
+      }),
+      strategySupportPair: true,
+    });
+  }
+  const entries = [...sources.entries()].flatMap(([strategyId, source]) => {
+    const anchorEntries: AiInspectorEntry[] = [
+      {
+        label: "Strategieanker",
+        value: strategyId,
+        detail: `Quelle: ${strategyAnchorSourceLabel(source)}`,
+        tone: "valid" as const,
+      },
+    ];
+    for (const pair of pairsByStrategy.get(strategyId) ?? []) {
+      if (!pair.role) continue;
+      anchorEntries.push({
+        label: "Strategische Rolle",
+        value: pair.role,
+        detail: strategySupportPairDetail(pair),
+        tone: "valid" as const,
+      });
+    }
+    return anchorEntries;
+  });
+  if (sources.size > 0 && !hasExplicitStrategySupportPairRoles(inspector)) {
+    for (const role of validStrategicRoles(inspector)) {
+      entries.push({
+        label: "Strategische Rolle (Fallback)",
+        value: role,
+        detail:
+          "Noch nicht als geprüftes Strategie/Rolle-Paar am einzelnen Strategieanker gespeichert.",
+        tone: "legacy",
+      });
+    }
+  }
+  return entries;
 }
 
-function strategyAnchorSourceLabel(source: { derived: boolean; lineSupport: boolean }): string {
-  if (source.derived && source.lineSupport) return "abgeleitet + lineSupport";
-  if (source.derived) return "abgeleitet";
-  return "lineSupport";
+function strategyAnchorSourceLabel(source: {
+  derived: boolean;
+  lineSupport: boolean;
+  strategySupportPair: boolean;
+}): string {
+  const parts = [];
+  if (source.strategySupportPair) parts.push("Strategie/Rolle-Paar");
+  if (source.derived) parts.push("abgeleitet");
+  if (source.lineSupport) parts.push("lineSupport");
+  if (parts.length > 0) return parts.join(" + ");
+  return "unbekannt";
 }
 
-function inactiveLineSupportEntries(classification: CatalogAiInspectorClassification[]): AiInspectorEntry[] {
+function strategySupportPairsByStrategy(
+  pairs: CatalogStrategySupportPair[],
+): Map<string, CatalogStrategySupportPair[]> {
+  const groups = new Map<string, CatalogStrategySupportPair[]>();
+  for (const pair of pairs) {
+    if (!pair.strategyId || pair.sourceField !== "strategySupportPairs")
+      continue;
+    const group = groups.get(pair.strategyId) ?? [];
+    group.push(pair);
+    groups.set(pair.strategyId, group);
+  }
+  return groups;
+}
+
+function strategySupportPairDetail(pair: CatalogStrategySupportPair): string {
+  return [
+    `zugeordnet zu ${pair.strategyId}`,
+    pair.roleDetail ? `Feinrolle: ${pair.roleDetail}` : undefined,
+    pair.confidence ? `Confidence: ${pair.confidence}` : undefined,
+    pair.evidence && pair.evidence.length > 0
+      ? `Evidence: ${pair.evidence.join(", ")}`
+      : undefined,
+    pair.rationale,
+  ]
+    .filter((entry): entry is string => Boolean(entry))
+    .join("; ");
+}
+
+function hasExplicitStrategySupportPairRoles(
+  inspector: CatalogAiInspector,
+): boolean {
+  return inspector.strategySupportPairs.some(
+    (pair) =>
+      pair.sourceField === "strategySupportPairs" &&
+      typeof pair.role === "string",
+  );
+}
+
+function inactiveLineSupportEntries(
+  classification: CatalogAiInspectorClassification[],
+): AiInspectorEntry[] {
   return classification
     .filter((entry) => !isActiveLineSupport(entry))
     .map((entry) => classificationEntry("Legacy-lineSupport", entry));
@@ -467,10 +667,14 @@ function isActiveLineSupport(entry: CatalogAiInspectorClassification): boolean {
 }
 
 function qualityEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
-  return inspector.quality ? keyValueEntries("Reviewdaten", inspector.quality, "info") : [];
+  return inspector.quality
+    ? keyValueEntries("Reviewdaten", inspector.quality, "info")
+    : [];
 }
 
-function qualityCheckpointEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
+function qualityCheckpointEntries(
+  inspector: CatalogAiInspector,
+): AiInspectorEntry[] {
   const quality = inspector.quality;
   const entries: AiInspectorEntry[] = [];
   if (!quality) return entries;
@@ -492,20 +696,39 @@ function qualityCheckpointEntries(inspector: CatalogAiInspector): AiInspectorEnt
 }
 
 function validStrategicRoles(inspector: CatalogAiInspector): string[] {
-  const statusValidValues = stringArrayField(inspector.warnings.strategicRoleStatus, "validValues");
+  const statusValidValues = stringArrayField(
+    inspector.warnings.strategicRoleStatus,
+    "validValues",
+  );
   if (statusValidValues.length > 0) return statusValidValues;
-  if (Object.prototype.hasOwnProperty.call(inspector.warnings.strategicRoleStatus, "validValues")) return [];
+  if (
+    Object.prototype.hasOwnProperty.call(
+      inspector.warnings.strategicRoleStatus,
+      "validValues",
+    )
+  )
+    return [];
   return inspector.strategicRole;
 }
 
-function stringArrayField(record: Record<string, unknown>, key: string): string[] {
+function stringArrayField(
+  record: Record<string, unknown>,
+  key: string,
+): string[] {
   const value = record[key];
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
 }
 
 function checkpointLabelForCategory(category: string): string {
   if (category.includes("missing")) return "Missing compiled hint";
-  if (category.includes("invalid") || category.includes("hard") || category.includes("wrong_side")) return "Invalid / Hard Problem";
+  if (
+    category.includes("invalid") ||
+    category.includes("hard") ||
+    category.includes("wrong_side")
+  )
+    return "Invalid / Hard Problem";
   if (
     category.includes("deferred") ||
     category.includes("human_review") ||
@@ -518,8 +741,10 @@ function checkpointLabelForCategory(category: string): string {
 }
 
 function checkpointToneForLabel(label: string): AiInspectorTone {
-  if (label === "Missing compiled hint" || label === "Invalid / Hard Problem") return "danger";
-  if (label === "Deferred / Human Review" || label === "Descriptor-Gap") return "warning";
+  if (label === "Missing compiled hint" || label === "Invalid / Hard Problem")
+    return "danger";
+  if (label === "Deferred / Human Review" || label === "Descriptor-Gap")
+    return "warning";
   return "info";
 }
 
@@ -533,7 +758,9 @@ function legacyDetailCount(inspector: CatalogAiInspector): number {
     inspector.legacyRoles.planRoles.length +
     inspector.legacyRoles.rolesClassification.length +
     inspector.legacyRoles.planRolesClassification.length +
-    inspector.lineSupport.classification.filter((entry) => !isActiveLineSupport(entry)).length +
+    inspector.lineSupport.classification.filter(
+      (entry) => !isActiveLineSupport(entry),
+    ).length +
     inspector.warnings.categories.filter(isLegacyNoticeCategory).length +
     Object.keys(inspector.warnings.legacyStatus).length
   );
@@ -543,20 +770,28 @@ function hasMechanicalDetails(inspector: CatalogAiInspector): boolean {
   const facts = inspector.mechanicalFacts;
   return Boolean(
     facts &&
-      (facts.effects.length > 0 ||
-        facts.conditions.length > 0 ||
-        facts.costProfile ||
-        facts.breakerProfile ||
-        facts.remoteRole ||
-        facts.targetProfiles.length > 0),
+    (facts.effects.length > 0 ||
+      facts.conditions.length > 0 ||
+      facts.costProfile ||
+      facts.breakerProfile ||
+      facts.remoteRole ||
+      facts.targetProfiles.length > 0),
   );
 }
 
-function stringEntries(label: string, values: string[], tone: AiInspectorTone): AiInspectorEntry[] {
+function stringEntries(
+  label: string,
+  values: string[],
+  tone: AiInspectorTone,
+): AiInspectorEntry[] {
   return values.map((value) => ({ label, value, tone }));
 }
 
-function keyValueEntries(label: string, values: Record<string, unknown>, tone: AiInspectorTone): AiInspectorEntry[] {
+function keyValueEntries(
+  label: string,
+  values: Record<string, unknown>,
+  tone: AiInspectorTone,
+): AiInspectorEntry[] {
   return Object.entries(values).map(([key, value]) => ({
     label,
     value: `${formatAiInspectorLabel(key)}: ${formatValue(value)}`,
@@ -564,13 +799,21 @@ function keyValueEntries(label: string, values: Record<string, unknown>, tone: A
   }));
 }
 
-function recordListEntries(label: string, values: Array<Record<string, unknown>>, primaryKey?: string): AiInspectorEntry[] {
+function recordListEntries(
+  label: string,
+  values: Array<Record<string, unknown>>,
+  primaryKey?: string,
+): AiInspectorEntry[] {
   return values.map((value) => {
-    const primary = primaryKey && typeof value[primaryKey] === "string" ? String(value[primaryKey]) : label;
+    const primary =
+      primaryKey && typeof value[primaryKey] === "string"
+        ? String(value[primaryKey])
+        : label;
     const rest = Object.fromEntries(
       Object.entries(value).filter(([key]) => key !== primaryKey),
     );
-    const detail = Object.keys(rest).length > 0 ? formatRecord(rest) : undefined;
+    const detail =
+      Object.keys(rest).length > 0 ? formatRecord(rest) : undefined;
     return {
       label,
       value: formatAiInspectorLabel(primary),
@@ -582,14 +825,17 @@ function recordListEntries(label: string, values: Array<Record<string, unknown>>
 
 function formatRecord(record: Record<string, unknown>): string {
   return Object.entries(record)
-    .map(([key, value]) => `${formatAiInspectorLabel(key)}: ${formatValue(value)}`)
+    .map(
+      ([key, value]) => `${formatAiInspectorLabel(key)}: ${formatValue(value)}`,
+    )
     .join("; ");
 }
 
 function formatValue(value: unknown): string {
   if (value === null || value === undefined) return "nicht gesetzt";
   if (Array.isArray(value)) return value.map(formatValue).join(", ");
-  if (typeof value === "object") return formatRecord(value as Record<string, unknown>);
+  if (typeof value === "object")
+    return formatRecord(value as Record<string, unknown>);
   if (typeof value === "boolean") return value ? "ja" : "nein";
   return String(value);
 }

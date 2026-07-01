@@ -13683,6 +13683,18 @@
       "strategicRole": [
         "enabler"
       ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "enabler",
+          "evidence": [
+            "score.agenda_difficulty_discount",
+            "score.black_ops_difficulty_discount"
+          ],
+          "confidence": "medium",
+          "rationale": "Difficulty-Reduction ist funktional Fast-Advance-Support; der Black-Ops-Subtype selbst ist kein Anker."
+        }
+      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -13749,6 +13761,19 @@
       ],
       "strategicRole": [
         "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "engine_anchor",
+          "roleDetail": "damage_amp_anchor",
+          "evidence": [
+            "score.meat_damage_amp",
+            "score.damage_amp"
+          ],
+          "confidence": "high",
+          "rationale": "Verstaerkt vorhandene Meat-Damage-Quellen und traegt damit echte Kill-Linien, erzeugt aber keinen Schaden allein."
+        }
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -13840,6 +13865,19 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "ice_type_anchor",
+          "evidence": [
+            "score.black_ice_strength_bonus",
+            "score.ice_type_tax_support"
+          ],
+          "confidence": "high",
+          "rationale": "Black-ICE-Staerke ist ICE-Tax/Glacier-Anker; kein Damage-Anker allein aus dem Black-ICE-Kontext."
+        }
       ],
       "tacticSignals": [
         "ice.strength_modifier",
@@ -14280,6 +14318,19 @@
       "strategicRole": [
         "engine_anchor"
       ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "engine_anchor",
+          "roleDetail": "remote_setup_engine",
+          "evidence": [
+            "score.remote_fort_creation",
+            "score.remote_install_budget"
+          ],
+          "confidence": "high",
+          "rationale": "Echte Remote-Setup-Engine, aber Zielwahl/Install-Sequenz passt nicht in TargetProfile V1."
+        }
+      ],
       "effects": [
         {
           "amount": 10,
@@ -14516,6 +14567,19 @@
       "strategicRole": [
         "tax_tool"
       ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "ice_type_anchor",
+          "evidence": [
+            "score.code_gate_strength_bonus",
+            "score.ice_type_tax_support"
+          ],
+          "confidence": "high",
+          "rationale": "Code-Gate-Buff traegt ICE-Tax; Reveal-Economy bleibt Support."
+        }
+      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -14601,6 +14665,18 @@
       "strategicRole": [
         "enabler"
       ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "enabler",
+          "evidence": [
+            "score.agenda_difficulty_discount",
+            "score.gray_ops_difficulty_discount"
+          ],
+          "confidence": "medium",
+          "rationale": "Difficulty-Reduction ist Fast-Advance-Support; Gray-Ops-Subtype allein bleibt kein Strategieanker."
+        }
+      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -14665,6 +14741,18 @@
       ],
       "strategicRole": [
         "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "enabler",
+          "evidence": [
+            "score.agenda_difficulty_discount",
+            "score.research_difficulty_discount"
+          ],
+          "confidence": "medium",
+          "rationale": "Research-Difficulty-Reduction ermoeglicht Fast-Advance-Linien, nicht Research als Subtyp."
+        }
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -14812,6 +14900,19 @@
       ],
       "strategicRole": [
         "payoff_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "payoff_anchor",
+          "roleDetail": "ice_upgrade_payoff",
+          "evidence": [
+            "score.chosen_ice_strength_bonus",
+            "score.repeat_ice_subroutines"
+          ],
+          "confidence": "high",
+          "rationale": "Gezielter ICE-Upgrade-Payoff; TargetProfile V1 waere moeglich, bleibt aber read-only Kandidat."
+        }
       ],
       "effects": [
         {
@@ -15068,6 +15169,19 @@
       "strategicRole": [
         "engine_anchor"
       ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "engine_anchor",
+          "roleDetail": "tag_source",
+          "evidence": [
+            "score.trace_tag_source",
+            "score.tag_source"
+          ],
+          "confidence": "high",
+          "rationale": "Trace-Tag-Quelle, getrennt von Tag-Payoff."
+        }
+      ],
       "tacticSignals": [
         "score.tag_source",
         "score.trace_tag_source",
@@ -15164,6 +15278,28 @@
       ],
       "strategicRole": [
         "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "damage_payoff",
+          "evidence": [
+            "score.tagged_meat_damage_payoff",
+            "score.meat_damage_source"
+          ],
+          "confidence": "high",
+          "rationale": "Tagged Meat-Damage-Payoff; Tag-Quelle und Payoff bleiben getrennt."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "punish_payoff",
+          "evidence": [
+            "risk.requires_tagged_runner"
+          ],
+          "confidence": "high",
+          "rationale": "Tagged Meat-Damage-Payoff; Tag-Quelle und Payoff bleiben getrennt."
+        }
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -15487,6 +15623,28 @@
       "strategicRole": [
         "scoring_tool"
       ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "scoring_tool",
+          "roleDetail": "tempo_payoff",
+          "evidence": [
+            "score.free_rez_ice"
+          ],
+          "confidence": "high",
+          "rationale": "Free-rez-payoff stuetzt ICE-Tax und Scoring-Window; nicht Economy-Reserve."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "scoring_tool",
+          "roleDetail": "score_window_payoff",
+          "evidence": [
+            "score.free_rez_ice"
+          ],
+          "confidence": "medium",
+          "rationale": "Free-rez-payoff stuetzt ICE-Tax und Scoring-Window; nicht Economy-Reserve."
+        }
+      ],
       "tacticSignals": [
         "score.free_rez_ice"
       ],
@@ -15604,6 +15762,19 @@
       "strategicRole": [
         "engine_anchor"
       ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "engine_anchor",
+          "roleDetail": "tag_source",
+          "evidence": [
+            "score.trace_tag_source",
+            "score.tag_source"
+          ],
+          "confidence": "high",
+          "rationale": "Trace-Tag-Quelle, getrennt von Payoff."
+        }
+      ],
       "tacticSignals": [
         "score.tag_source",
         "score.trace_tag_source",
@@ -15713,6 +15884,28 @@
       "strategicRole": [
         "tax_tool"
       ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "fort_tax_anchor",
+          "evidence": [
+            "score.fort_ice_strength_bonus"
+          ],
+          "confidence": "high",
+          "rationale": "Fortbezogener ICE-Buff traegt ICE-Tax und Remote-Defense."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "tax_tool",
+          "roleDetail": "remote_defense_anchor",
+          "evidence": [
+            "score.fort_ice_strength_bonus"
+          ],
+          "confidence": "medium",
+          "rationale": "Fortbezogener ICE-Buff traegt ICE-Tax und Remote-Defense."
+        }
+      ],
       "effects": [
         {
           "amount": 1,
@@ -15767,6 +15960,30 @@
       ],
       "strategicRole": [
         "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "scoring_tool",
+          "roleDetail": "setup_payoff",
+          "evidence": [
+            "score.free_install_and_rez_ice",
+            "score.rnd_install_and_rez"
+          ],
+          "confidence": "medium",
+          "rationale": "R&D-Reveal plus free install/rez ist Setup-Payoff; Sequenzzielwahl bleibt schema gap."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "scoring_tool",
+          "roleDetail": "setup_payoff",
+          "evidence": [
+            "score.free_install_and_rez_ice",
+            "score.rnd_install_and_rez"
+          ],
+          "confidence": "medium",
+          "rationale": "R&D-Reveal plus free install/rez ist Setup-Payoff; Sequenzzielwahl bleibt schema gap."
+        }
       ],
       "tacticSignals": [
         "access.rnd_reveal_requirement",
@@ -15904,6 +16121,28 @@
       ],
       "strategicRole": [
         "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "damage_payoff",
+          "evidence": [
+            "score.tagged_meat_damage_payoff",
+            "score.meat_damage_source"
+          ],
+          "confidence": "high",
+          "rationale": "Staerkerer Tagged Meat-Damage-Payoff; Tag-Quelle bleibt externe Bedingung."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "punish_payoff",
+          "evidence": [
+            "risk.requires_tagged_runner"
+          ],
+          "confidence": "high",
+          "rationale": "Staerkerer Tagged Meat-Damage-Payoff; Tag-Quelle bleibt externe Bedingung."
+        }
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -16069,6 +16308,19 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "ice_type_anchor",
+          "evidence": [
+            "score.wall_strength_bonus",
+            "score.ice_type_tax_support"
+          ],
+          "confidence": "high",
+          "rationale": "Wall-Buff traegt ICE-Tax; Reveal-Economy bleibt Support."
+        }
       ],
       "tacticSignals": [
         "ice.strength_modifier",
@@ -28645,6 +28897,29 @@
       "strategicRole": [
         "punish_payoff"
       ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "damage_engine",
+          "evidence": [
+            "score.tagged_meat_damage_payoff",
+            "score.meat_damage_source",
+            "score.hand_size_pressure"
+          ],
+          "confidence": "high",
+          "rationale": "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "punish_payoff",
+          "evidence": [
+            "risk.requires_tagged_runner"
+          ],
+          "confidence": "high",
+          "rationale": "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert."
+        }
+      ],
       "conditions": [
         {
           "kind": "requires_scored_agenda"
@@ -28689,6 +28964,30 @@
       ],
       "strategicRole": [
         "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "access_punish",
+          "evidence": [
+            "access.agenda_net_damage",
+            "score.net_damage_access_punish"
+          ],
+          "confidence": "high",
+          "rationale": "Access-Ambush mit Net-Damage und Steal-Tax; keine Runner-seitige verdeckte Semantik vor Access/Revealed."
+        },
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "roleDetail": "access_punish",
+          "evidence": [
+            "access.agenda_ambush",
+            "access.agenda_steal_tax"
+          ],
+          "confidence": "high",
+          "rationale": "Access-Ambush mit Net-Damage und Steal-Tax; keine Runner-seitige verdeckte Semantik vor Access/Revealed."
+        }
       ],
       "tacticSignals": [
         "access.agenda_ambush",
@@ -28759,6 +29058,29 @@
       ],
       "strategicRole": [
         "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "engine_anchor",
+          "roleDetail": "access_tag_source",
+          "evidence": [
+            "access.agenda_tag"
+          ],
+          "confidence": "high",
+          "rationale": "Access-Tag-Quelle; Tag-source und spaetere Payoffs bleiben getrennt."
+        },
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "engine_anchor",
+          "roleDetail": "access_punish",
+          "evidence": [
+            "access.agenda_ambush",
+            "access.agenda_tag"
+          ],
+          "confidence": "medium",
+          "rationale": "Access-Tag-Quelle; Tag-source und spaetere Payoffs bleiben getrennt."
+        }
       ],
       "tacticSignals": [
         "access.agenda_ambush",
@@ -28950,6 +29272,19 @@
       "strategicRole": [
         "punish_payoff"
       ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "roleDetail": "access_punish",
+          "evidence": [
+            "access.agenda_ambush",
+            "access.runner_program_disruption"
+          ],
+          "confidence": "medium",
+          "rationale": "Programmbounce/-Disruption ist Access-Punish, kein Damage-Kill; Access-Zielwahl bleibt schema gap."
+        }
+      ],
       "conditions": [
         {
           "kind": "requires_accessed_card"
@@ -28997,6 +29332,18 @@
       ],
       "strategicRole": [
         "win_condition"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "win_condition",
+          "evidence": [
+            "score.bonus_agenda_points",
+            "score.closeout_agenda"
+          ],
+          "confidence": "medium",
+          "rationale": "Extrem hoher Score-Payoff ist Closeout/Win-Condition, aber wegen Difficulty kein Fast-Advance-Anker."
+        }
       ],
       "conditions": [
         {
@@ -43131,6 +43478,18 @@
       ],
       "strategicRole": [
         "defensive_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "remote_defense_tool",
+          "evidence": [
+            "score.action_counter_bank"
+          ],
+          "confidence": "medium",
+          "rationale": "Scored Agenda banks a run-ending counter, protecting scored remotes and remote-score conversion without becoming a pure ICE-tax card."
+        }
       ]
     },
     {
@@ -43203,6 +43562,18 @@
       ],
       "strategicRole": [
         "defensive_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.central_stabilize",
+          "role": "defensive_tool",
+          "roleDetail": "virus_counter_defense",
+          "evidence": [
+            "virus.corp_counter_prevention"
+          ],
+          "confidence": "medium",
+          "rationale": "Virus-counter reset and prevention stabilize central pressure after scoring; the card is defensive infrastructure, not a scoring payoff."
+        }
       ]
     },
     {
@@ -43279,6 +43650,19 @@
       ],
       "strategicRole": [
         "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "engine_anchor",
+          "roleDetail": "scored_draw_engine",
+          "evidence": [
+            "score.recurring_draw",
+            "draw.corp_draw"
+          ],
+          "confidence": "medium",
+          "rationale": "Recurring draw after scoring turns a completed remote score into sustained follow-up pressure and supports continued remote scoring plans."
+        }
       ]
     },
     {
@@ -43386,6 +43770,20 @@
       ],
       "strategicRole": [
         "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "scoring_tool",
+          "roleDetail": "access_replacement_score_tool",
+          "evidence": [
+            "score.closeout_agenda",
+            "risk.high_difficulty_agenda",
+            "access.runner_program_bounce"
+          ],
+          "confidence": "medium",
+          "rationale": "The access replacement denies normal steal scoring and creates a difficult delayed score line, so it belongs under remote scoring as a scoring tool with high-difficulty risk."
+        }
       ]
     },
     {

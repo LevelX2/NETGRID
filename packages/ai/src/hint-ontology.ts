@@ -80,13 +80,17 @@ export const KNOWN_HINT_EFFECT_TIMINGS = [
   "scored_activated",
   "when_scored",
   "start_of_turn",
+  "end_of_turn",
+  "start_of_run",
   "during_run",
   "during_ice_encounter",
   "on_access",
   "on_rez",
   "persistent",
   "encounter",
+  "encounter_resolution",
   "successful_run",
+  "after_successful_run",
   "trace_success",
   "corp_turn",
   "runner_turn",
@@ -268,11 +272,15 @@ export const KNOWN_HINT_TARGET_PROFILE_KINDS = [
 export const KNOWN_HINT_TARGET_PROFILE_TIMINGS = [
   "on_install",
   "on_play",
+  "on_access",
   "paid_action",
   "paid_or_triggered_reposition",
+  "activated_ability",
   "corp_rez_window",
+  "start_of_run",
   "during_ice_encounter",
   "encounter_resolution",
+  "subroutine_resolution",
   "on_use",
   "after_successful_run",
   "hq_access",
@@ -335,9 +343,17 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "high_run_denial_payoff",
   "high_rez_cost_relief",
   "high_value_accessed_card",
+  "current_access_only",
   "denies_corp_economy_or_combo_piece",
   "normally_untrashable_payoff",
   "denies_corp_agenda_or_combo_piece",
+  "lowest_near_term_value",
+  "protect_agenda_density",
+  "breaker_covers_current_server",
+  "high_install_cost_or_memory",
+  "central_or_remote_plan_enabler",
+  "reduces_current_run_payoff",
+  "adds_relevant_encounter_tax",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
@@ -354,6 +370,10 @@ export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
   "access_goal_blocked_after_use",
   "option_with_no_visible_current_payoff",
   "low_value_accessed_card",
+  "next_turn_required_card",
+  "low_impact_ice",
+  "no_rezzed_ice_target",
+  "no_subsidiary_fort_target",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES = [
@@ -419,6 +439,20 @@ export const KNOWN_HINT_OPPONENT_SIGNAL_KINDS = [
 
 export const KNOWN_HINT_QUALITY_CONFIDENCE = ["low", "medium", "high"] as const;
 
+export const KNOWN_HINT_STRATEGY_SUPPORT_PAIR_ROLES = [
+  "payoff_anchor",
+  "engine_anchor",
+  "enabler",
+  "support_tool",
+  "utility",
+  "defensive_tool",
+  "emergency_tool",
+  "win_condition",
+  "tax_tool",
+  "punish_payoff",
+  "scoring_tool",
+] as const;
+
 const HIDDEN_INFO_RISK_FIELDS = [
   "opponentDeckList",
   "corpHiddenRndOrder",
@@ -472,6 +506,8 @@ export type KnownHintOpponentSignalKind =
   (typeof KNOWN_HINT_OPPONENT_SIGNAL_KINDS)[number];
 export type KnownHintQualityConfidence =
   (typeof KNOWN_HINT_QUALITY_CONFIDENCE)[number];
+export type KnownHintStrategySupportPairRole =
+  (typeof KNOWN_HINT_STRATEGY_SUPPORT_PAIR_ROLES)[number];
 
 export type AiHintStructuredEffect = {
   kind: KnownHintEffectKind;
@@ -561,6 +597,15 @@ export type AiHintQuality = {
   focusedDecisionTest?: string;
 };
 
+export type AiHintStrategySupportPair = {
+  strategyId: string;
+  role: KnownHintStrategySupportPairRole;
+  roleDetail?: string;
+  evidence: string[];
+  confidence: KnownHintQualityConfidence;
+  rationale?: string;
+};
+
 export type AiHintOntologyExtension = {
   effects?: AiHintStructuredEffect[];
   conditions?: AiHintCondition[];
@@ -569,6 +614,7 @@ export type AiHintOntologyExtension = {
   remoteRole?: AiHintRemoteRole;
   targetProfiles?: Array<AiHintEffectTargetProfile | AiHintTargetProfileV1>;
   lineSupport?: KnownHintLineSupport[];
+  strategySupportPairs?: AiHintStrategySupportPair[];
   opponentSignals?: AiHintOpponentSignal[];
   quality?: AiHintQuality;
 };
@@ -595,6 +641,8 @@ export type AiHintOntologyIssueKind =
   | "unknown_target_profile_avoid"
   | "unknown_target_profile_hidden_info_policy"
   | "unknown_line_support"
+  | "unknown_strategy_support_pair_role"
+  | "unknown_strategy_support_pair_confidence"
   | "hidden_info_risk"
   | "invalid_shape"
   | "missing_required_effect_field";
@@ -652,6 +700,11 @@ function validateExtensionFields(
     issues,
   );
   validateLineSupport(input.lineSupport, `${path}.lineSupport`, issues);
+  validateStrategySupportPairs(
+    input.strategySupportPairs,
+    `${path}.strategySupportPairs`,
+    issues,
+  );
   validateOpponentSignals(
     input.opponentSignals,
     `${path}.opponentSignals`,
@@ -1055,6 +1108,81 @@ function validateLineSupport(
     issues,
     false,
   );
+}
+
+function validateStrategySupportPairs(
+  strategySupportPairs: unknown,
+  path: string,
+  issues: AiHintOntologyIssue[],
+): void {
+  if (strategySupportPairs === undefined) return;
+  if (!Array.isArray(strategySupportPairs)) {
+    addIssue(issues, "error", "invalid_shape", path, "Expected array.");
+    return;
+  }
+  strategySupportPairs.forEach((pair, index) => {
+    const pairPath = `${path}[${index}]`;
+    if (!isRecord(pair)) {
+      addIssue(issues, "error", "invalid_shape", pairPath, "Expected object.");
+      return;
+    }
+    if (typeof pair.strategyId !== "string" || pair.strategyId.length === 0) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${pairPath}.strategyId`,
+        "Expected non-empty string.",
+      );
+    }
+    requireKnownField(
+      pair.role,
+      KNOWN_HINT_STRATEGY_SUPPORT_PAIR_ROLES,
+      `${pairPath}.role`,
+      "unknown_strategy_support_pair_role",
+      issues,
+      true,
+    );
+    if (pair.roleDetail !== undefined && typeof pair.roleDetail !== "string") {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${pairPath}.roleDetail`,
+        "Expected string.",
+      );
+    }
+    if (
+      !Array.isArray(pair.evidence) ||
+      pair.evidence.length === 0 ||
+      !pair.evidence.every((entry) => typeof entry === "string")
+    ) {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${pairPath}.evidence`,
+        "Expected non-empty string array.",
+      );
+    }
+    requireKnownField(
+      pair.confidence,
+      KNOWN_HINT_QUALITY_CONFIDENCE,
+      `${pairPath}.confidence`,
+      "unknown_strategy_support_pair_confidence",
+      issues,
+      true,
+    );
+    if (pair.rationale !== undefined && typeof pair.rationale !== "string") {
+      addIssue(
+        issues,
+        "error",
+        "invalid_shape",
+        `${pairPath}.rationale`,
+        "Expected string.",
+      );
+    }
+  });
 }
 
 function validateOpponentSignals(

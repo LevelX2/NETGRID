@@ -74,6 +74,53 @@ describe("AI hint ontology validation", () => {
     expect(result.valid).toBe(true);
   });
 
+  it("accepts reviewed strategy support pairs", () => {
+    const result = validateAiHintOntologyFields({
+      lineSupport: ["corp.remote_scoring"],
+      strategicRole: ["scoring_tool"],
+      strategySupportPairs: [
+        {
+          strategyId: "corp.remote_scoring",
+          role: "scoring_tool",
+          roleDetail: "score_window_payoff",
+          evidence: ["score.free_rez_ice"],
+          confidence: "high",
+          rationale: "Scored agenda creates a concrete scoring-window payoff.",
+        },
+      ],
+    });
+
+    expect(result.errors).toEqual([]);
+  });
+
+  it("rejects invalid strategy support pair role metadata", () => {
+    const result = validateAiHintOntologyFields({
+      strategySupportPairs: [
+        {
+          strategyId: "corp.remote_scoring",
+          role: "remote_score_helper",
+          evidence: [],
+          confidence: "certain",
+        },
+      ],
+    });
+
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({ kind: "unknown_strategy_support_pair_role" }),
+    );
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({
+        kind: "unknown_strategy_support_pair_confidence",
+      }),
+    );
+    expect(result.errors).toContainEqual(
+      expect.objectContaining({
+        kind: "invalid_shape",
+        path: "$.strategySupportPairs[0].evidence",
+      }),
+    );
+  });
+
   it("accepts a breaker profile with side effects", () => {
     const result = validateAiHintOntologyFields({
       breakerProfile: {

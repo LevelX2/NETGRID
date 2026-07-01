@@ -45,6 +45,20 @@ const INSPECTOR_FIXTURE: CatalogAiInspector = {
   },
   functionSignals: ["breaker.wall", "remote.ice_modifier"],
   strategyAnchors: ["runner.remote_contest"],
+  strategySupportPairs: [
+    {
+      strategyId: "runner.remote_contest",
+      role: "payoff_anchor",
+      roleDetail: "remote_contest_payoff",
+      confidence: "medium",
+      evidence: ["remote.ice_modifier"],
+      sourceField: "strategySupportPairs",
+      sourceValue: "runner.remote_contest",
+      triageCategory: "explicit_strategy_support_pair",
+      rationale:
+        "Remote pressure payoff is explicitly paired to the strategy anchor.",
+    },
+  ],
   lineSupport: {
     values: ["runner.remote_contest", "remote_contest"],
     classification: [
@@ -133,6 +147,7 @@ const LEGACY_ONLY_FIXTURE: CatalogAiInspector = {
   mechanicalFacts: null,
   functionSignals: [],
   strategyAnchors: [],
+  strategySupportPairs: [],
   lineSupport: {
     values: [],
     classification: [],
@@ -170,7 +185,6 @@ describe("AI hint inspector UI view model", () => {
     expect(sections.map((section) => section.title)).toEqual([
       "Taktiksignale",
       "Strategieanker",
-      "Strategische Rolle",
       "Prüfpunkte",
       "Herleitung / mechanische Details",
       "Interne Qualität / Reviewdaten",
@@ -179,7 +193,6 @@ describe("AI hint inspector UI view model", () => {
     expect(sections.map((section) => section.description)).toEqual([
       expect.stringContaining("Funktionssignale"),
       expect.stringContaining("Eindeutige Strategy Goals"),
-      expect.stringContaining("Rolle der Karte"),
       expect.stringContaining("Human Review"),
       expect.stringContaining("regelnahen Karteninformationen"),
       expect.stringContaining("Review-Metadaten"),
@@ -200,22 +213,34 @@ describe("AI hint inspector UI view model", () => {
     const sections = aiInspectorSections(INSPECTOR_FIXTURE);
     const strategyText = sectionText(sections, "strategyAnchors");
 
-    expect(strategyText.match(/Strategieanker runner\.remote_contest/g)).toHaveLength(1);
-    expect(strategyText).toContain("Quelle: abgeleitet + lineSupport");
+    expect(
+      strategyText.match(/Strategieanker runner\.remote_contest/g),
+    ).toHaveLength(1);
+    expect(strategyText).toContain(
+      "Quelle: Strategie/Rolle-Paar + abgeleitet + lineSupport",
+    );
+    expect(strategyText).toContain("Strategische Rolle payoff_anchor");
+    expect(strategyText).toContain("zugeordnet zu runner.remote_contest");
+    expect(strategyText).toContain("Feinrolle: remote_contest_payoff");
     expect(strategyText).not.toContain("Abgeleiteter Strategieanker");
     expect(strategyText).not.toContain("Gültiger lineSupport");
-    expect(strategyText).not.toContain("remote_contest [safe_strategy_anchor_alias]");
+    expect(strategyText).not.toContain(
+      "remote_contest [safe_strategy_anchor_alias]",
+    );
   });
 
-  it("shows function signals and valid strategic roles in the open main semantics", () => {
+  it("shows function signals and paired strategic roles in the open main semantics", () => {
     const sections = aiInspectorSections(INSPECTOR_FIXTURE);
     const tacticalText = sectionText(sections, "tacticalSignals");
-    const roleText = sectionText(sections, "strategicRole");
+    const strategyText = sectionText(sections, "strategyAnchors");
 
     expect(tacticalText).toContain("Taktiksignal breaker.wall");
     expect(tacticalText).toContain("Taktiksignal remote.ice_modifier");
-    expect(roleText).toContain("Strategische Rolle tempo_anchor");
-    expect(roleText).not.toContain("unknown_role");
+    expect(strategyText).toContain("Strategische Rolle payoff_anchor");
+    expect(strategyText).not.toContain(
+      "Strategische Rolle (Fallback) tempo_anchor",
+    );
+    expect(strategyText).not.toContain("unknown_role");
     expect(openText(sections)).not.toContain("effects breaker");
     expect(openText(sections)).not.toContain("Reviewdaten hint reviewed: ja");
   });
@@ -231,7 +256,9 @@ describe("AI hint inspector UI view model", () => {
     expect(mechanicalText).toContain("breakerProfile coverage: wall, sentry");
     expect(mechanicalText).toContain("remoteRole kind: ice_modifier");
     expect(mechanicalText).toContain("targetProfiles");
-    expect(mechanicalText).toContain("Compiled source data/ai/ai-card-hints-compiled.json");
+    expect(mechanicalText).toContain(
+      "Compiled source data/ai/ai-card-hints-compiled.json",
+    );
     expect(qualityText).toContain("Reviewdaten hint reviewed: ja");
     expect(qualityText).toContain("Reviewdaten confidence: low");
     expect(qualityText).not.toContain("economyQuality");
@@ -246,8 +273,12 @@ describe("AI hint inspector UI view model", () => {
     expect(text).not.toContain("Legacy roles breaker");
     expect(text).not.toContain("Legacy planRoles build_rig");
     expect(text).not.toContain("Legacy-lineSupport remote_contest");
-    expect(text).not.toContain("Legacy roles-Klassifikation breaker [function_signal_only]");
-    expect(text).not.toContain("Legacy planRoles-Klassifikation build_rig [strategy_alias]");
+    expect(text).not.toContain(
+      "Legacy roles-Klassifikation breaker [function_signal_only]",
+    );
+    expect(text).not.toContain(
+      "Legacy planRoles-Klassifikation build_rig [strategy_alias]",
+    );
   });
 
   it("keeps legacy roles, planRoles, alias classifications and raw categories in the closed developer section", () => {
@@ -256,23 +287,38 @@ describe("AI hint inspector UI view model", () => {
 
     expect(text).toContain("Diese Felder gehören zum bisherigen KI-Pfad");
     expect(text).toContain("Runtime-Legacy KI nutzt Legacy teilweise");
-    expect(text).toContain("Hinweis: Legacy-Rollen werden intern noch teilweise von der KI verwendet.");
+    expect(text).toContain(
+      "Hinweis: Legacy-Rollen werden intern noch teilweise von der KI verwendet.",
+    );
     expect(text).toContain("card-role-manifest Runtime-Legacy");
     expect(text).toContain("Legacy roles breaker");
     expect(text).toContain("Legacy planRoles build_rig");
-    expect(text).toContain("Legacy-lineSupport remote_contest [safe_strategy_anchor_alias] -> runner.remote_contest");
-    expect(text).toContain("Legacy roles-Klassifikation breaker [function_signal_only]");
-    expect(text).toContain("Legacy planRoles-Klassifikation build_rig [strategy_alias] -> runner.rig_first");
+    expect(text).toContain(
+      "Legacy-lineSupport remote_contest [safe_strategy_anchor_alias] -> runner.remote_contest",
+    );
+    expect(text).toContain(
+      "Legacy roles-Klassifikation breaker [function_signal_only]",
+    );
+    expect(text).toContain(
+      "Legacy planRoles-Klassifikation build_rig [strategy_alias] -> runner.rig_first",
+    );
     expect(text).toContain("Hinweis-Kategorie legacy line support");
   });
 
   it("groups relevant warnings in the main view without expanding legacy warnings", () => {
-    const text = sectionText(aiInspectorSections(INSPECTOR_FIXTURE), "checkpoints");
+    const text = sectionText(
+      aiInspectorSections(INSPECTOR_FIXTURE),
+      "checkpoints",
+    );
 
     expect(text).toContain("Human Review needs_human_review");
     expect(text).toContain("Confidence low confidence low");
-    expect(text).toContain("Deferred / Human Review deferred requires human review");
-    expect(text).toContain("Descriptor-Gap Descriptor-Gap interface_closeout_density_requires_aggregation");
+    expect(text).toContain(
+      "Deferred / Human Review deferred requires human review",
+    );
+    expect(text).toContain(
+      "Descriptor-Gap Descriptor-Gap interface_closeout_density_requires_aggregation",
+    );
     expect(text).toContain("Legacy / Migration Legacy-Daten vorhanden");
     expect(text).not.toContain("legacy line support");
     expect(text).not.toContain("hint reviewed");
@@ -283,6 +329,7 @@ describe("AI hint inspector UI view model", () => {
     const sections = aiInspectorSections({
       ...INSPECTOR_FIXTURE,
       strategyAnchors: [],
+      strategySupportPairs: [],
       lineSupport: { values: [], classification: [] },
     });
 
@@ -295,18 +342,24 @@ describe("AI hint inspector UI view model", () => {
     const sections = aiInspectorSections(LEGACY_ONLY_FIXTURE);
     const text = openText(sections);
 
-    expect(sectionText(sections, "tacticalSignals")).toContain("Keine Taktiksignale vorhanden");
+    expect(sectionText(sections, "tacticalSignals")).toContain(
+      "Keine Taktiksignale vorhanden",
+    );
     expect(sectionText(sections, "strategyAnchors")).toContain(
       "Strategieanker Keine aktive Strategiezuordnung",
     );
     expect(text).toContain("Legacy-Daten vorhanden");
-    expect(defaultCollapsedAiInspectorSections(sections).legacyDetails).toBe(true);
+    expect(defaultCollapsedAiInspectorSections(sections).legacyDetails).toBe(
+      true,
+    );
   });
 
   it("calls out cards with mechanical details but no derived tactic signals", () => {
     const sections = aiInspectorSections(MECHANICAL_WITHOUT_TACTICS_FIXTURE);
 
-    expect(sectionText(sections, "tacticalSignals")).toContain("Keine Taktiksignale vorhanden");
+    expect(sectionText(sections, "tacticalSignals")).toContain(
+      "Keine Taktiksignale vorhanden",
+    );
     expect(sectionText(sections, "tacticalSignals")).toContain(
       "Mechanische Daten vorhanden, aber noch keine Taktiksignale abgeleitet.",
     );
@@ -335,15 +388,28 @@ describe("AI hint inspector UI view model", () => {
   });
 
   it("renders active sections before legacy and debug details", () => {
-    const keys = aiInspectorSections(INSPECTOR_FIXTURE).map((section) => section.key);
+    const keys = aiInspectorSections(INSPECTOR_FIXTURE).map(
+      (section) => section.key,
+    );
 
-    expect(keys.indexOf("tacticalSignals")).toBeLessThan(keys.indexOf("mechanicalDetails"));
-    expect(keys.indexOf("strategyAnchors")).toBeLessThan(keys.indexOf("mechanicalDetails"));
-    expect(keys.indexOf("strategicRole")).toBeLessThan(keys.indexOf("qualityDetails"));
-    expect(keys.indexOf("checkpoints")).toBeLessThan(keys.indexOf("legacyDetails"));
-    expect(keys.indexOf("mechanicalDetails")).toBeLessThan(keys.indexOf("legacyDetails"));
-    expect(keys.indexOf("qualityDetails")).toBeLessThan(keys.indexOf("legacyDetails"));
-    expect(keys.indexOf("tacticalSignals")).toBeLessThan(keys.indexOf("legacyDetails"));
+    expect(keys.indexOf("tacticalSignals")).toBeLessThan(
+      keys.indexOf("mechanicalDetails"),
+    );
+    expect(keys.indexOf("strategyAnchors")).toBeLessThan(
+      keys.indexOf("mechanicalDetails"),
+    );
+    expect(keys.indexOf("checkpoints")).toBeLessThan(
+      keys.indexOf("legacyDetails"),
+    );
+    expect(keys.indexOf("mechanicalDetails")).toBeLessThan(
+      keys.indexOf("legacyDetails"),
+    );
+    expect(keys.indexOf("qualityDetails")).toBeLessThan(
+      keys.indexOf("legacyDetails"),
+    );
+    expect(keys.indexOf("tacticalSignals")).toBeLessThan(
+      keys.indexOf("legacyDetails"),
+    );
   });
 
   it("creates unique render keys when cards have repeated mechanical effects", () => {
@@ -357,7 +423,9 @@ describe("AI hint inspector UI view model", () => {
         ],
       },
     });
-    const activeSection = sections.find((section) => section.key === "mechanicalDetails");
+    const activeSection = sections.find(
+      (section) => section.key === "mechanicalDetails",
+    );
     expect(activeSection).toBeDefined();
 
     const effectEntries = activeSection!.entries.filter(
@@ -377,14 +445,20 @@ function openText(sections: ReturnType<typeof aiInspectorSections>): string {
   return flattenedText(sections.filter((section) => !collapsed[section.key]));
 }
 
-function sectionText(sections: ReturnType<typeof aiInspectorSections>, key: string): string {
+function sectionText(
+  sections: ReturnType<typeof aiInspectorSections>,
+  key: string,
+): string {
   return flattenedText(sections.filter((section) => section.key === key));
 }
 
-function flattenedText(sections: ReturnType<typeof aiInspectorSections>): string {
+function flattenedText(
+  sections: ReturnType<typeof aiInspectorSections>,
+): string {
   return sections
     .flatMap((section) => {
-      if (section.entries.length === 0) return section.emptyText ? [section.emptyText] : [];
+      if (section.entries.length === 0)
+        return section.emptyText ? [section.emptyText] : [];
       return section.entries.map((entry) =>
         [entry.label, entry.value, entry.detail].filter(Boolean).join(" "),
       );

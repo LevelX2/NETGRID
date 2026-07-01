@@ -12,7 +12,10 @@ const inspectorIndexPath = path.join(
   repoRoot,
   "data/ai/ai-hint-inspector-index.json",
 );
-const activeHintsPath = path.join(repoRoot, "data/ai/ai-card-hints-active.json");
+const activeHintsPath = path.join(
+  repoRoot,
+  "data/ai/ai-card-hints-active.json",
+);
 const compiledHintsPath = path.join(
   repoRoot,
   "data/ai/ai-card-hints-compiled.json",
@@ -45,6 +48,10 @@ type AiHintInspectorIndex = {
     derivedPossibleStrategyAnchors: string[];
     reviewedStrategySupportPairs: Array<{
       strategyId: string;
+      role?: string;
+      roleDetail?: string;
+      confidence?: string;
+      evidence?: string[];
       sourceField: string;
       sourceValue: string;
       triageCategory: string;
@@ -130,6 +137,7 @@ describe("AI005 hint inspector index", () => {
     const doppelganger = card(index, "onr_proteus_057_doppelganger-antibody");
     const closedAccounts = card(index, "onr_v1_285_closed-accounts");
     const onCallSoloTeam = card(index, "onr_v1_208_on-call-solo-team");
+    const priorityRequisition = card(index, "onr_v1_212_priority-requisition");
     const aiBoardMember = card(index, "onr_proteus_001_ai-board-member");
     const networkedCenter = card(index, "onr_proteus_065_networked-center");
     const canisMinor = card(index, "onr_v1_226_canis-minor");
@@ -193,6 +201,37 @@ describe("AI005 hint inspector index", () => {
     );
     expect(onCallSoloTeam.cardLevelStrategyAnchors).toContain(
       "corp.damage_kill",
+    );
+    expect(onCallSoloTeam.reviewedStrategySupportPairs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          strategyId: "corp.damage_kill",
+          role: "punish_payoff",
+          roleDetail: "damage_payoff",
+          sourceField: "strategySupportPairs",
+        }),
+        expect.objectContaining({
+          strategyId: "corp.tag_trace_punish",
+          role: "punish_payoff",
+          sourceField: "strategySupportPairs",
+        }),
+      ]),
+    );
+    expect(priorityRequisition.reviewedStrategySupportPairs).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          strategyId: "corp.ice_tax_glacier",
+          role: "scoring_tool",
+          roleDetail: "tempo_payoff",
+          confidence: "high",
+        }),
+        expect.objectContaining({
+          strategyId: "corp.remote_scoring",
+          role: "scoring_tool",
+          roleDetail: "score_window_payoff",
+          confidence: "medium",
+        }),
+      ]),
     );
     expect(onCallSoloTeam.derivedStrategyAnchors).toContain(
       "corp.tag_trace_punish",
@@ -603,9 +642,7 @@ describe("AI005 hint inspector index", () => {
     expect(compiledCreditBlocks.manualNotes?.join(" ")).toContain(
       "base rez plus 1",
     );
-    expect(compiledMobileBarricade.riskTags).toContain(
-      "same_fort_reposition",
-    );
+    expect(compiledMobileBarricade.riskTags).toContain("same_fort_reposition");
     expect(compiledMobileBarricade.manualNotes?.join(" ")).toContain(
       "same data fort",
     );
@@ -710,7 +747,9 @@ function readActiveHints(): {
 }
 
 function readClassicCardIds(): string[] {
-  const classicCards = JSON.parse(fs.readFileSync(classicCardsPath, "utf8")) as {
+  const classicCards = JSON.parse(
+    fs.readFileSync(classicCardsPath, "utf8"),
+  ) as {
     cards: Array<{ cardId: string }>;
   };
   return classicCards.cards.map((entry) => entry.cardId).sort();
