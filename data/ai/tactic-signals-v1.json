@@ -940,6 +940,22 @@
       "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "ice.recovery",
+      "group": "classic_corp_operation_zone_setup",
+      "sideScope": "corp",
+      "description": "Corp operation recovers ICE from Archives to HQ for rebuilt central or remote defense.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=card_recovery target=archives.corp_recovery",
+        "effects.kind=search target=ice_recovery"
+      ],
+      "examples": ["Reclamation Project"],
+      "targetProfileRelevant": true,
+      "notes": "Classic read-only AI hint signal; it records ICE-specific Archives recovery without creating planner, engine, legality, targeting, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "breaker.ap",
       "group": "breaker_coverage",
       "sideScope": "neutral",
@@ -5242,6 +5258,22 @@
       "examples": ["Bodyweight Data Creche"],
       "targetProfileRelevant": false,
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "run.successful_run_grip_reset",
+      "group": "classic_successful_run_disruption",
+      "sideScope": "corp",
+      "description": "Corp successful-run follow-up that shuffles the Runner grip into the stack and redraws the same count.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": ["corp.central_stabilize"],
+      "sourceKinds": [
+        "effects.kind=zone_shuffle timing=after_successful_run target=runner_grip_shuffle_stack_redraw",
+        "conditions.kind=requires_successful_run"
+      ],
+      "examples": ["Indiscriminate Response Team"],
+      "targetProfileRelevant": false,
+      "notes": "Classic read-only AI hint signal; it models hand-content disruption after a successful run without exposing hidden Runner grip or stack identities and does not create planner, engine, legality, targeting, action-score or plan-weight behavior."
     },
     {
       "signalId": "run.followup_run",

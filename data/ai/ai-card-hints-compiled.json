@@ -40417,14 +40417,12 @@
       "cardType": "asset",
       "roles": [
         "asset",
-        "successful_run_punishment",
-        "grip_disruption",
-        "stack_shuffle",
-        "hidden_zone"
+        "remote_support"
       ],
       "planRoles": [
-        "punish_successful_runs",
-        "protect_centrals"
+        "build_scoring_remote",
+        "protect_hq",
+        "protect_rnd"
       ],
       "requiredMechanics": [
         "successful_run_trigger",
@@ -40445,11 +40443,56 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "run.successful_run_grip_reset"
+      ],
+      "effects": [
+        {
+          "kind": "access_punish",
+          "timing": "after_successful_run",
+          "scope": "runner",
+          "resource": "cards",
+          "target": "runner_grip_shuffle_stack_redraw",
+          "repeatable": true
+        },
+        {
+          "kind": "zone_shuffle",
+          "timing": "after_successful_run",
+          "scope": "stack",
+          "resource": "cards",
+          "target": "runner_grip_shuffle_stack_redraw",
+          "repeatable": true
+        },
+        {
+          "kind": "draw",
+          "timing": "after_successful_run",
+          "scope": "runner",
+          "resource": "cards",
+          "target": "same_count_redraw",
+          "repeatable": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "lineSupport": [
+        "corp.central_stabilize"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-06: Successful-run follow-up resets Runner grip through stack shuffle/redraw. This is not an access ambush; hidden card identities stay outside Corp AI input."
+      ]
     },
     {
       "cardId": "onr_classic_020_london-city-grid",
@@ -40457,13 +40500,10 @@
       "cardType": "upgrade",
       "roles": [
         "upgrade",
-        "region",
-        "run_tax",
-        "noisy_breaker_tax"
+        "remote_support"
       ],
       "planRoles": [
-        "tax_remote_runs",
-        "protect_scoring_server"
+        "build_scoring_remote"
       ],
       "requiredMechanics": [
         "region_upgrade",
@@ -40484,11 +40524,51 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.break_cost_tax",
+        "remote.scoring_protection",
+        "run.break_cost_penalty",
+        "tax.runner_persistent"
+      ],
+      "effects": [
+        {
+          "kind": "run_tax",
+          "timing": "during_run",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 1,
+          "target": "run.break_cost_penalty",
+          "repeatable": true
+        },
+        {
+          "kind": "remote_protection",
+          "timing": "persistent",
+          "scope": "remote",
+          "target": "remote.scoring_protection"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        },
+        {
+          "kind": "requires_remote_server"
+        }
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_classic_021_satellite-monitors",
@@ -40496,12 +40576,10 @@
       "cardType": "asset",
       "roles": [
         "asset",
-        "start_turn",
-        "tag_punishment",
-        "deterministic_random"
+        "tag_punishment"
       ],
       "planRoles": [
-        "punish_repeated_runs"
+        "punish_tagged_runner"
       ],
       "requiredMechanics": [
         "corp_start_turn",
@@ -40523,11 +40601,39 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "condition.multiple_runs_last_turn",
+        "tag.source"
+      ],
+      "effects": [
+        {
+          "kind": "tag_source",
+          "timing": "start_of_turn",
+          "scope": "runner",
+          "resource": "tags",
+          "amount": 1,
+          "target": "tag.source",
+          "repeatable": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_start_of_turn"
+        }
+      ],
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "enabler"
+      ]
     },
     {
       "cardId": "onr_classic_022_self-destruct",
@@ -40535,12 +40641,11 @@
       "cardType": "upgrade",
       "roles": [
         "upgrade",
-        "access_ambush",
-        "corp_installed_trash",
+        "ambush",
         "net_damage"
       ],
       "planRoles": [
-        "defend_subsidiary_fort"
+        "remote_asset_trap"
       ],
       "requiredMechanics": [
         "access_effect",
@@ -40563,11 +40668,63 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "access.corp_net_damage_ambush",
+        "access.punish",
+        "damage.payoff",
+        "ice.corp_self_trash_cost",
+        "remote.ambush",
+        "risk.trash_own_rezzed_ice"
+      ],
+      "effects": [
+        {
+          "kind": "ambush",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "target": "remote.ambush",
+          "finite": true
+        },
+        {
+          "kind": "damage",
+          "timing": "on_access",
+          "scope": "runner",
+          "resource": "damage",
+          "target": "access.corp_net_damage_ambush",
+          "repeatable": true
+        },
+        {
+          "kind": "ice_trash",
+          "timing": "on_access",
+          "scope": "server",
+          "target": "ice.corp_self_trash_cost",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        },
+        {
+          "kind": "requires_remote_server"
+        }
+      ],
+      "lineSupport": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-06: Damage scales with other Corp cards trashed in the source subsidiary fort; own-board cost is explicit risk, not free damage."
+      ]
     },
     {
       "cardId": "onr_classic_023_shock-treatment",
@@ -40575,12 +40732,12 @@
       "cardType": "upgrade",
       "roles": [
         "upgrade",
-        "access_ambush",
-        "tag_punishment",
-        "rig_trash"
+        "ambush",
+        "tag_punishment"
       ],
       "planRoles": [
-        "punish_tagged_runner"
+        "punish_tagged_runner",
+        "remote_asset_trap"
       ],
       "requiredMechanics": [
         "access_effect",
@@ -40603,11 +40760,67 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "access.corp_hardware_trash",
+        "access.corp_program_trash",
+        "access.punish",
+        "remote.ambush",
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "effects": [
+        {
+          "kind": "ambush",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "target": "remote.ambush",
+          "finite": true
+        },
+        {
+          "kind": "hardware_trash",
+          "timing": "on_access",
+          "scope": "runner",
+          "target": "access.corp_hardware_trash",
+          "finite": true
+        },
+        {
+          "kind": "program_trash",
+          "timing": "on_access",
+          "scope": "installed_program",
+          "amount": 2,
+          "target": "access.corp_program_trash",
+          "finite": true
+        },
+        {
+          "kind": "tag_punish_payoff",
+          "timing": "on_access",
+          "scope": "runner",
+          "target": "tag.payoff",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        },
+        {
+          "kind": "requires_runner_tagged"
+        }
+      ],
+      "lineSupport": [
+        "corp.ambush_bluff",
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ]
     },
     {
       "cardId": "onr_classic_024_sterdroid",
@@ -40615,12 +40828,12 @@
       "cardType": "upgrade",
       "roles": [
         "upgrade",
-        "ice_strength",
-        "activated_ability",
-        "run_defense"
+        "remote_support"
       ],
       "planRoles": [
-        "boost_important_ice"
+        "build_scoring_remote",
+        "protect_hq",
+        "protect_rnd"
       ],
       "requiredMechanics": [
         "activated_ability",
@@ -40642,11 +40855,73 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "remote.scoring_protection"
+      ],
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "during_run",
+          "scope": "ice",
+          "resource": "strength",
+          "target": "double_chosen_ice_strength_until_end_of_turn",
+          "finite": true
+        },
+        {
+          "kind": "remote_protection",
+          "timing": "during_run",
+          "scope": "remote",
+          "target": "remote.scoring_protection",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_installed_ice"
+        },
+        {
+          "kind": "requires_corp_credits_threshold"
+        }
+      ],
+      "costProfile": {
+        "credits": 3,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "activated_ability",
+          "targetType": "installed_ice",
+          "purpose": "double_relevant_ice_strength_until_end_of_turn",
+          "preferences": [
+            "current_run_path_relevance",
+            "protects_agenda_remote",
+            "protects_central_access_pressure"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice",
+            "irrelevant_server_ice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_classic_025_strategic-planning-group",
@@ -40654,12 +40929,11 @@
       "cardType": "asset",
       "roles": [
         "asset",
-        "unique",
-        "draw_filter",
-        "rd_bottom"
+        "unique"
       ],
       "planRoles": [
-        "improve_corp_draw_quality"
+        "protect_hq",
+        "protect_rnd"
       ],
       "requiredMechanics": [
         "corp_draw_replacement",
@@ -40682,11 +40956,46 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "draw.corp_draw",
+        "hq.corp_hand_refresh"
+      ],
+      "effects": [
+        {
+          "kind": "draw",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "cards",
+          "amount": 1,
+          "target": "draw.corp_draw",
+          "repeatable": true
+        },
+        {
+          "kind": "zone_shuffle",
+          "timing": "persistent",
+          "scope": "rnd",
+          "resource": "cards",
+          "amount": 1,
+          "target": "bottom_one_drawn_card",
+          "repeatable": true
+        }
+      ],
+      "lineSupport": [
+        "corp.central_stabilize"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-06: Draw filter improves Corp hand quality, but hidden drawn-card identity remains controller-only and is not projected into public AI inputs."
+      ]
     },
     {
       "cardId": "onr_classic_026_street-enforcer",
@@ -40694,13 +41003,12 @@
       "cardType": "upgrade",
       "roles": [
         "upgrade",
-        "run_tax",
-        "tag_scaling_tax",
-        "sysop"
+        "remote_support",
+        "tag_punishment"
       ],
       "planRoles": [
-        "tax_tagged_runner",
-        "protect_scoring_server"
+        "build_scoring_remote",
+        "punish_tagged_runner"
       ],
       "requiredMechanics": [
         "run_start_tax",
@@ -40721,11 +41029,64 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "remote.scoring_protection",
+        "risk.requires_tagged_runner",
+        "tag.payoff",
+        "tax.runner_credit",
+        "tax.runner_persistent"
+      ],
+      "effects": [
+        {
+          "kind": "run_tax",
+          "timing": "start_of_run",
+          "scope": "runner",
+          "resource": "credits",
+          "target": "tax.runner_credit",
+          "repeatable": true
+        },
+        {
+          "kind": "tag_punish_payoff",
+          "timing": "start_of_run",
+          "scope": "runner",
+          "resource": "credits",
+          "target": "tag.payoff",
+          "repeatable": true
+        },
+        {
+          "kind": "remote_protection",
+          "timing": "persistent",
+          "scope": "remote",
+          "target": "remote.scoring_protection"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        },
+        {
+          "kind": "requires_runner_tagged"
+        },
+        {
+          "kind": "requires_remote_server"
+        }
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring",
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_classic_037_finders-keepers",

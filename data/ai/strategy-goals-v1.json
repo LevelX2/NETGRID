@@ -390,7 +390,8 @@
         "defense.central",
         "ice.central",
         "protection.hq",
-        "protection.rnd"
+        "protection.rnd",
+        "run.successful_run_grip_reset"
       ],
       "requiredSupport": {
         "ice": "required",

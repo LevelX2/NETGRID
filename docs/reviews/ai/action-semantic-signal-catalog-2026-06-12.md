@@ -8,23 +8,23 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 
 | Metric                                                         | Count |
 | -------------------------------------------------------------- | ----: |
-| Active cards                                                   |   564 |
-| covered                                                        |   539 |
+| Active cards                                                   |   616 |
+| covered                                                        |   591 |
 | deferred                                                       |    45 |
 | no_signal_reason != none                                       |    25 |
-| target_profile_gap                                             |    84 |
+| target_profile_gap                                             |    91 |
 | structural signal violations                                   |     0 |
 | unknown signals                                                |     0 |
-| covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |     0 |
+| covered delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE            |   +52 |
 | deferred delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE           |     0 |
 | no_signal delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE          |     0 |
-| target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |     0 |
+| target_profile_gap delta vs P2_POST_TARGET_PROFILE_GAP_CLOSURE |    +7 |
 
 ## No Signal Reasons
 
 | no_signal_reason       | Cards |
 | ---------------------- | ----: |
-| `none`                 |   539 |
+| `none`                 |   591 |
 | `legacy_fallback_only` |    23 |
 | `no_function_signal`   |     2 |
 
@@ -32,6 +32,13 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 
 | Card                                           | Side   | Type     | Signals expecting targets                                                 |
 | ---------------------------------------------- | ------ | -------- | ------------------------------------------------------------------------- |
+| `onr_classic_005_baskerville`                  | corp   | ice      | `economy.rez_discount`                                                    |
+| `onr_classic_006_bolter-swarm`                 | corp   | ice      | `corp_ice.next_ice_break_lock`, `economy.rez_discount`                    |
+| `onr_classic_021_satellite-monitors`           | corp   | asset    | `condition.multiple_runs_last_turn`                                       |
+| `onr_classic_022_self-destruct`                | corp   | upgrade  | `access.corp_net_damage_ambush`                                           |
+| `onr_classic_023_shock-treatment`              | corp   | upgrade  | `access.corp_hardware_trash`, `access.corp_program_trash`                 |
+| `onr_classic_030_psychic-friend`               | runner | program  | `breaker.scaling_strength`                                                |
+| `onr_classic_031_rent-i-con`                   | runner | program  | `breaker.emergency_coverage`                                              |
 | `onr_proteus_009_viral-breeding-ground`        | corp   | agenda   | `access.runner_program_bounce`, `access.runner_program_disruption`        |
 | `onr_proteus_056_department-of-misinformation` | corp   | asset    | `expose.corp_prevention`                                                  |
 | `onr_proteus_079_big-frackin-gun`              | runner | program  | `breaker.multi_subroutine_break`                                          |
@@ -55,13 +62,6 @@ Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Inf
 | `onr_proteus_142_hq-mole`                      | runner | resource | `access.hq_hidden_multiaccess`, `hidden.reveals_on_trash`                 |
 | `onr_proteus_143_liberated-savings-account`    | runner | resource | `hidden.reveals_on_trash`                                                 |
 | `onr_proteus_146_precision-bribery`            | runner | resource | `fort.creation_lock`                                                      |
-| `onr_proteus_147_r-and-d-mole`                 | runner | resource | `access.rnd_hidden_multiaccess`, `hidden.reveals_on_trash`                |
-| `onr_proteus_149_simulacrum`                   | runner | resource | `hidden.reveals_on_trash`, `run.bypass_ap_ice`, `run.encounter_escape`    |
-| `onr_proteus_152_swiss-bank-account`           | runner | resource | `hidden.reveals_on_trash`                                                 |
-| `onr_proteus_154_wired-switchboard`            | runner | resource | `hidden.reveals_on_trash`                                                 |
-| `onr_v1_008_boardwalk`                         | runner | program  | `access.hq_random_reveal`, `info.hq_information`                          |
-| `onr_v1_017_deep-thought`                      | runner | program  | `access.rnd_top_card`, `info.rnd_information`                             |
-| `onr_v1_020_dupre`                             | runner | program  | `breaker.scaling_strength`                                                |
 
 ## No Signal Review Start
 

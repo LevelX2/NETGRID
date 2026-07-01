@@ -7349,6 +7349,32 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "run.successful_run_grip_reset",
+      "source": "effects",
+      "match": {
+        "kind": "zone_shuffle",
+        "timing": "after_successful_run",
+        "target": "runner_grip_shuffle_stack_redraw"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset"
+        ],
+        "effectScope": [
+          "stack"
+        ],
+        "target": [
+          "runner_grip_shuffle_stack_redraw"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.central_stabilize"
+      ]
+    },
+    {
       "signalId": "run.followup_run",
       "source": "effects",
       "match": {
