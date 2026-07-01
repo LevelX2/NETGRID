@@ -29728,7 +29728,7 @@
       "cardId": "onr_classic_032_schematics-search-engine",
       "side": "runner",
       "cardType": "program",
-      "roles": ["program", "information", "expose", "hq_access"],
+      "roles": ["program", "expose", "hq_access"],
       "planRoles": ["information_gain"],
       "requiredMechanics": [
         "install_program",
@@ -29808,8 +29808,8 @@
       "cardId": "onr_classic_033_superglue",
       "side": "runner",
       "cardType": "program",
-      "roles": ["program", "derez", "fully_broken_ice", "tap_source"],
-      "planRoles": ["tempo_control"],
+      "roles": ["program", "derez", "fully_broken_ice"],
+      "planRoles": [],
       "requiredMechanics": [
         "install_program",
         "fully_break_ice_window",

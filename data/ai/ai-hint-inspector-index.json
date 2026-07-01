@@ -19,13 +19,12 @@
     "cardsWithOverlays": 6,
     "cardsWithFunctionSignals": 591,
     "cardsWithStrategyAnchors": 252,
-    "cardsWithWarnings": 118,
+    "cardsWithWarnings": 116,
     "warningCategoryCounts": {
       "deferred_requires_human_review": 45,
-      "descriptor_gap": 46,
-      "function_signal_descriptor_gap": 28,
-      "legacy_fallback_only": 34,
-      "unknown_unmapped": 1
+      "descriptor_gap": 45,
+      "function_signal_descriptor_gap": 27,
+      "legacy_fallback_only": 34
     }
   },
   "cards": [
@@ -4120,7 +4119,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "access.hq_full_reveal",
@@ -4178,13 +4177,6 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
-          "value": "information",
-          "category": "descriptor_gap",
-          "triageCategory": "descriptor_gap",
-          "mapsTo": [],
-          "rationale": "Broad information pressure is not stable enough to map without a narrower descriptor."
-        },
-        {
           "value": "program",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
@@ -4201,24 +4193,8 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
-      "warningCategories": [
-        "descriptor_gap",
-        "function_signal_descriptor_gap"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "interface_closeout_density_requires_aggregation",
-          "description": "Interface closeout is a DeckDoctrine aggregation over multiaccess density and central reach, not a per-card generic function tag.",
-          "affectedSignalsOrValues": [
-            "interface_pressure",
-            "closeout_pressure",
-            "information",
-            "hidden_information_pressure"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
@@ -4259,7 +4235,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.derez"
@@ -4293,31 +4269,14 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        },
-        {
-          "value": "tap_source",
-          "category": "unknown_unmapped",
-          "triageCategory": "unknown_unmapped",
-          "mapsTo": [],
-          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly."
         }
       ],
-      "planRolesClassification": [
-        {
-          "value": "tempo_control",
-          "category": "unknown_unmapped",
-          "triageCategory": "unknown_unmapped",
-          "mapsTo": [],
-          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly."
-        }
-      ],
-      "warningCategories": [
-        "unknown_unmapped"
-      ],
+      "planRolesClassification": [],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
-        "planRolesPresent": true,
+        "planRolesPresent": false,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",

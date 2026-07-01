@@ -12,10 +12,12 @@ const inspectorIndexPath = path.join(
   repoRoot,
   "data/ai/ai-hint-inspector-index.json",
 );
+const activeHintsPath = path.join(repoRoot, "data/ai/ai-card-hints-active.json");
 const compiledHintsPath = path.join(
   repoRoot,
   "data/ai/ai-card-hints-compiled.json",
 );
+const classicCardsPath = path.join(repoRoot, "data/cards/classic-cards.json");
 
 type AiHintInspectorIndex = {
   schemaVersion: string;
@@ -623,6 +625,56 @@ describe("AI005 hint inspector index", () => {
       "value it only when Corp can pay",
     );
   });
+
+  it("keeps Classic AI hints reviewed, signaled and warning-free", () => {
+    const index = readIndex();
+    const activeHints = readActiveHints();
+    const classicCardIds = readClassicCardIds();
+
+    expect(classicCardIds).toHaveLength(52);
+
+    for (const cardId of classicCardIds) {
+      const active = activeHints.cards.find((entry) => entry.cardId === cardId);
+      const inspector = card(index, cardId);
+      const compiled = compiledCard(cardId);
+
+      expect(active, cardId).toBeDefined();
+      expect(active?.quality?.hintReviewed, cardId).toBe(true);
+      expect(active?.quality?.needsHumanReview, cardId).toBe(false);
+      expect(compiled.aiSupportStatus, cardId).toBe("ai_supported");
+      expect(inspector.derivedFunctionSignals.length, cardId).toBeGreaterThan(
+        0,
+      );
+      expect(inspector.warningCategories, cardId).toEqual([]);
+      expect(JSON.stringify({ active, inspector }), cardId).not.toMatch(
+        /"cardInstances"|"privatePayload"|"fullState"|"stateHash"|"actionId"/,
+      );
+    }
+
+    const indiscriminateResponseTeam = card(
+      index,
+      "onr_classic_019_indiscriminate-response-team",
+    );
+    expect(indiscriminateResponseTeam.derivedFunctionSignals).toContain(
+      "run.successful_run_grip_reset",
+    );
+    expect(indiscriminateResponseTeam.cardLevelStrategyAnchors).toEqual([
+      "corp.central_stabilize",
+    ]);
+    expect(indiscriminateResponseTeam.cardLevelStrategyAnchors).not.toContain(
+      "corp.ambush_bluff",
+    );
+
+    expect(
+      compiledCard("onr_classic_018_reclamation-project").tacticSignals,
+    ).toEqual(
+      expect.arrayContaining(["archives.corp_recovery", "ice.recovery"]),
+    );
+
+    const superglue = card(index, "onr_classic_033_superglue");
+    expect(superglue.derivedFunctionSignals).toEqual(["ice.derez"]);
+    expect(superglue.cardLevelStrategyAnchors).toEqual([]);
+  });
 });
 
 function readIndex(): AiHintInspectorIndex {
@@ -637,7 +689,35 @@ function card(index: AiHintInspectorIndex, cardId: string) {
   return found;
 }
 
+function readActiveHints(): {
+  cards: Array<{
+    cardId: string;
+    quality?: {
+      hintReviewed?: boolean;
+      needsHumanReview?: boolean;
+    };
+  }>;
+} {
+  return JSON.parse(fs.readFileSync(activeHintsPath, "utf8")) as {
+    cards: Array<{
+      cardId: string;
+      quality?: {
+        hintReviewed?: boolean;
+        needsHumanReview?: boolean;
+      };
+    }>;
+  };
+}
+
+function readClassicCardIds(): string[] {
+  const classicCards = JSON.parse(fs.readFileSync(classicCardsPath, "utf8")) as {
+    cards: Array<{ cardId: string }>;
+  };
+  return classicCards.cards.map((entry) => entry.cardId).sort();
+}
+
 function compiledCard(cardId: string): {
+  aiSupportStatus?: string;
   targetProfiles?: unknown[];
   planRoles?: string[];
   riskTags?: string[];
@@ -647,6 +727,7 @@ function compiledCard(cardId: string): {
   const compiled = JSON.parse(fs.readFileSync(compiledHintsPath, "utf8")) as {
     cards: Array<{
       cardId: string;
+      aiSupportStatus?: string;
       targetProfiles?: unknown[];
       planRoles?: string[];
       riskTags?: string[];

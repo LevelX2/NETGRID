@@ -1130,13 +1130,16 @@
       "deferred_owner": "none",
       "no_signal_reason": "none",
       "target_profile_gap": false,
-      "signalCount": 1,
+      "signalCount": 2,
       "targetProfileCount": 2,
-      "derivedFunctionSignals": ["archives.corp_recovery"],
+      "derivedFunctionSignals": ["archives.corp_recovery", "ice.recovery"],
       "activeTacticSignals": ["archives.corp_recovery", "ice.recovery"],
       "unknownSignals": [],
       "structuralOnlySignals": [],
-      "targetProfileExpectedBySignals": ["archives.corp_recovery"],
+      "targetProfileExpectedBySignals": [
+        "archives.corp_recovery",
+        "ice.recovery"
+      ],
       "warningCategories": []
     },
     {
@@ -1504,7 +1507,7 @@
         "info.expose_installed_card",
         "info.hq_information"
       ],
-      "warningCategories": ["descriptor_gap", "function_signal_descriptor_gap"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_classic_033_superglue",
@@ -1524,7 +1527,7 @@
       "unknownSignals": [],
       "structuralOnlySignals": [],
       "targetProfileExpectedBySignals": ["ice.derez"],
-      "warningCategories": ["unknown_unmapped"]
+      "warningCategories": []
     },
     {
       "cardId": "onr_classic_034_boostergang-connections",

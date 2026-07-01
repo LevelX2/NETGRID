@@ -41755,7 +41755,6 @@
       "cardType": "program",
       "roles": [
         "program",
-        "information",
         "expose",
         "hq_access"
       ],
@@ -41851,12 +41850,9 @@
       "roles": [
         "program",
         "derez",
-        "fully_broken_ice",
-        "tap_source"
+        "fully_broken_ice"
       ],
-      "planRoles": [
-        "tempo_control"
-      ],
+      "planRoles": [],
       "requiredMechanics": [
         "install_program",
         "fully_break_ice_window",

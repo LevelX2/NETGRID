@@ -1,6 +1,6 @@
 # Classic AI Hint Semantics Process
 
-Status: `active`
+Status: `completed`
 
 Quelle/Vorgabe: Nutzerauftrag vom 2026-07-01 im Codex-Thread, Review `docs/reviews/ai/classic-ai-semantic-gap-review-2026-07-01.md`, Classic-Freigabe `docs/releases/classic/final-review.md`, aktive Kartendaten `data/cards/classic-cards.json`, aktive Hints `data/ai/ai-card-hints-active.json`.
 
