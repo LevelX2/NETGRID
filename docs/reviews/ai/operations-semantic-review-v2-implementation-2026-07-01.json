@@ -1,0 +1,3148 @@
+{
+  "schemaVersion": "operations-semantic-review-v2-implementation",
+  "generatedAt": "2026-07-01",
+  "mode": "ai_hint_metadata_only_no_engine_or_runtime_change",
+  "sources": [
+    "docs/reviews/ai/operations-semantic-review-v2-input-2026-07-01.md",
+    "data/ai/ai-card-hints-active.json",
+    "data/ai/tactic-signals-v1.json",
+    "packages/ai/src/hint-ontology.ts"
+  ],
+  "summary": {
+    "checkedOperations": 38,
+    "statusCounts": {
+      "ändern": 19,
+      "kleine Änderung": 13,
+      "behalten": 6
+    },
+    "priorityCounts": {
+      "medium": 14,
+      "high": 16,
+      "low": 8
+    },
+    "confirmedStrategySupportPairs": 29,
+    "candidateDeferredPairs": 6,
+    "supportOnlyCards": 13,
+    "anchoredCards": 25,
+    "forbiddenProductiveStrategies": []
+  },
+  "verification": {
+    "operationsV2InvariantCheck": "node scripts/check-operations-semantic-review-v2.mjs passed",
+    "pnpmHintOntologyTest": "blocked before test execution by ERR_PNPM_IGNORED_BUILDS for esbuild/sharp during dependency install"
+  },
+  "cards": [
+    {
+      "title": "Badtimes",
+      "cardId": "onr_classic_016_badtimes",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "bucket": "tagged_runner_payoff / memory_pressure",
+      "targetOrConstraints": "Keine Corp-Zielwahl. Wirkung reduziert Runner-MU; daraus folgende Programm-Auswahl/Trash ist Engine-/Runner-Entscheidung und darf nicht als Corp-Targeting modelliert werden.",
+      "taxonomyFollowup": "Präzises Signal für tagged-runner memory pressure katalogisieren; tag.payoff nur als Oberklasse behalten.",
+      "before": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff",
+          "tag.runner_memory_pressure",
+          "runner.memory_reduction",
+          "risk.program_cleanup_after_mu_loss"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_memory_pressure",
+            "evidence": [
+              "tag.payoff",
+              "tag.runner_memory_pressure",
+              "runner.memory_reduction"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: tagged_runner_payoff / memory_pressure."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=medium; bucket=tagged_runner_payoff / memory_pressure.",
+          "OPS-V2: Target/Constraints: Keine Corp-Zielwahl. Wirkung reduziert Runner-MU; daraus folgende Programm-Auswahl/Trash ist Engine-/Runner-Entscheidung und darf nicht als Corp-Targeting modelliert werden.",
+          "OPS-V2: Taxonomy follow-up: Präzises Signal für tagged-runner memory pressure katalogisieren; tag.payoff nur als Oberklasse behalten."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Corporate Shuffle",
+      "cardId": "onr_classic_017_corporate-shuffle",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "draw_hand_refresh / support_only",
+      "targetOrConstraints": "Corp wählt eine eigene HQ-Karte für R&D. Keine Runner-Zielwahl; keine kontrollierte Topdeck-Strategie ableiten.",
+      "taxonomyFollowup": "corp.deck_recycle_engine hier nicht setzen. Falls später eine Deck-Recycle-Strategy existiert, sollte diese wiederholbare/zentral deckprägende Effekte verlangen.",
+      "before": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "hq.corp_hand_refresh",
+          "rnd.corp_shuffle_hq_into_rnd"
+        ],
+        "lineSupport": [
+          "corp.central_stabilize"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "hq.corp_hand_refresh",
+          "rnd.corp_shuffle_hq_into_rnd",
+          "risk.double_operation_action_cost"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=draw_hand_refresh / support_only.",
+          "OPS-V2: Target/Constraints: Corp wählt eine eigene HQ-Karte für R&D. Keine Runner-Zielwahl; keine kontrollierte Topdeck-Strategie ableiten.",
+          "OPS-V2: Taxonomy follow-up: corp.deck_recycle_engine hier nicht setzen. Falls später eine Deck-Recycle-Strategy existiert, sollte diese wiederholbare/zentral deckprägende Effekte verlangen.",
+          "OPS-V2: Data/effect follow-up: Double Operation: kostet zwei konsekutive Aktionen; als Constraint/Risk erfassen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole"
+      ]
+    },
+    {
+      "title": "Reclamation Project",
+      "cardId": "onr_classic_018_reclamation-project",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "ice_recovery / glacier_support",
+      "targetOrConstraints": "Corp wählt beliebig viele ICE aus Archives; gewählte Karten werden Runner gezeigt und in HQ gespeichert. Zielprofil: eigene Archives-Karten, Typ ICE.",
+      "taxonomyFollowup": "ice.recovery ggf. auf ice.corp_recovery normalisieren.",
+      "before": {
+        "tacticSignals": [
+          "archives.corp_recovery",
+          "ice.recovery"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_archives_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "archives.corp_recovery",
+          "hq.corp_ice_recovery",
+          "ice.corp_recovery",
+          "info.reveal_recovered_cards_to_runner",
+          "risk.double_operation_action_cost"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "enabler",
+            "roleDetail": "archives_ice_restock",
+            "evidence": [
+              "archives.corp_recovery",
+              "hq.corp_ice_recovery",
+              "ice.corp_recovery",
+              "info.reveal_recovered_cards_to_runner"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: ice_recovery / glacier_support. Review-v2-Rolle recovery_enabler wird als validierbare Hauptrolle enabler mit roleDetail gespeichert."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_archives_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=ice_recovery / glacier_support.",
+          "OPS-V2: Target/Constraints: Corp wählt beliebig viele ICE aus Archives; gewählte Karten werden Runner gezeigt und in HQ gespeichert. Zielprofil: eigene Archives-Karten, Typ ICE.",
+          "OPS-V2: Taxonomy follow-up: ice.recovery ggf. auf ice.corp_recovery normalisieren.",
+          "OPS-V2: Data/effect follow-up: Double Operation: zwei konsekutive Aktionen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Accounts Receivable",
+      "cardId": "onr_v1_281_accounts-receivable",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "bucket": "economy_support",
+      "targetOrConstraints": "Keine Zielwahl.",
+      "taxonomyFollowup": "Keine.",
+      "before": {
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: behalten; priority=low; bucket=economy_support.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl.",
+          "OPS-V2: Data/effect follow-up: Kosten 5, Gain 9; netto +4 kann später im CostProfile statt Signal modelliert werden."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": []
+    },
+    {
+      "title": "Annual Reviews",
+      "cardId": "onr_v1_282_annual-reviews",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "bucket": "draw_support",
+      "targetOrConstraints": "Keine Zielwahl.",
+      "taxonomyFollowup": "Keine.",
+      "before": {
+        "tacticSignals": [
+          "draw.corp_draw"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "draw.corp_draw"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: behalten; priority=low; bucket=draw_support.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": []
+    },
+    {
+      "title": "Audit of Call Records",
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "trace_tag_source",
+      "targetOrConstraints": "Keine Zielwahl; Trace-Bidding über LegalActions. Spielbar nur, wenn Runner letzte Runde mindestens zwei Runs versucht hat.",
+      "taxonomyFollowup": "condition.multiple_runs_last_turn zu condition.runner_attempted_multiple_runs_last_turn normalisieren.",
+      "before": {
+        "tacticSignals": [
+          "condition.multiple_runs_last_turn",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_action"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "condition.runner_attempted_multiple_runs_last_turn",
+          "trace.source",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "retaliatory_multiple_run_tag_source",
+            "evidence": [
+              "trace.source",
+              "tag.source"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: trace_tag_source. Review-v2-Rolle trace_tag_source wird als validierbare Hauptrolle enabler mit roleDetail gespeichert."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          },
+          {
+            "kind": "requires_runner_attempted_multiple_runs_last_turn"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=trace_tag_source.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl; Trace-Bidding über LegalActions. Spielbar nur, wenn Runner letzte Runde mindestens zwei Runs versucht hat.",
+          "OPS-V2: Taxonomy follow-up: condition.multiple_runs_last_turn zu condition.runner_attempted_multiple_runs_last_turn normalisieren.",
+          "OPS-V2: Data/effect follow-up: Conditions im Effektmodell: requires_runner_action ist zu grob; besser spezifisch multiple-runs-last-turn plus requires_trace_success."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    },
+    {
+      "title": "Chance Observation",
+      "cardId": "onr_v1_284_chance-observation",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "trace_tag_source",
+      "targetOrConstraints": "Keine Zielwahl; Trace-Bidding über LegalActions. Spielbar nur nach Runner-Run im letzten Runnerzug.",
+      "taxonomyFollowup": "condition.last_turn_run zu condition.runner_attempted_run_last_turn normalisieren.",
+      "before": {
+        "tacticSignals": [
+          "condition.last_turn_run",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "condition.runner_attempted_run_last_turn",
+          "trace.source",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "retaliatory_run_tag_source",
+            "evidence": [
+              "trace.source",
+              "tag.source"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: trace_tag_source. Review-v2-Rolle trace_tag_source wird als validierbare Hauptrolle enabler mit roleDetail gespeichert."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          },
+          {
+            "kind": "requires_runner_attempted_run_last_turn"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=trace_tag_source.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl; Trace-Bidding über LegalActions. Spielbar nur nach Runner-Run im letzten Runnerzug.",
+          "OPS-V2: Taxonomy follow-up: condition.last_turn_run zu condition.runner_attempted_run_last_turn normalisieren."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    },
+    {
+      "title": "Closed Accounts",
+      "cardId": "onr_v1_285_closed-accounts",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "tagged_runner_payoff / credit_loss",
+      "targetOrConstraints": "Keine Zielwahl; betrifft Runner-Creditpool vollständig.",
+      "taxonomyFollowup": "economy.runner_credit_loss und tag.runner_credit_punish katalogisieren bzw. als präzise Varianten nutzen.",
+      "before": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff",
+          "economy.runner_credit_loss",
+          "tag.runner_credit_punish"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_credit_lockout",
+            "evidence": [
+              "tag.payoff",
+              "economy.runner_credit_loss",
+              "tag.runner_credit_punish"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: tagged_runner_payoff / credit_loss."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=tagged_runner_payoff / credit_loss.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl; betrifft Runner-Creditpool vollständig.",
+          "OPS-V2: Taxonomy follow-up: economy.runner_credit_loss und tag.runner_credit_punish katalogisieren bzw. als präzise Varianten nutzen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Corporate Detective Agency",
+      "cardId": "onr_v1_286_corporate-detective-agency",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "bucket": "tagged_runner_payoff / resource_trash",
+      "targetOrConstraints": "TargetProfile nötig: bis zu zwei installierte Runner-Resources, sichtbare/legale Ziele, Trash at no cost.",
+      "taxonomyFollowup": "resource.trash_payoff durch target.runner_resource_trash/tag.runner_resource_trash_payoff präzisieren.",
+      "before": {
+        "tacticSignals": [
+          "resource.trash_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff",
+          "target.runner_resource_trash",
+          "tag.runner_resource_trash_payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_resource_trash",
+            "evidence": [
+              "tag.payoff",
+              "target.runner_resource_trash",
+              "tag.runner_resource_trash_payoff"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: tagged_runner_payoff / resource_trash."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=medium; bucket=tagged_runner_payoff / resource_trash.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: bis zu zwei installierte Runner-Resources, sichtbare/legale Ziele, Trash at no cost.",
+          "OPS-V2: Taxonomy follow-up: resource.trash_payoff durch target.runner_resource_trash/tag.runner_resource_trash_payoff präzisieren."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Datapool by Zetatech",
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "tag_snowball_followup",
+      "targetOrConstraints": "Keine Zielwahl.",
+      "taxonomyFollowup": "tag.additional_tag_followup auf tag.additional_tag_source/tag_snowball_followup normalisieren; tag.source nicht als initiale Quelle verwenden.",
+      "before": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.additional_tag_followup",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.additional_tag_source",
+          "tag_snowball_followup",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "additional_tag_amplifier",
+            "evidence": [
+              "tag.additional_tag_source",
+              "tag_snowball_followup",
+              "tag.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: tag_snowball_followup. Review-v2-Rolle tag_snowball_followup wird als validierbare Hauptrolle enabler mit roleDetail gespeichert."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=tag_snowball_followup.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl.",
+          "OPS-V2: Taxonomy follow-up: tag.additional_tag_followup auf tag.additional_tag_source/tag_snowball_followup normalisieren; tag.source nicht als initiale Quelle verwenden."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Day Shift",
+      "cardId": "onr_v1_288_day-shift",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "bucket": "draw_economy_support",
+      "targetOrConstraints": "Keine Zielwahl.",
+      "taxonomyFollowup": "Keine.",
+      "before": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: behalten; priority=low; bucket=draw_economy_support.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": []
+    },
+    {
+      "title": "Edgerunner, Inc., Temps",
+      "cardId": "onr_v1_289_edgerunner-inc-temps",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "action_tempo_candidate / install_burst",
+      "targetOrConstraints": "Folgeaktionen dürfen nur legale Install-Actions sein; nicht alle drei müssen genommen werden.",
+      "taxonomyFollowup": "corp.action_tempo als Strategy-ID separat entscheiden. Bis dahin support-only mit StrategyCandidate/deferred.",
+      "before": {
+        "tacticSignals": [
+          "action.corp_install_action_bundle"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "action.corp_install_only_action_bundle",
+          "install.corp_action_bundle",
+          "tempo.corp_install_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=action_tempo_candidate / install_burst.",
+          "OPS-V2: Target/Constraints: Folgeaktionen dürfen nur legale Install-Actions sein; nicht alle drei müssen genommen werden.",
+          "OPS-V2: Taxonomy follow-up: corp.action_tempo als Strategy-ID separat entscheiden. Bis dahin support-only mit StrategyCandidate/deferred.",
+          "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 1; Report zeigt variabel/nicht numerisch. Datenmodell prüfen.",
+          "OPS-V2: Strategy candidate/deferred: candidate: corp.action_tempo -> enabler/install_only_action_bundle (medium), falls Strategy ID bewusst eingeführt wird"
+        ]
+      },
+      "candidateNotes": [
+        "OPS-V2: Strategy candidate/deferred: candidate: corp.action_tempo -> enabler/install_only_action_bundle (medium), falls Strategy ID bewusst eingeführt wird"
+      ],
+      "changedFields": [
+        "tacticSignals"
+      ]
+    },
+    {
+      "title": "Efficiency Experts",
+      "cardId": "onr_v1_290_efficiency-experts",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "bucket": "economy_support",
+      "targetOrConstraints": "Keine Zielwahl.",
+      "taxonomyFollowup": "Keine.",
+      "before": {
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: behalten; priority=low; bucket=economy_support.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": []
+    },
+    {
+      "title": "Falsified-Transactions Expert",
+      "cardId": "onr_v1_291_falsified-transactions-expert",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "advancement_counter_transfer / fast_advance",
+      "targetOrConstraints": "TargetProfile nötig: Quelle mit bis zu drei vorhandenen Advancement-Countern; Ziel ist andere installierte Karte, die advanced werden kann.",
+      "taxonomyFollowup": "advance.corp_counter_transfer und advance.counter_reallocation ggf. zusammenführen; keine counter_placement-Signale verwenden.",
+      "before": {
+        "tacticSignals": [
+          "advance.corp_counter_transfer",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          },
+          {
+            "kind": "requires_installed_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "advance.corp_counter_transfer",
+          "advance.counter_reallocation",
+          "advance.score_window_support",
+          "condition.requires_advancement_counter",
+          "condition.requires_installed_advanceable_card"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "roleDetail": "advancement_counter_reposition",
+            "evidence": [
+              "advance.corp_counter_transfer",
+              "advance.counter_reallocation",
+              "advance.score_window_support"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: advancement_counter_transfer / fast_advance."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          },
+          {
+            "kind": "requires_installed_advanceable_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=advancement_counter_transfer / fast_advance.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: Quelle mit bis zu drei vorhandenen Advancement-Countern; Ziel ist andere installierte Karte, die advanced werden kann.",
+          "OPS-V2: Taxonomy follow-up: advance.corp_counter_transfer und advance.counter_reallocation ggf. zusammenführen; keine counter_placement-Signale verwenden.",
+          "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 1; Report zeigt variabel/nicht numerisch. Datenmodell prüfen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    },
+    {
+      "title": "Management Shake-Up",
+      "cardId": "onr_v1_292_management-shake-up",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "advancement_counter_burst / fast_advance / overadvance_candidate",
+      "targetOrConstraints": "TargetProfile nötig: drei Advancement-Counter in beliebiger Kombination auf installierte advancebare Karten; eigene hidden information bleibt Corp-seitig.",
+      "taxonomyFollowup": "corp.overadvance_value separat entscheiden; bis dahin nur als candidate/deferred ausweisen.",
+      "before": {
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.overadvance_support",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "advance.corp_counter_placement",
+          "advance.corp_distributed_counter_burst",
+          "advance.score_window_support",
+          "advance.overadvance_support",
+          "condition.requires_installed_advanceable_card"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "roleDetail": "advance_counter_burst",
+            "evidence": [
+              "advance.corp_counter_placement",
+              "advance.corp_distributed_counter_burst",
+              "advance.score_window_support"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: advancement_counter_burst / fast_advance / overadvance_candidate."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_advanceable_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=advancement_counter_burst / fast_advance / overadvance_candidate.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: drei Advancement-Counter in beliebiger Kombination auf installierte advancebare Karten; eigene hidden information bleibt Corp-seitig.",
+          "OPS-V2: Taxonomy follow-up: corp.overadvance_value separat entscheiden; bis dahin nur als candidate/deferred ausweisen.",
+          "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 10; Report zeigt variabel/nicht numerisch. Datenmodell prüfen.",
+          "OPS-V2: Strategy candidate/deferred: candidate: corp.overadvance_value -> enabler/overadvance_counter_burst (medium), falls Strategy ID beschlossen wird"
+        ]
+      },
+      "candidateNotes": [
+        "OPS-V2: Strategy candidate/deferred: candidate: corp.overadvance_value -> enabler/overadvance_counter_burst (medium), falls Strategy ID beschlossen wird"
+      ],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    },
+    {
+      "title": "Netwatch Credit Voucher",
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "tag_snowball_followup / minor_economy",
+      "targetOrConstraints": "Keine Zielwahl.",
+      "taxonomyFollowup": "tag.additional_tag_followup auf tag.additional_tag_source/tag_snowball_followup normalisieren. Economy ist SupportingEvidence, nicht Rollenursache.",
+      "before": {
+        "tacticSignals": [
+          "economy.corp_credit_burst",
+          "risk.requires_tagged_runner",
+          "tag.additional_tag_followup",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.additional_tag_source",
+          "tag_snowball_followup",
+          "economy.corp_credit_burst",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "additional_tag_minor_credit_followup",
+            "evidence": [
+              "tag.additional_tag_source",
+              "tag_snowball_followup",
+              "tag.payoff"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: tag_snowball_followup / minor_economy. Review-v2-Rolle tag_snowball_followup wird als validierbare Hauptrolle enabler mit roleDetail gespeichert."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=tag_snowball_followup / minor_economy.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl.",
+          "OPS-V2: Taxonomy follow-up: tag.additional_tag_followup auf tag.additional_tag_source/tag_snowball_followup normalisieren. Economy ist SupportingEvidence, nicht Rollenursache."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "New Blood",
+      "cardId": "onr_v1_294_new-blood",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "ice_rearrange_conceal / glacier_support",
+      "targetOrConstraints": "Corp ordnet eigene ICE verdeckt; Runner darf neue Ordnung nicht aus Inspector-/KI-Daten kennen. TargetProfile/Choice muss side-safe sein.",
+      "taxonomyFollowup": "ice.corp_rearrange_conceal ggf. durch zwei präzisere Signale ersetzen.",
+      "before": {
+        "tacticSignals": [
+          "ice.corp_rearrange_conceal"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "ice.corp_conceal_unrezzed_ice",
+          "ice.corp_rearrange_installed_ice",
+          "info.corp_hidden_ice_order_reset"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "defensive_tool",
+            "roleDetail": "ice_conceal_rearrange",
+            "evidence": [
+              "ice.corp_conceal_unrezzed_ice",
+              "ice.corp_rearrange_installed_ice",
+              "info.corp_hidden_ice_order_reset"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: ice_rearrange_conceal / glacier_support."
+          }
+        ],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=ice_rearrange_conceal / glacier_support.",
+          "OPS-V2: Target/Constraints: Corp ordnet eigene ICE verdeckt; Runner darf neue Ordnung nicht aus Inspector-/KI-Daten kennen. TargetProfile/Choice muss side-safe sein.",
+          "OPS-V2: Taxonomy follow-up: ice.corp_rearrange_conceal ggf. durch zwei präzisere Signale ersetzen.",
+          "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 0; Report zeigt variabel/nicht numerisch. Datenmodell prüfen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Night Shift",
+      "cardId": "onr_v1_295_night-shift",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "bucket": "draw_economy_support",
+      "targetOrConstraints": "Keine Zielwahl.",
+      "taxonomyFollowup": "Keine.",
+      "before": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "economy.corp_credit_burst",
+          "draw.corp_draw"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: behalten; priority=low; bucket=draw_economy_support.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals"
+      ]
+    },
+    {
+      "title": "Off-Site Backups",
+      "cardId": "onr_v1_296_off-site-backups",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "archives_recovery / support_only",
+      "targetOrConstraints": "TargetProfile nötig: Corp wählt eine Karte aus eigenen Archives und bringt sie nach HQ; side-safe eigene Zone.",
+      "taxonomyFollowup": "Keine Strategy ID für generische Recovery setzen.",
+      "before": {
+        "tacticSignals": [
+          "archives.corp_recovery"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "archives.corp_recovery",
+          "hq.corp_card_recovery"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=archives_recovery / support_only.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: Corp wählt eine Karte aus eigenen Archives und bringt sie nach HQ; side-safe eigene Zone.",
+          "OPS-V2: Taxonomy follow-up: Keine Strategy ID für generische Recovery setzen.",
+          "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 0; Report zeigt variabel/nicht numerisch. Datenmodell prüfen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals"
+      ]
+    },
+    {
+      "title": "Overtime Incentives",
+      "cardId": "onr_v1_297_overtime-incentives",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "action_tempo_candidate / extra_action_burst",
+      "targetOrConstraints": "Keine Zielwahl; die gewonnenen Folgeaktionen bleiben normale LegalActions mit eigenen Kosten/Timing-Gates.",
+      "taxonomyFollowup": "corp.action_tempo separat entscheiden. Falls akzeptiert, Overtime ist der klarste High-Confidence-Anker dieser neuen Linie.",
+      "before": {
+        "tacticSignals": [
+          "action.corp_extra_action_support"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "action.corp_extra_action_burst",
+          "action.corp_extra_action_support",
+          "tempo.corp_action_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=action_tempo_candidate / extra_action_burst.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl; die gewonnenen Folgeaktionen bleiben normale LegalActions mit eigenen Kosten/Timing-Gates.",
+          "OPS-V2: Taxonomy follow-up: corp.action_tempo separat entscheiden. Falls akzeptiert, Overtime ist der klarste High-Confidence-Anker dieser neuen Linie.",
+          "OPS-V2: Strategy candidate/deferred: candidate: corp.action_tempo -> payoff_anchor/extra_action_burst (high), falls Strategy ID bewusst eingeführt wird"
+        ]
+      },
+      "candidateNotes": [
+        "OPS-V2: Strategy candidate/deferred: candidate: corp.action_tempo -> payoff_anchor/extra_action_burst (high), falls Strategy ID bewusst eingeführt wird"
+      ],
+      "changedFields": [
+        "tacticSignals"
+      ]
+    },
+    {
+      "title": "Planning Consultants",
+      "cardId": "onr_v1_298_planning-consultants",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "bucket": "rnd_topdeck_setup / support_only",
+      "targetOrConstraints": "Corp sieht und ordnet Top 5 von R&D; keine Runner-Information ableiten.",
+      "taxonomyFollowup": "Kein Deck-Recycle- oder Central-Stabilize-Anker allein aus Topdeck-Setup.",
+      "before": {
+        "tacticSignals": [
+          "rnd.corp_topdeck_reorder",
+          "rnd.corp_topdeck_setup"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "info.corp_rnd_peek",
+          "rnd.corp_topdeck_reorder",
+          "rnd.corp_topdeck_setup"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=low; bucket=rnd_topdeck_setup / support_only.",
+          "OPS-V2: Target/Constraints: Corp sieht und ordnet Top 5 von R&D; keine Runner-Information ableiten.",
+          "OPS-V2: Taxonomy follow-up: Kein Deck-Recycle- oder Central-Stabilize-Anker allein aus Topdeck-Setup.",
+          "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 0; Report zeigt variabel/nicht numerisch. Datenmodell prüfen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals"
+      ]
+    },
+    {
+      "title": "Power Grid Overload",
+      "cardId": "onr_v1_299_power-grid-overload",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "tagged_runner_payoff / hardware_trash",
+      "targetOrConstraints": "TargetProfile nötig: X installierte Runner-Hardware, Constraint not_cybernetics; nur sichtbare/legale Hardware-Ziele.",
+      "taxonomyFollowup": "hardware.trash_payoff durch target.runner_hardware_trash/tag.runner_hardware_trash_payoff präzisieren; not_cybernetics als Constraint, nicht als Taktiksignal.",
+      "before": {
+        "tacticSignals": [
+          "hardware.trash_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          },
+          {
+            "kind": "requires_installed_hardware"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff",
+          "target.runner_hardware_trash",
+          "tag.runner_hardware_trash_payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_hardware_trash",
+            "evidence": [
+              "tag.payoff",
+              "target.runner_hardware_trash",
+              "tag.runner_hardware_trash_payoff"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: tagged_runner_payoff / hardware_trash."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          },
+          {
+            "kind": "requires_installed_hardware"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=tagged_runner_payoff / hardware_trash.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: X installierte Runner-Hardware, Constraint not_cybernetics; nur sichtbare/legale Hardware-Ziele.",
+          "OPS-V2: Taxonomy follow-up: hardware.trash_payoff durch target.runner_hardware_trash/tag.runner_hardware_trash_payoff präzisieren; not_cybernetics als Constraint, nicht als Taktiksignal.",
+          "OPS-V2: Data/effect follow-up: Kosten X ist korrekt variabel."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Project Consultants",
+      "cardId": "onr_v1_300_project-consultants",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "advancement_counter_burst / fast_advance / overadvance_candidate",
+      "targetOrConstraints": "TargetProfile nötig: vier Advancement-Counter in beliebiger Kombination auf installierte advancebare Karten.",
+      "taxonomyFollowup": "corp.overadvance_value separat entscheiden. Bis dahin als candidate/deferred führen.",
+      "before": {
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.overadvance_support",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "advance.corp_counter_placement",
+          "advance.corp_distributed_counter_burst",
+          "advance.score_window_support",
+          "advance.overadvance_support",
+          "condition.requires_installed_advanceable_card"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "roleDetail": "advance_counter_burst",
+            "evidence": [
+              "advance.corp_counter_placement",
+              "advance.corp_distributed_counter_burst",
+              "advance.score_window_support"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: advancement_counter_burst / fast_advance / overadvance_candidate."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_advanceable_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=advancement_counter_burst / fast_advance / overadvance_candidate.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: vier Advancement-Counter in beliebiger Kombination auf installierte advancebare Karten.",
+          "OPS-V2: Taxonomy follow-up: corp.overadvance_value separat entscheiden. Bis dahin als candidate/deferred führen.",
+          "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 12; Report zeigt variabel/nicht numerisch. Datenmodell prüfen.",
+          "OPS-V2: Strategy candidate/deferred: candidate: corp.overadvance_value -> enabler/overadvance_counter_burst (medium), falls Strategy ID beschlossen wird"
+        ]
+      },
+      "candidateNotes": [
+        "OPS-V2: Strategy candidate/deferred: candidate: corp.overadvance_value -> enabler/overadvance_counter_burst (medium), falls Strategy ID beschlossen wird"
+      ],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    },
+    {
+      "title": "Punitive Counterstrike",
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "tagged_meat_damage_payoff",
+      "targetOrConstraints": "Keine Zielwahl; Damage-Prevention/Flatline bleiben Engine-Vertrag.",
+      "taxonomyFollowup": "damage.meat_source auf damage.corp_meat_source oder damage.corp_tagged_meat_payoff präzisieren.",
+      "before": {
+        "tacticSignals": [
+          "damage.meat_source",
+          "damage.tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "win_condition"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "damage.corp_meat_source",
+          "damage.corp_tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_meat_damage_payoff",
+            "evidence": [
+              "damage.corp_meat_source",
+              "damage.corp_tagged_meat_payoff",
+              "tag.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: tagged_meat_damage_payoff."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_meat_damage_payoff",
+            "evidence": [
+              "damage.corp_meat_source",
+              "damage.corp_tagged_meat_payoff",
+              "tag.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: tagged_meat_damage_payoff."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=tagged_meat_damage_payoff.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl; Damage-Prevention/Flatline bleiben Engine-Vertrag.",
+          "OPS-V2: Taxonomy follow-up: damage.meat_source auf damage.corp_meat_source oder damage.corp_tagged_meat_payoff präzisieren."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Scorched Earth",
+      "cardId": "onr_v1_302_scorched-earth",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "tagged_meat_damage_closeout",
+      "targetOrConstraints": "Keine Zielwahl; Damage-Prevention/Flatline bleiben Engine-Vertrag.",
+      "taxonomyFollowup": "damage.meat_source auf damage.corp_meat_source normalisieren.",
+      "before": {
+        "tacticSignals": [
+          "damage.meat_source",
+          "damage.tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "damage.corp_meat_source",
+          "damage.corp_tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition",
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "win_condition",
+            "roleDetail": "tagged_meat_damage_closeout",
+            "evidence": [
+              "damage.corp_meat_source",
+              "damage.corp_tagged_meat_payoff",
+              "tag.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: tagged_meat_damage_closeout."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_meat_damage_payoff",
+            "evidence": [
+              "damage.corp_meat_source",
+              "damage.corp_tagged_meat_payoff",
+              "tag.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: tagged_meat_damage_closeout."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=tagged_meat_damage_closeout.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl; Damage-Prevention/Flatline bleiben Engine-Vertrag.",
+          "OPS-V2: Taxonomy follow-up: damage.meat_source auf damage.corp_meat_source normalisieren."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Silver Lining Recovery Protocol",
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+      "reviewStatus": "kleine Änderung",
+      "priority": "low",
+      "bucket": "reactive_economy_support",
+      "targetOrConstraints": "Keine Zielwahl; Betrag hängt von Advancement-Countern der gestohlenen Agendas ab.",
+      "taxonomyFollowup": "Kein overadvance_support: die Karte nutzt gestohlene Agenda-Counter retrospektiv, sie unterstützt Overadvance nicht aktiv.",
+      "before": {
+        "tacticSignals": [
+          "condition.agenda_stolen_last_turn",
+          "economy.corp_conditional_credit"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_stolen_agenda_last_turn"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "condition.agenda_stolen_last_turn",
+          "economy.corp_reactive_credit_burst",
+          "economy.corp_conditional_credit"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_stolen_agenda_last_turn"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=low; bucket=reactive_economy_support.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl; Betrag hängt von Advancement-Countern der gestohlenen Agendas ab.",
+          "OPS-V2: Taxonomy follow-up: Kein overadvance_support: die Karte nutzt gestohlene Agenda-Counter retrospektiv, sie unterstützt Overadvance nicht aktiv.",
+          "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 0; Report zeigt variabel/nicht numerisch. Datenmodell prüfen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals"
+      ]
+    },
+    {
+      "title": "Systematic Layoffs",
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "advancement_counter_burst / fast_advance / overadvance_candidate",
+      "targetOrConstraints": "TargetProfile nötig: zwei Advancement-Counter in beliebiger Kombination auf installierte advancebare Karten.",
+      "taxonomyFollowup": "corp.overadvance_value separat entscheiden.",
+      "before": {
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.overadvance_support",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "advance.corp_counter_placement",
+          "advance.corp_distributed_counter_burst",
+          "advance.score_window_support",
+          "advance.overadvance_support",
+          "condition.requires_installed_advanceable_card"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "roleDetail": "advance_counter_burst",
+            "evidence": [
+              "advance.corp_counter_placement",
+              "advance.corp_distributed_counter_burst",
+              "advance.score_window_support"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: advancement_counter_burst / fast_advance / overadvance_candidate."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_advanceable_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=advancement_counter_burst / fast_advance / overadvance_candidate.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: zwei Advancement-Counter in beliebiger Kombination auf installierte advancebare Karten.",
+          "OPS-V2: Taxonomy follow-up: corp.overadvance_value separat entscheiden.",
+          "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 5; Report zeigt variabel/nicht numerisch. Datenmodell prüfen.",
+          "OPS-V2: Strategy candidate/deferred: candidate: corp.overadvance_value -> enabler/overadvance_counter_burst (medium), falls Strategy ID beschlossen wird"
+        ]
+      },
+      "candidateNotes": [
+        "OPS-V2: Strategy candidate/deferred: candidate: corp.overadvance_value -> enabler/overadvance_counter_burst (medium), falls Strategy ID beschlossen wird"
+      ],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    },
+    {
+      "title": "Team Restructuring",
+      "cardId": "onr_v1_305_team-restructuring",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "distributed_advancement / fast_advance",
+      "targetOrConstraints": "TargetProfile nötig: je ein Counter auf bis zu zwei installierte Karten, die advanced werden können.",
+      "taxonomyFollowup": "requires_score_window entfernen; optional schwaches advance.overadvance_support nur als supporting signal prüfen.",
+      "before": {
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_score_window"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "advance.corp_counter_placement",
+          "advance.corp_distributed_counter_support",
+          "advance.score_window_support",
+          "condition.requires_installed_advanceable_card"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "roleDetail": "distributed_advance_counter_support",
+            "evidence": [
+              "advance.corp_counter_placement",
+              "advance.corp_distributed_counter_support",
+              "advance.score_window_support"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: distributed_advancement / fast_advance."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_advanceable_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=distributed_advancement / fast_advance.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: je ein Counter auf bis zu zwei installierte Karten, die advanced werden können.",
+          "OPS-V2: Taxonomy follow-up: requires_score_window entfernen; optional schwaches advance.overadvance_support nur als supporting signal prüfen.",
+          "OPS-V2: Data/effect follow-up: Spoiler-Kosten: 1; Report zeigt variabel/nicht numerisch. Datenmodell prüfen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    },
+    {
+      "title": "Trojan Horse",
+      "cardId": "onr_v1_306_trojan-horse",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "retaliatory_tag_source",
+      "targetOrConstraints": "Keine Zielwahl. Nur spielbar, wenn Runner letzte Runde Agenda(s) gestohlen hat.",
+      "taxonomyFollowup": "retaliatory_tag_source in RoleDetail präzisieren; condition beibehalten.",
+      "before": {
+        "tacticSignals": [
+          "condition.agenda_stolen_last_turn",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_stolen_agenda_last_turn"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "condition.agenda_stolen_last_turn",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "retaliatory_agenda_stolen_tag_source",
+            "evidence": [
+              "tag.source"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: retaliatory_tag_source. Review-v2-Rolle tag_source_enabler wird als validierbare Hauptrolle enabler mit roleDetail gespeichert."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_stolen_agenda_last_turn"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=retaliatory_tag_source.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl. Nur spielbar, wenn Runner letzte Runde Agenda(s) gestohlen hat.",
+          "OPS-V2: Taxonomy follow-up: retaliatory_tag_source in RoleDetail präzisieren; condition beibehalten."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Urban Renewal",
+      "cardId": "onr_v1_307_urban-renewal",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "tagged_meat_damage_closeout",
+      "targetOrConstraints": "Keine Zielwahl; Damage-Prevention/Flatline bleiben Engine-Vertrag.",
+      "taxonomyFollowup": "damage.meat_source auf damage.corp_meat_source normalisieren.",
+      "before": {
+        "tacticSignals": [
+          "damage.meat_source",
+          "damage.tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "damage.corp_meat_source",
+          "damage.corp_tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition",
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "win_condition",
+            "roleDetail": "tagged_meat_damage_closeout",
+            "evidence": [
+              "damage.corp_meat_source",
+              "damage.corp_tagged_meat_payoff",
+              "tag.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: tagged_meat_damage_closeout."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_meat_damage_payoff",
+            "evidence": [
+              "damage.corp_meat_source",
+              "damage.corp_tagged_meat_payoff",
+              "tag.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: tagged_meat_damage_closeout."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=tagged_meat_damage_closeout.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl; Damage-Prevention/Flatline bleiben Engine-Vertrag.",
+          "OPS-V2: Taxonomy follow-up: damage.meat_source auf damage.corp_meat_source normalisieren."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Corporate Guard(R) Temps",
+      "cardId": "onr_proteus_046_corporate-guard-r-temps",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "action_tempo_candidate / recurring_extra_action_with_drawback",
+      "targetOrConstraints": "X wird beim Spielen gewählt/bezahlt; Folgeaktionen und Forfeit-Folge müssen als Engine-/LegalAction-Vertrag abgebildet werden.",
+      "taxonomyFollowup": "corp.action_tempo separat entscheiden. Drawback-Signal nach Regeltextverifikation normalisieren.",
+      "before": {
+        "tacticSignals": [
+          "action.corp_future_extra_action",
+          "risk.agenda_forfeit_drawback"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "action.corp_future_extra_action",
+          "action.corp_recurring_extra_action_limited",
+          "risk.future_forfeit_drawback"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=action_tempo_candidate / recurring_extra_action_with_drawback.",
+          "OPS-V2: Target/Constraints: X wird beim Spielen gewählt/bezahlt; Folgeaktionen und Forfeit-Folge müssen als Engine-/LegalAction-Vertrag abgebildet werden.",
+          "OPS-V2: Taxonomy follow-up: corp.action_tempo separat entscheiden. Drawback-Signal nach Regeltextverifikation normalisieren.",
+          "OPS-V2: Data/effect follow-up: Kartentext 'Forfeit the next [X] you gain' im Datenmodell prüfen: agenda point forfeit vs. Credit/sonstiger Forfeit darf nicht blind geraten werden.",
+          "OPS-V2: Strategy candidate/deferred: candidate: corp.action_tempo -> engine_anchor/delayed_recurring_extra_action_engine (medium), falls Strategy ID bewusst eingeführt wird"
+        ]
+      },
+      "candidateNotes": [
+        "OPS-V2: Strategy candidate/deferred: candidate: corp.action_tempo -> engine_anchor/delayed_recurring_extra_action_engine (medium), falls Strategy ID bewusst eingeführt wird"
+      ],
+      "changedFields": [
+        "tacticSignals"
+      ]
+    },
+    {
+      "title": "Credit Consolidation",
+      "cardId": "onr_proteus_047_credit-consolidation",
+      "reviewStatus": "behalten",
+      "priority": "low",
+      "bucket": "economy_support",
+      "targetOrConstraints": "Keine Zielwahl.",
+      "taxonomyFollowup": "Keine.",
+      "before": {
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: behalten; priority=low; bucket=economy_support.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl.",
+          "OPS-V2: Data/effect follow-up: Kosten 10, Gain 15; netto +5 im CostProfile modellieren."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": []
+    },
+    {
+      "title": "Data Sifters",
+      "cardId": "onr_proteus_048_data-sifters",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "retaliatory_tag_source",
+      "targetOrConstraints": "Keine Zielwahl. Spielbar nur, wenn Runner letzte Runde Node(s) trashte.",
+      "taxonomyFollowup": "condition.node_trashed_last_turn auf condition.runner_trashed_node_last_turn normalisieren.",
+      "before": {
+        "tacticSignals": [
+          "condition.node_trashed_last_turn",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "condition.runner_trashed_node_last_turn",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "retaliatory_node_trash_tag_source",
+            "evidence": [
+              "tag.source"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: retaliatory_tag_source. Review-v2-Rolle tag_source_enabler wird als validierbare Hauptrolle enabler mit roleDetail gespeichert."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_trashed_node_last_turn"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=retaliatory_tag_source.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl. Spielbar nur, wenn Runner letzte Runde Node(s) trashte.",
+          "OPS-V2: Taxonomy follow-up: condition.node_trashed_last_turn auf condition.runner_trashed_node_last_turn normalisieren.",
+          "OPS-V2: Data/effect follow-up: Effect Conditions von requires_installed_card auf requires_runner_trashed_node_last_turn prüfen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    },
+    {
+      "title": "Emergency Rig",
+      "cardId": "onr_proteus_049_emergency-rig",
+      "reviewStatus": "kleine Änderung",
+      "priority": "medium",
+      "bucket": "ice_rez / temporary_rez",
+      "targetOrConstraints": "TargetProfile nötig: eine installierte ICE; X Kludge-Counter > 0; Trash beim letzten entfernten Counter ist Engine-Folge.",
+      "taxonomyFollowup": "risk.temporary_rez_liability kann Oberklasse bleiben; präzises Trash-Liability-Signal ergänzen.",
+      "before": {
+        "tacticSignals": [
+          "ice.corp_free_rez",
+          "ice.corp_temporary_rez",
+          "risk.temporary_rez_liability"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "ice.corp_free_rez",
+          "ice.corp_temporary_rez",
+          "risk.temporary_rez_liability",
+          "risk.trash_rezzed_ice_after_kludge"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "enabler",
+            "roleDetail": "temporary_free_rez_ice",
+            "evidence": [
+              "ice.corp_free_rez",
+              "ice.corp_temporary_rez"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: ice_rez / temporary_rez."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: kleine Änderung; priority=medium; bucket=ice_rez / temporary_rez.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: eine installierte ICE; X Kludge-Counter > 0; Trash beim letzten entfernten Counter ist Engine-Folge.",
+          "OPS-V2: Taxonomy follow-up: risk.temporary_rez_liability kann Oberklasse bleiben; präzises Trash-Liability-Signal ergänzen.",
+          "OPS-V2: Data/effect follow-up: Kosten X korrekt variabel; X darf nicht 0 sein."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Manhunt",
+      "cardId": "onr_proteus_050_manhunt",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "scaling_trace_tag_source",
+      "targetOrConstraints": "Keine Zielwahl; Trace-Bidding über LegalActions; Tag-Anzahl = erfolgreiche Trace-Marge.",
+      "taxonomyFollowup": "tag.scaling_trace_margin_source oder RoleDetail scaling_trace_tag_source katalogisieren; condition.last_turn_run normalisieren.",
+      "before": {
+        "tacticSignals": [
+          "condition.last_turn_run",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "condition.runner_attempted_run_last_turn",
+          "trace.source",
+          "tag.source",
+          "tag.scaling_trace_margin_source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "scaling_trace_margin_tag_source",
+            "evidence": [
+              "trace.source",
+              "tag.source",
+              "tag.scaling_trace_margin_source"
+            ],
+            "confidence": "high",
+            "rationale": "Operations Semantic Review v2: scaling_trace_tag_source. Review-v2-Rolle trace_tag_source wird als validierbare Hauptrolle enabler mit roleDetail gespeichert."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          },
+          {
+            "kind": "requires_runner_attempted_run_last_turn"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=scaling_trace_tag_source.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl; Trace-Bidding über LegalActions; Tag-Anzahl = erfolgreiche Trace-Marge.",
+          "OPS-V2: Taxonomy follow-up: tag.scaling_trace_margin_source oder RoleDetail scaling_trace_tag_source katalogisieren; condition.last_turn_run normalisieren.",
+          "OPS-V2: Data/effect follow-up: Effect amount sollte scaling-by-trace-margin statt amount=1 abbilden."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    },
+    {
+      "title": "Rent-to-Own Contract",
+      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "ice_rez / installment_liability",
+      "targetOrConstraints": "TargetProfile nötig: eine installierte ICE; Term-Counter = Rez-Kosten; Folgezahlung/Counter-Änderung ist Engine-Vertrag.",
+      "taxonomyFollowup": "ice.corp_deferred_rez entfernen oder nur als Legacy; präzise Immediate-Free-Rez-plus-Installment-Semantik verwenden.",
+      "before": {
+        "tacticSignals": [
+          "ice.corp_deferred_rez",
+          "ice.corp_installment_rez"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "ice.corp_free_rez",
+          "ice.corp_installment_rez",
+          "risk.deferred_rez_payment_liability",
+          "risk.term_counter_payment_liability"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "enabler",
+            "roleDetail": "installment_free_rez_ice",
+            "evidence": [
+              "ice.corp_free_rez",
+              "ice.corp_installment_rez"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: ice_rez / installment_liability."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=ice_rez / installment_liability.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: eine installierte ICE; Term-Counter = Rez-Kosten; Folgezahlung/Counter-Änderung ist Engine-Vertrag.",
+          "OPS-V2: Taxonomy follow-up: ice.corp_deferred_rez entfernen oder nur als Legacy; präzise Immediate-Free-Rez-plus-Installment-Semantik verwenden."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "title": "Schlaghund Pointers",
+      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "reviewStatus": "ändern",
+      "priority": "medium",
+      "bucket": "paid_trace_tag_source",
+      "targetOrConstraints": "Keine Zielwahl; Trace-Bidding/Kosten über LegalActions; Bedingung: Runner hat in diesem Spiel einen Run versucht.",
+      "taxonomyFollowup": "condition.run_this_game normalisieren; risk.extra_trace_cost oder CostProfile-Feld prüfen.",
+      "before": {
+        "tacticSignals": [
+          "condition.run_this_game",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_runner_action"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "condition.runner_attempted_run_this_game",
+          "trace.source",
+          "tag.source",
+          "risk.extra_trace_cost"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "paid_trace_tag_source",
+            "evidence": [
+              "trace.source",
+              "tag.source"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: paid_trace_tag_source. Review-v2-Rolle trace_tag_source wird als validierbare Hauptrolle enabler mit roleDetail gespeichert."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          },
+          {
+            "kind": "requires_runner_attempted_run_this_game"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=medium; bucket=paid_trace_tag_source.",
+          "OPS-V2: Target/Constraints: Keine Zielwahl; Trace-Bidding/Kosten über LegalActions; Bedingung: Runner hat in diesem Spiel einen Run versucht.",
+          "OPS-V2: Taxonomy follow-up: condition.run_this_game normalisieren; risk.extra_trace_cost oder CostProfile-Feld prüfen."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    },
+    {
+      "title": "Underworld Mole",
+      "cardId": "onr_proteus_053_underworld-mole",
+      "reviewStatus": "ändern",
+      "priority": "high",
+      "bucket": "conditional_trace_tag_source / resource_trash",
+      "targetOrConstraints": "TargetProfile nötig: nur eine Resource, die Runner im letzten Zug installiert hat; Trash und Tag erfolgen nur bei Trace-Erfolg.",
+      "taxonomyFollowup": "condition.resource_installed_last_turn normalisieren; resource.trash_payoff richtungs- und zeitpräzise machen.",
+      "before": {
+        "tacticSignals": [
+          "condition.resource_installed_last_turn",
+          "resource.trash_payoff",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "conditions": [
+          {
+            "kind": "requires_installed_resource"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": []
+      },
+      "after": {
+        "tacticSignals": [
+          "condition.runner_installed_resource_last_turn",
+          "trace.source",
+          "tag.source",
+          "target.runner_resource_trash",
+          "resource.runner_recent_install_trash"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler",
+          "support_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "resource_install_retaliatory_trace_tag_source",
+            "evidence": [
+              "trace.source",
+              "tag.source",
+              "target.runner_resource_trash",
+              "resource.runner_recent_install_trash"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: conditional_trace_tag_source / resource_trash. Review-v2-Rolle trace_tag_source wird als validierbare Hauptrolle enabler mit roleDetail gespeichert."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "support_tool",
+            "roleDetail": "trace_success_recent_resource_trash",
+            "evidence": [
+              "trace.source",
+              "tag.source",
+              "target.runner_resource_trash",
+              "resource.runner_recent_install_trash"
+            ],
+            "confidence": "medium",
+            "rationale": "Operations Semantic Review v2: conditional_trace_tag_source / resource_trash. Review-v2-Rolle disruption_tool wird als validierbare Hauptrolle support_tool mit roleDetail gespeichert."
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          },
+          {
+            "kind": "requires_runner_installed_resource_last_turn"
+          }
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "manualNotes": [
+          "OPS-V2: ändern; priority=high; bucket=conditional_trace_tag_source / resource_trash.",
+          "OPS-V2: Target/Constraints: TargetProfile nötig: nur eine Resource, die Runner im letzten Zug installiert hat; Trash und Tag erfolgen nur bei Trace-Erfolg.",
+          "OPS-V2: Taxonomy follow-up: condition.resource_installed_last_turn normalisieren; resource.trash_payoff richtungs- und zeitpräzise machen.",
+          "OPS-V2: Data/effect follow-up: Effect Conditions: requires_installed_resource plus requires_trace_success reichen nicht; 'installed during last turn' muss sichtbar sein."
+        ]
+      },
+      "candidateNotes": [],
+      "changedFields": [
+        "tacticSignals",
+        "strategicRole",
+        "strategySupportPairs",
+        "conditions"
+      ]
+    }
+  ]
+}
