@@ -40785,11 +40785,40 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "timing": "persistent",
+          "scope": "runner"
+        }
+      ],
+      "costProfile": {
+        "clicks": 0,
+        "credits": 1,
+        "memory": 1,
+        "reserveRisk": "low",
+        "opportunityCost": "low"
+      },
+      "breakerProfile": {
+        "coverage": [
+          "wall"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 2,
+        "pumpStrengthAmount": 3,
+        "breakCost": 1,
+        "maxSubroutinesPerBreak": 1
+      },
+      "manualNotes": [
+        "CLASSIC-AI-01: Wall-only breaker. Coverage support for rig construction, not a direct pressure anchor."
+      ]
     },
     {
       "cardId": "onr_classic_028_matador",
@@ -40819,11 +40848,40 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "timing": "persistent",
+          "scope": "runner"
+        }
+      ],
+      "costProfile": {
+        "clicks": 0,
+        "credits": 1,
+        "memory": 1,
+        "reserveRisk": "medium",
+        "opportunityCost": "low"
+      },
+      "breakerProfile": {
+        "coverage": [
+          "sentry"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 3,
+        "pumpStrengthAmount": 5,
+        "breakCost": 1,
+        "maxSubroutinesPerBreak": 1
+      },
+      "manualNotes": [
+        "CLASSIC-AI-01: Sentry breaker with large pump increments. Coverage support only; no standalone strategy anchor."
+      ]
     },
     {
       "cardId": "onr_classic_029_ms-todon",
@@ -40860,11 +40918,69 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "timing": "persistent",
+          "scope": "runner"
+        },
+        {
+          "kind": "tag",
+          "timing": "during_run",
+          "scope": "runner",
+          "resource": "tags",
+          "amount": 1,
+          "target": "self_tag_after_first_sentry_break"
+        },
+        {
+          "kind": "finite_economy_pool",
+          "timing": "during_run",
+          "scope": "runner",
+          "resource": "credits",
+          "target": "stealth_credit_loss"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        },
+        {
+          "kind": "requires_encounter"
+        }
+      ],
+      "costProfile": {
+        "clicks": 0,
+        "credits": 1,
+        "memory": 1,
+        "reserveRisk": "medium",
+        "opportunityCost": "medium"
+      },
+      "breakerProfile": {
+        "coverage": [
+          "sentry"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 1,
+        "pumpStrengthAmount": 1,
+        "breakCost": 1,
+        "maxSubroutinesPerBreak": 1,
+        "sideEffects": [
+          "stealth_loss"
+        ],
+        "restrictions": [
+          "first_sentry_break_each_run_gives_runner_tag"
+        ]
+      },
+      "manualNotes": [
+        "CLASSIC-AI-01: Efficient Sentry coverage carries visible tag and stealth-loss risk after first Sentry break each run."
+      ]
     },
     {
       "cardId": "onr_classic_030_psychic-friend",
@@ -40897,11 +41013,48 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "timing": "persistent",
+          "scope": "runner"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "costProfile": {
+        "clicks": 0,
+        "credits": 1,
+        "memory": 1,
+        "reserveRisk": "low",
+        "opportunityCost": "low"
+      },
+      "breakerProfile": {
+        "coverage": [
+          "code_gate"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 2,
+        "pumpStrengthAmount": 1,
+        "breakCost": 1,
+        "maxSubroutinesPerBreak": 1,
+        "sideEffects": [
+          "temporary_strength"
+        ]
+      },
+      "manualNotes": [
+        "CLASSIC-AI-01: Code-gate breaker; current implementation models the printed end-of-turn pump as current-run duration."
+      ]
     },
     {
       "cardId": "onr_classic_031_rent-i-con",
@@ -40935,11 +41088,61 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "timing": "persistent",
+          "scope": "runner"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "on_leave_play",
+          "scope": "installed_program",
+          "target": "run_end_self_trash"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        },
+        {
+          "kind": "requires_encounter"
+        }
+      ],
+      "costProfile": {
+        "clicks": 0,
+        "credits": 1,
+        "memory": 1,
+        "reserveRisk": "medium",
+        "opportunityCost": "high"
+      },
+      "breakerProfile": {
+        "coverage": [
+          "universal"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 1,
+        "pumpStrengthAmount": 1,
+        "breakCost": 1,
+        "maxSubroutinesPerBreak": 1,
+        "emergencyCoverage": true,
+        "sideEffects": [
+          "program_trash_risk"
+        ],
+        "restrictions": [
+          "trashes_self_at_end_of_run_after_break_use"
+        ]
+      },
+      "manualNotes": [
+        "CLASSIC-AI-01: Universal emergency breaker. Valuable for temporary coverage, but self-trash makes it poor as stable rig-first anchor."
+      ]
     },
     {
       "cardId": "onr_classic_032_schematics-search-engine",
@@ -40971,11 +41174,70 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "hq_info",
+          "timing": "on_access",
+          "scope": "hq",
+          "resource": "cards",
+          "target": "full_reveal"
+        },
+        {
+          "kind": "expose_info",
+          "timing": "on_access",
+          "scope": "installed_card",
+          "resource": "cards",
+          "target": "installed_corp_cards"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_hq_pressure"
+        },
+        {
+          "kind": "requires_accessed_card"
+        }
+      ],
+      "costProfile": {
+        "clicks": 0,
+        "credits": 0,
+        "memory": 1,
+        "reserveRisk": "low",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "hq_access",
+          "targetType": "card",
+          "purpose": "expose_installed_corp_cards_after_hq_access",
+          "preferences": [
+            "current_run_path_relevance",
+            "use_choice_option_with_visible_board_payoff"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "lineSupport": [
+        "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-01: HQ access reveals installed Corp card definitions publicly without CardInstanceIds. This is HQ-pressure payoff, not generic expose spam."
+      ]
     },
     {
       "cardId": "onr_classic_033_superglue",
@@ -41009,11 +41271,60 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "rez",
+          "timing": "encounter_resolution",
+          "scope": "ice",
+          "target": "derez"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_rezzed_ice"
+        }
+      ],
+      "costProfile": {
+        "clicks": 0,
+        "memory": 1,
+        "counters": 0,
+        "reserveRisk": "low",
+        "opportunityCost": "medium"
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "encounter_resolution",
+          "targetType": "installed_ice",
+          "purpose": "derez_just_fully_broken_ice",
+          "preferences": [
+            "current_encounter_ice",
+            "known_or_rezzed_ice",
+            "high_rez_cost_relief",
+            "blocks_relevant_run_path"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "irrelevant_server_ice",
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "visible_or_known_only"
+        }
+      ],
+      "manualNotes": [
+        "CLASSIC-AI-01: Post-break derez support after all subroutines of the current ICE were broken. Support-only tempo tool, not a direct deck strategy anchor."
+      ]
     },
     {
       "cardId": "onr_classic_005_baskerville",
