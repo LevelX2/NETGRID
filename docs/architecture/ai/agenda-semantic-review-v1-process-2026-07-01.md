@@ -1,6 +1,6 @@
 # Agenda Semantic Review v1 Process
 
-Status: `active`
+Status: `complete`
 
 Quelle/Vorgabe: Nutzerauftrag vom 2026-07-01. Grundlage sind die fachlich überarbeiteten Review-Artefakte `agenda_semantic_review_v1.md`, `agenda_semantic_review_v1.csv` und der begleitende Kommentar, dass die alte Logik unvollständig ist und die Review-Ergebnisse vollständig umgesetzt werden sollen.
 
@@ -227,3 +227,13 @@ Arbeite ausschließlich im Agenda-Semantic-Review-v1-Worktree. Beginne bei AGEND
 - Alle neuen Evidence-IDs und Strategy-IDs sind validierbar.
 - Der Abschlussreport erlaubt fachliche Kontrolle von Alt- zu Neustand.
 - `main` enthält den integrierten Arbeitsbranch lokal und ist sauber.
+
+## Abschlussstand
+
+- Review-v1-Quellen wurden importiert.
+- Vier neue wiederverwendbare Corp-Strategieanker wurden ergänzt: `corp.action_tempo`, `corp.overadvance_value`, `corp.draw_engine`, `corp.deck_recycle_engine`.
+- 72 fehlende manuelle Agenda-Taktiksignale wurden katalogisiert.
+- Alle 50 Agenda-Hints wurden angewendet.
+- Ergebnis: 169 Taktiksignalverwendungen, 43 `strategySupportPairs`, 35 Agendas mit Strategieanker, 15 bewusst support-only.
+- Abschlussreport: `docs/reviews/ai/agenda-semantic-review-v1-result-2026-07-01.md`.
+- Harte Checks: compiled hints, Inspector-Index, Strategy-Taxonomie, gezielte AI-/Web-Tests, AI-/Web-Typechecks und `git diff --check` grün.
