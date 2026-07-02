@@ -10540,6 +10540,110 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "condition.runner_has_two_or_more_tags",
+      "group": "assets_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires the Runner to have two or more tags.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Assets Semantic Review v2 reviewed Corp-asset hints"
+      ],
+      "examples": [
+        "I Got a Rock"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Assets Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "condition.runner_received_tag_this_turn",
+      "group": "assets_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires the Runner to have received a tag during the current turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Assets Semantic Review v2 reviewed Corp-asset hints"
+      ],
+      "examples": [
+        "Omniscience Foundation"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Assets Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "economy.corp_installed_credit_pool",
+      "group": "assets_v2_economy",
+      "sideScope": "corp",
+      "description": "Installed Corp economy pool with preloaded credits that can be withdrawn through card actions.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Assets Semantic Review v2 reviewed Corp-asset hints"
+      ],
+      "examples": [
+        "BBS Whispering Campaign",
+        "Rockerboy Promotion"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Assets Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "economy.corp_rezzed_ice_cashout",
+      "group": "assets_v2_economy",
+      "sideScope": "corp",
+      "description": "Corp gains value by cashing out or trashing its own rezzed ICE.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Assets Semantic Review v2 reviewed Corp-asset hints"
+      ],
+      "examples": [
+        "Syd Meyer Superstores"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Assets Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "risk.ongoing_payment_liability",
+      "group": "assets_v2_risk_condition",
+      "sideScope": "corp",
+      "description": "Card carries an ongoing payment liability or upkeep burden that the Corp must account for.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Assets Semantic Review v2 reviewed Corp-asset hints"
+      ],
+      "examples": [
+        "ACME Savings and Loan"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Assets Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "risk.random_outcome",
+      "group": "assets_v2_risk_condition",
+      "sideScope": "corp",
+      "description": "Chosen action or trigger has a random outcome, such as a die-roll result.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Assets Semantic Review v2 reviewed Corp-asset hints"
+      ],
+      "examples": [
+        "Satellite Monitors",
+        "Schlaghund"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Assets Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     }
   ]
 }
