@@ -20376,12 +20376,8 @@
         "reserveRisk": "high",
         "opportunityCost": "high"
       },
-      "lineSupport": [
-        "corp.asset_economy"
-      ],
-      "strategicRole": [
-        "engine_anchor"
-      ],
+      "lineSupport": [],
+      "strategicRole": [],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -20394,7 +20390,14 @@
       "tacticSignals": [
         "economy.corp_credit_burst",
         "risk.agenda_point_cost",
-        "risk.loss_condition"
+        "risk.loss_condition",
+        "risk.ongoing_payment_liability"
+      ],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: ändern; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: schema_gap: long_term_liability_payment_choice.",
+        "ASSET-V2: Rationale: Starker, aber selbst-trashender One-shot-Burst mit Agenda-Kosten und Lose-Game-Liability; das ist keine Asset-Economy-Engine und sollte keine Decklinie allein ankern."
       ]
     },
     {
@@ -20462,8 +20465,26 @@
         "engine_anchor"
       ],
       "tacticSignals": [
-        "economy.corp_installed_credit_drip",
+        "economy.corp_installed_credit_pool",
         "remote.asset_economy"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.asset_economy",
+          "role": "engine_anchor",
+          "roleDetail": "installed_economy_engine",
+          "evidence": [
+            "remote.asset_economy",
+            "economy.corp_installed_credit_pool"
+          ],
+          "confidence": "medium",
+          "rationale": "Installed finite credit pool with action withdrawals creates asset-economy pressure; not an automatic drip."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Preloaded action-withdrawal pool, kein Drip. `corp.asset_economy` bleibt als installed economy engine."
       ]
     },
     {
@@ -20529,7 +20550,25 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "evidence": [
+            "trace.source",
+            "tag.source"
+          ],
+          "confidence": "medium",
+          "roleDetail": "trace_tag_source",
+          "rationale": "Trace 5 in Tag; kein Trace-Credit-Enabler. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:runner.",
+        "ASSET-V2: Rationale: Trace 5 in Tag; kein Trace-Credit-Enabler. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_311_braindance-campaign",
@@ -20597,6 +20636,23 @@
       "tacticSignals": [
         "economy.corp_installed_credit_drip",
         "remote.asset_economy"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.asset_economy",
+          "role": "engine_anchor",
+          "evidence": [
+            "remote.asset_economy"
+          ],
+          "confidence": "medium",
+          "roleDetail": "installed_economy_engine",
+          "rationale": "Start-of-turn installed economy creates asset-economy pressure; Gray Ops remains only a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Start-of-turn installed economy creates asset-economy pressure; Gray Ops remains only a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -20664,8 +20720,35 @@
       },
       "tacticSignals": [
         "advance.corp_counter_placement",
-        "advance.score_window_support",
-        "remote.scoring_protection"
+        "advance.score_window_support"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "scoring_tool",
+          "roleDetail": "advancement_enabler",
+          "evidence": [
+            "advance.corp_counter_placement",
+            "advance.score_window_support"
+          ],
+          "confidence": "high",
+          "rationale": "Repeatable two-counter placement is direct score-window support."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "scoring_tool",
+          "roleDetail": "advancement_enabler",
+          "evidence": [
+            "advance.score_window_support"
+          ],
+          "confidence": "medium",
+          "rationale": "Advancement acceleration also supports remote scoring, but it is not a protection effect."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:installed_advanceable_card.",
+        "ASSET-V2: Rationale: `remote.scoring_protection` ist für Chicago Branch ungenau; die Karte schützt nicht, sie beschleunigt Advancement/Scorefenster."
       ]
     },
     {
@@ -20732,6 +20815,24 @@
         {
           "kind": "requires_runner_pay_or_take_tag"
         }
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "evidence": [
+            "tag.corp_persistent_source",
+            "tag.source"
+          ],
+          "confidence": "high",
+          "roleDetail": "persistent_tag_source",
+          "rationale": "Persistent draw-linked tag pressure is a tag source, not a tagged payoff. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Persistent draw-linked tag pressure is a tag source, not a tagged payoff. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -20801,6 +20902,14 @@
         {
           "kind": "requires_agenda_reveal"
         }
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: behalten; priority=low; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: HQ-Agenda-Reveal-Economy with explicit reveal risk; no high-difficulty agenda risk. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -20836,7 +20945,7 @@
         "corp.ambush_bluff"
       ],
       "strategicRole": [
-        "support_tool"
+        "punish_payoff"
       ],
       "tacticSignals": [
         "access.corp_hardware_trash",
@@ -20867,7 +20976,26 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "evidence": [
+            "remote.ambush",
+            "access.punish",
+            "access.corp_hardware_trash"
+          ],
+          "confidence": "high",
+          "roleDetail": "access_hardware_trash",
+          "rationale": "Hardware-Trash-Access-Ambush ohne Tag-/Tagged-Logik. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: ändern; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:installed_hardware.",
+        "ASSET-V2: Rationale: Hardware-Trash-Access-Ambush ohne Tag-/Tagged-Logik. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_316_cowboy-sysop",
@@ -20916,7 +21044,15 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: behalten; priority=low; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: schema_gap: corp_private_installed_card_to_hq_choice.",
+        "ASSET-V2: Rationale: Uninstall eigener installierter Karte nach HQ; keine Archives-Recovery. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_317_data-masons",
@@ -20992,6 +21128,25 @@
         {
           "kind": "requires_installed_ice"
         }
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "evidence": [
+            "ice.corp_rez_discount",
+            "ice.corp_strength_support",
+            "tax.ice"
+          ],
+          "confidence": "high",
+          "roleDetail": "ice_tax_support",
+          "rationale": "Static Wall scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Static Wall scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -21023,7 +21178,6 @@
       ],
       "tacticSignals": [
         "economy.corp_action_charged_bank",
-        "economy.corp_charge_bank",
         "economy.corp_counter_bank",
         "remote.asset_economy"
       ],
@@ -21055,7 +21209,25 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.asset_economy",
+          "role": "engine_anchor",
+          "roleDetail": "installed_economy_engine",
+          "evidence": [
+            "remote.asset_economy",
+            "economy.corp_action_charged_bank"
+          ],
+          "confidence": "medium",
+          "rationale": "Action-charged installed credit bank; `economy.corp_charge_bank` is redundant with the more precise action-charged-bank signal."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: `economy.corp_charge_bank` ist redundant; action-charged bank plus counter bank genügt."
+      ]
     },
     {
       "cardId": "onr_v1_319_disinfectant-inc",
@@ -21102,7 +21274,15 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: behalten; priority=low; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Virus-counter prevention is defensive utility, not a generic Corp virus strategy. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_320_encoder-inc",
@@ -21173,7 +21353,26 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "evidence": [
+            "ice.corp_rez_discount",
+            "ice.corp_subroutine_support",
+            "tax.ice"
+          ],
+          "confidence": "high",
+          "roleDetail": "ice_tax_support",
+          "rationale": "Static Code-Gate scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Static Code-Gate scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_321_esa-contract",
@@ -21229,7 +21428,15 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: behalten; priority=low; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Corp Draw, nicht Credit-Economy. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_322_euromarket-consortium",
@@ -21294,7 +21501,15 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: behalten; priority=low; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Draw und Corp-Handsize, kein Score-Kontext. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_323_experimental-ai",
@@ -21362,7 +21577,26 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "evidence": [
+            "remote.ambush",
+            "access.punish",
+            "access.corp_program_trash"
+          ],
+          "confidence": "high",
+          "roleDetail": "access_program_trash",
+          "rationale": "Access program trash is a concrete ambush payoff; AI/Ambush subtypes remain card data. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:installed_program.",
+        "ASSET-V2: Rationale: Access program trash is a concrete ambush payoff; AI/Ambush subtypes remain card data. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_324_fortress-architects",
@@ -21414,17 +21648,32 @@
         "threatLevel": "medium"
       },
       "tacticSignals": [
-        "economy.rez_discount",
         "ice.corp_install_discount",
         "tax.ice"
       ],
       "lineSupport": [
-        "corp.economy_rez_reserve",
         "corp.ice_tax_glacier"
       ],
       "strategicRole": [
-        "engine_anchor",
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "ice_tax_support",
+          "evidence": [
+            "ice.corp_install_discount",
+            "tax.ice"
+          ],
+          "confidence": "medium",
+          "rationale": "Static ICE install discount supports ICE buildout/tax; it is not a rez discount and should not create a separate economy_rez_reserve anchor by itself."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: `economy.rez_discount` ist fachlich falsch, weil die Karte Installationskosten senkt. Der zweite Economy-Reserve-Anker ist zu stark."
       ]
     },
     {
@@ -21464,7 +21713,6 @@
         "enabler"
       ],
       "tacticSignals": [
-        "economy.corp_trace_credit_support",
         "trace.corp_credit_support"
       ],
       "effects": [
@@ -21482,7 +21730,24 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "roleDetail": "trace_credit_enabler",
+          "evidence": [
+            "trace.corp_credit_support"
+          ],
+          "confidence": "medium",
+          "rationale": "Trace-specific credit/limit support enables trace lines but is not a tag source itself."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: `economy.corp_trace_credit_support` und `trace.corp_credit_support` sind Synonyme; das trace.*-Signal ist präziser."
+      ]
     },
     {
       "cardId": "onr_v1_326_holovid-campaign",
@@ -21543,7 +21808,24 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.asset_economy",
+          "role": "engine_anchor",
+          "evidence": [
+            "remote.asset_economy"
+          ],
+          "confidence": "medium",
+          "roleDetail": "installed_economy_engine",
+          "rationale": "Installed credit drip creates asset-economy pressure; Advertisement remains a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Installed credit drip creates asset-economy pressure; Advertisement remains a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_327_i-got-a-rock",
@@ -21595,9 +21877,10 @@
         "win_condition"
       ],
       "tacticSignals": [
+        "condition.runner_has_two_or_more_tags",
         "damage.corp_tagged_meat_payoff",
         "damage.payoff",
-        "risk.requires_tagged_runner",
+        "risk.agenda_point_cost",
         "tag.payoff"
       ],
       "effects": [
@@ -21615,6 +21898,35 @@
         {
           "kind": "requires_scored_agenda"
         }
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "win_condition",
+          "roleDetail": "tagged_meat_payoff",
+          "evidence": [
+            "damage.corp_tagged_meat_payoff",
+            "damage.payoff"
+          ],
+          "confidence": "medium",
+          "rationale": "Massive meat damage payoff, but two-tag requirement and 3 agenda-point cost reduce confidence."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "win_condition",
+          "roleDetail": "tagged_meat_payoff",
+          "evidence": [
+            "tag.payoff",
+            "condition.runner_has_two_or_more_tags"
+          ],
+          "confidence": "medium",
+          "rationale": "Tag payoff requiring at least two tags and agenda-point payment; not a tag source."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:runner.",
+        "ASSET-V2: Rationale: Die Voraussetzung ist spezifisch „zwei oder mehr Tags“, nicht nur tagged; die Agenda-Punkt-Zahlung muss als Risiko/Kosten sichtbar sein."
       ]
     },
     {
@@ -21653,7 +21965,6 @@
       ],
       "tacticSignals": [
         "advance.corp_counter_bank",
-        "economy.corp_advanceable_cashout",
         "economy.corp_counter_cashout",
         "remote.asset_economy"
       ],
@@ -21673,7 +21984,25 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.asset_economy",
+          "role": "engine_anchor",
+          "roleDetail": "installed_economy_engine",
+          "evidence": [
+            "remote.asset_economy",
+            "economy.corp_counter_cashout"
+          ],
+          "confidence": "medium",
+          "rationale": "Advanceable counter cashout; `advance.corp_counter_bank` already carries the advanceable-counter context, so a separate advanceable-cashout synonym is unnecessary."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:self_advancement_counter_count.",
+        "ASSET-V2: Rationale: `economy.corp_advanceable_cashout` und `economy.corp_counter_cashout` doppeln sich hier; Counter-Cashout reicht zusammen mit `advance.corp_counter_bank`."
+      ]
     },
     {
       "cardId": "onr_v1_329_investment-firm",
@@ -21735,6 +22064,23 @@
           "timing": "action",
           "scope": "corp"
         }
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.asset_economy",
+          "role": "engine_anchor",
+          "evidence": [
+            "remote.asset_economy"
+          ],
+          "confidence": "medium",
+          "roleDetail": "installed_economy_engine",
+          "rationale": "Banked installed economy supports asset economy; Transactions remains card data. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Banked installed economy supports asset economy; Transactions remains card data. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -21769,7 +22115,6 @@
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_trace_hidden_targets"
       ],
       "tacticSignals": [
-        "economy.corp_trace_credit_support",
         "trace.corp_credit_support"
       ],
       "effects": [
@@ -21794,7 +22139,24 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "roleDetail": "trace_credit_enabler",
+          "evidence": [
+            "trace.corp_credit_support"
+          ],
+          "confidence": "low",
+          "rationale": "Small recurring trace-only credit support; not a tag source."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Trace-credit support nicht doppelt als economy.* und trace.* führen."
+      ]
     },
     {
       "cardId": "onr_v1_331_nevinyrral",
@@ -21844,7 +22206,15 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: behalten; priority=low; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Repeatable extra action with lose-game risk; no automatic Fast-Advance/Remote-Scoring anchor. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_332_newsgroup-taunting",
@@ -21902,7 +22272,25 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "evidence": [
+            "run.corp_start_tax",
+            "tax.runner_credit"
+          ],
+          "confidence": "medium",
+          "roleDetail": "run_tax_support",
+          "rationale": "Start-of-run credit tax supports tax/glacier without creating run legality. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Start-of-run credit tax supports tax/glacier without creating run legality. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_333_omniscience-foundation",
@@ -21937,9 +22325,8 @@
         "enabler"
       ],
       "tacticSignals": [
-        "risk.requires_tagged_runner",
-        "tag.additional_tag_followup",
-        "tag.payoff"
+        "condition.runner_received_tag_this_turn",
+        "tag.additional_tag_followup"
       ],
       "effects": [
         {
@@ -21962,7 +22349,24 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "roleDetail": "tag_snowball_followup",
+          "evidence": [
+            "tag.additional_tag_followup"
+          ],
+          "confidence": "medium",
+          "rationale": "Conditional additional-tag follow-up after Runner received a tag this turn; not an initial tag source and not generic tagged-runner payoff."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Die Bedingung ist „Runner received a tag this turn“, nicht „Runner is tagged“. `tag.payoff` ist hier zu grob."
+      ]
     },
     {
       "cardId": "onr_v1_334_pacifica-regional-ai",
@@ -22026,7 +22430,25 @@
         "kind": "asset_economy",
         "strategyDerivation": "not_for_strategy_derivation",
         "strategyDerivationNotes": "Guide V3: score-conversion support remains card-level fast advance; generated asset_economy remoteRole must not derive asset-economy strategy."
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "engine_anchor",
+          "evidence": [
+            "action.corp_counter_to_action",
+            "advance.score_window_support"
+          ],
+          "confidence": "high",
+          "roleDetail": "fast_advance_action_engine",
+          "rationale": "Advancement-counter-to-action conversion remains a plausible Fast-Advance anchor. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:self_advancement_counter_count.",
+        "ASSET-V2: Rationale: Advancement-counter-to-action conversion remains a plausible Fast-Advance anchor. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_335_remote-facility",
@@ -22074,7 +22496,15 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: behalten; priority=low; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Repeatable extra action remains a tactic signal; Fast-Advance/Remote-Scoring anchor deferred because no direct score conversion is encoded. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_336_rescheduler",
@@ -22140,7 +22570,15 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: behalten; priority=low; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: schema_gap: private_hq_shuffle_and_draw_count.",
+        "ASSET-V2: Rationale: HQ in R&D mischen und gleich viele Karten ziehen ist Hand-Refresh, kein kontrolliertes Topdeck-Setup. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_337_rockerboy-promotion",
@@ -22177,7 +22615,7 @@
         "engine_anchor"
       ],
       "tacticSignals": [
-        "economy.corp_installed_credit_drip",
+        "economy.corp_installed_credit_pool",
         "remote.asset_economy"
       ],
       "effects": [
@@ -22197,7 +22635,25 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.asset_economy",
+          "role": "engine_anchor",
+          "roleDetail": "installed_economy_engine",
+          "evidence": [
+            "remote.asset_economy",
+            "economy.corp_installed_credit_pool"
+          ],
+          "confidence": "medium",
+          "rationale": "Installed finite credit pool with action withdrawals creates asset-economy pressure; not an automatic drip."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Preloaded action-withdrawal pool, kein Drip. `corp.asset_economy` bleibt als installed economy engine."
+      ]
     },
     {
       "cardId": "onr_v1_338_rustbelt-hq-branch",
@@ -22255,7 +22711,15 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: behalten; priority=low; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Corp-Handsize, kein Score-Kontext. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_339_schlaghund",
@@ -22305,10 +22769,10 @@
         "win_condition"
       ],
       "tacticSignals": [
+        "condition.requires_tagged_runner",
         "damage.corp_tagged_meat_payoff",
         "damage.payoff",
-        "risk.random_action",
-        "risk.requires_tagged_runner",
+        "risk.random_outcome",
         "tag.payoff"
       ],
       "effects": [
@@ -22332,7 +22796,36 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "win_condition",
+          "roleDetail": "tagged_meat_payoff",
+          "evidence": [
+            "damage.corp_tagged_meat_payoff",
+            "damage.payoff"
+          ],
+          "confidence": "medium",
+          "rationale": "Tagged meat damage payoff with die-roll success condition; random outcome lowers confidence."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "win_condition",
+          "roleDetail": "tagged_meat_payoff",
+          "evidence": [
+            "tag.payoff",
+            "condition.requires_tagged_runner"
+          ],
+          "confidence": "medium",
+          "rationale": "Tag payoff, but stochastic; not a tag source."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:runner.",
+        "ASSET-V2: Rationale: `risk.random_action` beschreibt die Karte falsch; die Aktion ist gewählt, nur das Ergebnis ist zufällig."
+      ]
     },
     {
       "cardId": "onr_v1_340_setup",
@@ -22401,7 +22894,25 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "evidence": [
+            "access.corp_net_damage_ambush",
+            "access.punish"
+          ],
+          "confidence": "high",
+          "roleDetail": "access_net_damage_payoff",
+          "rationale": "Net-Damage-Access-Ambush; `damage.payoff` bleibt nur Oberklasse, kein Damage-Kill-Anker. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Net-Damage-Access-Ambush; `damage.payoff` bleibt nur Oberklasse, kein Damage-Kill-Anker. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
@@ -22465,7 +22976,25 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "evidence": [
+            "ice.corp_rez_discount",
+            "tax.ice"
+          ],
+          "confidence": "medium",
+          "roleDetail": "ice_tax_support",
+          "rationale": "Static Black-ICE scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Static Black-ICE scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_342_solo-squad",
@@ -22502,9 +23031,9 @@
         "win_condition"
       ],
       "tacticSignals": [
+        "condition.requires_tagged_runner",
         "damage.corp_tagged_meat_payoff",
         "damage.payoff",
-        "risk.requires_tagged_runner",
         "tag.payoff"
       ],
       "effects": [
@@ -22528,7 +23057,36 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "win_condition",
+          "roleDetail": "tagged_meat_payoff",
+          "evidence": [
+            "damage.corp_tagged_meat_payoff",
+            "damage.payoff"
+          ],
+          "confidence": "medium",
+          "rationale": "Small repeatable tagged meat damage can close games, but needs sustained tag state."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "win_condition",
+          "roleDetail": "tagged_meat_payoff",
+          "evidence": [
+            "tag.payoff",
+            "condition.requires_tagged_runner"
+          ],
+          "confidence": "medium",
+          "rationale": "Tagged-runner payoff; not a tag source."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:runner.",
+        "ASSET-V2: Rationale: `requires_tagged_runner` ist eine Condition, kein Risiko."
+      ]
     },
     {
       "cardId": "onr_v1_343_south-african-mining-corp",
@@ -22568,15 +23126,10 @@
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "corp.asset_economy"
-      ],
-      "strategicRole": [
-        "punish_payoff"
-      ],
+      "lineSupport": [],
+      "strategicRole": [],
       "tacticSignals": [
-        "economy.corp_multi_action_credit",
-        "remote.asset_economy"
+        "economy.corp_multi_action_credit"
       ],
       "effects": [
         {
@@ -22587,6 +23140,12 @@
           "amount": 6,
           "actionCost": 3
         }
+      ],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: ändern; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Drei Aktionen für 6 Credits ist generische, action-intensive Economy. Kein Remote-/Asset-Economy-Anker und kein punish_payoff/payoff_anchor."
       ]
     },
     {
@@ -22651,7 +23210,24 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.asset_economy",
+          "role": "engine_anchor",
+          "evidence": [
+            "remote.asset_economy"
+          ],
+          "confidence": "medium",
+          "roleDetail": "installed_economy_engine",
+          "rationale": "Installed banked economy supports asset economy without using Transactions as signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Installed banked economy supports asset economy without using Transactions as signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_345_trap",
@@ -22690,8 +23266,8 @@
         "corp.tag_trace_punish"
       ],
       "strategicRole": [
-        "enabler",
-        "punish_payoff"
+        "punish_payoff",
+        "enabler"
       ],
       "tacticSignals": [
         "access.archives_safe_exception",
@@ -22738,7 +23314,36 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "evidence": [
+            "access.corp_net_damage_ambush",
+            "access.punish"
+          ],
+          "confidence": "high",
+          "roleDetail": "access_net_damage_payoff",
+          "rationale": "Access-Net-Damage plus Access-Tag-Ambush; die Tag-Rolle ist nicht persistent. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "evidence": [
+            "access.corp_tag_ambush",
+            "tag.source"
+          ],
+          "confidence": "medium",
+          "roleDetail": "access_tag_source",
+          "rationale": "Access-Net-Damage plus Access-Tag-Ambush; die Tag-Rolle ist nicht persistent. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Access-Net-Damage plus Access-Tag-Ambush; die Tag-Rolle ist nicht persistent. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_346_vacant-soulkiller",
@@ -22807,7 +23412,36 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "evidence": [
+            "access.corp_brain_damage_ambush",
+            "access.punish"
+          ],
+          "confidence": "high",
+          "roleDetail": "access_brain_damage_payoff",
+          "rationale": "Brain-Damage-Ambush nach Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        },
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "evidence": [
+            "access.corp_brain_damage_ambush",
+            "damage.payoff"
+          ],
+          "confidence": "medium",
+          "roleDetail": "access_brain_damage_payoff",
+          "rationale": "Brain-Damage-Ambush nach Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Brain-Damage-Ambush nach Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_347_vapor-ops",
@@ -22841,7 +23475,7 @@
         "advance.corp_counter_bank",
         "advance.corp_counter_transfer",
         "advance.score_window_support",
-        "economy.corp_counter_bank"
+        "economy.corp_counter_cashout"
       ],
       "effects": [
         {
@@ -22869,7 +23503,25 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "scoring_tool",
+          "roleDetail": "advancement_enabler",
+          "evidence": [
+            "advance.corp_counter_transfer",
+            "advance.score_window_support"
+          ],
+          "confidence": "high",
+          "rationale": "Counter bank and transfer can convert into score windows; credit cashout is secondary support, not separate strategy evidence."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:installed_advanceable_card.",
+        "ASSET-V2: Rationale: Die Credit-Funktion ist Counter-Cashout, nicht nur ein Economy-Counter-Bank-Signal."
+      ]
     },
     {
       "cardId": "onr_v1_348_virus-test-site",
@@ -22945,7 +23597,36 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "evidence": [
+            "access.corp_net_damage_ambush",
+            "access.punish"
+          ],
+          "confidence": "high",
+          "roleDetail": "access_net_damage_payoff",
+          "rationale": "Net-Damage-Ambush skaliert mit Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        },
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "evidence": [
+            "access.corp_net_damage_ambush",
+            "damage.payoff"
+          ],
+          "confidence": "medium",
+          "roleDetail": "access_net_damage_payoff",
+          "rationale": "Net-Damage-Ambush skaliert mit Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Net-Damage-Ambush skaliert mit Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+      ]
     },
     {
       "cardId": "onr_v1_349_aardvark",
@@ -28102,6 +28783,24 @@
       ],
       "strategicRole": [
         "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "evidence": [
+            "access.corp_rnd_net_damage_ambush",
+            "access.punish"
+          ],
+          "confidence": "medium",
+          "roleDetail": "access_net_damage_payoff",
+          "rationale": "R&D-Access-Net-Damage plus Reveal/Self-Shuffle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=proteus.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: R&D-Access-Net-Damage plus Reveal/Self-Shuffle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -28137,8 +28836,7 @@
       },
       "tacticSignals": [
         "advance.corp_counter_bank",
-        "damage.corp_damage_amplifier",
-        "damage.payoff"
+        "damage.corp_damage_amplifier"
       ],
       "effects": [
         {
@@ -28151,7 +28849,24 @@
         "corp.damage_kill"
       ],
       "strategicRole": [
-        "win_condition"
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "enabler",
+          "roleDetail": "damage_amplifier",
+          "evidence": [
+            "damage.corp_damage_amplifier"
+          ],
+          "confidence": "high",
+          "rationale": "Advancement counters increase another meat damage source; not a direct damage payoff itself."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: ändern; priority=medium; set=proteus.",
+        "ASSET-V2: Target/Constraints: schema_gap: use_target:damage_source.",
+        "ASSET-V2: Rationale: `damage.payoff` ist für einen reinen Amplifier zu grob; die Karte liefert keinen eigenen Schaden."
       ]
     },
     {
@@ -28193,6 +28908,14 @@
           "timing": "prevention_window",
           "scope": "installed_card"
         }
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: behalten; priority=low; set=proteus.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:corp_card_expose_attempt.",
+        "ASSET-V2: Rationale: Expose prevention is defensive utility and not automatically remote contest. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -28256,6 +28979,24 @@
       ],
       "strategicRole": [
         "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "evidence": [
+            "access.corp_credit_loss_counter",
+            "access.punish"
+          ],
+          "confidence": "medium",
+          "roleDetail": "access_counter_credit_loss",
+          "rationale": "Counter-Punish konkret als Runner-Credit-Loss-Counter. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=proteus.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Counter-Punish konkret als Runner-Credit-Loss-Counter. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -28311,6 +29052,23 @@
       ],
       "strategicRole": [
         "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.economy_rez_reserve",
+          "role": "engine_anchor",
+          "evidence": [
+            "economy.corp_run_temporary_credit"
+          ],
+          "confidence": "medium",
+          "roleDetail": "install_rez_reserve",
+          "rationale": "Temporary run-only credits support rez/trace reserve with explicit random discard and temporary-credit drawbacks. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=proteus.",
+        "ASSET-V2: Target/Constraints: schema_gap: private_random_discard_cost.",
+        "ASSET-V2: Rationale: Temporary run-only credits support rez/trace reserve with explicit random discard and temporary-credit drawbacks. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -28345,7 +29103,7 @@
       },
       "tacticSignals": [
         "advance.corp_counter_bank",
-        "economy.advanceable",
+        "economy.corp_counter_cashout",
         "economy.corp_install_rez_credit",
         "risk.temporary_credit_drawback"
       ],
@@ -28360,9 +29118,6 @@
       "conditions": [
         {
           "kind": "requires_installed_card"
-        },
-        {
-          "kind": "requires_during_run"
         }
       ],
       "lineSupport": [
@@ -28370,6 +29125,24 @@
       ],
       "strategicRole": [
         "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.economy_rez_reserve",
+          "role": "engine_anchor",
+          "roleDetail": "install_rez_reserve",
+          "evidence": [
+            "economy.corp_install_rez_credit",
+            "economy.corp_counter_cashout"
+          ],
+          "confidence": "high",
+          "rationale": "Advanceable counters convert to temporary install/rez credits; side condition is not limited to during-run use."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=proteus.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:install_or_rez_payment.",
+        "ASSET-V2: Rationale: `economy.advanceable` ist zu generisch; Counter-Cashout plus Install/Rez-Credit beschreibt die Funktion präziser. `requires_during_run` sollte aus den Conditions entfernt werden."
       ]
     },
     {
@@ -28472,7 +29245,6 @@
       },
       "tacticSignals": [
         "advance.corp_counter_bank",
-        "economy.corp_trace_credit_support",
         "risk.temporary_credit_drawback",
         "trace.corp_credit_support"
       ],
@@ -28497,6 +29269,23 @@
       ],
       "strategicRole": [
         "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "roleDetail": "trace_credit_enabler",
+          "evidence": [
+            "trace.corp_credit_support"
+          ],
+          "confidence": "medium",
+          "rationale": "Advancement counters convert to trace-only temporary credits; not a tag source."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=proteus.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:trace_attempt.",
+        "ASSET-V2: Rationale: Trace-credit support nicht doppelt als economy.* und trace.* führen."
       ]
     },
     {
@@ -28995,6 +29784,24 @@
       ],
       "strategicRole": [
         "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "evidence": [
+            "access.corp_icebreaker_strength_counter",
+            "access.punish"
+          ],
+          "confidence": "medium",
+          "roleDetail": "access_counter_icebreaker_strength",
+          "rationale": "Counter-Punish konkret als Icebreaker-Strength-Counter. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=proteus.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:installed_icebreaker.",
+        "ASSET-V2: Rationale: Counter-Punish konkret als Icebreaker-Strength-Counter. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -29415,6 +30222,24 @@
       ],
       "strategicRole": [
         "defensive_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "evidence": [
+            "run.corp_redirect",
+            "remote.scoring_protection"
+          ],
+          "confidence": "high",
+          "roleDetail": "remote_run_control",
+          "rationale": "Run redirect/control supports remote defense but adds no planner or legality behavior. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=proteus.",
+        "ASSET-V2: Target/Constraints: schema_gap: run_redirect_fort_choice.",
+        "ASSET-V2: Rationale: Run redirect/control supports remote defense but adds no planner or legality behavior. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -29480,6 +30305,24 @@
       ],
       "strategicRole": [
         "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "evidence": [
+            "access.corp_archives_net_damage_ambush",
+            "access.punish"
+          ],
+          "confidence": "medium",
+          "roleDetail": "access_net_damage_payoff",
+          "rationale": "Archives selbst ist der Trigger; keine Archives-safe-exception. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=proteus.",
+        "ASSET-V2: Target/Constraints: not_required.",
+        "ASSET-V2: Rationale: Archives selbst ist der Trigger; keine Archives-safe-exception. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
       ]
     },
     {
@@ -29513,7 +30356,7 @@
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "economy.corp_asset_cashout",
+        "economy.corp_rezzed_ice_cashout",
         "ice.corp_self_trash_cost",
         "risk.trash_own_rezzed_ice"
       ],
@@ -29537,11 +30380,13 @@
           "kind": "requires_rezzed_ice"
         }
       ],
-      "lineSupport": [
-        "corp.asset_economy"
-      ],
-      "strategicRole": [
-        "punish_payoff"
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ASSET-V2: ändern; priority=medium; set=proteus.",
+        "ASSET-V2: Target/Constraints: candidate: use_target:own_rezzed_ice.",
+        "ASSET-V2: Rationale: Die Karte casht eigenes rezzed ICE aus, nicht ein Asset. Das ist Economy/ICE-Sacrifice-Utility mit Drawback, kein Asset-Economy-Anker."
       ]
     },
     {
@@ -36221,7 +37066,22 @@
         "defensive_tool"
       ],
       "manualNotes": [
-        "CLASSIC-AI-06: Successful-run follow-up resets Runner grip through stack shuffle/redraw. This is not an access ambush; hidden card identities stay outside Corp AI input."
+        "CLASSIC-AI-06: Successful-run follow-up resets Runner grip through stack shuffle/redraw. This is not an access ambush; hidden card identities stay outside Corp AI input.",
+        "ASSET-V2: kleine Änderung; priority=medium; set=classic.",
+        "ASSET-V2: Target/Constraints: kein TargetProfile; Runner-Handidentitäten bleiben verborgen, der Effekt ist nur als erfolgreicher-Run-Folgefenster relevant.",
+        "ASSET-V2: Rationale: Current-Hint ist fachlich brauchbar; es fehlt nur die hierarchische Pair-Ebene."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.central_stabilize",
+          "role": "defensive_tool",
+          "roleDetail": "successful_run_grip_reset_defense",
+          "evidence": [
+            "run.successful_run_grip_reset"
+          ],
+          "confidence": "medium",
+          "rationale": "Nach erfolgreichem Run stört der Asset-Trigger Runner-Handqualität und Folgeruns, ohne Access-Ambush- oder Hidden-Info-Leak zu sein."
+        }
       ]
     },
     {
@@ -36339,7 +37199,8 @@
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "condition.multiple_runs_last_turn",
+        "condition.runner_attempted_run_last_turn",
+        "risk.random_outcome",
         "tag.source"
       ],
       "effects": [
@@ -36363,6 +37224,24 @@
       ],
       "strategicRole": [
         "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "roleDetail": "run_count_start_turn_tag_source",
+          "evidence": [
+            "condition.runner_attempted_run_last_turn",
+            "tag.source"
+          ],
+          "confidence": "medium",
+          "rationale": "Delayed probabilistic start-of-turn tag source that scales with the number of Runner runs last turn; not specifically a multiple-run-only condition."
+        }
+      ],
+      "manualNotes": [
+        "ASSET-V2: kleine Änderung; priority=medium; set=classic.",
+        "ASSET-V2: Target/Constraints: kein Zielwahlprofil; Bedingung ist vergangene Runner-Run-Anzahl plus Würfel-/Zufallsauflösung.",
+        "ASSET-V2: Rationale: `condition.multiple_runs_last_turn` ist zu eng und nicht kanonisch; der Effekt funktioniert ab einem Run und skaliert mit Run-Anzahl. Der Würfelwurf gehört als Risiko/Outcome sichtbar dazu."
       ]
     },
     {
@@ -36695,7 +37574,8 @@
       },
       "tacticSignals": [
         "draw.corp_draw",
-        "hq.corp_hand_refresh"
+        "draw.corp_recurring",
+        "hq.corp_hand_filter"
       ],
       "effects": [
         {
@@ -36718,13 +37598,30 @@
         }
       ],
       "lineSupport": [
-        "corp.central_stabilize"
+        "corp.draw_engine"
       ],
       "strategicRole": [
         "engine_anchor"
       ],
       "manualNotes": [
-        "CLASSIC-AI-06: Draw filter improves Corp hand quality, but hidden drawn-card identity remains controller-only and is not projected into public AI inputs."
+        "CLASSIC-AI-06: Draw filter improves Corp hand quality, but hidden drawn-card identity remains controller-only and is not projected into public AI inputs.",
+        "ASSET-V2: ändern; priority=medium; set=classic.",
+        "ASSET-V2: Target/Constraints: Controller-only Kartenwahl; gezogene Kartenidentitäten dürfen nicht in öffentliche oder Runner-seitige AI-Inputs gelangen.",
+        "ASSET-V2: Rationale: Anker `corp.draw_engine` bleibt richtig; roleDetail sollte nicht `start_turn_*` heißen, weil der Effekt bei jedem Corp-Draw triggert."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.draw_engine",
+          "role": "engine_anchor",
+          "roleDetail": "recurring_draw_filter_engine",
+          "evidence": [
+            "draw.corp_draw",
+            "draw.corp_recurring",
+            "hq.corp_hand_filter"
+          ],
+          "confidence": "high",
+          "rationale": "Recurring extra draw plus controller-only bottom-deck filtering is a draw/filter engine, not central stabilization; trigger is not limited to start-of-turn draw."
+        }
       ]
     },
     {
