@@ -13,6 +13,7 @@ import {
   type CorpScoringWindowAssessment,
 } from "./semantic-runtime-corp-scoring-window";
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
+import { assessKnownRezzedIcePath } from "../visible-run-analysis";
 import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
@@ -174,16 +175,35 @@ export function semanticRuntimeCorpInstallRemoteScore<
     return hasStabilizingAlternative ? -2700 : -1700;
   }
 
-  if (
+  const supportSourceCard =
+    placement !== "ice"
+      ? dependencies.actionSourceCard(input, action)
+      : undefined;
+  const remoteSupportNeedsScorelineContext =
     placement !== "ice" &&
     semanticRuntimeCorpRemoteSupportNeedsScorelineContext(
-      dependencies.actionSourceCard(input, action),
+      supportSourceCard,
       roles,
       actionSemanticCandidate,
-    ) &&
+    );
+
+  if (
+    remoteSupportNeedsScorelineContext &&
     !semanticRuntimeCorpRemoteHasAdvancementContext(server)
   ) {
     return protectedRemote ? -900 : -1300;
+  }
+
+  if (
+    remoteSupportNeedsScorelineContext &&
+    semanticRuntimeCorpRemoteHasAdvancementContext(server) &&
+    semanticRuntimeCorpRemoteSupportInstallIsContestable(
+      input,
+      server,
+      supportSourceCard,
+    )
+  ) {
+    return -1400;
   }
 
   if (serverId === "new_remote" && emptyRemoteCount > 0) {
@@ -245,6 +265,79 @@ function semanticRuntimeCorpRemoteHasAdvancementContext(
         typeof card.advancementRequirement === "number",
     ) === true
   );
+}
+
+function semanticRuntimeCorpRemoteSupportInstallIsContestable(
+  input: AiDecisionInput,
+  server: CorpServerLike | undefined,
+  sourceCard: VisibleCard | undefined,
+): boolean {
+  if (!server) return false;
+  const visibleRunnerContestCredits =
+    input.playerView.opponent.credits +
+    visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? []) +
+    semanticRuntimeCorpRunnerExposureCredits(input);
+  const trashCost = semanticRuntimeCorpVisibleTrashCost(sourceCard);
+  if (server.ice.length === 0) {
+    return visibleRunnerContestCredits >= trashCost;
+  }
+  const projectedIce = server.ice.map((ice) => ({
+    ...ice,
+    known: ice.known !== false,
+    rezzed: true,
+  }));
+  const assessment = assessKnownRezzedIcePath(
+    projectedIce,
+    input.playerView.opponent.rig ?? [],
+    visibleRunnerContestCredits,
+    sourceCard ? [...server.root, sourceCard] : [...server.root],
+  );
+  return (
+    assessment.canReachAccess &&
+    assessment.creditsAfterPath >= Math.max(0, trashCost)
+  );
+}
+
+function semanticRuntimeCorpRunnerExposureCredits(
+  input: AiDecisionInput,
+): number {
+  const visibleClicks = input.playerView.opponent.clicks;
+  const availableRunnerClicks =
+    typeof visibleClicks === "number" && Number.isFinite(visibleClicks)
+      ? Math.max(0, Math.floor(visibleClicks))
+      : 4;
+  return Math.max(3, availableRunnerClicks - 1);
+}
+
+function semanticRuntimeCorpVisibleTrashCost(
+  card: VisibleCard | undefined,
+): number {
+  if (!card) return 0;
+  const definition = visibleCardDefinition(card);
+  const trashCost = card.trashCost ?? definition?.trashCost;
+  return typeof trashCost === "number" && Number.isFinite(trashCost)
+    ? Math.max(0, Math.floor(trashCost))
+    : 0;
+}
+
+function visibleRunnerRunCreditPool(rig: readonly VisibleCard[]): number {
+  return rig.reduce((sum, card) => {
+    if (card.known === false) return sum;
+    return (
+      sum +
+      (card.counterDisplays ?? []).reduce((cardSum, display) => {
+        const uses = display.creditPool?.uses ?? [];
+        if (
+          uses.includes("using_icebreaker_during_run") ||
+          uses.includes("using_icebreaker_during_run_non_noisy") ||
+          uses.includes("using_killer_during_run")
+        ) {
+          return cardSum + Math.max(0, Math.floor(display.amount));
+        }
+        return cardSum;
+      }, 0)
+    );
+  }, 0);
 }
 
 function semanticRuntimeCorpArchivesIceInstallScore<
@@ -377,7 +470,9 @@ export function semanticRuntimeCorpCentralIceProfile(
       profile.runLock,
     positionDependent: profile.positionDependent,
     modeChoice: profile.modeChoice,
-    ...(profile.iceDefinitionId ? { definitionId: profile.iceDefinitionId } : {}),
+    ...(profile.iceDefinitionId
+      ? { definitionId: profile.iceDefinitionId }
+      : {}),
   };
 }
 

@@ -521,6 +521,81 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
 
     expect(installRootScore(noiseUpgrade, "remote_1", input)).toBe(250);
   });
+
+  it("downranks scoreline support installed into a contestable advancement remote", () => {
+    const chicagoBranch = corpCard("chicago-branch", "asset", {
+      definitionId: "onr_v1_312_chicago-branch",
+      title: "Chicago Branch",
+      rulesText:
+        "[Click], [3]: Add two advancement counters to an installed card that can be advanced.",
+      trashCost: 1,
+    });
+    const input = corpInputForCentralInstall(chicagoBranch, {
+      agendaInHq: false,
+      runnerRig: [fracterBreaker()],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [
+            corpCard("remote-wall", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+          ],
+          root: [
+            corpCard("remote-agenda", "agenda", {
+              advancementRequirement: 3,
+              advancementCounters: 1,
+            }),
+          ],
+        },
+      ],
+    });
+
+    expect(
+      installRootScore(chicagoBranch, "remote_1", input, ["scoreline_support"]),
+    ).toBe(-1400);
+  });
+
+  it("keeps scoreline support viable when the advancement remote is not visibly contestable", () => {
+    const chicagoBranch = corpCard("chicago-branch", "asset", {
+      definitionId: "onr_v1_312_chicago-branch",
+      title: "Chicago Branch",
+      rulesText:
+        "[Click], [3]: Add two advancement counters to an installed card that can be advanced.",
+      trashCost: 1,
+    });
+    const input = corpInputForCentralInstall(chicagoBranch, {
+      agendaInHq: false,
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [
+            corpCard("remote-wall", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+          ],
+          root: [
+            corpCard("remote-agenda", "agenda", {
+              advancementRequirement: 3,
+              advancementCounters: 1,
+            }),
+          ],
+        },
+      ],
+    });
+
+    expect(
+      installRootScore(chicagoBranch, "remote_1", input, ["scoreline_support"]),
+    ).toBe(250);
+  });
 });
 
 function centralInstallScore(
@@ -748,6 +823,14 @@ function killerBreaker(): VisibleCard {
     title: "Loony Goon",
     subtypes: ["Icebreaker", "Killer"],
     rulesText: "Break sentry subroutines.",
+  });
+}
+
+function fracterBreaker(): VisibleCard {
+  return runnerCard("runner-fracter", "program", {
+    title: "Runner Fracter",
+    definitionId: "simple_fracter",
+    subtypes: ["Icebreaker", "Fracter"],
   });
 }
 
