@@ -1,0 +1,4520 @@
+{
+  "schemaVersion": "assets-semantic-review-v1",
+  "generatedAt": "2026-07-01",
+  "mode": "review_only_no_ai_data_changed",
+  "sources": [
+    "data/cards/classic-cards.json",
+    "data/cards/originalset-v1-cards.json",
+    "data/cards/proteus-cards.json",
+    "data/ai/ai-card-hints-active.json",
+    "docs/reviews/ai/ai026-corp-nodes-assets-semantics-review-report-2026-06-02.json",
+    "docs/reviews/ai/ai026-1-corp-nodes-assets-semantics-polish-report-2026-06-02.json"
+  ],
+  "summary": {
+    "totalAssets": 55,
+    "bySet": {
+      "classic": 3,
+      "originalset-v1": 41,
+      "proteus": 11
+    },
+    "current": {
+      "withTacticSignals": 55,
+      "withLineSupport": 45,
+      "withStrategicRole": 45,
+      "withStrategySupportPairs": 0,
+      "strategyCoveredTrue": 45
+    },
+    "recommended": {
+      "anchoredCards": 45,
+      "supportOnlyCards": 10,
+      "strategySupportPairCount": 53,
+      "changeStatusCounts": {
+        "kleine Änderung": 39,
+        "ändern": 6,
+        "behalten": 10
+      },
+      "strategyAnchorCounts": {
+        "corp.central_stabilize": 1,
+        "corp.tag_trace_punish": 11,
+        "corp.draw_engine": 1,
+        "corp.asset_economy": 11,
+        "corp.fast_advance": 3,
+        "corp.remote_scoring": 2,
+        "corp.ambush_bluff": 10,
+        "corp.ice_tax_glacier": 5,
+        "corp.economy_rez_reserve": 3,
+        "corp.damage_kill": 6
+      }
+    }
+  },
+  "findings": [
+    "Aktive Asset-Hints sind fast vollständig vorhanden, aber kein Asset besitzt derzeit strategySupportPairs.",
+    "Originalset- und Proteus-Assets können weitgehend aus AI026-1 in die neue Hierarchie überführt werden.",
+    "Classic-Assets besitzen seit 2026-07-01 Basis-Hints; Strategic Planning Group sollte auf corp.draw_engine statt corp.central_stabilize umgehängt werden.",
+    "Support-only Assets bleiben bewusst ohne Strategieanker, wenn sie nur Draw, Handgröße, Expose-Prävention oder private HQ/R&D-Utility liefern.",
+    "Hidden-Info-Grenze bleibt corp_side_only_until_rezzed_or_accessed; verdeckte Asset-Identitäten und private Kartenwahl dürfen nicht in öffentliche AI-/Runner-Sichten gelangen."
+  ],
+  "cards": [
+    {
+      "set": "classic",
+      "cardId": "onr_classic_019_indiscriminate-response-team",
+      "title": "Indiscriminate Response Team",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "black_ops"
+      ],
+      "rezCost": 0,
+      "trashCost": 2,
+      "costDisplay": "Rez 0 / Trash 2",
+      "ruleText": "After Runner makes a successful run, you may have Runner shuffle his or her hand into his or her stack and then draw as many cards as he or she had before.",
+      "current": {
+        "tacticSignals": [
+          "run.successful_run_grip_reset"
+        ],
+        "lineSupport": [
+          "corp.central_stabilize"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "access_punish",
+            "timing": "after_successful_run",
+            "scope": "runner",
+            "resource": "cards",
+            "target": "runner_grip_shuffle_stack_redraw",
+            "repeatable": true
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "after_successful_run",
+            "scope": "stack",
+            "resource": "cards",
+            "target": "runner_grip_shuffle_stack_redraw",
+            "repeatable": true
+          },
+          {
+            "kind": "draw",
+            "timing": "after_successful_run",
+            "scope": "runner",
+            "resource": "cards",
+            "target": "same_count_redraw",
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "run.successful_run_grip_reset"
+        ],
+        "lineSupport": [
+          "corp.central_stabilize"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.central_stabilize",
+            "role": "defensive_tool",
+            "roleDetail": "successful_run_grip_reset_defense",
+            "evidence": [
+              "run.successful_run_grip_reset"
+            ],
+            "confidence": "medium",
+            "rationale": "Nach erfolgreichem Run stört der Asset-Trigger Runner-Handqualität und Folgeruns, ohne Access-Ambush- oder Hidden-Info-Leak zu sein."
+          }
+        ],
+        "targetOrConstraints": "kein TargetProfile; Runner-Handidentitäten bleiben verborgen, der Effekt ist nur als erfolgreicher-Run-Folgefenster relevant",
+        "rationale": "Current-Hint ist fachlich brauchbar; es fehlt nur die hierarchische Pair-Ebene.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "classic",
+      "cardId": "onr_classic_021_satellite-monitors",
+      "title": "Satellite Monitors",
+      "type": "asset",
+      "subtypes": [
+        "node"
+      ],
+      "rezCost": 3,
+      "trashCost": 1,
+      "costDisplay": "Rez 3 / Trash 1",
+      "ruleText": "At the start of each of your turns, you may roll a die for each run Runner made during his or her last turn. Dor each 1, give Runner a tag.",
+      "current": {
+        "tacticSignals": [
+          "condition.multiple_runs_last_turn",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "tag_source",
+            "timing": "start_of_turn",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "target": "tag.source",
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_start_of_turn"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "condition.multiple_runs_last_turn",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "multi_run_start_turn_tag_source",
+            "evidence": [
+              "condition.multiple_runs_last_turn",
+              "tag.source"
+            ],
+            "confidence": "high",
+            "rationale": "Start-of-turn Tag-Quelle gegen Runner, die im letzten Zug mehrere Runs gemacht haben; das ist Setup für Tag-Payoffs, kein Payoff selbst."
+          }
+        ],
+        "targetOrConstraints": "kein Zielwahlprofil; Bedingung ist vergangene Runner-Run-Anzahl plus Würfel-/Zufallsauflösung",
+        "rationale": "Anker und Signale passen, aber die Rolle muss unter `corp.tag_trace_punish` als Pair hängen.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "classic",
+      "cardId": "onr_classic_025_strategic-planning-group",
+      "title": "Strategic Planning Group",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "unique"
+      ],
+      "rezCost": 2,
+      "trashCost": 4,
+      "costDisplay": "Rez 2 / Trash 4",
+      "ruleText": "Whenever you draw one or more cards, draw an extra card. Then place one of the drawn cards on the bottom of R&D. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
+      "current": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "hq.corp_hand_refresh"
+        ],
+        "lineSupport": [
+          "corp.central_stabilize"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "persistent",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1,
+            "target": "draw.corp_draw",
+            "repeatable": true
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "persistent",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 1,
+            "target": "bottom_one_drawn_card",
+            "repeatable": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "draw.corp_draw",
+          "draw.corp_recurring",
+          "hq.corp_hand_filter"
+        ],
+        "lineSupport": [
+          "corp.draw_engine"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.draw_engine",
+            "role": "engine_anchor",
+            "roleDetail": "start_turn_draw_filter_engine",
+            "evidence": [
+              "draw.corp_draw",
+              "draw.corp_recurring",
+              "hq.corp_hand_filter"
+            ],
+            "confidence": "high",
+            "rationale": "Ersetzt den normalen Startzug-Draw durch wiederholte Auswahl aus zwei Karten; das ist ein Draw-/Filter-Engine-Anker, nicht nur Central-Stabilisierung."
+          }
+        ],
+        "targetOrConstraints": "Controller-only Kartenwahl; gezogene Kartenidentitäten dürfen nicht in öffentliche oder Runner-seitige AI-Inputs gelangen",
+        "rationale": "`corp.central_stabilize` ist zu grob; der neue Agenda-Anker `corp.draw_engine` beschreibt die Funktion besser.",
+        "changedFields": [
+          "tacticSignals",
+          "lineSupport",
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_308_acme-savings-and-loan",
+      "title": "ACME Savings and Loan",
+      "type": "asset",
+      "subtypes": [
+        "transactions"
+      ],
+      "rezCost": 0,
+      "trashCost": 0,
+      "costDisplay": "Rez 0 / Trash 0",
+      "ruleText": "Rezzing ACME S&L costs 1 agenda point, in addition to the normal cost. When you rez ACME S&L, gain 12 credits and trash ACME S&L. For the remainder of the game, pay 1 credit at the end of each of your turns, or lose the game. You can remove this effect, and score 1 agenda point, by taking an action to pay 12 credits.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_credit_burst",
+          "risk.agenda_point_cost",
+          "risk.loss_condition"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "on_rez",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 12,
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_credit_burst",
+          "risk.agenda_point_cost",
+          "risk.loss_condition"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "payoff_anchor",
+            "evidence": [
+              "economy.corp_credit_burst"
+            ],
+            "confidence": "medium",
+            "roleDetail": "high_risk_economy_payoff",
+            "rationale": "Large one-shot credit injection with agenda-point and lose-game liability; economy function is explicit, risk is modeled separately. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "schema_gap: long_term_liability_payment_choice",
+        "rationale": "Large one-shot credit injection with agenda-point and lose-game liability; economy function is explicit, risk is modeled separately. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategicRole",
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_309_bbs-whispering-campaign",
+      "title": "BBS Whispering Campaign",
+      "type": "asset",
+      "subtypes": [
+        "advertisement"
+      ],
+      "rezCost": 0,
+      "trashCost": 4,
+      "costDisplay": "Rez 0 / Trash 4",
+      "ruleText": "Put [16] from the bank on BBS Whispering Campaign when you rez it.  When all the bits have been removed, trash BBS Whispering Campaign. A: Take [2] from BBS Whispering Campaign.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "engine_anchor",
+            "evidence": [
+              "remote.asset_economy"
+            ],
+            "confidence": "medium",
+            "roleDetail": "installed_economy_engine",
+            "rationale": "Installed credit campaign creates remote trash pressure but no subtype signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Installed credit campaign creates remote trash pressure but no subtype signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_310_blood-cat",
+      "title": "Blood Cat",
+      "type": "asset",
+      "subtypes": [
+        "ai"
+      ],
+      "rezCost": 6,
+      "trashCost": 0,
+      "costDisplay": "Rez 6 / Trash 0",
+      "ruleText": "A:Trace 5 -If trace is successful, give Runner a tag.",
+      "current": {
+        "tacticSignals": [
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 5
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "evidence": [
+              "trace.source",
+              "tag.source"
+            ],
+            "confidence": "medium",
+            "roleDetail": "trace_tag_source",
+            "rationale": "Trace 5 in Tag; kein Trace-Credit-Enabler. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:runner",
+        "rationale": "Trace 5 in Tag; kein Trace-Credit-Enabler. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_311_braindance-campaign",
+      "title": "Braindance Campaign",
+      "type": "asset",
+      "subtypes": [
+        "advertisement",
+        "gray ops"
+      ],
+      "rezCost": 6,
+      "trashCost": 7,
+      "costDisplay": "Rez 6 / Trash 7",
+      "ruleText": "Put [12] from the bank on Braindance Campaign when you rez it. Take [2] from Braindance Campaign at the start of each of your turns. When all the bits have been removed, trash Braindance Campaign.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "engine_anchor",
+            "evidence": [
+              "remote.asset_economy"
+            ],
+            "confidence": "medium",
+            "roleDetail": "installed_economy_engine",
+            "rationale": "Start-of-turn installed economy creates asset-economy pressure; Gray Ops remains only a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Start-of-turn installed economy creates asset-economy pressure; Gray Ops remains only a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_312_chicago-branch",
+      "title": "Chicago Branch",
+      "type": "asset",
+      "subtypes": [
+        "asset"
+      ],
+      "rezCost": 2,
+      "trashCost": 1,
+      "costDisplay": "Rez 2 / Trash 1",
+      "ruleText": "A, [3]: Add two advancement counters to an installed card that can be advanced.",
+      "current": {
+        "tacticSignals": [
+          "advance.corp_counter_placement",
+          "advance.score_window_support",
+          "remote.scoring_protection"
+        ],
+        "lineSupport": [
+          "corp.fast_advance",
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "advance",
+            "timing": "action",
+            "scope": "installed_card",
+            "amount": 2
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.corp_counter_placement",
+          "advance.score_window_support",
+          "remote.scoring_protection"
+        ],
+        "lineSupport": [
+          "corp.fast_advance",
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "evidence": [
+              "advance.corp_counter_placement",
+              "advance.score_window_support"
+            ],
+            "confidence": "high",
+            "roleDetail": "advancement_enabler",
+            "rationale": "Repeatable two-counter placement is real score conversion support. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          },
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "scoring_tool",
+            "evidence": [
+              "remote.scoring_protection"
+            ],
+            "confidence": "medium",
+            "roleDetail": "advancement_enabler",
+            "rationale": "Repeatable two-counter placement is real score conversion support. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:installed_advanceable_card",
+        "rationale": "Repeatable two-counter placement is real score conversion support. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_313_city-surveillance",
+      "title": "City Surveillance",
+      "type": "asset",
+      "subtypes": [
+        "gray ops"
+      ],
+      "rezCost": 1,
+      "trashCost": 2,
+      "costDisplay": "Rez 1 / Trash 2",
+      "ruleText": "For each card Runner draws, give Runner a tag unless Runner pays 1, in addition to any other costs, to avoid receiving that tag. You may rez City Surveillance just before the card is drawn.",
+      "current": {
+        "tacticSignals": [
+          "tag.corp_persistent_source",
+          "tag.source",
+          "tax.runner_credit"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "tag_source",
+            "timing": "runner_turn",
+            "scope": "runner"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "runner_turn",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_pay_or_take_tag"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "tag.corp_persistent_source",
+          "tag.source",
+          "tax.runner_credit"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "evidence": [
+              "tag.corp_persistent_source",
+              "tag.source"
+            ],
+            "confidence": "high",
+            "roleDetail": "persistent_tag_source",
+            "rationale": "Persistent draw-linked tag pressure is a tag source, not a tagged payoff. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Persistent draw-linked tag pressure is a tag source, not a tagged payoff. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_314_corporate-negotiating-center",
+      "title": "Corporate Negotiating Center",
+      "type": "asset",
+      "subtypes": [
+        "asset"
+      ],
+      "rezCost": 0,
+      "trashCost": 3,
+      "costDisplay": "Rez 0 / Trash 3",
+      "ruleText": "At the start of each of your turns, gain 1 for each agenda card stored in HQ that you show to Runner.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_hq_agenda_reveal_credit",
+          "info.hq_agenda_reveal",
+          "risk.reveal_hq_agendas"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "agenda_reveal_economy",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "target": "economy.corp_hq_agenda_reveal_credit"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_agenda_reveal"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "economy.corp_hq_agenda_reveal_credit",
+          "info.hq_agenda_reveal",
+          "risk.reveal_hq_agendas"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "not_required",
+        "rationale": "HQ-Agenda-Reveal-Economy with explicit reveal risk; no high-difficulty agenda risk. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": []
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_315_corprunners-shattered-remains",
+      "title": "Corprunner's Shattered Remains",
+      "type": "asset",
+      "subtypes": [
+        "ambush"
+      ],
+      "rezCost": 2,
+      "trashCost": 0,
+      "costDisplay": "Rez 2 / Trash 0",
+      "ruleText": "You may advance Shattered Remains before and after you rez it. When Runner accesses Shattered Remains, trash one piece of hardware for each advancement counter on it.",
+      "current": {
+        "tacticSignals": [
+          "access.corp_hardware_trash",
+          "access.punish",
+          "advance.corp_counter_bank",
+          "remote.ambush"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "hardware_trash",
+            "timing": "on_access",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "access.corp_hardware_trash",
+          "access.punish",
+          "advance.corp_counter_bank",
+          "remote.ambush"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "evidence": [
+              "remote.ambush",
+              "access.punish",
+              "access.corp_hardware_trash"
+            ],
+            "confidence": "high",
+            "roleDetail": "access_hardware_trash",
+            "rationale": "Hardware-Trash-Access-Ambush ohne Tag-/Tagged-Logik. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:installed_hardware",
+        "rationale": "Hardware-Trash-Access-Ambush ohne Tag-/Tagged-Logik. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategicRole",
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_316_cowboy-sysop",
+      "title": "Cowboy Sysop",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 0,
+      "trashCost": 3,
+      "costDisplay": "Rez 0 / Trash 3",
+      "ruleText": "A: Choose one of your installed cards to be uninstalled. Store it in HQ.",
+      "current": {
+        "tacticSignals": [
+          "hq.corp_installed_card_bounce",
+          "install.corp_uninstall_to_hq"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "card_recovery",
+            "timing": "action",
+            "scope": "installed_card",
+            "target": "hq.corp_installed_card_bounce"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "hq.corp_installed_card_bounce",
+          "install.corp_uninstall_to_hq"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "schema_gap: corp_private_installed_card_to_hq_choice",
+        "rationale": "Uninstall eigener installierter Karte nach HQ; keine Archives-Recovery. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": []
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_317_data-masons",
+      "title": "Data Masons",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 1,
+      "trashCost": 1,
+      "costDisplay": "Rez 1 / Trash 1",
+      "ruleText": "Walls cost 2 less to rez and get +1 strength while Data Masons is rezzed.",
+      "current": {
+        "tacticSignals": [
+          "ice.corp_rez_discount",
+          "ice.corp_strength_support",
+          "tax.ice"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "rez_discount",
+            "timing": "persistent",
+            "scope": "ice"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "ice.corp_rez_discount",
+          "ice.corp_strength_support",
+          "tax.ice"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "evidence": [
+              "ice.corp_rez_discount",
+              "ice.corp_strength_support",
+              "tax.ice"
+            ],
+            "confidence": "high",
+            "roleDetail": "ice_tax_support",
+            "rationale": "Static Wall scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Static Wall scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_318_department-of-truth-enhancement",
+      "title": "Department of Truth Enhancement",
+      "type": "asset",
+      "subtypes": [
+        "gray ops"
+      ],
+      "rezCost": 2,
+      "trashCost": 1,
+      "costDisplay": "Rez 2 / Trash 1",
+      "ruleText": "A: Put [3] from the bank on Department of Truth Enhancement. A: Take all the bits from Department of Truth Enhancement.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_action_charged_bank",
+          "economy.corp_charge_bank",
+          "economy.corp_counter_bank",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "finite_economy_pool",
+            "timing": "action",
+            "scope": "corp",
+            "target": "economy.corp_charge_bank"
+          },
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "target": "economy.corp_action_charged_bank"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_action_charged_bank",
+          "economy.corp_charge_bank",
+          "economy.corp_counter_bank",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "engine_anchor",
+            "evidence": [
+              "remote.asset_economy",
+              "economy.corp_action_charged_bank"
+            ],
+            "confidence": "medium",
+            "roleDetail": "installed_economy_engine",
+            "rationale": "Action-charged bank, nicht normaler Installed-Drip. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Action-charged bank, nicht normaler Installed-Drip. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_319_disinfectant-inc",
+      "title": "Disinfectant, Inc.",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 0,
+      "trashCost": 4,
+      "costDisplay": "Rez 0 / Trash 4",
+      "ruleText": "You may pay [1] to avoid receiving a Virus counter. Use this ability only once each turn.",
+      "current": {
+        "tacticSignals": [
+          "virus.corp_counter_prevention"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "prevention_replacement",
+            "timing": "persistent",
+            "scope": "corp"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "virus.corp_counter_prevention"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "not_required",
+        "rationale": "Virus-counter prevention is defensive utility, not a generic Corp virus strategy. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": []
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_320_encoder-inc",
+      "title": "Encoder, Inc.",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 0,
+      "trashCost": 1,
+      "costDisplay": "Rez 0 / Trash 1",
+      "ruleText": "Code gates cost 1 less to rez while Encoder, Inc. is rezzed. All code gates have an additional \"End the run\" subroutine after all other subroutines.",
+      "current": {
+        "tacticSignals": [
+          "ice.corp_rez_discount",
+          "ice.corp_subroutine_support",
+          "tax.ice"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "rez_discount",
+            "timing": "persistent",
+            "scope": "ice"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "ice.corp_rez_discount",
+          "ice.corp_subroutine_support",
+          "tax.ice"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "evidence": [
+              "ice.corp_rez_discount",
+              "ice.corp_subroutine_support",
+              "tax.ice"
+            ],
+            "confidence": "high",
+            "roleDetail": "ice_tax_support",
+            "rationale": "Static Code-Gate scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Static Code-Gate scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_321_esa-contract",
+      "title": "ESA Contract",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 0,
+      "trashCost": 3,
+      "costDisplay": "Rez 0 / Trash 3",
+      "ruleText": "A: Draw two cards.",
+      "current": {
+        "tacticSignals": [
+          "draw.corp_draw"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "target": "draw.corp_draw",
+            "amount": 2
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "draw.corp_draw"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "not_required",
+        "rationale": "Corp Draw, nicht Credit-Economy. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": []
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_322_euromarket-consortium",
+      "title": "Euromarket Consortium",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 2,
+      "trashCost": 4,
+      "costDisplay": "Rez 2 / Trash 4",
+      "ruleText": "Hand size +2; A, [1]: Draw two cards.",
+      "current": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "setup.corp_hand_size"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "target": "draw.corp_draw",
+            "amount": 2
+          },
+          {
+            "kind": "hand_size_modifier",
+            "timing": "persistent",
+            "scope": "corp",
+            "target": "setup.corp_hand_size"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "draw.corp_draw",
+          "setup.corp_hand_size"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "not_required",
+        "rationale": "Draw und Corp-Handsize, kein Score-Kontext. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": []
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_323_experimental-ai",
+      "title": "Experimental AI",
+      "type": "asset",
+      "subtypes": [
+        "ai",
+        "ambush"
+      ],
+      "rezCost": 2,
+      "trashCost": 0,
+      "costDisplay": "Rez 2 / Trash 0",
+      "ruleText": "You may advance Experimental AI before and after you rez it. When Runner accesses Experimental AI, trash one program for each advancement counter on it.",
+      "current": {
+        "tacticSignals": [
+          "access.corp_program_trash",
+          "access.punish",
+          "advance.corp_counter_bank",
+          "remote.ambush"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "program_trash",
+            "timing": "on_access",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "access.corp_program_trash",
+          "access.punish",
+          "advance.corp_counter_bank",
+          "remote.ambush"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "evidence": [
+              "remote.ambush",
+              "access.punish",
+              "access.corp_program_trash"
+            ],
+            "confidence": "high",
+            "roleDetail": "access_program_trash",
+            "rationale": "Access program trash is a concrete ambush payoff; AI/Ambush subtypes remain card data. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:installed_program",
+        "rationale": "Access program trash is a concrete ambush payoff; AI/Ambush subtypes remain card data. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_324_fortress-architects",
+      "title": "Fortress Architects",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 0,
+      "trashCost": 3,
+      "costDisplay": "Rez 0 / Trash 3",
+      "ruleText": "Cost to install ice is reduced by 1.",
+      "current": {
+        "tacticSignals": [
+          "economy.rez_discount",
+          "ice.corp_install_discount",
+          "tax.ice"
+        ],
+        "lineSupport": [
+          "corp.economy_rez_reserve",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "engine_anchor",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "install_discount",
+            "timing": "persistent",
+            "scope": "ice"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.rez_discount",
+          "ice.corp_install_discount",
+          "tax.ice"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "tax_tool",
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "evidence": [
+              "ice.corp_install_discount",
+              "tax.ice"
+            ],
+            "confidence": "medium",
+            "roleDetail": "ice_tax_support",
+            "rationale": "Static ICE-install discount has no target choice in current hint layer. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          },
+          {
+            "strategyId": "corp.economy_rez_reserve",
+            "role": "engine_anchor",
+            "evidence": [
+              "ice.corp_install_discount",
+              "economy.rez_discount"
+            ],
+            "confidence": "medium",
+            "roleDetail": "install_rez_reserve",
+            "rationale": "Static ICE-install discount has no target choice in current hint layer. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Static ICE-install discount has no target choice in current hint layer. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_325_hacker-tracker-central",
+      "title": "Hacker Tracker Central",
+      "type": "asset",
+      "subtypes": [
+        "asset"
+      ],
+      "rezCost": 0,
+      "trashCost": 2,
+      "costDisplay": "Rez 0 / Trash 2",
+      "ruleText": "After each trace attempt, whether successful or not, put 1 from the bank on Hacker Tracker Central. During a trace attempt, each bit you spend from Hacker Tracker Central increases by 1 both your trace strength and your trace limit.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_trace_credit_support",
+          "trace.corp_credit_support"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "trace_credit",
+            "timing": "trace_window",
+            "scope": "corp"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_trace_credit_support",
+          "trace.corp_credit_support"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "evidence": [
+              "trace.corp_credit_support"
+            ],
+            "confidence": "medium",
+            "roleDetail": "trace_credit_enabler",
+            "rationale": "Trace-specific credit support enables trace decks but is not a tag source by itself. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Trace-specific credit support enables trace decks but is not a tag source by itself. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_326_holovid-campaign",
+      "title": "Holovid Campaign",
+      "type": "asset",
+      "subtypes": [
+        "advertisement"
+      ],
+      "rezCost": 4,
+      "trashCost": 7,
+      "costDisplay": "Rez 4 / Trash 7",
+      "ruleText": "Put 12 from the bank on Holovid Campaign when you rez it. Take 1 from Holovid Campaign at the start of each of your turns. When all the bits have been removed, trash Holovid Campaign.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "engine_anchor",
+            "evidence": [
+              "remote.asset_economy"
+            ],
+            "confidence": "medium",
+            "roleDetail": "installed_economy_engine",
+            "rationale": "Installed credit drip creates asset-economy pressure; Advertisement remains a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Installed credit drip creates asset-economy pressure; Advertisement remains a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_327_i-got-a-rock",
+      "title": "I Got a Rock",
+      "type": "asset",
+      "subtypes": [
+        "black ops"
+      ],
+      "rezCost": 3,
+      "trashCost": 2,
+      "costDisplay": "Rez 3 / Trash 2",
+      "ruleText": "A, 3 agenda points: Do 15 meat damage to Runner. Use this ability only if Runner has two or more tags.",
+      "current": {
+        "tacticSignals": [
+          "damage.corp_tagged_meat_payoff",
+          "damage.payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 15
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          },
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "damage.corp_tagged_meat_payoff",
+          "damage.payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "win_condition",
+            "evidence": [
+              "damage.corp_tagged_meat_payoff",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "roleDetail": "tagged_meat_payoff",
+            "rationale": "Large tagged meat damage payoff is both Kill and Tag/Punish; Black Ops remains a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "win_condition",
+            "evidence": [
+              "tag.payoff"
+            ],
+            "confidence": "high",
+            "roleDetail": "tagged_meat_payoff",
+            "rationale": "Large tagged meat damage payoff is both Kill and Tag/Punish; Black Ops remains a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:runner",
+        "rationale": "Large tagged meat damage payoff is both Kill and Tag/Punish; Black Ops remains a subtype. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_328_information-laundering",
+      "title": "Information Laundering",
+      "type": "asset",
+      "subtypes": [
+        "transactions"
+      ],
+      "rezCost": 0,
+      "trashCost": 1,
+      "costDisplay": "Rez 0 / Trash 1",
+      "ruleText": "You may advance Information Laundering before and after you rez it. A, T: Gain [4] for each advancement counter on Information Laundering.",
+      "current": {
+        "tacticSignals": [
+          "advance.corp_counter_bank",
+          "economy.corp_advanceable_cashout",
+          "economy.corp_counter_cashout",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "target": "economy.corp_counter_cashout"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.corp_counter_bank",
+          "economy.corp_advanceable_cashout",
+          "economy.corp_counter_cashout",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "engine_anchor",
+            "evidence": [
+              "remote.asset_economy",
+              "economy.corp_counter_cashout"
+            ],
+            "confidence": "medium",
+            "roleDetail": "installed_economy_engine",
+            "rationale": "Advanceable counter cashout, nicht generischer Installed-Drip. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:self_advancement_counter_count",
+        "rationale": "Advanceable counter cashout, nicht generischer Installed-Drip. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_329_investment-firm",
+      "title": "Investment Firm",
+      "type": "asset",
+      "subtypes": [
+        "transactions"
+      ],
+      "rezCost": 1,
+      "trashCost": 2,
+      "costDisplay": "Rez 1 / Trash 2",
+      "ruleText": "Take 1 from Investment Firm, if it has any bits, at the start of each of your turns. Whenever 1 or more bits are added to your pool, you may put 2 from the bank on Investment Firm for each 1 you choose not to add to your pool. Effects that give you bits at the start of your turn cannot be used this way.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_counter_bank",
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "start_of_turn",
+            "scope": "corp"
+          },
+          {
+            "kind": "finite_economy_pool",
+            "timing": "action",
+            "scope": "corp"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_counter_bank",
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "engine_anchor",
+            "evidence": [
+              "remote.asset_economy"
+            ],
+            "confidence": "medium",
+            "roleDetail": "installed_economy_engine",
+            "rationale": "Banked installed economy supports asset economy; Transactions remains card data. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Banked installed economy supports asset economy; Transactions remains card data. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_330_krumz",
+      "title": "Krumz",
+      "type": "asset",
+      "subtypes": [
+        "ai"
+      ],
+      "rezCost": 0,
+      "trashCost": 2,
+      "costDisplay": "Rez 0 / Trash 2",
+      "ruleText": "Put [1] from the bank on Krumz when you rez it. Use this bit only to pay for traces. If you use this bit, replace it at the start of your next turn.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_trace_credit_support",
+          "trace.corp_credit_support"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "trace_credit",
+            "timing": "persistent",
+            "scope": "corp",
+            "amount": 1
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_trace_credit_support",
+          "trace.corp_credit_support"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "evidence": [
+              "trace.corp_credit_support"
+            ],
+            "confidence": "low",
+            "roleDetail": "trace_credit_enabler",
+            "rationale": "Small recurring trace credit support; not a tag source. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Small recurring trace credit support; not a tag source. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_331_nevinyrral",
+      "title": "Nevinyrral",
+      "type": "asset",
+      "subtypes": [
+        "ai",
+        "unique"
+      ],
+      "rezCost": 3,
+      "trashCost": 5,
+      "costDisplay": "Rez 3 / Trash 5",
+      "ruleText": "Gain an action during each of your turns. If Nevinyrral leaves play while rezzed, you lose the game.\nOnly one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
+      "current": {
+        "tacticSignals": [
+          "action.corp_repeatable_extra_action",
+          "risk.leaves_play_loss",
+          "risk.loss_condition"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "extra_action",
+            "timing": "corp_turn",
+            "scope": "corp"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "action.corp_repeatable_extra_action",
+          "risk.leaves_play_loss",
+          "risk.loss_condition"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "not_required",
+        "rationale": "Repeatable extra action with lose-game risk; no automatic Fast-Advance/Remote-Scoring anchor. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": []
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_332_newsgroup-taunting",
+      "title": "Newsgroup Taunting",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 1,
+      "trashCost": 0,
+      "costDisplay": "Rez 1 / Trash 0",
+      "ruleText": "At the start of each run, Runner must pay 1, in addition to any other costs, or end the run.",
+      "current": {
+        "tacticSignals": [
+          "run.corp_start_tax",
+          "tax.runner_credit"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "run_tax",
+            "timing": "during_run",
+            "scope": "runner",
+            "amount": 1
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "run.corp_start_tax",
+          "tax.runner_credit"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "evidence": [
+              "run.corp_start_tax",
+              "tax.runner_credit"
+            ],
+            "confidence": "medium",
+            "roleDetail": "run_tax_support",
+            "rationale": "Start-of-run credit tax supports tax/glacier without creating run legality. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Start-of-run credit tax supports tax/glacier without creating run legality. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_333_omniscience-foundation",
+      "title": "Omniscience Foundation",
+      "type": "asset",
+      "subtypes": [
+        "gray ops"
+      ],
+      "rezCost": 0,
+      "trashCost": 1,
+      "costDisplay": "Rez 0 / Trash 1",
+      "ruleText": "Give Runner a tag at the end of each turn during which Runner received a tag.",
+      "current": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.additional_tag_followup",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "tag_source",
+            "timing": "corp_turn",
+            "scope": "runner",
+            "target": "tag.additional_tag_followup"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.additional_tag_followup",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "evidence": [
+              "tag.additional_tag_followup",
+              "tag.payoff"
+            ],
+            "confidence": "medium",
+            "roleDetail": "tag_snowball_followup",
+            "rationale": "Conditional additional-tag follow-up; not an initial or persistent tag source. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Conditional additional-tag follow-up; not an initial or persistent tag source. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_334_pacifica-regional-ai",
+      "title": "Pacifica Regional AI",
+      "type": "asset",
+      "subtypes": [
+        "ai"
+      ],
+      "rezCost": 0,
+      "trashCost": 0,
+      "costDisplay": "Rez 0 / Trash 0",
+      "ruleText": "You may advance Pacifica Regional AI before and after you rez it.\nRegional AI advancement counter: Gain an action.",
+      "current": {
+        "tacticSignals": [
+          "action.corp_counter_to_action",
+          "advance.corp_counter_bank",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "extra_action",
+            "timing": "action",
+            "scope": "corp"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "action.corp_counter_to_action",
+          "advance.corp_counter_bank",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "engine_anchor",
+            "evidence": [
+              "action.corp_counter_to_action",
+              "advance.score_window_support"
+            ],
+            "confidence": "high",
+            "roleDetail": "fast_advance_action_engine",
+            "rationale": "Advancement-counter-to-action conversion remains a plausible Fast-Advance anchor. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:self_advancement_counter_count",
+        "rationale": "Advancement-counter-to-action conversion remains a plausible Fast-Advance anchor. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_335_remote-facility",
+      "title": "Remote Facility",
+      "type": "asset",
+      "subtypes": [
+        "asset"
+      ],
+      "rezCost": 5,
+      "trashCost": 1,
+      "costDisplay": "Rez 5 / Trash 1",
+      "ruleText": "Gain an action during each of your turns.",
+      "current": {
+        "tacticSignals": [
+          "action.corp_repeatable_extra_action"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "extra_action",
+            "timing": "corp_turn",
+            "scope": "corp"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "action.corp_repeatable_extra_action"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "not_required",
+        "rationale": "Repeatable extra action remains a tactic signal; Fast-Advance/Remote-Scoring anchor deferred because no direct score conversion is encoded. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": []
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_336_rescheduler",
+      "title": "Rescheduler",
+      "type": "asset",
+      "subtypes": [
+        "gray ops"
+      ],
+      "rezCost": 0,
+      "trashCost": 3,
+      "costDisplay": "Rez 0 / Trash 3",
+      "ruleText": "A: Note the number of cards stored in HQ. Shuffle those cards into R&D, and then draw that many cards.",
+      "current": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "hq.corp_hand_filter",
+          "hq.corp_hand_refresh",
+          "rnd.corp_shuffle_hq_into_rnd"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "shuffle_draw",
+            "timing": "action",
+            "scope": "corp",
+            "target": "hq.corp_hand_refresh"
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "action",
+            "scope": "rnd",
+            "target": "rnd.corp_shuffle_hq_into_rnd"
+          },
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "target": "draw.corp_draw"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "draw.corp_draw",
+          "hq.corp_hand_filter",
+          "hq.corp_hand_refresh",
+          "rnd.corp_shuffle_hq_into_rnd"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "schema_gap: private_hq_shuffle_and_draw_count",
+        "rationale": "HQ in R&D mischen und gleich viele Karten ziehen ist Hand-Refresh, kein kontrolliertes Topdeck-Setup. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": []
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_337_rockerboy-promotion",
+      "title": "Rockerboy Promotion",
+      "type": "asset",
+      "subtypes": [
+        "advertisement"
+      ],
+      "rezCost": 4,
+      "trashCost": 3,
+      "costDisplay": "Rez 4 / Trash 3",
+      "ruleText": "Put [15] from the bank on Rockerboy Promotion when you rez it. When all the bits have been removed, trash Rockerboy Promotion. A: Take [3] from Rockerboy Promotion.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "amount": 3,
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "engine_anchor",
+            "evidence": [
+              "remote.asset_economy"
+            ],
+            "confidence": "medium",
+            "roleDetail": "installed_economy_engine",
+            "rationale": "Installed action economy creates asset-economy pressure; no Advertisement signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Installed action economy creates asset-economy pressure; no Advertisement signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_338_rustbelt-hq-branch",
+      "title": "Rustbelt HQ Branch",
+      "type": "asset",
+      "subtypes": [
+        "asset"
+      ],
+      "rezCost": 0,
+      "trashCost": 2,
+      "costDisplay": "Rez 0 / Trash 2",
+      "ruleText": "Hand size +2.",
+      "current": {
+        "tacticSignals": [
+          "setup.corp_hand_size"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "hand_size_modifier",
+            "timing": "persistent",
+            "scope": "corp",
+            "target": "setup.corp_hand_size",
+            "amount": 2
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "setup.corp_hand_size"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "not_required",
+        "rationale": "Corp-Handsize, kein Score-Kontext. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": []
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_339_schlaghund",
+      "title": "Schlaghund",
+      "type": "asset",
+      "subtypes": [
+        "black ops",
+        "random"
+      ],
+      "rezCost": 2,
+      "trashCost": 4,
+      "costDisplay": "Rez 2 / Trash 4",
+      "ruleText": "A: Roll a die. If you roll less than or equal to the number of tags Runner has, Schlaghund does 10 meat damage and you trash Schlaghund.",
+      "current": {
+        "tacticSignals": [
+          "damage.corp_tagged_meat_payoff",
+          "damage.payoff",
+          "risk.random_action",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 10
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "damage.corp_tagged_meat_payoff",
+          "damage.payoff",
+          "risk.random_action",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "win_condition",
+            "evidence": [
+              "damage.corp_tagged_meat_payoff",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "roleDetail": "tagged_meat_payoff",
+            "rationale": "Tagged meat damage payoff is modeled by function; Random and Black Ops remain subtypes. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "win_condition",
+            "evidence": [
+              "tag.payoff"
+            ],
+            "confidence": "high",
+            "roleDetail": "tagged_meat_payoff",
+            "rationale": "Tagged meat damage payoff is modeled by function; Random and Black Ops remain subtypes. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:runner",
+        "rationale": "Tagged meat damage payoff is modeled by function; Random and Black Ops remain subtypes. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_340_setup",
+      "title": "Setup!",
+      "type": "asset",
+      "subtypes": [
+        "ambush"
+      ],
+      "rezCost": 0,
+      "trashCost": 0,
+      "costDisplay": "Rez 0 / Trash 0",
+      "ruleText": "When Runner accesses Setup!, it does 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses it from the Archives. If Setup! is accessed from R&D, Runner must show it to you.",
+      "current": {
+        "tacticSignals": [
+          "access.archives_safe_exception",
+          "access.corp_net_damage_ambush",
+          "access.punish",
+          "access.rnd_reveal_requirement",
+          "damage.payoff",
+          "remote.ambush"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "on_access",
+            "scope": "runner",
+            "target": "access.corp_net_damage_ambush",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "access.archives_safe_exception",
+          "access.corp_net_damage_ambush",
+          "access.punish",
+          "access.rnd_reveal_requirement",
+          "damage.payoff",
+          "remote.ambush"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "evidence": [
+              "access.corp_net_damage_ambush",
+              "access.punish"
+            ],
+            "confidence": "high",
+            "roleDetail": "access_net_damage_payoff",
+            "rationale": "Net-Damage-Access-Ambush; `damage.payoff` bleibt nur Oberklasse, kein Damage-Kill-Anker. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Net-Damage-Access-Ambush; `damage.payoff` bleibt nur Oberklasse, kein Damage-Kill-Anker. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
+      "title": "Skälderviken SA Beta Test Site",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 0,
+      "trashCost": 2,
+      "costDisplay": "Rez 0 / Trash 2",
+      "ruleText": "Black ice costs 2 less to rez while this asset is rezzed.",
+      "current": {
+        "tacticSignals": [
+          "ice.corp_rez_discount",
+          "tax.ice"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "rez_discount",
+            "timing": "persistent",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "ice.corp_rez_discount",
+          "tax.ice"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "evidence": [
+              "ice.corp_rez_discount",
+              "tax.ice"
+            ],
+            "confidence": "medium",
+            "roleDetail": "ice_tax_support",
+            "rationale": "Static Black-ICE scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Static Black-ICE scope is a constraint, not a TargetProfile. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_342_solo-squad",
+      "title": "Solo Squad",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 0,
+      "trashCost": 3,
+      "costDisplay": "Rez 0 / Trash 3",
+      "ruleText": "A: Do 1 meat damage. Use this ability only if Runner is tagged.",
+      "current": {
+        "tacticSignals": [
+          "damage.corp_tagged_meat_payoff",
+          "damage.payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "damage.corp_tagged_meat_payoff",
+          "damage.payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "win_condition",
+            "evidence": [
+              "damage.corp_tagged_meat_payoff",
+              "damage.payoff"
+            ],
+            "confidence": "medium",
+            "roleDetail": "tagged_meat_payoff",
+            "rationale": "Small repeatable tagged damage is a tag-punish kill support card, not a generic damage label. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "win_condition",
+            "evidence": [
+              "tag.payoff"
+            ],
+            "confidence": "medium",
+            "roleDetail": "tagged_meat_payoff",
+            "rationale": "Small repeatable tagged damage is a tag-punish kill support card, not a generic damage label. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:runner",
+        "rationale": "Small repeatable tagged damage is a tag-punish kill support card, not a generic damage label. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_343_south-african-mining-corp",
+      "title": "South African Mining Corp",
+      "type": "asset",
+      "subtypes": [
+        "transactions"
+      ],
+      "rezCost": 0,
+      "trashCost": 1,
+      "costDisplay": "Rez 0 / Trash 1",
+      "ruleText": "A, A, A: Gain [6].",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_multi_action_credit",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "target": "economy.corp_multi_action_credit",
+            "amount": 6,
+            "actionCost": 3
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_multi_action_credit",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "payoff_anchor",
+            "evidence": [
+              "remote.asset_economy",
+              "economy.corp_multi_action_credit"
+            ],
+            "confidence": "low",
+            "roleDetail": "high_risk_economy_payoff",
+            "rationale": "Drei Aktionen fuer 6 Credits; keine normale Drip-Economy. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Drei Aktionen fuer 6 Credits; keine normale Drip-Economy. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategicRole",
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_344_spinn-public-relations",
+      "title": "Spinn® Public Relations",
+      "type": "asset",
+      "subtypes": [
+        "transactions"
+      ],
+      "rezCost": 1,
+      "trashCost": 4,
+      "costDisplay": "Rez 1 / Trash 4",
+      "ruleText": "Take [1] from Spinn(R) Public Relations, if it has any bits, at the start of each of your turns. A: Put [3] from the bank on Spinn(R) Public Relations.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_counter_bank",
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "finite_economy_pool",
+            "timing": "action",
+            "scope": "corp"
+          },
+          {
+            "kind": "economy",
+            "timing": "start_of_turn",
+            "scope": "corp"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_counter_bank",
+          "economy.corp_installed_credit_drip",
+          "remote.asset_economy"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "engine_anchor",
+            "evidence": [
+              "remote.asset_economy"
+            ],
+            "confidence": "medium",
+            "roleDetail": "installed_economy_engine",
+            "rationale": "Installed banked economy supports asset economy without using Transactions as signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Installed banked economy supports asset economy without using Transactions as signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_345_trap",
+      "title": "TRAP!",
+      "type": "asset",
+      "subtypes": [
+        "ambush"
+      ],
+      "rezCost": 0,
+      "trashCost": 0,
+      "costDisplay": "Rez 0 / Trash 0",
+      "ruleText": "If you pay [4] when Runner accesses TRAP!, it does 3 Net damage and gives Runner a tag, even if TRAP! is not installed. Ignore this effect if Runner accesses it from the Archives. If TRAP! is accessed from R&D, Runner must show it to you.",
+      "current": {
+        "tacticSignals": [
+          "access.archives_safe_exception",
+          "access.corp_net_damage_ambush",
+          "access.corp_tag_ambush",
+          "access.punish",
+          "access.rnd_reveal_requirement",
+          "damage.payoff",
+          "remote.ambush",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler",
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "on_access",
+            "scope": "runner",
+            "target": "access.corp_net_damage_ambush",
+            "amount": 3
+          },
+          {
+            "kind": "tag_source",
+            "timing": "on_access",
+            "scope": "runner",
+            "target": "access.corp_tag_ambush",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_corp_credits_threshold"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "access.archives_safe_exception",
+          "access.corp_net_damage_ambush",
+          "access.corp_tag_ambush",
+          "access.punish",
+          "access.rnd_reveal_requirement",
+          "damage.payoff",
+          "remote.ambush",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "evidence": [
+              "access.corp_net_damage_ambush",
+              "access.punish"
+            ],
+            "confidence": "high",
+            "roleDetail": "access_net_damage_payoff",
+            "rationale": "Access-Net-Damage plus Access-Tag-Ambush; die Tag-Rolle ist nicht persistent. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "evidence": [
+              "access.corp_tag_ambush",
+              "tag.source"
+            ],
+            "confidence": "medium",
+            "roleDetail": "access_tag_source",
+            "rationale": "Access-Net-Damage plus Access-Tag-Ambush; die Tag-Rolle ist nicht persistent. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Access-Net-Damage plus Access-Tag-Ambush; die Tag-Rolle ist nicht persistent. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_346_vacant-soulkiller",
+      "title": "Vacant Soulkiller",
+      "type": "asset",
+      "subtypes": [
+        "ambush"
+      ],
+      "rezCost": 2,
+      "trashCost": 0,
+      "costDisplay": "Rez 2 / Trash 0",
+      "ruleText": "You may advance Vacant Soulkiller before and after you rez it. When Runner accesses Vacant Soulkiller, it does 1 brain damage for each advancement counter on it.",
+      "current": {
+        "tacticSignals": [
+          "access.corp_brain_damage_ambush",
+          "access.punish",
+          "advance.corp_counter_bank",
+          "damage.payoff",
+          "remote.ambush"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "on_access",
+            "scope": "runner",
+            "target": "access.corp_brain_damage_ambush"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "access.corp_brain_damage_ambush",
+          "access.punish",
+          "advance.corp_counter_bank",
+          "damage.payoff",
+          "remote.ambush"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "evidence": [
+              "access.corp_brain_damage_ambush",
+              "access.punish"
+            ],
+            "confidence": "high",
+            "roleDetail": "access_brain_damage_payoff",
+            "rationale": "Brain-Damage-Ambush nach Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          },
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "evidence": [
+              "access.corp_brain_damage_ambush",
+              "damage.payoff"
+            ],
+            "confidence": "medium",
+            "roleDetail": "access_brain_damage_payoff",
+            "rationale": "Brain-Damage-Ambush nach Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Brain-Damage-Ambush nach Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_347_vapor-ops",
+      "title": "Vapor Ops",
+      "type": "asset",
+      "subtypes": [],
+      "rezCost": 0,
+      "trashCost": 1,
+      "costDisplay": "Rez 0 / Trash 1",
+      "ruleText": "You may advance Vapor Ops before and after you rez it.\nVapor Ops advancement counter: Gain 1.\n[A]: Move any number of advancement counters from Vapor Ops to another installed card that can be advanced.",
+      "current": {
+        "tacticSignals": [
+          "advance.corp_counter_bank",
+          "advance.corp_counter_transfer",
+          "advance.score_window_support",
+          "economy.corp_counter_bank"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "advance",
+            "timing": "action",
+            "scope": "installed_card"
+          },
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.corp_counter_bank",
+          "advance.corp_counter_transfer",
+          "advance.score_window_support",
+          "economy.corp_counter_bank"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "evidence": [
+              "advance.corp_counter_transfer",
+              "advance.score_window_support"
+            ],
+            "confidence": "high",
+            "roleDetail": "advancement_enabler",
+            "rationale": "Counter bank and movement can convert to score windows; no generic asset signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:installed_advanceable_card",
+        "rationale": "Counter bank and movement can convert to score windows; no generic asset signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_348_virus-test-site",
+      "title": "Virus Test Site",
+      "type": "asset",
+      "subtypes": [
+        "ambush"
+      ],
+      "rezCost": 0,
+      "trashCost": 0,
+      "costDisplay": "Rez 0 / Trash 0",
+      "ruleText": "You may advance Virus Test Site before and after you rez it. When Runner accesses Test Site, it does 2 Net damage per advancement counter on it, or 1 Net damage if it has no counters, even if it is not installed or rezzed. Ignore this effect if Runner accesses it from the Archives. If Test Site is accessed from R&D, Runner must show it to you.",
+      "current": {
+        "tacticSignals": [
+          "access.archives_safe_exception",
+          "access.corp_net_damage_ambush",
+          "access.punish",
+          "access.rnd_reveal_requirement",
+          "advance.corp_counter_bank",
+          "damage.payoff",
+          "remote.ambush"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "on_access",
+            "scope": "runner",
+            "target": "access.corp_net_damage_ambush"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_advancement_counter"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "access.archives_safe_exception",
+          "access.corp_net_damage_ambush",
+          "access.punish",
+          "access.rnd_reveal_requirement",
+          "advance.corp_counter_bank",
+          "damage.payoff",
+          "remote.ambush"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "evidence": [
+              "access.corp_net_damage_ambush",
+              "access.punish"
+            ],
+            "confidence": "high",
+            "roleDetail": "access_net_damage_payoff",
+            "rationale": "Net-Damage-Ambush skaliert mit Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          },
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "evidence": [
+              "access.corp_net_damage_ambush",
+              "damage.payoff"
+            ],
+            "confidence": "medium",
+            "roleDetail": "access_net_damage_payoff",
+            "rationale": "Net-Damage-Ambush skaliert mit Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Net-Damage-Ambush skaliert mit Advancement Countern; keine Meat-Damage-Rolle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_054_bel-digmo-antibody",
+      "title": "Bel-Digmo Antibody",
+      "type": "asset",
+      "subtypes": [
+        "ambush",
+        "node",
+        "virus"
+      ],
+      "rezCost": 0,
+      "trashCost": 0,
+      "costDisplay": "Rez 0 / Trash 0",
+      "ruleText": "Shuffle Bel-Digmo Antibody into R&D when it is rezzed. When Runner accesses Bel-Digmo Antibody from R&D, do 1 Net damage, and Runner must show it to you.",
+      "current": {
+        "tacticSignals": [
+          "access.corp_net_damage_ambush",
+          "access.corp_rnd_net_damage_ambush",
+          "access.punish",
+          "access.rnd_reveal_requirement",
+          "damage.payoff",
+          "rnd.corp_self_shuffle_access"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "on_access",
+            "scope": "runner",
+            "target": "access.corp_rnd_net_damage_ambush",
+            "amount": 1
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "on_rez",
+            "scope": "rnd",
+            "target": "rnd.corp_self_shuffle_access"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_rnd_top"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "access.corp_net_damage_ambush",
+          "access.corp_rnd_net_damage_ambush",
+          "access.punish",
+          "access.rnd_reveal_requirement",
+          "damage.payoff",
+          "rnd.corp_self_shuffle_access"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "evidence": [
+              "access.corp_rnd_net_damage_ambush",
+              "access.punish"
+            ],
+            "confidence": "medium",
+            "roleDetail": "access_net_damage_payoff",
+            "rationale": "R&D-Access-Net-Damage plus Reveal/Self-Shuffle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "R&D-Access-Net-Damage plus Reveal/Self-Shuffle. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_055_cybertech-think-tank",
+      "title": "Cybertech Think Tank",
+      "type": "asset",
+      "subtypes": [
+        "asset",
+        "node"
+      ],
+      "rezCost": 1,
+      "trashCost": 3,
+      "costDisplay": "Rez 1 / Trash 3",
+      "ruleText": "You may advance Cybertech Think Tank before and after you rez it. Cybertech Think Tank advancement counter: Increase by 1 the meat damage dealt by another source.",
+      "current": {
+        "tacticSignals": [
+          "advance.corp_counter_bank",
+          "damage.corp_damage_amplifier",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "global_modifier",
+            "timing": "action",
+            "scope": "damage"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.corp_counter_bank",
+          "damage.corp_damage_amplifier",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "enabler",
+            "evidence": [
+              "damage.corp_damage_amplifier",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "roleDetail": "damage_amplifier",
+            "rationale": "Advancement counters increase another meat damage source; this is kill support, not a Node/AI signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "schema_gap: use_target:damage_source",
+        "rationale": "Advancement counters increase another meat damage source; this is kill support, not a Node/AI signal. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategicRole",
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_056_department-of-misinformation",
+      "title": "Department of Misinformation",
+      "type": "asset",
+      "subtypes": [
+        "asset",
+        "node"
+      ],
+      "rezCost": 0,
+      "trashCost": 4,
+      "costDisplay": "Rez 0 / Trash 4",
+      "ruleText": "You may rez Department of Misinformation when Runner attempts to expose a card. [1]: Prevent a card from being exposed.",
+      "current": {
+        "tacticSignals": [
+          "expose.corp_prevention"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "prevention_replacement",
+            "timing": "prevention_window",
+            "scope": "installed_card"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "expose.corp_prevention"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "candidate: use_target:corp_card_expose_attempt",
+        "rationale": "Expose prevention is defensive utility and not automatically remote contest. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": []
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_057_doppelganger-antibody",
+      "title": "Doppelganger Antibody",
+      "type": "asset",
+      "subtypes": [
+        "ambush",
+        "node",
+        "virus"
+      ],
+      "rezCost": 0,
+      "trashCost": 0,
+      "costDisplay": "Rez 0 / Trash 0",
+      "ruleText": "When Runner accesses Doppelganger Antibody, you may pay [2] to give Runner a Doppelganger counter, even if Doppelganger is not installed. Ignore this effect if Runner accesses Doppelganger from the Archives. Each Doppelganger counter causes Runner to lose [1] at the start of each of his or her turns. Runner may take an action to pay [4] to remove a Doppelganger counter. If Doppelganger is accessed from R&D, Runner must show it to you.",
+      "current": {
+        "tacticSignals": [
+          "access.archives_safe_exception",
+          "access.corp_counter_punish",
+          "access.corp_credit_loss_counter",
+          "access.punish",
+          "access.rnd_reveal_requirement"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "access_punish",
+            "timing": "on_access",
+            "scope": "runner",
+            "target": "access.corp_credit_loss_counter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_corp_credits_threshold"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "access.archives_safe_exception",
+          "access.corp_counter_punish",
+          "access.corp_credit_loss_counter",
+          "access.punish",
+          "access.rnd_reveal_requirement"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "evidence": [
+              "access.corp_credit_loss_counter",
+              "access.punish"
+            ],
+            "confidence": "medium",
+            "roleDetail": "access_counter_credit_loss",
+            "rationale": "Counter-Punish konkret als Runner-Credit-Loss-Counter. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Counter-Punish konkret als Runner-Credit-Loss-Counter. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_058_executive-boot-camp",
+      "title": "Executive Boot Camp",
+      "type": "asset",
+      "subtypes": [
+        "node"
+      ],
+      "rezCost": 0,
+      "trashCost": 2,
+      "costDisplay": "Rez 0 / Trash 2",
+      "ruleText": "Discard a card at random: Gain [2]. Use this ability only during a run. At the end of the run, return to the bank any of the [2] you did not spend.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_run_temporary_credit",
+          "risk.random_discard_cost",
+          "risk.temporary_credit_drawback"
+        ],
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "during_run",
+            "scope": "corp",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_run_temporary_credit",
+          "risk.random_discard_cost",
+          "risk.temporary_credit_drawback"
+        ],
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.economy_rez_reserve",
+            "role": "engine_anchor",
+            "evidence": [
+              "economy.corp_run_temporary_credit"
+            ],
+            "confidence": "medium",
+            "roleDetail": "install_rez_reserve",
+            "rationale": "Temporary run-only credits support rez/trace reserve with explicit random discard and temporary-credit drawbacks. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "schema_gap: private_random_discard_cost",
+        "rationale": "Temporary run-only credits support rez/trace reserve with explicit random discard and temporary-credit drawbacks. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_059_government-contract",
+      "title": "Government Contract",
+      "type": "asset",
+      "subtypes": [
+        "asset",
+        "node"
+      ],
+      "rezCost": 2,
+      "trashCost": 2,
+      "costDisplay": "Rez 2 / Trash 2",
+      "ruleText": "You may advance Government Contract before and after you rez it. Government Contract advancement counter: Gain [3]. Use these bits only to pay for installing or rezzing cards. When the turn ends, return to the bank any of the [3] you did not spend.",
+      "current": {
+        "tacticSignals": [
+          "advance.corp_counter_bank",
+          "economy.advanceable",
+          "economy.corp_install_rez_credit",
+          "risk.temporary_credit_drawback"
+        ],
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "amount": 3
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          },
+          {
+            "kind": "requires_during_run"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.corp_counter_bank",
+          "economy.advanceable",
+          "economy.corp_install_rez_credit",
+          "risk.temporary_credit_drawback"
+        ],
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.economy_rez_reserve",
+            "role": "engine_anchor",
+            "evidence": [
+              "economy.corp_install_rez_credit",
+              "economy.advanceable"
+            ],
+            "confidence": "high",
+            "roleDetail": "install_rez_reserve",
+            "rationale": "Advanceable install/rez credits support reserve-sensitive Corp economy with temporary-credit risk. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:install_or_rez_payment",
+        "rationale": "Advanceable install/rez credits support reserve-sensitive Corp economy with temporary-credit risk. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_061_ldl-traffic-analyzers",
+      "title": "LDL Traffic Analyzers",
+      "type": "asset",
+      "subtypes": [
+        "asset",
+        "node"
+      ],
+      "rezCost": 0,
+      "trashCost": 4,
+      "costDisplay": "Rez 0 / Trash 4",
+      "ruleText": "You may advance LDL Traffic Analyzers before and after you rez it. You may rez LDL Traffic Analyzers during a trace attempt. LDL Traffic Analyzers advancement counter: Gain [5]. Use this ability only during a trace attempt. When the trace attempt ends, return to the bank any of the [5] you did not spend.",
+      "current": {
+        "tacticSignals": [
+          "advance.corp_counter_bank",
+          "economy.corp_trace_credit_support",
+          "risk.temporary_credit_drawback",
+          "trace.corp_credit_support"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "trace_credit",
+            "timing": "trace_window",
+            "scope": "corp",
+            "amount": 5
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_attempt"
+          },
+          {
+            "kind": "requires_during_run"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.corp_counter_bank",
+          "economy.corp_trace_credit_support",
+          "risk.temporary_credit_drawback",
+          "trace.corp_credit_support"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "evidence": [
+              "trace.corp_credit_support"
+            ],
+            "confidence": "medium",
+            "roleDetail": "trace_credit_enabler",
+            "rationale": "Advancement counters convert to trace-only credits, supporting trace lines without being a tag source. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:trace_attempt",
+        "rationale": "Advancement counters convert to trace-only credits, supporting trace lines without being a tag source. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_068_pattel-antibody",
+      "title": "Pattel Antibody",
+      "type": "asset",
+      "subtypes": [
+        "ambush",
+        "node",
+        "virus"
+      ],
+      "rezCost": 0,
+      "trashCost": 0,
+      "costDisplay": "Rez 0 / Trash 0",
+      "ruleText": "When Runner accesses Pattel Antibody, you may pay [3] to put a Pattel counter on all installed icebreakers, even if Pattel Antibody is not installed. Ignore this effect if Runner accesses Pattel Antibody from the Archives. Each Pattel counter on an icebreaker reduces its strength by 1. If Pattel Antibody is accessed from R&D, Runner must show it to you.",
+      "current": {
+        "tacticSignals": [
+          "access.archives_safe_exception",
+          "access.corp_counter_punish",
+          "access.corp_icebreaker_strength_counter",
+          "access.punish",
+          "access.rnd_reveal_requirement"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "access_punish",
+            "timing": "on_access",
+            "scope": "runner",
+            "target": "access.corp_icebreaker_strength_counter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_corp_credits_threshold"
+          },
+          {
+            "kind": "requires_rnd_top"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "access.archives_safe_exception",
+          "access.corp_counter_punish",
+          "access.corp_icebreaker_strength_counter",
+          "access.punish",
+          "access.rnd_reveal_requirement"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "evidence": [
+              "access.corp_icebreaker_strength_counter",
+              "access.punish"
+            ],
+            "confidence": "medium",
+            "roleDetail": "access_counter_icebreaker_strength",
+            "rationale": "Counter-Punish konkret als Icebreaker-Strength-Counter. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:installed_icebreaker",
+        "rationale": "Counter-Punish konkret als Icebreaker-Strength-Counter. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_074_siren",
+      "title": "Siren",
+      "type": "asset",
+      "subtypes": [
+        "node"
+      ],
+      "rezCost": 3,
+      "trashCost": 0,
+      "costDisplay": "Rez 3 / Trash 0",
+      "ruleText": "Rez Siren when you install it. Install Siren only if you can pay to rez it. [1]: Runner must make a run on the fort Siren is installed in, if possible, instead of on the fort he or she was originally going to make a run on. Use this ability only at the start of a run.",
+      "current": {
+        "tacticSignals": [
+          "remote.scoring_protection",
+          "run.corp_redirect"
+        ],
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "run_lock",
+            "timing": "during_run",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          },
+          {
+            "kind": "requires_remote_server"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "remote.scoring_protection",
+          "run.corp_redirect"
+        ],
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "defensive_tool",
+            "evidence": [
+              "run.corp_redirect",
+              "remote.scoring_protection"
+            ],
+            "confidence": "high",
+            "roleDetail": "remote_run_control",
+            "rationale": "Run redirect/control supports remote defense but adds no planner or legality behavior. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "schema_gap: run_redirect_fort_choice",
+        "rationale": "Run redirect/control supports remote defense but adds no planner or legality behavior. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_075_stereogram-antibody",
+      "title": "Stereogram Antibody",
+      "type": "asset",
+      "subtypes": [
+        "ambush",
+        "node",
+        "virus"
+      ],
+      "rezCost": 0,
+      "trashCost": 0,
+      "costDisplay": "Rez 0 / Trash 0",
+      "ruleText": "When Runner accesses Stereogram Antibody from the Archives, do 1 Net damage and shuffle Stereogram Antibody into R&D.",
+      "current": {
+        "tacticSignals": [
+          "access.corp_archives_net_damage_ambush",
+          "access.corp_net_damage_ambush",
+          "access.punish",
+          "damage.payoff",
+          "rnd.corp_self_shuffle_access"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "on_access",
+            "scope": "runner",
+            "target": "access.corp_archives_net_damage_ambush",
+            "amount": 1
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "on_access",
+            "scope": "rnd",
+            "target": "rnd.corp_self_shuffle_access"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_archives_card"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "access.corp_archives_net_damage_ambush",
+          "access.corp_net_damage_ambush",
+          "access.punish",
+          "damage.payoff",
+          "rnd.corp_self_shuffle_access"
+        ],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ambush_bluff",
+            "role": "punish_payoff",
+            "evidence": [
+              "access.corp_archives_net_damage_ambush",
+              "access.punish"
+            ],
+            "confidence": "medium",
+            "roleDetail": "access_net_damage_payoff",
+            "rationale": "Archives selbst ist der Trigger; keine Archives-safe-exception. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "not_required",
+        "rationale": "Archives selbst ist der Trigger; keine Archives-safe-exception. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategySupportPairs"
+        ]
+      }
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_076_syd-meyer-superstores",
+      "title": "Syd Meyer Superstores",
+      "type": "asset",
+      "subtypes": [
+        "asset",
+        "node"
+      ],
+      "rezCost": 0,
+      "trashCost": 2,
+      "costDisplay": "Rez 0 / Trash 2",
+      "ruleText": "A: Trash a rezzed piece of ice. Gain [4].",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_asset_cashout",
+          "ice.corp_self_trash_cost",
+          "risk.trash_own_rezzed_ice"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "target": "economy.corp_asset_cashout",
+            "amount": 4
+          },
+          {
+            "kind": "ice_trash",
+            "timing": "action",
+            "scope": "ice",
+            "target": "ice.corp_self_trash_cost"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_rezzed_ice"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_asset_cashout",
+          "ice.corp_self_trash_cost",
+          "risk.trash_own_rezzed_ice"
+        ],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.asset_economy",
+            "role": "payoff_anchor",
+            "evidence": [
+              "economy.corp_asset_cashout"
+            ],
+            "confidence": "medium",
+            "roleDetail": "high_risk_economy_payoff",
+            "rationale": "Cashout durch Trash eigener rezzed ICE; kein Install-Discount und keine Temporary-Rez-Liability. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals."
+          }
+        ],
+        "targetOrConstraints": "candidate: use_target:own_rezzed_ice",
+        "rationale": "Cashout durch Trash eigener rezzed ICE; kein Install-Discount und keine Temporary-Rez-Liability. Node/Asset type and subtypes remain card data and are not mirrored as tactic signals.",
+        "changedFields": [
+          "strategicRole",
+          "strategySupportPairs"
+        ]
+      }
+    }
+  ]
+}

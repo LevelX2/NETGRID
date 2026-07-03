@@ -1,0 +1,2882 @@
+{
+  "schemaVersion": "operations-semantic-review-v1",
+  "generatedAt": "2026-07-01",
+  "mode": "review_only_no_ai_data_changed",
+  "sources": [
+    "data/cards/classic-cards.json",
+    "data/cards/originalset-v1-cards.json",
+    "data/cards/proteus-cards.json",
+    "data/ai/ai-card-hints-active.json",
+    "docs/reviews/ai/ai025-corp-operations-semantics-review-report-2026-06-02.json",
+    "docs/reviews/ai/ai025-1-corp-operations-semantics-polish-report-2026-06-02.json"
+  ],
+  "summary": {
+    "totalOperations": 38,
+    "bySet": {
+      "classic": 3,
+      "originalset-v1": 27,
+      "proteus": 8
+    },
+    "current": {
+      "withTacticSignals": 38,
+      "withLineSupport": 24,
+      "withStrategicRole": 24,
+      "withStrategySupportPairs": 0,
+      "strategyCoveredTrue": 24
+    },
+    "recommended": {
+      "anchoredCards": 29,
+      "supportOnlyCards": 9,
+      "strategySupportPairCount": 35,
+      "changeStatusCounts": {
+        "kleine Änderung": 21,
+        "ändern": 8,
+        "behalten": 9
+      },
+      "strategyAnchorCounts": {
+        "corp.tag_trace_punish": 16,
+        "corp.deck_recycle_engine": 1,
+        "corp.ice_tax_glacier": 4,
+        "corp.action_tempo": 3,
+        "corp.fast_advance": 5,
+        "corp.overadvance_value": 3,
+        "corp.damage_kill": 3
+      }
+    }
+  },
+  "cards": [
+    {
+      "set": "classic",
+      "cardId": "onr_classic_016_badtimes",
+      "title": "Badtimes",
+      "cost": 4,
+      "costDisplay": "4",
+      "ruleText": "Play only if Runner is tagged. Runner's MU is reduced by 2 until end of turn.",
+      "current": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "global_modifier",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": -2,
+            "target": "runner_memory_limit_modifier_until_end_of_turn",
+            "finite": true
+          },
+          {
+            "kind": "program_trash",
+            "timing": "action",
+            "scope": "installed_program",
+            "target": "memory_pressure_program_trash",
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 2,
+            "target": "memory_pressure",
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_memory_pressure",
+            "confidence": "medium",
+            "evidence": [
+              "risk.requires_tagged_runner",
+              "tag.payoff"
+            ],
+            "rationale": "Tagged-runner payoff; aktuell fehlt nur das hierarchische Pair. Optional später ein präziser Memory-/MU-Druck-Signal ergänzen."
+          }
+        ],
+        "targetOrConstraints": "keine Zielwahl; Wirkung trifft Runner-MU und daraus folgende legale Programmauswahl.",
+        "change": "`strategySupportPairs` ergänzen; Taktiksignal bleibt vorerst ausreichend, aber Memory-Druck ist noch zu grob."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "classic",
+      "cardId": "onr_classic_017_corporate-shuffle",
+      "title": "Corporate Shuffle",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Draw five cards, then shuffle a card stored in HQ into R&D. Playing a double operation costs two consecutive actions this turn instead of one.",
+      "current": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "hq.corp_hand_refresh",
+          "rnd.corp_shuffle_hq_into_rnd"
+        ],
+        "lineSupport": [
+          "corp.central_stabilize"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 5,
+            "target": "draw.corp_draw",
+            "finite": true
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "action",
+            "scope": "rnd",
+            "resource": "cards",
+            "amount": 1,
+            "target": "rnd.corp_shuffle_hq_into_rnd",
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "draw.corp_draw",
+          "hq.corp_hand_refresh",
+          "rnd.corp_shuffle_hq_into_rnd"
+        ],
+        "lineSupport": [
+          "corp.deck_recycle_engine"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.deck_recycle_engine",
+            "role": "support_tool",
+            "roleDetail": "hand_refresh_rnd_shuffle",
+            "confidence": "medium",
+            "evidence": [
+              "draw.corp_draw",
+              "hq.corp_hand_refresh",
+              "rnd.corp_shuffle_hq_into_rnd"
+            ],
+            "rationale": "Draw five plus HQ-to-R&D shuffle is deck-recycle/draw support, not central-defense support by itself."
+          }
+        ],
+        "targetOrConstraints": "Corp wählt eine eigene HQ-Karte; keine Runner-seitige Hidden-Info-Projektion.",
+        "change": "`corp.central_stabilize` durch `corp.deck_recycle_engine` ersetzen und Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "lineSupport",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "classic",
+      "cardId": "onr_classic_018_reclamation-project",
+      "title": "Reclamation Project",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Search the archives for any number of ice cards. Show those cards to Runner, then store them in HQ. Playing a double operation costs two consecutive actions this turn instead of one.",
+      "current": {
+        "tacticSignals": [
+          "archives.corp_recovery",
+          "ice.recovery"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-07-01",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "card_recovery",
+            "timing": "action",
+            "scope": "archives",
+            "resource": "cards",
+            "target": "archives.corp_recovery",
+            "finite": true
+          },
+          {
+            "kind": "search",
+            "timing": "action",
+            "scope": "archives",
+            "resource": "cards",
+            "target": "ice_recovery",
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_archives_card"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "archives.corp_recovery",
+          "ice.recovery"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "support_tool",
+            "roleDetail": "archives_ice_recovery",
+            "confidence": "high",
+            "evidence": [
+              "archives.corp_recovery",
+              "ice.recovery"
+            ],
+            "rationale": "Archives-to-HQ ICE recovery materially supports ICE density and glacier/tax rebuilds."
+          }
+        ],
+        "targetOrConstraints": "Corp wählt ICE aus Archives; gewählte Karten werden Runner gezeigt, danach HQ.",
+        "change": "Hierarchisches Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_281_accounts-receivable",
+      "title": "Accounts Receivable",
+      "cost": 5,
+      "costDisplay": "5",
+      "ruleText": "Gain 9.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 9,
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Support-only belassen; generische Economy ist kein Strategieanker."
+      },
+      "changedFieldsIfApplied": []
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_282_annual-reviews",
+      "title": "Annual Reviews",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Draw three cards.",
+      "current": {
+        "tacticSignals": [
+          "draw.corp_draw"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 3,
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "draw.corp_draw"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Support-only belassen; einmaliger Draw ist kein Draw-Engine-Anker."
+      },
+      "changedFieldsIfApplied": []
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Play only if Runner attempted two or more runs during last turn. Trace 5 - If successful, give Runner 1 tag.",
+      "current": {
+        "tacticSignals": [
+          "condition.multiple_runs_last_turn",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 5,
+            "finite": true
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_action"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "condition.multiple_runs_last_turn",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "trace_tag_source",
+            "confidence": "high",
+            "evidence": [
+              "condition.multiple_runs_last_turn",
+              "tag.source",
+              "trace.source"
+            ],
+            "rationale": "Conditional trace creates a tag source for the tag/trace punish plan."
+          }
+        ],
+        "targetOrConstraints": "Trace-Bidding über LegalActions; keine freie Zielwahl.",
+        "change": "Hierarchisches Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "cost": 2,
+      "costDisplay": "2",
+      "ruleText": "Play only if Runner attempted a run during last turn. Trace 5 - If successful, give Runner 1 tag.",
+      "current": {
+        "tacticSignals": [
+          "condition.last_turn_run",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 5,
+            "finite": true
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "condition.last_turn_run",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "trace_tag_source",
+            "confidence": "high",
+            "evidence": [
+              "condition.last_turn_run",
+              "tag.source",
+              "trace.source"
+            ],
+            "rationale": "Conditional trace creates a tag source for the tag/trace punish plan."
+          }
+        ],
+        "targetOrConstraints": "Trace-Bidding über LegalActions; keine freie Zielwahl.",
+        "change": "Hierarchisches Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "cost": 1,
+      "costDisplay": "1",
+      "ruleText": "Play only if Runner is tagged. Runner loses all bits.",
+      "current": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_credit_punish",
+            "confidence": "high",
+            "evidence": [
+              "risk.requires_tagged_runner",
+              "tag.payoff"
+            ],
+            "rationale": "Tagged-runner credit wipe is a tag-punish payoff, not a tag source."
+          }
+        ],
+        "targetOrConstraints": "keine Zielwahl; Runner verliert Credits.",
+        "change": "Hierarchisches Payoff-Pair ergänzen; optional später präzises Credit-loss-Signal ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_286_corporate-detective-agency",
+      "title": "Corporate Detective Agency",
+      "cost": 1,
+      "costDisplay": "1",
+      "ruleText": "Play only if Runner is tagged. Trash up to two Resources at no cost.",
+      "current": {
+        "tacticSignals": [
+          "resource.trash_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "resource_trash",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 2,
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "resource.trash_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_resource_trash",
+            "confidence": "high",
+            "evidence": [
+              "resource.trash_payoff",
+              "risk.requires_tagged_runner",
+              "tag.payoff"
+            ],
+            "rationale": "Tagged-runner resource trash is a tag-punish payoff."
+          }
+        ],
+        "targetOrConstraints": "Bis zu zwei installierte Ressourcen; sichtbare/legale Ziele.",
+        "change": "Hierarchisches Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "title": "Datapool by Zetatech",
+      "cost": 1,
+      "costDisplay": "1",
+      "ruleText": "Play only if Runner is tagged. Give Runner two tags.",
+      "current": {
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.additional_tag_followup",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "tag_source",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 2,
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "risk.requires_tagged_runner",
+          "tag.additional_tag_followup",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "tag_snowball_source",
+            "confidence": "high",
+            "evidence": [
+              "risk.requires_tagged_runner",
+              "tag.additional_tag_followup",
+              "tag.payoff"
+            ],
+            "rationale": "Requires an existing tag and adds more tags; this is tag-snowball enabling, not terminal payoff."
+          }
+        ],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Pair ergänzen; bei Umsetzung prüfen, ob zusätzlich `tag.source` aufgenommen und `tag.payoff` enger benannt werden sollte."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_288_day-shift",
+      "title": "Day Shift",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Draw two cards and gain 1.",
+      "current": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 2,
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "draw.corp_draw",
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Support-only belassen."
+      },
+      "changedFieldsIfApplied": []
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_289_edgerunner-inc-temps",
+      "title": "Edgerunner, Inc., Temps",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Gain three consecutive actions, which you may use only to install cards. You are not required to take all three of these actions.",
+      "current": {
+        "tacticSignals": [
+          "action.corp_install_action_bundle"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "install",
+            "timing": "action",
+            "scope": "corp",
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "action.corp_install_action_bundle"
+        ],
+        "lineSupport": [
+          "corp.action_tempo"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.action_tempo",
+            "role": "enabler",
+            "roleDetail": "install_only_action_bundle",
+            "confidence": "medium",
+            "evidence": [
+              "action.corp_install_action_bundle"
+            ],
+            "rationale": "Three install-only actions are explicit Corp action-tempo support."
+          }
+        ],
+        "targetOrConstraints": "Folgeaktionen dürfen nur legale Install-LegalActions sein.",
+        "change": "Neuen `corp.action_tempo`-Anker und Pair ergänzen; optional Signal auf `action.corp_install_only_action` normalisieren."
+      },
+      "changedFieldsIfApplied": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_290_efficiency-experts",
+      "title": "Efficiency Experts",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Gain 3.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Support-only belassen."
+      },
+      "changedFieldsIfApplied": []
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_291_falsified-transactions-expert",
+      "title": "Falsified-Transactions Expert",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Move up to three advancement counters from one card to another installed card that can be advanced.",
+      "current": {
+        "tacticSignals": [
+          "advance.corp_counter_transfer",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "advance",
+            "timing": "action",
+            "scope": "installed_card",
+            "resource": "advancement_counters",
+            "amount": 3,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          },
+          {
+            "kind": "requires_installed_card"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.corp_counter_transfer",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "roleDetail": "advancement_counter_reposition",
+            "confidence": "high",
+            "evidence": [
+              "advance.corp_counter_transfer",
+              "advance.score_window_support"
+            ],
+            "rationale": "Moving advancement counters can compress or salvage score windows."
+          }
+        ],
+        "targetOrConstraints": "Von einer Karte auf eine installierte advancebare Karte; nur legale/side-safe Ziele.",
+        "change": "Hierarchisches Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_292_management-shake-up",
+      "title": "Management Shake-Up",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Add three advancement counters to any combination of installed cards that can be advanced.",
+      "current": {
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.overadvance_support",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "advance_burst",
+            "timing": "action",
+            "scope": "score_area",
+            "resource": "advancement_counters",
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.overadvance_support",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance",
+          "corp.overadvance_value"
+        ],
+        "strategicRole": [
+          "scoring_tool",
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "roleDetail": "advance_counter_burst",
+            "confidence": "high",
+            "evidence": [
+              "advance.agenda_counter",
+              "advance.score_window_support"
+            ],
+            "rationale": "Three counters across installed advanceable cards directly improve scoring windows."
+          },
+          {
+            "strategyId": "corp.overadvance_value",
+            "role": "enabler",
+            "roleDetail": "overadvance_counter_burst",
+            "confidence": "medium",
+            "evidence": [
+              "advance.overadvance_support",
+              "advance.score_window_support"
+            ],
+            "rationale": "Because counters can overadvance, the card also enables overadvance-value lines."
+          }
+        ],
+        "targetOrConstraints": "Any combination of installed advanceable cards; Hidden-Info nur Corp-seitig.",
+        "change": "Pairs für Fast-Advance und Overadvance ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Play only if Runner is tagged. Give Runner 1 tag and gain 1.",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_credit_burst",
+          "risk.requires_tagged_runner",
+          "tag.additional_tag_followup",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "tag_source",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "economy.corp_credit_burst",
+          "risk.requires_tagged_runner",
+          "tag.additional_tag_followup",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "tag_snowball_credit_source",
+            "confidence": "medium",
+            "evidence": [
+              "risk.requires_tagged_runner",
+              "tag.additional_tag_followup",
+              "tag.payoff"
+            ],
+            "rationale": "Requires tagged Runner, adds another tag and minor economy; primarily tag-snowball support."
+          }
+        ],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Pair ergänzen; `tag.payoff` später enger von `tag.source`/Snowball trennen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_294_new-blood",
+      "title": "New Blood",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Conceal all revealed but unrezzed ice; then rearrange your installed ice by swapping pairs of ice while Runner looks away.",
+      "current": {
+        "tacticSignals": [
+          "ice.corp_rearrange_conceal"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "zone_shuffle",
+            "timing": "action",
+            "scope": "ice",
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "ice.corp_rearrange_conceal"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "defensive_tool",
+            "roleDetail": "ice_rearrange_conceal",
+            "confidence": "medium",
+            "evidence": [
+              "ice.corp_rearrange_conceal"
+            ],
+            "rationale": "Concealing and rearranging ICE is defensive glacier/tax support, with strict hidden-info handling."
+          }
+        ],
+        "targetOrConstraints": "Corp ordnet eigene ICE; Runner darf neue verdeckte Ordnung nicht aus KI-/Inspector-Daten ableiten.",
+        "change": "`corp.ice_tax_glacier`-Pair ergänzen; Hidden-Info-Hinweis im Report festhalten."
+      },
+      "changedFieldsIfApplied": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_295_night-shift",
+      "title": "Night Shift",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Gain 2 and draw one card.",
+      "current": {
+        "tacticSignals": [
+          "draw.corp_draw",
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-03",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 2,
+            "finite": true
+          },
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "draw.corp_draw",
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Support-only belassen."
+      },
+      "changedFieldsIfApplied": []
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_296_off-site-backups",
+      "title": "Off-Site Backups",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Bring any card from the Archives into HQ.",
+      "current": {
+        "tacticSignals": [
+          "archives.corp_recovery"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "card_recovery",
+            "timing": "action",
+            "scope": "archives",
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "archives.corp_recovery"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "Corp wählt Archives-Karte; side-safe eigene Zone.",
+        "change": "Support-only belassen; kein bestehender Strategieanker für allgemeine Archives-Recovery."
+      },
+      "changedFieldsIfApplied": []
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_297_overtime-incentives",
+      "title": "Overtime Incentives",
+      "cost": 4,
+      "costDisplay": "4",
+      "ruleText": "Gain two actions.",
+      "current": {
+        "tacticSignals": [
+          "action.corp_extra_action_support"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "extra_action",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "actions",
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "action.corp_extra_action_support"
+        ],
+        "lineSupport": [
+          "corp.action_tempo"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.action_tempo",
+            "role": "payoff_anchor",
+            "roleDetail": "extra_action_burst",
+            "confidence": "high",
+            "evidence": [
+              "action.corp_extra_action_support"
+            ],
+            "rationale": "Two extra Corp actions are a direct action-tempo payoff."
+          }
+        ],
+        "targetOrConstraints": "keine Zielwahl; Folgezuege bleiben LegalActions.",
+        "change": "`corp.action_tempo`-Pair ergänzen; Signal optional auf `action.corp_extra_action` normalisieren."
+      },
+      "changedFieldsIfApplied": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_298_planning-consultants",
+      "title": "Planning Consultants",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Look at the top five cards of R&D and arrange them in any order you choose.",
+      "current": {
+        "tacticSignals": [
+          "rnd.corp_topdeck_reorder",
+          "rnd.corp_topdeck_setup"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "topdeck_info",
+            "timing": "action",
+            "scope": "rnd",
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "rnd.corp_topdeck_reorder",
+          "rnd.corp_topdeck_setup"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "Corp sieht/ordnet R&D top 5; keine Runner-Info.",
+        "change": "Support-only belassen; wichtiger Hidden-Info-Hinweis."
+      },
+      "changedFieldsIfApplied": []
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_299_power-grid-overload",
+      "title": "Power Grid Overload",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Play only if Runner is tagged. Trash X pieces of hardware, other than cybernetics.",
+      "current": {
+        "tacticSignals": [
+          "hardware.trash_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "hardware_trash",
+            "timing": "action",
+            "scope": "runner",
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          },
+          {
+            "kind": "requires_installed_hardware"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "hardware.trash_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_hardware_trash",
+            "confidence": "high",
+            "evidence": [
+              "hardware.trash_payoff",
+              "risk.requires_tagged_runner",
+              "tag.payoff"
+            ],
+            "rationale": "Tagged-runner hardware trash is a tag-punish payoff."
+          }
+        ],
+        "targetOrConstraints": "X Hardware außer Cybernetics; nur sichtbare/legale installierte Hardware.",
+        "change": "Hierarchisches Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_300_project-consultants",
+      "title": "Project Consultants",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Add four advancement counters to any combination of installed cards that can be advanced.",
+      "current": {
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.overadvance_support",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "advance_burst",
+            "timing": "action",
+            "scope": "score_area",
+            "resource": "advancement_counters",
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.overadvance_support",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance",
+          "corp.overadvance_value"
+        ],
+        "strategicRole": [
+          "scoring_tool",
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "roleDetail": "advance_counter_burst",
+            "confidence": "high",
+            "evidence": [
+              "advance.agenda_counter",
+              "advance.score_window_support"
+            ],
+            "rationale": "Four counters directly compress scoring windows."
+          },
+          {
+            "strategyId": "corp.overadvance_value",
+            "role": "enabler",
+            "roleDetail": "overadvance_counter_burst",
+            "confidence": "medium",
+            "evidence": [
+              "advance.overadvance_support",
+              "advance.score_window_support"
+            ],
+            "rationale": "Four counters can materially enable overadvance payoff lines."
+          }
+        ],
+        "targetOrConstraints": "Any combination of installed advanceable cards; Hidden-Info nur Corp-seitig.",
+        "change": "Pairs für Fast-Advance und Overadvance ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "title": "Punitive Counterstrike",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Play only if Runner is tagged. Do 2 meat damage.",
+      "current": {
+        "tacticSignals": [
+          "damage.meat_source",
+          "damage.tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "win_condition"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2,
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "high",
+        "tacticSignals": [
+          "damage.meat_source",
+          "damage.tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_meat_damage_payoff",
+            "confidence": "high",
+            "evidence": [
+              "damage.meat_source",
+              "damage.tagged_meat_payoff",
+              "risk.requires_tagged_runner"
+            ],
+            "rationale": "Tagged meat damage is a damage-kill payoff."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_punish_payoff",
+            "confidence": "high",
+            "evidence": [
+              "risk.requires_tagged_runner",
+              "tag.payoff"
+            ],
+            "rationale": "Requires tagged Runner and converts tag state into punishment."
+          }
+        ],
+        "targetOrConstraints": "keine Zielwahl; damage prevention/flatline bleibt Engine-Vertrag.",
+        "change": "Zwei hierarchische Payoff-Pairs ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "cost": 3,
+      "costDisplay": "3",
+      "ruleText": "Play only if Runner is tagged. Do 4 meat damage.",
+      "current": {
+        "tacticSignals": [
+          "damage.meat_source",
+          "damage.tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 4,
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 4,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "high",
+        "tacticSignals": [
+          "damage.meat_source",
+          "damage.tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition",
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "win_condition",
+            "roleDetail": "tagged_meat_damage_closeout",
+            "confidence": "high",
+            "evidence": [
+              "damage.meat_source",
+              "damage.tagged_meat_payoff",
+              "risk.requires_tagged_runner"
+            ],
+            "rationale": "Four meat damage can be a direct kill closeout."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_punish_payoff",
+            "confidence": "high",
+            "evidence": [
+              "risk.requires_tagged_runner",
+              "tag.payoff"
+            ],
+            "rationale": "Requires tagged Runner and converts tag state into punishment."
+          }
+        ],
+        "targetOrConstraints": "keine Zielwahl; damage prevention/flatline bleibt Engine-Vertrag.",
+        "change": "Zwei hierarchische Payoff-Pairs ergänzen; `win_condition` an Damage-Pair binden."
+      },
+      "changedFieldsIfApplied": [
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+      "title": "Silver Lining Recovery Protocol",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "If any agendas were stolen during Runner's last turn, gain bits equal to three times the number of advancement counters those agendas had.",
+      "current": {
+        "tacticSignals": [
+          "condition.agenda_stolen_last_turn",
+          "economy.corp_conditional_credit"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_stolen_agenda_last_turn"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "condition.agenda_stolen_last_turn",
+          "economy.corp_conditional_credit"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Reactive Economy bleibt support-only."
+      },
+      "changedFieldsIfApplied": []
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "title": "Systematic Layoffs",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Add two advancement counters to any combination of installed cards that can be advanced.",
+      "current": {
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.overadvance_support",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "advance_burst",
+            "timing": "action",
+            "scope": "score_area",
+            "resource": "advancement_counters",
+            "amount": 2,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.overadvance_support",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance",
+          "corp.overadvance_value"
+        ],
+        "strategicRole": [
+          "scoring_tool",
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "roleDetail": "advance_counter_burst",
+            "confidence": "high",
+            "evidence": [
+              "advance.agenda_counter",
+              "advance.score_window_support"
+            ],
+            "rationale": "Two counters improve score windows."
+          },
+          {
+            "strategyId": "corp.overadvance_value",
+            "role": "enabler",
+            "roleDetail": "overadvance_counter_burst",
+            "confidence": "medium",
+            "evidence": [
+              "advance.overadvance_support",
+              "advance.score_window_support"
+            ],
+            "rationale": "Can enable overadvance payoff lines."
+          }
+        ],
+        "targetOrConstraints": "Any combination of installed advanceable cards.",
+        "change": "Pairs für Fast-Advance und Overadvance ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_305_team-restructuring",
+      "title": "Team Restructuring",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Add one advancement counter to each of up to two installed cards that can be advanced.",
+      "current": {
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "advance",
+            "timing": "action",
+            "scope": "score_area",
+            "resource": "advancement_counters",
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_score_window"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "advance.agenda_counter",
+          "advance.score_window_support"
+        ],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "strategicRole": [
+          "scoring_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.fast_advance",
+            "role": "scoring_tool",
+            "roleDetail": "distributed_advance_counter_support",
+            "confidence": "medium",
+            "evidence": [
+              "advance.agenda_counter",
+              "advance.score_window_support"
+            ],
+            "rationale": "Distributed advancement counters support score-window compression."
+          }
+        ],
+        "targetOrConstraints": "Bis zu zwei installierte advancebare Karten.",
+        "change": "Hierarchisches Fast-Advance-Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_306_trojan-horse",
+      "title": "Trojan Horse",
+      "cost": 2,
+      "costDisplay": "2",
+      "ruleText": "Play only if Runner stole any agendas during his or her last turn. Give Runner a tag.",
+      "current": {
+        "tacticSignals": [
+          "condition.agenda_stolen_last_turn",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "tag_source",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_stolen_agenda_last_turn"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "condition.agenda_stolen_last_turn",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "retaliatory_tag_source",
+            "confidence": "medium",
+            "evidence": [
+              "condition.agenda_stolen_last_turn",
+              "tag.source"
+            ],
+            "rationale": "Retaliatory tag source after stolen agenda supports tag/trace punish plans."
+          }
+        ],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Hierarchisches Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "originalset-v1",
+      "cardId": "onr_v1_307_urban-renewal",
+      "title": "Urban Renewal",
+      "cost": 6,
+      "costDisplay": "6",
+      "ruleText": "Play only if Runner is tagged. Do 5 meat damage.",
+      "current": {
+        "tacticSignals": [
+          "damage.meat_source",
+          "damage.tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 5,
+            "finite": true
+          },
+          {
+            "kind": "tag_punish_payoff",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 5,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "high",
+        "tacticSignals": [
+          "damage.meat_source",
+          "damage.tagged_meat_payoff",
+          "risk.requires_tagged_runner",
+          "tag.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "win_condition",
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "win_condition",
+            "roleDetail": "tagged_meat_damage_closeout",
+            "confidence": "high",
+            "evidence": [
+              "damage.meat_source",
+              "damage.tagged_meat_payoff",
+              "risk.requires_tagged_runner"
+            ],
+            "rationale": "Five meat damage is a direct kill closeout."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "tagged_runner_punish_payoff",
+            "confidence": "high",
+            "evidence": [
+              "risk.requires_tagged_runner",
+              "tag.payoff"
+            ],
+            "rationale": "Requires tagged Runner and converts tag state into punishment."
+          }
+        ],
+        "targetOrConstraints": "keine Zielwahl; damage prevention/flatline bleibt Engine-Vertrag.",
+        "change": "Zwei hierarchische Payoff-Pairs ergänzen; `win_condition` an Damage-Pair binden."
+      },
+      "changedFieldsIfApplied": [
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_046_corporate-guard-r-temps",
+      "title": "Corporate Guard(R) Temps",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Pay two times [X] when you play Corporate Guard(R) Temps, to gain an action during each of your next X turns. Forfeit the next [X] you gain.",
+      "current": {
+        "tacticSignals": [
+          "action.corp_future_extra_action",
+          "risk.agenda_forfeit_drawback"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "extra_action",
+            "timing": "corp_turn",
+            "scope": "corp",
+            "resource": "actions"
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "action.corp_future_extra_action",
+          "risk.agenda_forfeit_drawback"
+        ],
+        "lineSupport": [
+          "corp.action_tempo"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.action_tempo",
+            "role": "engine_anchor",
+            "roleDetail": "delayed_recurring_extra_action_engine",
+            "confidence": "medium",
+            "evidence": [
+              "action.corp_future_extra_action",
+              "risk.agenda_forfeit_drawback"
+            ],
+            "rationale": "Future extra actions create a temporary action-tempo engine with forfeit drawback."
+          }
+        ],
+        "targetOrConstraints": "X wird beim Spielen bezahlt; Folgeaktionen/Forfeit bleiben LegalAction-/Engine-Vertrag.",
+        "change": "`corp.action_tempo`-Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_047_credit-consolidation",
+      "title": "Credit Consolidation",
+      "cost": 10,
+      "costDisplay": "10",
+      "ruleText": "Gain [15].",
+      "current": {
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "finite": true
+          }
+        ],
+        "conditions": []
+      },
+      "recommendation": {
+        "reviewStatus": "behalten",
+        "priority": "low",
+        "tacticSignals": [
+          "economy.corp_credit_burst"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Support-only belassen."
+      },
+      "changedFieldsIfApplied": []
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_048_data-sifters",
+      "title": "Data Sifters",
+      "cost": 4,
+      "costDisplay": "4",
+      "ruleText": "Play only if Runner trashed any nodes during his or her last turn. Give Runner a tag.",
+      "current": {
+        "tacticSignals": [
+          "condition.node_trashed_last_turn",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "tag_source",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "condition.node_trashed_last_turn",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "retaliatory_tag_source",
+            "confidence": "medium",
+            "evidence": [
+              "condition.node_trashed_last_turn",
+              "tag.source"
+            ],
+            "rationale": "Retaliatory tag source after node trash supports tag/trace punish."
+          }
+        ],
+        "targetOrConstraints": "keine Zielwahl.",
+        "change": "Hierarchisches Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_049_emergency-rig",
+      "title": "Emergency Rig",
+      "cost": null,
+      "costDisplay": "variabel/nicht numerisch im Datenmodell",
+      "ruleText": "Rez a piece of ice, at no cost. Put X Kludge counters on that piece of ice; X cannot be 0. At the start of each of your turns, remove a Kludge counter. Trash that piece of ice when the last Kludge counter is removed from it.",
+      "current": {
+        "tacticSignals": [
+          "ice.corp_free_rez",
+          "ice.corp_temporary_rez",
+          "risk.temporary_rez_liability"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "rez",
+            "timing": "action",
+            "scope": "ice",
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "ice.corp_free_rez",
+          "ice.corp_temporary_rez",
+          "risk.temporary_rez_liability"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "enabler",
+            "roleDetail": "temporary_free_rez_ice",
+            "confidence": "medium",
+            "evidence": [
+              "ice.corp_free_rez",
+              "ice.corp_temporary_rez",
+              "risk.temporary_rez_liability"
+            ],
+            "rationale": "Free temporary rez supports glacier/tax windows but carries expiry liability."
+          }
+        ],
+        "targetOrConstraints": "Wähle installierte ICE; Rez-/Counter-/Trash-Folge ist Engine-Vertrag.",
+        "change": "Hierarchisches Pair ergänzen; Rolle von losem `tax_tool` auf `enabler` präzisieren."
+      },
+      "changedFieldsIfApplied": [
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_050_manhunt",
+      "title": "Manhunt",
+      "cost": 4,
+      "costDisplay": "4",
+      "ruleText": "Play only if Runner attempted a run during his or her last turn. Trace 6-If trace is successful, give Runner one tag for each point by which your trace exceeded his or her link.",
+      "current": {
+        "tacticSignals": [
+          "condition.last_turn_run",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "action",
+            "scope": "runner",
+            "finite": true
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "condition.last_turn_run",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "scaling_trace_tag_source",
+            "confidence": "high",
+            "evidence": [
+              "condition.last_turn_run",
+              "tag.source",
+              "trace.source"
+            ],
+            "rationale": "Trace can create one or more tags, making it a strong tag/trace punish enabler."
+          }
+        ],
+        "targetOrConstraints": "Trace-Bidding über LegalActions.",
+        "change": "Hierarchisches Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "title": "Rent-to-Own Contract",
+      "cost": 0,
+      "costDisplay": "0",
+      "ruleText": "Rez a piece of ice, at no cost. Put on that ice a number of Term counters equal to its rez cost. At the start of each of your turns, if you have at least [2], lose [2] and remove one of these Term counters; otherwise, put a Term counter on that piece of ice.",
+      "current": {
+        "tacticSignals": [
+          "ice.corp_deferred_rez",
+          "ice.corp_installment_rez"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": false,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "rez",
+            "timing": "action",
+            "scope": "ice",
+            "finite": true
+          },
+          {
+            "kind": "rez",
+            "timing": "corp_turn",
+            "scope": "ice",
+            "finite": false
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_ice"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "ändern",
+        "priority": "medium",
+        "tacticSignals": [
+          "ice.corp_deferred_rez",
+          "ice.corp_installment_rez"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "enabler",
+            "roleDetail": "installment_free_rez_ice",
+            "confidence": "medium",
+            "evidence": [
+              "ice.corp_deferred_rez",
+              "ice.corp_installment_rez"
+            ],
+            "rationale": "Free rez with term counters supports ICE-tax/glacier setup, with recurring payment liability."
+          }
+        ],
+        "targetOrConstraints": "Wähle installierte ICE; Term-Counter und Zahlung/Verlängerung bleiben Engine-Vertrag.",
+        "change": "Neuen `corp.ice_tax_glacier`-Anker und Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "title": "Schlaghund Pointers",
+      "cost": 6,
+      "costDisplay": "6",
+      "ruleText": "Play only if Runner has attempted a run this game. Trace 3-If trace is successful, give Runner a tag. Pay [1], in addition to the normal cost, for each point of trace above 0.",
+      "current": {
+        "tacticSignals": [
+          "condition.run_this_game",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "action",
+            "scope": "runner",
+            "finite": true
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_action"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "condition.run_this_game",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "paid_trace_tag_source",
+            "confidence": "medium",
+            "evidence": [
+              "condition.run_this_game",
+              "tag.source",
+              "trace.source"
+            ],
+            "rationale": "Paid trace creates a tag source for tag/trace punish."
+          }
+        ],
+        "targetOrConstraints": "Trace-Bidding/Kosten über LegalActions.",
+        "change": "Hierarchisches Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "set": "proteus",
+      "cardId": "onr_proteus_053_underworld-mole",
+      "title": "Underworld Mole",
+      "cost": 6,
+      "costDisplay": "6",
+      "ruleText": "Play only if Runner installed any resources during his or her last turn. Trace 4-If trace is successful, trash a resource Runner installed during his or her last turn and give Runner a tag.",
+      "current": {
+        "tacticSignals": [
+          "condition.resource_installed_last_turn",
+          "resource.trash_payoff",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [],
+        "quality": {
+          "strategyCovered": true,
+          "confidence": "high",
+          "reviewedDate": "2026-06-02",
+          "reviewedBy": "codex"
+        },
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "action",
+            "scope": "runner",
+            "amount": 4,
+            "finite": true
+          },
+          {
+            "kind": "resource_trash",
+            "timing": "trace_success",
+            "scope": "runner",
+            "finite": true
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_resource"
+          },
+          {
+            "kind": "requires_trace_success"
+          }
+        ]
+      },
+      "recommendation": {
+        "reviewStatus": "kleine Änderung",
+        "priority": "medium",
+        "tacticSignals": [
+          "condition.resource_installed_last_turn",
+          "resource.trash_payoff",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "punish_payoff",
+            "roleDetail": "trace_resource_trash_tag_payoff",
+            "confidence": "high",
+            "evidence": [
+              "condition.resource_installed_last_turn",
+              "resource.trash_payoff",
+              "tag.source",
+              "trace.source"
+            ],
+            "rationale": "Trace can trash the newly installed resource and give a tag; this is both tag source and resource punish payoff."
+          }
+        ],
+        "targetOrConstraints": "Nur Ressourcen, die Runner letzte Runde installierte; Trace und Zielwahl legal/side-safe.",
+        "change": "Hierarchisches Payoff-Pair ergänzen."
+      },
+      "changedFieldsIfApplied": [
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    }
+  ]
+}
