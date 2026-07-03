@@ -471,6 +471,259 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("locks an active protected remote agenda over setup, central ice, and economy", () => {
+    const agenda = corpCard("active-agenda", "agenda", {
+      title: "Active Agenda",
+      advancementRequirement: 3,
+      advancementCounters: 1,
+      agendaPoints: 2,
+    });
+    const advanceAgenda = corpAction(
+      "advance-active-agenda",
+      "advance_card",
+      { cardId: agenda.instanceId, serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    advanceAgenda.costs = [{ clicks: 1, credits: 1 }];
+    const installRemoteIce = corpAction(
+      "install-extra-remote-ice",
+      "install_card",
+      { placement: "ice", serverId: "remote_1" },
+      "extra-remote-ice",
+    );
+    const installSupportRoot = corpAction(
+      "install-support-root",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      "support-root",
+    );
+    const installRdIce = corpAction(
+      "install-rd-ice",
+      "install_card",
+      { placement: "ice", serverId: "rd" },
+      "rd-ice",
+    );
+    const installNewRemoteAgenda = corpAction(
+      "install-new-remote-agenda",
+      "install_card",
+      { cardType: "agenda", placement: "root", serverId: "new_remote" },
+      "second-agenda",
+    );
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithRemoteAgenda(6, 3, agenda, [
+      advanceAgenda,
+      installRemoteIce,
+      installSupportRoot,
+      installRdIce,
+      installNewRemoteAgenda,
+      gainCredit,
+    ]);
+    input.playerView.own.gripOrHq = [
+      agendaCard("second-agenda", 2),
+      corpIce("extra-remote-ice", {
+        definitionId: "simple_barrier_ice",
+        rezCost: 2,
+      }),
+      corpIce("rd-ice", { definitionId: "simple_barrier_ice", rezCost: 2 }),
+      corpCard("support-root", "upgrade"),
+    ];
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-wall", { rezCost: 1, rezzed: true })],
+        root: [agenda],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId ||
+        action.actionId === installNewRemoteAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "temporary_safe",
+              runnerCanContestBeforeScore: false,
+              runnerCanReachAccessBeforeScore: false,
+              affordableDurableRelevantIceCount: 1,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: true,
+              dynamicProtectionWeaknessCount: 0,
+              recommendedNextStep: "score",
+              evidence: ["test_active_scoreline_clock"],
+            })
+          : undefined,
+    };
+
+    const advanceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceAgenda,
+      "simple_score_advance",
+      dependencies,
+    );
+    const distractingActions = [
+      installRemoteIce,
+      installSupportRoot,
+      installRdIce,
+      installNewRemoteAgenda,
+      gainCredit,
+    ];
+
+    expect(advanceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining(
+            "corp_active_scoreline_clock:true",
+          ),
+        }),
+      ]),
+    );
+    for (const distractingAction of distractingActions) {
+      const components = semanticRuntimeCorpScoreComponents(
+        input,
+        distractingAction,
+        distractingAction.type === "advance_card"
+          ? "simple_score_advance"
+          : "basic_install",
+        dependencies,
+      );
+      expect(components).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            key: "corp_board_triage_mismatch",
+            reason: expect.stringContaining(
+              "corp_active_scoreline_clock:true",
+            ),
+          }),
+        ]),
+      );
+      expect(totalScore(advanceComponents)).toBeGreaterThan(
+        totalScore(components),
+      );
+    }
+  });
+
+  it("uses an existing ready remote for HQ agenda install over opening another remote", () => {
+    const agenda = agendaCard("agenda-in-hq", 2);
+    const installExistingRemote = corpAction(
+      "install-agenda-existing-remote",
+      "install_card",
+      { cardType: "agenda", placement: "root", serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    const installNewRemote = corpAction(
+      "install-agenda-new-remote",
+      "install_card",
+      { cardType: "agenda", placement: "root", serverId: "new_remote" },
+      agenda.instanceId,
+    );
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithHqCards(6, [agenda], [
+      installExistingRemote,
+      installNewRemote,
+      gainCredit,
+    ]);
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-wall", { rezCost: 1, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installExistingRemote.actionId ||
+        action.actionId === installNewRemote.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installExistingRemote.actionId ||
+        action.actionId === installNewRemote.actionId
+          ? scoringWindow({
+              serverId: String(action.payload?.serverId),
+              windowKind: "temporary_safe",
+              runnerCanContestBeforeScore: false,
+              runnerCanReachAccessBeforeScore: false,
+              affordableDurableRelevantIceCount: 1,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: true,
+              dynamicProtectionWeaknessCount: 0,
+              recommendedNextStep: "score",
+              evidence: [`test_ready_remote:${action.payload?.serverId}`],
+            })
+          : undefined,
+    };
+
+    const existingComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installExistingRemote,
+      "basic_install",
+      dependencies,
+    );
+    const newRemoteComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installNewRemote,
+      "basic_install",
+      dependencies,
+    );
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      dependencies,
+    );
+
+    expect(existingComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining(
+            "corp_active_scoreline_clock:true",
+          ),
+        }),
+      ]),
+    );
+    expect(newRemoteComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_mismatch",
+          reason: expect.stringContaining(
+            "triage_action_server:new_remote",
+          ),
+        }),
+      ]),
+    );
+    expect(totalScore(existingComponents)).toBeGreaterThan(
+      totalScore(newRemoteComponents),
+    );
+    expect(totalScore(existingComponents)).toBeGreaterThan(
+      totalScore(creditComponents),
+    );
+  });
+
   it("prefers scoring a scoreable non-overadvance agenda over adding extra counters", () => {
     const agenda = corpCard("marine-arcology", "agenda", {
       title: "Marine Arcology",
