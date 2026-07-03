@@ -1,0 +1,45 @@
+Ich würde den ICE-Report **nicht 1:1 übernehmen**. Die Grundrichtung ist gut: Der Upload-Report prüft 114 aktive Corp-ICE, ergänzt überall fehlende `strategySupportPairs` und hält einfache ETR-/Program-Trash-ICE grundsätzlich support-only.  Aber beim kritischen Gegencheck fallen mehrere fachliche Signalfehler und einige fehlende Strategiepaare auf. Die Leitregel bleibt: Vanilla-ETR ist kein Strategieanker, einfaches Program-Trash+ETR ist nicht automatisch Glacier, aber mehrfacher Program-Trash, echte Run-Locks, skalierende Damage-/Tag-Payoffs und starke Tax-Funktionen dürfen sehr wohl Strategieanker tragen. 
+
+Ich habe daraus eine v2-Änderungsliste erstellt:
+
+[ICE-Review v2 als Markdown](sandbox:/mnt/data/ice-ai-hints-critical-review-v2-2026-07-03.md)
+[ICE-Review v2 als JSON](sandbox:/mnt/data/ice-ai-hints-critical-review-v2-2026-07-03.json)
+
+Die v2 ist nicht einfach konservativer, sondern präziser. Sie kommt auf **57 Karten mit Strategieanker** statt 52 und auf **72 StrategySupportPairs** statt 66. Das ist mehr als im Upload-Report, weil einige echte ICE-Tax-/Damage-/Tag-Enabler bisher unterschätzt wurden. Gleichzeitig fallen überbreite oder falsche Zuordnungen weg, etwa bei **Cortical Scrub**, **Glacier**, **Dumpster**, **Entrapment/Vortex** und mehreren falschen `ice.strength_modifier`-Fällen.
+
+Die wichtigsten Korrekturen:
+
+| Karte                                | Änderung                                                                                                                                                                                                                                                                                   |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Cortical Scrub**                   | `corp_ice.program_trash` entfernen. Die Karte macht Brain/Core damage und ETR, aber keinen Program-Trash. Dadurch fällt auch der `corp.ice_tax_glacier`-Pair weg; `corp.damage_kill` bleibt.                                                                                               |
+| **Data Darts**                       | `corp_ice.next_ice_break_lock` und `corp_ice.run_lock` ergänzen. Zusätzlich `corp.damage_kill` und `corp.ice_tax_glacier` setzen. Die Karte ist funktional die kleinere Bolter-Variante.                                                                                                   |
+| **Neural Blade**                     | Ebenfalls `next_ice_break_lock` und `run_lock` ergänzen. Kein Damage-Kill-Anker wegen nur 1 Net damage, aber klarer `corp.ice_tax_glacier`-Tax-Tool.                                                                                                                                       |
+| **Bolter Cluster**                   | Auf dieselbe Signalform wie Bolter Swarm bringen: `next_ice_break_lock` statt unscharfem `encounter_tax`.                                                                                                                                                                                  |
+| **Colonel Failure**                  | Nicht support-only. Drei Program-Trash- und zwei ETR-Subroutinen erfüllen die im Guide genannte Schwelle für anchorfähigen Program-Trash.                                                                                                                                                  |
+| **Hunting Pack**                     | `ice.strength_modifier` entfernen; Hunting Pack verändert keine Stärke. Dafür `corp.tag_trace_punish` als Enabler ergänzen, weil es multiple Trace-5-Tag-Subroutinen erzeugt.                                                                                                              |
+| **Pocket Virtual Reality**           | `trace.corp_credit_support` ergänzen und `corp.tag_trace_punish` setzen. Zwei Trace-6-Tag-Subroutinen plus encounter-lokale Trace-Credits sind stärker als einfache Hunter/Fetch-Tag-ICE.                                                                                                  |
+| **Bug Zapper**                       | `ice.strength_modifier` entfernen; die Karte verändert keine Stärke. Dafür `corp.damage_kill` ergänzen, weil Net damage mit äußerem rezzed ICE skaliert.                                                                                                                                   |
+| **Dog Pile**                         | Damage-Kill-Pair ergänzen. Dog Pile hat nicht nur Strength-Scaling, sondern auch skalierenden Net-Damage.                                                                                                                                                                                  |
+| **Minotaur**                         | `ice.strength_modifier` entfernen; Minotaur skaliert ETR-Subroutinen, nicht Stärke.                                                                                                                                                                                                        |
+| **Entrapment / Vortex**              | `corp_ice.runner_pay_or_end_run` entfernen. Die Corp zahlt [2] für den Redirect; der Runner zahlt nicht.                                                                                                                                                                                   |
+| **Ball and Chain / Tutor**           | `jackout_tax` entfernen. Beide besteuern Encounter bzw. spätere Subroutinen, nicht Jackout.                                                                                                                                                                                                |
+| **Vacuum Link**                      | Nicht nur `random_or_guessing`. Der eigentliche Effekt ist Runpath-Kontrolle: Runner wird auf frühere rezzed ICE zurückgesetzt oder jackt out. Neuer/zu prüfender Signalvorschlag: `run.corp_run_rewind`.                                                                                  |
+| **Glacier**                          | `corp.central_stabilize` und `corp.remote_scoring` entfernen. Die Karte ist ein mobiles ICE-Tax-/Glacier-Werkzeug; der konkrete Server ist Einsatzkontext, kein eigener Strategieanker.                                                                                                    |
+| **Baskerville / Cerberus / Mastiff** | Persistente Damage-Counter präziser modellieren. Neuer/zu prüfender Signalvorschlag: `damage.corp_persistent_damage_counter`. Bei Mastiff ist außerdem der lokale Spoilertext fehlerhaft verkürzt; eine externe Kartendatenbank weist den fehlenden Trace als Trace5 aus. ([Franckjeb][1]) |
+
+Die wichtigsten Taxonomie-Konsolidierungen aus v2:
+
+| Problem                                                                | Vorschlag                                                                          |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Persistente Damage-Counter sind nur generisch oder gar nicht sichtbar. | `damage.corp_persistent_damage_counter` ergänzen.                                  |
+| Einfacher und mehrfacher Program-Trash werden gleich behandelt.        | `corp_ice.multi_program_trash` ergänzen.                                           |
+| Run-Rewind wird als bloßer Zufall modelliert.                          | `run.corp_run_rewind` ergänzen; nicht mit `run.corp_redirect` vermischen.          |
+| Position-Scaling wird fälschlich als Strength-Modifier interpretiert.  | `ice.strength_modifier` nur setzen, wenn der Kartentext wirklich Stärke verändert. |
+| Jackout-Tax wird für Encounter-Tax verwendet.                          | `jackout_tax` nur verwenden, wenn Jackout tatsächlich kostet.                      |
+| Corp-paid Redirect wird als Runner-pay-or-end-run modelliert.          | `runner_pay_or_end_run` nur verwenden, wenn der Runner zahlt oder der Run endet.   |
+
+Bewusst **nicht** geändert: einfache ETR-ICE bleiben support-only; einfache Program-Trash+ETR-ICE wie Banpei, D’Arc Knight, Data Naga oder Triggerman bleiben support-only; einfache Tag-ICE wie Fetch 4.0.1 und Hunter bleiben support-only. Das folgt der Grundregel, dass Support nicht automatisch Strategie ist und Strategieanker nur bei echten Ankern, Payoffs, Engines, Enablern oder Schlüsselkarten gesetzt werden sollen. 
+
+Für die Umsetzung: erst die drei neuen Signale im Katalog prüfen oder ergänzen, dann die JSON-Overrides anwenden. Wenn der v1-Report noch nicht importiert wurde, kann `fullFinalRecommendations` in der JSON direkt als Zielzustand dienen.
+
+[1]: https://franckjeb.free.fr/CardSearchDB/Netrunner/netrunner_card.php?id=01147 "https://franckjeb.free.fr/CardSearchDB/Netrunner/netrunner_card.php?id=01147"
