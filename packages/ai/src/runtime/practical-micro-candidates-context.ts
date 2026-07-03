@@ -7,6 +7,7 @@ import type {
 
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { PracticalMicroCandidate } from "./practical-micro-runtime";
+import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 import { rolesMatch } from "./role-match";
 
 type KnownPathAssessment = {
@@ -43,6 +44,9 @@ export type PracticalMicroCandidatesContextDependencies = {
   ) => KnownPathAssessment;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
   scoreTerminalWindow: (input: AiDecisionInput) => CorpScoreTerminalWindow;
+  scorelineWindowAssessment?: (
+    input: AiDecisionInput,
+  ) => CorpScorelineWindowAssessment;
   actionTypeIsReactive: (type: LegalAction["type"]) => boolean;
   runnerRunTargets: (input: AiDecisionInput) => RunnerRunTargetEvaluation[];
   runnerRunTargetPlausibleForMultiRun: (
@@ -224,6 +228,10 @@ export function createPracticalMicroCandidatesContext(
     runtimeDecision: AiDecision,
   ): PracticalMicroCandidate | undefined {
     if (input.side !== "corp") return undefined;
+    const scoreline = dependencies.scorelineWindowAssessment?.(input);
+    if (scoreline) {
+      return corpSafeScorelineCandidateFromAssessment(input, scoreline);
+    }
     const terminal = dependencies.scoreTerminalWindow(input);
     if (!terminal.terminalWindow) return undefined;
     if (
@@ -251,6 +259,42 @@ export function createPracticalMicroCandidatesContext(
       evidence: [
         "practical_micro_corp_safe_scoreline:true",
         ...terminal.evidence.slice(0, 8),
+        `scoreline_action:${action.actionId}`,
+      ],
+    };
+  }
+
+  function corpSafeScorelineCandidateFromAssessment(
+    input: AiDecisionInput,
+    scoreline: CorpScorelineWindowAssessment,
+  ): PracticalMicroCandidate | undefined {
+    const path =
+      scoreline.bestPath && !scoreline.bestPath.blocked
+        ? scoreline.bestPath
+        : undefined;
+    if (
+      !path ||
+      (path.recommendedNextStep !== "score_now" &&
+        path.recommendedNextStep !== "advance_agenda" &&
+        path.recommendedNextStep !== "install_agenda")
+    ) {
+      return undefined;
+    }
+    const action = input.legalActions.find(
+      (candidate) => candidate.actionId === path.actionId,
+    );
+    if (!action) return undefined;
+    return {
+      ruleId: "corp_safe_scoreline",
+      actionId: action.actionId,
+      actionType: action.type,
+      reasonCode: "practical_micro.corp_safe_scoreline",
+      explanation:
+        "Die Corp vollzieht eine sichere Scoreline, statt das geöffnete Score-Fenster zu vertagen.",
+      evidence: [
+        "practical_micro_corp_safe_scoreline:true",
+        ...scoreline.evidence.slice(0, 8),
+        ...path.evidence.slice(0, 8),
         `scoreline_action:${action.actionId}`,
       ],
     };

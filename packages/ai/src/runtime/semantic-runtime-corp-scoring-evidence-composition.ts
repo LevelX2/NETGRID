@@ -20,6 +20,7 @@ import {
   type SemanticRuntimeCorpScoreCompositionDependencies,
 } from "./semantic-runtime-corp-score-composition";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
+import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
@@ -50,6 +51,9 @@ export type SemanticRuntimeCorpScoringEvidenceCompositionDependencies<
         action: LegalAction,
         roles?: string[],
       ) => CorpScoringWindowAssessment | undefined;
+      corpScorelineWindowAssessment: (
+        input: AiDecisionInput,
+      ) => CorpScorelineWindowAssessment;
     };
 
 export function createSemanticRuntimeCorpScoringEvidenceComposition<
@@ -75,6 +79,7 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
     semanticRuntimeCorpPassiveScoreLinePenalty,
   } = createSemanticRuntimeCorpPassiveScoreLineContext({
     scoreTerminalWindow: dependencies.scoreTerminalWindow,
+    scorelineWindowAssessment: dependencies.corpScorelineWindowAssessment,
     actionIsScoreLine: dependencies.corpActionIsScoreLine,
     rolesForAction: dependencies.rolesForAction,
     scoreLineActionIsRisky: (input, action) =>
@@ -91,6 +96,7 @@ export function createSemanticRuntimeCorpScoringEvidenceComposition<
     semanticRuntimeCorpScoreNowSafetyGate,
   } = createSemanticRuntimeCorpScoreSafetyContext({
     scoreTerminalWindow: dependencies.scoreTerminalWindow,
+    scorelineWindowAssessment: dependencies.corpScorelineWindowAssessment,
   });
 
   const { semanticRuntimeCorpEvidence } =

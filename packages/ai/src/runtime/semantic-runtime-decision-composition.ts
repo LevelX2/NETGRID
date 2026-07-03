@@ -73,6 +73,9 @@ export function createSemanticRuntimeDecisionComposition(
         ),
       rolesForAction: dependencies.rolesForAction,
       scoreTerminalWindow: dependencies.scoreTerminalWindow,
+      ...(dependencies.scorelineWindowAssessment
+        ? { scorelineWindowAssessment: dependencies.scorelineWindowAssessment }
+        : {}),
       actionTypeIsReactive: dependencies.actionTypeIsReactive,
       runnerRunTargets: (runtimeInput) =>
         dependencies.evaluatePracticalRunnerRunTargets({

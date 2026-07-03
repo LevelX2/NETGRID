@@ -237,6 +237,8 @@ function createSemanticRuntimeDependencies(
       corpScoring.semanticRuntimeCorpAdvancementCounterPlacementAssessment,
     corpComponents: corpScoring.semanticRuntimeCorpScoreComponents,
     corpEvidence: corpScoring.semanticRuntimeCorpEvidence,
+    scorelineWindowAssessment:
+      corpScoring.semanticRuntimeCorpScorelineWindowAssessment,
     corpOntologyPayoffAvailableForTagSource:
       corpScoring.corpOntologyPayoffAvailableForTagSource,
   };

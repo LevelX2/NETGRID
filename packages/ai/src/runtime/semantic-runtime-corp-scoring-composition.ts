@@ -1,3 +1,4 @@
+import type { AiDecisionInput } from "@netgrid/shared";
 import {
   createCorpTagPunishWindowComposition,
   type CorpTagPunishWindowCompositionDependencies,
@@ -10,6 +11,7 @@ import {
   createSemanticRuntimeCorpScoringEvidenceComposition,
   type SemanticRuntimeCorpScoringEvidenceCompositionDependencies,
 } from "./semantic-runtime-corp-scoring-evidence-composition";
+import { assessCorpScorelineWindow } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 
 export type SemanticRuntimeCorpScoringCompositionDependencies<
   TConsumer extends string,
@@ -47,6 +49,7 @@ export type SemanticRuntimeCorpScoringCompositionDependencies<
       | "corpTaggedRunnerPayoffPressure"
       | "corpTaggedPayoffWindowPassiveActionPenalty"
       | "corpScoringWindowAssessment"
+      | "corpScorelineWindowAssessment"
     >;
 
 export function createSemanticRuntimeCorpScoringComposition<
@@ -67,6 +70,32 @@ export function createSemanticRuntimeCorpScoringComposition<
     advanceCompletesScore: board.semanticRuntimeCorpAdvanceCompletesScore,
     actionIsScoreLine: board.semanticRuntimeCorpActionIsScoreLine,
   });
+
+  const semanticRuntimeCorpScorelineWindowAssessment = (
+    input: AiDecisionInput,
+  ) =>
+    assessCorpScorelineWindow(input, {
+      actionServerId: board.semanticRuntimeCorpActionServerId,
+      server: board.semanticRuntimeCorpServer,
+      actionCreditCost: dependencies.actionCreditCost,
+      actionIsScoreLine: board.semanticRuntimeCorpActionIsScoreLine,
+      advanceCompletesScore: board.semanticRuntimeCorpAdvanceCompletesScore,
+      remoteHasScoreLine: board.semanticRuntimeCorpRemoteHasScoreLine,
+      isRemoteServerTarget: dependencies.isRemoteServerTarget,
+      visibleIceRezCost: board.semanticRuntimeVisibleIceRezCost,
+      actionSourceCard: board.semanticRuntimeCorpActionSourceCard,
+      rolesForAction: dependencies.rolesForAction,
+      remoteIsProtected: board.semanticRuntimeCorpRemoteIsProtected,
+      remoteContestabilityAssessment:
+        board.semanticRuntimeCorpRemoteScoreContestabilityAssessment,
+      actionIsEconomy: (runtimeInput, action) => {
+        if (action.type === "draw_card") return false;
+        if (action.type === "gain_credit") return true;
+        return dependencies
+          .rolesForAction(runtimeInput, action)
+          .some((role) => role.includes("economy"));
+      },
+    });
 
   const {
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
@@ -110,6 +139,8 @@ export function createSemanticRuntimeCorpScoringComposition<
     corpAdvanceRemoteScore: board.semanticRuntimeCorpAdvanceRemoteScore,
     corpScoringWindowAssessment:
       board.semanticRuntimeCorpScoringWindowAssessment,
+    corpScorelineWindowAssessment:
+      semanticRuntimeCorpScorelineWindowAssessment,
     corpTaggedRunnerPayoffPressure,
     corpTaggedPayoffWindowPassiveActionPenalty,
   });
@@ -118,6 +149,7 @@ export function createSemanticRuntimeCorpScoringComposition<
     corpOntologyPayoffAvailableForTagSource,
     tagPunishWindowDiagnosticsForSimulationAction,
     semanticRuntimeCorpAdvancementCounterPlacementAssessment,
+    semanticRuntimeCorpScorelineWindowAssessment,
     semanticRuntimeCorpEvidence,
     semanticRuntimeCorpScoreComponents,
   };

@@ -3,6 +3,9 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
+import type {
+  CorpScorelineWindowAssessment,
+} from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 
 import { rolesMatch } from "./role-match";
 
@@ -21,6 +24,9 @@ export type SemanticRuntimeCorpPassiveScoreLineDependencies = {
   scoreTerminalWindow: (
     input: AiDecisionInput,
   ) => CorpScoreTerminalWindowLike;
+  scorelineWindowAssessment?: (
+    input: AiDecisionInput,
+  ) => CorpScorelineWindowAssessment;
   actionIsScoreLine: (input: AiDecisionInput, action: LegalAction) => boolean;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
   scoreLineActionIsRisky?: (
@@ -35,6 +41,10 @@ export function semanticRuntimeCorpPassiveScoreLinePenalty(
   dependencies: SemanticRuntimeCorpPassiveScoreLineDependencies,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "corp") return undefined;
+  const scoreline = dependencies.scorelineWindowAssessment?.(input);
+  if (scoreline) {
+    return passiveScorelinePenaltyFromAssessment(input, action, dependencies, scoreline);
+  }
   const terminal = dependencies.scoreTerminalWindow(input);
   const terminalActionIds = new Set([
     ...terminal.scoreActionIds,
@@ -54,6 +64,51 @@ export function semanticRuntimeCorpPassiveScoreLinePenalty(
     return undefined;
   }
   if (!hasSafeTerminalScoreLineAction(input, terminalActionIds, dependencies)) {
+    return undefined;
+  }
+  const passiveKind = semanticRuntimeCorpPassiveScoreLineActionKind(
+    input,
+    action,
+    dependencies,
+  );
+  if (!passiveKind) return undefined;
+  return {
+    key: "corp_passive_scoreline_available",
+    label: "Passive Aktion trotz Scoreline",
+    value: semanticRuntimeCorpPassiveScoreLinePenaltyValue(passiveKind),
+    reason: passiveKind,
+  };
+}
+
+function passiveScorelinePenaltyFromAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpPassiveScoreLineDependencies,
+  scoreline: CorpScorelineWindowAssessment,
+): AiDecisionScoreComponent | undefined {
+  const safeScorelineActionIds = new Set(
+    scoreline.paths
+      .filter(
+        (path) =>
+          !path.blocked &&
+          (path.recommendedNextStep === "score_now" ||
+            path.recommendedNextStep === "advance_agenda"),
+      )
+      .map((path) => path.actionId),
+  );
+  if (safeScorelineActionIds.size === 0) return undefined;
+  if (safeScorelineActionIds.has(action.actionId)) return undefined;
+  const actionPath = scoreline.paths.find(
+    (path) => path.actionId === action.actionId,
+  );
+  if (actionPath?.recommendedNextStep === "fund_scoreline") return undefined;
+  const bestPath = scoreline.bestPath;
+  if (
+    !bestPath ||
+    bestPath.blocked ||
+    (bestPath.recommendedNextStep !== "score_now" &&
+      bestPath.recommendedNextStep !== "advance_agenda")
+  ) {
     return undefined;
   }
   const passiveKind = semanticRuntimeCorpPassiveScoreLineActionKind(
