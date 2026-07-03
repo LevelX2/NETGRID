@@ -10644,6 +10644,317 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Assets Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "advance.access_window_counter_support",
+      "group": "upgrades_v2_advancement",
+      "sideScope": "corp",
+      "description": "Corp places or supports advancement counters during an access-window timing after the Runner passes the last ICE.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Lesley Major"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "condition.corp_installed_or_advanced_this_fort_last_turn",
+      "group": "upgrades_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect depends on the Corp having installed inside or advanced a card on this specific fort during the last Corp turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Roving Submarine"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "condition.during_hq_run",
+      "group": "upgrades_v2_conditions",
+      "sideScope": "corp",
+      "description": "Ability is usable only during a run on HQ.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Panic Button"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "condition.runner_has_four_or_more_tags",
+      "group": "upgrades_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires the Runner to have four or more tags.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Shock Treatment"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "condition.runner_has_one_or_more_tags",
+      "group": "upgrades_v2_conditions",
+      "sideScope": "corp",
+      "description": "Effect requires or scales with the Runner having at least one tag.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Street Enforcer"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "condition.runner_passed_last_ice_this_fort",
+      "group": "upgrades_v2_conditions",
+      "sideScope": "corp",
+      "description": "Timing condition after the Runner passes the last ICE protecting this specific fort.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Lesley Major"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "ice.corp_ice_swap",
+      "group": "upgrades_v2_ice_control",
+      "sideScope": "corp",
+      "description": "Corp swaps an unrezzed installed ICE with a chosen ICE from HQ or another allowed Corp source.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Omni Kismet, Ph.D.",
+        "Singapore City Grid"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "ice.corp_install_during_run",
+      "group": "upgrades_v2_ice_control",
+      "sideScope": "corp",
+      "description": "Corp may install ICE during a run as a reactive defensive or tax effect.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Jenny Jett"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "ice.corp_targeted_strength_boost",
+      "group": "upgrades_v2_ice_control",
+      "sideScope": "corp",
+      "description": "Corp gives a targeted temporary strength boost to a chosen piece of ICE.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Sterdroid"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "ice.corp_temporary_encounter",
+      "group": "upgrades_v2_ice_control",
+      "sideScope": "corp",
+      "description": "Corp forces a temporary encounter with ICE without permanently installing that ICE into the run path.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Dr. Dreff"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "remote.content_swap_defense",
+      "group": "upgrades_v2_remote_control",
+      "sideScope": "corp",
+      "description": "Corp swaps or replaces remote fort contents as defensive remote-scoring support.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Pavit Bharat"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "remote.trash_tax_protection",
+      "group": "upgrades_v2_remote_control",
+      "sideScope": "corp",
+      "description": "Remote protection that increases Runner trash costs for installed node or upgrade contents.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "New Galveston City Grid"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "risk.temporary_ice_trash",
+      "group": "upgrades_v2_risk_condition",
+      "sideScope": "corp",
+      "description": "Temporary ICE effect includes trashing that ICE after the encounter or effect window.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Dr. Dreff"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "risk.trash_own_installed_cards",
+      "group": "upgrades_v2_risk_condition",
+      "sideScope": "corp",
+      "description": "Corp effect trashes its own installed cards as cost, drawback, or collateral effect.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Self-Destruct"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "run.corp_random_end_run",
+      "group": "upgrades_v2_run_control",
+      "sideScope": "corp",
+      "description": "Corp run-control effect can randomly end the run.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Rio de Janeiro City Grid"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "tag.runner_credit_loss_payoff",
+      "group": "upgrades_v2_tag_payoff",
+      "sideScope": "corp",
+      "description": "Tagged-runner payoff that causes Runner credit loss, often scaling with tag count.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Street Enforcer"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "trace.runner_link_penalty",
+      "group": "upgrades_v2_tag_trace",
+      "sideScope": "corp",
+      "description": "Corp trace effect penalizes or reduces Runner link before or during the trace.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff",
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
+      ],
+      "examples": [
+        "Crybaby"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     }
   ]
 }
