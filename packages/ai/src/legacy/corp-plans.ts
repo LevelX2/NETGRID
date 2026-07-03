@@ -48,6 +48,10 @@ import {
   classifyTagPunishLegalActionFromOntology,
   classifyTagPunishPayoffFromOntology,
 } from "../tag-punish-ontology-consumer";
+import {
+  assessCorpScorelineWindow,
+  scorelineAssessmentToTerminalWindowLike,
+} from "../runtime/corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 
 const TEAM_RESTRUCTURING_CARD_ID = "onr_v1_305_team-restructuring";
 
@@ -2603,98 +2607,86 @@ export function assessCorpScoreTerminalWindow(
 ): CorpScoreTerminalWindowAssessment {
   const context = corpEvaluationContext(input, contextOrBelief);
   const features = extractCorpPlanFeatures(input);
-  const compression = corpScoreWindowCompressionContext(input, context);
-  const scoreActionIds = compression.scoreActionIds;
-  const advanceToScoreActionIds = input.legalActions
-    .filter((action) => {
-      if (action.type !== "advance_card") return false;
-      if (!compression.advanceActionIds.includes(action.actionId)) return false;
-      const horizon = remoteScoreHorizonForAction(input, action, context);
-      return (horizon?.advancesRemainingAfterAction ?? 99) <= 0;
-    })
-    .map((action) => action.actionId);
-  const agendaInstallActionIds = compression.agendaInstallActionIds;
-  const terminalActionIds = [
-    ...scoreActionIds,
-    ...advanceToScoreActionIds,
-    ...agendaInstallActionIds,
-  ];
-  const terminalServers = sortedUnique(
-    input.legalActions
-      .filter((action) => terminalActionIds.includes(action.actionId))
-      .map(
-        (action) =>
-          remoteScoreHorizonForAction(input, action, context)?.serverId ??
-          remoteServerIdForAction(input, action),
-      )
-      .filter(
-        (serverId): serverId is string =>
-          typeof serverId === "string" && serverId.startsWith("remote_"),
-      ),
-  );
-  const safetyAssessments = terminalServers.map((serverId) =>
-    assessCorpEffectiveRemoteSafety(input, serverId, context),
-  );
-  const reserveNeeds = terminalServers
-    .map((serverId) => remoteRezReserveNeedForServer(input, serverId, context))
-    .filter((need): need is { serverId: string; reserveTarget: number } =>
-      Boolean(need),
-    );
-  const blockedByCredits = reserveNeeds.some(
-    (need) => features.credits < need.reserveTarget,
-  );
-  const blockedByCheapContest = safetyAssessments.some(
-    (safety) => safety.cheaplyContestable && !safety.sameTurnScoreAllowed,
-  );
-  const blockedByRunnerContest = safetyAssessments.some(
-    (safety) =>
-      safety.contestCapacity === "high" &&
-      !safety.effectivelyProtected &&
-      !safety.sameTurnScoreAllowed,
-  );
   const memory = evaluateRemoteIntentMemory(input, context.beliefState);
   const runnerAccessThreatHigh =
     features.ownAgendaPressure >= 110 ||
     memory.centralRunSignals.hq >= 3 ||
     memory.centralRunSignals.rd >= 3;
-  const blockedByHqThreat =
-    runnerAccessThreatHigh && terminalActionIds.length === 0;
-  const remoteContestLow = safetyAssessments.some(
-    (safety) => safety.contestCapacity === "low",
-  );
-  const creditsSufficient = !blockedByCredits;
-  const terminalWindow =
-    terminalActionIds.length > 0 ||
-    compression.compressionActionIds.length > 0 ||
-    compression.economyNecessaryActionIds.length > 0;
-  return {
-    terminalWindow,
-    scoreActionIds,
-    advanceToScoreActionIds,
-    agendaInstallActionIds,
-    protectedRemoteIds: compression.protectedRemoteIds,
-    remoteContestLow,
-    creditsSufficient,
-    runnerAccessThreatHigh,
-    blockedByCheapContest,
-    blockedByCredits,
-    blockedByRunnerContest,
-    blockedByHqThreat,
-    evidence: [
-      "corp_score_terminal_window:true",
-      `corp_score_terminal_score_actions:${scoreActionIds.length}`,
-      `corp_score_terminal_advance_to_score_actions:${advanceToScoreActionIds.length}`,
-      `corp_score_terminal_agenda_install_actions:${agendaInstallActionIds.length}`,
-      `corp_score_terminal_protected_remote_count:${compression.protectedRemoteIds.length}`,
-      `corp_score_terminal_remote_contest_low:${remoteContestLow}`,
-      `corp_score_terminal_credits_sufficient:${creditsSufficient}`,
-      `corp_score_terminal_runner_access_threat_high:${runnerAccessThreatHigh}`,
-      `corp_score_terminal_blocked_by_cheap_contest:${blockedByCheapContest}`,
-      `corp_score_terminal_blocked_by_credits:${blockedByCredits}`,
-      `corp_score_terminal_blocked_by_runner_contest:${blockedByRunnerContest}`,
-      `corp_score_terminal_blocked_by_hq_threat:${blockedByHqThreat}`,
-    ],
-  };
+  const assessment = assessCorpScorelineWindow(input, {
+    actionServerId: (runtimeInput, action) =>
+      remoteScoreHorizonForAction(runtimeInput, action, context)?.serverId ??
+      remoteServerIdForAction(runtimeInput, action),
+    server: (runtimeInput, serverId) =>
+      runtimeInput.playerView.servers.find((server) => server.id === serverId),
+    actionCreditCost,
+    actionIsScoreLine: (
+      runtimeInput,
+      action,
+      roles = rolesForAction(runtimeInput, action),
+    ) => {
+      const sourceDefinitionId = sourceCardForAction(
+        runtimeInput,
+        action,
+      )?.definitionId;
+      return sourceDefinitionId
+        ? isAgendaDefinition(sourceDefinitionId)
+        : action.payload?.cardType === "agenda" ||
+            action.payload?.targetCardType === "agenda" ||
+            roles.some(isAgendaRole);
+    },
+    advanceCompletesScore: (runtimeInput, action) =>
+      action.type === "advance_card" &&
+      (remoteScoreHorizonForAction(runtimeInput, action, context)
+        ?.advancesRemainingAfterAction ?? 99) <= 0,
+    remoteHasScoreLine: (server) =>
+      server?.root.some(
+        (card) =>
+          (card.known && card.type === "agenda") ||
+          (card.advancementCounters ?? 0) > 0,
+      ) === true,
+    isRemoteServerTarget: (serverId) =>
+      typeof serverId === "string" && serverId.startsWith("remote_"),
+    visibleIceRezCost: (card) => rezCostForVisibleCard(card),
+    actionSourceCard: sourceCardForAction,
+    rolesForAction,
+    projectedCreditsAfterAction: creditsAfterCorpPlanAction,
+    remoteIsProtected: (server) =>
+      server?.id.startsWith("remote_") === true
+        ? assessCorpEffectiveRemoteSafety(input, server.id, context)
+            .effectivelyProtected
+        : (server?.ice.length ?? 0) > 0,
+    remoteContestabilityAssessment: (runtimeInput, action) => {
+      const serverId =
+        remoteScoreHorizonForAction(runtimeInput, action, context)?.serverId ??
+        remoteServerIdForAction(runtimeInput, action);
+      if (!serverId?.startsWith("remote_")) return undefined;
+      const safety = assessCorpEffectiveRemoteSafety(
+        runtimeInput,
+        serverId,
+        context,
+        action,
+      );
+      const contestable =
+        (safety.cheaplyContestable || safety.contestCapacity === "high") &&
+        !safety.sameTurnScoreAllowed;
+      return {
+        serverId,
+        contestable,
+        evidence: [
+          `server:${serverId}`,
+          `remote_contestable_by_runner:${contestable}`,
+          `remote_cheaply_contestable:${safety.cheaplyContestable}`,
+          `remote_contest_capacity:${safety.contestCapacity}`,
+          `remote_same_turn_score_allowed:${safety.sameTurnScoreAllowed}`,
+        ],
+      };
+    },
+    centralThreatHigh: () => runnerAccessThreatHigh,
+    actionIsEconomy: (runtimeInput, action) =>
+      action.type !== "draw_card" &&
+      isCorpEconomyOrDrawAction(runtimeInput, action, context),
+  });
+  return scorelineAssessmentToTerminalWindowLike(assessment);
 }
 
 function corpScoreTerminalActionPriorityBonus(
