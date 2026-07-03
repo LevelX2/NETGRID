@@ -1029,6 +1029,42 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("takes basic funding over ending the turn at zero credits with rez-floor pressure", () => {
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const endTurn = corpAction("end-turn", "end_turn");
+    const input = corpInputWithGoals([], [gainCredit, endTurn]);
+    input.playerView.own.credits = 0;
+    input.playerView.own.clicks = 2;
+    const dependencies = {
+      ...testDependencies(),
+      corpHasCentralRezFloorFundingNeed: () => true,
+    };
+
+    const endTurnComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      endTurn,
+      "end_turn",
+      dependencies,
+    );
+
+    expect(endTurnComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_end_turn_leaves_critical_funding_gap",
+          value: -900,
+        }),
+      ]),
+    );
+    expect(
+      totalScoreFor(input, gainCredit, "basic_economy_draw", dependencies),
+    ).toBeGreaterThan(totalScore(endTurnComponents));
+  });
+
   it("uses board triage so deckout agenda flood forces scoreline over passive economy", () => {
     const installAgenda = corpAction(
       "install-agenda-remote-1",

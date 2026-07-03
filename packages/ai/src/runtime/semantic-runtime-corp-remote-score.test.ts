@@ -134,6 +134,41 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     expect(centralInstallScore(etrIce, "rd", input)).toBe(250);
   });
 
+  it("does not drain the rez bank for unrezzable central ICE while a remote agenda is active", () => {
+    const etrIce = corpCard("rd-wall", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 2,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      credits: 2,
+      runnerRig: [rdInterface()],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        { id: "archives", label: "Archives", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [
+            corpCard("remote-wall", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+          ],
+          root: [
+            corpCard("active-agenda", "agenda", {
+              advancementRequirement: 3,
+              advancementCounters: 1,
+            }),
+          ],
+        },
+      ],
+    });
+
+    expect(centralInstallScore(etrIce, "rd", input, 2)).toBe(-1500);
+  });
+
   it("downgrades solo Dog Pile when visible Killer coverage can break it", () => {
     const dogPile = corpCard("dog-pile", "ice", {
       definitionId: "onr_proteus_021_dog-pile",
@@ -364,6 +399,43 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     expect(installIceScore(etrIce, "remote_1", input)).toBe(850);
   });
 
+  it("does not seed a second remote while an existing remote agenda is active", () => {
+    const etrIce = corpCard("second-remote-wall", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 2,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: true,
+      credits: 6,
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        { id: "archives", label: "Archives", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [
+            corpCard("remote-wall", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+          ],
+          root: [
+            corpCard("active-agenda", "agenda", {
+              advancementRequirement: 3,
+              advancementCounters: 1,
+            }),
+          ],
+        },
+      ],
+    });
+
+    expect(installIceScore(etrIce, "new_remote", input)).toBe(-2400);
+    expect(installIceScore(etrIce, "remote_1", input)).toBeGreaterThan(
+      installIceScore(etrIce, "new_remote", input),
+    );
+  });
+
   it("does not keep adding generic ICE once the empty scoring remote already has three ICE", () => {
     const etrIce = corpCard("fourth-remote-wall", "ice", {
       definitionId: "simple_barrier_ice",
@@ -455,19 +527,20 @@ function centralInstallScore(
   ice: VisibleCard,
   serverId: "hq" | "rd",
   input = corpInputForCentralInstall(ice),
+  actionCreditCost = 0,
 ): number {
   const action = centralInstallIceAction(ice, serverId);
   return semanticRuntimeCorpInstallRemoteScore(
     input,
     action,
     [],
-    centralInstallDependencies(),
+    centralInstallDependencies({ actionCreditCost }),
   );
 }
 
 function installIceScore(
   ice: VisibleCard,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  serverId: "hq" | "rd" | "archives" | "new_remote" | `remote_${number}`,
   input = corpInputForCentralInstall(ice),
 ): number {
   const action = centralInstallIceAction(ice, serverId);
@@ -520,7 +593,7 @@ function remoteInstallIceAction(): LegalAction {
 
 function centralInstallIceAction(
   ice: VisibleCard,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  serverId: "hq" | "rd" | "archives" | "new_remote" | `remote_${number}`,
 ): LegalAction {
   return {
     actionId: `install-${serverId}-ice`,
@@ -767,7 +840,9 @@ function semanticCandidate(
   };
 }
 
-function centralInstallDependencies() {
+function centralInstallDependencies(
+  options: { actionCreditCost?: number } = {},
+) {
   return {
     actionServerId: (_input: AiDecisionInput, action: LegalAction) =>
       typeof action.payload?.serverId === "string"
@@ -777,14 +852,14 @@ function centralInstallDependencies() {
       input.playerView.servers.find((candidate) => candidate.id === serverId),
     hasStabilizingAlternative: () => false,
     isRemoteServerTarget: (serverId: string | undefined) =>
-      serverId?.startsWith("remote_") === true,
+      serverId === "new_remote" || serverId?.startsWith("remote_") === true,
     emptyRemoteCount: () => 0,
     remoteIsProtected: (
       server: AiDecisionInput["playerView"]["servers"][number] | undefined,
     ) => (server?.ice.length ?? 0) > 0,
     actionIsScoreLine: () => false,
     remoteHasScoreLine: () => false,
-    actionCreditCost: () => 0,
+    actionCreditCost: () => options.actionCreditCost ?? 0,
     advanceCompletesScore: () => false,
     visibleIceRezCost: (card: VisibleCard) => card.rezCost,
     actionSourceCard: (input: AiDecisionInput, action: LegalAction) =>

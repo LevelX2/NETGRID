@@ -535,6 +535,25 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       value: -1400,
       reason: `actions:${input.playerView.own.clicks}`,
     });
+    if (
+      credits <= 2 &&
+      corpLegalEconomyActionExists(input) &&
+      (dependencies.corpHasRemoteInstability(input) ||
+        dependencies.corpHasRemoteRezFloorFundingNeed(input) ||
+        dependencies.corpHasCentralRezFloorFundingNeed(input))
+    ) {
+      components.push({
+        key: "corp_end_turn_leaves_critical_funding_gap",
+        label: "Funding vor Zugende",
+        value: -900,
+        reason: [
+          `credits:${credits}`,
+          `remote_instability:${dependencies.corpHasRemoteInstability(input)}`,
+          `remote_rez_floor:${dependencies.corpHasRemoteRezFloorFundingNeed(input)}`,
+          `central_rez_floor:${dependencies.corpHasCentralRezFloorFundingNeed(input)}`,
+        ].join("|"),
+      });
+    }
   }
   return components;
 }
@@ -587,6 +606,19 @@ function corpInputHasConcreteDevelopmentAction(
       candidate.type === "play_operation"
     );
   });
+}
+
+function corpLegalEconomyActionExists(input: AiDecisionInput): boolean {
+  const legalActions =
+    input.legalActions ?? input.playerView.legalActions ?? [];
+  return legalActions.some(
+    (candidate) =>
+      candidate.side === "corp" &&
+      (candidate.type === "gain_credit" ||
+        candidate.type === "play_operation" ||
+        candidate.type === "activated_card_ability" ||
+        candidate.type === "trigger_ability"),
+  );
 }
 
 function corpIcePlacementComponent<TConsumer extends string>(

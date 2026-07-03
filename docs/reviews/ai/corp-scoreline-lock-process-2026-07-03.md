@@ -1,6 +1,6 @@
 # Corp Scoreline Lock Paketprozess
 
-Status: aktiv
+Status: in Umsetzung
 
 Quelle/Vorgabe: Analyse der gekippten Seeds `latest-match-baseline-013` und `latest-match-baseline-016` nach dem Korp-ICE-Placement- und Signal-Consumer-Cutover. Der neue Bewertungsstand erkennt Score-Terminal-Windows, laesst aber neue Remotes, Root-/Upgrade-Installationen, Central-ICE und Economy zu oft ueber eine laufende Scoreline gewinnen.
 
@@ -105,6 +105,12 @@ Done-Gate:
 
 Commit:
 - `fix(ai): prioritize active corp scorelines`
+
+Ergebnis:
+- Commit `baa3c9c49` ergaenzt `force_scoreline_clock` fuer aktive, spielbare Scorelines und bestehende Ready-Remotes.
+- Nach Seed-Pruefung zeigte `latest-match-baseline-016`, dass zusaetzlich `new_remote`-ICE und unrezzbares Central-ICE bei aktiver Remote-Agenda unterdrueckt werden muessen.
+- Der Folgefix laesst `new_remote`-ICE bei aktiver bestehender Remote-Scoreline negativ werden, bewertet bankleerendes unrezzbares Central-ICE in diesem Kontext negativ und bestraft End Turn bei offenem Funding-Need und legaler Economy.
+- Zwei-Seed-Check nach Folgefix: `latest-match-baseline-016` verbessert sich von 0 auf 3 Corp-Agenda-Punkte; `latest-match-baseline-013` bleibt Runner 7:2. Die Aenderung reduziert den konkreten Remote-/Central-Drift, dreht aber nicht alle gekippten Seeds zurueck.
 
 ### Paket 3: Verifikation und Integration
 

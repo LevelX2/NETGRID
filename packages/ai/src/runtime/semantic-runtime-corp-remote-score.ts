@@ -7,6 +7,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { rolesMatch } from "./role-match";
 import { createAiHintsByCard } from "../ai-hints";
 import { buildCorpIceCardPlacementProfile } from "./corp-ice-placement/corp-ice-placement";
+import { visibleCardDefinition } from "./card-definition-lookup";
 import {
   semanticRuntimeCorpScoringWindowAssessment,
   type CorpScoringWindowAssessment,
@@ -109,6 +110,12 @@ export function semanticRuntimeCorpInstallRemoteScore<
   );
 
   if (installsIce) {
+    if (
+      serverId === "new_remote" &&
+      semanticRuntimeCorpHasActiveRemoteScoreline(input)
+    ) {
+      return -2400;
+    }
     if (scoringWindow?.recommendedNextStep === "build_remote_ice") {
       if (semanticRuntimeCorpDynamicOnlyRemoteIce(scoringWindow)) return 450;
       if ((scoringWindow.dynamicProtectionWeaknessCount ?? 0) > 0) return 800;
@@ -317,6 +324,12 @@ function semanticRuntimeCorpCentralIceInstallScore<
     profile.positionDependent && firstCentralIce;
 
   if (!canRez) {
+    if (
+      semanticRuntimeCorpHasActiveRemoteScoreline(input) &&
+      creditsAfterInstall <= 0
+    ) {
+      return -1500;
+    }
     if (centralThreat) return firstCentralIce ? 250 : 150;
     return firstCentralIce ? 100 : 50;
   }
@@ -659,6 +672,23 @@ function semanticRuntimeCorpScoreLineWindowValue(
 function semanticRuntimeCorpHasAgendaInHq(input: AiDecisionInput): boolean {
   return input.playerView.own.gripOrHq.some(
     (card) => card.known && card.type === "agenda",
+  );
+}
+
+function semanticRuntimeCorpHasActiveRemoteScoreline(
+  input: AiDecisionInput,
+): boolean {
+  return input.playerView.servers.some(
+    (server) =>
+      server.id.startsWith("remote_") &&
+      server.root.some(
+        (card) =>
+          card.known !== false &&
+          (card.type === "agenda" ||
+            typeof card.advancementRequirement === "number" ||
+            typeof visibleCardDefinition(card)?.advancementRequirement ===
+              "number"),
+      ),
   );
 }
 
