@@ -23691,7 +23691,10 @@
       ],
       "manualNotes": [
         "AI030 rationale: Worm-specific breaker hate is meaningful but too narrow for a deck-line anchor.",
-        "AI030 support-only/evidence signal: run.corp_worm_lockout"
+        "AI030 support-only/evidence signal: run.corp_worm_lockout",
+        "UPGRADE-V2: behalten; priority=low; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Worm/program target remains a TargetProfile/constraint, not a strategy anchor.",
+        "UPGRADE-V2: Rationale: Niche worm hate. Useful tactically, but not a reliable deck-line anchor."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -23699,9 +23702,12 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": []
     },
     {
       "cardId": "onr_v1_350_antiquated-interface-routines",
@@ -23740,7 +23746,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -23783,7 +23789,22 @@
         }
       ],
       "manualNotes": [
-        "AI030 rationale: All ICE on the fort gain strength; glacier-tax support is true, generic remote-scoring is too broad."
+        "AI030 rationale: All ICE on the fort gain strength; glacier-tax support is true, generic remote-scoring is too broad.",
+        "UPGRADE-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Fort-wide ICE modifier; no single ICE target.",
+        "UPGRADE-V2: Rationale: Old anchor is plausible; hierarchical pair is missing."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "fort_ice_strength_support",
+          "evidence": [
+            "ice.corp_strength_support"
+          ],
+          "confidence": "medium",
+          "rationale": "Fort-wide ICE strength support increases break cost and supports tax/glacier."
+        }
       ]
     },
     {
@@ -23817,13 +23838,14 @@
         "data/scenarios/ai-deck-legal-v199-smokes.json#corp_v199_bizarre_encryption_delay"
       ],
       "tacticSignals": [
-        "access.corp_agenda_score_delay"
+        "access.corp_agenda_score_delay",
+        "remote.scoring_protection"
       ],
       "lineSupport": [
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "scoring_tool"
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -23844,7 +23866,10 @@
         "serverScope": "fort"
       },
       "manualNotes": [
-        "AI030 rationale: Accessed agenda scoring is delayed by a turn; this materially protects scoring remotes without becoming fast advance."
+        "AI030 rationale: Accessed agenda scoring is delayed by a turn; this materially protects scoring remotes without becoming fast advance.",
+        "UPGRADE-V2: ändern; priority=high; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Access replacement for agendas in this fort; no normal target profile.",
+        "UPGRADE-V2: Rationale: Role should be defensive_tool rather than generic scoring_tool."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -23852,9 +23877,22 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "access_agenda_score_delay",
+          "evidence": [
+            "access.corp_agenda_score_delay",
+            "remote.scoring_protection"
+          ],
+          "confidence": "high",
+          "rationale": "Delays immediate agenda steal from a remote run and buys the Corp a scoring window."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_352_chester-mix",
@@ -23892,19 +23930,17 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "ice.corp_install_discount"
       ],
       "lineSupport": [
-        "corp.economy_rez_reserve",
         "corp.ice_tax_glacier"
       ],
       "strategicRole": [
-        "support_tool",
-        "tax_tool"
+        "support_tool"
       ],
       "effects": [
         {
@@ -23941,7 +23977,22 @@
         "serverScope": "fort"
       },
       "manualNotes": [
-        "AI030 rationale: The fort ICE install discount supports ICE-heavy glacier and rez/install reserve lines."
+        "AI030 rationale: The fort ICE install discount supports ICE-heavy glacier and rez/install reserve lines.",
+        "UPGRADE-V2: ändern; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Installed-ICE/Fort constraint; install discount, not rez discount.",
+        "UPGRADE-V2: Rationale: Remove corp.economy_rez_reserve; install discounts are not a rez-reserve engine."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "support_tool",
+          "roleDetail": "ice_install_discount_fort_builder",
+          "evidence": [
+            "ice.corp_install_discount"
+          ],
+          "confidence": "medium",
+          "rationale": "Discounts ICE installation on this fort; supports building a glacier/tax server."
+        }
       ]
     },
     {
@@ -23976,8 +24027,9 @@
         "data/scenarios/ai-deck-legal-v199-smokes.json#runner_v199_chimera_daemon_choice"
       ],
       "tacticSignals": [
-        "access.corp_daemon_trash",
-        "access.punish"
+        "remote.ambush",
+        "access.punish",
+        "access.corp_daemon_trash"
       ],
       "lineSupport": [
         "corp.ambush_bluff"
@@ -24014,7 +24066,10 @@
       ],
       "manualNotes": [
         "AI030 rationale: Daemon trash on access is a real bluff/punish payload and uses only visible installed Runner cards.",
-        "AI030 support-only/evidence signal: access.punish"
+        "AI030 support-only/evidence signal: access.punish",
+        "UPGRADE-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Program target with Daemon subtype constraint.",
+        "UPGRADE-V2: Rationale: Add remote ambush context and explicit pair."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -24022,9 +24077,23 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "roleDetail": "access_daemon_trash",
+          "evidence": [
+            "remote.ambush",
+            "access.punish",
+            "access.corp_daemon_trash"
+          ],
+          "confidence": "medium",
+          "rationale": "Access punish against Daemon programs fits ambush/bluff but is target-dependent."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_354_crybaby",
@@ -24059,19 +24128,25 @@
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_access_ambush"
       ],
       "lineSupport": [
-        "corp.ambush_bluff"
+        "corp.ambush_bluff",
+        "corp.tag_trace_punish"
       ],
       "strategicRole": [
-        "punish_payoff"
+        "punish_payoff",
+        "enabler"
       ],
       "tacticSignals": [
-        "access.punish",
         "remote.ambush",
+        "access.punish",
+        "trace.runner_link_penalty",
         "tax.runner_persistent"
       ],
       "manualNotes": [
         "AI030 rationale: Crying counters are persistent access punishment; no extra tag/damage anchor is implied.",
-        "AI030 support-only/evidence signal: remote.ambush"
+        "AI030 support-only/evidence signal: remote.ambush",
+        "UPGRADE-V2: ändern; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Crying counter on Runner state; no card target.",
+        "UPGRADE-V2: Rationale: Current ambush-only model misses the trace-support role."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -24079,9 +24154,34 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "roleDetail": "access_trace_link_counter",
+          "evidence": [
+            "remote.ambush",
+            "access.punish",
+            "trace.runner_link_penalty"
+          ],
+          "confidence": "medium",
+          "rationale": "Access gives a persistent link penalty counter."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "roleDetail": "persistent_trace_link_penalty",
+          "evidence": [
+            "trace.runner_link_penalty",
+            "tax.runner_persistent"
+          ],
+          "confidence": "medium",
+          "rationale": "Link reduction strengthens later trace/tag lines without creating tags itself."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_355_crystal-palace-station-grid",
@@ -24119,10 +24219,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -24130,13 +24230,19 @@
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "tax_tool"
+        "tax_tool",
+        "defensive_tool"
       ],
       "tacticSignals": [
-        "tax.remote"
+        "tax.remote",
+        "tax.runner_credit",
+        "remote.scoring_protection"
       ],
       "manualNotes": [
-        "AI030 rationale: Per-subroutine break tax protects a fort and was already covered by overlay."
+        "AI030 rationale: Per-subroutine break tax protects a fort and was already covered by overlay.",
+        "UPGRADE-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; no single target.",
+        "UPGRADE-V2: Rationale: Old anchors are plausible; role must be split per strategy."
       ],
       "effects": [
         {
@@ -24158,7 +24264,31 @@
         "kind": "run_tax",
         "threatLevel": "medium",
         "serverScope": "fort"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "remote_break_tax",
+          "evidence": [
+            "tax.remote",
+            "tax.runner_credit"
+          ],
+          "confidence": "high",
+          "rationale": "Fort-wide additional break costs are classic tax/glacier support."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "remote_break_tax_protection",
+          "evidence": [
+            "remote.scoring_protection",
+            "tax.remote"
+          ],
+          "confidence": "medium",
+          "rationale": "The tax protects scoring remotes against runs."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_356_dedicated-response-team",
@@ -24200,6 +24330,9 @@
         "punish_payoff"
       ],
       "tacticSignals": [
+        "remote.ambush",
+        "access.punish",
+        "condition.requires_tagged_runner",
         "damage.corp_tagged_meat_payoff",
         "damage.payoff",
         "tag.payoff"
@@ -24225,7 +24358,10 @@
       "manualNotes": [
         "AI030 rationale: The meat damage only fires if Runner is tagged; both tag-payoff and damage-kill support are explicit.",
         "AI030 support-only/evidence signal: damage.payoff",
-        "AI030 support-only/evidence signal: tag.payoff"
+        "AI030 support-only/evidence signal: tag.payoff",
+        "UPGRADE-V2: ändern; priority=high; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Runner tagged condition; no target profile.",
+        "UPGRADE-V2: Rationale: Condition should be explicit; add ambush context and pairs."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -24233,9 +24369,35 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "tagged_meat_damage_payoff",
+          "evidence": [
+            "condition.requires_tagged_runner",
+            "damage.corp_tagged_meat_payoff",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "Three meat damage on access against a tagged Runner is a real flatline payoff."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "punish_payoff",
+          "roleDetail": "tagged_meat_damage_payoff",
+          "evidence": [
+            "condition.requires_tagged_runner",
+            "tag.payoff",
+            "damage.corp_tagged_meat_payoff"
+          ],
+          "confidence": "medium",
+          "rationale": "Consumes tags as payoff; does not create tags."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_357_dieter-esslin",
@@ -24282,6 +24444,7 @@
         }
       ],
       "tacticSignals": [
+        "remote.ambush",
         "access.corp_net_damage_ambush",
         "access.punish",
         "damage.payoff"
@@ -24294,7 +24457,10 @@
       ],
       "manualNotes": [
         "AI030 rationale: Access net damage is an ambush/bluff payload, not enough by itself for damage-kill.",
-        "AI030 support-only/evidence signal: damage.payoff"
+        "AI030 support-only/evidence signal: damage.payoff",
+        "UPGRADE-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: No target profile; on-access Runner damage.",
+        "UPGRADE-V2: Rationale: Keep ambush only; do not add damage_kill."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -24302,9 +24468,23 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "roleDetail": "access_net_damage_payoff",
+          "evidence": [
+            "remote.ambush",
+            "access.corp_net_damage_ambush",
+            "access.punish"
+          ],
+          "confidence": "medium",
+          "rationale": "One net damage is an access ambush payoff, not a damage-kill anchor by itself."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_358_dr-dreff",
@@ -24335,15 +24515,16 @@
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_run_tax_stealth"
       ],
       "tacticSignals": [
-        "ice.corp_hq_runpath_insert"
+        "ice.corp_temporary_encounter",
+        "risk.temporary_ice_trash"
       ],
       "lineSupport": [
         "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "scoring_tool",
-        "tax_tool"
+        "tax_tool",
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -24388,7 +24569,10 @@
       },
       "hiddenInfoPolicy": "corp_side_only_until_revealed_by_effect",
       "manualNotes": [
-        "AI030 rationale: Corp chooses HQ ICE for a temporary encounter; target metadata must not expose hidden HQ contents."
+        "AI030 rationale: Corp chooses HQ ICE for a temporary encounter; target metadata must not expose hidden HQ contents.",
+        "UPGRADE-V2: ändern; priority=high; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Corp chooses an ICE card stored in HQ; own private HQ identity is controller-only. The ICE is encountered temporarily and trashed after the encounter.",
+        "UPGRADE-V2: Rationale: `ice.corp_hq_runpath_insert` war zu breit: Dr. Dreff installiert/swappt kein ICE, sondern erzeugt eine temporäre Begegnung. Das Risiko ist präziser `risk.temporary_ice_trash` statt abstrakter Liability."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -24396,9 +24580,31 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "successful_run_temporary_hq_ice_encounter",
+          "evidence": [
+            "ice.corp_temporary_encounter"
+          ],
+          "confidence": "medium",
+          "rationale": "Forces an additional temporary ICE encounter from HQ after an apparent successful run; taxes the run path without actually installing the ICE."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "successful_run_temporary_hq_ice_encounter_defense",
+          "evidence": [
+            "ice.corp_temporary_encounter"
+          ],
+          "confidence": "high",
+          "rationale": "Can revoke a successful remote run unless the Runner also passes the temporary HQ ICE encounter."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_359_jenny-jett",
@@ -24470,7 +24676,8 @@
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "scoring_tool"
+        "tax_tool",
+        "defensive_tool"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -24478,11 +24685,12 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "ice.corp_hq_runpath_insert",
+        "ice.corp_install_during_run",
         "remote.scoring_protection"
       ],
       "targetProfiles": [
@@ -24501,7 +24709,34 @@
       ],
       "hiddenInfoPolicy": "corp_side_only_until_installed",
       "manualNotes": [
-        "AI030 rationale: Innermost HQ ICE install after a successful run protects the scoring fort while keeping HQ choices private."
+        "AI030 rationale: Innermost HQ ICE install after a successful run protects the scoring fort while keeping HQ choices private.",
+        "UPGRADE-V2: kleine Änderung; priority=high; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Corp chooses HQ ICE; hidden info is controller-only.",
+        "UPGRADE-V2: Rationale: Remote-defense role is stronger than generic scoring_tool."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "successful_run_hq_ice_insert",
+          "evidence": [
+            "ice.corp_hq_runpath_insert",
+            "ice.corp_install_during_run"
+          ],
+          "confidence": "medium",
+          "rationale": "Installs HQ ICE during the run and increases server structure."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "successful_run_hq_ice_insert_defense",
+          "evidence": [
+            "ice.corp_hq_runpath_insert",
+            "remote.scoring_protection"
+          ],
+          "confidence": "high",
+          "rationale": "Can block or tax access after an apparently successful remote run."
+        }
       ]
     },
     {
@@ -24538,20 +24773,19 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
-        "corp.economy_rez_reserve",
         "corp.ice_tax_glacier"
       ],
       "strategicRole": [
-        "support_tool",
         "tax_tool"
       ],
       "tacticSignals": [
         "ice.corp_rez_discount",
-        "ice.corp_strength_support"
+        "ice.corp_strength_support",
+        "tax.ice"
       ],
       "effects": [
         {
@@ -24596,7 +24830,24 @@
         "serverScope": "fort"
       },
       "manualNotes": [
-        "AI030 rationale: Wall rez discount plus strength support belongs to reserve/glacier, not a generic remote-scoring tag."
+        "AI030 rationale: Wall rez discount plus strength support belongs to reserve/glacier, not a generic remote-scoring tag.",
+        "UPGRADE-V2: ändern; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; Wall-only is a constraint.",
+        "UPGRADE-V2: Rationale: Remove economy_rez_reserve; function is ICE tax/glacier."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "wall_rez_discount_strength_support",
+          "evidence": [
+            "ice.corp_rez_discount",
+            "ice.corp_strength_support",
+            "tax.ice"
+          ],
+          "confidence": "high",
+          "rationale": "Wall rez discount plus wall strength is clear glacier/tax support."
+        }
       ]
     },
     {
@@ -24661,7 +24912,7 @@
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "scoring_tool"
+        "support_tool"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -24669,15 +24920,29 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "remote.capacity_support",
-        "remote.scoring_protection"
+        "remote.capacity_support"
       ],
       "manualNotes": [
-        "AI030 rationale: Extra agenda/node capacity is a remote-scoring support fact, not hidden targeting or fast advance."
+        "AI030 rationale: Extra agenda/node capacity is a remote-scoring support fact, not hidden targeting or fast advance.",
+        "UPGRADE-V2: ändern; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Subsidiary data fort capacity expansion; leaves-play overcapacity cleanup must stay rules-side. No normal TargetProfile.",
+        "UPGRADE-V2: Rationale: `remote.scoring_protection` ist hier falsch: Namatoki schützt keine Agenda und erzeugt kein Scorefenster, sondern erweitert nur die Fort-Kapazität. Rolle deshalb `support_tool`, nicht `scoring_tool`."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "support_tool",
+          "roleDetail": "remote_capacity_expansion",
+          "evidence": [
+            "remote.capacity_support"
+          ],
+          "confidence": "medium",
+          "rationale": "Additional agenda/node capacity supports remote construction, but it is not itself protection."
+        }
       ]
     },
     {
@@ -24714,7 +24979,8 @@
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_city_grid_counter"
       ],
       "tacticSignals": [
-        "access.corp_installed_trash_tax"
+        "access.corp_installed_trash_tax",
+        "remote.trash_tax_protection"
       ],
       "effects": [
         {
@@ -24733,7 +24999,10 @@
       },
       "manualNotes": [
         "AI030 rationale: Trash-cost protection for nodes/upgrades is relevant evidence but not a standalone strategy anchor.",
-        "AI030 support-only/evidence signal: access.corp_installed_trash_tax"
+        "AI030 support-only/evidence signal: access.corp_installed_trash_tax",
+        "UPGRADE-V2: kleine Änderung; priority=low; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; tax protects nodes/upgrades, not agendas.",
+        "UPGRADE-V2: Rationale: Remote shell support, but no confirmed remote-scoring anchor because agendas are not directly protected."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -24741,9 +25010,12 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": []
     },
     {
       "cardId": "onr_v1_363_olivia-salazar",
@@ -24781,7 +25053,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -24809,17 +25081,15 @@
         "serverScope": "fort"
       },
       "lineSupport": [
-        "corp.economy_rez_reserve",
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring"
+        "corp.ice_tax_glacier"
       ],
       "strategicRole": [
-        "support_tool"
+        "tax_tool"
       ],
       "tacticSignals": [
         "ice.corp_rez_discount",
         "ice.corp_temporary_rez",
-        "remote.scoring_protection"
+        "risk.temporary_rez_liability"
       ],
       "targetProfiles": [
         {
@@ -24836,7 +25106,23 @@
         }
       ],
       "manualNotes": [
-        "AI030 rationale: Half-cost temporary rez during runs is both reserve/glacier support and remote protection."
+        "AI030 rationale: Half-cost temporary rez during runs is both reserve/glacier support and remote protection.",
+        "UPGRADE-V2: ändern; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: One installed ICE on this fort; temporary derez liability remains relevant.",
+        "UPGRADE-V2: Rationale: `corp.economy_rez_reserve` ist zu groß für eine einmal-pro-Run temporäre Rez-Ermäßigung. Die Karte unterstützt ICE-Tax/Glacier, ist aber keine Rez-Reserve-Engine."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "temporary_ice_rez_support",
+          "evidence": [
+            "ice.corp_temporary_rez",
+            "ice.corp_rez_discount"
+          ],
+          "confidence": "medium",
+          "rationale": "Half-cost temporary rez can activate ICE tax during a run, with derez drawback."
+        }
       ]
     },
     {
@@ -24868,7 +25154,7 @@
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_trace_tag_condition"
       ],
       "tacticSignals": [
-        "ice.corp_hq_runpath_insert"
+        "ice.corp_ice_swap"
       ],
       "lineSupport": [
         "corp.ice_tax_glacier"
@@ -24910,7 +25196,10 @@
       },
       "hiddenInfoPolicy": "corp_side_only_until_installed",
       "manualNotes": [
-        "AI030 rationale: Hidden HQ ICE swap is an ICE-tax tool; no tag/economy role is retained from legacy roles."
+        "AI030 rationale: Hidden HQ ICE swap is an ICE-tax tool; no tag/economy role is retained from legacy roles.",
+        "UPGRADE-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Unrezzed ICE on this fort plus an ICE card stored in HQ; controller-only HQ choice must remain hidden from Runner-side AI.",
+        "UPGRADE-V2: Rationale: `ice.corp_hq_runpath_insert` ist hier nicht präzise, weil die Karte kein ICE einfügt, sondern ein unrezzed ICE austauscht. `ice.corp_ice_swap` reicht; HQ-Quelle ist Constraint."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -24918,9 +25207,21 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "hq_ice_swap_support",
+          "evidence": [
+            "ice.corp_ice_swap"
+          ],
+          "confidence": "medium",
+          "rationale": "Swapping unrezzed ICE with HQ ICE improves the fort run path and tax control without adding a new ICE encounter."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_365_paris-city-grid",
@@ -24958,14 +25259,13 @@
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_trace_pool"
       ],
       "tacticSignals": [
-        "economy.corp_trace_credit_support",
         "trace.corp_credit_support"
       ],
       "lineSupport": [
         "corp.tag_trace_punish"
       ],
       "strategicRole": [
-        "support_tool"
+        "enabler"
       ],
       "effects": [
         {
@@ -24991,7 +25291,10 @@
         "serverScope": "fort"
       },
       "manualNotes": [
-        "AI030 rationale: Server-bound trace credits are true tag/trace support, refreshed without exposing hidden state."
+        "AI030 rationale: Server-bound trace credits are true tag/trace support, refreshed without exposing hidden state.",
+        "UPGRADE-V2: ändern; priority=high; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; credits only pay for traces on this fort.",
+        "UPGRADE-V2: Rationale: Remove economy.corp_trace_credit_support duplicate; trace-specific signal is enough."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -24999,9 +25302,21 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "roleDetail": "trace_credit_enabler",
+          "evidence": [
+            "trace.corp_credit_support"
+          ],
+          "confidence": "high",
+          "rationale": "Recurring trace-credit pool on this fort strengthens trace/tag strategies."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_366_red-herrings",
@@ -25039,23 +25354,27 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "tax_tool"
+        "defensive_tool"
       ],
       "tacticSignals": [
-        "remote.agenda_steal_tax"
+        "remote.agenda_steal_tax",
+        "tax.runner_credit"
       ],
       "manualNotes": [
-        "AI030 rationale: Agenda steal tax is a direct remote-scoring support signal and already had overlay coverage."
+        "AI030 rationale: Agenda steal tax is a direct remote-scoring support signal and already had overlay coverage.",
+        "UPGRADE-V2: kleine Änderung; priority=high; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Agenda access in this fort.",
+        "UPGRADE-V2: Rationale: Role should be defensive_tool rather than tax_tool."
       ],
       "effects": [
         {
@@ -25081,7 +25400,20 @@
         "kind": "agenda_steal_tax",
         "threatLevel": "high",
         "serverScope": "fort"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "agenda_steal_tax",
+          "evidence": [
+            "remote.agenda_steal_tax",
+            "tax.runner_credit"
+          ],
+          "confidence": "high",
+          "rationale": "Agenda steal tax is direct scoring-remote defense."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
@@ -25119,20 +25451,39 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "scoring_tool"
+        "defensive_tool"
       ],
       "tacticSignals": [
-        "remote.scoring_protection"
+        "remote.scoring_protection",
+        "risk.random_outcome",
+        "run.corp_random_end_run"
       ],
       "manualNotes": [
-        "AI030 rationale: Die-roll end-the-run pressure protects the fort; no new random/planner behavior is implied."
+        "AI030 rationale: Die-roll end-the-run pressure protects the fort; no new random/planner behavior is implied.",
+        "UPGRADE-V2: ändern; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; random outcome must stay separate.",
+        "UPGRADE-V2: Rationale: scoring_tool is too strong; random risk should be visible."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "random_pass_ice_end_run",
+          "evidence": [
+            "remote.scoring_protection",
+            "run.corp_random_end_run",
+            "risk.random_outcome"
+          ],
+          "confidence": "medium",
+          "rationale": "Random end-the-run chance after passing rezzed ICE protects a remote but remains probabilistic."
+        }
       ]
     },
     {
@@ -25169,17 +25520,18 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "run.corp_server_lock"
+        "run.corp_server_lock",
+        "condition.corp_installed_or_advanced_this_fort_last_turn"
       ],
       "lineSupport": [
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "scoring_tool"
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -25200,7 +25552,23 @@
         "serverScope": "remote"
       },
       "manualNotes": [
-        "AI030 rationale: Run eligibility restriction on a subsidiary fort is a direct remote-scoring protection fact."
+        "AI030 rationale: Run eligibility restriction on a subsidiary fort is a direct remote-scoring protection fact.",
+        "UPGRADE-V2: ändern; priority=high; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Subsidiary remote; condition is specifically install/advance inside or on this fort during the Corp last turn.",
+        "UPGRADE-V2: Rationale: Die Bedingung im Report war zu breit. Es geht nicht um irgendeine Corp-Install-/Advance-Aktion, sondern um diese Fort-Zone. Außerdem ist `high` zu stark, weil aktive Scoring-Entwicklung die Run-Erlaubnis gerade wieder öffnet."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "conditional_server_lock",
+          "evidence": [
+            "run.corp_server_lock",
+            "condition.corp_installed_or_advanced_this_fort_last_turn"
+          ],
+          "confidence": "medium",
+          "rationale": "Conditional run lock can protect a dormant or staged remote, but the same condition opens the fort after recent install/advance activity."
+        }
       ]
     },
     {
@@ -25232,7 +25600,7 @@
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_runtime_definition"
       ],
       "tacticSignals": [
-        "ice.corp_hq_runpath_insert"
+        "ice.corp_ice_swap"
       ],
       "lineSupport": [
         "corp.ice_tax_glacier"
@@ -25274,7 +25642,10 @@
       },
       "hiddenInfoPolicy": "corp_side_only_until_installed",
       "manualNotes": [
-        "AI030 rationale: Region version of the hidden HQ ICE swap keeps the same side-safe target semantics."
+        "AI030 rationale: Region version of the hidden HQ ICE swap keeps the same side-safe target semantics.",
+        "UPGRADE-V2: kleine Änderung; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint plus unrezzed ICE on this fort and an ICE card stored in HQ; controller-only HQ choice.",
+        "UPGRADE-V2: Rationale: `ice.corp_hq_runpath_insert` ist auch hier zu breit. Die Karte tauscht ICE aus; sie installiert oder erzwingt keine zusätzliche Begegnung."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -25282,9 +25653,21 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "hq_ice_swap_support",
+          "evidence": [
+            "ice.corp_ice_swap"
+          ],
+          "confidence": "medium",
+          "rationale": "Region version of HQ ICE swap; improves run-path control without inserting an additional ICE."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_370_tesseract-fort-construction",
@@ -25325,7 +25708,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -25352,10 +25735,13 @@
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "engine_anchor"
+        "engine_anchor",
+        "defensive_tool"
       ],
       "tacticSignals": [
         "ice.corp_subroutine_support",
+        "run.corp_pay_or_end_run",
+        "tax.runner_credit",
         "remote.scoring_protection"
       ],
       "targetProfiles": [
@@ -25373,7 +25759,35 @@
         }
       ],
       "manualNotes": [
-        "AI030 rationale: Additional ETR subroutines materially support both glacier tax and scoring fort protection."
+        "AI030 rationale: Additional ETR subroutines materially support both glacier tax and scoring fort protection.",
+        "UPGRADE-V2: kleine Änderung; priority=high; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: All ICE on this fort; persistent server-bound modifier.",
+        "UPGRADE-V2: Rationale: Keep engine anchor but split role by strategy."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "engine_anchor",
+          "roleDetail": "fort_subroutine_tax_engine",
+          "evidence": [
+            "ice.corp_subroutine_support",
+            "run.corp_pay_or_end_run",
+            "tax.runner_credit"
+          ],
+          "confidence": "high",
+          "rationale": "Fort-wide pay-or-end-run subroutine on every ICE is deck-shaping tax/glacier support."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "fort_subroutine_remote_protection",
+          "evidence": [
+            "remote.scoring_protection",
+            "run.corp_pay_or_end_run"
+          ],
+          "confidence": "medium",
+          "rationale": "Additional subroutine directly protects scoring remotes."
+        }
       ]
     },
     {
@@ -25428,7 +25842,10 @@
       },
       "manualNotes": [
         "AI030 rationale: Credits after unsuccessful runs are useful support evidence but too conditional for an economy-reserve anchor.",
-        "AI030 support-only/evidence signal: economy.corp_unsuccessful_run_credit"
+        "AI030 support-only/evidence signal: economy.corp_unsuccessful_run_credit",
+        "UPGRADE-V2: ändern; priority=low; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; trigger is unsuccessful run on this fort.",
+        "UPGRADE-V2: Rationale: Credits nach erfolglosem Run belohnen einen bereits starken Server, erzeugen aber selbst weder Tax noch ETR noch Scoring-Schutz. Der niedrige Glacier-Support aus v1 sollte nicht als Strategieanker zählen."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -25436,9 +25853,12 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": []
     },
     {
       "cardId": "onr_v1_372_turbeau-delacroix",
@@ -25473,14 +25893,18 @@
         "corp.tag_trace_punish"
       ],
       "strategicRole": [
-        "engine_anchor"
+        "enabler"
       ],
       "tacticSignals": [
-        "tag.source",
-        "trace.source"
+        "remote.ambush",
+        "trace.source",
+        "tag.source"
       ],
       "manualNotes": [
-        "AI030 rationale: Trace 10 into a tag is a clear tag/trace source."
+        "AI030 rationale: Trace 10 into a tag is a clear tag/trace source.",
+        "UPGRADE-V2: ändern; priority=high; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Access trigger and trace; no target profile.",
+        "UPGRADE-V2: Rationale: engine_anchor is too strong; this is a tag source/enabler."
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -25488,9 +25912,22 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "roleDetail": "access_trace_tag_source",
+          "evidence": [
+            "trace.source",
+            "tag.source"
+          ],
+          "confidence": "high",
+          "rationale": "Trace 10 on access can give a tag and is a clear tag/trace enabler."
+        }
+      ]
     },
     {
       "cardId": "onr_v1_373_twenty-four-hour-surveillance",
@@ -25524,12 +25961,8 @@
       "tacticSignals": [
         "run.corp_stealth_credit_lockout"
       ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
-      ],
+      "lineSupport": [],
+      "strategicRole": [],
       "effects": [
         {
           "kind": "run_tax",
@@ -25550,17 +25983,21 @@
         "serverScope": "fort"
       },
       "manualNotes": [
-        "AI030 rationale: Stealth-credit denial taxes breaker plans on the protected fort without exposing private data."
+        "AI030 rationale: Stealth-credit denial taxes breaker plans on the protected fort without exposing private data.",
+        "UPGRADE-V2: ändern; priority=medium; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Fort-bound run constraint; only affects stealth credit sources.",
+        "UPGRADE-V2: Rationale: Stealth-Hate ist wie Worm-Hate ein taktisches Matchup-/Constraint-Signal, aber kein verlässlicher ICE-Tax-/Glacier-Anker. `tax.runner_credit` ist als Zusatzsignal zu breit, weil keine zusätzlichen Credits gezahlt werden, sondern eine Quelle gesperrt wird."
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": []
     },
     {
       "cardId": "onr_v1_374_washington-d-c-city-grid",
@@ -25598,7 +26035,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -25638,7 +26075,23 @@
         "serverScope": "remote"
       },
       "manualNotes": [
-        "AI030 rationale: Washington reduces agenda difficulty in its fort; this is remote-scoring support, not generic fast advance."
+        "AI030 rationale: Washington reduces agenda difficulty in its fort; this is remote-scoring support, not generic fast advance.",
+        "UPGRADE-V2: kleine Änderung; priority=high; set=originalset-v1.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; no separate fast-advance inference.",
+        "UPGRADE-V2: Rationale: Set remote-scoring pair, not fast-advance."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "scoring_tool",
+          "roleDetail": "agenda_difficulty_discount",
+          "evidence": [
+            "remote.agenda_difficulty_discount",
+            "score.agenda_difficulty_discount"
+          ],
+          "confidence": "high",
+          "rationale": "Agenda difficulty discount in this remote opens scoring windows."
+        }
       ]
     },
     {
@@ -29170,10 +29623,10 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -29209,7 +29662,28 @@
       "hiddenInfoPolicy": "corp_side_only_until_revealed_by_run_path",
       "manualNotes": [
         "AI030 rationale: ICE rearrangement is a real target/choice profile but support-only without a stable strategy anchor.",
-        "AI030 support-only/evidence signal: ice.corp_reorder_fort"
+        "AI030 support-only/evidence signal: ice.corp_reorder_fort",
+        "UPGRADE-V2: ändern; priority=medium; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: All ICE on this fort; order is visible server state.",
+        "UPGRADE-V2: Rationale: Currently support-only; useful enough for glacier as tax tool."
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "ice_order_control",
+          "evidence": [
+            "ice.corp_reorder_fort"
+          ],
+          "confidence": "medium",
+          "rationale": "Start-of-run ICE reorder improves the tax/glacier run path."
+        }
       ]
     },
     {
@@ -29316,18 +29790,19 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "advance.corp_counter_placement",
-        "advance.remote_score_window_support"
+        "advance.access_window_counter_support",
+        "condition.runner_passed_last_ice_this_fort"
       ],
       "lineSupport": [
-        "corp.remote_scoring"
+        "corp.ambush_bluff"
       ],
       "strategicRole": [
-        "scoring_tool"
+        "enabler"
       ],
       "effects": [
         {
@@ -29371,7 +29846,23 @@
       ],
       "manualNotes": [
         "AI030 rationale: Counters placed as the Runner passes the last ICE create a remote score-window support fact.",
-        "AI030 support-only/evidence signal: advance.corp_counter_placement"
+        "AI030 support-only/evidence signal: advance.corp_counter_placement",
+        "UPGRADE-V2: ändern; priority=high; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Installed card in subsidiary fort; timing is after Runner passes the last ICE and once per run. Target should be an installed card that can use advancement counters.",
+        "UPGRADE-V2: Rationale: Der v1-Anker `corp.remote_scoring` ist fraglich: Das Timing vor Access schützt Agendas nicht zuverlässig und erzeugt kein Score-Closeout. Fachlich stärker ist die Karte als Access-Window-Advancement-Enabler für Ambush/Bluff-Linien."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "enabler",
+          "roleDetail": "access_window_advancement_enabler",
+          "evidence": [
+            "advance.corp_counter_placement",
+            "advance.access_window_counter_support"
+          ],
+          "confidence": "medium",
+          "rationale": "Counters are added after the Runner has passed the last ICE, which is more relevant as surprise support for advanceable ambushes or remote traps than as normal remote scoring."
+        }
       ]
     },
     {
@@ -29402,7 +29893,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -29451,7 +29942,22 @@
       "hiddenInfoPolicy": "random_discard_without_ai_hidden_choice",
       "manualNotes": [
         "AI030 rationale: Subroutine repeat supports ICE tax; random discard is cost/risk evidence only.",
-        "AI030 support-only/evidence signal: risk.random_discard_cost"
+        "AI030 support-only/evidence signal: risk.random_discard_cost",
+        "UPGRADE-V2: kleine Änderung; priority=medium; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Installed ICE/subroutine target; random discard is cost risk.",
+        "UPGRADE-V2: Rationale: Old tax anchor is plausible; pair is missing."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "ice_subroutine_repeat_support",
+          "evidence": [
+            "ice.corp_subroutine_repeat"
+          ],
+          "confidence": "high",
+          "rationale": "Repeats an ICE subroutine and increases tax/ETR/damage depending on the ICE."
+        }
       ]
     },
     {
@@ -29482,7 +29988,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -29531,7 +30037,22 @@
       "hiddenInfoPolicy": "top_rnd_trash_without_ai_hidden_choice",
       "manualNotes": [
         "AI030 rationale: Subroutine repeat supports ICE tax; top-R&D trash cost is support-only risk metadata.",
-        "AI030 support-only/evidence signal: risk.rnd_trash_cost"
+        "AI030 support-only/evidence signal: risk.rnd_trash_cost",
+        "UPGRADE-V2: kleine Änderung; priority=medium; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Installed ICE/subroutine target; R&D trash cost separated from tactic.",
+        "UPGRADE-V2: Rationale: Old tax anchor is plausible; pair is missing."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "ice_subroutine_repeat_support",
+          "evidence": [
+            "ice.corp_subroutine_repeat"
+          ],
+          "confidence": "high",
+          "rationale": "Repeats an ICE subroutine; R&D trash is the cost risk."
+        }
       ]
     },
     {
@@ -29562,7 +30083,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -29604,7 +30125,23 @@
       },
       "manualNotes": [
         "AI030 rationale: Gray Ops difficulty discount is a remote-scoring support signal, not a fast-advance derivation.",
-        "AI030 support-only/evidence signal: score.gray_ops_difficulty_discount"
+        "AI030 support-only/evidence signal: score.gray_ops_difficulty_discount",
+        "UPGRADE-V2: kleine Änderung; priority=high; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; Gray Ops agendas only.",
+        "UPGRADE-V2: Rationale: Set pair."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "scoring_tool",
+          "roleDetail": "gray_ops_agenda_difficulty_discount",
+          "evidence": [
+            "remote.agenda_difficulty_discount",
+            "score.gray_ops_difficulty_discount"
+          ],
+          "confidence": "high",
+          "rationale": "Gray Ops agenda difficulty discount supports remote scoring."
+        }
       ]
     },
     {
@@ -29635,11 +30172,12 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "run.corp_spend_cap"
+        "run.corp_spend_cap",
+        "tax.runner_credit"
       ],
       "lineSupport": [
         "corp.ice_tax_glacier"
@@ -29667,7 +30205,23 @@
         "serverScope": "fort"
       },
       "manualNotes": [
-        "AI030 rationale: Declared spend cap constrains the whole run and materially supports taxing ICE plans."
+        "AI030 rationale: Declared spend cap constrains the whole run and materially supports taxing ICE plans.",
+        "UPGRADE-V2: kleine Änderung; priority=medium; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Start-of-run fort constraint; no card target.",
+        "UPGRADE-V2: Rationale: Old tax anchor is plausible; tax.runner_credit should be explicit."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_spend_cap_tax",
+          "evidence": [
+            "run.corp_spend_cap",
+            "tax.runner_credit"
+          ],
+          "confidence": "high",
+          "rationale": "Runner must cap run spending in advance, which strongly supports tax/glacier."
+        }
       ]
     },
     {
@@ -29698,11 +30252,12 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "draw.corp_draw"
+        "draw.corp_draw",
+        "condition.during_hq_run"
       ],
       "effects": [
         {
@@ -29720,8 +30275,14 @@
       ],
       "manualNotes": [
         "AI030 rationale: HQ-only paid draw during runs is utility evidence only and should not anchor a strategy.",
-        "AI030 support-only/evidence signal: draw.corp_draw"
-      ]
+        "AI030 support-only/evidence signal: draw.corp_draw",
+        "UPGRADE-V2: kleine Änderung; priority=low; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Install only in HQ; ability only during a run on HQ.",
+        "UPGRADE-V2: Rationale: `condition.hq_run` sollte präziser als Timing-/Nutzungscondition formuliert werden: `condition.during_hq_run`. Support-only bleibt richtig."
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": []
     },
     {
       "cardId": "onr_proteus_068_pattel-antibody",
@@ -29829,15 +30390,16 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "hq.corp_installed_card_bounce",
-        "install.corp_uninstall_to_hq"
+        "install.corp_uninstall_to_hq",
+        "remote.content_swap_defense"
       ],
       "effects": [
         {
@@ -29879,7 +30441,30 @@
       "manualNotes": [
         "AI030 rationale: Fort refresh from HQ is a side-safe target profile but not a stable deck-line anchor.",
         "AI030 support-only/evidence signal: hq.corp_installed_card_bounce",
-        "AI030 support-only/evidence signal: install.corp_uninstall_to_hq"
+        "AI030 support-only/evidence signal: install.corp_uninstall_to_hq",
+        "UPGRADE-V2: ändern; priority=high; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Subsidiary fort contents plus HQ replacement cards; strict hidden-info boundary.",
+        "UPGRADE-V2: Rationale: Currently support-only, but strategically relevant as remote defense."
+      ],
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "remote_content_swap_defense",
+          "evidence": [
+            "hq.corp_installed_card_bounce",
+            "install.corp_uninstall_to_hq",
+            "remote.content_swap_defense"
+          ],
+          "confidence": "medium",
+          "rationale": "Can swap remote contents after the last ICE and defend agenda/trap remotes; hidden info remains controller-only."
+        }
       ]
     },
     {
@@ -29910,18 +30495,21 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "run.corp_pay_or_end_run"
+        "run.corp_pay_or_end_run",
+        "tax.runner_credit",
+        "remote.scoring_protection"
       ],
       "lineSupport": [
         "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "tax_tool"
+        "tax_tool",
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -29944,7 +30532,34 @@
         "serverScope": "fort"
       },
       "manualNotes": [
-        "AI030 rationale: Pay-or-end-run after each ICE directly protects scoring remotes and increases run tax."
+        "AI030 rationale: Pay-or-end-run after each ICE directly protects scoring remotes and increases run tax.",
+        "UPGRADE-V2: kleine Änderung; priority=high; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Fort-bound during-run tax; no single target.",
+        "UPGRADE-V2: Rationale: Remote-defense role should be explicit."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "pass_ice_pay_or_end_tax",
+          "evidence": [
+            "run.corp_pay_or_end_run",
+            "tax.runner_credit"
+          ],
+          "confidence": "high",
+          "rationale": "Pay-or-end-run after every passed ICE is strong glacier/tax support."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "pass_ice_pay_or_end_remote_protection",
+          "evidence": [
+            "run.corp_pay_or_end_run",
+            "remote.scoring_protection"
+          ],
+          "confidence": "medium",
+          "rationale": "Protects scoring remotes through repeated pay/stop windows."
+        }
       ]
     },
     {
@@ -29975,11 +30590,12 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "advance.corp_counter_bank",
+        "economy.corp_counter_cashout",
         "economy.corp_run_temporary_credit",
         "risk.temporary_credit_drawback"
       ],
@@ -30035,7 +30651,24 @@
       "manualNotes": [
         "AI030 rationale: Temporary run credits from advancement counters are reserve support; unspent credits returning are drawback evidence.",
         "AI030 support-only/evidence signal: advance.corp_counter_bank",
-        "AI030 support-only/evidence signal: risk.temporary_credit_drawback"
+        "AI030 support-only/evidence signal: risk.temporary_credit_drawback",
+        "UPGRADE-V2: ändern; priority=medium; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Advancement counters on cards in this fort; unused credits returned.",
+        "UPGRADE-V2: Rationale: Add counter-cashout signal and express reserve support hierarchically."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.economy_rez_reserve",
+          "role": "support_tool",
+          "roleDetail": "run_temporary_credit_reserve",
+          "evidence": [
+            "economy.corp_run_temporary_credit",
+            "economy.corp_counter_cashout",
+            "risk.temporary_credit_drawback"
+          ],
+          "confidence": "medium",
+          "rationale": "Converts advancement counters into temporary run credits; support only."
+        }
       ]
     },
     {
@@ -30066,7 +30699,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -30108,7 +30741,23 @@
       },
       "manualNotes": [
         "AI030 rationale: Research agenda difficulty discount is remote-scoring support, not a fast-advance derivation.",
-        "AI030 support-only/evidence signal: score.research_difficulty_discount"
+        "AI030 support-only/evidence signal: score.research_difficulty_discount",
+        "UPGRADE-V2: kleine Änderung; priority=high; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; Research agendas only.",
+        "UPGRADE-V2: Rationale: Set pair."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "scoring_tool",
+          "roleDetail": "research_agenda_difficulty_discount",
+          "evidence": [
+            "remote.agenda_difficulty_discount",
+            "score.research_difficulty_discount"
+          ],
+          "confidence": "high",
+          "rationale": "Research agenda difficulty discount supports remote scoring."
+        }
       ]
     },
     {
@@ -30139,7 +30788,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -30149,7 +30798,7 @@
         "corp.central_stabilize"
       ],
       "strategicRole": [
-        "support_tool"
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -30165,7 +30814,22 @@
         }
       ],
       "manualNotes": [
-        "AI030 rationale: HQ/R&D access reduction is a central-stabilize support signal and has no target choice."
+        "AI030 rationale: HQ/R&D access reduction is a central-stabilize support signal and has no target choice.",
+        "UPGRADE-V2: kleine Änderung; priority=medium; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: HQ or R&D only; access reduction is central-bound.",
+        "UPGRADE-V2: Rationale: defensive_tool is more precise than support_tool."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.central_stabilize",
+          "role": "defensive_tool",
+          "roleDetail": "central_multiaccess_reduction",
+          "evidence": [
+            "access.corp_central_access_reduction"
+          ],
+          "confidence": "high",
+          "rationale": "Reduces central multiaccess from HQ/R&D and stabilizes central defense."
+        }
       ]
     },
     {
@@ -30417,7 +31081,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -30459,7 +31123,23 @@
       },
       "manualNotes": [
         "AI030 rationale: Black Ops difficulty discount is remote-scoring support, not a fast-advance derivation.",
-        "AI030 support-only/evidence signal: score.black_ops_difficulty_discount"
+        "AI030 support-only/evidence signal: score.black_ops_difficulty_discount",
+        "UPGRADE-V2: kleine Änderung; priority=high; set=proteus.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; Black Ops agendas only.",
+        "UPGRADE-V2: Rationale: Set pair."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "scoring_tool",
+          "roleDetail": "black_ops_agenda_difficulty_discount",
+          "evidence": [
+            "remote.agenda_difficulty_discount",
+            "score.black_ops_difficulty_discount"
+          ],
+          "confidence": "high",
+          "rationale": "Black Ops agenda difficulty discount supports remote scoring."
+        }
       ]
     },
     {
@@ -36211,14 +36891,20 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-03",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [],
       "no_signal_reason": "Vanilla test upgrade has no active ability or tactical semantics.",
       "manualNotes": [
-        "AI030 rationale: Kept intentionally signal-empty for the test fixture."
-      ]
+        "AI030 rationale: Kept intentionally signal-empty for the test fixture.",
+        "UPGRADE-V2: behalten; priority=low; set=testset.",
+        "UPGRADE-V2: Target/Constraints: Testset placeholder without active ability.",
+        "UPGRADE-V2: Rationale: No productive AI hint needed."
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": []
     },
     {
       "cardId": "v08_adaptive_killer",
@@ -37115,15 +37801,13 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "corp_ice.break_cost_tax",
-        "remote.scoring_protection",
         "run.break_cost_penalty",
         "tax.runner_persistent"
       ],
@@ -37152,12 +37836,13 @@
           "kind": "requires_remote_server"
         }
       ],
-      "lineSupport": [
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring"
-      ],
-      "strategicRole": [
-        "tax_tool"
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "UPGRADE-V2: ändern; priority=medium; set=classic.",
+        "UPGRADE-V2: Target/Constraints: Region/Fort constraint; applies only to using subroutines of noisy icebreakers during runs on this fort.",
+        "UPGRADE-V2: Rationale: Noisy-Icebreaker-Hate ist subtype-/matchup-spezifisch wie Worm- oder Stealth-Hate. Das ist ein taktisches Tax-/Constraint-Signal, aber kein stabiler `corp.ice_tax_glacier`- oder `corp.remote_scoring`-Anker."
       ]
     },
     {
@@ -37281,16 +37966,15 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
+        "remote.ambush",
         "access.corp_net_damage_ambush",
         "access.punish",
         "damage.payoff",
-        "ice.corp_self_trash_cost",
-        "remote.ambush",
-        "risk.trash_own_rezzed_ice"
+        "risk.trash_own_installed_cards"
       ],
       "effects": [
         {
@@ -37332,7 +38016,35 @@
         "punish_payoff"
       ],
       "manualNotes": [
-        "CLASSIC-AI-06: Damage scales with other Corp cards trashed in the source subsidiary fort; own-board cost is explicit risk, not free damage."
+        "CLASSIC-AI-06: Damage scales with other Corp cards trashed in the source subsidiary fort; own-board cost is explicit risk, not free damage.",
+        "UPGRADE-V2: kleine Änderung; priority=high; set=classic.",
+        "UPGRADE-V2: Target/Constraints: Trashes other installed cards in/on the fort; own-board risk is broader than own ICE.",
+        "UPGRADE-V2: Rationale: risk.trash_own_rezzed_ice is too narrow."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "roleDetail": "access_scaling_net_damage_ambush",
+          "evidence": [
+            "remote.ambush",
+            "access.corp_net_damage_ambush",
+            "access.punish"
+          ],
+          "confidence": "high",
+          "rationale": "On-access Self-Destruct is clear remote ambush payoff."
+        },
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "access_scaling_net_damage_payoff",
+          "evidence": [
+            "access.corp_net_damage_ambush",
+            "damage.payoff"
+          ],
+          "confidence": "medium",
+          "rationale": "Net damage scales with trashed cards and can create flatline pressure, with board-cost risk."
+        }
       ]
     },
     {
@@ -37373,15 +38085,15 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
+        "remote.ambush",
         "access.corp_hardware_trash",
         "access.corp_program_trash",
         "access.punish",
-        "remote.ambush",
-        "risk.requires_tagged_runner",
+        "condition.runner_has_four_or_more_tags",
         "tag.payoff"
       ],
       "effects": [
@@ -37429,6 +38141,39 @@
       ],
       "strategicRole": [
         "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "punish_payoff",
+          "roleDetail": "access_rig_trash_payoff",
+          "evidence": [
+            "remote.ambush",
+            "access.corp_hardware_trash",
+            "access.corp_program_trash",
+            "access.punish"
+          ],
+          "confidence": "high",
+          "rationale": "Mass rig-trash on access is ambush punish."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "punish_payoff",
+          "roleDetail": "tag_threshold_rig_trash_payoff",
+          "evidence": [
+            "condition.runner_has_four_or_more_tags",
+            "tag.payoff",
+            "access.corp_hardware_trash",
+            "access.corp_program_trash"
+          ],
+          "confidence": "high",
+          "rationale": "The payoff requires four or more tags and consumes tag/trace pressure."
+        }
+      ],
+      "manualNotes": [
+        "UPGRADE-V2: ändern; priority=high; set=classic.",
+        "UPGRADE-V2: Target/Constraints: Runner installed hardware/programs; four-tag threshold is a condition.",
+        "UPGRADE-V2: Rationale: Use specific tag-threshold condition instead of risk.requires_tagged_runner."
       ]
     },
     {
@@ -37468,12 +38213,12 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "ice.strength_modifier",
-        "remote.scoring_protection"
+        "ice.corp_targeted_strength_boost",
+        "ice.corp_strength_support"
       ],
       "effects": [
         {
@@ -37525,11 +38270,28 @@
         }
       ],
       "lineSupport": [
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring"
+        "corp.ice_tax_glacier"
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "targeted_ice_strength_burst",
+          "evidence": [
+            "ice.corp_targeted_strength_boost",
+            "ice.corp_strength_support"
+          ],
+          "confidence": "medium",
+          "rationale": "Temporary targeted strength boost can increase break cost on a key ICE, but it is not inherently remote-scoring protection."
+        }
+      ],
+      "manualNotes": [
+        "UPGRADE-V2: ändern; priority=medium; set=classic.",
+        "UPGRADE-V2: Target/Constraints: TargetProfile needed: choose a piece of ICE; visible/known ICE state only, no hidden Runner knowledge.",
+        "UPGRADE-V2: Rationale: `ice.strength_modifier` ist zu generisch und nicht Corp-seitig. `remote.scoring_protection` und der Remote-Scoring-Pair sind zu breit, weil Sterdroid ein zielbares ICE-Buff-Werkzeug ist, kein remote-spezifischer Schutz."
       ]
     },
     {
@@ -37660,14 +38422,13 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "remote.scoring_protection",
-        "risk.requires_tagged_runner",
+        "condition.runner_has_one_or_more_tags",
         "tag.payoff",
-        "tax.runner_credit",
+        "tag.runner_credit_loss_payoff",
         "tax.runner_persistent"
       ],
       "effects": [
@@ -37706,13 +38467,28 @@
         }
       ],
       "lineSupport": [
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring",
         "corp.tag_trace_punish"
       ],
       "strategicRole": [
-        "punish_payoff",
-        "tax_tool"
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "punish_payoff",
+          "roleDetail": "tag_count_credit_loss_payoff",
+          "evidence": [
+            "tag.payoff",
+            "tag.runner_credit_loss_payoff"
+          ],
+          "confidence": "high",
+          "rationale": "Start-of-run credit loss scales with Runner tag count; this is primarily a tag payoff, not a generic glacier or remote-scoring card."
+        }
+      ],
+      "manualNotes": [
+        "UPGRADE-V2: ändern; priority=high; set=classic.",
+        "UPGRADE-V2: Target/Constraints: Installed in a data fort; effect scales with Runner tag count at the start of each run on that fort.",
+        "UPGRADE-V2: Rationale: Die v1-Zuordnung zu drei Strategien überdehnt die Karte. Fachlich ist Street Enforcer ein Tag-Payoff. ICE-Tax und Remote-Scoring sollten nicht zusätzlich ankern, weil die Tax nur aus bereits vorhandenen Tags entsteht."
       ]
     },
     {
