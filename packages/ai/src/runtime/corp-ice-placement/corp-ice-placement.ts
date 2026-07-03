@@ -195,6 +195,10 @@ export function corpIcePlacementCandidateForAction<
     components,
     params.hasUrgentScoreline === true,
   );
+  const deferReason =
+    recommendation === "install_now"
+      ? undefined
+      : corpDeferReasonForPlacement(components, deckDensity);
   return {
     actionId: action.actionId,
     iceInstanceId: sourceCard.instanceId,
@@ -213,6 +217,7 @@ export function corpIcePlacementCandidateForAction<
       `rez_cost:${profile.rezCost}`,
       `rez_affordable:${affordable}`,
       `recommendation:${recommendation}`,
+      ...(deferReason ? [`defer_reason:${deferReason}`] : []),
       ...serverNeed.evidence,
       ...profile.evidence,
       ...deckDensity.evidence,
@@ -728,6 +733,14 @@ function corpDeckDensityAdjustmentValue(
   serverNeed: CorpServerNeedProfile,
 ): number {
   if (!firstIce || serverNeed.serverNeed < 450) return 0;
+  if (
+    deckDensity.iceDensityClass === "low" &&
+    serverNeed.serverNeed >= 900 &&
+    profile.positionDependent &&
+    !profile.immediateStop
+  ) {
+    return 900;
+  }
   if (deckDensity.iceDensityClass === "low") return 250;
   if (
     deckDensity.iceDensityClass === "high" &&
@@ -775,13 +788,18 @@ function corpBestDeferReason(
   deckDensity: CorpIceDensityProfile,
 ): string | undefined {
   if (candidate.recommendation === "install_now") return undefined;
-  if (candidate.components.rezAffordability < 0) return "rez_reserve_too_low";
-  if (candidate.components.positionFit < -500) {
-    return "bad_first_ice_wait_for_followup";
-  }
+  return corpDeferReasonForPlacement(candidate.components, deckDensity);
+}
+
+function corpDeferReasonForPlacement(
+  components: CorpIcePlacementCandidate["components"],
+  deckDensity: CorpIceDensityProfile,
+): string {
+  if (components.rezAffordability < 0) return "rez_reserve_too_low";
+  if (components.positionFit < -500) return "bad_first_ice_wait_for_followup";
   if (
     deckDensity.iceDensityClass === "high" &&
-    candidate.components.deckDensityAdjustment < 0
+    components.deckDensityAdjustment < 0
   ) {
     return "deck_ice_density_high_wait_reasonable";
   }

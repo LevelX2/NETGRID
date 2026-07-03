@@ -6,6 +6,7 @@ import {
   buildCorpIceDensityProfile,
   buildCorpServerNeedProfile,
   corpIcePlacementCandidateForAction,
+  corpIcePlacementEvaluationForActions,
   corpIcePlacementScoreComponent,
 } from "./corp-ice-placement";
 
@@ -221,6 +222,194 @@ describe("corp ICE placement candidate scoring", () => {
     expect(component?.reason).toContain("server:hq");
     expect(component?.reason).toContain("recommendation:install_now");
   });
+
+  it("routes urgent HQ agenda-flood protection above remote setup", () => {
+    const hqWall = corpIce("hq-wall", {
+      rulesText: "*End the run.",
+      rezCost: 2,
+    });
+    const remoteWall = corpIce("remote-wall", {
+      rulesText: "*End the run.",
+      rezCost: 2,
+    });
+    const input = corpInput({
+      credits: 6,
+      hq: [agenda("agenda-in-hq"), hqWall, remoteWall],
+      servers: [server("hq", []), server("rd", []), server("remote_1", [])],
+    });
+
+    const hqCandidate = candidateFor(input, hqWall, "hq");
+    const remoteCandidate = candidateFor(input, remoteWall, "remote_1");
+
+    expect(hqCandidate?.score).toBeGreaterThan(remoteCandidate?.score ?? 0);
+    expect(hqCandidate?.evidence).toContain("hq_agenda_risk:true");
+  });
+
+  it("routes visible R&D multiaccess pressure to R&D before HQ when HQ has no agenda", () => {
+    const hqWall = corpIce("hq-wall", {
+      rulesText: "*End the run.",
+      rezCost: 2,
+    });
+    const rdWall = corpIce("rd-wall", {
+      rulesText: "*End the run.",
+      rezCost: 2,
+    });
+    const input = corpInput({
+      credits: 6,
+      hq: [hqWall, rdWall],
+      servers: [server("hq", []), server("rd", [])],
+      runnerRig: [
+        card("rd-interface", "hardware", {
+          title: "R&D Interface",
+          rulesText: "Whenever you access R&D, access 1 additional card.",
+        }),
+      ],
+    });
+
+    const rdCandidate = candidateFor(input, rdWall, "rd");
+    const hqCandidate = candidateFor(input, hqWall, "hq");
+
+    expect(rdCandidate?.score).toBeGreaterThan(hqCandidate?.score ?? 0);
+    expect(rdCandidate?.evidence).toContain("rd_pressure:true");
+  });
+
+  it("prioritizes a scoreline remote over quiet central over-icing", () => {
+    const remoteWall = corpIce("remote-wall", {
+      rulesText: "*End the run.",
+      rezCost: 2,
+    });
+    const hqWall = corpIce("hq-wall", {
+      rulesText: "*End the run.",
+      rezCost: 2,
+    });
+    const input = corpInput({
+      credits: 6,
+      hq: [remoteWall, hqWall],
+      servers: [
+        server("hq", [corpIce("existing-hq-wall", { rulesText: "*End the run." })]),
+        server("rd", [corpIce("existing-rd-wall", { rulesText: "*End the run." })]),
+        server("remote_1", [], [agenda("remote-agenda")]),
+      ],
+    });
+
+    const remoteCandidate = candidateFor(input, remoteWall, "remote_1");
+    const hqCandidate = candidateFor(input, hqWall, "hq");
+
+    expect(remoteCandidate?.score).toBeGreaterThan(hqCandidate?.score ?? 0);
+    expect(remoteCandidate?.evidence).toContain("remote_scoreline_root:true");
+  });
+
+  it("defers unrezzable ICE in favor of economy when the server need is low", () => {
+    const expensiveIce = corpIce("expensive-ice", {
+      rulesText: "*End the run.",
+      rezCost: 8,
+    });
+    const input = corpInput({
+      credits: 2,
+      hq: [expensiveIce],
+      servers: [server("remote_1", [])],
+    });
+
+    const candidate = candidateFor(input, expensiveIce, "remote_1", {
+      actionCreditCost: 1,
+      iceRezCost: 8,
+    });
+
+    expect(candidate?.recommendation).toBe("prefer_economy");
+    expect(candidate?.evidence).toContain("defer_reason:rez_reserve_too_low");
+  });
+
+  it("waits on high-density dead first ICE but installs it under low ICE density and urgent HQ need", () => {
+    const comboIce = corpIce("combo-ice", {
+      title: "Combo ICE",
+      rulesText:
+        "For each rezzed piece of ice installed outside Combo ICE, trace the Runner.",
+      rezCost: 2,
+    });
+    const highDensityInput = corpInput({
+      credits: 5,
+      hq: [
+        agenda("agenda-in-hq"),
+        comboIce,
+        corpIce("other-ice-1"),
+        corpIce("other-ice-2"),
+        corpIce("other-ice-3"),
+      ],
+      servers: [server("hq", []), server("rd", [])],
+    });
+    const lowDensityInput = corpInput({
+      credits: 5,
+      hq: [
+        agenda("agenda-in-hq"),
+        card("operation-1", "operation"),
+        card("operation-2", "operation"),
+        card("asset-1", "asset"),
+        card("upgrade-1", "upgrade"),
+        comboIce,
+      ],
+      servers: [server("hq", []), server("rd", [])],
+    });
+
+    const highDensityCandidate = candidateFor(highDensityInput, comboIce, "hq");
+    const lowDensityCandidate = candidateFor(lowDensityInput, comboIce, "hq");
+
+    expect(highDensityCandidate?.recommendation).toBe("hold_for_later");
+    expect(lowDensityCandidate?.score).toBeGreaterThan(
+      highDensityCandidate?.score ?? 0,
+    );
+    expect(lowDensityCandidate?.recommendation).toBe("install_now");
+    expect(lowDensityCandidate?.evidence).toContain("ice_density_class:low");
+  });
+
+  it("halves first-ICE position penalties for mobile reposition ICE without removing them", () => {
+    const staticCombo = corpIce("static-combo", {
+      rulesText:
+        "For each rezzed piece of ice installed outside this ice, trace the Runner.",
+      rezCost: 2,
+    });
+    const mobileCombo = corpIce("mobile-combo", {
+      rulesText:
+        "For each rezzed piece of ice installed outside this ice, trace the Runner. You may move this ice.",
+      rezCost: 2,
+    });
+    const input = corpInput({
+      credits: 5,
+      hq: [staticCombo, mobileCombo],
+      servers: [server("remote_1", [])],
+    });
+
+    const staticCandidate = candidateFor(input, staticCombo, "remote_1");
+    const mobileCandidate = candidateFor(input, mobileCombo, "remote_1");
+
+    expect(staticCandidate?.components.positionFit).toBe(-1300);
+    expect(mobileCandidate?.components.positionFit).toBe(-650);
+  });
+
+  it("returns bestDeferReason for poor install portfolios without creating a fake action", () => {
+    const comboIce = corpIce("combo-ice", {
+      rulesText:
+        "For each rezzed piece of ice installed outside Combo ICE, trace the Runner.",
+      rezCost: 2,
+    });
+    const input = corpInput({
+      credits: 5,
+      hq: [comboIce],
+      servers: [server("remote_1", [])],
+    });
+    const action = installIceAction(comboIce, "remote_1");
+
+    const evaluation = corpIcePlacementEvaluationForActions(input, [action], {
+      serverIdForAction: () => "remote_1",
+      serverForId: () => input.playerView.servers[0],
+      actionCreditCost: () => 1,
+      visibleIceRezCost: () => 2,
+    });
+
+    expect(evaluation.bestInstall?.actionId).toBe(action.actionId);
+    expect(evaluation.bestInstall?.recommendation).toBe("hold_for_later");
+    expect(evaluation.bestDeferReason).toBe("bad_first_ice_wait_for_followup");
+    expect(evaluation.candidates).toHaveLength(1);
+  });
 });
 
 function corpInput(overrides: {
@@ -229,6 +418,7 @@ function corpInput(overrides: {
   archives?: VisibleCard[];
   servers?: AiDecisionInput["playerView"]["servers"];
   stackOrRdCount?: number;
+  runnerRig?: VisibleCard[];
 } = {}): AiDecisionInput {
   return {
     side: "corp",
@@ -268,7 +458,7 @@ function corpInput(overrides: {
         deckCount: 30,
         discardCount: 0,
         scoreArea: [],
-        rig: [],
+        rig: overrides.runnerRig ?? [],
       },
       servers: overrides.servers ?? [server("hq", []), server("rd", [])],
       publicEvents: [],
@@ -277,6 +467,23 @@ function corpInput(overrides: {
       agendaPointsToWin: 7,
     },
   } as unknown as AiDecisionInput;
+}
+
+function candidateFor(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  options: { actionCreditCost?: number; iceRezCost?: number } = {},
+) {
+  return corpIcePlacementCandidateForAction({
+    input,
+    action: installIceAction(ice, serverId),
+    serverId,
+    server: input.playerView.servers.find((server) => server.id === serverId),
+    sourceCard: ice,
+    actionCreditCost: options.actionCreditCost ?? 1,
+    iceRezCost: options.iceRezCost ?? ice.rezCost ?? 0,
+  });
 }
 
 function server(
