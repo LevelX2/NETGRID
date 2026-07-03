@@ -3529,26 +3529,29 @@ function formatChronicleEffect(
     );
   }
 
-  if (
-    sourceDefinitionId === QUEST_FOR_CATTEKIN_ID &&
-    effect.reason === "start_of_turn"
-  ) {
+  const randomStartTurnOutcome = startTurnRandomEffectOutcome(effect);
+  if (effect.reason === "start_of_turn" && randomStartTurnOutcome) {
     const payload = effect as Record<string, unknown>;
     const dieRoll = numberValue(payload.v1921DieRoll);
-    const outcome = stringValue(payload.questForCattekinOutcome);
+    const outcome = randomStartTurnOutcome;
+    const outcomeDamageType = startTurnRandomEffectDamageType(outcome);
+    const displayDamageType = damageTypeLabel(
+      stringValue(effect.damageType) ?? outcomeDamageType,
+    );
     category =
-      outcome === "core_damage" || outcome === "net_damage"
+      outcomeDamageType !== undefined
         ? "danger"
         : outcome === "permanent_action"
           ? "turn"
           : "card";
     importance =
-      outcome === "core_damage" || outcome === "net_damage"
+      outcomeDamageType !== undefined
         ? "critical"
         : outcome === "permanent_action"
           ? "important"
           : "normal";
-    const source = sourceTitle ?? "Quest for Cattekin";
+    const source =
+      sourceTitle ?? titleForDefinitionId(sourceDefinitionId) ?? "Die Quelle";
     const rollText =
       dieRoll !== undefined ? ` würfelt eine ${dieRoll}` : " würfelt";
     const gainsAction = subject === "Du" ? "Du erhältst" : `${subject} erhält`;
@@ -3564,25 +3567,17 @@ function formatChronicleEffect(
         "Dauerhaft",
         "Trash",
       );
-    } else if (outcome === "core_damage") {
-      title = `${source}${rollText}: ${suffersDamage} ${amount || 1} Core Damage`;
-      description =
-        "Der Schaden von Quest for Cattekin kann nicht verhindert werden.";
+    } else if (outcomeDamageType !== undefined) {
+      title = `${source}${rollText}: ${suffersDamage} ${amount || 1} ${displayDamageType}`;
+      if (payload.damageCannotBePrevented === true)
+        description = `Der Schaden von ${source} kann nicht verhindert werden.`;
       chips.push(
         source,
         ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []),
-        "Core Damage",
-        "Nicht verhinderbar",
-      );
-    } else if (outcome === "net_damage") {
-      title = `${source}${rollText}: ${suffersDamage} ${amount || 1} Net Damage`;
-      description =
-        "Der Schaden von Quest for Cattekin kann nicht verhindert werden.";
-      chips.push(
-        source,
-        ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []),
-        "Net Damage",
-        "Nicht verhinderbar",
+        displayDamageType,
+        ...(payload.damageCannotBePrevented === true
+          ? ["Nicht verhinderbar"]
+          : []),
       );
     } else {
       title = `${source}${rollText}: kein weiterer Effekt`;
@@ -3601,7 +3596,7 @@ function formatChronicleEffect(
       title: ensurePeriod(title),
       ...(description ? { description: ensurePeriod(description) } : {}),
       chips: uniqueChips(chips.filter(Boolean)),
-      cardDefinitionId: QUEST_FOR_CATTEKIN_ID,
+      ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
       cardTitle: source,
       cardDetailLines: [],
       groupLabel: groupLabelFor(
@@ -4423,7 +4418,7 @@ export function chronicleStartTurnEffectGroupFromEvent(
     item.actor === eventActor
   )
     return null;
-  if (!item.chips.includes("Automatisch")) return null;
+  if (!chronicleItemIsStartTurnEffectFromEvent(event, item)) return null;
   const label = chronicleTurnGroupLabel(
     item.actor,
     eventTurnNumber ? eventTurnNumber + 1 : null,
@@ -4436,6 +4431,43 @@ function chronicleEventCanCarryNextTurnStartEffects(
   actionType: string,
 ): boolean {
   return actionType === "end_turn" || isDiscardPhaseResolution(event);
+}
+
+function chronicleItemIsStartTurnEffectFromEvent(
+  event: PublicGameEvent,
+  item: ChronicleItem,
+): boolean {
+  const effectPrefix = `${event.eventId}:effect:`;
+  if (!item.id.startsWith(effectPrefix)) return false;
+  return resolvedEffectsFromPayload(event.publicPayload.resolvedEffects).some(
+    (effect, index) =>
+      item.id === `${effectPrefix}${effect.effectId || index}` &&
+      effect.reason === "start_of_turn" &&
+      sideValue(effect.side) === item.actor,
+  );
+}
+
+function startTurnRandomEffectOutcome(
+  effect: ResolvedGameEffect,
+): string | undefined {
+  const payload = effect as Record<string, unknown>;
+  const outcome =
+    stringValue(payload.randomEffectOutcome) ??
+    stringValue(payload.questForCattekinOutcome);
+  if (
+    outcome === "no_effect" ||
+    outcome === "permanent_action" ||
+    startTurnRandomEffectDamageType(outcome) !== undefined
+  )
+    return outcome;
+  return undefined;
+}
+
+function startTurnRandomEffectDamageType(
+  outcome: string | undefined,
+): string | undefined {
+  const match = outcome?.match(/^(net|meat|core)_damage$/);
+  return match?.[1];
 }
 
 function categoryFor(actionType: string): ChronicleCategory {

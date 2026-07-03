@@ -5518,6 +5518,79 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("shows Omnitech Spinal Tap start-turn die rolls and groups them under the Runner turn", () => {
+    const sourceDefinitionId =
+      "onr_classic_048_omnitech-spinal-tap-cybermodem";
+    const sourceTitle = 'Omnitech "Spinal Tap" Cybermodem';
+    const damageEvent = makeEvent("end_turn", {
+      actor: "corp",
+      eventId: "evt_corp_end_spinal_damage",
+      resolvedEffects: [
+        {
+          effectId: "spinal.damage",
+          kind: "damage",
+          visibility: "public",
+          side: "runner",
+          amount: 2,
+          reason: "start_of_turn",
+          sourceDefinitionId,
+          sourceTitle,
+          v1921DieRoll: 1,
+          randomEffectOutcome: "core_damage",
+          damageCannotBePrevented: true,
+          damageType: "core",
+        },
+      ],
+    });
+    const noEffectEvent = makeEvent("end_turn", {
+      actor: "corp",
+      eventId: "evt_corp_end_spinal_no_effect",
+      resolvedEffects: [
+        {
+          effectId: "spinal.no_effect",
+          kind: "counter_change",
+          visibility: "public",
+          side: "runner",
+          amount: 0,
+          reason: "start_of_turn",
+          sourceDefinitionId,
+          sourceTitle,
+          v1921DieRoll: 4,
+          randomEffectOutcome: "no_effect",
+        },
+      ],
+    });
+
+    const damageItem = formatChronicleEffectItems(damageEvent, "runner")[0];
+    const noEffectItem = formatChronicleEffectItems(noEffectEvent, "runner")[0];
+
+    expect(damageItem?.title).toBe(
+      'Omnitech "Spinal Tap" Cybermodem würfelt eine 1: Du erleidest 2 Core Damage.',
+    );
+    expect(damageItem?.description).toBe(
+      'Der Schaden von Omnitech "Spinal Tap" Cybermodem kann nicht verhindert werden.',
+    );
+    expect(damageItem?.chips).toEqual(
+      expect.arrayContaining(["Wurf 1", "Core Damage", "Nicht verhinderbar"]),
+    );
+    expect(
+      damageItem
+        ? chronicleStartTurnEffectGroupFromEvent(damageEvent, 11, damageItem)
+        : null,
+    ).toEqual({ label: "Zug 12 - Runner", kind: "runner" });
+    expect(noEffectItem?.title).toBe(
+      'Omnitech "Spinal Tap" Cybermodem würfelt eine 4: kein weiterer Effekt.',
+    );
+    expect(noEffectItem?.chips).toEqual(
+      expect.arrayContaining(["Wurf 4", "Kein Effekt"]),
+    );
+    expect(
+      noEffectItem
+        ? chronicleStartTurnEffectGroupFromEvent(noEffectEvent, 11, noEffectItem)
+        : null,
+    ).toEqual({ label: "Zug 12 - Runner", kind: "runner" });
+  });
+
   it("formats auto-rezzed region effects", () => {
     const items = formatChronicleEffectItems(
       makeEvent("install_card", {
