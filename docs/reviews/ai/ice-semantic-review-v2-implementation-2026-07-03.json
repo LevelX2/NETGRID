@@ -1,0 +1,6089 @@
+{
+  "schemaVersion": "netgrid.ai.ice-semantic-review-v2-implementation.v1",
+  "taskId": "ice-semantic-review-v2-implementation-2026-07-03",
+  "generatedAt": "2026-07-03T00:00:00+02:00",
+  "status": "implemented_in_worktree",
+  "sourceReview": "docs/reviews/ai/ice-ai-hints-critical-review-v2-input-2026-07-03.json",
+  "comparedBefore": "git show HEAD~1:data/ai/ai-card-hints-active.json",
+  "comparedAfter": "data/ai/ai-card-hints-active.json",
+  "summary": {
+    "checkedCorpIce": 114,
+    "bySet": {
+      "classic": 11,
+      "originalset-v1": 60,
+      "proteus": 35,
+      "testset": 8
+    },
+    "changedCards": 70,
+    "tacticSignalChangedCards": 37,
+    "anchorChangedCards": 15,
+    "pairChangedCards": 57,
+    "oldCardsWithTacticSignals": 106,
+    "newCardsWithTacticSignals": 114,
+    "oldCardsWithStrategyAnchor": 55,
+    "newCardsWithStrategyAnchor": 57,
+    "oldStrategySupportPairs": 0,
+    "newStrategySupportPairs": 72,
+    "newStrategyAnchorCounts": {
+      "corp.central_stabilize": 1,
+      "corp.damage_kill": 20,
+      "corp.ice_tax_glacier": 46,
+      "corp.remote_scoring": 2,
+      "corp.tag_trace_punish": 3
+    }
+  },
+  "records": [
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_005_baskerville",
+      "title": "Baskerville",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "ap",
+        "hellhound",
+        "sleepy"
+      ],
+      "rezCost": 10,
+      "strength": 4,
+      "rulesText": "*Do 2 Net damage. *Trace5 - If trace is successful, give Runner a Baskerville counter. Each counter does 2 Net damage at the start of each run. Runner may remove a Baskerville counter by taking an action to spend [3]. *End the run. If Runner has used a noisy icebreaker during this run, the cost to rez Baskerville is reduced by [5].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.rez_economy",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "tax.runner_persistent",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.rez_economy",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "damage.corp_persistent_damage_counter",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "persistent_damage_counter_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.net_damage",
+              "damage.corp_persistent_damage_counter",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Baskerville-Counter erzeugen wiederkehrenden Net-Damage am Start jedes Runs."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "ice_tax_or_lock_piece",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.end_run",
+              "corp_ice.net_damage"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: ETR plus Damage-Druck und noisy-rez discount unterstützen ICE-Tax/Glacier."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Constraint: Rez-Kostenreduktion nur nach noisy icebreaker in diesem Run; Baskerville-Counter entfernen kostet Runner eine Aktion und [3].",
+      "taxonomyFollowup": "damage.corp_persistent_damage_counter als präziser Ersatz/Ergänzung zu tax.runner_persistent prüfen.",
+      "v2Rationale": "tax.runner_persistent ist zu unscharf für einen persistenten Damage-Counter. Der Damage-Counter sollte als Damage-Signal sichtbar sein.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "targetOrConstraints",
+        "taxonomyFollowup"
+      ]
+    },
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_006_bolter-swarm",
+      "title": "Bolter Swarm",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "ap",
+        "hellbolt",
+        "sleepy"
+      ],
+      "rezCost": 8,
+      "strength": 4,
+      "rulesText": "*Do 4 Net damage. *Runner cannot break any subroutines on the next piece of ice encountered during this run. If Runner has used a noisy icebreaker during this run, the cost to rez Bolter Swarm is reduced by [5].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "corp_ice.next_ice_break_lock",
+          "corp_ice.rez_economy",
+          "corp_ice.run_lock",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "corp_ice.next_ice_break_lock",
+          "corp_ice.rez_economy",
+          "corp_ice.run_lock",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "net_damage_run_lock_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.net_damage",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Bolter Swarm bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "next_ice_break_lock_ice",
+            "evidence": [
+              "corp_ice.next_ice_break_lock",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Bolter Swarm bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Constraint: Rez-Kostenreduktion nur nach noisy icebreaker in diesem Run.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_007_brain-drain",
+      "title": "Brain Drain",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "black_ice",
+        "ap"
+      ],
+      "rezCost": 3,
+      "strength": 3,
+      "rulesText": "*Roll a die. On a 1, do 3 brain damage.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.random_or_guessing",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.random_or_guessing",
+          "damage.payoff",
+          "risk.random_outcome"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "random_brain_damage_ice",
+            "evidence": [
+              "corp_ice.brain_damage",
+              "corp_ice.damage_source",
+              "damage.payoff",
+              "risk.random_outcome"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: 3 Brain damage ist stark, aber nur auf Würfelwurf 1; random outcome senkt Confidence."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "risk.random_outcome für ICE-Random-Fälle einheitlich mit Upgrade/Asset-Reviews verwenden.",
+      "v2Rationale": "Der Damage-Anker bleibt, aber high confidence ist wegen 1/6-Würfelrisiko zu hoch. Risiko sollte explizit sichtbar sein.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "taxonomyFollowup"
+      ]
+    },
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_008_deadeye",
+      "title": "Deadeye",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "killer",
+        "sleepy"
+      ],
+      "rezCost": 5,
+      "strength": 0,
+      "rulesText": "*Trash a program. *End the run. If Runner has used a noisy icebreaker during this run, the cost to rez Deadeye is reduced by [5].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash",
+          "corp_ice.rez_economy"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash",
+          "corp_ice.rez_economy"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "lineSupport",
+        "strategicRole"
+      ],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich. Constraint: Rez-Kostenreduktion nur nach noisy icebreaker in diesem Run.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_009_dumpster",
+      "title": "Dumpster",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate",
+        "deflector"
+      ],
+      "rezCost": 5,
+      "strength": 5,
+      "rulesText": "Dumpster cannot be installed on the Archives. *Runner is now encountering the outermost piece of rezzed ice on the Archives, instead of passing Dumpster. The run is now considered to be a run on the Archives. If there is no rezzed ice on the Archives, Runner is considered to have passed the last piece of ice on the Archives.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.other_utility",
+          "run.corp_redirect"
+        ],
+        "lineSupport": [
+          "corp.central_stabilize",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "defensive_tool",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "run.corp_redirect"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_redirect_tax_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "run.corp_redirect"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Redirect zu Archives ist primär Runpath-/Tax-Kontrolle; central_stabilize wäre nur abhängig vom Installationsfort."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "TargetProfile/Constraint: Nicht auf Archives installierbar; Redirect auf Archives und dort äußeres rezzed ICE bzw. Fallback-Regel prüfen.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "corp_ice.other_utility ist redundant. Der central_stabilize-Anker ist zu situationsabhängig, weil Dumpster nicht nur auf HQ/R&D installiert werden kann.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs",
+        "targetOrConstraints"
+      ]
+    },
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_010_entrapment",
+      "title": "Entrapment",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate",
+        "deflector"
+      ],
+      "rezCost": 2,
+      "strength": 4,
+      "rulesText": "*If you pay [2], Runner is now encountering the outermost piece of rezzed ice on a data fort of your choice, instead of passing Entrapment. The run is now considered to be a run on that data fort. If there is no rezzed ice on that fort, Runner is considered to have passed the last piece of ice on that fort.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.other_utility",
+          "corp_ice.runner_pay_or_end_run",
+          "run.corp_redirect"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "defensive_tool",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "run.corp_redirect"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "tax_tool",
+          "defensive_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_redirect_tax_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "run.corp_redirect"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Redirect erzeugt zusätzliche Encounter-/Tax-Struktur; die Zahlung ist Corp-Kosten-/LegalAction-Semantik, kein Runner-pay-or-end-run."
+          },
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "defensive_tool",
+            "roleDetail": "remote_run_redirect_defense",
+            "evidence": [
+              "run.corp_redirect"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Redirect kann einen Scoring-Remote verteidigen, bleibt aber fort-/zielabhängig."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "TargetProfile: legaler Redirect-Fort und dort äußeres rezzed ICE bzw. Fallback-Regel prüfen. Constraint: Corp zahlt [2] für den Redirect; nicht Runner-pay-or-end-run.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "corp_ice.runner_pay_or_end_run ist fachlich falsch, weil die Corp [2] zahlt. corp_ice.other_utility ist redundant neben run.corp_redirect.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "targetOrConstraints"
+      ]
+    },
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_011_glacier",
+      "title": "Glacier",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 0,
+      "strength": 5,
+      "rulesText": "Rezzing Glacier cost 1 agenda point, in addition to the normal cost. *End the run. *End the run. [1]: Move Glacier to the outermost position of any other data fort. Use this ability only at the start of a run. You may use this ability even if Glacier is unrezzed, in which case, you reveal it.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.mobile_position_change",
+          "corp_ice.multi_end_run",
+          "ice.etr"
+        ],
+        "lineSupport": [
+          "corp.central_stabilize",
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "defensive_tool",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.mobile_position_change",
+          "corp_ice.multi_end_run",
+          "ice.etr"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "mobile_fort_ice",
+            "evidence": [
+              "corp_ice.mobile_position_change",
+              "corp_ice.multi_end_run",
+              "corp_ice.end_run"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Mobile Fort-ICE ist ein klarer Glacier-/Tax-Baustein; central/remote sind Einsatzorte, keine eigenständigen Strategieanker."
+          }
+        ]
+      },
+      "changedFields": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "TargetProfile/Constraint: Fort-Position und Start-of-run-Timing; Rez kostet zusätzlich 1 Agenda-Punkt.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "corp.central_stabilize und corp.remote_scoring sind für ein generisches mobiles ICE zu breit. Die Karte schützt je nach Einsatzort verschiedene Server, belegt aber primär die ICE-Tax/Glacier-Linie.",
+      "changedAgainstUploadedReport": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs",
+        "targetOrConstraints"
+      ]
+    },
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_012_imperial-guard",
+      "title": "Imperial Guard",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "killer",
+        "sleepy"
+      ],
+      "rezCost": 10,
+      "strength": 5,
+      "rulesText": "*Trash a program. *End the run. If Runner has used a noisy icebreaker during this run, the cost to rez Imperial Guard is reduced by [5].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash",
+          "corp_ice.rez_economy"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash",
+          "corp_ice.rez_economy"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "lineSupport",
+        "strategicRole"
+      ],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich. Constraint: Rez-Kostenreduktion nur nach noisy icebreaker in diesem Run.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_013_puzzle",
+      "title": "Puzzle",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rezCost": 2,
+      "strength": 5,
+      "rulesText": "*End the run, and trash Puzzle at end of turn. *End the run, and trash Puzzle at end of turn.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run",
+          "corp_ice.self_bounce_or_maintenance_drawback"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run",
+          "corp_ice.self_bounce_or_maintenance_drawback"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "lineSupport",
+        "strategicRole"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_014_trapdoor",
+      "title": "Trapdoor",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate",
+        "deflector"
+      ],
+      "rezCost": 3,
+      "strength": 3,
+      "rulesText": "Install Trapdoor only on R&D or HQ. *Runner is now encountering the outermost piece of rezzed ice on a subsidiary data fort of your choice, instead of passing Trapdoor. The run is now considered to be a run on that data fort. If there is no rezzed ice on that fort, Runner is considered to have passed the last piece of ice on that fort. Runner automatically breaks this subroutine if there are no subsidiary data forts.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.other_utility",
+          "run.corp_redirect"
+        ],
+        "lineSupport": [
+          "corp.central_stabilize",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "defensive_tool",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "run.corp_redirect"
+        ],
+        "lineSupport": [
+          "corp.central_stabilize",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "defensive_tool",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.central_stabilize",
+            "role": "defensive_tool",
+            "roleDetail": "central_run_redirect_defense",
+            "evidence": [
+              "run.corp_redirect"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Trapdoor ist nur auf HQ/R&D installierbar und schützt damit tatsächlich zentrale Server."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_redirect_tax_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "run.corp_redirect"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Redirect erzeugt zusätzliche Encounter-/Tax-Struktur."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "TargetProfile/Constraint: Nur auf R&D oder HQ installierbar; legaler subsidiary Redirect-Fort und dort äußeres rezzed ICE bzw. Fallback-Regel prüfen.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "corp_ice.other_utility ist redundant; die zentral-spezifische Verteidigungsrolle bleibt wegen Installationsconstraint auf HQ/R&D korrekt.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "targetOrConstraints"
+      ]
+    },
+    {
+      "setId": "classic",
+      "cardId": "onr_classic_015_vortex",
+      "title": "Vortex",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate",
+        "deflector"
+      ],
+      "rezCost": 0,
+      "strength": 2,
+      "rulesText": "*If you pay [2], Runner is now encountering the outermost piece of rezzed ice on a data fort of your choice, instead of passing Vortex. The run is now considered to be a run on that data fort. If there is no rezzed ice on that fort, Runner is considered to have passed the last piece of ice on that fort.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.other_utility",
+          "corp_ice.runner_pay_or_end_run",
+          "run.corp_redirect"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "defensive_tool",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "run.corp_redirect"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "strategicRole": [
+          "tax_tool",
+          "defensive_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_redirect_tax_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "run.corp_redirect"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Redirect erzeugt zusätzliche Encounter-/Tax-Struktur; die Zahlung ist Corp-Kosten-/LegalAction-Semantik, kein Runner-pay-or-end-run."
+          },
+          {
+            "strategyId": "corp.remote_scoring",
+            "role": "defensive_tool",
+            "roleDetail": "remote_run_redirect_defense",
+            "evidence": [
+              "run.corp_redirect"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Redirect kann einen Scoring-Remote verteidigen, bleibt aber fort-/zielabhängig."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "TargetProfile: legaler Redirect-Fort und dort äußeres rezzed ICE bzw. Fallback-Regel prüfen. Constraint: Corp zahlt [2] für den Redirect; nicht Runner-pay-or-end-run.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "corp_ice.runner_pay_or_end_run ist fachlich falsch, weil die Corp [2] zahlt. corp_ice.other_utility ist redundant neben run.corp_redirect.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "targetOrConstraints"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_221_asp",
+      "title": "Asp",
+      "cardType": "ice",
+      "subtypes": [
+        "flatline",
+        "sentry"
+      ],
+      "rezCost": 4,
+      "strength": 4,
+      "rulesText": "*Trace 5-If trace is successful, end the run, and Runner cannot run again until Runner takes an action to pay [1].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_lock_ice",
+            "evidence": [
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Asp bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_222_ball-and-chain",
+      "title": "Ball and Chain",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 2,
+      "strength": 5,
+      "rulesText": "[Subroutine] For the remainder of the run, Runner must pay 2 when encountering a piece of ice, in addition to any other costs, or end the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.end_run",
+          "corp_ice.jackout_tax",
+          "corp_ice.multi_end_run"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.runner_pay_or_end_run",
+          "corp_ice.run_lock"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "encounter_pay_or_end_run_tax_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "corp_ice.runner_pay_or_end_run",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Runner zahlt bei weiteren ICE-Encountern oder der Run endet; das ist kein Jackout-Tax."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "jackout_tax ist falsch; die Karte besteuert Encounters. multi_end_run/end_run sind weniger präzise als runner_pay_or_end_run + run_lock.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_223_banpei",
+      "title": "Banpei",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "rezCost": 4,
+      "strength": 0,
+      "rulesText": "[Subroutine] Trash a program. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_224_bolter-cluster",
+      "title": "Bolter Cluster",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "hellbolt",
+        "sentry"
+      ],
+      "rezCost": 7,
+      "strength": 4,
+      "rulesText": "[Subroutine] Do 4 net damage. [Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.encounter_tax",
+          "corp_ice.net_damage",
+          "corp_ice.run_lock",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "corp_ice.next_ice_break_lock",
+          "corp_ice.run_lock",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "net_damage_run_lock_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.net_damage",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "v2: 4 Net damage plus Next-ICE-Lock ist ein starker Damage-Payoff."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "next_ice_break_lock_ice",
+            "evidence": [
+              "corp_ice.next_ice_break_lock",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Präzises Signal statt generischem encounter_tax."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "Für dieselbe Funktion wie Bolter Swarm sollte dasselbe präzise next_ice_break_lock-Signal verwendet werden; encounter_tax ist hier zu unscharf.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_225_canis-major",
+      "title": "Canis Major",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "watchdog"
+      ],
+      "rezCost": 0,
+      "strength": 4,
+      "rulesText": "[Subroutine] For the remainder of the run, all further ice is encountered at +2 strength.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "ice.strength_modifier"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.future_strength_buff"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "future_strength_buff_tax_ice",
+            "evidence": [
+              "corp_ice.future_strength_buff"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Die Karte erhöht die Stärke weiterer ICE im laufenden Run; das ist präziser als encounter_tax/ice.strength_modifier."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "future_strength_buff ist die präzisere Funktionssprache. encounter_tax und generisches ice.strength_modifier sollten hier nicht die eigentliche Wirkung ersetzen.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_226_canis-minor",
+      "title": "Canis Minor",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "watchdog"
+      ],
+      "rezCost": 0,
+      "strength": 5,
+      "rulesText": "[Subroutine] For the remainder of the run, all further ice is encountered at +1 strength.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "ice.strength_modifier"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.future_strength_buff"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "future_strength_buff_tax_ice",
+            "evidence": [
+              "corp_ice.future_strength_buff"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Die Karte erhöht die Stärke weiterer ICE im laufenden Run; das ist präziser als encounter_tax/ice.strength_modifier."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "future_strength_buff ist die präzisere Funktionssprache. encounter_tax und generisches ice.strength_modifier sollten hier nicht die eigentliche Wirkung ersetzen.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_227_cerberus",
+      "title": "Cerberus",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "hellhound",
+        "sentry"
+      ],
+      "rezCost": 11,
+      "strength": 5,
+      "rulesText": "[Subroutine] Do 3 Net damage. [Subroutine] Trace 5 - If trace is successful, give Runner a Cerberus counter. Each Cerberus counter does 2 Net damage at the start of each run. Runner may remove a Cerberus counter by taking an action to spend [4]. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "damage.corp_persistent_damage_counter",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "persistent_damage_counter_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.net_damage",
+              "damage.corp_persistent_damage_counter",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Cerberus-Counter erzeugen wiederkehrenden Net-Damage am Start jedes Runs."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Constraint: Cerberus-Counter entfernen kostet Runner eine Aktion und [4].",
+      "taxonomyFollowup": "damage.corp_persistent_damage_counter als präziser gemeinsamer Signaltyp für Baskerville/Cerberus/Mastiff prüfen.",
+      "v2Rationale": "Der persistente Damage-Counter ist für die KI wichtiger als nur generisches damage.payoff/trace.source.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "targetOrConstraints",
+        "taxonomyFollowup"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_228_cinderella",
+      "title": "Cinderella",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "firestarter",
+        "sentry"
+      ],
+      "rezCost": 8,
+      "strength": 6,
+      "rulesText": "[Subroutine] Trace 6 - If trace is successful, end the run, trash a piece of hardware, and do 2 meat damage. This damage cannot be prevented.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.hardware_trash",
+          "corp_ice.meat_damage",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.conditional_end_run",
+          "corp_ice.hardware_trash",
+          "corp_ice.meat_damage",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "meat_damage_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.meat_damage",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Trace-success Meat damage bleibt Damage-Kill-Payoff."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "trace_success_hardware_trash_etr_ice",
+            "evidence": [
+              "corp_ice.conditional_end_run",
+              "corp_ice.hardware_trash",
+              "corp_ice.trace_source"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: ETR/Hardware-Trash hängen am Trace-Erfolg; conditional_end_run ist präziser als end_run."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Hardware-Ziel erforderlich. Constraint: ETR, Hardware-Trash und Meat damage nur bei Trace-Erfolg.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "Der End-the-run-Effekt ist an erfolgreichen Trace gekoppelt. conditional_end_run ist präziser als ein generisches end_run-Signal.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "targetOrConstraints"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_229_code-corpse",
+      "title": "Code Corpse",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "ice",
+        "sentry",
+        "zombie"
+      ],
+      "rezCost": 10,
+      "strength": 5,
+      "rulesText": "[Subroutine] Do 1 core damage. [Subroutine] Do 1 core damage. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "brain_damage_ice",
+            "evidence": [
+              "corp_ice.brain_damage",
+              "corp_ice.damage_source",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Code Corpse bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_230_cortical-scanner",
+      "title": "Cortical Scanner",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 7,
+      "strength": 3,
+      "rulesText": "[Subroutine] End the run. [Subroutine] End the run. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "brainwipe",
+        "sentry"
+      ],
+      "rezCost": 7,
+      "strength": 3,
+      "rulesText": "[Subroutine] Do 1 core damage. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.program_trash",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "brain_damage_ice",
+            "evidence": [
+              "corp_ice.brain_damage",
+              "corp_ice.damage_source",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Kartentext enthält Brain/Core damage und ETR, aber keinen Program-Trash; Damage-Kill bleibt, ICE-Tax aus Program-Trash entfällt."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "Program-Trash ist im Kartentext nicht vorhanden. Der daraus abgeleitete corp.ice_tax_glacier-Pair war fachlich falsch; es bleibt ein Brain-Damage-ICE für corp.damage_kill.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs",
+        "targetOrConstraints"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_232_crystal-wall",
+      "title": "Crystal Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 4,
+      "strength": 3,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_233_d-arc-knight",
+      "title": "D'Arc Knight",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "rezCost": 6,
+      "strength": 2,
+      "rulesText": "[Subroutine] Trash a program. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_234_data-darts",
+      "title": "Data Darts",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "hellbolt",
+        "sentry"
+      ],
+      "rezCost": 5,
+      "strength": 3,
+      "rulesText": "[Subroutine] Do 3 net damage. [Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "corp_ice.next_ice_break_lock",
+          "corp_ice.run_lock",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "net_damage_run_lock_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.net_damage",
+              "damage.payoff"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: 3 Net damage ist ein echter Damage-Payoff, wenn auch etwas schwächer als Bolter Cluster/Bolter Swarm."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "next_ice_break_lock_ice",
+            "evidence": [
+              "corp_ice.next_ice_break_lock",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Die nächste ICE kann nicht gebrochen werden; das ist ein klarer Tax-/Lock-Baustein."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "Der zweite Subroutine-Effekt fehlte vollständig. Data Darts ist funktional die kleinere Bolter-Variante und sollte next_ice_break_lock/run_lock sowie passende StrategySupportPairs erhalten.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_235_data-naga",
+      "title": "Data Naga",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "rezCost": 9,
+      "strength": 5,
+      "rulesText": "[Subroutine] Trash a program. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_236_data-raven",
+      "title": "Data Raven",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 5,
+      "strength": 5,
+      "rulesText": "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and a Data Raven counter. Each Data Raven counter gives Runner a tag at the start of each Runner turn. Runner may remove a Data Raven counter by taking an action to pay 1.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.persistent_tag_source",
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.persistent_tag_source",
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "engine_anchor",
+            "roleDetail": "persistent_tag_engine_ice",
+            "evidence": [
+              "corp_ice.persistent_tag_source",
+              "corp_ice.tag_source",
+              "corp_ice.trace_source",
+              "tag.source",
+              "trace.source"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Data Raven bestätigt corp.tag_trace_punish nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_237_data-wall",
+      "title": "Data Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 1,
+      "strength": 0,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_238_data-wall-2-0",
+      "title": "Data Wall 2.0",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 2,
+      "strength": 1,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_239_endless-corridor",
+      "title": "Endless Corridor",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 4,
+      "strength": 2,
+      "rulesText": "[Subroutine] End the run. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_240_fang",
+      "title": "Fang",
+      "cardType": "ice",
+      "subtypes": [
+        "pit bull",
+        "sentry"
+      ],
+      "rezCost": 5,
+      "strength": 4,
+      "rulesText": "[Subroutine] Trace 4 - If trace is successful, end the run, and Runner cannot run again until Runner takes an action to pay [2].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.end_run",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_lock_ice",
+            "evidence": [
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Trace-success ETR plus Run-Lock; no unconditional end_run signal."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "Fang sollte wie Asp/Fang 2.0/Rex über conditional_end_run modelliert werden, nicht zusätzlich als generisches end_run.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_241_fang-2-0",
+      "title": "Fang 2.0",
+      "cardType": "ice",
+      "subtypes": [
+        "pit bull",
+        "sentry"
+      ],
+      "rezCost": 6,
+      "strength": 5,
+      "rulesText": "[Subroutine] Trace 5 - If trace is successful, end the run, and Runner cannot run again until Runner takes an action to pay [2].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_lock_ice",
+            "evidence": [
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Fang 2.0 bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_242_fatal-attractor",
+      "title": "Fatal Attractor",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "sentry"
+      ],
+      "rezCost": 1,
+      "strength": 4,
+      "rulesText": "[Subroutine] The next time Runner encounters a piece of ice during the run, do 3 Net damage unless Runner breaks all subroutines of that piece of ice.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "net_damage_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.net_damage",
+              "damage.payoff"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Fatal Attractor bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_243_fetch-4-0-1",
+      "title": "Fetch 4.0.1",
+      "cardType": "ice",
+      "subtypes": [
+        "bloodhound",
+        "sentry"
+      ],
+      "rezCost": 0,
+      "strength": 3,
+      "rulesText": "[Subroutine] Trace 3 - If trace is successful, give Runner a tag.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_244_filter",
+      "title": "Filter",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 0,
+      "strength": 0,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_245_fire-wall",
+      "title": "Fire Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 5,
+      "strength": 4,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_246_fragmentation-storm",
+      "title": "Fragmentation Storm",
+      "cardType": "ice",
+      "subtypes": [
+        "flatline",
+        "sentry"
+      ],
+      "rezCost": 6,
+      "strength": 4,
+      "rulesText": "[Subroutine] Trace 4 - If trace is successful, end the run and trash a program, and Runner cannot run again until Runner takes an action to pay [1].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.program_trash",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.program_trash",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_lock_ice",
+            "evidence": [
+              "corp_ice.program_trash",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Fragmentation Storm bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_247_haunting-inquisition",
+      "title": "Haunting Inquisition",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 8,
+      "strength": 6,
+      "rulesText": "[Subroutine] Runner cannot make another run during his or her next six actions. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.run_lock"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.run_lock",
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_lock_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Haunting Inquisition bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_248_homewrecker",
+      "title": "Homewrecker™",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "firestarter",
+        "sentry"
+      ],
+      "rezCost": 7,
+      "strength": 5,
+      "rulesText": "[Subroutine] Trace 5 - If trace is successful, end the run, trash a piece of hardware, and do 2 meat damage. This damage cannot be prevented.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.hardware_trash",
+          "corp_ice.meat_damage",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.conditional_end_run",
+          "corp_ice.hardware_trash",
+          "corp_ice.meat_damage",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "meat_damage_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.meat_damage",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Trace-success Meat damage bleibt Damage-Kill-Payoff."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "trace_success_hardware_trash_etr_ice",
+            "evidence": [
+              "corp_ice.conditional_end_run",
+              "corp_ice.hardware_trash",
+              "corp_ice.trace_source"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: ETR/Hardware-Trash hängen am Trace-Erfolg; conditional_end_run ist präziser als end_run."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Hardware-Ziel erforderlich. Constraint: ETR, Hardware-Trash und Meat damage nur bei Trace-Erfolg.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "Der End-the-run-Effekt ist an erfolgreichen Trace gekoppelt. conditional_end_run ist präziser als ein generisches end_run-Signal.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "targetOrConstraints"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_249_hunter",
+      "title": "Hunter",
+      "cardType": "ice",
+      "subtypes": [
+        "bloodhound",
+        "sentry"
+      ],
+      "rezCost": 2,
+      "strength": 5,
+      "rulesText": "[Subroutine] Trace 5 - If trace is successful, give Runner a tag.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_250_ice-pick-willie",
+      "title": "Ice Pick Willie",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "rezCost": 5,
+      "strength": 1,
+      "rulesText": "[Subroutine] Trash a program. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_251_jack-attack",
+      "title": "Jack Attack",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "sentry"
+      ],
+      "rezCost": 3,
+      "strength": 3,
+      "rulesText": "[Subroutine] For the remainder of the run, Runner cannot jack out. [Subroutine] Trace 5 - If trace is successful, give Runner a tag.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.jackout_lock",
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.jackout_lock",
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "jackout_tax_or_lock_ice",
+            "evidence": [
+              "corp_ice.jackout_lock"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Jack Attack bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_252_keeper",
+      "title": "Keeper",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 4,
+      "strength": 4,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_253_laser-wire",
+      "title": "Laser Wire",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 4,
+      "strength": 2,
+      "rulesText": "[Subroutine] Do 1 net damage. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_254_liche",
+      "title": "Liche",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "sentry"
+      ],
+      "rezCost": 14,
+      "strength": 6,
+      "rulesText": "[Subroutine] Do 1 core damage. [Subroutine] Do 1 core damage. [Subroutine] Do 1 core damage. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "brain_damage_ice",
+            "evidence": [
+              "corp_ice.brain_damage",
+              "corp_ice.damage_source",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Liche bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_255_mastiff",
+      "title": "Mastiff",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "hellhound",
+        "sentry",
+        "watchdog"
+      ],
+      "rezCost": 12,
+      "strength": 5,
+      "rulesText": "*Do 1 brain damage. *Do 1 Net damage. *For the remainder of the run, all ice is encountered at +1 strength. *-If trace is successful, give Runner a Mastiff counter. Each Mastiff counter does 1 brain damage at the start of each run. Runner may remove a Mastiff counter by taking an action to spend [4]. *End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "trace.source",
+          "corp_ice.net_damage",
+          "corp_ice.future_strength_buff",
+          "damage.corp_persistent_damage_counter"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "persistent_brain_damage_counter_ice",
+            "evidence": [
+              "corp_ice.brain_damage",
+              "corp_ice.damage_source",
+              "corp_ice.net_damage",
+              "damage.corp_persistent_damage_counter",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Brain+Net damage plus persistenter Brain-Damage-Counter ist ein starker Damage-Payoff."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "future_strength_buff_tax_ice",
+            "evidence": [
+              "corp_ice.future_strength_buff",
+              "corp_ice.end_run"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Die Karte stärkt alle weiteren ICE im Run und ist damit auch Glacier-/Tax-Support."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "Lokale Spoilerquelle lässt die Trace-Zahl aus; externe Kartendatenbank weist auf Trace5 hin. Signal damage.corp_persistent_damage_counter sollte auch für Baskerville/Cerberus geprüft werden.",
+      "v2Rationale": "Neben Damage-Kill unterstützt Mastiff über future_strength_buff dieselbe ICE-Tax-Linie wie Canis/Coyote. Der persistente Damage-Counter sollte präziser sichtbar sein.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs",
+        "taxonomyFollowup"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_256_mazer",
+      "title": "Mazer",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 5,
+      "strength": 5,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_257_nerve-labyrinth",
+      "title": "Nerve Labyrinth",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 6,
+      "strength": 4,
+      "rulesText": "[Subroutine] Do 2 net damage. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_258_neural-blade",
+      "title": "Neural Blade",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "sentry",
+        "sword"
+      ],
+      "rezCost": 4,
+      "strength": 4,
+      "rulesText": "[Subroutine] Do 1 net damage. [Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "corp_ice.next_ice_break_lock",
+          "corp_ice.run_lock",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "next_ice_break_lock_ice",
+            "evidence": [
+              "corp_ice.next_ice_break_lock",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Auch mit nur 1 Net damage ist die Break-Lock-Funktion für die nächste ICE ein starker Tax-/Lock-Baustein."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "Der Break-Lock-Effekt auf die nächste ICE fehlte. Wegen nur 1 Net damage kein eigener Damage-Kill-Anker, aber klarer corp.ice_tax_glacier-Tax-Tool.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_259_in-the-face",
+      "title": "Pi in the 'Face",
+      "cardType": "ice",
+      "subtypes": [
+        "deckrash",
+        "sentry"
+      ],
+      "rezCost": 5,
+      "strength": 3,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_260_pocket-virtual-reality",
+      "title": "Pocket Virtual Reality",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 7,
+      "strength": 4,
+      "rulesText": "[Subroutine] Trace 6 - If trace is successful, give Runner a tag. [Subroutine] Trace 6 - If trace is successful, give Runner a tag. Whenever Pocket Virtual Reality is encountered, gain [4]. Use these bits only to pay for the above traces. When the encounter ends, return to the bank any of the [4] you did not spend.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.tag_source",
+          "corp_ice.trace_source",
+          "tag.source",
+          "trace.source",
+          "trace.corp_credit_support"
+        ],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "encounter_trace_tag_credit_ice",
+            "evidence": [
+              "corp_ice.tag_source",
+              "corp_ice.trace_source",
+              "tag.source",
+              "trace.source",
+              "trace.corp_credit_support"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Zwei Trace-6-Tag-Subroutinen mit encounter-lokalem Trace-Credit-Pool sind ein klarer Tag/Trace-Enabler."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Constraint: [4] Encounter-Credits nur für die beiden Trace-Subroutinen und nur bis Encounter-Ende.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "Der Trace-Credit-Pool fehlt im Report. Durch zwei Trace-6-Tag-Subroutinen plus zweckgebundene Credits ist die Karte stärker als einfache Fetch/Hunter-Tag-ICE und sollte corp.tag_trace_punish als Enabler tragen.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs",
+        "targetOrConstraints"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_261_quandary",
+      "title": "Quandary",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 2,
+      "strength": 2,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_262_razor-wire",
+      "title": "Razor Wire",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 6,
+      "strength": 3,
+      "rulesText": "[Subroutine] Do 2 net damage. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_263_reinforced-wall",
+      "title": "Reinforced Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 8,
+      "strength": 4,
+      "rulesText": "[Subroutine] End the run. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_264_rex",
+      "title": "Rex",
+      "cardType": "ice",
+      "subtypes": [
+        "pit bull",
+        "sentry"
+      ],
+      "rezCost": 4,
+      "strength": 3,
+      "rulesText": "[Subroutine] Trace 3 - If trace is successful, end the run, and Runner cannot run again until Runner takes an action to pay [2].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_lock_ice",
+            "evidence": [
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Rex bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_265_rock-is-strong",
+      "title": "Rock Is Strong",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 6,
+      "strength": 5,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_266_scramble",
+      "title": "Scramble",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 3,
+      "strength": 3,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_267_sentinels-prime",
+      "title": "Sentinels Prime",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "rezCost": 8,
+      "strength": 4,
+      "rulesText": "[Subroutine] Trash a program. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_268_shock-r",
+      "title": "Shock.r",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "sentry",
+        "stun"
+      ],
+      "rezCost": 1,
+      "strength": 3,
+      "rulesText": "[Subroutine] Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.jackout_lock",
+          "corp_ice.next_ice_break_lock"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.jackout_lock",
+          "corp_ice.next_ice_break_lock"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "next_ice_break_lock_ice",
+            "evidence": [
+              "corp_ice.jackout_lock",
+              "corp_ice.next_ice_break_lock"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Shock.r bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_269_shotgun-wire",
+      "title": "Shotgun Wire",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 8,
+      "strength": 5,
+      "rulesText": "[Subroutine] Do 2 net damage. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_270_sleeper",
+      "title": "Sleeper",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 1,
+      "strength": 1,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_271_tko-2-0",
+      "title": "TKO 2.0",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "knockout",
+        "sentry"
+      ],
+      "rezCost": 7,
+      "strength": 4,
+      "rulesText": "[Subroutine] End the run, and Runner forgoes his or her next action.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.runner_action_loss"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.runner_action_loss"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "ice_tax_or_lock_piece",
+            "evidence": [
+              "corp_ice.end_run",
+              "corp_ice.runner_action_loss"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: TKO 2.0 bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_272_too-many-doors",
+      "title": "Too Many Doors",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 1,
+      "strength": 3,
+      "rulesText": "[Subroutine] Secretly spend [0], [1], or [2]; Runner does the same. Then you and Runner reveal how much each of you spent. End the run unless you spent as many bits as Runner spent.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.random_or_guessing"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.random_or_guessing"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_273_triggerman",
+      "title": "Triggerman",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "rezCost": 7,
+      "strength": 3,
+      "rulesText": "[Subroutine] Trash a program. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "rezCost": 4,
+      "strength": 5,
+      "rulesText": "[Subroutine] For the remainder of the run, all ice encountered has an additional subroutine, \"[Subroutine] End the run,\" after all other subroutines.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.end_run",
+          "corp_ice.jackout_tax",
+          "corp_ice.run_lock"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.end_run",
+          "corp_ice.run_lock"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "future_etr_subroutine_tax_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "corp_ice.end_run",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Tutor fügt künftigen ICE ETR-Subroutinen hinzu; das ist kein Jackout-Tax."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "Optional: präzises Signal corp_ice.future_end_run_subroutine oder ice.corp_subroutine_support prüfen, falls die ICE-/Asset-Taxonomie vereinheitlicht werden soll.",
+      "v2Rationale": "jackout_tax ist falsch; Tutor besteuert nicht das Jackout, sondern fügt für den Rest des Runs zusätzliche ETR-Subroutinen an spätere ICE an.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs",
+        "taxonomyFollowup"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_275_vacuum-link",
+      "title": "Vacuum Link",
+      "cardType": "ice",
+      "subtypes": [
+        "random",
+        "sentry"
+      ],
+      "rezCost": 3,
+      "strength": 5,
+      "rulesText": "[Subroutine] Roll a die. If you roll a 1, 2, or 3, Runner resumes the run from that many pieces of rezzed ice back, or jacks out. If there are not that many pieces of ice, Runner returns to the first piece of ice.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.random_or_guessing"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.random_or_guessing",
+          "corp_ice.encounter_tax",
+          "run.corp_run_rewind",
+          "risk.random_outcome"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "random_run_rewind_tax_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "run.corp_run_rewind",
+              "risk.random_outcome"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Run-Rewind kann bereits passierte ICE erneut erzwingen oder Jackout provozieren; random outcome begrenzt die Verlässlichkeit."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "Neues/zu prüfendes Signal: run.corp_run_rewind für same-server Rückversetzen im Run; nicht mit cross-fort run.corp_redirect vermischen.",
+      "v2Rationale": "Nur random_or_guessing unterschlägt die eigentliche Funktion. Vacuum Link kontrolliert den Runpath, indem der Runner zu früherem rezzed ICE zurückgesetzt wird oder jackt out.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs",
+        "taxonomyFollowup"
+      ]
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 5,
+      "strength": 3,
+      "rulesText": "[Subroutine] For the remainder of the run, Runner must pay [1] to jack out, in addition to any other costs. [Subroutine] For the remainder of the run, Runner trashes an installed program after passing each piece of rezzed ice, including Viral 15, unless Runner jacks out.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.jackout_tax",
+          "corp_ice.program_trash",
+          "corp_ice.run_lock"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.jackout_tax",
+          "corp_ice.program_trash",
+          "corp_ice.run_lock"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_lock_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "corp_ice.jackout_tax",
+              "corp_ice.program_trash",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Viral 15 bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 2,
+      "strength": 4,
+      "rulesText": "[Subroutine] For the remainder of the run, Runner must pay an additional [1] to break each ice subroutine.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.break_cost_tax",
+          "corp_ice.encounter_tax",
+          "corp_ice.run_lock"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.break_cost_tax",
+          "corp_ice.encounter_tax",
+          "corp_ice.run_lock"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_lock_ice",
+            "evidence": [
+              "corp_ice.break_cost_tax",
+              "corp_ice.encounter_tax",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Virizz bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_278_wall-of-ice",
+      "title": "Wall of Ice",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 13,
+      "strength": 6,
+      "rulesText": "[Subroutine] Do 2 net damage. [Subroutine] Do 2 net damage. [Subroutine] End the run. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "net_damage_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.net_damage",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Wall of Ice bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "multi_end_run_tax_ice",
+            "evidence": [
+              "corp_ice.multi_end_run"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Wall of Ice bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_279_wall-of-static",
+      "title": "Wall of Static",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 3,
+      "strength": 2,
+      "rulesText": "[Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "originalset-v1",
+      "cardId": "onr_v1_280_zombie",
+      "title": "Zombie",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "sentry",
+        "zombie"
+      ],
+      "rezCost": 9,
+      "strength": 4,
+      "rulesText": "[Subroutine] Do 1 brain damage. [Subroutine] Do 1 brain damage. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "brain_damage_ice",
+            "evidence": [
+              "corp_ice.brain_damage",
+              "corp_ice.damage_source",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Zombie bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_011_brain-wash",
+      "title": "Brain Wash",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black_ice",
+        "brainwipe",
+        "sentry"
+      ],
+      "rezCost": 3,
+      "strength": 2,
+      "rulesText": "*Do 1 brain damage.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "brain_damage_ice",
+            "evidence": [
+              "corp_ice.brain_damage",
+              "corp_ice.damage_source",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Brain Wash bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_012_bug-zapper",
+      "title": "Bug Zapper",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "hellbolt",
+        "sentry"
+      ],
+      "rezCost": 6,
+      "strength": 2,
+      "rulesText": "*Do 2 Net damage for each rezzed piece of ice installed outside Bug Zapper. *End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling",
+          "damage.payoff",
+          "ice.strength_modifier"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "payoff_anchor"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "position_scaling_net_damage_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.net_damage",
+              "corp_ice.outer_ice_scaling",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Net damage skaliert mit äußerem rezzed ICE; das ist ein echter Damage-Payoff."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "payoff_anchor",
+            "roleDetail": "deep_server_damage_payoff_ice",
+            "evidence": [
+              "corp_ice.outer_ice_scaling",
+              "corp_ice.position_scaling",
+              "corp_ice.net_damage"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Die Karte belohnt tiefe/rezzed ICE-Server, aber nicht über Strength; Glacier-Bezug über Position-Scaling, nicht ice.strength_modifier."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "ice.strength_modifier ist falsch, weil Bug Zapper keine Stärke verändert. Dafür ist der skalierende Net-Damage-Payoff stark genug für corp.damage_kill und als deep-server payoff für corp.ice_tax_glacier.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_013_caryatid",
+      "title": "Caryatid",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 7,
+      "strength": 5,
+      "rulesText": "*End the run. When you rez Caryatid, you may pay [1], above the rez cost, to make it a code gate instead of a wall.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_014_chihuahua",
+      "title": "Chihuahua",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "hellhound",
+        "sentry"
+      ],
+      "rezCost": 0,
+      "strength": 0,
+      "rulesText": "*Trace 1-If trace is successful, do 1 Net damage. Gain [2] when you rez Chihuahua.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "corp_ice.rez_economy",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "trace.source"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.net_damage",
+          "corp_ice.rez_economy",
+          "corp_ice.trace_source",
+          "damage.payoff",
+          "trace.source"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_015_colonel-failure",
+      "title": "Colonel Failure",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "rezCost": 17,
+      "strength": 6,
+      "rulesText": "*Trash a program. *Trash a program. *Trash a program. *End the run. *End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run",
+          "corp_ice.program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run",
+          "corp_ice.program_trash",
+          "corp_ice.multi_program_trash"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "multi_program_trash_tax_ice",
+            "evidence": [
+              "corp_ice.multi_program_trash",
+              "corp_ice.program_trash",
+              "corp_ice.multi_end_run"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Drei Program-Trash- und zwei ETR-Subroutinen erfüllen ausdrücklich die Guide-Schwelle für anchorfähigen Program-Trash."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "Neues/zu prüfendes Signal: corp_ice.multi_program_trash für mehrfachen Program-Trash als harte Rig-Tax-Schwelle.",
+      "v2Rationale": "Der Guide nennt mehrfachen Program-Trash ausdrücklich als anchorfähigen Sonderfall. Colonel Failure ist daher nicht nur support-only.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs",
+        "taxonomyFollowup"
+      ]
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_016_coyote",
+      "title": "Coyote",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "watchdog"
+      ],
+      "rezCost": 0,
+      "strength": 3,
+      "rulesText": "*For the remainder of the run, all further ice is encountered at +1 strength, unless Runner pays [2] while passing Coyote. Gain [3] when you rez Coyote.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.future_strength_buff",
+          "corp_ice.rez_economy"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.future_strength_buff",
+          "corp_ice.rez_economy"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "future_strength_tax_ice",
+            "evidence": [
+              "corp_ice.future_strength_buff"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Coyote bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_017_credit-blocks",
+      "title": "Credit Blocks",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 6,
+      "strength": 3,
+      "rulesText": "*End the run. When you rez Credit Blocks, you may pay [1], above the rez cost, to make it a wall instead of a sentry.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.rez_economy",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "tacticSignals"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "Optional: Wenn Mehrkosten beim Rezzen explizit modelliert werden sollen, eigenes Risiko/Cost-Signal wie risk.additional_rez_cost statt corp_ice.rez_economy verwenden.",
+      "v2Rationale": "Die Karte gibt keine Credits und reduziert keine Kosten; sie kann beim Rezzen gegen Mehrkosten den ICE-Typ ändern. corp_ice.rez_economy ist deshalb falsch.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "taxonomyFollowup"
+      ]
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_018_datacomb",
+      "title": "Datacomb",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 4,
+      "strength": 4,
+      "rulesText": "*End the run. If Runner passes Datacomb, pay [1], or uninstall it and store it in HQ.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.self_bounce_or_maintenance_drawback"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.self_bounce_or_maintenance_drawback"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "title": "Death Yo-Yo",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black_ice",
+        "brainwipe",
+        "sentry"
+      ],
+      "rezCost": 7,
+      "strength": 2,
+      "rulesText": "*Do 1 brain damage. *End the run. If Runner passes Death Yo-Yo, you may choose to uninstall it, store it in HQ, and gain [1].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.optional_self_bounce_gain",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.brain_damage",
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.optional_self_bounce_gain",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "brain_damage_ice",
+            "evidence": [
+              "corp_ice.brain_damage",
+              "corp_ice.damage_source",
+              "damage.payoff"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Death Yo-Yo bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_020_digiconda",
+      "title": "Digiconda",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "sentry",
+        "sword"
+      ],
+      "rezCost": 6,
+      "strength": null,
+      "rulesText": "*Do 2 Net damage. *End the run. Pay [X], above the rez cost, when you rez Digiconda. X is Digiconda 's strength, and X cannot be greater than 6.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.rez_paid_scaling",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.rez_paid_scaling",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "rez_paid_scaling_ice",
+            "evidence": [
+              "corp_ice.rez_paid_scaling"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Digiconda bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_021_dog-pile",
+      "title": "Dog Pile",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "sentry"
+      ],
+      "rezCost": 5,
+      "strength": 0,
+      "rulesText": "*Do 1 Net damage for each rezzed piece of ice installed outside Dog Pile. *End the run. Dog Pile has +1 strength for each rezzed piece of ice installed outside it.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling",
+          "damage.payoff",
+          "ice.strength_modifier"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling",
+          "damage.payoff",
+          "ice.strength_modifier"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "position_scaling_net_damage_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "corp_ice.net_damage",
+              "corp_ice.outer_ice_scaling",
+              "damage.payoff"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Net damage skaliert mit äußerem rezzed ICE; Damage-Kill-Payoff ist vorhanden, aber niedriger als Bug Zapper."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "position_scaling_strength_tax_ice",
+            "evidence": [
+              "corp_ice.outer_ice_scaling",
+              "corp_ice.position_scaling",
+              "ice.strength_modifier"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Zusätzlich zum skalierenden Schaden skaliert die Stärke mit äußerem rezzed ICE."
+          }
+        ]
+      },
+      "changedFields": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "Dog Pile hat nicht nur Strength-Scaling, sondern auch skalierenden Net-Damage. Der Damage-Kill-Bezug sollte sichtbar sein.",
+      "changedAgainstUploadedReport": [
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_022_food-fight",
+      "title": "Food Fight",
+      "cardType": "ice",
+      "subtypes": [
+        "deckrash",
+        "sentry"
+      ],
+      "rezCost": 4,
+      "strength": 3,
+      "rulesText": "Food Fight has one \"*End the run\" subroutine for every [2] you pay, above the rez cost, when you rez it.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.rez_paid_scaling"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.rez_paid_scaling"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "rez_paid_scaling_ice",
+            "evidence": [
+              "corp_ice.rez_paid_scaling"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Food Fight bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_023_galatea",
+      "title": "Galatea",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 6,
+      "strength": 4,
+      "rulesText": "*End the run. When you rez Galatea, you may pay [1], above the rez cost, to make it a code gate instead of a wall.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_024_gatekeeper",
+      "title": "Gatekeeper",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rezCost": 3,
+      "strength": 4,
+      "rulesText": "Gatekeeper has one \"*End the run\" subroutine for every [2] you pay, above the rez cost, when you rez it.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.rez_paid_scaling"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.rez_paid_scaling"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "rez_paid_scaling_ice",
+            "evidence": [
+              "corp_ice.rez_paid_scaling"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Gatekeeper bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_025_homing-missile",
+      "title": "Homing Missile",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 4,
+      "strength": null,
+      "rulesText": "*Trace x-If trace is successful, end the run, and Runner cannot make another run until Runner takes an action to pay [2]. Pay X, above the rez cost, when you rez Homing Missile. X is Homing Missile 's strength and trace limit, and X cannot be greater than 8.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.rez_paid_scaling",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.conditional_end_run",
+          "corp_ice.rez_paid_scaling",
+          "corp_ice.run_lock",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "run_lock_ice",
+            "evidence": [
+              "corp_ice.rez_paid_scaling",
+              "corp_ice.run_lock"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Homing Missile bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_026_hunting-pack",
+      "title": "Hunting Pack",
+      "cardType": "ice",
+      "subtypes": [
+        "bloodhound",
+        "sentry"
+      ],
+      "rezCost": 1,
+      "strength": 4,
+      "rulesText": "For each rezzed piece of ice installed outside Hunting Pack, Hunting Pack has one subroutine as follows: \"*Trace 5-If trace is successful, give Runner a tag.\"",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling",
+          "corp_ice.tag_source",
+          "ice.strength_modifier",
+          "tag.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling",
+          "corp_ice.tag_source",
+          "tag.source",
+          "corp_ice.trace_source",
+          "trace.source"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "tax_tool",
+          "enabler"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "position_scaling_trace_tag_tax_ice",
+            "evidence": [
+              "corp_ice.outer_ice_scaling",
+              "corp_ice.position_scaling",
+              "corp_ice.trace_source"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Mehr Trace-Tag-Subroutinen erhöhen Break-/Risk-Druck in tiefen Servern; kein Strength-Modifier."
+          },
+          {
+            "strategyId": "corp.tag_trace_punish",
+            "role": "enabler",
+            "roleDetail": "position_scaling_trace_tag_source",
+            "evidence": [
+              "corp_ice.tag_source",
+              "corp_ice.trace_source",
+              "tag.source",
+              "trace.source",
+              "corp_ice.outer_ice_scaling"
+            ],
+            "confidence": "medium",
+            "rationale": "v2: Mehrere Trace-5-Tag-Subroutinen sind deutlich stärker als ein einfacher Hunter/Fetch-Trace und tragen die Tag/Trace-Linie als Enabler."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "Tag-Trace-Strategieanker bleibt bewusst deferred; Skalierung ist nützlich, aber ohne eigenen Payoff kein bestätigter Punish-Anchor.",
+      "v2Rationale": "ice.strength_modifier ist falsch; Hunting Pack verändert keine Stärke. Die multiple Trace-Tag-Funktion sollte aber zusätzlich corp.tag_trace_punish als Enabler tragen.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "lineSupport",
+        "strategicRole",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_027_iceberg",
+      "title": "Iceberg",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 4,
+      "strength": 4,
+      "rulesText": "*Do 1 Net damage. *[2]: Iceberg has one \"*End the run\" subroutine for the present encounter. Use this ability only when Runner encounters Iceberg.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.encounter_paid_subroutine_add",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.encounter_paid_subroutine_add",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "paid_end_run_subroutine_ice",
+            "evidence": [
+              "corp_ice.encounter_paid_subroutine_add"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Iceberg bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+      "taxonomyFollowup": "Optionales Follow-up: bezahlte ETR-Subroutine ist aktuell nur über corp_ice.encounter_paid_subroutine_add modelliert.",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "title": "Lesser Arcana",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 7,
+      "strength": 4,
+      "rulesText": "*End the run. When you rez Lesser Arcana, you may pay 1, above the rez cost, to make it a wall instead of a sentry.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_029_marionette",
+      "title": "Marionette",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "rezCost": 3,
+      "strength": 0,
+      "rulesText": "*Trash a program. *End the run. If Runner passes Marionette, pay [1], or uninstall it and store it in HQ.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash",
+          "corp_ice.self_bounce_or_maintenance_drawback"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.program_trash",
+          "corp_ice.self_bounce_or_maintenance_drawback"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_030_mastermind",
+      "title": "Mastermind",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black_ice",
+        "sentry",
+        "zombie"
+      ],
+      "rezCost": 7,
+      "strength": 0,
+      "rulesText": "*Do 1 brain damage for each rezzed piece of ice installed outside Mastermind. *End the run. Mastermind has +1 strength for each rezzed piece of ice installed outside it.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.net_damage",
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling",
+          "damage.payoff",
+          "ice.strength_modifier"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling",
+          "damage.payoff",
+          "ice.strength_modifier",
+          "corp_ice.brain_damage"
+        ],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.damage_kill",
+            "role": "punish_payoff",
+            "roleDetail": "brain_damage_ice",
+            "evidence": [
+              "corp_ice.damage_source",
+              "damage.payoff",
+              "corp_ice.brain_damage"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Mastermind bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          },
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "position_scaling_tax_ice",
+            "evidence": [
+              "corp_ice.outer_ice_scaling",
+              "corp_ice.position_scaling",
+              "ice.strength_modifier"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Mastermind bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_031_minotaur",
+      "title": "Minotaur",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 6,
+      "strength": 4,
+      "rulesText": "For each rezzed code gate or wall installed outside Minotaur, Minotaur has one \"*End the run\" subroutine.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling",
+          "ice.strength_modifier"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.outer_ice_scaling",
+          "corp_ice.position_scaling"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "position_scaling_etr_ice",
+            "evidence": [
+              "corp_ice.outer_ice_scaling",
+              "corp_ice.position_scaling",
+              "corp_ice.end_run"
+            ],
+            "confidence": "high",
+            "rationale": "v2: Minotaur erzeugt position-skalierende ETR-Subroutinen, aber keinen Strength-Modifier."
+          }
+        ]
+      },
+      "changedFields": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "ice.strength_modifier ist falsch; Minotaur erhält zusätzliche ETR-Subroutinen, keine Stärke.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "strategySupportPairs"
+      ]
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_032_misleading-access-menus",
+      "title": "Misleading Access Menus",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rezCost": 0,
+      "strength": 1,
+      "rulesText": "*End the run unless Runner pays [1]. Gain [3] when you rez Misleading Access Menus.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.rez_economy",
+          "corp_ice.runner_pay_or_end_run"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.rez_economy",
+          "corp_ice.runner_pay_or_end_run"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "pay_or_end_run_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "corp_ice.runner_pay_or_end_run"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Misleading Access Menus bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_033_mobile-barricade",
+      "title": "Mobile Barricade",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 6,
+      "strength": 3,
+      "rulesText": "*Do 1 Net damage. *End the run. [1]: Move Mobile Barricade and insert it in a different position on this data fort. Use this ability only at the start of a run on this data fort. You may use this ability even if Mobile Barricade is unrezzed, in which case, you reveal it.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.mobile_position_change",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.damage_source",
+          "corp_ice.end_run",
+          "corp_ice.mobile_position_change",
+          "corp_ice.net_damage",
+          "damage.payoff"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "TargetProfile/Constraint: Fort-Position und Start-of-run-Timing.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_034_riddler",
+      "title": "Riddler",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rezCost": 2,
+      "strength": 4,
+      "rulesText": "[2]: Riddler has one \"*End the run\" subroutine for the present encounter. Use this ability only when Runner encounters Riddler.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_paid_subroutine_add"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_paid_subroutine_add"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "paid_end_run_subroutine_ice",
+            "evidence": [
+              "corp_ice.encounter_paid_subroutine_add"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Riddler bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+      "taxonomyFollowup": "Optionales Follow-up: bezahlte ETR-Subroutine ist aktuell nur über corp_ice.encounter_paid_subroutine_add modelliert.",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_035_roadblock",
+      "title": "Roadblock",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate",
+        "random"
+      ],
+      "rezCost": 2,
+      "strength": 0,
+      "rulesText": "*End the run. When Runner encounters Roadblock, roll a die. On a 6, derez Roadblock, and Runner automatically passes it; otherwise, add the result to Roadblock's strength for that encounter.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.random_or_guessing"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.random_or_guessing",
+          "risk.random_outcome"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "tacticSignals"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "Optional: eigenes Risiko für random bypass/derez liability prüfen, wenn Roadblock-ähnliche Karten häufiger werden.",
+      "v2Rationale": "Die Karte hat ein relevantes Zufallsergebnis: meistens temporäre Strength-Erhöhung, auf 6 aber Derez und automatisches Passieren. risk.random_outcome sollte sichtbar sein.",
+      "changedAgainstUploadedReport": [
+        "tacticSignals",
+        "taxonomyFollowup"
+      ]
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_036_sandstorm",
+      "title": "Sandstorm",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 4,
+      "strength": 4,
+      "rulesText": "Sandstorm has one \"*End the run\" subroutine for every [2] you pay, above the rez cost, when you rez it.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.rez_paid_scaling"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.rez_paid_scaling"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "rez_paid_scaling_ice",
+            "evidence": [
+              "corp_ice.rez_paid_scaling"
+            ],
+            "confidence": "medium",
+            "rationale": "ICE Semantic Review v1: Sandstorm bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_037_scaffolding",
+      "title": "Scaffolding",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 2,
+      "strength": 0,
+      "rulesText": "*End the run. If Runner passes Scaffolding, you may choose to uninstall it, store it in HQ, and gain [1].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.optional_self_bounce_gain"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.optional_self_bounce_gain"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_038_snowbank",
+      "title": "Snowbank",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 0,
+      "strength": 0,
+      "rulesText": "*End the run unless Runner pays [1]. Gain [3] when you rez Snowbank.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.rez_economy",
+          "corp_ice.runner_pay_or_end_run"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.encounter_tax",
+          "corp_ice.rez_economy",
+          "corp_ice.runner_pay_or_end_run"
+        ],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ],
+        "strategySupportPairs": [
+          {
+            "strategyId": "corp.ice_tax_glacier",
+            "role": "tax_tool",
+            "roleDetail": "pay_or_end_run_ice",
+            "evidence": [
+              "corp_ice.encounter_tax",
+              "corp_ice.runner_pay_or_end_run"
+            ],
+            "confidence": "high",
+            "rationale": "ICE Semantic Review v1: Snowbank bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+          }
+        ]
+      },
+      "changedFields": [
+        "strategySupportPairs"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "title": "Sphinx 2006",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rezCost": 6,
+      "strength": 5,
+      "rulesText": "*End the run. When you rez Sphinx 2006, you may pay [4], above the rez cost, to make it a sentry instead of a code gate.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_040_sumo-2008",
+      "title": "Sumo 2008",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 8,
+      "strength": 5,
+      "rulesText": "*End the run. When you rez Sumo 2008, you may pay [1], above the rez cost, to make it a wall instead of a sentry.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.type_choice_or_mode_choice"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "title": "Toughonium™ Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 13,
+      "strength": 7,
+      "rulesText": "[Subroutine] End the run. [Subroutine] End the run. [Subroutine] End the run. [Subroutine] End the run.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.multi_end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_042_tumblers",
+      "title": "Tumblers",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rezCost": 5,
+      "strength": 4,
+      "rulesText": "*End the run. If Runner passes Tumblers, you may choose to uninstall it, store it in HQ, and gain [1].",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.optional_self_bounce_gain"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.optional_self_bounce_gain"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_043_twisty-passages",
+      "title": "Twisty Passages",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rezCost": 3,
+      "strength": 4,
+      "rulesText": "*End the run. If Runner passes Twisty Passages, pay [1], or uninstall it and store it in HQ.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.self_bounce_or_maintenance_drawback"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.self_bounce_or_maintenance_drawback"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_044_walking-wall",
+      "title": "Walking Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rezCost": 5,
+      "strength": 3,
+      "rulesText": "*End the run. [1]: Move Walking Wall and insert it in a different position on this data fort. Use this ability only at the start of a run on this data fort. You may use this ability even if Walking Wall is unrezzed, in which case, you reveal it.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.mobile_position_change"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run",
+          "corp_ice.mobile_position_change"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "TargetProfile/Constraint: Fort-Position und Start-of-run-Timing.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "proteus",
+      "cardId": "onr_proteus_045_washed-up-solo-construct",
+      "title": "Washed-Up Solo Construct",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "rezCost": 0,
+      "strength": 0,
+      "rulesText": "*Trash a program unless Runner pays [1]. Gain [3] when you rez Washed-Up Solo Construct.",
+      "old": {
+        "tacticSignals": [
+          "corp_ice.program_trash",
+          "corp_ice.rez_economy",
+          "corp_ice.runner_pay_or_program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.program_trash",
+          "corp_ice.rez_economy",
+          "corp_ice.runner_pay_or_program_trash"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [],
+      "targetOrConstraints": "TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "testset",
+      "cardId": "v08_gate_ice",
+      "title": "Gate ICE",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rezCost": 4,
+      "strength": 3,
+      "rulesText": "Die Corp erhält 2 Credits. End the run.",
+      "old": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "economy.corp_credit_burst",
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "tacticSignals"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "testset",
+      "cardId": "simple_barrier_ice",
+      "title": "Simple Barrier ICE",
+      "cardType": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "rezCost": 3,
+      "strength": 3,
+      "rulesText": "End the run.",
+      "old": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "tacticSignals"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "testset",
+      "cardId": "simple_code_gate_ice",
+      "title": "Simple Code Gate ICE",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rezCost": 2,
+      "strength": 2,
+      "rulesText": "Die Corp erhält 1 Credit. End the run.",
+      "old": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "economy.corp_credit_burst",
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "tacticSignals"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "testset",
+      "cardId": "simple_sentry_ice",
+      "title": "Simple Sentry ICE",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 4,
+      "strength": 3,
+      "rulesText": "Der Runner verliert 2 Credits, falls möglich. End the run.",
+      "old": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "economy.runner_credit_loss",
+          "tax.runner_credit",
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "tacticSignals"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "testset",
+      "cardId": "simple_tag_ice",
+      "title": "Simple Tag ICE",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 3,
+      "strength": 2,
+      "rulesText": "Gib dem Runner 1 Tag. End the run.",
+      "old": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.tag_source",
+          "tag.source",
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "tacticSignals"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "testset",
+      "cardId": "simple_taxing_barrier_ice",
+      "title": "Simple Taxing Barrier ICE",
+      "cardType": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "rezCost": 4,
+      "strength": 4,
+      "rulesText": "Der Runner verliert 1 Credit. End the run.",
+      "old": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "economy.runner_credit_loss",
+          "tax.runner_credit",
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "tacticSignals"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "testset",
+      "cardId": "v08_wall_ice",
+      "title": "Wall ICE",
+      "cardType": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "rezCost": 5,
+      "strength": 5,
+      "rulesText": "End the run.",
+      "old": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "tacticSignals"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    },
+    {
+      "setId": "testset",
+      "cardId": "v08_watchdog_ice",
+      "title": "Watchdog ICE",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rezCost": 4,
+      "strength": 3,
+      "rulesText": "Gib dem Runner 1 Tag. End the run.",
+      "old": {
+        "tacticSignals": [],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "new": {
+        "tacticSignals": [
+          "corp_ice.tag_source",
+          "tag.source",
+          "corp_ice.end_run"
+        ],
+        "lineSupport": [],
+        "strategicRole": [],
+        "strategySupportPairs": []
+      },
+      "changedFields": [
+        "tacticSignals"
+      ],
+      "targetOrConstraints": "",
+      "taxonomyFollowup": "",
+      "v2Rationale": "",
+      "changedAgainstUploadedReport": []
+    }
+  ],
+  "verification": {
+    "passed": [
+      "node scripts/check-ice-semantic-review-v2.mjs",
+      "node scripts/check-ai024-corp-ice-semantics.mjs",
+      "node scripts/check-ai024-1-corp-ice-semantics-polish.mjs",
+      "node scripts/check-ai-action-semantic-signal-catalog.mjs",
+      "git diff --check"
+    ],
+    "residualFailures": [
+      {
+        "command": "node scripts/check-ai-strategy-taxonomy.mjs",
+        "status": "pre_existing_failure_on_main",
+        "worktreeResult": "30 errors after ICE-v2 derivation alignment; no new ICE-v2 signal mismatch remains.",
+        "mainResult": "30 errors on main before this branch; same legacy tactic-signal anchor contract backlog plus warnings.",
+        "removalCondition": "Clean up legacy tactic-signal anchor contracts and invalid signal id in the AI004 taxonomy backlog."
+      }
+    ],
+    "notes": [
+      "Action semantic signal catalog report regenerated after signal catalog changes.",
+      "AI024/AI024-1 checks were updated only for current Classic active inventory and the v2 Colonel Failure multi-program-trash exception."
+    ]
+  }
+}

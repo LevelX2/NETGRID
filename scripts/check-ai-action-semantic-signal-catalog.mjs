@@ -522,7 +522,9 @@ function formatWithPrettier(filePaths) {
     shell: false,
   });
   if (result.status === 0) return;
-  if (result.stderr.trim()) console.error(result.stderr.trim());
+  if (result.error?.code === "ENOENT") return;
+  const stderr = result.stderr ?? "";
+  if (stderr.trim()) console.error(stderr.trim());
   fail("prettier failed for signal catalog reports");
 }
 

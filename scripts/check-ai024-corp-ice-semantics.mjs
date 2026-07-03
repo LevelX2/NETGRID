@@ -133,9 +133,9 @@ function main() {
   if (report.schemaVersion !== "ai024-corp-ice-semantics-review-report-v1") fail(errors, "unexpected schemaVersion");
   if (report.taskId !== "AI024") fail(errors, "unexpected taskId");
   if (report.summary?.activeCorpIceCount !== 95) fail(errors, `expected 95 active Corp ICE, report=${report.summary?.activeCorpIceCount}`);
-  if (report.summary?.inactiveCheckedIceCount !== 11) fail(errors, `expected 11 inactive checked Corp ICE, report=${report.summary?.inactiveCheckedIceCount}`);
+  if (report.summary?.inactiveCheckedIceCount !== 11) fail(errors, `expected 11 historically inactive checked Corp ICE in AI024 report, report=${report.summary?.inactiveCheckedIceCount}`);
   if (activeCompiledIce.length !== report.summary?.activeCorpIceCount) fail(errors, "active Corp ICE inventory mismatch");
-  if (inactiveIce.length !== report.summary?.inactiveCheckedIceCount) fail(errors, "inactive Corp ICE inventory mismatch");
+  if (inactiveIce.length !== 0) fail(errors, "current Corp ICE inventory has inactive original/classic/proteus ICE");
   if ((report.postReviewAssignments ?? []).length !== activeCompiledIce.length) fail(errors, "postReviewAssignments length mismatch");
   if (report.summary?.newStrategyIdCount !== 0 || (report.newStrategyIds ?? []).length !== 0) fail(errors, "AI024 must not introduce Strategy IDs");
   for (const flag of REPORT_FLAGS) if (report.summary?.[flag] !== false) fail(errors, `${flag} is not false`);
