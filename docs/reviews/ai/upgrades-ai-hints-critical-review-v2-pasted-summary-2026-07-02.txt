@@ -1,0 +1,39 @@
+Ich würde den Upgrade-Report **nicht vollständig übernehmen**, sondern als v2 korrigieren. Der Upload-Report ist grundsätzlich gut strukturiert, setzt aber aus meiner Sicht zu viele Strategieanker: Er kommt auf **41 Karten mit Strategieanker**, **4 support-only Karten** und **55 StrategySupportPairs**.  Nach den Leitregeln sollen Strategieanker aber selten bleiben und nur für echte Anker, Payoffs, Engines, Enabler oder Schlüssel-/Win-Condition-Karten gesetzt werden; bloßer Support und matchup-spezifische Tax-Effekte sollen keine Strategie erzeugen. 
+
+Ich habe daraus eine korrigierte Änderungsliste erstellt:
+
+[Upgrades-Review v2 als Markdown](sandbox:/mnt/data/upgrades-ai-hints-critical-review-v2-2026-07-02.md)
+[Upgrades-Review v2 als JSON](sandbox:/mnt/data/upgrades-ai-hints-critical-review-v2-2026-07-02.json)
+
+Meine v2 reduziert die Dichte von **41 auf 38 Karten mit Strategieanker** und von **55 auf 47 StrategySupportPairs**. Die wichtigsten Demotions zu support-only sind **Tokyo-Chiba Infighting**, **Twenty-Four-Hour Surveillance** und **London City Grid**. Damit bleiben **7 support-only Upgrades**: Aardvark, New Galveston City Grid, Tokyo-Chiba Infighting, Twenty-Four-Hour Surveillance, Panic Button, London City Grid und Simple Upgrade.
+
+Die wichtigsten Korrekturen:
+
+| Karte                                 | Anpassung                                                                                                                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Tokyo-Chiba Infighting**            | Kein `corp.ice_tax_glacier`. Der Effekt belohnt nur bereits erfolglose Runs; das ist situative Economy, kein Glacier-Anker.                                                                |
+| **Twenty-Four-Hour Surveillance**     | Kein `corp.ice_tax_glacier`. Stealth-Credit-Lockout ist matchup-spezifischer Hate, ähnlich wie Aardvark gegen Worms.                                                                       |
+| **London City Grid**                  | Kein `corp.ice_tax_glacier` und kein `corp.remote_scoring`. Noisy-Icebreaker-Hate ist zu eng und abhängig vom Runner-Rig.                                                                  |
+| **Lesley Major**                      | Nicht primär `corp.remote_scoring`, sondern `corp.ambush_bluff`. Der Trigger nach Passieren des letzten ICE passt besser zu advanceable Ambush/Trap-Surprise als zu verlässlichem Scoring. |
+| **Street Enforcer**                   | Nur `corp.tag_trace_punish`. Die Glacier- und Remote-Scoring-Anker sind zu breit; der Effekt skaliert ausschließlich mit vorhandenen Tags.                                                 |
+| **Sterdroid**                         | `remote_scoring` entfernen. Es bleibt ein gezielter temporärer ICE-Strength-Boost für `corp.ice_tax_glacier`, aber kein eigenständiger Scoring-Schutz.                                     |
+| **Olivia Salazar**                    | `corp.economy_rez_reserve` entfernen. Halbkosten-Rez mit Derez-Liability ist ICE-Aktivierung/Tax-Support, kein echter Rez-Reserve-Engine-Anker.                                            |
+| **Namatoki Plaza**                    | `remote.scoring_protection` entfernen. Die Karte erweitert Remote-Kapazität, schützt aber nicht aktiv.                                                                                     |
+| **Dr. Dreff**                         | `ice.corp_hq_runpath_insert` präzisieren zu temporärem HQ-ICE-Encounter; zusätzlich `risk.temporary_ice_trash`.                                                                            |
+| **Omni Kismet / Singapore City Grid** | `ice.corp_hq_runpath_insert` entfernen. Es wird kein neues ICE in den Runpath installiert, sondern ein unrezzed ICE mit HQ-ICE getauscht.                                                  |
+| **Roving Submarine**                  | Condition präzisieren zu `condition.corp_installed_or_advanced_this_fort_last_turn`; die Bedingung gilt für genau diesen Fort.                                                             |
+
+Einige Vorschläge aus dem Upload bleiben unverändert sinnvoll. **Turbeau Delacroix** ist korrekt kein `engine_anchor`, sondern ein `corp.tag_trace_punish`-Enabler; der Kartentext ist ein Access-Trace, der bei Erfolg einen Tag gibt.  **Tesseract Fort Construction** bleibt ein starker `corp.ice_tax_glacier`-Engine-Anker, weil jedes ICE auf dem Fort eine Pay-or-End-the-Run-Subroutine erhält.  **Rasmin Bridger** bleibt ebenfalls stark genug für `corp.ice_tax_glacier` plus defensive Remote-Rolle, weil nach jedem passierten ICE ein Pay-or-End-Fenster entsteht. 
+
+Die wichtigsten Taxonomie-Konsolidierungen:
+
+| Alt / Problem                                                    | Neu / Vorschlag                                                                                                                             |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ice.corp_hq_runpath_insert` für Swap- oder Encounter-Effekte    | Nur bei echter Runpath-Installation verwenden. Für Dr. Dreff besser `ice.corp_temporary_encounter`; für Omni/Singapore `ice.corp_ice_swap`. |
+| `condition.corp_installed_or_advanced_last_turn`                 | Für Roving Submarine präziser: `condition.corp_installed_or_advanced_this_fort_last_turn`.                                                  |
+| `risk.temporary_ice_liability`                                   | Präziser trennen: `risk.temporary_ice_trash` für Dr. Dreff, `risk.temporary_rez_liability` für Olivia.                                      |
+| `remote.scoring_protection` auf generischen Tax-/Hate-Karten     | Nur setzen, wenn die Karte wirklich Remote-Scoring schützt, nicht bloß Kosten oder Matchup-Hate erzeugt.                                    |
+| `ice.strength_modifier`                                          | Für Corp-Karten besser `ice.corp_targeted_strength_boost`, falls es ein gezielter temporärer ICE-Boost ist.                                 |
+| `condition.requires_tagged_runner` bei tag-skalierenden Effekten | Bei Street Enforcer besser `condition.runner_has_one_or_more_tags`; bei Shock Treatment korrekt `condition.runner_has_four_or_more_tags`.   |
+
+Keine neue **Strategiegruppe** ist nötig. Die vorhandenen Strategy IDs reichen aus. Die Anpassung ist eher eine konservativere Vergabe der vorhandenen Anker und eine präzisere Signal-/Condition-Taxonomie. Die JSON enthält dafür `cardOverridesAgainstUploadedReport` für gezielte Overrides und `fullFinalRecommendations` als direkten Zielzustand.
