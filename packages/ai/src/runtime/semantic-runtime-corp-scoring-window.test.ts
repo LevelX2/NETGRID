@@ -422,6 +422,59 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     );
   });
 
+  it("marks delayed wall scorelines contestable when visible worm coverage can fund access before score", () => {
+    const agenda = agendaCard("remote-classic-agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 4,
+    });
+    const action = corpAction(
+      "advance-classic-wall-agenda",
+      "advance_card",
+      {
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 0,
+        runnerRig: [earlyWormBreaker("runner-worm")],
+        servers: protectedCentralServers([
+          remoteServer(
+            "remote_1",
+            [
+              classicWallIce("remote-classic-wall", {
+                rezzed: true,
+                rezCost: 0,
+              }),
+            ],
+            [agenda],
+          ),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      scoreHorizon: "next_turn",
+      missingVisibleBreakerCoverage: false,
+      runnerCanReachAccessNow: false,
+      runnerCanReachAccessBeforeScore: true,
+      runnerCanContestBeforeScore: true,
+      recommendedNextStep: "build_remote_ice",
+    });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_exposure_credit_actions:3",
+        "visible_runner_exposure_contest_credits:3",
+        "exposure_remote_access:visible_break_cost:3",
+      ]),
+    );
+  });
+
   it("treats remote ICE as the next score-window step when it removes before-score contestability", () => {
     const agenda = agendaCard("remote-agenda", {
       advancementCounters: 1,
@@ -1369,6 +1422,24 @@ function wallIce(
   } as VisibleCard;
 }
 
+function classicWallIce(
+  instanceId: string,
+  overrides: Partial<VisibleCard> = {},
+): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "ice",
+    title: "Crystal Wall",
+    definitionId: "onr_v1_232_crystal-wall",
+    subtypes: ["Wall"],
+    rezzed: false,
+    rezCost: 4,
+    owner: "corp",
+    ...overrides,
+  } as VisibleCard;
+}
+
 function centralIce(instanceId: string): VisibleCard {
   return wallIce(instanceId, { rezCost: 1 });
 }
@@ -1505,6 +1576,18 @@ function simpleFracter(
           ],
         }
       : {}),
+  } as VisibleCard;
+}
+
+function earlyWormBreaker(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "program",
+    title: "Early Worm",
+    definitionId: "onr_classic_027_early-worm",
+    subtypes: ["Icebreaker", "Worm"],
+    owner: "runner",
   } as VisibleCard;
 }
 

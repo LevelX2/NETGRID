@@ -8,17 +8,26 @@ import {
 describe("visibleBreakerRoles", () => {
   it("derives breaker roles from visible subtypes instead of demo definition ids", () => {
     expect(
-      visibleBreakerRoles(visibleProgram("custom-fracter", ["Icebreaker", "Fracter"])),
+      visibleBreakerRoles(
+        visibleProgram("custom-fracter", ["Icebreaker", "Fracter"]),
+      ),
     ).toEqual(["fracter"]);
-    expect(visibleBreakerRoles(visibleProgram("simple_fracter", []))).toEqual([]);
-    expect(visibleBreakerRoles(visibleProgram("generic-breaker", ["Icebreaker"]))).toEqual([
-      "icebreaker",
-    ]);
+    expect(visibleBreakerRoles(visibleProgram("simple_fracter", []))).toEqual(
+      [],
+    );
+    expect(
+      visibleBreakerRoles(visibleProgram("generic-breaker", ["Icebreaker"])),
+    ).toEqual(["icebreaker"]);
     expect(
       visibleBreakerRoles(
         visibleProgram("spaced-killer", [" Icebreaker ", " Killer "]),
       ),
     ).toEqual(["killer"]);
+    expect(
+      visibleBreakerRoles(
+        visibleProgram("classic-worm", ["Icebreaker", "Worm"]),
+      ),
+    ).toEqual(["fracter"]);
   });
 });
 
@@ -29,9 +38,9 @@ describe("visibleBreakerCardCanAddressIce", () => {
 
     expect(canAddress(["support_fracter"], "Barrier")).toBe(true);
     expect(canAddress(["fracterish_noise"], "Barrier")).toBe(false);
-    expect(canAddress(["support_fracter"], "Firewall", "Fracter support.")).toBe(
-      false,
-    );
+    expect(
+      canAddress(["support_fracter"], "Firewall", "Fracter support."),
+    ).toBe(false);
 
     expect(canAddress(["support_decoder"], "Code Gate")).toBe(true);
     expect(canAddress(["decoderish_noise"], "Code Gate")).toBe(false);
@@ -39,12 +48,19 @@ describe("visibleBreakerCardCanAddressIce", () => {
     expect(canAddress(["support_killer"], "Sentry")).toBe(true);
     expect(canAddress(["killerish_noise"], "Sentry")).toBe(false);
   });
+
+  it("uses visible breaker text for wall coverage when subtype roles are generic", () => {
+    expect(
+      canAddress(
+        ["icebreaker"],
+        "Wall. End the run.",
+        "[1]: Break wall subroutine. [2]: +3 strength.",
+      ),
+    ).toBe(true);
+  });
 });
 
-function visibleProgram(
-  definitionId: string,
-  subtypes: string[],
-): VisibleCard {
+function visibleProgram(definitionId: string, subtypes: string[]): VisibleCard {
   return {
     instanceId: `${definitionId}-instance`,
     definitionId,

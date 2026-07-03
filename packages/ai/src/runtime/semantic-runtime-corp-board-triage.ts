@@ -763,8 +763,7 @@ function highestPriorityActiveScorelineEntry(
 ): ScoredLegalAction | undefined {
   return [...entries].sort(
     (left, right) =>
-      activeScorelineEntryPriority(right) -
-      activeScorelineEntryPriority(left),
+      activeScorelineEntryPriority(right) - activeScorelineEntryPriority(left),
   )[0];
 }
 
@@ -1255,7 +1254,9 @@ function triageSeverityFromScoringWindow(
 }
 
 function centralPressureTriage(
-  centralPressure: ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment>,
+  centralPressure: ReturnType<
+    typeof semanticRuntimeCorpCentralPressureAssessment
+  >,
   severity: CorpBoardTriageSeverity,
   currentCredits: number,
   extraEvidence: readonly string[] = [],
@@ -1334,9 +1335,9 @@ function centralPressureIsTriageAcute(
   return liveAccessSignal || pressure.pressure >= 0.7;
 }
 
-function highestPriorityTriageCentralPressure(input: AiDecisionInput):
-  | ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment>
-  | undefined {
+function highestPriorityTriageCentralPressure(
+  input: AiDecisionInput,
+): ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment> | undefined {
   const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
   const rdPressure = semanticRuntimeCorpCentralPressureAssessment(input, "rd");
   const acuteHqPressure = centralPressureIsTriageAcute(input, hqPressure)
@@ -1469,7 +1470,9 @@ function unprotectedHqAgendaExposureRequiresPreScoreProtection(
     return true;
   }
   const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
-  return hqPressure.runnerRunCredits >= 4 || hqPressure.successfulAccessEvents > 0;
+  return (
+    hqPressure.runnerRunCredits >= 4 || hqPressure.successfulAccessEvents > 0
+  );
 }
 
 function actionProtectsServer<TConsumer extends string>(
@@ -1496,7 +1499,7 @@ function actionProtectsServer<TConsumer extends string>(
   );
   if (!defense?.isRezzableNow || defense.zeroEffectRisk) return false;
   if (triage.primary === "protect_hq" || triage.primary === "protect_rd") {
-    return defense.hasImmediateStopPotential;
+    return defense.hasImmediateStopPotential || defense.hasVisibleBreakerTax;
   }
   return defense.hasImmediateStopPotential || defense.hasMeaningfulTaxOrDamage;
 }
@@ -1535,7 +1538,10 @@ function sameTargetRezMissesCriticalCentralStop<TConsumer extends string>(
     actionSemanticCandidate,
     { actionCreditCost: dependencies.actionCreditCost },
   );
-  return defense?.hasImmediateStopPotential !== true;
+  return (
+    defense?.hasImmediateStopPotential !== true &&
+    defense?.hasVisibleBreakerTax !== true
+  );
 }
 
 function installedIceHasImmediateStopPotential(
@@ -1728,6 +1734,7 @@ function actionDistractsFromCentralProtection(
     return true;
   }
   if (actionServerId === "archives") return true;
+  if (action.type === "end_turn") return true;
   if (action.type === "advance_card") return true;
   if (action.type === "install_card") return true;
   if (triage.severity === "critical") {
