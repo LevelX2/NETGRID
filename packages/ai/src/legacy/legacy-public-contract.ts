@@ -16,12 +16,10 @@ export type {
   RunnerOpeningHandEvaluation,
 } from "../deck-opening-hand";
 export {
-  assessCorpFutureRunIcePlacement,
   assessCorpIcePortfolioAction,
   assessCorpScoreTerminalWindow,
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
-  classifyCorpFutureRunIceDefinitionId,
   classifyCorpScoredAgendaAbility,
   classifyScoredAgendaActionFromOntology,
   corpPlanUsesOnlyAiSupportedCards,

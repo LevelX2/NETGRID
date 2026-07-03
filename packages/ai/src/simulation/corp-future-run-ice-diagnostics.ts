@@ -1,9 +1,9 @@
 import { type AiDecisionInput, type LegalAction } from "@netgrid/shared";
 
 import {
-  assessCorpFutureRunIcePlacement,
-  classifyCorpFutureRunIceDefinitionId,
-} from "../legacy/legacy-entrypoints";
+  assessCorpIcePlacementForDiagnostics,
+  classifyCorpFutureRunIcePlacementProfile,
+} from "../runtime/corp-ice-placement/corp-ice-placement";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 export type SourceDefinitionIdForSimulationAction = (
@@ -25,12 +25,12 @@ export function createCorpFutureRunIceDiagnosticsForSimulationAction(
         candidate.type === "install_card" &&
         candidate.payload?.placement === "ice" &&
         Boolean(
-          classifyCorpFutureRunIceDefinitionId(
+          classifyCorpFutureRunIcePlacementProfile(
             sourceDefinitionIdForSimulationAction(input, candidate),
           ),
         ),
     );
-    const assessment = assessCorpFutureRunIcePlacement(input, action);
+    const assessment = assessCorpIcePlacementForDiagnostics(input, action);
     if (!assessment) {
       return opportunity ? { corpFutureRunIceInstallOpportunity: true } : {};
     }

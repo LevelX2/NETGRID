@@ -36,7 +36,7 @@ import {
   buildAiDecisionInput,
   type AiDecisionInputWithDeckCapabilities,
   assessCorpScoreTerminalWindow,
-  assessCorpFutureRunIcePlacement,
+  assessCorpIcePlacementForDiagnostics,
   assessCorpIcePortfolioAction,
   chooseAiAction,
   chooseCorpBaselineAction,
@@ -6533,7 +6533,10 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
         "onr_v1_222_ball-and-chain",
     );
     expect(ballAction).toBeDefined();
-    const ballPlacement = assessCorpFutureRunIcePlacement(input, ballAction!);
+    const ballPlacement = assessCorpIcePlacementForDiagnostics(
+      input,
+      ballAction!,
+    );
     expect(ballPlacement).toMatchObject({
       installedOnEmptyServer: true,
       deadEffect: true,
@@ -6574,7 +6577,9 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     );
 
     expect(ballAction).toBeDefined();
-    expect(assessCorpFutureRunIcePlacement(input, ballAction!)).toMatchObject({
+    expect(
+      assessCorpIcePlacementForDiagnostics(input, ballAction!),
+    ).toMatchObject({
       existingIceCount: 1,
       hasLaterIceAfterInstall: true,
       liveEffect: true,
@@ -6669,7 +6674,7 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     );
 
     expect(action).toBeDefined();
-    expect(assessCorpFutureRunIcePlacement(input, action!)).toMatchObject({
+    expect(assessCorpIcePlacementForDiagnostics(input, action!)).toMatchObject({
       installedOnEmptyServer: true,
       deadEffect: true,
     });

@@ -8046,14 +8046,14 @@ function actionsForCandidate(
     .filter((action): action is LegalAction => Boolean(action));
 }
 
-export function classifyCorpFutureRunIceDefinitionId(
+function classifyCorpFutureRunIceDefinitionId(
   definitionId: string | undefined,
 ): CorpFutureRunIceClass | undefined {
   if (!definitionId) return undefined;
   return CORP_FUTURE_RUN_ICE_CLASSES[definitionId];
 }
 
-export function assessCorpFutureRunIcePlacement(
+function assessCorpFutureRunIcePlacement(
   input: AiDecisionInput,
   action: LegalAction,
 ): CorpFutureRunIcePlacementAssessment | undefined {

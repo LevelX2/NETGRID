@@ -5,12 +5,23 @@ import {
   buildCorpIceCardPlacementProfile,
   buildCorpIceDensityProfile,
   buildCorpServerNeedProfile,
+  assessCorpIcePlacementForDiagnostics,
+  classifyCorpFutureRunIcePlacementProfile,
   corpIcePlacementCandidateForAction,
   corpIcePlacementEvaluationForActions,
   corpIcePlacementScoreComponent,
 } from "./corp-ice-placement";
 
 describe("corp ICE placement profile", () => {
+  it("classifies historical future-run ICE through the new placement profile", () => {
+    expect(
+      classifyCorpFutureRunIcePlacementProfile("onr_v1_222_ball-and-chain"),
+    ).toBe("ball_and_chain");
+    expect(
+      classifyCorpFutureRunIcePlacementProfile("onr_v1_225_canis-major"),
+    ).toBe("canis");
+  });
+
   it("classifies direct stop ICE as immediate protection", () => {
     const profile = buildCorpIceCardPlacementProfile(
       corpIce("data-wall", {
@@ -409,6 +420,34 @@ describe("corp ICE placement candidate scoring", () => {
     expect(evaluation.bestInstall?.recommendation).toBe("hold_for_later");
     expect(evaluation.bestDeferReason).toBe("bad_first_ice_wait_for_followup");
     expect(evaluation.candidates).toHaveLength(1);
+  });
+
+  it("replaces legacy future-run assessment diagnostics from the placement profile", () => {
+    const ballAndChain = corpIce("ball-and-chain", {
+      title: "Ball and Chain",
+      definitionId: "onr_v1_222_ball-and-chain",
+      rulesText: "For the remainder of this run, the next ice is stronger.",
+      rezCost: 2,
+    });
+    const directIce = corpIce("direct-ice", {
+      definitionId: "simple_barrier_ice",
+      rulesText: "*End the run.",
+      rezCost: 2,
+    });
+    const input = corpInput({
+      credits: 5,
+      hq: [ballAndChain, directIce],
+      servers: [server("remote_1", [])],
+    });
+    const action = installIceAction(ballAndChain, "remote_1");
+    input.legalActions = [action, installIceAction(directIce, "remote_1")];
+
+    expect(assessCorpIcePlacementForDiagnostics(input, action)).toMatchObject({
+      futureRunIceClass: "ball_and_chain",
+      installedOnEmptyServer: true,
+      deadEffect: true,
+      directImpactAlternativeCount: 1,
+    });
   });
 });
 

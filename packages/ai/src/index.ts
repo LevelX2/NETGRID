@@ -67,6 +67,26 @@ export type {
   AiDecisionInputWithDeckCapabilities,
   AiDecisionSideSelection,
 } from "./runtime/ai-decision-input";
+export {
+  assessCorpIcePlacementForDiagnostics,
+  buildCorpIceCardPlacementProfile,
+  buildCorpIceDensityProfile,
+  buildCorpServerNeedProfile,
+  classifyCorpFutureRunIcePlacementProfile,
+  corpIcePlacementCandidateForAction,
+  corpIcePlacementEvaluationForActions,
+  corpIcePlacementScoreComponent,
+} from "./runtime/corp-ice-placement/corp-ice-placement";
+export type {
+  CorpFutureRunIceClass,
+  CorpIceCardPlacementProfile,
+  CorpIceDensityProfile,
+  CorpIcePlacementCandidate,
+  CorpIcePlacementDiagnosticsAssessment,
+  CorpIcePlacementEvaluation,
+  CorpIcePlacementRecommendation,
+  CorpServerNeedProfile,
+} from "./runtime/corp-ice-placement/corp-ice-placement";
 export { createBeliefSimulationWorld } from "./simulation/belief-simulation-world";
 export { listMatchProgressionBenchmarkDeckSlots } from "./simulation/benchmark-deck-slot-list";
 export type {
@@ -167,12 +187,10 @@ export {
   structuredBreakerProfileCoversIce,
 } from "./breaker-ontology-consumer";
 export {
-  assessCorpFutureRunIcePlacement,
   assessCorpIcePortfolioAction,
   assessCorpScoreTerminalWindow,
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
-  classifyCorpFutureRunIceDefinitionId,
   classifyCorpScoredAgendaAbility,
   classifyScoredAgendaActionFromOntology,
   corpPlanUsesOnlyAiSupportedCards,

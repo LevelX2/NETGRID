@@ -1,12 +1,10 @@
 // Single internal entrypoint for runtime and simulation Legacy access.
 // Keep new semantic behavior outside legacy and route remaining Legacy use here.
 export {
-  assessCorpFutureRunIcePlacement,
   assessCorpIcePortfolioAction,
   assessCorpScoreTerminalWindow,
   chooseCorpPlanAction,
   chooseRunnerPlanAction,
-  classifyCorpFutureRunIceDefinitionId,
   classifyCorpScoredAgendaAbility,
   hasCorpPlanAction,
   hasRunnerPlanAction,

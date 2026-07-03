@@ -3,7 +3,7 @@ import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import compiledAiHintsData from "../../../data/ai/ai-card-hints-compiled.json";
 import fullCoverageReport from "../../../docs/reviews/ai/aufgabe-042-full-compiled-hint-coverage-report-2026-05-25.json";
 import {
-  classifyCorpFutureRunIceDefinitionId,
+  classifyCorpFutureRunIcePlacementProfile,
   getStructuredBreakerProfileForCard,
   getStructuredRemoteRoleForCard,
   classifyTagPunishPayoffFromOntology,
@@ -260,11 +260,11 @@ describe("compiled AI hints runtime full coverage", () => {
 
   it("serves compiled future-encounter facts to ICE-ordering classification", () => {
     expect(
-      classifyCorpFutureRunIceDefinitionId("onr_v1_222_ball-and-chain"),
+      classifyCorpFutureRunIcePlacementProfile("onr_v1_222_ball-and-chain"),
     ).toBe("ball_and_chain");
-    expect(classifyCorpFutureRunIceDefinitionId("onr_v1_225_canis-major")).toBe(
-      "canis",
-    );
+    expect(
+      classifyCorpFutureRunIcePlacementProfile("onr_v1_225_canis-major"),
+    ).toBe("canis");
     for (const cardId of [
       "onr_v1_222_ball-and-chain",
       "onr_v1_225_canis-major",
