@@ -81,7 +81,7 @@ Ausgeführt:
 
 Hinweis: Der frische Worktree hatte anfangs keine `node_modules`; `corepack pnpm install` wurde im Worktree ausgeführt.
 
-Breiter Check: `corepack pnpm --filter @netgrid/ai test` wurde zusätzlich angestoßen. Er ist nicht als Paket-Gate grün, weil mehrere vorhandene AI-Daten-/Report-Gates nicht gegen die committed Reports deterministisch sind, unter anderem Hint-Inspector-, Derived-Facts-, Compiled-Index-, Manual-Overlay-, Strategy-Taxonomy- und Hint-Quality-Reports. Aus diesem Lauf wurde eine echte Scope-Regression in den Corp-Economy-Entscheidungstests herausgezogen und mit der Tag-/Trace-ICE-Regel oben behoben; die übrigen Full-Test-Reportdifferenzen bleiben separater Datenpflege-Scope.
+Breiter Check: `corepack pnpm --filter @netgrid/ai test` wurde zusätzlich vor und nach dem Merge des aktuellen lokalen `main` angestoßen. Er ist nicht als Paket-Gate grün, weil mehrere vorhandene AI-Daten-/Report-Gates nicht gegen die committed Reports deterministisch sind, unter anderem Hint-Inspector-, Derived-Facts-, Compiled-Index-, Manual-Overlay-, Strategy-Taxonomy- und Hint-Quality-Reports. Der Nach-Merge-Lauf endete mit `10 failed | 264 passed` Testdateien und `22 failed | 2205 passed` Tests; die vorherige echte Scope-Regression in den Corp-Economy-Entscheidungstests ist darin nicht mehr enthalten. Die übrigen Full-Test-Reportdifferenzen bleiben separater Datenpflege-Scope.
 
 ## Restpunkte
 
