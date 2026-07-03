@@ -10172,6 +10172,68 @@
         ]
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "damage.corp_persistent_damage_counter",
+      "source": "effects",
+      "match": {
+        "target": "damage.corp_persistent_damage_counter"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "damage.corp_persistent_damage_counter"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "corp_ice.multi_program_trash",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.multi_program_trash"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.multi_program_trash"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "run.corp_run_rewind",
+      "source": "effects",
+      "match": {
+        "target": "run.corp_run_rewind"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "run.corp_run_rewind"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "run.corp_redirect",
+      "source": "effects",
+      "match": {
+        "target": "run.corp_redirect"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "run.corp_redirect"
+      },
+      "strategyAnchorFor": [
+        "corp.central_stabilize",
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ]
     }
   ],
   "descriptorGaps": [

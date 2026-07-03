@@ -14394,7 +14394,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -14402,6 +14402,23 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_lock_ice",
+          "evidence": [
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Asp bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -14443,7 +14460,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -14474,9 +14491,27 @@
       ],
       "tacticSignals": [
         "corp_ice.encounter_tax",
-        "corp_ice.end_run",
-        "corp_ice.jackout_tax",
-        "corp_ice.multi_end_run"
+        "corp_ice.runner_pay_or_end_run",
+        "corp_ice.run_lock"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "encounter_pay_or_end_run_tax_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "corp_ice.runner_pay_or_end_run",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Runner zahlt bei weiteren ICE-Encountern oder der Run endet; das ist kein Jackout-Tax."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: jackout_tax ist falsch; die Karte besteuert Encounters. multi_end_run/end_run sind weniger präzise als runner_pay_or_end_run + run_lock."
       ]
     },
     {
@@ -14520,7 +14555,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -14538,6 +14573,14 @@
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.program_trash"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -14606,7 +14649,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "strategicRole": [
@@ -14615,10 +14658,40 @@
       ],
       "tacticSignals": [
         "corp_ice.damage_source",
-        "corp_ice.encounter_tax",
         "corp_ice.net_damage",
+        "corp_ice.next_ice_break_lock",
         "corp_ice.run_lock",
         "damage.payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "net_damage_run_lock_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "v2: 4 Net damage plus Next-ICE-Lock ist ein starker Damage-Payoff."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "next_ice_break_lock_ice",
+          "evidence": [
+            "corp_ice.next_ice_break_lock",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Präzises Signal statt generischem encounter_tax."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Für dieselbe Funktion wie Bolter Swarm sollte dasselbe präzise next_ice_break_lock-Signal verwendet werden; encounter_tax ist hier zu unscharf."
       ]
     },
     {
@@ -14679,17 +14752,33 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "strategicRole": [
         "tax_tool"
       ],
       "tacticSignals": [
-        "corp_ice.encounter_tax",
-        "ice.strength_modifier"
+        "corp_ice.future_strength_buff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "future_strength_buff_tax_ice",
+          "evidence": [
+            "corp_ice.future_strength_buff"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Die Karte erhöht die Stärke weiterer ICE im laufenden Run; das ist präziser als encounter_tax/ice.strength_modifier."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: future_strength_buff ist die präzisere Funktionssprache. encounter_tax und generisches ice.strength_modifier sollten hier nicht die eigentliche Wirkung ersetzen."
       ]
     },
     {
@@ -14752,15 +14841,31 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "strategicRole": [
         "tax_tool"
       ],
       "tacticSignals": [
-        "corp_ice.encounter_tax",
-        "ice.strength_modifier"
+        "corp_ice.future_strength_buff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "future_strength_buff_tax_ice",
+          "evidence": [
+            "corp_ice.future_strength_buff"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Die Karte erhöht die Stärke weiterer ICE im laufenden Run; das ist präziser als encounter_tax/ice.strength_modifier."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: future_strength_buff ist die präzisere Funktionssprache. encounter_tax und generisches ice.strength_modifier sollten hier nicht die eigentliche Wirkung ersetzen."
       ]
     },
     {
@@ -14838,7 +14943,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "strategicRole": [
@@ -14850,7 +14955,29 @@
         "corp_ice.net_damage",
         "corp_ice.trace_source",
         "damage.payoff",
+        "damage.corp_persistent_damage_counter",
         "trace.source"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "persistent_damage_counter_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.corp_persistent_damage_counter",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Cerberus-Counter erzeugen wiederkehrenden Net-Damage am Start jedes Runs."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, strategySupportPairs, targetOrConstraints, taxonomyFollowup.",
+        "ICE-V2: Target/Constraints: Constraint: Cerberus-Counter entfernen kostet Runner eine Aktion und [4].",
+        "ICE-V2: Taxonomy follow-up: damage.corp_persistent_damage_counter als präziser gemeinsamer Signaltyp für Baskerville/Cerberus/Mastiff prüfen.",
+        "ICE-V2: Rationale: Der persistente Damage-Counter ist für die KI wichtiger als nur generisches damage.payoff/trace.source."
       ]
     },
     {
@@ -14894,7 +15021,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -14937,12 +15064,43 @@
       ],
       "tacticSignals": [
         "corp_ice.damage_source",
-        "corp_ice.end_run",
+        "corp_ice.conditional_end_run",
         "corp_ice.hardware_trash",
         "corp_ice.meat_damage",
         "corp_ice.trace_source",
         "damage.payoff",
         "trace.source"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "meat_damage_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.meat_damage",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Trace-success Meat damage bleibt Damage-Kill-Payoff."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "trace_success_hardware_trash_etr_ice",
+          "evidence": [
+            "corp_ice.conditional_end_run",
+            "corp_ice.hardware_trash",
+            "corp_ice.trace_source"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: ETR/Hardware-Trash hängen am Trace-Erfolg; conditional_end_run ist präziser als end_run."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, strategySupportPairs, targetOrConstraints.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Hardware-Ziel erforderlich. Constraint: ETR, Hardware-Trash und Meat damage nur bei Trace-Erfolg.",
+        "ICE-V2: Rationale: Der End-the-run-Effekt ist an erfolgreichen Trace gekoppelt. conditional_end_run ist präziser als ein generisches end_run-Signal."
       ]
     },
     {
@@ -14996,9 +15154,28 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "brain_damage_ice",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Code Corpse bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_230_cortical-scanner",
@@ -15035,7 +15212,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -15061,6 +15238,14 @@
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.multi_end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -15124,9 +15309,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "conditions": [
@@ -15141,16 +15326,32 @@
         "corp_ice.brain_damage",
         "corp_ice.damage_source",
         "corp_ice.end_run",
-        "corp_ice.program_trash",
         "damage.payoff"
       ],
       "lineSupport": [
-        "corp.damage_kill",
-        "corp.ice_tax_glacier"
+        "corp.damage_kill"
       ],
       "strategicRole": [
-        "punish_payoff",
-        "tax_tool"
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "brain_damage_ice",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Kartentext enthält Brain/Core damage und ETR, aber keinen Program-Trash; Damage-Kill bleibt, ICE-Tax aus Program-Trash entfällt."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, lineSupport, strategicRole, strategySupportPairs, targetOrConstraints.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Program-Trash ist im Kartentext nicht vorhanden. Der daraus abgeleitete corp.ice_tax_glacier-Pair war fachlich falsch; es bleibt ein Brain-Damage-ICE für corp.damage_kill."
       ]
     },
     {
@@ -15188,7 +15389,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -15213,6 +15414,14 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -15257,9 +15466,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_234_data-darts",
@@ -15294,17 +15511,57 @@
       "tacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.net_damage",
+        "corp_ice.next_ice_break_lock",
+        "corp_ice.run_lock",
         "damage.payoff"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "net_damage_run_lock_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.payoff"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: 3 Net damage ist ein echter Damage-Payoff, wenn auch etwas schwächer als Bolter Cluster/Bolter Swarm."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "next_ice_break_lock_ice",
+          "evidence": [
+            "corp_ice.next_ice_break_lock",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Die nächste ICE kann nicht gebrochen werden; das ist ein klarer Tax-/Lock-Baustein."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, lineSupport, strategicRole, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Der zweite Subroutine-Effekt fehlte vollständig. Data Darts ist funktional die kleinere Bolter-Variante und sollte next_ice_break_lock/run_lock sowie passende StrategySupportPairs erhalten."
+      ]
     },
     {
       "cardId": "onr_v1_235_data-naga",
@@ -15350,9 +15607,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_236_data-raven",
@@ -15427,7 +15692,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "strategicRole": [
@@ -15439,6 +15704,27 @@
         "corp_ice.trace_source",
         "tag.source",
         "trace.source"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "engine_anchor",
+          "roleDetail": "persistent_tag_engine_ice",
+          "evidence": [
+            "corp_ice.persistent_tag_source",
+            "corp_ice.tag_source",
+            "corp_ice.trace_source",
+            "tag.source",
+            "trace.source"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Data Raven bestätigt corp.tag_trace_punish nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -15476,7 +15762,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex",
         "focusedDecisionTest": "packages/ai/src/index.test.ts::keeps the Data Wall versus Japanese Water Torture repro generic through visible break cost"
       },
@@ -15502,6 +15788,14 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -15539,7 +15833,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -15564,6 +15858,14 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -15601,7 +15903,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -15627,6 +15929,14 @@
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.multi_end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -15662,7 +15972,6 @@
       ],
       "tacticSignals": [
         "corp_ice.conditional_end_run",
-        "corp_ice.end_run",
         "corp_ice.run_lock",
         "corp_ice.trace_source",
         "trace.source"
@@ -15673,7 +15982,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -15681,6 +15990,23 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_lock_ice",
+          "evidence": [
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Trace-success ETR plus Run-Lock; no unconditional end_run signal."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Fang sollte wie Asp/Fang 2.0/Rex über conditional_end_run modelliert werden, nicht zusätzlich als generisches end_run."
       ]
     },
     {
@@ -15724,7 +16050,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -15732,6 +16058,23 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_lock_ice",
+          "evidence": [
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Fang 2.0 bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -15782,11 +16125,30 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "net_damage_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.payoff"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Fatal Attractor bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_243_fetch-4-0-1",
@@ -15830,7 +16192,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -15865,6 +16227,14 @@
         "corp_ice.trace_source",
         "tag.source",
         "trace.source"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -15902,7 +16272,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -15927,6 +16297,14 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -15964,7 +16342,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -15989,6 +16367,14 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -16043,9 +16429,27 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_lock_ice",
+          "evidence": [
+            "corp_ice.program_trash",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Fragmentation Storm bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_247_haunting-inquisition",
@@ -16081,9 +16485,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -16094,7 +16498,26 @@
       ],
       "tacticSignals": [
         "corp_ice.encounter_tax",
-        "corp_ice.run_lock"
+        "corp_ice.run_lock",
+        "corp_ice.end_run"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_lock_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Haunting Inquisition bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -16142,7 +16565,7 @@
       ],
       "tacticSignals": [
         "corp_ice.damage_source",
-        "corp_ice.end_run",
+        "corp_ice.conditional_end_run",
         "corp_ice.hardware_trash",
         "corp_ice.meat_damage",
         "corp_ice.trace_source",
@@ -16155,9 +16578,40 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "meat_damage_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.meat_damage",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Trace-success Meat damage bleibt Damage-Kill-Payoff."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "trace_success_hardware_trash_etr_ice",
+          "evidence": [
+            "corp_ice.conditional_end_run",
+            "corp_ice.hardware_trash",
+            "corp_ice.trace_source"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: ETR/Hardware-Trash hängen am Trace-Erfolg; conditional_end_run ist präziser als end_run."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, strategySupportPairs, targetOrConstraints.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Hardware-Ziel erforderlich. Constraint: ETR, Hardware-Trash und Meat damage nur bei Trace-Erfolg.",
+        "ICE-V2: Rationale: Der End-the-run-Effekt ist an erfolgreichen Trace gekoppelt. conditional_end_run ist präziser als ein generisches end_run-Signal."
+      ]
     },
     {
       "cardId": "onr_v1_249_hunter",
@@ -16201,7 +16655,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -16236,6 +16690,14 @@
         "corp_ice.trace_source",
         "tag.source",
         "trace.source"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -16308,9 +16770,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_251_jack-attack",
@@ -16358,9 +16828,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -16368,6 +16838,23 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "jackout_tax_or_lock_ice",
+          "evidence": [
+            "corp_ice.jackout_lock"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Jack Attack bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -16405,7 +16892,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -16430,6 +16917,14 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -16476,9 +16971,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_254_liche",
@@ -16531,9 +17034,28 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "brain_damage_ice",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Liche bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_255_mastiff",
@@ -16567,10 +17089,12 @@
         "data/scenarios/ai-deck-legal-v1915-smokes.json#corp_v1915_trace_ice"
       ],
       "lineSupport": [
-        "corp.damage_kill"
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
       ],
       "strategicRole": [
-        "punish_payoff"
+        "punish_payoff",
+        "tax_tool"
       ],
       "tacticSignals": [
         "corp_ice.brain_damage",
@@ -16578,7 +17102,10 @@
         "corp_ice.end_run",
         "corp_ice.trace_source",
         "damage.payoff",
-        "trace.source"
+        "trace.source",
+        "corp_ice.net_damage",
+        "corp_ice.future_strength_buff",
+        "damage.corp_persistent_damage_counter"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -16586,9 +17113,42 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "persistent_brain_damage_counter_ice",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.corp_persistent_damage_counter",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Brain+Net damage plus persistenter Brain-Damage-Counter ist ein starker Damage-Payoff."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "future_strength_buff_tax_ice",
+          "evidence": [
+            "corp_ice.future_strength_buff",
+            "corp_ice.end_run"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Die Karte stärkt alle weiteren ICE im Run und ist damit auch Glacier-/Tax-Support."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, lineSupport, strategicRole, strategySupportPairs, taxonomyFollowup.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Taxonomy follow-up: Lokale Spoilerquelle lässt die Trace-Zahl aus; externe Kartendatenbank weist auf Trace5 hin. Signal damage.corp_persistent_damage_counter sollte auch für Baskerville/Cerberus geprüft werden.",
+        "ICE-V2: Rationale: Neben Damage-Kill unterstützt Mastiff über future_strength_buff dieselbe ICE-Tax-Linie wie Canis/Coyote. Der persistente Damage-Counter sollte präziser sichtbar sein."
+      ]
     },
     {
       "cardId": "onr_v1_256_mazer",
@@ -16648,9 +17208,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_257_nerve-labyrinth",
@@ -16696,9 +17264,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_258_neural-blade",
@@ -16740,10 +17316,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -16768,7 +17344,33 @@
       "tacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.net_damage",
+        "corp_ice.next_ice_break_lock",
+        "corp_ice.run_lock",
         "damage.payoff"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "next_ice_break_lock_ice",
+          "evidence": [
+            "corp_ice.next_ice_break_lock",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Auch mit nur 1 Net damage ist die Break-Lock-Funktion für die nächste ICE ein starker Tax-/Lock-Baustein."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, lineSupport, strategicRole, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Der Break-Lock-Effekt auf die nächste ICE fehlte. Wegen nur 1 Net damage kein eigener Damage-Kill-Anker, aber klarer corp.ice_tax_glacier-Tax-Tool."
       ]
     },
     {
@@ -16807,7 +17409,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -16832,6 +17434,14 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -16868,17 +17478,45 @@
         "corp_ice.tag_source",
         "corp_ice.trace_source",
         "tag.source",
-        "trace.source"
+        "trace.source",
+        "trace.corp_credit_support"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "roleDetail": "encounter_trace_tag_credit_ice",
+          "evidence": [
+            "corp_ice.tag_source",
+            "corp_ice.trace_source",
+            "tag.source",
+            "trace.source",
+            "trace.corp_credit_support"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Zwei Trace-6-Tag-Subroutinen mit encounter-lokalem Trace-Credit-Pool sind ein klarer Tag/Trace-Enabler."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, lineSupport, strategicRole, strategySupportPairs, targetOrConstraints.",
+        "ICE-V2: Target/Constraints: Constraint: [4] Encounter-Credits nur für die beiden Trace-Subroutinen und nur bis Encounter-Ende.",
+        "ICE-V2: Rationale: Der Trace-Credit-Pool fehlt im Report. Durch zwei Trace-6-Tag-Subroutinen plus zweckgebundene Credits ist die Karte stärker als einfache Fetch/Hunter-Tag-ICE und sollte corp.tag_trace_punish als Enabler tragen."
+      ]
     },
     {
       "cardId": "onr_v1_261_quandary",
@@ -16915,7 +17553,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -16940,6 +17578,14 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -16986,9 +17632,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_263_reinforced-wall",
@@ -17025,7 +17679,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -17051,6 +17705,14 @@
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.multi_end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -17094,7 +17756,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -17102,6 +17764,23 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_lock_ice",
+          "evidence": [
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Rex bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -17139,7 +17818,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -17164,6 +17843,14 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -17224,9 +17911,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_267_sentinels-prime",
@@ -17278,12 +17973,20 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.program_trash"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -17323,9 +18026,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -17349,6 +18052,24 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "next_ice_break_lock_ice",
+          "evidence": [
+            "corp_ice.jackout_lock",
+            "corp_ice.next_ice_break_lock"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Shock.r bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -17395,9 +18116,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_270_sleeper",
@@ -17457,9 +18186,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_271_tko-2-0",
@@ -17503,9 +18240,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -17513,6 +18250,24 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.end_run",
+            "corp_ice.runner_action_loss"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: TKO 2.0 bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -17561,9 +18316,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_273_triggerman",
@@ -17607,9 +18370,17 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
-      }
+      },
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_v1_274_tutor",
@@ -17667,7 +18438,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "strategicRole": [
@@ -17676,8 +18447,27 @@
       "tacticSignals": [
         "corp_ice.encounter_tax",
         "corp_ice.end_run",
-        "corp_ice.jackout_tax",
         "corp_ice.run_lock"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "future_etr_subroutine_tax_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "corp_ice.end_run",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Tutor fügt künftigen ICE ETR-Subroutinen hinzu; das ist kein Jackout-Tax."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, strategySupportPairs, taxonomyFollowup.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Taxonomy follow-up: Optional: präzises Signal corp_ice.future_end_run_subroutine oder ice.corp_subroutine_support prüfen, falls die ICE-/Asset-Taxonomie vereinheitlicht werden soll.",
+        "ICE-V2: Rationale: jackout_tax ist falsch; Tutor besteuert nicht das Jackout, sondern fügt für den Rest des Runs zusätzliche ETR-Subroutinen an spätere ICE an."
       ]
     },
     {
@@ -17717,14 +18507,43 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "corp_ice.random_or_guessing"
+        "corp_ice.random_or_guessing",
+        "corp_ice.encounter_tax",
+        "run.corp_run_rewind",
+        "risk.random_outcome"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "random_run_rewind_tax_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "run.corp_run_rewind",
+            "risk.random_outcome"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Run-Rewind kann bereits passierte ICE erneut erzwingen oder Jackout provozieren; random outcome begrenzt die Verlässlichkeit."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=tacticSignals, lineSupport, strategicRole, strategySupportPairs, taxonomyFollowup.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Taxonomy follow-up: Neues/zu prüfendes Signal: run.corp_run_rewind für same-server Rückversetzen im Run; nicht mit cross-fort run.corp_redirect vermischen.",
+        "ICE-V2: Rationale: Nur random_or_guessing unterschlägt die eigentliche Funktion. Vacuum Link kontrolliert den Runpath, indem der Runner zu früherem rezzed ICE zurückgesetzt wird oder jackt out."
       ]
     },
     {
@@ -17793,7 +18612,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "strategicRole": [
@@ -17804,6 +18623,26 @@
         "corp_ice.jackout_tax",
         "corp_ice.program_trash",
         "corp_ice.run_lock"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_lock_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "corp_ice.jackout_tax",
+            "corp_ice.program_trash",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Viral 15 bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -17865,7 +18704,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "strategicRole": [
@@ -17875,6 +18714,25 @@
         "corp_ice.break_cost_tax",
         "corp_ice.encounter_tax",
         "corp_ice.run_lock"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_lock_ice",
+          "evidence": [
+            "corp_ice.break_cost_tax",
+            "corp_ice.encounter_tax",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Virizz bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -17915,7 +18773,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -17946,6 +18804,35 @@
         "corp_ice.multi_end_run",
         "corp_ice.net_damage",
         "damage.payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "net_damage_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Wall of Ice bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "multi_end_run_tax_ice",
+          "evidence": [
+            "corp_ice.multi_end_run"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Wall of Ice bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -17983,7 +18870,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -18008,6 +18895,14 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -18052,7 +18947,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -18060,6 +18955,25 @@
       ],
       "strategicRole": [
         "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "brain_damage_ice",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Zombie bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=originalset-v1; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -26745,9 +27659,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -26760,6 +27674,25 @@
         "corp_ice.brain_damage",
         "corp_ice.damage_source",
         "damage.payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "brain_damage_ice",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Brain Wash bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -26794,9 +27727,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -26805,17 +27738,48 @@
         "corp_ice.net_damage",
         "corp_ice.outer_ice_scaling",
         "corp_ice.position_scaling",
-        "damage.payoff",
-        "ice.strength_modifier"
+        "damage.payoff"
       ],
       "lineSupport": [
+        "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
       "strategicRole": [
-        "tax_tool"
+        "punish_payoff",
+        "payoff_anchor"
       ],
       "manualNotes": [
-        "Bug Zapper's damage scales with rezzed outside ICE; solo Bug Zapper should not be treated as durable central or remote tax when visible Killer coverage can break it."
+        "Bug Zapper's damage scales with rezzed outside ICE; solo Bug Zapper should not be treated as durable central or remote tax when visible Killer coverage can break it.",
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=tacticSignals, lineSupport, strategicRole, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: ice.strength_modifier ist falsch, weil Bug Zapper keine Stärke verändert. Dafür ist der skalierende Net-Damage-Payoff stark genug für corp.damage_kill und als deep-server payoff für corp.ice_tax_glacier."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "position_scaling_net_damage_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "corp_ice.outer_ice_scaling",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Net damage skaliert mit äußerem rezzed ICE; das ist ein echter Damage-Payoff."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "payoff_anchor",
+          "roleDetail": "deep_server_damage_payoff_ice",
+          "evidence": [
+            "corp_ice.outer_ice_scaling",
+            "corp_ice.position_scaling",
+            "corp_ice.net_damage"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Die Karte belohnt tiefe/rezzed ICE-Server, aber nicht über Strength; Glacier-Bezug über Position-Scaling, nicht ice.strength_modifier."
+        }
       ]
     },
     {
@@ -26849,7 +27813,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -26874,6 +27838,14 @@
             "option_with_no_visible_current_payoff"
           ]
         }
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -26909,7 +27881,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -26919,6 +27891,14 @@
         "corp_ice.trace_source",
         "damage.payoff",
         "trace.source"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -26949,16 +27929,43 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.multi_end_run",
-        "corp_ice.program_trash"
+        "corp_ice.program_trash",
+        "corp_ice.multi_program_trash"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "multi_program_trash_tax_ice",
+          "evidence": [
+            "corp_ice.multi_program_trash",
+            "corp_ice.program_trash",
+            "corp_ice.multi_end_run"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Drei Program-Trash- und zwei ETR-Subroutinen erfüllen ausdrücklich die Guide-Schwelle für anchorfähigen Program-Trash."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=tacticSignals, lineSupport, strategicRole, strategySupportPairs, taxonomyFollowup.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Taxonomy follow-up: Neues/zu prüfendes Signal: corp_ice.multi_program_trash für mehrfachen Program-Trash als harte Rig-Tax-Schwelle.",
+        "ICE-V2: Rationale: Der Guide nennt mehrfachen Program-Trash ausdrücklich als anchorfähigen Sonderfall. Colonel Failure ist daher nicht nur support-only."
       ]
     },
     {
@@ -26988,9 +27995,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27002,6 +28009,23 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "future_strength_tax_ice",
+          "evidence": [
+            "corp_ice.future_strength_buff"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Coyote bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27036,12 +28060,11 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.end_run",
-        "corp_ice.rez_economy",
         "corp_ice.type_choice_or_mode_choice"
       ],
       "targetProfiles": [
@@ -27064,8 +28087,15 @@
         }
       ],
       "manualNotes": [
-        "Credit Blocks needs the extra-credit wall mode to dodge visible Killer-only coverage; if Corp cannot pay base rez plus 1, sentry mode remains contestable."
-      ]
+        "Credit Blocks needs the extra-credit wall mode to dodge visible Killer-only coverage; if Corp cannot pay base rez plus 1, sentry mode remains contestable.",
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=tacticSignals, taxonomyFollowup.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Taxonomy follow-up: Optional: Wenn Mehrkosten beim Rezzen explizit modelliert werden sollen, eigenes Risiko/Cost-Signal wie risk.additional_rez_cost statt corp_ice.rez_economy verwenden.",
+        "ICE-V2: Rationale: Die Karte gibt keine Credits und reduziert keine Kosten; sie kann beim Rezzen gegen Mehrkosten den ICE-Typ ändern. corp_ice.rez_economy ist deshalb falsch."
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": []
     },
     {
       "cardId": "onr_proteus_018_datacomb",
@@ -27098,7 +28128,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -27124,6 +28154,14 @@
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27159,7 +28197,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -27174,6 +28212,25 @@
         "corp_ice.end_run",
         "corp_ice.optional_self_bounce_gain",
         "damage.payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "brain_damage_ice",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Death Yo-Yo bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27209,7 +28266,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27224,6 +28281,23 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "rez_paid_scaling_ice",
+          "evidence": [
+            "corp_ice.rez_paid_scaling"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Digiconda bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27258,9 +28332,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27273,13 +28347,45 @@
         "ice.strength_modifier"
       ],
       "lineSupport": [
+        "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
       "strategicRole": [
+        "punish_payoff",
         "tax_tool"
       ],
       "manualNotes": [
-        "Dog Pile needs outside rezzed ICE for durable remote protection; solo Dog Pile is only a temporary coverage window."
+        "Dog Pile needs outside rezzed ICE for durable remote protection; solo Dog Pile is only a temporary coverage window.",
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=lineSupport, strategicRole, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Dog Pile hat nicht nur Strength-Scaling, sondern auch skalierenden Net-Damage. Der Damage-Kill-Bezug sollte sichtbar sein."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "position_scaling_net_damage_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "corp_ice.outer_ice_scaling",
+            "damage.payoff"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Net damage skaliert mit äußerem rezzed ICE; Damage-Kill-Payoff ist vorhanden, aber niedriger als Bug Zapper."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "position_scaling_strength_tax_ice",
+          "evidence": [
+            "corp_ice.outer_ice_scaling",
+            "corp_ice.position_scaling",
+            "ice.strength_modifier"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Zusätzlich zum skalierenden Schaden skaliert die Stärke mit äußerem rezzed ICE."
+        }
       ]
     },
     {
@@ -27313,7 +28419,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27325,6 +28431,23 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "rez_paid_scaling_ice",
+          "evidence": [
+            "corp_ice.rez_paid_scaling"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Food Fight bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27358,7 +28481,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27383,6 +28506,14 @@
             "option_with_no_visible_current_payoff"
           ]
         }
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27416,7 +28547,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27428,6 +28559,23 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "rez_paid_scaling_ice",
+          "evidence": [
+            "corp_ice.rez_paid_scaling"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Gatekeeper bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27463,7 +28611,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27478,6 +28626,24 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_lock_ice",
+          "evidence": [
+            "corp_ice.rez_paid_scaling",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Homing Missile bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27514,24 +28680,59 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.outer_ice_scaling",
         "corp_ice.position_scaling",
         "corp_ice.tag_source",
-        "ice.strength_modifier",
-        "tag.source"
+        "tag.source",
+        "corp_ice.trace_source",
+        "trace.source"
       ],
       "lineSupport": [
-        "corp.ice_tax_glacier"
+        "corp.ice_tax_glacier",
+        "corp.tag_trace_punish"
       ],
       "strategicRole": [
-        "tax_tool"
+        "tax_tool",
+        "enabler"
       ],
       "manualNotes": [
-        "Hunting Pack needs rezzed outside ICE before its trace subroutines exist; solo Hunting Pack is setup, not durable protection."
+        "Hunting Pack needs rezzed outside ICE before its trace subroutines exist; solo Hunting Pack is setup, not durable protection.",
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=tacticSignals, lineSupport, strategicRole, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Taxonomy follow-up: Tag-Trace-Strategieanker bleibt bewusst deferred; Skalierung ist nützlich, aber ohne eigenen Payoff kein bestätigter Punish-Anchor.",
+        "ICE-V2: Rationale: ice.strength_modifier ist falsch; Hunting Pack verändert keine Stärke. Die multiple Trace-Tag-Funktion sollte aber zusätzlich corp.tag_trace_punish als Enabler tragen."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "position_scaling_trace_tag_tax_ice",
+          "evidence": [
+            "corp_ice.outer_ice_scaling",
+            "corp_ice.position_scaling",
+            "corp_ice.trace_source"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Mehr Trace-Tag-Subroutinen erhöhen Break-/Risk-Druck in tiefen Servern; kein Strength-Modifier."
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "enabler",
+          "roleDetail": "position_scaling_trace_tag_source",
+          "evidence": [
+            "corp_ice.tag_source",
+            "corp_ice.trace_source",
+            "tag.source",
+            "trace.source",
+            "corp_ice.outer_ice_scaling"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Mehrere Trace-5-Tag-Subroutinen sind deutlich stärker als ein einfacher Hunter/Fetch-Trace und tragen die Tag/Trace-Linie als Enabler."
+        }
       ]
     },
     {
@@ -27565,9 +28766,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27581,6 +28782,24 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "paid_end_run_subroutine_ice",
+          "evidence": [
+            "corp_ice.encounter_paid_subroutine_add"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Iceberg bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+        "ICE-V2: Taxonomy follow-up: Optionales Follow-up: bezahlte ETR-Subroutine ist aktuell nur über corp_ice.encounter_paid_subroutine_add modelliert.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27614,7 +28833,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27639,6 +28858,14 @@
             "option_with_no_visible_current_payoff"
           ]
         }
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27672,13 +28899,21 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.program_trash",
         "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27712,19 +28947,19 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.end_run",
-        "corp_ice.net_damage",
         "corp_ice.outer_ice_scaling",
         "corp_ice.position_scaling",
         "damage.payoff",
-        "ice.strength_modifier"
+        "ice.strength_modifier",
+        "corp_ice.brain_damage"
       ],
       "lineSupport": [
         "corp.damage_kill",
@@ -27733,6 +28968,37 @@
       "strategicRole": [
         "punish_payoff",
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "brain_damage_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "damage.payoff",
+            "corp_ice.brain_damage"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Mastermind bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "position_scaling_tax_ice",
+          "evidence": [
+            "corp_ice.outer_ice_scaling",
+            "corp_ice.position_scaling",
+            "ice.strength_modifier"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Mastermind bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27764,9 +29030,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
@@ -27778,8 +29044,26 @@
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.outer_ice_scaling",
-        "corp_ice.position_scaling",
-        "ice.strength_modifier"
+        "corp_ice.position_scaling"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "position_scaling_etr_ice",
+          "evidence": [
+            "corp_ice.outer_ice_scaling",
+            "corp_ice.position_scaling",
+            "corp_ice.end_run"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Minotaur erzeugt position-skalierende ETR-Subroutinen, aber keinen Strength-Modifier."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=tacticSignals, strategySupportPairs.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: ice.strength_modifier ist falsch; Minotaur erhält zusätzliche ETR-Subroutinen, keine Stärke."
       ]
     },
     {
@@ -27813,7 +29097,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27826,6 +29110,24 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "pay_or_end_run_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "corp_ice.runner_pay_or_end_run"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Misleading Access Menus bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -27862,7 +29164,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27892,8 +29194,14 @@
         }
       ],
       "manualNotes": [
-        "Mobile Barricade only repositions within the same data fort; do not count it as fixing an unrelated weak server or empty remote."
-      ]
+        "Mobile Barricade only repositions within the same data fort; do not count it as fixing an unrelated weak server or empty remote.",
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile/Constraint: Fort-Position und Start-of-run-Timing.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": []
     },
     {
       "cardId": "onr_proteus_034_riddler",
@@ -27925,9 +29233,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -27940,7 +29248,23 @@
         "tax_tool"
       ],
       "manualNotes": [
-        "Riddler end-the-run protection is encounter-paid; value it only when Corp can pay during the encounter."
+        "Riddler end-the-run protection is encounter-paid; value it only when Corp can pay during the encounter.",
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+        "ICE-V2: Taxonomy follow-up: Optionales Follow-up: bezahlte ETR-Subroutine ist aktuell nur über corp_ice.encounter_paid_subroutine_add modelliert.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "paid_end_run_subroutine_ice",
+          "evidence": [
+            "corp_ice.encounter_paid_subroutine_add"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Riddler bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
       ]
     },
     {
@@ -27974,7 +29298,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -27999,7 +29323,17 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run",
-        "corp_ice.random_or_guessing"
+        "corp_ice.random_or_guessing",
+        "risk.random_outcome"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=tacticSignals, taxonomyFollowup.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Taxonomy follow-up: Optional: eigenes Risiko für random bypass/derez liability prüfen, wenn Roadblock-ähnliche Karten häufiger werden.",
+        "ICE-V2: Rationale: Die Karte hat ein relevantes Zufallsergebnis: meistens temporäre Strength-Erhöhung, auf 6 aber Derez und automatisches Passieren. risk.random_outcome sollte sichtbar sein."
       ]
     },
     {
@@ -28033,7 +29367,7 @@
         "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -28045,6 +29379,23 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "rez_paid_scaling_ice",
+          "evidence": [
+            "corp_ice.rez_paid_scaling"
+          ],
+          "confidence": "medium",
+          "rationale": "ICE Semantic Review v1: Sandstorm bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Choice/Constraint: bezahltes X oder encounter-paid Option muss über LegalActions bewertet werden.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -28078,7 +29429,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -28104,6 +29455,14 @@
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.optional_self_bounce_gain"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -28137,7 +29496,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -28150,6 +29509,24 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "pay_or_end_run_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "corp_ice.runner_pay_or_end_run"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Snowbank bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -28183,7 +29560,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -28208,6 +29585,14 @@
             "option_with_no_visible_current_payoff"
           ]
         }
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -28241,7 +29626,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -28266,6 +29651,14 @@
             "option_with_no_visible_current_payoff"
           ]
         }
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -28299,12 +29692,20 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.multi_end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -28338,7 +29739,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -28364,6 +29765,14 @@
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.optional_self_bounce_gain"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -28397,7 +29806,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -28423,6 +29832,14 @@
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -28456,7 +29873,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -28481,6 +29898,14 @@
             "hidden_info_dependent_choice"
           ]
         }
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile/Constraint: Fort-Position und Start-of-run-Timing.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -28512,13 +29937,21 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.program_trash",
         "corp_ice.rez_economy",
         "corp_ice.runner_pay_or_program_trash"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=proteus; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -36215,11 +37648,24 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "low",
-        "needsHumanReview": true
-      }
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=testset; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "simple_code_gate_ice",
@@ -36250,11 +37696,25 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "low",
-        "needsHumanReview": true
-      }
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "economy.corp_credit_burst",
+        "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=testset; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "simple_decoder",
@@ -36686,11 +38146,26 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "low",
-        "needsHumanReview": true
-      }
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "economy.runner_credit_loss",
+        "tax.runner_credit",
+        "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=testset; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "simple_setup_hardware",
@@ -36760,11 +38235,26 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "low",
-        "needsHumanReview": true
-      }
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.tag_source",
+        "tag.source",
+        "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=testset; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "simple_tag_punishment_operation",
@@ -36852,11 +38342,26 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "low",
-        "needsHumanReview": true
-      }
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "economy.runner_credit_loss",
+        "tax.runner_credit",
+        "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=testset; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "simple_upgrade",
@@ -37184,11 +38689,25 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "low",
-        "needsHumanReview": true
-      }
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "economy.corp_credit_burst",
+        "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=testset; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "v08_memory_chip",
@@ -37408,11 +38927,24 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "low",
-        "needsHumanReview": true
-      }
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=testset; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "v08_watchdog_ice",
@@ -37445,11 +38977,26 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "low",
-        "needsHumanReview": true
-      }
+        "needsHumanReview": false,
+        "reviewedDate": "2026-07-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "corp_ice.tag_source",
+        "tag.source",
+        "corp_ice.end_run"
+      ],
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=testset; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
+      ]
     },
     {
       "cardId": "onr_classic_017_corporate-shuffle",
@@ -39378,7 +40925,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -39388,7 +40935,7 @@
         "corp_ice.rez_economy",
         "corp_ice.trace_source",
         "damage.payoff",
-        "tax.runner_persistent",
+        "damage.corp_persistent_damage_counter",
         "trace.source"
       ],
       "effects": [
@@ -39459,7 +41006,38 @@
         "tax_tool"
       ],
       "manualNotes": [
-        "CLASSIC-AI-05: Trace success creates a public Baskerville counter; do not model it as tag payoff."
+        "CLASSIC-AI-05: Trace success creates a public Baskerville counter; do not model it as tag payoff.",
+        "ICE-V2: set=classic; changedAgainstUploadedReport=tacticSignals, strategySupportPairs, targetOrConstraints, taxonomyFollowup.",
+        "ICE-V2: Target/Constraints: Constraint: Rez-Kostenreduktion nur nach noisy icebreaker in diesem Run; Baskerville-Counter entfernen kostet Runner eine Aktion und [3].",
+        "ICE-V2: Taxonomy follow-up: damage.corp_persistent_damage_counter als präziser Ersatz/Ergänzung zu tax.runner_persistent prüfen.",
+        "ICE-V2: Rationale: tax.runner_persistent ist zu unscharf für einen persistenten Damage-Counter. Der Damage-Counter sollte als Damage-Signal sichtbar sein."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "persistent_damage_counter_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.corp_persistent_damage_counter",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Baskerville-Counter erzeugen wiederkehrenden Net-Damage am Start jedes Runs."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.end_run",
+            "corp_ice.net_damage"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: ETR plus Damage-Druck und noisy-rez discount unterstützen ICE-Tax/Glacier."
+        }
       ]
     },
     {
@@ -39506,7 +41084,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -39562,6 +41140,36 @@
       "strategicRole": [
         "punish_payoff",
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "net_damage_run_lock_ice",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.payoff"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Bolter Swarm bestätigt corp.damage_kill nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "next_ice_break_lock_ice",
+          "evidence": [
+            "corp_ice.next_ice_break_lock",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "high",
+          "rationale": "ICE Semantic Review v1: Bolter Swarm bestätigt corp.ice_tax_glacier nur aus konkreten ICE-Funktionssignalen; Subtypen bleiben Kartendaten."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=classic; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Constraint: Rez-Kostenreduktion nur nach noisy icebreaker in diesem Run.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -39602,16 +41210,17 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.brain_damage",
         "corp_ice.damage_source",
         "corp_ice.random_or_guessing",
-        "damage.payoff"
+        "damage.payoff",
+        "risk.random_outcome"
       ],
       "effects": [
         {
@@ -39639,7 +41248,26 @@
         "punish_payoff"
       ],
       "manualNotes": [
-        "CLASSIC-AI-05: Random damage is deterministic through engine RNG; value is high-impact but probabilistic."
+        "CLASSIC-AI-05: Random damage is deterministic through engine RNG; value is high-impact but probabilistic.",
+        "ICE-V2: set=classic; changedAgainstUploadedReport=tacticSignals, strategySupportPairs, taxonomyFollowup.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Taxonomy follow-up: risk.random_outcome für ICE-Random-Fälle einheitlich mit Upgrade/Asset-Reviews verwenden.",
+        "ICE-V2: Rationale: Der Damage-Anker bleibt, aber high confidence ist wegen 1/6-Würfelrisiko zu hoch. Risiko sollte explizit sichtbar sein."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "punish_payoff",
+          "roleDetail": "random_brain_damage_ice",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff",
+            "risk.random_outcome"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: 3 Brain damage ist stark, aber nur auf Würfelwurf 1; random outcome senkt Confidence."
+        }
       ]
     },
     {
@@ -39678,10 +41306,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -39744,11 +41372,13 @@
           "hiddenInfoPolicy": "visible_or_known_only"
         }
       ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=classic; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich. Constraint: Rez-Kostenreduktion nur nach noisy icebreaker in diesem Run.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -39787,10 +41417,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -39853,11 +41483,13 @@
           "hiddenInfoPolicy": "visible_or_known_only"
         }
       ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=classic; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: TargetProfile: installiertes Runner-Programm als legales Trash-Ziel erforderlich. Constraint: Rez-Kostenreduktion nur nach noisy icebreaker in diesem Run.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -39895,10 +41527,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -39938,11 +41570,13 @@
           "kind": "requires_unbroken_subroutine"
         }
       ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
+      "lineSupport": [],
+      "strategicRole": [],
+      "strategySupportPairs": [],
+      "manualNotes": [
+        "ICE-V2: set=classic; changedAgainstUploadedReport=none.",
+        "ICE-V2: Target/Constraints: Keine zusätzlichen Target-/Constraint-Hinweise.",
+        "ICE-V2: Rationale: Critical Review v2 bestätigt den Zielzustand."
       ]
     },
     {
@@ -39982,12 +41616,11 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.encounter_tax",
-        "corp_ice.other_utility",
         "run.corp_redirect"
       ],
       "effects": [
@@ -40027,12 +41660,28 @@
         }
       ],
       "lineSupport": [
-        "corp.central_stabilize",
         "corp.ice_tax_glacier"
       ],
       "strategicRole": [
-        "defensive_tool",
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_redirect_tax_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "run.corp_redirect"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Redirect zu Archives ist primär Runpath-/Tax-Kontrolle; central_stabilize wäre nur abhängig vom Installationsfort."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=classic; changedAgainstUploadedReport=tacticSignals, lineSupport, strategicRole, strategySupportPairs, targetOrConstraints.",
+        "ICE-V2: Target/Constraints: TargetProfile/Constraint: Nicht auf Archives installierbar; Redirect auf Archives und dort äußeres rezzed ICE bzw. Fallback-Regel prüfen.",
+        "ICE-V2: Rationale: corp_ice.other_utility ist redundant. Der central_stabilize-Anker ist zu situationsabhängig, weil Dumpster nicht nur auf HQ/R&D installiert werden kann."
       ]
     },
     {
@@ -40073,13 +41722,11 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.encounter_tax",
-        "corp_ice.other_utility",
-        "corp_ice.runner_pay_or_end_run",
         "run.corp_redirect"
       ],
       "effects": [
@@ -40130,8 +41777,36 @@
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "defensive_tool",
-        "tax_tool"
+        "tax_tool",
+        "defensive_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_redirect_tax_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "run.corp_redirect"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Redirect erzeugt zusätzliche Encounter-/Tax-Struktur; die Zahlung ist Corp-Kosten-/LegalAction-Semantik, kein Runner-pay-or-end-run."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "remote_run_redirect_defense",
+          "evidence": [
+            "run.corp_redirect"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Redirect kann einen Scoring-Remote verteidigen, bleibt aber fort-/zielabhängig."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=classic; changedAgainstUploadedReport=tacticSignals, strategySupportPairs, targetOrConstraints.",
+        "ICE-V2: Target/Constraints: TargetProfile: legaler Redirect-Fort und dort äußeres rezzed ICE bzw. Fallback-Regel prüfen. Constraint: Corp zahlt [2] für den Redirect; nicht Runner-pay-or-end-run.",
+        "ICE-V2: Rationale: corp_ice.runner_pay_or_end_run ist fachlich falsch, weil die Corp [2] zahlt. corp_ice.other_utility ist redundant neben run.corp_redirect."
       ]
     },
     {
@@ -40173,9 +41848,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
@@ -40244,16 +41919,30 @@
         }
       ],
       "lineSupport": [
-        "corp.central_stabilize",
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring"
+        "corp.ice_tax_glacier"
       ],
       "strategicRole": [
-        "defensive_tool",
         "tax_tool"
       ],
       "manualNotes": [
-        "CLASSIC-AI-05: Reposition may reveal unrezzed Glacier and costs 1 credit; rez also costs 1 agenda point."
+        "CLASSIC-AI-05: Reposition may reveal unrezzed Glacier and costs 1 credit; rez also costs 1 agenda point.",
+        "ICE-V2: set=classic; changedAgainstUploadedReport=lineSupport, strategicRole, strategySupportPairs, targetOrConstraints.",
+        "ICE-V2: Target/Constraints: TargetProfile/Constraint: Fort-Position und Start-of-run-Timing; Rez kostet zusätzlich 1 Agenda-Punkt.",
+        "ICE-V2: Rationale: corp.central_stabilize und corp.remote_scoring sind für ein generisches mobiles ICE zu breit. Die Karte schützt je nach Einsatzort verschiedene Server, belegt aber primär die ICE-Tax/Glacier-Linie."
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "mobile_fort_ice",
+          "evidence": [
+            "corp_ice.mobile_position_change",
+            "corp_ice.multi_end_run",
+            "corp_ice.end_run"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Mobile Fort-ICE ist ein klarer Glacier-/Tax-Baustein; central/remote sind Einsatzorte, keine eigenständigen Strategieanker."
+        }
       ]
     },
     {
@@ -40294,12 +41983,11 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.encounter_tax",
-        "corp_ice.other_utility",
         "run.corp_redirect"
       ],
       "effects": [
@@ -40345,6 +42033,34 @@
       "strategicRole": [
         "defensive_tool",
         "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.central_stabilize",
+          "role": "defensive_tool",
+          "roleDetail": "central_run_redirect_defense",
+          "evidence": [
+            "run.corp_redirect"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Trapdoor ist nur auf HQ/R&D installierbar und schützt damit tatsächlich zentrale Server."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_redirect_tax_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "run.corp_redirect"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Redirect erzeugt zusätzliche Encounter-/Tax-Struktur."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=classic; changedAgainstUploadedReport=tacticSignals, strategySupportPairs, targetOrConstraints.",
+        "ICE-V2: Target/Constraints: TargetProfile/Constraint: Nur auf R&D oder HQ installierbar; legaler subsidiary Redirect-Fort und dort äußeres rezzed ICE bzw. Fallback-Regel prüfen.",
+        "ICE-V2: Rationale: corp_ice.other_utility ist redundant; die zentral-spezifische Verteidigungsrolle bleibt wegen Installationsconstraint auf HQ/R&D korrekt."
       ]
     },
     {
@@ -40385,13 +42101,11 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-07-01",
+        "reviewedDate": "2026-07-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.encounter_tax",
-        "corp_ice.other_utility",
-        "corp_ice.runner_pay_or_end_run",
         "run.corp_redirect"
       ],
       "effects": [
@@ -40442,8 +42156,36 @@
         "corp.remote_scoring"
       ],
       "strategicRole": [
-        "defensive_tool",
-        "tax_tool"
+        "tax_tool",
+        "defensive_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tax_tool",
+          "roleDetail": "run_redirect_tax_ice",
+          "evidence": [
+            "corp_ice.encounter_tax",
+            "run.corp_redirect"
+          ],
+          "confidence": "high",
+          "rationale": "v2: Redirect erzeugt zusätzliche Encounter-/Tax-Struktur; die Zahlung ist Corp-Kosten-/LegalAction-Semantik, kein Runner-pay-or-end-run."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "defensive_tool",
+          "roleDetail": "remote_run_redirect_defense",
+          "evidence": [
+            "run.corp_redirect"
+          ],
+          "confidence": "medium",
+          "rationale": "v2: Redirect kann einen Scoring-Remote verteidigen, bleibt aber fort-/zielabhängig."
+        }
+      ],
+      "manualNotes": [
+        "ICE-V2: set=classic; changedAgainstUploadedReport=tacticSignals, strategySupportPairs, targetOrConstraints.",
+        "ICE-V2: Target/Constraints: TargetProfile: legaler Redirect-Fort und dort äußeres rezzed ICE bzw. Fallback-Regel prüfen. Constraint: Corp zahlt [2] für den Redirect; nicht Runner-pay-or-end-run.",
+        "ICE-V2: Rationale: corp_ice.runner_pay_or_end_run ist fachlich falsch, weil die Corp [2] zahlt. corp_ice.other_utility ist redundant neben run.corp_redirect."
       ]
     },
     {

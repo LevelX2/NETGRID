@@ -114,7 +114,8 @@ function main() {
   if (report.schemaVersion !== "ai024-1-corp-ice-semantics-polish-report-v1") fail(errors, "unexpected schemaVersion");
   if (report.taskId !== "AI024-1") fail(errors, "unexpected taskId");
   if (report.countsAfter?.activeCompiledCorpIce !== 95 || activeCompiledIce.length !== 95) fail(errors, "active Corp ICE count changed");
-  if (report.countsAfter?.inactiveCheckedCorpIce !== 11 || inactiveIce.length !== 11) fail(errors, "inactive Corp ICE count changed");
+  if (report.countsAfter?.inactiveCheckedCorpIce !== 11) fail(errors, "AI024-1 historical inactive Corp ICE count changed");
+  if (inactiveIce.length !== 0) fail(errors, "current Corp ICE inventory has inactive original/classic/proteus ICE");
   if (report.countsAfter?.newStrategyIdCount !== 0) fail(errors, "AI024-1 must not introduce Strategy IDs");
   for (const flag of REPORT_FLAGS) if (report.countsAfter?.[flag] !== false) fail(errors, `${flag} is not false`);
 
@@ -185,10 +186,12 @@ function main() {
   }
   if ((hint("Data Wall 2.0")?.tacticSignals ?? []).includes("corp_ice.multi_end_run")) fail(errors, "Data Wall 2.0 has false multi_end_run");
 
-  for (const title of ["Banpei", "D'Arc Knight", "Data Naga", "Ice Pick Willie", "Sentinels Prime", "Triggerman", "Marionette", "Washed-Up Solo Construct", "Colonel Failure"]) {
+  for (const title of ["Banpei", "D'Arc Knight", "Data Naga", "Ice Pick Willie", "Sentinels Prime", "Triggerman", "Marionette", "Washed-Up Solo Construct"]) {
     const h = hint(title);
     if ((h?.lineSupport ?? []).includes("corp.ice_tax_glacier")) fail(errors, `${title} simple program-trash ICE should not anchor ice_tax_glacier`);
   }
+  if (!hasAll(hint("Colonel Failure"), ["corp_ice.multi_program_trash"])) fail(errors, "Colonel Failure missing v2 multi-program-trash signal");
+  if (!((hint("Colonel Failure")?.lineSupport ?? []).includes("corp.ice_tax_glacier"))) fail(errors, "Colonel Failure missing v2 multi-program-trash ice_tax_glacier anchor");
   for (const title of ["Zombie", "Wall of Ice", "Death Yo-Yo"]) {
     if (!((hint(title)?.lineSupport ?? []).includes("corp.damage_kill"))) fail(errors, `${title} missing damage_kill anchor`);
   }

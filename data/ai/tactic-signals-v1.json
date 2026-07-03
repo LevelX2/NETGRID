@@ -7135,14 +7135,17 @@
       "supportOnly": false,
       "mayAnchorStrategy": true,
       "allowedStrategyAnchors": [
+        "corp.central_stabilize",
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "ICE Semantic Review v2 reviewed Corp-ICE hints"
       ],
       "examples": [],
       "targetProfileRelevant": true,
-      "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+      "notes": "Corp run redirect signal; read-only hint metadata only. ICE Semantic Review v2 allows reviewed card-level central-stabilize, ice-tax/glacier, or remote-scoring StrategySupportPairs when redirect text supports them. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "run.corp_server_lock",
@@ -10955,6 +10958,65 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Upgrades Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "damage.corp_persistent_damage_counter",
+      "group": "ice_semantic_review_v2_damage",
+      "sideScope": "corp",
+      "description": "Corp ICE creates a persistent Runner counter or marker that causes recurring damage on future runs.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "ICE Semantic Review v2 reviewed Corp-ICE hints"
+      ],
+      "examples": [
+        "Baskerville",
+        "Cerberus",
+        "Mastiff"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "ICE Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "corp_ice.multi_program_trash",
+      "group": "ice_semantic_review_v2_program_trash",
+      "sideScope": "corp",
+      "description": "Corp ICE threatens multiple program-trash subroutines, crossing the reviewed threshold from simple support-only program trash into anchor-capable rig pressure.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "ICE Semantic Review v2 reviewed Corp-ICE hints"
+      ],
+      "examples": [
+        "Colonel Failure"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "ICE Semantic Review v2 signal; read-only hint metadata only. It distinguishes reviewed multi-program-trash ICE from simple program-trash+ETR support-only ICE. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "run.corp_run_rewind",
+      "group": "ice_semantic_review_v2_run_path",
+      "sideScope": "corp",
+      "description": "Corp ICE can move the Runner backward along the same run path to earlier rezzed ICE or force a jack-out choice.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "ICE Semantic Review v2 reviewed Corp-ICE hints"
+      ],
+      "examples": [
+        "Vacuum Link"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "ICE Semantic Review v2 signal; read-only hint metadata only. It models same-server runpath rewind separately from cross-fort run.corp_redirect. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     }
   ]
 }
