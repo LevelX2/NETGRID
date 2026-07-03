@@ -8,7 +8,7 @@ import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "./semantic-runtime-corp-effective-defense";
 import { semanticRuntimeCorpBoardTriageActionComponent } from "./semantic-runtime-corp-board-triage";
-import { semanticRuntimeCorpCentralIceProfile } from "./semantic-runtime-corp-remote-score";
+import { corpIcePlacementScoreComponent } from "./corp-ice-placement/corp-ice-placement";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { rolesMatch } from "./role-match";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
@@ -279,11 +279,13 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: "protect_role",
       });
     }
-    const centralIceQuality = corpCentralIceInstallQualityComponent(
+    const icePlacement = corpIcePlacementComponent(
       input,
       action,
+      dependencies,
+      actionSemanticCandidate,
     );
-    if (centralIceQuality) components.push(centralIceQuality);
+    if (icePlacement) components.push(icePlacement);
     if (rolesMatch(roles, ["economy"])) {
       components.push({
         key: "corp_install_economy",
@@ -587,46 +589,42 @@ function corpInputHasConcreteDevelopmentAction(
   });
 }
 
-function corpCentralIceInstallQualityComponent(
+function corpIcePlacementComponent<TConsumer extends string>(
   input: AiDecisionInput,
   action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): AiDecisionScoreComponent | undefined {
   if (action.type !== "install_card" || action.payload?.placement !== "ice") {
     return undefined;
   }
   const serverId = corpInstallServerId(action);
-  if (serverId !== "hq" && serverId !== "rd") return undefined;
-  if (!corpCentralInstallHasAgendaPressure(input, serverId)) return undefined;
+  const server =
+    serverId && serverId !== "new_remote"
+      ? input.playerView.servers.find((candidate) => candidate.id === serverId)
+      : undefined;
   const sourceCard = visibleSourceCardForAction(input, action);
-  if (!sourceCard || sourceCard.known === false) return undefined;
-  const profile = semanticRuntimeCorpCentralIceProfile(sourceCard);
-  if (profile.hasAccessStop && !profile.positionDependent) {
-    return {
-      key: "corp_central_ice_access_stop_install_value",
-      label: "Zentraler Zugriffsstopp",
-      value: 450,
-      reason: [
-        `server:${serverId}`,
-        `ice:${sourceCard.instanceId}`,
-        "central_agenda_pressure:true",
-        "access_stop:true",
-      ].join("|"),
-    };
-  }
-  const value = profile.positionDependent ? -750 : -900;
-  return {
-    key: "corp_central_ice_low_access_stop_install_penalty",
-    label: "Zentraler Zugriffsstopp fehlt",
-    value,
-    reason: [
-      `server:${serverId}`,
-      `ice:${sourceCard.instanceId}`,
-      "central_agenda_pressure:true",
-      `access_stop:${profile.hasAccessStop}`,
-      `tax_or_damage:${profile.hasTaxOrDamage}`,
-      `position_dependent:${profile.positionDependent}`,
-    ].join("|"),
-  };
+  const scoringWindow = dependencies.corpScoringWindowAssessment?.(
+    input,
+    action,
+    dependencies.rolesForAction(input, action),
+  );
+  return corpIcePlacementScoreComponent({
+    input,
+    action,
+    serverId,
+    server,
+    sourceCard,
+    actionCreditCost: semanticRuntimeCorpActionCreditCost(
+      dependencies,
+      action,
+      actionSemanticCandidate,
+    ),
+    iceRezCost: sourceCard?.rezCost,
+    hasUrgentScoreline:
+      scoringWindow?.recommendedNextStep === "build_remote_ice" ||
+      scoringWindow?.agendaStealSeverity === "game_ending",
+  });
 }
 
 function corpInstallServerId(action: LegalAction): string | undefined {
@@ -635,22 +633,6 @@ function corpInstallServerId(action: LegalAction): string | undefined {
     action.payload?.targetServerId ??
     action.payload?.attackedServerId;
   return typeof serverId === "string" ? serverId : undefined;
-}
-
-function corpCentralInstallHasAgendaPressure(
-  input: AiDecisionInput,
-  serverId: "hq" | "rd",
-): boolean {
-  if (serverId === "hq") {
-    return input.playerView.own.gripOrHq.some(
-      (card) => card.known !== false && card.type === "agenda",
-    );
-  }
-  const runnerAgendaPoints =
-    typeof input.playerView.opponent?.agendaPoints === "number"
-      ? input.playerView.opponent.agendaPoints
-      : 0;
-  return runnerAgendaPoints >= 5;
 }
 
 function corpPostPassIceLifecycleComponent(

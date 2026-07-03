@@ -1433,7 +1433,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
-  it("prefers HQ access-stop ICE over tax-only ICE under HQ agenda pressure", () => {
+  it("prefers HQ access-stop ICE over position-dependent ICE under HQ agenda pressure", () => {
     const agenda = agendaCard("agenda-1");
     const taxOnlyIce = corpCard("ball-and-chain", "ice", {
       title: "Ball and Chain",
@@ -1487,16 +1487,16 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     expect(taxComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_central_ice_low_access_stop_install_penalty",
-          reason: expect.stringContaining("access_stop:false"),
+          key: "corp_ice_placement_evaluator",
+          reason: expect.stringContaining("position_dependent:true"),
         }),
       ]),
     );
     expect(etrComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_central_ice_access_stop_install_value",
-          reason: expect.stringContaining("access_stop:true"),
+          key: "corp_ice_placement_evaluator",
+          reason: expect.stringContaining("position_dependent:false"),
         }),
       ]),
     );

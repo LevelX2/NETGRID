@@ -435,7 +435,7 @@ export function buildCorpIceCardPlacementProfile(
       "outside_ice_scaling",
       "position_scaling",
     ]) ||
-    (tokenSet.has("outside") && tokenSet.has("rezzed") && tokenSet.has("ice"));
+    (tokenSet.has("outside") && tokenSet.has("ice"));
   const innerIceScaling =
     rolesMatch([...hintRiskTags, ...hintTacticSignals], [
       "inner_ice_scaling",

@@ -1,12 +1,12 @@
 import {
-  DEMO_CARDS_BY_ID,
   type AiDecisionInput,
   type LegalAction,
   type VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { rolesMatch } from "./role-match";
-import { createAiHintsByCard, RUNTIME_CARDS } from "../ai-hints";
+import { createAiHintsByCard } from "../ai-hints";
+import { buildCorpIceCardPlacementProfile } from "./corp-ice-placement/corp-ice-placement";
 import {
   semanticRuntimeCorpScoringWindowAssessment,
   type CorpScoringWindowAssessment,
@@ -279,19 +279,7 @@ function semanticRuntimeCorpDynamicOnlyRemoteIce(
 function semanticRuntimeCorpRemoteInstallHasDynamicProtectionRisk(
   card: VisibleCard | undefined,
 ): boolean {
-  if (!card?.definitionId) return false;
-  const hint = AI_HINTS_BY_CARD.get(card.definitionId);
-  const signals = [
-    ...semanticRuntimeCorpHintRiskTags(hint),
-    ...semanticRuntimeCorpHintTacticSignals(hint),
-  ];
-  return rolesMatch(signals, [
-    "position_dependent_ice",
-    "position_scaling",
-    "outer_ice_scaling",
-    "same_fort_reposition",
-    "mobile_position_change",
-  ]);
+  return buildCorpIceCardPlacementProfile(card).positionDependent;
 }
 
 function semanticRuntimeCorpCentralIceInstallScore<
@@ -365,99 +353,18 @@ export function semanticRuntimeCorpCentralIceProfile(
   modeChoice: boolean;
   definitionId?: string;
 } {
-  const definitionId = card?.definitionId;
-  const runtimeDefinition = definitionId
-    ? RUNTIME_CARDS[definitionId]
-    : undefined;
-  const demoDefinition = definitionId
-    ? (DEMO_CARDS_BY_ID[definitionId] ??
-      (runtimeDefinition?.engineCardId
-        ? DEMO_CARDS_BY_ID[runtimeDefinition.engineCardId]
-        : undefined))
-    : undefined;
-  const hint = definitionId ? AI_HINTS_BY_CARD.get(definitionId) : undefined;
-  const visibleSubroutines = [
-    ...(card?.effectiveRunQuote?.subroutines ?? []),
-    ...(demoDefinition?.subroutines ?? []),
-  ];
-  const hasStructuredStop = visibleSubroutines.some((subroutine) => {
-    if (
-      subroutine.type === "end_the_run" ||
-      subroutine.type === "end_the_run_unless_runner_pays" ||
-      subroutine.type === "set_run_future_end_the_run_subroutine" ||
-      subroutine.type === "set_runner_run_lock_actions"
-    ) {
-      return true;
-    }
-    return (
-      subroutine.type === "initiate_trace" &&
-      (subroutine.traceSuccessEffect?.type === "end_run_and_run_lock" ||
-        subroutine.traceSuccessEffect?.type ===
-          "end_run_trash_program_and_run_lock")
-    );
-  });
-  const hasHintStop =
-    hint?.roles.some((role) =>
-      roleMatchesAny(role, ["etr_ice", "end_run", "run_lock"]),
-    ) === true ||
-    hint?.effects?.some(
-      (effect) => effect.kind === "etr" || effect.kind === "run_lock",
-    ) === true;
-  const hasStructuredTaxOrDamage = visibleSubroutines.some((subroutine) =>
-    [
-      "do_damage",
-      "trash_installed_program",
-      "trash_installed_program_unless_runner_pays",
-      "initiate_trace",
-      "corp_gain_credit",
-      "set_run_break_subroutine_cost_modifier",
-      "set_run_encounter_tax",
-    ].includes(subroutine.type),
-  );
-  const hasHintTaxOrDamage =
-    hint?.roles.some((role) =>
-      roleMatchesAny(role, [
-        "damage_ice",
-        "trace",
-        "tax",
-        "program_trash",
-        "hardware_trash",
-      ]),
-    ) === true ||
-    hint?.effects?.some((effect) =>
-      [
-        "damage",
-        "trace",
-        "run_tax",
-        "program_trash",
-        "hardware_trash",
-        "tag",
-      ].includes(effect.kind),
-    ) === true;
-  const hintTacticSignals = semanticRuntimeCorpHintTacticSignals(hint);
-  const positionDependent =
-    semanticRuntimeCorpHintRiskTags(hint).includes("position_dependent_ice") ||
-    hintTacticSignals.some((signal) =>
-      roleMatchesAny(signal, ["position_scaling", "outer_ice_scaling"]),
-    ) ||
-    visibleSubroutines.some((subroutine) =>
-      semanticRuntimeCorpRecordHasToken(subroutine, "outside"),
-    );
-  const modeChoice =
-    hintTacticSignals.some((signal) =>
-      roleMatchesAny(signal, ["type_choice_or_mode_choice"]),
-    ) ||
-    semanticRuntimeCorpHintTargetProfiles(hint).some(
-      (profile) => profile.kind === "mode_choice",
-    );
-  const hasAccessStop =
-    hasStructuredStop || (visibleSubroutines.length === 0 && hasHintStop);
+  const profile = buildCorpIceCardPlacementProfile(card);
   return {
-    hasAccessStop,
-    hasTaxOrDamage: hasStructuredTaxOrDamage || hasHintTaxOrDamage,
-    positionDependent,
-    modeChoice,
-    ...(definitionId ? { definitionId } : {}),
+    hasAccessStop: profile.immediateStop,
+    hasTaxOrDamage:
+      profile.tax ||
+      profile.damage ||
+      profile.programTrash ||
+      profile.tagTrace ||
+      profile.runLock,
+    positionDependent: profile.positionDependent,
+    modeChoice: profile.modeChoice,
+    ...(profile.iceDefinitionId ? { definitionId: profile.iceDefinitionId } : {}),
   };
 }
 
@@ -531,30 +438,6 @@ function semanticRuntimeCorpHintRiskTags(
   return Array.isArray(value)
     ? value.filter((entry): entry is string => typeof entry === "string")
     : [];
-}
-
-function semanticRuntimeCorpHintTargetProfiles(
-  hint: ReturnType<typeof AI_HINTS_BY_CARD.get>,
-): Array<{ kind?: string }> {
-  const value = (hint as { targetProfiles?: unknown } | undefined)
-    ?.targetProfiles;
-  return Array.isArray(value)
-    ? value.filter(
-        (entry): entry is { kind?: string } =>
-          typeof entry === "object" && entry !== null,
-      )
-    : [];
-}
-
-function semanticRuntimeCorpRecordHasToken(
-  value: unknown,
-  token: string,
-): boolean {
-  const tokens = JSON.stringify(value)
-    .toLocaleLowerCase("en-US")
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
-  return new Set(tokens).has(token);
 }
 
 function semanticRuntimeCorpTextTokens(values: readonly unknown[]): string[] {
@@ -645,10 +528,6 @@ function stringPayload(
 ): string | undefined {
   const value = payload[key];
   return typeof value === "string" ? value : undefined;
-}
-
-function roleMatchesAny(role: string, options: readonly string[]): boolean {
-  return rolesMatch([role.toLocaleLowerCase("en-US")], options);
 }
 
 export function semanticRuntimeCorpShouldBuildProtectedScoreRemote<
