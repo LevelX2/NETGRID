@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { PlayerView } from "@netgrid/shared";
 
 import { cardChoiceOrderBadge } from "../features/actions/card-choice-order-badge";
+import { choiceSelectionRangeLabel } from "../features/actions/card-choice-selection-label";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 
@@ -47,5 +48,14 @@ describe("cardChoiceOrderBadge", () => {
       label: "1",
       ariaLabel: "Auswahlposition 1",
     });
+  });
+});
+
+describe("choiceSelectionRangeLabel", () => {
+  it("states how many cards the player may select", () => {
+    expect(choiceSelectionRangeLabel(2, 2)).toBe("2 Karten auswählen");
+    expect(choiceSelectionRangeLabel(1, 1)).toBe("1 Karte auswählen");
+    expect(choiceSelectionRangeLabel(0, 3)).toBe("Bis zu 3 Karten auswählen");
+    expect(choiceSelectionRangeLabel(1, 3)).toBe("1 bis 3 Karten auswählen");
   });
 });

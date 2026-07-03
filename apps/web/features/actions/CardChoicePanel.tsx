@@ -17,6 +17,7 @@ import { CardView } from "../cards/CardView";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
 import { type CardDisplayMode } from "../settings/settings-model";
 import { cardChoiceOrderBadge, isRunnerStackTopChooseOneArrangeRestChoice } from "./card-choice-order-badge";
+import { choiceSelectionRangeLabel } from "./card-choice-selection-label";
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
@@ -272,11 +273,6 @@ function cardChoiceReadonlyQuestion(choice: VisibleChoice): string {
     return "Diese Stack-Karten wurden der Korp durch Mystery Box gezeigt.";
   }
   return "Diese Karten wurden nur dir angezeigt.";
-}
-
-function choiceSelectionRangeLabel(minSelections: number, maxSelections: number): string {
-  if (minSelections === maxSelections) return `${maxSelections} ${maxSelections === 1 ? "Karte" : "Karten"}`;
-  return `${minSelections}-${maxSelections} Karten`;
 }
 
 function cardChoiceQuestion(choice: VisibleChoice, selectedOptions: VisibleChoiceOption[]): string {
