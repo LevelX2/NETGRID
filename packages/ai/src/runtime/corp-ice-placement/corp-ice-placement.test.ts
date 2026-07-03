@@ -70,6 +70,38 @@ describe("corp ICE placement profile", () => {
     expect(nextIce.nextIceModifier).toBe(true);
     expect(noisyText.nextIceModifier).toBe(false);
   });
+
+  it("consumes compiled ICE-v2 tactic signals in placement profiles", () => {
+    const colonelFailure = buildCorpIceCardPlacementProfile(
+      corpIce("colonel-failure", {
+        definitionId: "onr_proteus_015_colonel-failure",
+      }),
+    );
+    const vacuumLink = buildCorpIceCardPlacementProfile(
+      corpIce("vacuum-link", {
+        definitionId: "onr_v1_275_vacuum-link",
+      }),
+    );
+    const baskerville = buildCorpIceCardPlacementProfile(
+      corpIce("baskerville", {
+        definitionId: "onr_classic_005_baskerville",
+      }),
+    );
+
+    expect(colonelFailure.multiProgramTrash).toBe(true);
+    expect(colonelFailure.programTrash).toBe(true);
+    expect(colonelFailure.evidence).toContain("multi_program_trash:true");
+
+    expect(vacuumLink.runRewind).toBe(true);
+    expect(vacuumLink.tax).toBe(true);
+    expect(vacuumLink.positionDependent).toBe(true);
+    expect(vacuumLink.wantsInner).toBe(true);
+    expect(vacuumLink.deadAsFirstIce).toBe(true);
+
+    expect(baskerville.persistentDamageCounter).toBe(true);
+    expect(baskerville.damage).toBe(true);
+    expect(baskerville.evidence).toContain("persistent_damage_counter:true");
+  });
 });
 
 describe("corp ICE placement server need and density", () => {
@@ -442,6 +474,36 @@ describe("corp ICE placement candidate scoring", () => {
 
     expect(staticCandidate?.components.positionFit).toBe(-1300);
     expect(mobileCandidate?.components.positionFit).toBe(-650);
+  });
+
+  it("rewards run-rewind ICE only after a rezzed outside layer exists", () => {
+    const vacuumLink = corpIce("vacuum-link", {
+      definitionId: "onr_v1_275_vacuum-link",
+      rezCost: 2,
+    });
+    const firstIceInput = corpInput({
+      credits: 5,
+      hq: [vacuumLink],
+      servers: [server("remote_1", [])],
+    });
+    const layeredInput = corpInput({
+      credits: 5,
+      hq: [vacuumLink],
+      servers: [
+        server("remote_1", [
+          corpIce("outside-wall", { rulesText: "*End the run.", rezzed: true }),
+        ]),
+      ],
+    });
+
+    const firstIceCandidate = candidateFor(firstIceInput, vacuumLink, "remote_1");
+    const layeredCandidate = candidateFor(layeredInput, vacuumLink, "remote_1");
+
+    expect(firstIceCandidate?.components.futureRunSynergy).toBeLessThan(0);
+    expect(layeredCandidate?.components.futureRunSynergy).toBeGreaterThan(0);
+    expect(layeredCandidate?.score).toBeGreaterThan(
+      firstIceCandidate?.score ?? 0,
+    );
   });
 
   it("returns bestDeferReason for poor install portfolios without creating a fake action", () => {

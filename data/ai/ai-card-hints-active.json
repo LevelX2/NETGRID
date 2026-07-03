@@ -19553,7 +19553,7 @@
       "tacticSignals": [
         "risk.requires_tagged_runner",
         "tag.additional_tag_source",
-        "tag_snowball_followup",
+        "tag.snowball_followup",
         "tag.payoff"
       ],
       "strategySupportPairs": [
@@ -19563,7 +19563,7 @@
           "roleDetail": "additional_tag_amplifier",
           "evidence": [
             "tag.additional_tag_source",
-            "tag_snowball_followup",
+            "tag.snowball_followup",
             "tag.payoff"
           ],
           "confidence": "high",
@@ -20035,7 +20035,7 @@
       "tacticSignals": [
         "risk.requires_tagged_runner",
         "tag.additional_tag_source",
-        "tag_snowball_followup",
+        "tag.snowball_followup",
         "economy.corp_credit_burst",
         "tag.payoff"
       ],
@@ -20046,7 +20046,7 @@
           "roleDetail": "additional_tag_minor_credit_followup",
           "evidence": [
             "tag.additional_tag_source",
-            "tag_snowball_followup",
+            "tag.snowball_followup",
             "tag.payoff"
           ],
           "confidence": "medium",

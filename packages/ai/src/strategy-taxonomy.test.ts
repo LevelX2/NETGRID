@@ -190,7 +190,7 @@ describe("AI003 strategy goal taxonomy", () => {
     const ids = goals.map((goal) => goal.strategyId);
 
     expect(report.hardErrorCount).toBe(0);
-    expect(report.taxonomy.strategyGoalCount).toBe(20);
+    expect(report.taxonomy.strategyGoalCount).toBe(24);
     expect(new Set(ids).size).toBe(ids.length);
     expect(goals.map((goal) => goal.detectionMode)).toEqual(
       expect.arrayContaining([
@@ -208,7 +208,7 @@ describe("AI003 strategy goal taxonomy", () => {
     const corpGoals = goals.filter((goal) => goal.side === "corp");
 
     expect(runnerGoals).toHaveLength(10);
-    expect(corpGoals).toHaveLength(10);
+    expect(corpGoals).toHaveLength(14);
     expect(runnerGoals.every((goal) => goal.strategyId.startsWith("runner."))).toBe(
       true,
     );
@@ -260,14 +260,18 @@ describe("AI003 strategy goal taxonomy", () => {
 
     expect(report.hardErrorCount).toBe(0);
     expect(tacticSignalCatalogData.schemaVersion).toBe("ai-tactic-signals-v1");
-    expect(report.taxonomy.tacticSignalCatalogCount).toBe(528);
+    expect(report.taxonomy.tacticSignalCatalogCount).toBe(673);
     expect(new Set(signalIds).size).toBe(signalIds.length);
-    expect(dormantTacticSignalIds).toEqual([
-      "breaker.break_any_subroutine",
-      "breaker.subroutine_prevention",
-      "defense.encounter_threat_mitigation",
-      "encounter.emergency_subroutine_prevention",
-    ]);
+    expect(dormantTacticSignalIds).toEqual(
+      expect.arrayContaining([
+        "breaker.break_any_subroutine",
+        "breaker.subroutine_prevention",
+        "defense.encounter_threat_mitigation",
+        "encounter.emergency_subroutine_prevention",
+        "tag.snowball_followup",
+      ]),
+    );
+    expect(dormantTacticSignalIds).not.toContain("tag_snowball_followup");
     expect([...signalIds].sort()).toEqual(expectedCatalogSignalIds);
     expect(signalIds.some((signalId) => signalId.startsWith("anti.ice."))).toBe(
       false,

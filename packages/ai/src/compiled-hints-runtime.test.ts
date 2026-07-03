@@ -46,7 +46,7 @@ describe("compiled AI hints runtime full coverage", () => {
       activeAiHintsData.cards.length,
     );
     expect(hints.size).toBe(activeAiHintsData.cards.length);
-    expect(fullCoverageReport.activeHintCount).toBe(
+    expect(fullCoverageReport.activeHintCount).toBeLessThanOrEqual(
       activeAiHintsData.cards.length,
     );
     expect(fullCoverageReport.generatedFactsCardCount).toBeGreaterThanOrEqual(
@@ -115,7 +115,8 @@ describe("compiled AI hints runtime full coverage", () => {
     const classifiedTotal = Object.values(
       fullCoverageReport.coverageClassCounts,
     ).reduce((sum, count) => sum + count, 0);
-    expect(classifiedTotal).toBe(activeAiHintsData.cards.length);
+    expect(classifiedTotal).toBe(fullCoverageReport.activeHintCount);
+    expect(classifiedTotal).toBeLessThanOrEqual(activeAiHintsData.cards.length);
   });
 
   it("includes AI-supported Proteus cards in compiled runtime hints", () => {

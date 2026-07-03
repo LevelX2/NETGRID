@@ -67,9 +67,12 @@ export type CorpIceCardPlacementProfile = {
   softStop: boolean;
   tax: boolean;
   damage: boolean;
+  persistentDamageCounter: boolean;
   programTrash: boolean;
+  multiProgramTrash: boolean;
   tagTrace: boolean;
   runLock: boolean;
+  runRewind: boolean;
   nextIceModifier: boolean;
   futureIceModifier: boolean;
   outsideIceScaling: boolean;
@@ -507,23 +510,38 @@ export function buildCorpIceCardPlacementProfile(
     structuredSubroutines.some(subroutineLooksLikeSoftStop) ||
     (tokenSet.has("unless") &&
       (tokenSet.has("pay") || tokenSet.has("pays") || tokenSet.has("trace")));
+  const persistentDamageCounter = rolesMatch(
+    [...hintTacticSignals, ...hintEffectKinds],
+    ["damage.corp_persistent_damage_counter", "persistent_damage_counter"],
+  );
   const damage =
+    persistentDamageCounter ||
     structuredSubroutines.some(subroutineLooksLikeDamage) ||
     rolesMatch([...hintRoles, ...hintEffectKinds], ["damage_ice", "damage"]) ||
     tokenSet.has("damage");
+  const multiProgramTrash = rolesMatch(
+    [...hintTacticSignals, ...hintEffectKinds],
+    ["corp_ice.multi_program_trash", "multi_program_trash"],
+  );
   const programTrash =
+    multiProgramTrash ||
     structuredSubroutines.some(subroutineLooksLikeProgramTrash) ||
     rolesMatch([...hintRoles, ...hintEffectKinds], [
       "program_trash",
       "program_trash_ice",
     ]) ||
     (tokenSet.has("trash") && tokenSet.has("program"));
+  const runRewind = rolesMatch([...hintTacticSignals, ...hintEffectKinds], [
+    "run.corp_run_rewind",
+    "corp_run_rewind",
+  ]);
   const tagTrace =
     structuredSubroutines.some(subroutineLooksLikeTraceOrTag) ||
     rolesMatch([...hintRoles, ...hintEffectKinds], ["trace", "tag"]) ||
     tokenSet.has("trace") ||
     tokenSet.has("tag");
   const tax =
+    runRewind ||
     structuredSubroutines.some(subroutineLooksLikeTax) ||
     rolesMatch([...hintRoles, ...hintEffectKinds], ["tax", "run_tax"]) ||
     tokenSet.has("tax") ||
@@ -584,6 +602,7 @@ export function buildCorpIceCardPlacementProfile(
   const positionDependent =
     outsideIceScaling ||
     innerIceScaling ||
+    runRewind ||
     nextIceModifier ||
     futureIceModifier ||
     mobileReposition ||
@@ -591,7 +610,7 @@ export function buildCorpIceCardPlacementProfile(
       "position_dependent_ice",
       "position_scaling",
     ]);
-  const wantsInner = outsideIceScaling || innerIceScaling;
+  const wantsInner = outsideIceScaling || innerIceScaling || runRewind;
   const wantsOuter = nextIceModifier || futureIceModifier;
   const wantsFollowupIce = wantsInner || wantsOuter;
   const deadAsFirstIce = wantsFollowupIce && !immediateStop;
@@ -599,6 +618,9 @@ export function buildCorpIceCardPlacementProfile(
     ...(definitionId ? [`definition:${definitionId}`] : []),
     `immediate_stop:${immediateStop}`,
     `tax_or_damage:${tax || damage || programTrash || tagTrace}`,
+    `persistent_damage_counter:${persistentDamageCounter}`,
+    `multi_program_trash:${multiProgramTrash}`,
+    `run_rewind:${runRewind}`,
     `position_dependent:${positionDependent}`,
     `wants_inner:${wantsInner}`,
     `wants_outer:${wantsOuter}`,
@@ -613,9 +635,12 @@ export function buildCorpIceCardPlacementProfile(
     softStop,
     tax,
     damage,
+    persistentDamageCounter,
     programTrash,
+    multiProgramTrash,
     tagTrace,
     runLock,
+    runRewind,
     nextIceModifier,
     futureIceModifier,
     outsideIceScaling,
@@ -816,6 +841,12 @@ function corpImmediateStopValue(
     return serverNeed.serverNeed >= 1000 ? 900 : 650;
   }
   if (profile.immediateStop) return serverNeed.serverNeed >= 1000 ? 250 : 150;
+  if (profile.runRewind && serverNeed.iceCount > 0) {
+    return serverNeed.serverNeed >= 1000 ? 325 : 225;
+  }
+  if (profile.multiProgramTrash || profile.persistentDamageCounter) {
+    return serverNeed.serverNeed >= 1000 ? 350 : 225;
+  }
   if (profile.tax || profile.damage || profile.programTrash || profile.tagTrace) {
     return serverNeed.serverNeed >= 1000 ? 250 : 150;
   }
@@ -828,6 +859,7 @@ function corpFutureRunSynergyValue(
   hasOutsideRezzedIce: boolean,
 ): number {
   if (!profile.wantsFollowupIce) return 0;
+  if (profile.runRewind) return hasOutsideRezzedIce ? 350 : -450;
   if (profile.outsideIceScaling) return hasOutsideRezzedIce ? 450 : -550;
   if (profile.nextIceModifier || profile.futureIceModifier) {
     return firstIce ? -350 : 350;
@@ -843,6 +875,7 @@ function corpPositionFitValue(
   let value = 0;
   if (profile.deadAsFirstIce && firstIce) value -= 850;
   if (profile.outsideIceScaling && !hasOutsideRezzedIce) value -= 450;
+  if (profile.runRewind && !hasOutsideRezzedIce && !firstIce) value -= 250;
   if ((profile.nextIceModifier || profile.futureIceModifier) && !firstIce) {
     value += 300;
   }

@@ -60,6 +60,11 @@
     "corpIceOrdering": [
       "effects.future_encounter_effect"
     ],
+    "corpIcePlacement": [
+      "tacticSignals.corp_ice.multi_program_trash",
+      "tacticSignals.damage.corp_persistent_damage_counter",
+      "tacticSignals.run.corp_run_rewind"
+    ],
     "corpTagPunish": [
       "effects.tag_punish_payoff"
     ],

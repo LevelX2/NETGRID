@@ -194,6 +194,12 @@ const KNOWN_CONDITIONS = new Set([
   "requires_stack_search",
   "requires_heap_card",
   "requires_credit_pool",
+  "requires_installed_advanceable_card",
+  "requires_runner_attempted_multiple_runs_last_turn",
+  "requires_runner_attempted_run_last_turn",
+  "requires_runner_attempted_run_this_game",
+  "requires_runner_installed_resource_last_turn",
+  "requires_runner_trashed_node_last_turn",
 ]);
 const KNOWN_BREAKER_COVERAGES = new Set([
   "wall",
@@ -485,6 +491,11 @@ export function buildCompiledHintsReport(
       runnerSearch: ["effects.search", "targetProfiles"],
       runnerRemoteTrash: ["remoteRole.asset_economy", "effects.trash_credit"],
       corpIceOrdering: ["effects.future_encounter_effect"],
+      corpIcePlacement: [
+        "tacticSignals.corp_ice.multi_program_trash",
+        "tacticSignals.damage.corp_persistent_damage_counter",
+        "tacticSignals.run.corp_run_rewind",
+      ],
       corpTagPunish: ["effects.tag_punish_payoff"],
       runnerRemoteAccess: ["remoteRole.agenda_steal_tax"],
     },

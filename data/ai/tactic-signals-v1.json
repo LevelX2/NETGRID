@@ -9785,10 +9785,8 @@
       "sideScope": "corp",
       "description": "Corp places multiple advancement counters distributed across advanceable installed cards.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -9806,10 +9804,8 @@
       "sideScope": "corp",
       "description": "Corp places advancement counters as distributed score-window support.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -9825,10 +9821,8 @@
       "sideScope": "corp",
       "description": "Existing advancement counters are moved or reallocated between installed advanceable cards.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -9966,10 +9960,8 @@
       "sideScope": "corp",
       "description": "Corp effect is a meat-damage source.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.damage_kill"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10004,10 +9996,8 @@
       "sideScope": "corp",
       "description": "Runner loses credits; this is not Corp credit economy.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10040,10 +10030,8 @@
       "sideScope": "corp",
       "description": "Corp recovers ICE into HQ.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.ice_tax_glacier"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10059,10 +10047,8 @@
       "sideScope": "corp",
       "description": "Corp conceals or resets public knowledge of unrezzed ICE order.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.ice_tax_glacier"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10078,10 +10064,8 @@
       "sideScope": "corp",
       "description": "Corp rearranges installed ICE within a fort/server.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.ice_tax_glacier"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10097,10 +10081,8 @@
       "sideScope": "corp",
       "description": "Corp recovers ICE cards.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.ice_tax_glacier"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10184,10 +10166,8 @@
       "sideScope": "corp",
       "description": "Corp trashes a Runner resource installed during the recent qualifying window.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10323,10 +10303,8 @@
       "sideScope": "corp",
       "description": "Runner memory limit is reduced.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10342,10 +10320,8 @@
       "sideScope": "corp",
       "description": "Corp gives additional tags only after Runner is already tagged or under a qualifying tag condition.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10362,10 +10338,8 @@
       "sideScope": "corp",
       "description": "Tagged-runner payoff that punishes Runner credits.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10381,10 +10355,8 @@
       "sideScope": "corp",
       "description": "Tagged-runner payoff that trashes Runner hardware.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10400,10 +10372,8 @@
       "sideScope": "corp",
       "description": "Tagged-runner payoff that pressures Runner memory and installed programs.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10419,10 +10389,8 @@
       "sideScope": "corp",
       "description": "Tagged-runner payoff that trashes Runner resources.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10438,10 +10406,8 @@
       "sideScope": "corp",
       "description": "Trace-tag source where tag amount scales with successful trace margin.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10452,15 +10418,13 @@
       "notes": "Operations Semantic Review v2 signal; read-only hint metadata only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
-      "signalId": "tag_snowball_followup",
+      "signalId": "tag.snowball_followup",
       "group": "ops_v2_tag_snowball",
       "sideScope": "corp",
       "description": "Follow-up that amplifies an existing tag state; not an initial tag source.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10477,10 +10441,8 @@
       "sideScope": "corp",
       "description": "Corp effect targets Runner hardware for trashing.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10496,10 +10458,8 @@
       "sideScope": "corp",
       "description": "Corp effect targets Runner resources for trashing.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Operations Semantic Review v2 reviewed Corp-operation hints"
       ],
@@ -10654,10 +10614,8 @@
       "sideScope": "corp",
       "description": "Corp places or supports advancement counters during an access-window timing after the Runner passes the last ICE.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.ambush_bluff"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
       ],
@@ -10758,10 +10716,8 @@
       "sideScope": "corp",
       "description": "Corp swaps an unrezzed installed ICE with a chosen ICE from HQ or another allowed Corp source.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.ice_tax_glacier"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
       ],
@@ -10778,11 +10734,8 @@
       "sideScope": "corp",
       "description": "Corp may install ICE during a run as a reactive defensive or tax effect.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
       ],
@@ -10798,10 +10751,8 @@
       "sideScope": "corp",
       "description": "Corp gives a targeted temporary strength boost to a chosen piece of ICE.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.ice_tax_glacier"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
       ],
@@ -10817,11 +10768,8 @@
       "sideScope": "corp",
       "description": "Corp forces a temporary encounter with ICE without permanently installing that ICE into the run path.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
       ],
@@ -10837,10 +10785,8 @@
       "sideScope": "corp",
       "description": "Corp swaps or replaces remote fort contents as defensive remote-scoring support.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.remote_scoring"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
       ],
@@ -10907,10 +10853,8 @@
       "sideScope": "corp",
       "description": "Corp run-control effect can randomly end the run.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.remote_scoring"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
       ],
@@ -10926,10 +10870,8 @@
       "sideScope": "corp",
       "description": "Tagged-runner payoff that causes Runner credit loss, often scaling with tag count.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
       ],
@@ -10945,11 +10887,8 @@
       "sideScope": "corp",
       "description": "Corp trace effect penalizes or reduces Runner link before or during the trace.",
       "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.ambush_bluff",
-        "corp.tag_trace_punish"
-      ],
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "Upgrades Semantic Review v2 reviewed Corp-upgrade hints"
       ],
@@ -10978,7 +10917,7 @@
         "Mastiff"
       ],
       "targetProfileRelevant": false,
-      "notes": "ICE Semantic Review v2 signal; read-only hint metadata only. Strategy anchoring is expressed through reviewed card-level strategySupportPairs, not derivation rules. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+      "notes": "ICE Semantic Review v2 signal. Runtime consumer coverage 2026-07-03: the Corp ICE placement profile treats this as persistentDamageCounter and damage threat evidence for Korp ICE installation scoring. Strategy anchoring is derivable and reviewed card-level strategySupportPairs remain the evidence source. It does not create engine, legality, targeting, UI or hidden-info behavior."
     },
     {
       "signalId": "corp_ice.multi_program_trash",
@@ -10997,7 +10936,7 @@
         "Colonel Failure"
       ],
       "targetProfileRelevant": true,
-      "notes": "ICE Semantic Review v2 signal; read-only hint metadata only. It distinguishes reviewed multi-program-trash ICE from simple program-trash+ETR support-only ICE. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+      "notes": "ICE Semantic Review v2 signal. Runtime consumer coverage 2026-07-03: the Corp ICE placement profile treats this as multiProgramTrash plus programTrash rig-pressure evidence for Korp ICE installation scoring. Strategy anchoring is derivable and reviewed card-level strategySupportPairs remain the evidence source. It does not create engine, legality, targeting, UI or hidden-info behavior."
     },
     {
       "signalId": "run.corp_run_rewind",
@@ -11016,7 +10955,7 @@
         "Vacuum Link"
       ],
       "targetProfileRelevant": true,
-      "notes": "ICE Semantic Review v2 signal; read-only hint metadata only. It models same-server runpath rewind separately from cross-fort run.corp_redirect. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+      "notes": "ICE Semantic Review v2 signal. Runtime consumer coverage 2026-07-03: the Corp ICE placement profile treats this as runRewind, tax pressure and an inner/position-dependent follow-up ICE requirement for Korp ICE installation scoring. Strategy anchoring is derivable and reviewed card-level strategySupportPairs remain the evidence source. It does not create engine, legality, targeting, UI or hidden-info behavior."
     }
   ]
 }
