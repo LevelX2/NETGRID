@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { DeckDefinition, GameState } from "@netgrid/shared";
-import { createGameAfterSetup, getLegalActions, validateGameState } from "../../index";
+import {
+  createGameAfterSetup,
+  getLegalActions,
+  validateGameState,
+} from "../../index";
 import { runnerMemoryLimit } from "../../ability-engine/effective-values";
 import { cardImplementationCoverageForDefinitionId } from "../../card-implementations/coverage";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
@@ -8,9 +12,11 @@ import { addCorpCardToHqForTest } from "../../test-fixtures/index-test-helpers";
 import {
   agendaPoints,
   apply,
+  applyChoices,
   emptyRunnerGripForTest,
   installRunnerHardwareForTest,
   moveRunnerCardCopyToGrip,
+  putRunnerCardOnTopOfStack,
   scoreRunnerAgendaForTest,
   setCardCounterForTest,
   sourceDefinition,
@@ -146,7 +152,9 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       });
     }
 
-    expect(cardImplementationForDefinitionId(BADTIMES)?.corpUtility).toMatchObject({
+    expect(
+      cardImplementationForDefinitionId(BADTIMES)?.corpUtility,
+    ).toMatchObject({
       kind: "runner_memory_limit_modifier_until_end_of_turn",
       amount: 2,
     });
@@ -162,6 +170,92 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     ).toMatchObject({
       usableFor: ["play_events"],
     });
+  });
+
+  it("opens a private stack choice for Boostergang Connections instead of taking the top stack cards", () => {
+    let state = toRunnerClassic09Game("classic-09-boostergang-choice");
+    emptyRunnerGripForTest(state);
+    const eventId = moveRunnerCardCopyToGrip(state, BOOSTERGANG_CONNECTIONS);
+    moveRunnerCardCopyToGrip(state, "simple_economy_event");
+    moveRunnerCardCopyToGrip(state, "simple_run_event");
+    const selectedThird = putRunnerCardOnTopOfStack(state, CRASH_SPACE);
+    const selectedSecond = putRunnerCardOnTopOfStack(
+      state,
+      GYPSYTM_SCHEDULE_ANALYZER,
+    );
+    const unchosenTop = putRunnerCardOnTopOfStack(state, LIBRARY_SEARCH);
+    state.runner.credits = 40;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === eventId,
+    );
+
+    expect(state.runner.grip).toHaveLength(0);
+    expect(
+      state.runner.heap.map(
+        (cardId) => state.cardInstances[cardId]?.definitionId,
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        BOOSTERGANG_CONNECTIONS,
+        "simple_economy_event",
+        "simple_run_event",
+      ]),
+    );
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("p3_37.search_stack_to_grip"),
+      minSelections: 2,
+      maxSelections: 2,
+      visibility: "hidden_info_barrier",
+      cardSearchPresentation: {
+        sourceZone: "stack",
+        selectableFilter: "any_card",
+        destination: "grip",
+        reveal: "hidden",
+        shuffleAfter: true,
+      },
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: BOOSTERGANG_CONNECTIONS,
+      runnerEventAbility: "trash_grip_search_stack_to_grip_equal_count",
+      trashedCount: 2,
+      searchedCount: 2,
+      movedToGripCount: 0,
+      stackShuffled: false,
+      choiceVisibility: "runner_private",
+    });
+
+    state = applyChoices(state, "runner", [
+      `card_${selectedSecond}`,
+      `card_${selectedThird}`,
+    ]);
+
+    expect(state.runner.grip).toEqual(
+      expect.arrayContaining([selectedSecond, selectedThird]),
+    );
+    expect(state.runner.stack).toContain(unchosenTop);
+    expect(state.runner.stack).not.toContain(selectedSecond);
+    expect(state.runner.stack).not.toContain(selectedThird);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "p3_37_search_stack_to_grip",
+      sourceDefinitionId: BOOSTERGANG_CONNECTIONS,
+      searchedZone: "runner_stack",
+      selectedCount: 2,
+      movedCardCount: 2,
+      searchDestination: "runner_grip",
+      shufflePerformed: true,
+      shuffled: true,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "publicRevealDefinitionId",
+    );
+    expectValid(state);
   });
 
   it("reduces Runner MU with Badtimes only until the Corp turn ends", () => {
@@ -189,14 +283,17 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
       cardDefinitionId: BADTIMES,
-      classicCorpUtilityAbility: "runner_memory_limit_modifier_until_end_of_turn",
+      classicCorpUtilityAbility:
+        "runner_memory_limit_modifier_until_end_of_turn",
       temporaryRunnerMemoryLimitReduction: 2,
     });
 
     state = apply(state, "corp", (action) => action.type === "end_turn");
 
     expect(runnerMemoryLimit(state)).toBe(4);
-    expect(state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn ?? []).toHaveLength(0);
+    expect(
+      state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn ?? [],
+    ).toHaveLength(0);
     expectValid(state);
   });
 
@@ -216,8 +313,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       state,
       "runner",
       (action) =>
-        action.type === "play_event" &&
-        action.payload?.cardId === corruptionId,
+        action.type === "play_event" && action.payload?.cardId === corruptionId,
     );
 
     expect(state.runner.scoreArea).not.toContain(agendaId);
@@ -253,7 +349,9 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       (action) =>
         action.type === "play_event" && action.payload?.cardId === eventId,
     );
-    expect(drineActions.map((action) => action.payload?.xValue)).toEqual([1, 2]);
+    expect(drineActions.map((action) => action.payload?.xValue)).toEqual([
+      1, 2,
+    ]);
 
     state = apply(
       state,
@@ -283,7 +381,10 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
   it("spends Zetatech Portastation bits before normal credits when playing events", () => {
     let state = toRunnerClassic09Game("classic-09-zetatech-library-search");
     emptyRunnerGripForTest(state);
-    const zetatechId = installRunnerHardwareForTest(state, ZETATECH_PORTASTATION);
+    const zetatechId = installRunnerHardwareForTest(
+      state,
+      ZETATECH_PORTASTATION,
+    );
     setCardCounterForTest(state, zetatechId, "bit", 1);
     const librarySearchId = moveRunnerCardCopyToGrip(state, LIBRARY_SEARCH);
     state.runner.credits = 1;

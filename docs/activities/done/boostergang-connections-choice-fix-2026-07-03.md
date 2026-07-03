@@ -1,6 +1,6 @@
 # Boostergang Connections Choice Fix
 
-Status: in_progress
+Status: done
 
 Quelle/Vorgabe: Nutzerfund vom 2026-07-03: Beim Ausspielen von `Boostergang Connections` erhielt der Runner automatisch Karten statt eine Stack-Auswahl treffen zu können.
 
@@ -144,3 +144,16 @@ Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, Worktr
 - Hauptworkspace ist auf `main`.
 - `git status --short` und `git diff --check` auf `main` sind sauber.
 - Arbeits-Worktree ist entfernt.
+
+## Ergebnis 2026-07-03
+
+- BC-CHOICE-1: Prozessartefakt erstellt und committed.
+- BC-CHOICE-2: `Boostergang Connections` öffnet nach dem Hand-Trash eine private `p3_37.search_stack_to_grip`-Choice mit exakter Auswahlzahl statt automatisch die obersten Stack-Karten zu nehmen.
+- Die bestehende Search-to-Grip-Auflösung unterstützt weiterhin Single-Searches und zusätzlich Mehrfachauswahl mit einer einzigen Stack-Mischung.
+- Öffentliche Events spiegeln nur Hidden-Zone-Metadaten, Counts und Shuffle-Flags; private Stack-Kartenidentitäten bleiben verdeckt.
+
+## Checks 2026-07-03
+
+- `corepack pnpm exec vitest run packages/engine/src/game/hidden-zone/search-choice-handlers.test.ts packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts`
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `git diff --check`

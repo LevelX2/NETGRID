@@ -167,10 +167,12 @@ function host(
     },
     constants: {
       topStackTakeMatchingSourceId: aujourdOuiId,
-      randomStackProgramInstallSourceId: "revealed_stack_program_install" as CardDefinitionId,
+      randomStackProgramInstallSourceId:
+        "revealed_stack_program_install" as CardDefinitionId,
       stackProgramFreeInstallSourceId,
       stackSearchGripSourceId: shortCircuitId,
-      temporaryProgramInstallSourceId: "temporary_program_install" as CardDefinitionId,
+      temporaryProgramInstallSourceId:
+        "temporary_program_install" as CardDefinitionId,
     },
     cards: {
       definitionFor: (cardId) => {
@@ -238,6 +240,50 @@ describe("hidden-zone search choice handlers", () => {
       searchDestination: "runner_grip",
       shuffled: true,
     });
+  });
+
+  it("handles multi-card stack search-to-grip choices with one shuffle", () => {
+    const testHost = host(
+      {
+        ...choice({
+          source: `p3_37.search_stack_to_grip:${sourceCardId}:${sourceDefinitionId}:any_card:private:shuffle:7`,
+          options: [
+            { id: `card_${programId}`, label: "Program", value: programId },
+            {
+              id: `card_${hardwareId}`,
+              label: "Hardware",
+              value: hardwareId,
+            },
+          ],
+        }),
+        minSelections: 2,
+        maxSelections: 2,
+      },
+      playerAction(`card_${programId}`, `card_${hardwareId}`),
+      {
+        stack: [programId, hardwareId],
+      },
+    );
+
+    const result = handleHiddenZoneSearchChoice(testHost);
+
+    expect(result).toMatchObject({
+      handled: true,
+      deletePendingChoice: true,
+      shufflePerformed: true,
+      movedCardIds: [programId, hardwareId],
+    });
+    expect(testHost.state.runner.grip).toEqual([programId, hardwareId]);
+    expect(testHost.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "p3_37_search_stack_to_grip",
+      selectedCount: 2,
+      movedCardCount: 2,
+      searchDestination: "runner_grip",
+      shuffled: true,
+    });
+    expect(testHost.legalAction.payload).not.toHaveProperty(
+      "publicRevealDefinitionId",
+    );
   });
 
   it("handles trash search-to-grip choices without stack shuffle", () => {
@@ -383,7 +429,10 @@ describe("hidden-zone search choice handlers", () => {
     });
     expect(installed).toEqual([programId]);
     expect(testHost.state.temporaryProgramInstallReturns).toEqual([
-      { cardId: programId, sourceCardDefinitionId: "temporary_program_install" },
+      {
+        cardId: programId,
+        sourceCardDefinitionId: "temporary_program_install",
+      },
     ]);
     expect(testHost.legalAction.payload).toMatchObject({
       hiddenZoneAction: "temporary_program_install",

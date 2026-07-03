@@ -23,6 +23,13 @@ export type SearchToGripSelectionResult = {
   shuffleNeeded: boolean;
 };
 
+export type SearchToGripSelectionsResult = Omit<
+  SearchToGripSelectionResult,
+  "selectedCardId"
+> & {
+  selectedCardIds: CardInstanceId[];
+};
+
 export type SearchStackInstallSelectionResult = {
   sourceCardId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
@@ -70,6 +77,32 @@ export function resolveSearchToGripSelection(input: {
     filter: SearchToGripFilter;
   }) => readonly CardInstanceId[];
 }): SearchToGripSelectionResult {
+  const result = resolveSearchToGripSelections({
+    ...input,
+    selectedCardIds: input.selectedCardId ? [input.selectedCardId] : [],
+  });
+  const selectedCardId = result.selectedCardIds[0];
+  if (!selectedCardId)
+    throw new Error("Die gewaehlte Karte ist fuer diese Suche nicht legal.");
+  return {
+    sourceCardId: result.sourceCardId,
+    sourceDefinitionId: result.sourceDefinitionId,
+    filter: result.filter,
+    sourceZone: result.sourceZone,
+    selectedCardId,
+    revealToCorp: result.revealToCorp,
+    shuffleNeeded: result.shuffleNeeded,
+  };
+}
+
+export function resolveSearchToGripSelections(input: {
+  choice: ChoiceRequest | undefined;
+  selectedCardIds: readonly CardInstanceId[];
+  legalTargetIdsFor: (input: {
+    sourceZone: SearchSourceZone;
+    filter: SearchToGripFilter;
+  }) => readonly CardInstanceId[];
+}): SearchToGripSelectionsResult {
   const choice = input.choice;
   if (!choice) throw new Error("Es ist keine CardImplementation-Search-Choice offen.");
   const sourceParts = choice.source.split(":");
@@ -87,7 +120,20 @@ export function resolveSearchToGripSelection(input: {
     throw new Error("Die CardImplementation-Search-Choice ist ungueltig.");
   const sourceZone = kind === "p3_37.search_trash_to_grip" ? "heap" : "stack";
   const legalTargetIds = input.legalTargetIdsFor({ sourceZone, filter });
-  if (!input.selectedCardId || !legalTargetIds.includes(input.selectedCardId))
+  const selectedCardIds = [...input.selectedCardIds];
+  if (
+    selectedCardIds.length < choice.minSelections ||
+    selectedCardIds.length > choice.maxSelections
+  )
+    throw new Error(
+      "Die Anzahl gewaehlter Karten passt nicht zu dieser Suche.",
+    );
+  if (new Set(selectedCardIds).size !== selectedCardIds.length)
+    throw new Error("Die gewaehlte Karte ist fuer diese Suche nicht legal.");
+  if (
+    selectedCardIds.length === 0 ||
+    selectedCardIds.some((cardId) => !legalTargetIds.includes(cardId))
+  )
     throw new Error("Die gewaehlte Karte ist fuer diese Suche nicht legal.");
   const shuffleNeeded = sourceZone === "stack" && sourceParts[5] === "shuffle";
   return {
@@ -95,7 +141,7 @@ export function resolveSearchToGripSelection(input: {
     sourceDefinitionId,
     filter,
     sourceZone,
-    selectedCardId: input.selectedCardId,
+    selectedCardIds,
     revealToCorp: sourceParts[4] === "reveal",
     shuffleNeeded,
   };
@@ -286,7 +332,8 @@ export function resolveRevealedStackProgramInstallSelection(input: {
   if (!choice || !choice.source.startsWith("v1915.revealed_stack_program_install"))
     throw new Error("Es ist keine Revealed-Stack-Program-Install-Choice offen.");
   const sourceCardId = choice.source.split(":")[1] as CardInstanceId | undefined;
-  if (!sourceCardId) throw new Error("Die offengelegte Stack-Quelle ist nicht mehr installiert.");
+  if (!sourceCardId)
+    throw new Error("Die offengelegte Stack-Quelle ist nicht mehr installiert.");
   if (!input.selectedCardId || !input.currentTopCardIds.includes(input.selectedCardId))
     throw new Error("Das gewaehlte Programm liegt nicht mehr im Reveal-Fenster.");
   if (!input.isSelectedProgram)

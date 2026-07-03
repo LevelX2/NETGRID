@@ -826,12 +826,26 @@ export function publicContextForAction(
   if (legalAction.payload?.hiddenZoneBarrier === true) {
     context.hiddenZoneBarrier = true;
     context.hiddenZoneAction = legalAction.payload.hiddenZoneAction;
+    if (typeof legalAction.payload.searchedZone === "string")
+      context.searchedZone = legalAction.payload.searchedZone;
     if (typeof legalAction.payload.selectedCount === "number")
       context.selectedCount = legalAction.payload.selectedCount;
+    if (typeof legalAction.payload.searchedCount === "number")
+      context.searchedCount = legalAction.payload.searchedCount;
+    if (typeof legalAction.payload.movedCardCount === "number")
+      context.movedCardCount = legalAction.payload.movedCardCount;
+    if (typeof legalAction.payload.movedToGripCount === "number")
+      context.movedToGripCount = legalAction.payload.movedToGripCount;
     if (typeof legalAction.payload.arrangedCount === "number")
       context.arrangedCount = legalAction.payload.arrangedCount;
     if (typeof legalAction.payload.trashedCount === "number")
       context.trashedCount = legalAction.payload.trashedCount;
+    if (typeof legalAction.payload.stackShuffled === "boolean")
+      context.stackShuffled = legalAction.payload.stackShuffled;
+    if (typeof legalAction.payload.shufflePerformed === "boolean")
+      context.shufflePerformed = legalAction.payload.shufflePerformed;
+    if (typeof legalAction.payload.shuffled === "boolean")
+      context.shuffled = legalAction.payload.shuffled;
     if (typeof legalAction.payload.requiredConnectionTrashCount === "number")
       context.requiredConnectionTrashCount =
         legalAction.payload.requiredConnectionTrashCount;
@@ -889,8 +903,7 @@ export function publicContextForAction(
       context.trashedInstalledRunnerHardwareCount =
         legalAction.payload.trashedInstalledRunnerHardwareCount;
     if (
-      typeof legalAction.payload.trashedInstalledRunnerProgramCount ===
-      "number"
+      typeof legalAction.payload.trashedInstalledRunnerProgramCount === "number"
     )
       context.trashedInstalledRunnerProgramCount =
         legalAction.payload.trashedInstalledRunnerProgramCount;
@@ -2085,14 +2098,17 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.scoredSourceAsAgenda === "boolean")
     context.scoredSourceAsAgenda = legalAction.payload.scoredSourceAsAgenda;
   if (typeof legalAction.payload?.scoredAgendaPointValue === "number")
-    context.scoredAgendaPointValue =
-      legalAction.payload.scoredAgendaPointValue;
+    context.scoredAgendaPointValue = legalAction.payload.scoredAgendaPointValue;
   if (typeof legalAction.payload?.runnerMemoryUsedAfter === "number")
     context.runnerMemoryUsedAfter = legalAction.payload.runnerMemoryUsedAfter;
-  if (typeof legalAction.payload?.cardImplementationSourceCounterType === "string")
+  if (
+    typeof legalAction.payload?.cardImplementationSourceCounterType === "string"
+  )
     context.cardImplementationSourceCounterType =
       legalAction.payload.cardImplementationSourceCounterType;
-  if (typeof legalAction.payload?.cardImplementationSourceCounterCost === "number")
+  if (
+    typeof legalAction.payload?.cardImplementationSourceCounterCost === "number"
+  )
     context.cardImplementationSourceCounterCost =
       legalAction.payload.cardImplementationSourceCounterCost;
   if (typeof legalAction.payload?.runEnded === "boolean")

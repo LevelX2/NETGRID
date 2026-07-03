@@ -251,6 +251,7 @@ import {
   temporaryProgramInstallableProgramIds,
   temporaryProgramInstallSourceOptions,
   startAujourdOuiTop5Activation,
+  startSearchStackToGripActivation,
   startRunnerStackSearchChoiceActivation,
   startHiddenStackProgramInstallActivation,
   startTemporaryProgramInstallSourceActivation,
@@ -1689,28 +1690,37 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
         zone: { side: "runner", zone: "heap" },
       };
     }
-    const takenIds = state.runner.stack.slice(0, trashedIds.length);
-    for (const cardId of takenIds) {
-      removeFromAllZones(state, cardId);
-      state.runner.grip.push(cardId);
-      state.cardInstances[cardId] = {
-        ...mustInstance(state.cardInstances, cardId),
-        faceup: false,
-        zone: { side: "runner", zone: "grip" },
-      };
+    const selectionCount = Math.min(
+      trashedIds.length,
+      state.runner.stack.length,
+    );
+    if (selectionCount > 0) {
+      startSearchStackToGripActivation(
+        hiddenZoneSearchActivationHandlerHost(state, legalAction),
+        {
+          sourceCardId,
+          sourceDefinitionId,
+          filter: "any_card",
+          revealToCorp: false,
+          shuffleAfterwards: true,
+          selectionCount,
+        },
+      );
+    } else {
+      shuffleRunnerStack(state);
     }
-    shuffleRunnerStack(state);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       runnerEventAbility: "trash_grip_search_stack_to_grip_equal_count",
       sourceDefinitionId,
       cardId: sourceCardId,
       trashedCount: trashedIds.length,
-      searchedCount: takenIds.length,
-      movedToGripCount: takenIds.length,
-      stackShuffled: true,
+      searchedCount: selectionCount,
+      movedToGripCount: 0,
+      stackShuffled: selectionCount === 0,
       hiddenZoneBarrier: true,
       randomCounterAfter: state.randomCounter,
+      ...(selectionCount > 0 ? { choiceVisibility: "runner_private" } : {}),
     };
   }
 

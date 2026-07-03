@@ -180,6 +180,7 @@ export function startSearchStackToGripActivation(
     filter: SearchToGripFilter;
     revealToCorp: boolean;
     shuffleAfterwards: true;
+    selectionCount?: number;
   },
 ): HiddenZoneSearchActivationResult {
   if (host.state.pendingChoice)
@@ -194,6 +195,9 @@ export function startSearchStackToGripActivation(
     filter: input.filter,
     revealToCorp: input.revealToCorp,
     shuffleAfterwards: input.shuffleAfterwards,
+    ...(input.selectionCount !== undefined
+      ? { selectionCount: input.selectionCount }
+      : {}),
     options: host.state.runner.stack.map((cardId) => {
       const definition = host.cards.definitionFor(cardId);
       const selectable = targets.includes(cardId);
@@ -572,7 +576,8 @@ export function startTemporaryProgramInstallSourceActivation(
     sourcePrefix: input.sourcePrefix ?? "v1911.temporary_program_install",
     sourceCardId: input.sourceCardId,
     sourceDefinitionId:
-      input.sourceDefinitionId ?? host.constants.temporaryProgramInstallSourceId,
+      input.sourceDefinitionId ??
+      host.constants.temporaryProgramInstallSourceId,
     options,
   });
   host.legalAction.payload = {
@@ -592,8 +597,13 @@ export function handleTopFiveProgramInstallActivation(
   ) as CardInstanceId;
   if (!host.state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Die offengelegte Stack-Quelle ist nicht installiert.");
-  if (host.cards.definitionFor(sourceCardId).id !== host.constants.randomStackProgramInstallSourceId)
-    throw new Error("Die Revealed-Stack-Program-Install-Faehigkeit passt nicht zur Karte.");
+  if (
+    host.cards.definitionFor(sourceCardId).id !==
+    host.constants.randomStackProgramInstallSourceId
+  )
+    throw new Error(
+      "Die Revealed-Stack-Program-Install-Faehigkeit passt nicht zur Karte.",
+    );
   const oncePerRunPlan = createSourceOncePerRunPostInstallPlan({
     sourceCardId,
     usedSourceIdsThisRun: run.hiddenStackInstallUsedSourceIdsThisRun ?? [],

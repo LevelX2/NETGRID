@@ -8,11 +8,7 @@ type HiddenZonePayload = Record<string, string | number | boolean>;
 type ChoiceOptions = ChoiceRequest["options"];
 type SearchToGripFilter = "program" | "any_card";
 type InstallSourceZone = "heap" | "stack";
-type SearchCardType =
-  | "program"
-  | "event"
-  | "hardware"
-  | "resource";
+type SearchCardType = "program" | "event" | "hardware" | "resource";
 
 export function buildSearchTrashToGripChoice(input: {
   stateVersion: number;
@@ -65,8 +61,10 @@ export function buildSearchStackToGripChoice(input: {
   revealToCorp: boolean;
   shuffleAfterwards: true;
   options: ChoiceOptions;
+  selectionCount?: number;
 }): ChoiceRequest {
   const nextStateVersion = input.stateVersion + 1;
+  const selectionCount = Math.max(1, Math.floor(input.selectionCount ?? 1));
   return {
     choiceId: `p3_37_search_stack_to_grip_${nextStateVersion}`,
     side: "runner",
@@ -74,8 +72,8 @@ export function buildSearchStackToGripChoice(input: {
     prompt: "Stack durchsuchen",
     kind: "select_cards",
     options: input.options,
-    minSelections: 1,
-    maxSelections: 1,
+    minSelections: selectionCount,
+    maxSelections: selectionCount,
     stateVersion: nextStateVersion,
     visibility: "hidden_info_barrier",
     cardSearchPresentation: {

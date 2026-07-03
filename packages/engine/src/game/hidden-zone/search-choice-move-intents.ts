@@ -3,7 +3,10 @@ import type {
   CardDefinitionId,
   CardInstanceId,
 } from "@netgrid/shared";
-import type { SearchToGripSelectionResult } from "./search-choice-resolvers";
+import type {
+  SearchToGripSelectionResult,
+  SearchToGripSelectionsResult,
+} from "./search-choice-resolvers";
 
 type HiddenZonePayload = Record<string, string | number | boolean>;
 type SearchToGripSourceZone = "heap" | "stack";
@@ -36,6 +39,11 @@ export type AppliedSearchToGripMove = {
   payload: HiddenZonePayload;
 };
 
+export type AppliedSearchToGripMoves = {
+  results: SearchToGripMoveResult[];
+  payload: HiddenZonePayload;
+};
+
 export function createSearchToGripMoveIntent(input: {
   selectedCardId: CardInstanceId;
   sourceCardIds: readonly CardInstanceId[];
@@ -46,7 +54,9 @@ export function createSearchToGripMoveIntent(input: {
   shuffleNeeded: boolean;
 }): SearchToGripMoveIntent {
   if (!input.sourceCardIds.includes(input.selectedCardId))
-    throw new Error("Die gewaehlte Hidden-Zone-Karte liegt nicht in der Quellzone.");
+    throw new Error(
+      "Die gewaehlte Hidden-Zone-Karte liegt nicht in der Quellzone.",
+    );
   return {
     selectedCardId: input.selectedCardId,
     sourceZone: input.sourceZone,
@@ -105,7 +115,8 @@ export function applyResolvedSearchToGripMove(input: {
     addToGrip: input.addToGrip,
   });
   const instance = input.cardInstances[moveResult.movedCardId];
-  if (!instance) throw new Error(`CardInstance fehlt: ${moveResult.movedCardId}`);
+  if (!instance)
+    throw new Error(`CardInstance fehlt: ${moveResult.movedCardId}`);
   input.cardInstances[moveResult.movedCardId] = {
     ...instance,
     zone: { side: "runner", zone: "grip" },
@@ -113,6 +124,65 @@ export function applyResolvedSearchToGripMove(input: {
   return {
     result: moveResult,
     payload: buildSearchToGripResolvedPayload(moveResult),
+  };
+}
+
+export function applyResolvedSearchToGripMoves(input: {
+  selection: SearchToGripSelectionsResult;
+  sourceCardIds: readonly CardInstanceId[];
+  sourceDefinition: {
+    id: CardDefinitionId;
+    type: string;
+  };
+  selectedCards: readonly {
+    cardId: CardInstanceId;
+    definitionId: CardDefinitionId;
+  }[];
+  installedRunnerResourceIds: readonly CardInstanceId[];
+  cardInstances: Record<CardInstanceId, CardInstance>;
+  removeFromAllZones: (cardId: CardInstanceId) => void;
+  addToGrip: (cardId: CardInstanceId) => void;
+}): AppliedSearchToGripMoves {
+  const { selection } = input;
+  if (input.sourceDefinition.id !== selection.sourceDefinitionId)
+    throw new Error("Die Search-Quelle ist nicht mehr gueltig.");
+  if (
+    input.sourceDefinition.type === "resource" &&
+    !input.installedRunnerResourceIds.includes(selection.sourceCardId)
+  )
+    throw new Error("Die Search-Quelle ist nicht mehr installiert.");
+  const selectedDefinitions = new Map(
+    input.selectedCards.map((card) => [card.cardId, card.definitionId]),
+  );
+  const results = selection.selectedCardIds.map((selectedCardId) => {
+    const selectedCardDefinitionId = selectedDefinitions.get(selectedCardId);
+    if (!selectedCardDefinitionId)
+      throw new Error("Die gewaehlte Hidden-Zone-Karte ist unbekannt.");
+    const moveIntent = createSearchToGripMoveIntent({
+      selectedCardId,
+      sourceCardIds: input.sourceCardIds,
+      sourceZone: selection.sourceZone,
+      sourceDefinitionId: selection.sourceDefinitionId,
+      selectedCardDefinitionId,
+      revealToCorp: selection.revealToCorp,
+      shuffleNeeded: selection.shuffleNeeded,
+    });
+    const moveResult = applySearchToGripMoveIntent(moveIntent, {
+      removeFromAllZones: input.removeFromAllZones,
+      addToGrip: input.addToGrip,
+    });
+    const instance = input.cardInstances[moveResult.movedCardId];
+    if (!instance)
+      throw new Error(`CardInstance fehlt: ${moveResult.movedCardId}`);
+    input.cardInstances[moveResult.movedCardId] = {
+      ...instance,
+      zone: { side: "runner", zone: "grip" },
+    };
+    return moveResult;
+  });
+  return {
+    results,
+    payload: buildSearchToGripResolvedPayloadForResults(results),
   };
 }
 
@@ -133,25 +203,37 @@ export function createSearchToGripMoveResult(
 export function buildSearchToGripResolvedPayload(
   result: SearchToGripMoveResult,
 ): HiddenZonePayload {
+  return buildSearchToGripResolvedPayloadForResults([result]);
+}
+
+function buildSearchToGripResolvedPayloadForResults(
+  results: readonly SearchToGripMoveResult[],
+): HiddenZonePayload {
+  const first = results[0];
+  if (!first) throw new Error("Search-to-Grip braucht mindestens eine Karte.");
+  const revealedDefinitionIds = results.map(
+    (result) => result.selectedCardDefinitionId,
+  );
   return {
     hiddenZoneBarrier: true,
     hiddenZoneAction:
-      result.sourceZone === "runner_heap"
+      first.sourceZone === "runner_heap"
         ? "p3_37_search_trash_to_grip"
         : "p3_37_search_stack_to_grip",
-    sourceDefinitionId: result.sourceDefinitionId,
-    searchedZone: result.sourceZone,
-    selectedCount: 1,
-    movedCardCount: 1,
-    searchDestination: result.destinationZone,
-    shufflePerformed: result.shuffleNeeded,
-    shuffled: result.shuffleNeeded,
-    ...(result.sourceZone === "runner_heap" || result.revealToCorp
+    sourceDefinitionId: first.sourceDefinitionId,
+    searchedZone: first.sourceZone,
+    selectedCount: results.length,
+    movedCardCount: results.length,
+    searchDestination: first.destinationZone,
+    shufflePerformed: first.shuffleNeeded,
+    shuffled: first.shuffleNeeded,
+    ...(first.sourceZone === "runner_heap" || first.revealToCorp
       ? {
-          cardDefinitionId: result.selectedCardDefinitionId,
+          cardDefinitionId: first.selectedCardDefinitionId,
           publicRevealKind: "reveal",
-          publicRevealDefinitionId: result.selectedCardDefinitionId,
-          revealedCardDefinitionIds: result.selectedCardDefinitionId,
+          publicRevealDefinitionId: first.selectedCardDefinitionId,
+          revealedCardDefinitionIds: revealedDefinitionIds.join(","),
+          revealedCount: results.length,
         }
       : {}),
   };

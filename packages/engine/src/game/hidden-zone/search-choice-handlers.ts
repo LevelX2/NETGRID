@@ -23,9 +23,9 @@ import {
 import {
   resolveLookTopStackTakeMatchingSelection,
   resolveSearchStackInstallSelection,
-  resolveSearchToGripSelection,
+  resolveSearchToGripSelections,
 } from "./search-choice-resolvers";
-import { applyResolvedSearchToGripMove } from "./search-choice-move-intents";
+import { applyResolvedSearchToGripMoves } from "./search-choice-move-intents";
 import {
   applyTopNTakeMatchingMoveIntent,
   buildTopNTakeMatchingResolvedPayload,
@@ -698,34 +698,44 @@ function handleCardImplementationSearchToGripChoice(
   host: HiddenZoneSearchChoiceHandlerHost,
 ): HiddenZoneChoiceHandlerResult {
   const { choice, state } = host;
-  const selection = resolveSearchToGripSelection({
+  const selectedCardIds = selectedChoiceCardIds(choice, host.playerAction);
+  const selection = resolveSearchToGripSelections({
     choice,
-    selectedCardId: selectedChoiceCardIds(choice, host.playerAction)[0],
+    selectedCardIds,
     legalTargetIdsFor: ({ sourceZone, filter }) =>
       sourceZone === "heap"
         ? searchTrashToGripTargets(host, filter)
         : searchStackToGripTargets(host, filter),
   });
-  const move = applyResolvedSearchToGripMove({
+  const move = applyResolvedSearchToGripMoves({
     selection,
-    sourceCardIds: selection.sourceZone === "heap" ? state.runner.heap : state.runner.stack,
+    sourceCardIds:
+      selection.sourceZone === "heap" ? state.runner.heap : state.runner.stack,
     sourceDefinition: host.cards.definitionFor(selection.sourceCardId),
-    selectedCardDefinitionId: host.cards.definitionFor(selection.selectedCardId).id,
+    selectedCards: selection.selectedCardIds.map((cardId) => ({
+      cardId,
+      definitionId: host.cards.definitionFor(cardId).id,
+    })),
     installedRunnerResourceIds: state.runner.rig.resources,
     cardInstances: state.cardInstances,
     removeFromAllZones: host.zones.removeFromAllZones,
     addToGrip: host.zones.addToGrip,
   });
-  if (move.result.shuffleNeeded)
-    host.shuffleRunnerStack(`p3_37_search_stack_to_grip:${choice.choiceId}:shuffle`);
-  host.legalAction.payload = { ...(host.legalAction.payload ?? {}), ...move.payload };
+  if (selection.shuffleNeeded)
+    host.shuffleRunnerStack(
+      `p3_37_search_stack_to_grip:${choice.choiceId}:shuffle`,
+    );
+  host.legalAction.payload = {
+    ...(host.legalAction.payload ?? {}),
+    ...move.payload,
+  };
   return {
     handled: true,
     stateChanged: true,
     deletePendingChoice: true,
     resolvedPayload: host.legalAction.payload as HiddenZonePayload,
-    shufflePerformed: move.result.shuffleNeeded,
-    movedCardIds: [move.result.movedCardId],
+    shufflePerformed: selection.shuffleNeeded,
+    movedCardIds: move.results.map((result) => result.movedCardId),
   };
 }
 
