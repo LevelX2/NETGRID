@@ -8,12 +8,16 @@ import {
 describe("visibleBreakerRoles", () => {
   it("derives breaker roles from visible subtypes instead of demo definition ids", () => {
     expect(
-      visibleBreakerRoles(visibleProgram("custom-fracter", ["Icebreaker", "Fracter"])),
+      visibleBreakerRoles(
+        visibleProgram("custom-fracter", ["Icebreaker", "Fracter"]),
+      ),
     ).toEqual(["fracter"]);
-    expect(visibleBreakerRoles(visibleProgram("simple_fracter", []))).toEqual([]);
-    expect(visibleBreakerRoles(visibleProgram("generic-breaker", ["Icebreaker"]))).toEqual([
-      "icebreaker",
-    ]);
+    expect(visibleBreakerRoles(visibleProgram("simple_fracter", []))).toEqual(
+      [],
+    );
+    expect(
+      visibleBreakerRoles(visibleProgram("generic-breaker", ["Icebreaker"])),
+    ).toEqual(["icebreaker"]);
     expect(
       visibleBreakerRoles(
         visibleProgram("spaced-killer", [" Icebreaker ", " Killer "]),
@@ -34,9 +38,9 @@ describe("visibleBreakerCardCanAddressIce", () => {
 
     expect(canAddress(["support_fracter"], "Barrier")).toBe(true);
     expect(canAddress(["fracterish_noise"], "Barrier")).toBe(false);
-    expect(canAddress(["support_fracter"], "Firewall", "Fracter support.")).toBe(
-      false,
-    );
+    expect(
+      canAddress(["support_fracter"], "Firewall", "Fracter support."),
+    ).toBe(false);
 
     expect(canAddress(["support_decoder"], "Code Gate")).toBe(true);
     expect(canAddress(["decoderish_noise"], "Code Gate")).toBe(false);
@@ -56,10 +60,7 @@ describe("visibleBreakerCardCanAddressIce", () => {
   });
 });
 
-function visibleProgram(
-  definitionId: string,
-  subtypes: string[],
-): VisibleCard {
+function visibleProgram(definitionId: string, subtypes: string[]): VisibleCard {
   return {
     instanceId: `${definitionId}-instance`,
     definitionId,

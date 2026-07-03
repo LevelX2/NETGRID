@@ -11,15 +11,16 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         variableRezKind: "x_strength",
         variableRezValue: 0,
       }),
-      rezCandidate("homing-x0", 4, [
-        "role:trace_ice",
-        "corp_ice.conditional_end_run",
-        "trace.source",
-      ], {
-        kind: "rez_cost",
-        chosen: 0,
-        min: 0,
-      }),
+      rezCandidate(
+        "homing-x0",
+        4,
+        ["role:trace_ice", "corp_ice.conditional_end_run", "trace.source"],
+        {
+          kind: "rez_cost",
+          chosen: 0,
+          min: 0,
+        },
+      ),
       { actionCreditCost },
     );
 
@@ -81,15 +82,16 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
         variableRezKind: "x_strength",
         variableRezValue: 1,
       }),
-      rezCandidate("homing-x1", 5, [
-        "role:trace_ice",
-        "corp_ice.conditional_end_run",
-        "trace.source",
-      ], {
-        kind: "rez_cost",
-        chosen: 1,
-        min: 1,
-      }),
+      rezCandidate(
+        "homing-x1",
+        5,
+        ["role:trace_ice", "corp_ice.conditional_end_run", "trace.source"],
+        {
+          kind: "rez_cost",
+          chosen: 1,
+          min: 1,
+        },
+      ),
       { actionCreditCost },
     );
 
@@ -245,10 +247,16 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
           ]),
         ],
       }),
-      rezAction("credit-blocks-sentry", 3, {
-        variableRezKind: "alternate_subtype",
-        selectedSubtypesAfterRez: "sentry",
-      }, "Credit Blocks rezzen", "credit-blocks"),
+      rezAction(
+        "credit-blocks-sentry",
+        3,
+        {
+          variableRezKind: "alternate_subtype",
+          selectedSubtypesAfterRez: "sentry",
+        },
+        "Credit Blocks rezzen",
+        "credit-blocks",
+      ),
       rezCandidate("credit-blocks-sentry", 3, [
         "role:etr_ice",
         "corp_ice.end_run",
@@ -280,10 +288,16 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
           ]),
         ],
       }),
-      rezAction("credit-blocks-wall", 4, {
-        variableRezKind: "alternate_subtype",
-        selectedSubtypesAfterRez: "wall",
-      }, "Credit Blocks als Wall rezzen", "credit-blocks"),
+      rezAction(
+        "credit-blocks-wall",
+        4,
+        {
+          variableRezKind: "alternate_subtype",
+          selectedSubtypesAfterRez: "wall",
+        },
+        "Credit Blocks als Wall rezzen",
+        "credit-blocks",
+      ),
       rezCandidate("credit-blocks-wall", 4, [
         "role:etr_ice",
         "corp_ice.end_run",
@@ -300,12 +314,94 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
       "effective_defense_visible_breaker_coverage:false",
     );
   });
+
+  it("treats breakable wall ETR as visible tax instead of zero-effect defense", () => {
+    const context = semanticRuntimeCorpEffectiveDefenseContext(
+      corpInput(5, {
+        runnerCredits: 4,
+        runnerRig: [earlyWormBreaker()],
+        servers: [
+          server("rd", [
+            corpIce("wall-of-static", {
+              definitionId: "onr_v1_279_wall-of-static",
+              title: "Wall of Static",
+              subtypes: ["wall"],
+            }),
+          ]),
+        ],
+      }),
+      rezAction(
+        "rez-wall-of-static",
+        3,
+        {},
+        "Wall of Static rezzen",
+        "wall-of-static",
+      ),
+      undefined,
+      { actionCreditCost },
+    );
+
+    expect(context).toMatchObject({
+      isRezzableNow: true,
+      visibleBreakerCoverage: true,
+      visibleBreakCost: 1,
+      runnerCanAffordVisibleBreak: true,
+      hasImmediateStopPotential: false,
+      hasVisibleBreakerTax: true,
+      hasMeaningfulTaxOrDamage: true,
+      zeroEffectRisk: false,
+    });
+    expect(context?.evidence).toEqual(
+      expect.arrayContaining([
+        "effective_defense_visible_break_cost:1",
+        "effective_defense_visible_breaker_tax:true",
+      ]),
+    );
+  });
+
+  it("treats covered wall ETR as a stop when the runner cannot afford the visible break", () => {
+    const context = semanticRuntimeCorpEffectiveDefenseContext(
+      corpInput(5, {
+        runnerCredits: 0,
+        runnerRig: [earlyWormBreaker()],
+        servers: [
+          server("rd", [
+            corpIce("wall-of-static", {
+              definitionId: "onr_v1_279_wall-of-static",
+              title: "Wall of Static",
+              subtypes: ["wall"],
+            }),
+          ]),
+        ],
+      }),
+      rezAction(
+        "rez-wall-of-static",
+        3,
+        {},
+        "Wall of Static rezzen",
+        "wall-of-static",
+      ),
+      undefined,
+      { actionCreditCost },
+    );
+
+    expect(context).toMatchObject({
+      isRezzableNow: true,
+      visibleBreakerCoverage: true,
+      visibleBreakCost: 1,
+      runnerCanAffordVisibleBreak: false,
+      hasImmediateStopPotential: true,
+      hasVisibleBreakerTax: true,
+      zeroEffectRisk: false,
+    });
+  });
 });
 
 function corpInput(
   credits: number,
   overrides: {
     runnerRig?: NonNullable<AiDecisionInput["playerView"]["opponent"]["rig"]>;
+    runnerCredits?: number;
     servers?: AiDecisionInput["playerView"]["servers"];
   } = {},
 ): AiDecisionInput {
@@ -317,6 +413,7 @@ function corpInput(
         gripOrHq: [],
       },
       opponent: {
+        credits: overrides.runnerCredits ?? 0,
         rig: overrides.runnerRig ?? [],
       },
       servers: overrides.servers ?? [],
@@ -416,7 +513,9 @@ function server(
 
 function corpIce(
   instanceId: string,
-  overrides: Partial<AiDecisionInput["playerView"]["servers"][number]["ice"][number]> = {},
+  overrides: Partial<
+    AiDecisionInput["playerView"]["servers"][number]["ice"][number]
+  > = {},
 ): AiDecisionInput["playerView"]["servers"][number]["ice"][number] {
   return {
     instanceId,
@@ -443,5 +542,20 @@ function killerBreaker(): NonNullable<
     controller: "runner",
     subtypes: ["Icebreaker", "Killer"],
     rulesText: "Break sentry subroutines.",
+  };
+}
+
+function earlyWormBreaker(): NonNullable<
+  AiDecisionInput["playerView"]["opponent"]["rig"]
+>[number] {
+  return {
+    instanceId: "early-worm",
+    definitionId: "onr_classic_027_early-worm",
+    title: "Early Worm",
+    known: true,
+    type: "program",
+    owner: "runner",
+    controller: "runner",
+    subtypes: ["Icebreaker", "Worm"],
   };
 }

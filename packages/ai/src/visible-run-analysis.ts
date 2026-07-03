@@ -158,9 +158,7 @@ export function runnerKnownPathAssessmentIsKnownNoAccess(
   );
 }
 
-const RUN_REMAINDER_STRENGTH_BREAKER_IDS = new Set([
-  "onr_v1_030_grubb",
-]);
+const RUN_REMAINDER_STRENGTH_BREAKER_IDS = new Set(["onr_v1_030_grubb"]);
 
 export function serverIdFromEvent(event: PublicGameEvent): string | undefined {
   const candidate =
@@ -377,15 +375,15 @@ function assessKnownRezzedIcePathInternal(
     }
     const futureIce = iceCards.slice(0, Math.max(0, iceIndex));
     const runPathEffects = pathProjectionEffectsForQuote(quote).filter(
-      ({ effect }) => !runPathEffectAlreadyVisibleOnFutureIce(effect, futureIce),
+      ({ effect }) =>
+        !runPathEffectAlreadyVisibleOnFutureIce(effect, futureIce),
     );
     for (const { effect, sourceSubroutine } of runPathEffects) {
-      const unavoidableTraceRunLock =
-        unbrokenEffectIsUnavoidableTraceRunLock(
-          effect,
-          sourceSubroutine,
-          remainingCredits,
-        );
+      const unavoidableTraceRunLock = unbrokenEffectIsUnavoidableTraceRunLock(
+        effect,
+        sourceSubroutine,
+        remainingCredits,
+      );
       const hardEffectKinds = hardUnbrokenRunEffectKinds(
         effect,
         futureIce.length,
@@ -443,23 +441,22 @@ function assessKnownRezzedIcePathInternal(
                 : "ice_unaffordable",
         });
       }
-      const breakAssessment =
-        options.allowBreakingRunPathEffects
-          ? runPathEffectBreakAssessment({
-              iceCards,
-              iceIndex,
-              ice: effectiveIce,
-              quote,
-              effect,
-              activeRunPathEffects,
-              rigCards,
-              rootCards,
-              remainingCredits,
-              visibleCorpBidCapacity,
-              breakerStrengths,
-              additionalBreakCostPerSubroutine,
-            })
-          : undefined;
+      const breakAssessment = options.allowBreakingRunPathEffects
+        ? runPathEffectBreakAssessment({
+            iceCards,
+            iceIndex,
+            ice: effectiveIce,
+            quote,
+            effect,
+            activeRunPathEffects,
+            rigCards,
+            rootCards,
+            remainingCredits,
+            visibleCorpBidCapacity,
+            breakerStrengths,
+            additionalBreakCostPerSubroutine,
+          })
+        : undefined;
       if (breakAssessment) {
         visibleBreakCost += breakAssessment.cost;
         remainingCredits -= breakAssessment.cost;
@@ -660,10 +657,7 @@ function visibleIceRunHazardsForQuote(params: {
     const traceAvoidance =
       traceBaseStrength === undefined
         ? undefined
-        : visibleTraceAvoidanceForBaseStrength(
-            traceBaseStrength,
-            traceSupport,
-          );
+        : visibleTraceAvoidanceForBaseStrength(traceBaseStrength, traceSupport);
     const visibleCorpBidCapacity = Math.max(
       0,
       Math.floor(params.visibleCorpBidCapacity),
@@ -718,16 +712,15 @@ function visibleIceRunHazardsForQuote(params: {
       traceAvoidance?.cheapestUnsafe;
     const guaranteedTraceAvoidance =
       visibleCorpMaxTraceAvoidance?.cheapestAffordableSafe;
-    const baseLinkEvidenceSource =
-      guaranteedTraceAvoidance?.baseLink
-        ? guaranteedTraceAvoidance
-        : cheapestCorpMaxTraceAvoidance?.baseLink
-          ? cheapestCorpMaxTraceAvoidance
-          : cheapestTraceAvoidance?.baseLink
-            ? cheapestTraceAvoidance
-            : unsafeTraceAvoidance?.baseLink
-              ? unsafeTraceAvoidance
-              : undefined;
+    const baseLinkEvidenceSource = guaranteedTraceAvoidance?.baseLink
+      ? guaranteedTraceAvoidance
+      : cheapestCorpMaxTraceAvoidance?.baseLink
+        ? cheapestCorpMaxTraceAvoidance
+        : cheapestTraceAvoidance?.baseLink
+          ? cheapestTraceAvoidance
+          : unsafeTraceAvoidance?.baseLink
+            ? unsafeTraceAvoidance
+            : undefined;
     const baseTraceCovered =
       traceAvoidance?.cheapestAffordableSafe !== undefined;
     const visibleCorpMaxTraceCovered =
@@ -819,7 +812,9 @@ function visibleIceRunHazardsForQuote(params: {
             ]
           : []),
         ...(baseLinkEvidenceSource?.sourceTitle
-          ? [`visible_trace_base_link_source:${baseLinkEvidenceSource.sourceTitle}`]
+          ? [
+              `visible_trace_base_link_source:${baseLinkEvidenceSource.sourceTitle}`,
+            ]
           : []),
         ...(baseLinkEvidenceSource?.sideEffect
           ? [
@@ -850,31 +845,33 @@ function visibleIceRunHazardsForQuote(params: {
 
 function visibleIceRunHazardForTraceEffect(
   effect: TraceSuccessEffect | undefined,
-): Omit<
-  VisibleIceRunHazard,
-  | "iceIndex"
-  | "sourceDefinitionId"
-  | "sourceTitle"
-  | "subroutineId"
-  | "traceBaseStrength"
-  | "runnerTraceCapacity"
-  | "baseTraceCovered"
-  | "visibleCorpBidCapacity"
-  | "visibleCorpMaxTraceCovered"
-  | "traceAvoidanceCost"
-  | "visibleCorpMaxTraceAvoidanceCost"
-  | "traceBidCost"
-  | "baseLinkValue"
-  | "baseLinkActivationCost"
-  | "baseLinkSourceDefinitionId"
-  | "baseLinkSourceTitle"
-  | "baseLinkSideEffect"
-  | "breakAvoidanceCost"
-  | "minimumAvoidanceCost"
-  | "unavoidable"
-  | "penalty"
-  | "evidence"
-> | undefined {
+):
+  | Omit<
+      VisibleIceRunHazard,
+      | "iceIndex"
+      | "sourceDefinitionId"
+      | "sourceTitle"
+      | "subroutineId"
+      | "traceBaseStrength"
+      | "runnerTraceCapacity"
+      | "baseTraceCovered"
+      | "visibleCorpBidCapacity"
+      | "visibleCorpMaxTraceCovered"
+      | "traceAvoidanceCost"
+      | "visibleCorpMaxTraceAvoidanceCost"
+      | "traceBidCost"
+      | "baseLinkValue"
+      | "baseLinkActivationCost"
+      | "baseLinkSourceDefinitionId"
+      | "baseLinkSourceTitle"
+      | "baseLinkSideEffect"
+      | "breakAvoidanceCost"
+      | "minimumAvoidanceCost"
+      | "unavoidable"
+      | "penalty"
+      | "evidence"
+    >
+  | undefined {
   if (!effect || effect.type === "none") return undefined;
   switch (effect.type) {
     case "add_tag":
@@ -1042,9 +1039,7 @@ function visibleRunnerTraceSupport(
         baseLink: staticIdentityBaseLink,
         activationCost: 0,
         safeForAccess: true,
-        ...(card.definitionId
-          ? { sourceDefinitionId: card.definitionId }
-          : {}),
+        ...(card.definitionId ? { sourceDefinitionId: card.definitionId } : {}),
         ...(card.title ? { sourceTitle: card.title } : {}),
       });
     }
@@ -1083,7 +1078,8 @@ function visibleTraceAvoidanceForBaseStrength(
     const affordable =
       option.activationCost <= support.availableCredits &&
       traceBidCost <=
-        support.availableCredits - option.activationCost +
+        support.availableCredits -
+          option.activationCost +
           support.traceCreditPool;
     return {
       ...option,
@@ -1170,9 +1166,7 @@ function definitionSubroutineForVisibleSubroutine(
   quote: VisibleEffectiveIceRunQuote,
   subroutine: VisibleEffectiveSubroutine,
   subroutineIndex: number,
-):
-  | NonNullable<CardDefinition["subroutines"]>[number]
-  | undefined {
+): NonNullable<CardDefinition["subroutines"]>[number] | undefined {
   const definition =
     visibleRunCardDefinition(subroutine.sourceDefinitionId) ??
     visibleRunCardDefinition(quote.iceDefinitionId);
@@ -1187,7 +1181,9 @@ function definitionSubroutineForVisibleSubroutine(
   const sameTypeIndex = quote.subroutines
     .slice(0, subroutineIndex)
     .filter((candidate) => candidate.type === subroutine.type).length;
-  return sameType[sameTypeIndex] ?? (sameType.length === 1 ? sameType[0] : undefined);
+  return (
+    sameType[sameTypeIndex] ?? (sameType.length === 1 ? sameType[0] : undefined)
+  );
 }
 
 function runPathEffectAlreadyVisibleOnFutureIce(
@@ -1199,8 +1195,7 @@ function runPathEffectAlreadyVisibleOnFutureIce(
       effectiveRunQuoteForIce(ice)?.subroutines.some(
         (subroutine) =>
           subroutine.type === "end_the_run" &&
-          subroutine.dynamicSourceKind ===
-            "run_duration_additional_subroutine",
+          subroutine.dynamicSourceKind === "run_duration_additional_subroutine",
       ),
     );
   }
@@ -1437,8 +1432,8 @@ function hardUnbrokenEffectBlockedPathAssessment(params: {
     ? missingCoverageForIceSubtypes(params.iceSubtypes ?? [])
     : undefined;
   const title = params.iceDefinitionId
-    ? visibleRunCardDefinition(params.iceDefinitionId)?.title ??
-      params.iceDefinitionId
+    ? (visibleRunCardDefinition(params.iceDefinitionId)?.title ??
+      params.iceDefinitionId)
     : undefined;
   return {
     blocked: true,
@@ -1711,8 +1706,7 @@ function creditsToBreakVisibleSubroutinesWithBreaker(
     cost:
       pumpCost +
       breakUses * (breakAbility.cost.credits ?? 0) +
-      targetSubroutines.length *
-        Math.max(0, additionalBreakCostPerSubroutine),
+      targetSubroutines.length * Math.max(0, additionalBreakCostPerSubroutine),
     breakerInstanceId: breakerCard.instanceId,
     endingStrength,
     carriesStrengthAcrossIce:
@@ -1873,8 +1867,9 @@ function textBreakIceSubtype(clause: string): string | undefined {
 
 function visibleTextActionCost(clause: string): number | undefined {
   const bracketCost = clause.match(/\[(\d+)\]\s*:/)?.[1];
-  const colonCost = clause.match(/\b(\d+)\s*(?:credit|credits|bit|bits)?\s*:/)
-    ?.[1];
+  const colonCost = clause.match(
+    /\b(\d+)\s*(?:credit|credits|bit|bits)?\s*:/,
+  )?.[1];
   const cost = Number.parseInt(bracketCost ?? colonCost ?? "", 10);
   return Number.isFinite(cost) && cost >= 0 ? cost : undefined;
 }

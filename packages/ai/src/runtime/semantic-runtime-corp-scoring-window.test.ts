@@ -444,7 +444,12 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         servers: protectedCentralServers([
           remoteServer(
             "remote_1",
-            [classicWallIce("remote-classic-wall", { rezzed: true, rezCost: 0 })],
+            [
+              classicWallIce("remote-classic-wall", {
+                rezzed: true,
+                rezCost: 0,
+              }),
+            ],
             [agenda],
           ),
         ]),

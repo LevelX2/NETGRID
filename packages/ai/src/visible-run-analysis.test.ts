@@ -101,7 +101,9 @@ describe("visible run analysis known-path classification", () => {
 
 describe("visible run analysis server ids", () => {
   it("uses structured event server ids and ignores label-only server text", () => {
-    expect(serverIdFromEvent(event({ serverLabel: "Remote 1" }))).toBeUndefined();
+    expect(
+      serverIdFromEvent(event({ serverLabel: "Remote 1" })),
+    ).toBeUndefined();
     expect(serverIdFromEvent(event({ serverLabel: "R&D" }))).toBeUndefined();
     expect(serverIdFromEvent(event({ serverId: "remote_1" }))).toBe("remote_1");
     expect(serverIdFromEvent(event({ attackedServerId: "rd" }))).toBe("rd");

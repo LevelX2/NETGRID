@@ -5,6 +5,10 @@ import {
   visibleBreakerRoles,
 } from "./runner-visible-breaker-coverage";
 import { visibleCardDefinition } from "./card-definition-lookup";
+import {
+  endTheRunSubroutineCount,
+  minimumCreditsToBreakEndTheRunSubroutines,
+} from "../visible-run-analysis";
 
 export type EffectiveDefenseContext = {
   isRezzableNow: boolean;
@@ -15,6 +19,9 @@ export type EffectiveDefenseContext = {
   requiresPostRezPaidAbility: boolean;
   postRezAbilityAffordable: boolean;
   visibleBreakerCoverage: boolean;
+  visibleBreakCost?: number;
+  runnerCanAffordVisibleBreak?: boolean;
+  hasVisibleBreakerTax: boolean;
   minimumUsefulX?: number;
   zeroEffectRisk: boolean;
   evidence: string[];
@@ -76,12 +83,12 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
   const hasEtrSignal =
     sourceDefense.hasImmediateStop ||
     defenseSignals.some(
-    (signal) =>
-      signalHasTerm(signal, "etr_ice") ||
-      signalHasTerm(signal, "end_the_run") ||
-      signalHasTerm(signal, "end_run") ||
-      signalHasTerm(signal, "conditional_end_run") ||
-      signalHasTerm(signal, "ice_protection"),
+      (signal) =>
+        signalHasTerm(signal, "etr_ice") ||
+        signalHasTerm(signal, "end_the_run") ||
+        signalHasTerm(signal, "end_run") ||
+        signalHasTerm(signal, "conditional_end_run") ||
+        signalHasTerm(signal, "ice_protection"),
     );
   const hasTraceSignal = defenseSignals.some((signal) =>
     signalHasTerm(signal, "trace"),
@@ -91,11 +98,21 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
     defenseSignals.some(
       (signal) =>
         signalHasTerm(signal, "tax") || signalHasTerm(signal, "damage"),
-    ) || hasTraceSignal;
+    ) ||
+    hasTraceSignal;
   const visibleBreakerCoverage = visibleRunnerCoverageCanBreakRezzedIce(
     input,
     action,
   );
+  const visibleBreakCost = visibleRunnerBreakCostForRezzedIce(input, action);
+  const runnerCanAffordVisibleBreak =
+    visibleBreakCost !== undefined
+      ? visibleRunnerContestCredits(input) >= visibleBreakCost
+      : undefined;
+  const hasVisibleBreakerTax =
+    visibleBreakerCoverage &&
+    visibleBreakCost !== undefined &&
+    visibleBreakCost > 0;
   const rawImmediateStopPotential =
     isRezzableNow &&
     !zeroVariableDefense &&
@@ -105,11 +122,12 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
         variableRezValue !== undefined &&
         variableRezValue >= (minimumUsefulX ?? 1)));
   const hasImmediateStopPotential =
-    rawImmediateStopPotential && !visibleBreakerCoverage;
+    rawImmediateStopPotential &&
+    (!visibleBreakerCoverage || runnerCanAffordVisibleBreak === false);
   const hasMeaningfulTaxOrDamage =
     isRezzableNow &&
     !zeroVariableDefense &&
-    hasTaxOrDamageSignal &&
+    (hasTaxOrDamageSignal || hasVisibleBreakerTax) &&
     (!requiresPostRezPaidAbility || postRezAbilityAffordable);
   const hasKnownDefenseSignal =
     hasEtrSignal ||
@@ -119,7 +137,9 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
   const zeroEffectRisk =
     isRezzableNow &&
     (zeroVariableDefense ||
-      (visibleBreakerCoverage && !hasMeaningfulTaxOrDamage) ||
+      (visibleBreakerCoverage &&
+        !hasVisibleBreakerTax &&
+        !hasMeaningfulTaxOrDamage) ||
       (hasKnownDefenseSignal &&
         ((requiresPostRezPaidAbility && !postRezAbilityAffordable) ||
           (!hasImmediateStopPotential && !hasMeaningfulTaxOrDamage))));
@@ -133,6 +153,11 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
     requiresPostRezPaidAbility,
     postRezAbilityAffordable,
     visibleBreakerCoverage,
+    ...(visibleBreakCost !== undefined ? { visibleBreakCost } : {}),
+    ...(runnerCanAffordVisibleBreak !== undefined
+      ? { runnerCanAffordVisibleBreak }
+      : {}),
+    hasVisibleBreakerTax,
     ...(minimumUsefulX !== undefined ? { minimumUsefulX } : {}),
     zeroEffectRisk,
     evidence: [
@@ -144,6 +169,15 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
       `effective_defense_post_rez_paid_ability:${requiresPostRezPaidAbility}`,
       `effective_defense_post_rez_ability_affordable:${postRezAbilityAffordable}`,
       `effective_defense_visible_breaker_coverage:${visibleBreakerCoverage}`,
+      ...(visibleBreakCost !== undefined
+        ? [`effective_defense_visible_break_cost:${visibleBreakCost}`]
+        : []),
+      ...(runnerCanAffordVisibleBreak !== undefined
+        ? [
+            `effective_defense_runner_can_afford_visible_break:${runnerCanAffordVisibleBreak}`,
+          ]
+        : []),
+      `effective_defense_visible_breaker_tax:${hasVisibleBreakerTax}`,
       `effective_defense_zero_effect:${zeroEffectRisk}`,
       ...(variableRezKind
         ? [`effective_defense_variable_kind:${variableRezKind}`]
@@ -157,6 +191,79 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
       ...sourceDefense.evidence,
     ],
   };
+}
+
+function visibleRunnerBreakCostForRezzedIce(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number | undefined {
+  const sourceCard = visibleActionSourceCard(input, action);
+  if (!sourceCard?.definitionId) return undefined;
+  const selectedSubtypes = selectedSubtypesAfterRez(action);
+  const assessedIce =
+    selectedSubtypes.length > 0
+      ? {
+          ...sourceCard,
+          subtypes: selectedSubtypes,
+        }
+      : sourceCard;
+  const endTheRunCount = visibleEndTheRunSubroutineCount(sourceCard);
+  if (endTheRunCount <= 0) return undefined;
+  return minimumCreditsToBreakEndTheRunSubroutines(
+    assessedIce,
+    input.playerView.opponent.rig ?? [],
+    endTheRunCount,
+    new Map(),
+  )?.cost;
+}
+
+function visibleEndTheRunSubroutineCount(sourceCard: {
+  definitionId?: string;
+  effectiveRunQuote?: { subroutines?: readonly { type?: string }[] };
+}): number {
+  const quoteCount =
+    sourceCard.effectiveRunQuote?.subroutines?.filter(
+      (subroutine) => subroutine.type === "end_the_run",
+    ).length ?? 0;
+  if (quoteCount > 0) return quoteCount;
+  return sourceCard.definitionId
+    ? endTheRunSubroutineCount(sourceCard.definitionId)
+    : 0;
+}
+
+function visibleRunnerContestCredits(input: AiDecisionInput): number {
+  return (
+    input.playerView.opponent.credits +
+    visibleRunnerRunCreditPool(input.playerView.opponent.rig ?? [])
+  );
+}
+
+function visibleRunnerRunCreditPool(
+  rig: readonly {
+    known: boolean;
+    counterDisplays?: readonly {
+      amount: number;
+      creditPool?: { uses?: readonly string[] };
+    }[];
+  }[],
+): number {
+  return rig.reduce((sum, card) => {
+    if (card.known === false) return sum;
+    return (
+      sum +
+      (card.counterDisplays ?? []).reduce((cardSum, display) => {
+        const uses = display.creditPool?.uses ?? [];
+        if (
+          uses.includes("using_icebreaker_during_run") ||
+          uses.includes("using_icebreaker_during_run_non_noisy") ||
+          uses.includes("using_killer_during_run")
+        ) {
+          return cardSum + Math.max(0, Math.floor(display.amount));
+        }
+        return cardSum;
+      }, 0)
+    );
+  }, 0);
 }
 
 function visibleSourceIceDefenseProfile(
@@ -207,7 +314,8 @@ function visibleSourceIceDefenseProfile(
   if (typeof sourceCard.definitionId === "string") {
     textInput.definitionId = sourceCard.definitionId;
   }
-  if (Array.isArray(sourceCard.subtypes)) textInput.subtypes = sourceCard.subtypes;
+  if (Array.isArray(sourceCard.subtypes))
+    textInput.subtypes = sourceCard.subtypes;
   const rulesTokens = visibleCardText(textInput).toLocaleLowerCase("en-US");
   const hasImmediateStop =
     subroutines.some(subroutineLooksLikeImmediateStop) ||

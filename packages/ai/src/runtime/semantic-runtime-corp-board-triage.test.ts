@@ -56,7 +56,9 @@ describe("semantic runtime corp board triage", () => {
       value: -3200,
     });
     expect(component?.reason).toContain("triage_primary:protect_score_remote");
-    expect(component?.reason).toContain("triage_action:purge_runner_virus_counters");
+    expect(component?.reason).toContain(
+      "triage_action:purge_runner_virus_counters",
+    );
   });
 
   it("lets critical repeated R&D pressure override remote-protection triage", () => {
@@ -167,6 +169,92 @@ describe("semantic runtime corp board triage", () => {
     expect(rezComponent?.reason).toContain("triage_action_server:rd");
   });
 
+  it("aligns same-target R&D tax rez when visible breaker coverage still pays through ETR", () => {
+    const rdRez = corpRezIceAction("rez-rd-wall", "rd-wall", 3);
+    const declineRez = corpAction("decline-rez", "decline_rez");
+    const input = corpInput({
+      runnerAgendaPoints: 5,
+      runnerRig: [earlyWormBreaker()],
+      legalActions: [rdRez, declineRez],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [
+          iceCard("rd-wall", {
+            definitionId: "onr_v1_279_wall-of-static",
+            title: "Wall of Static",
+            subtypes: ["wall"],
+          }),
+        ]),
+      ],
+    });
+    const dependencies = testDependencies();
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const rezComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      rdRez,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_rd",
+      severity: "critical",
+      targetServerId: "rd",
+    });
+    expect(rezComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(rezComponent?.reason).toContain("triage_action:rez_ice");
+    expect(rezComponent?.reason).toContain("triage_action_server:rd");
+  });
+
+  it("treats end-turn as a mismatch while critical central protection is unresolved", () => {
+    const endTurn = corpAction("end-turn", "end_turn");
+    const rdIce = corpAction("install-rd-ice", "install_card", {
+      placement: "ice",
+      serverId: "rd",
+    });
+    const input = corpInput({
+      runnerAgendaPoints: 5,
+      legalActions: [endTurn, rdIce],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", []),
+      ],
+    });
+    const dependencies = testDependencies();
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const endTurnComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      endTurn,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_rd",
+      severity: "critical",
+      targetServerId: "rd",
+    });
+    expect(endTurnComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -3200,
+    });
+    expect(endTurnComponent?.reason).toContain("triage_action:end_turn");
+  });
+
   it("protects open HQ before forcing remote scoreline when HQ agenda flood has runner exposure", () => {
     const hqIce = corpAction("install-hq-ice", "install_card", {
       placement: "ice",
@@ -177,10 +265,7 @@ describe("semantic runtime corp board triage", () => {
       serverId: "remote_1",
     });
     const input = corpInput({
-      corpHq: [
-        agendaCard("hq-agenda-1", 2),
-        agendaCard("hq-agenda-2", 2),
-      ],
+      corpHq: [agendaCard("hq-agenda-1", 2), agendaCard("hq-agenda-2", 2)],
       legalActions: [remoteAgenda, hqIce],
       servers: [
         centralServer("hq", []),
@@ -277,9 +362,11 @@ function corpInput(overrides: {
   } as unknown as AiDecisionInput;
 }
 
-function testDependencies(options: {
-  scoringWindowByActionId?: Record<string, CorpScoringWindowAssessment>;
-} = {}): CorpBoardTriageDependencies<"test"> {
+function testDependencies(
+  options: {
+    scoringWindowByActionId?: Record<string, CorpScoringWindowAssessment>;
+  } = {},
+): CorpBoardTriageDependencies<"test"> {
   return {
     actionCreditCost: () => 0,
     rolesForAction: () => [],
@@ -373,7 +460,10 @@ function remoteServer(
   return { id, label: id, ice: [...ice], root: [...root] };
 }
 
-function agendaCard(instanceId = "remote-agenda", agendaPoints = 2): VisibleCard {
+function agendaCard(
+  instanceId = "remote-agenda",
+  agendaPoints = 2,
+): VisibleCard {
   return {
     instanceId,
     known: true,
@@ -409,6 +499,18 @@ function rdVirusCard(instanceId: string): VisibleCard {
     title: "Highlighter",
     rulesText:
       "After each successful run on R&D, give the Corp a Highlighter counter. Each counter after the first allows you to access an additional card from R&D.",
+  } as VisibleCard;
+}
+
+function earlyWormBreaker(): VisibleCard {
+  return {
+    instanceId: "early-worm",
+    known: true,
+    type: "program",
+    owner: "runner",
+    title: "Early Worm",
+    definitionId: "onr_classic_027_early-worm",
+    subtypes: ["Icebreaker", "Worm"],
   } as VisibleCard;
 }
 
