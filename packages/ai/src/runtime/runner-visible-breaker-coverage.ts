@@ -152,6 +152,9 @@ export function visibleBreakerRoles(card: VisibleCard): string[] {
   if (subtypes.has("fracter")) {
     roles.add("fracter");
   }
+  if (subtypes.has("worm")) {
+    roles.add("fracter");
+  }
   if (subtypes.has("decoder")) {
     roles.add("decoder");
   }

@@ -38,6 +38,16 @@ type BreakAssessment = {
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
 };
+type BreakSubroutineAbilityLike = {
+  cost: { credits?: number };
+  count?: number;
+  iceSubtype?: string;
+  subroutineBreakTags?: readonly string[];
+};
+type PumpStrengthAbilityLike = {
+  cost: { credits?: number };
+  amount?: number;
+};
 type VisibleTraceSupportSideEffect = "forces_jack_out_after_encounter";
 export type VisibleIceRunHazardKind =
   | "trace_tag"
@@ -1667,22 +1677,24 @@ function creditsToBreakVisibleSubroutinesWithBreaker(
     return undefined;
   const iceSubtypes = ice.subtypes ?? iceDefinition.subtypes;
   const targetBreakTags = targetSubroutines.map(breakTagsForSubroutine);
-  const breakAbility = breakerDefinition.abilities?.find((ability) => {
-    if (ability.type !== "break_subroutine") return false;
-    if (ability.iceSubtype && !hasSubtype(iceSubtypes, ability.iceSubtype)) {
-      return false;
-    }
-    const abilityBreakTags = ability.subroutineBreakTags ?? [];
-    if (abilityBreakTags.length === 0) return true;
-    return targetBreakTags.every((tags) =>
-      abilityBreakTags.some((tag) => tags.includes(subtypeKey(tag))),
-    );
-  });
+  const breakAbility =
+    breakerDefinition.abilities?.find((ability) => {
+      if (ability.type !== "break_subroutine") return false;
+      if (ability.iceSubtype && !hasSubtype(iceSubtypes, ability.iceSubtype)) {
+        return false;
+      }
+      const abilityBreakTags = ability.subroutineBreakTags ?? [];
+      if (abilityBreakTags.length === 0) return true;
+      return targetBreakTags.every((tags) =>
+        abilityBreakTags.some((tag) => tags.includes(subtypeKey(tag))),
+      );
+    }) ?? textBreakSubroutineAbility(breakerDefinition, iceSubtypes);
   if (!breakAbility) return undefined;
   const iceStrength = ice.strength ?? iceDefinition.strength ?? 0;
-  const pumpAbility = breakerDefinition.abilities?.find(
-    (ability) => ability.type === "pump_strength",
-  );
+  const pumpAbility =
+    breakerDefinition.abilities?.find(
+      (ability) => ability.type === "pump_strength",
+    ) ?? textPumpStrengthAbility(breakerDefinition);
   let pumpCost = 0;
   let endingStrength = currentBreakerStrength;
   if (endingStrength < iceStrength) {
@@ -1766,16 +1778,18 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
   )
     return undefined;
   const iceSubtypes = ice.subtypes ?? iceDefinition.subtypes;
-  const breakAbility = breakerDefinition.abilities?.find(
-    (ability) =>
-      ability.type === "break_subroutine" &&
-      (!ability.iceSubtype || hasSubtype(iceSubtypes, ability.iceSubtype)),
-  );
+  const breakAbility =
+    breakerDefinition.abilities?.find(
+      (ability) =>
+        ability.type === "break_subroutine" &&
+        (!ability.iceSubtype || hasSubtype(iceSubtypes, ability.iceSubtype)),
+    ) ?? textBreakSubroutineAbility(breakerDefinition, iceSubtypes);
   if (!breakAbility) return undefined;
   const iceStrength = ice.strength ?? iceDefinition.strength ?? 0;
-  const pumpAbility = breakerDefinition.abilities?.find(
-    (ability) => ability.type === "pump_strength",
-  );
+  const pumpAbility =
+    breakerDefinition.abilities?.find(
+      (ability) => ability.type === "pump_strength",
+    ) ?? textPumpStrengthAbility(breakerDefinition);
   let pumpCost = 0;
   let endingStrength = currentBreakerStrength;
   if (endingStrength < iceStrength) {
@@ -1806,6 +1820,84 @@ export function endTheRunSubroutineCount(iceDefinitionId: string): number {
       (subroutine) => subroutine.type === "end_the_run",
     ).length ?? 0
   );
+}
+
+function textBreakSubroutineAbility(
+  breakerDefinition: CardDefinition,
+  iceSubtypes: readonly string[],
+): BreakSubroutineAbilityLike | undefined {
+  const clauses = visibleDefinitionRulesClauses(breakerDefinition);
+  for (const clause of clauses) {
+    if (!/\bbreak(?:s)?\b/.test(clause) || !/\bsubroutine/.test(clause)) {
+      continue;
+    }
+    const iceSubtype = textBreakIceSubtype(clause);
+    if (iceSubtype && !hasSubtype([...iceSubtypes], iceSubtype)) {
+      continue;
+    }
+    return {
+      cost: { credits: visibleTextActionCost(clause) ?? 1 },
+      count: visibleTextBreakCount(clause),
+      iceSubtype,
+    };
+  }
+  return undefined;
+}
+
+function textPumpStrengthAbility(
+  breakerDefinition: CardDefinition,
+): PumpStrengthAbilityLike | undefined {
+  const clause = visibleDefinitionRulesClauses(breakerDefinition).find((part) =>
+    /\+\s*\d+\s+strength\b/.test(part),
+  );
+  if (!clause) return undefined;
+  const amount = Number.parseInt(
+    clause.match(/\+\s*(\d+)\s+strength\b/)?.[1] ?? "",
+    10,
+  );
+  if (!Number.isFinite(amount) || amount <= 0) return undefined;
+  return {
+    cost: { credits: visibleTextActionCost(clause) ?? 1 },
+    amount,
+  };
+}
+
+function textBreakIceSubtype(clause: string): string | undefined {
+  if (/\bwall\b/.test(clause)) return "wall";
+  if (/\bbarrier\b/.test(clause)) return "barrier";
+  if (/\bcode\s*gate\b|\bcodegate\b/.test(clause)) return "code_gate";
+  if (/\bsentry\b/.test(clause)) return "sentry";
+  if (/\bice\b/.test(clause)) return undefined;
+  return undefined;
+}
+
+function visibleTextActionCost(clause: string): number | undefined {
+  const bracketCost = clause.match(/\[(\d+)\]\s*:/)?.[1];
+  const colonCost = clause.match(/\b(\d+)\s*(?:credit|credits|bit|bits)?\s*:/)
+    ?.[1];
+  const cost = Number.parseInt(bracketCost ?? colonCost ?? "", 10);
+  return Number.isFinite(cost) && cost >= 0 ? cost : undefined;
+}
+
+function visibleTextBreakCount(clause: string): number {
+  const count = Number.parseInt(
+    clause.match(/\bbreak(?:s)?\s+(\d+)\b/)?.[1] ?? "",
+    10,
+  );
+  return Number.isFinite(count) && count > 0 ? count : 1;
+}
+
+function visibleDefinitionRulesClauses(definition: CardDefinition): string[] {
+  const runtimeText = RUNTIME_CARDS[definition.id]?.text;
+  return [definition.rulesText, runtimeText]
+    .filter((text): text is string => typeof text === "string")
+    .flatMap((text) =>
+      text
+        .toLocaleLowerCase("en-US")
+        .split(/[.;\n]+/)
+        .map((clause) => clause.trim())
+        .filter(Boolean),
+    );
 }
 
 export function canBreakerDefinitionBreakIce(

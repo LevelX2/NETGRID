@@ -19,6 +19,11 @@ describe("visibleBreakerRoles", () => {
         visibleProgram("spaced-killer", [" Icebreaker ", " Killer "]),
       ),
     ).toEqual(["killer"]);
+    expect(
+      visibleBreakerRoles(
+        visibleProgram("classic-worm", ["Icebreaker", "Worm"]),
+      ),
+    ).toEqual(["fracter"]);
   });
 });
 
@@ -38,6 +43,16 @@ describe("visibleBreakerCardCanAddressIce", () => {
 
     expect(canAddress(["support_killer"], "Sentry")).toBe(true);
     expect(canAddress(["killerish_noise"], "Sentry")).toBe(false);
+  });
+
+  it("uses visible breaker text for wall coverage when subtype roles are generic", () => {
+    expect(
+      canAddress(
+        ["icebreaker"],
+        "Wall. End the run.",
+        "[1]: Break wall subroutine. [2]: +3 strength.",
+      ),
+    ).toBe(true);
   });
 });
 

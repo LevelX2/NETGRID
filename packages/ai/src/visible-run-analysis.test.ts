@@ -108,6 +108,39 @@ describe("visible run analysis server ids", () => {
   });
 });
 
+describe("visible run analysis text-derived breaker costs", () => {
+  it("counts a visible wall-breaker text profile against classic wall ICE", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [classicWallIce("remote-wall")],
+      [earlyWormBreaker("runner-worm")],
+      3,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      creditsAfterPath: 0,
+      visibleBreakCost: 3,
+      reachableAccessReason: "known_path_reachable",
+    });
+  });
+
+  it("keeps classic wall ICE blocking when the text-derived break cost is unaffordable", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [classicWallIce("remote-wall")],
+      [earlyWormBreaker("runner-worm")],
+      2,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      noAccessReason: "known_path_unpayable",
+      unpayableReason: "ice_unaffordable",
+    });
+  });
+});
+
 describe("visible run analysis trace hazards", () => {
   it("projects an unavoidable visible Hunter tag hazard without blocking access", () => {
     const assessment = assessKnownRezzedIcePath(
@@ -383,6 +416,31 @@ describe("visible run analysis trace hazards", () => {
     });
   });
 });
+
+function classicWallIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_232_crystal-wall",
+    title: "Crystal Wall",
+    type: "ice",
+    subtypes: ["wall"],
+    known: true,
+    rezzed: true,
+    strength: 3,
+  };
+}
+
+function earlyWormBreaker(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_classic_027_early-worm",
+    title: "Early Worm",
+    type: "program",
+    subtypes: ["icebreaker", "worm"],
+    known: true,
+    strength: 2,
+  };
+}
 
 function hunterTraceTagIce(instanceId: string): VisibleCard {
   return {
