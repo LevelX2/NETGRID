@@ -1832,7 +1832,7 @@ function textBreakSubroutineAbility(
     return {
       cost: { credits: visibleTextActionCost(clause) ?? 1 },
       count: visibleTextBreakCount(clause),
-      iceSubtype,
+      ...(iceSubtype ? { iceSubtype } : {}),
     };
   }
   return undefined;
