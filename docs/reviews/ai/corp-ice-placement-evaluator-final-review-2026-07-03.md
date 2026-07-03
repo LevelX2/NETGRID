@@ -38,6 +38,7 @@ Die Tests decken die acht Vorgaben aus der Nutzeranlage ab:
 - scorebare Remote bei ruhigen Centrals: Remote-ICE schlägt zusätzliches Central-Overice.
 - niedrige Credits und teures ICE: Empfehlung `prefer_economy` mit `defer_reason:rez_reserve_too_low`.
 - niedrige ICE-Dichte: mittelmäßiges positionsabhängiges ICE wird bei dringender Servernot eher installiert, statt unrealistisch auf bessere ICE zu warten.
+- nicht stoppendes Tag-/Trace-ICE auf HQ wird trotz zentralem Agenda-Druck nicht als `install_now` geboostet, wenn starke Immediate-Economy verfügbar ist.
 
 Mobile/repositionierbare ICE halbieren Positionsmalus, entfernen ihn aber nicht.
 
@@ -73,10 +74,14 @@ Ausgeführt:
 - `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-ice-placement/corp-ice-placement.test.ts`
 - `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-ice-placement/corp-ice-placement.test.ts src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/semantic-runtime-corp-score.test.ts`
 - `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-ice-placement/corp-ice-placement.test.ts src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/semantic-runtime-corp-score.test.ts src/compiled-hints-runtime.test.ts src/index.test.ts -t "future-run|ICE-ordering|Ball and Chain|corp ICE placement|ICE-Platzierung|prefers HQ access-stop ICE"`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-ice-placement/corp-ice-placement.test.ts src/index.test.ts -t "corp ICE placement|nonurgent HQ ICE|Accounts Receivable before|Credit Consolidation before"`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/corp-ice-placement/corp-ice-placement.test.ts src/runtime/semantic-runtime-corp-remote-score.test.ts src/runtime/semantic-runtime-corp-score.test.ts src/compiled-hints-runtime.test.ts src/index.test.ts -t "future-run|ICE-ordering|Ball and Chain|corp ICE placement|ICE-Platzierung|prefers HQ access-stop ICE|nonurgent HQ ICE|Accounts Receivable before|Credit Consolidation before"`
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
 Hinweis: Der frische Worktree hatte anfangs keine `node_modules`; `corepack pnpm install` wurde im Worktree ausgeführt.
+
+Breiter Check: `corepack pnpm --filter @netgrid/ai test` wurde zusätzlich angestoßen. Er ist nicht als Paket-Gate grün, weil mehrere vorhandene AI-Daten-/Report-Gates nicht gegen die committed Reports deterministisch sind, unter anderem Hint-Inspector-, Derived-Facts-, Compiled-Index-, Manual-Overlay-, Strategy-Taxonomy- und Hint-Quality-Reports. Aus diesem Lauf wurde eine echte Scope-Regression in den Corp-Economy-Entscheidungstests herausgezogen und mit der Tag-/Trace-ICE-Regel oben behoben; die übrigen Full-Test-Reportdifferenzen bleiben separater Datenpflege-Scope.
 
 ## Restpunkte
 

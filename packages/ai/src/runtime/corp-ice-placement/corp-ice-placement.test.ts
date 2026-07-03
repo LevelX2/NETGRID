@@ -159,6 +159,54 @@ describe("corp ICE placement candidate scoring", () => {
     expect(huntingPackCandidate?.components.positionFit).toBeLessThan(0);
   });
 
+  it("keeps non-stopping tag ICE below install-now even under central agenda pressure", () => {
+    const fetch = corpIce("fetch-4-0-1", {
+      definitionId: "onr_v1_243_fetch-4-0-1",
+      rulesText:
+        "[Subroutine] Trace 3 - If trace is successful, give Runner a tag.",
+      rezCost: 0,
+    });
+    const input = corpInput({
+      credits: 5,
+      hq: [
+        agenda("agenda-in-hq"),
+        fetch,
+        corpIce("other-ice-1"),
+        corpIce("other-ice-2"),
+        corpIce("other-ice-3"),
+      ],
+      servers: [server("hq", []), server("rd", [])],
+    });
+
+    const candidate = corpIcePlacementCandidateForAction({
+      input,
+      action: installIceAction(fetch, "hq"),
+      serverId: "hq",
+      server: input.playerView.servers[0],
+      sourceCard: fetch,
+      actionCreditCost: 1,
+      iceRezCost: 0,
+    });
+
+    expect(candidate?.components.serverNeed).toBeLessThan(900);
+    expect(candidate?.recommendation).toBe("hold_for_later");
+    expect(candidate?.evidence).toContain("raw_server_need:1350");
+    expect(candidate?.evidence).toContain("server_need_score:350");
+
+    const component = corpIcePlacementScoreComponent({
+      input,
+      action: installIceAction(fetch, "hq"),
+      serverId: "hq",
+      server: input.playerView.servers[0],
+      sourceCard: fetch,
+      actionCreditCost: 1,
+      iceRezCost: 0,
+    });
+
+    expect(component?.value).toBe(0);
+    expect(component?.reason).toContain("recommendation:hold_for_later");
+  });
+
   it("improves outside-scaling ICE once a rezzed outside layer exists", () => {
     const huntingPack = corpIce("hunting-pack", {
       title: "Hunting Pack",

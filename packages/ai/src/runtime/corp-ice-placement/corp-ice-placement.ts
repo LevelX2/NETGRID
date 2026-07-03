@@ -193,9 +193,10 @@ export function corpIcePlacementCandidateForAction<
   const affordable = profile.rezCost <= Math.max(0, creditsAfterInstall);
   const firstIce = serverNeed.iceCount === 0;
   const hasOutsideRezzedIce = serverNeed.existingRezzedIceCount > 0;
+  const serverNeedScore = corpServerNeedScoreValue(profile, serverNeed);
 
   const components = {
-    serverNeed: serverNeed.serverNeed,
+    serverNeed: serverNeedScore,
     immediateStopValue: corpImmediateStopValue(
       profile,
       serverNeed,
@@ -250,6 +251,8 @@ export function corpIcePlacementCandidateForAction<
       `credits_after_install:${creditsAfterInstall}`,
       `rez_cost:${profile.rezCost}`,
       `rez_affordable:${affordable}`,
+      `raw_server_need:${serverNeed.serverNeed}`,
+      `server_need_score:${serverNeedScore}`,
       `recommendation:${recommendation}`,
       ...(deferReason ? [`defer_reason:${deferReason}`] : []),
       ...serverNeed.evidence,
@@ -266,10 +269,14 @@ export function corpIcePlacementScoreComponent<
 ): AiDecisionScoreComponent | undefined {
   const candidate = corpIcePlacementCandidateForAction(params);
   if (!candidate) return undefined;
+  const value =
+    candidate.recommendation === "install_now"
+      ? candidate.score
+      : Math.min(candidate.score, 0);
   return {
     key: "corp_ice_placement_evaluator",
     label: "ICE-Platzierung",
-    value: candidate.score,
+    value,
     reason: candidate.evidence.join("|"),
   };
 }
@@ -777,6 +784,27 @@ export function corpIcePlacementServerId(
     action.payload?.targetServerId ??
     action.payload?.attackedServerId;
   return typeof value === "string" ? value : undefined;
+}
+
+function corpServerNeedScoreValue(
+  profile: CorpIceCardPlacementProfile,
+  serverNeed: CorpServerNeedProfile,
+): number {
+  if (profile.immediateStop) return serverNeed.serverNeed;
+  if (profile.positionDependent && serverNeed.serverNeed >= 900) {
+    return serverNeed.serverNeed;
+  }
+  if (
+    profile.softStop ||
+    profile.tax ||
+    profile.damage ||
+    profile.programTrash ||
+    profile.tagTrace ||
+    profile.runLock
+  ) {
+    return Math.min(serverNeed.serverNeed, 350);
+  }
+  return Math.min(serverNeed.serverNeed, 200);
 }
 
 function corpImmediateStopValue(
