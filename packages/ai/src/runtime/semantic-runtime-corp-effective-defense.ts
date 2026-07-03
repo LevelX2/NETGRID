@@ -4,6 +4,7 @@ import {
   visibleBreakerCardCanAddressIce,
   visibleBreakerRoles,
 } from "./runner-visible-breaker-coverage";
+import { visibleCardDefinition } from "./card-definition-lookup";
 
 export type EffectiveDefenseContext = {
   isRezzableNow: boolean;
@@ -47,6 +48,7 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
   const postRezCredits = input.playerView.own.credits - rezCost;
   const isRezzableNow = postRezCredits >= 0;
   const defenseSignals = defenseSignalEntries(action, actionSemanticCandidate);
+  const sourceDefense = visibleSourceIceDefenseProfile(input, action);
   const variableRezKind = variableRezKindForAction(
     action,
     actionSemanticCandidate,
@@ -71,18 +73,21 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
   const postRezAbilityMinimumCost = requiresPostRezPaidAbility ? 2 : 0;
   const postRezAbilityAffordable =
     !requiresPostRezPaidAbility || postRezCredits >= postRezAbilityMinimumCost;
-  const hasEtrSignal = defenseSignals.some(
+  const hasEtrSignal =
+    sourceDefense.hasImmediateStop ||
+    defenseSignals.some(
     (signal) =>
       signalHasTerm(signal, "etr_ice") ||
       signalHasTerm(signal, "end_the_run") ||
       signalHasTerm(signal, "end_run") ||
       signalHasTerm(signal, "conditional_end_run") ||
       signalHasTerm(signal, "ice_protection"),
-  );
+    );
   const hasTraceSignal = defenseSignals.some((signal) =>
     signalHasTerm(signal, "trace"),
   );
   const hasTaxOrDamageSignal =
+    sourceDefense.hasMeaningfulTaxOrDamage ||
     defenseSignals.some(
       (signal) =>
         signalHasTerm(signal, "tax") || signalHasTerm(signal, "damage"),
@@ -149,8 +154,135 @@ export function semanticRuntimeCorpEffectiveDefenseContext(
       ...(minimumUsefulX !== undefined
         ? [`effective_defense_minimum_useful_x:${minimumUsefulX}`]
         : []),
+      ...sourceDefense.evidence,
     ],
   };
+}
+
+function visibleSourceIceDefenseProfile(
+  input: AiDecisionInput,
+  action: LegalAction,
+): {
+  hasImmediateStop: boolean;
+  hasMeaningfulTaxOrDamage: boolean;
+  evidence: string[];
+} {
+  const sourceCard = visibleActionSourceCard(input, action);
+  if (!sourceCard || sourceCard.known === false || sourceCard.type !== "ice") {
+    return {
+      hasImmediateStop: false,
+      hasMeaningfulTaxOrDamage: false,
+      evidence: [],
+    };
+  }
+  const definition = visibleCardDefinition(sourceCard);
+  const subroutines = [
+    ...visibleSubroutineArray(
+      (sourceCard as { subroutines?: unknown }).subroutines,
+    ),
+    ...visibleSubroutineArray(
+      (definition as { subroutines?: unknown } | undefined)?.subroutines,
+    ),
+  ];
+  const mechanics = [
+    ...visibleStringArray((sourceCard as { mechanics?: unknown }).mechanics),
+    ...visibleStringArray(
+      (definition as { mechanics?: unknown } | undefined)?.mechanics,
+    ),
+  ].map((entry) => entry.toLocaleLowerCase("en-US"));
+  const textInput: {
+    title?: string;
+    rulesText?: string;
+    definitionId?: string;
+    subtypes?: readonly string[];
+  } = {
+    rulesText: [
+      sourceCard.rulesText,
+      (definition as { rulesText?: string } | undefined)?.rulesText,
+    ]
+      .filter((value): value is string => typeof value === "string")
+      .join(" "),
+  };
+  if (typeof sourceCard.title === "string") textInput.title = sourceCard.title;
+  if (typeof sourceCard.definitionId === "string") {
+    textInput.definitionId = sourceCard.definitionId;
+  }
+  if (Array.isArray(sourceCard.subtypes)) textInput.subtypes = sourceCard.subtypes;
+  const rulesTokens = visibleCardText(textInput).toLocaleLowerCase("en-US");
+  const hasImmediateStop =
+    subroutines.some(subroutineLooksLikeImmediateStop) ||
+    mechanics.some((mechanic) => mechanic === "end_the_run") ||
+    rulesTokens.includes("end the run");
+  const hasMeaningfulTaxOrDamage =
+    subroutines.some(subroutineLooksLikeTaxOrDamage) ||
+    mechanics.some(
+      (mechanic) =>
+        mechanic.includes("damage") ||
+        mechanic.includes("trace") ||
+        mechanic.includes("tag"),
+    );
+  return {
+    hasImmediateStop,
+    hasMeaningfulTaxOrDamage,
+    evidence: [
+      "effective_defense_source_visible_ice:true",
+      `effective_defense_source_definition:${sourceCard.definitionId ?? "unknown"}`,
+      `effective_defense_source_stop:${hasImmediateStop}`,
+      `effective_defense_source_tax_or_damage:${hasMeaningfulTaxOrDamage}`,
+    ],
+  };
+}
+
+function visibleSubroutineArray(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function visibleStringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === "string")
+    : [];
+}
+
+function subroutineType(subroutine: unknown): string | undefined {
+  if (typeof subroutine !== "object" || subroutine === null) return undefined;
+  const value = (subroutine as { type?: unknown; kind?: unknown }).type;
+  if (typeof value === "string") return value;
+  const kind = (subroutine as { kind?: unknown }).kind;
+  return typeof kind === "string" ? kind : undefined;
+}
+
+function subroutineLooksLikeImmediateStop(subroutine: unknown): boolean {
+  const type = subroutineType(subroutine);
+  if (
+    type === "end_the_run" ||
+    type === "end_the_run_unless_runner_pays" ||
+    type === "set_run_future_end_the_run_subroutine" ||
+    type === "set_runner_run_lock_actions"
+  ) {
+    return true;
+  }
+  if (type !== "initiate_trace") return false;
+  const effect = (subroutine as { traceSuccessEffect?: { type?: unknown } })
+    .traceSuccessEffect;
+  return (
+    effect?.type === "end_run_and_run_lock" ||
+    effect?.type === "end_run_trash_program_and_run_lock"
+  );
+}
+
+function subroutineLooksLikeTaxOrDamage(subroutine: unknown): boolean {
+  const type = subroutineType(subroutine);
+  return (
+    type === "do_damage" ||
+    type === "initiate_trace" ||
+    type === "give_tag" ||
+    type === "corp_gain_credit" ||
+    type === "set_run_break_subroutine_cost_modifier" ||
+    type === "set_run_encounter_tax" ||
+    type === "trash_installed_program" ||
+    type === "trash_installed_program_unless_runner_pays" ||
+    type === "end_the_run_unless_runner_pays"
+  );
 }
 
 function visibleRunnerCoverageCanBreakRezzedIce(

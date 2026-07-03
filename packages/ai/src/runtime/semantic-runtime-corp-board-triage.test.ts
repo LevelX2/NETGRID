@@ -113,7 +113,7 @@ describe("semantic runtime corp board triage", () => {
       targetServerId: "rd",
     });
     expect(triage.evidence).toContain(
-      "corp_board_triage_central_override:critical_before_remote",
+      "corp_board_triage_central_override:pre_score_rd_exposure",
     );
     expect(purgeComponent).toMatchObject({
       key: "corp_board_triage_mismatch",
@@ -123,11 +123,127 @@ describe("semantic runtime corp board triage", () => {
       key: "corp_board_triage_alignment",
     });
   });
+
+  it("aligns same-target R&D rez under critical protect-rd triage", () => {
+    const rdRez = corpRezIceAction("rez-rd-quandary", "rd-ice", 2);
+    const declineRez = corpAction("decline-rez", "decline_rez");
+    const input = corpInput({
+      runnerAgendaPoints: 5,
+      legalActions: [rdRez, declineRez],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [
+          iceCard("rd-ice", {
+            definitionId: "onr_v1_261_quandary",
+            title: "Quandary",
+          }),
+        ]),
+      ],
+    });
+    const dependencies = testDependencies();
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const rezComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      rdRez,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_rd",
+      severity: "critical",
+      targetServerId: "rd",
+    });
+    expect(rezComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(rezComponent?.reason).toContain("triage_action:rez_ice");
+    expect(rezComponent?.reason).toContain("triage_action_server:rd");
+  });
+
+  it("protects open HQ before forcing remote scoreline when HQ agenda flood has runner exposure", () => {
+    const hqIce = corpAction("install-hq-ice", "install_card", {
+      placement: "ice",
+      serverId: "hq",
+    });
+    const remoteAgenda = corpAction("remote-scoreline", "install_card", {
+      placement: "root",
+      serverId: "remote_1",
+    });
+    const input = corpInput({
+      corpHq: [
+        agendaCard("hq-agenda-1", 2),
+        agendaCard("hq-agenda-2", 2),
+      ],
+      legalActions: [remoteAgenda, hqIce],
+      servers: [
+        centralServer("hq", []),
+        centralServer("rd", []),
+        remoteServer("remote_1", [iceCard("remote-ice")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "durable",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezFullPathWithDynamicReserve: true,
+          corpCanRezRelevantIce: true,
+          recommendedNextStep: "score",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const hqComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      hqIce,
+      dependencies,
+    );
+    const remoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteAgenda,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_hq",
+      severity: "critical",
+      targetServerId: "hq",
+    });
+    expect(triage.evidence).toContain(
+      "corp_board_triage_central_override:unprotected_hq_before_runner_exposure",
+    );
+    expect(hqComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(remoteComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -3200,
+    });
+  });
 });
 
 function corpInput(overrides: {
   legalActions: LegalAction[];
   servers: AiDecisionInput["playerView"]["servers"];
+  corpHq?: VisibleCard[];
+  corpCredits?: number;
   runnerAgendaPoints?: number;
   runnerRig?: VisibleCard[];
   eventTail?: AiDecisionInput["eventTail"];
@@ -139,10 +255,10 @@ function corpInput(overrides: {
     playerView: {
       stateVersion: 1,
       own: {
-        credits: 5,
+        credits: overrides.corpCredits ?? 5,
         clicks: 3,
         agendaPoints: 0,
-        gripOrHq: [],
+        gripOrHq: overrides.corpHq ?? [],
         heapOrArchives: [],
         scoreArea: [],
         stackOrRdCount: 20,
@@ -226,6 +342,22 @@ function corpAction(
   } as unknown as LegalAction;
 }
 
+function corpRezIceAction(
+  actionId: string,
+  source: string,
+  rezCost: number,
+): LegalAction {
+  return {
+    actionId,
+    type: "rez_ice",
+    side: "corp",
+    label: actionId,
+    source,
+    costs: [{ credits: rezCost }],
+    payload: { rezCostPaid: rezCost },
+  } as unknown as LegalAction;
+}
+
 function centralServer(
   id: "hq" | "rd",
   ice: readonly VisibleCard[],
@@ -241,19 +373,22 @@ function remoteServer(
   return { id, label: id, ice: [...ice], root: [...root] };
 }
 
-function agendaCard(): VisibleCard {
+function agendaCard(instanceId = "remote-agenda", agendaPoints = 2): VisibleCard {
   return {
-    instanceId: "remote-agenda",
+    instanceId,
     known: true,
     type: "agenda",
     owner: "corp",
     advancementRequirement: 3,
     advancementCounters: 1,
-    agendaPoints: 2,
+    agendaPoints,
   } as VisibleCard;
 }
 
-function iceCard(instanceId: string): VisibleCard {
+function iceCard(
+  instanceId: string,
+  overrides: Partial<VisibleCard> = {},
+): VisibleCard {
   return {
     instanceId,
     known: true,
@@ -261,6 +396,7 @@ function iceCard(instanceId: string): VisibleCard {
     owner: "corp",
     definitionId: "simple_barrier_ice",
     rezCost: 2,
+    ...overrides,
   } as VisibleCard;
 }
 

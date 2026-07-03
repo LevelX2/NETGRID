@@ -142,6 +142,13 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     };
   }
 
+  const preScoreCentralProtection = preScoreCentralProtectionTriage(
+    input,
+    actions,
+    currentCredits,
+  );
+  if (preScoreCentralProtection) return preScoreCentralProtection;
+
   const forcedScorelinePressure = corpForcedScorelineClockPressure(
     input,
     actions,
@@ -442,7 +449,14 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         action.type === "rez_ice" &&
         actionServerId === triage.targetServerId
       ) {
-        return "mismatch";
+        return sameTargetRezIsDefinitelyBad(
+          input,
+          action,
+          dependencies,
+          actionSemanticCandidate,
+        )
+          ? "mismatch"
+          : "neutral";
       }
       return actionPushesUnsafeScoreline(input, action, dependencies) ||
         actionIsOffTargetInstall(action, actionServerId, triage) ||
@@ -493,7 +507,14 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         action.type === "rez_ice" &&
         actionServerId === triage.targetServerId
       ) {
-        return "mismatch";
+        return sameTargetRezIsDefinitelyBad(
+          input,
+          action,
+          dependencies,
+          actionSemanticCandidate,
+        )
+          ? "mismatch"
+          : "neutral";
       }
       return actionDistractsFromCentralProtection(
         action,
@@ -1113,6 +1134,121 @@ function highestPriorityTriageCentralPressure(input: AiDecisionInput):
   return acuteHqPressure ?? acuteRdPressure;
 }
 
+function preScoreCentralProtectionTriage(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+  currentCredits: number,
+): CorpBoardTriage | undefined {
+  const pressureInput = inputWithOpponentDefaults(input);
+  const rdPressure = semanticRuntimeCorpCentralPressureAssessment(
+    pressureInput,
+    "rd",
+  );
+  const rdSeverity = centralTriageSeverity(pressureInput, rdPressure);
+  if (
+    centralPressureIsTriageAcute(pressureInput, rdPressure) &&
+    rdSeverity === "critical" &&
+    centralServerNeedsProtection(input, "rd") &&
+    concreteCentralProtectionActionExists(actions, "rd")
+  ) {
+    return centralPressureTriage(rdPressure, rdSeverity, currentCredits, [
+      "corp_board_triage_central_override:pre_score_rd_exposure",
+    ]);
+  }
+
+  const hqAgendaCards = input.playerView.own.gripOrHq.filter(
+    corpTriageVisibleCardIsAgenda,
+  );
+  const hqAgendaCount = hqAgendaCards.length;
+  const hqAgendaPoints = hqAgendaCards.reduce(
+    (sum, card) => sum + corpTriageVisibleAgendaPoints(card),
+    0,
+  );
+  const runnerAgendaPoints =
+    corpTriagePositiveNumber(input.playerView.opponent?.agendaPoints) ?? 0;
+  if (
+    hqAgendaCount <= 0 ||
+    !centralServerNeedsProtection(input, "hq") ||
+    !concreteCentralProtectionActionExists(actions, "hq") ||
+    !unprotectedHqAgendaExposureRequiresPreScoreProtection(
+      pressureInput,
+      hqAgendaCount,
+      hqAgendaPoints,
+      runnerAgendaPoints,
+    )
+  ) {
+    return undefined;
+  }
+
+  const hqPressure = semanticRuntimeCorpCentralPressureAssessment(
+    pressureInput,
+    "hq",
+  );
+  const severity =
+    runnerAgendaPoints >= 5 || hqAgendaPoints >= 4 || hqAgendaCount >= 3
+      ? "critical"
+      : "high";
+  return {
+    primary: "protect_hq",
+    severity,
+    targetServerId: "hq",
+    currentCredits,
+    evidence: [
+      "corp_board_triage_primary:protect_hq",
+      "corp_board_triage_central_override:unprotected_hq_before_runner_exposure",
+      "corp_board_triage_no_score_now_before_runner_exposure:true",
+      `corp_hq_agenda_count:${hqAgendaCount}`,
+      `corp_hq_agenda_points:${hqAgendaPoints}`,
+      `corp_runner_agenda_points:${runnerAgendaPoints}`,
+      "corp_hq_ice_count:0",
+      ...hqPressure.evidence.slice(0, 8),
+    ],
+  };
+}
+
+function centralServerNeedsProtection(
+  input: AiDecisionInput,
+  serverId: "hq" | "rd",
+): boolean {
+  return centralServerIceCount(input, serverId) === 0;
+}
+
+function centralServerIceCount(
+  input: AiDecisionInput,
+  serverId: "hq" | "rd",
+): number {
+  return (
+    input.playerView.servers?.find((server) => server.id === serverId)?.ice
+      .length ?? 0
+  );
+}
+
+function concreteCentralProtectionActionExists(
+  actions: readonly ScoredLegalAction[],
+  serverId: "hq" | "rd",
+): boolean {
+  return actions.some(
+    (entry) =>
+      entry.serverId === serverId &&
+      ((entry.action.type === "install_card" &&
+        entry.action.payload?.placement === "ice") ||
+        entry.action.type === "rez_ice"),
+  );
+}
+
+function unprotectedHqAgendaExposureRequiresPreScoreProtection(
+  input: AiDecisionInput,
+  hqAgendaCount: number,
+  hqAgendaPoints: number,
+  runnerAgendaPoints: number,
+): boolean {
+  if (hqAgendaCount >= 2 || hqAgendaPoints >= 3 || runnerAgendaPoints >= 4) {
+    return true;
+  }
+  const hqPressure = semanticRuntimeCorpCentralPressureAssessment(input, "hq");
+  return hqPressure.runnerRunCredits >= 4 || hqPressure.successfulAccessEvents > 0;
+}
+
 function actionProtectsServer<TConsumer extends string>(
   input: AiDecisionInput,
   action: LegalAction,
@@ -1140,6 +1276,21 @@ function actionProtectsServer<TConsumer extends string>(
     return defense.hasImmediateStopPotential;
   }
   return defense.hasImmediateStopPotential || defense.hasMeaningfulTaxOrDamage;
+}
+
+function sameTargetRezIsDefinitelyBad<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): boolean {
+  const defense = semanticRuntimeCorpEffectiveDefenseContext(
+    input,
+    action,
+    actionSemanticCandidate,
+    { actionCreditCost: dependencies.actionCreditCost },
+  );
+  return !defense?.isRezzableNow || defense.zeroEffectRisk;
 }
 
 function installedIceHasImmediateStopPotential(

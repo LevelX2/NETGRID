@@ -126,6 +126,44 @@ describe("semanticRuntimeCorpEffectiveDefenseContext", () => {
     expect(context?.minimumUsefulX).toBeUndefined();
   });
 
+  it("uses visible own ICE card data when rez action signals omit ETR", () => {
+    const context = semanticRuntimeCorpEffectiveDefenseContext(
+      corpInput(5, {
+        servers: [
+          server("rd", [
+            corpIce("quandary-installed", {
+              definitionId: "onr_v1_261_quandary",
+              title: "Quandary",
+            }),
+          ]),
+        ],
+      }),
+      rezAction(
+        "corp.rez_ice.quandary-installed",
+        2,
+        {},
+        "Quandary rezzen",
+        "quandary-installed",
+      ),
+      undefined,
+      { actionCreditCost },
+    );
+
+    expect(context).toMatchObject({
+      isRezzableNow: true,
+      postRezCredits: 3,
+      hasImmediateStopPotential: true,
+      zeroEffectRisk: false,
+    });
+    expect(context?.evidence).toEqual(
+      expect.arrayContaining([
+        "effective_defense_source_visible_ice:true",
+        "effective_defense_source_definition:onr_v1_261_quandary",
+        "effective_defense_source_stop:true",
+      ]),
+    );
+  });
+
   it("ignores substring-only structured defense signal noise", () => {
     const context = semanticRuntimeCorpEffectiveDefenseContext(
       corpInput(5),
