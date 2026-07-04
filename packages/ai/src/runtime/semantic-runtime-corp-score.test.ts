@@ -1511,6 +1511,14 @@ describe("semanticRuntimeCorpScoreComponents", () => {
         }),
       ]),
     );
+    expect(nightShiftComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_hq_agenda_flood_draw_risk",
+          value: -1800,
+        }),
+      ]),
+    );
     expect(totalScore(installComponents)).toBeGreaterThan(
       totalScore(nightShiftComponents),
     );
@@ -1626,6 +1634,87 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     expect(totalScore(remoteIceComponents)).toBeGreaterThan(
       totalScore(installComponents),
     );
+  });
+
+  it("penalizes non-agenda roots that block a prepared scoring remote", () => {
+    const installAgenda = corpAction(
+      "install-agenda-remote-1",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "agenda-1",
+    );
+    const installSupportRoot = corpAction(
+      "install-support-remote-1",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+      },
+      "support-root",
+    );
+    const input = corpInputWithHqCards(
+      5,
+      [agendaCard("agenda-1", 2), corpCard("support-root", "asset")],
+      [installAgenda, installSupportRoot],
+    );
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-data-wall", { rezCost: 1, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "durable",
+              affordableDurableRelevantIceCount: 1,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: true,
+              dynamicProtectionWeaknessCount: 0,
+              agendaStealSeverity: "normal",
+              recommendedNextStep: "score",
+              evidence: ["test_ready_remote_agenda_payload"],
+            })
+          : undefined,
+    };
+
+    const supportComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installSupportRoot,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(supportComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_non_agenda_root_blocks_score_remote",
+          value: -1800,
+          reason: expect.stringContaining(
+            "available_scoreline_action:install-agenda-remote-1",
+          ),
+        }),
+      ]),
+    );
+    expect(
+      totalScoreFor(input, installAgenda, "basic_install", dependencies),
+    ).toBeGreaterThan(totalScore(supportComponents));
   });
 
   it("does not force a game-ending contestable HQ-flood scoreline", () => {

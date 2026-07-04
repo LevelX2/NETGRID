@@ -338,6 +338,13 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
           : scopeId,
       });
     }
+    const rootPayloadPlan = corpNonAgendaRootBlocksScoreRemoteComponent(
+      input,
+      action,
+      dependencies,
+      roles,
+    );
+    if (rootPayloadPlan) components.push(rootPayloadPlan);
     if (hqAgendaRelief) components.push(hqAgendaRelief.component);
     addCorpScoringWindowEvidenceComponent(
       components,
@@ -454,6 +461,14 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       reason: burstEconomyOperation.evidence.join("|"),
     });
   }
+  const hqAgendaFloodDrawRisk = corpHqAgendaFloodDrawRiskComponent(
+    input,
+    action,
+    dependencies,
+    actionSemanticCandidate,
+    boardTriageState,
+  );
+  if (hqAgendaFloodDrawRisk) components.push(hqAgendaFloodDrawRisk);
   const burstEconomyThreshold =
     action.type === "gain_credit" && action.source === "basic_action"
       ? corpBurstEconomyThresholdAfterBasicCredit(input)
@@ -734,6 +749,98 @@ function corpScorelineActionServerId(
         ? action.source
         : undefined;
   return cardId ? corpServerIdForRootCard(input, cardId) : undefined;
+}
+
+function corpNonAgendaRootBlocksScoreRemoteComponent<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  roles: string[],
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card" || action.payload?.placement !== "root") {
+    return undefined;
+  }
+  if (dependencies.corpActionIsScoreLine(input, action, roles)) {
+    return undefined;
+  }
+  const serverId = corpInstallServerId(action);
+  if (!serverId?.startsWith("remote_")) return undefined;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!server || server.root.length > 0 || server.ice.length === 0) {
+    return undefined;
+  }
+  const source = visibleSourceCardForAction(input, action);
+  const definition = source ? visibleCardDefinition(source) : undefined;
+  if (source?.type === "agenda" || definition?.type === "agenda") {
+    return undefined;
+  }
+  const agendaInstall = corpLegalActions(input).find((candidate) => {
+    if (candidate.actionId === action.actionId) return false;
+    if (
+      candidate.type !== "install_card" ||
+      candidate.payload?.placement !== "root" ||
+      corpInstallServerId(candidate) !== serverId
+    ) {
+      return false;
+    }
+    const candidateRoles = dependencies.rolesForAction(input, candidate);
+    return dependencies.corpActionIsScoreLine(
+      input,
+      candidate,
+      candidateRoles,
+    );
+  });
+  if (!agendaInstall) return undefined;
+  return {
+    key: "corp_non_agenda_root_blocks_score_remote",
+    label: "Scoring-Remote-Payload",
+    value: -1800,
+    reason: [
+      "non_agenda_root_blocks_score_remote:true",
+      `server:${serverId}`,
+      `available_scoreline_action:${agendaInstall.actionId}`,
+    ].join("|"),
+  };
+}
+
+function corpHqAgendaFloodDrawRiskComponent<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+): AiDecisionScoreComponent | undefined {
+  if (boardTriageState.primary !== "force_scoreline_clock") return undefined;
+  if (!boardTriageState.evidence.includes("corp_hq_agenda_flood_pressure:true")) {
+    return undefined;
+  }
+  const burstEconomyOperation = corpBurstEconomyOperationForAction(
+    input,
+    action,
+    dependencies,
+    actionSemanticCandidate,
+  );
+  const drawCards =
+    action.type === "draw_card" ? 1 : burstEconomyOperation?.drawCards ?? 0;
+  if (drawCards <= 0) return undefined;
+  return {
+    key: "corp_hq_agenda_flood_draw_risk",
+    label: "HQ-Flood-Draw-Risiko",
+    value: -1800,
+    reason: [
+      "hq_agenda_flood:true",
+      `draw_cards:${drawCards}`,
+      "scoreline_clock_before_more_hq_cards:true",
+    ].join("|"),
+  };
+}
+
+function corpLegalActions(input: AiDecisionInput): LegalAction[] {
+  return (input.legalActions ?? input.playerView.legalActions ?? []).filter(
+    (action) => action.side === "corp",
+  );
 }
 
 function corpInputHasConcreteDevelopmentAction(
