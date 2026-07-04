@@ -18,6 +18,19 @@ export function runnerBasicActionPenaltyScoreComponents(
       reason: scopeId,
     });
   }
+  if (
+    action.type === "continue_run" &&
+    scopeId === "simple_run_choice" &&
+    action.payload?.encounterWillEndRun === true &&
+    input.legalActions.some((candidate) => candidate.type === "break_subroutine")
+  ) {
+    components.push({
+      key: "runner_continue_run_ends_run_with_break_available",
+      label: "Ungebrochene ETR-Subroutine auslösen",
+      value: -2500,
+      reason: "break_subroutine_available",
+    });
+  }
   if (action.type === "end_turn" && input.playerView.own.clicks > 0) {
     components.push({
       key: "runner_unused_actions",
