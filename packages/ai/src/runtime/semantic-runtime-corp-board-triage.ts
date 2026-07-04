@@ -187,26 +187,6 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     );
   }
 
-  const remoteProtection = highestPriorityScoreRemoteEntry(
-    actions.filter((entry) => scoreRemoteNeedsProtection(entry)),
-  );
-  if (remoteProtection?.scoringWindow) {
-    return {
-      primary: "protect_score_remote",
-      severity: triageSeverityFromScoringWindow(remoteProtection.scoringWindow),
-      targetServerId: remoteProtection.serverId,
-      scoreRemoteServerId: remoteProtection.serverId,
-      currentCredits,
-      runnerAgendaPointsAfterSteal:
-        remoteProtection.scoringWindow.runnerAgendaPointsAfterSteal,
-      evidence: [
-        "corp_board_triage_primary:protect_score_remote",
-        `corp_board_triage_target:${remoteProtection.serverId ?? "unknown"}`,
-        ...remoteProtection.scoringWindow.evidence,
-      ],
-    };
-  }
-
   const remoteFunding = highestPriorityScoreRemoteEntry(
     actions.filter((entry) => scoreRemoteNeedsFunding(entry)),
   );
@@ -225,6 +205,26 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
         `corp_board_triage_target:${remoteFunding.serverId ?? "unknown"}`,
         ...remoteFunding.scoringWindow.evidence,
         ...(remoteFunding.remoteRezFloor?.evidence ?? []),
+      ],
+    };
+  }
+
+  const remoteProtection = highestPriorityScoreRemoteEntry(
+    actions.filter((entry) => scoreRemoteNeedsProtection(entry)),
+  );
+  if (remoteProtection?.scoringWindow) {
+    return {
+      primary: "protect_score_remote",
+      severity: triageSeverityFromScoringWindow(remoteProtection.scoringWindow),
+      targetServerId: remoteProtection.serverId,
+      scoreRemoteServerId: remoteProtection.serverId,
+      currentCredits,
+      runnerAgendaPointsAfterSteal:
+        remoteProtection.scoringWindow.runnerAgendaPointsAfterSteal,
+      evidence: [
+        "corp_board_triage_primary:protect_score_remote",
+        `corp_board_triage_target:${remoteProtection.serverId ?? "unknown"}`,
+        ...remoteProtection.scoringWindow.evidence,
       ],
     };
   }

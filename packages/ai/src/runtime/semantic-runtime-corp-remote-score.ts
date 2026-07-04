@@ -167,6 +167,13 @@ export function semanticRuntimeCorpInstallRemoteScore<
     return score;
   }
 
+  if (
+    serverId === "new_remote" &&
+    semanticRuntimeCorpHasActiveRemoteScoreline(input)
+  ) {
+    return -2600;
+  }
+
   if (targetIsScoreLine) {
     const scoreWindowValue =
       semanticRuntimeCorpScoreLineWindowValue(scoringWindow);

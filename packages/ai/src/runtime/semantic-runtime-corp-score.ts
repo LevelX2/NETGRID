@@ -286,6 +286,17 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       actionSemanticCandidate,
     );
     if (icePlacement) components.push(icePlacement);
+    const scorelineIceFundingPenalty =
+      corpRemoteScorelineIceFundingPenaltyComponent(
+        input,
+        action,
+        dependencies,
+        roles,
+        icePlacement,
+      );
+    if (scorelineIceFundingPenalty) {
+      components.push(scorelineIceFundingPenalty);
+    }
     if (rolesMatch(roles, ["economy"])) {
       components.push({
         key: "corp_install_economy",
@@ -657,6 +668,75 @@ function corpIcePlacementComponent<TConsumer extends string>(
       scoringWindow?.recommendedNextStep === "build_remote_ice" ||
       scoringWindow?.agendaStealSeverity === "game_ending",
   });
+}
+
+function corpRemoteScorelineIceFundingPenaltyComponent<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  roles: string[],
+  icePlacement: AiDecisionScoreComponent | undefined,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card" || action.payload?.placement !== "ice") {
+    return undefined;
+  }
+  const serverId = corpInstallServerId(action);
+  if (!serverId?.startsWith("remote_")) return undefined;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  if (!corpServerHasVisibleScorelineRoot(server)) return undefined;
+
+  const placementReason = icePlacement?.reason ?? "";
+  const placementPrefersFunding =
+    placementReason.includes("recommendation:prefer_economy") ||
+    placementReason.includes("defer_reason:rez_reserve_too_low");
+  const scoringWindow = dependencies.corpScoringWindowAssessment?.(
+    input,
+    action,
+    roles,
+  );
+  const windowNeedsFunding =
+    scoringWindow?.recommendedNextStep === "gain_credit" ||
+    scoringWindow?.corpCanRezRelevantIce === false ||
+    scoringWindow?.corpCanRezFullPathWithDynamicReserve === false;
+  if (!placementPrefersFunding && !windowNeedsFunding) return undefined;
+
+  return {
+    key: "corp_remote_scoreline_unfunded_ice_install_penalty",
+    label: "Remote-Scoreline-Funding",
+    value: -1900,
+    reason: [
+      "active_remote_scoreline:true",
+      `server:${serverId}`,
+      `placement_prefers_funding:${placementPrefersFunding}`,
+      `window_needs_funding:${windowNeedsFunding}`,
+      ...(scoringWindow?.recommendedNextStep
+        ? [`recommended_next_step:${scoringWindow.recommendedNextStep}`]
+        : []),
+      ...(scoringWindow?.dynamicProtectionReserve !== undefined
+        ? [`dynamic_protection_reserve:${scoringWindow.dynamicProtectionReserve}`]
+        : []),
+    ].join("|"),
+  };
+}
+
+function corpServerHasVisibleScorelineRoot(
+  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): boolean {
+  return (
+    server?.root.some(
+      (card) =>
+        card.known !== false &&
+        (card.type === "agenda" ||
+          typeof card.advancementRequirement === "number" ||
+          typeof visibleCardDefinition(card)?.advancementRequirement ===
+            "number" ||
+          (card.advancementCounters ?? 0) > 0),
+    ) === true
+  );
 }
 
 function corpInstallServerId(action: LegalAction): string | undefined {

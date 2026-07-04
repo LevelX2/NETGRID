@@ -436,6 +436,53 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     );
   });
 
+  it("does not open a non-ICE side remote while an existing remote agenda is active", () => {
+    const sideAsset = corpCard("side-asset", "asset", {
+      title: "Side Asset",
+    });
+    const input = corpInputForCentralInstall(sideAsset, {
+      agendaInHq: true,
+      credits: 6,
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        { id: "archives", label: "Archives", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [
+            corpCard("remote-wall", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+          ],
+          root: [
+            corpCard("active-agenda", "agenda", {
+              advancementRequirement: 3,
+              advancementCounters: 1,
+            }),
+          ],
+        },
+      ],
+    });
+    const action = {
+      ...centralInstallIceAction(sideAsset, "new_remote"),
+      payload: {
+        placement: "root",
+        serverId: "new_remote",
+      },
+    } as LegalAction;
+
+    expect(
+      semanticRuntimeCorpInstallRemoteScore(
+        input,
+        action,
+        [],
+        centralInstallDependencies(),
+      ),
+    ).toBe(-2600);
+  });
+
   it("does not keep adding generic ICE once the empty scoring remote already has three ICE", () => {
     const etrIce = corpCard("fourth-remote-wall", "ice", {
       definitionId: "simple_barrier_ice",

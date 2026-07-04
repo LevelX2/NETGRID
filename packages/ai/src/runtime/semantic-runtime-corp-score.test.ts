@@ -1029,6 +1029,84 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("funds an active score remote before adding ICE that misses the rez floor", () => {
+    const installRemoteIce = corpAction(
+      "install-remote-ice",
+      "install_card",
+      {
+        placement: "ice",
+        serverId: "remote_1",
+      },
+    );
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithRemoteAgenda(
+      2,
+      3,
+      agendaCard("active-remote-agenda"),
+      [installRemoteIce, gainCredit],
+    );
+    const dependencies = {
+      ...testDependencies(),
+      corpHasRemoteRezFloorFundingNeed: () => true,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installRemoteIce.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              corpCanRezRelevantIce: false,
+              corpCanRezFullPathWithDynamicReserve: false,
+              dynamicProtectionReserve: 4,
+              recommendedNextStep: "gain_credit",
+              evidence: ["test_remote_window:ice_needs_funding"],
+            })
+          : undefined,
+    };
+
+    const installComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installRemoteIce,
+      "basic_install",
+      dependencies,
+    );
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      dependencies,
+    );
+
+    expect(installComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_remote_scoreline_unfunded_ice_install_penalty",
+          value: -1900,
+          reason: expect.stringContaining("window_needs_funding:true"),
+        }),
+      ]),
+    );
+    expect(creditComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining("triage_primary:fund_score_remote"),
+        }),
+      ]),
+    );
+    expect(totalScore(creditComponents)).toBeGreaterThan(
+      totalScore(installComponents),
+    );
+  });
+
   it("takes basic funding over ending the turn at zero credits with rez-floor pressure", () => {
     const gainCredit = corpAction(
       "gain-credit",
