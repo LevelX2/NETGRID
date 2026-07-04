@@ -8,6 +8,7 @@ import type { LegalAction, PlayerView, Side } from "@netgrid/shared";
 
 import {
   RUN_TIMELINE_STEPS,
+  actionButtonTone,
   breachHighlighterAccessHint,
   breachProgressLabel,
   currentRunTimelineStep,
@@ -43,7 +44,7 @@ export function RunTimelineOverlay({
   actionDisabled,
   highlighted = false,
   onAction,
-  onChoiceOption
+  onChoiceOption,
 }: {
   view: PlayerView;
   legalActions: LegalAction[];
@@ -52,17 +53,29 @@ export function RunTimelineOverlay({
   actionDisabled: boolean;
   highlighted?: boolean;
   onAction(action: LegalAction): void;
-  onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
+  onChoiceOption(
+    action: LegalAction,
+    choiceId: string,
+    selectedOptionId: string,
+  ): void;
 }) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const [position, setPosition] = useState<OverlayPositionPreference>(() =>
     typeof window === "undefined"
       ? { kind: "default" }
-      : parseOverlayPositionPreference(readLocalStorageWithLegacy(RUN_OVERLAY_POSITION_STORAGE_KEY, LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY))
+      : parseOverlayPositionPreference(
+          readLocalStorageWithLegacy(
+            RUN_OVERLAY_POSITION_STORAGE_KEY,
+            LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY,
+          ),
+        ),
   );
   useEffect(() => {
-    window.localStorage.setItem(RUN_OVERLAY_POSITION_STORAGE_KEY, serializeOverlayPositionPreference(position));
+    window.localStorage.setItem(
+      RUN_OVERLAY_POSITION_STORAGE_KEY,
+      serializeOverlayPositionPreference(position),
+    );
   }, [position]);
   const run = view.run;
   if (!run) return null;
@@ -71,7 +84,10 @@ export function RunTimelineOverlay({
     const overlay = overlayRef.current;
     if (!overlay) return;
     const rect = overlay.getBoundingClientRect();
-    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    dragOffsetRef.current = {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
     event.currentTarget.setPointerCapture(event.pointerId);
   };
   const dragOverlay = (event: ReactPointerEvent<HTMLDivElement>) => {
@@ -86,35 +102,75 @@ export function RunTimelineOverlay({
         window.innerWidth,
         window.innerHeight,
         rect.width,
-        rect.height
-      )
+        rect.height,
+      ),
     );
   };
   const stopDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     dragOffsetRef.current = null;
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    if (event.currentTarget.hasPointerCapture(event.pointerId))
+      event.currentTarget.releasePointerCapture(event.pointerId);
   };
 
   const currentStep = currentRunTimelineStep(view, legalActions);
   const verticalSteps = [...RUN_TIMELINE_STEPS].reverse();
-  const approachedIce = run.approachedIce ? enrichVisibleCard(run.approachedIce, cardDetailsById) : null;
-  const encounteredIce = run.encounteredIce ? enrichVisibleCard(run.encounteredIce, cardDetailsById) : null;
+  const approachedIce = run.approachedIce
+    ? enrichVisibleCard(run.approachedIce, cardDetailsById)
+    : null;
+  const encounteredIce = run.encounteredIce
+    ? enrichVisibleCard(run.encounteredIce, cardDetailsById)
+    : null;
   const runFocusIce = encounteredIce ?? approachedIce;
-  const runFocusIceFallback = approachedIce ? "Angesehenes ICE" : "Sichtbares ICE";
+  const runFocusIceFallback = approachedIce
+    ? "Angesehenes ICE"
+    : "Sichtbares ICE";
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
   const breachProgress = breachProgressLabel(view);
   const breachHighlighterHint = breachHighlighterAccessHint(view);
   const headerStatus = runWindowStatusLabel(view);
   const breakerHint = runBreakerActionHint(view, legalActions);
-  const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
-  const choiceAction = view.pendingChoice ? runActions.find((action) => action.type === "resolve_choice" && action.payload?.choiceId === view.pendingChoice?.choiceId) : undefined;
-  const regularRunActions = choiceAction ? runActions.filter((action) => action.actionId !== choiceAction.actionId) : runActions;
-  const runChoice = view.pendingChoice && choiceAction && view.pendingChoice.minSelections === 1 && view.pendingChoice.maxSelections === 1 ? view.pendingChoice : null;
-  const runChoiceStatus = runChoice ? runChoiceStatusLabel(view, runChoice) : null;
+  const positionStyle: CSSProperties =
+    position.kind === "custom"
+      ? {
+          left: `${position.xPercent}%`,
+          top: `${position.yPercent}%`,
+          transform: "none",
+        }
+      : {};
+  const choiceAction = view.pendingChoice
+    ? runActions.find(
+        (action) =>
+          action.type === "resolve_choice" &&
+          action.payload?.choiceId === view.pendingChoice?.choiceId,
+      )
+    : undefined;
+  const regularRunActions = choiceAction
+    ? runActions.filter((action) => action.actionId !== choiceAction.actionId)
+    : runActions;
+  const runChoice =
+    view.pendingChoice &&
+    choiceAction &&
+    view.pendingChoice.minSelections === 1 &&
+    view.pendingChoice.maxSelections === 1
+      ? view.pendingChoice
+      : null;
+  const runChoiceStatus = runChoice
+    ? runChoiceStatusLabel(view, runChoice)
+    : null;
 
   const overlay = (
-    <div ref={overlayRef} className={`runTimelineOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} aria-live="polite" aria-atomic="true">
-      <div className={`runTimeline active overlay ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline" role="status">
+    <div
+      ref={overlayRef}
+      className={`runTimelineOverlay ${position.kind === "custom" ? "custom" : ""}`}
+      style={positionStyle}
+      aria-live="polite"
+      aria-atomic="true"
+    >
+      <div
+        className={`runTimeline active overlay ${highlighted ? "cueHighlight" : ""}`}
+        data-testid="run-timeline"
+        role="status"
+      >
         <div
           className="runTimelineHead runTimelineDragHandle"
           onPointerDown={startDrag}
@@ -133,14 +189,23 @@ export function RunTimelineOverlay({
         </div>
         <div className="runSteps">
           {verticalSteps.map((step) => (
-            <span className={currentStep === step.id ? "current" : ""} key={step.id}>
+            <span
+              className={currentStep === step.id ? "current" : ""}
+              key={step.id}
+            >
               {step.label}
             </span>
           ))}
         </div>
         {runChoice && choiceAction ? (
-          <div className="runActionBar" aria-label={runChoice.prompt} data-testid="run-choice-action-bar">
-            {runChoiceStatus ? <p className="runHint runChoiceHint">{runChoiceStatus}</p> : null}
+          <div
+            className="runActionBar"
+            aria-label={runChoice.prompt}
+            data-testid="run-choice-action-bar"
+          >
+            {runChoiceStatus ? (
+              <p className="runHint runChoiceHint">{runChoiceStatus}</p>
+            ) : null}
             {runChoice.options.map((option) => (
               <OverflowAwareActionButton
                 action={choiceAction}
@@ -148,7 +213,9 @@ export function RunTimelineOverlay({
                 key={option.id}
                 label={option.label}
                 displayLabel={option.label}
-                onClick={() => onChoiceOption(choiceAction, runChoice.choiceId, option.id)}
+                onClick={() =>
+                  onChoiceOption(choiceAction, runChoice.choiceId, option.id)
+                }
                 disabled={actionDisabled || option.selectable === false}
                 type="button"
                 data-testid="run-choice-button"
@@ -159,7 +226,11 @@ export function RunTimelineOverlay({
           </div>
         ) : null}
         {regularRunActions.length > 0 ? (
-          <div className="runActionBar" aria-label="Run-Aktionen" data-testid="run-action-bar">
+          <div
+            className="runActionBar"
+            aria-label="Run-Aktionen"
+            data-testid="run-action-bar"
+          >
             {regularRunActions.map((action) => {
               const compactLabel = runWindowActionButtonLabel(view, action);
               const fullLabel =
@@ -173,6 +244,7 @@ export function RunTimelineOverlay({
                   key={action.actionId}
                   label={fullLabel}
                   displayLabel={compactLabel}
+                  tone={actionButtonTone(view, action)}
                   onClick={() => onAction(action)}
                   disabled={actionDisabled}
                   type="button"
@@ -184,11 +256,17 @@ export function RunTimelineOverlay({
             })}
           </div>
         ) : !runChoice && jackOutAvailable ? (
-          <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p>
+          <p className="runHint">
+            Du kannst den Run jetzt abbrechen (Jack-out).
+          </p>
         ) : null}
         {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
-        {breachHighlighterHint ? <p className="runHint">{breachHighlighterHint}</p> : null}
-        {breakerHint ? <p className="runHint runBreakerHint">{breakerHint}</p> : null}
+        {breachHighlighterHint ? (
+          <p className="runHint">{breachHighlighterHint}</p>
+        ) : null}
+        {breakerHint ? (
+          <p className="runHint runBreakerHint">{breakerHint}</p>
+        ) : null}
         {runFocusIce ? (
           <div className="encounterFocus">
             {runFocusIce.known ? (
@@ -209,10 +287,15 @@ export function RunTimelineOverlay({
   return createPortal(overlay, document.body);
 }
 
-function runChoiceStatusLabel(view: PlayerView, choice: NonNullable<PlayerView["pendingChoice"]>): string | null {
+function runChoiceStatusLabel(
+  view: PlayerView,
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+): string | null {
   if (choice.source.startsWith("p3_35.access_payment")) {
     const amount = accessAmbushChoiceAmount(choice);
-    const amountText = amount ? `${amount} ${amount === 1 ? "Credit" : "Credits"}` : "Credits";
+    const amountText = amount
+      ? `${amount} ${amount === 1 ? "Credit" : "Credits"}`
+      : "Credits";
     return choice.side === view.side
       ? `Du entscheidest jetzt, ob du ${amountText} für den Access-Ambush zahlst.`
       : `${sideLabel(choice.side)} entscheidet jetzt, ob ${choice.side === "corp" ? "sie" : "er"} ${amountText} für den Access-Ambush zahlt.`;
@@ -222,7 +305,9 @@ function runChoiceStatusLabel(view: PlayerView, choice: NonNullable<PlayerView["
   return prompt.endsWith(".") ? prompt : `${prompt}.`;
 }
 
-function accessAmbushChoiceAmount(choice: NonNullable<PlayerView["pendingChoice"]>): number | null {
+function accessAmbushChoiceAmount(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+): number | null {
   for (const option of choice.options) {
     const match = /^(\d+)\s+Credits?\s+zahlen$/i.exec(option.label.trim());
     if (match?.[1]) return Number(match[1]);

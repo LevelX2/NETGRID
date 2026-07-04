@@ -11,6 +11,11 @@ import type { DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
 import { CostChips } from "./ActionControls";
 
+const reviewCardPreviewStyle = {
+  justifySelf: "center",
+  width: "min(156px, 100%)",
+} as const;
+
 export type AccessReveal = {
   eventId: string;
   kind: "access" | "archives_reveal" | "gypsy_rd_reveal" | "hq_agenda_reveal";
@@ -135,7 +140,9 @@ export function AccessRevealModal({
                 className="exposeReviewCard"
                 key={`${reveal.eventId}-${card.definitionId ?? card.instanceId}-${index}`}
               >
-                <CardView card={card} displayMode={displayMode} preview />
+                <div style={reviewCardPreviewStyle}>
+                  <CardView card={card} displayMode={displayMode} preview />
+                </div>
                 <div className="exposeReviewCardText">
                   <strong>{card.title}</strong>
                   <span>
@@ -290,7 +297,9 @@ export function ExposeReviewModal({
               className="exposeReviewCard"
               key={`${review.eventId}-${card.definitionId ?? card.instanceId}-${index}`}
             >
-              <CardView card={card} displayMode={displayMode} preview />
+              <div style={reviewCardPreviewStyle}>
+                <CardView card={card} displayMode={displayMode} preview />
+              </div>
               <div className="exposeReviewCardText">
                 <strong>{card.title}</strong>
                 {review.serverLabels[index] ? (

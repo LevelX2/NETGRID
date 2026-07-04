@@ -1,63 +1,110 @@
 "use client";
 
-import { PanelTopClose, PanelTopOpen, Pause, Play, Route, X, Zap } from "lucide-react";
+import {
+  PanelTopClose,
+  PanelTopOpen,
+  Pause,
+  Play,
+  Route,
+  X,
+  Zap,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ButtonHTMLAttributes, CSSProperties } from "react";
 import type { LegalAction } from "@netgrid/shared";
-import { actionConsumesClick, actionCostChips } from "../../app/action-board-ui";
+import {
+  actionConsumesClick,
+  actionCostChips,
+  type ActionButtonTone,
+} from "../../app/action-board-ui";
 
 export function ActionPanelDockPlaceholder({
   runActive,
   floatingVisible,
-  onDock
+  onDock,
 }: {
   runActive: boolean;
   floatingVisible: boolean;
   onDock(): void;
 }) {
   return (
-    <section className="section actionPanelDockPlaceholder" data-testid="legal-actions-dock-placeholder">
+    <section
+      className="section actionPanelDockPlaceholder"
+      data-testid="legal-actions-dock-placeholder"
+    >
       <div className="sectionTitleLine">
         <h2>Mögliche Aktionen</h2>
-        <button className="button actionPanelDockButton" type="button" onClick={onDock} title="Aktionsfenster andocken">
+        <button
+          className="button actionPanelDockButton"
+          type="button"
+          onClick={onDock}
+          title="Aktionsfenster andocken"
+        >
           <PanelTopClose size={14} />
           Andocken
         </button>
       </div>
-      <p className="meta">{runActive && !floatingVisible ? "Run-Fenster aktiv." : "Schwebendes Aktionsfenster aktiv."}</p>
+      <p className="meta">
+        {runActive && !floatingVisible
+          ? "Run-Fenster aktiv."
+          : "Schwebendes Aktionsfenster aktiv."}
+      </p>
     </section>
   );
 }
 
 export function ActionPanelFloatButton({ onFloat }: { onFloat(): void }) {
   return (
-    <button className="priorityHoldToggle actionPanelFloatToggle" type="button" onClick={onFloat} aria-label="Aktionsfenster schweben lassen" title="Aktionsfenster schweben lassen">
+    <button
+      className="priorityHoldToggle actionPanelFloatToggle"
+      type="button"
+      onClick={onFloat}
+      aria-label="Aktionsfenster schweben lassen"
+      title="Aktionsfenster schweben lassen"
+    >
       <PanelTopOpen size={14} />
     </button>
   );
 }
 
-export function PriorityWindowHoldToggle({ enabled, onToggle }: { enabled: boolean; onToggle(enabled: boolean): void }) {
+export function PriorityWindowHoldToggle({
+  enabled,
+  onToggle,
+}: {
+  enabled: boolean;
+  onToggle(enabled: boolean): void;
+}) {
   const [tooltipStyle, setTooltipStyle] = useState<CSSProperties | null>(null);
-  const tooltipText = "Bei deinem nächsten legalen Reaktions- oder Rez-Fenster anhalten. Bleibt aktiv, bis du es ausschaltest.";
+  const tooltipText =
+    "Bei deinem nächsten legalen Reaktions- oder Rez-Fenster anhalten. Bleibt aktiv, bis du es ausschaltest.";
   const label = enabled ? "Fensterhalt ausschalten" : "Fensterhalt einschalten";
   const showTooltip = (element: HTMLElement) => {
     const rect = element.getBoundingClientRect();
     const margin = 10;
     const width = 276;
-    const left = Math.min(Math.max(margin, rect.right - width), window.innerWidth - width - margin);
+    const left = Math.min(
+      Math.max(margin, rect.right - width),
+      window.innerWidth - width - margin,
+    );
     const belowTop = rect.bottom + 8;
-    const top = belowTop + 64 < window.innerHeight ? belowTop : Math.max(margin, rect.top - 72);
+    const top =
+      belowTop + 64 < window.innerHeight
+        ? belowTop
+        : Math.max(margin, rect.top - 72);
     setTooltipStyle({ left, top, width });
   };
   const tooltip =
     tooltipStyle && typeof document !== "undefined"
       ? createPortal(
-          <span className="priorityHoldTooltip" role="tooltip" style={tooltipStyle}>
+          <span
+            className="priorityHoldTooltip"
+            role="tooltip"
+            style={tooltipStyle}
+          >
             {tooltipText}
           </span>,
-          document.body
+          document.body,
         )
       : null;
 
@@ -85,11 +132,24 @@ export function CostChips({ action }: { action: LegalAction }) {
   const chips = actionCostChips(action);
   if (chips.length === 0) return null;
   return (
-    <span className="costChips" aria-label={`Kosten: ${chips.map((chip) => chip.label).join(" + ")}`} data-testid="cost-chips">
+    <span
+      className="costChips"
+      aria-label={`Kosten: ${chips.map((chip) => chip.label).join(" + ")}`}
+      data-testid="cost-chips"
+    >
       {chips.map((chip) => (
-        <span className={`costChip ${chip.kind}`} key={`${chip.kind}-${chip.amount}`}>
+        <span
+          className={`costChip ${chip.kind}`}
+          key={`${chip.kind}-${chip.amount}`}
+        >
           {chip.kind === "action" ? (
-            Array.from({ length: chip.amount }, (_, index) => <span className="costActionIcon" aria-hidden="true" key={`action-${index}`} />)
+            Array.from({ length: chip.amount }, (_, index) => (
+              <span
+                className="costActionIcon"
+                aria-hidden="true"
+                key={`action-${index}`}
+              />
+            ))
           ) : (
             <>
               <span className="costCreditIcon" aria-hidden="true" />
@@ -102,11 +162,21 @@ export function CostChips({ action }: { action: LegalAction }) {
   );
 }
 
-type OverflowAwareActionButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "children"> & {
+type OverflowAwareActionButtonProps = Omit<
+  ButtonHTMLAttributes<HTMLButtonElement>,
+  "aria-label" | "children"
+> & {
   action: LegalAction;
   label: string;
   displayLabel?: string;
   iconSize?: number;
+  tone?: ActionButtonTone;
+};
+
+const warningActionButtonStyle: CSSProperties = {
+  background: "color-mix(in srgb, #f6b947 22%, var(--panel) 78%)",
+  borderColor: "color-mix(in srgb, #f6b947 74%, var(--line) 26%)",
+  color: "color-mix(in srgb, #f6b947 42%, var(--text) 58%)",
 };
 
 export function OverflowAwareActionButton({
@@ -114,11 +184,20 @@ export function OverflowAwareActionButton({
   label,
   displayLabel = label,
   iconSize,
+  tone = "default",
+  className,
+  style,
   type = "button",
   ...buttonProps
 }: OverflowAwareActionButtonProps) {
   const labelRef = useRef<HTMLSpanElement | null>(null);
   const [tooltipEnabled, setTooltipEnabled] = useState(false);
+  const tonedClassName =
+    [className, tone === "danger" ? "dangerButton" : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
+  const tonedStyle =
+    tone === "warning" ? { ...warningActionButtonStyle, ...style } : style;
 
   useEffect(() => {
     const labelElement = labelRef.current;
@@ -136,7 +215,10 @@ export function OverflowAwareActionButton({
 
     updateTooltipAvailability();
     const frame = window.requestAnimationFrame(updateTooltipAvailability);
-    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateTooltipAvailability) : null;
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(updateTooltipAvailability)
+        : null;
     resizeObserver?.observe(labelElement);
     window.addEventListener("resize", updateTooltipAvailability);
     return () => {
@@ -150,18 +232,37 @@ export function OverflowAwareActionButton({
     <button
       {...buttonProps}
       type={type}
+      className={tonedClassName}
+      style={tonedStyle}
       aria-label={label}
       data-tooltip={tooltipEnabled ? label : undefined}
+      data-action-tone={tone === "default" ? undefined : tone}
     >
-      <ActionLeadIcon action={action} {...(iconSize !== undefined ? { size: iconSize } : {})} />
-      <span className="actionButtonLabel" ref={labelRef}>{displayLabel}</span>
+      <ActionLeadIcon
+        action={action}
+        {...(iconSize !== undefined ? { size: iconSize } : {})}
+      />
+      <span className="actionButtonLabel" ref={labelRef}>
+        {displayLabel}
+      </span>
       <CostChips action={action} />
     </button>
   );
 }
 
-export function ActionLeadIcon({ action, size = 15 }: { action: LegalAction; size?: number }) {
+export function ActionLeadIcon({
+  action,
+  size = 15,
+}: {
+  action: LegalAction;
+  size?: number;
+}) {
   if (action.type === "jack_out") return <X size={size} aria-hidden="true" />;
-  if (action.type === "continue_run") return <Route size={size} aria-hidden="true" />;
-  return actionConsumesClick(action) ? <Play size={size} aria-hidden="true" /> : <Zap size={size} aria-hidden="true" />;
+  if (action.type === "continue_run")
+    return <Route size={size} aria-hidden="true" />;
+  return actionConsumesClick(action) ? (
+    <Play size={size} aria-hidden="true" />
+  ) : (
+    <Zap size={size} aria-hidden="true" />
+  );
 }

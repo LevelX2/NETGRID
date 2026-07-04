@@ -1,10 +1,23 @@
 "use client";
 
-import { Building2, Check, Fingerprint, RotateCcw, Search, X } from "lucide-react";
-import type { LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
+import {
+  Building2,
+  Check,
+  Fingerprint,
+  RotateCcw,
+  Search,
+  X,
+} from "lucide-react";
+import type {
+  LegalAction,
+  PlayerView,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import {
   actionContextTitle,
+  actionButtonTone,
   actionSlotDisplay,
   isSingleInstalledCorpExposeChoice,
   runAwareActionButtonLabel,
@@ -24,10 +37,7 @@ import {
   cardChoiceTitle,
   enrichVisibleChoiceCardsFromView,
 } from "./CardChoicePanel";
-import {
-  DiscardChoicePanel,
-  FieldCardChoicePanel,
-} from "./ChoicePanels";
+import { DiscardChoicePanel, FieldCardChoicePanel } from "./ChoicePanels";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
 
 export function LegalActionsPanel({
@@ -54,7 +64,7 @@ export function LegalActionsPanel({
   onFloatPanel,
   enrichCard,
   connection,
-  onClearContext
+  onClearContext,
 }: {
   view: PlayerView;
   primaryActions: LegalAction[];
@@ -71,8 +81,16 @@ export function LegalActionsPanel({
   selectedDiscardOptionIds: string[];
   selectedFieldCardChoiceOptionIds: string[];
   onAction(action: LegalAction): void;
-  onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
-  onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
+  onChoiceOption(
+    action: LegalAction,
+    choiceId: string,
+    selectedOptionId: string,
+  ): void;
+  onChoiceOptions(
+    action: LegalAction,
+    choiceId: string,
+    selectedOptionIds: string[],
+  ): void;
   onDiscardChoiceToggle(optionId: string): void;
   onFieldCardChoiceClear(): void;
   onPriorityWindowHoldEnabled(enabled: boolean): void;
@@ -81,20 +99,44 @@ export function LegalActionsPanel({
   connection: "offline" | "connecting" | "online";
   onClearContext(): void;
 }) {
-  const setupChoice = view.pendingChoice?.source === "setup.mulligan" ? view.pendingChoice : undefined;
-  const setupAction = setupChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
+  const setupChoice =
+    view.pendingChoice?.source === "setup.mulligan"
+      ? view.pendingChoice
+      : undefined;
+  const setupAction = setupChoice
+    ? primaryActions.find((action) => action.type === "resolve_choice")
+    : undefined;
   if (setupChoice && setupAction) {
     return (
-      <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="setup-mulligan-panel">
+      <section
+        className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`}
+        data-testid="setup-mulligan-panel"
+      >
         <h2>
-          {view.side === "runner" ? <Fingerprint size={16} /> : <Building2 size={16} />}
+          {view.side === "runner" ? (
+            <Fingerprint size={16} />
+          ) : (
+            <Building2 size={16} />
+          )}
           Setup
         </h2>
         <p className="meta">{setupChoice.prompt}</p>
         <div className="actions setupActions">
           {setupChoice.options.map((option) => (
-            <button className="button actionButton primary" key={option.id} onClick={() => onChoiceOption(setupAction, setupChoice.choiceId, option.id)} disabled={disabled} data-testid="setup-choice-button">
-              {option.id === "keep" ? <Check size={15} /> : <RotateCcw size={15} />}
+            <button
+              className="button actionButton primary"
+              key={option.id}
+              onClick={() =>
+                onChoiceOption(setupAction, setupChoice.choiceId, option.id)
+              }
+              disabled={disabled}
+              data-testid="setup-choice-button"
+            >
+              {option.id === "keep" ? (
+                <Check size={15} />
+              ) : (
+                <RotateCcw size={15} />
+              )}
               <span className="actionButtonLabel">{option.label}</span>
             </button>
           ))}
@@ -102,13 +144,30 @@ export function LegalActionsPanel({
       </section>
     );
   }
-  const discardChoice = view.pendingChoice?.source === "discard_phase" ? view.pendingChoice : undefined;
-  const discardAction = discardChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
+  const discardChoice =
+    view.pendingChoice?.source === "discard_phase"
+      ? view.pendingChoice
+      : undefined;
+  const discardAction = discardChoice
+    ? primaryActions.find((action) => action.type === "resolve_choice")
+    : undefined;
   if (discardChoice && discardAction) {
-    return <DiscardChoicePanel choice={discardChoice} action={discardAction} selected={selectedDiscardOptionIds} disabled={disabled} highlighted={highlighted} onToggle={onDiscardChoiceToggle} onChoiceOptions={onChoiceOptions} />;
+    return (
+      <DiscardChoicePanel
+        choice={discardChoice}
+        action={discardAction}
+        selected={selectedDiscardOptionIds}
+        disabled={disabled}
+        highlighted={highlighted}
+        onToggle={onDiscardChoiceToggle}
+        onChoiceOptions={onChoiceOptions}
+      />
+    );
   }
   const genericChoice = view.pendingChoice;
-  const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
+  const genericChoiceAction = genericChoice
+    ? primaryActions.find((action) => action.type === "resolve_choice")
+    : undefined;
   if (genericChoice && genericChoiceAction) {
     if (shouldUseFieldCardChoice(genericChoice, view)) {
       if (isSingleInstalledCorpExposeChoice(genericChoice)) return null;
@@ -128,20 +187,38 @@ export function LegalActionsPanel({
       const cardChoice = enrichVisibleChoiceCardsFromView(genericChoice, view);
       if (connection !== "online") {
         return (
-          <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="card-choice-paused-panel">
+          <section
+            className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`}
+            data-testid="card-choice-paused-panel"
+          >
             <h2>
               <Search size={16} />
               {cardChoiceTitle(cardChoice)}
             </h2>
             <p className="meta">{cardChoice.prompt}</p>
-            <p className="meta">Die Kartenwahl wird wieder geöffnet, sobald die Verbindung steht.</p>
+            <p className="meta">
+              Die Kartenwahl wird wieder geöffnet, sobald die Verbindung steht.
+            </p>
           </section>
         );
       }
-      return <CardChoicePanel choice={cardChoice} action={genericChoiceAction} view={view} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
+      return (
+        <CardChoicePanel
+          choice={cardChoice}
+          action={genericChoiceAction}
+          view={view}
+          disabled={disabled}
+          highlighted={highlighted}
+          enrichCard={enrichCard}
+          onChoiceOptions={onChoiceOptions}
+        />
+      );
     }
     return (
-      <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="generic-choice-panel">
+      <section
+        className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`}
+        data-testid="generic-choice-panel"
+      >
         <h2>
           <Check size={16} />
           {sideLabel(genericChoice.side)}-Entscheidung
@@ -149,7 +226,19 @@ export function LegalActionsPanel({
         <p className="meta">{genericChoice.prompt}</p>
         <div className="actions setupActions">
           {genericChoice.options.map((option) => (
-            <button className="button actionButton primary" key={option.id} onClick={() => onChoiceOption(genericChoiceAction, genericChoice.choiceId, option.id)} disabled={disabled} data-testid="generic-choice-button">
+            <button
+              className="button actionButton primary"
+              key={option.id}
+              onClick={() =>
+                onChoiceOption(
+                  genericChoiceAction,
+                  genericChoice.choiceId,
+                  option.id,
+                )
+              }
+              disabled={disabled}
+              data-testid="generic-choice-button"
+            >
               <ActionLeadIcon action={genericChoiceAction} />
               <span className="actionButtonLabel">{option.label}</span>
             </button>
@@ -160,27 +249,54 @@ export function LegalActionsPanel({
   }
   if (view.phase === "setup") {
     return (
-      <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="setup-waiting-panel">
+      <section
+        className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`}
+        data-testid="setup-waiting-panel"
+      >
         <h2>Setup</h2>
         <p className="meta">{setupWaitingLabel(view)}</p>
       </section>
     );
   }
   const currentTurnSide = turnSideForView(view) ?? view.activeSide;
-  const currentTurnClicks = currentTurnSide === view.side ? view.own.clicks : view.opponent.clicks;
+  const currentTurnClicks =
+    currentTurnSide === view.side ? view.own.clicks : view.opponent.clicks;
   const currentTurnCapacity = actionCapacities[currentTurnSide];
-  const currentTurnDisplay = actionSlotDisplay(currentTurnSide, currentTurnClicks, currentTurnCapacity, true);
+  const currentTurnDisplay = actionSlotDisplay(
+    currentTurnSide,
+    currentTurnClicks,
+    currentTurnCapacity,
+    true,
+  );
   return (
-    <section className={`section ${highlighted ? "cueHighlight" : ""}`} data-testid="legal-actions">
+    <section
+      className={`section ${highlighted ? "cueHighlight" : ""}`}
+      data-testid="legal-actions"
+    >
       <div className={`turnActionHeader side-${currentTurnSide}`}>
         <div className="turnActionHeaderTop">
           <h2>{turnActionHeaderLabel(view, currentTurnSide, activeAiSide)}</h2>
-          <PriorityWindowHoldToggle enabled={priorityWindowHoldEnabled} onToggle={onPriorityWindowHoldEnabled} />
-          {onFloatPanel ? <ActionPanelFloatButton onFloat={onFloatPanel} /> : null}
+          <PriorityWindowHoldToggle
+            enabled={priorityWindowHoldEnabled}
+            onToggle={onPriorityWindowHoldEnabled}
+          />
+          {onFloatPanel ? (
+            <ActionPanelFloatButton onFloat={onFloatPanel} />
+          ) : null}
         </div>
-        <div className={`actionAvailability side-${currentTurnSide}`} data-testid="action-availability">
+        <div
+          className={`actionAvailability side-${currentTurnSide}`}
+          data-testid="action-availability"
+        >
           <span className="actionAvailabilityCount">{`noch ${currentTurnDisplay.available}`}</span>
-          <ActionSlotMeter side={currentTurnSide} currentClicks={currentTurnClicks} displayCapacity={currentTurnCapacity} active compact slotsOnly />
+          <ActionSlotMeter
+            side={currentTurnSide}
+            currentClicks={currentTurnClicks}
+            displayCapacity={currentTurnCapacity}
+            active
+            compact
+            slotsOnly
+          />
         </div>
       </div>
       <div className="actions">
@@ -192,6 +308,7 @@ export function LegalActionsPanel({
               className="button actionButton primary"
               key={action.actionId}
               label={label}
+              tone={actionButtonTone(view, action)}
               onClick={() => onAction(action)}
               disabled={disabled}
               data-testid="action-button"
@@ -203,7 +320,13 @@ export function LegalActionsPanel({
           <div className="actionGroup selectedActionGroup">
             <div className="selectedActionTitle">
               <span>{actionContextTitle(selectedContext)}</span>
-              <button className="button iconOnly" onClick={onClearContext} type="button" aria-label="Auswahl aufheben" title="Auswahl aufheben">
+              <button
+                className="button iconOnly"
+                onClick={onClearContext}
+                type="button"
+                aria-label="Auswahl aufheben"
+                title="Auswahl aufheben"
+              >
                 <X size={14} />
               </button>
             </div>
@@ -215,6 +338,7 @@ export function LegalActionsPanel({
                   className="button actionButton"
                   key={action.actionId}
                   label={label}
+                  tone={actionButtonTone(view, action)}
                   onClick={() => onAction(action)}
                   disabled={disabled}
                   data-testid="action-button"
@@ -222,24 +346,41 @@ export function LegalActionsPanel({
                 />
               );
             })}
-            {contextualActions.length === 0 ? <p className="meta">Keine Aktion für diese Auswahl in diesem Fenster.</p> : null}
+            {contextualActions.length === 0 ? (
+              <p className="meta">
+                Keine Aktion für diese Auswahl in diesem Fenster.
+              </p>
+            ) : null}
           </div>
         ) : hasHiddenContextActions ? (
-          <p className="meta">{hiddenContextHint ?? "Wähle hier eine Aktion oder wähle im Spielfeld eine eigene Spielkarte bzw. ein sichtbares Spielobjekt für weitere Optionen."}</p>
+          <p className="meta">
+            {hiddenContextHint ??
+              "Wähle hier eine Aktion oder wähle im Spielfeld eine eigene Spielkarte bzw. ein sichtbares Spielobjekt für weitere Optionen."}
+          </p>
         ) : null}
-        {primaryActions.length === 0 && !selectedContext && !cardContextActive ? <p className="meta">Keine Aktion in diesem Fenster.</p> : null}
+        {primaryActions.length === 0 &&
+        !selectedContext &&
+        !cardContextActive ? (
+          <p className="meta">Keine Aktion in diesem Fenster.</p>
+        ) : null}
       </div>
     </section>
   );
 }
 
 function turnSideForView(view: PlayerView): Side | null {
-  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase") return "corp";
-  if (view.phase === "runner_action_phase" || view.phase === "run") return "runner";
+  if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase")
+    return "corp";
+  if (view.phase === "runner_action_phase" || view.phase === "run")
+    return "runner";
   return null;
 }
 
-function turnActionHeaderLabel(view: PlayerView, side: Side, activeAiSide?: Side): string {
+function turnActionHeaderLabel(
+  view: PlayerView,
+  side: Side,
+  activeAiSide?: Side,
+): string {
   const actorLabel = `${sideLabel(side)}${activeAiSide === side ? "-KI" : ""}`;
   return `Zug: ${currentTurnNumberForView(view)}  ${actorLabel} Aktionen`;
 }
@@ -249,7 +390,10 @@ function currentTurnNumberForView(view: PlayerView): number {
   let activeTurnNumber = 1;
 
   for (const event of view.publicEvents) {
-    const actionType = typeof event.publicPayload.actionType === "string" ? event.publicPayload.actionType : event.type;
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
     const actor = sideFromPublicPayload(event.publicPayload.actor);
     if (!actor) continue;
 
@@ -278,8 +422,10 @@ function sideFromPublicPayload(value: unknown): Side | null {
 }
 
 function setupWaitingLabel(view: PlayerView): string {
-  if (view.timingPoint === "setup.mulligan.runner") return "Runner entscheidet über die Starthand.";
-  if (view.timingPoint === "setup.mulligan.corp") return "Korp entscheidet über die Starthand.";
+  if (view.timingPoint === "setup.mulligan.runner")
+    return "Runner entscheidet über die Starthand.";
+  if (view.timingPoint === "setup.mulligan.corp")
+    return "Korp entscheidet über die Starthand.";
   return "Setup läuft.";
 }
 
