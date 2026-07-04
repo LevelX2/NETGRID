@@ -363,13 +363,13 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 977,
-      "cardsNeedingManualOverlay": 132
+      "warningCount": 999,
+      "cardsNeedingManualOverlay": 133
     },
     "compiledIndex": {
       "hardErrorCount": 0,
-      "warningCount": 735,
-      "reviewCandidates": 128
+      "warningCount": 740,
+      "reviewCandidates": 129
     },
     "migrationPriority": {
       "candidateCount": 193,

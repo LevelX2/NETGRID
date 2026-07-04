@@ -40,6 +40,8 @@ describe("AI hint ontology validation", () => {
       activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
     );
     const strategyCoveredPilotCardIds = new Set([
+      "onr_v1_355_crystal-palace-station-grid",
+      "onr_v1_366_red-herrings",
       "onr_v1_274_tutor",
       "onr_v1_277_virizz",
       "onr_v1_302_scorched-earth",

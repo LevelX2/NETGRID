@@ -62,8 +62,8 @@ describe("generated fact Batch-1 rollup", () => {
     expect(report.remainingShapeDifferenceCount).toBe(0);
     expect(report.monolithOnlyMechanicalFactCount).toBe(0);
     expect(report.deriverFollowupCandidateCount).toBe(0);
-    expect(report.descriptorGapRemainingCount).toBe(4);
-    expect(report.humanReviewCandidateCount).toBe(2);
+    expect(report.descriptorGapRemainingCount).toBe(6);
+    expect(report.humanReviewCandidateCount).toBe(3);
     expect(report.batchOneStatus).toBe("needs_followup");
   });
 

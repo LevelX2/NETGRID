@@ -200,7 +200,9 @@ export function assessCorpScorelineWindow<
       `corp_scoreline_blocked_by_runner_contest:${blockedByRunnerContest}`,
       `corp_scoreline_blocked_by_central_threat:${blockedByHqThreat}`,
       `corp_scoreline_runner_access_threat_high:${centralThreatHigh}`,
-      ...(bestPath ? [`corp_scoreline_best_action:${bestPath.actionId}`] : []),
+      ...(bestPath
+        ? [`corp_scoreline_best_action:${scorelinePathSafeSignature(bestPath)}`]
+        : []),
     ],
   };
 }
@@ -297,7 +299,7 @@ function scorelinePathForAction<TServer extends VisibleCorpServer>(
     ...(scoringWindow?.scoreHorizon ? { scoreHorizon: scoringWindow.scoreHorizon } : {}),
     ...(scoringWindow ? { scoringWindow } : {}),
     evidence: [
-      `corp_scoreline_action:${action.actionId}`,
+      `corp_scoreline_action:${scorelineActionSafeSignature(action, actionRoles, serverId)}`,
       `corp_scoreline_action_type:${action.type}`,
       ...(serverId ? [`corp_scoreline_server:${serverId}`] : []),
       `corp_scoreline_roles:${actionRoles.join(",")}`,
@@ -335,7 +337,7 @@ function scorelineFundingPathForAction<TServer extends VisibleCorpServer>(
     creditsBeforeAction,
     creditsAfterAction,
     evidence: [
-      `corp_scoreline_action:${action.actionId}`,
+      `corp_scoreline_action:${scorelineActionSafeSignature(action, ["fund_scoreline"])}`,
       `corp_scoreline_action_type:${action.type}`,
       "corp_scoreline_roles:fund_scoreline",
       "corp_scoreline_path_blocked:false",
@@ -463,6 +465,26 @@ function scorelineRecommendedNextStep(
   if (actionRoles.includes("central_protection")) return "protect_central";
   if (actionRoles.includes("remote_protection")) return "protect_remote";
   return "defer";
+}
+
+function scorelinePathSafeSignature(path: CorpScorelinePathAssessment): string {
+  return [
+    path.actionType,
+    path.actionRoles.join("+") || "unclassified",
+    path.serverId ?? "none",
+  ].join(":");
+}
+
+function scorelineActionSafeSignature(
+  action: LegalAction,
+  actionRoles: readonly CorpScorelineActionRole[],
+  serverId?: string,
+): string {
+  return [
+    action.type,
+    actionRoles.join("+") || "unclassified",
+    serverId ?? action.payload?.serverId ?? "none",
+  ].join(":");
 }
 
 function pathWindowKind(

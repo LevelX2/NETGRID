@@ -1,67 +1,86 @@
 {
   "generatedAt": "2026-05-25",
   "source": "data/ai/ai-card-hints-active.json",
-  "note": "Diagnostic review inventory only. Not consumed by runtime. Updated after semantic hint audit corrections on 2026-05-25.",
+  "note": "Diagnostic review inventory only. Not consumed by runtime. Updated after Classic AI hint semantic corrections on 2026-07-01.",
   "totals": {
-    "hints": 410,
+    "hints": 616,
     "support": {
-      "ai_supported": 410
+      "ai_supported": 616
     },
     "cardTypes": {
-      "identity": 2,
-      "program": 81,
-      "hardware": 32,
-      "event": 49,
-      "resource": 40,
-      "agenda": 36,
-      "ice": 68,
-      "operation": 32,
-      "asset": 43,
-      "upgrade": 27
+      "ice": 114,
+      "program": 112,
+      "event": 86,
+      "resource": 65,
+      "asset": 57,
+      "agenda": 50,
+      "upgrade": 45,
+      "operation": 43,
+      "hardware": 42,
+      "identity": 2
     },
     "sides": {
-      "corp": 207,
-      "runner": 203
+      "corp": 310,
+      "runner": 306
     }
   },
   "valueHintKeys": {
-    "defense": 77,
-    "economy": 57,
-    "runPressure": 56,
+    "defense": 131,
+    "economy": 85,
+    "utility": 82,
+    "runPressure": 75,
     "perCardLongtailPriority": 44,
+    "rigCoverage": 41,
     "threat": 40,
-    "rigCoverage": 30,
+    "scoring": 33,
+    "tempo": 25,
     "modifier": 23,
-    "scoring": 23,
-    "tempo": 21,
-    "utility": 18,
-    "information": 16,
+    "information": 20,
+    "survival": 16,
     "cardFlow": 14,
-    "survival": 14,
     "agenda": 12,
+    "damage": 11,
     "remote": 11,
-    "damage": 10,
+    "memory": 10,
+    "tax": 10,
     "link": 9,
     "access": 8,
     "consistency": 8,
+    "runControl": 8,
     "run": 7,
-    "tax": 6,
+    "breaker": 6,
     "trace": 6,
+    "cardVelocity": 5,
     "setup": 5,
+    "tagSafety": 5,
+    "agendaPoints": 4,
+    "disruption": 4,
     "survivability": 4,
-    "memory": 3,
+    "damageThreat": 3,
+    "programPressure": 3,
+    "traceSafety": 3,
+    "accessPressure": 2,
+    "ambush": 2,
+    "efficiency": 2,
+    "eventSupport": 2,
     "postBidLink": 2,
     "recurringCredits": 2,
+    "recursion": 2,
     "rig": 2,
+    "tagPunish": 2,
     "tagRelief": 2,
     "accessEconomy": 1,
     "advance": 1,
     "afterPassIcePriority": 1,
     "agendaPointCost": 1,
+    "agendaPressure": 1,
     "board_pressure": 1,
-    "breaker": 1,
+    "burstStrength": 1,
+    "cardSelection": 1,
     "counter_control": 1,
     "draw": 1,
+    "emergencyBreaker": 1,
+    "handSize": 1,
     "hidden_zone": 1,
     "hqRunCounterPriority": 1,
     "installCost": 1,
@@ -71,173 +90,253 @@
     "memoryLimitBonus": 1,
     "playfulAiGainAllPriority": 1,
     "pressure": 1,
-    "recursion": 1,
     "rezBeforeRunnerRunPriority": 1,
+    "rigSupport": 1,
     "risk": 1,
     "run_safety": 1,
     "runStartTaxCredits": 1,
+    "runSupport": 1,
+    "setupConsistency": 1,
     "startOfTurnCreditLoss": 1,
     "startRunStrengthPriority": 1,
     "startTurnRandomPriority": 1,
     "tag": 1,
     "tagDamagePriority": 1,
-    "tagPunish": 1,
+    "tagPressure": 1,
     "traceBidCredit": 1,
     "traceBidSupport": 1,
     "traceDefense": 1,
+    "tracePressure": 1,
     "trashEconomy": 1,
-    "virus": 1
+    "virus": 1,
+    "virusPressure": 1
   },
   "riskTags": {
+    "hidden_ice": 85,
     "public_payload_only": 54,
     "legal_actions_only": 53,
-    "hidden_ice": 50,
+    "damage_window": 50,
     "replay_statehash_required": 49,
-    "encounter": 36,
+    "encounter": 48,
+    "trace_window": 35,
+    "hidden_root": 32,
+    "tag_window": 31,
+    "hidden_until_score_or_access": 27,
     "state_hash_replay_stable": 26,
-    "damage_window": 24,
     "modifier_layering": 23,
-    "trace_window": 23,
-    "credit_reserve": 21,
-    "tag_window": 18,
-    "hidden_until_score_or_access": 17,
+    "credit_reserve": 22,
+    "hidden_zone_barrier": 21,
     "hidden_info_barrier": 14,
     "runner_trash_value": 14,
+    "tag": 13,
     "public_play": 12,
-    "tag": 12,
     "access_window": 11,
     "resource_trash_if_tagged": 10,
+    "timing_window": 10,
     "damage": 9,
-    "timing_window": 9,
-    "hidden_root": 8,
-    "hidden_zone_projection": 8,
+    "hidden_zone_projection": 9,
+    "hidden_zone": 8,
     "score_window": 8,
     "counter_state": 7,
     "hidden_zone_change": 7,
     "shuffle_invalidates_memory": 7,
     "counter_accounting": 6,
     "credit_intensive": 6,
+    "double_action": 6,
     "random_counter_replay_required": 6,
-    "hidden_zone_barrier": 5,
+    "access_replacement": 5,
     "install_runner": 5,
+    "program_trash": 5,
+    "public_reveal": 5,
     "random_outcome": 5,
     "region_unique_server": 5,
     "board_presence": 4,
     "conditional": 4,
-    "public_reveal": 4,
+    "noisy_discount": 4,
     "run_commitment": 4,
+    "run_redirect": 4,
+    "tag_risk": 4,
+    "unpreventable_damage": 4,
     "visible_targeting": 4,
-    "access_replacement": 3,
+    "agenda_point_cost": 3,
     "board_tradeoff": 3,
+    "credit_cost": 3,
+    "deterministic_random": 3,
+    "high_opportunity_cost": 3,
+    "install_restriction": 3,
+    "position_dependent_ice": 3,
+    "restricted_credits": 3,
+    "run_cost_modifier": 3,
+    "run_success_dependency": 3,
+    "self_trash": 3,
     "server_targeting": 3,
-    "tag_risk": 3,
+    "tag_self": 3,
+    "tap_source": 3,
+    "trace": 3,
     "access_timing": 2,
     "agenda_cost": 2,
-    "agenda_point_cost": 2,
+    "ap_damage": 2,
+    "brain_damage": 2,
+    "corp_credit_cost": 2,
     "counter_setup": 2,
+    "deck_unique": 2,
     "fort_ice_modifier": 2,
     "next_ice_lock": 2,
-    "program_trash": 2,
     "recurring_refresh": 2,
     "reorder_updates_memory": 2,
     "run": 2,
     "run_start_window": 2,
     "scored_agenda_action": 2,
+    "start_turn_trigger": 2,
     "stealth_conflict": 2,
     "stealth_credit_accounting": 2,
     "stealth_credit_restriction": 2,
     "subroutine_bound": 2,
+    "subsidiary_only": 2,
     "successful_run_window": 2,
     "tag_condition_revalidated": 2,
-    "trace": 2,
+    "target_fort_choice": 2,
     "trash_prevention_window": 2,
-    "unpreventable_damage": 2,
+    "unique_resource": 2,
     "virus_cleanup": 2,
     "action_lock": 1,
+    "agenda_transfer": 1,
     "agenda_window": 1,
+    "archives_dependency": 1,
+    "archives_only_target": 1,
     "click_cost": 1,
+    "conditional_access": 1,
+    "conditional_play": 1,
+    "core_damage": 1,
     "corp_cancel_window": 1,
     "corp_trash_action": 1,
     "counter_pressure": 1,
     "credit_swing": 1,
     "delayed_scoring": 1,
+    "draw_replacement": 1,
+    "dynamic_memory": 1,
     "encounter_timing": 1,
     "encounter_window": 1,
     "end_turn_payment": 1,
     "event_heap_movement": 1,
     "finite_credit_pool": 1,
+    "flatline_risk": 1,
+    "future_action_debt": 1,
     "global_modifier": 1,
+    "grip_size_dependency": 1,
+    "grip_trash": 1,
     "hidden_zone_access_queue": 1,
+    "hosted_counters": 1,
     "hosting": 1,
     "hosting_cleanup": 1,
     "hosting_lifecycle": 1,
+    "hq_card_selection": 1,
     "hq_ice_dependency": 1,
     "installed_card_destroy": 1,
     "killer_restricted_payment": 1,
+    "leave_play_credit_loss": 1,
+    "leave_play_damage": 1,
     "leave_play_penalty": 1,
     "lose_condition": 1,
     "low_base_strength": 1,
+    "memory_pressure": 1,
+    "memory_pressure_for_runner": 1,
     "mu_check": 1,
+    "net_damage": 1,
+    "next_encounter_lock": 1,
     "next_encounter_modifier": 1,
+    "noisy": 1,
+    "noisy_breaker_restriction": 1,
     "once_per_turn": 1,
     "overcapacity_trash_choice": 1,
+    "paid_etr_requires_corp_credits": 1,
     "persistent_public_state": 1,
     "pool_exhaustion": 1,
+    "prep_dependency": 1,
+    "public_counter": 1,
     "public_counter_lifecycle": 1,
     "public_trash_to_hand": 1,
     "purge_window": 1,
     "random_counter": 1,
+    "random_effect": 1,
+    "rd_reveal": 1,
+    "region": 1,
+    "remove_from_game": 1,
     "replacement_window": 1,
     "requires_visible_run_history": 1,
     "requires_visible_tag": 1,
     "restricted_payment": 1,
+    "reveal_to_runner": 1,
+    "rig_trash": 1,
+    "risk.access_loss_on_use": 1,
+    "risk.blocks_run_continuation": 1,
+    "risk.ends_run_on_use": 1,
+    "run_duration_strength": 1,
     "run_only_spend": 1,
     "run_spending_cap": 1,
     "run_start_tax_layering": 1,
     "run_window": 1,
     "runner_breaker_dependency": 1,
+    "runner_can_score_later": 1,
+    "runner_counter": 1,
     "runner_daemon_dependency": 1,
     "runner_memory": 1,
     "runner_removal_window": 1,
-    "self_trash": 1,
+    "same_fort_reposition": 1,
+    "scored_counter": 1,
     "server_bound_modifier": 1,
     "server_scope_public": 1,
+    "single_use": 1,
     "source_bound_rez_cost": 1,
     "start_of_turn_trigger": 1,
     "start_of_turn_window": 1,
-    "start_turn_trigger": 1,
-    "subsidiary_only": 1,
+    "start_run_reposition": 1,
+    "stealth_loss": 1,
+    "subsidiary_target_only": 1,
+    "successful_run": 1,
+    "tag_clear_timing": 1,
+    "tag_condition": 1,
     "tag_dependency": 1,
-    "tag_self": 1,
+    "tag_prevention": 1,
+    "tag_synergy": 1,
+    "tag_threshold": 1,
     "target_revalidation": 1,
     "target_unrezzed_ice": 1,
+    "targeted_ice": 1,
     "temporary_install": 1,
+    "temporary_modifier": 1,
+    "temporary_prevention": 1,
+    "trace_liability": 1,
     "trace_pool_server_bound": 1,
     "trash_top_card_dependency": 1,
+    "turn_end_delayed_effect": 1,
+    "unique": 1,
+    "virus_meta": 1,
     "wall_reveal_choice": 1
   },
   "requiredMechanics": {
-    "rez_ice": 65,
+    "rez_ice": 72,
+    "install_program": 68,
     "install_ice": 64,
     "encounter_ice": 63,
-    "install_program": 60,
     "rez_card": 48,
     "memory": 46,
     "per_card_longtail_resolver_gate": 44,
+    "play_event": 42,
+    "install_resource": 37,
     "install_remote": 34,
-    "install_resource": 33,
-    "play_event": 32,
-    "play_operation": 29,
-    "trace": 26,
+    "play_operation": 32,
+    "trace": 27,
     "advance": 25,
     "install_asset": 25,
+    "install_hardware": 25,
     "persistent_special_state_resolver": 22,
     "subtype_icebreaker": 22,
-    "install_hardware": 21,
     "score": 21,
     "install_upgrade": 18,
     "legal_action_only": 16,
     "break_subroutine": 15,
+    "end_the_run": 15,
     "gain_credit": 15,
     "persistent_modifier": 15,
     "runner_program_resolver": 15,
@@ -248,8 +347,7 @@
     "pump_breaker": 13,
     "damage_prevention": 12,
     "global_static_modifier_layer_resolver": 12,
-    "end_the_run": 11,
-    "net_damage": 11,
+    "net_damage": 12,
     "subtype_code_gate": 11,
     "subtype_wall": 11,
     "add_tag": 10,
@@ -262,85 +360,103 @@
     "successful_run": 10,
     "tags": 10,
     "agenda_difficulty": 9,
+    "core_damage": 9,
     "install_hardware_memory_surface": 9,
+    "search_stack": 9,
     "subtype_killer": 9,
     "take_click_ability": 9,
     "access": 8,
     "access_ambush": 8,
-    "core_damage": 8,
     "recurring_credit": 8,
-    "search_stack": 8,
     "base_link": 7,
     "credits": 7,
     "damage_event_prevention_resolver": 7,
+    "draw_cards": 7,
+    "gain_credits": 7,
     "link": 7,
     "resource_tag_interaction": 7,
     "run": 7,
     "shuffle": 7,
+    "start_run": 7,
     "corp_agenda_resolver": 6,
     "deterministic_random_card_resolver": 6,
+    "double_action_cost": 6,
     "draw": 6,
     "per_card_longtail_resolver_gate; install_hardware_memory_surface": 6,
+    "reveal": 6,
     "rez_upgrade": 6,
+    "score_agenda": 6,
     "steal": 6,
     "subtype_decoder": 6,
     "subtype_sentry": 6,
     "tag_condition": 6,
     "city_grid": 5,
     "deterministic_die_roll": 5,
+    "pump_icebreaker_strength": 5,
     "recurring_start_turn": 5,
-    "reveal": 5,
     "tag_avoid": 5,
+    "trash_installed_program": 5,
     "typed_counter_virus_purge_resolver": 5,
     "v1922_runner_program_install_surface_ability_gated": 5,
+    "deck_unique_replacement": 4,
+    "deflect_run": 4,
+    "encounter_reposition": 4,
     "event_modification_prevention_avoid_resolver": 4,
     "give_runner_tag": 4,
     "hosting": 4,
     "multiaccess": 4,
     "recurring_pool_start_turn_resolver": 4,
     "run_flow": 4,
-    "start_run": 4,
+    "runner_is_tagged": 4,
+    "sleepy_noisy_rez_discount": 4,
     "subtype_gray_ops": 4,
+    "trash_hardware": 4,
     "virus_purge": 4,
     "access_replacement": 3,
     "advancement_requirement": 3,
+    "break_wall_subroutine": 3,
     "breaker_restriction": 3,
     "choice_resolution": 3,
     "corp_operation_resolver": 3,
+    "credit_cost": 3,
     "expose_server_card": 3,
     "flatline": 3,
     "global_ice_rez_cost_modifier": 3,
     "global_ice_strength_modifier": 3,
     "hidden_zone": 3,
     "hidden_zone_search_reveal_reorder_resolver": 3,
+    "install_restriction": 3,
+    "random_die_resolution": 3,
     "remove_tag": 3,
-    "runner_is_tagged": 3,
+    "restricted_credit_pool": 3,
+    "run_start_tax": 3,
+    "runner_counter_removal": 3,
     "stealth_loss": 3,
     "subroutine_modifier_resolver": 3,
     "subtype_barrier": 3,
     "subtype_black_ops": 3,
     "subtype_fracter": 3,
+    "subtype_noisy": 3,
     "successful_rd_run_counter": 3,
+    "successful_run_trigger": 3,
+    "tap_source": 3,
     "trash_cost": 3,
-    "trash_hardware": 3,
-    "trash_installed_program": 3,
     "uninstall_runner_program": 3,
     "unique_card": 3,
     "access_card": 2,
+    "access_effect": 2,
     "advancement_counter": 2,
     "agenda_counters": 2,
     "agenda_point_cost_resolver": 2,
+    "agenda_point_rez_cost": 2,
     "bid_amount": 2,
     "bit_counter": 2,
-    "break_wall_subroutine": 2,
+    "break_sentry_subroutine": 2,
     "core_brain_damage_modifier_resolver": 2,
     "corp_purge": 2,
-    "credit_cost": 2,
+    "damage_prevention_turn_limit": 2,
     "deck_unique": 2,
-    "deck_unique_replacement": 2,
     "deterministic_random": 2,
-    "draw_cards": 2,
-    "gain_credits": 2,
     "generic_upgrade_root_server_resolver": 2,
     "hidden_zone_tool": 2,
     "hq_run": 2,
@@ -348,15 +464,19 @@
     "installed_card_destroy": 2,
     "jack_out_restriction": 2,
     "last_turn_run_check": 2,
+    "memory_modifier": 2,
+    "paid_subroutine_choice": 2,
+    "paid_tap_ability": 2,
     "post_bid_link": 2,
+    "printed_subroutine_damage": 2,
     "program_trash_prevention": 2,
+    "remove_tags": 2,
     "resolve_subroutine": 2,
     "reveal_rd_top": 2,
-    "run_start_tax": 2,
-    "runner_counter_removal": 2,
-    "score_agenda": 2,
     "scored_agenda_action": 2,
     "search_trash": 2,
+    "shuffle_stack": 2,
+    "start_of_turn_credit": 2,
     "start_of_turn_credit_gain": 2,
     "start_of_turn_trigger": 2,
     "steal_agenda": 2,
@@ -364,11 +484,10 @@
     "stolen_agenda_check": 2,
     "subtype_chip": 2,
     "subtype_daemon": 2,
-    "subtype_noisy": 2,
     "subtype_transactions": 2,
     "subtype_worm": 2,
-    "successful_run_trigger": 2,
     "tag": 2,
+    "take_tag": 2,
     "trace_bid_credit_source": 2,
     "virus_counters": 2,
     "ablative_counter": 1,
@@ -378,14 +497,23 @@
     "accessed_card_ambush_daemon_trash": 1,
     "action_cost": 1,
     "action_counter": 1,
+    "activated_ability": 1,
+    "add_tags": 1,
+    "agenda_access_replacement": 1,
     "agenda_difficulty_overadvance_resolver": 1,
-    "agenda_point_rez_cost": 1,
     "agenda_steal_tax": 1,
     "agenda_subtype_condition": 1,
+    "archives_to_hq": 1,
+    "auto_break_without_target": 1,
     "bit_counter_pool_12": 1,
     "bit_depot": 1,
     "bit_pool": 1,
     "bonus_run_window": 1,
+    "bottom_rd": 1,
+    "brain_damage": 1,
+    "break_any_subroutine": 1,
+    "break_code_gate_subroutine": 1,
+    "break_subroutine_cost_modifier": 1,
     "break_trace_subroutine": 1,
     "butcher_boy_counter": 1,
     "cascade_counter": 1,
@@ -394,8 +522,11 @@
     "concrete_special_resolver": 1,
     "corp_access_delay_and_return_to_server_then_start_turn_score": 1,
     "corp_credit_loss": 1,
+    "corp_draw_replacement": 1,
+    "corp_during_run_paid_ability": 1,
     "corp_paid_counter_removal": 1,
     "corp_paid_trash_action": 1,
+    "corp_start_turn": 1,
     "corp_start_turn_extra_draw": 1,
     "corp_start_turn_trash_faceup_rd": 1,
     "counter_refresh": 1,
@@ -404,24 +535,33 @@
     "counters": 1,
     "credit_swing": 1,
     "daemon_trash_choice": 1,
-    "damage_prevention_turn_limit": 1,
     "deck_unique_constraint": 1,
     "delayed_install": 1,
+    "delayed_turn_end_trash": 1,
+    "derez_ice": 1,
     "deterministic_shuffle": 1,
     "encounter_usage_limit": 1,
     "end_of_turn_payment": 1,
+    "end_run": 1,
     "end_run_after_breaker_use": 1,
     "end_turn_return": 1,
     "expose_fort_cards": 1,
     "expose_installed_cards": 1,
+    "expose_installed_corp_cards": 1,
     "expose_outermost_ice_each_data_fort": 1,
+    "extra_draw": 1,
+    "fully_break_ice_window": 1,
+    "future_action_debt": 1,
     "gain_credits_on_install": 1,
+    "hand_size_modifier": 1,
     "hardware_trash_prevention": 1,
     "heap_to_grip": 1,
     "hidden_zone_reveal_resolver": 1,
     "hosted_card_cleanup": 1,
+    "hosted_counters": 1,
     "hosted_program_lifecycle": 1,
     "hosted_program_memory_model": 1,
+    "hq_access_trigger": 1,
     "hq_agenda_reveal": 1,
     "hq_shuffle_into_rd": 1,
     "ice_install_cost_mod_server": 1,
@@ -429,15 +569,22 @@
     "ice_rez_cost_modifier": 1,
     "ice_strength_modifier_resolver": 1,
     "icebreaker_strength_modifier": 1,
+    "install_as_runner_program": 1,
     "jack_out_window": 1,
     "killer_restricted_run_credit_payment": 1,
+    "leave_play_credit_loss": 1,
+    "leave_play_damage": 1,
     "link_bits": 1,
     "lose_the_game": 1,
+    "memory_limit_from_grip_size": 1,
     "memory_mu_modifier": 1,
     "militech_counter": 1,
+    "move_card_to_hq": 1,
     "multiaccess_hq": 1,
     "next_action_forfeit": 1,
     "next_encounter_no_break": 1,
+    "next_encounter_no_break_subroutines": 1,
+    "no_noisy_icebreaker_or_trace_condition": 1,
     "node_trash_recurring_credit": 1,
     "on_rez_credit_gain": 1,
     "on_score_rez_ice_free": 1,
@@ -445,20 +592,30 @@
     "paid_counter_removal": 1,
     "paid_effect_removal": 1,
     "persistent_counter": 1,
+    "play_event_payment": 1,
     "post_encounter_trigger": 1,
     "power_counter": 1,
+    "prep_credit_gain_bonus": 1,
+    "prevent_tag": 1,
     "prevention": 1,
+    "printed_random_damage": 1,
+    "private_hq_look": 1,
+    "private_rnd_top_look": 1,
     "public_trash_to_hand": 1,
     "pump_strength": 1,
+    "purge_runner_virus_counters": 1,
     "random_discard": 1,
+    "random_start_turn_damage": 1,
     "rd_additional_access": 1,
     "rd_run": 1,
     "recent_damage_gate": 1,
+    "recent_stolen_agenda_gate": 1,
     "recurring_icebreaker_credit": 1,
     "region_install_rules": 1,
     "region_unique_server": 1,
+    "region_upgrade": 1,
     "remove_from_game": 1,
-    "remove_tags": 1,
+    "remove_from_game_on_leave_play": 1,
     "remove_virus_counter": 1,
     "reorder_rd_top2": 1,
     "reorder_stack": 1,
@@ -466,26 +623,40 @@
     "restricted_breaker_targets": 1,
     "restricted_recurring_credit": 1,
     "return_to_hand": 1,
+    "reveal_cards_until_agenda": 1,
     "reveal_selected_programs": 1,
     "run_action_gain": 1,
+    "run_attempt_count": 1,
     "run_cost_modifier": 1,
     "run_credit_spend_rules": 1,
+    "run_duration_rez_cost_surcharge": 1,
+    "run_duration_strength": 1,
+    "run_end_self_trash": 1,
     "run_flow_lock_resolver": 1,
     "run_persistent_bonus": 1,
     "run_rewind": 1,
     "run_spending_cap": 1,
+    "run_start_counter_damage": 1,
     "run_start_tax_resolver": 1,
     "run_strength_modifier": 1,
     "run_unsuccessful_credit_bonus": 1,
+    "runner_choice": 1,
+    "runner_counter": 1,
     "runner_gain_credits": 1,
     "runner_gain_tag": 1,
     "runner_run_history": 1,
+    "runner_score_action": 1,
     "runner_stole_agenda_last_turn": 1,
+    "runner_tags": 1,
+    "runner_tags_at_least": 1,
     "runner_turn_start_recurring_refresh": 1,
     "runtime_unique_constraint": 1,
+    "same_fort": 1,
     "score_agenda_point": 1,
+    "score_area_transfer": 1,
     "score_trigger_rezzed_ice_choice_resolver": 1,
     "scored_agenda_static_active_resolver": 1,
+    "scored_counter": 1,
     "self_trash": 1,
     "self_trash_on_rez": 1,
     "server_ice_strength_modifier": 1,
@@ -494,19 +665,22 @@
     "shell_counter": 1,
     "show_to_corp": 1,
     "shuffle_grip_heap_stack": 1,
+    "shuffle_grip_into_stack": 1,
     "shuffle_hidden_zone": 1,
-    "shuffle_stack": 1,
+    "shuffle_hq_to_rd": 1,
     "side_safe_targeting": 1,
     "skivviss_counter": 1,
     "spy_counter": 1,
     "start_of_turn": 1,
-    "start_of_turn_credit": 1,
     "start_of_turn_optional_trash_for_credit": 1,
+    "start_run_ice_move": 1,
     "start_turn_counter_drain": 1,
     "start_turn_counter_removal": 1,
     "start_turn_credit_from_counter_pairs": 1,
     "start_turn_gain_2": 1,
     "start_turn_take_credit": 1,
+    "start_turn_trigger": 1,
+    "stealth_credit_loss": 1,
     "stealth_recurring_credit": 1,
     "subtype_asset": 1,
     "subtype_deckrash": 1,
@@ -514,27 +688,41 @@
     "successful_hq_run_condition": 1,
     "successful_hq_run_counter": 1,
     "successful_rd_run": 1,
+    "successful_run_access_replacement": 1,
+    "successful_run_bonus_access": 1,
     "successful_run_bonus_run": 1,
     "tag_condition_avoid_remove_resolver": 1,
+    "tag_self": 1,
+    "target_rezzed_ice": 1,
     "temporary_derez": 1,
+    "temporary_ice_strength": 1,
     "temporary_install": 1,
+    "temporary_memory_limit_modifier": 1,
     "thought_counter": 1,
     "top_five_program_choice": 1,
     "top_rd_look": 1,
     "top_rd_look_threshold_3": 1,
+    "trace_attempt_modifier": 1,
     "trace_link_bid_window_resolver": 1,
     "trace_link_recurring_credit": 1,
     "trace_link_reduction": 1,
     "trash_cost_modifier": 1,
     "trash_for_value": 1,
+    "trash_grip": 1,
+    "trash_installed_corp_cards": 1,
+    "trash_installed_program_if_over_memory": 1,
     "trash_installed_runner_card": 1,
     "trash_on_run": 1,
     "trash_on_use": 1,
+    "trash_programs": 1,
     "trash_resource": 1,
     "trash_self": 1,
+    "trash_source": 1,
     "trash_when_empty": 1,
     "trauma_counter": 1,
     "turn_boundary_resolver": 1,
+    "unique": 1,
+    "unique_resource": 1,
     "upgrade_trash_payment_window": 1,
     "v1922_corp_agenda_data_fort_reclamation_hq_install_sequence": 1,
     "v1922_corp_agenda_on_score_credit_threshold": 1,
@@ -569,46 +757,13 @@
     "v1922_scored_agenda_action_gain_2_until_install_or_rez": 1,
     "v1922_scored_agenda_action_gain_3": 1,
     "v1922_scored_agenda_action_gain_3_for_2_actions": 1,
+    "virus_counter_prevention": 1,
     "virus_counter_purge_replacement": 1
   },
   "roles": [
     {
-      "value": "program",
-      "count": 69,
-      "examples": [
-        {
-          "cardId": "onr_v1_001_afreet",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_002_ai-boon",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_004_bakdoor",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_007_blink",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
-    },
-    {
       "value": "ice",
-      "count": 60,
+      "count": 106,
       "examples": [
         {
           "cardId": "onr_v1_191_black-ice-quality-assurance",
@@ -634,6 +789,312 @@
           "cardId": "onr_v1_223_banpei",
           "side": "corp",
           "cardType": "ice"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "program",
+      "count": 100,
+      "examples": [
+        {
+          "cardId": "onr_v1_001_afreet",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_002_ai-boon",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_003_baedekers-net-map",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_004_bakdoor",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "event",
+      "count": 78,
+      "examples": [
+        {
+          "cardId": "onr_v1_076_all-nighter",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_077_anonymous-tip",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_078_arasaka-owns-you",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_080_core-command-jettison-ice",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_081_custodial-position",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "etr_ice",
+      "count": 73,
+      "examples": [
+        {
+          "cardId": "onr_v1_222_ball-and-chain",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_223_banpei",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_229_code-corpse",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_230_cortical-scanner",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_231_cortical-scrub",
+          "side": "corp",
+          "cardType": "ice"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "resource",
+      "count": 65,
+      "examples": [
+        {
+          "cardId": "onr_v1_148_access-through-alpha",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_149_access-to-arasaka",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_150_access-to-kiribati",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_151_aujourdoui",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_152_back-door-to-hilliard",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "agenda",
+      "count": 57,
+      "examples": [
+        {
+          "cardId": "onr_v1_025_fait-accompli",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_078_arasaka-owns-you",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_188_ai-chief-financial-officer",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_189_artificial-security-directors",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_190_bioweapons-engineering",
+          "side": "corp",
+          "cardType": "agenda"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "economy",
+      "count": 48,
+      "examples": [
+        {
+          "cardId": "onr_v1_009_butcher-boy",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_011_cloak",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "sentry_ice",
+      "count": 47,
+      "examples": [
+        {
+          "cardId": "onr_v1_223_banpei",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_224_bolter-cluster",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_225_canis-major",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_226_canis-minor",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_229_code-corpse",
+          "side": "corp",
+          "cardType": "ice"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "upgrade",
+      "count": 45,
+      "examples": [
+        {
+          "cardId": "onr_v1_349_aardvark",
+          "side": "corp",
+          "cardType": "upgrade"
+        },
+        {
+          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "side": "corp",
+          "cardType": "upgrade"
+        },
+        {
+          "cardId": "onr_v1_351_bizarre-encryption-scheme",
+          "side": "corp",
+          "cardType": "upgrade"
+        },
+        {
+          "cardId": "onr_v1_352_chester-mix",
+          "side": "corp",
+          "cardType": "upgrade"
+        },
+        {
+          "cardId": "onr_v1_353_chimera",
+          "side": "corp",
+          "cardType": "upgrade"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "asset",
+      "count": 44,
+      "examples": [
+        {
+          "cardId": "onr_v1_308_acme-savings-and-loan",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_310_blood-cat",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_311_braindance-campaign",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_312_chicago-branch",
+          "side": "corp",
+          "cardType": "asset"
         }
       ],
       "codeExactReference": true,
@@ -676,7 +1137,7 @@
     },
     {
       "value": "runner",
-      "count": 44,
+      "count": 40,
       "examples": [
         {
           "cardId": "onr_v1_002_ai-boon",
@@ -709,67 +1170,67 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "agenda",
-      "count": 43,
+      "value": "hardware",
+      "count": 39,
       "examples": [
         {
-          "cardId": "onr_v1_025_fait-accompli",
+          "cardId": "onr_v1_119_arasaka-portable-prototype",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_120_armadillo-armored-road-home",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_121_armored-fridge",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_122_artemis-2020",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_123_bodyweight-data-creche",
+          "side": "runner",
+          "cardType": "hardware"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "icebreaker",
+      "count": 39,
+      "examples": [
+        {
+          "cardId": "onr_v1_001_afreet",
           "side": "runner",
           "cardType": "program"
         },
         {
-          "cardId": "onr_v1_078_arasaka-owns-you",
+          "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
           "side": "runner",
-          "cardType": "event"
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_188_ai-chief-financial-officer",
-          "side": "corp",
-          "cardType": "agenda"
+          "cardId": "onr_v1_007_blink",
+          "side": "runner",
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_189_artificial-security-directors",
-          "side": "corp",
-          "cardType": "agenda"
+          "cardId": "onr_v1_013_cockroach",
+          "side": "runner",
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_190_bioweapons-engineering",
-          "side": "corp",
-          "cardType": "agenda"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "asset",
-      "count": 41,
-      "examples": [
-        {
-          "cardId": "onr_v1_308_acme-savings-and-loan",
-          "side": "corp",
-          "cardType": "asset"
-        },
-        {
-          "cardId": "onr_v1_309_bbs-whispering-campaign",
-          "side": "corp",
-          "cardType": "asset"
-        },
-        {
-          "cardId": "onr_v1_310_blood-cat",
-          "side": "corp",
-          "cardType": "asset"
-        },
-        {
-          "cardId": "onr_v1_311_braindance-campaign",
-          "side": "corp",
-          "cardType": "asset"
-        },
-        {
-          "cardId": "onr_v1_312_chicago-branch",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_014_codecracker",
+          "side": "runner",
+          "cardType": "program"
         }
       ],
       "codeExactReference": true,
@@ -777,106 +1238,38 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "event",
-      "count": 41,
+      "value": "operation",
+      "count": 36,
       "examples": [
         {
-          "cardId": "onr_v1_076_all-nighter",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_281_accounts-receivable",
+          "side": "corp",
+          "cardType": "operation"
         },
         {
-          "cardId": "onr_v1_077_anonymous-tip",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_282_annual-reviews",
+          "side": "corp",
+          "cardType": "operation"
         },
         {
-          "cardId": "onr_v1_078_arasaka-owns-you",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_283_audit-of-call-records",
+          "side": "corp",
+          "cardType": "operation"
         },
         {
-          "cardId": "onr_v1_080_core-command-jettison-ice",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_284_chance-observation",
+          "side": "corp",
+          "cardType": "operation"
         },
         {
-          "cardId": "onr_v1_081_custodial-position",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_285_closed-accounts",
+          "side": "corp",
+          "cardType": "operation"
         }
       ],
       "codeExactReference": true,
       "codeSubstringReference": true,
       "classification": "direct_or_doctrine_effect"
-    },
-    {
-      "value": "resource",
-      "count": 40,
-      "examples": [
-        {
-          "cardId": "onr_v1_148_access-through-alpha",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_149_access-to-arasaka",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_150_access-to-kiribati",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_151_aujourdoui",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_152_back-door-to-hilliard",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
-    },
-    {
-      "value": "etr_ice",
-      "count": 38,
-      "examples": [
-        {
-          "cardId": "onr_v1_222_ball-and-chain",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_223_banpei",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_229_code-corpse",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_230_cortical-scanner",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_231_cortical-scrub",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
     },
     {
       "value": "corp",
@@ -913,212 +1306,8 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "economy",
-      "count": 30,
-      "examples": [
-        {
-          "cardId": "onr_v1_009_butcher-boy",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_011_cloak",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_084_edited-shipping-manifests",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_097_livewires-contacts",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_108_score",
-          "side": "runner",
-          "cardType": "event"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "hardware",
-      "count": 29,
-      "examples": [
-        {
-          "cardId": "onr_v1_003_baedekers-net-map",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_119_arasaka-portable-prototype",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_120_armadillo-armored-road-home",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_121_armored-fridge",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_122_artemis-2020",
-          "side": "runner",
-          "cardType": "hardware"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
-    },
-    {
-      "value": "operation",
-      "count": 27,
-      "examples": [
-        {
-          "cardId": "onr_v1_281_accounts-receivable",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "onr_v1_282_annual-reviews",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "onr_v1_283_audit-of-call-records",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "onr_v1_284_chance-observation",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "onr_v1_285_closed-accounts",
-          "side": "corp",
-          "cardType": "operation"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
-    },
-    {
-      "value": "upgrade",
-      "count": 27,
-      "examples": [
-        {
-          "cardId": "onr_v1_349_aardvark",
-          "side": "corp",
-          "cardType": "upgrade"
-        },
-        {
-          "cardId": "onr_v1_350_antiquated-interface-routines",
-          "side": "corp",
-          "cardType": "upgrade"
-        },
-        {
-          "cardId": "onr_v1_351_bizarre-encryption-scheme",
-          "side": "corp",
-          "cardType": "upgrade"
-        },
-        {
-          "cardId": "onr_v1_352_chester-mix",
-          "side": "corp",
-          "cardType": "upgrade"
-        },
-        {
-          "cardId": "onr_v1_353_chimera",
-          "side": "corp",
-          "cardType": "upgrade"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "sentry_ice",
-      "count": 24,
-      "examples": [
-        {
-          "cardId": "onr_v1_223_banpei",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_224_bolter-cluster",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_225_canis-major",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_226_canis-minor",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_229_code-corpse",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "icebreaker",
-      "count": 22,
-      "examples": [
-        {
-          "cardId": "onr_v1_001_afreet",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_007_blink",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_013_cockroach",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_014_codecracker",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
-    },
-    {
       "value": "hidden_zone_tool",
-      "count": 20,
+      "count": 32,
       "examples": [
         {
           "cardId": "onr_v1_017_deep-thought",
@@ -1151,38 +1340,174 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "counter",
+      "value": "barrier_ice",
+      "count": 25,
+      "examples": [
+        {
+          "cardId": "onr_v1_232_crystal-wall",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_237_data-wall",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_238_data-wall-2-0",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_245_fire-wall",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_253_laser-wire",
+          "side": "corp",
+          "cardType": "ice"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "remote_support",
+      "count": 25,
+      "examples": [
+        {
+          "cardId": "onr_v1_317_data-masons",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_320_encoder-inc",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "side": "corp",
+          "cardType": "upgrade"
+        },
+        {
+          "cardId": "onr_v1_371_tokyo-chiba-infighting",
+          "side": "corp",
+          "cardType": "upgrade"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "code_gate_ice",
+      "count": 24,
+      "examples": [
+        {
+          "cardId": "onr_v1_222_ball-and-chain",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_230_cortical-scanner",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_239_endless-corridor",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_244_filter",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_252_keeper",
+          "side": "corp",
+          "cardType": "ice"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "damage_ice",
       "count": 19,
       "examples": [
         {
-          "cardId": "onr_v1_025_fait-accompli",
-          "side": "runner",
-          "cardType": "program"
+          "cardId": "onr_v1_224_bolter-cluster",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_029_gremlins",
-          "side": "runner",
-          "cardType": "program"
+          "cardId": "onr_v1_242_fatal-attractor",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_121_armored-fridge",
-          "side": "runner",
-          "cardType": "hardware"
+          "cardId": "onr_v1_253_laser-wire",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_174_rigged-investments",
-          "side": "runner",
-          "cardType": "resource"
+          "cardId": "onr_v1_257_nerve-labyrinth",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_176_the-shell-traders",
-          "side": "runner",
-          "cardType": "resource"
+          "cardId": "onr_v1_258_neural-blade",
+          "side": "corp",
+          "cardType": "ice"
         }
       ],
       "codeExactReference": true,
       "codeSubstringReference": true,
       "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "run_pressure",
+      "count": 19,
+      "examples": [
+        {
+          "cardId": "onr_v1_018_dogcatcher",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_294_new-blood",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "onr_proteus_101_all-hands",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_proteus_102_blackmail",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
     },
     {
       "value": "trace",
@@ -1204,12 +1529,12 @@
           "cardType": "event"
         },
         {
-          "cardId": "onr_v1_164_hells-run",
-          "side": "runner",
-          "cardType": "resource"
+          "cardId": "onr_v1_221_asp",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_221_asp",
+          "cardId": "onr_v1_227_cerberus",
           "side": "corp",
           "cardType": "ice"
         }
@@ -1217,6 +1542,40 @@
       "codeExactReference": true,
       "codeSubstringReference": true,
       "classification": "direct_decision_effect"
+    },
+    {
+      "value": "counter",
+      "count": 18,
+      "examples": [
+        {
+          "cardId": "onr_v1_025_fait-accompli",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_029_gremlins",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_121_armored-fridge",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_176_the-shell-traders",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_185_trauma-team",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_or_doctrine_effect"
     },
     {
       "value": "score_plan",
@@ -1253,110 +1612,8 @@
       "classification": "indirect_generic_effect"
     },
     {
-      "value": "barrier_ice",
-      "count": 14,
-      "examples": [
-        {
-          "cardId": "onr_v1_232_crystal-wall",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_237_data-wall",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_238_data-wall-2-0",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_245_fire-wall",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_253_laser-wire",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "setup",
-      "count": 13,
-      "examples": [
-        {
-          "cardId": "corp_identity_001",
-          "side": "corp",
-          "cardType": "identity"
-        },
-        {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_095_jack-n-joe",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_144_tycho-mem-chip",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_145_wutech-mem-chip",
-          "side": "runner",
-          "cardType": "hardware"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
-    },
-    {
-      "value": "code_gate_ice",
-      "count": 12,
-      "examples": [
-        {
-          "cardId": "onr_v1_222_ball-and-chain",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_230_cortical-scanner",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_239_endless-corridor",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_244_filter",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_252_keeper",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
       "value": "breaker_killer",
-      "count": 11,
+      "count": 16,
       "examples": [
         {
           "cardId": "onr_v1_006_black-dahlia",
@@ -1389,8 +1646,144 @@
       "classification": "direct_decision_effect"
     },
     {
+      "value": "memory",
+      "count": 16,
+      "examples": [
+        {
+          "cardId": "onr_v1_119_arasaka-portable-prototype",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_133_militech-mram-chip",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_134_mram-chip",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_143_techtronica-utility-suit",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_144_tycho-mem-chip",
+          "side": "runner",
+          "cardType": "hardware"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "damage",
+      "count": 15,
+      "examples": [
+        {
+          "cardId": "onr_v1_171_preying-mantis",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_172_quest-for-cattekin",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_224_bolter-cluster",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_227_cerberus",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_228_cinderella",
+          "side": "corp",
+          "cardType": "ice"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "setup",
+      "count": 15,
+      "examples": [
+        {
+          "cardId": "corp_identity_001",
+          "side": "corp",
+          "cardType": "identity"
+        },
+        {
+          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_144_tycho-mem-chip",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_145_wutech-mem-chip",
+          "side": "runner",
+          "cardType": "hardware"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "breaker_fracter",
+      "count": 14,
+      "examples": [
+        {
+          "cardId": "efficient_fracter",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_021_dwarf",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_036_jackhammer",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_039_krash",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_047_pile-driver",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
       "value": "damage_prevention",
-      "count": 11,
+      "count": 14,
       "examples": [
         {
           "cardId": "onr_v1_023_evil-twin",
@@ -1424,12 +1817,12 @@
     },
     {
       "value": "link",
-      "count": 11,
+      "count": 13,
       "examples": [
         {
           "cardId": "onr_v1_003_baedekers-net-map",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "program"
         },
         {
           "cardId": "onr_v1_132_microtech-trode-set",
@@ -1457,42 +1850,42 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "damage",
-      "count": 10,
+      "value": "draw",
+      "count": 12,
       "examples": [
         {
-          "cardId": "onr_v1_224_bolter-cluster",
-          "side": "corp",
-          "cardType": "ice"
+          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "side": "runner",
+          "cardType": "event"
         },
         {
-          "cardId": "onr_v1_227_cerberus",
-          "side": "corp",
-          "cardType": "ice"
+          "cardId": "onr_v1_095_jack-n-joe",
+          "side": "runner",
+          "cardType": "event"
         },
         {
-          "cardId": "onr_v1_228_cinderella",
-          "side": "corp",
-          "cardType": "ice"
+          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "side": "runner",
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_234_data-darts",
-          "side": "corp",
-          "cardType": "ice"
+          "cardId": "onr_v1_179_silicon-saloon-franchise",
+          "side": "runner",
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_248_homewrecker",
+          "cardId": "onr_v1_336_rescheduler",
           "side": "corp",
-          "cardType": "ice"
+          "cardType": "asset"
         }
       ],
       "codeExactReference": true,
       "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
+      "classification": "direct_decision_effect"
     },
     {
       "value": "ambush",
-      "count": 9,
+      "count": 11,
       "examples": [
         {
           "cardId": "onr_v1_315_corprunners-shattered-remains",
@@ -1525,8 +1918,110 @@
       "classification": "direct_decision_effect"
     },
     {
+      "value": "breaker_decoder",
+      "count": 11,
+      "examples": [
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_016_cyfermaster",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_039_krash",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_052_raffles",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_070_tinweasel",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "connection",
+      "count": 11,
+      "examples": [
+        {
+          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_154_broker",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_156_corporate-ally",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_159_databroker",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "documentary_or_weak_generic"
+    },
+    {
+      "value": "economy_asset",
+      "count": 11,
+      "examples": [
+        {
+          "cardId": "onr_v1_308_acme-savings-and-loan",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_317_data-masons",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_320_encoder-inc",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_371_tokyo-chiba-infighting",
+          "side": "corp",
+          "cardType": "upgrade"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
       "value": "economy_operation",
-      "count": 9,
+      "count": 11,
       "examples": [
         {
           "cardId": "onr_v1_281_accounts-receivable",
@@ -1552,6 +2047,74 @@
           "cardId": "onr_v1_293_netwatch-credit-voucher",
           "side": "corp",
           "cardType": "operation"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "taxing_ice",
+      "count": 11,
+      "examples": [
+        {
+          "cardId": "onr_v1_222_ball-and-chain",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_225_canis-major",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_226_canis-minor",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "simple_taxing_barrier_ice",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "v08_gate_ice",
+          "side": "corp",
+          "cardType": "ice"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "asset_trash_target",
+      "count": 9,
+      "examples": [
+        {
+          "cardId": "onr_proteus_054_bel-digmo-antibody",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_proteus_055_cybertech-think-tank",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_proteus_056_department-of-misinformation",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_proteus_057_doppelganger-antibody",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_proteus_068_pattel-antibody",
+          "side": "corp",
+          "cardType": "asset"
         }
       ],
       "codeExactReference": true,
@@ -1627,47 +2190,81 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "memory",
+      "value": "run_event",
       "count": 9,
       "examples": [
         {
-          "cardId": "onr_v1_119_arasaka-portable-prototype",
+          "cardId": "onr_v1_076_all-nighter",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "event"
         },
         {
-          "cardId": "onr_v1_133_militech-mram-chip",
+          "cardId": "onr_v1_081_custodial-position",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "event"
         },
         {
-          "cardId": "onr_v1_134_mram-chip",
+          "cardId": "onr_v1_085_executive-wiretaps",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "event"
         },
         {
-          "cardId": "onr_v1_143_techtronica-utility-suit",
+          "cardId": "onr_v1_094_inside-job",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "event"
         },
         {
-          "cardId": "onr_v1_144_tycho-mem-chip",
+          "cardId": "onr_v1_096_kilroy-was-here",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "event"
         }
       ],
       "codeExactReference": true,
       "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "virus",
+      "count": 9,
+      "examples": [
+        {
+          "cardId": "onr_v1_008_boardwalk",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_009_butcher-boy",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_010_cascade",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_017_deep-thought",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_046_pattels-virus",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": true,
+      "classification": "documentary_or_weak_generic"
     },
     {
       "value": "recurring",
-      "count": 9,
+      "count": 8,
       "examples": [
         {
           "cardId": "onr_v1_003_baedekers-net-map",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "program"
         },
         {
           "cardId": "onr_v1_011_cloak",
@@ -1693,108 +2290,6 @@
       "codeExactReference": false,
       "codeSubstringReference": true,
       "classification": "documentary_or_weak_generic"
-    },
-    {
-      "value": "breaker_decoder",
-      "count": 8,
-      "examples": [
-        {
-          "cardId": "onr_v1_014_codecracker",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_016_cyfermaster",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_039_krash",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_052_raffles",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_070_tinweasel",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "breaker_fracter",
-      "count": 8,
-      "examples": [
-        {
-          "cardId": "efficient_fracter",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_021_dwarf",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_036_jackhammer",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_039_krash",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_047_pile-driver",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "damage_ice",
-      "count": 8,
-      "examples": [
-        {
-          "cardId": "onr_v1_224_bolter-cluster",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_242_fatal-attractor",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_253_laser-wire",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_257_nerve-labyrinth",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_258_neural-blade",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
     },
     {
       "value": "tag",
@@ -1831,106 +2326,140 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "virus",
+      "value": "tag_punishment",
       "count": 8,
       "examples": [
         {
-          "cardId": "onr_v1_008_boardwalk",
-          "side": "runner",
-          "cardType": "program"
+          "cardId": "onr_v1_287_datapool-by-zetatech",
+          "side": "corp",
+          "cardType": "operation"
         },
         {
-          "cardId": "onr_v1_009_butcher-boy",
-          "side": "runner",
-          "cardType": "program"
+          "cardId": "onr_v1_293_netwatch-credit-voucher",
+          "side": "corp",
+          "cardType": "operation"
         },
         {
-          "cardId": "onr_v1_010_cascade",
-          "side": "runner",
-          "cardType": "program"
+          "cardId": "onr_v1_299_power-grid-overload",
+          "side": "corp",
+          "cardType": "operation"
         },
         {
-          "cardId": "onr_v1_017_deep-thought",
-          "side": "runner",
-          "cardType": "program"
+          "cardId": "onr_v1_339_schlaghund",
+          "side": "corp",
+          "cardType": "asset"
         },
         {
-          "cardId": "onr_v1_046_pattels-virus",
-          "side": "runner",
-          "cardType": "program"
+          "cardId": "simple_tag_punishment_operation",
+          "side": "corp",
+          "cardType": "operation"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "tag_punishment_operation",
+      "count": 8,
+      "examples": [
+        {
+          "cardId": "onr_v1_285_closed-accounts",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "onr_v1_286_corporate-detective-agency",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "onr_v1_287_datapool-by-zetatech",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "onr_v1_293_netwatch-credit-voucher",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "onr_v1_301_punitive-counterstrike",
+          "side": "corp",
+          "cardType": "operation"
         }
       ],
       "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "documentary_or_weak_generic"
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
     },
     {
-      "value": "draw",
-      "count": 7,
+      "value": "utility_resource",
+      "count": 8,
       "examples": [
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_095_jack-n-joe",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "cardId": "onr_v1_151_aujourdoui",
           "side": "runner",
           "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_179_silicon-saloon-franchise",
+          "cardId": "onr_v1_163_floating-runner-bbs",
           "side": "runner",
           "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_336_rescheduler",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_165_junkyard-bbs",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_169_n-e-t-o",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_175_ronin-around",
+          "side": "runner",
+          "cardType": "resource"
         }
       ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "economy_asset",
+      "value": "ap_ice",
       "count": 7,
       "examples": [
         {
-          "cardId": "onr_v1_308_acme-savings-and-loan",
+          "cardId": "onr_v1_224_bolter-cluster",
           "side": "corp",
-          "cardType": "asset"
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_317_data-masons",
+          "cardId": "onr_v1_242_fatal-attractor",
           "side": "corp",
-          "cardType": "asset"
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_320_encoder-inc",
+          "cardId": "onr_v1_258_neural-blade",
           "side": "corp",
-          "cardType": "asset"
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
+          "cardId": "onr_v1_268_shock-r",
           "side": "corp",
-          "cardType": "asset"
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_371_tokyo-chiba-infighting",
+          "cardId": "onr_classic_005_baskerville",
           "side": "corp",
-          "cardType": "upgrade"
+          "cardType": "ice"
         }
       ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
     },
     {
       "value": "ice_modifier",
@@ -2001,38 +2530,72 @@
       "classification": "indirect_generic_effect"
     },
     {
-      "value": "run_event",
+      "value": "program_trash_ice",
       "count": 7,
       "examples": [
         {
-          "cardId": "onr_v1_076_all-nighter",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_223_banpei",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_081_custodial-position",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_233_d-arc-knight",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_085_executive-wiretaps",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_235_data-naga",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_094_inside-job",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_267_sentinels-prime",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_096_kilroy-was-here",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_273_triggerman",
+          "side": "corp",
+          "cardType": "ice"
         }
       ],
-      "codeExactReference": true,
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "random",
+      "count": 7,
+      "examples": [
+        {
+          "cardId": "onr_v1_002_ai-boon",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_008_boardwalk",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_104_playful-ai",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_172_quest-for-cattekin",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_339_schlaghund",
+          "side": "corp",
+          "cardType": "asset"
+        }
+      ],
+      "codeExactReference": false,
       "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
+      "classification": "documentary_or_weak_generic"
     },
     {
       "value": "stack_search",
@@ -2059,7 +2622,7 @@
           "cardType": "event"
         },
         {
-          "cardId": "onr_v1_151_aujourdoui",
+          "cardId": "onr_v1_169_n-e-t-o",
           "side": "runner",
           "cardType": "resource"
         }
@@ -2069,38 +2632,38 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "tag_punishment_operation",
+      "value": "unique",
       "count": 7,
       "examples": [
         {
-          "cardId": "onr_v1_285_closed-accounts",
-          "side": "corp",
-          "cardType": "operation"
+          "cardId": "onr_v1_156_corporate-ally",
+          "side": "runner",
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_286_corporate-detective-agency",
-          "side": "corp",
-          "cardType": "operation"
+          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "side": "runner",
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_287_datapool-by-zetatech",
-          "side": "corp",
-          "cardType": "operation"
+          "cardId": "onr_v1_160_diplomatic-immunity",
+          "side": "runner",
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_293_netwatch-credit-voucher",
-          "side": "corp",
-          "cardType": "operation"
+          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "side": "runner",
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_301_punitive-counterstrike",
-          "side": "corp",
-          "cardType": "operation"
+          "cardId": "onr_v1_180_smiths-pawnshop",
+          "side": "runner",
+          "cardType": "resource"
         }
       ],
       "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
+      "codeSubstringReference": true,
+      "classification": "documentary_or_weak_generic"
     },
     {
       "value": "access",
@@ -2137,40 +2700,6 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "action",
-      "count": 6,
-      "examples": [
-        {
-          "cardId": "onr_v1_171_preying-mantis",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_192_corporate-boon",
-          "side": "corp",
-          "cardType": "agenda"
-        },
-        {
-          "cardId": "onr_v1_218_subsidiary-branch",
-          "side": "corp",
-          "cardType": "agenda"
-        },
-        {
-          "cardId": "onr_v1_331_nevinyrral",
-          "side": "corp",
-          "cardType": "asset"
-        },
-        {
-          "cardId": "onr_v1_334_pacifica-regional-ai",
-          "side": "corp",
-          "cardType": "asset"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "documentary_or_weak_generic"
-    },
-    {
       "value": "city_grid",
       "count": 6,
       "examples": [
@@ -2203,6 +2732,74 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "documentary_or_weak_generic"
+    },
+    {
+      "value": "deck",
+      "count": 6,
+      "examples": [
+        {
+          "cardId": "onr_v1_119_arasaka-portable-prototype",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_122_artemis-2020",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_138_pk-6089a",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_143_techtronica-utility-suit",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_classic_047_little-black-box",
+          "side": "runner",
+          "cardType": "hardware"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": true,
+      "classification": "documentary_or_weak_generic"
+    },
+    {
+      "value": "draw_operation",
+      "count": 6,
+      "examples": [
+        {
+          "cardId": "onr_v1_282_annual-reviews",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "onr_v1_288_day-shift",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "onr_v1_295_night-shift",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "simple_draw_operation",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "v08_archive_planning_operation",
+          "side": "corp",
+          "cardType": "operation"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
     },
     {
       "value": "hosting",
@@ -2239,38 +2836,72 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "random",
+      "value": "hq_pressure",
       "count": 6,
       "examples": [
         {
-          "cardId": "onr_v1_002_ai-boon",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_008_boardwalk",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_104_playful-ai",
+          "cardId": "onr_v1_107_romp-through-hq",
           "side": "runner",
           "cardType": "event"
         },
         {
-          "cardId": "onr_v1_172_quest-for-cattekin",
+          "cardId": "onr_v1_115_terrorist-reprisal",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "event"
         },
         {
-          "cardId": "onr_v1_339_schlaghund",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_118_weather-to-finance-pipe",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_129_hq-interface",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_proteus_136_credit-subversion",
+          "side": "runner",
+          "cardType": "resource"
         }
       ],
-      "codeExactReference": false,
+      "codeExactReference": true,
       "codeSubstringReference": true,
-      "classification": "documentary_or_weak_generic"
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "multiaccess",
+      "count": 6,
+      "examples": [
+        {
+          "cardId": "onr_v1_081_custodial-position",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_085_executive-wiretaps",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_105_priority-wreck",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_129_hq-interface",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_proteus_142_hq-mole",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
     },
     {
       "value": "region",
@@ -2307,33 +2938,101 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "remote_support",
+      "value": "run_support",
       "count": 6,
       "examples": [
         {
-          "cardId": "onr_v1_317_data-masons",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+          "side": "runner",
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_320_encoder-inc",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_007_blink",
+          "side": "runner",
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_012_clown",
+          "side": "runner",
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_350_antiquated-interface-routines",
-          "side": "corp",
-          "cardType": "upgrade"
+          "cardId": "onr_v1_046_pattels-virus",
+          "side": "runner",
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_371_tokyo-chiba-infighting",
+          "cardId": "onr_v1_049_pox",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "documentary_or_weak_generic"
+    },
+    {
+      "value": "tag_avoid",
+      "count": 6,
+      "examples": [
+        {
+          "cardId": "onr_v1_135_nasuko-cycle",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_161_fall-guy",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_167_leland-corporate-bodyguard",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_170_nomad-allies",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "tag_ice",
+      "count": 6,
+      "examples": [
+        {
+          "cardId": "onr_v1_236_data-raven",
           "side": "corp",
-          "cardType": "upgrade"
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_243_fetch-4-0-1",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_v1_249_hunter",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_proteus_026_hunting-pack",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "simple_tag_ice",
+          "side": "corp",
+          "cardType": "ice"
         }
       ],
       "codeExactReference": true,
@@ -2341,38 +3040,72 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "run_pressure",
-      "count": 6,
+      "value": "access_trash",
+      "count": 5,
       "examples": [
         {
-          "cardId": "onr_v1_018_dogcatcher",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_019_dropp",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_108_score",
+          "cardId": "onr_v1_096_kilroy-was-here",
           "side": "runner",
           "cardType": "event"
         },
         {
-          "cardId": "onr_v1_294_new-blood",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "simple_run_event",
+          "cardId": "onr_v1_107_romp-through-hq",
           "side": "runner",
           "cardType": "event"
+        },
+        {
+          "cardId": "onr_proteus_136_credit-subversion",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_proteus_137_death-from-above",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_proteus_145_mercenary-subcontract",
+          "side": "runner",
+          "cardType": "resource"
         }
       ],
-      "codeExactReference": true,
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "action",
+      "count": 5,
+      "examples": [
+        {
+          "cardId": "onr_v1_192_corporate-boon",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_218_subsidiary-branch",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_331_nevinyrral",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_334_pacifica-regional-ai",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_v1_335_remote-facility",
+          "side": "corp",
+          "cardType": "asset"
+        }
+      ],
+      "codeExactReference": false,
       "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
+      "classification": "documentary_or_weak_generic"
     },
     {
       "value": "campaign",
@@ -2407,40 +3140,6 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "documentary_or_weak_generic"
-    },
-    {
-      "value": "draw_operation",
-      "count": 5,
-      "examples": [
-        {
-          "cardId": "onr_v1_282_annual-reviews",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "onr_v1_288_day-shift",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "onr_v1_295_night-shift",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "simple_draw_operation",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "v08_archive_planning_operation",
-          "side": "corp",
-          "cardType": "operation"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
     },
     {
       "value": "end_run",
@@ -2511,33 +3210,33 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "program_trash_ice",
+      "value": "net_damage",
       "count": 5,
       "examples": [
         {
-          "cardId": "onr_v1_223_banpei",
+          "cardId": "onr_v1_246_fragmentation-storm",
           "side": "corp",
           "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_233_d-arc-knight",
+          "cardId": "onr_v1_340_setup",
           "side": "corp",
-          "cardType": "ice"
+          "cardType": "asset"
         },
         {
-          "cardId": "onr_v1_235_data-naga",
+          "cardId": "onr_v1_345_trap",
           "side": "corp",
-          "cardType": "ice"
+          "cardType": "asset"
         },
         {
-          "cardId": "onr_v1_267_sentinels-prime",
+          "cardId": "onr_v1_348_virus-test-site",
           "side": "corp",
-          "cardType": "ice"
+          "cardType": "asset"
         },
         {
-          "cardId": "onr_v1_273_triggerman",
+          "cardId": "onr_classic_022_self-destruct",
           "side": "corp",
-          "cardType": "ice"
+          "cardType": "upgrade"
         }
       ],
       "codeExactReference": false,
@@ -2545,48 +3244,43 @@
       "classification": "indirect_generic_effect"
     },
     {
-      "value": "run_support",
+      "value": "recurring_credit",
       "count": 5,
       "examples": [
         {
-          "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+          "cardId": "onr_v1_048_poltergeist",
           "side": "runner",
           "cardType": "program"
         },
         {
-          "cardId": "onr_v1_007_blink",
+          "cardId": "onr_v1_057_scatter-shot",
           "side": "runner",
           "cardType": "program"
         },
         {
-          "cardId": "onr_v1_012_clown",
+          "cardId": "onr_v1_122_artemis-2020",
           "side": "runner",
-          "cardType": "program"
+          "cardType": "hardware"
         },
         {
-          "cardId": "onr_v1_046_pattels-virus",
+          "cardId": "onr_v1_147_zz22-speed-chip",
           "side": "runner",
-          "cardType": "program"
+          "cardType": "hardware"
         },
         {
-          "cardId": "onr_v1_049_pox",
+          "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
           "side": "runner",
-          "cardType": "program"
+          "cardType": "hardware"
         }
       ],
       "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "documentary_or_weak_generic"
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
     },
     {
-      "value": "tag_ice",
+      "value": "trace_ice",
       "count": 5,
       "examples": [
-        {
-          "cardId": "onr_v1_236_data-raven",
-          "side": "corp",
-          "cardType": "ice"
-        },
         {
           "cardId": "onr_v1_243_fetch-4-0-1",
           "side": "corp",
@@ -2598,80 +3292,17 @@
           "cardType": "ice"
         },
         {
-          "cardId": "simple_tag_ice",
+          "cardId": "onr_proteus_014_chihuahua",
           "side": "corp",
           "cardType": "ice"
         },
         {
-          "cardId": "v08_watchdog_ice",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "tag_punishment",
-      "count": 5,
-      "examples": [
-        {
-          "cardId": "onr_v1_287_datapool-by-zetatech",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "onr_v1_293_netwatch-credit-voucher",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "onr_v1_299_power-grid-overload",
-          "side": "corp",
-          "cardType": "operation"
-        },
-        {
-          "cardId": "onr_v1_339_schlaghund",
-          "side": "corp",
-          "cardType": "asset"
-        },
-        {
-          "cardId": "simple_tag_punishment_operation",
-          "side": "corp",
-          "cardType": "operation"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "taxing_ice",
-      "count": 5,
-      "examples": [
-        {
-          "cardId": "onr_v1_222_ball-and-chain",
+          "cardId": "onr_proteus_025_homing-missile",
           "side": "corp",
           "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_225_canis-major",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_226_canis-minor",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "simple_taxing_barrier_ice",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "v08_gate_ice",
+          "cardId": "onr_proteus_026_hunting-pack",
           "side": "corp",
           "cardType": "ice"
         }
@@ -2710,35 +3341,6 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "ap_ice",
-      "count": 4,
-      "examples": [
-        {
-          "cardId": "onr_v1_224_bolter-cluster",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_242_fatal-attractor",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_258_neural-blade",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_268_shock-r",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
-    },
-    {
       "value": "build_rig",
       "count": 4,
       "examples": [
@@ -2768,33 +3370,33 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "deck",
+      "value": "core_damage_ice",
       "count": 4,
       "examples": [
         {
-          "cardId": "onr_v1_119_arasaka-portable-prototype",
-          "side": "runner",
-          "cardType": "hardware"
+          "cardId": "onr_v1_229_code-corpse",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_122_artemis-2020",
-          "side": "runner",
-          "cardType": "hardware"
+          "cardId": "onr_v1_231_cortical-scrub",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_138_pk-6089a",
-          "side": "runner",
-          "cardType": "hardware"
+          "cardId": "onr_v1_254_liche",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_143_techtronica-utility-suit",
-          "side": "runner",
-          "cardType": "hardware"
+          "cardId": "onr_classic_007_brain-drain",
+          "side": "corp",
+          "cardType": "ice"
         }
       ],
       "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "documentary_or_weak_generic"
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
     },
     {
       "value": "expose_helper",
@@ -2855,28 +3457,28 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "hq_pressure",
+      "value": "program_search",
       "count": 4,
       "examples": [
         {
-          "cardId": "onr_v1_107_romp-through-hq",
+          "cardId": "onr_v1_114_temple-microcode-outlet",
           "side": "runner",
           "cardType": "event"
         },
         {
-          "cardId": "onr_v1_115_terrorist-reprisal",
+          "cardId": "onr_v1_151_aujourdoui",
           "side": "runner",
-          "cardType": "event"
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_118_weather-to-finance-pipe",
+          "cardId": "onr_v1_177_the-short-circuit",
           "side": "runner",
-          "cardType": "event"
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": "onr_proteus_128_airport-locker",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "resource"
         }
       ],
       "codeExactReference": true,
@@ -2884,91 +3486,91 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "multiaccess",
+      "value": "rd_run_reward",
       "count": 4,
       "examples": [
         {
-          "cardId": "onr_v1_081_custodial-position",
+          "cardId": "onr_v1_010_cascade",
           "side": "runner",
-          "cardType": "event"
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_085_executive-wiretaps",
+          "cardId": "onr_v1_017_deep-thought",
           "side": "runner",
-          "cardType": "event"
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_105_priority-wreck",
+          "cardId": "onr_v1_064_skivviss",
           "side": "runner",
-          "cardType": "event"
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_129_hq-interface",
+          "cardId": "onr_classic_050_sandbox-dig",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "resource"
         }
       ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "net_damage",
+      "value": "run_defense",
       "count": 4,
       "examples": [
         {
-          "cardId": "onr_v1_246_fragmentation-storm",
+          "cardId": "onr_v1_359_jenny-jett",
+          "side": "corp",
+          "cardType": "upgrade"
+        },
+        {
+          "cardId": "onr_v1_363_olivia-salazar",
+          "side": "corp",
+          "cardType": "upgrade"
+        },
+        {
+          "cardId": "onr_v1_370_tesseract-fort-construction",
+          "side": "corp",
+          "cardType": "upgrade"
+        },
+        {
+          "cardId": "onr_classic_001_data-fort-remapping",
+          "side": "corp",
+          "cardType": "agenda"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "documentary_or_weak_generic"
+    },
+    {
+      "value": "run_lock_ice",
+      "count": 4,
+      "examples": [
+        {
+          "cardId": "onr_v1_224_bolter-cluster",
           "side": "corp",
           "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_340_setup",
+          "cardId": "onr_v1_258_neural-blade",
           "side": "corp",
-          "cardType": "asset"
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_345_trap",
+          "cardId": "onr_v1_268_shock-r",
           "side": "corp",
-          "cardType": "asset"
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_348_virus-test-site",
+          "cardId": "onr_classic_006_bolter-swarm",
           "side": "corp",
-          "cardType": "asset"
+          "cardType": "ice"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "indirect_generic_effect"
-    },
-    {
-      "value": "recurring_credit",
-      "count": 4,
-      "examples": [
-        {
-          "cardId": "onr_v1_048_poltergeist",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_057_scatter-shot",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_122_artemis-2020",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_147_zz22-speed-chip",
-          "side": "runner",
-          "cardType": "hardware"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
     },
     {
       "value": "run_tax",
@@ -3000,6 +3602,35 @@
       "classification": "direct_decision_effect"
     },
     {
+      "value": "sentry_breaker",
+      "count": 4,
+      "examples": [
+        {
+          "cardId": "onr_v1_054_raptor",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_060_shaka",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_classic_028_matador",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_classic_029_ms-todon",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
+    },
+    {
       "value": "stealth",
       "count": 4,
       "examples": [
@@ -3029,33 +3660,33 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "tag_avoid",
+      "value": "successful_run_reward",
       "count": 4,
       "examples": [
         {
-          "cardId": "onr_v1_135_nasuko-cycle",
+          "cardId": "onr_v1_032_i-spy",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_161_fall-guy",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_170_nomad-allies",
+          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
           "side": "runner",
           "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+          "cardId": "onr_proteus_130_back-door-to-rivals",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_proteus_148_runner-sensei",
           "side": "runner",
           "cardType": "resource"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
+      "classification": "suspicious_rare_or_documentary"
     },
     {
       "value": "transactions",
@@ -3080,6 +3711,59 @@
           "cardId": "onr_v1_344_spinn-public-relations",
           "side": "corp",
           "cardType": "asset"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "documentary_or_weak_generic"
+    },
+    {
+      "value": "wall_breaker",
+      "count": 4,
+      "examples": [
+        {
+          "cardId": "onr_v1_036_jackhammer",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_047_pile-driver",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_053_ramming-piston",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_classic_027_early-worm",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "access_replacement",
+      "count": 3,
+      "examples": [
+        {
+          "cardId": "onr_v1_050_r-and-d-protocol-files",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_classic_004_theorem-proof",
+          "side": "corp",
+          "cardType": "agenda"
         }
       ],
       "codeExactReference": false,
@@ -3135,28 +3819,28 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "connection",
+      "value": "code_gate_breaker",
       "count": 3,
       "examples": [
         {
-          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "cardId": "onr_v1_016_cyfermaster",
           "side": "runner",
-          "cardType": "event"
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_156_corporate-ally",
+          "cardId": "onr_v1_052_raffles",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_159_databroker",
+          "cardId": "onr_classic_030_psychic-friend",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "program"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "documentary_or_weak_generic"
+      "classification": "indirect_generic_effect"
     },
     {
       "value": "core_damage",
@@ -3176,30 +3860,6 @@
           "cardId": "onr_v1_346_vacant-soulkiller",
           "side": "corp",
           "cardType": "asset"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
-    },
-    {
-      "value": "core_damage_ice",
-      "count": 3,
-      "examples": [
-        {
-          "cardId": "onr_v1_229_code-corpse",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_231_cortical-scrub",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_254_liche",
-          "side": "corp",
-          "cardType": "ice"
         }
       ],
       "codeExactReference": false,
@@ -3255,6 +3915,30 @@
       "classification": "indirect_generic_effect"
     },
     {
+      "value": "expose",
+      "count": 3,
+      "examples": [
+        {
+          "cardId": "onr_v1_032_i-spy",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_091_hunt-club-bbs",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_classic_032_schematics-search-engine",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
       "value": "gray_ops",
       "count": 3,
       "examples": [
@@ -3303,28 +3987,52 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "rd_run_reward",
+      "value": "meat_damage",
       "count": 3,
       "examples": [
         {
-          "cardId": "onr_v1_010_cascade",
+          "cardId": "onr_v1_160_diplomatic-immunity",
           "side": "runner",
-          "cardType": "program"
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_017_deep-thought",
-          "side": "runner",
-          "cardType": "program"
+          "cardId": "onr_v1_339_schlaghund",
+          "side": "corp",
+          "cardType": "asset"
         },
         {
-          "cardId": "onr_v1_064_skivviss",
-          "side": "runner",
-          "cardType": "program"
+          "cardId": "onr_v1_342_solo-squad",
+          "side": "corp",
+          "cardType": "asset"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "documentary_or_weak_generic"
+      "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "rd_pressure",
+      "count": 3,
+      "examples": [
+        {
+          "cardId": "onr_v1_096_kilroy-was-here",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_183_technician-lover",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_classic_039_library-search",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": true,
+      "classification": "suspicious_rare_generic"
     },
     {
       "value": "rig_defense",
@@ -3351,52 +4059,28 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "run_defense",
+      "value": "run_action",
       "count": 3,
       "examples": [
         {
-          "cardId": "onr_v1_359_jenny-jett",
-          "side": "corp",
-          "cardType": "upgrade"
+          "cardId": "onr_v1_171_preying-mantis",
+          "side": "runner",
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_363_olivia-salazar",
-          "side": "corp",
-          "cardType": "upgrade"
+          "cardId": "onr_v1_172_quest-for-cattekin",
+          "side": "runner",
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_370_tesseract-fort-construction",
-          "side": "corp",
-          "cardType": "upgrade"
+          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+          "side": "runner",
+          "cardType": "resource"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "documentary_or_weak_generic"
-    },
-    {
-      "value": "run_lock_ice",
-      "count": 3,
-      "examples": [
-        {
-          "cardId": "onr_v1_224_bolter-cluster",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_258_neural-blade",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_268_shock-r",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
+      "classification": "suspicious_rare_or_documentary"
     },
     {
       "value": "tag_operation",
@@ -3423,6 +4107,54 @@
       "classification": "indirect_generic_effect"
     },
     {
+      "value": "tag_removal",
+      "count": 3,
+      "examples": [
+        {
+          "cardId": "onr_v1_158_danshis-second-id",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_170_nomad-allies",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_classic_040_meat-upgrade",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_generic"
+    },
+    {
+      "value": "tag_self",
+      "count": 3,
+      "examples": [
+        {
+          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_classic_035_corruption",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_classic_044_crash-space",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_generic"
+    },
+    {
       "value": "tempo",
       "count": 3,
       "examples": [
@@ -3447,61 +4179,23 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "wall_breaker",
+      "value": "trash_prevention",
       "count": 3,
       "examples": [
         {
-          "cardId": "onr_v1_036_jackhammer",
+          "cardId": "onr_v1_038_joan-of-arc",
           "side": "runner",
           "cardType": "program"
         },
         {
-          "cardId": "onr_v1_047_pile-driver",
+          "cardId": "onr_v1_186_umbrella-policy",
           "side": "runner",
-          "cardType": "program"
+          "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_053_ramming-piston",
+          "cardId": "onr_proteus_153_time-to-collect",
           "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
-    },
-    {
-      "value": "access_replacement",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_050_r-and-d-protocol-files",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_084_edited-shipping-manifests",
-          "side": "runner",
-          "cardType": "event"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "documentary_or_weak_generic"
-    },
-    {
-      "value": "access_trash",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_096_kilroy-was-here",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_107_romp-through-hq",
-          "side": "runner",
-          "cardType": "event"
+          "cardType": "resource"
         }
       ],
       "codeExactReference": false,
@@ -3547,25 +4241,6 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "agenda_modifier",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_156_corporate-ally",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_201_executive-extraction",
-          "side": "corp",
-          "cardType": "agenda"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "direct_decision_effect"
-    },
-    {
       "value": "agenda_point_event",
       "count": 2,
       "examples": [
@@ -3582,25 +4257,6 @@
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "asset_trash_target",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "simple_economy_asset",
-          "side": "corp",
-          "cardType": "asset"
-        },
-        {
-          "cardId": "v08_cashout_asset",
-          "side": "corp",
-          "cardType": "asset"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
       "classification": "direct_decision_effect"
     },
     {
@@ -3642,25 +4298,6 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "code_gate_breaker",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_016_cyfermaster",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_052_raffles",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
-    },
-    {
       "value": "daemon",
       "count": 2,
       "examples": [
@@ -3697,25 +4334,6 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "documentary_or_weak_generic"
-    },
-    {
-      "value": "expose",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_032_i-spy",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_091_hunt-club-bbs",
-          "side": "runner",
-          "cardType": "event"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
     },
     {
       "value": "flex_breaker",
@@ -3756,6 +4374,44 @@
       "classification": "indirect_generic_effect"
     },
     {
+      "value": "high_risk_economy",
+      "count": 2,
+      "examples": [
+        {
+          "cardId": "onr_classic_035_corruption",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_classic_036_do-the-drine",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "hq_access",
+      "count": 2,
+      "examples": [
+        {
+          "cardId": "onr_classic_032_schematics-search-engine",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_classic_046_executive-file-clerk",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_decision_effect"
+    },
+    {
       "value": "hq_run",
       "count": 2,
       "examples": [
@@ -3794,42 +4450,23 @@
       "classification": "indirect_generic_effect"
     },
     {
-      "value": "information",
+      "value": "link_recurring_credit",
       "count": 2,
       "examples": [
         {
-          "cardId": "onr_v1_162_field-reporter-for-ice-and-data",
+          "cardId": "onr_v1_138_pk-6089a",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "hardware"
         },
         {
-          "cardId": "onr_v1_183_technician-lover",
+          "cardId": "onr_v1_164_hells-run",
           "side": "runner",
           "cardType": "resource"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "documentary_or_weak_generic"
-    },
-    {
-      "value": "meat_damage",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_339_schlaghund",
-          "side": "corp",
-          "cardType": "asset"
-        },
-        {
-          "cardId": "onr_v1_342_solo-squad",
-          "side": "corp",
-          "cardType": "asset"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
+      "classification": "suspicious_rare_or_documentary"
     },
     {
       "value": "memory_support",
@@ -3851,23 +4488,23 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "persistent",
+      "value": "noisy",
       "count": 2,
       "examples": [
         {
-          "cardId": "onr_v1_168_loan-from-chiba",
+          "cardId": "onr_v1_036_jackhammer",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_172_quest-for-cattekin",
+          "cardId": "onr_classic_029_ms-todon",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "program"
         }
       ],
       "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "documentary_or_weak_generic"
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_or_documentary"
     },
     {
       "value": "post_bid_link",
@@ -3879,7 +4516,7 @@
           "cardType": "program"
         },
         {
-          "cardId": "onr_v1_181_the-springboard",
+          "cardId": "onr_proteus_154_wired-switchboard",
           "side": "runner",
           "cardType": "resource"
         }
@@ -3889,23 +4526,23 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "prevention",
+      "value": "program_trash",
       "count": 2,
       "examples": [
         {
-          "cardId": "onr_v1_078_arasaka-owns-you",
-          "side": "runner",
-          "cardType": "event"
+          "cardId": "onr_v1_246_fragmentation-storm",
+          "side": "corp",
+          "cardType": "ice"
         },
         {
-          "cardId": "onr_v1_160_diplomatic-immunity",
-          "side": "runner",
-          "cardType": "resource"
+          "cardId": "onr_classic_016_badtimes",
+          "side": "corp",
+          "cardType": "operation"
         }
       ],
       "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "documentary_or_weak_generic"
+      "codeSubstringReference": true,
+      "classification": "suspicious_rare_generic"
     },
     {
       "value": "random_breaker",
@@ -3925,6 +4562,120 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "random_discard_pressure",
+      "count": 2,
+      "examples": [
+        {
+          "cardId": "onr_v1_013_cockroach",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_proteus_141_get-ready-to-rumble",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_generic"
+    },
+    {
+      "value": "rd_multiaccess",
+      "count": 2,
+      "examples": [
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_proteus_147_r-and-d-mole",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_generic"
+    },
+    {
+      "value": "rd_run",
+      "count": 2,
+      "examples": [
+        {
+          "cardId": "onr_v1_050_r-and-d-protocol-files",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": true,
+      "classification": "suspicious_rare_or_documentary"
+    },
+    {
+      "value": "remote_upgrade_tax",
+      "count": 2,
+      "examples": [
+        {
+          "cardId": "onr_v1_156_corporate-ally",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_370_tesseract-fort-construction",
+          "side": "corp",
+          "cardType": "upgrade"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "run_bypass",
+      "count": 2,
+      "examples": [
+        {
+          "cardId": "onr_v1_094_inside-job",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_proteus_149_simulacrum",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_or_documentary"
+    },
+    {
+      "value": "run_drawback",
+      "count": 2,
+      "examples": [
+        {
+          "cardId": "onr_v1_182_submarine-uplink",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_184_top-runners-conference",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_or_documentary"
     },
     {
       "value": "run_flow",
@@ -3984,25 +4735,6 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "sentry_breaker",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_054_raptor",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_060_shaka",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
-    },
-    {
       "value": "server_defense",
       "count": 2,
       "examples": [
@@ -4022,23 +4754,23 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "start_of_turn",
+      "value": "server_ice_install",
       "count": 2,
       "examples": [
         {
-          "cardId": "onr_v1_163_floating-runner-bbs",
+          "cardId": "onr_v1_173_restrictive-net-zoning",
           "side": "runner",
           "cardType": "resource"
         },
         {
-          "cardId": "onr_v1_180_smiths-pawnshop",
-          "side": "runner",
-          "cardType": "resource"
+          "cardId": "onr_v1_359_jenny-jett",
+          "side": "corp",
+          "cardType": "upgrade"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "documentary_or_weak_generic"
+      "classification": "suspicious_rare_generic"
     },
     {
       "value": "steal_reward",
@@ -4155,25 +4887,6 @@
       "classification": "indirect_generic_effect"
     },
     {
-      "value": "tag_protection",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_120_armadillo-armored-road-home",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_167_leland-corporate-bodyguard",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
-    },
-    {
       "value": "tag_remove",
       "count": 2,
       "examples": [
@@ -4191,25 +4904,6 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "indirect_generic_effect"
-    },
-    {
-      "value": "tag_risk",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_154_broker",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_165_junkyard-bbs",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
     },
     {
       "value": "trace_agenda",
@@ -4231,25 +4925,6 @@
       "classification": "indirect_generic_effect"
     },
     {
-      "value": "trace_ice",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_243_fetch-4-0-1",
-          "side": "corp",
-          "cardType": "ice"
-        },
-        {
-          "cardId": "onr_v1_249_hunter",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
       "value": "trace_operation",
       "count": 2,
       "examples": [
@@ -4267,6 +4942,25 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "trace_tag_ice",
+      "count": 2,
+      "examples": [
+        {
+          "cardId": "onr_v1_251_jack-attack",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_proteus_129_back-door-to-netwatch",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_generic"
     },
     {
       "value": "trash_cost_payment",
@@ -4288,25 +4982,6 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "trash_prevention",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_038_joan-of-arc",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_186_umbrella-policy",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
-    },
-    {
       "value": "trash_recovery",
       "count": 2,
       "examples": [
@@ -4316,7 +4991,7 @@
           "cardType": "event"
         },
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": "onr_v1_165_junkyard-bbs",
           "side": "runner",
           "cardType": "resource"
         }
@@ -4324,25 +4999,6 @@
       "codeExactReference": true,
       "codeSubstringReference": true,
       "classification": "direct_or_doctrine_effect"
-    },
-    {
-      "value": "unique",
-      "count": 2,
-      "examples": [
-        {
-          "cardId": "onr_v1_156_corporate-ally",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_180_smiths-pawnshop",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "documentary_or_weak_generic"
     },
     {
       "value": "access_ambush",
@@ -4401,6 +5057,20 @@
       "classification": "suspicious_rare_generic"
     },
     {
+      "value": "advanceable",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_001_data-fort-remapping",
+          "side": "corp",
+          "cardType": "agenda"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_decision_effect"
+    },
+    {
       "value": "agenda_1pt",
       "count": 1,
       "examples": [
@@ -4443,13 +5113,13 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "agenda_node_slot",
+      "value": "agenda_modifier",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_361_namatoki-plaza",
+          "cardId": "onr_v1_201_executive-extraction",
           "side": "corp",
-          "cardType": "upgrade"
+          "cardType": "agenda"
         }
       ],
       "codeExactReference": false,
@@ -4457,13 +5127,13 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "agenda_point_cancel",
+      "value": "agenda_node_slot",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_160_diplomatic-immunity",
-          "side": "runner",
-          "cardType": "resource"
+          "cardId": "onr_v1_361_namatoki-plaza",
+          "side": "corp",
+          "cardType": "upgrade"
         }
       ],
       "codeExactReference": false,
@@ -4485,6 +5155,20 @@
       "classification": "direct_decision_effect"
     },
     {
+      "value": "agenda_pressure",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_decision_effect"
+    },
+    {
       "value": "agenda_reward",
       "count": 1,
       "examples": [
@@ -4497,6 +5181,20 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "direct_decision_effect"
+    },
+    {
+      "value": "agenda_steal_followup",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_035_corruption",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
     },
     {
       "value": "agenda_steal_tax",
@@ -4534,20 +5232,6 @@
           "cardId": "onr_v1_326_holovid-campaign",
           "side": "corp",
           "cardType": "asset"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
-      "value": "bit_depot",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_178_short-term-contract",
-          "side": "runner",
-          "cardType": "resource"
         }
       ],
       "codeExactReference": false,
@@ -4597,6 +5281,20 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
+      "value": "brain_damage_economy",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_036_do-the-drine",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
       "value": "breaker_end_run",
       "count": 1,
       "examples": [
@@ -4609,20 +5307,6 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "direct_decision_effect"
-    },
-    {
-      "value": "emergency_breaker",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_019_dropp",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
     },
     {
       "value": "card_flow_agenda",
@@ -4639,18 +5323,18 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "click_economy",
+      "value": "choice",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_178_short-term-contract",
+          "cardId": "onr_classic_036_do-the-drine",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "event"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "suspicious_rare_generic"
+      "classification": "documentary_or_weak_generic"
     },
     {
       "value": "corp_draw_pressure",
@@ -4685,7 +5369,7 @@
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "cardId": "onr_proteus_129_back-door-to-netwatch",
           "side": "runner",
           "cardType": "resource"
         }
@@ -4793,18 +5477,32 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "drip_economy",
+      "value": "derez",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_178_short-term-contract",
+          "cardId": "onr_classic_033_superglue",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "program"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "suspicious_rare_generic"
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "deterministic_random",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_037_finders-keepers",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "documentary_or_weak_generic"
     },
     {
       "value": "economy_denial",
@@ -4835,6 +5533,20 @@
       "classification": "suspicious_rare_generic"
     },
     {
+      "value": "emergency_breaker",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_v1_019_dropp",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
+    },
+    {
       "value": "etr_tax",
       "count": 1,
       "examples": [
@@ -4847,6 +5559,20 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "suspicious_rare_generic"
+    },
+    {
+      "value": "event_credit_host",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_052_zetatech-portastation",
+          "side": "runner",
+          "cardType": "hardware"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_or_doctrine_effect"
     },
     {
       "value": "expensive_ice_synergy",
@@ -4875,6 +5601,20 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "suspicious_rare_or_documentary"
+    },
+    {
+      "value": "fully_broken_ice",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_033_superglue",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_or_doctrine_effect"
     },
     {
       "value": "global_ice_strength_modifier",
@@ -4961,6 +5701,20 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
+      "value": "ice_recovery",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_018_reclamation-project",
+          "side": "corp",
+          "cardType": "operation"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
       "value": "ice_rez",
       "count": 1,
       "examples": [
@@ -4982,20 +5736,6 @@
           "cardId": "onr_v1_352_chester-mix",
           "side": "corp",
           "cardType": "upgrade"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
-      "value": "install_cost_modifier",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_173_restrictive-net-zoning",
-          "side": "runner",
-          "cardType": "resource"
         }
       ],
       "codeExactReference": false,
@@ -5031,20 +5771,6 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "link_recurring_credit",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_138_pk-6089a",
-          "side": "runner",
-          "cardType": "hardware"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
       "value": "low_install_breaker",
       "count": 1,
       "examples": [
@@ -5059,6 +5785,20 @@
       "classification": "suspicious_rare_generic"
     },
     {
+      "value": "memory_pressure",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_016_badtimes",
+          "side": "corp",
+          "cardType": "operation"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_decision_effect"
+    },
+    {
       "value": "no_ability_agenda",
       "count": 1,
       "examples": [
@@ -5066,20 +5806,6 @@
           "cardId": "simple_agenda",
           "side": "corp",
           "cardType": "agenda"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
-      "value": "noisy",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_036_jackhammer",
-          "side": "runner",
-          "cardType": "program"
         }
       ],
       "codeExactReference": false,
@@ -5129,46 +5855,18 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "position",
+      "value": "prevention",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_179_silicon-saloon-franchise",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
-      "value": "program_search",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "cardId": "onr_v1_078_arasaka-owns-you",
           "side": "runner",
           "cardType": "event"
         }
       ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
-    },
-    {
-      "value": "program_trash",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_246_fragmentation-storm",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
       "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "suspicious_rare_generic"
+      "codeSubstringReference": false,
+      "classification": "documentary_or_weak_generic"
     },
     {
       "value": "random_discard_event",
@@ -5185,20 +5883,6 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "random_discard_pressure",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_013_cockroach",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_generic"
-    },
-    {
       "value": "random_ice",
       "count": 1,
       "examples": [
@@ -5213,32 +5897,18 @@
       "classification": "suspicious_rare_generic"
     },
     {
-      "value": "rd_multiaccess",
+      "value": "rd_access_replacement",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_139_r-and-d-interface",
-          "side": "runner",
-          "cardType": "hardware"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_generic"
-    },
-    {
-      "value": "rd_pressure",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_096_kilroy-was-here",
+          "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
           "side": "runner",
           "cardType": "event"
         }
       ],
       "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "suspicious_rare_generic"
+      "codeSubstringReference": false,
+      "classification": "direct_or_doctrine_effect"
     },
     {
       "value": "rd_reorder",
@@ -5269,20 +5939,6 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "rd_run",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_050_r-and-d-protocol-files",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
       "value": "rd_success_replacement",
       "count": 1,
       "examples": [
@@ -5290,20 +5946,6 @@
           "cardId": "onr_v1_106_private-ldl-access",
           "side": "runner",
           "cardType": "event"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
-      "value": "recursion",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_154_broker",
-          "side": "runner",
-          "cardType": "resource"
         }
       ],
       "codeExactReference": false,
@@ -5351,48 +5993,6 @@
       "codeExactReference": true,
       "codeSubstringReference": true,
       "classification": "direct_decision_effect"
-    },
-    {
-      "value": "remote_upgrade_tax",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_370_tesseract-fort-construction",
-          "side": "corp",
-          "cardType": "upgrade"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "remove_tag",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_170_nomad-allies",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
-    },
-    {
-      "value": "repeatable_resource_ability",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_177_the-short-circuit",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
     },
     {
       "value": "research",
@@ -5451,32 +6051,18 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "run_action",
+      "value": "rez_tax",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
-      "value": "run_bypass",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_094_inside-job",
+          "cardId": "onr_classic_043_running-interference",
           "side": "runner",
           "cardType": "event"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
+      "classification": "direct_decision_effect"
     },
     {
       "value": "run_counter",
@@ -5486,20 +6072,6 @@
           "cardId": "onr_v1_034_incubator",
           "side": "runner",
           "cardType": "program"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
-      "value": "run_drawback",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_184_top-runners-conference",
-          "side": "runner",
-          "cardType": "resource"
         }
       ],
       "codeExactReference": false,
@@ -5563,6 +6135,20 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
+      "value": "runner_program",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_004_theorem-proof",
+          "side": "corp",
+          "cardType": "agenda"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
       "value": "scored_agenda_ability",
       "count": 1,
       "examples": [
@@ -5605,6 +6191,20 @@
       "classification": "suspicious_rare_generic"
     },
     {
+      "value": "self_trash",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_031_rent-i-con",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
+    },
+    {
       "value": "server_development",
       "count": 1,
       "examples": [
@@ -5617,20 +6217,6 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "suspicious_rare_or_documentary"
-    },
-    {
-      "value": "server_ice_install",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_359_jenny-jett",
-          "side": "corp",
-          "cardType": "upgrade"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_generic"
     },
     {
       "value": "server_tax",
@@ -5647,34 +6233,6 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
-      "value": "set_aside_install",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_176_the-shell-traders",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
-      "value": "shell_counter",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_176_the-shell-traders",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": true,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
       "value": "spy_counter",
       "count": 1,
       "examples": [
@@ -5682,20 +6240,6 @@
           "cardId": "onr_v1_032_i-spy",
           "side": "runner",
           "cardType": "program"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
-      "value": "stack_reorder",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_175_ronin-around",
-          "side": "runner",
-          "cardType": "resource"
         }
       ],
       "codeExactReference": false,
@@ -5717,20 +6261,6 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "successful_run_reward",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_032_i-spy",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
-    },
-    {
       "value": "tag_enabler",
       "count": 1,
       "examples": [
@@ -5745,32 +6275,32 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "tag_removal",
+      "value": "tag_prevention",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_158_danshis-second-id",
+          "cardId": "onr_classic_051_vintage-camaro",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "hardware"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "suspicious_rare_generic"
+      "classification": "direct_decision_effect"
     },
     {
-      "value": "tag_self",
+      "value": "tag_protection",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "cardId": "onr_v1_120_armadillo-armored-road-home",
           "side": "runner",
-          "cardType": "event"
+          "cardType": "hardware"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "suspicious_rare_generic"
+      "classification": "indirect_generic_effect"
     },
     {
       "value": "temporary_program_install",
@@ -5829,20 +6359,6 @@
       "classification": "suspicious_rare_generic"
     },
     {
-      "value": "trace_tag_ice",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_251_jack-attack",
-          "side": "corp",
-          "cardType": "ice"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_generic"
-    },
-    {
       "value": "trash_for_value",
       "count": 1,
       "examples": [
@@ -5871,18 +6387,18 @@
       "classification": "suspicious_rare_generic"
     },
     {
-      "value": "utility_resource",
+      "value": "universal_breaker",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_158_danshis-second-id",
+          "cardId": "onr_classic_031_rent-i-con",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "program"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
+      "classification": "direct_decision_effect"
     },
     {
       "value": "virus_counter_protection",
@@ -5944,7 +6460,7 @@
   "planRoles": [
     {
       "value": "build_rig",
-      "count": 117,
+      "count": 166,
       "examples": [
         {
           "cardId": "efficient_fracter",
@@ -5959,7 +6475,7 @@
         {
           "cardId": "onr_v1_003_baedekers-net-map",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "program"
         },
         {
           "cardId": "onr_v1_004_bakdoor",
@@ -5978,7 +6494,7 @@
     },
     {
       "value": "protect_rnd",
-      "count": 61,
+      "count": 110,
       "examples": [
         {
           "cardId": "onr_v1_194_corporate-downsizing",
@@ -6012,7 +6528,7 @@
     },
     {
       "value": "protect_hq",
-      "count": 55,
+      "count": 104,
       "examples": [
         {
           "cardId": "onr_v1_207_netwatch-operations-office",
@@ -6045,42 +6561,8 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "recover_economy",
-      "count": 39,
-      "examples": [
-        {
-          "cardId": "onr_v1_028_force-shield",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_097_livewires-contacts",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_108_score",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_118_weather-to-finance-pipe",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_125_dermatech-bodyplating",
-          "side": "runner",
-          "cardType": "hardware"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
       "value": "safe_probe_run",
-      "count": 35,
+      "count": 77,
       "examples": [
         {
           "cardId": "onr_v1_001_afreet",
@@ -6114,7 +6596,7 @@
     },
     {
       "value": "build_scoring_remote",
-      "count": 30,
+      "count": 69,
       "examples": [
         {
           "cardId": "corp_identity_001",
@@ -6138,6 +6620,176 @@
         },
         {
           "cardId": "onr_v1_209_political-coup",
+          "side": "corp",
+          "cardType": "agenda"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "recover_economy",
+      "count": 54,
+      "examples": [
+        {
+          "cardId": "onr_v1_028_force-shield",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_097_livewires-contacts",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_118_weather-to-finance-pipe",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_158_danshis-second-id",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "protect_remote",
+      "count": 32,
+      "examples": [
+        {
+          "cardId": "onr_v1_362_new-galveston-city-grid",
+          "side": "corp",
+          "cardType": "upgrade"
+        },
+        {
+          "cardId": "onr_v1_366_red-herrings",
+          "side": "corp",
+          "cardType": "upgrade"
+        },
+        {
+          "cardId": "onr_proteus_012_bug-zapper",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_proteus_013_caryatid",
+          "side": "corp",
+          "cardType": "ice"
+        },
+        {
+          "cardId": "onr_proteus_015_colonel-failure",
+          "side": "corp",
+          "cardType": "ice"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "pressure_rnd",
+      "count": 29,
+      "examples": [
+        {
+          "cardId": "onr_v1_050_r-and-d-protocol-files",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_064_skivviss",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_076_all-nighter",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_081_custodial-position",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_083_desperate-competitor",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "score_next_turn",
+      "count": 28,
+      "examples": [
+        {
+          "cardId": "onr_v1_188_ai-chief-financial-officer",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_193_corporate-coup",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_201_executive-extraction",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_203_hostile-takeover",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_207_netwatch-operations-office",
+          "side": "corp",
+          "cardType": "agenda"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "corp_score_agenda",
+      "count": 25,
+      "examples": [
+        {
+          "cardId": "onr_v1_189_artificial-security-directors",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_190_bioweapons-engineering",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_191_black-ice-quality-assurance",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_192_corporate-boon",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_195_corporate-retreat",
           "side": "corp",
           "cardType": "agenda"
         }
@@ -6181,74 +6833,6 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "score_next_turn",
-      "count": 18,
-      "examples": [
-        {
-          "cardId": "onr_v1_188_ai-chief-financial-officer",
-          "side": "corp",
-          "cardType": "agenda"
-        },
-        {
-          "cardId": "onr_v1_193_corporate-coup",
-          "side": "corp",
-          "cardType": "agenda"
-        },
-        {
-          "cardId": "onr_v1_201_executive-extraction",
-          "side": "corp",
-          "cardType": "agenda"
-        },
-        {
-          "cardId": "onr_v1_203_hostile-takeover",
-          "side": "corp",
-          "cardType": "agenda"
-        },
-        {
-          "cardId": "onr_v1_207_netwatch-operations-office",
-          "side": "corp",
-          "cardType": "agenda"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "contest_remote",
-      "count": 16,
-      "examples": [
-        {
-          "cardId": "onr_v1_018_dogcatcher",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_019_dropp",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_042_mouse",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_058_seeya",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_076_all-nighter",
-          "side": "runner",
-          "cardType": "event"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
       "value": "runner_install_program",
       "count": 16,
       "examples": [
@@ -6283,50 +6867,21 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "corp_score_agenda",
+      "value": "contest_remote",
       "count": 15,
       "examples": [
         {
-          "cardId": "onr_v1_189_artificial-security-directors",
-          "side": "corp",
-          "cardType": "agenda"
-        },
-        {
-          "cardId": "onr_v1_190_bioweapons-engineering",
-          "side": "corp",
-          "cardType": "agenda"
-        },
-        {
-          "cardId": "onr_v1_191_black-ice-quality-assurance",
-          "side": "corp",
-          "cardType": "agenda"
-        },
-        {
-          "cardId": "onr_v1_192_corporate-boon",
-          "side": "corp",
-          "cardType": "agenda"
-        },
-        {
-          "cardId": "onr_v1_195_corporate-retreat",
-          "side": "corp",
-          "cardType": "agenda"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
-      "value": "pressure_rnd",
-      "count": 13,
-      "examples": [
-        {
-          "cardId": "onr_v1_050_r-and-d-protocol-files",
+          "cardId": "onr_v1_018_dogcatcher",
           "side": "runner",
           "cardType": "program"
         },
         {
-          "cardId": "onr_v1_064_skivviss",
+          "cardId": "onr_v1_042_mouse",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_058_seeya",
           "side": "runner",
           "cardType": "program"
         },
@@ -6336,12 +6891,41 @@
           "cardType": "event"
         },
         {
-          "cardId": "onr_v1_081_custodial-position",
+          "cardId": "onr_v1_083_desperate-competitor",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "pressure_hq",
+      "count": 14,
+      "examples": [
+        {
+          "cardId": "onr_v1_013_cockroach",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_v1_076_all-nighter",
           "side": "runner",
           "cardType": "event"
         },
         {
           "cardId": "onr_v1_083_desperate-competitor",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_085_executive-wiretaps",
           "side": "runner",
           "cardType": "event"
         }
@@ -6385,40 +6969,6 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "pressure_hq",
-      "count": 12,
-      "examples": [
-        {
-          "cardId": "onr_v1_013_cockroach",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_076_all-nighter",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_083_desperate-competitor",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_084_edited-shipping-manifests",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_085_executive-wiretaps",
-          "side": "runner",
-          "cardType": "event"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
-    },
-    {
       "value": "remote_asset_economy",
       "count": 12,
       "examples": [
@@ -6451,6 +7001,40 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "runner_install_hardware",
+      "count": 12,
+      "examples": [
+        {
+          "cardId": "onr_v1_119_arasaka-portable-prototype",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_122_artemis-2020",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_123_bodyweight-data-creche",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_124_corolla-speed-chip",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_131_microtech-backup-drive",
+          "side": "runner",
+          "cardType": "hardware"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "documentary_or_weak_generic"
     },
     {
       "value": "score_now",
@@ -6493,7 +7077,7 @@
         {
           "cardId": "onr_v1_003_baedekers-net-map",
           "side": "runner",
-          "cardType": "hardware"
+          "cardType": "program"
         },
         {
           "cardId": "onr_v1_056_replicator",
@@ -6657,6 +7241,40 @@
       "classification": "indirect_generic_effect"
     },
     {
+      "value": "draw_for_answers",
+      "count": 9,
+      "examples": [
+        {
+          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_101_mit-west-tier",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_v1_179_silicon-saloon-franchise",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_or_doctrine_effect"
+    },
+    {
       "value": "recover_rig",
       "count": 9,
       "examples": [
@@ -6725,106 +7343,72 @@
       "classification": "indirect_generic_effect"
     },
     {
-      "value": "runner_install_hardware",
-      "count": 9,
+      "value": "remote_asset_trap",
+      "count": 8,
       "examples": [
         {
-          "cardId": "onr_v1_119_arasaka-portable-prototype",
-          "side": "runner",
-          "cardType": "hardware"
+          "cardId": "onr_v1_315_corprunners-shattered-remains",
+          "side": "corp",
+          "cardType": "asset"
         },
         {
-          "cardId": "onr_v1_122_artemis-2020",
-          "side": "runner",
-          "cardType": "hardware"
+          "cardId": "onr_v1_323_experimental-ai",
+          "side": "corp",
+          "cardType": "asset"
         },
         {
-          "cardId": "onr_v1_123_bodyweight-data-creche",
-          "side": "runner",
-          "cardType": "hardware"
+          "cardId": "onr_v1_340_setup",
+          "side": "corp",
+          "cardType": "asset"
         },
         {
-          "cardId": "onr_v1_124_corolla-speed-chip",
-          "side": "runner",
-          "cardType": "hardware"
+          "cardId": "onr_v1_345_trap",
+          "side": "corp",
+          "cardType": "asset"
         },
         {
-          "cardId": "onr_v1_131_microtech-backup-drive",
-          "side": "runner",
-          "cardType": "hardware"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "documentary_or_weak_generic"
-    },
-    {
-      "value": "draw_for_answers",
-      "count": 7,
-      "examples": [
-        {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_095_jack-n-joe",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_101_mit-west-tier",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
-          "side": "runner",
-          "cardType": "event"
-        },
-        {
-          "cardId": "onr_v1_179_silicon-saloon-franchise",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
-      "classification": "direct_or_doctrine_effect"
-    },
-    {
-      "value": "remote_upgrade_modifier",
-      "count": 7,
-      "examples": [
-        {
-          "cardId": "onr_v1_022_emergency-self-construct",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_029_gremlins",
-          "side": "runner",
-          "cardType": "program"
-        },
-        {
-          "cardId": "onr_v1_133_militech-mram-chip",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_134_mram-chip",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_160_diplomatic-immunity",
-          "side": "runner",
-          "cardType": "resource"
+          "cardId": "onr_v1_346_vacant-soulkiller",
+          "side": "corp",
+          "cardType": "asset"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "punish_tagged_runner",
+      "count": 7,
+      "examples": [
+        {
+          "cardId": "onr_v1_287_datapool-by-zetatech",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "onr_v1_306_trojan-horse",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "onr_v1_339_schlaghund",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_classic_021_satellite-monitors",
+          "side": "corp",
+          "cardType": "asset"
+        },
+        {
+          "cardId": "onr_classic_023_shock-treatment",
+          "side": "corp",
+          "cardType": "upgrade"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_generic"
     },
     {
       "value": "remote_upgrade_tax",
@@ -6859,6 +7443,74 @@
       "codeExactReference": true,
       "codeSubstringReference": true,
       "classification": "direct_decision_effect"
+    },
+    {
+      "value": "score_agenda",
+      "count": 7,
+      "examples": [
+        {
+          "cardId": "onr_v1_194_corporate-downsizing",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_198_detroit-police-contract",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_v1_199_employee-empowerment",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_classic_001_data-fort-remapping",
+          "side": "corp",
+          "cardType": "agenda"
+        },
+        {
+          "cardId": "onr_classic_002_superserum",
+          "side": "corp",
+          "cardType": "agenda"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "survive_meat_damage",
+      "count": 7,
+      "examples": [
+        {
+          "cardId": "onr_v1_121_armored-fridge",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_125_dermatech-bodyplating",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_127_full-body-conversion",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_143_techtronica-utility-suit",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_160_diplomatic-immunity",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
     },
     {
       "value": "corp_agenda_ability",
@@ -6929,6 +7581,40 @@
       "classification": "direct_or_doctrine_effect"
     },
     {
+      "value": "find_economy",
+      "count": 6,
+      "examples": [
+        {
+          "cardId": "onr_classic_037_finders-keepers",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_classic_041_networking",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_classic_042_panzer-run",
+          "side": "runner",
+          "cardType": "event"
+        },
+        {
+          "cardId": "onr_classic_044_crash-space",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_classic_045_elena-laskova",
+          "side": "runner",
+          "cardType": "resource"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_decision_effect"
+    },
+    {
       "value": "information",
       "count": 6,
       "examples": [
@@ -6963,33 +7649,33 @@
       "classification": "documentary_or_weak_generic"
     },
     {
-      "value": "remote_asset_trap",
+      "value": "remote_upgrade_modifier",
       "count": 6,
       "examples": [
         {
-          "cardId": "onr_v1_315_corprunners-shattered-remains",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_022_emergency-self-construct",
+          "side": "runner",
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_323_experimental-ai",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_029_gremlins",
+          "side": "runner",
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_340_setup",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_133_militech-mram-chip",
+          "side": "runner",
+          "cardType": "hardware"
         },
         {
-          "cardId": "onr_v1_345_trap",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_134_mram-chip",
+          "side": "runner",
+          "cardType": "hardware"
         },
         {
-          "cardId": "onr_v1_346_vacant-soulkiller",
-          "side": "corp",
-          "cardType": "asset"
+          "cardId": "onr_v1_171_preying-mantis",
+          "side": "runner",
+          "cardType": "resource"
         }
       ],
       "codeExactReference": false,
@@ -7063,6 +7749,74 @@
       "codeExactReference": false,
       "codeSubstringReference": true,
       "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "avoid_tags",
+      "count": 5,
+      "examples": [
+        {
+          "cardId": "onr_v1_135_nasuko-cycle",
+          "side": "runner",
+          "cardType": "hardware"
+        },
+        {
+          "cardId": "onr_v1_161_fall-guy",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_170_nomad-allies",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_classic_051_vintage-camaro",
+          "side": "runner",
+          "cardType": "hardware"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
+    },
+    {
+      "value": "break_ice",
+      "count": 5,
+      "examples": [
+        {
+          "cardId": "onr_classic_027_early-worm",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_classic_028_matador",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_classic_029_ms-todon",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_classic_030_psychic-friend",
+          "side": "runner",
+          "cardType": "program"
+        },
+        {
+          "cardId": "onr_classic_031_rent-i-con",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_decision_effect"
     },
     {
       "value": "corp_install_ice",
@@ -7160,69 +7914,6 @@
           "cardId": "onr_v1_370_tesseract-fort-construction",
           "side": "corp",
           "cardType": "upgrade"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
-    },
-    {
-      "value": "survive_meat_damage",
-      "count": 5,
-      "examples": [
-        {
-          "cardId": "onr_v1_121_armored-fridge",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_127_full-body-conversion",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_143_techtronica-utility-suit",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_185_trauma-team",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
-          "side": "runner",
-          "cardType": "resource"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "indirect_generic_effect"
-    },
-    {
-      "value": "avoid_tags",
-      "count": 4,
-      "examples": [
-        {
-          "cardId": "onr_v1_135_nasuko-cycle",
-          "side": "runner",
-          "cardType": "hardware"
-        },
-        {
-          "cardId": "onr_v1_161_fall-guy",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_170_nomad-allies",
-          "side": "runner",
-          "cardType": "resource"
-        },
-        {
-          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
-          "side": "runner",
-          "cardType": "resource"
         }
       ],
       "codeExactReference": false,
@@ -7336,6 +8027,30 @@
       "classification": "documentary_or_weak_generic"
     },
     {
+      "value": "draw",
+      "count": 3,
+      "examples": [
+        {
+          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_classic_017_corporate-shuffle",
+          "side": "corp",
+          "cardType": "operation"
+        },
+        {
+          "cardId": "onr_classic_003_unlisted-research-lab",
+          "side": "corp",
+          "cardType": "agenda"
+        }
+      ],
+      "codeExactReference": true,
+      "codeSubstringReference": true,
+      "classification": "direct_decision_effect"
+    },
+    {
       "value": "economy",
       "count": 3,
       "examples": [
@@ -7360,27 +8075,27 @@
       "classification": "direct_decision_effect"
     },
     {
-      "value": "score_agenda",
+      "value": "rig_setup",
       "count": 3,
       "examples": [
         {
-          "cardId": "onr_v1_194_corporate-downsizing",
-          "side": "corp",
-          "cardType": "agenda"
+          "cardId": "onr_classic_047_little-black-box",
+          "side": "runner",
+          "cardType": "hardware"
         },
         {
-          "cardId": "onr_v1_198_detroit-police-contract",
-          "side": "corp",
-          "cardType": "agenda"
+          "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+          "side": "runner",
+          "cardType": "hardware"
         },
         {
-          "cardId": "onr_v1_199_employee-empowerment",
-          "side": "corp",
-          "cardType": "agenda"
+          "cardId": "onr_classic_049_omnitech-wet-drive",
+          "side": "runner",
+          "cardType": "hardware"
         }
       ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
+      "codeExactReference": false,
+      "codeSubstringReference": false,
       "classification": "direct_decision_effect"
     },
     {
@@ -7479,23 +8194,23 @@
       "classification": "indirect_generic_effect"
     },
     {
-      "value": "protect_remote",
+      "value": "pressure_remote",
       "count": 2,
       "examples": [
         {
-          "cardId": "onr_v1_362_new-galveston-city-grid",
-          "side": "corp",
-          "cardType": "upgrade"
+          "cardId": "onr_v1_032_i-spy",
+          "side": "runner",
+          "cardType": "program"
         },
         {
-          "cardId": "onr_v1_366_red-herrings",
-          "side": "corp",
-          "cardType": "upgrade"
+          "cardId": "onr_classic_043_running-interference",
+          "side": "runner",
+          "cardType": "event"
         }
       ],
-      "codeExactReference": true,
+      "codeExactReference": false,
       "codeSubstringReference": true,
-      "classification": "direct_decision_effect"
+      "classification": "suspicious_rare_generic"
     },
     {
       "value": "protect_rig",
@@ -7515,6 +8230,25 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "documentary_or_weak_generic"
+    },
+    {
+      "value": "recover_key_card",
+      "count": 2,
+      "examples": [
+        {
+          "cardId": "onr_v1_154_broker",
+          "side": "runner",
+          "cardType": "resource"
+        },
+        {
+          "cardId": "onr_classic_034_boostergang-connections",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "suspicious_rare_or_documentary"
     },
     {
       "value": "remote_upgrade_agenda_support",
@@ -7574,6 +8308,20 @@
       "classification": "indirect_generic_effect"
     },
     {
+      "value": "agenda_pressure",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_decision_effect"
+    },
+    {
       "value": "agenda_reward",
       "count": 1,
       "examples": [
@@ -7614,6 +8362,20 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "suspicious_rare_or_documentary"
+    },
+    {
+      "value": "convert_recent_agenda_points_to_economy",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_035_corruption",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_or_doctrine_effect"
     },
     {
       "value": "corp_after_pass_ice_random_end_run",
@@ -7700,18 +8462,46 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "draw",
+      "value": "disrupt_runner_rig",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
-          "side": "runner",
-          "cardType": "resource"
+          "cardId": "onr_classic_016_badtimes",
+          "side": "corp",
+          "cardType": "operation"
         }
       ],
-      "codeExactReference": true,
-      "codeSubstringReference": true,
+      "codeExactReference": false,
+      "codeSubstringReference": false,
       "classification": "direct_decision_effect"
+    },
+    {
+      "value": "emergency_economy",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_036_do-the-drine",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_decision_effect"
+    },
+    {
+      "value": "ice_recovery",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_018_reclamation-project",
+          "side": "corp",
+          "cardType": "operation"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_or_doctrine_effect"
     },
     {
       "value": "increase_link",
@@ -7728,6 +8518,20 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
+      "value": "information_gain",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_032_schematics-search-engine",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_decision_effect"
+    },
+    {
       "value": "managed_risk_economy",
       "count": 1,
       "examples": [
@@ -7739,20 +8543,6 @@
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "suspicious_rare_generic"
-    },
-    {
-      "value": "pressure_remote",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_032_i-spy",
-          "side": "runner",
-          "cardType": "program"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": true,
       "classification": "suspicious_rare_generic"
     },
     {
@@ -7784,20 +8574,6 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "punish_tagged_runner",
-      "count": 1,
-      "examples": [
-        {
-          "cardId": "onr_v1_339_schlaghund",
-          "side": "corp",
-          "cardType": "asset"
-        }
-      ],
-      "codeExactReference": false,
-      "codeSubstringReference": false,
-      "classification": "suspicious_rare_generic"
-    },
-    {
       "value": "recover_cards",
       "count": 1,
       "examples": [
@@ -7812,18 +8588,18 @@
       "classification": "suspicious_rare_or_documentary"
     },
     {
-      "value": "recover_key_card",
+      "value": "recover_from_tags",
       "count": 1,
       "examples": [
         {
-          "cardId": "onr_v1_154_broker",
+          "cardId": "onr_classic_040_meat-upgrade",
           "side": "runner",
-          "cardType": "resource"
+          "cardType": "event"
         }
       ],
       "codeExactReference": false,
       "codeSubstringReference": false,
-      "classification": "suspicious_rare_or_documentary"
+      "classification": "direct_decision_effect"
     },
     {
       "value": "remote_asset_agenda_support",
@@ -7922,6 +8698,20 @@
       "codeExactReference": false,
       "codeSubstringReference": false,
       "classification": "suspicious_rare_generic"
+    },
+    {
+      "value": "repair_setup",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_034_boostergang-connections",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_or_doctrine_effect"
     },
     {
       "value": "resource_value_engine",
@@ -8202,6 +8992,20 @@
       "codeExactReference": true,
       "codeSubstringReference": true,
       "classification": "direct_or_doctrine_effect"
+    },
+    {
+      "value": "tax_corp_rez",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_classic_043_running-interference",
+          "side": "runner",
+          "cardType": "event"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "direct_decision_effect"
     },
     {
       "value": "trace_defense",

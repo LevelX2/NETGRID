@@ -5649,14 +5649,15 @@
       ],
       "monolithFields": ["effects", "conditions", "costProfile"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 1,
       "rationale": "Trace/tag operation facts are clear generated candidates, with trace success remaining runtime context.",
       "doNotMigrateFields": [
@@ -5854,7 +5855,7 @@
       ],
       "generatedFields": ["effects"],
       "generatedMechanicalFacts": ["effect:zone_shuffle"],
-      "monolithFields": ["effects"],
+      "monolithFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
@@ -5892,7 +5893,7 @@
       ],
       "generatedFields": ["effects"],
       "generatedMechanicalFacts": ["effect:draw", "effect:economy"],
-      "monolithFields": ["effects", "costProfile"],
+      "monolithFields": ["effects", "conditions", "costProfile"],
       "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
@@ -5933,7 +5934,7 @@
         "condition:requires_archives_card",
         "effect:card_recovery"
       ],
-      "monolithFields": ["effects", "costProfile"],
+      "monolithFields": ["effects", "conditions", "costProfile"],
       "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
@@ -5972,7 +5973,7 @@
       ],
       "generatedFields": ["effects"],
       "generatedMechanicalFacts": ["effect:extra_action"],
-      "monolithFields": ["effects"],
+      "monolithFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
@@ -6014,7 +6015,7 @@
         "effect:topdeck_info",
         "effect:zone_shuffle"
       ],
-      "monolithFields": ["effects"],
+      "monolithFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
@@ -6328,11 +6329,16 @@
       ],
       "monolithFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["costProfile", "effects", "remoteRole"],
+      "generatedOnlyFields": [
+        "conditions",
+        "costProfile",
+        "effects",
+        "remoteRole"
+      ],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 3,
+        "generated_fact_absent_from_monolith": 4,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -7990,7 +7996,7 @@
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 1,
-        "overlay_strategy_field_not_in_monolith": 1
+        "overlay_strategy_field_not_in_monolith": 2
       },
       "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
       "migrationReadiness": "ready",
@@ -8387,7 +8393,7 @@
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 3,
         "generated_fact_absent_from_monolith": 2,
-        "overlay_strategy_field_not_in_monolith": 1
+        "overlay_strategy_field_not_in_monolith": 2
       },
       "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
       "migrationReadiness": "ready",

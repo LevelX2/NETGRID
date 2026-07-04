@@ -9,8 +9,8 @@
   "pilotCardCount": 193,
   "implementationFoundCount": 193,
   "cardsWithDerivedFacts": 193,
-  "cardsWithManualOntologyOverlap": 157,
-  "cardsNeedingManualOverlay": 132,
+  "cardsWithManualOntologyOverlap": 156,
+  "cardsNeedingManualOverlay": 133,
   "effectKindCounts": {
     "access_punish": 5,
     "access_replacement": 3,
@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 977,
+  "warningCount": 999,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -1631,6 +1631,11 @@
       "cardId": "onr_v1_178_short-term-contract"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_188_ai-chief-financial-officer"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Manual ontology contains fields not currently derivable.",
       "cardId": "onr_v1_188_ai-chief-financial-officer"
@@ -1649,6 +1654,11 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_188_ai-chief-financial-officer"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_189_artificial-security-directors"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -1721,14 +1731,29 @@
       "cardId": "onr_v1_191_black-ice-quality-assurance"
     },
     {
-      "kind": "text_pattern_derivation",
-      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
       "cardId": "onr_v1_192_corporate-boon"
     },
     {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_192_corporate-boon"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
       "cardId": "onr_v1_193_corporate-coup"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_193_corporate-coup"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_194_corporate-downsizing"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -1781,9 +1806,19 @@
       "cardId": "onr_v1_194_corporate-downsizing"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_195_corporate-retreat"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_195_corporate-retreat"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_196_corporate-war"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -1871,6 +1906,11 @@
       "cardId": "onr_v1_197_data-fort-reclamation"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_198_detroit-police-contract"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_198_detroit-police-contract"
@@ -1899,6 +1939,11 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_198_detroit-police-contract"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_199_employee-empowerment"
     },
     {
       "kind": "text_pattern_derivation",
@@ -1951,6 +1996,11 @@
       "cardId": "onr_v1_200_encryption-breakthrough"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_201_executive-extraction"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_201_executive-extraction"
@@ -1974,6 +2024,11 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_201_executive-extraction"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_202_genetics-visionary-acquisition"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -2061,6 +2116,11 @@
       "cardId": "onr_v1_204_ice-transmutation"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_206_marine-arcology"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_206_marine-arcology"
@@ -2074,6 +2134,11 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_208_on-call-solo-team"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_209_political-coup"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -2094,6 +2159,11 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_209_political-coup"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_210_political-overthrow"
     },
     {
       "kind": "text_pattern_derivation",
@@ -2201,6 +2271,11 @@
       "cardId": "onr_v1_215_security-net-optimization"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_216_security-purge"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_216_security-purge"
@@ -2249,6 +2324,11 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_217_strike-force-kali"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_218_subsidiary-branch"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -2481,6 +2561,11 @@
       "cardId": "onr_v1_224_bolter-cluster"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence medium differs from manual confidence high.",
+      "cardId": "onr_v1_225_canis-major"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime.",
       "cardId": "onr_v1_225_canis-major"
@@ -2624,11 +2709,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_228_cinderella"
-    },
-    {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_231_cortical-scrub"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -2866,6 +2946,11 @@
       "cardId": "onr_v1_241_fang-2-0"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_242_fatal-attractor"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_242_fatal-attractor"
@@ -3069,11 +3154,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_249_hunter"
-    },
-    {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence medium differs from manual confidence high.",
-      "cardId": "onr_v1_251_jack-attack"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -3306,6 +3386,11 @@
       "cardId": "onr_v1_260_pocket-virtual-reality"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_268_shock-r"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_268_shock-r"
@@ -3407,7 +3492,7 @@
     },
     {
       "kind": "manual_ontology_without_generated_match",
-      "message": "Manual condition:requires_runner_action has no generated basic fact match.",
+      "message": "Manual condition:requires_runner_attempted_multiple_runs_last_turn has no generated basic fact match.",
       "cardId": "onr_v1_283_audit-of-call-records"
     },
     {
@@ -3419,6 +3504,21 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_283_audit-of-call-records"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
+      "cardId": "onr_v1_284_chance-observation"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual condition:requires_runner_attempted_run_last_turn has no generated basic fact match.",
+      "cardId": "onr_v1_284_chance-observation"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_284_chance-observation",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
     },
     {
       "kind": "text_pattern_derivation",
@@ -3597,7 +3697,7 @@
     },
     {
       "kind": "manual_ontology_without_generated_match",
-      "message": "Manual condition:requires_installed_card has no generated basic fact match.",
+      "message": "Manual condition:requires_installed_advanceable_card has no generated basic fact match.",
       "cardId": "onr_v1_300_project-consultants"
     },
     {
@@ -3652,7 +3752,7 @@
     },
     {
       "kind": "manual_ontology_without_generated_match",
-      "message": "Manual condition:requires_installed_card has no generated basic fact match.",
+      "message": "Manual condition:requires_installed_advanceable_card has no generated basic fact match.",
       "cardId": "onr_v1_304_systematic-layoffs"
     },
     {
@@ -3677,6 +3777,11 @@
     },
     {
       "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "cardId": "onr_v1_305_team-restructuring"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
       "message": "Generated effect:advance_burst has no manual ontology match.",
       "cardId": "onr_v1_305_team-restructuring"
     },
@@ -3688,6 +3793,11 @@
     {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated remoteRole:asset_economy has no manual ontology match.",
+      "cardId": "onr_v1_305_team-restructuring"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual condition:requires_installed_advanceable_card has no generated basic fact match.",
       "cardId": "onr_v1_305_team-restructuring"
     },
     {
@@ -13194,12 +13304,14 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.deck_recycle_engine"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -13223,6 +13335,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
@@ -13295,7 +13411,7 @@
           "hintReviewed": true,
           "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -13316,6 +13432,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -13608,12 +13728,14 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.action_tempo"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -13630,6 +13752,10 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -13722,7 +13848,7 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -13739,6 +13865,10 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -13830,12 +13960,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.central_stabilize"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -13866,6 +13998,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -13985,7 +14121,7 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -14002,6 +14138,10 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -14091,7 +14231,7 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -14118,6 +14258,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -14368,7 +14512,7 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -14391,6 +14535,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -14523,12 +14671,14 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.draw_engine"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -14545,6 +14695,10 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -14761,7 +14915,7 @@
           "hintReviewed": true,
           "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -14782,6 +14936,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -14858,7 +15016,7 @@
           "hintReviewed": true,
           "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -14879,6 +15037,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -15209,7 +15371,7 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -15226,6 +15388,10 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -15609,7 +15775,7 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -15632,6 +15798,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -15730,7 +15900,7 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -15747,6 +15917,10 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -16323,14 +16497,13 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -16359,6 +16532,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -16579,12 +16756,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.action_tempo"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -16605,6 +16784,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -17514,7 +17697,7 @@
           "hintReviewed": true,
           "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
@@ -17544,6 +17727,10 @@
       ],
       "confidence": "medium",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence medium differs from manual confidence high."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
@@ -18198,14 +18385,13 @@
           }
         ],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
+          "corp.damage_kill"
         ],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
@@ -18230,10 +18416,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
@@ -18320,10 +18502,13 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -19078,7 +19263,7 @@
           "hintReviewed": true,
           "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -19107,6 +19292,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -19868,7 +20057,7 @@
           "hintReviewed": true,
           "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -19902,10 +20091,6 @@
       ],
       "confidence": "medium",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence medium differs from manual confidence high."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
@@ -20069,7 +20254,8 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.damage_kill"
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -20271,10 +20457,12 @@
             "kind": "requires_during_run"
           }
         ],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -20420,10 +20608,12 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -20577,7 +20767,7 @@
           "hintReviewed": true,
           "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -20610,6 +20800,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -21072,7 +21266,7 @@
         ],
         "conditions": [
           {
-            "kind": "requires_runner_action"
+            "kind": "requires_runner_attempted_multiple_runs_last_turn"
           },
           {
             "kind": "requires_trace_success"
@@ -21102,11 +21296,11 @@
         ],
         "generatedOnly": [],
         "manualOnly": [
-          "condition:requires_runner_action"
+          "condition:requires_runner_attempted_multiple_runs_last_turn"
         ]
       },
       "missingManualOverlay": [
-        "condition:requires_runner_action"
+        "condition:requires_runner_attempted_multiple_runs_last_turn"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -21119,7 +21313,7 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_runner_action has no generated basic fact match."
+          "message": "Manual condition:requires_runner_attempted_multiple_runs_last_turn has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -21200,6 +21394,9 @@
         ],
         "conditions": [
           {
+            "kind": "requires_runner_attempted_run_last_turn"
+          },
+          {
             "kind": "requires_trace_success"
           }
         ],
@@ -21226,12 +21423,26 @@
           "effect:trace"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_runner_attempted_run_last_turn"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_runner_attempted_run_last_turn"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_runner_attempted_run_last_turn has no generated basic fact match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -21756,10 +21967,12 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -22362,7 +22575,7 @@
         ],
         "conditions": [
           {
-            "kind": "requires_installed_card"
+            "kind": "requires_installed_advanceable_card"
           }
         ],
         "lineSupport": [
@@ -22386,11 +22599,11 @@
           "remoteRole:asset_economy"
         ],
         "manualOnly": [
-          "condition:requires_installed_card"
+          "condition:requires_installed_advanceable_card"
         ]
       },
       "missingManualOverlay": [
-        "condition:requires_installed_card",
+        "condition:requires_installed_advanceable_card",
         "condition:requires_score_window",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
@@ -22423,7 +22636,7 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_installed_card has no generated basic fact match."
+          "message": "Manual condition:requires_installed_advanceable_card has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -22820,7 +23033,7 @@
         ],
         "conditions": [
           {
-            "kind": "requires_installed_card"
+            "kind": "requires_installed_advanceable_card"
           }
         ],
         "lineSupport": [
@@ -22844,11 +23057,11 @@
           "remoteRole:asset_economy"
         ],
         "manualOnly": [
-          "condition:requires_installed_card"
+          "condition:requires_installed_advanceable_card"
         ]
       },
       "missingManualOverlay": [
-        "condition:requires_installed_card",
+        "condition:requires_installed_advanceable_card",
         "condition:requires_score_window",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
@@ -22881,7 +23094,7 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual condition:requires_installed_card has no generated basic fact match."
+          "message": "Manual condition:requires_installed_advanceable_card has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -22964,7 +23177,7 @@
         ],
         "conditions": [
           {
-            "kind": "requires_score_window"
+            "kind": "requires_installed_advanceable_card"
           }
         ],
         "lineSupport": [
@@ -22979,19 +23192,21 @@
         }
       },
       "overlap": {
-        "matches": [
-          "condition:requires_score_window"
-        ],
+        "matches": [],
         "generatedOnly": [
+          "condition:requires_score_window",
           "effect:advance_burst",
           "effect:score_acceleration",
           "remoteRole:asset_economy"
         ],
         "manualOnly": [
+          "condition:requires_installed_advanceable_card",
           "effect:advance"
         ]
       },
       "missingManualOverlay": [
+        "condition:requires_installed_advanceable_card",
+        "condition:requires_score_window",
         "effect:advance",
         "effect:advance_burst",
         "effect:score_acceleration",
@@ -23013,6 +23228,10 @@
         },
         {
           "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_score_window has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:advance_burst has no manual ontology match."
         },
         {
@@ -23022,6 +23241,10 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated remoteRole:asset_economy has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_installed_advanceable_card has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -23312,9 +23535,7 @@
           "reserveRisk": "high",
           "opportunityCost": "high"
         },
-        "lineSupport": [
-          "corp.asset_economy"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": true,
@@ -25099,7 +25320,6 @@
           "serverScope": "remote"
         },
         "lineSupport": [
-          "corp.economy_rez_reserve",
           "corp.ice_tax_glacier"
         ],
         "quality": {
@@ -27165,9 +27385,7 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "corp.asset_economy"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": true,
@@ -27744,7 +27962,6 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "corp.economy_rez_reserve",
           "corp.ice_tax_glacier"
         ],
         "quality": {
@@ -27894,7 +28111,8 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.ambush_bluff"
+          "corp.ambush_bluff",
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -28043,7 +28261,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -28446,7 +28664,6 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "corp.economy_rez_reserve",
           "corp.ice_tax_glacier"
         ],
         "quality": {
@@ -28818,9 +29035,7 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "corp.economy_rez_reserve",
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -29043,7 +29258,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false

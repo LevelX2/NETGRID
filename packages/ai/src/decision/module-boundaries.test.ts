@@ -493,6 +493,7 @@ describe("AI module boundaries", () => {
           "../breaker-ontology-consumer",
           "../hint-ontology",
           "../remote-role-ontology-consumer",
+          "../runtime/corp-scoreline/semantic-runtime-corp-scoreline-assessment",
           "../tag-punish-ontology-consumer",
           "../visible-run-analysis",
         ],
@@ -790,6 +791,7 @@ describe("AI module boundaries", () => {
           "runtime/semantic-runtime-corp-board.ts",
           "runtime/semantic-runtime-corp-board-context.ts",
           "runtime/semantic-runtime-corp-board-score-composition.ts",
+          "runtime/semantic-runtime-corp-scoring-composition.ts",
         ]),
       ],
       [

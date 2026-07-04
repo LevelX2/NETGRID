@@ -24,8 +24,8 @@
   "remainingShapeDifferenceCount": 0,
   "monolithOnlyMechanicalFactCount": 0,
   "deriverFollowupCandidateCount": 0,
-  "descriptorGapRemainingCount": 4,
-  "humanReviewCandidateCount": 2,
+  "descriptorGapRemainingCount": 6,
+  "humanReviewCandidateCount": 3,
   "boardContextRequiredCount": 31,
   "consumerActiveForFactTypeCount": 40,
   "legacyKeepForCompatCount": 11,
@@ -391,13 +391,13 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 977,
-      "cardsNeedingManualOverlay": 132
+      "warningCount": 999,
+      "cardsNeedingManualOverlay": 133
     },
     "compiledIndex": {
       "hardErrorCount": 0,
-      "warningCount": 735,
-      "reviewCandidates": 128
+      "warningCount": 740,
+      "reviewCandidates": 129
     },
     "migrationPriority": {
       "candidateCount": 193,

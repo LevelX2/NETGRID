@@ -14,10 +14,10 @@
   "includedCardCount": 30,
   "excludedCardCount": 0,
   "confirmedGeneratedFactCount": 101,
-  "previewAddedFactCount": 72,
+  "previewAddedFactCount": 73,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 204,
+  "normalizedDifferenceCount": 205,
   "remainingDifferenceCount": 0,
   "scoreContextInfoCount": 18,
   "legalActionContextInfoCount": 11,
@@ -2999,7 +2999,11 @@
         "effect:advance_burst",
         "effect:score_acceleration"
       ],
-      "previewAdds": ["effect:advance_burst", "effect:score_acceleration"],
+      "previewAdds": [
+        "condition:requires_score_window",
+        "effect:advance_burst",
+        "effect:score_acceleration"
+      ],
       "normalizedDifferences": [
         {
           "field": "condition:requires_score_window",
@@ -3011,6 +3015,12 @@
         {
           "field": "conditions",
           "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },

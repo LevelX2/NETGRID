@@ -8912,7 +8912,7 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     );
   });
 
-  it("keeps unsafe semantic score evidence without Doctrine v1 suppression rows", () => {
+  it("keeps score-now semantic evidence without Doctrine v1 suppression rows", () => {
     const input = corpActionPhaseInput(
       "ai-corp-semantic-doctrine-scoreline-unsafe",
       (state) => {
@@ -8961,22 +8961,30 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       (component) =>
         component.key === "corp_scoreline_safety_gate_blocks_doctrine",
     );
+    const scoreComponent = scoreAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "corp_score_available_agenda",
+    );
+    const scoringWindow = scoreAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "corp_scoring_window_assessment",
+    );
 
     expect(input.legalActions.map((action) => action.actionId)).toContain(
       score.actionId,
     );
+    expect(decision.actionId).toBe(score.actionId);
     expect(doctrineWeight).toBeUndefined();
     expect(suppressed).toBeUndefined();
-    expect(safetyGate?.value).toBeLessThan(0);
-    expect(String(safetyGate?.reason)).toMatch(
-      /unsafe_score_(runner_access_threat_high|unprotected_remote|cheap_contest_available)/,
+    expect(safetyGate).toBeUndefined();
+    expect(scoreComponent?.value).toBe(1200);
+    expect(String(scoringWindow?.reason)).toContain(
+      "score_horizon:immediate",
     );
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
   });
 
-  it("keeps unsafe score evidence separate from credit alternatives", () => {
+  it("keeps score-now evidence separate from credit alternatives", () => {
     const input = corpActionPhaseInput(
       "ai-corp-unsafe-score-over-credit",
       (state) => {
@@ -9020,12 +9028,19 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       (component) =>
         component.key === "corp_scoreline_safety_gate_blocks_doctrine",
     );
+    const gainSafetyGate = gainAlternative?.scoreBreakdown?.find(
+      (component) =>
+        component.key === "corp_scoreline_safety_gate_blocks_doctrine",
+    );
+    const scoreComponent = scoreAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "corp_score_available_agenda",
+    );
 
     expect(gainAlternative).toBeDefined();
-    expect(safetyGate?.value).toBeLessThan(0);
-    expect(String(safetyGate?.reason)).toMatch(
-      /unsafe_score_(runner_access_threat_high|unprotected_remote|cheap_contest_available)/,
-    );
+    expect(decision.actionId).toBe(score.actionId);
+    expect(safetyGate).toBeUndefined();
+    expect(gainSafetyGate).toBeUndefined();
+    expect(scoreComponent?.value).toBe(1200);
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );

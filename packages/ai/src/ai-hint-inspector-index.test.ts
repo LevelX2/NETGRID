@@ -706,7 +706,7 @@ describe("AI005 hint inspector index", () => {
     expect(
       compiledCard("onr_classic_018_reclamation-project").tacticSignals,
     ).toEqual(
-      expect.arrayContaining(["archives.corp_recovery", "ice.recovery"]),
+      expect.arrayContaining(["archives.corp_recovery", "ice.corp_recovery"]),
     );
 
     const superglue = card(index, "onr_classic_033_superglue");

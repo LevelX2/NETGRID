@@ -152,7 +152,7 @@
     }
   ],
   "hardErrorCount": 0,
-  "warningCount": 21,
+  "warningCount": 23,
   "errors": [],
   "warnings": [
     {
@@ -264,6 +264,13 @@
       "title": "Crybaby"
     },
     {
+      "kind": "active_quality_differs",
+      "message": "Overlay quality.strategyCovered differs from the active monolith.",
+      "cardId": "onr_v1_355_crystal-palace-station-grid",
+      "overlayPath": "data/ai/hints/overlays/onr-v1/corp/upgrades.json",
+      "field": "strategyCovered"
+    },
+    {
       "kind": "missing_manual_overlay_pilot_card",
       "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
       "cardId": "onr_v1_359_jenny-jett",
@@ -274,6 +281,13 @@
       "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
       "cardId": "onr_v1_362_new-galveston-city-grid",
       "title": "New Galveston City Grid"
+    },
+    {
+      "kind": "active_quality_differs",
+      "message": "Overlay quality.strategyCovered differs from the active monolith.",
+      "cardId": "onr_v1_366_red-herrings",
+      "overlayPath": "data/ai/hints/overlays/onr-v1/corp/upgrades.json",
+      "field": "strategyCovered"
     },
     {
       "kind": "missing_manual_overlay_pilot_card",
