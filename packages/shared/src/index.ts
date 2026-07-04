@@ -906,6 +906,7 @@ export type CardInstance = {
   rezzed: boolean;
   advancementCounters: number;
   strengthModifier: number;
+  agendaPointsSpent?: number;
   counters?: Partial<Record<CounterType, number>>;
   tapped?: boolean;
   hostedOn?: CardInstanceId;

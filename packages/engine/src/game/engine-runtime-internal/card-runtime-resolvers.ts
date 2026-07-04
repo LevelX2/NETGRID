@@ -1077,6 +1077,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     skivvissCounterTotal,
     sourcePartsForP334Choice,
     specialZoneHarnessActions,
+    spendAgendaPointFromScoredCard,
     spendCorpAgendaPointCost,
     spendEncounterTemporaryTraceCredits,
     spendCorpTraceCounterPoolCounters,
@@ -1750,20 +1751,12 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     let agendaPointsLost = 0;
     const agendaDefinitionIds: CardDefinitionId[] = [];
     for (const agendaId of agendaIds) {
-      agendaPointsLost += agendaPointsForScoredCard(state, agendaId);
+      const agendaPointsFromCard = agendaPointsForScoredCard(state, agendaId);
+      agendaPointsLost += agendaPointsFromCard;
       agendaDefinitionIds.push(definitionFor(state, agendaId).id);
-      removeFromAllZones(state, agendaId);
-      ensureSpecialZones(state).removedFromGame.push(agendaId);
-      state.cardInstances[agendaId] = {
-        ...mustInstance(state.cardInstances, agendaId),
-        faceup: true,
-        rezzed: true,
-        zone: {
-          side: "special",
-          zone: "removed_from_game",
-          visibility: "public",
-        },
-      };
+      for (let index = 0; index < agendaPointsFromCard; index += 1) {
+        spendAgendaPointFromScoredCard(state, agendaId);
+      }
     }
     state.corpBonusAgendaPoints =
       Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0)) +
@@ -1783,20 +1776,20 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
       state.runnerTurnFlags.stolenAgendaIdsThisTurn = (
         state.runnerTurnFlags.stolenAgendaIdsThisTurn ?? []
       ).filter((cardId) => !agendaIds.includes(cardId));
+    const spentAgendaDefinitionIds = agendaDefinitionIds.sort().join(",");
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       runnerEventAbility: "runner_corruption_agenda_point_transfer",
       sourceDefinitionId,
       corruptedAgendaCount: agendaIds.length,
-      corruptedAgendaDefinitionIds: agendaDefinitionIds.sort().join(","),
+      corruptedAgendaDefinitionIds: spentAgendaDefinitionIds,
+      spentAgendaDefinitionIds,
       agendaPointsLost,
       corpBonusAgendaPointsAfter: state.corpBonusAgendaPoints,
       gainedCredits,
       runnerCreditsAfter: state.runner.credits,
       tagsAdded: Math.max(0, state.runner.tags - tagsBefore),
       runnerTagsAfter: state.runner.tags,
-      specialZone: "removed_from_game",
-      specialZoneVisibility: "public",
     };
   }
 

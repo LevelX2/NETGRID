@@ -928,7 +928,27 @@ export function agendaPointsForScoredCard(
   const definition = definitionFor(state, cardId);
   const basePoints = definition.agendaPoints ?? 0;
   const bonusPoints = cardCounter(state, cardId, "agenda");
-  return Math.max(0, basePoints + bonusPoints);
+  const spentPoints = Math.max(
+    0,
+    Math.floor(state.cardInstances[cardId]?.agendaPointsSpent ?? 0),
+  );
+  return Math.max(0, basePoints + bonusPoints - spentPoints);
+}
+
+export function spendAgendaPointFromScoredCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): void {
+  if (agendaPointsForScoredCard(state, cardId) < 1)
+    throw new Error(
+      "Die gewaehlte Agenda liefert keinen Agenda-Punkt fuer Kosten.",
+    );
+  const instance = mustInstance(state.cardInstances, cardId);
+  state.cardInstances[cardId] = {
+    ...instance,
+    agendaPointsSpent:
+      Math.max(0, Math.floor(instance.agendaPointsSpent ?? 0)) + 1,
+  };
 }
 
 export function scoreInstalledRunnerProgramAsAgenda(
@@ -993,8 +1013,8 @@ export function pickRunnerAgendaForAgendaPointCost(
 type CorpAgendaPointCostResult = {
   paidPoints: number;
   bonusPointsSpent: number;
-  forfeitedAgendaIds: CardInstanceId[];
-  forfeitedAgendaDefinitionIds: CardDefinitionId[];
+  spentAgendaIds: CardInstanceId[];
+  spentAgendaDefinitionIds: CardDefinitionId[];
 };
 
 

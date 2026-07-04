@@ -3911,7 +3911,7 @@ describe("V1.8.0 Mechanikpaket G", () => {
     );
   });
 
-  it("enforces Corporate Ally install agenda-point forfeit and Databroker agenda-point-to-credit action", () => {
+  it("enforces Corporate Ally install agenda-point spend and Databroker agenda-point-to-credit action", () => {
     let state = toRunnerTurn(
       v180CardReleaseGame("v180-corporate-ally-databroker"),
     );
@@ -3948,8 +3948,11 @@ describe("V1.8.0 Mechanikpaket G", () => {
     );
     expect(state.runner.rig.resources).toContain(corporateAllyId);
     if (stolenAgendaId) {
-      expect(state.runner.scoreArea).not.toContain(stolenAgendaId);
-      expect(state.specialZones?.removedFromGame).toContain(stolenAgendaId);
+      expect(state.runner.scoreArea).toContain(stolenAgendaId);
+      expect(state.specialZones?.removedFromGame ?? []).not.toContain(
+        stolenAgendaId,
+      );
+      expect(state.cardInstances[stolenAgendaId]?.agendaPointsSpent).toBe(1);
     }
 
     state = apply(
@@ -3968,7 +3971,7 @@ describe("V1.8.0 Mechanikpaket G", () => {
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
-    const databrokerForfeitTarget = state.runner.scoreArea.find(
+    const databrokerSpendTarget = state.runner.scoreArea.find(
       (cardId) =>
         state.cardInstances[cardId]?.definitionId ===
         "onr_v1_203_hostile-takeover",
@@ -3984,11 +3987,14 @@ describe("V1.8.0 Mechanikpaket G", () => {
     );
     expect(state.runner.credits).toBe(creditsBefore + 10);
     expect(state.runner.heap).toContain(databrokerId);
-    if (databrokerForfeitTarget) {
-      expect(state.runner.scoreArea).not.toContain(databrokerForfeitTarget);
-      expect(state.specialZones?.removedFromGame).toContain(
-        databrokerForfeitTarget,
+    if (databrokerSpendTarget) {
+      expect(state.runner.scoreArea).toContain(databrokerSpendTarget);
+      expect(state.specialZones?.removedFromGame ?? []).not.toContain(
+        databrokerSpendTarget,
       );
+      expect(
+        state.cardInstances[databrokerSpendTarget]?.agendaPointsSpent,
+      ).toBe(1);
     }
   });
 
@@ -7098,13 +7104,16 @@ describe("V1.9.5 Mechanikpaket N", () => {
         sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
     );
     expect(state.corp.credits).toBe(22);
-    expect(state.corp.scoreArea).not.toContain(scoredAgendaId);
+    expect(state.corp.scoreArea).toContain(scoredAgendaId);
+    expect(state.specialZones?.removedFromGame ?? []).not.toContain(scoredAgendaId);
+    expect(state.cardInstances[scoredAgendaId]?.agendaPointsSpent).toBe(1);
     expect(state.corp.archives).toContain(acmeId);
     expect(state.activeObligationDebtCount).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "rez_ice",
       cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
       agendaPointCost: 1,
+      spentAgendaDefinitionIds: "onr_v1_203_hostile-takeover",
       gainedCredits: 12,
       selfTrashed: true,
       obligationDebtCountAfter: 1,
@@ -7117,6 +7126,68 @@ describe("V1.9.5 Mechanikpaket N", () => {
       obligationDebtAbility: "end_of_turn_payment",
       obligationDebtPaymentPaid: 1,
       corpCreditsAfter: 21,
+    });
+  });
+
+  it("spends exactly one agenda point from Tycho Extension when rezzing ACME", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v195-acme-tycho-spend",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: ONR_V1_9_5_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_9_5_CORP_DECK,
+          id: "onr_v1_9_5_corp_acme_tycho_spend",
+          cards: [
+            ...ONR_V1_9_5_CORP_DECK.cards,
+            { id: "onr_v1_220_tycho-extension", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    const tychoId = scoreCorpAgendaForTest(
+      state,
+      "onr_v1_220_tycho-extension",
+    );
+    const acmeId = moveCorpCardToHq(
+      state,
+      "onr_v1_308_acme-savings-and-loan",
+    );
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 10;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+    );
+    state.corp.credits = 0;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+    );
+
+    expect(state.corp.scoreArea).toContain(tychoId);
+    expect(state.specialZones?.removedFromGame ?? []).not.toContain(tychoId);
+    expect(state.cardInstances[tychoId]?.agendaPointsSpent).toBe(1);
+    expect(agendaPoints(state, "corp")).toBe(3);
+    expect(state.corp.archives).toContain(acmeId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "rez_ice",
+      cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
+      agendaPointCost: 1,
+      agendaPointCostPaid: 1,
+      spentAgendaDefinitionIds: "onr_v1_220_tycho-extension",
+      gainedCredits: 12,
     });
   });
 

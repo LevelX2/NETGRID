@@ -711,6 +711,7 @@ export function createScoredEconomyRuntimeHosts(
     runRezWindowHostForState,
     scoredAgendaImplementationForDefinition,
     scoredAgendaKindForDefinition,
+    spendCorpAgendaPointCost,
     spendVisibleCardCounter,
     trashCorpInstalledCardToArchives,
     trashOlderRegionUpgradesInServer,
@@ -1084,6 +1085,8 @@ export function createScoredEconomyRuntimeHosts(
           agendaPointsForScoredCard(state, cardId),
         forfeitCorpAgendaForPointCost: (cardId) =>
           forfeitCorpAgendaForPointCost(state, cardId),
+        spendPointCost: (requiredPoints) =>
+          spendCorpAgendaPointCost(state, requiredPoints),
       },
       damage: {
         resolveDamageOperation: (damageType, amount, sourceDefinitionId) => {

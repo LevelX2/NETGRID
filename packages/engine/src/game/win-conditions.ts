@@ -60,7 +60,11 @@ function agendaPointsForScoredCard(
   const definition = definitionFor(state, cardId);
   const basePoints = definition.agendaPoints ?? 0;
   const bonusPoints = cardCounter(state, cardId, "agenda");
-  return Math.max(0, basePoints + bonusPoints);
+  const spentPoints = Math.max(
+    0,
+    Math.floor(state.cardInstances[cardId]?.agendaPointsSpent ?? 0),
+  );
+  return Math.max(0, basePoints + bonusPoints - spentPoints);
 }
 
 function cardCounter(

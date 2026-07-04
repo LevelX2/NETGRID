@@ -775,6 +775,7 @@ import {
   runnerTracePaymentDeps,
   runnerTrashedNodeLastTurn,
   sanitizeId,
+  spendAgendaPointFromScoredCard,
 } from "./runtime-bootstrap-support";
 import {
   RUNNER_EVENT_RESOLVERS,
@@ -1330,6 +1331,7 @@ export function initializeStateRuntimeBootstrap({
     skivvissCounterTotal,
     sourcePartsForP334Choice,
     specialZoneHarnessActions,
+    spendAgendaPointFromScoredCard,
     spendCorpAgendaPointCost,
     spendEncounterTemporaryTraceCredits,
     spendCorpTraceCounterPoolCounters,

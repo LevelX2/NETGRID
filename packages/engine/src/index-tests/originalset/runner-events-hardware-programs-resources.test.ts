@@ -2232,12 +2232,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       (action) => action.actionId === databrokerAction.actionId,
     );
     expect(databroker.runner.credits).toBe(creditsBefore + 10);
-    expect(databroker.specialZones?.removedFromGame).toContain(agendaId);
+    expect(databroker.runner.scoreArea).toContain(agendaId);
+    expect(databroker.specialZones?.removedFromGame ?? []).not.toContain(agendaId);
+    expect(databroker.cardInstances[agendaId]?.agendaPointsSpent).toBe(1);
     expect(databroker.runner.heap).toContain(brokerId);
     expect(databroker.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_159_databroker",
       resourceAbility: "databroker",
       agendaPointCostPaid: 1,
+      spentAgendaCardId: agendaId,
       gainedCredits: 10,
     });
     const dataReplay = replayEvents(

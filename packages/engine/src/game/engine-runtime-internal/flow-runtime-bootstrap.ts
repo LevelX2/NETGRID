@@ -1434,6 +1434,7 @@ export function configureFlowRuntimeBootstrap({
       chooseAgendasForPointCost: chooseCorpAgendasForPointCost,
       agendaPointsForScoredCard,
       forfeitAgendaForPointCost: forfeitCorpAgendaForPointCost,
+      spendAgendaPointCost: spendCorpAgendaPointCost,
     },
     counters: {
       cardCounter: (state, cardId, counterType) =>
