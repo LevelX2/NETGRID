@@ -7,6 +7,10 @@ import type {
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import { rolesMatch } from "./role-match";
 import { visibleCardDefinition } from "./card-definition-lookup";
+import {
+  visibleBreakerCardCanAddressIce,
+  visibleBreakerRoles,
+} from "./runner-visible-breaker-coverage";
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "./semantic-runtime-corp-effective-defense";
 import { semanticRuntimeCorpCentralIceProfile } from "./semantic-runtime-corp-remote-score";
@@ -900,7 +904,7 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
   const playableScorelineEntries = actions.filter(
     (entry) =>
       actionPushesUnsafeScoreline(input, entry.action, dependencies) &&
-      scorelineEntryCanRelieveHqAgendaFlood(entry),
+      scorelineEntryCanRelieveHqAgendaFlood(input, entry, actions),
   );
   if (playableScorelineEntries.length === 0) return undefined;
 
@@ -947,6 +951,9 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
       ...(requiredRezFloor !== undefined
         ? [`corp_forced_scoreline_rez_floor:${requiredRezFloor}`]
         : []),
+      ...(preferred && scorelineEntryIsRelativeHqAgendaRelief(input, preferred, actions)
+        ? ["corp_hq_agenda_relative_remote_relief:true"]
+        : []),
       ...hqPressure.evidence.slice(0, 6),
       ...(preferred?.scoringWindow?.evidence ?? []).slice(0, 8),
     ],
@@ -975,7 +982,9 @@ function corpHqAgendaFloodIsPressured(
 }
 
 function scorelineEntryCanRelieveHqAgendaFlood(
+  input: AiDecisionInput,
   entry: ScoredLegalAction,
+  actions: readonly ScoredLegalAction[],
 ): boolean {
   if (!entry.serverId || entry.serverId === "new_remote") return false;
   if (!entry.serverId.startsWith("remote_")) return false;
@@ -998,14 +1007,60 @@ function scorelineEntryCanRelieveHqAgendaFlood(
       (assessment.affordableDurableRelevantIceCount ?? 0) >= 1
     );
   }
+  return scorelineEntryIsRelativeHqAgendaRelief(input, entry, actions);
+}
+
+function scorelineEntryIsRelativeHqAgendaRelief(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  actions: readonly ScoredLegalAction[],
+): boolean {
+  const assessment = entry.scoringWindow;
+  if (!entry.serverId || !entry.serverId.startsWith("remote_")) return false;
+  if (!assessment) return false;
+  const pointsToWin =
+    corpTriagePositiveNumber(input.playerView.agendaPointsToWin) ?? 7;
+  const runnerAgendaPointsAfterSteal =
+    corpTriagePositiveNumber(assessment.runnerAgendaPointsAfterSteal) ?? 0;
   return (
     assessment.windowKind === "unsafe" &&
-    assessment.missingVisibleBreakerCoverage &&
-    !assessment.runnerCanReachAccessNow &&
-    !assessment.runnerCanContestBeforeScore &&
-    !assessment.runnerCanReachAccessBeforeScore &&
     assessment.agendaStealSeverity !== "game_ending" &&
-    (assessment.affordableDurableRelevantIceCount ?? 0) >= 1
+    runnerAgendaPointsAfterSteal < pointsToWin &&
+    assessment.recommendedNextStep !== "gain_credit" &&
+    assessment.corpCanRezRelevantIce !== false &&
+    assessment.corpCanRezFullPathWithDynamicReserve !== false &&
+    (assessment.dynamicProtectionWeaknessCount ?? 0) === 0 &&
+    (assessment.affordableDurableRelevantIceCount ?? 0) >= 1 &&
+    existingRemoteCanCarryRelativeHqRelief(input, entry) &&
+    !concreteRemoteProtectionActionExists(actions, entry.serverId)
+  );
+}
+
+function existingRemoteCanCarryRelativeHqRelief(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+): boolean {
+  if (!entry.serverId) return false;
+  if (entry.action.type === "advance_card") {
+    return remoteServerHasVisibleScoreline(input, entry.serverId);
+  }
+  return (
+    entry.action.type === "install_card" &&
+    entry.action.payload?.placement !== "ice" &&
+    existingReadyRemoteCanReceiveScoreline(input, entry.serverId)
+  );
+}
+
+function concreteRemoteProtectionActionExists(
+  actions: readonly ScoredLegalAction[],
+  serverId: string,
+): boolean {
+  return actions.some(
+    (entry) =>
+      entry.serverId === serverId &&
+      ((entry.action.type === "install_card" &&
+        entry.action.payload?.placement === "ice") ||
+        entry.action.type === "rez_ice"),
   );
 }
 
@@ -1422,7 +1477,11 @@ function preScoreCentralProtectionTriage(
       `corp_hq_agenda_count:${hqAgendaCount}`,
       `corp_hq_agenda_points:${hqAgendaPoints}`,
       `corp_runner_agenda_points:${runnerAgendaPoints}`,
-      "corp_hq_ice_count:0",
+      `corp_hq_ice_count:${centralServerIceCount(input, "hq")}`,
+      `corp_hq_effective_stop_ice:${centralServerHasEffectiveStopIce(
+        input,
+        "hq",
+      )}`,
       ...hqPressure.evidence.slice(0, 8),
     ],
   };
@@ -1432,7 +1491,7 @@ function centralServerNeedsProtection(
   input: AiDecisionInput,
   serverId: "hq" | "rd",
 ): boolean {
-  return centralServerIceCount(input, serverId) === 0;
+  return !centralServerHasEffectiveStopIce(input, serverId);
 }
 
 function centralServerIceCount(
@@ -1442,6 +1501,47 @@ function centralServerIceCount(
   return (
     input.playerView.servers?.find((server) => server.id === serverId)?.ice
       .length ?? 0
+  );
+}
+
+function centralServerHasEffectiveStopIce(
+  input: AiDecisionInput,
+  serverId: "hq" | "rd",
+): boolean {
+  const server = input.playerView.servers?.find(
+    (candidate) => candidate.id === serverId,
+  );
+  return (
+    server?.ice.some((ice) => centralIceIsEffectiveAccessStop(input, ice)) ===
+    true
+  );
+}
+
+function centralIceIsEffectiveAccessStop(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+): boolean {
+  if (ice.known === false) return true;
+  const profile = semanticRuntimeCorpCentralIceProfile(ice);
+  if (!profile.hasAccessStop || profile.positionDependent) return false;
+  if (ice.rezzed === true && runnerHasVisibleCoverageForIce(input, ice)) {
+    return false;
+  }
+  return true;
+}
+
+function runnerHasVisibleCoverageForIce(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+): boolean {
+  return (input.playerView.opponent.rig ?? []).some(
+    (card) =>
+      card.known !== false &&
+      card.type === "program" &&
+      visibleBreakerCardCanAddressIce(card, ice, {
+        visibleBreakerRoles,
+        visibleCardText: corpBoardTriageVisibleCardCoverageText,
+      }),
   );
 }
 
@@ -1679,6 +1779,21 @@ function actionHasVisibleDrawSource(
     .filter((value): value is string => typeof value === "string")
     .join(" ");
   return corpBoardTriageTokensIncludeDraw(corpBoardTriageRulesTextTokens(text));
+}
+
+function corpBoardTriageVisibleCardCoverageText(card: VisibleCard): string {
+  const definition = visibleCardDefinition(card);
+  return [
+    card.title,
+    card.rulesText,
+    card.definitionId,
+    ...(card.subtypes ?? []),
+    definition?.title,
+    definition?.rulesText,
+    ...(definition?.subtypes ?? []),
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
 }
 
 function corpTriageVisibleCardIsAgenda(card: VisibleCard): boolean {

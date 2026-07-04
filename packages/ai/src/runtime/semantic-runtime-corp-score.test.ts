@@ -1382,6 +1382,341 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("softens contestable remote penalties for relative HQ agenda relief", () => {
+    const installAgenda = corpAction(
+      "install-agenda-remote-1",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "agenda-1",
+    );
+    const nightShift = corpAction(
+      "play-night-shift",
+      "play_operation",
+      {},
+      "corp_night_shift",
+    );
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithHqCards(
+      8,
+      [
+        agendaCard("agenda-1", 4),
+        agendaCard("agenda-2", 2),
+        nightShiftCard(),
+      ],
+      [installAgenda, nightShift, gainCredit],
+    );
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 2,
+      credits: 5,
+    });
+    input.playerView.servers = [
+      {
+        id: "hq",
+        label: "HQ",
+        ice: [corpIce("hq-filter", { rezzed: true })],
+        root: [],
+      },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-data-wall", { rezCost: 1, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpInstallRemoteScore: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) => (action.actionId === installAgenda.actionId ? -2200 : 0),
+      corpRemoteScoreContestabilityAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? { contestable: true, evidence: ["test_contestable_remote"] }
+          : undefined,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              missingVisibleBreakerCoverage: false,
+              runnerCanReachAccessNow: true,
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              affordableDurableRelevantIceCount: 1,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: true,
+              dynamicProtectionWeaknessCount: 0,
+              agendaStealSeverity: "near_win",
+              runnerAgendaPointsAfterSteal: 6,
+              recommendedNextStep: "build_remote_ice",
+              evidence: ["test_relative_hq_relief_scoreline"],
+            })
+          : undefined,
+    };
+
+    const installComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installAgenda,
+      "basic_install",
+      dependencies,
+    );
+    const nightShiftComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      nightShift,
+      "basic_install",
+      dependencies,
+      semanticCandidate(
+        nightShift.actionId,
+        "play.corp_operation",
+        ["economy.corp_credit_burst", "draw_operation"],
+        "play_operation",
+      ),
+    );
+
+    expect(installComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_hq_agenda_relief_scoreline",
+          value: 3200,
+        }),
+        expect.objectContaining({
+          key: "corp_install_remote_context",
+          value: -350,
+          reason: expect.stringContaining("remote_context_floor:-350"),
+        }),
+        expect.objectContaining({
+          key: "corp_contestable_remote_score_penalty",
+          value: -900,
+          reason: expect.stringContaining(
+            "contestable_penalty_softened_for_hq_relief:true",
+          ),
+        }),
+      ]),
+    );
+    expect(nightShiftComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_hq_agenda_flood_draw_risk",
+          value: -1800,
+        }),
+      ]),
+    );
+    expect(totalScore(installComponents)).toBeGreaterThan(
+      totalScore(nightShiftComponents),
+    );
+    expect(totalScore(installComponents)).toBeGreaterThan(
+      totalScoreFor(input, gainCredit, "basic_economy_draw", dependencies),
+    );
+  });
+
+  it("keeps remote protection above relative HQ relief when protection is legal", () => {
+    const installAgenda = corpAction(
+      "install-agenda-remote-1",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "agenda-1",
+    );
+    const installRemoteIce = corpAction("install-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const input = corpInputWithHqCards(
+      8,
+      [agendaCard("agenda-1", 4), agendaCard("agenda-2", 2)],
+      [installAgenda, installRemoteIce],
+    );
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 2,
+      credits: 5,
+    });
+    input.playerView.servers = [
+      {
+        id: "hq",
+        label: "HQ",
+        ice: [corpIce("hq-filter", { rezzed: true })],
+        root: [],
+      },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-data-wall", { rezCost: 1, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpInstallRemoteScore: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) => (action.actionId === installAgenda.actionId ? -2200 : 0),
+      corpRemoteScoreContestabilityAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? { contestable: true, evidence: ["test_contestable_remote"] }
+          : undefined,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              missingVisibleBreakerCoverage: false,
+              runnerCanReachAccessNow: true,
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              affordableDurableRelevantIceCount: 1,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: true,
+              dynamicProtectionWeaknessCount: 0,
+              agendaStealSeverity: "near_win",
+              runnerAgendaPointsAfterSteal: 6,
+              recommendedNextStep: "build_remote_ice",
+              evidence: ["test_relative_hq_relief_needs_protection"],
+            })
+          : undefined,
+    };
+
+    const installComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installAgenda,
+      "basic_install",
+      dependencies,
+    );
+    const remoteIceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installRemoteIce,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(JSON.stringify(installComponents)).not.toContain(
+      "corp_hq_agenda_relief_scoreline",
+    );
+    expect(remoteIceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining(
+            "triage_primary:protect_score_remote",
+          ),
+        }),
+      ]),
+    );
+    expect(totalScore(remoteIceComponents)).toBeGreaterThan(
+      totalScore(installComponents),
+    );
+  });
+
+  it("penalizes non-agenda roots that block a prepared scoring remote", () => {
+    const installAgenda = corpAction(
+      "install-agenda-remote-1",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "agenda-1",
+    );
+    const installSupportRoot = corpAction(
+      "install-support-remote-1",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+      },
+      "support-root",
+    );
+    const input = corpInputWithHqCards(
+      5,
+      [agendaCard("agenda-1", 2), corpCard("support-root", "asset")],
+      [installAgenda, installSupportRoot],
+    );
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-data-wall", { rezCost: 1, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "durable",
+              affordableDurableRelevantIceCount: 1,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: true,
+              dynamicProtectionWeaknessCount: 0,
+              agendaStealSeverity: "normal",
+              recommendedNextStep: "score",
+              evidence: ["test_ready_remote_agenda_payload"],
+            })
+          : undefined,
+    };
+
+    const supportComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installSupportRoot,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(supportComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_non_agenda_root_blocks_score_remote",
+          value: -1800,
+          reason: expect.stringContaining(
+            "available_scoreline_action:install-agenda-remote-1",
+          ),
+        }),
+      ]),
+    );
+    expect(
+      totalScoreFor(input, installAgenda, "basic_install", dependencies),
+    ).toBeGreaterThan(totalScore(supportComponents));
+  });
+
   it("does not force a game-ending contestable HQ-flood scoreline", () => {
     const installAgenda = corpAction(
       "install-game-ending-agenda",

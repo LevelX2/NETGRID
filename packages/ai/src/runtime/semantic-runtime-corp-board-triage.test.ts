@@ -322,6 +322,82 @@ describe("semantic runtime corp board triage", () => {
       value: -3200,
     });
   });
+
+  it("protects HQ with visibly covered ICE before forcing remote scoreline", () => {
+    const hqIce = corpAction("install-hq-ice", "install_card", {
+      placement: "ice",
+      serverId: "hq",
+    });
+    const remoteAgenda = corpAction("remote-scoreline", "install_card", {
+      placement: "root",
+      serverId: "remote_1",
+    });
+    const input = corpInput({
+      corpHq: [agendaCard("hq-agenda-1", 2), agendaCard("hq-agenda-2", 2)],
+      runnerRig: [fracterBreaker()],
+      legalActions: [remoteAgenda, hqIce],
+      servers: [
+        centralServer("hq", [
+          iceCard("hq-wall", {
+            title: "Wall of Static",
+            definitionId: "onr_v1_279_wall-of-static",
+            rezzed: true,
+            subtypes: ["Wall"],
+            rulesText: "End the run.",
+          }),
+        ]),
+        centralServer("rd", []),
+        remoteServer("remote_1", [iceCard("remote-ice")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "durable",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezFullPathWithDynamicReserve: true,
+          corpCanRezRelevantIce: true,
+          recommendedNextStep: "score",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const hqComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      hqIce,
+      dependencies,
+    );
+    const remoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteAgenda,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_hq",
+      severity: "critical",
+      targetServerId: "hq",
+    });
+    expect(triage.evidence).toContain("corp_hq_ice_count:1");
+    expect(triage.evidence).toContain("corp_hq_effective_stop_ice:false");
+    expect(hqComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(remoteComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -3200,
+    });
+  });
 });
 
 function corpInput(overrides: {
@@ -511,6 +587,18 @@ function earlyWormBreaker(): VisibleCard {
     title: "Early Worm",
     definitionId: "onr_classic_027_early-worm",
     subtypes: ["Icebreaker", "Worm"],
+  } as VisibleCard;
+}
+
+function fracterBreaker(): VisibleCard {
+  return {
+    instanceId: "runner-fracter",
+    known: true,
+    type: "program",
+    owner: "runner",
+    title: "Runner Fracter",
+    subtypes: ["Icebreaker", "Fracter"],
+    rulesText: "Break wall subroutines.",
   } as VisibleCard;
 }
 
