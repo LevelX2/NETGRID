@@ -83,6 +83,7 @@ const BLINK_ID = "onr_v1_007_blink";
 const SOCIAL_ENGINEERING_ID = "onr_v1_111_social-engineering";
 const VIRAL_15_ID = "onr_v1_276_viral-15";
 const PLAYFUL_AI_ID = "onr_v1_104_playful-ai";
+const GYPSY_SCHEDULE_ANALYZER_ID = "onr_classic_038_gypsytm-schedule-analyzer";
 
 export function isISpySuccessfulRunFollowupPayload(
   payload: Record<string, unknown>,
@@ -2055,6 +2056,25 @@ export function formatChronicleEvent(
       }
       if (
         actionType === "play_event" &&
+        stringValue(payload.accessReplacement) ===
+          "reveal_rd_until_agenda_store_in_hq"
+      ) {
+        const summary = gypsyScheduleAnalyzerChronicleSummary(
+          payload,
+          cardTitle,
+        );
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, summary.title);
+        description = summary.description;
+        cardDefinitionId = cardDefinitionId ?? summary.cardDefinitionId;
+        cardTitle = summary.sourceTitle;
+        chips.push(...summary.chips);
+        break;
+      }
+      if (
+        actionType === "play_event" &&
         stringValue(payload.accessReplacement)
       ) {
         const creditLoss = numberValue(payload.creditLoss) ?? 0;
@@ -2517,6 +2537,24 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (
+        stringValue(payload.accessReplacement) ===
+        "reveal_rd_until_agenda_store_in_hq"
+      ) {
+        const summary = gypsyScheduleAnalyzerChronicleSummary(
+          payload,
+          cardTitle,
+        );
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, summary.title);
+        description = summary.description;
+        cardDefinitionId = cardDefinitionId ?? summary.cardDefinitionId;
+        cardTitle = summary.sourceTitle;
+        chips.push(...summary.chips);
+        break;
+      }
       if (stringValue(payload.accessReplacement) === "archives_faceup_to_rd") {
         const movedCount = numberValue(payload.movedCount) ?? 0;
         const shuffledCount =
@@ -2728,12 +2766,11 @@ export function formatChronicleEvent(
         const schematicsExpose =
           hiddenZoneAction ===
           "schematics_search_engine_expose_installed_cards_review";
-        const source =
-          schematicsExpose
-            ? (titleForDefinitionId(sourceDefinitionId) ??
-              sourceTitle ??
-              "Schematics Search Engine")
-            : undefined;
+        const source = schematicsExpose
+          ? (titleForDefinitionId(sourceDefinitionId) ??
+            sourceTitle ??
+            "Schematics Search Engine")
+          : undefined;
         const revealedTitles = schematicsExpose
           ? publicRevealTitleList(payload.publicRevealTitles)
           : [];
@@ -5377,6 +5414,82 @@ function accessReplacementEffectParts(
   if (corpDrawnCount > 0)
     parts.push(`Korp zieht ${cardCountText(corpDrawnCount)}`);
   return parts.length > 0 ? parts : ["der Zugriff wird ersetzt"];
+}
+
+function gypsyScheduleAnalyzerChronicleSummary(
+  payload: Record<string, unknown>,
+  fallbackCardTitle: string | undefined,
+): {
+  title: string;
+  description: string;
+  chips: string[];
+  cardDefinitionId: string;
+  sourceTitle: string;
+} {
+  const sourceDefinitionId =
+    stringValue(payload.sourceDefinitionId) ?? GYPSY_SCHEDULE_ANALYZER_ID;
+  const sourceTitle =
+    titleForDefinitionId(sourceDefinitionId) ??
+    stringValue(payload.sourceTitle) ??
+    fallbackCardTitle ??
+    "Gypsy Schedule Analyzer";
+  const revealedTitles = publicRevealTitlesFromPayload(payload);
+  const revealedCount =
+    numberValue(payload.revealedCount) ?? revealedTitles.length;
+  const storedAgendaDefinitionId =
+    stringValue(payload.storedAgendaDefinitionId) ??
+    definitionIdsFromCsv(stringValue(payload.revealedAgendaDefinitionIds))[0];
+  const storedAgendaTitle = titleForDefinitionId(storedAgendaDefinitionId);
+  const agendaStored =
+    payload.agendaStoredInHq === true || Boolean(storedAgendaDefinitionId);
+  const shuffledIntoRdCount =
+    numberValue(payload.shuffledIntoRdCount) ??
+    Math.max(0, revealedCount - (agendaStored ? 1 : 0));
+  const revealDescription =
+    revealedTitles.length > 0
+      ? `Aufgedeckt: ${revealedTitles.join(", ")}.`
+      : revealedCount > 0
+        ? `${cardCountText(revealedCount)} aus R&D wurden aufgedeckt.`
+        : "R&D war leer.";
+  const shuffleDescription = agendaStored
+    ? `${shuffledIntoRdCount} Nicht-Agenda-${shuffledIntoRdCount === 1 ? "Karte wurde" : "Karten wurden"} in R&D gemischt; es gab keinen normalen Zugriff.`
+    : `${shuffledIntoRdCount} aufgedeckte ${shuffledIntoRdCount === 1 ? "Karte wurde" : "Karten wurden"} in R&D gemischt; es gab keinen normalen Zugriff.`;
+
+  return {
+    title: agendaStored
+      ? `${sourceTitle} abgeschlossen: ${storedAgendaTitle ?? "eine Agenda"} gefunden und in HQ gespeichert`
+      : `${sourceTitle} abgeschlossen: keine Agenda in R&D gefunden`,
+    description: `${revealDescription} ${shuffleDescription}`,
+    chips: [
+      sourceTitle,
+      "R&D Reveal",
+      revealedCount > 0 ? `Top ${revealedCount}` : "R&D leer",
+      agendaStored ? "Agenda nach HQ" : "Keine Agenda",
+      `${shuffledIntoRdCount} gemischt`,
+    ],
+    cardDefinitionId: sourceDefinitionId,
+    sourceTitle,
+  };
+}
+
+function publicRevealTitlesFromPayload(
+  payload: Record<string, unknown>,
+): string[] {
+  const fromIds = titlesForDefinitionIds(
+    stringValue(payload.publicRevealDefinitionIds),
+  );
+  if (fromIds.length > 0) return fromIds;
+  const rawTitles = stringValue(payload.publicRevealTitles);
+  if (!rawTitles) return [];
+  const separator = rawTitles.includes("||")
+    ? "||"
+    : rawTitles.includes("|")
+      ? "|"
+      : ",";
+  return rawTitles
+    .split(separator)
+    .map((title) => title.trim())
+    .filter(Boolean);
 }
 
 function searchDestinationLabel(destination: string | undefined): string {

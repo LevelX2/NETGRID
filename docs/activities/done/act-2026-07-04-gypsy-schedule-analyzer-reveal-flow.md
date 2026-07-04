@@ -1,19 +1,31 @@
 ---
 activityId: act-2026-07-04-gypsy-schedule-analyzer-reveal-flow
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: critical
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-04
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-04
+completedAt: 2026-07-04
+branch: codex/activities-worktree-20260704-090854
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/run/run-access-transition.ts
+  - packages/engine/src/public-context.ts
+  - packages/engine/src/mechanics/public-payload-schema.ts
+  - packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/classic-runner-rest-cards.test.ts -t "Gypsy Schedule Analyzer"
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts -t "Gypsy Schedule Analyzer"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm format:changed
+  - git diff --check
 ---
 
 # Gypsy Schedule Analyzer: R&D-Reveal sichtbar und korrekt abwickeln
@@ -49,14 +61,14 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] Nach erfolgreichem `Gypsy™ Schedule Analyzer`-Run werden die tatsächlich aufgedeckten R&D-Karten für den Runner sichtbar, in Reihenfolge nachvollziehbar und ohne zusätzliche verdeckte R&D-Information angezeigt.
-- [ ] Wenn eine Agenda gefunden wird, wird genau diese Agenda in HQ gespeichert und die Chronik nennt sie als gefunden beziehungsweise nach HQ verschoben.
-- [ ] Wenn keine Agenda gefunden wird, nennt die Chronik den Fall ausdrücklich.
-- [ ] Die übrigen aufgedeckten Nicht-Agenda-Karten werden deterministisch in R&D gemischt; Replay und StateHash bleiben stabil.
-- [ ] Die Korp erhält nur Informationen, die durch den Reveal-Effekt rechtmäßig öffentlich geworden sind; nicht aufgedeckte R&D-Karten bleiben verdeckt.
-- [ ] Runner- und Korp-PlayerViews, PublicEvents, WebSocket-/Reconnect-Payloads, Undo-Previews, öffentliche Replays und Logs leaken keine zusätzlichen verdeckten Karten.
-- [ ] Fokussierte Tests decken mindestens einen Fall "Nicht-Agenda, Nicht-Agenda, Agenda" und einen Fall "R&D ohne Agenda" ab.
-- [ ] Relevante Checks laufen oder werden begründet eingegrenzt; mindestens `git diff --check` nach Umsetzung.
+- [x] Nach erfolgreichem `Gypsy™ Schedule Analyzer`-Run werden die tatsächlich aufgedeckten R&D-Karten für den Runner sichtbar, in Reihenfolge nachvollziehbar und ohne zusätzliche verdeckte R&D-Information angezeigt.
+- [x] Wenn eine Agenda gefunden wird, wird genau diese Agenda in HQ gespeichert und die Chronik nennt sie als gefunden beziehungsweise nach HQ verschoben.
+- [x] Wenn keine Agenda gefunden wird, nennt die Chronik den Fall ausdrücklich.
+- [x] Die übrigen aufgedeckten Nicht-Agenda-Karten werden deterministisch in R&D gemischt; Replay und StateHash bleiben stabil.
+- [x] Die Korp erhält nur Informationen, die durch den Reveal-Effekt rechtmäßig öffentlich geworden sind; nicht aufgedeckte R&D-Karten bleiben verdeckt.
+- [x] Runner- und Korp-PlayerViews, PublicEvents, WebSocket-/Reconnect-Payloads, Undo-Previews, öffentliche Replays und Logs leaken keine zusätzlichen verdeckten Karten.
+- [x] Fokussierte Tests decken mindestens einen Fall "Nicht-Agenda, Nicht-Agenda, Agenda" und einen Fall "R&D ohne Agenda" ab.
+- [x] Relevante Checks laufen oder werden begründet eingegrenzt; mindestens `git diff --check` nach Umsetzung.
 
 ## Umsetzungshinweise
 
@@ -67,4 +79,6 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Der `Gypsy™ Schedule Analyzer`-Ersatz-Zugriff setzt jetzt eine öffentliche Reveal-Payload mit aufgedeckter Kartenfolge, gefundener Agenda, HQ-Speicherung und Shuffle-Count. Die PublicContext-/Schema-Brücke reicht diese Felder side-sicher durch; die Web-Chronik zeigt für Agenda- und No-Agenda-Fälle konkrete, lesbare Ergebniszeilen statt nur Run-Fortschritt.
+
+Regressionen decken den Fall `Nicht-Agenda, Nicht-Agenda, Agenda`, den Fall `R&D ohne Agenda`, PlayerView-/PublicEvent-Sichtbarkeit, Replay/StateHash und die Chronikformatierung ab. Ein separates Klick-für-Klick-Dialogfenster wurde nicht eingeführt; die bestehende Engine-Auflösung ist jetzt sichtbar und regelkonform dokumentiert.

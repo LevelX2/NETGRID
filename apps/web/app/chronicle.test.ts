@@ -1793,6 +1793,86 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(protectedRun)).not.toContain("cardInstances");
   });
 
+  it("describes Gypsy Schedule Analyzer R&D reveal with an agenda moved to HQ", () => {
+    const item = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        sourceDefinitionId: "onr_classic_038_gypsytm-schedule-analyzer",
+        sourceTitle: "Gypsy™ Schedule Analyzer",
+        accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+        publicRevealDefinitionIds:
+          "simple_economy_operation,simple_barrier_ice,simple_agenda",
+        publicRevealTitles:
+          "Simple Economy Operation||Simple Barrier ICE||Simple Agenda",
+        revealedAgendaDefinitionIds: "simple_agenda",
+        revealedCount: 3,
+        revealedNonAgendaCount: 2,
+        agendaStoredInHq: true,
+        storedAgendaDefinitionId: "simple_agenda",
+        shuffledIntoRdCount: 2,
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Du hast Gypsy™ Schedule Analyzer abgeschlossen: Simple Agenda gefunden und in HQ gespeichert.",
+    );
+    expect(item.description).toBe(
+      "Aufgedeckt: Simple Economy Operation, Simple Barrier ICE, Simple Agenda. 2 Nicht-Agenda-Karten wurden in R&D gemischt; es gab keinen normalen Zugriff.",
+    );
+    expect(item.category).toBe("run");
+    expect(item.visibility).toBe("public");
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Gypsy™ Schedule Analyzer",
+        "R&D Reveal",
+        "Top 3",
+        "Agenda nach HQ",
+        "2 gemischt",
+      ]),
+    );
+    expect(JSON.stringify(item)).not.toContain("cardInstances");
+  });
+
+  it("describes Gypsy Schedule Analyzer R&D reveal when no agenda is found", () => {
+    const item = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        sourceDefinitionId: "onr_classic_038_gypsytm-schedule-analyzer",
+        accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+        publicRevealDefinitionIds:
+          "simple_economy_operation,simple_barrier_ice",
+        publicRevealTitles: "Simple Economy Operation||Simple Barrier ICE",
+        revealedAgendaDefinitionIds: "",
+        revealedCount: 2,
+        revealedNonAgendaCount: 2,
+        agendaStoredInHq: false,
+        shuffledIntoRdCount: 2,
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Du hast Gypsy™ Schedule Analyzer abgeschlossen: keine Agenda in R&D gefunden.",
+    );
+    expect(item.description).toBe(
+      "Aufgedeckt: Simple Economy Operation, Simple Barrier ICE. 2 aufgedeckte Karten wurden in R&D gemischt; es gab keinen normalen Zugriff.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Gypsy™ Schedule Analyzer",
+        "R&D Reveal",
+        "Top 2",
+        "Keine Agenda",
+        "2 gemischt",
+      ]),
+    );
+  });
+
   it("describes Technician Lover private look in the use message and suppresses the confirmation event", () => {
     const activated = makeEvent("activated_card_ability", {
       actor: "runner",
@@ -3076,7 +3156,8 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         title: "Do the 'Drine",
         cardDefinitionId: "onr_classic_036_do-the-drine",
-        runnerEventAbility: "do_the_drine_unpreventable_core_damage_for_credits",
+        runnerEventAbility:
+          "do_the_drine_unpreventable_core_damage_for_credits",
         xValue: 4,
         damageType: "core",
         damageAmount: 4,
@@ -5628,8 +5709,7 @@ describe("formatChronicleEvent", () => {
   });
 
   it("shows Omnitech Spinal Tap start-turn die rolls and groups them under the Runner turn", () => {
-    const sourceDefinitionId =
-      "onr_classic_048_omnitech-spinal-tap-cybermodem";
+    const sourceDefinitionId = "onr_classic_048_omnitech-spinal-tap-cybermodem";
     const sourceTitle = 'Omnitech "Spinal Tap" Cybermodem';
     const damageEvent = makeEvent("end_turn", {
       actor: "corp",
@@ -5695,7 +5775,11 @@ describe("formatChronicleEvent", () => {
     );
     expect(
       noEffectItem
-        ? chronicleStartTurnEffectGroupFromEvent(noEffectEvent, 11, noEffectItem)
+        ? chronicleStartTurnEffectGroupFromEvent(
+            noEffectEvent,
+            11,
+            noEffectItem,
+          )
         : null,
     ).toEqual({ label: "Zug 12 - Runner", kind: "runner" });
   });

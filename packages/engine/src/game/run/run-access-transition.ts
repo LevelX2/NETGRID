@@ -73,9 +73,7 @@ export type RunAccessTransitionHost = {
   run: {
     isV097OrLater: () => boolean;
     finishRun: (successful: boolean, legalAction?: LegalAction) => void;
-    applyUniqueDirectSuccessfulRunTriggers: (
-      legalAction?: LegalAction,
-    ) => void;
+    applyUniqueDirectSuccessfulRunTriggers: (legalAction?: LegalAction) => void;
     successfulRunInterventionKindForSource: (
       sourceCardId: CardInstanceId,
     ) => SuccessfulRunInterventionKind | undefined;
@@ -86,7 +84,9 @@ export type RunAccessTransitionHost = {
     ) => number;
   };
   choices: {
-    selectedChoiceIds: (selectedChoices: PlayerAction["selectedChoices"]) => string[];
+    selectedChoiceIds: (
+      selectedChoices: PlayerAction["selectedChoices"],
+    ) => string[];
   };
 };
 
@@ -108,7 +108,11 @@ export function enterAccessFromSuccessfulRun(
 ): RunAccessTransitionResult {
   let run = mustRun(host);
   if (startSuccessfulRunInterventionChoice(host, run, legalAction))
-    return { handled: true, stateChanged: true, ...resolvedPayloadFor(legalAction) };
+    return {
+      handled: true,
+      stateChanged: true,
+      ...resolvedPayloadFor(legalAction),
+    };
   markSuccessfulRunForTurn(host, run);
   host.run.applyUniqueDirectSuccessfulRunTriggers(legalAction);
   if (
@@ -151,7 +155,10 @@ export function enterAccessFromSuccessfulRun(
       ...resolvedPayloadFor(legalAction),
     };
   }
-  if (run.successfulRunAccessReplacement === "trash_rezzed_ice_on_fort_and_tag_runner") {
+  if (
+    run.successfulRunAccessReplacement ===
+    "trash_rezzed_ice_on_fort_and_tag_runner"
+  ) {
     applySuccessfulRunAccessReplacement(host, run, legalAction);
     host.run.finishRun(true, legalAction);
     return {
@@ -176,8 +183,7 @@ export function enterAccessFromSuccessfulRun(
     };
   }
   if (
-    run.successfulRunAccessReplacement ===
-    "reveal_rd_until_agenda_store_in_hq"
+    run.successfulRunAccessReplacement === "reveal_rd_until_agenda_store_in_hq"
   ) {
     applyRevealRdUntilAgendaStoreInHqReplacement(host, run, legalAction);
     host.run.finishRun(true, legalAction);
@@ -190,15 +196,9 @@ export function enterAccessFromSuccessfulRun(
       ...resolvedPayloadFor(legalAction),
     };
   }
-  const microtechSourceId =
-    host.access.findPreAccessTopRdReorderSource(run);
+  const microtechSourceId = host.access.findPreAccessTopRdReorderSource(run);
   if (microtechSourceId) {
-    startPreAccessTopRdReorderChoice(
-      host,
-      run,
-      microtechSourceId,
-      legalAction,
-    );
+    startPreAccessTopRdReorderChoice(host, run, microtechSourceId, legalAction);
     return {
       handled: true,
       stateChanged: true,
@@ -312,12 +312,19 @@ export function resolveSuccessfulRunCreditLossSpendChoice(
 ): void {
   const choice = host.state.pendingChoice;
   const run = host.state.run;
-  if (!choice || !run || !choice.source.startsWith("successful_run.credit_loss_spend"))
+  if (
+    !choice ||
+    !run ||
+    !choice.source.startsWith("successful_run.credit_loss_spend")
+  )
     throw new Error("Es ist keine Successful-Run-Credit-Loss-Choice offen.");
   if (run.successfulRunAccessReplacement !== "runner_spend_corp_lose_credits")
     throw new Error("Credit-Loss-Spend passt nicht zum aktuellen Run.");
-  const selectedId = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const option = choice.options.find((candidate) => candidate.id === selectedId);
+  const selectedId =
+    host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const option = choice.options.find(
+    (candidate) => candidate.id === selectedId,
+  );
   const amount = Number(option?.value ?? -1);
   if (!Number.isInteger(amount) || amount < 0)
     throw new Error("Credit-Loss-Betrag ist ungueltig.");
@@ -347,16 +354,24 @@ export function resolvePreAccessTopRdReorderChoice(
   const choice = host.state.pendingChoice;
   if (!choice || !choice.source.startsWith("pre_access.top_rd_reorder"))
     throw new Error("Es ist keine Pre-Access-R&D-Reorder-Choice offen.");
-  const sourceCardId = choice.source.split(":")[2] as CardInstanceId | undefined;
-  if (
-    !sourceCardId ||
-    !host.access.isPreAccessTopRdReorderSource(sourceCardId)
-  )
-    throw new Error("Die Pre-Access-R&D-Reorder-Quelle ist nicht mehr installiert.");
-  const selectedId = host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
-  const option = choice.options.find((candidate) => candidate.id === selectedId);
+  const sourceCardId = choice.source.split(":")[2] as
+    | CardInstanceId
+    | undefined;
+  if (!sourceCardId || !host.access.isPreAccessTopRdReorderSource(sourceCardId))
+    throw new Error(
+      "Die Pre-Access-R&D-Reorder-Quelle ist nicht mehr installiert.",
+    );
+  const selectedId =
+    host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const option = choice.options.find(
+    (candidate) => candidate.id === selectedId,
+  );
   const amount = Number(option?.value ?? -1);
-  if (!Number.isInteger(amount) || amount < 0 || amount > host.state.corp.rd.length)
+  if (
+    !Number.isInteger(amount) ||
+    amount < 0 ||
+    amount > host.state.corp.rd.length
+  )
     throw new Error("Die R&D-Cut-Anzahl ist ungueltig.");
   if (amount > 0) {
     const moved = host.state.corp.rd.slice(0, amount);
@@ -507,7 +522,10 @@ function applySuccessfulRunAccessReplacement(
   }
   let trashedRezzedIceCount = 0;
   const trashedRezzedIceDefinitionIds: CardDefinitionId[] = [];
-  if (run.successfulRunAccessReplacement === "trash_rezzed_ice_on_fort_and_tag_runner") {
+  if (
+    run.successfulRunAccessReplacement ===
+    "trash_rezzed_ice_on_fort_and_tag_runner"
+  ) {
     const server = host.breach.servers.mustServer(run.attackedServerId);
     for (const iceId of server.ice.slice()) {
       if (host.cards.cardInstanceFor(iceId).rezzed !== true) continue;
@@ -521,7 +539,8 @@ function applySuccessfulRunAccessReplacement(
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      accessReplacement: run.successfulRunAccessReplacement ?? "corp_lose_credits",
+      accessReplacement:
+        run.successfulRunAccessReplacement ?? "corp_lose_credits",
       creditLoss,
       corpCreditsAfter: host.state.corp.credits,
       tagsAdded: runnerTagGain,
@@ -532,7 +551,11 @@ function applySuccessfulRunAccessReplacement(
       trashedRezzedIceCount,
       trashedCount: trashedRezzedIceCount,
       ...(trashedRezzedIceDefinitionIds.length > 0
-        ? { trashedCardDefinitionIds: trashedRezzedIceDefinitionIds.sort().join(",") }
+        ? {
+            trashedCardDefinitionIds: trashedRezzedIceDefinitionIds
+              .sort()
+              .join(","),
+          }
         : {}),
       hiddenZoneBarrier: true,
       ...sourcePayloadForSuccessfulRunReplacement(run),
@@ -555,7 +578,12 @@ function applyRevealRdUntilAgendaStoreInHqReplacement(
       break;
     }
   }
-  const revealedNonAgendaIds = revealedIds.filter((cardId) => cardId !== agendaId);
+  const revealedNonAgendaIds = revealedIds.filter(
+    (cardId) => cardId !== agendaId,
+  );
+  const revealedDefinitions = revealedIds.map((cardId) =>
+    host.cards.definitionFor(cardId),
+  );
   if (agendaId) {
     host.state.corp.hq.push(agendaId);
     host.state.cardInstances[agendaId] = {
@@ -582,11 +610,23 @@ function applyRevealRdUntilAgendaStoreInHqReplacement(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+      publicRevealKind: "reveal",
       revealedCount: revealedIds.length,
       agendaStoredInHq: Boolean(agendaId),
       ...(agendaId
         ? { storedAgendaDefinitionId: host.cards.definitionFor(agendaId).id }
         : {}),
+      revealedAgendaDefinitionIds: agendaId
+        ? host.cards.definitionFor(agendaId).id
+        : "",
+      publicRevealDefinitionIds: revealedDefinitions
+        .map((definition) => definition.id)
+        .join(","),
+      publicRevealTitles: revealedDefinitions
+        .map((definition) => definition.title)
+        .join("||"),
+      revealedNonAgendaCount: revealedNonAgendaIds.length,
       shuffledIntoRdCount: revealedNonAgendaIds.length,
       hiddenZoneBarrier: true,
       randomCounterAfter: host.state.randomCounter,
@@ -619,8 +659,10 @@ function applyConditionalAccessBonus(
       conditionalAccessBonusKind: bonus.kind,
       conditionalAccessBonusApplied: qualifies,
       additionalAccessCount: amount,
-      effectiveAccessCountAfterConditionalBonus:
-        Math.max(1, Math.floor(updated.accessCount ?? 1)),
+      effectiveAccessCountAfterConditionalBonus: Math.max(
+        1,
+        Math.floor(updated.accessCount ?? 1),
+      ),
       sourceDefinitionId: bonus.sourceDefinitionId,
     };
   }
@@ -632,7 +674,8 @@ function startSuccessfulRunCreditLossSpendChoice(
   run: ActiveRun,
   legalAction?: LegalAction,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   host.state.run = { ...run, phase: "access", successful: true };
   const maxSpend = Math.max(0, Math.floor(host.state.runner.credits));
   host.state.pendingChoice = {
@@ -707,7 +750,8 @@ function startPreAccessTopRdReorderChoice(
   sourceCardId: CardInstanceId,
   legalAction?: LegalAction,
 ): void {
-  if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
   host.state.run = { ...run, preAccessTopRdReorderResolved: true };
   const maxCut = host.state.corp.rd.length;
   host.state.pendingChoice = {
@@ -756,7 +800,11 @@ function revealArchivesAtBreachStart(
   );
   for (const cardId of revealedIds) {
     const instance = host.cards.cardInstanceFor(cardId);
-    host.state.cardInstances[cardId] = { ...instance, faceup: true, rezzed: true };
+    host.state.cardInstances[cardId] = {
+      ...instance,
+      faceup: true,
+      rezzed: true,
+    };
   }
   if (legalAction) {
     legalAction.payload = {

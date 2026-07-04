@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import type { DeckDefinition, GameState } from "@netgrid/shared";
 import {
   createGameAfterSetup,
+  getPlayerView,
   getLegalActions,
+  hashState,
+  replayEvents,
   validateGameState,
 } from "../../index";
 import { runnerMemoryLimit } from "../../ability-engine/effective-values";
@@ -17,6 +20,7 @@ import {
   installRunnerHardwareForTest,
   installRunnerResourceForTest,
   moveRunnerCardCopyToGrip,
+  putCorpCardOnTopOfRd,
   putRunnerCardOnTopOfStack,
   scoreRunnerAgendaForTest,
   setCardCounterForTest,
@@ -136,6 +140,64 @@ function toRunnerClassic09Game(seed: string): GameState {
 
 function expectValid(state: GameState): void {
   expect(validateGameState(state).ok).toBe(true);
+}
+
+function setCorpRdForTest(
+  state: GameState,
+  orderedIds: readonly string[],
+): void {
+  const orderedSet = new Set(orderedIds);
+  const otherRdIds = state.corp.rd.filter((cardId) => !orderedSet.has(cardId));
+  state.corp.rd = [...orderedIds];
+  for (const cardId of orderedIds) {
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      zone: { side: "corp", zone: "rd" },
+      faceup: false,
+      rezzed: false,
+    };
+  }
+  for (const cardId of otherRdIds) {
+    state.corp.hq.push(cardId);
+    state.cardInstances[cardId] = {
+      ...state.cardInstances[cardId]!,
+      zone: { side: "corp", zone: "hq" },
+      faceup: false,
+      rezzed: false,
+    };
+  }
+}
+
+function continueUntilRunResolved(state: GameState): GameState {
+  let next = state;
+  for (let attempt = 0; attempt < 12; attempt += 1) {
+    if (!next.run) return next;
+    const runnerAction = getLegalActions(next, "runner").find(
+      (action) =>
+        action.type === "continue_run" || action.type === "access_card",
+    );
+    if (runnerAction) {
+      next = apply(
+        next,
+        "runner",
+        (action) => action.actionId === runnerAction.actionId,
+      );
+      continue;
+    }
+    const corpAction = getLegalActions(next, "corp").find(
+      (action) => action.type === "decline_rez",
+    );
+    if (corpAction) {
+      next = apply(
+        next,
+        "corp",
+        (action) => action.actionId === corpAction.actionId,
+      );
+      continue;
+    }
+    break;
+  }
+  throw new Error("Gypsy Schedule Analyzer run did not resolve");
 }
 
 describe("Classic Runner Rest Card Implementation Smokes", () => {
@@ -376,6 +438,104 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       gainedCredits: 12,
       flatline: false,
     });
+    expectValid(state);
+  });
+
+  it("reveals R&D through Gypsy Schedule Analyzer until an agenda and stores it in HQ", () => {
+    let state = toRunnerClassic09Game("classic-09-gypsy-reveal-agenda");
+    emptyRunnerGripForTest(state);
+    const eventId = moveRunnerCardCopyToGrip(state, GYPSYTM_SCHEDULE_ANALYZER);
+    const agendaId = putCorpCardOnTopOfRd(state, "simple_agenda");
+    const iceId = putCorpCardOnTopOfRd(state, "simple_barrier_ice");
+    const operationId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    setCorpRdForTest(state, [operationId, iceId, agendaId]);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === eventId,
+    );
+    state = continueUntilRunResolved(state);
+
+    expect(state.run).toBeUndefined();
+    expect(state.corp.hq).toContain(agendaId);
+    expect(state.corp.rd).not.toContain(agendaId);
+    expect(state.corp.rd).toEqual(expect.arrayContaining([operationId, iceId]));
+    expect(state.cardInstances[agendaId]?.zone).toMatchObject({
+      side: "corp",
+      zone: "hq",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionIds:
+        "simple_economy_operation,simple_barrier_ice,simple_agenda",
+      publicRevealTitles:
+        "Simple Economy Operation||Simple Barrier ICE||Simple Agenda",
+      revealedAgendaDefinitionIds: "simple_agenda",
+      revealedCount: 3,
+      revealedNonAgendaCount: 2,
+      agendaStoredInHq: true,
+      storedAgendaDefinitionId: "simple_agenda",
+      shuffledIntoRdCount: 2,
+    });
+    expect(
+      JSON.stringify(
+        getPlayerView(state, "runner").publicEvents.at(-1)?.publicPayload,
+      ),
+    ).toContain("Simple Agenda");
+    expect(
+      JSON.stringify(
+        getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload,
+      ),
+    ).toContain("Simple Agenda");
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expectValid(state);
+  });
+
+  it("reveals all R&D through Gypsy Schedule Analyzer when no agenda is present", () => {
+    let state = toRunnerClassic09Game("classic-09-gypsy-no-agenda");
+    emptyRunnerGripForTest(state);
+    const eventId = moveRunnerCardCopyToGrip(state, GYPSYTM_SCHEDULE_ANALYZER);
+    const iceId = putCorpCardOnTopOfRd(state, "simple_barrier_ice");
+    const operationId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    setCorpRdForTest(state, [operationId, iceId]);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === eventId,
+    );
+    state = continueUntilRunResolved(state);
+
+    expect(state.run).toBeUndefined();
+    expect(state.corp.hq).not.toContain(operationId);
+    expect(state.corp.hq).not.toContain(iceId);
+    expect(state.corp.rd).toEqual(expect.arrayContaining([operationId, iceId]));
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+      publicRevealDefinitionIds: "simple_economy_operation,simple_barrier_ice",
+      publicRevealTitles: "Simple Economy Operation||Simple Barrier ICE",
+      revealedAgendaDefinitionIds: "",
+      revealedCount: 2,
+      revealedNonAgendaCount: 2,
+      agendaStoredInHq: false,
+      shuffledIntoRdCount: 2,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "storedAgendaDefinitionId",
+    );
     expectValid(state);
   });
 

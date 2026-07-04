@@ -840,6 +840,22 @@ export function publicContextForAction(
       context.arrangedCount = legalAction.payload.arrangedCount;
     if (typeof legalAction.payload.trashedCount === "number")
       context.trashedCount = legalAction.payload.trashedCount;
+    for (const key of [
+      "publicRevealKind",
+      "publicRevealDefinitionIds",
+      "publicRevealTitles",
+      "revealedAgendaDefinitionIds",
+      "storedAgendaDefinitionId",
+    ]) {
+      const value = legalAction.payload[key];
+      if (typeof value === "string") context[key] = value;
+    }
+    for (const key of ["revealedNonAgendaCount", "shuffledIntoRdCount"]) {
+      const value = legalAction.payload[key];
+      if (typeof value === "number") context[key] = value;
+    }
+    if (typeof legalAction.payload.agendaStoredInHq === "boolean")
+      context.agendaStoredInHq = legalAction.payload.agendaStoredInHq;
     if (typeof legalAction.payload.stackShuffled === "boolean")
       context.stackShuffled = legalAction.payload.stackShuffled;
     if (typeof legalAction.payload.shufflePerformed === "boolean")
