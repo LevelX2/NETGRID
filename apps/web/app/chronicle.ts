@@ -1597,6 +1597,24 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (
+        stringValue(payload.accessReplacement) ===
+        "reveal_rd_until_agenda_store_in_hq"
+      ) {
+        const summary = gypsyScheduleAnalyzerChronicleSummary(
+          payload,
+          cardTitle,
+        );
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, summary.title);
+        description = summary.description;
+        cardDefinitionId = cardDefinitionId ?? summary.cardDefinitionId;
+        cardTitle = summary.sourceTitle;
+        chips.push(...summary.chips);
+        break;
+      }
       category = "system";
       visibility = "system";
       title = phrase(subject, "eine Entscheidung beantwortet");
@@ -5471,6 +5489,41 @@ function gypsyScheduleAnalyzerChronicleSummary(
   const revealedTitles = publicRevealTitlesFromPayload(payload);
   const revealedCount =
     numberValue(payload.revealedCount) ?? revealedTitles.length;
+  const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
+  if (hiddenZoneAction === "gypsy_schedule_analyzer_reveal_choice_opened") {
+    return {
+      title: `${sourceTitle}: R&D-Reveal bereit`,
+      description:
+        "Der erfolgreiche Run ersetzt den normalen Zugriff. Der Runner deckt R&D jetzt Karte für Karte auf.",
+      chips: [sourceTitle, "R&D Reveal", "Bereit"],
+      cardDefinitionId: sourceDefinitionId,
+      sourceTitle,
+    };
+  }
+  if (hiddenZoneAction === "gypsy_schedule_analyzer_reveal_next") {
+    const latestTitle =
+      revealedTitles.at(-1) ??
+      (revealedCount > 0 ? `Karte ${revealedCount}` : "eine Karte");
+    const agendaRevealed =
+      definitionIdsFromCsv(stringValue(payload.revealedAgendaDefinitionIds))
+        .length > 0;
+    return {
+      title: `${sourceTitle}: ${latestTitle} aus R&D aufgedeckt`,
+      description: agendaRevealed
+        ? `Aufgedeckt: ${revealedTitles.join(", ")}. Eine Agenda wurde gefunden; nach Bestätigung wird sie in HQ gespeichert.`
+        : revealedCount > 0
+          ? `Aufgedeckt: ${revealedTitles.join(", ")}. Noch keine Agenda gefunden.`
+          : "R&D war leer.",
+      chips: [
+        sourceTitle,
+        "R&D Reveal",
+        revealedCount > 0 ? `Karte ${revealedCount}` : "R&D leer",
+        agendaRevealed ? "Agenda gefunden" : "Weiter",
+      ],
+      cardDefinitionId: sourceDefinitionId,
+      sourceTitle,
+    };
+  }
   const storedAgendaDefinitionId =
     stringValue(payload.storedAgendaDefinitionId) ??
     definitionIdsFromCsv(stringValue(payload.revealedAgendaDefinitionIds))[0];

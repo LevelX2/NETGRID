@@ -352,6 +352,7 @@ import {
 } from "../access/breach-state";
 import {
   resolvePreAccessTopRdReorderChoice,
+  resolveRevealRdUntilAgendaStoreInHqChoice,
   resolveSuccessfulRunCreditLossSpendChoice,
   sourcePayloadForSuccessfulRunReplacement,
   type RunAccessTransitionHost,
@@ -923,6 +924,7 @@ export function initializeStateRuntimeBootstrap({
     resolvePdcaDamageReplacementChoice,
     resolveCorpInstalledEconomyCreditChoice,
     resolvePreAccessTopRdReorderChoice,
+    resolveRevealRdUntilAgendaStoreInHqChoice,
     resolvePassRezzedIceProgramTrashChoiceInRunModule,
     resolveBrokenIceVirusCounterChoice,
     resolvePostMeatDamageHiddenResourceChoice,

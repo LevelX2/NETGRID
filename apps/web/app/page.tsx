@@ -29,11 +29,16 @@ import {
   Volume2,
   VolumeX,
   X,
-  ZoomIn
+  ZoomIn,
 } from "lucide-react";
 import { Fragment, useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, ReactNode } from "react";
+import type {
+  CSSProperties,
+  DragEvent as ReactDragEvent,
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+} from "react";
 import type {
   ApiClientGameMode,
   ApiCreateMatchResponse,
@@ -57,7 +62,10 @@ import type {
   Winner,
 } from "@netgrid/shared";
 import { formatChronicleEvent } from "./chronicle";
-import { deckAgendaStatusForEditor, type DeckAgendaStatus } from "./deck-editor-ui";
+import {
+  deckAgendaStatusForEditor,
+  type DeckAgendaStatus,
+} from "./deck-editor-ui";
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
@@ -67,7 +75,7 @@ import {
   type BoardHighlight,
   type DamageImpactCue,
   type OpponentActionCue,
-  type TurnStartAudioState
+  type TurnStartAudioState,
 } from "./action-cues";
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
@@ -115,10 +123,20 @@ import {
   type HumanAiSideSelection,
   type HumanSideSelection,
   type MatchFormatSelection,
-  type PlayMode
+  type PlayMode,
 } from "./match-start";
-import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
-import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
+import {
+  formatMatchTimerDuration,
+  matchTimerDecisionKey,
+  matchTimerScopeLabel,
+} from "./match-timer-ui";
+import {
+  parseMatchStartSettingsFromStorage,
+  serializeMatchStartSettingsForStorage,
+  type MatchStartPlayerClockGraceSeconds,
+  type MatchStartPlayerClockMinutes,
+  type MatchStartPlayerClockMode,
+} from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
 import {
   catalogCardMatchesTypeFilters,
@@ -139,12 +157,12 @@ import {
   removeRecentSession,
   storedSessionMatches,
   type RecentSessionInfo,
-  type SessionInfo
+  type SessionInfo,
 } from "./session-recovery";
 import {
   latestMaintenanceAiTraceId,
   type MaintenanceAiTraceDetail,
-  type MaintenanceAiTraceIndexEntry
+  type MaintenanceAiTraceIndexEntry,
 } from "./maintenance";
 import {
   ACTION_CUE_SETTINGS_STORAGE_KEY,
@@ -174,9 +192,13 @@ import {
   LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY,
   LEGACY_MATCH_START_SETTINGS_STORAGE_KEY,
   MATCH_START_SETTINGS_STORAGE_KEY,
-  cardPreviewCollapsedStorageKeyFor
+  cardPreviewCollapsedStorageKeyFor,
 } from "../lib/storage-keys";
-import { readLocalStorageWithLegacy, rememberDisplayName, removeLocalStorageKeys } from "../lib/local-storage";
+import {
+  readLocalStorageWithLegacy,
+  rememberDisplayName,
+  removeLocalStorageKeys,
+} from "../lib/local-storage";
 import { copyTextToClipboard } from "../lib/clipboard";
 import { downloadTextFile } from "../lib/download";
 import { runtimeRandomId } from "../lib/runtime-id";
@@ -196,27 +218,32 @@ import {
   postJson,
   serverErrorNotice,
   type AiDecisionPreview,
-  type OpenMatchEntry
+  type OpenMatchEntry,
 } from "../lib/client-api";
-import { playActionCueSound, playResultSound, primeAudio, seriesAudioOutcome } from "../lib/audio";
+import {
+  playActionCueSound,
+  playResultSound,
+  primeAudio,
+  seriesAudioOutcome,
+} from "../lib/audio";
 import {
   clampOverlayPosition,
   parseOverlayPositionPreference,
   serializeOverlayPositionPreference,
-  type OverlayPositionPreference
+  type OverlayPositionPreference,
 } from "../lib/overlay-position";
 import {
   AppBrand,
   ConnectionBadge,
   type ActiveMatchWorkspace,
-  type ConnectionState
+  type ConnectionState,
 } from "../features/app-shell/AppShell";
 import { ActiveMatchWorkspaceArea } from "../features/app-shell/ActiveMatchWorkspaceArea";
 import { ActiveMatchTopbar } from "../features/app-shell/ActiveMatchTopbar";
 import { useObservedElementHeight } from "../features/app-shell/useObservedElementHeight";
 import {
   ConfirmationDialog,
-  type ConfirmationDialogRequest
+  type ConfirmationDialogRequest,
 } from "../features/app-shell/ConfirmationDialog";
 import { OptionsDialog } from "../features/app-shell/OptionsDialog";
 import { UndoPanel } from "../features/app-shell/UndoPanel";
@@ -231,13 +258,13 @@ import type {
   DeckTemplate,
   DeckTemplatesResponse,
   DeckValidationResponse,
-  DeckValidationResult
+  DeckValidationResult,
 } from "../features/decks/deck-api-types";
 import {
   deckFingerprint,
   deckMetadataFromEditable,
   type DeckCardEntry,
-  type EditableDeck
+  type EditableDeck,
 } from "../features/decks/deck-table-model";
 import {
   DEFAULT_CORP_SNAPSHOT_ID,
@@ -247,29 +274,27 @@ import {
   catalogCardAllowedForDeckEditor,
   deckProfileForMatchCardPool,
   editableDeckAllowedForMatchCardPool,
-  snapshotAllowedForMatchCardPool
+  snapshotAllowedForMatchCardPool,
 } from "../features/decks/deck-match-filters";
 import {
   enrichVisibleCard,
   visibleCardFromCatalogDetail,
   visibleKnownCardIds,
-  type DisplayVisibleCard
+  type DisplayVisibleCard,
 } from "../features/cards/card-view-model";
 import {
   CardImagePreferenceContext,
   CardScaleSettingsContext,
   CardTooltipSettingsContext,
   useCardScaleSettings,
-  usePreferredCardImageSource
+  usePreferredCardImageSource,
 } from "../features/cards/card-display-settings";
 import { usePersistentCardScaleSettings } from "../features/cards/usePersistentCardScaleSettings";
 import {
   cardDetailLines,
-  cardWithoutDevelopmentCounters
+  cardWithoutDevelopmentCounters,
 } from "../features/cards/card-detail-lines";
-import {
-  scoreCardStateBadges
-} from "../features/cards/ScoredAgendaState";
+import { scoreCardStateBadges } from "../features/cards/ScoredAgendaState";
 import { CardPreviewPanel } from "../features/cards/CardPreviewPanel";
 import { GameOverModal } from "../features/results/GameOverModal";
 import { type AiSimulationSummary } from "../features/results/SimulationResult";
@@ -297,24 +322,33 @@ import {
   type ChronicleDetailMode,
   type ColorScheme,
   type CueAutoDismissMs,
-  type ResourceStripMode
+  type ResourceStripMode,
 } from "../features/settings/settings-model";
-import { PlayerClockStrip, playerClockGraceDisplay } from "../features/game-board/PlayerClock";
+import {
+  PlayerClockStrip,
+  playerClockGraceDisplay,
+} from "../features/game-board/PlayerClock";
 import {
   RunnerOpponentZonesStrip,
   RunnerRigStrip,
-  type FieldChoiceCardProps
+  type FieldChoiceCardProps,
 } from "../features/game-board/RunnerBoardStrips";
 import { ActiveServerGrid } from "../features/game-board/ActiveServerGrid";
 import { ActiveRunnerZoneBoard } from "../features/game-board/ActiveRunnerZoneBoard";
 import { ScoredAgendaOverlay } from "../features/game-board/ScoredAgendaOverlay";
 import { RunTimelineOverlay } from "../features/game-board/RunTimelineOverlay";
 import { SpecialZonesStrip } from "../features/game-board/SpecialZonesStrip";
-import { ActionSlotMeter, ActiveMatchResourceStrip } from "../features/game-board/ResourceStrip";
-import { OpponentPanel, PlayerPanel } from "../features/game-board/SideStatusPanels";
+import {
+  ActionSlotMeter,
+  ActiveMatchResourceStrip,
+} from "../features/game-board/ResourceStrip";
+import {
+  OpponentPanel,
+  PlayerPanel,
+} from "../features/game-board/SideStatusPanels";
 import {
   ActionPanelDockPlaceholder,
-  CostChips
+  CostChips,
 } from "../features/actions/ActionControls";
 import { LegalActionsPanel } from "../features/actions/LegalActionsPanel";
 import { DamageImpactOverlay } from "../features/actions/DamageImpactOverlay";
@@ -323,29 +357,44 @@ import { OpponentCueTitle } from "../features/actions/OpponentCueTitle";
 import { FloatingActionPanelOverlay } from "../features/actions/FloatingActionPanelOverlay";
 import {
   AccessRevealModal,
-  ExposeReviewModal
+  ExposeReviewModal,
 } from "../features/actions/AccessReviewModals";
 import {
   accessRevealFromCurrentRun,
   accessRevealFromLatestEvent,
   archivesRevealFromLatestEvent,
   exposeReviewFromLatestEvent,
+  gypsyScheduleAnalyzerRevealFromPendingChoice,
   hqAgendaRevealFromLatestEvent,
   retainedArchivesRevealEvent,
   retainedHqAgendaRevealEvent,
-  revealedEventCardIds
+  revealedEventCardIds,
 } from "../features/actions/access-review-derivation";
-import { eventActionType, localActionSoundKey, localActionSoundKind, publicEventsAfter } from "../features/actions/local-action-sounds";
+import {
+  eventActionType,
+  localActionSoundKey,
+  localActionSoundKind,
+  publicEventsAfter,
+} from "../features/actions/local-action-sounds";
 import { runHiddenContextActionHint } from "../features/actions/run-hidden-context-hint";
 import { RecentGamesPanel } from "../features/recent/RecentGamesPanel";
-import { effectiveAiTurnPresentation, removePendingUndo } from "../features/match-session/client-payload-helpers";
+import {
+  effectiveAiTurnPresentation,
+  removePendingUndo,
+} from "../features/match-session/client-payload-helpers";
 import { useMatchTransport } from "../features/match-session/useMatchTransport";
-import { ChroniclePanel, chronicleContextByEventId } from "../features/chronicle/ChroniclePanel";
+import {
+  ChroniclePanel,
+  chronicleContextByEventId,
+} from "../features/chronicle/ChroniclePanel";
 import {
   FloatingAiDecisionDebugOverlay,
-  type AiDecisionDebugOverlayStatus
+  type AiDecisionDebugOverlayStatus,
 } from "../features/debug/AiDecisionDebugOverlay";
-import { DiagnosticsDrawer, shortDiagnosticsHash } from "../features/debug/DiagnosticsDrawer";
+import {
+  DiagnosticsDrawer,
+  shortDiagnosticsHash,
+} from "../features/debug/DiagnosticsDrawer";
 import { AiPacingControls } from "../features/debug/AiPacingControls";
 import { MatchHostConsole } from "../features/match-start/MatchHostConsole";
 import { MatchJoinConsole } from "../features/match-start/MatchJoinConsole";
@@ -368,7 +417,7 @@ import {
   turnActionHeaderLabel,
   turnSideForView,
   updateActionSlotCapacity,
-  zoneHighlighted
+  zoneHighlighted,
 } from "../features/game-board/board-view-helpers";
 
 const APP_NAME = "NETGRID";
@@ -382,7 +431,11 @@ type GameMode = ApiClientGameMode;
 type MatchFormat = MatchFormatSelection;
 type MatchCardPool = ApiMatchCardPool;
 type AiDifficulty = "easy" | "normal" | "hard";
-type AiDeckPolicy = "fixed" | "selected" | "seeded_random" | "same_as_participant_a";
+type AiDeckPolicy =
+  | "fixed"
+  | "selected"
+  | "seeded_random"
+  | "same_as_participant_a";
 type AiTraceStartMode = "off" | "detailed";
 type EntryTab = "play" | "catalog" | "decks" | "recent" | "options";
 type DeckSideFilter = Side | "all";
@@ -432,24 +485,34 @@ const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 
 export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
-  const [activeMatchWorkspace, setActiveMatchWorkspace] = useState<ActiveMatchWorkspace>("game");
+  const [activeMatchWorkspace, setActiveMatchWorkspace] =
+    useState<ActiveMatchWorkspace>("game");
   const [mode, setMode] = useState<"host" | "join">("host");
   const [recoveryTabSelected, setRecoveryTabSelected] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>("human_vs_human");
-  const [humanSideSelection, setHumanSideSelection] = useState<HumanSideSelection>("random");
-  const [humanAiSideSelection, setHumanAiSideSelection] = useState<HumanAiSideSelection>("random");
+  const [humanSideSelection, setHumanSideSelection] =
+    useState<HumanSideSelection>("random");
+  const [humanAiSideSelection, setHumanAiSideSelection] =
+    useState<HumanAiSideSelection>("random");
   const [matchFormat, setMatchFormat] = useState<MatchFormat>("rules_match");
-  const [matchCardPool, setMatchCardPool] = useState<MatchCardPool>("originalset");
-  const [playerClockMode, setPlayerClockMode] = useState<MatchStartPlayerClockMode>("none");
-  const [playerClockMinutes, setPlayerClockMinutes] = useState<MatchStartPlayerClockMinutes>(10);
-  const [playerClockGraceSeconds, setPlayerClockGraceSeconds] = useState<MatchStartPlayerClockGraceSeconds>(10);
-  const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
+  const [matchCardPool, setMatchCardPool] =
+    useState<MatchCardPool>("originalset");
+  const [playerClockMode, setPlayerClockMode] =
+    useState<MatchStartPlayerClockMode>("none");
+  const [playerClockMinutes, setPlayerClockMinutes] =
+    useState<MatchStartPlayerClockMinutes>(10);
+  const [playerClockGraceSeconds, setPlayerClockGraceSeconds] =
+    useState<MatchStartPlayerClockGraceSeconds>(10);
+  const [runnerDifficulty, setRunnerDifficulty] =
+    useState<AiDifficulty>("normal");
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [aiDeckPolicy, setAiDeckPolicy] = useState<AiDeckPolicy>("selected");
-  const [aiTraceStartMode, setAiTraceStartMode] = useState<AiTraceStartMode>("off");
+  const [aiTraceStartMode, setAiTraceStartMode] =
+    useState<AiTraceStartMode>("off");
   const [testSetupMode, setTestSetupMode] = useState(false);
   const [displayName, setDisplayName] = useState("Teilnehmer A");
-  const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] = useState(false);
+  const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] =
+    useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
   const [seed, setSeed] = useState("");
   const [joinLinkInput, setJoinLinkInput] = useState("");
@@ -460,61 +523,111 @@ export default function Page() {
   const [openLanLoading, setOpenLanLoading] = useState(false);
   const [openLanError, setOpenLanError] = useState("");
   const [openLanUpdatedAt, setOpenLanUpdatedAt] = useState<string | null>(null);
-  const [recentGameResults, setRecentGameResults] = useState<ApiRecentResultEntry[]>([]);
-  const [recentGameResultsLoading, setRecentGameResultsLoading] = useState(false);
+  const [recentGameResults, setRecentGameResults] = useState<
+    ApiRecentResultEntry[]
+  >([]);
+  const [recentGameResultsLoading, setRecentGameResultsLoading] =
+    useState(false);
   const [recentGameResultsError, setRecentGameResultsError] = useState("");
-  const [recentGameResultsUpdatedAt, setRecentGameResultsUpdatedAt] = useState<string | null>(null);
+  const [recentGameResultsUpdatedAt, setRecentGameResultsUpdatedAt] = useState<
+    string | null
+  >(null);
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [payload, setPayload] = useState<ClientPayload | null>(null);
   const [lobby, setLobby] = useState<LobbyClientPayload | null>(null);
   const [matchClockNowMs, setMatchClockNowMs] = useState(() => Date.now());
-  const [matchClockAnchor, setMatchClockAnchor] = useState<LocalMatchClockAnchor | null>(null);
+  const [matchClockAnchor, setMatchClockAnchor] =
+    useState<LocalMatchClockAnchor | null>(null);
   const [lobbyChatText, setLobbyChatText] = useState("");
-  const [simulation, setSimulation] = useState<AiSimulationSummary | null>(null);
+  const [simulation, setSimulation] = useState<AiSimulationSummary | null>(
+    null,
+  );
   const [simulationPending, setSimulationPending] = useState(false);
   const [connection, setConnection] = useState<ConnectionState>("offline");
   const [notice, setNotice] = useState("");
   const [undoNotice, setUndoNotice] = useState("");
   const [deckSnapshots, setDeckSnapshots] = useState<DeckSnapshot[]>([]);
   const [deckTemplates, setDeckTemplates] = useState<DeckTemplate[]>([]);
-  const [runnerDeckSource, setRunnerDeckSource] = useState<"snapshot" | "local">("snapshot");
-  const [corpDeckSource, setCorpDeckSource] = useState<"snapshot" | "local">("snapshot");
-  const [participantBRunnerDeckSource, setParticipantBRunnerDeckSource] = useState<"snapshot" | "local">("snapshot");
-  const [participantBCorpDeckSource, setParticipantBCorpDeckSource] = useState<"snapshot" | "local">("snapshot");
-  const [selectedRunnerSnapshotId, setSelectedRunnerSnapshotId] = useState(DEFAULT_RUNNER_SNAPSHOT_ID);
-  const [selectedCorpSnapshotId, setSelectedCorpSnapshotId] = useState(DEFAULT_CORP_SNAPSHOT_ID);
-  const [selectedParticipantBRunnerSnapshotId, setSelectedParticipantBRunnerSnapshotId] = useState(DEFAULT_RUNNER_SNAPSHOT_ID);
-  const [selectedParticipantBCorpSnapshotId, setSelectedParticipantBCorpSnapshotId] = useState(DEFAULT_CORP_SNAPSHOT_ID);
-  const [selectedRunnerLocalDeckId, setSelectedRunnerLocalDeckId] = useState("");
+  const [runnerDeckSource, setRunnerDeckSource] = useState<
+    "snapshot" | "local"
+  >("snapshot");
+  const [corpDeckSource, setCorpDeckSource] = useState<"snapshot" | "local">(
+    "snapshot",
+  );
+  const [participantBRunnerDeckSource, setParticipantBRunnerDeckSource] =
+    useState<"snapshot" | "local">("snapshot");
+  const [participantBCorpDeckSource, setParticipantBCorpDeckSource] = useState<
+    "snapshot" | "local"
+  >("snapshot");
+  const [selectedRunnerSnapshotId, setSelectedRunnerSnapshotId] = useState(
+    DEFAULT_RUNNER_SNAPSHOT_ID,
+  );
+  const [selectedCorpSnapshotId, setSelectedCorpSnapshotId] = useState(
+    DEFAULT_CORP_SNAPSHOT_ID,
+  );
+  const [
+    selectedParticipantBRunnerSnapshotId,
+    setSelectedParticipantBRunnerSnapshotId,
+  ] = useState(DEFAULT_RUNNER_SNAPSHOT_ID);
+  const [
+    selectedParticipantBCorpSnapshotId,
+    setSelectedParticipantBCorpSnapshotId,
+  ] = useState(DEFAULT_CORP_SNAPSHOT_ID);
+  const [selectedRunnerLocalDeckId, setSelectedRunnerLocalDeckId] =
+    useState("");
   const [selectedCorpLocalDeckId, setSelectedCorpLocalDeckId] = useState("");
-  const [selectedParticipantBRunnerLocalDeckId, setSelectedParticipantBRunnerLocalDeckId] = useState("");
-  const [selectedParticipantBCorpLocalDeckId, setSelectedParticipantBCorpLocalDeckId] = useState("");
-  const [runnerLocalSnapshot, setRunnerLocalSnapshot] = useState<DeckSnapshot | null>(null);
-  const [corpLocalSnapshot, setCorpLocalSnapshot] = useState<DeckSnapshot | null>(null);
+  const [
+    selectedParticipantBRunnerLocalDeckId,
+    setSelectedParticipantBRunnerLocalDeckId,
+  ] = useState("");
+  const [
+    selectedParticipantBCorpLocalDeckId,
+    setSelectedParticipantBCorpLocalDeckId,
+  ] = useState("");
+  const [runnerLocalSnapshot, setRunnerLocalSnapshot] =
+    useState<DeckSnapshot | null>(null);
+  const [corpLocalSnapshot, setCorpLocalSnapshot] =
+    useState<DeckSnapshot | null>(null);
   const [localDecks, setLocalDecks] = useState<EditableDeck[]>([]);
   const [localDecksLoaded, setLocalDecksLoaded] = useState(false);
-  const [savedDeckFingerprints, setSavedDeckFingerprints] = useState<Record<string, string>>({});
+  const [savedDeckFingerprints, setSavedDeckFingerprints] = useState<
+    Record<string, string>
+  >({});
   const [deckLibraryStoragePath, setDeckLibraryStoragePath] = useState("");
-  const [selectedLocalDeckId, setSelectedLocalDeckId] = useState<string | null>(null);
-  const [deckValidation, setDeckValidation] = useState<DeckValidationResult | null>(null);
-  const [validatedSnapshot, setValidatedSnapshot] = useState<DeckSnapshot | null>(null);
+  const [selectedLocalDeckId, setSelectedLocalDeckId] = useState<string | null>(
+    null,
+  );
+  const [deckValidation, setDeckValidation] =
+    useState<DeckValidationResult | null>(null);
+  const [validatedSnapshot, setValidatedSnapshot] =
+    useState<DeckSnapshot | null>(null);
   const [deckImportText, setDeckImportText] = useState("");
   const [deckExportText, setDeckExportText] = useState("");
-  const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
+  const [cardDisplayMode, setCardDisplayMode] =
+    useState<CardDisplayMode>("placeholder");
   const [preferGermanCardImages, setPreferGermanCardImages] = useState(false);
   const [showSetBadges, setShowSetBadges] = useState(true);
   const [cardPreviewCollapsed, setCardPreviewCollapsed] = useState(false);
-  const [boardZoneCollapsed, setBoardZoneCollapsed] = useState<Record<string, boolean>>({});
-  const [scoreAreaOverlays, setScoreAreaOverlays] = useState<Record<Side, boolean>>({ runner: false, corp: false });
-  const [scoreAreaOverlayPositions, setScoreAreaOverlayPositions] = useState<Record<Side, RunOverlayPositionPreference>>({
+  const [boardZoneCollapsed, setBoardZoneCollapsed] = useState<
+    Record<string, boolean>
+  >({});
+  const [scoreAreaOverlays, setScoreAreaOverlays] = useState<
+    Record<Side, boolean>
+  >({ runner: false, corp: false });
+  const [scoreAreaOverlayPositions, setScoreAreaOverlayPositions] = useState<
+    Record<Side, RunOverlayPositionPreference>
+  >({
     runner: { kind: "default" },
-    corp: { kind: "default" }
+    corp: { kind: "default" },
   });
   const [rightRailCollapsed, setRightRailCollapsed] = useState(false);
   const [undoPanelOpen, setUndoPanelOpen] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
-  const [dismissedAccessEventIds, setDismissedAccessEventIds] = useState<string[]>([]);
-  const [dismissedExposeReviewEventId, setDismissedExposeReviewEventId] = useState<string | null>(null);
+  const [dismissedAccessEventIds, setDismissedAccessEventIds] = useState<
+    string[]
+  >([]);
+  const [dismissedExposeReviewEventId, setDismissedExposeReviewEventId] =
+    useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
@@ -522,63 +635,110 @@ export default function Page() {
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [audioVolume, setAudioVolume] = useState(0.45);
   const [audioSettingsLoaded, setAudioSettingsLoaded] = useState(false);
-  const [localAiPacingMode, setLocalAiPacingMode] = useState<AiPacingMode>("paced");
+  const [localAiPacingMode, setLocalAiPacingMode] =
+    useState<AiPacingMode>("paced");
   const [aiPacingModeLoaded, setAiPacingModeLoaded] = useState(false);
   const [cardDisplayModeLoaded, setCardDisplayModeLoaded] = useState(false);
-  const [cardImageSkinSettingsLoaded, setCardImageSkinSettingsLoaded] = useState(false);
-  const [chronicleDetailMode, setChronicleDetailMode] = useState<ChronicleDetailMode>("full");
-  const [chronicleDetailModeLoaded, setChronicleDetailModeLoaded] = useState(false);
+  const [cardImageSkinSettingsLoaded, setCardImageSkinSettingsLoaded] =
+    useState(false);
+  const [chronicleDetailMode, setChronicleDetailMode] =
+    useState<ChronicleDetailMode>("full");
+  const [chronicleDetailModeLoaded, setChronicleDetailModeLoaded] =
+    useState(false);
 
-  const boardZoneCollapsedFor = (key: string): boolean => Boolean(boardZoneCollapsed[key]);
+  const boardZoneCollapsedFor = (key: string): boolean =>
+    Boolean(boardZoneCollapsed[key]);
   const toggleBoardZoneCollapsed = (key: string) => {
     setBoardZoneCollapsed((current) => ({ ...current, [key]: !current[key] }));
   };
   const [actionCueQueue, setActionCueQueue] = useState<OpponentActionCue[]>([]);
-  const [currentActionCue, setCurrentActionCue] = useState<OpponentActionCue | null>(null);
-  const [damageImpactQueue, setDamageImpactQueue] = useState<DamageImpactCue[]>([]);
-  const [currentDamageImpact, setCurrentDamageImpact] = useState<DamageImpactCue | null>(null);
+  const [currentActionCue, setCurrentActionCue] =
+    useState<OpponentActionCue | null>(null);
+  const [damageImpactQueue, setDamageImpactQueue] = useState<DamageImpactCue[]>(
+    [],
+  );
+  const [currentDamageImpact, setCurrentDamageImpact] =
+    useState<DamageImpactCue | null>(null);
   const [aiPacingFallbackVisible, setAiPacingFallbackVisible] = useState(false);
-  const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
+  const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(
+    null,
+  );
   const [seriesTransitioning, setSeriesTransitioning] = useState(false);
   const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
-  const [confirmationDialog, setConfirmationDialog] = useState<ConfirmationDialogRequest | null>(null);
+  const [confirmationDialog, setConfirmationDialog] =
+    useState<ConfirmationDialogRequest | null>(null);
   const [actionCuesEnabled, setActionCuesEnabled] = useState(true);
-  const [actionCueAutoDismissMs, setActionCueAutoDismissMs] = useState<CueAutoDismissMs>(2500);
-  const [automaticEffectCuesEnabled, setAutomaticEffectCuesEnabled] = useState(false);
+  const [actionCueAutoDismissMs, setActionCueAutoDismissMs] =
+    useState<CueAutoDismissMs>(2500);
+  const [automaticEffectCuesEnabled, setAutomaticEffectCuesEnabled] =
+    useState(false);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
   const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(false);
-  const [autoCorpMandatoryDrawEnabled, setAutoCorpMandatoryDrawEnabled] = useState(false);
+  const [autoCorpMandatoryDrawEnabled, setAutoCorpMandatoryDrawEnabled] =
+    useState(false);
   const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
-  const [priorityWindowHoldEnabled, setPriorityWindowHoldEnabled] = useState(false);
+  const [priorityWindowHoldEnabled, setPriorityWindowHoldEnabled] =
+    useState(false);
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
-  const [resourceStripMode, setResourceStripMode] = useState<ResourceStripMode>("auto");
-  const [actionPanelMode, setActionPanelMode] = useState<ActionPanelMode>("docked");
-  const [aiDecisionDebugOverlayEnabled, setAiDecisionDebugOverlayEnabled] = useState(false);
-  const [actionPanelOverlayPosition, setActionPanelOverlayPosition] = useState<RunOverlayPositionPreference>(() =>
-    typeof window === "undefined"
-      ? { kind: "default" }
-      : parseOverlayPositionPreference(readLocalStorageWithLegacy(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY))
-  );
-  const [aiDecisionDebugOverlayPosition, setAiDecisionDebugOverlayPosition] = useState<RunOverlayPositionPreference>(() =>
-    typeof window === "undefined"
-      ? { kind: "default" }
-      : parseOverlayPositionPreference(readLocalStorageWithLegacy(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY))
-  );
-  const [aiDecisionDebugStatus, setAiDecisionDebugStatus] = useState<AiDecisionDebugOverlayStatus>("off");
+  const [resourceStripMode, setResourceStripMode] =
+    useState<ResourceStripMode>("auto");
+  const [actionPanelMode, setActionPanelMode] =
+    useState<ActionPanelMode>("docked");
+  const [aiDecisionDebugOverlayEnabled, setAiDecisionDebugOverlayEnabled] =
+    useState(false);
+  const [actionPanelOverlayPosition, setActionPanelOverlayPosition] =
+    useState<RunOverlayPositionPreference>(() =>
+      typeof window === "undefined"
+        ? { kind: "default" }
+        : parseOverlayPositionPreference(
+            readLocalStorageWithLegacy(
+              ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
+              LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
+            ),
+          ),
+    );
+  const [aiDecisionDebugOverlayPosition, setAiDecisionDebugOverlayPosition] =
+    useState<RunOverlayPositionPreference>(() =>
+      typeof window === "undefined"
+        ? { kind: "default" }
+        : parseOverlayPositionPreference(
+            readLocalStorageWithLegacy(
+              AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
+              LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
+            ),
+          ),
+    );
+  const [aiDecisionDebugStatus, setAiDecisionDebugStatus] =
+    useState<AiDecisionDebugOverlayStatus>("off");
   const [aiDecisionDebugError, setAiDecisionDebugError] = useState("");
-  const [aiDecisionDebugPreview, setAiDecisionDebugPreview] = useState<AiDecisionPreview | null>(null);
-  const [aiDecisionDebugPreviewError, setAiDecisionDebugPreviewError] = useState("");
-  const [aiDecisionDebugTraceIndex, setAiDecisionDebugTraceIndex] = useState<MaintenanceAiTraceIndexEntry[]>([]);
-  const [aiDecisionDebugTrace, setAiDecisionDebugTrace] = useState<MaintenanceAiTraceDetail | null>(null);
+  const [aiDecisionDebugPreview, setAiDecisionDebugPreview] =
+    useState<AiDecisionPreview | null>(null);
+  const [aiDecisionDebugPreviewError, setAiDecisionDebugPreviewError] =
+    useState("");
+  const [aiDecisionDebugTraceIndex, setAiDecisionDebugTraceIndex] = useState<
+    MaintenanceAiTraceIndexEntry[]
+  >([]);
+  const [aiDecisionDebugTrace, setAiDecisionDebugTrace] =
+    useState<MaintenanceAiTraceDetail | null>(null);
   const [statusPanelsVisible, setStatusPanelsVisible] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
-  const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{ choiceId: string; selectedOptionIds: string[] } | null>(null);
-  const [fieldCardChoiceSelection, setFieldCardChoiceSelection] = useState<{ choiceId: string; selectedOptionIds: string[] } | null>(null);
-  const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
+  const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{
+    choiceId: string;
+    selectedOptionIds: string[];
+  } | null>(null);
+  const [fieldCardChoiceSelection, setFieldCardChoiceSelection] = useState<{
+    choiceId: string;
+    selectedOptionIds: string[];
+  } | null>(null);
+  const [cuePosition, setCuePosition] =
+    useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
   const [cuePositionLoaded, setCuePositionLoaded] = useState(false);
-  const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] = useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
-  const [cardTooltipMode, setCardTooltipMode] = useState<CardTooltipMode>("enhanced");
-  const [cardTooltipSettingsLoaded, setCardTooltipSettingsLoaded] = useState(false);
+  const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] =
+    useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
+  const [cardTooltipMode, setCardTooltipMode] =
+    useState<CardTooltipMode>("enhanced");
+  const [cardTooltipSettingsLoaded, setCardTooltipSettingsLoaded] =
+    useState(false);
   const {
     cardTooltipScalePercent,
     cardHandScalePercent,
@@ -591,14 +751,19 @@ export default function Page() {
     setCardArchiveScalePercent,
     setCardZoneScalePercent,
     setCardBoardScalePercent,
-    setCardRigScalePercent
+    setCardRigScalePercent,
   } = usePersistentCardScaleSettings();
-  const [selectedActionContext, setSelectedActionContext] = useState<ActionContext | null>(null);
-  const [actionSlotCapacities, setActionSlotCapacities] = useState<Record<Side, number>>({
+  const [selectedActionContext, setSelectedActionContext] =
+    useState<ActionContext | null>(null);
+  const [actionSlotCapacities, setActionSlotCapacities] = useState<
+    Record<Side, number>
+  >({
     runner: baseActionSlotCapacity("runner"),
-    corp: baseActionSlotCapacity("corp")
+    corp: baseActionSlotCapacity("corp"),
   });
-  const [recentSession, setRecentSession] = useState<RecentSessionInfo | null>(null);
+  const [recentSession, setRecentSession] = useState<RecentSessionInfo | null>(
+    null,
+  );
   const sessionRef = useRef<SessionInfo | null>(null);
   const lobbyRef = useRef<LobbyClientPayload | null>(null);
   const resultAudioPrimedRef = useRef(false);
@@ -616,10 +781,18 @@ export default function Page() {
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const hasStoredMatchStartSettingsRef = useRef(false);
   const statusPanelsRef = useRef<HTMLElement | null>(null);
-  const lastActionSlotTurnRef = useRef<{ matchId: string; activeSide: Side } | null>(null);
-  const cardPreviewCollapsedStorageKey = session ? cardPreviewCollapsedStorageKeyFor(session.matchId, session.side) : null;
+  const lastActionSlotTurnRef = useRef<{
+    matchId: string;
+    activeSide: Side;
+  } | null>(null);
+  const cardPreviewCollapsedStorageKey = session
+    ? cardPreviewCollapsedStorageKeyFor(session.matchId, session.side)
+    : null;
   const activeMatchIsGame = activeMatchWorkspace === "game";
-  const { elementRef: topbarRef, heightPx: topbarHeightPx } = useObservedElementHeight<HTMLElement>(`${activeMatchIsGame ? "game" : "entry"}:${payload?.matchId ?? ""}`);
+  const { elementRef: topbarRef, heightPx: topbarHeightPx } =
+    useObservedElementHeight<HTMLElement>(
+      `${activeMatchIsGame ? "game" : "entry"}:${payload?.matchId ?? ""}`,
+    );
 
   const selectStartTab = (nextMode: "host" | "join" | "resume") => {
     if (nextMode === "resume") {
@@ -632,7 +805,11 @@ export default function Page() {
 
   const updateCardPreviewCollapsed = (collapsed: boolean) => {
     setCardPreviewCollapsed(collapsed);
-    if (cardPreviewCollapsedStorageKey) window.localStorage.setItem(cardPreviewCollapsedStorageKey, collapsed ? "true" : "false");
+    if (cardPreviewCollapsedStorageKey)
+      window.localStorage.setItem(
+        cardPreviewCollapsedStorageKey,
+        collapsed ? "true" : "false",
+      );
   };
 
   useEffect(() => {
@@ -667,47 +844,125 @@ export default function Page() {
     const token = params.get("joinToken");
     const reconnectToken = params.get("reconnectToken");
     const reconnectSide = params.get("side");
-    const storedDisplayName = readLocalStorageWithLegacy(DISPLAY_NAME_STORAGE_KEY, LEGACY_DISPLAY_NAME_STORAGE_KEY)?.trim();
-    const rawMatchStartSettings = readLocalStorageWithLegacy(MATCH_START_SETTINGS_STORAGE_KEY, LEGACY_MATCH_START_SETTINGS_STORAGE_KEY);
-    const storedMatchStartSettings = parseMatchStartSettingsFromStorage(rawMatchStartSettings);
-    if (rawMatchStartSettings && !storedMatchStartSettings) removeLocalStorageKeys(MATCH_START_SETTINGS_STORAGE_KEY, LEGACY_MATCH_START_SETTINGS_STORAGE_KEY);
+    const storedDisplayName = readLocalStorageWithLegacy(
+      DISPLAY_NAME_STORAGE_KEY,
+      LEGACY_DISPLAY_NAME_STORAGE_KEY,
+    )?.trim();
+    const rawMatchStartSettings = readLocalStorageWithLegacy(
+      MATCH_START_SETTINGS_STORAGE_KEY,
+      LEGACY_MATCH_START_SETTINGS_STORAGE_KEY,
+    );
+    const storedMatchStartSettings = parseMatchStartSettingsFromStorage(
+      rawMatchStartSettings,
+    );
+    if (rawMatchStartSettings && !storedMatchStartSettings)
+      removeLocalStorageKeys(
+        MATCH_START_SETTINGS_STORAGE_KEY,
+        LEGACY_MATCH_START_SETTINGS_STORAGE_KEY,
+      );
     if (storedMatchStartSettings) {
       hasStoredMatchStartSettingsRef.current = true;
       if (storedMatchStartSettings.mode) setMode(storedMatchStartSettings.mode);
-      if (storedMatchStartSettings.playMode) setPlayMode(storedMatchStartSettings.playMode);
-      if (storedMatchStartSettings.humanSideSelection) setHumanSideSelection(storedMatchStartSettings.humanSideSelection);
-      if (storedMatchStartSettings.humanAiSideSelection) setHumanAiSideSelection(storedMatchStartSettings.humanAiSideSelection);
-      if (storedMatchStartSettings.matchFormat) setMatchFormat(storedMatchStartSettings.matchFormat);
-      if (storedMatchStartSettings.matchCardPool) setMatchCardPool(storedMatchStartSettings.matchCardPool);
-      if (storedMatchStartSettings.playerClockMode) setPlayerClockMode(storedMatchStartSettings.playerClockMode);
-      if (storedMatchStartSettings.playerClockMinutes) setPlayerClockMinutes(storedMatchStartSettings.playerClockMinutes);
-      if (storedMatchStartSettings.playerClockGraceSeconds !== undefined) setPlayerClockGraceSeconds(storedMatchStartSettings.playerClockGraceSeconds);
-      if (storedMatchStartSettings.runnerDifficulty) setRunnerDifficulty(storedMatchStartSettings.runnerDifficulty);
-      if (storedMatchStartSettings.corpDifficulty) setCorpDifficulty(storedMatchStartSettings.corpDifficulty);
-      if (storedMatchStartSettings.aiDeckPolicy) setAiDeckPolicy(storedMatchStartSettings.aiDeckPolicy);
-      if (typeof storedMatchStartSettings.testSetupMode === "boolean") setTestSetupMode(storedMatchStartSettings.testSetupMode);
-      if (storedMatchStartSettings.countdownSeconds) setCountdownSeconds(storedMatchStartSettings.countdownSeconds);
-      if (typeof storedMatchStartSettings.seed === "string") setSeed(normalizeMatchSeed(storedMatchStartSettings.seed));
+      if (storedMatchStartSettings.playMode)
+        setPlayMode(storedMatchStartSettings.playMode);
+      if (storedMatchStartSettings.humanSideSelection)
+        setHumanSideSelection(storedMatchStartSettings.humanSideSelection);
+      if (storedMatchStartSettings.humanAiSideSelection)
+        setHumanAiSideSelection(storedMatchStartSettings.humanAiSideSelection);
+      if (storedMatchStartSettings.matchFormat)
+        setMatchFormat(storedMatchStartSettings.matchFormat);
+      if (storedMatchStartSettings.matchCardPool)
+        setMatchCardPool(storedMatchStartSettings.matchCardPool);
+      if (storedMatchStartSettings.playerClockMode)
+        setPlayerClockMode(storedMatchStartSettings.playerClockMode);
+      if (storedMatchStartSettings.playerClockMinutes)
+        setPlayerClockMinutes(storedMatchStartSettings.playerClockMinutes);
+      if (storedMatchStartSettings.playerClockGraceSeconds !== undefined)
+        setPlayerClockGraceSeconds(
+          storedMatchStartSettings.playerClockGraceSeconds,
+        );
+      if (storedMatchStartSettings.runnerDifficulty)
+        setRunnerDifficulty(storedMatchStartSettings.runnerDifficulty);
+      if (storedMatchStartSettings.corpDifficulty)
+        setCorpDifficulty(storedMatchStartSettings.corpDifficulty);
+      if (storedMatchStartSettings.aiDeckPolicy)
+        setAiDeckPolicy(storedMatchStartSettings.aiDeckPolicy);
+      if (typeof storedMatchStartSettings.testSetupMode === "boolean")
+        setTestSetupMode(storedMatchStartSettings.testSetupMode);
+      if (storedMatchStartSettings.countdownSeconds)
+        setCountdownSeconds(storedMatchStartSettings.countdownSeconds);
+      if (typeof storedMatchStartSettings.seed === "string")
+        setSeed(normalizeMatchSeed(storedMatchStartSettings.seed));
       else setSeed(createMatchSeed());
-      if (storedMatchStartSettings.runnerDeckSource) setRunnerDeckSource(storedMatchStartSettings.runnerDeckSource);
-      if (storedMatchStartSettings.corpDeckSource) setCorpDeckSource(storedMatchStartSettings.corpDeckSource);
-      if (storedMatchStartSettings.participantBRunnerDeckSource) setParticipantBRunnerDeckSource(storedMatchStartSettings.participantBRunnerDeckSource);
-      if (storedMatchStartSettings.participantBCorpDeckSource) setParticipantBCorpDeckSource(storedMatchStartSettings.participantBCorpDeckSource);
-      if (typeof storedMatchStartSettings.selectedRunnerSnapshotId === "string") setSelectedRunnerSnapshotId(storedMatchStartSettings.selectedRunnerSnapshotId);
-      if (typeof storedMatchStartSettings.selectedCorpSnapshotId === "string") setSelectedCorpSnapshotId(storedMatchStartSettings.selectedCorpSnapshotId);
-      if (typeof storedMatchStartSettings.selectedParticipantBRunnerSnapshotId === "string") setSelectedParticipantBRunnerSnapshotId(storedMatchStartSettings.selectedParticipantBRunnerSnapshotId);
-      if (typeof storedMatchStartSettings.selectedParticipantBCorpSnapshotId === "string") setSelectedParticipantBCorpSnapshotId(storedMatchStartSettings.selectedParticipantBCorpSnapshotId);
-      if (typeof storedMatchStartSettings.selectedRunnerLocalDeckId === "string") setSelectedRunnerLocalDeckId(storedMatchStartSettings.selectedRunnerLocalDeckId);
-      if (typeof storedMatchStartSettings.selectedCorpLocalDeckId === "string") setSelectedCorpLocalDeckId(storedMatchStartSettings.selectedCorpLocalDeckId);
-      if (typeof storedMatchStartSettings.selectedParticipantBRunnerLocalDeckId === "string") setSelectedParticipantBRunnerLocalDeckId(storedMatchStartSettings.selectedParticipantBRunnerLocalDeckId);
-      if (typeof storedMatchStartSettings.selectedParticipantBCorpLocalDeckId === "string") setSelectedParticipantBCorpLocalDeckId(storedMatchStartSettings.selectedParticipantBCorpLocalDeckId);
+      if (storedMatchStartSettings.runnerDeckSource)
+        setRunnerDeckSource(storedMatchStartSettings.runnerDeckSource);
+      if (storedMatchStartSettings.corpDeckSource)
+        setCorpDeckSource(storedMatchStartSettings.corpDeckSource);
+      if (storedMatchStartSettings.participantBRunnerDeckSource)
+        setParticipantBRunnerDeckSource(
+          storedMatchStartSettings.participantBRunnerDeckSource,
+        );
+      if (storedMatchStartSettings.participantBCorpDeckSource)
+        setParticipantBCorpDeckSource(
+          storedMatchStartSettings.participantBCorpDeckSource,
+        );
+      if (typeof storedMatchStartSettings.selectedRunnerSnapshotId === "string")
+        setSelectedRunnerSnapshotId(
+          storedMatchStartSettings.selectedRunnerSnapshotId,
+        );
+      if (typeof storedMatchStartSettings.selectedCorpSnapshotId === "string")
+        setSelectedCorpSnapshotId(
+          storedMatchStartSettings.selectedCorpSnapshotId,
+        );
+      if (
+        typeof storedMatchStartSettings.selectedParticipantBRunnerSnapshotId ===
+        "string"
+      )
+        setSelectedParticipantBRunnerSnapshotId(
+          storedMatchStartSettings.selectedParticipantBRunnerSnapshotId,
+        );
+      if (
+        typeof storedMatchStartSettings.selectedParticipantBCorpSnapshotId ===
+        "string"
+      )
+        setSelectedParticipantBCorpSnapshotId(
+          storedMatchStartSettings.selectedParticipantBCorpSnapshotId,
+        );
+      if (
+        typeof storedMatchStartSettings.selectedRunnerLocalDeckId === "string"
+      )
+        setSelectedRunnerLocalDeckId(
+          storedMatchStartSettings.selectedRunnerLocalDeckId,
+        );
+      if (typeof storedMatchStartSettings.selectedCorpLocalDeckId === "string")
+        setSelectedCorpLocalDeckId(
+          storedMatchStartSettings.selectedCorpLocalDeckId,
+        );
+      if (
+        typeof storedMatchStartSettings.selectedParticipantBRunnerLocalDeckId ===
+        "string"
+      )
+        setSelectedParticipantBRunnerLocalDeckId(
+          storedMatchStartSettings.selectedParticipantBRunnerLocalDeckId,
+        );
+      if (
+        typeof storedMatchStartSettings.selectedParticipantBCorpLocalDeckId ===
+        "string"
+      )
+        setSelectedParticipantBCorpLocalDeckId(
+          storedMatchStartSettings.selectedParticipantBCorpLocalDeckId,
+        );
     } else {
       hasStoredMatchStartSettingsRef.current = false;
       setSeed(createMatchSeed());
     }
     setMatchStartSettingsLoaded(true);
     const storedSession = loadCurrentTabSession();
-    if (matchId && reconnectToken && (reconnectSide === "runner" || reconnectSide === "corp")) {
+    if (
+      matchId &&
+      reconnectToken &&
+      (reconnectSide === "runner" || reconnectSide === "corp")
+    ) {
       setEntryTab("play");
       selectStartTab("join");
       void reconnectSession(
@@ -717,9 +972,9 @@ export default function Page() {
           sessionToken: "",
           reconnectToken,
           webSocketUrl: "",
-          displayName: storedDisplayName || "Du"
+          displayName: storedDisplayName || "Du",
         },
-        "Wiederverbindung konnte nicht geladen werden."
+        "Wiederverbindung konnte nicht geladen werden.",
       );
       return;
     }
@@ -742,13 +997,20 @@ export default function Page() {
               return;
             }
             if (storedSession.reconnectToken) {
-              void reconnectSession(storedSession, "Session konnte nicht geladen werden.");
+              void reconnectSession(
+                storedSession,
+                "Session konnte nicht geladen werden.",
+              );
               return;
             }
             setNotice("Session konnte nicht geladen werden.");
           })
           .catch(() => {
-            if (storedSession.reconnectToken) void reconnectSession(storedSession, "Session konnte nicht geladen werden.");
+            if (storedSession.reconnectToken)
+              void reconnectSession(
+                storedSession,
+                "Session konnte nicht geladen werden.",
+              );
             else setNotice("Session konnte nicht geladen werden.");
           });
         return;
@@ -779,12 +1041,18 @@ export default function Page() {
           setPayload(null);
           persistSession(storedSession, bootstrapped);
         } else if (storedSession.reconnectToken) {
-          void reconnectSession(storedSession, "Session konnte nicht geladen werden.");
-        }
-        else setNotice("Session konnte nicht geladen werden.");
+          void reconnectSession(
+            storedSession,
+            "Session konnte nicht geladen werden.",
+          );
+        } else setNotice("Session konnte nicht geladen werden.");
       })
       .catch(() => {
-        if (storedSession.reconnectToken) void reconnectSession(storedSession, "Session konnte nicht geladen werden.");
+        if (storedSession.reconnectToken)
+          void reconnectSession(
+            storedSession,
+            "Session konnte nicht geladen werden.",
+          );
         else setNotice("Session konnte nicht geladen werden.");
       });
   }, []);
@@ -802,11 +1070,15 @@ export default function Page() {
 
   useEffect(() => {
     document.documentElement.dataset.theme = colorScheme;
-    if (colorSchemeLoaded) window.localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, colorScheme);
+    if (colorSchemeLoaded)
+      window.localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, colorScheme);
   }, [colorScheme, colorSchemeLoaded]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(CARD_DISPLAY_MODE_STORAGE_KEY, LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY);
+    const stored = readLocalStorageWithLegacy(
+      CARD_DISPLAY_MODE_STORAGE_KEY,
+      LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY,
+    );
     if (stored !== null) setCardDisplayMode(normalizeCardDisplayMode(stored));
     setCardDisplayModeLoaded(true);
   }, []);
@@ -817,14 +1089,25 @@ export default function Page() {
   }, [cardDisplayModeLoaded, cardDisplayMode]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY, LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY);
+    const stored = readLocalStorageWithLegacy(
+      CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
+      LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
+    );
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { preferGermanCardImages?: unknown; showSetBadges?: unknown };
-        if (typeof parsed.preferGermanCardImages === "boolean") setPreferGermanCardImages(parsed.preferGermanCardImages);
-        if (typeof parsed.showSetBadges === "boolean") setShowSetBadges(parsed.showSetBadges);
+        const parsed = JSON.parse(stored) as {
+          preferGermanCardImages?: unknown;
+          showSetBadges?: unknown;
+        };
+        if (typeof parsed.preferGermanCardImages === "boolean")
+          setPreferGermanCardImages(parsed.preferGermanCardImages);
+        if (typeof parsed.showSetBadges === "boolean")
+          setShowSetBadges(parsed.showSetBadges);
       } catch {
-        removeLocalStorageKeys(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY, LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY);
+        removeLocalStorageKeys(
+          CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
+          LEGACY_CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
+        );
       }
     }
     setCardImageSkinSettingsLoaded(true);
@@ -832,17 +1115,30 @@ export default function Page() {
 
   useEffect(() => {
     if (!cardImageSkinSettingsLoaded) return;
-    window.localStorage.setItem(CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY, JSON.stringify({ preferGermanCardImages, showSetBadges }));
+    window.localStorage.setItem(
+      CARD_IMAGE_SKIN_SETTINGS_STORAGE_KEY,
+      JSON.stringify({ preferGermanCardImages, showSetBadges }),
+    );
   }, [cardImageSkinSettingsLoaded, preferGermanCardImages, showSetBadges]);
 
   useEffect(() => {
-    setChronicleDetailMode(normalizeChronicleDetailMode(readLocalStorageWithLegacy(CHRONICLE_DETAIL_MODE_STORAGE_KEY, LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY)));
+    setChronicleDetailMode(
+      normalizeChronicleDetailMode(
+        readLocalStorageWithLegacy(
+          CHRONICLE_DETAIL_MODE_STORAGE_KEY,
+          LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY,
+        ),
+      ),
+    );
     setChronicleDetailModeLoaded(true);
   }, []);
 
   useEffect(() => {
     if (!chronicleDetailModeLoaded) return;
-    window.localStorage.setItem(CHRONICLE_DETAIL_MODE_STORAGE_KEY, chronicleDetailMode);
+    window.localStorage.setItem(
+      CHRONICLE_DETAIL_MODE_STORAGE_KEY,
+      chronicleDetailMode,
+    );
   }, [chronicleDetailModeLoaded, chronicleDetailMode]);
 
   useEffect(() => {
@@ -855,12 +1151,16 @@ export default function Page() {
       setCardPreviewCollapsed(stored === "true");
       return;
     }
-    if (stored !== null) window.localStorage.removeItem(cardPreviewCollapsedStorageKey);
+    if (stored !== null)
+      window.localStorage.removeItem(cardPreviewCollapsedStorageKey);
     setCardPreviewCollapsed(false);
   }, [cardPreviewCollapsedStorageKey]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(AI_PACING_MODE_STORAGE_KEY, LEGACY_AI_PACING_MODE_STORAGE_KEY);
+    const stored = readLocalStorageWithLegacy(
+      AI_PACING_MODE_STORAGE_KEY,
+      LEGACY_AI_PACING_MODE_STORAGE_KEY,
+    );
     if (stored !== null) setLocalAiPacingMode(normalizeAiPacingMode(stored));
     setAiPacingModeLoaded(true);
   }, []);
@@ -875,14 +1175,20 @@ export default function Page() {
     const legacyDecks = readLegacyBrowserDecks();
     async function loadDeckLibrary() {
       try {
-        const response = await fetch("/api/decks/library", { cache: "no-store" });
+        const response = await fetch("/api/decks/library", {
+          cache: "no-store",
+        });
         const data = (await response.json()) as DeckLibraryResponse;
-        if (!response.ok || data.error) throw new Error(data.error?.message ?? "deck_library_load_failed");
+        if (!response.ok || data.error)
+          throw new Error(data.error?.message ?? "deck_library_load_failed");
         let decks = data.decks ?? [];
         if (decks.length === 0 && legacyDecks.length > 0) {
           const migrated = await persistDeckLibrary(legacyDecks);
           decks = migrated.decks;
-          if (!cancelled) setNotice("Bisherige Browser-Decks wurden in die lokale Datei-Deckbibliothek übernommen.");
+          if (!cancelled)
+            setNotice(
+              "Bisherige Browser-Decks wurden in die lokale Datei-Deckbibliothek übernommen.",
+            );
         }
         if (cancelled) return;
         setDeckLibraryStoragePath(data.storagePath ?? "");
@@ -890,7 +1196,10 @@ export default function Page() {
       } catch {
         if (!cancelled) {
           applyLoadedDecks(legacyDecks);
-          if (legacyDecks.length > 0) setNotice("Datei-Deckbibliothek nicht erreichbar; Browser-Decks wurden nur als Übergang geladen.");
+          if (legacyDecks.length > 0)
+            setNotice(
+              "Datei-Deckbibliothek nicht erreichbar; Browser-Decks wurden nur als Übergang geladen.",
+            );
         }
       } finally {
         if (!cancelled) setLocalDecksLoaded(true);
@@ -904,21 +1213,63 @@ export default function Page() {
 
   useEffect(() => {
     if (!localDecksLoaded) return;
-    const fallbackRunnerDeckId = localDecks.find((deck) => deck.side === "runner")?.deckId ?? "";
-    const fallbackCorpDeckId = localDecks.find((deck) => deck.side === "corp")?.deckId ?? "";
-    if (!localDecks.some((deck) => deck.side === "runner" && deck.deckId === selectedRunnerLocalDeckId)) setSelectedRunnerLocalDeckId(fallbackRunnerDeckId);
-    if (!localDecks.some((deck) => deck.side === "corp" && deck.deckId === selectedCorpLocalDeckId)) setSelectedCorpLocalDeckId(fallbackCorpDeckId);
-    if (!localDecks.some((deck) => deck.side === "runner" && deck.deckId === selectedParticipantBRunnerLocalDeckId)) setSelectedParticipantBRunnerLocalDeckId(fallbackRunnerDeckId);
-    if (!localDecks.some((deck) => deck.side === "corp" && deck.deckId === selectedParticipantBCorpLocalDeckId)) setSelectedParticipantBCorpLocalDeckId(fallbackCorpDeckId);
-  }, [localDecks, localDecksLoaded, selectedRunnerLocalDeckId, selectedCorpLocalDeckId, selectedParticipantBRunnerLocalDeckId, selectedParticipantBCorpLocalDeckId]);
+    const fallbackRunnerDeckId =
+      localDecks.find((deck) => deck.side === "runner")?.deckId ?? "";
+    const fallbackCorpDeckId =
+      localDecks.find((deck) => deck.side === "corp")?.deckId ?? "";
+    if (
+      !localDecks.some(
+        (deck) =>
+          deck.side === "runner" && deck.deckId === selectedRunnerLocalDeckId,
+      )
+    )
+      setSelectedRunnerLocalDeckId(fallbackRunnerDeckId);
+    if (
+      !localDecks.some(
+        (deck) =>
+          deck.side === "corp" && deck.deckId === selectedCorpLocalDeckId,
+      )
+    )
+      setSelectedCorpLocalDeckId(fallbackCorpDeckId);
+    if (
+      !localDecks.some(
+        (deck) =>
+          deck.side === "runner" &&
+          deck.deckId === selectedParticipantBRunnerLocalDeckId,
+      )
+    )
+      setSelectedParticipantBRunnerLocalDeckId(fallbackRunnerDeckId);
+    if (
+      !localDecks.some(
+        (deck) =>
+          deck.side === "corp" &&
+          deck.deckId === selectedParticipantBCorpLocalDeckId,
+      )
+    )
+      setSelectedParticipantBCorpLocalDeckId(fallbackCorpDeckId);
+  }, [
+    localDecks,
+    localDecksLoaded,
+    selectedRunnerLocalDeckId,
+    selectedCorpLocalDeckId,
+    selectedParticipantBRunnerLocalDeckId,
+    selectedParticipantBCorpLocalDeckId,
+  ]);
 
   useEffect(() => {
-    const storedAudio = readLocalStorageWithLegacy(AUDIO_STORAGE_KEY, LEGACY_AUDIO_STORAGE_KEY);
+    const storedAudio = readLocalStorageWithLegacy(
+      AUDIO_STORAGE_KEY,
+      LEGACY_AUDIO_STORAGE_KEY,
+    );
     if (storedAudio) {
       try {
-        const parsed = JSON.parse(storedAudio) as { enabled?: boolean; volume?: number };
+        const parsed = JSON.parse(storedAudio) as {
+          enabled?: boolean;
+          volume?: number;
+        };
         setAudioEnabled(Boolean(parsed.enabled));
-        if (typeof parsed.volume === "number") setAudioVolume(Math.min(1, Math.max(0, parsed.volume)));
+        if (typeof parsed.volume === "number")
+          setAudioVolume(Math.min(1, Math.max(0, parsed.volume)));
       } catch {
         removeLocalStorageKeys(AUDIO_STORAGE_KEY, LEGACY_AUDIO_STORAGE_KEY);
       }
@@ -928,19 +1279,36 @@ export default function Page() {
 
   useEffect(() => {
     if (!audioSettingsLoaded) return;
-    window.localStorage.setItem(AUDIO_STORAGE_KEY, JSON.stringify({ enabled: audioEnabled, volume: audioVolume }));
+    window.localStorage.setItem(
+      AUDIO_STORAGE_KEY,
+      JSON.stringify({ enabled: audioEnabled, volume: audioVolume }),
+    );
   }, [audioSettingsLoaded, audioEnabled, audioVolume]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(ACTION_CUE_SETTINGS_STORAGE_KEY, LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY);
+    const stored = readLocalStorageWithLegacy(
+      ACTION_CUE_SETTINGS_STORAGE_KEY,
+      LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY,
+    );
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { enabled?: boolean; autoDismissMs?: number; automaticEffectsEnabled?: boolean };
-        if (typeof parsed.enabled === "boolean") setActionCuesEnabled(parsed.enabled);
-        if (typeof parsed.automaticEffectsEnabled === "boolean") setAutomaticEffectCuesEnabled(parsed.automaticEffectsEnabled);
-        setActionCueAutoDismissMs(normalizeCueAutoDismissMs(parsed.autoDismissMs));
+        const parsed = JSON.parse(stored) as {
+          enabled?: boolean;
+          autoDismissMs?: number;
+          automaticEffectsEnabled?: boolean;
+        };
+        if (typeof parsed.enabled === "boolean")
+          setActionCuesEnabled(parsed.enabled);
+        if (typeof parsed.automaticEffectsEnabled === "boolean")
+          setAutomaticEffectCuesEnabled(parsed.automaticEffectsEnabled);
+        setActionCueAutoDismissMs(
+          normalizeCueAutoDismissMs(parsed.autoDismissMs),
+        );
       } catch {
-        removeLocalStorageKeys(ACTION_CUE_SETTINGS_STORAGE_KEY, LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY);
+        removeLocalStorageKeys(
+          ACTION_CUE_SETTINGS_STORAGE_KEY,
+          LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY,
+        );
       }
     }
     setActionCueSettingsLoaded(true);
@@ -948,24 +1316,61 @@ export default function Page() {
 
   useEffect(() => {
     if (!actionCueSettingsLoaded) return;
-    window.localStorage.setItem(ACTION_CUE_SETTINGS_STORAGE_KEY, JSON.stringify({ enabled: actionCuesEnabled, autoDismissMs: actionCueAutoDismissMs, automaticEffectsEnabled: automaticEffectCuesEnabled }));
-  }, [actionCueSettingsLoaded, actionCuesEnabled, actionCueAutoDismissMs, automaticEffectCuesEnabled]);
+    window.localStorage.setItem(
+      ACTION_CUE_SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        enabled: actionCuesEnabled,
+        autoDismissMs: actionCueAutoDismissMs,
+        automaticEffectsEnabled: automaticEffectCuesEnabled,
+      }),
+    );
+  }, [
+    actionCueSettingsLoaded,
+    actionCuesEnabled,
+    actionCueAutoDismissMs,
+    automaticEffectCuesEnabled,
+  ]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
+    const stored = readLocalStorageWithLegacy(
+      GAMEPLAY_SETTINGS_STORAGE_KEY,
+      LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY,
+    );
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { autoCorpMandatoryDrawEnabled?: unknown; autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; priorityWindowHoldEnabled?: unknown; topbarStickyEnabled?: unknown; resourceStripMode?: unknown; actionPanelMode?: unknown; aiDecisionDebugOverlayEnabled?: unknown };
-        if (typeof parsed.autoCorpMandatoryDrawEnabled === "boolean") setAutoCorpMandatoryDrawEnabled(parsed.autoCorpMandatoryDrawEnabled);
-        if (typeof parsed.autoEndTurnEnabled === "boolean") setAutoEndTurnEnabled(parsed.autoEndTurnEnabled);
-        if (typeof parsed.autoDiscardEnabled === "boolean") setAutoDiscardEnabled(parsed.autoDiscardEnabled);
-        if (typeof parsed.priorityWindowHoldEnabled === "boolean") setPriorityWindowHoldEnabled(parsed.priorityWindowHoldEnabled);
-        if (typeof parsed.topbarStickyEnabled === "boolean") setTopbarStickyEnabled(parsed.topbarStickyEnabled);
-        if (typeof parsed.aiDecisionDebugOverlayEnabled === "boolean") setAiDecisionDebugOverlayEnabled(parsed.aiDecisionDebugOverlayEnabled);
-        setResourceStripMode(normalizeResourceStripMode(parsed.resourceStripMode));
+        const parsed = JSON.parse(stored) as {
+          autoCorpMandatoryDrawEnabled?: unknown;
+          autoDiscardEnabled?: unknown;
+          autoEndTurnEnabled?: unknown;
+          priorityWindowHoldEnabled?: unknown;
+          topbarStickyEnabled?: unknown;
+          resourceStripMode?: unknown;
+          actionPanelMode?: unknown;
+          aiDecisionDebugOverlayEnabled?: unknown;
+        };
+        if (typeof parsed.autoCorpMandatoryDrawEnabled === "boolean")
+          setAutoCorpMandatoryDrawEnabled(parsed.autoCorpMandatoryDrawEnabled);
+        if (typeof parsed.autoEndTurnEnabled === "boolean")
+          setAutoEndTurnEnabled(parsed.autoEndTurnEnabled);
+        if (typeof parsed.autoDiscardEnabled === "boolean")
+          setAutoDiscardEnabled(parsed.autoDiscardEnabled);
+        if (typeof parsed.priorityWindowHoldEnabled === "boolean")
+          setPriorityWindowHoldEnabled(parsed.priorityWindowHoldEnabled);
+        if (typeof parsed.topbarStickyEnabled === "boolean")
+          setTopbarStickyEnabled(parsed.topbarStickyEnabled);
+        if (typeof parsed.aiDecisionDebugOverlayEnabled === "boolean")
+          setAiDecisionDebugOverlayEnabled(
+            parsed.aiDecisionDebugOverlayEnabled,
+          );
+        setResourceStripMode(
+          normalizeResourceStripMode(parsed.resourceStripMode),
+        );
         setActionPanelMode(normalizeActionPanelMode(parsed.actionPanelMode));
       } catch {
-        removeLocalStorageKeys(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
+        removeLocalStorageKeys(
+          GAMEPLAY_SETTINGS_STORAGE_KEY,
+          LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY,
+        );
       }
     }
     setGameplaySettingsLoaded(true);
@@ -973,26 +1378,65 @@ export default function Page() {
 
   useEffect(() => {
     if (!gameplaySettingsLoaded) return;
-    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode, actionPanelMode, aiDecisionDebugOverlayEnabled }));
-  }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode, actionPanelMode, aiDecisionDebugOverlayEnabled]);
+    window.localStorage.setItem(
+      GAMEPLAY_SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        autoCorpMandatoryDrawEnabled,
+        autoDiscardEnabled,
+        autoEndTurnEnabled,
+        priorityWindowHoldEnabled,
+        topbarStickyEnabled,
+        resourceStripMode,
+        actionPanelMode,
+        aiDecisionDebugOverlayEnabled,
+      }),
+    );
+  }, [
+    gameplaySettingsLoaded,
+    autoCorpMandatoryDrawEnabled,
+    autoDiscardEnabled,
+    autoEndTurnEnabled,
+    priorityWindowHoldEnabled,
+    topbarStickyEnabled,
+    resourceStripMode,
+    actionPanelMode,
+    aiDecisionDebugOverlayEnabled,
+  ]);
 
   useEffect(() => {
-    window.localStorage.setItem(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, serializeOverlayPositionPreference(actionPanelOverlayPosition));
+    window.localStorage.setItem(
+      ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY,
+      serializeOverlayPositionPreference(actionPanelOverlayPosition),
+    );
   }, [actionPanelOverlayPosition]);
 
   useEffect(() => {
-    window.localStorage.setItem(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, serializeOverlayPositionPreference(aiDecisionDebugOverlayPosition));
+    window.localStorage.setItem(
+      AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY,
+      serializeOverlayPositionPreference(aiDecisionDebugOverlayPosition),
+    );
   }, [aiDecisionDebugOverlayPosition]);
 
   useEffect(() => {
-    const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
+    const stored = readLocalStorageWithLegacy(
+      CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
+      LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
+    );
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { hoverOpenDelayMs?: unknown; mode?: unknown };
-        setCardTooltipHoverDelayMs(normalizeCardTooltipHoverDelayMs(parsed.hoverOpenDelayMs));
+        const parsed = JSON.parse(stored) as {
+          hoverOpenDelayMs?: unknown;
+          mode?: unknown;
+        };
+        setCardTooltipHoverDelayMs(
+          normalizeCardTooltipHoverDelayMs(parsed.hoverOpenDelayMs),
+        );
         setCardTooltipMode(normalizeCardTooltipMode(parsed.mode));
       } catch {
-        removeLocalStorageKeys(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
+        removeLocalStorageKeys(
+          CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
+          LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
+        );
       }
     }
     setCardTooltipSettingsLoaded(true);
@@ -1000,17 +1444,33 @@ export default function Page() {
 
   useEffect(() => {
     if (!cardTooltipSettingsLoaded) return;
-    window.localStorage.setItem(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, JSON.stringify({ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }));
+    window.localStorage.setItem(
+      CARD_TOOLTIP_SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        hoverOpenDelayMs: cardTooltipHoverDelayMs,
+        mode: cardTooltipMode,
+      }),
+    );
   }, [cardTooltipSettingsLoaded, cardTooltipHoverDelayMs, cardTooltipMode]);
 
   useEffect(() => {
-    setCuePosition(parseCuePositionPreference(readLocalStorageWithLegacy(ACTION_CUE_POSITION_STORAGE_KEY, LEGACY_ACTION_CUE_POSITION_STORAGE_KEY)));
+    setCuePosition(
+      parseCuePositionPreference(
+        readLocalStorageWithLegacy(
+          ACTION_CUE_POSITION_STORAGE_KEY,
+          LEGACY_ACTION_CUE_POSITION_STORAGE_KEY,
+        ),
+      ),
+    );
     setCuePositionLoaded(true);
   }, []);
 
   useEffect(() => {
     if (!cuePositionLoaded) return;
-    window.localStorage.setItem(ACTION_CUE_POSITION_STORAGE_KEY, serializeCuePositionPreference(cuePosition));
+    window.localStorage.setItem(
+      ACTION_CUE_POSITION_STORAGE_KEY,
+      serializeCuePositionPreference(cuePosition),
+    );
   }, [cuePositionLoaded, cuePosition]);
 
   useEffect(() => {
@@ -1022,7 +1482,10 @@ export default function Page() {
         playMode,
         humanSideSelection,
         humanAiSideSelection,
-        matchFormat: matchFormat === "two_game_side_swap" ? "two_game_side_swap" : "rules_match",
+        matchFormat:
+          matchFormat === "two_game_side_swap"
+            ? "two_game_side_swap"
+            : "rules_match",
         matchCardPool,
         playerClockMode,
         playerClockMinutes,
@@ -1044,8 +1507,8 @@ export default function Page() {
         selectedRunnerLocalDeckId,
         selectedCorpLocalDeckId,
         selectedParticipantBRunnerLocalDeckId,
-        selectedParticipantBCorpLocalDeckId
-      })
+        selectedParticipantBCorpLocalDeckId,
+      }),
     );
   }, [
     matchStartSettingsLoaded,
@@ -1076,7 +1539,7 @@ export default function Page() {
     selectedCorpLocalDeckId,
     selectedParticipantBRunnerLocalDeckId,
     selectedParticipantBCorpLocalDeckId,
-    localDecksLoaded
+    localDecksLoaded,
   ]);
 
   useEffect(() => {
@@ -1084,10 +1547,44 @@ export default function Page() {
       .then((response) => response.json() as Promise<DeckSnapshotsResponse>)
       .then((data) => {
         setDeckSnapshots(data.snapshots ?? []);
-        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID)) setSelectedRunnerSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "runner")?.deckSnapshotId ?? "");
-        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID)) setSelectedCorpSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "corp")?.deckSnapshotId ?? "");
-        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID)) setSelectedParticipantBRunnerSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "runner")?.deckSnapshotId ?? "");
-        if (!data.snapshots?.some((snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID)) setSelectedParticipantBCorpSnapshotId(data.snapshots?.find((snapshot) => snapshot.side === "corp")?.deckSnapshotId ?? "");
+        if (
+          !data.snapshots?.some(
+            (snapshot) =>
+              snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID,
+          )
+        )
+          setSelectedRunnerSnapshotId(
+            data.snapshots?.find((snapshot) => snapshot.side === "runner")
+              ?.deckSnapshotId ?? "",
+          );
+        if (
+          !data.snapshots?.some(
+            (snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID,
+          )
+        )
+          setSelectedCorpSnapshotId(
+            data.snapshots?.find((snapshot) => snapshot.side === "corp")
+              ?.deckSnapshotId ?? "",
+          );
+        if (
+          !data.snapshots?.some(
+            (snapshot) =>
+              snapshot.deckSnapshotId === DEFAULT_RUNNER_SNAPSHOT_ID,
+          )
+        )
+          setSelectedParticipantBRunnerSnapshotId(
+            data.snapshots?.find((snapshot) => snapshot.side === "runner")
+              ?.deckSnapshotId ?? "",
+          );
+        if (
+          !data.snapshots?.some(
+            (snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID,
+          )
+        )
+          setSelectedParticipantBCorpSnapshotId(
+            data.snapshots?.find((snapshot) => snapshot.side === "corp")
+              ?.deckSnapshotId ?? "",
+          );
       })
       .catch(() => setDeckSnapshots([]));
     void fetch("/api/decks/templates", { cache: "no-store" })
@@ -1102,7 +1599,12 @@ export default function Page() {
       setMatchClockAnchor(null);
       return;
     }
-    const decisionKey = matchTimerDecisionKey({ matchId: payload.matchId, playerView: activeView, legalActions: payload.legalActions, winner: payload.winner });
+    const decisionKey = matchTimerDecisionKey({
+      matchId: payload.matchId,
+      playerView: activeView,
+      legalActions: payload.legalActions,
+      winner: payload.winner,
+    });
     const now = Date.now();
     setMatchClockNowMs(now);
     setMatchClockAnchor((current) => {
@@ -1111,48 +1613,77 @@ export default function Page() {
           matchId: payload.matchId,
           matchStartedAtMs: now,
           decisionKey,
-          decisionStartedAtMs: now
+          decisionStartedAtMs: now,
         };
       }
       if (current.decisionKey !== decisionKey) {
         return {
           ...current,
           decisionKey,
-          decisionStartedAtMs: now
+          decisionStartedAtMs: now,
         };
       }
       return current;
     });
-  }, [
-    activeView,
-    payload?.legalActions,
-    payload?.matchId,
-    payload?.winner
-  ]);
+  }, [activeView, payload?.legalActions, payload?.matchId, payload?.winner]);
 
   useEffect(() => {
     if (!payload || !activeView) return;
     setMatchClockNowMs(Date.now());
-    const handle = window.setInterval(() => setMatchClockNowMs(Date.now()), 1000);
+    const handle = window.setInterval(
+      () => setMatchClockNowMs(Date.now()),
+      1000,
+    );
     return () => window.clearInterval(handle);
   }, [activeView, payload?.matchId]);
 
-  const activeDiscardChoice = activeView?.pendingChoice?.source === "discard_phase" ? activeView.pendingChoice : null;
-  const activeDiscardOptionIds = useMemo(() => new Set(activeDiscardChoice?.options.map((option) => option.id) ?? []), [activeDiscardChoice]);
+  const activeDiscardChoice =
+    activeView?.pendingChoice?.source === "discard_phase"
+      ? activeView.pendingChoice
+      : null;
+  const activeDiscardOptionIds = useMemo(
+    () =>
+      new Set(activeDiscardChoice?.options.map((option) => option.id) ?? []),
+    [activeDiscardChoice],
+  );
   const currentDiscardChoiceSelection = discardChoiceSelection;
   const selectedDiscardOptionIds =
-    currentDiscardChoiceSelection && currentDiscardChoiceSelection.choiceId === activeDiscardChoice?.choiceId
-      ? currentDiscardChoiceSelection.selectedOptionIds.filter((optionId) => activeDiscardOptionIds.has(optionId))
+    currentDiscardChoiceSelection &&
+    currentDiscardChoiceSelection.choiceId === activeDiscardChoice?.choiceId
+      ? currentDiscardChoiceSelection.selectedOptionIds.filter((optionId) =>
+          activeDiscardOptionIds.has(optionId),
+        )
       : [];
-  const selectedDiscardOptionIdSet = useMemo(() => new Set(selectedDiscardOptionIds), [selectedDiscardOptionIds.join("|")]);
-  const activeFieldCardChoice = activeView?.pendingChoice && shouldUseFieldCardChoice(activeView.pendingChoice, activeView) ? activeView.pendingChoice : null;
-  const activeFieldCardChoiceOptionIds = useMemo(() => new Set(activeFieldCardChoice?.options.filter((option) => option.selectable !== false).map((option) => option.id) ?? []), [activeFieldCardChoice]);
+  const selectedDiscardOptionIdSet = useMemo(
+    () => new Set(selectedDiscardOptionIds),
+    [selectedDiscardOptionIds.join("|")],
+  );
+  const activeFieldCardChoice =
+    activeView?.pendingChoice &&
+    shouldUseFieldCardChoice(activeView.pendingChoice, activeView)
+      ? activeView.pendingChoice
+      : null;
+  const activeFieldCardChoiceOptionIds = useMemo(
+    () =>
+      new Set(
+        activeFieldCardChoice?.options
+          .filter((option) => option.selectable !== false)
+          .map((option) => option.id) ?? [],
+      ),
+    [activeFieldCardChoice],
+  );
   const currentFieldCardChoiceSelection = fieldCardChoiceSelection;
   const selectedFieldCardChoiceOptionIds =
-    currentFieldCardChoiceSelection && currentFieldCardChoiceSelection.choiceId === activeFieldCardChoice?.choiceId
-      ? currentFieldCardChoiceSelection.selectedOptionIds.filter((optionId) => activeFieldCardChoiceOptionIds.has(optionId))
+    currentFieldCardChoiceSelection &&
+    currentFieldCardChoiceSelection.choiceId === activeFieldCardChoice?.choiceId
+      ? currentFieldCardChoiceSelection.selectedOptionIds.filter((optionId) =>
+          activeFieldCardChoiceOptionIds.has(optionId),
+        )
       : [];
-  const selectedFieldCardChoiceOptionIdSet = useMemo(() => new Set(selectedFieldCardChoiceOptionIds), [selectedFieldCardChoiceOptionIds.join("|")]);
+  const selectedFieldCardChoiceOptionIdSet = useMemo(
+    () => new Set(selectedFieldCardChoiceOptionIds),
+    [selectedFieldCardChoiceOptionIds.join("|")],
+  );
   const activeFieldCardChoiceAction = activeFieldCardChoice
     ? payload?.legalActions.find(
         (action) =>
@@ -1162,57 +1693,168 @@ export default function Page() {
     : undefined;
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
-  const runnerSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "runner" && snapshot.validation.ok && snapshotAllowedForMatchCardPool(snapshot, matchCardPool));
-  const corpSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "corp" && snapshot.validation.ok && snapshotAllowedForMatchCardPool(snapshot, matchCardPool));
-  const matchStartLocalDecks = localDecks.filter((deck) => editableDeckAllowedForMatchCardPool(deck, matchCardPool));
-  const defaultCorpSnapshot = corpSnapshots.find((snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID) ?? corpSnapshots[0] ?? null;
-  const selectedRunnerSnapshot = runnerSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedRunnerSnapshotId) ?? runnerSnapshots[0] ?? null;
-  const selectedCorpSnapshot = corpSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedCorpSnapshotId) ?? defaultCorpSnapshot;
-  const selectedParticipantBRunnerSnapshot = runnerSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedParticipantBRunnerSnapshotId) ?? runnerSnapshots[0] ?? null;
-  const selectedParticipantBCorpSnapshot = corpSnapshots.find((snapshot) => snapshot.deckSnapshotId === selectedParticipantBCorpSnapshotId) ?? corpSnapshots[0] ?? null;
-  const runnerLocalDeck = matchStartLocalDecks.find((deck) => deck.deckId === selectedRunnerLocalDeckId && deck.side === "runner") ?? null;
-  const corpLocalDeck = matchStartLocalDecks.find((deck) => deck.deckId === selectedCorpLocalDeckId && deck.side === "corp") ?? null;
-  const participantBRunnerLocalDeck = matchStartLocalDecks.find((deck) => deck.deckId === selectedParticipantBRunnerLocalDeckId && deck.side === "runner") ?? null;
-  const participantBCorpLocalDeck = matchStartLocalDecks.find((deck) => deck.deckId === selectedParticipantBCorpLocalDeckId && deck.side === "corp") ?? null;
-  const participantARunnerMetadata = runnerDeckSource === "local" ? deckMetadataFromEditable(runnerLocalDeck) : selectedRunnerSnapshot?.publicMetadata;
-  const participantACorpMetadata = corpDeckSource === "local" ? deckMetadataFromEditable(corpLocalDeck) : selectedCorpSnapshot?.publicMetadata;
-  const participantBRunnerMetadata = participantBRunnerDeckSource === "local" ? deckMetadataFromEditable(participantBRunnerLocalDeck) : selectedParticipantBRunnerSnapshot?.publicMetadata;
-  const participantBCorpMetadata = participantBCorpDeckSource === "local" ? deckMetadataFromEditable(participantBCorpLocalDeck) : selectedParticipantBCorpSnapshot?.publicMetadata;
-  const matchStart = deriveMatchStart({ playMode, humanSideSelection, humanAiSideSelection });
-  const gameMode: GameMode = matchStart.isSimulation ? "ai_vs_ai" : matchStart.technicalMode ?? (playMode === "human_vs_ai" ? "human_runner_vs_corp_ai" : "human_vs_human");
+  const runnerSnapshots = deckSnapshots.filter(
+    (snapshot) =>
+      snapshot.side === "runner" &&
+      snapshot.validation.ok &&
+      snapshotAllowedForMatchCardPool(snapshot, matchCardPool),
+  );
+  const corpSnapshots = deckSnapshots.filter(
+    (snapshot) =>
+      snapshot.side === "corp" &&
+      snapshot.validation.ok &&
+      snapshotAllowedForMatchCardPool(snapshot, matchCardPool),
+  );
+  const matchStartLocalDecks = localDecks.filter((deck) =>
+    editableDeckAllowedForMatchCardPool(deck, matchCardPool),
+  );
+  const defaultCorpSnapshot =
+    corpSnapshots.find(
+      (snapshot) => snapshot.deckSnapshotId === DEFAULT_CORP_SNAPSHOT_ID,
+    ) ??
+    corpSnapshots[0] ??
+    null;
+  const selectedRunnerSnapshot =
+    runnerSnapshots.find(
+      (snapshot) => snapshot.deckSnapshotId === selectedRunnerSnapshotId,
+    ) ??
+    runnerSnapshots[0] ??
+    null;
+  const selectedCorpSnapshot =
+    corpSnapshots.find(
+      (snapshot) => snapshot.deckSnapshotId === selectedCorpSnapshotId,
+    ) ?? defaultCorpSnapshot;
+  const selectedParticipantBRunnerSnapshot =
+    runnerSnapshots.find(
+      (snapshot) =>
+        snapshot.deckSnapshotId === selectedParticipantBRunnerSnapshotId,
+    ) ??
+    runnerSnapshots[0] ??
+    null;
+  const selectedParticipantBCorpSnapshot =
+    corpSnapshots.find(
+      (snapshot) =>
+        snapshot.deckSnapshotId === selectedParticipantBCorpSnapshotId,
+    ) ??
+    corpSnapshots[0] ??
+    null;
+  const runnerLocalDeck =
+    matchStartLocalDecks.find(
+      (deck) =>
+        deck.deckId === selectedRunnerLocalDeckId && deck.side === "runner",
+    ) ?? null;
+  const corpLocalDeck =
+    matchStartLocalDecks.find(
+      (deck) => deck.deckId === selectedCorpLocalDeckId && deck.side === "corp",
+    ) ?? null;
+  const participantBRunnerLocalDeck =
+    matchStartLocalDecks.find(
+      (deck) =>
+        deck.deckId === selectedParticipantBRunnerLocalDeckId &&
+        deck.side === "runner",
+    ) ?? null;
+  const participantBCorpLocalDeck =
+    matchStartLocalDecks.find(
+      (deck) =>
+        deck.deckId === selectedParticipantBCorpLocalDeckId &&
+        deck.side === "corp",
+    ) ?? null;
+  const participantARunnerMetadata =
+    runnerDeckSource === "local"
+      ? deckMetadataFromEditable(runnerLocalDeck)
+      : selectedRunnerSnapshot?.publicMetadata;
+  const participantACorpMetadata =
+    corpDeckSource === "local"
+      ? deckMetadataFromEditable(corpLocalDeck)
+      : selectedCorpSnapshot?.publicMetadata;
+  const participantBRunnerMetadata =
+    participantBRunnerDeckSource === "local"
+      ? deckMetadataFromEditable(participantBRunnerLocalDeck)
+      : selectedParticipantBRunnerSnapshot?.publicMetadata;
+  const participantBCorpMetadata =
+    participantBCorpDeckSource === "local"
+      ? deckMetadataFromEditable(participantBCorpLocalDeck)
+      : selectedParticipantBCorpSnapshot?.publicMetadata;
+  const matchStart = deriveMatchStart({
+    playMode,
+    humanSideSelection,
+    humanAiSideSelection,
+  });
+  const gameMode: GameMode = matchStart.isSimulation
+    ? "ai_vs_ai"
+    : (matchStart.technicalMode ??
+      (playMode === "human_vs_ai"
+        ? "human_runner_vs_corp_ai"
+        : "human_vs_human"));
   const hasAiOpponent = matchStart.hasAiOpponent;
   const isHumanVsHuman = playMode === "human_vs_human";
   const isHumanVsAi = playMode === "human_vs_ai";
   const aiTurnPresentation = effectiveAiTurnPresentation(payload);
-  const hasPendingAiCue = currentActionCue?.source === "ai" || actionCueQueue.some((cue) => cue.source === "ai");
-  const aiPacingFallbackDelay = aiPacingFallbackDelayMs(localAiPacingMode, hasPendingAiCue);
+  const hasPendingAiCue =
+    currentActionCue?.source === "ai" ||
+    actionCueQueue.some((cue) => cue.source === "ai");
+  const aiPacingFallbackDelay = aiPacingFallbackDelayMs(
+    localAiPacingMode,
+    hasPendingAiCue,
+  );
   const resultSummary = payload?.resultSummary ?? null;
-  const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
-  const matchEnded = Boolean(payload?.winner || resultSummary || payload?.matchStatus === "finished" || payload?.matchStatus === "forfeited");
-  const showAiPacingFallbackControls = Boolean(aiTurnPresentation?.canAdvanceAi && !matchEnded && aiPacingFallbackDelay !== null && (aiPacingFallbackDelay === 0 || aiPacingFallbackVisible));
+  const resultKey = resultSummary
+    ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}`
+    : null;
+  const matchEnded = Boolean(
+    payload?.winner ||
+    resultSummary ||
+    payload?.matchStatus === "finished" ||
+    payload?.matchStatus === "forfeited",
+  );
+  const showAiPacingFallbackControls = Boolean(
+    aiTurnPresentation?.canAdvanceAi &&
+    !matchEnded &&
+    aiPacingFallbackDelay !== null &&
+    (aiPacingFallbackDelay === 0 || aiPacingFallbackVisible),
+  );
   const startSummary = matchStartSummary({
     playMode,
-    matchFormat: matchFormat === "two_game_side_swap" ? "two_game_side_swap" : "rules_match",
+    matchFormat:
+      matchFormat === "two_game_side_swap"
+        ? "two_game_side_swap"
+        : "rules_match",
     matchCardPool,
     humanSideSelection,
     humanAiSideSelection,
     aiDeckPolicy,
-    testSetupMode
-  }).concat(playerClockMode === "player_clock" ? [`Spielerzeit ${playerClockMinutes} Min · ${playerClockGraceSeconds} s Kulanz`] : ["Ohne Spielerzeit"]);
-  const playerClockDetailControlsDisabled = matchStartSettingsLoaded ? playerClockMode === "none" : false;
+    testSetupMode,
+  }).concat(
+    playerClockMode === "player_clock"
+      ? [
+          `Spielerzeit ${playerClockMinutes} Min · ${playerClockGraceSeconds} s Kulanz`,
+        ]
+      : ["Ohne Spielerzeit"],
+  );
+  const playerClockDetailControlsDisabled = matchStartSettingsLoaded
+    ? playerClockMode === "none"
+    : false;
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
-  const aiDeckPolicyUsesPrimaryDeckSlots = aiDeckPolicy === "selected" || aiDeckPolicy === "same_as_participant_a";
-  const openLanJoinableIds = new Set(openLanMatches.map((entry) => entry.matchId));
+  const aiDeckPolicyUsesPrimaryDeckSlots =
+    aiDeckPolicy === "selected" || aiDeckPolicy === "same_as_participant_a";
+  const openLanJoinableIds = new Set(
+    openLanMatches.map((entry) => entry.matchId),
+  );
   const joinMatchIdTrimmed = joinMatchId.trim();
   const joinTokenTrimmed = joinToken.trim();
-  const canJoinViaOpenLan = joinMatchIdTrimmed.length > 0 && joinTokenTrimmed.length === 0 && openLanJoinableIds.has(joinMatchIdTrimmed);
-  const canSubmitJoin = joinMatchIdTrimmed.length > 0 && (joinTokenTrimmed.length > 0 || canJoinViaOpenLan);
+  const canJoinViaOpenLan =
+    joinMatchIdTrimmed.length > 0 &&
+    joinTokenTrimmed.length === 0 &&
+    openLanJoinableIds.has(joinMatchIdTrimmed);
+  const canSubmitJoin =
+    joinMatchIdTrimmed.length > 0 &&
+    (joinTokenTrimmed.length > 0 || canJoinViaOpenLan);
   const visibleDeckMetadataEntries =
     gameMode === "ai_vs_ai"
       ? aiDeckPolicyUsesPrimaryDeckSlots
         ? [
             { label: "Runner-KI", metadata: participantARunnerMetadata },
-            { label: "Korp-KI", metadata: participantACorpMetadata }
+            { label: "Korp-KI", metadata: participantACorpMetadata },
           ]
         : []
       : [
@@ -1221,87 +1863,172 @@ export default function Page() {
           ...(aiSlotDisabled || (isHumanVsHuman && !testSetupMode)
             ? []
             : [
-                { label: hasAiOpponent ? "KI Runner" : "B Runner", metadata: participantBRunnerMetadata },
-                { label: hasAiOpponent ? "KI Korp" : "B Korp", metadata: participantBCorpMetadata }
-              ])
+                {
+                  label: hasAiOpponent ? "KI Runner" : "B Runner",
+                  metadata: participantBRunnerMetadata,
+                },
+                {
+                  label: hasAiOpponent ? "KI Korp" : "B Korp",
+                  metadata: participantBCorpMetadata,
+                },
+              ]),
         ];
-  const simulationStatusText = simulationPending ? "Simulation läuft..." : gameMode === "ai_vs_ai" ? notice : "";
-  const selectedLocalDeck = localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
-  const selectedDeckDirty = selectedLocalDeck ? savedDeckFingerprints[selectedLocalDeck.deckId] !== deckFingerprint(selectedLocalDeck) : false;
+  const simulationStatusText = simulationPending
+    ? "Simulation läuft..."
+    : gameMode === "ai_vs_ai"
+      ? notice
+      : "";
+  const selectedLocalDeck =
+    localDecks.find((deck) => deck.deckId === selectedLocalDeckId) ?? null;
+  const selectedDeckDirty = selectedLocalDeck
+    ? savedDeckFingerprints[selectedLocalDeck.deckId] !==
+      deckFingerprint(selectedLocalDeck)
+    : false;
   const playableCatalogCards = useMemo(
-    () => allCatalogCards.filter((card) => catalogCardAllowedForDeckEditor(card, selectedLocalDeck)),
-    [allCatalogCards, selectedLocalDeck?.formatProfileId, selectedLocalDeck?.side]
+    () =>
+      allCatalogCards.filter((card) =>
+        catalogCardAllowedForDeckEditor(card, selectedLocalDeck),
+      ),
+    [
+      allCatalogCards,
+      selectedLocalDeck?.formatProfileId,
+      selectedLocalDeck?.side,
+    ],
   );
-  const gripPreviewCard = activeView?.own.gripOrHq.find((card) => card.known) ?? null;
-  const rigPreviewCard = activeView?.own.rig?.find((card) => card.known) ?? null;
-  const currentFocusedCard = focusedCard?.matchId === payload?.matchId ? focusedCard : null;
+  const gripPreviewCard =
+    activeView?.own.gripOrHq.find((card) => card.known) ?? null;
+  const rigPreviewCard =
+    activeView?.own.rig?.find((card) => card.known) ?? null;
+  const currentFocusedCard =
+    focusedCard?.matchId === payload?.matchId ? focusedCard : null;
   const previewSelection =
     currentFocusedCard ??
-    (activeView?.run?.approachedIce ? { card: activeView.run.approachedIce, hiddenSide: "corp" as const } : null) ??
-    (activeView?.run?.encounteredIce ? { card: activeView.run.encounteredIce, hiddenSide: "corp" as const } : null) ??
+    (activeView?.run?.approachedIce
+      ? { card: activeView.run.approachedIce, hiddenSide: "corp" as const }
+      : null) ??
+    (activeView?.run?.encounteredIce
+      ? { card: activeView.run.encounteredIce, hiddenSide: "corp" as const }
+      : null) ??
     (gripPreviewCard ? { card: gripPreviewCard } : null) ??
     (rigPreviewCard ? { card: rigPreviewCard } : null);
   const previewCard = previewSelection?.card ?? null;
   const previewHiddenSide = previewSelection?.hiddenSide;
-  const enrichCard = (card: VisibleCard) => enrichVisibleCard(card, catalogDetailsById);
+  const enrichCard = (card: VisibleCard) =>
+    enrichVisibleCard(card, catalogDetailsById);
   const enrichedPreviewCard = previewCard ? enrichCard(previewCard) : null;
   const focusCard = (card: DisplayVisibleCard, hiddenSide?: Side) => {
     if (!payload?.matchId) return;
-    setFocusedCard({ card, matchId: payload.matchId, ...(hiddenSide ? { hiddenSide } : {}) });
+    setFocusedCard({
+      card,
+      matchId: payload.matchId,
+      ...(hiddenSide ? { hiddenSide } : {}),
+    });
   };
   const selectActionCard = (card: DisplayVisibleCard, hiddenSide?: Side) => {
     focusCard(card, hiddenSide);
     if (card.known) {
-      setSelectedActionContext((current) => (current?.kind === "card" && current.id === card.instanceId ? null : { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
+      setSelectedActionContext((current) =>
+        current?.kind === "card" && current.id === card.instanceId
+          ? null
+          : { kind: "card", id: card.instanceId, label: card.title ?? "Karte" },
+      );
     }
   };
-  const discardOptionForCard = (card: VisibleCard): VisibleChoiceOption | null => {
+  const discardOptionForCard = (
+    card: VisibleCard,
+  ): VisibleChoiceOption | null => {
     if (!activeDiscardChoice) return null;
-    return activeDiscardChoice.options.find((option) => option.value === card.instanceId) ?? null;
+    return (
+      activeDiscardChoice.options.find(
+        (option) => option.value === card.instanceId,
+      ) ?? null
+    );
   };
-  const fieldChoiceOptionsForCard = (card: VisibleCard): VisibleChoiceOption[] => {
-    return activeFieldCardChoice && activeView ? fieldCardChoiceOptionsForCard(activeFieldCardChoice, activeView, card) : [];
+  const fieldChoiceOptionsForCard = (
+    card: VisibleCard,
+  ): VisibleChoiceOption[] => {
+    return activeFieldCardChoice && activeView
+      ? fieldCardChoiceOptionsForCard(activeFieldCardChoice, activeView, card)
+      : [];
   };
   const toggleDiscardOption = (optionId: string) => {
     if (!activeDiscardChoice) return;
     const required = activeDiscardChoice.maxSelections;
     setDiscardChoiceSelection((current) => {
-      const currentSelected = current?.choiceId === activeDiscardChoice.choiceId ? current.selectedOptionIds.filter((id) => activeDiscardOptionIds.has(id)) : [];
+      const currentSelected =
+        current?.choiceId === activeDiscardChoice.choiceId
+          ? current.selectedOptionIds.filter((id) =>
+              activeDiscardOptionIds.has(id),
+            )
+          : [];
       const nextSelected = currentSelected.includes(optionId)
         ? currentSelected.filter((id) => id !== optionId)
         : currentSelected.length >= required
           ? currentSelected
           : [...currentSelected, optionId];
-      return { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
+      return {
+        choiceId: activeDiscardChoice.choiceId,
+        selectedOptionIds: nextSelected,
+      };
     });
   };
   const toggleFieldCardChoiceCardOptions = (optionIds: string[]) => {
     if (!activeFieldCardChoice || optionIds.length === 0) return;
-    const minSelections = Math.max(0, Math.floor(activeFieldCardChoice.minSelections));
-    const maxSelections = Math.max(minSelections, Math.floor(activeFieldCardChoice.maxSelections));
+    const minSelections = Math.max(
+      0,
+      Math.floor(activeFieldCardChoice.minSelections),
+    );
+    const maxSelections = Math.max(
+      minSelections,
+      Math.floor(activeFieldCardChoice.maxSelections),
+    );
     setFieldCardChoiceSelection((current) => {
-      const currentSelected = current?.choiceId === activeFieldCardChoice.choiceId ? current.selectedOptionIds.filter((id) => activeFieldCardChoiceOptionIds.has(id)) : [];
-      const selectedForCard = optionIds.filter((id) => currentSelected.includes(id));
-      const allCardOptionsSelected = selectedForCard.length === optionIds.length;
+      const currentSelected =
+        current?.choiceId === activeFieldCardChoice.choiceId
+          ? current.selectedOptionIds.filter((id) =>
+              activeFieldCardChoiceOptionIds.has(id),
+            )
+          : [];
+      const selectedForCard = optionIds.filter((id) =>
+        currentSelected.includes(id),
+      );
+      const allCardOptionsSelected =
+        selectedForCard.length === optionIds.length;
       if (allCardOptionsSelected) {
         return {
           choiceId: activeFieldCardChoice.choiceId,
-          selectedOptionIds: currentSelected.filter((id) => !optionIds.includes(id))
+          selectedOptionIds: currentSelected.filter(
+            (id) => !optionIds.includes(id),
+          ),
         };
       }
-      const nextOptionId = optionIds.find((id) => !currentSelected.includes(id));
+      const nextOptionId = optionIds.find(
+        (id) => !currentSelected.includes(id),
+      );
       if (!nextOptionId || currentSelected.length >= maxSelections) {
         if (nextOptionId && maxSelections === 1) {
-          return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [nextOptionId] };
+          return {
+            choiceId: activeFieldCardChoice.choiceId,
+            selectedOptionIds: [nextOptionId],
+          };
         }
-        return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: currentSelected };
+        return {
+          choiceId: activeFieldCardChoice.choiceId,
+          selectedOptionIds: currentSelected,
+        };
       }
-      return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [...currentSelected, nextOptionId] };
+      return {
+        choiceId: activeFieldCardChoice.choiceId,
+        selectedOptionIds: [...currentSelected, nextOptionId],
+      };
     });
   };
   const clearFieldCardChoiceSelection = () => {
     if (!activeFieldCardChoice) return;
-    setFieldCardChoiceSelection({ choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [] });
+    setFieldCardChoiceSelection({
+      choiceId: activeFieldCardChoice.choiceId,
+      selectedOptionIds: [],
+    });
   };
   const fieldChoiceCardProps = (card: VisibleCard): FieldChoiceCardProps => {
     const options = fieldChoiceOptionsForCard(card);
@@ -1334,7 +2061,9 @@ export default function Page() {
       };
     }
     const optionIds = options.map((candidate) => candidate.id);
-    const selectedCount = optionIds.filter((optionId) => selectedFieldCardChoiceOptionIdSet.has(optionId)).length;
+    const selectedCount = optionIds.filter((optionId) =>
+      selectedFieldCardChoiceOptionIdSet.has(optionId),
+    ).length;
     const selected = selectedCount > 0;
     const multiOptionCard = optionIds.length > 1;
     return {
@@ -1343,40 +2072,140 @@ export default function Page() {
         selected,
         disabled: Boolean(payload?.winner) || connection !== "online",
         onToggle: () => toggleFieldCardChoiceCardOptions(optionIds),
-        label: multiOptionCard ? `Für Auswahl markieren (${selectedCount}/${optionIds.length})` : "Für Auswahl markieren",
-        selectedLabel: multiOptionCard ? `${selectedCount}/${optionIds.length} ausgewählt` : "Aus Auswahl entfernen"
+        label: multiOptionCard
+          ? `Für Auswahl markieren (${selectedCount}/${optionIds.length})`
+          : "Für Auswahl markieren",
+        selectedLabel: multiOptionCard
+          ? `${selectedCount}/${optionIds.length} ausgewählt`
+          : "Aus Auswahl entfernen",
       },
-      onSelect: () => toggleFieldCardChoiceCardOptions(optionIds)
+      onSelect: () => toggleFieldCardChoiceCardOptions(optionIds),
     };
   };
-  const latestAccessRevealEvent = payload ? latestRetainableAccessRevealEvent(payload.eventTail) : null;
+  const latestAccessRevealEvent = payload
+    ? latestRetainableAccessRevealEvent(payload.eventTail)
+    : null;
   const lastDismissedAccessEventId = dismissedAccessEventIds.at(-1) ?? null;
-  const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, lastDismissedAccessEventId) : null;
-  const hqAgendaRevealEvent = payload ? retainedHqAgendaRevealEvent(payload.eventTail, dismissedAccessEventIds) : null;
-  const hqAgendaReveal = payload ? hqAgendaRevealFromLatestEvent(hqAgendaRevealEvent ?? undefined, catalogDetailsById, payload.side) : null;
-  const archivesRevealEvent = payload ? retainedArchivesRevealEvent(payload.eventTail, dismissedAccessEventIds) : null;
-  const archivesReveal = payload ? archivesRevealFromLatestEvent(archivesRevealEvent ?? undefined, catalogDetailsById, payload.side) : null;
-  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, payload.eventTail, latestAccessRevealEvent) : null;
-  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, payload.eventTail) : null;
-  const accessReveal = hqAgendaReveal ?? archivesReveal ?? currentAccessReveal ?? retainedEventAccessReveal;
-  const showAccessReveal = Boolean(accessReveal && !matchEnded && !dismissedAccessEventIds.includes(accessReveal.eventId));
-  const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
-  const exposeReview = payload ? exposeReviewFromLatestEvent(exposeReviewEvent ?? undefined, catalogDetailsById, payload.side) : null;
-  const viewedApproachIceId = approachIceExposeViewingIceId(payload?.legalActions ?? []);
-  const viewedInstalledExposeCardId = installedCorpExposeReviewCardId(activeView?.pendingChoice);
-  const showExposeReview = Boolean(exposeReview && !matchEnded && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal && !viewedApproachIceId && !viewedInstalledExposeCardId);
-  const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
-  const canReturnToStart = Boolean(payload && (resultSummary || payload.winner || payload.matchStatus === "finished" || payload.matchStatus === "forfeited"));
+  const accessRevealEvent = payload
+    ? retainedAccessRevealEvent(payload.eventTail, lastDismissedAccessEventId)
+    : null;
+  const hqAgendaRevealEvent = payload
+    ? retainedHqAgendaRevealEvent(payload.eventTail, dismissedAccessEventIds)
+    : null;
+  const hqAgendaReveal = payload
+    ? hqAgendaRevealFromLatestEvent(
+        hqAgendaRevealEvent ?? undefined,
+        catalogDetailsById,
+        payload.side,
+      )
+    : null;
+  const archivesRevealEvent = payload
+    ? retainedArchivesRevealEvent(payload.eventTail, dismissedAccessEventIds)
+    : null;
+  const archivesReveal = payload
+    ? archivesRevealFromLatestEvent(
+        archivesRevealEvent ?? undefined,
+        catalogDetailsById,
+        payload.side,
+      )
+    : null;
+  const gypsyReveal = payload
+    ? gypsyScheduleAnalyzerRevealFromPendingChoice(
+        payload.playerView,
+        catalogDetailsById,
+        payload.legalActions,
+        payload.side,
+        payload.eventTail,
+      )
+    : null;
+  const currentAccessReveal = payload
+    ? accessRevealFromCurrentRun(
+        payload.playerView,
+        catalogDetailsById,
+        payload.legalActions,
+        payload.side,
+        payload.eventTail,
+        latestAccessRevealEvent,
+      )
+    : null;
+  const retainedEventAccessReveal = payload
+    ? accessRevealFromLatestEvent(
+        accessRevealEvent ?? undefined,
+        catalogDetailsById,
+        payload.legalActions,
+        payload.side,
+        payload.eventTail,
+      )
+    : null;
+  const accessReveal =
+    gypsyReveal ??
+    hqAgendaReveal ??
+    archivesReveal ??
+    currentAccessReveal ??
+    retainedEventAccessReveal;
+  const showAccessReveal = Boolean(
+    accessReveal &&
+    !matchEnded &&
+    !dismissedAccessEventIds.includes(accessReveal.eventId),
+  );
+  const exposeReviewEvent = payload
+    ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId)
+    : null;
+  const exposeReview = payload
+    ? exposeReviewFromLatestEvent(
+        exposeReviewEvent ?? undefined,
+        catalogDetailsById,
+        payload.side,
+      )
+    : null;
+  const viewedApproachIceId = approachIceExposeViewingIceId(
+    payload?.legalActions ?? [],
+  );
+  const viewedInstalledExposeCardId = installedCorpExposeReviewCardId(
+    activeView?.pendingChoice,
+  );
+  const showExposeReview = Boolean(
+    exposeReview &&
+    !matchEnded &&
+    dismissedExposeReviewEventId !== exposeReview.eventId &&
+    !showAccessReveal &&
+    !viewedApproachIceId &&
+    !viewedInstalledExposeCardId,
+  );
+  const showResultModal = Boolean(
+    resultSummary && resultKey && dismissedResultKey !== resultKey,
+  );
+  const canReturnToStart = Boolean(
+    payload &&
+    (resultSummary ||
+      payload.winner ||
+      payload.matchStatus === "finished" ||
+      payload.matchStatus === "forfeited"),
+  );
   const canStartNextSeriesGame = Boolean(resultSummary?.series?.nextAvailable);
-  const opponentDisplayName = payload?.opponentStatus.displayName ?? lobby?.opponentStatus.displayName ?? null;
-  const canForfeit = Boolean(payload && payload.matchStatus === "active" && !payload.winner);
+  const opponentDisplayName =
+    payload?.opponentStatus.displayName ??
+    lobby?.opponentStatus.displayName ??
+    null;
+  const canForfeit = Boolean(
+    payload && payload.matchStatus === "active" && !payload.winner,
+  );
   const matchClockDisplay =
     payload && activeView && matchClockAnchor?.matchId === payload.matchId
       ? {
-          matchElapsed: formatMatchTimerDuration(matchClockNowMs - matchClockAnchor.matchStartedAtMs),
-          decisionElapsed: formatMatchTimerDuration(matchClockNowMs - matchClockAnchor.decisionStartedAtMs),
-          scopeLabel: payload.winner ? "Spiel beendet" : matchTimerScopeLabel(activeView, payload.legalActions),
-          graceLabel: playerClockGraceDisplay(payload.playerClock, matchClockNowMs)
+          matchElapsed: formatMatchTimerDuration(
+            matchClockNowMs - matchClockAnchor.matchStartedAtMs,
+          ),
+          decisionElapsed: formatMatchTimerDuration(
+            matchClockNowMs - matchClockAnchor.decisionStartedAtMs,
+          ),
+          scopeLabel: payload.winner
+            ? "Spiel beendet"
+            : matchTimerScopeLabel(activeView, payload.legalActions),
+          graceLabel: playerClockGraceDisplay(
+            payload.playerClock,
+            matchClockNowMs,
+          ),
         }
       : null;
   useEffect(() => {
@@ -1414,58 +2243,139 @@ export default function Page() {
       window.removeEventListener("scroll", scheduleUpdate);
       window.removeEventListener("resize", scheduleUpdate);
     };
-  }, [activeMatchIsGame, payload?.matchId, topbarHeightPx, topbarStickyEnabled]);
+  }, [
+    activeMatchIsGame,
+    payload?.matchId,
+    topbarHeightPx,
+    topbarStickyEnabled,
+  ]);
 
   const activeCueHighlight = currentActionCue?.highlight ?? null;
-  const hasDecisionCue = Boolean(!matchEnded && (currentActionCue?.requiresLocalAttention || activeView?.pendingChoice || (activeView?.activeSide === activeView?.side && payload?.legalActions.length)));
-  const legalActionSplit = useMemo(() => splitLegalActions(payload?.legalActions ?? []), [payload?.legalActions]);
-  const runActions = useMemo(() => (activeView ? runWindowActions(activeView, payload?.legalActions ?? []) : []), [activeView, payload?.legalActions]);
-  const selectedPanelContext = selectedActionContext?.kind === "server" ? selectedActionContext : null;
-  const selectedPanelContextActions = selectedPanelContext ? legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, selectedPanelContext)) : [];
+  const hasDecisionCue = Boolean(
+    !matchEnded &&
+    (currentActionCue?.requiresLocalAttention ||
+      activeView?.pendingChoice ||
+      (activeView?.activeSide === activeView?.side &&
+        payload?.legalActions.length)),
+  );
+  const legalActionSplit = useMemo(
+    () => splitLegalActions(payload?.legalActions ?? []),
+    [payload?.legalActions],
+  );
+  const runActions = useMemo(
+    () =>
+      activeView
+        ? runWindowActions(activeView, payload?.legalActions ?? [])
+        : [],
+    [activeView, payload?.legalActions],
+  );
+  const selectedPanelContext =
+    selectedActionContext?.kind === "server" ? selectedActionContext : null;
+  const selectedPanelContextActions = selectedPanelContext
+    ? legalActionSplit.contextualActions.filter((action) =>
+        actionMatchesContext(action, selectedPanelContext),
+      )
+    : [];
   const runActionIds = new Set(runActions.map((action) => action.actionId));
-  const floatingPanelPrimaryActions = activeView?.run ? legalActionSplit.primaryActions.filter((action) => !runActionIds.has(action.actionId)) : legalActionSplit.primaryActions;
-  const floatingPanelContextualActions = activeView?.run ? selectedPanelContextActions.filter((action) => !runActionIds.has(action.actionId)) : selectedPanelContextActions;
-  const floatingPanelNeededDuringRun = Boolean(activeView?.run && (activeView.pendingChoice || floatingPanelPrimaryActions.length > 0 || floatingPanelContextualActions.length > 0));
-  const showFloatingActionPanel = Boolean(activeMatchIsGame && !matchEnded && activeView && actionPanelMode === "floating" && (!activeView.run || floatingPanelNeededDuringRun));
-  const aiDecisionDebugMatchId = activeMatchIsGame && session && payload ? session.matchId : "";
-  const showAiDecisionDebugOverlay = Boolean(activeMatchIsGame && aiDecisionDebugOverlayEnabled && session);
-  const floatingPanelHasHiddenContextActions = Boolean(!activeView?.run && legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card");
+  const floatingPanelPrimaryActions = activeView?.run
+    ? legalActionSplit.primaryActions.filter(
+        (action) => !runActionIds.has(action.actionId),
+      )
+    : legalActionSplit.primaryActions;
+  const floatingPanelContextualActions = activeView?.run
+    ? selectedPanelContextActions.filter(
+        (action) => !runActionIds.has(action.actionId),
+      )
+    : selectedPanelContextActions;
+  const floatingPanelNeededDuringRun = Boolean(
+    activeView?.run &&
+    (activeView.pendingChoice ||
+      floatingPanelPrimaryActions.length > 0 ||
+      floatingPanelContextualActions.length > 0),
+  );
+  const showFloatingActionPanel = Boolean(
+    activeMatchIsGame &&
+    !matchEnded &&
+    activeView &&
+    actionPanelMode === "floating" &&
+    (!activeView.run || floatingPanelNeededDuringRun),
+  );
+  const aiDecisionDebugMatchId =
+    activeMatchIsGame && session && payload ? session.matchId : "";
+  const showAiDecisionDebugOverlay = Boolean(
+    activeMatchIsGame && aiDecisionDebugOverlayEnabled && session,
+  );
+  const floatingPanelHasHiddenContextActions = Boolean(
+    !activeView?.run &&
+    legalActionSplit.contextualActions.length > 0 &&
+    selectedActionContext?.kind !== "card",
+  );
   const cardActionsFor = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
     return orderedCardContextActions(
-      legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }))
+      legalActionSplit.contextualActions.filter((action) =>
+        actionMatchesContext(action, {
+          kind: "card",
+          id: card.instanceId,
+          label: card.title ?? "Karte",
+        }),
+      ),
     );
   };
   const runActionForServer = (serverId: string): LegalAction | null => {
-    const serverContext = { kind: "server" as const, id: serverId, label: serverDisplayLabel(serverId) };
-    const runActions = legalActionSplit.contextualActions.filter((action) => action.type === "start_run" && actionMatchesContext(action, serverContext));
+    const serverContext = {
+      kind: "server" as const,
+      id: serverId,
+      label: serverDisplayLabel(serverId),
+    };
+    const runActions = legalActionSplit.contextualActions.filter(
+      (action) =>
+        action.type === "start_run" &&
+        actionMatchesContext(action, serverContext),
+    );
     return runActions.length === 1 ? runActions[0]! : null;
   };
   const activeRunTargetIds = activeView ? runTargetServerIds(activeView) : [];
   const activeRunIceId = activeView ? activeRunIceInstanceId(activeView) : null;
-  const hiddenContextHint = activeView ? runHiddenContextActionHint(activeView, legalActionSplit.contextualActions) : null;
-  const ownRigGroups = activeView ? groupRunnerRigCards(activeView.own.rig ?? [], { includeEmptyProgramGroup: Boolean(runnerRigMemorySummary(activeView, "own")) }) : [];
+  const hiddenContextHint = activeView
+    ? runHiddenContextActionHint(activeView, legalActionSplit.contextualActions)
+    : null;
+  const ownRigGroups = activeView
+    ? groupRunnerRigCards(activeView.own.rig ?? [], {
+        includeEmptyProgramGroup: Boolean(
+          runnerRigMemorySummary(activeView, "own"),
+        ),
+      })
+    : [];
   const scoreAreaCardsBySide = (side: Side): VisibleCard[] => {
     if (!activeView) return [];
-    return side === activeView.side ? activeView.own.scoreArea : activeView.opponent.scoreArea;
+    return side === activeView.side
+      ? activeView.own.scoreArea
+      : activeView.opponent.scoreArea;
   };
   const agendaPointsBySide = (side: Side): number => {
     if (!activeView) return 0;
-    return side === activeView.side ? activeView.own.agendaPoints : activeView.opponent.agendaPoints;
+    return side === activeView.side
+      ? activeView.own.agendaPoints
+      : activeView.opponent.agendaPoints;
   };
   const toggleScoreAreaOverlay = (side: Side) => {
     setScoreAreaOverlays((value) => ({ ...value, [side]: !value[side] }));
   };
   const effectiveAgendaTarget = activeView?.agendaPointsToWin ?? 7;
-  const resourceStripVisible = resourceStripMode === "on" || (resourceStripMode === "auto" && !statusPanelsVisible);
+  const resourceStripVisible =
+    resourceStripMode === "on" ||
+    (resourceStripMode === "auto" && !statusPanelsVisible);
   const activeMatchClassName = [
     "app",
     "activeMatch",
     topbarStickyEnabled ? "" : "topbarStickyDisabled",
     actionPanelMode === "floating" ? "actionPanelFloatingMode" : "",
     `resourceStrip-${resourceStripMode}`,
-    resourceStripVisible ? "resourceStripVisible" : ""
-  ].filter(Boolean).join(" ");
+    resourceStripVisible ? "resourceStripVisible" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   useEffect(() => {
     if (!aiDecisionDebugOverlayEnabled || !aiDecisionDebugMatchId) {
@@ -1482,7 +2392,9 @@ export default function Page() {
     let closed = false;
     const enableTracing = async () => {
       if (aiDecisionDebugEnabledMatchRef.current === aiDecisionDebugMatchId) {
-        setAiDecisionDebugStatus((current) => current === "off" ? "waiting" : current);
+        setAiDecisionDebugStatus((current) =>
+          current === "off" ? "waiting" : current,
+        );
         return;
       }
       setAiDecisionDebugStatus("activating");
@@ -1500,7 +2412,11 @@ export default function Page() {
       } catch (error) {
         if (closed) return;
         setAiDecisionDebugStatus("error");
-        setAiDecisionDebugError(error instanceof Error ? error.message : "KI-Trace konnte nicht aktiviert werden.");
+        setAiDecisionDebugError(
+          error instanceof Error
+            ? error.message
+            : "KI-Trace konnte nicht aktiviert werden.",
+        );
       }
     };
     void enableTracing();
@@ -1510,11 +2426,19 @@ export default function Page() {
   }, [aiDecisionDebugOverlayEnabled, aiDecisionDebugMatchId]);
 
   useEffect(() => {
-    if (!aiDecisionDebugOverlayEnabled || !aiDecisionDebugMatchId || aiDecisionDebugStatus === "off" || aiDecisionDebugStatus === "error") return;
+    if (
+      !aiDecisionDebugOverlayEnabled ||
+      !aiDecisionDebugMatchId ||
+      aiDecisionDebugStatus === "off" ||
+      aiDecisionDebugStatus === "error"
+    )
+      return;
     let closed = false;
     const loadLatestTrace = async () => {
       try {
-        const traces = await fetchAiDecisionDebugTraceIndex(aiDecisionDebugMatchId);
+        const traces = await fetchAiDecisionDebugTraceIndex(
+          aiDecisionDebugMatchId,
+        );
         if (closed) return;
         setAiDecisionDebugTraceIndex(traces);
         const latestTraceId = latestMaintenanceAiTraceId(traces);
@@ -1533,7 +2457,11 @@ export default function Page() {
       } catch (error) {
         if (closed) return;
         setAiDecisionDebugStatus("error");
-        setAiDecisionDebugError(error instanceof Error ? error.message : "KI-Trace konnte nicht geladen werden.");
+        setAiDecisionDebugError(
+          error instanceof Error
+            ? error.message
+            : "KI-Trace konnte nicht geladen werden.",
+        );
       }
     };
     void loadLatestTrace();
@@ -1542,10 +2470,20 @@ export default function Page() {
       closed = true;
       window.clearInterval(timer);
     };
-  }, [aiDecisionDebugOverlayEnabled, aiDecisionDebugMatchId, aiDecisionDebugStatus]);
+  }, [
+    aiDecisionDebugOverlayEnabled,
+    aiDecisionDebugMatchId,
+    aiDecisionDebugStatus,
+  ]);
 
   useEffect(() => {
-    if (!aiDecisionDebugOverlayEnabled || !session || !payload || !aiTurnPresentation?.canAdvanceAi || payload.winner) {
+    if (
+      !aiDecisionDebugOverlayEnabled ||
+      !session ||
+      !payload ||
+      !aiTurnPresentation?.canAdvanceAi ||
+      payload.winner
+    ) {
       setAiDecisionDebugPreview(null);
       setAiDecisionDebugPreviewError("");
       return;
@@ -1560,7 +2498,11 @@ export default function Page() {
       } catch (error) {
         if (closed) return;
         setAiDecisionDebugPreview(null);
-        setAiDecisionDebugPreviewError(error instanceof Error ? error.message : "KI-Preview konnte nicht geladen werden.");
+        setAiDecisionDebugPreviewError(
+          error instanceof Error
+            ? error.message
+            : "KI-Preview konnte nicht geladen werden.",
+        );
       }
     };
     void loadPreview();
@@ -1577,35 +2519,58 @@ export default function Page() {
     payload?.playerView.stateVersion,
     payload?.winner,
     aiTurnPresentation?.activeAiSide,
-    aiTurnPresentation?.canAdvanceAi
+    aiTurnPresentation?.canAdvanceAi,
   ]);
 
   useEffect(() => {
     if (runnerSnapshots.length === 0) return;
     const firstRunnerSnapshotId = runnerSnapshots[0]?.deckSnapshotId ?? "";
-    const runnerSnapshotIds = new Set(runnerSnapshots.map((snapshot) => snapshot.deckSnapshotId));
-    if (!runnerSnapshotIds.has(selectedRunnerSnapshotId)) setSelectedRunnerSnapshotId(firstRunnerSnapshotId);
-    if (!runnerSnapshotIds.has(selectedParticipantBRunnerSnapshotId)) setSelectedParticipantBRunnerSnapshotId(firstRunnerSnapshotId);
-  }, [runnerSnapshots, selectedRunnerSnapshotId, selectedParticipantBRunnerSnapshotId]);
+    const runnerSnapshotIds = new Set(
+      runnerSnapshots.map((snapshot) => snapshot.deckSnapshotId),
+    );
+    if (!runnerSnapshotIds.has(selectedRunnerSnapshotId))
+      setSelectedRunnerSnapshotId(firstRunnerSnapshotId);
+    if (!runnerSnapshotIds.has(selectedParticipantBRunnerSnapshotId))
+      setSelectedParticipantBRunnerSnapshotId(firstRunnerSnapshotId);
+  }, [
+    runnerSnapshots,
+    selectedRunnerSnapshotId,
+    selectedParticipantBRunnerSnapshotId,
+  ]);
 
   useEffect(() => {
     if (corpSnapshots.length === 0) return;
     const firstCorpSnapshotId = corpSnapshots[0]?.deckSnapshotId ?? "";
-    const corpSnapshotIds = new Set(corpSnapshots.map((snapshot) => snapshot.deckSnapshotId));
-    if (!corpSnapshotIds.has(selectedCorpSnapshotId)) setSelectedCorpSnapshotId(firstCorpSnapshotId);
-    if (!corpSnapshotIds.has(selectedParticipantBCorpSnapshotId)) setSelectedParticipantBCorpSnapshotId(firstCorpSnapshotId);
-  }, [corpSnapshots, selectedCorpSnapshotId, selectedParticipantBCorpSnapshotId]);
+    const corpSnapshotIds = new Set(
+      corpSnapshots.map((snapshot) => snapshot.deckSnapshotId),
+    );
+    if (!corpSnapshotIds.has(selectedCorpSnapshotId))
+      setSelectedCorpSnapshotId(firstCorpSnapshotId);
+    if (!corpSnapshotIds.has(selectedParticipantBCorpSnapshotId))
+      setSelectedParticipantBCorpSnapshotId(firstCorpSnapshotId);
+  }, [
+    corpSnapshots,
+    selectedCorpSnapshotId,
+    selectedParticipantBCorpSnapshotId,
+  ]);
 
   useEffect(() => {
     if (!selectedActionContext) return;
-    if (!activeView || payload?.winner || !actionContextStillVisible(selectedActionContext, activeView)) setSelectedActionContext(null);
+    if (
+      !activeView ||
+      payload?.winner ||
+      !actionContextStillVisible(selectedActionContext, activeView)
+    )
+      setSelectedActionContext(null);
   }, [activeView, payload?.winner, selectedActionContext]);
 
   useEffect(() => {
     if (!matchEnded) return;
     setSelectedActionContext(null);
     setFocusedCard(null);
-    setScoreAreaOverlays((current) => (current.runner || current.corp ? { runner: false, corp: false } : current));
+    setScoreAreaOverlays((current) =>
+      current.runner || current.corp ? { runner: false, corp: false } : current,
+    );
     setActionCueQueue([]);
     setCurrentActionCue(null);
     setDamageImpactQueue([]);
@@ -1618,8 +2583,13 @@ export default function Page() {
       if (isCardActionSurfaceTarget(event.target)) return;
       setSelectedActionContext(null);
     };
-    window.addEventListener("pointerdown", closeCardActionMenu, { capture: true });
-    return () => window.removeEventListener("pointerdown", closeCardActionMenu, { capture: true });
+    window.addEventListener("pointerdown", closeCardActionMenu, {
+      capture: true,
+    });
+    return () =>
+      window.removeEventListener("pointerdown", closeCardActionMenu, {
+        capture: true,
+      });
   }, [selectedActionContext]);
 
   useEffect(() => {
@@ -1629,10 +2599,21 @@ export default function Page() {
       return;
     }
     setDiscardChoiceSelection((current) => {
-      if (!current || current.choiceId !== activeDiscardChoice.choiceId) return { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: [] };
-    const nextSelected = current.selectedOptionIds.filter((optionId) => activeDiscardOptionIds.has(optionId));
-    return nextSelected.length === current.selectedOptionIds.length ? current : { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
-  });
+      if (!current || current.choiceId !== activeDiscardChoice.choiceId)
+        return {
+          choiceId: activeDiscardChoice.choiceId,
+          selectedOptionIds: [],
+        };
+      const nextSelected = current.selectedOptionIds.filter((optionId) =>
+        activeDiscardOptionIds.has(optionId),
+      );
+      return nextSelected.length === current.selectedOptionIds.length
+        ? current
+        : {
+            choiceId: activeDiscardChoice.choiceId,
+            selectedOptionIds: nextSelected,
+          };
+    });
   }, [activeDiscardChoice?.choiceId, activeDiscardOptionIds]);
 
   useEffect(() => {
@@ -1641,9 +2622,20 @@ export default function Page() {
       return;
     }
     setFieldCardChoiceSelection((current) => {
-      if (!current || current.choiceId !== activeFieldCardChoice.choiceId) return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [] };
-      const nextSelected = current.selectedOptionIds.filter((optionId) => activeFieldCardChoiceOptionIds.has(optionId));
-      return nextSelected.length === current.selectedOptionIds.length ? current : { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: nextSelected };
+      if (!current || current.choiceId !== activeFieldCardChoice.choiceId)
+        return {
+          choiceId: activeFieldCardChoice.choiceId,
+          selectedOptionIds: [],
+        };
+      const nextSelected = current.selectedOptionIds.filter((optionId) =>
+        activeFieldCardChoiceOptionIds.has(optionId),
+      );
+      return nextSelected.length === current.selectedOptionIds.length
+        ? current
+        : {
+            choiceId: activeFieldCardChoice.choiceId,
+            selectedOptionIds: nextSelected,
+          };
     });
   }, [activeFieldCardChoice?.choiceId, activeFieldCardChoiceOptionIds]);
 
@@ -1651,22 +2643,53 @@ export default function Page() {
     if (!payload || !activeView) return;
     const ownSide = activeView.side;
     const opponent = opponentSide(ownSide);
-    const turnKey = { matchId: payload.matchId, activeSide: activeView.activeSide };
+    const turnKey = {
+      matchId: payload.matchId,
+      activeSide: activeView.activeSide,
+    };
     const previousTurnKey = lastActionSlotTurnRef.current;
-    const resetActiveSide = !previousTurnKey || previousTurnKey.matchId !== turnKey.matchId || previousTurnKey.activeSide !== turnKey.activeSide;
+    const resetActiveSide =
+      !previousTurnKey ||
+      previousTurnKey.matchId !== turnKey.matchId ||
+      previousTurnKey.activeSide !== turnKey.activeSide;
     lastActionSlotTurnRef.current = turnKey;
 
     setActionSlotCapacities((current) => {
       const next = { ...current };
-      updateActionSlotCapacity(next, ownSide, activeView.own.clicks, activeView.activeSide === ownSide, resetActiveSide, activeView.publicEvents);
-      updateActionSlotCapacity(next, opponent, activeView.opponent.clicks, activeView.activeSide === opponent, resetActiveSide, activeView.publicEvents);
-      return next.runner === current.runner && next.corp === current.corp ? current : next;
+      updateActionSlotCapacity(
+        next,
+        ownSide,
+        activeView.own.clicks,
+        activeView.activeSide === ownSide,
+        resetActiveSide,
+        activeView.publicEvents,
+      );
+      updateActionSlotCapacity(
+        next,
+        opponent,
+        activeView.opponent.clicks,
+        activeView.activeSide === opponent,
+        resetActiveSide,
+        activeView.publicEvents,
+      );
+      return next.runner === current.runner && next.corp === current.corp
+        ? current
+        : next;
     });
-  }, [activeView?.activeSide, activeView?.own.clicks, activeView?.opponent.clicks, activeView?.side, payload?.matchId, payload?.playerView.stateVersion]);
+  }, [
+    activeView?.activeSide,
+    activeView?.own.clicks,
+    activeView?.opponent.clicks,
+    activeView?.side,
+    payload?.matchId,
+    payload?.playerView.stateVersion,
+  ]);
 
   useEffect(() => {
     if (entryTab !== "decks" || !selectedLocalDeck) return;
-    const catalogCardById = new Map(allCatalogCards.map((card) => [card.catalogCardId, card]));
+    const catalogCardById = new Map(
+      allCatalogCards.map((card) => [card.catalogCardId, card]),
+    );
     const missingIds = selectedLocalDeck.cards
       .map((entry) => entry.cardId)
       .filter((cardId) => {
@@ -1675,13 +2698,26 @@ export default function Page() {
         return !catalogCard || catalogCard.type === "agenda";
       });
     void ensureCatalogDetails(missingIds);
-  }, [entryTab, selectedLocalDeck, allCatalogCards, catalogDetailsById, ensureCatalogDetails]);
+  }, [
+    entryTab,
+    selectedLocalDeck,
+    allCatalogCards,
+    catalogDetailsById,
+    ensureCatalogDetails,
+  ]);
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
-    const missingIds = playableCatalogCards.map((card) => card.catalogCardId).filter((cardId) => !catalogDetailsById[cardId]);
+    const missingIds = playableCatalogCards
+      .map((card) => card.catalogCardId)
+      .filter((cardId) => !catalogDetailsById[cardId]);
     void ensureCatalogDetails(missingIds);
-  }, [entryTab, playableCatalogCards, catalogDetailsById, ensureCatalogDetails]);
+  }, [
+    entryTab,
+    playableCatalogCards,
+    catalogDetailsById,
+    ensureCatalogDetails,
+  ]);
 
   useEffect(() => {
     if (!resultKey || !resultSummary) {
@@ -1715,7 +2751,10 @@ export default function Page() {
 
   useEffect(() => {
     if (payload?.pendingUndo) setUndoPanelOpen(true);
-  }, [payload?.pendingUndo?.undoRequestId, payload?.pendingUndo?.needsResponse]);
+  }, [
+    payload?.pendingUndo?.undoRequestId,
+    payload?.pendingUndo?.needsResponse,
+  ]);
 
   const updateLocalAiPacingMode = (mode: AiPacingMode) => {
     localAiPacingModeRef.current = mode;
@@ -1733,14 +2772,26 @@ export default function Page() {
       matchId: payload.matchId,
       stateVersion: payload.playerView.stateVersion,
       activeSide: payload.playerView.activeSide,
-      phase: payload.playerView.phase
+      phase: payload.playerView.phase,
     };
     const cue = turnStartAudioCue(current, lastTurnStartAudioStateRef.current);
     lastTurnStartAudioStateRef.current = current;
-    if (!audioEnabled || !cue || lastTurnStartAudioCueKeyRef.current === cue.key) return;
+    if (
+      !audioEnabled ||
+      !cue ||
+      lastTurnStartAudioCueKeyRef.current === cue.key
+    )
+      return;
     lastTurnStartAudioCueKeyRef.current = cue.key;
     playActionCueSound(cue.sound, audioVolume);
-  }, [audioEnabled, audioVolume, payload?.matchId, payload?.playerView.activeSide, payload?.playerView.phase, payload?.playerView.stateVersion]);
+  }, [
+    audioEnabled,
+    audioVolume,
+    payload?.matchId,
+    payload?.playerView.activeSide,
+    payload?.playerView.phase,
+    payload?.playerView.stateVersion,
+  ]);
 
   useEffect(() => {
     if (!payload) return;
@@ -1755,7 +2806,11 @@ export default function Page() {
       return;
     }
     const newEvents = publicEventsAfter(payload.eventTail, lastSeen);
-    const contextByEventId = chronicleContextByEventId(payload.playerView.publicEvents, catalogDetailsById, { preferGermanCardImages });
+    const contextByEventId = chronicleContextByEventId(
+      payload.playerView.publicEvents,
+      catalogDetailsById,
+      { preferGermanCardImages },
+    );
     const cues = actionCuesEnabled
       ? deriveOpponentActionCues({
           viewerSide: payload.side,
@@ -1763,30 +2818,57 @@ export default function Page() {
           events: payload.eventTail,
           lastPresentedEventId: lastSeen,
           includeAutomaticEffectCues: automaticEffectCuesEnabled,
-          contextByEventId
+          contextByEventId,
         })
       : [];
     const damageImpacts = deriveDamageImpactCues({
       viewerSide: payload.side,
       playerView: payload.playerView,
       events: payload.eventTail,
-      lastPresentedEventId: lastSeen
+      lastPresentedEventId: lastSeen,
     });
     lastSeenCueEventIdRef.current = latestId;
     if (cues.length > 0) setActionCueQueue((current) => [...current, ...cues]);
-    if (damageImpacts.length > 0) setDamageImpactQueue((current) => [...current, ...damageImpacts]);
+    if (damageImpacts.length > 0)
+      setDamageImpactQueue((current) => [...current, ...damageImpacts]);
     if (!audioEnabled || newEvents.length === 0) return;
     const overlayEventIds = new Set(cues.map((cue) => cue.eventId));
     for (const event of newEvents) {
       if (overlayEventIds.has(event.eventId)) continue;
-      const item = formatChronicleEvent(event, payload.side, contextByEventId[event.eventId] ?? {});
+      const item = formatChronicleEvent(
+        event,
+        payload.side,
+        contextByEventId[event.eventId] ?? {},
+      );
       const actionType = eventActionType(event);
       const actor = sideFromPublicPayload(event.publicPayload.actor);
-      if (actor === payload.side && locallyPlayedActionSoundKeysRef.current.delete(localActionSoundKey(actor, event.stateVersionBefore, actionType))) continue;
+      if (
+        actor === payload.side &&
+        locallyPlayedActionSoundKeysRef.current.delete(
+          localActionSoundKey(actor, event.stateVersionBefore, actionType),
+        )
+      )
+        continue;
       const sound = actionSoundForActionType(actionType, item.visibility);
-      if (sound) playActionCueSound(sound, audioVolume, actionSoundCountForAction(actionType, event.publicPayload));
+      if (sound)
+        playActionCueSound(
+          sound,
+          audioVolume,
+          actionSoundCountForAction(actionType, event.publicPayload),
+        );
     }
-  }, [actionCuesEnabled, automaticEffectCuesEnabled, audioEnabled, audioVolume, matchEnded, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById, preferGermanCardImages]);
+  }, [
+    actionCuesEnabled,
+    automaticEffectCuesEnabled,
+    audioEnabled,
+    audioVolume,
+    matchEnded,
+    payload?.eventTail,
+    payload?.playerView.stateVersion,
+    payload?.side,
+    catalogDetailsById,
+    preferGermanCardImages,
+  ]);
 
   useEffect(() => {
     if (currentActionCue || actionCueQueue.length === 0) return;
@@ -1806,41 +2888,100 @@ export default function Page() {
 
   useEffect(() => {
     if (!currentActionCue) return;
-    if (audioEnabled && currentActionCue.sound) playActionCueSound(currentActionCue.sound, audioVolume, currentActionCue.soundCount);
-    if (localAiPacingMode === "manual" && currentActionCue.source === "ai" && aiTurnPresentation?.canAdvanceAi) return;
+    if (audioEnabled && currentActionCue.sound)
+      playActionCueSound(
+        currentActionCue.sound,
+        audioVolume,
+        currentActionCue.soundCount,
+      );
+    if (
+      localAiPacingMode === "manual" &&
+      currentActionCue.source === "ai" &&
+      aiTurnPresentation?.canAdvanceAi
+    )
+      return;
     if (actionCueAutoDismissMs === 0) return;
-    const timeout = window.setTimeout(() => setCurrentActionCue(null), actionCueAutoDismissMs);
+    const timeout = window.setTimeout(
+      () => setCurrentActionCue(null),
+      actionCueAutoDismissMs,
+    );
     return () => window.clearTimeout(timeout);
-  }, [actionCueAutoDismissMs, aiTurnPresentation?.canAdvanceAi, audioEnabled, audioVolume, currentActionCue, localAiPacingMode]);
+  }, [
+    actionCueAutoDismissMs,
+    aiTurnPresentation?.canAdvanceAi,
+    audioEnabled,
+    audioVolume,
+    currentActionCue,
+    localAiPacingMode,
+  ]);
 
   useEffect(() => {
-    if (!payload || !aiTurnPresentation?.canAdvanceAi || payload.winner || connection !== "online" || priorityWindowHoldEnabled) return;
-    const delayMs = aiPacingDelayMs(localAiPacingMode, Boolean(currentActionCue) || actionCueQueue.length > 0, actionCueAutoDismissMs);
+    if (
+      !payload ||
+      !aiTurnPresentation?.canAdvanceAi ||
+      payload.winner ||
+      connection !== "online" ||
+      priorityWindowHoldEnabled
+    )
+      return;
+    const delayMs = aiPacingDelayMs(
+      localAiPacingMode,
+      Boolean(currentActionCue) || actionCueQueue.length > 0,
+      actionCueAutoDismissMs,
+    );
     if (delayMs === null) return;
     const advanceKey = `${payload.matchId}:${payload.matchVersion}:${payload.playerView.stateVersion}:${localAiPacingMode}`;
     if (pendingAiAdvanceKeyRef.current === advanceKey) return;
     pendingAiAdvanceKeyRef.current = advanceKey;
     const timeout = window.setTimeout(() => {
-      if (localAiPacingModeRef.current !== localAiPacingMode || localAiPacingModeRef.current === "manual") {
-        if (pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
+      if (
+        localAiPacingModeRef.current !== localAiPacingMode ||
+        localAiPacingModeRef.current === "manual"
+      ) {
+        if (pendingAiAdvanceKeyRef.current === advanceKey)
+          pendingAiAdvanceKeyRef.current = null;
         return;
       }
       if (currentActionCue) setCurrentActionCue(null);
-      const sent = advanceAi(localAiPacingModeRef.current === "fast" ? "until_human" : "single_step");
-      if (!sent && pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
+      const sent = advanceAi(
+        localAiPacingModeRef.current === "fast" ? "until_human" : "single_step",
+      );
+      if (!sent && pendingAiAdvanceKeyRef.current === advanceKey)
+        pendingAiAdvanceKeyRef.current = null;
     }, delayMs);
-    const retryTimeout = window.setTimeout(() => {
-      if (pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
-    }, Math.max(delayMs + 2500, 3200));
+    const retryTimeout = window.setTimeout(
+      () => {
+        if (pendingAiAdvanceKeyRef.current === advanceKey)
+          pendingAiAdvanceKeyRef.current = null;
+      },
+      Math.max(delayMs + 2500, 3200),
+    );
     return () => {
       window.clearTimeout(timeout);
       window.clearTimeout(retryTimeout);
-      if (pendingAiAdvanceKeyRef.current === advanceKey) pendingAiAdvanceKeyRef.current = null;
+      if (pendingAiAdvanceKeyRef.current === advanceKey)
+        pendingAiAdvanceKeyRef.current = null;
     };
-  }, [actionCueAutoDismissMs, actionCueQueue.length, aiTurnPresentation?.canAdvanceAi, connection, currentActionCue, localAiPacingMode, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner, priorityWindowHoldEnabled]);
+  }, [
+    actionCueAutoDismissMs,
+    actionCueQueue.length,
+    aiTurnPresentation?.canAdvanceAi,
+    connection,
+    currentActionCue,
+    localAiPacingMode,
+    payload?.matchId,
+    payload?.matchVersion,
+    payload?.playerView.stateVersion,
+    payload?.winner,
+    priorityWindowHoldEnabled,
+  ]);
 
   useEffect(() => {
-    if (!aiTurnPresentation?.canAdvanceAi || payload?.winner || aiPacingFallbackDelay === null) {
+    if (
+      !aiTurnPresentation?.canAdvanceAi ||
+      payload?.winner ||
+      aiPacingFallbackDelay === null
+    ) {
       setAiPacingFallbackVisible(false);
       return;
     }
@@ -1849,9 +2990,19 @@ export default function Page() {
       return;
     }
     setAiPacingFallbackVisible(false);
-    const timeout = window.setTimeout(() => setAiPacingFallbackVisible(true), aiPacingFallbackDelay);
+    const timeout = window.setTimeout(
+      () => setAiPacingFallbackVisible(true),
+      aiPacingFallbackDelay,
+    );
     return () => window.clearTimeout(timeout);
-  }, [aiPacingFallbackDelay, aiTurnPresentation?.canAdvanceAi, payload?.matchId, payload?.matchVersion, payload?.playerView.stateVersion, payload?.winner]);
+  }, [
+    aiPacingFallbackDelay,
+    aiTurnPresentation?.canAdvanceAi,
+    payload?.matchId,
+    payload?.matchVersion,
+    payload?.playerView.stateVersion,
+    payload?.winner,
+  ]);
 
   const createMatch = async () => {
     setNotice("");
@@ -1864,7 +3015,11 @@ export default function Page() {
     try {
       deckPayload = await matchDeckPayload();
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Deckauswahl ist nicht matchstartfähig.");
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : "Deckauswahl ist nicht matchstartfähig.",
+      );
       return;
     }
     const matchSeed = normalizeMatchSeed(seed);
@@ -1878,7 +3033,9 @@ export default function Page() {
         runnerDifficulty,
         corpDifficulty,
         ...(hasAiOpponent ? { aiPacingMode: "paced" } : {}),
-        ...(hasAiOpponent && aiTraceStartMode !== "off" ? { aiTraceMode: aiTraceStartMode } : {}),
+        ...(hasAiOpponent && aiTraceStartMode !== "off"
+          ? { aiTraceMode: aiTraceStartMode }
+          : {}),
         ...(isHumanVsHuman ? { countdownSeconds } : {}),
         ...(isHumanVsHuman ? { discoverableInLan } : {}),
         settings: {
@@ -1890,14 +3047,16 @@ export default function Page() {
               ? {
                   mode: "player_clock",
                   startingTimeMs: playerClockMinutes * 60_000,
-                  gracePeriodMs: playerClockGraceSeconds * 1000
+                  gracePeriodMs: playerClockGraceSeconds * 1000,
                 }
-              : { mode: "none" }
+              : { mode: "none" },
         },
-        ...deckPayload
+        ...deckPayload,
       });
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Match konnte nicht erstellt werden."));
+      setNotice(
+        serverErrorNotice(error, "Match konnte nicht erstellt werden."),
+      );
       return;
     }
     if (created.error) {
@@ -1914,32 +3073,47 @@ export default function Page() {
       webSocketUrl: created.webSocketUrl,
       displayName,
       ...(created.pendingDeckHandshake ? { pendingDeckHandshake: true } : {}),
-      ...(created.joinUrl ? { joinUrl: created.joinUrl } : {})
+      ...(created.joinUrl ? { joinUrl: created.joinUrl } : {}),
     };
     persistSession(nextSession);
     setSession(nextSession);
-    const aiTraceNotice = hasAiOpponent && aiTraceStartMode !== "off" ? " KI-Trace läuft ab Start." : "";
+    const aiTraceNotice =
+      hasAiOpponent && aiTraceStartMode !== "off"
+        ? " KI-Trace läuft ab Start."
+        : "";
     if (created.lobby || created.pendingDeckHandshake || !created.playerView) {
       setPayload(null);
       setLobby(lobbyFromInitialResponse(created, created.hostSide));
-      const sideNotice = created.lobby?.sideAssignmentMode === "random_pending" ? "Seite wird beim Start ausgelost" : `Du startest als ${sideLabel(created.hostSide)}`;
+      const sideNotice =
+        created.lobby?.sideAssignmentMode === "random_pending"
+          ? "Seite wird beim Start ausgelost"
+          : `Du startest als ${sideLabel(created.hostSide)}`;
       setNotice(`Lobby erstellt. ${sideNotice}.${aiTraceNotice}`);
       return;
     }
     setPayload(fromInitialResponse(created, created.hostSide));
     setLobby(null);
-    setNotice(`Match erstellt. Du startest als ${sideLabel(created.hostSide)}.${aiTraceNotice}`);
+    setNotice(
+      `Match erstellt. Du startest als ${sideLabel(created.hostSide)}.${aiTraceNotice}`,
+    );
   };
 
   const startNextSeriesGame = async () => {
-    if (!session || !resultSummary?.series?.nextAvailable || seriesTransitioning) return;
+    if (
+      !session ||
+      !resultSummary?.series?.nextAvailable ||
+      seriesTransitioning
+    )
+      return;
     setSeriesTransitioning(true);
     setNotice("");
     try {
-      const next = await postJson<CreateMatchResponse & { error?: { message: string } }>(`/api/matches/${encodeURIComponent(session.matchId)}/series-next`, {
+      const next = await postJson<
+        CreateMatchResponse & { error?: { message: string } }
+      >(`/api/matches/${encodeURIComponent(session.matchId)}/series-next`, {
         side: session.side,
         sessionToken: session.sessionToken,
-        displayName: session.displayName
+        displayName: session.displayName,
       });
       if (next.error) {
         setNotice(next.error.message);
@@ -1952,16 +3126,25 @@ export default function Page() {
         reconnectToken: next.hostReconnectToken,
         webSocketUrl: next.webSocketUrl,
         displayName: session.displayName,
-        ...(next.joinUrl ? { joinUrl: next.joinUrl } : {})
+        ...(next.joinUrl ? { joinUrl: next.joinUrl } : {}),
       };
       persistSession(nextSession);
       setSession(nextSession);
       setPayload(fromInitialResponse(next, next.hostSide));
       setLobby(null);
       setDismissedResultKey(null);
-      setNotice(next.joinUrl ? "Nächstes Serienspiel erstellt. Teile den neuen Join-Link." : "Nächstes Serienspiel erstellt.");
+      setNotice(
+        next.joinUrl
+          ? "Nächstes Serienspiel erstellt. Teile den neuen Join-Link."
+          : "Nächstes Serienspiel erstellt.",
+      );
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Nächstes Serienspiel konnte nicht erstellt werden."));
+      setNotice(
+        serverErrorNotice(
+          error,
+          "Nächstes Serienspiel konnte nicht erstellt werden.",
+        ),
+      );
     } finally {
       setSeriesTransitioning(false);
     }
@@ -1973,14 +3156,17 @@ export default function Page() {
     setSimulationPending(true);
     try {
       const deckPayload = await matchDeckPayload();
-      const result = await postJson<{ summary?: AiSimulationSummary; error?: { message: string } }>("/api/simulations/ai-vs-ai", {
+      const result = await postJson<{
+        summary?: AiSimulationSummary;
+        error?: { message: string };
+      }>("/api/simulations/ai-vs-ai", {
         seed,
         runnerDifficulty,
         corpDifficulty,
         ...deckPayload,
         settings: { cardPool: matchCardPool },
         agendaPointsToWin: effectiveAgendaTarget,
-        maxActions: 120
+        maxActions: 120,
       });
       if (result.error) {
         setNotice(result.error.message);
@@ -1993,7 +3179,9 @@ export default function Page() {
       setSimulation(result.summary);
       setNotice("Simulation abgeschlossen.");
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Simulation konnte nicht gestartet werden."));
+      setNotice(
+        serverErrorNotice(error, "Simulation konnte nicht gestartet werden."),
+      );
     } finally {
       setSimulationPending(false);
     }
@@ -2002,8 +3190,16 @@ export default function Page() {
   async function matchDeckPayload() {
     if (gameMode === "ai_vs_ai") return await simulationDeckPayload();
     return {
-      participantADecks: await deckPairPayload(runnerDeckSource, selectedRunnerSnapshotId, selectedRunnerLocalDeckId, corpDeckSource, selectedCorpSnapshotId, selectedCorpLocalDeckId),
-      ...((isHumanVsHuman && testSetupMode) || (isHumanVsAi && aiDeckPolicy === "selected")
+      participantADecks: await deckPairPayload(
+        runnerDeckSource,
+        selectedRunnerSnapshotId,
+        selectedRunnerLocalDeckId,
+        corpDeckSource,
+        selectedCorpSnapshotId,
+        selectedCorpLocalDeckId,
+      ),
+      ...((isHumanVsHuman && testSetupMode) ||
+      (isHumanVsAi && aiDeckPolicy === "selected")
         ? {
             participantBDecks: await deckPairPayload(
               participantBRunnerDeckSource,
@@ -2011,54 +3207,129 @@ export default function Page() {
               selectedParticipantBRunnerLocalDeckId,
               participantBCorpDeckSource,
               selectedParticipantBCorpSnapshotId,
-              selectedParticipantBCorpLocalDeckId
-            )
+              selectedParticipantBCorpLocalDeckId,
+            ),
           }
         : {}),
-      ...(hasAiOpponent ? { aiDeckPolicy } : {})
+      ...(hasAiOpponent ? { aiDeckPolicy } : {}),
     };
   }
 
   async function simulationDeckPayload() {
-    if (aiDeckPolicy === "fixed" || aiDeckPolicy === "seeded_random") return { aiDeckPolicy };
+    if (aiDeckPolicy === "fixed" || aiDeckPolicy === "seeded_random")
+      return { aiDeckPolicy };
     return {
       aiDeckPolicy,
-      ...(await deckSidePayload("runner", runnerDeckSource, selectedRunnerSnapshotId, selectedRunnerLocalDeckId)),
-      ...(await deckSidePayload("corp", corpDeckSource, selectedCorpSnapshotId, selectedCorpLocalDeckId))
+      ...(await deckSidePayload(
+        "runner",
+        runnerDeckSource,
+        selectedRunnerSnapshotId,
+        selectedRunnerLocalDeckId,
+      )),
+      ...(await deckSidePayload(
+        "corp",
+        corpDeckSource,
+        selectedCorpSnapshotId,
+        selectedCorpLocalDeckId,
+      )),
     };
   }
 
   async function currentSideDeckPayload() {
     const runnerSlot =
-      gameMode === "human_corp_vs_runner_ai" || (isHumanVsHuman && humanSideSelection === "corp")
-        ? { source: participantBRunnerDeckSource, snapshotId: selectedParticipantBRunnerSnapshotId, localDeckId: selectedParticipantBRunnerLocalDeckId }
-        : { source: runnerDeckSource, snapshotId: selectedRunnerSnapshotId, localDeckId: selectedRunnerLocalDeckId };
+      gameMode === "human_corp_vs_runner_ai" ||
+      (isHumanVsHuman && humanSideSelection === "corp")
+        ? {
+            source: participantBRunnerDeckSource,
+            snapshotId: selectedParticipantBRunnerSnapshotId,
+            localDeckId: selectedParticipantBRunnerLocalDeckId,
+          }
+        : {
+            source: runnerDeckSource,
+            snapshotId: selectedRunnerSnapshotId,
+            localDeckId: selectedRunnerLocalDeckId,
+          };
     const corpSlot =
-      gameMode === "human_runner_vs_corp_ai" || gameMode === "ai_vs_ai" || (isHumanVsHuman && humanSideSelection !== "corp")
-        ? { source: participantBCorpDeckSource, snapshotId: selectedParticipantBCorpSnapshotId, localDeckId: selectedParticipantBCorpLocalDeckId }
-        : { source: corpDeckSource, snapshotId: selectedCorpSnapshotId, localDeckId: selectedCorpLocalDeckId };
+      gameMode === "human_runner_vs_corp_ai" ||
+      gameMode === "ai_vs_ai" ||
+      (isHumanVsHuman && humanSideSelection !== "corp")
+        ? {
+            source: participantBCorpDeckSource,
+            snapshotId: selectedParticipantBCorpSnapshotId,
+            localDeckId: selectedParticipantBCorpLocalDeckId,
+          }
+        : {
+            source: corpDeckSource,
+            snapshotId: selectedCorpSnapshotId,
+            localDeckId: selectedCorpLocalDeckId,
+          };
     return {
-      ...(await deckSidePayload("runner", runnerSlot.source, runnerSlot.snapshotId, runnerSlot.localDeckId)),
-      ...(await deckSidePayload("corp", corpSlot.source, corpSlot.snapshotId, corpSlot.localDeckId))
+      ...(await deckSidePayload(
+        "runner",
+        runnerSlot.source,
+        runnerSlot.snapshotId,
+        runnerSlot.localDeckId,
+      )),
+      ...(await deckSidePayload(
+        "corp",
+        corpSlot.source,
+        corpSlot.snapshotId,
+        corpSlot.localDeckId,
+      )),
     };
   }
 
-  async function deckPairPayload(runnerSource: "snapshot" | "local", runnerSnapshotId: string, runnerLocalDeckId: string, corpSource: "snapshot" | "local", corpSnapshotId: string, corpLocalDeckId: string) {
+  async function deckPairPayload(
+    runnerSource: "snapshot" | "local",
+    runnerSnapshotId: string,
+    runnerLocalDeckId: string,
+    corpSource: "snapshot" | "local",
+    corpSnapshotId: string,
+    corpLocalDeckId: string,
+  ) {
     return {
-      ...(await deckSidePayload("runner", runnerSource, runnerSnapshotId, runnerLocalDeckId)),
-      ...(await deckSidePayload("corp", corpSource, corpSnapshotId, corpLocalDeckId))
+      ...(await deckSidePayload(
+        "runner",
+        runnerSource,
+        runnerSnapshotId,
+        runnerLocalDeckId,
+      )),
+      ...(await deckSidePayload(
+        "corp",
+        corpSource,
+        corpSnapshotId,
+        corpLocalDeckId,
+      )),
     };
   }
 
-  async function deckSidePayload(side: Side, source: "snapshot" | "local", snapshotId: string, localDeckId: string) {
+  async function deckSidePayload(
+    side: Side,
+    source: "snapshot" | "local",
+    snapshotId: string,
+    localDeckId: string,
+  ) {
     if (source === "local") {
-      const deck = localDecks.find((candidate) => candidate.deckId === localDeckId && candidate.side === side);
-      if (!deck) throw new Error(`Bitte wähle ein gespeichertes ${sideLabel(side)}-Deck.`);
-      if (savedDeckFingerprints[deck.deckId] !== deckFingerprint(deck)) throw new Error(`Bitte speichere das ${sideLabel(side)}-Deck vor dem Matchstart.`);
+      const deck = localDecks.find(
+        (candidate) =>
+          candidate.deckId === localDeckId && candidate.side === side,
+      );
+      if (!deck)
+        throw new Error(
+          `Bitte wähle ein gespeichertes ${sideLabel(side)}-Deck.`,
+        );
+      if (savedDeckFingerprints[deck.deckId] !== deckFingerprint(deck))
+        throw new Error(
+          `Bitte speichere das ${sideLabel(side)}-Deck vor dem Matchstart.`,
+        );
       const snapshot = await validateDeckForMatch(deck);
-      return side === "runner" ? { runnerDeckSnapshot: snapshot } : { corpDeckSnapshot: snapshot };
+      return side === "runner"
+        ? { runnerDeckSnapshot: snapshot }
+        : { corpDeckSnapshot: snapshot };
     }
-    return side === "runner" ? { runnerDeckSnapshotId: snapshotId } : { corpDeckSnapshotId: snapshotId };
+    return side === "runner"
+      ? { runnerDeckSnapshotId: snapshotId }
+      : { corpDeckSnapshotId: snapshotId };
   }
 
   const refreshOpenLanMatches = async (silent = false) => {
@@ -2076,7 +3347,9 @@ export default function Page() {
       setOpenLanUpdatedAt(new Date().toISOString());
     } catch (error) {
       setOpenLanMatches([]);
-      setOpenLanError(serverErrorNotice(error, "Offene Spiele konnten nicht geladen werden."));
+      setOpenLanError(
+        serverErrorNotice(error, "Offene Spiele konnten nicht geladen werden."),
+      );
       setOpenLanUpdatedAt(new Date().toISOString());
     } finally {
       if (!silent) setOpenLanLoading(false);
@@ -2098,7 +3371,9 @@ export default function Page() {
       setRecentGameResultsUpdatedAt(new Date().toISOString());
     } catch (error) {
       setRecentGameResults([]);
-      setRecentGameResultsError(serverErrorNotice(error, "Letzte Spiele konnten nicht geladen werden."));
+      setRecentGameResultsError(
+        serverErrorNotice(error, "Letzte Spiele konnten nicht geladen werden."),
+      );
       setRecentGameResultsUpdatedAt(new Date().toISOString());
     } finally {
       setRecentGameResultsLoading(false);
@@ -2150,26 +3425,37 @@ export default function Page() {
         selectedParticipantBRunnerLocalDeckId,
         participantBCorpDeckSource,
         selectedParticipantBCorpSnapshotId,
-        selectedParticipantBCorpLocalDeckId
+        selectedParticipantBCorpLocalDeckId,
       );
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Deckauswahl ist nicht matchstartfähig.");
+      setNotice(
+        error instanceof Error
+          ? error.message
+          : "Deckauswahl ist nicht matchstartfähig.",
+      );
       return;
     }
     let joined: JoinMatchResponse;
     try {
-      joined = await postJson<JoinMatchResponse>(`/api/matches/${encodeURIComponent(joinMatchIdTrimmed)}/join`, {
-        token: joinTokenTrimmed,
-        displayName,
-        ...deckPayload
-      });
+      joined = await postJson<JoinMatchResponse>(
+        `/api/matches/${encodeURIComponent(joinMatchIdTrimmed)}/join`,
+        {
+          token: joinTokenTrimmed,
+          displayName,
+          ...deckPayload,
+        },
+      );
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Beitritt konnte nicht gestartet werden."));
+      setNotice(
+        serverErrorNotice(error, "Beitritt konnte nicht gestartet werden."),
+      );
       return;
     }
     if (joined.error) {
       if (canJoinViaOpenLan) {
-        setNotice("Das ausgewählte Spiel ist nicht mehr offen. Die LAN-Liste wurde aktualisiert.");
+        setNotice(
+          "Das ausgewählte Spiel ist nicht mehr offen. Die LAN-Liste wurde aktualisiert.",
+        );
         void refreshOpenLanMatches(true);
       } else {
         setNotice(joined.error.message);
@@ -2183,7 +3469,7 @@ export default function Page() {
       sessionToken: joined.sessionToken,
       reconnectToken: joined.reconnectToken,
       webSocketUrl: joined.webSocketUrl,
-      displayName
+      displayName,
     };
     persistSession(nextSession);
     setSession(nextSession);
@@ -2198,21 +3484,31 @@ export default function Page() {
     setNotice(`Beigetreten. Du startest als ${sideLabel(joined.side)}.`);
   };
 
-  const reconnectSession = async (baseSession: SessionInfo, fallbackNotice = "Wiederverbindung konnte nicht gestartet werden.") => {
+  const reconnectSession = async (
+    baseSession: SessionInfo,
+    fallbackNotice = "Wiederverbindung konnte nicht gestartet werden.",
+  ) => {
     let reconnected: JoinMatchResponse;
     try {
-      reconnected = await postJson<JoinMatchResponse>(`/api/matches/${encodeURIComponent(baseSession.matchId)}/reconnect`, {
-        side: baseSession.side,
-        reconnectToken: baseSession.reconnectToken,
-        displayName: baseSession.displayName
-      });
+      reconnected = await postJson<JoinMatchResponse>(
+        `/api/matches/${encodeURIComponent(baseSession.matchId)}/reconnect`,
+        {
+          side: baseSession.side,
+          reconnectToken: baseSession.reconnectToken,
+          displayName: baseSession.displayName,
+        },
+      );
     } catch (error) {
       setNotice(serverErrorNotice(error, fallbackNotice));
       return false;
     }
     if (reconnected.error) {
       setNotice(reconnected.error.message);
-      setSession(baseSession.sessionToken.trim() && baseSession.webSocketUrl.trim() ? baseSession : null);
+      setSession(
+        baseSession.sessionToken.trim() && baseSession.webSocketUrl.trim()
+          ? baseSession
+          : null,
+      );
       setPayload(null);
       setLobby(null);
       setConnection("offline");
@@ -2222,7 +3518,7 @@ export default function Page() {
       ...baseSession,
       sessionToken: reconnected.sessionToken,
       reconnectToken: reconnected.reconnectToken,
-      webSocketUrl: reconnected.webSocketUrl
+      webSocketUrl: reconnected.webSocketUrl,
     };
     persistSession(nextSession);
     setSession(nextSession);
@@ -2242,7 +3538,9 @@ export default function Page() {
     await reconnectSession(session);
   };
 
-  function applyRemotePayload(remotePayload: ClientPayload | LobbyClientPayload) {
+  function applyRemotePayload(
+    remotePayload: ClientPayload | LobbyClientPayload,
+  ) {
     if ("playerView" in remotePayload) {
       setPayload(remotePayload);
       setLobby(null);
@@ -2275,12 +3573,18 @@ export default function Page() {
   const resumeRecentSession = async () => {
     if (!recentSession) return;
     const nextSession = loadStoredSession();
-    if (!nextSession || nextSession.matchId !== recentSession.matchId || nextSession.side !== recentSession.side) {
+    if (
+      !nextSession ||
+      nextSession.matchId !== recentSession.matchId ||
+      nextSession.side !== recentSession.side
+    ) {
       setEntryTab("play");
       selectStartTab("join");
       setJoinMatchId(recentSession.matchId);
       setJoinToken("");
-      setNotice("Fortsetzen braucht ein Token aus diesem Tab. Für die Wiederverbindung bitte den Link oder Token erneut eintragen.");
+      setNotice(
+        "Fortsetzen braucht ein Token aus diesem Tab. Für die Wiederverbindung bitte den Link oder Token erneut eintragen.",
+      );
       return;
     }
     setSession(nextSession);
@@ -2290,7 +3594,9 @@ export default function Page() {
     try {
       bootstrapped = await bootstrap(nextSession);
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Letzte Sitzung konnte nicht geladen werden."));
+      setNotice(
+        serverErrorNotice(error, "Letzte Sitzung konnte nicht geladen werden."),
+      );
       return;
     }
     if (bootstrapped && "playerView" in bootstrapped) {
@@ -2312,7 +3618,9 @@ export default function Page() {
     selectStartTab("join");
     setJoinMatchId(recentSession.matchId);
     setJoinToken("");
-    setNotice("Beitreten ist vorbereitet. Die Match-ID ist eingetragen; bitte den aktuellen Join- oder Wiederverbindungs-Token aus dem Link ergänzen.");
+    setNotice(
+      "Beitreten ist vorbereitet. Die Match-ID ist eingetragen; bitte den aktuellen Join- oder Wiederverbindungs-Token aus dem Link ergänzen.",
+    );
   };
 
   const discardRecentSession = () => {
@@ -2324,14 +3632,21 @@ export default function Page() {
     setRecentSession(nextRecentSession);
     if (nextRecentSession) {
       setRecoveryTabSelected(true);
-      setNotice("Gespeichertes Spiel verworfen. Ein weiteres gespeichertes Spiel ist verfügbar.");
+      setNotice(
+        "Gespeichertes Spiel verworfen. Ein weiteres gespeichertes Spiel ist verfügbar.",
+      );
     } else {
       selectStartTab("host");
-      setNotice("Gespeichertes Spiel verworfen. Es gibt kein Spiel zum Fortsetzen.");
+      setNotice(
+        "Gespeichertes Spiel verworfen. Es gibt kein Spiel zum Fortsetzen.",
+      );
     }
   };
 
-  const playImmediateActionAudio = (action: LegalAction, stateVersion: number) => {
+  const playImmediateActionAudio = (
+    action: LegalAction,
+    stateVersion: number,
+  ) => {
     if (!audioEnabled) return;
     const sound = localActionSoundKind(action);
     if (!sound) return;
@@ -2342,12 +3657,19 @@ export default function Page() {
     if (keys.size > 20 && oldestKey) keys.delete(oldestKey);
   };
 
-  const submitAction = (action: LegalAction, options: { immediateAudio?: boolean; confirmed?: boolean } = {}): boolean => {
+  const submitAction = (
+    action: LegalAction,
+    options: { immediateAudio?: boolean; confirmed?: boolean } = {},
+  ): boolean => {
     if (!session || !payload || !ensureSocketConnected()) return false;
-    if (!options.confirmed && actionNeedsRegionReplacementConfirmation(action)) {
+    if (
+      !options.confirmed &&
+      actionNeedsRegionReplacementConfirmation(action)
+    ) {
       setConfirmationDialog({
         title: "Region ersetzen",
-        message: "Diese Installation ersetzt die vorhandene Region. Die bisherige Region wird ins Archiv gelegt.",
+        message:
+          "Diese Installation ersetzt die vorhandene Region. Die bisherige Region wird ins Archiv gelegt.",
         confirmLabel: "Fortfahren",
         onConfirm: () => {
           submitAction(action, { ...options, confirmed: true });
@@ -2356,37 +3678,86 @@ export default function Page() {
       return false;
     }
     const stateVersion = payload.playerView.stateVersion;
-    if (options.immediateAudio !== false) playImmediateActionAudio(action, stateVersion);
-    if (selectedActionContext && actionMatchesContext(action, selectedActionContext)) setSelectedActionContext(null);
+    if (options.immediateAudio !== false)
+      playImmediateActionAudio(action, stateVersion);
+    if (
+      selectedActionContext &&
+      actionMatchesContext(action, selectedActionContext)
+    )
+      setSelectedActionContext(null);
     sendSocketMessage("submit_action", {
       matchId: session.matchId,
       side: session.side,
       actionId: action.actionId,
       clientKnownStateVersion: stateVersion,
-      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${runtimeRandomId()}`
+      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${runtimeRandomId()}`,
     });
     return true;
   };
 
   useEffect(() => {
-    if (!autoCorpMandatoryDrawEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online") return;
-    const action = automaticCorpMandatoryDrawAction(payload.playerView, payload.legalActions, session.side);
+    if (
+      !autoCorpMandatoryDrawEnabled ||
+      !gameplaySettingsLoaded ||
+      !session ||
+      !payload ||
+      connection !== "online"
+    )
+      return;
+    const action = automaticCorpMandatoryDrawAction(
+      payload.playerView,
+      payload.legalActions,
+      session.side,
+    );
     if (!action) return;
     const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${action.actionId}`;
     if (autoCorpMandatoryDrawSubmittedKeyRef.current === key) return;
-    if (submitAction(action, { immediateAudio: false })) autoCorpMandatoryDrawSubmittedKeyRef.current = key;
-  }, [autoCorpMandatoryDrawEnabled, gameplaySettingsLoaded, session, payload, connection, submitAction]);
+    if (submitAction(action, { immediateAudio: false }))
+      autoCorpMandatoryDrawSubmittedKeyRef.current = key;
+  }, [
+    autoCorpMandatoryDrawEnabled,
+    gameplaySettingsLoaded,
+    session,
+    payload,
+    connection,
+    submitAction,
+  ]);
 
   useEffect(() => {
-    if (!autoEndTurnEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online") return;
-    const action = automaticEndTurnAction(payload.playerView, payload.legalActions, session.side, { accessRevealVisible: showAccessReveal });
+    if (
+      !autoEndTurnEnabled ||
+      !gameplaySettingsLoaded ||
+      !session ||
+      !payload ||
+      connection !== "online"
+    )
+      return;
+    const action = automaticEndTurnAction(
+      payload.playerView,
+      payload.legalActions,
+      session.side,
+      { accessRevealVisible: showAccessReveal },
+    );
     if (!action) return;
     const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${action.actionId}`;
     if (autoEndTurnSubmittedKeyRef.current === key) return;
-    if (submitAction(action, { immediateAudio: false })) autoEndTurnSubmittedKeyRef.current = key;
-  }, [autoEndTurnEnabled, gameplaySettingsLoaded, session, payload, connection, submitAction, showAccessReveal]);
+    if (submitAction(action, { immediateAudio: false }))
+      autoEndTurnSubmittedKeyRef.current = key;
+  }, [
+    autoEndTurnEnabled,
+    gameplaySettingsLoaded,
+    session,
+    payload,
+    connection,
+    submitAction,
+    showAccessReveal,
+  ]);
 
-  const submitChoiceOption = (action: LegalAction, choiceId: string, selectedOptionId: string) => {
+  const submitChoiceOption = (
+    action: LegalAction,
+    choiceId: string,
+    selectedOptionId: string,
+  ) => {
     if (!session || !payload || !ensureSocketConnected()) return;
     const stateVersion = payload.playerView.stateVersion;
     playImmediateActionAudio(action, stateVersion);
@@ -2396,34 +3767,74 @@ export default function Page() {
       actionId: action.actionId,
       clientKnownStateVersion: stateVersion,
       selectedChoices: { choiceId, selectedOptionIds: [selectedOptionId] },
-      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionId}-${runtimeRandomId()}`
+      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionId}-${runtimeRandomId()}`,
     });
   };
 
-  const submitChoiceOptions = (action: LegalAction, choiceId: string, selectedOptionIds: string[], options: { immediateAudio?: boolean } = {}): boolean => {
+  const submitChoiceOptions = (
+    action: LegalAction,
+    choiceId: string,
+    selectedOptionIds: string[],
+    options: { immediateAudio?: boolean } = {},
+  ): boolean => {
     if (!session || !payload || !ensureSocketConnected()) return false;
     const stateVersion = payload.playerView.stateVersion;
-    if (options.immediateAudio !== false) playImmediateActionAudio(action, stateVersion);
+    if (options.immediateAudio !== false)
+      playImmediateActionAudio(action, stateVersion);
     sendSocketMessage("submit_action", {
       matchId: session.matchId,
       side: session.side,
       actionId: action.actionId,
       clientKnownStateVersion: stateVersion,
       selectedChoices: { choiceId, selectedOptionIds },
-      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${runtimeRandomId()}`
+      idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${runtimeRandomId()}`,
     });
     return true;
   };
 
   useEffect(() => {
-    if (!autoDiscardEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online" || !activeDiscardChoice) return;
-    const discardAction = payload.legalActions.find((action) => action.type === "resolve_choice" && action.payload?.choiceId === activeDiscardChoice.choiceId);
+    if (
+      !autoDiscardEnabled ||
+      !gameplaySettingsLoaded ||
+      !session ||
+      !payload ||
+      connection !== "online" ||
+      !activeDiscardChoice
+    )
+      return;
+    const discardAction = payload.legalActions.find(
+      (action) =>
+        action.type === "resolve_choice" &&
+        action.payload?.choiceId === activeDiscardChoice.choiceId,
+    );
     const required = activeDiscardChoice.maxSelections;
-    if (!discardAction || required <= 0 || selectedDiscardOptionIds.length !== required) return;
+    if (
+      !discardAction ||
+      required <= 0 ||
+      selectedDiscardOptionIds.length !== required
+    )
+      return;
     const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${discardAction.actionId}:${selectedDiscardOptionIds.join(".")}`;
     if (autoDiscardSubmittedKeyRef.current === key) return;
-    if (submitChoiceOptions(discardAction, activeDiscardChoice.choiceId, selectedDiscardOptionIds, { immediateAudio: false })) autoDiscardSubmittedKeyRef.current = key;
-  }, [autoDiscardEnabled, gameplaySettingsLoaded, session, payload, connection, activeDiscardChoice, selectedDiscardOptionIds, submitChoiceOptions]);
+    if (
+      submitChoiceOptions(
+        discardAction,
+        activeDiscardChoice.choiceId,
+        selectedDiscardOptionIds,
+        { immediateAudio: false },
+      )
+    )
+      autoDiscardSubmittedKeyRef.current = key;
+  }, [
+    autoDiscardEnabled,
+    gameplaySettingsLoaded,
+    session,
+    payload,
+    connection,
+    activeDiscardChoice,
+    selectedDiscardOptionIds,
+    submitChoiceOptions,
+  ]);
 
   const setReady = (ready: boolean) => {
     if (!session || !ensureSocketConnected()) return;
@@ -2439,12 +3850,17 @@ export default function Page() {
     if (!session) return;
     let result: LifecycleActionResponse;
     try {
-      result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/cancel`, {
-        side: session.side,
-        sessionToken: session.sessionToken
-      });
+      result = await postJson<LifecycleActionResponse>(
+        `/api/matches/${encodeURIComponent(session.matchId)}/cancel`,
+        {
+          side: session.side,
+          sessionToken: session.sessionToken,
+        },
+      );
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Match konnte nicht abgebrochen werden."));
+      setNotice(
+        serverErrorNotice(error, "Match konnte nicht abgebrochen werden."),
+      );
       return;
     }
     if (!result.ok) {
@@ -2452,7 +3868,9 @@ export default function Page() {
       return;
     }
     applyRemotePayload(result.actorPayload);
-    setNotice("Match abgebrochen. Der alte Link und die alten Tokens sind ungültig.");
+    setNotice(
+      "Match abgebrochen. Der alte Link und die alten Tokens sind ungültig.",
+    );
   };
 
   const leaveMatchLifecycle = async () => {
@@ -2462,12 +3880,17 @@ export default function Page() {
     }
     let result: LifecycleActionResponse;
     try {
-      result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/leave`, {
-        side: session.side,
-        sessionToken: session.sessionToken
-      });
+      result = await postJson<LifecycleActionResponse>(
+        `/api/matches/${encodeURIComponent(session.matchId)}/leave`,
+        {
+          side: session.side,
+          sessionToken: session.sessionToken,
+        },
+      );
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Lobby konnte nicht verlassen werden."));
+      setNotice(
+        serverErrorNotice(error, "Lobby konnte nicht verlassen werden."),
+      );
       return;
     }
     if (!result.ok) {
@@ -2485,15 +3908,26 @@ export default function Page() {
   };
 
   const forfeitMatch = async () => {
-    if (!session || !payload || payload.matchStatus !== "active" || payload.winner) return;
+    if (
+      !session ||
+      !payload ||
+      payload.matchStatus !== "active" ||
+      payload.winner
+    )
+      return;
     let result: LifecycleActionResponse;
     try {
-      result = await postJson<LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/forfeit`, {
-        side: session.side,
-        sessionToken: session.sessionToken
-      });
+      result = await postJson<LifecycleActionResponse>(
+        `/api/matches/${encodeURIComponent(session.matchId)}/forfeit`,
+        {
+          side: session.side,
+          sessionToken: session.sessionToken,
+        },
+      );
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Spiel konnte nicht aufgegeben werden."));
+      setNotice(
+        serverErrorNotice(error, "Spiel konnte nicht aufgegeben werden."),
+      );
       return;
     }
     if (!result.ok) {
@@ -2501,17 +3935,26 @@ export default function Page() {
       return;
     }
     applyRemotePayload(result.actorPayload);
-    setNotice("Spiel aufgegeben. Der Engine-State bleibt der letzte echte Spielzustand.");
+    setNotice(
+      "Spiel aufgegeben. Der Engine-State bleibt der letzte echte Spielzustand.",
+    );
   };
 
   const requestForfeitMatch = () => {
-    if (!session || !payload || payload.matchStatus !== "active" || payload.winner) return;
+    if (
+      !session ||
+      !payload ||
+      payload.matchStatus !== "active" ||
+      payload.winner
+    )
+      return;
     setConfirmationDialog({
       title: "Spiel aufgeben?",
-      message: "Diese Aufgabe beendet nur dieses Spiel. In einer Matchserie kann ein offenes Folgespiel danach weiter gestartet werden. Der Engine-State bleibt der letzte echte Spielzustand.",
+      message:
+        "Diese Aufgabe beendet nur dieses Spiel. In einer Matchserie kann ein offenes Folgespiel danach weiter gestartet werden. Der Engine-State bleibt der letzte echte Spielzustand.",
       confirmLabel: "Aufgeben",
       tone: "danger",
-      onConfirm: forfeitMatch
+      onConfirm: forfeitMatch,
     });
   };
 
@@ -2519,34 +3962,52 @@ export default function Page() {
     if (!session) return;
     let result: RetentionProtectionResponse;
     try {
-      result = await postJson<RetentionProtectionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/retention-protection`, {
-        side: session.side,
-        sessionToken: session.sessionToken,
-        protected: protectedValue
-      });
+      result = await postJson<RetentionProtectionResponse>(
+        `/api/matches/${encodeURIComponent(session.matchId)}/retention-protection`,
+        {
+          side: session.side,
+          sessionToken: session.sessionToken,
+          protected: protectedValue,
+        },
+      );
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Löschschutz konnte nicht geändert werden."));
+      setNotice(
+        serverErrorNotice(error, "Löschschutz konnte nicht geändert werden."),
+      );
       return;
     }
     if (!result.ok) {
-      setNotice("error" in result ? result.error.message : "Löschschutz konnte nicht geändert werden.");
+      setNotice(
+        "error" in result
+          ? result.error.message
+          : "Löschschutz konnte nicht geändert werden.",
+      );
       return;
     }
     applyRemotePayload(result.payload);
-    setNotice(protectedValue ? "Dieses Spiel ist gegen automatisches Löschen geschützt." : "Löschschutz ist aufgehoben.");
+    setNotice(
+      protectedValue
+        ? "Dieses Spiel ist gegen automatisches Löschen geschützt."
+        : "Löschschutz ist aufgehoben.",
+    );
   };
 
   const recreateMatch = async () => {
     if (!session) return;
     let recreated: CreateMatchResponse | LifecycleActionResponse;
     try {
-      recreated = await postJson<CreateMatchResponse | LifecycleActionResponse>(`/api/matches/${encodeURIComponent(session.matchId)}/recreate`, {
-        side: session.side,
-        sessionToken: session.sessionToken,
-        displayName: session.displayName
-      });
+      recreated = await postJson<CreateMatchResponse | LifecycleActionResponse>(
+        `/api/matches/${encodeURIComponent(session.matchId)}/recreate`,
+        {
+          side: session.side,
+          sessionToken: session.sessionToken,
+          displayName: session.displayName,
+        },
+      );
     } catch (error) {
-      setNotice(serverErrorNotice(error, "Match konnte nicht neu erstellt werden."));
+      setNotice(
+        serverErrorNotice(error, "Match konnte nicht neu erstellt werden."),
+      );
       return;
     }
     if ("error" in recreated && recreated.error) {
@@ -2565,12 +4026,16 @@ export default function Page() {
       webSocketUrl: recreated.webSocketUrl,
       displayName: session.displayName,
       ...(recreated.pendingDeckHandshake ? { pendingDeckHandshake: true } : {}),
-      ...(recreated.joinUrl ? { joinUrl: recreated.joinUrl } : {})
+      ...(recreated.joinUrl ? { joinUrl: recreated.joinUrl } : {}),
     };
     persistSession(nextSession);
     setSession(nextSession);
     setDismissedResultKey(null);
-    if (recreated.lobby || recreated.pendingDeckHandshake || !recreated.playerView) {
+    if (
+      recreated.lobby ||
+      recreated.pendingDeckHandshake ||
+      !recreated.playerView
+    ) {
       setPayload(null);
       setLobby(lobbyFromInitialResponse(recreated, recreated.hostSide));
     } else {
@@ -2578,7 +4043,11 @@ export default function Page() {
       setLobby(null);
     }
     setEntryTab("play");
-    setNotice(recreated.joinUrl ? "Neues Match erstellt. Teile den neuen Join-Link." : "Neues Match erstellt.");
+    setNotice(
+      recreated.joinUrl
+        ? "Neues Match erstellt. Teile den neuen Join-Link."
+        : "Neues Match erstellt.",
+    );
   };
 
   const returnToSetupFromLobby = () => {
@@ -2587,7 +4056,9 @@ export default function Page() {
       setEntryTab("play");
       return;
     }
-    const isHost = lobby.startLobby ? playerSlotForSide(lobby.startLobby, lobby.side) === "player_a" : true;
+    const isHost = lobby.startLobby
+      ? playerSlotForSide(lobby.startLobby, lobby.side) === "player_a"
+      : true;
     if (isHost) void cancelMatchLifecycle();
     else void leaveMatchLifecycle();
   };
@@ -2600,7 +4071,9 @@ export default function Page() {
     setLobbyChatText("");
   };
 
-  const advanceAi = (mode: "single_step" | "until_human" = "single_step"): boolean => {
+  const advanceAi = (
+    mode: "single_step" | "until_human" = "single_step",
+  ): boolean => {
     if (!session || !payload || !aiTurnPresentation?.canAdvanceAi) return false;
     if (!ensureSocketConnected()) return false;
     try {
@@ -2609,12 +4082,14 @@ export default function Page() {
       sendSocketMessage("advance_ai", {
         knownStateVersion: payload.playerView.stateVersion,
         knownMatchVersion: payload.matchVersion,
-        mode
+        mode,
       });
       return true;
     } catch {
       pendingAiAdvanceKeyRef.current = null;
-      setNotice("KI-Schritt konnte nicht gesendet werden. Bitte verbinde Dich erneut oder nutze den KI-Schritt erneut.");
+      setNotice(
+        "KI-Schritt konnte nicht gesendet werden. Bitte verbinde Dich erneut oder nutze den KI-Schritt erneut.",
+      );
       return false;
     }
   };
@@ -2629,7 +4104,7 @@ export default function Page() {
     if (!payload?.pendingUndo || !ensureSocketConnected()) return;
     setUndoNotice("");
     sendSocketMessage(accepted ? "accept_undo" : "decline_undo", {
-      undoRequestId: payload.pendingUndo.undoRequestId
+      undoRequestId: payload.pendingUndo.undoRequestId,
     });
   };
 
@@ -2651,25 +4126,34 @@ export default function Page() {
   const copyJoinLink = async () => {
     if (!session?.joinUrl) return;
     const copied = await copyTextToClipboard(session.joinUrl);
-    setNotice(copied ? "Join-Link kopiert." : "Kopieren war nicht möglich. Bitte Link manuell markieren und kopieren.");
+    setNotice(
+      copied
+        ? "Join-Link kopiert."
+        : "Kopieren war nicht möglich. Bitte Link manuell markieren und kopieren.",
+    );
   };
 
   const copyReconnectLink = async () => {
     if (!session?.reconnectToken) return;
     const copied = await copyTextToClipboard(reconnectUrlForSession(session));
-    setNotice(copied ? "Wiederverbindungslink kopiert." : "Kopieren war nicht möglich. Bitte Link manuell markieren und kopieren.");
+    setNotice(
+      copied
+        ? "Wiederverbindungslink kopiert."
+        : "Kopieren war nicht möglich. Bitte Link manuell markieren und kopieren.",
+    );
   };
 
   const discardLocalActiveSession = () => {
     setConfirmationDialog({
       title: "Lokale Sitzung löschen?",
-      message: "Das Spiel wird nicht aufgegeben. Für den Wiedereinstieg brauchst Du den Wiederverbindungslink.",
+      message:
+        "Das Spiel wird nicht aufgegeben. Für den Wiedereinstieg brauchst Du den Wiederverbindungslink.",
       confirmLabel: "Sitzung löschen",
       tone: "danger",
       onConfirm: () => {
         setOptionsDialogOpen(false);
         leaveMatch();
-      }
+      },
     });
   };
 
@@ -2680,7 +4164,9 @@ export default function Page() {
 
   const createEmptyDeck = (side: Side) => {
     const now = new Date().toISOString();
-    const templateIdentity = deckTemplates.find((candidate) => candidate.side === side)?.identityCardId;
+    const templateIdentity = deckTemplates.find(
+      (candidate) => candidate.side === side,
+    )?.identityCardId;
     const deckProfile = deckProfileForMatchCardPool(matchCardPool);
     const deck: EditableDeck = {
       deckId: `local_${side}_${runtimeRandomId().slice(0, 8)}`,
@@ -2695,18 +4181,27 @@ export default function Page() {
       validationStatus: "needs_revalidation",
       cards: [],
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
     const nextDecks = [...localDecks, deck];
     setLocalDecks(nextDecks);
-    void commitDeckLibrary(nextDecks, "Neues Deck gespeichert. Füge Karten hinzu und speichere Änderungen bewusst.");
+    void commitDeckLibrary(
+      nextDecks,
+      "Neues Deck gespeichert. Füge Karten hinzu und speichere Änderungen bewusst.",
+    );
     setSelectedLocalDeckId(deck.deckId);
     selectDeckForSide(deck);
     clearDeckValidation();
   };
 
   const updateSelectedDeck = (nextDeck: EditableDeck) => {
-    setLocalDecks((current) => current.map((deck) => (deck.deckId === nextDeck.deckId ? { ...nextDeck, updatedAt: new Date().toISOString() } : deck)));
+    setLocalDecks((current) =>
+      current.map((deck) =>
+        deck.deckId === nextDeck.deckId
+          ? { ...nextDeck, updatedAt: new Date().toISOString() }
+          : deck,
+      ),
+    );
     clearDeckValidation();
   };
 
@@ -2718,12 +4213,19 @@ export default function Page() {
   const updateDeckCardQuantity = (cardId: string, quantity: number) => {
     if (!selectedLocalDeck) return;
     const nextQuantity = Math.max(0, Math.floor(quantity));
-    const existing = selectedLocalDeck.cards.some((entry) => entry.cardId === cardId);
+    const existing = selectedLocalDeck.cards.some(
+      (entry) => entry.cardId === cardId,
+    );
     updateSelectedDeck({
       ...selectedLocalDeck,
-      cards: (existing ? selectedLocalDeck.cards.map((entry) => (entry.cardId === cardId ? { ...entry, quantity: nextQuantity } : entry)) : [...selectedLocalDeck.cards, { cardId, quantity: nextQuantity }]).filter(
-        (entry) => entry.quantity > 0
-      )
+      cards: (existing
+        ? selectedLocalDeck.cards.map((entry) =>
+            entry.cardId === cardId
+              ? { ...entry, quantity: nextQuantity }
+              : entry,
+          )
+        : [...selectedLocalDeck.cards, { cardId, quantity: nextQuantity }]
+      ).filter((entry) => entry.quantity > 0),
     });
   };
 
@@ -2735,7 +4237,7 @@ export default function Page() {
       deckId: `${selectedLocalDeck.deckId}_copy_${runtimeRandomId().slice(0, 6)}`,
       name: `${selectedLocalDeck.name} Kopie`,
       createdAt: now,
-      updatedAt: now
+      updatedAt: now,
     };
     const nextDecks = [...localDecks, copy];
     setLocalDecks(nextDecks);
@@ -2747,7 +4249,9 @@ export default function Page() {
 
   const deleteSelectedDeck = () => {
     if (!selectedLocalDeck) return;
-    const nextDecks = localDecks.filter((deck) => deck.deckId !== selectedLocalDeck.deckId);
+    const nextDecks = localDecks.filter(
+      (deck) => deck.deckId !== selectedLocalDeck.deckId,
+    );
     setLocalDecks(nextDecks);
     setSelectedLocalDeckId(nextDecks[0]?.deckId ?? null);
     void commitDeckLibrary(nextDecks, "Deck gelöscht.");
@@ -2759,7 +4263,7 @@ export default function Page() {
     const result = await fetch("/api/decks/validate", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ deck: selectedLocalDeck })
+      body: JSON.stringify({ deck: selectedLocalDeck }),
     }).then((response) => response.json() as Promise<DeckValidationResponse>);
     if (result.error) {
       setNotice(result.error.message);
@@ -2767,7 +4271,11 @@ export default function Page() {
     }
     setDeckValidation(result.validation);
     setValidatedSnapshot(result.snapshot);
-    setNotice(result.validation.ok ? "Deck validiert." : "Deck braucht noch Korrekturen.");
+    setNotice(
+      result.validation.ok
+        ? "Deck validiert."
+        : "Deck braucht noch Korrekturen.",
+    );
   };
 
   const useValidatedDeckForMatch = () => {
@@ -2775,11 +4283,13 @@ export default function Page() {
     if (validatedSnapshot.side === "runner") {
       setRunnerLocalSnapshot(validatedSnapshot);
       setRunnerDeckSource("local");
-      if (selectedLocalDeck) setSelectedRunnerLocalDeckId(selectedLocalDeck.deckId);
+      if (selectedLocalDeck)
+        setSelectedRunnerLocalDeckId(selectedLocalDeck.deckId);
     } else {
       setCorpLocalSnapshot(validatedSnapshot);
       setCorpDeckSource("local");
-      if (selectedLocalDeck) setSelectedCorpLocalDeckId(selectedLocalDeck.deckId);
+      if (selectedLocalDeck)
+        setSelectedCorpLocalDeckId(selectedLocalDeck.deckId);
     }
     setEntryTab("play");
     setNotice("Deck-Snapshot für Match Setup gesetzt.");
@@ -2790,18 +4300,22 @@ export default function Page() {
     if (validatedSnapshot.side === "runner") {
       setRunnerLocalSnapshot(validatedSnapshot);
       setRunnerDeckSource("local");
-      if (selectedLocalDeck) setSelectedRunnerLocalDeckId(selectedLocalDeck.deckId);
+      if (selectedLocalDeck)
+        setSelectedRunnerLocalDeckId(selectedLocalDeck.deckId);
     } else {
       setCorpLocalSnapshot(validatedSnapshot);
       setCorpDeckSource("local");
-      if (selectedLocalDeck) setSelectedCorpLocalDeckId(selectedLocalDeck.deckId);
+      if (selectedLocalDeck)
+        setSelectedCorpLocalDeckId(selectedLocalDeck.deckId);
     }
     setNotice("Deck-Snapshot für den nächsten Matchstart vorgemerkt.");
   };
 
   const exportSelectedDeck = () => {
     if (!selectedLocalDeck) return;
-    setDeckExportText(`${JSON.stringify({ schemaVersion: "editable-deck-v0.6", deck: selectedLocalDeck }, null, 2)}\n`);
+    setDeckExportText(
+      `${JSON.stringify({ schemaVersion: "editable-deck-v0.6", deck: selectedLocalDeck }, null, 2)}\n`,
+    );
   };
 
   const importLocalDeck = () => {
@@ -2812,18 +4326,25 @@ export default function Page() {
       setNotice("Deck-Import konnte nicht gelesen werden.");
       return;
     }
-    if (!parsed.deck || (parsed.deck.side !== "runner" && parsed.deck.side !== "corp")) {
+    if (
+      !parsed.deck ||
+      (parsed.deck.side !== "runner" && parsed.deck.side !== "corp")
+    ) {
       setNotice("Deck-Import konnte nicht gelesen werden.");
       return;
     }
     const now = new Date().toISOString();
     const imported = {
       ...parsed.deck,
-      deckId: parsed.deck.deckId || `local_import_${runtimeRandomId().slice(0, 8)}`,
+      deckId:
+        parsed.deck.deckId || `local_import_${runtimeRandomId().slice(0, 8)}`,
       createdAt: parsed.deck.createdAt || now,
-      updatedAt: now
+      updatedAt: now,
     };
-    const nextDecks = [...localDecks.filter((deck) => deck.deckId !== imported.deckId), imported];
+    const nextDecks = [
+      ...localDecks.filter((deck) => deck.deckId !== imported.deckId),
+      imported,
+    ];
     setLocalDecks(nextDecks);
     void commitDeckLibrary(nextDecks, "Deck importiert und gespeichert.");
     setSelectedLocalDeckId(imported.deckId);
@@ -2836,41 +4357,82 @@ export default function Page() {
     setValidatedSnapshot(null);
   }
 
-  async function commitDeckLibrary(nextDecks: EditableDeck[], successNotice: string) {
+  async function commitDeckLibrary(
+    nextDecks: EditableDeck[],
+    successNotice: string,
+  ) {
     try {
       const result = await persistDeckLibrary(nextDecks);
       setLocalDecks(result.decks);
-      setSavedDeckFingerprints(Object.fromEntries(result.decks.map((deck) => [deck.deckId, deckFingerprint(deck)])));
+      setSavedDeckFingerprints(
+        Object.fromEntries(
+          result.decks.map((deck) => [deck.deckId, deckFingerprint(deck)]),
+        ),
+      );
       if (result.storagePath) setDeckLibraryStoragePath(result.storagePath);
       setNotice(successNotice);
     } catch {
-      setNotice("Deck konnte nicht in der lokalen Datei-Deckbibliothek gespeichert werden.");
+      setNotice(
+        "Deck konnte nicht in der lokalen Datei-Deckbibliothek gespeichert werden.",
+      );
     }
   }
 
-  async function persistDeckLibrary(nextDecks: EditableDeck[]): Promise<{ decks: EditableDeck[]; storagePath?: string }> {
+  async function persistDeckLibrary(
+    nextDecks: EditableDeck[],
+  ): Promise<{ decks: EditableDeck[]; storagePath?: string }> {
     const response = await fetch("/api/decks/library", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ decks: nextDecks })
+      body: JSON.stringify({ decks: nextDecks }),
     });
     const data = (await response.json()) as DeckLibraryResponse;
-    if (!response.ok || data.error) throw new Error(data.error?.message ?? "deck_library_save_failed");
-    return { decks: data.decks ?? nextDecks, ...(data.storagePath ? { storagePath: data.storagePath } : {}) };
+    if (!response.ok || data.error)
+      throw new Error(data.error?.message ?? "deck_library_save_failed");
+    return {
+      decks: data.decks ?? nextDecks,
+      ...(data.storagePath ? { storagePath: data.storagePath } : {}),
+    };
   }
 
   function applyLoadedDecks(decks: EditableDeck[]) {
-    const firstRunnerDeckId = decks.find((deck) => deck.side === "runner")?.deckId ?? "";
-    const firstCorpDeckId = decks.find((deck) => deck.side === "corp")?.deckId ?? "";
+    const firstRunnerDeckId =
+      decks.find((deck) => deck.side === "runner")?.deckId ?? "";
+    const firstCorpDeckId =
+      decks.find((deck) => deck.side === "corp")?.deckId ?? "";
     const hasRunnerDeck = firstRunnerDeckId.length > 0;
     const hasCorpDeck = firstCorpDeckId.length > 0;
     setLocalDecks(decks);
     setSelectedLocalDeckId(decks[0]?.deckId ?? null);
-    setSavedDeckFingerprints(Object.fromEntries(decks.map((deck) => [deck.deckId, deckFingerprint(deck)])));
-    setSelectedRunnerLocalDeckId((current) => (hasRunnerDeck && decks.some((deck) => deck.side === "runner" && deck.deckId === current) ? current : firstRunnerDeckId));
-    setSelectedCorpLocalDeckId((current) => (hasCorpDeck && decks.some((deck) => deck.side === "corp" && deck.deckId === current) ? current : firstCorpDeckId));
-    setSelectedParticipantBRunnerLocalDeckId((current) => (hasRunnerDeck && decks.some((deck) => deck.side === "runner" && deck.deckId === current) ? current : firstRunnerDeckId));
-    setSelectedParticipantBCorpLocalDeckId((current) => (hasCorpDeck && decks.some((deck) => deck.side === "corp" && deck.deckId === current) ? current : firstCorpDeckId));
+    setSavedDeckFingerprints(
+      Object.fromEntries(
+        decks.map((deck) => [deck.deckId, deckFingerprint(deck)]),
+      ),
+    );
+    setSelectedRunnerLocalDeckId((current) =>
+      hasRunnerDeck &&
+      decks.some((deck) => deck.side === "runner" && deck.deckId === current)
+        ? current
+        : firstRunnerDeckId,
+    );
+    setSelectedCorpLocalDeckId((current) =>
+      hasCorpDeck &&
+      decks.some((deck) => deck.side === "corp" && deck.deckId === current)
+        ? current
+        : firstCorpDeckId,
+    );
+    setSelectedParticipantBRunnerLocalDeckId((current) =>
+      hasRunnerDeck &&
+      decks.some((deck) => deck.side === "runner" && deck.deckId === current)
+        ? current
+        : firstRunnerDeckId,
+    );
+    setSelectedParticipantBCorpLocalDeckId((current) =>
+      hasCorpDeck &&
+      decks.some((deck) => deck.side === "corp" && deck.deckId === current)
+        ? current
+        : firstCorpDeckId,
+    );
     if (!hasStoredMatchStartSettingsRef.current) {
       if (hasRunnerDeck) setRunnerDeckSource("local");
       if (hasCorpDeck) setCorpDeckSource("local");
@@ -2878,7 +4440,10 @@ export default function Page() {
   }
 
   function readLegacyBrowserDecks(): EditableDeck[] {
-    const storedDecks = readLocalStorageWithLegacy(DECK_STORAGE_KEY, LEGACY_DECK_STORAGE_KEY);
+    const storedDecks = readLocalStorageWithLegacy(
+      DECK_STORAGE_KEY,
+      LEGACY_DECK_STORAGE_KEY,
+    );
     if (!storedDecks) return [];
     try {
       const parsed = JSON.parse(storedDecks) as EditableDeck[];
@@ -2899,15 +4464,20 @@ export default function Page() {
     }
   }
 
-  async function validateDeckForMatch(deck: EditableDeck): Promise<DeckSnapshot> {
+  async function validateDeckForMatch(
+    deck: EditableDeck,
+  ): Promise<DeckSnapshot> {
     const result = await fetch("/api/decks/validate", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ deck, matchCardPool })
+      body: JSON.stringify({ deck, matchCardPool }),
     }).then((response) => response.json() as Promise<DeckValidationResponse>);
     if (result.error) throw new Error(result.error.message);
     if (!result.validation.ok || !result.snapshot) {
-      const details = result.validation.errors.length > 0 ? ` ${result.validation.errors.join(" ")}` : "";
+      const details =
+        result.validation.errors.length > 0
+          ? ` ${result.validation.errors.join(" ")}`
+          : "";
       throw new Error(`${deck.name} ist nicht matchstartfähig.${details}`);
     }
     if (deck.side === "runner") setRunnerLocalSnapshot(result.snapshot);
@@ -2919,7 +4489,8 @@ export default function Page() {
     if (message.type === "lobby_update") {
       setLobby(message.payload);
       setPayload(null);
-      if (sessionRef.current) rememberRecentSession(sessionRef.current, message.payload);
+      if (sessionRef.current)
+        rememberRecentSession(sessionRef.current, message.payload);
       return;
     }
     if (message.type === "state_update") {
@@ -2938,10 +4509,15 @@ export default function Page() {
                   matchVersion: message.payload.matchVersion,
                   side,
                   playerView: message.payload.playerView,
-                  ...(message.payload.playerClock ? { playerClock: message.payload.playerClock } : {}),
+                  ...(message.payload.playerClock
+                    ? { playerClock: message.payload.playerClock }
+                    : {}),
                   legalActions: [],
                   eventTail: [],
-                  opponentStatus: currentLobby?.opponentStatus ?? { side: side === "runner" ? "corp" : "runner", connected: false }
+                  opponentStatus: currentLobby?.opponentStatus ?? {
+                    side: side === "runner" ? "corp" : "runner",
+                    connected: false,
+                  },
                 }
               : null;
           return nextFromLobby;
@@ -2951,41 +4527,64 @@ export default function Page() {
           matchStatus: message.payload.matchStatus,
           matchVersion: message.payload.matchVersion,
           playerView: message.payload.playerView,
-          ...(message.payload.playerClock ? { playerClock: message.payload.playerClock } : {})
+          ...(message.payload.playerClock
+            ? { playerClock: message.payload.playerClock }
+            : {}),
         };
-        const nextWithUndo = message.payload.pendingUndo ? { ...next, pendingUndo: message.payload.pendingUndo } : removePendingUndo(next);
-        if (message.payload.playerView.winner) return { ...next, winner: message.payload.playerView.winner };
-        const { winner: _winner, finalStateHash: _finalStateHash, ...withoutWinner } = nextWithUndo;
+        const nextWithUndo = message.payload.pendingUndo
+          ? { ...next, pendingUndo: message.payload.pendingUndo }
+          : removePendingUndo(next);
+        if (message.payload.playerView.winner)
+          return { ...next, winner: message.payload.playerView.winner };
+        const {
+          winner: _winner,
+          finalStateHash: _finalStateHash,
+          ...withoutWinner
+        } = nextWithUndo;
         return withoutWinner;
       });
       setLobby(null);
       return;
     }
     if (message.type === "legal_actions") {
-      setPayload((current) => (current ? { ...current, legalActions: message.payload.legalActions } : current));
+      setPayload((current) =>
+        current
+          ? { ...current, legalActions: message.payload.legalActions }
+          : current,
+      );
       return;
     }
     if (message.type === "event_log_update") {
-      setPayload((current) => (current ? { ...current, eventTail: message.payload.events } : current));
+      setPayload((current) =>
+        current ? { ...current, eventTail: message.payload.events } : current,
+      );
       return;
     }
     if (message.type === "opponent_status") {
-      setPayload((current) => (current ? { ...current, opponentStatus: message.payload } : current));
-      setLobby((current) => (current ? { ...current, opponentStatus: message.payload } : current));
+      setPayload((current) =>
+        current ? { ...current, opponentStatus: message.payload } : current,
+      );
+      setLobby((current) =>
+        current ? { ...current, opponentStatus: message.payload } : current,
+      );
       return;
     }
     if (message.type === "ai_turn") {
       pendingAiAdvanceKeyRef.current = null;
       setPayload((current) => {
         if (!current) return current;
-        if (message.payload) return { ...current, aiTurnPresentation: message.payload };
-        const { aiTurnPresentation: _aiTurnPresentation, ...withoutAiTurn } = current;
+        if (message.payload)
+          return { ...current, aiTurnPresentation: message.payload };
+        const { aiTurnPresentation: _aiTurnPresentation, ...withoutAiTurn } =
+          current;
         return withoutAiTurn;
       });
       return;
     }
     if (message.type === "undo_request") {
-      setPayload((current) => (current ? { ...current, pendingUndo: message.payload } : current));
+      setPayload((current) =>
+        current ? { ...current, pendingUndo: message.payload } : current,
+      );
       return;
     }
     if (message.type === "match_finished") {
@@ -2995,13 +4594,18 @@ export default function Page() {
               ...current,
               winner: message.payload.winner,
               finalStateHash: message.payload.finalStateHash,
-              ...(message.payload.resultSummary ? { resultSummary: message.payload.resultSummary } : {}),
-              matchStatus: message.payload.matchStatus
+              ...(message.payload.resultSummary
+                ? { resultSummary: message.payload.resultSummary }
+                : {}),
+              matchStatus: message.payload.matchStatus,
             }
-          : current
+          : current,
       );
       const activeSession = sessionRef.current;
-      if (activeSession && shouldForgetRecoveryStatus(message.payload.matchStatus)) {
+      if (
+        activeSession &&
+        shouldForgetRecoveryStatus(message.payload.matchStatus)
+      ) {
         clearStoredSession(activeSession);
         removeRecentSession(activeSession);
         setRecentSession(loadRecentSession());
@@ -3016,7 +4620,15 @@ export default function Page() {
         setUndoPanelOpen(true);
       }
       if (message.payload.playerView) {
-        setPayload((current) => (current ? { ...current, playerView: message.payload.playerView!, legalActions: message.payload.playerView!.legalActions } : current));
+        setPayload((current) =>
+          current
+            ? {
+                ...current,
+                playerView: message.payload.playerView!,
+                legalActions: message.payload.playerView!.legalActions,
+              }
+            : current,
+        );
       }
     }
   }
@@ -3027,29 +4639,58 @@ export default function Page() {
     if (connection === "connecting") return "Verbindet";
     return "Offline";
   }, [connection, session]);
-  const startLobbyBlocksSetup = Boolean(session && lobby && matchStartLobbyBlocksSetup(lobby.matchStatus));
+  const startLobbyBlocksSetup = Boolean(
+    session && lobby && matchStartLobbyBlocksSetup(lobby.matchStatus),
+  );
   const showingSessionRecovery = Boolean(session && !payload && !lobby);
   const hasRecoveryStartTab = Boolean(showingSessionRecovery || recentSession);
-  const activeStartTab = recoveryTabSelected && hasRecoveryStartTab ? "resume" : mode;
-  const canResumeRecentSession = Boolean(recentSession && storedSessionMatches(recentSession));
+  const activeStartTab =
+    recoveryTabSelected && hasRecoveryStartTab ? "resume" : mode;
+  const canResumeRecentSession = Boolean(
+    recentSession && storedSessionMatches(recentSession),
+  );
   const updateAudioEnabled = (enabled: boolean) => {
     if (enabled) primeAudio(audioVolume);
     setAudioEnabled(enabled);
   };
-  const handCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, cardHandScalePercent / 100);
-  const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, cardZoneScalePercent / 100);
-  const boardCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, cardBoardScalePercent / 100);
-  const rigCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, cardRigScalePercent / 100);
+  const handCardScale = Math.max(
+    CARD_SCALE_PERCENT_MIN / 100,
+    cardHandScalePercent / 100,
+  );
+  const zoneCardScale = Math.max(
+    CARD_SCALE_PERCENT_MIN / 100,
+    cardZoneScalePercent / 100,
+  );
+  const boardCardScale = Math.max(
+    CARD_SCALE_PERCENT_MIN / 100,
+    cardBoardScalePercent / 100,
+  );
+  const rigCardScale = Math.max(
+    CARD_SCALE_PERCENT_MIN / 100,
+    cardRigScalePercent / 100,
+  );
   const handCardsStyle = useMemo(
-    () => ({ "--cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * handCardScale)}px` } as CSSProperties),
-    [handCardScale]
+    () =>
+      ({
+        "--cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * handCardScale)}px`,
+      }) as CSSProperties,
+    [handCardScale],
   );
   const ownRigCardsStyle = useMemo(
-    () => ({ "--cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * rigCardScale)}px` } as CSSProperties),
-    [rigCardScale]
+    () =>
+      ({
+        "--cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * rigCardScale)}px`,
+      }) as CSSProperties,
+    [rigCardScale],
   );
-  const zoneCardsStyle = useMemo(() => ({ "--zone-card-scale": String(zoneCardScale) } as CSSProperties), [zoneCardScale]);
-  const boardLaneStyle = useMemo(() => ({ "--lane-card-scale": String(boardCardScale) } as CSSProperties), [boardCardScale]);
+  const zoneCardsStyle = useMemo(
+    () => ({ "--zone-card-scale": String(zoneCardScale) }) as CSSProperties,
+    [zoneCardScale],
+  );
+  const boardLaneStyle = useMemo(
+    () => ({ "--lane-card-scale": String(boardCardScale) }) as CSSProperties,
+    [boardCardScale],
+  );
 
   if (!session || !payload || !activeView) {
     return (
@@ -3060,312 +4701,437 @@ export default function Page() {
           archivePercent: cardArchiveScalePercent,
           zonePercent: cardZoneScalePercent,
           boardPercent: cardBoardScalePercent,
-          rigPercent: cardRigScalePercent
+          rigPercent: cardRigScalePercent,
         }}
       >
-      <CardImagePreferenceContext.Provider value={{ preferGermanCardImages, showSetBadges }}>
-      <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
-      <main className="app" data-theme={colorScheme}>
-        <header className="topbar">
-          <div className="topbarStatusGroup">
-            <AppBrand appName={APP_NAME} iconSrc={APP_ICON_SRC} wordmarkSrc={APP_WORDMARK_SRC} />
-            <div className="topbarMeta">
-              <span className="topbarVersion">{APP_STATUS_LABEL}</span>
-              <ConnectionBadge text={statusText} state={connection} />
-            </div>
-          </div>
-        </header>
-        <div className="setup v07Entry" data-testid="setup-screen">
-          <nav className="entryTabs" aria-label="Startbereiche">
-            <button className={`entryTab ${entryTab === "play" ? "active" : ""}`} onClick={() => setEntryTab("play")} type="button" aria-current={entryTab === "play" ? "page" : undefined}>
-              <Play size={16} />
-              Spiel
-            </button>
-            <button className={`entryTab ${entryTab === "catalog" ? "active" : ""}`} onClick={() => setEntryTab("catalog")} type="button" aria-current={entryTab === "catalog" ? "page" : undefined}>
-              <ListFilter size={16} />
-              Katalog
-            </button>
-            <button className={`entryTab ${entryTab === "decks" ? "active" : ""}`} onClick={() => setEntryTab("decks")} type="button" aria-current={entryTab === "decks" ? "page" : undefined}>
-              <Layers3 size={16} />
-              Deck-Editor
-            </button>
-            <button className={`entryTab ${entryTab === "recent" ? "active" : ""}`} onClick={() => setEntryTab("recent")} type="button" aria-current={entryTab === "recent" ? "page" : undefined}>
-              <Award size={16} />
-              Letzte Spiele
-            </button>
-            <button className={`entryTab ${entryTab === "options" ? "active" : ""}`} onClick={() => setEntryTab("options")} type="button" aria-current={entryTab === "options" ? "page" : undefined}>
-              <SlidersHorizontal size={16} />
-              Optionen
-            </button>
-          </nav>
-          {session && lobby ? (
-            <StartLobbyPanel
-              lobby={lobby}
-              joinUrl={session.joinUrl}
-              chatText={lobbyChatText}
-              connection={connection}
-              onReady={setReady}
-              onCancel={cancelCountdown}
-              onCancelMatch={cancelMatchLifecycle}
-              onLeaveMatch={leaveMatchLifecycle}
-              onRecreate={recreateMatch}
-              onDiscardLocal={leaveMatch}
-              onReturnToSetup={returnToSetupFromLobby}
-              onChatText={setLobbyChatText}
-              onSendChat={sendLobbyChat}
-              onCopyJoinLink={copyJoinLink}
-            />
-          ) : null}
-          <div className={`entryContent ${entryTab === "decks" ? "deckEntryContent" : ""}`}>
-          {notice ? <p className="notice entryNotice">{notice}</p> : null}
-          {entryTab === "play" && !startLobbyBlocksSetup ? (
-          <section className="setupPanel">
-            <div className={`tabs ${hasRecoveryStartTab ? "threeTabs" : ""}`}>
-              <button className={`tab ${activeStartTab === "host" ? "active" : ""}`} onClick={() => selectStartTab("host")}>
-                Match erstellen
-              </button>
-              <button className={`tab ${activeStartTab === "join" ? "active" : ""}`} onClick={() => selectStartTab("join")}>
-                Beitreten
-              </button>
-              {hasRecoveryStartTab ? (
-                <button className={`tab ${activeStartTab === "resume" ? "active" : ""}`} onClick={() => selectStartTab("resume")}>
-                  {showingSessionRecovery ? "Wieder verbinden" : "Fortsetzen"}
-                </button>
-              ) : null}
-            </div>
+        <CardImagePreferenceContext.Provider
+          value={{ preferGermanCardImages, showSetBadges }}
+        >
+          <CardTooltipSettingsContext.Provider
+            value={{
+              hoverOpenDelayMs: cardTooltipHoverDelayMs,
+              mode: cardTooltipMode,
+            }}
+          >
+            <main className="app" data-theme={colorScheme}>
+              <header className="topbar">
+                <div className="topbarStatusGroup">
+                  <AppBrand
+                    appName={APP_NAME}
+                    iconSrc={APP_ICON_SRC}
+                    wordmarkSrc={APP_WORDMARK_SRC}
+                  />
+                  <div className="topbarMeta">
+                    <span className="topbarVersion">{APP_STATUS_LABEL}</span>
+                    <ConnectionBadge text={statusText} state={connection} />
+                  </div>
+                </div>
+              </header>
+              <div className="setup v07Entry" data-testid="setup-screen">
+                <nav className="entryTabs" aria-label="Startbereiche">
+                  <button
+                    className={`entryTab ${entryTab === "play" ? "active" : ""}`}
+                    onClick={() => setEntryTab("play")}
+                    type="button"
+                    aria-current={entryTab === "play" ? "page" : undefined}
+                  >
+                    <Play size={16} />
+                    Spiel
+                  </button>
+                  <button
+                    className={`entryTab ${entryTab === "catalog" ? "active" : ""}`}
+                    onClick={() => setEntryTab("catalog")}
+                    type="button"
+                    aria-current={entryTab === "catalog" ? "page" : undefined}
+                  >
+                    <ListFilter size={16} />
+                    Katalog
+                  </button>
+                  <button
+                    className={`entryTab ${entryTab === "decks" ? "active" : ""}`}
+                    onClick={() => setEntryTab("decks")}
+                    type="button"
+                    aria-current={entryTab === "decks" ? "page" : undefined}
+                  >
+                    <Layers3 size={16} />
+                    Deck-Editor
+                  </button>
+                  <button
+                    className={`entryTab ${entryTab === "recent" ? "active" : ""}`}
+                    onClick={() => setEntryTab("recent")}
+                    type="button"
+                    aria-current={entryTab === "recent" ? "page" : undefined}
+                  >
+                    <Award size={16} />
+                    Letzte Spiele
+                  </button>
+                  <button
+                    className={`entryTab ${entryTab === "options" ? "active" : ""}`}
+                    onClick={() => setEntryTab("options")}
+                    type="button"
+                    aria-current={entryTab === "options" ? "page" : undefined}
+                  >
+                    <SlidersHorizontal size={16} />
+                    Optionen
+                  </button>
+                </nav>
+                {session && lobby ? (
+                  <StartLobbyPanel
+                    lobby={lobby}
+                    joinUrl={session.joinUrl}
+                    chatText={lobbyChatText}
+                    connection={connection}
+                    onReady={setReady}
+                    onCancel={cancelCountdown}
+                    onCancelMatch={cancelMatchLifecycle}
+                    onLeaveMatch={leaveMatchLifecycle}
+                    onRecreate={recreateMatch}
+                    onDiscardLocal={leaveMatch}
+                    onReturnToSetup={returnToSetupFromLobby}
+                    onChatText={setLobbyChatText}
+                    onSendChat={sendLobbyChat}
+                    onCopyJoinLink={copyJoinLink}
+                  />
+                ) : null}
+                <div
+                  className={`entryContent ${entryTab === "decks" ? "deckEntryContent" : ""}`}
+                >
+                  {notice ? (
+                    <p className="notice entryNotice">{notice}</p>
+                  ) : null}
+                  {entryTab === "play" && !startLobbyBlocksSetup ? (
+                    <section className="setupPanel">
+                      <div
+                        className={`tabs ${hasRecoveryStartTab ? "threeTabs" : ""}`}
+                      >
+                        <button
+                          className={`tab ${activeStartTab === "host" ? "active" : ""}`}
+                          onClick={() => selectStartTab("host")}
+                        >
+                          Match erstellen
+                        </button>
+                        <button
+                          className={`tab ${activeStartTab === "join" ? "active" : ""}`}
+                          onClick={() => selectStartTab("join")}
+                        >
+                          Beitreten
+                        </button>
+                        {hasRecoveryStartTab ? (
+                          <button
+                            className={`tab ${activeStartTab === "resume" ? "active" : ""}`}
+                            onClick={() => selectStartTab("resume")}
+                          >
+                            {showingSessionRecovery
+                              ? "Wieder verbinden"
+                              : "Fortsetzen"}
+                          </button>
+                        ) : null}
+                      </div>
 
-            {activeStartTab === "resume" ? (
-              <MatchResumePanel
-                showingSessionRecovery={showingSessionRecovery}
-                session={session}
-                connection={connection}
-                canReconnect={canReconnect}
-                recentSession={recentSession}
-                canResumeRecentSession={canResumeRecentSession}
-                onReconnect={reconnect}
-                onCopyReconnectLink={copyReconnectLink}
-                onLeaveMatch={leaveMatch}
-                onResumeRecentSession={resumeRecentSession}
-                onReconnectFromRecentSession={reconnectFromRecentSession}
-                onDiscardRecentSession={discardRecentSession}
-              />
-            ) : activeStartTab === "host" ? (
-              <MatchHostConsole
-                playMode={playMode}
-                matchFormat={matchFormat}
-                matchCardPool={matchCardPool}
-                displayName={displayName}
-                isHumanVsAi={isHumanVsAi}
-                humanAiSideSelection={humanAiSideSelection}
-                gameMode={gameMode}
-                runnerDifficulty={runnerDifficulty}
-                corpDifficulty={corpDifficulty}
-                aiDeckPolicyUsesPrimaryDeckSlots={aiDeckPolicyUsesPrimaryDeckSlots}
-                runnerSnapshots={runnerSnapshots}
-                corpSnapshots={corpSnapshots}
-                localDecks={matchStartLocalDecks}
-                runnerDeckSource={runnerDeckSource}
-                corpDeckSource={corpDeckSource}
-                selectedRunnerSnapshotId={selectedRunnerSnapshotId}
-                selectedCorpSnapshotId={selectedCorpSnapshotId}
-                selectedRunnerLocalDeckId={selectedRunnerLocalDeckId}
-                selectedCorpLocalDeckId={selectedCorpLocalDeckId}
-                isHumanVsHuman={isHumanVsHuman}
-                testSetupMode={testSetupMode}
-                startSummary={startSummary}
-                simulationPending={simulationPending}
-                simulationStatusText={simulationStatusText}
-                hasAiOpponent={hasAiOpponent}
-                humanSideSelection={humanSideSelection}
-                countdownSeconds={countdownSeconds}
-                discoverableInLan={discoverableInLan}
-                playerClockMode={playerClockMode}
-                playerClockMinutes={playerClockMinutes}
-                playerClockGraceSeconds={playerClockGraceSeconds}
-                playerClockDetailControlsDisabled={playerClockDetailControlsDisabled}
-                seed={seed}
-                aiTraceStartMode={aiTraceStartMode}
-                aiDeckPolicy={aiDeckPolicy}
-                participantBRunnerDeckSource={participantBRunnerDeckSource}
-                participantBCorpDeckSource={participantBCorpDeckSource}
-                selectedParticipantBRunnerSnapshotId={selectedParticipantBRunnerSnapshotId}
-                selectedParticipantBCorpSnapshotId={selectedParticipantBCorpSnapshotId}
-                selectedParticipantBRunnerLocalDeckId={selectedParticipantBRunnerLocalDeckId}
-                selectedParticipantBCorpLocalDeckId={selectedParticipantBCorpLocalDeckId}
-                aiSlotDisabled={aiSlotDisabled}
-                visibleDeckMetadataEntries={visibleDeckMetadataEntries}
-                simulation={simulation}
-                onPlayMode={setPlayMode}
-                onMatchFormat={setMatchFormat}
-                onMatchCardPool={setMatchCardPool}
-                onDisplayName={updateDisplayName}
-                onHumanAiSideSelection={setHumanAiSideSelection}
-                onRunnerDifficulty={setRunnerDifficulty}
-                onCorpDifficulty={setCorpDifficulty}
-                onRunnerDeckSource={setRunnerDeckSource}
-                onCorpDeckSource={setCorpDeckSource}
-                onSelectedRunnerSnapshotId={setSelectedRunnerSnapshotId}
-                onSelectedCorpSnapshotId={setSelectedCorpSnapshotId}
-                onSelectedRunnerLocalDeckId={setSelectedRunnerLocalDeckId}
-                onSelectedCorpLocalDeckId={setSelectedCorpLocalDeckId}
-                onCreateMatch={createMatch}
-                onHumanSideSelection={setHumanSideSelection}
-                onCountdownSeconds={setCountdownSeconds}
-                onDiscoverableInLan={setDiscoverableInLan}
-                onPlayerClockMode={setPlayerClockMode}
-                onPlayerClockMinutes={setPlayerClockMinutes}
-                onPlayerClockGraceSeconds={setPlayerClockGraceSeconds}
-                onSeed={setSeed}
-                onAiTraceStartMode={setAiTraceStartMode}
-                onTestSetupMode={setTestSetupMode}
-                onAiDeckPolicy={setAiDeckPolicy}
-                onParticipantBRunnerDeckSource={setParticipantBRunnerDeckSource}
-                onParticipantBCorpDeckSource={setParticipantBCorpDeckSource}
-                onSelectedParticipantBRunnerSnapshotId={setSelectedParticipantBRunnerSnapshotId}
-                onSelectedParticipantBCorpSnapshotId={setSelectedParticipantBCorpSnapshotId}
-                onSelectedParticipantBRunnerLocalDeckId={setSelectedParticipantBRunnerLocalDeckId}
-                onSelectedParticipantBCorpLocalDeckId={setSelectedParticipantBCorpLocalDeckId}
-              />
-            ) : (
-              <MatchJoinConsole
-                openLanMatches={openLanMatches}
-                openLanLoading={openLanLoading}
-                openLanError={openLanError}
-                openLanUpdatedAt={openLanUpdatedAt}
-                joinMatchIdTrimmed={joinMatchIdTrimmed}
-                joinTokenTrimmed={joinTokenTrimmed}
-                joinLinkInput={joinLinkInput}
-                displayName={displayName}
-                runnerSnapshots={runnerSnapshots}
-                corpSnapshots={corpSnapshots}
-                localDecks={matchStartLocalDecks}
-                participantBRunnerDeckSource={participantBRunnerDeckSource}
-                participantBCorpDeckSource={participantBCorpDeckSource}
-                selectedParticipantBRunnerSnapshotId={selectedParticipantBRunnerSnapshotId}
-                selectedParticipantBCorpSnapshotId={selectedParticipantBCorpSnapshotId}
-                selectedParticipantBRunnerLocalDeckId={selectedParticipantBRunnerLocalDeckId}
-                selectedParticipantBCorpLocalDeckId={selectedParticipantBCorpLocalDeckId}
-                joinMatchId={joinMatchId}
-                joinToken={joinToken}
-                canSubmitJoin={canSubmitJoin}
-                onRefreshOpenLanMatches={() => void refreshOpenLanMatches()}
-                onSelectOpenLanMatch={selectOpenLanMatch}
-                onJoinLinkInput={updateJoinLinkInput}
-                onDisplayName={updateDisplayName}
-                onParticipantBRunnerDeckSource={setParticipantBRunnerDeckSource}
-                onParticipantBCorpDeckSource={setParticipantBCorpDeckSource}
-                onSelectedParticipantBRunnerSnapshotId={setSelectedParticipantBRunnerSnapshotId}
-                onSelectedParticipantBCorpSnapshotId={setSelectedParticipantBCorpSnapshotId}
-                onSelectedParticipantBRunnerLocalDeckId={setSelectedParticipantBRunnerLocalDeckId}
-                onSelectedParticipantBCorpLocalDeckId={setSelectedParticipantBCorpLocalDeckId}
-                onJoinMatchId={setJoinMatchId}
-                onJoinToken={setJoinToken}
-                onJoinMatch={joinMatch}
-              />
-            )}
-          </section>
-          ) : null}
-          {entryTab === "catalog" ? (
-            <CatalogPanel {...catalogPanelProps} />
-          ) : null}
-          {entryTab === "decks" ? (
-            <DeckEditorPanel
-            localDecks={localDecks}
-            selectedDeck={selectedLocalDeck}
-            selectedDeckDirty={selectedDeckDirty}
-            storagePath={deckLibraryStoragePath}
-            validation={deckValidation}
-            validatedSnapshot={validatedSnapshot}
-            playableCards={playableCatalogCards}
-            cardDetailsById={catalogDetailsById}
-            importText={deckImportText}
-            exportText={deckExportText}
-            onCreateEmpty={createEmptyDeck}
-            onSelectDeck={setSelectedLocalDeckId}
-            onUpdateDeck={updateSelectedDeck}
-            onSave={saveSelectedDeck}
-            onUpdateQuantity={updateDeckCardQuantity}
-            onDuplicate={duplicateSelectedDeck}
-            onDelete={deleteSelectedDeck}
-            onValidate={validateSelectedDeck}
-            onUseForMatch={useValidatedDeckForMatch}
-            onExport={exportSelectedDeck}
-            onImportText={setDeckImportText}
-            onImport={importLocalDeck}
-          />
-          ) : null}
-          {entryTab === "recent" ? (
-            <RecentGamesPanel
-              results={recentGameResults}
-              loading={recentGameResultsLoading}
-              error={recentGameResultsError}
-              updatedAt={recentGameResultsUpdatedAt}
-              onRefresh={refreshRecentGameResults}
-            />
-          ) : null}
-          {entryTab === "options" ? (
-            <OptionsPanel
-              actionCueAutoDismissMs={actionCueAutoDismissMs}
-              actionCuesEnabled={actionCuesEnabled}
-              automaticEffectCuesEnabled={automaticEffectCuesEnabled}
-              autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
-              autoDiscardEnabled={autoDiscardEnabled}
-              autoEndTurnEnabled={autoEndTurnEnabled}
-              topbarStickyEnabled={topbarStickyEnabled}
-              resourceStripMode={resourceStripMode}
-              actionPanelMode={actionPanelMode}
-              aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
-              audioEnabled={audioEnabled}
-              audioVolume={audioVolume}
-              cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
-              cardTooltipMode={cardTooltipMode}
-              cardTooltipScalePercent={cardTooltipScalePercent}
-              cardHandScalePercent={cardHandScalePercent}
-              cardArchiveScalePercent={cardArchiveScalePercent}
-              cardZoneScalePercent={cardZoneScalePercent}
-              cardBoardScalePercent={cardBoardScalePercent}
-              cardRigScalePercent={cardRigScalePercent}
-              cardDisplayMode={cardDisplayMode}
-              preferGermanCardImages={preferGermanCardImages}
-              showSetBadges={showSetBadges}
-              chronicleDetailMode={chronicleDetailMode}
-              colorScheme={colorScheme}
-              cuePosition={cuePosition}
-              aiPacingMode={localAiPacingMode}
-              onActionCueAutoDismissMs={setActionCueAutoDismissMs}
-              onActionCuesEnabled={setActionCuesEnabled}
-              onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
-              onAutoCorpMandatoryDrawEnabled={setAutoCorpMandatoryDrawEnabled}
-              onAutoDiscardEnabled={setAutoDiscardEnabled}
-              onAutoEndTurnEnabled={setAutoEndTurnEnabled}
-              onTopbarStickyEnabled={setTopbarStickyEnabled}
-              onResourceStripMode={setResourceStripMode}
-              onActionPanelMode={setActionPanelMode}
-              onAiDecisionDebugOverlayEnabled={setAiDecisionDebugOverlayEnabled}
-              onAudioEnabled={updateAudioEnabled}
-              onAudioVolume={setAudioVolume}
-              onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
-              onCardTooltipMode={setCardTooltipMode}
-              onCardTooltipScalePercent={setCardTooltipScalePercent}
-              onCardHandScalePercent={setCardHandScalePercent}
-              onCardArchiveScalePercent={setCardArchiveScalePercent}
-              onCardZoneScalePercent={setCardZoneScalePercent}
-              onCardBoardScalePercent={setCardBoardScalePercent}
-              onCardRigScalePercent={setCardRigScalePercent}
-              onCardDisplayMode={setCardDisplayMode}
-              onPreferGermanCardImages={setPreferGermanCardImages}
-              onShowSetBadges={setShowSetBadges}
-              onChronicleDetailMode={setChronicleDetailMode}
-              onColorScheme={setColorScheme}
-              onCuePosition={setCuePosition}
-              onAiPacingMode={updateLocalAiPacingMode}
-            />
-          ) : null}
-          </div>
-        </div>
-      </main>
-      </CardTooltipSettingsContext.Provider>
-      </CardImagePreferenceContext.Provider>
+                      {activeStartTab === "resume" ? (
+                        <MatchResumePanel
+                          showingSessionRecovery={showingSessionRecovery}
+                          session={session}
+                          connection={connection}
+                          canReconnect={canReconnect}
+                          recentSession={recentSession}
+                          canResumeRecentSession={canResumeRecentSession}
+                          onReconnect={reconnect}
+                          onCopyReconnectLink={copyReconnectLink}
+                          onLeaveMatch={leaveMatch}
+                          onResumeRecentSession={resumeRecentSession}
+                          onReconnectFromRecentSession={
+                            reconnectFromRecentSession
+                          }
+                          onDiscardRecentSession={discardRecentSession}
+                        />
+                      ) : activeStartTab === "host" ? (
+                        <MatchHostConsole
+                          playMode={playMode}
+                          matchFormat={matchFormat}
+                          matchCardPool={matchCardPool}
+                          displayName={displayName}
+                          isHumanVsAi={isHumanVsAi}
+                          humanAiSideSelection={humanAiSideSelection}
+                          gameMode={gameMode}
+                          runnerDifficulty={runnerDifficulty}
+                          corpDifficulty={corpDifficulty}
+                          aiDeckPolicyUsesPrimaryDeckSlots={
+                            aiDeckPolicyUsesPrimaryDeckSlots
+                          }
+                          runnerSnapshots={runnerSnapshots}
+                          corpSnapshots={corpSnapshots}
+                          localDecks={matchStartLocalDecks}
+                          runnerDeckSource={runnerDeckSource}
+                          corpDeckSource={corpDeckSource}
+                          selectedRunnerSnapshotId={selectedRunnerSnapshotId}
+                          selectedCorpSnapshotId={selectedCorpSnapshotId}
+                          selectedRunnerLocalDeckId={selectedRunnerLocalDeckId}
+                          selectedCorpLocalDeckId={selectedCorpLocalDeckId}
+                          isHumanVsHuman={isHumanVsHuman}
+                          testSetupMode={testSetupMode}
+                          startSummary={startSummary}
+                          simulationPending={simulationPending}
+                          simulationStatusText={simulationStatusText}
+                          hasAiOpponent={hasAiOpponent}
+                          humanSideSelection={humanSideSelection}
+                          countdownSeconds={countdownSeconds}
+                          discoverableInLan={discoverableInLan}
+                          playerClockMode={playerClockMode}
+                          playerClockMinutes={playerClockMinutes}
+                          playerClockGraceSeconds={playerClockGraceSeconds}
+                          playerClockDetailControlsDisabled={
+                            playerClockDetailControlsDisabled
+                          }
+                          seed={seed}
+                          aiTraceStartMode={aiTraceStartMode}
+                          aiDeckPolicy={aiDeckPolicy}
+                          participantBRunnerDeckSource={
+                            participantBRunnerDeckSource
+                          }
+                          participantBCorpDeckSource={
+                            participantBCorpDeckSource
+                          }
+                          selectedParticipantBRunnerSnapshotId={
+                            selectedParticipantBRunnerSnapshotId
+                          }
+                          selectedParticipantBCorpSnapshotId={
+                            selectedParticipantBCorpSnapshotId
+                          }
+                          selectedParticipantBRunnerLocalDeckId={
+                            selectedParticipantBRunnerLocalDeckId
+                          }
+                          selectedParticipantBCorpLocalDeckId={
+                            selectedParticipantBCorpLocalDeckId
+                          }
+                          aiSlotDisabled={aiSlotDisabled}
+                          visibleDeckMetadataEntries={
+                            visibleDeckMetadataEntries
+                          }
+                          simulation={simulation}
+                          onPlayMode={setPlayMode}
+                          onMatchFormat={setMatchFormat}
+                          onMatchCardPool={setMatchCardPool}
+                          onDisplayName={updateDisplayName}
+                          onHumanAiSideSelection={setHumanAiSideSelection}
+                          onRunnerDifficulty={setRunnerDifficulty}
+                          onCorpDifficulty={setCorpDifficulty}
+                          onRunnerDeckSource={setRunnerDeckSource}
+                          onCorpDeckSource={setCorpDeckSource}
+                          onSelectedRunnerSnapshotId={
+                            setSelectedRunnerSnapshotId
+                          }
+                          onSelectedCorpSnapshotId={setSelectedCorpSnapshotId}
+                          onSelectedRunnerLocalDeckId={
+                            setSelectedRunnerLocalDeckId
+                          }
+                          onSelectedCorpLocalDeckId={setSelectedCorpLocalDeckId}
+                          onCreateMatch={createMatch}
+                          onHumanSideSelection={setHumanSideSelection}
+                          onCountdownSeconds={setCountdownSeconds}
+                          onDiscoverableInLan={setDiscoverableInLan}
+                          onPlayerClockMode={setPlayerClockMode}
+                          onPlayerClockMinutes={setPlayerClockMinutes}
+                          onPlayerClockGraceSeconds={setPlayerClockGraceSeconds}
+                          onSeed={setSeed}
+                          onAiTraceStartMode={setAiTraceStartMode}
+                          onTestSetupMode={setTestSetupMode}
+                          onAiDeckPolicy={setAiDeckPolicy}
+                          onParticipantBRunnerDeckSource={
+                            setParticipantBRunnerDeckSource
+                          }
+                          onParticipantBCorpDeckSource={
+                            setParticipantBCorpDeckSource
+                          }
+                          onSelectedParticipantBRunnerSnapshotId={
+                            setSelectedParticipantBRunnerSnapshotId
+                          }
+                          onSelectedParticipantBCorpSnapshotId={
+                            setSelectedParticipantBCorpSnapshotId
+                          }
+                          onSelectedParticipantBRunnerLocalDeckId={
+                            setSelectedParticipantBRunnerLocalDeckId
+                          }
+                          onSelectedParticipantBCorpLocalDeckId={
+                            setSelectedParticipantBCorpLocalDeckId
+                          }
+                        />
+                      ) : (
+                        <MatchJoinConsole
+                          openLanMatches={openLanMatches}
+                          openLanLoading={openLanLoading}
+                          openLanError={openLanError}
+                          openLanUpdatedAt={openLanUpdatedAt}
+                          joinMatchIdTrimmed={joinMatchIdTrimmed}
+                          joinTokenTrimmed={joinTokenTrimmed}
+                          joinLinkInput={joinLinkInput}
+                          displayName={displayName}
+                          runnerSnapshots={runnerSnapshots}
+                          corpSnapshots={corpSnapshots}
+                          localDecks={matchStartLocalDecks}
+                          participantBRunnerDeckSource={
+                            participantBRunnerDeckSource
+                          }
+                          participantBCorpDeckSource={
+                            participantBCorpDeckSource
+                          }
+                          selectedParticipantBRunnerSnapshotId={
+                            selectedParticipantBRunnerSnapshotId
+                          }
+                          selectedParticipantBCorpSnapshotId={
+                            selectedParticipantBCorpSnapshotId
+                          }
+                          selectedParticipantBRunnerLocalDeckId={
+                            selectedParticipantBRunnerLocalDeckId
+                          }
+                          selectedParticipantBCorpLocalDeckId={
+                            selectedParticipantBCorpLocalDeckId
+                          }
+                          joinMatchId={joinMatchId}
+                          joinToken={joinToken}
+                          canSubmitJoin={canSubmitJoin}
+                          onRefreshOpenLanMatches={() =>
+                            void refreshOpenLanMatches()
+                          }
+                          onSelectOpenLanMatch={selectOpenLanMatch}
+                          onJoinLinkInput={updateJoinLinkInput}
+                          onDisplayName={updateDisplayName}
+                          onParticipantBRunnerDeckSource={
+                            setParticipantBRunnerDeckSource
+                          }
+                          onParticipantBCorpDeckSource={
+                            setParticipantBCorpDeckSource
+                          }
+                          onSelectedParticipantBRunnerSnapshotId={
+                            setSelectedParticipantBRunnerSnapshotId
+                          }
+                          onSelectedParticipantBCorpSnapshotId={
+                            setSelectedParticipantBCorpSnapshotId
+                          }
+                          onSelectedParticipantBRunnerLocalDeckId={
+                            setSelectedParticipantBRunnerLocalDeckId
+                          }
+                          onSelectedParticipantBCorpLocalDeckId={
+                            setSelectedParticipantBCorpLocalDeckId
+                          }
+                          onJoinMatchId={setJoinMatchId}
+                          onJoinToken={setJoinToken}
+                          onJoinMatch={joinMatch}
+                        />
+                      )}
+                    </section>
+                  ) : null}
+                  {entryTab === "catalog" ? (
+                    <CatalogPanel {...catalogPanelProps} />
+                  ) : null}
+                  {entryTab === "decks" ? (
+                    <DeckEditorPanel
+                      localDecks={localDecks}
+                      selectedDeck={selectedLocalDeck}
+                      selectedDeckDirty={selectedDeckDirty}
+                      storagePath={deckLibraryStoragePath}
+                      validation={deckValidation}
+                      validatedSnapshot={validatedSnapshot}
+                      playableCards={playableCatalogCards}
+                      cardDetailsById={catalogDetailsById}
+                      importText={deckImportText}
+                      exportText={deckExportText}
+                      onCreateEmpty={createEmptyDeck}
+                      onSelectDeck={setSelectedLocalDeckId}
+                      onUpdateDeck={updateSelectedDeck}
+                      onSave={saveSelectedDeck}
+                      onUpdateQuantity={updateDeckCardQuantity}
+                      onDuplicate={duplicateSelectedDeck}
+                      onDelete={deleteSelectedDeck}
+                      onValidate={validateSelectedDeck}
+                      onUseForMatch={useValidatedDeckForMatch}
+                      onExport={exportSelectedDeck}
+                      onImportText={setDeckImportText}
+                      onImport={importLocalDeck}
+                    />
+                  ) : null}
+                  {entryTab === "recent" ? (
+                    <RecentGamesPanel
+                      results={recentGameResults}
+                      loading={recentGameResultsLoading}
+                      error={recentGameResultsError}
+                      updatedAt={recentGameResultsUpdatedAt}
+                      onRefresh={refreshRecentGameResults}
+                    />
+                  ) : null}
+                  {entryTab === "options" ? (
+                    <OptionsPanel
+                      actionCueAutoDismissMs={actionCueAutoDismissMs}
+                      actionCuesEnabled={actionCuesEnabled}
+                      automaticEffectCuesEnabled={automaticEffectCuesEnabled}
+                      autoCorpMandatoryDrawEnabled={
+                        autoCorpMandatoryDrawEnabled
+                      }
+                      autoDiscardEnabled={autoDiscardEnabled}
+                      autoEndTurnEnabled={autoEndTurnEnabled}
+                      topbarStickyEnabled={topbarStickyEnabled}
+                      resourceStripMode={resourceStripMode}
+                      actionPanelMode={actionPanelMode}
+                      aiDecisionDebugOverlayEnabled={
+                        aiDecisionDebugOverlayEnabled
+                      }
+                      audioEnabled={audioEnabled}
+                      audioVolume={audioVolume}
+                      cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
+                      cardTooltipMode={cardTooltipMode}
+                      cardTooltipScalePercent={cardTooltipScalePercent}
+                      cardHandScalePercent={cardHandScalePercent}
+                      cardArchiveScalePercent={cardArchiveScalePercent}
+                      cardZoneScalePercent={cardZoneScalePercent}
+                      cardBoardScalePercent={cardBoardScalePercent}
+                      cardRigScalePercent={cardRigScalePercent}
+                      cardDisplayMode={cardDisplayMode}
+                      preferGermanCardImages={preferGermanCardImages}
+                      showSetBadges={showSetBadges}
+                      chronicleDetailMode={chronicleDetailMode}
+                      colorScheme={colorScheme}
+                      cuePosition={cuePosition}
+                      aiPacingMode={localAiPacingMode}
+                      onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+                      onActionCuesEnabled={setActionCuesEnabled}
+                      onAutomaticEffectCuesEnabled={
+                        setAutomaticEffectCuesEnabled
+                      }
+                      onAutoCorpMandatoryDrawEnabled={
+                        setAutoCorpMandatoryDrawEnabled
+                      }
+                      onAutoDiscardEnabled={setAutoDiscardEnabled}
+                      onAutoEndTurnEnabled={setAutoEndTurnEnabled}
+                      onTopbarStickyEnabled={setTopbarStickyEnabled}
+                      onResourceStripMode={setResourceStripMode}
+                      onActionPanelMode={setActionPanelMode}
+                      onAiDecisionDebugOverlayEnabled={
+                        setAiDecisionDebugOverlayEnabled
+                      }
+                      onAudioEnabled={updateAudioEnabled}
+                      onAudioVolume={setAudioVolume}
+                      onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
+                      onCardTooltipMode={setCardTooltipMode}
+                      onCardTooltipScalePercent={setCardTooltipScalePercent}
+                      onCardHandScalePercent={setCardHandScalePercent}
+                      onCardArchiveScalePercent={setCardArchiveScalePercent}
+                      onCardZoneScalePercent={setCardZoneScalePercent}
+                      onCardBoardScalePercent={setCardBoardScalePercent}
+                      onCardRigScalePercent={setCardRigScalePercent}
+                      onCardDisplayMode={setCardDisplayMode}
+                      onPreferGermanCardImages={setPreferGermanCardImages}
+                      onShowSetBadges={setShowSetBadges}
+                      onChronicleDetailMode={setChronicleDetailMode}
+                      onColorScheme={setColorScheme}
+                      onCuePosition={setCuePosition}
+                      onAiPacingMode={updateLocalAiPacingMode}
+                    />
+                  ) : null}
+                </div>
+              </div>
+            </main>
+          </CardTooltipSettingsContext.Provider>
+        </CardImagePreferenceContext.Provider>
       </CardScaleSettingsContext.Provider>
     );
   }
@@ -3378,644 +5144,812 @@ export default function Page() {
         archivePercent: cardArchiveScalePercent,
         zonePercent: cardZoneScalePercent,
         boardPercent: cardBoardScalePercent,
-        rigPercent: cardRigScalePercent
+        rigPercent: cardRigScalePercent,
       }}
     >
-    <CardImagePreferenceContext.Provider value={{ preferGermanCardImages, showSetBadges }}>
-    <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
-    <main className={activeMatchClassName} data-theme={colorScheme}>
-      <ActiveMatchTopbar
-        topbarRef={topbarRef}
-        appName={APP_NAME}
-        appStatusLabel={APP_STATUS_LABEL}
-        appIconSrc={APP_ICON_SRC}
-        appWordmarkSrc={APP_WORDMARK_SRC}
-        statusText={statusText}
-        connection={connection}
-        workspace={activeMatchWorkspace}
-        activeMatchIsGame={activeMatchIsGame}
-        undoPanelOpen={undoPanelOpen}
-        pendingUndo={payload.pendingUndo}
-        canReconnect={canReconnect}
-        matchDetailsOpen={matchDetailsOpen}
-        canStartNextSeriesGame={canStartNextSeriesGame}
-        seriesTransitioning={seriesTransitioning}
-        canReturnToStart={canReturnToStart}
-        canForfeit={canForfeit}
-        rightRailCollapsed={rightRailCollapsed}
-        onWorkspace={setActiveMatchWorkspace}
-        onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
-        onReconnect={reconnect}
-        onToggleMatchDetails={() => setMatchDetailsOpen((open) => !open)}
-        onStartNextSeriesGame={startNextSeriesGame}
-        onLeaveMatch={leaveMatch}
-        onRequestForfeitMatch={requestForfeitMatch}
-        onToggleRightRail={() => setRightRailCollapsed((current) => !current)}
-      />
-
-      {matchDetailsOpen ? (
-        <div className="matchStrip" id="match-details-strip" aria-label="Status zum aktiven Spiel">
-          <span title={payload.matchStatus}><strong>Status</strong> {payload.matchStatus}</span>
-          <span title={payload.matchId}><strong>Match</strong> {shortDiagnosticsHash(payload.matchId)}</span>
-          <span><strong>Gegenüber</strong> {opponentDisplayName ?? sideLabel(payload.opponentStatus.side)}</span>
-          {activeView.deckMetadata ? <span title={activeView.deckMetadata.own.deckName}><strong>Deck</strong> {activeView.deckMetadata.own.deckName} · geprüft</span> : null}
-          <span><strong>Version</strong> {payload.matchVersion}</span>
-          <span><strong>State</strong> {activeView.stateVersion}</span>
-          {notice ? <span className="matchStripNotice">{notice}</span> : null}
-        </div>
-      ) : notice ? (
-        <div className="matchNotice" role="status" aria-live="polite">
-          {notice}
-        </div>
-      ) : null}
-      <UndoPanel
-        open={undoPanelOpen}
-        pendingUndo={payload.pendingUndo}
-        undoNotice={undoNotice}
-        latestEventId={latestEventId}
-        connection={connection}
-        onRequest={requestUndo}
-        onResolve={resolveUndo}
-      />
-      {activeMatchIsGame && !matchEnded ? (
-      <DamageImpactOverlay
-        cue={currentDamageImpact}
-        queued={damageImpactQueue.length}
-        onDismiss={() => setCurrentDamageImpact(null)}
-      />
-      ) : null}
-      {activeMatchIsGame && !matchEnded ? (
-      <OpponentActionOverlay
-        cue={currentActionCue}
-        queued={actionCueQueue.length}
-        position={cuePosition}
-        cardDetailsById={catalogDetailsById}
-        displayMode={cardDisplayMode}
-        canAdvanceAi={Boolean(aiTurnPresentation?.canAdvanceAi && connection === "online")}
-        renderTitle={(cue) => {
-          const titleCard = cue.cardDefinitionId ? (catalogDetailsById[cue.cardDefinitionId] ?? null) : null;
-          return (
-            <OpponentCueTitle
-              cue={cue}
-              card={titleCard}
-              previewCard={titleCard ? visibleCardFromCatalogDetail(titleCard) : null}
-              displayMode={cardDisplayMode}
-              onFocusCard={focusCard}
-            />
-          );
-        }}
-        onPosition={setCuePosition}
-        onDismiss={() => setCurrentActionCue(null)}
-        onAdvanceAi={() => {
-          setCurrentActionCue(null);
-          advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
-        }}
-      />
-      ) : null}
-      {activeMatchIsGame && !matchEnded && activeView?.run ? (
-        <RunTimelineOverlay
-          view={activeView}
-          legalActions={payload.legalActions}
-          runActions={runActions}
-          cardDetailsById={catalogDetailsById}
-          actionDisabled={Boolean(payload.winner) || connection !== "online"}
-          highlighted={activeCueHighlight?.kind === "run"}
-          onAction={submitAction}
-          onChoiceOption={submitChoiceOption}
-        />
-      ) : null}
-      {showFloatingActionPanel && activeView ? (
-        <FloatingActionPanelOverlay
-          position={actionPanelOverlayPosition}
-          onPosition={setActionPanelOverlayPosition}
-          onDock={() => setActionPanelMode("docked")}
+      <CardImagePreferenceContext.Provider
+        value={{ preferGermanCardImages, showSetBadges }}
+      >
+        <CardTooltipSettingsContext.Provider
+          value={{
+            hoverOpenDelayMs: cardTooltipHoverDelayMs,
+            mode: cardTooltipMode,
+          }}
         >
-          <LegalActionsPanel
-            view={activeView}
-            primaryActions={floatingPanelPrimaryActions}
-            contextualActions={floatingPanelContextualActions}
-            selectedContext={selectedPanelContext}
-            hasHiddenContextActions={floatingPanelHasHiddenContextActions}
-            cardContextActive={selectedActionContext?.kind === "card"}
-            hiddenContextHint={hiddenContextHint}
-            actionCapacities={actionSlotCapacities}
-            priorityWindowHoldEnabled={priorityWindowHoldEnabled}
-            {...(aiTurnPresentation?.activeAiSide ? { activeAiSide: aiTurnPresentation.activeAiSide } : {})}
-            disabled={Boolean(payload.winner) || connection !== "online"}
-            highlighted={hasDecisionCue}
-            selectedDiscardOptionIds={selectedDiscardOptionIds}
-            selectedFieldCardChoiceOptionIds={selectedFieldCardChoiceOptionIds}
-            onAction={submitAction}
-            onChoiceOption={submitChoiceOption}
-            onChoiceOptions={submitChoiceOptions}
-            onDiscardChoiceToggle={toggleDiscardOption}
-            onFieldCardChoiceClear={clearFieldCardChoiceSelection}
-            onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
-            enrichCard={enrichCard}
-            connection={connection}
-            onClearContext={() => setSelectedActionContext(null)}
-          />
-        </FloatingActionPanelOverlay>
-      ) : null}
-      {showAiDecisionDebugOverlay ? (
-        <FloatingAiDecisionDebugOverlay
-          position={aiDecisionDebugOverlayPosition}
-          status={aiDecisionDebugStatus}
-          error={aiDecisionDebugError}
-          preview={aiDecisionDebugPreview}
-          previewError={aiDecisionDebugPreviewError}
-          trace={aiDecisionDebugTrace}
-          traceCount={aiDecisionDebugTraceIndex.length}
-          onPosition={setAiDecisionDebugOverlayPosition}
-          onClose={() => setAiDecisionDebugOverlayEnabled(false)}
-        />
-      ) : null}
-      {activeMatchIsGame ? (
-      <ScoredAgendaOverlay
-        side="corp"
-        cards={scoreAreaCardsBySide("corp")}
-        agendaPoints={agendaPointsBySide("corp")}
-        agendaPointsToWin={effectiveAgendaTarget}
-        open={Boolean(scoreAreaOverlays.corp)}
-        position={scoreAreaOverlayPositions.corp}
-        cardDisplayMode={cardDisplayMode}
-        enrichCard={enrichCard}
-        cardActionsFor={cardActionsFor}
-        actionDisabled={Boolean(payload.winner) || connection !== "online"}
-        selectedContext={selectedActionContext}
-        onAction={submitAction}
-        onFocus={focusCard}
-        onActionContextSelect={selectActionCard}
-        onClose={() => setScoreAreaOverlays((value) => ({ ...value, corp: false }))}
-        onPosition={(position) => setScoreAreaOverlayPositions((value) => ({ ...value, corp: position }))}
-      />
-      ) : null}
-      {activeMatchIsGame ? (
-      <ScoredAgendaOverlay
-        side="runner"
-        cards={scoreAreaCardsBySide("runner")}
-        agendaPoints={agendaPointsBySide("runner")}
-        agendaPointsToWin={effectiveAgendaTarget}
-        open={Boolean(scoreAreaOverlays.runner)}
-        position={scoreAreaOverlayPositions.runner}
-        cardDisplayMode={cardDisplayMode}
-        enrichCard={enrichCard}
-        cardActionsFor={cardActionsFor}
-        actionDisabled={Boolean(payload.winner) || connection !== "online"}
-        selectedContext={selectedActionContext}
-        onAction={submitAction}
-        onFocus={focusCard}
-        onActionContextSelect={selectActionCard}
-        onClose={() => setScoreAreaOverlays((value) => ({ ...value, runner: false }))}
-        onPosition={(position) => setScoreAreaOverlayPositions((value) => ({ ...value, runner: position }))}
-      />
-      ) : null}
-
-      {activeMatchIsGame && activeView ? (
-      <ActiveMatchResourceStrip
-        view={activeView}
-        agendaPointsToWin={effectiveAgendaTarget}
-        actionCapacities={actionSlotCapacities}
-        ariaHidden={!resourceStripVisible}
-        topOffsetPx={topbarStickyEnabled ? topbarHeightPx : 0}
-      />
-      ) : null}
-
-      {activeMatchIsGame ? (
-      <div className={`main${rightRailCollapsed ? " rightRailCollapsed" : ""}`} data-testid="active-game">
-        <aside className="column panel sidePanel" ref={statusPanelsRef}>
-          <OpponentPanel
-            view={activeView}
-            scoreAreaCards={scoreAreaCardsBySide(opponentSide(activeView.side))}
-            scoreAreaOpen={scoreAreaOverlays[opponentSide(activeView.side)]}
-            agendaPointsToWin={effectiveAgendaTarget}
-            scoreAreaHighlighted={zoneHighlighted(activeCueHighlight, opponentSide(activeView.side), "scoreArea")}
-            onToggleScoreArea={() => toggleScoreAreaOverlay(opponentSide(activeView.side))}
-            {...(payload.opponentStatus.displayName ? { displayName: payload.opponentStatus.displayName } : {})}
-          />
-          {showAiPacingFallbackControls ? (
-            <AiPacingControls
-              presentation={aiTurnPresentation}
-              mode={localAiPacingMode}
+          <main className={activeMatchClassName} data-theme={colorScheme}>
+            <ActiveMatchTopbar
+              topbarRef={topbarRef}
+              appName={APP_NAME}
+              appStatusLabel={APP_STATUS_LABEL}
+              appIconSrc={APP_ICON_SRC}
+              appWordmarkSrc={APP_WORDMARK_SRC}
+              statusText={statusText}
               connection={connection}
-              onAdvance={() => advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step")}
+              workspace={activeMatchWorkspace}
+              activeMatchIsGame={activeMatchIsGame}
+              undoPanelOpen={undoPanelOpen}
+              pendingUndo={payload.pendingUndo}
+              canReconnect={canReconnect}
+              matchDetailsOpen={matchDetailsOpen}
+              canStartNextSeriesGame={canStartNextSeriesGame}
+              seriesTransitioning={seriesTransitioning}
+              canReturnToStart={canReturnToStart}
+              canForfeit={canForfeit}
+              rightRailCollapsed={rightRailCollapsed}
+              onWorkspace={setActiveMatchWorkspace}
+              onToggleUndoPanel={() => setUndoPanelOpen((open) => !open)}
+              onReconnect={reconnect}
+              onToggleMatchDetails={() => setMatchDetailsOpen((open) => !open)}
+              onStartNextSeriesGame={startNextSeriesGame}
+              onLeaveMatch={leaveMatch}
+              onRequestForfeitMatch={requestForfeitMatch}
+              onToggleRightRail={() =>
+                setRightRailCollapsed((current) => !current)
+              }
             />
-          ) : null}
-          {actionPanelMode === "floating" ? (
-            <ActionPanelDockPlaceholder
-              runActive={Boolean(activeView.run)}
-              floatingVisible={showFloatingActionPanel}
-              onDock={() => setActionPanelMode("docked")}
-            />
-          ) : (
-            <LegalActionsPanel
-              view={activeView}
-              primaryActions={legalActionSplit.primaryActions}
-              contextualActions={selectedPanelContextActions}
-              selectedContext={selectedPanelContext}
-              hasHiddenContextActions={legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card"}
-              cardContextActive={selectedActionContext?.kind === "card"}
-              hiddenContextHint={hiddenContextHint}
-              actionCapacities={actionSlotCapacities}
-              priorityWindowHoldEnabled={priorityWindowHoldEnabled}
-              {...(aiTurnPresentation?.activeAiSide ? { activeAiSide: aiTurnPresentation.activeAiSide } : {})}
-              disabled={Boolean(payload.winner) || connection !== "online"}
-              highlighted={hasDecisionCue}
-              selectedDiscardOptionIds={selectedDiscardOptionIds}
-              selectedFieldCardChoiceOptionIds={selectedFieldCardChoiceOptionIds}
-              onAction={submitAction}
-              onChoiceOption={submitChoiceOption}
-              onChoiceOptions={submitChoiceOptions}
-              onDiscardChoiceToggle={toggleDiscardOption}
-              onFieldCardChoiceClear={clearFieldCardChoiceSelection}
-              onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
-              onFloatPanel={() => setActionPanelMode("floating")}
-              enrichCard={enrichCard}
+
+            {matchDetailsOpen ? (
+              <div
+                className="matchStrip"
+                id="match-details-strip"
+                aria-label="Status zum aktiven Spiel"
+              >
+                <span title={payload.matchStatus}>
+                  <strong>Status</strong> {payload.matchStatus}
+                </span>
+                <span title={payload.matchId}>
+                  <strong>Match</strong> {shortDiagnosticsHash(payload.matchId)}
+                </span>
+                <span>
+                  <strong>Gegenüber</strong>{" "}
+                  {opponentDisplayName ??
+                    sideLabel(payload.opponentStatus.side)}
+                </span>
+                {activeView.deckMetadata ? (
+                  <span title={activeView.deckMetadata.own.deckName}>
+                    <strong>Deck</strong> {activeView.deckMetadata.own.deckName}{" "}
+                    · geprüft
+                  </span>
+                ) : null}
+                <span>
+                  <strong>Version</strong> {payload.matchVersion}
+                </span>
+                <span>
+                  <strong>State</strong> {activeView.stateVersion}
+                </span>
+                {notice ? (
+                  <span className="matchStripNotice">{notice}</span>
+                ) : null}
+              </div>
+            ) : notice ? (
+              <div className="matchNotice" role="status" aria-live="polite">
+                {notice}
+              </div>
+            ) : null}
+            <UndoPanel
+              open={undoPanelOpen}
+              pendingUndo={payload.pendingUndo}
+              undoNotice={undoNotice}
+              latestEventId={latestEventId}
               connection={connection}
-              onClearContext={() => setSelectedActionContext(null)}
+              onRequest={requestUndo}
+              onResolve={resolveUndo}
             />
-          )}
-          <PlayerPanel
-            view={activeView}
-            title={`Du · ${sideLabel(activeView.side)}`}
-            scoreAreaCards={scoreAreaCardsBySide(activeView.side)}
-            scoreAreaOpen={scoreAreaOverlays[activeView.side]}
-            agendaPointsToWin={effectiveAgendaTarget}
-            scoreAreaHighlighted={zoneHighlighted(activeCueHighlight, activeView.side, "scoreArea")}
-            onToggleScoreArea={() => toggleScoreAreaOverlay(activeView.side)}
-          />
-          <SpecialZonesStrip view={activeView} cardDetailsById={catalogDetailsById} displayMode={cardDisplayMode} compact onFocus={focusCard} />
-        </aside>
-
-        <section className="board boardPanel" data-testid="active-board">
-          {matchClockDisplay || payload.playerClock ? (
-            <div className="clockCluster" aria-label="Uhrenbereich">
-              {matchClockDisplay ? (
-                <div className="matchClockStrip" aria-label="Uhr für dieses Match" data-testid="match-clock">
-                  <span className="matchClockIcon" aria-hidden="true">
-                    <Clock size={15} />
-                  </span>
-                  <span>
-                    <strong>Match</strong> {matchClockDisplay.matchElapsed}
-                  </span>
-                  <span>
-                    <strong>{matchClockDisplay.scopeLabel}</strong> {matchClockDisplay.decisionElapsed}
-                  </span>
-                  {matchClockDisplay.graceLabel ? <small>{matchClockDisplay.graceLabel}</small> : null}
-                </div>
-              ) : null}
-              {payload.playerClock ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
-            </div>
-          ) : null}
-          {activeView.side === "corp" ? (
-            <section className="opponentRunnerBoardStrip" aria-label="Runner-Bereich">
-              <RunnerOpponentZonesStrip
+            {activeMatchIsGame && !matchEnded ? (
+              <DamageImpactOverlay
+                cue={currentDamageImpact}
+                queued={damageImpactQueue.length}
+                onDismiss={() => setCurrentDamageImpact(null)}
+              />
+            ) : null}
+            {activeMatchIsGame && !matchEnded ? (
+              <OpponentActionOverlay
+                cue={currentActionCue}
+                queued={actionCueQueue.length}
+                position={cuePosition}
+                cardDetailsById={catalogDetailsById}
+                displayMode={cardDisplayMode}
+                canAdvanceAi={Boolean(
+                  aiTurnPresentation?.canAdvanceAi && connection === "online",
+                )}
+                renderTitle={(cue) => {
+                  const titleCard = cue.cardDefinitionId
+                    ? (catalogDetailsById[cue.cardDefinitionId] ?? null)
+                    : null;
+                  return (
+                    <OpponentCueTitle
+                      cue={cue}
+                      card={titleCard}
+                      previewCard={
+                        titleCard
+                          ? visibleCardFromCatalogDetail(titleCard)
+                          : null
+                      }
+                      displayMode={cardDisplayMode}
+                      onFocusCard={focusCard}
+                    />
+                  );
+                }}
+                onPosition={setCuePosition}
+                onDismiss={() => setCurrentActionCue(null)}
+                onAdvanceAi={() => {
+                  setCurrentActionCue(null);
+                  advanceAi(
+                    localAiPacingMode === "fast"
+                      ? "until_human"
+                      : "single_step",
+                  );
+                }}
+              />
+            ) : null}
+            {activeMatchIsGame && !matchEnded && activeView?.run ? (
+              <RunTimelineOverlay
                 view={activeView}
+                legalActions={payload.legalActions}
+                runActions={runActions}
                 cardDetailsById={catalogDetailsById}
-                displayMode={cardDisplayMode}
-                selectedContext={selectedActionContext}
-                contextualActions={legalActionSplit.contextualActions}
-                actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                highlightedZone={activeCueHighlight}
-                onFocus={focusCard}
-                onActionContext={selectActionCard}
+                actionDisabled={
+                  Boolean(payload.winner) || connection !== "online"
+                }
+                highlighted={activeCueHighlight?.kind === "run"}
                 onAction={submitAction}
+                onChoiceOption={submitChoiceOption}
               />
-              <RunnerRigStrip
-                view={activeView}
-                cardDetailsById={catalogDetailsById}
-                displayMode={cardDisplayMode}
+            ) : null}
+            {showFloatingActionPanel && activeView ? (
+              <FloatingActionPanelOverlay
+                position={actionPanelOverlayPosition}
+                onPosition={setActionPanelOverlayPosition}
+                onDock={() => setActionPanelMode("docked")}
+              >
+                <LegalActionsPanel
+                  view={activeView}
+                  primaryActions={floatingPanelPrimaryActions}
+                  contextualActions={floatingPanelContextualActions}
+                  selectedContext={selectedPanelContext}
+                  hasHiddenContextActions={floatingPanelHasHiddenContextActions}
+                  cardContextActive={selectedActionContext?.kind === "card"}
+                  hiddenContextHint={hiddenContextHint}
+                  actionCapacities={actionSlotCapacities}
+                  priorityWindowHoldEnabled={priorityWindowHoldEnabled}
+                  {...(aiTurnPresentation?.activeAiSide
+                    ? { activeAiSide: aiTurnPresentation.activeAiSide }
+                    : {})}
+                  disabled={Boolean(payload.winner) || connection !== "online"}
+                  highlighted={hasDecisionCue}
+                  selectedDiscardOptionIds={selectedDiscardOptionIds}
+                  selectedFieldCardChoiceOptionIds={
+                    selectedFieldCardChoiceOptionIds
+                  }
+                  onAction={submitAction}
+                  onChoiceOption={submitChoiceOption}
+                  onChoiceOptions={submitChoiceOptions}
+                  onDiscardChoiceToggle={toggleDiscardOption}
+                  onFieldCardChoiceClear={clearFieldCardChoiceSelection}
+                  onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
+                  enrichCard={enrichCard}
+                  connection={connection}
+                  onClearContext={() => setSelectedActionContext(null)}
+                />
+              </FloatingActionPanelOverlay>
+            ) : null}
+            {showAiDecisionDebugOverlay ? (
+              <FloatingAiDecisionDebugOverlay
+                position={aiDecisionDebugOverlayPosition}
+                status={aiDecisionDebugStatus}
+                error={aiDecisionDebugError}
+                preview={aiDecisionDebugPreview}
+                previewError={aiDecisionDebugPreviewError}
+                trace={aiDecisionDebugTrace}
+                traceCount={aiDecisionDebugTraceIndex.length}
+                onPosition={setAiDecisionDebugOverlayPosition}
+                onClose={() => setAiDecisionDebugOverlayEnabled(false)}
+              />
+            ) : null}
+            {activeMatchIsGame ? (
+              <ScoredAgendaOverlay
+                side="corp"
+                cards={scoreAreaCardsBySide("corp")}
+                agendaPoints={agendaPointsBySide("corp")}
+                agendaPointsToWin={effectiveAgendaTarget}
+                open={Boolean(scoreAreaOverlays.corp)}
+                position={scoreAreaOverlayPositions.corp}
+                cardDisplayMode={cardDisplayMode}
+                enrichCard={enrichCard}
+                cardActionsFor={cardActionsFor}
+                actionDisabled={
+                  Boolean(payload.winner) || connection !== "online"
+                }
                 selectedContext={selectedActionContext}
-                contextualActions={legalActionSplit.contextualActions}
-                actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                highlightedZone={activeCueHighlight}
-                fieldChoiceCardProps={fieldChoiceCardProps}
-                onFocus={focusCard}
-                onActionContext={selectActionCard}
                 onAction={submitAction}
+                onFocus={focusCard}
+                onActionContextSelect={selectActionCard}
+                onClose={() =>
+                  setScoreAreaOverlays((value) => ({ ...value, corp: false }))
+                }
+                onPosition={(position) =>
+                  setScoreAreaOverlayPositions((value) => ({
+                    ...value,
+                    corp: position,
+                  }))
+                }
               />
-            </section>
-          ) : (
-            <RunnerRigStrip
-              view={activeView}
-              cardDetailsById={catalogDetailsById}
-              displayMode={cardDisplayMode}
-              selectedContext={selectedActionContext}
-              contextualActions={legalActionSplit.contextualActions}
-              actionDisabled={Boolean(payload.winner) || connection !== "online"}
-              fieldChoiceCardProps={fieldChoiceCardProps}
-              onFocus={focusCard}
-              onActionContext={selectActionCard}
-              onAction={submitAction}
-            />
-          )}
-          {payload.winner ? (
-            <div className="runBar">
-              <Sparkles size={18} />
-              <span className="winner">
-                {payload.winner === "runner" ? "Runner" : payload.winner === "corp" ? "Korp" : "Draw"} gewinnt.
-              </span>
-            </div>
-          ) : null}
-          <ActiveServerGrid
-            view={activeView}
-            actionDisabled={Boolean(payload.winner) || connection !== "online"}
-            activeHighlight={activeCueHighlight}
-            activeRunTargetIds={activeRunTargetIds}
-            activeRunIceId={activeRunIceId}
-            viewedApproachIceId={viewedApproachIceId}
-            viewedInstalledExposeCardId={viewedInstalledExposeCardId}
-            selectedActionContext={selectedActionContext}
-            selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
-            boardLaneStyle={boardLaneStyle}
-            handCardsStyle={handCardsStyle}
-            zoneCardsStyle={zoneCardsStyle}
-            cardDisplayMode={cardDisplayMode}
-            boardZoneCollapsedFor={boardZoneCollapsedFor}
-            toggleBoardZoneCollapsed={toggleBoardZoneCollapsed}
-            runActionForServer={runActionForServer}
-            cardActionsFor={cardActionsFor}
-            enrichCard={enrichCard}
-            scoreAreaCardsBySide={scoreAreaCardsBySide}
-            discardOptionForCard={discardOptionForCard}
-            toggleDiscardOption={toggleDiscardOption}
-            fieldChoiceCardProps={fieldChoiceCardProps}
-            onAction={submitAction}
-            onFocus={focusCard}
-            onActionContextSelect={selectActionCard}
-            onSelectActionContext={setSelectedActionContext}
-          />
-          <section className="section panel boardSection zoneBoardSection">
-            <ActiveRunnerZoneBoard
-              view={activeView}
-              actionDisabled={Boolean(payload.winner) || connection !== "online"}
-              activeHighlight={activeCueHighlight}
-              selectedActionContext={selectedActionContext}
-              selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
-              ownRigGroups={ownRigGroups}
-              ownRigCardsStyle={ownRigCardsStyle}
-              handCardsStyle={handCardsStyle}
-              zoneCardsStyle={zoneCardsStyle}
-              cardDisplayMode={cardDisplayMode}
-              boardZoneCollapsedFor={boardZoneCollapsedFor}
-              toggleBoardZoneCollapsed={toggleBoardZoneCollapsed}
-              cardActionsFor={cardActionsFor}
-              enrichCard={enrichCard}
-              discardOptionForCard={discardOptionForCard}
-              toggleDiscardOption={toggleDiscardOption}
-              fieldChoiceCardProps={fieldChoiceCardProps}
-              onAction={submitAction}
-              onFocus={focusCard}
-              onActionContextSelect={selectActionCard}
-            />
-          </section>
-        </section>
+            ) : null}
+            {activeMatchIsGame ? (
+              <ScoredAgendaOverlay
+                side="runner"
+                cards={scoreAreaCardsBySide("runner")}
+                agendaPoints={agendaPointsBySide("runner")}
+                agendaPointsToWin={effectiveAgendaTarget}
+                open={Boolean(scoreAreaOverlays.runner)}
+                position={scoreAreaOverlayPositions.runner}
+                cardDisplayMode={cardDisplayMode}
+                enrichCard={enrichCard}
+                cardActionsFor={cardActionsFor}
+                actionDisabled={
+                  Boolean(payload.winner) || connection !== "online"
+                }
+                selectedContext={selectedActionContext}
+                onAction={submitAction}
+                onFocus={focusCard}
+                onActionContextSelect={selectActionCard}
+                onClose={() =>
+                  setScoreAreaOverlays((value) => ({ ...value, runner: false }))
+                }
+                onPosition={(position) =>
+                  setScoreAreaOverlayPositions((value) => ({
+                    ...value,
+                    runner: position,
+                  }))
+                }
+              />
+            ) : null}
 
-        <aside className="log panel rightRail">
-          {!rightRailCollapsed ? (
-            <>
-              <CardPreviewPanel
-                card={enrichedPreviewCard}
-                displayMode={cardDisplayMode}
-                onDisplayMode={setCardDisplayMode}
-                collapsed={cardPreviewCollapsed}
-                onCollapsed={updateCardPreviewCollapsed}
-                {...(previewHiddenSide ? { hiddenSide: previewHiddenSide } : {})}
+            {activeMatchIsGame && activeView ? (
+              <ActiveMatchResourceStrip
+                view={activeView}
+                agendaPointsToWin={effectiveAgendaTarget}
+                actionCapacities={actionSlotCapacities}
+                ariaHidden={!resourceStripVisible}
+                topOffsetPx={topbarStickyEnabled ? topbarHeightPx : 0}
               />
-              <ChroniclePanel
-                events={payload.eventTail}
-                turnContextEvents={payload.playerView.publicEvents}
-                side={payload.side}
-                cardDetailsById={catalogDetailsById}
-                displayMode={cardDisplayMode}
-                detailMode={chronicleDetailMode}
-                preferGermanCardImages={preferGermanCardImages}
-                onFocusCard={focusCard}
+            ) : null}
+
+            {activeMatchIsGame ? (
+              <div
+                className={`main${rightRailCollapsed ? " rightRailCollapsed" : ""}`}
+                data-testid="active-game"
+              >
+                <aside className="column panel sidePanel" ref={statusPanelsRef}>
+                  <OpponentPanel
+                    view={activeView}
+                    scoreAreaCards={scoreAreaCardsBySide(
+                      opponentSide(activeView.side),
+                    )}
+                    scoreAreaOpen={
+                      scoreAreaOverlays[opponentSide(activeView.side)]
+                    }
+                    agendaPointsToWin={effectiveAgendaTarget}
+                    scoreAreaHighlighted={zoneHighlighted(
+                      activeCueHighlight,
+                      opponentSide(activeView.side),
+                      "scoreArea",
+                    )}
+                    onToggleScoreArea={() =>
+                      toggleScoreAreaOverlay(opponentSide(activeView.side))
+                    }
+                    {...(payload.opponentStatus.displayName
+                      ? { displayName: payload.opponentStatus.displayName }
+                      : {})}
+                  />
+                  {showAiPacingFallbackControls ? (
+                    <AiPacingControls
+                      presentation={aiTurnPresentation}
+                      mode={localAiPacingMode}
+                      connection={connection}
+                      onAdvance={() =>
+                        advanceAi(
+                          localAiPacingMode === "fast"
+                            ? "until_human"
+                            : "single_step",
+                        )
+                      }
+                    />
+                  ) : null}
+                  {actionPanelMode === "floating" ? (
+                    <ActionPanelDockPlaceholder
+                      runActive={Boolean(activeView.run)}
+                      floatingVisible={showFloatingActionPanel}
+                      onDock={() => setActionPanelMode("docked")}
+                    />
+                  ) : (
+                    <LegalActionsPanel
+                      view={activeView}
+                      primaryActions={legalActionSplit.primaryActions}
+                      contextualActions={selectedPanelContextActions}
+                      selectedContext={selectedPanelContext}
+                      hasHiddenContextActions={
+                        legalActionSplit.contextualActions.length > 0 &&
+                        selectedActionContext?.kind !== "card"
+                      }
+                      cardContextActive={selectedActionContext?.kind === "card"}
+                      hiddenContextHint={hiddenContextHint}
+                      actionCapacities={actionSlotCapacities}
+                      priorityWindowHoldEnabled={priorityWindowHoldEnabled}
+                      {...(aiTurnPresentation?.activeAiSide
+                        ? { activeAiSide: aiTurnPresentation.activeAiSide }
+                        : {})}
+                      disabled={
+                        Boolean(payload.winner) || connection !== "online"
+                      }
+                      highlighted={hasDecisionCue}
+                      selectedDiscardOptionIds={selectedDiscardOptionIds}
+                      selectedFieldCardChoiceOptionIds={
+                        selectedFieldCardChoiceOptionIds
+                      }
+                      onAction={submitAction}
+                      onChoiceOption={submitChoiceOption}
+                      onChoiceOptions={submitChoiceOptions}
+                      onDiscardChoiceToggle={toggleDiscardOption}
+                      onFieldCardChoiceClear={clearFieldCardChoiceSelection}
+                      onPriorityWindowHoldEnabled={setPriorityWindowHoldEnabled}
+                      onFloatPanel={() => setActionPanelMode("floating")}
+                      enrichCard={enrichCard}
+                      connection={connection}
+                      onClearContext={() => setSelectedActionContext(null)}
+                    />
+                  )}
+                  <PlayerPanel
+                    view={activeView}
+                    title={`Du · ${sideLabel(activeView.side)}`}
+                    scoreAreaCards={scoreAreaCardsBySide(activeView.side)}
+                    scoreAreaOpen={scoreAreaOverlays[activeView.side]}
+                    agendaPointsToWin={effectiveAgendaTarget}
+                    scoreAreaHighlighted={zoneHighlighted(
+                      activeCueHighlight,
+                      activeView.side,
+                      "scoreArea",
+                    )}
+                    onToggleScoreArea={() =>
+                      toggleScoreAreaOverlay(activeView.side)
+                    }
+                  />
+                  <SpecialZonesStrip
+                    view={activeView}
+                    cardDetailsById={catalogDetailsById}
+                    displayMode={cardDisplayMode}
+                    compact
+                    onFocus={focusCard}
+                  />
+                </aside>
+
+                <section
+                  className="board boardPanel"
+                  data-testid="active-board"
+                >
+                  {matchClockDisplay || payload.playerClock ? (
+                    <div className="clockCluster" aria-label="Uhrenbereich">
+                      {matchClockDisplay ? (
+                        <div
+                          className="matchClockStrip"
+                          aria-label="Uhr für dieses Match"
+                          data-testid="match-clock"
+                        >
+                          <span className="matchClockIcon" aria-hidden="true">
+                            <Clock size={15} />
+                          </span>
+                          <span>
+                            <strong>Match</strong>{" "}
+                            {matchClockDisplay.matchElapsed}
+                          </span>
+                          <span>
+                            <strong>{matchClockDisplay.scopeLabel}</strong>{" "}
+                            {matchClockDisplay.decisionElapsed}
+                          </span>
+                          {matchClockDisplay.graceLabel ? (
+                            <small>{matchClockDisplay.graceLabel}</small>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      {payload.playerClock ? (
+                        <PlayerClockStrip
+                          snapshot={payload.playerClock}
+                          nowMs={matchClockNowMs}
+                        />
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {activeView.side === "corp" ? (
+                    <section
+                      className="opponentRunnerBoardStrip"
+                      aria-label="Runner-Bereich"
+                    >
+                      <RunnerOpponentZonesStrip
+                        view={activeView}
+                        cardDetailsById={catalogDetailsById}
+                        displayMode={cardDisplayMode}
+                        selectedContext={selectedActionContext}
+                        contextualActions={legalActionSplit.contextualActions}
+                        actionDisabled={
+                          Boolean(payload.winner) || connection !== "online"
+                        }
+                        highlightedZone={activeCueHighlight}
+                        onFocus={focusCard}
+                        onActionContext={selectActionCard}
+                        onAction={submitAction}
+                      />
+                      <RunnerRigStrip
+                        view={activeView}
+                        cardDetailsById={catalogDetailsById}
+                        displayMode={cardDisplayMode}
+                        selectedContext={selectedActionContext}
+                        contextualActions={legalActionSplit.contextualActions}
+                        actionDisabled={
+                          Boolean(payload.winner) || connection !== "online"
+                        }
+                        highlightedZone={activeCueHighlight}
+                        fieldChoiceCardProps={fieldChoiceCardProps}
+                        onFocus={focusCard}
+                        onActionContext={selectActionCard}
+                        onAction={submitAction}
+                      />
+                    </section>
+                  ) : (
+                    <RunnerRigStrip
+                      view={activeView}
+                      cardDetailsById={catalogDetailsById}
+                      displayMode={cardDisplayMode}
+                      selectedContext={selectedActionContext}
+                      contextualActions={legalActionSplit.contextualActions}
+                      actionDisabled={
+                        Boolean(payload.winner) || connection !== "online"
+                      }
+                      fieldChoiceCardProps={fieldChoiceCardProps}
+                      onFocus={focusCard}
+                      onActionContext={selectActionCard}
+                      onAction={submitAction}
+                    />
+                  )}
+                  {payload.winner ? (
+                    <div className="runBar">
+                      <Sparkles size={18} />
+                      <span className="winner">
+                        {payload.winner === "runner"
+                          ? "Runner"
+                          : payload.winner === "corp"
+                            ? "Korp"
+                            : "Draw"}{" "}
+                        gewinnt.
+                      </span>
+                    </div>
+                  ) : null}
+                  <ActiveServerGrid
+                    view={activeView}
+                    actionDisabled={
+                      Boolean(payload.winner) || connection !== "online"
+                    }
+                    activeHighlight={activeCueHighlight}
+                    activeRunTargetIds={activeRunTargetIds}
+                    activeRunIceId={activeRunIceId}
+                    viewedApproachIceId={viewedApproachIceId}
+                    viewedInstalledExposeCardId={viewedInstalledExposeCardId}
+                    selectedActionContext={selectedActionContext}
+                    selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
+                    boardLaneStyle={boardLaneStyle}
+                    handCardsStyle={handCardsStyle}
+                    zoneCardsStyle={zoneCardsStyle}
+                    cardDisplayMode={cardDisplayMode}
+                    boardZoneCollapsedFor={boardZoneCollapsedFor}
+                    toggleBoardZoneCollapsed={toggleBoardZoneCollapsed}
+                    runActionForServer={runActionForServer}
+                    cardActionsFor={cardActionsFor}
+                    enrichCard={enrichCard}
+                    scoreAreaCardsBySide={scoreAreaCardsBySide}
+                    discardOptionForCard={discardOptionForCard}
+                    toggleDiscardOption={toggleDiscardOption}
+                    fieldChoiceCardProps={fieldChoiceCardProps}
+                    onAction={submitAction}
+                    onFocus={focusCard}
+                    onActionContextSelect={selectActionCard}
+                    onSelectActionContext={setSelectedActionContext}
+                  />
+                  <section className="section panel boardSection zoneBoardSection">
+                    <ActiveRunnerZoneBoard
+                      view={activeView}
+                      actionDisabled={
+                        Boolean(payload.winner) || connection !== "online"
+                      }
+                      activeHighlight={activeCueHighlight}
+                      selectedActionContext={selectedActionContext}
+                      selectedDiscardOptionIdSet={selectedDiscardOptionIdSet}
+                      ownRigGroups={ownRigGroups}
+                      ownRigCardsStyle={ownRigCardsStyle}
+                      handCardsStyle={handCardsStyle}
+                      zoneCardsStyle={zoneCardsStyle}
+                      cardDisplayMode={cardDisplayMode}
+                      boardZoneCollapsedFor={boardZoneCollapsedFor}
+                      toggleBoardZoneCollapsed={toggleBoardZoneCollapsed}
+                      cardActionsFor={cardActionsFor}
+                      enrichCard={enrichCard}
+                      discardOptionForCard={discardOptionForCard}
+                      toggleDiscardOption={toggleDiscardOption}
+                      fieldChoiceCardProps={fieldChoiceCardProps}
+                      onAction={submitAction}
+                      onFocus={focusCard}
+                      onActionContextSelect={selectActionCard}
+                    />
+                  </section>
+                </section>
+
+                <aside className="log panel rightRail">
+                  {!rightRailCollapsed ? (
+                    <>
+                      <CardPreviewPanel
+                        card={enrichedPreviewCard}
+                        displayMode={cardDisplayMode}
+                        onDisplayMode={setCardDisplayMode}
+                        collapsed={cardPreviewCollapsed}
+                        onCollapsed={updateCardPreviewCollapsed}
+                        {...(previewHiddenSide
+                          ? { hiddenSide: previewHiddenSide }
+                          : {})}
+                      />
+                      <ChroniclePanel
+                        events={payload.eventTail}
+                        turnContextEvents={payload.playerView.publicEvents}
+                        side={payload.side}
+                        cardDetailsById={catalogDetailsById}
+                        displayMode={cardDisplayMode}
+                        detailMode={chronicleDetailMode}
+                        preferGermanCardImages={preferGermanCardImages}
+                        onFocusCard={focusCard}
+                      />
+                      <section className="section">
+                        <button
+                          className="button wide"
+                          onClick={() =>
+                            setDiagnosticsOpen((current) => !current)
+                          }
+                        >
+                          <PanelRightOpen size={15} />
+                          Diagnostics
+                        </button>
+                      </section>
+                      <DiagnosticsDrawer
+                        open={diagnosticsOpen}
+                        payload={payload}
+                        connection={connection}
+                      />
+                    </>
+                  ) : null}
+                </aside>
+              </div>
+            ) : (
+              <ActiveMatchWorkspaceArea
+                workspace={activeMatchWorkspace}
+                catalogPanelProps={catalogPanelProps}
+                deckEditorPanelProps={{
+                  localDecks,
+                  selectedDeck: selectedLocalDeck,
+                  selectedDeckDirty,
+                  storagePath: deckLibraryStoragePath,
+                  validation: deckValidation,
+                  validatedSnapshot,
+                  playableCards: playableCatalogCards,
+                  cardDetailsById: catalogDetailsById,
+                  importText: deckImportText,
+                  exportText: deckExportText,
+                  onCreateEmpty: createEmptyDeck,
+                  onSelectDeck: setSelectedLocalDeckId,
+                  onUpdateDeck: updateSelectedDeck,
+                  onSave: saveSelectedDeck,
+                  onUpdateQuantity: updateDeckCardQuantity,
+                  onDuplicate: duplicateSelectedDeck,
+                  onDelete: deleteSelectedDeck,
+                  onValidate: validateSelectedDeck,
+                  onUseForMatch: useValidatedDeckForNextMatch,
+                  useForMatchLabel: "Für nächsten Start vormerken",
+                  onExport: exportSelectedDeck,
+                  onImportText: setDeckImportText,
+                  onImport: importLocalDeck,
+                }}
+                recentGamesPanelProps={{
+                  results: recentGameResults,
+                  loading: recentGameResultsLoading,
+                  error: recentGameResultsError,
+                  updatedAt: recentGameResultsUpdatedAt,
+                  onRefresh: refreshRecentGameResults,
+                }}
+                optionsPanelProps={{
+                  actionCueAutoDismissMs,
+                  actionCuesEnabled,
+                  automaticEffectCuesEnabled,
+                  autoCorpMandatoryDrawEnabled,
+                  autoDiscardEnabled,
+                  autoEndTurnEnabled,
+                  topbarStickyEnabled,
+                  resourceStripMode,
+                  actionPanelMode,
+                  aiDecisionDebugOverlayEnabled,
+                  audioEnabled,
+                  audioVolume,
+                  cardTooltipHoverDelayMs,
+                  cardTooltipMode,
+                  cardTooltipScalePercent,
+                  cardHandScalePercent,
+                  cardArchiveScalePercent,
+                  cardZoneScalePercent,
+                  cardBoardScalePercent,
+                  cardRigScalePercent,
+                  cardDisplayMode,
+                  preferGermanCardImages,
+                  showSetBadges,
+                  chronicleDetailMode,
+                  colorScheme,
+                  cuePosition,
+                  aiPacingMode: localAiPacingMode,
+                  session,
+                  onActionCueAutoDismissMs: setActionCueAutoDismissMs,
+                  onActionCuesEnabled: setActionCuesEnabled,
+                  onAutomaticEffectCuesEnabled: setAutomaticEffectCuesEnabled,
+                  onAutoCorpMandatoryDrawEnabled:
+                    setAutoCorpMandatoryDrawEnabled,
+                  onAutoDiscardEnabled: setAutoDiscardEnabled,
+                  onAutoEndTurnEnabled: setAutoEndTurnEnabled,
+                  onTopbarStickyEnabled: setTopbarStickyEnabled,
+                  onResourceStripMode: setResourceStripMode,
+                  onActionPanelMode: setActionPanelMode,
+                  onAiDecisionDebugOverlayEnabled:
+                    setAiDecisionDebugOverlayEnabled,
+                  onAudioEnabled: updateAudioEnabled,
+                  onAudioVolume: setAudioVolume,
+                  onCardTooltipHoverDelayMs: setCardTooltipHoverDelayMs,
+                  onCardTooltipMode: setCardTooltipMode,
+                  onCardTooltipScalePercent: setCardTooltipScalePercent,
+                  onCardHandScalePercent: setCardHandScalePercent,
+                  onCardArchiveScalePercent: setCardArchiveScalePercent,
+                  onCardZoneScalePercent: setCardZoneScalePercent,
+                  onCardBoardScalePercent: setCardBoardScalePercent,
+                  onCardRigScalePercent: setCardRigScalePercent,
+                  onCardDisplayMode: setCardDisplayMode,
+                  onPreferGermanCardImages: setPreferGermanCardImages,
+                  onShowSetBadges: setShowSetBadges,
+                  onChronicleDetailMode: setChronicleDetailMode,
+                  onColorScheme: setColorScheme,
+                  onCuePosition: setCuePosition,
+                  onAiPacingMode: updateLocalAiPacingMode,
+                  onCopyReconnectLink: copyReconnectLink,
+                  onDiscardLocalSession: discardLocalActiveSession,
+                }}
               />
-              <section className="section">
-                <button className="button wide" onClick={() => setDiagnosticsOpen((current) => !current)}>
-                  <PanelRightOpen size={15} />
-                  Diagnostics
-                </button>
-              </section>
-              <DiagnosticsDrawer open={diagnosticsOpen} payload={payload} connection={connection} />
-            </>
-          ) : null}
-        </aside>
-      </div>
-      ) : (
-        <ActiveMatchWorkspaceArea
-          workspace={activeMatchWorkspace}
-          catalogPanelProps={catalogPanelProps}
-          deckEditorPanelProps={{
-            localDecks,
-            selectedDeck: selectedLocalDeck,
-            selectedDeckDirty,
-            storagePath: deckLibraryStoragePath,
-            validation: deckValidation,
-            validatedSnapshot,
-            playableCards: playableCatalogCards,
-            cardDetailsById: catalogDetailsById,
-            importText: deckImportText,
-            exportText: deckExportText,
-            onCreateEmpty: createEmptyDeck,
-            onSelectDeck: setSelectedLocalDeckId,
-            onUpdateDeck: updateSelectedDeck,
-            onSave: saveSelectedDeck,
-            onUpdateQuantity: updateDeckCardQuantity,
-            onDuplicate: duplicateSelectedDeck,
-            onDelete: deleteSelectedDeck,
-            onValidate: validateSelectedDeck,
-            onUseForMatch: useValidatedDeckForNextMatch,
-            useForMatchLabel: "Für nächsten Start vormerken",
-            onExport: exportSelectedDeck,
-            onImportText: setDeckImportText,
-            onImport: importLocalDeck
-          }}
-          recentGamesPanelProps={{
-            results: recentGameResults,
-            loading: recentGameResultsLoading,
-            error: recentGameResultsError,
-            updatedAt: recentGameResultsUpdatedAt,
-            onRefresh: refreshRecentGameResults
-          }}
-          optionsPanelProps={{
-            actionCueAutoDismissMs,
-            actionCuesEnabled,
-            automaticEffectCuesEnabled,
-            autoCorpMandatoryDrawEnabled,
-            autoDiscardEnabled,
-            autoEndTurnEnabled,
-            topbarStickyEnabled,
-            resourceStripMode,
-            actionPanelMode,
-            aiDecisionDebugOverlayEnabled,
-            audioEnabled,
-            audioVolume,
-            cardTooltipHoverDelayMs,
-            cardTooltipMode,
-            cardTooltipScalePercent,
-            cardHandScalePercent,
-            cardArchiveScalePercent,
-            cardZoneScalePercent,
-            cardBoardScalePercent,
-            cardRigScalePercent,
-            cardDisplayMode,
-            preferGermanCardImages,
-            showSetBadges,
-            chronicleDetailMode,
-            colorScheme,
-            cuePosition,
-            aiPacingMode: localAiPacingMode,
-            session,
-            onActionCueAutoDismissMs: setActionCueAutoDismissMs,
-            onActionCuesEnabled: setActionCuesEnabled,
-            onAutomaticEffectCuesEnabled: setAutomaticEffectCuesEnabled,
-            onAutoCorpMandatoryDrawEnabled: setAutoCorpMandatoryDrawEnabled,
-            onAutoDiscardEnabled: setAutoDiscardEnabled,
-            onAutoEndTurnEnabled: setAutoEndTurnEnabled,
-            onTopbarStickyEnabled: setTopbarStickyEnabled,
-            onResourceStripMode: setResourceStripMode,
-            onActionPanelMode: setActionPanelMode,
-            onAiDecisionDebugOverlayEnabled: setAiDecisionDebugOverlayEnabled,
-            onAudioEnabled: updateAudioEnabled,
-            onAudioVolume: setAudioVolume,
-            onCardTooltipHoverDelayMs: setCardTooltipHoverDelayMs,
-            onCardTooltipMode: setCardTooltipMode,
-            onCardTooltipScalePercent: setCardTooltipScalePercent,
-            onCardHandScalePercent: setCardHandScalePercent,
-            onCardArchiveScalePercent: setCardArchiveScalePercent,
-            onCardZoneScalePercent: setCardZoneScalePercent,
-            onCardBoardScalePercent: setCardBoardScalePercent,
-            onCardRigScalePercent: setCardRigScalePercent,
-            onCardDisplayMode: setCardDisplayMode,
-            onPreferGermanCardImages: setPreferGermanCardImages,
-            onShowSetBadges: setShowSetBadges,
-            onChronicleDetailMode: setChronicleDetailMode,
-            onColorScheme: setColorScheme,
-            onCuePosition: setCuePosition,
-            onAiPacingMode: updateLocalAiPacingMode,
-            onCopyReconnectLink: copyReconnectLink,
-            onDiscardLocalSession: discardLocalActiveSession
-          }}
-        />
-      )}
-      {activeMatchIsGame && showResultModal && resultSummary ? (
-        <GameOverModal
-          result={resultSummary}
-          side={session.side}
-          playerName={session.displayName}
-          onDismiss={() => {
-            if (resultKey) setDismissedResultKey(resultKey);
-          }}
-          onNewMatch={leaveMatch}
-          nextSeriesPending={seriesTransitioning}
-          retentionProtected={payload?.retentionProtected === true}
-          onRetentionProtection={setRetentionProtection}
-          {...(opponentDisplayName ? { opponentName: opponentDisplayName } : {})}
-          {...(canStartNextSeriesGame ? { onNextSeriesGame: startNextSeriesGame } : {})}
-        />
-      ) : null}
-      {activeMatchIsGame && showAccessReveal && accessReveal ? (
-        <AccessRevealModal
-          reveal={accessReveal}
-          displayMode={cardDisplayMode}
-          disabled={Boolean(payload.winner) || connection !== "online"}
-          onAction={submitAction}
-          onDismiss={() =>
-            setDismissedAccessEventIds((eventIds) =>
-              eventIds.includes(accessReveal.eventId)
-                ? eventIds
-                : [...eventIds, accessReveal.eventId].slice(-30),
-            )
-          }
-        />
-      ) : null}
-      {activeMatchIsGame && showExposeReview && exposeReview ? (
-        <ExposeReviewModal
-          review={exposeReview}
-          displayMode={cardDisplayMode}
-          onDismiss={() => setDismissedExposeReviewEventId(exposeReview.eventId)}
-        />
-      ) : null}
-      {optionsDialogOpen ? (
-        <OptionsDialog onDismiss={() => setOptionsDialogOpen(false)}>
-          <OptionsPanel
-            actionCueAutoDismissMs={actionCueAutoDismissMs}
-            actionCuesEnabled={actionCuesEnabled}
-            automaticEffectCuesEnabled={automaticEffectCuesEnabled}
-            autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
-            autoDiscardEnabled={autoDiscardEnabled}
-            autoEndTurnEnabled={autoEndTurnEnabled}
-            topbarStickyEnabled={topbarStickyEnabled}
-            resourceStripMode={resourceStripMode}
-            actionPanelMode={actionPanelMode}
-            aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
-            audioEnabled={audioEnabled}
-            audioVolume={audioVolume}
-            cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
-            cardTooltipMode={cardTooltipMode}
-            cardTooltipScalePercent={cardTooltipScalePercent}
-            cardHandScalePercent={cardHandScalePercent}
-            cardArchiveScalePercent={cardArchiveScalePercent}
-            cardZoneScalePercent={cardZoneScalePercent}
-            cardBoardScalePercent={cardBoardScalePercent}
-            cardRigScalePercent={cardRigScalePercent}
-            cardDisplayMode={cardDisplayMode}
-            preferGermanCardImages={preferGermanCardImages}
-            showSetBadges={showSetBadges}
-            chronicleDetailMode={chronicleDetailMode}
-            colorScheme={colorScheme}
-            cuePosition={cuePosition}
-            aiPacingMode={localAiPacingMode}
-            modal
-            session={session}
-            onActionCueAutoDismissMs={setActionCueAutoDismissMs}
-            onActionCuesEnabled={setActionCuesEnabled}
-            onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
-            onAutoCorpMandatoryDrawEnabled={setAutoCorpMandatoryDrawEnabled}
-            onAutoDiscardEnabled={setAutoDiscardEnabled}
-            onAutoEndTurnEnabled={setAutoEndTurnEnabled}
-            onTopbarStickyEnabled={setTopbarStickyEnabled}
-            onResourceStripMode={setResourceStripMode}
-            onActionPanelMode={setActionPanelMode}
-            onAiDecisionDebugOverlayEnabled={setAiDecisionDebugOverlayEnabled}
-            onAudioEnabled={updateAudioEnabled}
-            onAudioVolume={setAudioVolume}
-            onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
-            onCardTooltipMode={setCardTooltipMode}
-            onCardTooltipScalePercent={setCardTooltipScalePercent}
-            onCardHandScalePercent={setCardHandScalePercent}
-            onCardArchiveScalePercent={setCardArchiveScalePercent}
-            onCardZoneScalePercent={setCardZoneScalePercent}
-            onCardBoardScalePercent={setCardBoardScalePercent}
-            onCardRigScalePercent={setCardRigScalePercent}
-            onCardDisplayMode={setCardDisplayMode}
-            onPreferGermanCardImages={setPreferGermanCardImages}
-            onShowSetBadges={setShowSetBadges}
-            onChronicleDetailMode={setChronicleDetailMode}
-            onColorScheme={setColorScheme}
-            onCuePosition={setCuePosition}
-            onAiPacingMode={updateLocalAiPacingMode}
-            onCopyReconnectLink={copyReconnectLink}
-            onDiscardLocalSession={discardLocalActiveSession}
-          />
-        </OptionsDialog>
-      ) : null}
-      {confirmationDialog ? (
-        <ConfirmationDialog
-          request={confirmationDialog}
-          onCancel={() => setConfirmationDialog(null)}
-          onConfirm={() => {
-            const request = confirmationDialog;
-            setConfirmationDialog(null);
-            void request.onConfirm();
-          }}
-        />
-      ) : null}
-    </main>
-    </CardTooltipSettingsContext.Provider>
-    </CardImagePreferenceContext.Provider>
+            )}
+            {activeMatchIsGame && showResultModal && resultSummary ? (
+              <GameOverModal
+                result={resultSummary}
+                side={session.side}
+                playerName={session.displayName}
+                onDismiss={() => {
+                  if (resultKey) setDismissedResultKey(resultKey);
+                }}
+                onNewMatch={leaveMatch}
+                nextSeriesPending={seriesTransitioning}
+                retentionProtected={payload?.retentionProtected === true}
+                onRetentionProtection={setRetentionProtection}
+                {...(opponentDisplayName
+                  ? { opponentName: opponentDisplayName }
+                  : {})}
+                {...(canStartNextSeriesGame
+                  ? { onNextSeriesGame: startNextSeriesGame }
+                  : {})}
+              />
+            ) : null}
+            {activeMatchIsGame && showAccessReveal && accessReveal ? (
+              <AccessRevealModal
+                reveal={accessReveal}
+                displayMode={cardDisplayMode}
+                disabled={Boolean(payload.winner) || connection !== "online"}
+                onAction={submitAction}
+                onChoiceOption={submitChoiceOption}
+                onDismiss={() =>
+                  setDismissedAccessEventIds((eventIds) =>
+                    eventIds.includes(accessReveal.eventId)
+                      ? eventIds
+                      : [...eventIds, accessReveal.eventId].slice(-30),
+                  )
+                }
+              />
+            ) : null}
+            {activeMatchIsGame && showExposeReview && exposeReview ? (
+              <ExposeReviewModal
+                review={exposeReview}
+                displayMode={cardDisplayMode}
+                onDismiss={() =>
+                  setDismissedExposeReviewEventId(exposeReview.eventId)
+                }
+              />
+            ) : null}
+            {optionsDialogOpen ? (
+              <OptionsDialog onDismiss={() => setOptionsDialogOpen(false)}>
+                <OptionsPanel
+                  actionCueAutoDismissMs={actionCueAutoDismissMs}
+                  actionCuesEnabled={actionCuesEnabled}
+                  automaticEffectCuesEnabled={automaticEffectCuesEnabled}
+                  autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
+                  autoDiscardEnabled={autoDiscardEnabled}
+                  autoEndTurnEnabled={autoEndTurnEnabled}
+                  topbarStickyEnabled={topbarStickyEnabled}
+                  resourceStripMode={resourceStripMode}
+                  actionPanelMode={actionPanelMode}
+                  aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
+                  audioEnabled={audioEnabled}
+                  audioVolume={audioVolume}
+                  cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
+                  cardTooltipMode={cardTooltipMode}
+                  cardTooltipScalePercent={cardTooltipScalePercent}
+                  cardHandScalePercent={cardHandScalePercent}
+                  cardArchiveScalePercent={cardArchiveScalePercent}
+                  cardZoneScalePercent={cardZoneScalePercent}
+                  cardBoardScalePercent={cardBoardScalePercent}
+                  cardRigScalePercent={cardRigScalePercent}
+                  cardDisplayMode={cardDisplayMode}
+                  preferGermanCardImages={preferGermanCardImages}
+                  showSetBadges={showSetBadges}
+                  chronicleDetailMode={chronicleDetailMode}
+                  colorScheme={colorScheme}
+                  cuePosition={cuePosition}
+                  aiPacingMode={localAiPacingMode}
+                  modal
+                  session={session}
+                  onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+                  onActionCuesEnabled={setActionCuesEnabled}
+                  onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
+                  onAutoCorpMandatoryDrawEnabled={
+                    setAutoCorpMandatoryDrawEnabled
+                  }
+                  onAutoDiscardEnabled={setAutoDiscardEnabled}
+                  onAutoEndTurnEnabled={setAutoEndTurnEnabled}
+                  onTopbarStickyEnabled={setTopbarStickyEnabled}
+                  onResourceStripMode={setResourceStripMode}
+                  onActionPanelMode={setActionPanelMode}
+                  onAiDecisionDebugOverlayEnabled={
+                    setAiDecisionDebugOverlayEnabled
+                  }
+                  onAudioEnabled={updateAudioEnabled}
+                  onAudioVolume={setAudioVolume}
+                  onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
+                  onCardTooltipMode={setCardTooltipMode}
+                  onCardTooltipScalePercent={setCardTooltipScalePercent}
+                  onCardHandScalePercent={setCardHandScalePercent}
+                  onCardArchiveScalePercent={setCardArchiveScalePercent}
+                  onCardZoneScalePercent={setCardZoneScalePercent}
+                  onCardBoardScalePercent={setCardBoardScalePercent}
+                  onCardRigScalePercent={setCardRigScalePercent}
+                  onCardDisplayMode={setCardDisplayMode}
+                  onPreferGermanCardImages={setPreferGermanCardImages}
+                  onShowSetBadges={setShowSetBadges}
+                  onChronicleDetailMode={setChronicleDetailMode}
+                  onColorScheme={setColorScheme}
+                  onCuePosition={setCuePosition}
+                  onAiPacingMode={updateLocalAiPacingMode}
+                  onCopyReconnectLink={copyReconnectLink}
+                  onDiscardLocalSession={discardLocalActiveSession}
+                />
+              </OptionsDialog>
+            ) : null}
+            {confirmationDialog ? (
+              <ConfirmationDialog
+                request={confirmationDialog}
+                onCancel={() => setConfirmationDialog(null)}
+                onConfirm={() => {
+                  const request = confirmationDialog;
+                  setConfirmationDialog(null);
+                  void request.onConfirm();
+                }}
+              />
+            ) : null}
+          </main>
+        </CardTooltipSettingsContext.Provider>
+      </CardImagePreferenceContext.Provider>
     </CardScaleSettingsContext.Provider>
   );
 }

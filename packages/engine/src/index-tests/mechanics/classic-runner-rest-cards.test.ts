@@ -170,10 +170,11 @@ function setCorpRdForTest(
   }
 }
 
-function continueUntilRunResolved(state: GameState): GameState {
+function continueUntilGypsyRevealChoice(state: GameState): GameState {
   let next = state;
   for (let attempt = 0; attempt < 12; attempt += 1) {
-    if (!next.run) return next;
+    if (next.pendingChoice?.source.startsWith("successful_run.gypsy_rd_reveal"))
+      return next;
     const runnerAction = getLegalActions(next, "runner").find(
       (action) =>
         action.type === "continue_run" || action.type === "access_card",
@@ -199,7 +200,7 @@ function continueUntilRunResolved(state: GameState): GameState {
     }
     break;
   }
-  throw new Error("Gypsy Schedule Analyzer run did not resolve");
+  throw new Error("Gypsy Schedule Analyzer reveal choice did not open");
 }
 
 describe("Classic Runner Rest Card Implementation Smokes", () => {
@@ -504,8 +505,86 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       (action) =>
         action.type === "play_event" && action.payload?.cardId === eventId,
     );
-    state = continueUntilRunResolved(state);
+    state = continueUntilGypsyRevealChoice(state);
 
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("successful_run.gypsy_rd_reveal"),
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "hidden_info_barrier",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "reveal_next",
+    ]);
+    expect(state.run).toMatchObject({ phase: "access", successful: true });
+    expect(state.corp.hq).not.toContain(agendaId);
+    expect(state.corp.rd.slice(0, 3)).toEqual([operationId, iceId, agendaId]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_choice_opened",
+      hiddenZoneBarrier: true,
+      choiceVisibility: "hidden_info_barrier",
+    });
+
+    state = applyChoices(state, "runner", ["reveal_next"]);
+    expect(state.corp.hq).not.toContain(agendaId);
+    expect(state.corp.rd.slice(0, 3)).toEqual([operationId, iceId, agendaId]);
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "reveal_next",
+    ]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
+      choiceVisibility: "hidden_info_barrier",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionIds: "simple_economy_operation",
+      publicRevealTitles: "Simple Economy Operation",
+      revealedAgendaDefinitionIds: "",
+      revealedCount: 1,
+      revealedNonAgendaCount: 1,
+      agendaStoredInHq: false,
+    });
+
+    state = applyChoices(state, "runner", ["reveal_next"]);
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "reveal_next",
+    ]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
+      publicRevealDefinitionIds: "simple_economy_operation,simple_barrier_ice",
+      publicRevealTitles: "Simple Economy Operation||Simple Barrier ICE",
+      revealedAgendaDefinitionIds: "",
+      revealedCount: 2,
+      revealedNonAgendaCount: 2,
+      agendaStoredInHq: false,
+    });
+
+    state = applyChoices(state, "runner", ["reveal_next"]);
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "finish",
+    ]);
+    expect(state.corp.hq).not.toContain(agendaId);
+    expect(state.corp.rd.slice(0, 3)).toEqual([operationId, iceId, agendaId]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
+      publicRevealDefinitionIds:
+        "simple_economy_operation,simple_barrier_ice,simple_agenda",
+      publicRevealTitles:
+        "Simple Economy Operation||Simple Barrier ICE||Simple Agenda",
+      revealedAgendaDefinitionIds: "simple_agenda",
+      revealedCount: 3,
+      revealedNonAgendaCount: 2,
+      agendaStoredInHq: false,
+    });
+
+    state = applyChoices(state, "runner", ["finish"]);
+
+    expect(state.pendingChoice).toBeUndefined();
     expect(state.run).toBeUndefined();
     expect(state.corp.hq).toContain(agendaId);
     expect(state.corp.rd).not.toContain(agendaId);
@@ -515,10 +594,11 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       zone: "hq",
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_event",
+      actionType: "resolve_choice",
       accessReplacement: "reveal_rd_until_agenda_store_in_hq",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+      choiceVisibility: "hidden_info_barrier",
       publicRevealKind: "reveal",
       publicRevealDefinitionIds:
         "simple_economy_operation,simple_barrier_ice,simple_agenda",
@@ -560,17 +640,55 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       (action) =>
         action.type === "play_event" && action.payload?.cardId === eventId,
     );
-    state = continueUntilRunResolved(state);
+    state = continueUntilGypsyRevealChoice(state);
 
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "reveal_next",
+    ]);
+    expect(state.corp.rd).toEqual([operationId, iceId]);
+    state = applyChoices(state, "runner", ["reveal_next"]);
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "reveal_next",
+    ]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
+      publicRevealDefinitionIds: "simple_economy_operation",
+      publicRevealTitles: "Simple Economy Operation",
+      revealedAgendaDefinitionIds: "",
+      revealedCount: 1,
+      revealedNonAgendaCount: 1,
+      agendaStoredInHq: false,
+    });
+    state = applyChoices(state, "runner", ["reveal_next"]);
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "finish",
+    ]);
+    expect(state.corp.rd).toEqual([operationId, iceId]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
+      publicRevealDefinitionIds: "simple_economy_operation,simple_barrier_ice",
+      publicRevealTitles: "Simple Economy Operation||Simple Barrier ICE",
+      revealedAgendaDefinitionIds: "",
+      revealedCount: 2,
+      revealedNonAgendaCount: 2,
+      agendaStoredInHq: false,
+    });
+
+    state = applyChoices(state, "runner", ["finish"]);
+
+    expect(state.pendingChoice).toBeUndefined();
     expect(state.run).toBeUndefined();
     expect(state.corp.hq).not.toContain(operationId);
     expect(state.corp.hq).not.toContain(iceId);
     expect(state.corp.rd).toEqual(expect.arrayContaining([operationId, iceId]));
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_event",
+      actionType: "resolve_choice",
       accessReplacement: "reveal_rd_until_agenda_store_in_hq",
       hiddenZoneBarrier: true,
       hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+      choiceVisibility: "hidden_info_barrier",
       publicRevealDefinitionIds: "simple_economy_operation,simple_barrier_ice",
       publicRevealTitles: "Simple Economy Operation||Simple Barrier ICE",
       revealedAgendaDefinitionIds: "",

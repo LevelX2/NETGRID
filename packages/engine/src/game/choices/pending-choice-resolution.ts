@@ -25,7 +25,10 @@ export type PendingChoiceResolutionHost = {
     corpZoneChoiceHandlerHost: HostFn<unknown>;
     isP358HiddenReplacementCompatibilityChoiceSource: HostFn<boolean>;
     resolveP358HiddenReplacementChoice: HostFn<void>;
-    handleHiddenZoneSearchChoice: HostFn<{ handled: boolean; deletePendingChoice?: boolean }>;
+    handleHiddenZoneSearchChoice: HostFn<{
+      handled: boolean;
+      deletePendingChoice?: boolean;
+    }>;
     hiddenZoneSearchChoiceHandlerHost: HostFn<unknown>;
     resolveMultiExposeInstalledCorpCardsChoice: HostFn<void>;
     resolveExposeInstalledCorpCardsChoice: HostFn<void>;
@@ -87,6 +90,7 @@ export type PendingChoiceResolutionHost = {
     resolveSuccessfulRunCreditLossSpendChoice: HostFn<void>;
     runAccessTransitionHost: HostFn<unknown>;
     resolvePreAccessTopRdReorderChoice: HostFn<void>;
+    resolveRevealRdUntilAgendaStoreInHqChoice?: HostFn<void>;
   };
   cardImplementation: {
     resolveCardImplementationAccessPaymentChoice: HostFn<void>;
@@ -187,8 +191,7 @@ export function resolvePendingChoice(
   const scoredAgendaFlowHost = host.corp.scoredAgendaFlowHost;
   const resolveRunnerProgramTrashBeforeInstallChoice =
     host.runner.resolveRunnerProgramTrashBeforeInstallChoice;
-  const resolveHqIceSwapChoice =
-    host.run.resolveHqIceSwapChoice;
+  const resolveHqIceSwapChoice = host.run.resolveHqIceSwapChoice;
   const fortPassWindowHostForState = host.run.fortPassWindowHostForState;
   const resolveSecretSpendCompareChoiceInRunModule =
     host.run.resolveSecretSpendCompareChoiceInRunModule;
@@ -219,21 +222,24 @@ export function resolvePendingChoice(
     host.run.resolvePostMeatDamageHiddenResourceChoice;
   const resolveStartOfRunFortUtilityChoice =
     host.run.resolveStartOfRunFortUtilityChoice;
-  const resolveClassicDeflectorChoice =
-    host.run.resolveClassicDeflectorChoice;
+  const resolveClassicDeflectorChoice = host.run.resolveClassicDeflectorChoice;
   const resolveSuccessfulRunCreditLossSpendChoice =
     host.access.resolveSuccessfulRunCreditLossSpendChoice;
   const runAccessTransitionHost = host.access.runAccessTransitionHost;
   const resolvePreAccessTopRdReorderChoice =
     host.access.resolvePreAccessTopRdReorderChoice;
+  const resolveRevealRdUntilAgendaStoreInHqChoice =
+    host.access.resolveRevealRdUntilAgendaStoreInHqChoice;
   const resolveCardImplementationAccessPaymentChoice =
     host.cardImplementation.resolveCardImplementationAccessPaymentChoice;
   const resolveCardImplementationAdvancementDistributionChoice =
-    host.cardImplementation.resolveCardImplementationAdvancementDistributionChoice;
+    host.cardImplementation
+      .resolveCardImplementationAdvancementDistributionChoice;
   const resolveCardImplementationMoveAdvancementChoice =
     host.cardImplementation.resolveCardImplementationMoveAdvancementChoice;
   const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE =
-    host.constants.RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE;
+    host.constants
+      .RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE;
 
   const choiceId = String(legalAction.payload?.choiceId ?? "");
   if (!state.pendingChoice || state.pendingChoice.choiceId !== choiceId)
@@ -254,7 +260,9 @@ export function resolvePendingChoice(
     resolveEventModificationChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("proteus.pdca_damage_replacement")) {
+  if (
+    state.pendingChoice.source.startsWith("proteus.pdca_damage_replacement")
+  ) {
     resolvePdcaDamageReplacementChoice(state, legalAction, playerAction);
     return;
   }
@@ -262,7 +270,9 @@ export function resolvePendingChoice(
     resolveTraceChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("hidden_resource.post_meat_damage")) {
+  if (
+    state.pendingChoice.source.startsWith("hidden_resource.post_meat_damage")
+  ) {
     resolvePostMeatDamageHiddenResourceChoice(state, legalAction, playerAction);
     return;
   }
@@ -299,9 +309,7 @@ export function resolvePendingChoice(
   );
   if (scoredAgendaFlowChoice.handled) return;
   if (
-    isP358HiddenReplacementCompatibilityChoiceSource(
-      state.pendingChoice.source,
-    )
+    isP358HiddenReplacementCompatibilityChoiceSource(state.pendingChoice.source)
   ) {
     resolveP358HiddenReplacementChoice(state, legalAction, playerAction);
     return;
@@ -323,8 +331,16 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("card_implementation.multi_expose_installed_corp_cards")) {
-    resolveMultiExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.multi_expose_installed_corp_cards",
+    )
+  ) {
+    resolveMultiExposeInstalledCorpCardsChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (state.pendingChoice.source.startsWith("corp.expose_prevention")) {
@@ -340,8 +356,12 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("p3_36.expose_installed_cards_review:") ||
-    state.pendingChoice.source.startsWith("p3_36.expose_installed_card_review:") ||
+    state.pendingChoice.source.startsWith(
+      "p3_36.expose_installed_cards_review:",
+    ) ||
+    state.pendingChoice.source.startsWith(
+      "p3_36.expose_installed_card_review:",
+    ) ||
     state.pendingChoice.source.startsWith("p3_36.expose_installed_card:") ||
     state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")
   ) {
@@ -350,14 +370,20 @@ export function resolvePendingChoice(
   }
   if (
     state.pendingChoice.source.startsWith("proteus.pavit_bharat_replacement") ||
-    state.pendingChoice.source.startsWith("card_implementation.fort_hq_replacement")
+    state.pendingChoice.source.startsWith(
+      "card_implementation.fort_hq_replacement",
+    )
   ) {
     if (!resolveFortHqReplacementChoice)
       throw new Error("Pavit-Bharat-Choice-Resolver fehlt.");
     resolveFortHqReplacementChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("corp_installed_economy.credit_choice")) {
+  if (
+    state.pendingChoice.source.startsWith(
+      "corp_installed_economy.credit_choice",
+    )
+  ) {
     resolveCorpInstalledEconomyCreditChoice(state, legalAction, playerAction);
     return;
   }
@@ -365,7 +391,11 @@ export function resolvePendingChoice(
     resolveCrashEverettDrawChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("card_implementation.installed_hardware_trash_by_counter")) {
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.installed_hardware_trash_by_counter",
+    )
+  ) {
     resolveHardwareTrashByCounterChoice(state, legalAction, playerAction);
     return;
   }
@@ -374,14 +404,12 @@ export function resolvePendingChoice(
       "card_implementation.advancement_placement",
     )
   ) {
-    resolveAdvancementPlacementChoice(
-      state,
-      legalAction,
-      playerAction,
-    );
+    resolveAdvancementPlacementChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("card_implementation.hq_ice_swap")) {
+  if (
+    state.pendingChoice.source.startsWith("card_implementation.hq_ice_swap")
+  ) {
     resolveHqIceSwapChoice(
       fortPassWindowHostForState(state),
       legalAction,
@@ -390,13 +418,17 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("card_implementation.derez_rezzed_black_ice")
+    state.pendingChoice.source.startsWith(
+      "card_implementation.derez_rezzed_black_ice",
+    )
   ) {
     resolveDerezRezzedBlackIceChoice(state, legalAction, playerAction);
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("card_implementation.pay_rez_cost_trash_rezzed_ice")
+    state.pendingChoice.source.startsWith(
+      "card_implementation.pay_rez_cost_trash_rezzed_ice",
+    )
   ) {
     resolvePayRezCostToTrashRezzedIceChoice(state, legalAction, playerAction);
     return;
@@ -414,7 +446,9 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("card_implementation.corp_choice_rez_or_trash_ice_decision")
+    state.pendingChoice.source.startsWith(
+      "card_implementation.corp_choice_rez_or_trash_ice_decision",
+    )
   ) {
     resolveCorpChoiceRezOrTrashIceDecisionChoice(
       state,
@@ -423,11 +457,19 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (state.pendingChoice.source.startsWith("card_implementation.trash_unrezzed_ice")) {
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.trash_unrezzed_ice",
+    )
+  ) {
     resolveTrashUnrezzedIceChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("card_implementation.random_dice_split")) {
+  if (
+    state.pendingChoice.source.startsWith(
+      "card_implementation.random_dice_split",
+    )
+  ) {
     resolveRandomDiceSplitChoice(state, legalAction, playerAction);
     return;
   }
@@ -463,7 +505,9 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("card_implementation.secret_spend_compare")
+    state.pendingChoice.source.startsWith(
+      "card_implementation.secret_spend_compare",
+    )
   ) {
     resolveSecretSpendCompareChoiceInRunModule(
       encounterSpecialWindowHostForState(state),
@@ -473,14 +517,14 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("card_implementation.paid_source_return_to_grip")
+    state.pendingChoice.source.startsWith(
+      "card_implementation.paid_source_return_to_grip",
+    )
   ) {
     resolvePaidSourceReturnToGripChoice(state, legalAction, playerAction);
     return;
   }
-  if (
-    state.pendingChoice.source.startsWith("v1922.hammer_stealth_loss")
-  ) {
+  if (state.pendingChoice.source.startsWith("v1922.hammer_stealth_loss")) {
     resolveHammerStealthLossChoice(
       fortRunSideFamiliesHostForState(state),
       legalAction,
@@ -489,7 +533,9 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("card_implementation.active_ice_program_trash")
+    state.pendingChoice.source.startsWith(
+      "card_implementation.active_ice_program_trash",
+    )
   ) {
     resolveActiveIceProgramTrashChoiceInRunModule(
       encounterResolutionHostForState(state),
@@ -498,9 +544,7 @@ export function resolvePendingChoice(
     );
     return;
   }
-  if (
-    state.pendingChoice.source.startsWith("p3_56.pass_ice_program_trash")
-  ) {
+  if (state.pendingChoice.source.startsWith("p3_56.pass_ice_program_trash")) {
     resolvePassRezzedIceProgramTrashChoiceInRunModule(
       encounterResolutionHostForState(state),
       legalAction,
@@ -533,7 +577,9 @@ export function resolvePendingChoice(
     return;
   }
   if (
-    state.pendingChoice.source.startsWith("runner_virus_counter_purge_replacement")
+    state.pendingChoice.source.startsWith(
+      "runner_virus_counter_purge_replacement",
+    )
   ) {
     resolveVirusCounterPurgePreserveChoice(state, legalAction, playerAction);
     return;
@@ -563,11 +609,27 @@ export function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_35.access_payment")) {
-    resolveCardImplementationAccessPaymentChoice(state, legalAction, playerAction);
+    resolveCardImplementationAccessPaymentChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
     return;
   }
-  if (state.pendingChoice.source.startsWith("successful_run.credit_loss_spend")) {
+  if (
+    state.pendingChoice.source.startsWith("successful_run.credit_loss_spend")
+  ) {
     resolveSuccessfulRunCreditLossSpendChoice(
+      runAccessTransitionHost(state),
+      legalAction,
+      playerAction,
+    );
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("successful_run.gypsy_rd_reveal")) {
+    if (!resolveRevealRdUntilAgendaStoreInHqChoice)
+      throw new Error("Gypsy-R&D-Reveal-Resolver fehlt.");
+    resolveRevealRdUntilAgendaStoreInHqChoice(
       runAccessTransitionHost(state),
       legalAction,
       playerAction,

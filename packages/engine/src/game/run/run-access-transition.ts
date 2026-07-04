@@ -15,6 +15,10 @@ import {
 } from "../access/breach-state";
 
 type ActiveRun = NonNullable<GameState["run"]>;
+const GYPSY_RD_REVEAL_CHOICE_SOURCE = "successful_run.gypsy_rd_reveal";
+const GYPSY_RD_REVEAL_NEXT_OPTION_ID = "reveal_next";
+const GYPSY_RD_REVEAL_FINISH_OPTION_ID = "finish";
+
 export type SuccessfulRunInterventionKind =
   | "temporary_hq_ice_encounter_after_successful_run"
   | "install_hq_ice_innermost_after_successful_run";
@@ -185,13 +189,11 @@ export function enterAccessFromSuccessfulRun(
   if (
     run.successfulRunAccessReplacement === "reveal_rd_until_agenda_store_in_hq"
   ) {
-    applyRevealRdUntilAgendaStoreInHqReplacement(host, run, legalAction);
-    host.run.finishRun(true, legalAction);
+    startRevealRdUntilAgendaStoreInHqChoice(host, run, legalAction);
     return {
       handled: true,
       accessSkipped: true,
       replacementApplied: "reveal_rd_until_agenda_store_in_hq",
-      runFinished: true,
       stateChanged: true,
       ...resolvedPayloadFor(legalAction),
     };
@@ -388,6 +390,40 @@ export function resolvePreAccessTopRdReorderChoice(
   enterAccessFromSuccessfulRun(host, legalAction);
 }
 
+export function resolveRevealRdUntilAgendaStoreInHqChoice(
+  host: RunAccessTransitionHost,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = host.state.pendingChoice;
+  const run = host.state.run;
+  if (
+    !choice ||
+    !run ||
+    !choice.source.startsWith(GYPSY_RD_REVEAL_CHOICE_SOURCE)
+  )
+    throw new Error("Es ist keine Gypsy-R&D-Reveal-Choice offen.");
+  if (
+    run.successfulRunAccessReplacement !== "reveal_rd_until_agenda_store_in_hq"
+  )
+    throw new Error("Gypsy-R&D-Reveal passt nicht zum aktuellen Run.");
+  const parsed = parseGypsyRdRevealChoiceSource(choice.source);
+  if (parsed.runId !== run.runId)
+    throw new Error("Gypsy-R&D-Reveal passt nicht mehr zum aktuellen Run.");
+  assertGypsyRevealedPrefix(host, parsed.revealedIds);
+  const selectedId =
+    host.choices.selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  if (selectedId === GYPSY_RD_REVEAL_NEXT_OPTION_ID) {
+    revealNextGypsyRdCard(host, run, parsed.revealedIds, legalAction);
+    return;
+  }
+  if (selectedId === GYPSY_RD_REVEAL_FINISH_OPTION_ID) {
+    finishGypsyRdReveal(host, run, parsed.revealedIds, legalAction);
+    return;
+  }
+  throw new Error("Die Gypsy-R&D-Reveal-Auswahl ist ungueltig.");
+}
+
 export function successfulRunInterventionSourceIds(
   host: RunAccessTransitionHost,
   run: ActiveRun,
@@ -563,21 +599,95 @@ function applySuccessfulRunAccessReplacement(
   }
 }
 
-function applyRevealRdUntilAgendaStoreInHqReplacement(
+function startRevealRdUntilAgendaStoreInHqChoice(
   host: RunAccessTransitionHost,
   run: ActiveRun,
   legalAction?: LegalAction,
 ): void {
-  const revealedIds: CardInstanceId[] = [];
-  let agendaId: CardInstanceId | undefined;
-  while (host.state.corp.rd.length > 0) {
-    const cardId = host.state.corp.rd.shift()!;
-    revealedIds.push(cardId);
-    if (host.cards.definitionFor(cardId).type === "agenda") {
-      agendaId = cardId;
-      break;
-    }
+  if (host.state.pendingChoice)
+    throw new Error("Es ist bereits eine Choice offen.");
+  host.state.run = { ...run, phase: "access", successful: true };
+  host.state.pendingChoice = gypsyRdRevealChoice(
+    host,
+    run,
+    [],
+    host.state.stateVersion + 1,
+  );
+  host.state.timingPoint = "access.resolve_card";
+  host.state.activeSide = "runner";
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_choice_opened",
+      hiddenZoneBarrier: true,
+      choiceVisibility: "hidden_info_barrier",
+      ...sourcePayloadForSuccessfulRunReplacement(run),
+    };
   }
+}
+
+function revealNextGypsyRdCard(
+  host: RunAccessTransitionHost,
+  run: ActiveRun,
+  revealedIds: CardInstanceId[],
+  legalAction: LegalAction,
+): void {
+  if (firstRevealedAgendaId(host, revealedIds))
+    throw new Error(
+      "Gypsy Schedule Analyzer hat bereits eine Agenda gefunden.",
+    );
+  const nextCardId = host.state.corp.rd[revealedIds.length];
+  if (!nextCardId)
+    throw new Error("R&D enthaelt keine weitere Gypsy-Reveal-Karte.");
+  const nextRevealedIds = [...revealedIds, nextCardId];
+  const nextRevealedDefinitions = nextRevealedIds.map((cardId) =>
+    host.cards.definitionFor(cardId),
+  );
+  const revealedAgendaDefinitionIds = nextRevealedDefinitions
+    .filter((definition) => definition.type === "agenda")
+    .map((definition) => definition.id);
+  host.state.pendingChoice = gypsyRdRevealChoice(
+    host,
+    run,
+    nextRevealedIds,
+    host.state.stateVersion + 1,
+  );
+  host.state.timingPoint = "access.resolve_card";
+  host.state.activeSide = "runner";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+    hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
+    publicRevealKind: "reveal",
+    publicRevealDefinitionIds: nextRevealedDefinitions
+      .map((definition) => definition.id)
+      .join(","),
+    publicRevealTitles: nextRevealedDefinitions
+      .map((definition) => definition.title)
+      .join("||"),
+    revealedAgendaDefinitionIds: revealedAgendaDefinitionIds.join(","),
+    revealedCount: nextRevealedIds.length,
+    revealedNonAgendaCount: nextRevealedDefinitions.filter(
+      (definition) => definition.type !== "agenda",
+    ).length,
+    agendaStoredInHq: false,
+    hiddenZoneBarrier: true,
+    choiceVisibility: "hidden_info_barrier",
+    ...sourcePayloadForSuccessfulRunReplacement(run),
+  };
+}
+
+function finishGypsyRdReveal(
+  host: RunAccessTransitionHost,
+  run: ActiveRun,
+  revealedIds: CardInstanceId[],
+  legalAction: LegalAction,
+): void {
+  const agendaId = firstRevealedAgendaId(host, revealedIds);
+  if (!agendaId && revealedIds.length < host.state.corp.rd.length)
+    throw new Error("Gypsy Schedule Analyzer muss weiter R&D aufdecken.");
+  const remainingRd = host.state.corp.rd.slice(revealedIds.length);
   const revealedNonAgendaIds = revealedIds.filter(
     (cardId) => cardId !== agendaId,
   );
@@ -594,7 +704,7 @@ function applyRevealRdUntilAgendaStoreInHqReplacement(
     };
   }
   const shuffledRd = host.rng.shuffleStateIds(
-    [...host.state.corp.rd, ...revealedNonAgendaIds],
+    [...remainingRd, ...revealedNonAgendaIds],
     `successful_run.reveal_rd_until_agenda.${run.runId}`,
   );
   host.state.corp.rd = shuffledRd;
@@ -606,33 +716,120 @@ function applyRevealRdUntilAgendaStoreInHqReplacement(
       zone: { side: "corp", zone: "rd" },
     };
   }
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      accessReplacement: "reveal_rd_until_agenda_store_in_hq",
-      hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
-      publicRevealKind: "reveal",
-      revealedCount: revealedIds.length,
-      agendaStoredInHq: Boolean(agendaId),
-      ...(agendaId
-        ? { storedAgendaDefinitionId: host.cards.definitionFor(agendaId).id }
-        : {}),
-      revealedAgendaDefinitionIds: agendaId
-        ? host.cards.definitionFor(agendaId).id
-        : "",
-      publicRevealDefinitionIds: revealedDefinitions
-        .map((definition) => definition.id)
-        .join(","),
-      publicRevealTitles: revealedDefinitions
-        .map((definition) => definition.title)
-        .join("||"),
-      revealedNonAgendaCount: revealedNonAgendaIds.length,
-      shuffledIntoRdCount: revealedNonAgendaIds.length,
-      hiddenZoneBarrier: true,
-      randomCounterAfter: host.state.randomCounter,
-      ...sourcePayloadForSuccessfulRunReplacement(run),
-    };
-  }
+  delete host.state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+    hiddenZoneAction: "gypsy_schedule_analyzer_reveal_rd_until_agenda",
+    publicRevealKind: "reveal",
+    revealedCount: revealedIds.length,
+    agendaStoredInHq: Boolean(agendaId),
+    ...(agendaId
+      ? { storedAgendaDefinitionId: host.cards.definitionFor(agendaId).id }
+      : {}),
+    revealedAgendaDefinitionIds: agendaId
+      ? host.cards.definitionFor(agendaId).id
+      : "",
+    publicRevealDefinitionIds: revealedDefinitions
+      .map((definition) => definition.id)
+      .join(","),
+    publicRevealTitles: revealedDefinitions
+      .map((definition) => definition.title)
+      .join("||"),
+    revealedNonAgendaCount: revealedNonAgendaIds.length,
+    shuffledIntoRdCount: revealedNonAgendaIds.length,
+    hiddenZoneBarrier: true,
+    choiceVisibility: "hidden_info_barrier",
+    randomCounterAfter: host.state.randomCounter,
+    ...sourcePayloadForSuccessfulRunReplacement(run),
+  };
+  host.run.finishRun(true, legalAction);
+}
+
+function gypsyRdRevealChoice(
+  host: RunAccessTransitionHost,
+  run: ActiveRun,
+  revealedIds: CardInstanceId[],
+  stateVersion: number,
+): NonNullable<GameState["pendingChoice"]> {
+  const agendaRevealed = Boolean(firstRevealedAgendaId(host, revealedIds));
+  const canRevealNext =
+    !agendaRevealed && revealedIds.length < host.state.corp.rd.length;
+  const option = canRevealNext
+    ? {
+        id: GYPSY_RD_REVEAL_NEXT_OPTION_ID,
+        label:
+          revealedIds.length === 0
+            ? "Erste R&D-Karte zeigen"
+            : "Nächste R&D-Karte zeigen",
+        publicLabel: "Gypsy Schedule Analyzer deckt eine R&D-Karte auf",
+        value: GYPSY_RD_REVEAL_NEXT_OPTION_ID,
+      }
+    : {
+        id: GYPSY_RD_REVEAL_FINISH_OPTION_ID,
+        label: agendaRevealed
+          ? "Agenda nach HQ legen und R&D mischen"
+          : revealedIds.length > 0
+            ? "R&D mischen und Effekt abschließen"
+            : "Effekt abschließen",
+        publicLabel: "Gypsy Schedule Analyzer abschließen",
+        value: GYPSY_RD_REVEAL_FINISH_OPTION_ID,
+      };
+  return {
+    choiceId: `gypsy_rd_reveal_${run.runId}_${stateVersion}`,
+    side: "runner",
+    source: gypsyRdRevealChoiceSource(run.runId, revealedIds, stateVersion),
+    prompt: "Gypsy Schedule Analyzer: R&D aufdecken",
+    kind: "select_option",
+    options: [option],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function gypsyRdRevealChoiceSource(
+  runId: string,
+  revealedIds: CardInstanceId[],
+  stateVersion: number,
+): string {
+  return `${GYPSY_RD_REVEAL_CHOICE_SOURCE}:${runId}:${revealedIds.join(",")}:${stateVersion}`;
+}
+
+function parseGypsyRdRevealChoiceSource(source: string): {
+  runId: string;
+  revealedIds: CardInstanceId[];
+} {
+  const [prefix, runId = "", revealedIdCsv = ""] = source.split(":");
+  if (prefix !== GYPSY_RD_REVEAL_CHOICE_SOURCE || !runId)
+    throw new Error("Die Gypsy-R&D-Reveal-Choice ist ungueltig.");
+  const revealedIds = revealedIdCsv
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean) as CardInstanceId[];
+  return { runId, revealedIds };
+}
+
+function assertGypsyRevealedPrefix(
+  host: RunAccessTransitionHost,
+  revealedIds: CardInstanceId[],
+): void {
+  const rdPrefix = host.state.corp.rd.slice(0, revealedIds.length);
+  if (
+    rdPrefix.length !== revealedIds.length ||
+    rdPrefix.some((cardId, index) => cardId !== revealedIds[index])
+  )
+    throw new Error("Die Gypsy-R&D-Reveal-Reihenfolge ist nicht mehr gueltig.");
+}
+
+function firstRevealedAgendaId(
+  host: RunAccessTransitionHost,
+  revealedIds: CardInstanceId[],
+): CardInstanceId | undefined {
+  return revealedIds.find(
+    (cardId) => host.cards.definitionFor(cardId).type === "agenda",
+  );
 }
 
 function applyConditionalAccessBonus(

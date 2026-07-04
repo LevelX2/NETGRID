@@ -116,6 +116,7 @@ export function createPendingChoiceRuntimeHosts(
     resolveBrokenIceVirusCounterChoice,
     resolvePostMeatDamageHiddenResourceChoice,
     resolveHardwareTrashByCounterChoice,
+    resolveRevealRdUntilAgendaStoreInHqChoice,
     resolveSuccessfulRunCreditLossSpendChoice,
     resolveReplacementChoice,
     resolveRunnerPrivateLookChoice,
@@ -726,6 +727,7 @@ export function createPendingChoiceRuntimeHosts(
         resolveSuccessfulRunCreditLossSpendChoice,
         runAccessTransitionHost,
         resolvePreAccessTopRdReorderChoice,
+        resolveRevealRdUntilAgendaStoreInHqChoice,
       },
       cardImplementation: {
         resolveCardImplementationAccessPaymentChoice,

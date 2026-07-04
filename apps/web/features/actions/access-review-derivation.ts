@@ -1,10 +1,18 @@
-import type { LegalAction, PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
+import type {
+  LegalAction,
+  PlayerView,
+  PublicGameEvent,
+  Side,
+} from "@netgrid/shared";
 
-import { accessRevealStatusLabel, serverDisplayLabel } from "../../app/action-board-ui";
+import {
+  accessRevealStatusLabel,
+  serverDisplayLabel,
+} from "../../app/action-board-ui";
 import {
   enrichVisibleCard,
   visibleCardFromCatalogDetail,
-  visibleCardFromPublicEvent
+  visibleCardFromPublicEvent,
 } from "../cards/card-view-model";
 import type { AccessReveal, ExposeReview } from "./AccessReviewModals";
 
@@ -28,7 +36,7 @@ export function revealedEventCardIds(event: PublicGameEvent): string[] {
   const ids = [
     revealedEventCardId(event),
     ...payloadStringList(event.publicPayload, "publicRevealDefinitionIds"),
-    ...payloadStringList(event.publicPayload, "revealedAgendaDefinitionIds")
+    ...payloadStringList(event.publicPayload, "revealedAgendaDefinitionIds"),
   ].filter((value): value is string => Boolean(value));
   return Array.from(new Set(ids));
 }
@@ -38,7 +46,7 @@ export function accessRevealFromLatestEvent(
   detailsById: Record<string, CatalogCardDetail>,
   legalActions: LegalAction[],
   viewerSide: Side,
-  events: PublicGameEvent[] = []
+  events: PublicGameEvent[] = [],
 ): AccessReveal | null {
   if (!event || event.publicPayload.actionType !== "access_card") return null;
   const cardId = payloadString(event.publicPayload, "cardDefinitionId");
@@ -46,10 +54,26 @@ export function accessRevealFromLatestEvent(
   if (!cardId || !title) return null;
   const actorSide = payloadSide(event.publicPayload, "actor") ?? "runner";
   const detail = detailsById[cardId] ?? null;
-  const card = detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, cardId, title);
-  const serverLabel = serverDisplayLabel(payloadString(event.publicPayload, "serverLabel") ?? "einen Server");
-  const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
-  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, event, undefined, events);
+  const card = detail
+    ? visibleCardFromCatalogDetail(detail)
+    : visibleCardFromPublicEvent(event, cardId, title);
+  const serverLabel = serverDisplayLabel(
+    payloadString(event.publicPayload, "serverLabel") ?? "einen Server",
+  );
+  const actions = legalActions.filter((action) =>
+    [
+      "access_card",
+      "steal_agenda",
+      "trash_accessed_card",
+      "decline_trash",
+    ].includes(action.type),
+  );
+  const pendingAmbushStatus = accessAmbushPendingStatus(
+    viewerSide,
+    event,
+    undefined,
+    events,
+  );
   const highlighterStatus = accessHighlighterStatus(event.publicPayload);
   return {
     eventId: event.eventId,
@@ -62,8 +86,16 @@ export function accessRevealFromLatestEvent(
     description: accessRevealDescription(actorSide, viewerSide, serverLabel),
     card,
     actions,
-    trashStatus: pendingAmbushStatus ?? accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel),
-    ...(highlighterStatus ? { followupStatus: highlighterStatus } : {})
+    trashStatus:
+      pendingAmbushStatus ??
+      accessRevealStatusLabel(
+        card,
+        actions,
+        actorSide,
+        viewerSide,
+        serverLabel,
+      ),
+    ...(highlighterStatus ? { followupStatus: highlighterStatus } : {}),
   };
 }
 
@@ -74,20 +106,43 @@ export function accessRevealFromCurrentRun(
   viewerSide: Side,
   events: PublicGameEvent[],
   accessEvent: PublicGameEvent | null,
-  eventId?: string
+  eventId?: string,
 ): AccessReveal | null {
   const accessedCard = view.run?.accessedCard;
   if (!accessedCard?.known || !accessedCard.title) return null;
   const actorSide: Side = "runner";
-  const serverLabel = serverDisplayLabel(view.run?.breach?.serverId ?? view.run?.attackedServerId ?? "einen Server");
-  const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
+  const serverLabel = serverDisplayLabel(
+    view.run?.breach?.serverId ?? view.run?.attackedServerId ?? "einen Server",
+  );
+  const actions = legalActions.filter((action) =>
+    [
+      "access_card",
+      "steal_agenda",
+      "trash_accessed_card",
+      "decline_trash",
+    ].includes(action.type),
+  );
   const card = enrichVisibleCard(accessedCard, detailsById);
-  const followupStatus = latestAccessAmbushPaymentStatus(events, accessEvent, card.definitionId);
-  const pendingAmbushStatus = accessAmbushPendingStatus(viewerSide, accessEvent, view, events);
-  const highlighterStatus = accessEvent ? accessHighlighterStatus(accessEvent.publicPayload) : null;
+  const followupStatus = latestAccessAmbushPaymentStatus(
+    events,
+    accessEvent,
+    card.definitionId,
+  );
+  const pendingAmbushStatus = accessAmbushPendingStatus(
+    viewerSide,
+    accessEvent,
+    view,
+    events,
+  );
+  const highlighterStatus = accessEvent
+    ? accessHighlighterStatus(accessEvent.publicPayload)
+    : null;
   const accessFollowupStatus = highlighterStatus ?? followupStatus;
   return {
-    eventId: eventId ?? accessEvent?.eventId ?? `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
+    eventId:
+      eventId ??
+      accessEvent?.eventId ??
+      `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
     kind: "access",
     actorSide,
     viewerSide,
@@ -97,30 +152,45 @@ export function accessRevealFromCurrentRun(
     description: accessRevealDescription(actorSide, viewerSide, serverLabel),
     card,
     actions,
-    trashStatus: pendingAmbushStatus ?? accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel),
-    ...(accessFollowupStatus ? { followupStatus: accessFollowupStatus } : {})
+    trashStatus:
+      pendingAmbushStatus ??
+      accessRevealStatusLabel(
+        card,
+        actions,
+        actorSide,
+        viewerSide,
+        serverLabel,
+      ),
+    ...(accessFollowupStatus ? { followupStatus: accessFollowupStatus } : {}),
   };
 }
 
 export function archivesRevealFromLatestEvent(
   event: PublicGameEvent | undefined,
   detailsById: Record<string, CatalogCardDetail>,
-  viewerSide: Side
+  viewerSide: Side,
 ): AccessReveal | null {
   if (!event || !isArchivesBreachRevealEvent(event)) return null;
   const actorSide = payloadSide(event.publicPayload, "actor") ?? "runner";
-  const count = payloadPositiveInteger(event.publicPayload, "archivesRevealCount") ?? 0;
-  const definitionIds = payloadStringList(event.publicPayload, "archivesRevealDefinitionIds").length > 0
-    ? payloadStringList(event.publicPayload, "archivesRevealDefinitionIds")
-    : payloadStringList(event.publicPayload, "publicRevealDefinitionIds");
+  const count =
+    payloadPositiveInteger(event.publicPayload, "archivesRevealCount") ?? 0;
+  const definitionIds =
+    payloadStringList(event.publicPayload, "archivesRevealDefinitionIds")
+      .length > 0
+      ? payloadStringList(event.publicPayload, "archivesRevealDefinitionIds")
+      : payloadStringList(event.publicPayload, "publicRevealDefinitionIds");
   if (definitionIds.length === 0) return null;
-  const titles = payloadPipeStringList(event.publicPayload, "archivesRevealTitles").length > 0
-    ? payloadPipeStringList(event.publicPayload, "archivesRevealTitles")
-    : payloadPipeStringList(event.publicPayload, "publicRevealTitles");
+  const titles =
+    payloadPipeStringList(event.publicPayload, "archivesRevealTitles").length >
+    0
+      ? payloadPipeStringList(event.publicPayload, "archivesRevealTitles")
+      : payloadPipeStringList(event.publicPayload, "publicRevealTitles");
   const cards = definitionIds.map((definitionId, index) => {
     const detail = detailsById[definitionId] ?? null;
     const title = detail?.title ?? titles[index] ?? definitionId;
-    return detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, definitionId, title);
+    return detail
+      ? visibleCardFromCatalogDetail(detail)
+      : visibleCardFromPublicEvent(event, definitionId, title);
   });
   const serverLabel = "Archive";
   return {
@@ -131,34 +201,49 @@ export function archivesRevealFromLatestEvent(
     serverLabel,
     serverTitleLabel: accessServerTitleLabel(serverLabel),
     serverLocationPhrase: accessServerLocationPhrase(serverLabel),
-    description: archivesRevealDescription(actorSide, viewerSide, count || cards.length),
+    description: archivesRevealDescription(
+      actorSide,
+      viewerSide,
+      count || cards.length,
+    ),
     revealedCards: cards,
     actions: [],
-    trashStatus: cards.length === 1 ? "Diese Karte liegt jetzt offen im Archiv." : "Diese Karten liegen jetzt offen im Archiv."
+    trashStatus:
+      cards.length === 1
+        ? "Diese Karte liegt jetzt offen im Archiv."
+        : "Diese Karten liegen jetzt offen im Archiv.",
   };
 }
 
 export function hqAgendaRevealFromLatestEvent(
   event: PublicGameEvent | undefined,
   detailsById: Record<string, CatalogCardDetail>,
-  viewerSide: Side
+  viewerSide: Side,
 ): AccessReveal | null {
   if (!event || !isCorpHqAgendaRevealEvent(event)) return null;
-  const definitionIds = payloadStringList(event.publicPayload, "publicRevealDefinitionIds").length > 0
-    ? payloadStringList(event.publicPayload, "publicRevealDefinitionIds")
-    : payloadStringList(event.publicPayload, "revealedAgendaDefinitionIds");
+  const definitionIds =
+    payloadStringList(event.publicPayload, "publicRevealDefinitionIds").length >
+    0
+      ? payloadStringList(event.publicPayload, "publicRevealDefinitionIds")
+      : payloadStringList(event.publicPayload, "revealedAgendaDefinitionIds");
   if (definitionIds.length === 0) return null;
-  const titles = payloadPipeStringList(event.publicPayload, "publicRevealTitles");
+  const titles = payloadPipeStringList(
+    event.publicPayload,
+    "publicRevealTitles",
+  );
   const cards = definitionIds.map((definitionId, index) => {
     const detail = detailsById[definitionId] ?? null;
     const title = detail?.title ?? titles[index] ?? definitionId;
-    return detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, definitionId, title);
+    return detail
+      ? visibleCardFromCatalogDetail(detail)
+      : visibleCardFromPublicEvent(event, definitionId, title);
   });
   const actorSide = payloadSide(event.publicPayload, "actor") ?? "corp";
   const sourceTitle =
     payloadString(event.publicPayload, "sourceTitle") ??
     "Corporate Negotiating Center";
-  const trashSubject = cards.length === 1 ? "Diese Agenda wurde" : "Diese Agenden wurden";
+  const trashSubject =
+    cards.length === 1 ? "Diese Agenda wurde" : "Diese Agenden wurden";
   const trashVerb = cards.length === 1 ? "bleibt" : "bleiben";
   return {
     eventId: event.eventId,
@@ -168,19 +253,87 @@ export function hqAgendaRevealFromLatestEvent(
     serverLabel: "HQ",
     serverTitleLabel: "Hauptquartier (HQ)",
     serverLocationPhrase: "im Hauptquartier (HQ)",
-    description: hqAgendaRevealDescription(actorSide, viewerSide, cards.length, sourceTitle),
+    description: hqAgendaRevealDescription(
+      actorSide,
+      viewerSide,
+      cards.length,
+      sourceTitle,
+    ),
     revealedCards: cards,
     actions: [],
     trashStatus: `${trashSubject} öffentlich vorgezeigt und ${trashVerb} hier sichtbar, bis du das Ansehen beendest.`,
     revealedCardStatus: "Aus HQ vorgezeigt",
-    dismissLabel: "Ansehen beenden"
+    dismissLabel: "Ansehen beenden",
+  };
+}
+
+export function gypsyScheduleAnalyzerRevealFromPendingChoice(
+  view: PlayerView,
+  detailsById: Record<string, CatalogCardDetail>,
+  legalActions: LegalAction[],
+  viewerSide: Side,
+  events: PublicGameEvent[],
+): AccessReveal | null {
+  const choice = view.pendingChoice;
+  if (!choice?.source.startsWith("successful_run.gypsy_rd_reveal")) return null;
+  const choiceAction = legalActions.find(
+    (action) =>
+      action.type === "resolve_choice" &&
+      action.payload?.choiceId === choice.choiceId,
+  );
+  if (!choiceAction) return null;
+  const revealEvent = latestGypsyScheduleAnalyzerRevealEvent(
+    events,
+    choice.stateVersion,
+  );
+  const definitionIds = revealEvent
+    ? payloadStringList(revealEvent.publicPayload, "publicRevealDefinitionIds")
+    : [];
+  const titles = revealEvent
+    ? payloadPipeStringList(revealEvent.publicPayload, "publicRevealTitles")
+    : [];
+  const cards = definitionIds.map((definitionId, index) => {
+    const detail = detailsById[definitionId] ?? null;
+    const title = detail?.title ?? titles[index] ?? definitionId;
+    return detail
+      ? visibleCardFromCatalogDetail(detail)
+      : visibleCardFromPublicEvent(revealEvent!, definitionId, title);
+  });
+  const revealNextAvailable = choice.options.some(
+    (option) => option.id === "reveal_next",
+  );
+  const agendaRevealed = cards.some((card) => card.type === "agenda");
+  return {
+    eventId:
+      revealEvent?.eventId ??
+      `gypsy-rd-reveal:${view.stateVersion}:${choice.choiceId}`,
+    kind: "gypsy_rd_reveal",
+    actorSide: "runner",
+    viewerSide,
+    serverLabel: "R&D",
+    serverTitleLabel: accessServerTitleLabel("R&D"),
+    serverLocationPhrase: accessServerLocationPhrase("R&D"),
+    description: gypsyScheduleAnalyzerRevealDescription(
+      viewerSide,
+      cards.length,
+    ),
+    revealedCards: cards,
+    actions: [],
+    choice,
+    choiceAction,
+    trashStatus: gypsyScheduleAnalyzerRevealStatus(
+      cards.length,
+      agendaRevealed,
+      revealNextAvailable,
+    ),
+    revealedCardStatus: "Aus R&D aufgedeckt",
   };
 }
 
 export function exposeReviewFromLatestEvent(
   event: PublicGameEvent | undefined,
   detailsById: Record<string, CatalogCardDetail>,
-  viewerSide: Side
+  viewerSide: Side,
 ): ExposeReview | null {
   if (!event || event.publicPayload.publicRevealKind !== "expose") return null;
   if (event.publicPayload.approachIceExposeDecision) return null;
@@ -189,22 +342,38 @@ export function exposeReviewFromLatestEvent(
   const cards = definitionIds.map((definitionId) => {
     const detail = detailsById[definitionId] ?? null;
     const title = detail?.title ?? definitionId;
-    return detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, definitionId, title);
+    return detail
+      ? visibleCardFromCatalogDetail(detail)
+      : visibleCardFromPublicEvent(event, definitionId, title);
   });
   const actorSide = payloadSide(event.publicPayload, "actor") ?? "runner";
-  const serverLabels = payloadStringList(event.publicPayload, "exposedServerLabels").map(serverDisplayLabel);
+  const serverLabels = payloadStringList(
+    event.publicPayload,
+    "exposedServerLabels",
+  ).map(serverDisplayLabel);
   return {
     eventId: event.eventId,
     actorSide,
     viewerSide,
     cards,
     serverLabels,
-    title: cards.length === 1 ? "Karte angesehen" : `${cards.length} Karten angesehen`,
-    description: exposeReviewDescription(actorSide, viewerSide, cards.length, serverLabels)
+    title:
+      cards.length === 1
+        ? "Karte angesehen"
+        : `${cards.length} Karten angesehen`,
+    description: exposeReviewDescription(
+      actorSide,
+      viewerSide,
+      cards.length,
+      serverLabels,
+    ),
   };
 }
 
-export function retainedArchivesRevealEvent(events: PublicGameEvent[], dismissedEventIds: string[]): PublicGameEvent | null {
+export function retainedArchivesRevealEvent(
+  events: PublicGameEvent[],
+  dismissedEventIds: string[],
+): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
     if (!event) continue;
@@ -215,12 +384,18 @@ export function retainedArchivesRevealEvent(events: PublicGameEvent[], dismissed
   return null;
 }
 
-export function retainedHqAgendaRevealEvent(events: PublicGameEvent[], dismissedEventIds: string[]): PublicGameEvent | null {
+export function retainedHqAgendaRevealEvent(
+  events: PublicGameEvent[],
+  dismissedEventIds: string[],
+): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
     if (!event) continue;
     if (isCorpHqAgendaRevealCandidateEvent(event)) {
-      if (dismissedEventIds.includes(event.eventId) || !isCorpHqAgendaRevealEvent(event))
+      if (
+        dismissedEventIds.includes(event.eventId) ||
+        !isCorpHqAgendaRevealEvent(event)
+      )
         return null;
       return event;
     }
@@ -243,14 +418,22 @@ function exposeReviewDefinitionIds(event: PublicGameEvent): string[] {
     new Set(
       [
         payloadString(event.publicPayload, "publicRevealDefinitionId"),
-        ...payloadStringList(event.publicPayload, "publicRevealDefinitionIds")
-      ].filter((value): value is string => Boolean(value))
-    )
+        ...payloadStringList(event.publicPayload, "publicRevealDefinitionIds"),
+      ].filter((value): value is string => Boolean(value)),
+    ),
   );
 }
 
-function exposeReviewDescription(actorSide: Side, viewerSide: Side, count: number, serverLabels: string[]): string {
-  const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
+function exposeReviewDescription(
+  actorSide: Side,
+  viewerSide: Side,
+  count: number,
+  serverLabels: string[],
+): string {
+  const subject =
+    actorSide === viewerSide
+      ? "Du hast"
+      : `${accessActorSubject(actorSide)} hat`;
   const object = count === 1 ? "eine Karte" : `${count} Karten`;
   const locations = Array.from(new Set(serverLabels)).filter(Boolean);
   return `${subject} ${object}${locations.length > 0 ? ` in ${locations.join(", ")}` : ""} angesehen.`;
@@ -260,19 +443,28 @@ function hqAgendaRevealDescription(
   actorSide: Side,
   viewerSide: Side,
   count: number,
-  sourceTitle: string
+  sourceTitle: string,
 ): string {
-  const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
+  const subject =
+    actorSide === viewerSide
+      ? "Du hast"
+      : `${accessActorSubject(actorSide)} hat`;
   const object = count === 1 ? "eine Agenda" : `${count} Agenden`;
   return `${subject} ${object} aus HQ durch ${sourceTitle} vorgezeigt.`;
 }
 
-function payloadString(payload: Record<string, unknown>, key: string): string | null {
+function payloadString(
+  payload: Record<string, unknown>,
+  key: string,
+): string | null {
   const value = payload[key];
   return typeof value === "string" && value.trim() ? value : null;
 }
 
-function payloadStringList(payload: Record<string, unknown>, key: string): string[] {
+function payloadStringList(
+  payload: Record<string, unknown>,
+  key: string,
+): string[] {
   return (
     payloadString(payload, key)
       ?.split(",")
@@ -281,7 +473,10 @@ function payloadStringList(payload: Record<string, unknown>, key: string): strin
   );
 }
 
-function payloadPipeStringList(payload: Record<string, unknown>, key: string): string[] {
+function payloadPipeStringList(
+  payload: Record<string, unknown>,
+  key: string,
+): string[] {
   return (
     payloadString(payload, key)
       ?.split("|")
@@ -290,27 +485,47 @@ function payloadPipeStringList(payload: Record<string, unknown>, key: string): s
   );
 }
 
-function payloadSide(payload: Record<string, unknown>, key: string): Side | null {
+function payloadSide(
+  payload: Record<string, unknown>,
+  key: string,
+): Side | null {
   const value = payloadString(payload, key);
   return value === "corp" || value === "runner" ? value : null;
 }
 
-function payloadPositiveInteger(payload: Record<string, unknown>, key: string): number | null {
+function payloadPositiveInteger(
+  payload: Record<string, unknown>,
+  key: string,
+): number | null {
   const value = payload[key];
-  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : null;
+  return typeof value === "number" && Number.isInteger(value) && value > 0
+    ? value
+    : null;
 }
 
-function payloadNumber(payload: Record<string, unknown>, key: string): number | null {
+function payloadNumber(
+  payload: Record<string, unknown>,
+  key: string,
+): number | null {
   const value = payload[key];
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
-function accessHighlighterStatus(payload: Record<string, unknown>): string | null {
-  const highlighterCounterCount = payloadPositiveInteger(payload, "highlighterCounterCount") ?? 0;
-  const highlighterAccessBonus = payloadPositiveInteger(payload, "highlighterAccessBonus") ?? Math.max(0, highlighterCounterCount - 1);
+function accessHighlighterStatus(
+  payload: Record<string, unknown>,
+): string | null {
+  const highlighterCounterCount =
+    payloadPositiveInteger(payload, "highlighterCounterCount") ?? 0;
+  const highlighterAccessBonus =
+    payloadPositiveInteger(payload, "highlighterAccessBonus") ??
+    Math.max(0, highlighterCounterCount - 1);
   const accessIndex = payloadNumber(payload, "accessIndex");
-  const baseAccessCount = payloadPositiveInteger(payload, "baseAccessCount") ?? 1;
-  const effectiveAccessCount = payloadPositiveInteger(payload, "effectiveAccessCount");
+  const baseAccessCount =
+    payloadPositiveInteger(payload, "baseAccessCount") ?? 1;
+  const effectiveAccessCount = payloadPositiveInteger(
+    payload,
+    "effectiveAccessCount",
+  );
   if (
     highlighterCounterCount <= 1 ||
     highlighterAccessBonus <= 0 ||
@@ -322,15 +537,28 @@ function accessHighlighterStatus(payload: Record<string, unknown>): string | nul
   return `Zusätzlicher R&D-Zugriff ${accessIndex + 1} von ${Math.max(accessIndex + 1, effectiveAccessCount)}: Die Korp hat ${highlighterCounterCount} Highlighter-Counter.`;
 }
 
-function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel: string): string {
+function accessRevealDescription(
+  actorSide: Side,
+  viewerSide: Side,
+  serverLabel: string,
+): string {
   const location = accessServerLocationPhrase(serverLabel);
-  if (actorSide === viewerSide) return `Du hast auf eine Karte ${location} zugegriffen.`;
+  if (actorSide === viewerSide)
+    return `Du hast auf eine Karte ${location} zugegriffen.`;
   return `${accessActorSubject(actorSide)} hat auf eine Karte ${location} zugegriffen.`;
 }
 
-function archivesRevealDescription(actorSide: Side, viewerSide: Side, count: number): string {
-  const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
-  const object = count === 1 ? "eine verdeckte Karte" : `${count} verdeckte Karten`;
+function archivesRevealDescription(
+  actorSide: Side,
+  viewerSide: Side,
+  count: number,
+): string {
+  const subject =
+    actorSide === viewerSide
+      ? "Du hast"
+      : `${accessActorSubject(actorSide)} hat`;
+  const object =
+    count === 1 ? "eine verdeckte Karte" : `${count} verdeckte Karten`;
   return `${subject} ${object} im Archiv aufgedeckt.`;
 }
 
@@ -338,8 +566,15 @@ function isArchivesBreachRevealEvent(event: PublicGameEvent): boolean {
   const payload = event.publicPayload;
   if (payload.actionType !== "start_run") return false;
   if (payload.hiddenZoneAction !== "archives_breach_reveal") return false;
-  const serverLabel = serverDisplayLabel(payloadString(payload, "serverLabel") ?? payloadString(payload, "serverId") ?? "");
-  return serverLabel === "Archive" && Boolean(payloadPositiveInteger(payload, "archivesRevealCount"));
+  const serverLabel = serverDisplayLabel(
+    payloadString(payload, "serverLabel") ??
+      payloadString(payload, "serverId") ??
+      "",
+  );
+  return (
+    serverLabel === "Archive" &&
+    Boolean(payloadPositiveInteger(payload, "archivesRevealCount"))
+  );
 }
 
 function isCorpHqAgendaRevealEvent(event: PublicGameEvent): boolean {
@@ -365,6 +600,50 @@ function isCorpHqAgendaRevealCandidateEvent(event: PublicGameEvent): boolean {
   return true;
 }
 
+function latestGypsyScheduleAnalyzerRevealEvent(
+  events: PublicGameEvent[],
+  choiceStateVersion: number,
+): PublicGameEvent | null {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (!event) continue;
+    if (event.stateVersionAfter < choiceStateVersion) continue;
+    if (
+      event.publicPayload.actionType === "resolve_choice" &&
+      event.publicPayload.hiddenZoneAction ===
+        "gypsy_schedule_analyzer_reveal_next"
+    )
+      return event;
+  }
+  return null;
+}
+
+function gypsyScheduleAnalyzerRevealDescription(
+  viewerSide: Side,
+  revealedCount: number,
+): string {
+  const subject = viewerSide === "runner" ? "Du deckst" : "Der Runner deckt";
+  if (revealedCount === 0)
+    return `${subject} R&D mit Gypsy Schedule Analyzer Karte für Karte auf.`;
+  return `${subject} R&D mit Gypsy Schedule Analyzer weiter auf.`;
+}
+
+function gypsyScheduleAnalyzerRevealStatus(
+  revealedCount: number,
+  agendaRevealed: boolean,
+  revealNextAvailable: boolean,
+): string {
+  if (revealNextAvailable) {
+    if (revealedCount === 0) return "Bereit: Decke die erste R&D-Karte auf.";
+    return `${revealedCount} ${revealedCount === 1 ? "Karte ist" : "Karten sind"} aufgedeckt. Decke die nächste R&D-Karte auf.`;
+  }
+  if (agendaRevealed)
+    return "Agenda gefunden. Bestätige, um die Agenda nach HQ zu legen und die übrigen Karten in R&D zu mischen.";
+  if (revealedCount > 0)
+    return "Keine Agenda in R&D gefunden. Bestätige, um die aufgedeckten Karten in R&D zu mischen.";
+  return "R&D ist leer. Bestätige, um den Effekt abzuschließen.";
+}
+
 function accessActorSubject(side: Side): string {
   return side === "corp" ? "Die Korp" : "Der Runner";
 }
@@ -381,53 +660,104 @@ function accessServerLocationPhrase(serverLabel: string): string {
   return `in ${serverLabel}`;
 }
 
-function latestAccessAmbushPaymentStatus(events: PublicGameEvent[], accessEvent: PublicGameEvent | null, cardDefinitionId?: string): string | undefined {
+function latestAccessAmbushPaymentStatus(
+  events: PublicGameEvent[],
+  accessEvent: PublicGameEvent | null,
+  cardDefinitionId?: string,
+): string | undefined {
   if (!accessEvent || !cardDefinitionId) return undefined;
-  const accessIndex = events.findIndex((event) => event.eventId === accessEvent.eventId);
+  const accessIndex = events.findIndex(
+    (event) => event.eventId === accessEvent.eventId,
+  );
   if (accessIndex < 0) return undefined;
   for (let index = events.length - 1; index > accessIndex; index -= 1) {
     const payload = events[index]?.publicPayload;
     if (!payload || payload.actionType !== "resolve_choice") continue;
-    const ambushDefinitionId = payloadString(payload, "ambushDefinitionId") ?? payloadString(payload, "accessEffectSourceDefinitionId");
+    const ambushDefinitionId =
+      payloadString(payload, "ambushDefinitionId") ??
+      payloadString(payload, "accessEffectSourceDefinitionId");
     if (ambushDefinitionId !== cardDefinitionId) continue;
     const paidCost = payloadPositiveInteger(payload, "ambushPaidCost");
-    if (paidCost) return `Die Korp hat ${paidCost} ${paidCost === 1 ? "Credit" : "Credits"} für den Access-Ambush bezahlt.`;
-    if (payload.ambushPaymentDeclined === true) return "Die Korp hat den Access-Ambush nicht bezahlt.";
+    if (paidCost)
+      return `Die Korp hat ${paidCost} ${paidCost === 1 ? "Credit" : "Credits"} für den Access-Ambush bezahlt.`;
+    if (payload.ambushPaymentDeclined === true)
+      return "Die Korp hat den Access-Ambush nicht bezahlt.";
   }
   return undefined;
 }
 
-function accessAmbushPendingStatus(viewerSide: Side, accessEvent: PublicGameEvent | null | undefined, view?: PlayerView, events: PublicGameEvent[] = []): string | undefined {
-  const eventChoiceResolved = accessEvent ? accessAmbushPaymentChoiceResolved(events, accessEvent) : false;
-  const eventChoiceOpened = !eventChoiceResolved && accessEvent?.publicPayload.ambushPaymentChoiceOpened === true;
-  const eventAmount = eventChoiceOpened ? payloadPositiveInteger(accessEvent.publicPayload, "ambushPaymentAmount") : null;
-  const choiceAmount = view?.pendingChoice?.source.startsWith("p3_35.access_payment") ? accessAmbushChoiceAmount(view.pendingChoice) : null;
+function accessAmbushPendingStatus(
+  viewerSide: Side,
+  accessEvent: PublicGameEvent | null | undefined,
+  view?: PlayerView,
+  events: PublicGameEvent[] = [],
+): string | undefined {
+  const eventChoiceResolved = accessEvent
+    ? accessAmbushPaymentChoiceResolved(events, accessEvent)
+    : false;
+  const eventChoiceOpened =
+    !eventChoiceResolved &&
+    accessEvent?.publicPayload.ambushPaymentChoiceOpened === true;
+  const eventAmount = eventChoiceOpened
+    ? payloadPositiveInteger(accessEvent.publicPayload, "ambushPaymentAmount")
+    : null;
+  const choiceAmount = view?.pendingChoice?.source.startsWith(
+    "p3_35.access_payment",
+  )
+    ? accessAmbushChoiceAmount(view.pendingChoice)
+    : null;
   const amount = eventAmount ?? choiceAmount;
-  const pending = Boolean(amount || eventChoiceOpened || view?.pendingChoice?.source.startsWith("p3_35.access_payment"));
+  const pending = Boolean(
+    amount ||
+    eventChoiceOpened ||
+    view?.pendingChoice?.source.startsWith("p3_35.access_payment"),
+  );
   if (!pending) return undefined;
-  const amountText = amount ? `${amount} ${amount === 1 ? "Credit" : "Credits"}` : "Credits";
-  if (viewerSide === "corp" && view?.pendingChoice?.source.startsWith("p3_35.access_payment")) {
+  const amountText = amount
+    ? `${amount} ${amount === 1 ? "Credit" : "Credits"}`
+    : "Credits";
+  if (
+    viewerSide === "corp" &&
+    view?.pendingChoice?.source.startsWith("p3_35.access_payment")
+  ) {
     return `Du entscheidest jetzt, ob du ${amountText} für den Access-Ambush zahlst.`;
   }
   return `Die Korp entscheidet jetzt, ob sie ${amountText} für den Access-Ambush zahlt.`;
 }
 
-function accessAmbushPaymentChoiceResolved(events: PublicGameEvent[], accessEvent: PublicGameEvent): boolean {
-  const accessIndex = events.findIndex((event) => event.eventId === accessEvent.eventId);
+function accessAmbushPaymentChoiceResolved(
+  events: PublicGameEvent[],
+  accessEvent: PublicGameEvent,
+): boolean {
+  const accessIndex = events.findIndex(
+    (event) => event.eventId === accessEvent.eventId,
+  );
   if (accessIndex < 0) return false;
-  const accessDefinitionId = payloadString(accessEvent.publicPayload, "cardDefinitionId");
+  const accessDefinitionId = payloadString(
+    accessEvent.publicPayload,
+    "cardDefinitionId",
+  );
   for (let index = accessIndex + 1; index < events.length; index += 1) {
     const payload = events[index]?.publicPayload;
     if (!payload || payload.actionType !== "resolve_choice") continue;
-    const ambushDefinitionId = payloadString(payload, "ambushDefinitionId") ?? payloadString(payload, "accessEffectSourceDefinitionId");
-    if (accessDefinitionId && ambushDefinitionId && ambushDefinitionId !== accessDefinitionId) continue;
+    const ambushDefinitionId =
+      payloadString(payload, "ambushDefinitionId") ??
+      payloadString(payload, "accessEffectSourceDefinitionId");
+    if (
+      accessDefinitionId &&
+      ambushDefinitionId &&
+      ambushDefinitionId !== accessDefinitionId
+    )
+      continue;
     if (payload.ambushPaymentDeclined === true) return true;
     if (payloadPositiveInteger(payload, "ambushPaidCost")) return true;
   }
   return false;
 }
 
-function accessAmbushChoiceAmount(choice: NonNullable<PlayerView["pendingChoice"]>): number | null {
+function accessAmbushChoiceAmount(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+): number | null {
   for (const option of choice.options) {
     const match = /^(\d+)\s+Credits?\s+zahlen$/i.exec(option.label.trim());
     if (match?.[1]) return Number(match[1]);

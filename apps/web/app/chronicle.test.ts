@@ -1870,6 +1870,41 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(item)).not.toContain("cardInstances");
   });
 
+  it("describes a Gypsy Schedule Analyzer single R&D reveal step", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        sourceDefinitionId: "onr_classic_038_gypsytm-schedule-analyzer",
+        sourceTitle: "Gypsy™ Schedule Analyzer",
+        accessReplacement: "reveal_rd_until_agenda_store_in_hq",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "gypsy_schedule_analyzer_reveal_next",
+        publicRevealDefinitionIds: "simple_economy_operation,simple_agenda",
+        publicRevealTitles: "Simple Economy Operation||Simple Agenda",
+        revealedAgendaDefinitionIds: "simple_agenda",
+        revealedCount: 2,
+        revealedNonAgendaCount: 1,
+        agendaStoredInHq: false,
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Du hast Gypsy™ Schedule Analyzer: Simple Agenda aus R&D aufgedeckt.",
+    );
+    expect(item.description).toBe(
+      "Aufgedeckt: Simple Economy Operation, Simple Agenda. Eine Agenda wurde gefunden; nach Bestätigung wird sie in HQ gespeichert.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Gypsy™ Schedule Analyzer",
+        "R&D Reveal",
+        "Karte 2",
+        "Agenda gefunden",
+      ]),
+    );
+  });
+
   it("describes Gypsy Schedule Analyzer R&D reveal when no agenda is found", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {
