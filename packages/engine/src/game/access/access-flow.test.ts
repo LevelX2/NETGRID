@@ -398,13 +398,27 @@ describe("access flow execution", () => {
       accessedCardId: "hq_card",
       serverId: "hq",
       runnerUtilityAbility: "hq_access_expose_all_installed_corp_cards",
+      hiddenZoneAction: "schematics_search_engine_expose_installed_cards_review",
       publicRevealKind: "expose",
       sourceDefinitionId: "onr_classic_032_schematics-search-engine",
       revealedCount: 2,
       publicRevealDefinitionIds: "asset_def,ice_def",
-      publicRevealTitles: "asset_def,ice_def",
+      publicRevealTitles: "asset_def||ice_def",
       exposedServerLabels: "remote_1 root,remote_1 ICE 1",
     });
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      prompt: "Installierte Korp-Karten ansehen",
+      kind: "select_option",
+      options: [{ id: "done", label: "Ansehen beenden", value: "done" }],
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "hidden_info_barrier",
+    });
+    expect(state.pendingChoice?.source).toContain(
+      "p3_36.expose_installed_cards_review:asset|ice:schematics:onr_classic_032_schematics-search-engine:",
+    );
+    expect(JSON.stringify(legalAction.payload)).not.toContain("CardInstance");
   });
 
   it("steals an accessed agenda after revalidating the current steal cost", () => {

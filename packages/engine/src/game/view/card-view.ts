@@ -975,7 +975,7 @@ export function visibleCorpCard(
   const viewedApproachedIce =
     viewer === "runner" && state.run?.approachIceExposeViewingIceId === id;
   const viewedInstalledExposeCard =
-    viewer === "runner" && pendingInstalledCorpExposeReviewCardId(state) === id;
+    viewer === "runner" && pendingInstalledCorpExposeReviewCardIds(state).has(id);
   const privateRunnerRdAccess =
     viewer === "corp" &&
     accessed &&
@@ -1005,16 +1005,28 @@ export function visibleCorpCard(
   return visibleOwnCard(state, id);
 }
 
-function pendingInstalledCorpExposeReviewCardId(
+function pendingInstalledCorpExposeReviewCardIds(
   state: GameState,
-): CardInstanceId | undefined {
+): Set<CardInstanceId> {
   const source = state.pendingChoice?.source ?? "";
-  if (!source.startsWith("p3_36.expose_installed_card_review:"))
-    return undefined;
-  const targetCardId = source.split(":")[1];
-  return targetCardId && state.cardInstances[targetCardId]
-    ? (targetCardId as CardInstanceId)
-    : undefined;
+  if (source.startsWith("p3_36.expose_installed_card_review:")) {
+    const targetCardId = source.split(":")[1];
+    return new Set(
+      targetCardId && state.cardInstances[targetCardId]
+        ? [targetCardId as CardInstanceId]
+        : [],
+    );
+  }
+  if (source.startsWith("p3_36.expose_installed_cards_review:")) {
+    const targetCardIds = source.split(":")[1] ?? "";
+    return new Set(
+      targetCardIds
+        .split("|")
+        .filter((cardId) => state.cardInstances[cardId])
+        .map((cardId) => cardId as CardInstanceId),
+    );
+  }
+  return new Set();
 }
 
 export function visibleCorpArchives(state: GameState, viewer: Side): VisibleCard[] {

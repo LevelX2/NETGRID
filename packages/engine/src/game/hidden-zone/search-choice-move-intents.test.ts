@@ -68,6 +68,7 @@ describe("hidden-zone search choice move intents", () => {
       publicRevealKind: "reveal",
       publicRevealDefinitionId: selectedDefinitionId,
       revealedCardDefinitionIds: selectedDefinitionId,
+      revealedCount: 1,
     });
   });
 
@@ -108,6 +109,7 @@ describe("hidden-zone search choice move intents", () => {
       publicRevealKind: "reveal",
       publicRevealDefinitionId: selectedDefinitionId,
       revealedCardDefinitionIds: selectedDefinitionId,
+      revealedCount: 1,
     });
   });
 

@@ -15,6 +15,7 @@ import {
   applyChoices,
   emptyRunnerGripForTest,
   installRunnerHardwareForTest,
+  installRunnerResourceForTest,
   moveRunnerCardCopyToGrip,
   putRunnerCardOnTopOfStack,
   scoreRunnerAgendaForTest,
@@ -350,7 +351,7 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
         action.type === "play_event" && action.payload?.cardId === eventId,
     );
     expect(drineActions.map((action) => action.payload?.xValue)).toEqual([
-      1, 2,
+      1, 2, 3,
     ]);
 
     state = apply(
@@ -359,21 +360,71 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       (action) =>
         action.type === "play_event" &&
         action.payload?.cardId === eventId &&
-        action.payload?.xValue === 2,
+        action.payload?.xValue === 3,
     );
 
-    expect(state.runner.credits).toBe(8);
-    expect(state.runner.coreDamage).toBe(2);
-    expect(state.runner.grip).toHaveLength(1);
+    expect(state.runner.credits).toBe(12);
+    expect(state.runner.coreDamage).toBe(3);
+    expect(state.runner.grip).toHaveLength(0);
     expect(state.phase).not.toBe("game_over");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: DO_THE_DRINE,
       runnerEventAbility: "do_the_drine_unpreventable_core_damage_for_credits",
-      xValue: 2,
+      xValue: 3,
       damageCannotBePrevented: true,
-      gainedCredits: 8,
+      gainedCredits: 12,
       flatline: false,
+    });
+    expectValid(state);
+  });
+
+  it("lets Sandbox Dig finish its private R&D look after trashing itself as a cost", () => {
+    let state = toRunnerClassic09Game("classic-09-sandbox-dig");
+    const sandboxId = installRunnerResourceForTest(state, SANDBOX_DIG);
+    state.runner.credits = 40;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.source === sandboxId &&
+        sourceDefinition(state, action) === SANDBOX_DIG,
+    );
+
+    expect(state.runner.rig.resources).not.toContain(sandboxId);
+    expect(state.runner.heap).toContain(sandboxId);
+    expect(state.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining(
+        `p3_33.private_look:ability:${sandboxId}:rd`,
+      ),
+      prompt: "R&D ansehen (3)",
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "hidden_info_barrier",
+    });
+    expect(
+      state.pendingChoice?.options.filter((option) =>
+        option.id.startsWith("card_"),
+      ),
+    ).toHaveLength(3);
+    expect(state.pendingChoice?.options.at(-1)).toMatchObject({
+      id: "done",
+      label: "Fertig",
+      value: "done",
+    });
+
+    state = applyChoices(state, "runner", ["done"]);
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "p3_33_private_look",
+      sourceDefinitionId: SANDBOX_DIG,
+      privateLookZone: "rd",
+      privateLookCount: 3,
     });
     expectValid(state);
   });

@@ -383,7 +383,7 @@ function applyHqAccessExposeInstalledCorpCards(
     });
   if (!sourceCardId) return;
 
-  const exposedCardIds = installedCorpCardIds(host);
+  const exposedCardIds = unrezzedInstalledCorpCardIds(host);
   if (exposedCardIds.length === 0) return;
 
   const existingDefinitionIds =
@@ -394,7 +394,7 @@ function applyHqAccessExposeInstalledCorpCards(
   const existingTitles =
     typeof legalAction.payload?.publicRevealTitles === "string" &&
     legalAction.payload.publicRevealTitles.length > 0
-      ? legalAction.payload.publicRevealTitles.split(",")
+      ? splitPublicRevealTitles(legalAction.payload.publicRevealTitles)
       : [];
   const existingLabels =
     typeof legalAction.payload?.exposedServerLabels === "string" &&
@@ -405,9 +405,31 @@ function applyHqAccessExposeInstalledCorpCards(
     host.cards.definitionFor(cardId),
   );
   const sourceDefinition = host.cards.definitionFor(sourceCardId);
+  const openedReviewChoice = !host.state.pendingChoice;
+  if (openedReviewChoice) {
+    host.state.pendingChoice = {
+      choiceId: `p3_36_schematics_expose_installed_cards_review_${host.state.stateVersion + 1}`,
+      side: "runner",
+      source:
+        `p3_36.expose_installed_cards_review:${exposedCardIds.join("|")}` +
+        `:${sourceCardId}:${sourceDefinition.id}:${host.state.stateVersion + 1}`,
+      prompt: "Installierte Korp-Karten ansehen",
+      kind: "select_option",
+      options: [{ id: "done", label: "Ansehen beenden", value: "done" }],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: host.state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+    host.state.activeSide = "runner";
+  }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     runnerUtilityAbility: "hq_access_expose_all_installed_corp_cards",
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: openedReviewChoice
+      ? "schematics_search_engine_expose_installed_cards_review"
+      : "schematics_search_engine_expose_installed_cards",
     publicRevealKind: "expose",
     sourceDefinitionId:
       typeof legalAction.payload?.sourceDefinitionId === "string"
@@ -427,7 +449,7 @@ function applyHqAccessExposeInstalledCorpCards(
     publicRevealTitles: [
       ...existingTitles,
       ...exposedDefinitions.map((definition) => definition.title),
-    ].join(","),
+    ].join("||"),
     exposedServerLabels: [
       ...existingLabels,
       ...exposedCardIds.map((cardId) => installedCorpCardLabel(host, cardId)),
@@ -435,10 +457,15 @@ function applyHqAccessExposeInstalledCorpCards(
   };
 }
 
-function installedCorpCardIds(host: AccessFlowHost): CardInstanceId[] {
+function splitPublicRevealTitles(value: string): string[] {
+  return value.includes("||") ? value.split("||") : value.split(",");
+}
+
+function unrezzedInstalledCorpCardIds(host: AccessFlowHost): CardInstanceId[] {
   return host.state.corp.servers
     .flatMap((server) => [...server.root, ...server.ice])
     .filter((cardId) => host.state.cardInstances[cardId])
+    .filter((cardId) => !host.cards.cardInstanceFor(cardId).rezzed)
     .sort();
 }
 

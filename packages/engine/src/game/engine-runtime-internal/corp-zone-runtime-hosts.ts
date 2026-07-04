@@ -878,6 +878,40 @@ export function createCorpZoneRuntimeHosts(
     playerAction: PlayerAction,
   ): void {
     const choice = state.pendingChoice;
+    if (choice?.source.startsWith("p3_36.expose_installed_cards_review:")) {
+      const [
+        ,
+        targetCardIdsText = "",
+        sourceCardId = "",
+        sourceDefinitionId = "",
+      ] = choice.source.split(":");
+      const targetCardIds = targetCardIdsText
+        .split("|")
+        .filter((cardId) => cardId.length > 0);
+      if (targetCardIds.length === 0)
+        throw new Error("Es sind keine angezeigten Korp-Karten vorhanden.");
+      for (const targetCardId of targetCardIds) {
+        if (!state.cardInstances[targetCardId])
+          throw new Error(
+            "Eine angezeigte Korp-Karte ist nicht mehr vorhanden.",
+          );
+      }
+      if (!sourceCardId || !state.cardInstances[sourceCardId])
+        throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
+      const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+      if (selected !== "done")
+        throw new Error("Diese Expose-Ansicht kann nur beendet werden.");
+      delete state.pendingChoice;
+      state.activeSide = "runner";
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "schematics_search_engine_expose_installed_cards_finish",
+        sourceCardId,
+        sourceDefinitionId,
+      };
+      return;
+    }
     if (choice?.source.startsWith("p3_36.expose_installed_card_review:")) {
       const [, targetCardId = "", sourceCardId = "", sourceDefinitionId = ""] =
         choice.source.split(":");

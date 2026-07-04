@@ -78,7 +78,6 @@ import {
   mustServer,
   publicInstalledCorpCardIdentityKnown,
   rezzedRootCardIdOnServer,
-  runnerInstalledCardIds,
   scoredCorpAgendaIds,
   unrezzedRootCardIdOnServer,
 } from "../state/card-server-lookup";
@@ -1245,11 +1244,6 @@ function resolveRunnerPrivateLookChoice(
   const [, reason, sourceCardId, zone] = choice.source.split(":");
   if (zone !== "rd" && zone !== "hq")
     throw new Error("Die private Look-Zone ist ungueltig.");
-  if (
-    reason === "ability" &&
-    (!sourceCardId || !runnerInstalledCardIds(state).includes(sourceCardId))
-  )
-    throw new Error("Die private Look-Quelle ist nicht mehr installiert.");
   const privateLookCount = choice.options.filter((option) =>
     option.id.startsWith("card_"),
   ).length;

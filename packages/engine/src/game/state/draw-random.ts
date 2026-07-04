@@ -65,7 +65,8 @@ function applyStrategicPlanningGroupDrawReplacement(state: GameState): void {
 }
 
 function strategicPlanningGroupSourceIds(state: GameState): CardInstanceId[] {
-  return state.corp.servers
+  const servers = state.corp.servers ?? [];
+  return servers
     .flatMap((server) => server.root)
     .filter((cardId): cardId is CardInstanceId => {
       const instance = state.cardInstances[cardId];

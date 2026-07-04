@@ -340,6 +340,7 @@ export function resolvePendingChoice(
     return;
   }
   if (
+    state.pendingChoice.source.startsWith("p3_36.expose_installed_cards_review:") ||
     state.pendingChoice.source.startsWith("p3_36.expose_installed_card_review:") ||
     state.pendingChoice.source.startsWith("p3_36.expose_installed_card:") ||
     state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")

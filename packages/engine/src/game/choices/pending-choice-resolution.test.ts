@@ -63,6 +63,25 @@ describe("pending choice resolution", () => {
 
     expect(state.pendingChoice).toBeUndefined();
   });
+
+  it("dispatches Schematics multi-expose review choices through the expose resolver", () => {
+    const state = stateWithChoice(
+      "schematics_review",
+      "p3_36.expose_installed_cards_review:ice_1|asset_1:schematics:onr_classic_032_schematics-search-engine:2",
+    );
+    const resolveExposeInstalledCorpCardsChoice = vi.fn();
+
+    resolvePendingChoice(
+      pendingChoiceHost(state, {
+        hiddenZone: { resolveExposeInstalledCorpCardsChoice },
+      }),
+      choiceAction("schematics_review"),
+      playerChoice("schematics_review", ["done"]),
+    );
+
+    expect(resolveExposeInstalledCorpCardsChoice).toHaveBeenCalledOnce();
+    expect(resolveExposeInstalledCorpCardsChoice.mock.calls[0]?.[0]).toBe(state);
+  });
 });
 
 function stateWithChoice(choiceId: string, source: string): GameState {

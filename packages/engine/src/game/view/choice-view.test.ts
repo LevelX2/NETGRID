@@ -10,6 +10,7 @@ import {
 import {
   choiceRequest,
   putCorpIceOnServer,
+  putCorpRootInRemote,
   toRunnerTurn,
 } from "../../test-fixtures/mechanic-smoke-fixtures";
 import type { CardInstanceId } from "@netgrid/shared";
@@ -257,5 +258,39 @@ describe("ChoiceView projection", () => {
       rezzed: true,
     });
     expect(JSON.stringify(runnerView)).toContain("Simple Barrier ICE");
+  });
+
+  it("keeps multiple Schematics-exposed installed Corp cards visible until review ends", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "choice-view-schematics-multi-expose" }),
+    );
+    const rootId = putCorpRootInRemote(state, "simple_economy_asset");
+    const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.pendingChoice = {
+      choiceId: "p3_36_schematics_expose_installed_cards_review_1",
+      side: "runner",
+      source: `p3_36.expose_installed_cards_review:${rootId}|${iceId}:schematics:onr_classic_032_schematics-search-engine:1`,
+      prompt: "Installierte Korp-Karten ansehen",
+      kind: "select_option",
+      options: [{ id: "done", label: "Ansehen beenden", value: "done" }],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+
+    const runnerView = getPlayerView(state, "runner");
+    expect(
+      runnerView.servers
+        .flatMap((server) => [...server.root, ...server.ice])
+        .filter((card) => card.known)
+        .map((card) => card.definitionId)
+        .sort(),
+    ).toEqual(["simple_barrier_ice", "simple_economy_asset"]);
+
+    delete state.pendingChoice;
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toMatch(
+      /simple_barrier_ice|simple_economy_asset|Simple Barrier ICE|Simple Economy Asset/,
+    );
   });
 });

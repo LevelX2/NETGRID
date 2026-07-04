@@ -1811,7 +1811,7 @@ export function createCardRuntimeResolvers(deps: RuntimeDeps) {
     const gripAfterPlay = state.runner.grip.length - sourceInGrip;
     return Math.max(
       0,
-      Math.min(gripAfterPlay - 1, maxHandSize(state, "runner")),
+      Math.min(gripAfterPlay, maxHandSize(state, "runner")),
     );
   }
 
