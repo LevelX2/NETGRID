@@ -353,8 +353,8 @@ function executeRunScopedBlackOpsRezHook(
         spendCorpAgendaPointCost: () => ({
           paidPoints: 0,
           bonusPointsSpent: 0,
-          forfeitedAgendaIds: [],
-          forfeitedAgendaDefinitionIds: [],
+          spentAgendaIds: [],
+          spentAgendaDefinitionIds: [],
         }),
         activeObligationCount: () => 0,
       },

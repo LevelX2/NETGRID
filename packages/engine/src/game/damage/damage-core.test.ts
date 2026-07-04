@@ -392,6 +392,12 @@ function testHost(): DamageCoreHost {
       chooseAgendasForPointCost: () => [],
       agendaPointsForScoredCard: () => 0,
       forfeitAgendaForPointCost: () => undefined,
+      spendAgendaPointCost: () => ({
+        paidPoints: 0,
+        bonusPointsSpent: 0,
+        spentAgendaIds: [],
+        spentAgendaDefinitionIds: [],
+      }),
     },
     counters: {
       cardCounter: () => 0,

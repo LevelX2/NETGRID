@@ -2507,11 +2507,16 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
         sourceDefinition(cancelState, action) === "onr_v1_301_punitive-counterstrike",
     );
     cancelState = applyChoice(cancelState, "corp", "pass");
-    expect(cancelState.specialZones?.removedFromGame).toContain(agendaId);
+    expect(cancelState.corp.scoreArea).toContain(agendaId);
+    expect(cancelState.specialZones?.removedFromGame ?? []).not.toContain(
+      agendaId,
+    );
+    expect(cancelState.cardInstances[agendaId]?.agendaPointsSpent).toBe(1);
     const cancelPayload = cancelState.eventLog.at(-1)?.publicPayload;
     expect(cancelPayload).toMatchObject({
       eventModificationDecision: "cancel",
       agendaPointCost: 1,
+      spentAgendaDefinitionIds: "simple_agenda",
       damageAmount: 2,
       cardsTrashed: 2,
     });

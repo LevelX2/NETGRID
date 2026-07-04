@@ -2946,7 +2946,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     });
   });
 
-  it("hardens Corporate Ally for deterministic multi-agenda forfeit and payload redaction", () => {
+  it("hardens Corporate Ally for deterministic multi-agenda spend and payload redaction", () => {
     let state = toRunnerTurn(v180CardReleaseGame("spotcheck-corporate-ally-hardening"));
     state.runner.credits = 30;
     state.runner.clicks = 10;
@@ -2959,7 +2959,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       "onr_v1_203_hostile-takeover",
     );
     state.runner.scoreArea = [secondAgendaId, firstAgendaId];
-    const expectedForfeitId = [firstAgendaId, secondAgendaId].sort()[0];
+    const expectedSpendId = [firstAgendaId, secondAgendaId].sort()[0];
+    if (!expectedSpendId)
+      throw new Error("Missing deterministic agenda spend target");
     const corporateAllyId = moveRunnerCardToGrip(
       state,
       "onr_v1_156_corporate-ally",
@@ -2973,22 +2975,21 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     expect(install.payload).toMatchObject({
       installAgendaPointCost: 1,
-      forfeitAgendaCardId: expectedForfeitId,
+      spentAgendaCardId: expectedSpendId,
       installCostReason: "card_implementation_agenda_point_cost",
     });
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(state, "runner", (action) => action.actionId === install.actionId);
-    expect(state.runner.scoreArea).not.toContain(expectedForfeitId);
-    expect(state.runner.scoreArea).toContain(
-      expectedForfeitId === firstAgendaId ? secondAgendaId : firstAgendaId,
-    );
-    expect(state.specialZones?.removedFromGame).toContain(expectedForfeitId);
+    expect(state.runner.scoreArea).toContain(firstAgendaId);
+    expect(state.runner.scoreArea).toContain(secondAgendaId);
+    expect(state.specialZones?.removedFromGame ?? []).not.toContain(expectedSpendId);
+    expect(state.cardInstances[expectedSpendId]?.agendaPointsSpent).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
       cardDefinitionId: "onr_v1_156_corporate-ally",
       agendaPointCostPaid: 1,
-      forfeitedAgendaCardId: expectedForfeitId,
+      spentAgendaCardId: expectedSpendId,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/,

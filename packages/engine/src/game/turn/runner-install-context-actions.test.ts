@@ -37,7 +37,7 @@ describe("runner install context action builders", () => {
     });
     const before = structuredClone(state);
     const cardId = "runner_agenda_point_hardware" as CardInstanceId;
-    const forfeitAgendaCardId = "runner_scored_agenda" as CardInstanceId;
+    const spentAgendaCardId = "runner_scored_agenda" as CardInstanceId;
 
     const action = buildRunnerAgendaPointInstallAction(state, {
       cardId,
@@ -48,7 +48,7 @@ describe("runner install context action builders", () => {
         3,
       ),
       installAgendaPointCost: 1,
-      forfeitAgendaCardId,
+      spentAgendaCardId,
       targetRequirementId: "hardwareCard",
     });
 
@@ -63,7 +63,7 @@ describe("runner install context action builders", () => {
       payload: {
         cardId,
         installAgendaPointCost: 1,
-        forfeitAgendaCardId,
+        spentAgendaCardId,
         installCostReason: "card_implementation_agenda_point_cost",
       },
       targetRequirements: [

@@ -13,7 +13,7 @@ export type RunnerAgendaPointInstallActionInput = {
   cardId: CardInstanceId;
   definition: CardDefinition;
   installAgendaPointCost: number;
-  forfeitAgendaCardId: CardInstanceId;
+  spentAgendaCardId: CardInstanceId;
   targetRequirementId: RunnerInstallGripTargetId;
 };
 
@@ -54,7 +54,7 @@ export function buildRunnerAgendaPointInstallAction(
     {
       cardId: input.cardId,
       installAgendaPointCost: input.installAgendaPointCost,
-      forfeitAgendaCardId: input.forfeitAgendaCardId,
+      spentAgendaCardId: input.spentAgendaCardId,
       installCostReason: "card_implementation_agenda_point_cost",
     },
     runnerGripTargetMetadata(input.targetRequirementId),

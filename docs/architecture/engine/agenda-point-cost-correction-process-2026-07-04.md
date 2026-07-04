@@ -1,6 +1,6 @@
 # Agenda-Point-Cost-Correction-Prozess
 
-Status: geplant
+Status: umgesetzt im Arbeitsbranch
 Datum: 2026-07-04
 Arbeitsbranch: `codex/agenda-point-cost-correction`
 
@@ -99,3 +99,21 @@ Abnahmekriterien:
 - Relevante Tests und `git diff --check` sind erfolgreich.
 - Der Branch ist lokal nach `main` gemergt.
 - Der temporäre Worktree ist entfernt oder als entfernt dokumentiert.
+
+## Umsetzungsstand
+
+APCC-01 bis APCC-04 wurden im Arbeitsbranch umgesetzt. Das neue Ledger-Feld `agendaPointsSpent` reduziert den verbleibenden Punktwert gescorter Agendas, ohne die Agenda-Karte aus der Score Area zu entfernen.
+
+Geprüfte und angepasste Agenda-Punkt-Zahlungspfade:
+
+- Corp-Rez-Kosten: `ACME Savings and Loan`, `Glacier`.
+- Corp-Aktions-/Cancelkosten: `I Got a Rock`, `Diplomatic Immunity`-Cancel.
+- Runner-Installkosten: `Corporate Ally`, `Arasaka Portable Prototype`.
+- Runner-Aktionskosten: `Databroker`.
+- Agenda-Punkt-Verlust-/Forfeit-Punkteffekte: `Arasaka Owns You`, `Corruption`.
+
+Verifikation im Worktree:
+
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm --filter @netgrid/engine test`
+- `git diff --check`

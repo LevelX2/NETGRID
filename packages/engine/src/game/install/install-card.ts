@@ -359,17 +359,16 @@ function installRunnerCard(
       throw new Error(
         "Die CardImplementation-Installation benötigt exakt die deklarierten Agenda-Punkt-Zusatzkosten.",
       );
-    const forfeitAgendaCardId = String(
-      legalAction.payload?.forfeitAgendaCardId ?? "",
+    const agendaPointSourceCardId = String(
+      legalAction.payload?.spentAgendaCardId ??
+        legalAction.payload?.forfeitAgendaCardId ??
+        "",
     ) as CardInstanceId;
-    host.runner.forfeitRunnerAgendaForPointCost(forfeitAgendaCardId);
+    host.runner.forfeitRunnerAgendaForPointCost(agendaPointSourceCardId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       agendaPointCostPaid: agendaCost,
-      forfeitedAgendaCardId: forfeitAgendaCardId,
-      specialZone: "removed_from_game",
-      specialZoneVisibility: "public",
-      specialZoneReason: "agenda_point_cost_card_implementation_install",
+      spentAgendaCardId: agendaPointSourceCardId,
     };
   }
   if (

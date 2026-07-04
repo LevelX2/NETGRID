@@ -647,47 +647,19 @@ function stealAgenda(
     Math.floor(host.state.runnerAgendaPointsToForfeit ?? 0),
   );
   host.zones.removeFromAllZones(cardId as CardInstanceId);
+  let paidDebt = 0;
   if (agendaDebt > 0) {
-    const paidDebt = Math.min(agendaDebt, agendaPointValue);
+    paidDebt = Math.min(agendaDebt, agendaPointValue);
     host.state.runnerAgendaPointsToForfeit = agendaDebt - paidDebt;
-    host.zones.ensureSpecialZones().removedFromGame.push(cardId as CardInstanceId);
-    host.state.cardInstances[cardId] = {
-      ...host.cards.cardInstanceFor(cardId as CardInstanceId),
-      faceup: true,
-      rezzed: true,
-      zone: {
-        side: "special",
-        zone: "removed_from_game",
-        visibility: "public",
-      },
-    };
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         v1919RunnerEventAbility: "future_agenda_point_forfeit",
         futureAgendaPointForfeitPaid: paidDebt,
         futureAgendaPointForfeitPending: host.state.runnerAgendaPointsToForfeit,
-        specialZone: "removed_from_game",
-        specialZoneVisibility: "public",
-        specialZoneReason: "v1919_future_agenda_point_forfeit",
+        spentAgendaCardId: cardId,
       };
     }
-    if (host.state.run?.breach) {
-      return {
-        ...completeCurrentBreachAccess(host, "stolen", legalAction),
-        stolenAgendaId: cardId as CardInstanceId,
-        ...resolvedPayloadFor(legalAction),
-      };
-    }
-    host.run.finishRun(true, legalAction);
-    return {
-      handled: true,
-      stolenAgendaId: cardId as CardInstanceId,
-      runFinished: true,
-      accessFinished: true,
-      ...resolvedPayloadFor(legalAction),
-      stateChanged: true,
-    };
   }
   flags.stolenAgendaIdsThisTurn = [
     ...new Set([...(flags.stolenAgendaIdsThisTurn ?? []), cardId as CardInstanceId]),
@@ -697,6 +669,18 @@ function stealAgenda(
     ...host.cards.cardInstanceFor(cardId as CardInstanceId),
     faceup: true,
     rezzed: true,
+    ...(paidDebt > 0
+      ? {
+          agendaPointsSpent:
+            Math.max(
+              0,
+              Math.floor(
+                host.cards.cardInstanceFor(cardId as CardInstanceId)
+                  .agendaPointsSpent ?? 0,
+              ),
+            ) + paidDebt,
+        }
+      : {}),
     zone: { side: "runner", zone: "scoreArea" },
   };
   if (host.state.run?.breach) {

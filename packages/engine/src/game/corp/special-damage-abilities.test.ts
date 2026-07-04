@@ -74,7 +74,7 @@ function makeHost(legalAction?: LegalAction) {
   } as unknown as GameState;
   const calls = {
     builtActions: [] as LegalAction[],
-    forfeited: [] as CardInstanceId[],
+    spentAgendaPointCosts: [] as number[],
     damages: [] as Array<{ type: string; amount: number; source: string }>,
     rolls: [] as string[],
     trashedCorp: [] as CardInstanceId[],
@@ -135,7 +135,16 @@ function makeHost(legalAction?: LegalAction) {
       total: () => 3,
       scoredForfeitTargets: () => ["agenda" as CardInstanceId],
       pointsForScoredCard: () => 3,
-      forfeitCorpAgendaForPointCost: (cardId) => calls.forfeited.push(cardId),
+      forfeitCorpAgendaForPointCost: () => undefined,
+      spendPointCost: (requiredPoints) => {
+        calls.spentAgendaPointCosts.push(requiredPoints);
+        return {
+          paidPoints: requiredPoints,
+          bonusPointsSpent: 0,
+          spentAgendaIds: ["agenda" as CardInstanceId],
+          spentAgendaDefinitionIds: ["agenda" as CardDefinitionId],
+        };
+      },
     },
     damage: {
       resolveDamageOperation: (type, amount, source) => {
@@ -191,7 +200,7 @@ describe("corp special damage abilities", () => {
     });
   });
 
-  it("executes I Got a Rock through agenda forfeit and damage callbacks", () => {
+  it("executes I Got a Rock through agenda point spend and damage callbacks", () => {
     const legalAction = makeAction({
       cardId: "rock",
       v1920AssetAbility: "tagged_meat_damage",
@@ -201,15 +210,16 @@ describe("corp special damage abilities", () => {
     const result = handleCorpSpecialDamageAbilityAction(host);
 
     expect(result.handled).toBe(true);
-    expect(calls.forfeited).toEqual(["agenda"]);
+    expect(calls.spentAgendaPointCosts).toEqual([3]);
     expect(calls.damages).toEqual([
       { type: "meat", amount: 15, source: "onr_v1_327_i-got-a-rock" },
     ]);
     expect(legalAction.payload).toMatchObject({
       agendaPointCost: 3,
       agendaPointCostPaid: 3,
-      specialZoneReason: "tagged_meat_damage_agenda_point_cost",
+      spentAgendaDefinitionIds: "agenda",
     });
+    expect(legalAction.payload?.specialZoneReason).toBeUndefined();
   });
 
   it("executes Schlaghund with stable die purpose, threshold damage, and source trash", () => {

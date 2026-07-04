@@ -196,6 +196,7 @@ export function publicContextForAction(
       "agendaPointCostPaid",
       "deckUniqueReplacement",
       "forfeitedAgendaCardId",
+      "spentAgendaCardId",
       "iceInstallBaseCost",
       "iceInstallAdditionalCost",
       "iceInstallIncreaseSourceDefinitionIds",
@@ -444,7 +445,9 @@ export function publicContextForAction(
       "affectedSide",
       "agendaPointCost",
       "agendaPointCostPaid",
+      "corpBonusAgendaPointsSpent",
       "forfeitedAgendaDefinitionIds",
+      "spentAgendaDefinitionIds",
       "specialZone",
       "specialZoneVisibility",
       "specialZoneReason",
@@ -509,7 +512,9 @@ export function publicContextForAction(
       "futureActionDebtAdded",
       "futureActionDebtPending",
       "futureAgendaPointForfeitAdded",
+      "futureAgendaPointForfeitPaid",
       "futureAgendaPointForfeitPending",
+      "spentAgendaCardId",
       "sourceDefinitionId",
       "cardDefinitionId",
       "scoredAgendaStartDrawDecision",
@@ -717,6 +722,7 @@ export function publicContextForAction(
       "corruptedAgendaDefinitionIds",
       "agendaPointsLost",
       "corpBonusAgendaPointsAfter",
+      "spentAgendaDefinitionIds",
       "tagsAdded",
       "runnerTagsAfter",
       "specialZone",
@@ -1279,6 +1285,7 @@ export function publicContextForAction(
     "endedRun",
     "runnerUtilityAbility",
     "resourceAbility",
+    "spentAgendaCardId",
     "counterType",
     "addedCounterAmount",
     "removedCounterAmount",
@@ -1565,6 +1572,7 @@ export function publicContextForAction(
       "agendaPointCostPaid",
       "corpBonusAgendaPointsSpent",
       "forfeitedAgendaDefinitionIds",
+      "spentAgendaDefinitionIds",
       "gainedCredits",
       "selfTrashed",
       "activeObligationDebtCount",
@@ -1802,6 +1810,8 @@ export function publicContextForAction(
     if (typeof legalAction.payload.futureAgendaPointForfeitPending === "number")
       context.futureAgendaPointForfeitPending =
         legalAction.payload.futureAgendaPointForfeitPending;
+    if (typeof legalAction.payload.spentAgendaCardId === "string")
+      context.spentAgendaCardId = legalAction.payload.spentAgendaCardId;
     if (legalAction.payload.specialZone)
       context.specialZone = legalAction.payload.specialZone;
     if (legalAction.payload.specialZoneVisibility)
@@ -1850,6 +1860,12 @@ export function publicContextForAction(
       context.agendaPointCost = legalAction.payload.agendaPointCost;
     if (typeof legalAction.payload.agendaPointCostPaid === "number")
       context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
+    if (typeof legalAction.payload.corpBonusAgendaPointsSpent === "number")
+      context.corpBonusAgendaPointsSpent =
+        legalAction.payload.corpBonusAgendaPointsSpent;
+    if (typeof legalAction.payload.spentAgendaDefinitionIds === "string")
+      context.spentAgendaDefinitionIds =
+        legalAction.payload.spentAgendaDefinitionIds;
   }
   if (typeof legalAction.payload?.v1920RunnerRunLockAbility === "string") {
     context.v1920RunnerRunLockAbility =

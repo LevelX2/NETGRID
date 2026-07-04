@@ -1393,12 +1393,19 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         action.payload?.v1920AssetAbility === "tagged_meat_damage",
     );
 
-    expect(state.specialZones?.removedFromGame).toContain(scoredAgendaId);
+    expect(state.corp.scoreArea).toContain(scoredAgendaId);
+    expect(state.specialZones?.removedFromGame ?? []).not.toContain(
+      scoredAgendaId,
+    );
+    expect(state.cardInstances[scoredAgendaId]?.agendaPointsSpent).toBe(3);
+    expect(agendaPoints(state, "corp")).toBe(0);
     expect(state.winner).toBe("corp");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
       v1920AssetAbility: "tagged_meat_damage",
       agendaPointCost: 3,
+      agendaPointCostPaid: 3,
+      spentAgendaDefinitionIds: "onr_v1_204_ice-transmutation",
       damageResolved: true,
       damageType: "meat",
       damageAmount: 15,

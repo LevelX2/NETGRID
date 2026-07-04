@@ -12,6 +12,13 @@ import type { CardUniqueDirectLongtailImplementation } from "../../ability-engin
 
 type SpecialDamagePayload = Record<string, string | number | boolean>;
 
+type AgendaPointSpendResult = {
+  paidPoints: number;
+  bonusPointsSpent: number;
+  spentAgendaIds: CardInstanceId[];
+  spentAgendaDefinitionIds: CardDefinitionId[];
+};
+
 export type CorpSpecialDamageAbilityHost = {
   state: GameState;
   legalAction?: LegalAction;
@@ -40,6 +47,7 @@ export type CorpSpecialDamageAbilityHost = {
     scoredForfeitTargets: () => CardInstanceId[];
     pointsForScoredCard: (cardId: CardInstanceId) => number;
     forfeitCorpAgendaForPointCost: (cardId: CardInstanceId) => void;
+    spendPointCost: (requiredPoints: number) => AgendaPointSpendResult;
   };
   damage: {
     resolveDamageOperation: (
@@ -201,22 +209,9 @@ function handleTaggedMeatDamageAction(
     throw new Error("Die Tagged-Damage-Faehigkeit passt nicht zur Karte.");
   if (host.state.runner.tags < implementation.requiredRunnerTags)
     throw new Error("Die Tagged-Damage-Faehigkeit verlangt mehr Runner-Tags.");
-  const forfeitedAgendaIds = chooseCorpAgendasForPointCost(
-    host,
+  const costResult = host.agendaPoints.spendPointCost(
     implementation.agendaPointCost,
   );
-  const paidPoints = forfeitedAgendaIds.reduce(
-    (sum, cardId) => sum + host.agendaPoints.pointsForScoredCard(cardId),
-    0,
-  );
-  if (paidPoints < implementation.agendaPointCost)
-    throw new Error("Die Tagged-Damage-Faehigkeit braucht Agenda-Punkte.");
-  const forfeitedDefinitionIds = forfeitedAgendaIds
-    .map((cardId) => host.cards.definitionFor(cardId).id)
-    .join(",");
-  for (const agendaId of forfeitedAgendaIds) {
-    host.agendaPoints.forfeitCorpAgendaForPointCost(agendaId);
-  }
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1920AssetAbility: "tagged_meat_damage",
@@ -224,31 +219,22 @@ function handleTaggedMeatDamageAction(
     sourceCardId,
     runnerTagsBefore: host.state.runner.tags,
     agendaPointCost: implementation.agendaPointCost,
-    agendaPointCostPaid: paidPoints,
-    forfeitedAgendaDefinitionIds: forfeitedDefinitionIds,
-    specialZone: "removed_from_game",
-    specialZoneVisibility: "public",
-    specialZoneReason: "tagged_meat_damage_agenda_point_cost",
+    agendaPointCostPaid: costResult.paidPoints,
+    ...(costResult.bonusPointsSpent > 0
+      ? { corpBonusAgendaPointsSpent: costResult.bonusPointsSpent }
+      : {}),
+    ...(costResult.spentAgendaDefinitionIds.length > 0
+      ? {
+          spentAgendaDefinitionIds:
+            costResult.spentAgendaDefinitionIds.join(","),
+        }
+      : {}),
   };
   host.damage.resolveDamageOperation(
     implementation.damageType,
     implementation.damageAmount,
     definition.id,
   );
-}
-
-function chooseCorpAgendasForPointCost(
-  host: CorpSpecialDamageAbilityHost,
-  requiredPoints: number,
-): CardInstanceId[] {
-  let total = 0;
-  const selected: CardInstanceId[] = [];
-  for (const cardId of host.agendaPoints.scoredForfeitTargets()) {
-    selected.push(cardId);
-    total += host.agendaPoints.pointsForScoredCard(cardId);
-    if (total >= requiredPoints) return selected;
-  }
-  return [];
 }
 
 function handleSchlaghundAction(

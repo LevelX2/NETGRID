@@ -90,8 +90,8 @@ export type BreakSubroutineCostBreakdown = {
 export type CorpAgendaPointCostResult = {
   paidPoints: number;
   bonusPointsSpent: number;
-  forfeitedAgendaIds: CardInstanceId[];
-  forfeitedAgendaDefinitionIds: CardDefinitionId[];
+  spentAgendaIds: CardInstanceId[];
+  spentAgendaDefinitionIds: CardDefinitionId[];
 };
 export type RunnerTraceCounterEffectRuntime = {
   counterType: CounterType;

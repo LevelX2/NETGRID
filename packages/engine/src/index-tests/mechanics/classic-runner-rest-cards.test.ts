@@ -382,8 +382,12 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
         action.type === "play_event" && action.payload?.cardId === corruptionId,
     );
 
-    expect(state.runner.scoreArea).not.toContain(agendaId);
-    expect(state.specialZones?.removedFromGame).toContain(agendaId);
+    expect(state.runner.scoreArea).toContain(agendaId);
+    expect(state.specialZones?.removedFromGame ?? []).not.toContain(agendaId);
+    expect(state.cardInstances[agendaId]?.agendaPointsSpent).toBe(
+      runnerPointsBefore,
+    );
+    expect(agendaPoints(state, "runner")).toBe(0);
     expect(state.corpBonusAgendaPoints).toBe(runnerPointsBefore);
     expect(state.runner.credits).toBe(runnerPointsBefore * 10);
     expect(state.runner.tags).toBe(1);
@@ -396,9 +400,11 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       runnerEventAbility: "runner_corruption_agenda_point_transfer",
       corruptedAgendaCount: 1,
       agendaPointsLost: runnerPointsBefore,
+      spentAgendaDefinitionIds: expect.any(String),
       gainedCredits: runnerPointsBefore * 10,
       tagsAdded: 1,
     });
+    expect(state.eventLog.at(-1)?.publicPayload?.specialZone).toBeUndefined();
     expectValid(state);
   });
 

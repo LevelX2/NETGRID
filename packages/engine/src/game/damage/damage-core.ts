@@ -50,6 +50,13 @@ export type DamageSummary = {
   runnerMaxHandSizeAfter?: number;
 };
 
+type CorpAgendaPointCostSpendResult = {
+  paidPoints: number;
+  bonusPointsSpent: number;
+  spentAgendaIds: CardInstanceId[];
+  spentAgendaDefinitionIds: CardDefinitionId[];
+};
+
 const DAMAGE_PREVENTION_BYPASS_CHOICE_PREFIX =
   "damage_prevention_bypass_pay_";
 
@@ -87,6 +94,10 @@ export type DamageCoreHost = {
     ) => CardInstanceId[];
     agendaPointsForScoredCard: (state: GameState, cardId: CardInstanceId) => number;
     forfeitAgendaForPointCost: (state: GameState, cardId: CardInstanceId) => void;
+    spendAgendaPointCost: (
+      state: GameState,
+      requiredPoints: number,
+    ) => CorpAgendaPointCostSpendResult;
   };
   counters: {
     cardCounter: (
@@ -189,16 +200,6 @@ function corpAgendaPointTotal(state: GameState): number {
   return requireDamageCoreHost().corp.agendaPointTotal(state);
 }
 
-function chooseCorpAgendasForPointCost(
-  state: GameState,
-  requiredPoints: number,
-): CardInstanceId[] {
-  return requireDamageCoreHost().corp.chooseAgendasForPointCost(
-    state,
-    requiredPoints,
-  );
-}
-
 function agendaPointsForScoredCard(
   state: GameState,
   cardId: CardInstanceId,
@@ -206,11 +207,14 @@ function agendaPointsForScoredCard(
   return requireDamageCoreHost().corp.agendaPointsForScoredCard(state, cardId);
 }
 
-function forfeitCorpAgendaForPointCost(
+function spendCorpAgendaPointCost(
   state: GameState,
-  cardId: CardInstanceId,
-): void {
-  requireDamageCoreHost().corp.forfeitAgendaForPointCost(state, cardId);
+  requiredPoints: number,
+): CorpAgendaPointCostSpendResult {
+  return requireDamageCoreHost().corp.spendAgendaPointCost(
+    state,
+    requiredPoints,
+  );
 }
 
 function cardCounter(
@@ -1695,28 +1699,21 @@ export function resolveEventModificationChoice(
       isCorpDamagePreventionCancelCandidate(state, cancelCandidate);
     let agendaPointCost = 0;
     let agendaPointCostPaid = 0;
-    let forfeitedAgendaDefinitionIds = "";
+    let corpBonusAgendaPointsSpent = 0;
+    let spentAgendaDefinitionIds = "";
     if (corpDamagePreventionCancel) {
       agendaPointCost =
         damagePreventionSourceForEventCandidate(
           state,
           cancelCandidate,
         )?.corpMayCancelUntilEndOfTurn?.agendaPointCost ?? 1;
-      const forfeitedAgendaIds = chooseCorpAgendasForPointCost(
-        state,
-        agendaPointCost,
-      );
-      agendaPointCostPaid = forfeitedAgendaIds.reduce(
-        (sum, cardId) => sum + agendaPointsForScoredCard(state, cardId),
-        0,
-      );
+      const costResult = spendCorpAgendaPointCost(state, agendaPointCost);
+      agendaPointCostPaid = costResult.paidPoints;
       if (agendaPointCostPaid < agendaPointCost)
         throw new Error("Damage Prevention kann nicht gecancelt werden.");
-      forfeitedAgendaDefinitionIds = forfeitedAgendaIds
-        .map((cardId) => definitionFor(state, cardId).id)
-        .join(",");
-      for (const agendaId of forfeitedAgendaIds)
-        forfeitCorpAgendaForPointCost(state, agendaId);
+      corpBonusAgendaPointsSpent = costResult.bonusPointsSpent;
+      spentAgendaDefinitionIds =
+        costResult.spentAgendaDefinitionIds.join(",");
       const sourceInstanceId = cancelCandidate.sourceRef.instanceId;
       if (sourceInstanceId) {
         state.cancelledDamagePreventionSourceIdsUntilEndOfTurn = [
@@ -1746,10 +1743,12 @@ export function resolveEventModificationChoice(
                 sourceDefinitionId: cancelCandidate.sourceRef.definitionId,
                 agendaPointCost,
                 agendaPointCostPaid,
-                forfeitedAgendaDefinitionIds,
-                specialZone: "removed_from_game",
-                specialZoneVisibility: "public",
-                specialZoneReason: "damage_prevention_cancel",
+                ...(corpBonusAgendaPointsSpent > 0
+                  ? { corpBonusAgendaPointsSpent }
+                  : {}),
+                ...(spentAgendaDefinitionIds
+                  ? { spentAgendaDefinitionIds }
+                  : {}),
               }
             : {}),
         },
@@ -1766,10 +1765,12 @@ export function resolveEventModificationChoice(
             sourceDefinitionId: cancelCandidate.sourceRef.definitionId,
             agendaPointCost,
             agendaPointCostPaid,
-            forfeitedAgendaDefinitionIds,
-            specialZone: "removed_from_game",
-            specialZoneVisibility: "public",
-            specialZoneReason: "damage_prevention_cancel",
+            ...(corpBonusAgendaPointsSpent > 0
+              ? { corpBonusAgendaPointsSpent }
+              : {}),
+            ...(spentAgendaDefinitionIds
+              ? { spentAgendaDefinitionIds }
+              : {}),
           }
         : {}),
     };

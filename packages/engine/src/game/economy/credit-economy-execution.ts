@@ -576,10 +576,12 @@ export function handleCreditEconomyExecution(
     const expectedAgendaCost = implementation.agendaPointCost;
     if (!Number.isInteger(agendaCost) || agendaCost !== expectedAgendaCost)
       throw new Error("Der Databroker-Agenda-Kostenpfad ist ungueltig.");
-    const forfeitAgendaCardId = String(
-      legalAction.payload?.forfeitAgendaCardId ?? "",
+    const agendaPointSourceCardId = String(
+      legalAction.payload?.spentAgendaCardId ??
+        legalAction.payload?.forfeitAgendaCardId ??
+        "",
     ) as CardInstanceId;
-    host.runner.forfeitAgendaForPointCost(state, forfeitAgendaCardId);
+    host.runner.forfeitAgendaForPointCost(state, agendaPointSourceCardId);
     if (legalAction.payload?.trashOnUse === true)
       host.runner.trashInstalledCardToHeap(state, sourceCardId);
     const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 10);
@@ -593,12 +595,9 @@ export function handleCreditEconomyExecution(
     host.credits.gain(state, "runner", gainAmount);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      forfeitedAgendaCardId: forfeitAgendaCardId,
+      spentAgendaCardId: agendaPointSourceCardId,
       agendaPointCostPaid: agendaCost,
       gainedCredits: gainAmount,
-      specialZone: "removed_from_game",
-      specialZoneVisibility: "public",
-      specialZoneReason: "agenda_point_cost_databroker",
     };
     return handled(legalAction);
   }

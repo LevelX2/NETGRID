@@ -608,14 +608,14 @@ export function buildRunnerMainActions(
       const installAgendaPointCost =
         cardImplementationAgendaPointInstallCost(definition);
       if (installAgendaPointCost > 0) {
-        const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
-        if (!forfeitAgendaId) continue;
+        const spentAgendaId = pickRunnerAgendaForAgendaPointCost(state);
+        if (!spentAgendaId) continue;
         actions.push(
           buildRunnerAgendaPointInstallAction(state, {
             cardId: id,
             definition,
             installAgendaPointCost,
-            forfeitAgendaCardId: forfeitAgendaId,
+            spentAgendaCardId: spentAgendaId,
             targetRequirementId: "hardwareCard",
           }),
         );
@@ -634,14 +634,14 @@ export function buildRunnerMainActions(
       const installAgendaPointCost =
         cardImplementationAgendaPointInstallCost(definition);
       if (installAgendaPointCost > 0) {
-        const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
-        if (!forfeitAgendaId) continue;
+        const spentAgendaId = pickRunnerAgendaForAgendaPointCost(state);
+        if (!spentAgendaId) continue;
         actions.push(
           buildRunnerAgendaPointInstallAction(state, {
             cardId: id,
             definition,
             installAgendaPointCost,
-            forfeitAgendaCardId: forfeitAgendaId,
+            spentAgendaCardId: spentAgendaId,
             targetRequirementId: "resourceCard",
           }),
         );
@@ -1012,8 +1012,8 @@ export function buildRunnerMainActions(
         resourceId,
       );
       if (uniqueDirectLongtail?.kind === "agenda_point_for_credits_resource") {
-        const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
-        if (forfeitAgendaId) {
+        const spentAgendaId = pickRunnerAgendaForAgendaPointCost(state);
+        if (spentAgendaId) {
           const agendaPointCost = uniqueDirectLongtail.agendaPointCost;
           const gainCreditsAmount = uniqueDirectLongtail.gainCredits;
           actions.push(
@@ -1027,7 +1027,7 @@ export function buildRunnerMainActions(
               {
                 cardId: resourceId,
                 resourceAbility: "databroker",
-                forfeitAgendaCardId: forfeitAgendaId,
+                spentAgendaCardId: spentAgendaId,
                 agendaPointCost,
                 trashOnUse: true,
                 gainCreditsAmount,

@@ -1057,6 +1057,7 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     shuffleRunnerStack,
     skivvissCounterTotal,
     specialZoneHarnessActions,
+    spendAgendaPointFromScoredCard,
     spendEncounterTemporaryTraceCredits,
     spendCorpTraceCounterPoolCounters,
     spendRecurringTraceCreditPool,
@@ -1133,27 +1134,13 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
   ): void {
     if (!cardId || !state.runner.scoreArea.includes(cardId))
       throw new Error(
-        "Der Runner kann diese Agenda nicht fuer Kosten forfeiten.",
+        "Der Runner kann mit dieser Agenda keine Kosten bezahlen.",
       );
     if (agendaPointsForScoredCard(state, cardId) < 1)
       throw new Error(
         "Die gewaehlte Runner-Agenda liefert keinen Agenda-Punkt fuer Kosten.",
       );
-    const instance = mustInstance(state.cardInstances, cardId);
-    removeFromAllZones(state, cardId);
-    const specialZones = ensureSpecialZones(state);
-    specialZones.removedFromGame.push(cardId);
-    specialZones.removedFromGame.sort();
-    state.cardInstances[cardId] = {
-      ...instance,
-      faceup: true,
-      rezzed: true,
-      zone: {
-        side: "special",
-        zone: "removed_from_game",
-        visibility: "public",
-      },
-    };
+    spendAgendaPointFromScoredCard(state, cardId);
   }
 
   function forfeitCorpAgendaForPointCost(
@@ -1162,27 +1149,13 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
   ): void {
     if (!cardId || !state.corp.scoreArea.includes(cardId))
       throw new Error(
-        "Die Korp kann diese Agenda nicht fuer Kosten forfeiten.",
+        "Die Korp kann mit dieser Agenda keine Kosten bezahlen.",
       );
     if (agendaPointsForScoredCard(state, cardId) < 1)
       throw new Error(
         "Die gewaehlte Korp-Agenda liefert keinen Agenda-Punkt fuer Kosten.",
       );
-    const instance = mustInstance(state.cardInstances, cardId);
-    removeFromAllZones(state, cardId);
-    const specialZones = ensureSpecialZones(state);
-    specialZones.removedFromGame.push(cardId);
-    specialZones.removedFromGame.sort();
-    state.cardInstances[cardId] = {
-      ...instance,
-      faceup: true,
-      rezzed: true,
-      zone: {
-        side: "special",
-        zone: "removed_from_game",
-        visibility: "public",
-      },
-    };
+    spendAgendaPointFromScoredCard(state, cardId);
   }
 
   function activeObligationCount(state: GameState): number {
@@ -1212,6 +1185,8 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
   ): CorpAgendaPointCostResult {
     if (!Number.isInteger(requiredPoints) || requiredPoints <= 0)
       throw new Error("Agenda-Punkt-Kosten sind ungueltig.");
+    if (corpAgendaPointTotal(state) < requiredPoints)
+      throw new Error("Die Korp hat nicht genug Agenda-Punkte.");
     let remaining = requiredPoints;
     let paidPoints = 0;
     const bonusBefore = Math.max(
@@ -1224,16 +1199,20 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
       remaining -= bonusPointsSpent;
       paidPoints += bonusPointsSpent;
     }
-    const forfeitedAgendaIds: CardInstanceId[] = [];
-    const forfeitedAgendaDefinitionIds: CardDefinitionId[] = [];
+    const spentAgendaIds: CardInstanceId[] = [];
+    const spentAgendaDefinitionIds: CardDefinitionId[] = [];
     if (remaining > 0) {
       for (const agendaId of corpScoredAgendaForfeitTargets(state)) {
         const points = agendaPointsForScoredCard(state, agendaId);
-        forfeitedAgendaIds.push(agendaId);
-        forfeitedAgendaDefinitionIds.push(definitionFor(state, agendaId).id);
-        paidPoints += points;
-        remaining -= points;
-        forfeitCorpAgendaForPointCost(state, agendaId);
+        const spentFromAgenda = Math.min(points, remaining);
+        if (spentFromAgenda <= 0) continue;
+        spentAgendaIds.push(agendaId);
+        spentAgendaDefinitionIds.push(definitionFor(state, agendaId).id);
+        for (let index = 0; index < spentFromAgenda; index += 1) {
+          spendAgendaPointFromScoredCard(state, agendaId);
+        }
+        paidPoints += spentFromAgenda;
+        remaining -= spentFromAgenda;
         if (remaining <= 0) break;
       }
     }
@@ -1242,8 +1221,8 @@ export function createCorpRuntimeResolvers(deps: RuntimeDeps) {
     return {
       paidPoints,
       bonusPointsSpent,
-      forfeitedAgendaIds,
-      forfeitedAgendaDefinitionIds,
+      spentAgendaIds,
+      spentAgendaDefinitionIds,
     };
   }
 

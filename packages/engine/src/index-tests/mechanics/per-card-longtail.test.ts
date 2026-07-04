@@ -3496,7 +3496,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
             "onr_v1_119_arasaka-portable-prototype",
       ),
     ).toBe(false);
-    scoreRunnerAgendaForTest(state, "simple_agenda");
+    const spentAgendaId = scoreRunnerAgendaForTest(state, "simple_agenda");
 
     state = apply(
       state,
@@ -3517,11 +3517,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.rig.hardware).toContain(arasakaId);
     expect(getPlayerView(state, "runner").own.memoryLimit).toBe(7);
     expect(cardCounterAmount(state, arasakaId, "bit")).toBe(3);
-    expect(state.runner.scoreArea.length).toBe(0);
+    expect(state.runner.scoreArea).toContain(spentAgendaId);
+    expect(state.specialZones?.removedFromGame ?? []).not.toContain(spentAgendaId);
+    expect(state.cardInstances[spentAgendaId]?.agendaPointsSpent).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_119_arasaka-portable-prototype",
       deckUniqueReplacement: true,
       agendaPointCostPaid: 1,
+      spentAgendaCardId: spentAgendaId,
       hostedCreditsAdded: 3,
       counterType: "bit",
     });

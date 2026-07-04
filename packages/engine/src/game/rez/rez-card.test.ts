@@ -367,8 +367,8 @@ function testHost(
         return {
           paidPoints,
           bonusPointsSpent: paidPoints,
-          forfeitedAgendaIds: [],
-          forfeitedAgendaDefinitionIds: [],
+          spentAgendaIds: [],
+          spentAgendaDefinitionIds: [],
         };
       },
       activeObligationCount: () =>

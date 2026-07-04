@@ -17,8 +17,8 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 type CorpAgendaPointCostResult = {
   paidPoints: number;
   bonusPointsSpent: number;
-  forfeitedAgendaIds: CardInstanceId[];
-  forfeitedAgendaDefinitionIds: CardDefinitionId[];
+  spentAgendaIds: CardInstanceId[];
+  spentAgendaDefinitionIds: CardDefinitionId[];
 };
 
 export type RezCardHost = {
@@ -154,13 +154,10 @@ export function rezCard(
       ...(costResult.bonusPointsSpent > 0
         ? { corpBonusAgendaPointsSpent: costResult.bonusPointsSpent }
         : {}),
-      ...(costResult.forfeitedAgendaDefinitionIds.length > 0
+      ...(costResult.spentAgendaDefinitionIds.length > 0
         ? {
-            forfeitedAgendaDefinitionIds:
-              costResult.forfeitedAgendaDefinitionIds.join(","),
-            specialZone: "removed_from_game",
-            specialZoneVisibility: "public",
-            specialZoneReason: "obligation_debt_rez_cost",
+            spentAgendaDefinitionIds:
+              costResult.spentAgendaDefinitionIds.join(","),
           }
         : {}),
     };
@@ -181,13 +178,10 @@ export function rezCard(
       ...(costResult.bonusPointsSpent > 0
         ? { corpBonusAgendaPointsSpent: costResult.bonusPointsSpent }
         : {}),
-      ...(costResult.forfeitedAgendaDefinitionIds.length > 0
+      ...(costResult.spentAgendaDefinitionIds.length > 0
         ? {
-            forfeitedAgendaDefinitionIds:
-              costResult.forfeitedAgendaDefinitionIds.join(","),
-            specialZone: "removed_from_game",
-            specialZoneVisibility: "public",
-            specialZoneReason: "self_rez_agenda_point_cost",
+            spentAgendaDefinitionIds:
+              costResult.spentAgendaDefinitionIds.join(","),
           }
         : {}),
     };

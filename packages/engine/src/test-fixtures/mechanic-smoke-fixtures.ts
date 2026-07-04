@@ -2363,10 +2363,17 @@ export function sourceDefinition(
 export function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
   const scoredPoints = ids.reduce(
-    (sum, id) =>
-      sum +
-      (DEMO_CARDS_BY_ID[state.cardInstances[id]?.definitionId ?? ""]
-        ?.agendaPoints ?? 0),
+    (sum, id) => {
+      const instance = state.cardInstances[id];
+      const basePoints =
+        DEMO_CARDS_BY_ID[instance?.definitionId ?? ""]?.agendaPoints ?? 0;
+      const bonusPoints = instance?.counters?.agenda ?? 0;
+      const spentPoints = Math.max(
+        0,
+        Math.floor(instance?.agendaPointsSpent ?? 0),
+      );
+      return sum + Math.max(0, basePoints + bonusPoints - spentPoints);
+    },
     0,
   );
   return side === "corp"
