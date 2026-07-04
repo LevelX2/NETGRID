@@ -59,8 +59,8 @@ export function resolveDeckSetup(input: MatchDeckSelectionInput = {}, options: {
   if (options.aiDeckPolicy === "seeded_random") {
     return pairToDeckSetup(
       resolveParticipantPair({
-        runnerDeckSnapshotId: deterministicSnapshotId("runner", options.seed ?? "seeded-random", "runner"),
-        corpDeckSnapshotId: deterministicSnapshotId("corp", options.seed ?? "seeded-random", "corp")
+        runnerDeckSnapshotId: deterministicSnapshotId("runner", options.seed ?? "seeded-random", "runner", options.cardPool),
+        corpDeckSnapshotId: deterministicSnapshotId("corp", options.seed ?? "seeded-random", "corp", options.cardPool)
       }, options.cardPool)
     );
   }
@@ -80,8 +80,8 @@ export function resolveParticipantDeckSetup(
   };
   const participantAInput = input.participantADecks ?? legacyPair;
   const setup: ResolvedParticipantDeckSetup = {
-    player_a: resolveParticipantPair(deckInputForPlayer("player_a", participantAInput, participantAInput, options.seed, options.aiPlayer, policy), options.cardPool),
-    player_b: resolveParticipantPair(deckInputForPlayer("player_b", input.participantBDecks ?? legacyPair, participantAInput, options.seed, options.aiPlayer, policy), options.cardPool)
+    player_a: resolveParticipantPair(deckInputForPlayer("player_a", participantAInput, participantAInput, options.seed, options.aiPlayer, policy, options.cardPool), options.cardPool),
+    player_b: resolveParticipantPair(deckInputForPlayer("player_b", input.participantBDecks ?? legacyPair, participantAInput, options.seed, options.aiPlayer, policy, options.cardPool), options.cardPool)
   };
   if (options.aiPlayer && !participantPairUsesAiSupportedCards(setup[options.aiPlayer])) throw new Error("ai_deck_snapshot_not_supported");
   return setup;
@@ -131,15 +131,16 @@ function deckInputForPlayer(
   participantAInput: ParticipantDeckPairInput,
   seed: string,
   aiPlayer: SeriesPlayerSlot | undefined,
-  policy: AiDeckPolicy
+  policy: AiDeckPolicy,
+  cardPool: MatchCardPool | undefined
 ): ParticipantDeckPairInput {
   if (player !== aiPlayer) return selected;
   if (policy === "fixed") return {};
   if (policy === "same_as_participant_a") return participantAInput;
   if (policy === "seeded_random") {
     return {
-      runnerDeckSnapshotId: deterministicSnapshotId("runner", seed, `${player}:runner`),
-      corpDeckSnapshotId: deterministicSnapshotId("corp", seed, `${player}:corp`)
+      runnerDeckSnapshotId: deterministicSnapshotId("runner", seed, `${player}:runner`, cardPool),
+      corpDeckSnapshotId: deterministicSnapshotId("corp", seed, `${player}:corp`, cardPool)
     };
   }
   return selected;
@@ -189,9 +190,9 @@ function cardPoolIncludesProteus(cardPool: MatchCardPool): boolean {
   return cardPool === "originalset_proteus" || cardPool === "originalset_classic_proteus";
 }
 
-function deterministicSnapshotId(side: "runner" | "corp", seed: string, salt: string): string {
+function deterministicSnapshotId(side: "runner" | "corp", seed: string, salt: string, cardPool?: MatchCardPool): string {
   const candidates = frozenSnapshots
-    .filter((candidate) => candidate.side === side && candidate.validation.ok && aiDeckPool.some((entry) => entry.side === side && entry.snapshotId === candidate.deckSnapshotId) && snapshotUsesAiSupportedCards(candidate))
+    .filter((candidate) => candidate.side === side && candidate.validation.ok && snapshotAllowedForCardPool(candidate, cardPool ?? "originalset") && aiDeckPool.some((entry) => entry.side === side && entry.snapshotId === candidate.deckSnapshotId) && snapshotUsesAiSupportedCards(candidate))
     .map((candidate) => candidate.deckSnapshotId)
     .sort();
   if (candidates.length === 0) return side === "runner" ? DEFAULT_RUNNER_SNAPSHOT_ID : DEFAULT_CORP_SNAPSHOT_ID;
