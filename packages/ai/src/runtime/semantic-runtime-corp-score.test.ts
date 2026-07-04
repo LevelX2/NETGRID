@@ -471,6 +471,34 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("does not treat advanceable assets as same-turn agenda closeouts", () => {
+    const vaporOps = corpCard("vapor-ops", "asset", {
+      title: "Vapor Ops",
+      definitionId: "onr_v1_347_vapor-ops",
+      advancementRequirement: 3,
+      advancementCounters: 1,
+    });
+    const advanceVapor = corpAction(
+      "advance-vapor-ops",
+      "advance_card",
+      { cardId: vaporOps.instanceId, serverId: "remote_1" },
+      vaporOps.instanceId,
+    );
+    advanceVapor.costs = [{ clicks: 1, credits: 1 }];
+    const input = corpInputWithRemoteAgenda(2, 3, vaporOps, [advanceVapor]);
+
+    const componentKeys = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceVapor,
+      "simple_score_advance",
+      testDependencies(),
+    ).map((component) => component.key);
+
+    expect(componentKeys).not.toContain(
+      "corp_same_turn_score_closeout_advance",
+    );
+  });
+
   it("locks an active protected remote agenda over setup, central ice, and economy", () => {
     const agenda = corpCard("active-agenda", "agenda", {
       title: "Active Agenda",
@@ -2624,9 +2652,19 @@ describe("semanticRuntimeCorpScoreComponents", () => {
 
   it("scores advancement-burst operations as score closeout candidates", () => {
     const closeoutAction = corpAction("advancement-burst", "play_operation");
+    const remoteAgenda = agendaCard("remote-agenda");
     const components = semanticRuntimeCorpScoreComponents(
-      corpInputWithGoals(
-        [
+      {
+        ...corpInputWithRemoteAgenda(5, 3, remoteAgenda, [
+          closeoutAction,
+          corpAction(
+            "advance-scoreline",
+            "advance_card",
+            { cardId: remoteAgenda.instanceId, serverId: "remote_1" },
+            remoteAgenda.instanceId,
+          ),
+        ]),
+        ownCorpTacticalGoals: [
           {
             goalId: "corp.tactical.score_closeout",
             family: "corp_scoreline",
@@ -2636,8 +2674,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
             evidence: ["test_goal"],
           },
         ],
-        [closeoutAction, corpAction("advance-scoreline", "advance_card")],
-      ),
+      } as unknown as AiDecisionInput,
       closeoutAction,
       "basic_install",
       testDependencies(),
@@ -2715,6 +2752,27 @@ describe("semanticRuntimeCorpScoreComponents", () => {
         targetConstraintResults: [],
       },
     } satisfies ActionSemanticCandidate;
+    const scorelineOnlyTarget = {
+      ...baseCandidate,
+      targetContext: {
+        selectedTargets: [
+          {
+            targetId: "remote_1_scoreline_asset",
+            targetKind: "card",
+            targetSide: "corp",
+            visibilityScope: "actor_private",
+            evidence: ["target_role:scoreline"],
+          },
+        ],
+        targetKind: "card",
+        targetZones: ["remote"],
+        targetSide: "corp",
+        hiddenInfoPolicy: "side_safe_engine_input_only",
+        availableTargetsStatus: "engine_provided",
+        targetProfileMatches: [],
+        targetConstraintResults: [],
+      },
+    } satisfies ActionSemanticCandidate;
 
     const agendaComponents = semanticRuntimeCorpScoreComponents(
       input,
@@ -2730,6 +2788,13 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       testDependencies(),
       noiseTarget,
     );
+    const scorelineOnlyComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      closeoutAction,
+      "basic_install",
+      testDependencies(),
+      scorelineOnlyTarget,
+    );
 
     expect(agendaComponents.map((component) => component.key)).toContain(
       "corp_score_closeout_semantic_candidate",
@@ -2737,6 +2802,9 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     expect(noiseComponents.map((component) => component.key)).not.toContain(
       "corp_score_closeout_semantic_candidate",
     );
+    expect(
+      scorelineOnlyComponents.map((component) => component.key),
+    ).not.toContain("corp_score_closeout_semantic_candidate");
   });
 
   it("uses ActionSemanticCandidate cost profile for rez affordability", () => {

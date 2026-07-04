@@ -4513,7 +4513,7 @@ function evaluateCorpExtraActionOperations(
   const score = best.scoreWindowAfterExtraActions
     ? 190
     : best.basicCreditFollowupOnly && best.netValue < 0
-      ? -260
+      ? -420
       : best.netValue < 0
         ? -130
         : 40 + best.netValue * 35;
@@ -8756,7 +8756,7 @@ function actionPriority(
     extraActionOperation?.basicCreditFollowupOnly &&
     extraActionOperation.netValue < 0
   )
-    return 35;
+    return -80;
   if (kind === "recover_economy" && extraActionOperation)
     return (
       (extraActionOperation.scoreWindowAfterExtraActions

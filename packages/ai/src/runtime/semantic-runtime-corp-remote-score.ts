@@ -846,9 +846,7 @@ function semanticRuntimeCorpHasActiveRemoteScoreline(
         (card) =>
           card.known !== false &&
           (card.type === "agenda" ||
-            typeof card.advancementRequirement === "number" ||
-            typeof visibleCardDefinition(card)?.advancementRequirement ===
-              "number"),
+            visibleCardDefinition(card)?.type === "agenda"),
       ),
   );
 }

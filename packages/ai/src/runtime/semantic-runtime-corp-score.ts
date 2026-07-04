@@ -1014,6 +1014,7 @@ function corpSameTurnScoreCloseoutComponent<TConsumer extends string>(
   if (action.type !== "advance_card") return undefined;
   const sourceCard = visibleSourceCardForAction(input, action);
   if (!sourceCard || sourceCard.known === false) return undefined;
+  if (!corpVisibleCardIsAgenda(sourceCard)) return undefined;
   const requirement = corpVisibleAdvancementRequirement(sourceCard);
   if (requirement === undefined) return undefined;
   const counters = positiveOrZeroNumber(sourceCard.advancementCounters) ?? 0;
@@ -1069,6 +1070,7 @@ function corpScoreableAgendaAdvancePenaltyComponent(
   if (action.type !== "advance_card") return undefined;
   const sourceCard = visibleSourceCardForAction(input, action);
   if (!sourceCard || sourceCard.known === false) return undefined;
+  if (!corpVisibleCardIsAgenda(sourceCard)) return undefined;
   const requirement = corpVisibleAdvancementRequirement(sourceCard);
   if (requirement === undefined) return undefined;
   const counters = positiveOrZeroNumber(sourceCard.advancementCounters) ?? 0;
@@ -1288,19 +1290,29 @@ function corpInputHasScoreCloseoutBasis(input: AiDecisionInput): boolean {
       (candidate) =>
         candidate.side === "corp" &&
         (candidate.type === "score_agenda" ||
-          candidate.type === "advance_card"),
+          (candidate.type === "advance_card" &&
+            corpActionTargetsVisibleAgenda(input, candidate))),
     )
   ) {
     return true;
   }
   return (input.playerView.servers ?? []).some((server) =>
     (server.root ?? []).some(
-      (card) =>
-        card.known !== false &&
-        (card.type === "agenda" ||
-          typeof card.advancementRequirement === "number"),
+      (card) => card.known !== false && corpVisibleCardIsAgenda(card),
     ),
   );
+}
+
+function corpActionTargetsVisibleAgenda(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const sourceCard = visibleSourceCardForAction(input, action);
+  return sourceCard !== undefined && corpVisibleCardIsAgenda(sourceCard);
+}
+
+function corpVisibleCardIsAgenda(card: VisibleCard): boolean {
+  return card.type === "agenda" || visibleCardDefinition(card)?.type === "agenda";
 }
 
 function corpBurstEconomyOperationForAction<TConsumer extends string>(
@@ -1658,8 +1670,7 @@ function corpActionCandidateTargetsCorpScoreline(
     return (
       target.targetSide !== "runner" &&
       (target.targetKind === "agenda" ||
-        target.evidence.some((entry) => evidenceHasTerm(entry, "agenda")) ||
-        target.evidence.some((entry) => evidenceHasTerm(entry, "scoreline")))
+        target.evidence.some((entry) => evidenceHasTerm(entry, "agenda")))
     );
   });
 }

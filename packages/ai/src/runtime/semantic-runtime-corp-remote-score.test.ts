@@ -522,6 +522,55 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     ).toBe(-2600);
   });
 
+  it("does not treat a Vapor Ops remote as an active agenda scoreline lock", () => {
+    const sideAsset = corpCard("side-asset", "asset", {
+      title: "Side Asset",
+    });
+    const input = corpInputForCentralInstall(sideAsset, {
+      agendaInHq: false,
+      credits: 6,
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+        { id: "archives", label: "Archives", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [
+            corpCard("remote-wall", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+          ],
+          root: [
+            corpCard("vapor-ops", "asset", {
+              title: "Vapor Ops",
+              definitionId: "onr_v1_347_vapor-ops",
+              advancementRequirement: 3,
+              advancementCounters: 2,
+            }),
+          ],
+        },
+      ],
+    });
+    const action = {
+      ...centralInstallIceAction(sideAsset, "new_remote"),
+      payload: {
+        placement: "root",
+        serverId: "new_remote",
+      },
+    } as LegalAction;
+
+    expect(
+      semanticRuntimeCorpInstallRemoteScore(
+        input,
+        action,
+        [],
+        centralInstallDependencies(),
+      ),
+    ).not.toBe(-2600);
+  });
+
   it("does not keep adding generic ICE once the empty scoring remote already has three ICE", () => {
     const etrIce = corpCard("fourth-remote-wall", "ice", {
       definitionId: "simple_barrier_ice",

@@ -797,9 +797,7 @@ function remoteServerHasVisibleScoreline(
       ?.root.some(
         (card) =>
           card.known !== false &&
-          (card.type === "agenda" ||
-            typeof card.advancementRequirement === "number" ||
-            (card.advancementCounters ?? 0) > 0),
+          corpTriageVisibleCardIsAgenda(card),
       ) === true
   );
 }
