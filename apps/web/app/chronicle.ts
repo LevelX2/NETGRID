@@ -1524,6 +1524,26 @@ export function formatChronicleEvent(
         chips.push("Start-of-turn");
         break;
       }
+      if (
+        hiddenZoneAction ===
+        "schematics_search_engine_expose_installed_cards_finish"
+      ) {
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "Schematics Search Engine";
+        category = "hidden";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = cardTitle ?? source;
+        title = phrase(
+          subject,
+          `das Ansehen der durch ${source} aufgedeckten installierten Korp-Karten beendet`,
+        );
+        chips.push(source, "Expose", "Ansehen beendet");
+        break;
+      }
       if (hiddenZoneAction === "p3_33_private_look") {
         const source =
           titleForDefinitionId(sourceDefinitionId) ??
@@ -2091,6 +2111,34 @@ export function formatChronicleEvent(
             : undefined;
         chips.push("Event", "Expose", `${exposedCount} ICE`, ...serverLabels);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        break;
+      }
+      if (
+        actionType === "play_event" &&
+        stringValue(payload.runnerEventAbility) ===
+          "do_the_drine_unpreventable_core_damage_for_credits"
+      ) {
+        const damageAmount =
+          numberValue(payload.damageAmount) ?? numberValue(payload.xValue) ?? 0;
+        const gainedCredits = numberValue(payload.gainedCredits) ?? 0;
+        const cardsTrashed = numberValue(payload.cardsTrashed) ?? damageAmount;
+        const maxHandSizeAfter = numberValue(payload.runnerMaxHandSizeAfter);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title = phrase(
+          subject,
+          `${cardTitle ?? "Do the 'Drine"} gespielt: ${damageAmount} Core Damage gewählt und ${creditText(gainedCredits)} erhalten`,
+        );
+        description = `${cardCountText(cardsTrashed)} ${cardsTrashed === 1 ? "wurde" : "wurden"} aus der Grip in den Heap bewegt; der Damage konnte nicht verhindert werden${maxHandSizeAfter !== undefined ? `; Handlimit danach: ${maxHandSizeAfter}` : ""}`;
+        chips.push(
+          "Event",
+          `${damageAmount} Core Damage`,
+          `+${gainedCredits} ${creditLabel(gainedCredits)}`,
+          `${cardsTrashed} Heap`,
+          "Unverhinderbar",
+        );
         break;
       }
       const playEffect = mergedCardResolverEffect ?? effect;
@@ -2677,16 +2725,57 @@ export function formatChronicleEvent(
       {
         const highlighterAccess = highlighterAccessExplanation(payload);
         const location = accessServerLocationSuffix(serverLabel);
+        const schematicsExpose =
+          hiddenZoneAction ===
+          "schematics_search_engine_expose_installed_cards_review";
+        const source =
+          schematicsExpose
+            ? (titleForDefinitionId(sourceDefinitionId) ??
+              sourceTitle ??
+              "Schematics Search Engine")
+            : undefined;
+        const revealedTitles = schematicsExpose
+          ? publicRevealTitleList(payload.publicRevealTitles)
+          : [];
+        const revealedDefinitionCount = schematicsExpose
+          ? definitionIdsFromCsv(stringValue(payload.publicRevealDefinitionIds))
+              .length
+          : 0;
+        const exposedCount = schematicsExpose
+          ? (numberValue(payload.revealedCount) ??
+            (revealedTitles.length > 0
+              ? revealedTitles.length
+              : revealedDefinitionCount))
+          : 0;
+        const exposedText =
+          exposedCount === 1
+            ? "eine installierte Korp-Karte"
+            : `${exposedCount} installierte Korp-Karten`;
         title = phrase(
           subject,
-          `auf ${cardTitle ?? "eine Karte"}${location} zugegriffen${highlighterAccess ? `, weil die Korp ${highlighterAccess.counterCount} Highlighter-Counter hat` : ""}`,
+          `auf ${cardTitle ?? "eine Karte"}${location} zugegriffen${schematicsExpose ? ` und ${exposedText} durch ${source} aufgedeckt` : ""}${highlighterAccess ? `, weil die Korp ${highlighterAccess.counterCount} Highlighter-Counter hat` : ""}`,
         );
-        description = highlighterAccess
-          ? `Das ist Zugriff ${highlighterAccess.accessNumber} von ${highlighterAccess.totalAccesses}; Highlighter erlaubt diesen zusätzlichen R&D-Zugriff.`
-          : undefined;
+        if (schematicsExpose) {
+          description =
+            revealedTitles.length > 0
+              ? `Aufgedeckt: ${revealedTitles.join(", ")}. Die Ansicht bleibt offen, bis der Runner das Ansehen beendet.`
+              : `${source} hat ${exposedText} aufgedeckt; die Ansicht bleibt offen, bis der Runner das Ansehen beendet.`;
+          cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        } else {
+          description = highlighterAccess
+            ? `Das ist Zugriff ${highlighterAccess.accessNumber} von ${highlighterAccess.totalAccesses}; Highlighter erlaubt diesen zusätzlichen R&D-Zugriff.`
+            : undefined;
+        }
         chips.push(
           "Zugriff",
           ...(serverLabel ? [serverLabel] : []),
+          ...(schematicsExpose
+            ? [
+                source ?? "Schematics Search Engine",
+                "Expose",
+                `${exposedCount} ${exposedCount === 1 ? "Karte" : "Karten"}`,
+              ]
+            : []),
           ...(highlighterAccess
             ? [
                 `${highlighterAccess.counterCount} Highlighter`,

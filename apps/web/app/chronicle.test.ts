@@ -834,6 +834,78 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("SeeYa");
   });
 
+  it("shows Schematics Search Engine HQ access exposes in the chronicle", () => {
+    const item = formatChronicleEvent(
+      makeEvent("access_card", {
+        actor: "runner",
+        serverLabel: "HQ",
+        title: "Simple Agenda",
+        cardDefinitionId: "simple_agenda",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction:
+          "schematics_search_engine_expose_installed_cards_review",
+        publicRevealKind: "expose",
+        sourceDefinitionId: "onr_classic_032_schematics-search-engine",
+        sourceTitle: "Schematics Search Engine",
+        revealedCount: 2,
+        publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+        publicRevealTitles: "Simple Barrier ICE||Simple Economy Asset",
+        exposedServerLabels: "R&D ICE 1,Remote 1 Root 1",
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Du hast auf Simple Agenda in HQ zugegriffen und 2 installierte Korp-Karten durch Schematics Search Engine aufgedeckt.",
+    );
+    expect(item.description).toBe(
+      "Aufgedeckt: Simple Barrier ICE, Simple Economy Asset. Die Ansicht bleibt offen, bis der Runner das Ansehen beendet.",
+    );
+    expect(item.category).toBe("run");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("simple_agenda");
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Zugriff",
+        "HQ",
+        "Schematics Search Engine",
+        "Expose",
+        "2 Karten",
+      ]),
+    );
+  });
+
+  it("shows Schematics Search Engine expose review finish instead of a generic choice", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction:
+          "schematics_search_engine_expose_installed_cards_finish",
+        sourceDefinitionId: "onr_classic_032_schematics-search-engine",
+        sourceTitle: "Schematics Search Engine",
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Du hast das Ansehen der durch Schematics Search Engine aufgedeckten installierten Korp-Karten beendet.",
+    );
+    expect(item.title).not.toContain("Entscheidung beantwortet");
+    expect(item.category).toBe("hidden");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe(
+      "onr_classic_032_schematics-search-engine",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Schematics Search Engine",
+        "Expose",
+        "Ansehen beendet",
+      ]),
+    );
+  });
+
   it("shows Corporate Negotiating Center HQ agenda reveals with public card names", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -2996,6 +3068,43 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("Event");
     expect(item.chips).toContain("+3 Credits");
     expect(effects).toEqual([]);
+  });
+
+  it("shows the chosen Do the 'Drine damage amount in the chronicle", () => {
+    const item = formatChronicleEvent(
+      makeEvent("play_event", {
+        actor: "runner",
+        title: "Do the 'Drine",
+        cardDefinitionId: "onr_classic_036_do-the-drine",
+        runnerEventAbility: "do_the_drine_unpreventable_core_damage_for_credits",
+        xValue: 4,
+        damageType: "core",
+        damageAmount: 4,
+        damageCannotBePrevented: true,
+        cardsTrashed: 4,
+        runnerMaxHandSizeAfter: 1,
+        gainedCredits: 16,
+        runnerCreditsAfter: 16,
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Du hast Do the 'Drine gespielt: 4 Core Damage gewählt und 16 Credits erhalten.",
+    );
+    expect(item.description).toBe(
+      "4 Karten wurden aus der Grip in den Heap bewegt; der Damage konnte nicht verhindert werden; Handlimit danach: 1.",
+    );
+    expect(item.category).toBe("danger");
+    expect(item.importance).toBe("important");
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "4 Core Damage",
+        "+16 Credits",
+        "4 Heap",
+        "Unverhinderbar",
+      ]),
+    );
   });
 
   it("merges simple play lose-credit effects into the played card entry", () => {

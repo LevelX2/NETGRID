@@ -794,7 +794,7 @@ function isNewRemoteInstallAction(action: Pick<LegalAction, "type" | "payload">)
 
 function playEventContextLabel(action: LegalAction): string {
   const serverId = typeof action.payload?.serverId === "string" ? action.payload.serverId : null;
-  if (!serverId) return "Spielen";
+  if (!serverId) return action.payload?.xValue !== undefined ? cardContextFallbackLabel(action) : "Spielen";
   const serverLabel = serverDisplayLabel(serverId);
   const fullLabel = actionButtonLabel(action);
   if (action.payload?.runnerEventRun === true || /\bRun\b/i.test(fullLabel) || /\bDeep Dive\b/i.test(fullLabel))
@@ -1061,6 +1061,8 @@ export function retainedExposeReviewEvent(events: PublicGameEvent[], dismissedEv
     if (event.publicPayload.hiddenZoneAction === "approach_ice_expose_finish") return null;
     if (event.publicPayload.hiddenZoneAction === "expose_installed_card_review") return null;
     if (event.publicPayload.hiddenZoneAction === "expose_installed_card_finish") return null;
+    if (event.publicPayload.hiddenZoneAction === "schematics_search_engine_expose_installed_cards_review") return null;
+    if (event.publicPayload.hiddenZoneAction === "schematics_search_engine_expose_installed_cards_finish") return null;
     if (event.publicPayload.publicRevealKind !== "expose") continue;
     if (event.publicPayload.hiddenZoneAction === "approach_ice_expose") return null;
     if (event.publicPayload.approachIceExposeDecision) return null;
