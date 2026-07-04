@@ -422,6 +422,24 @@ function semanticRuntimeCorpCentralIceInstallScore<
     : false;
   const positionDependentWeakSolo =
     profile.positionDependent && firstCentralIce;
+  const yieldsToActiveScoreline =
+    semanticRuntimeCorpCentralInstallYieldsToActiveScoreline(
+      input,
+      serverId,
+      server,
+    );
+
+  if (yieldsToActiveScoreline) {
+    if (!canRez) return -350;
+    if (profile.hasAccessStop && !visibleCoverage) {
+      return centralThreat ? 250 : 100;
+    }
+    if (profile.hasAccessStop && visibleCoverage) {
+      return centralThreat ? 100 : 50;
+    }
+    if (profile.hasTaxOrDamage) return centralThreat ? 50 : 0;
+    return 0;
+  }
 
   if (!canRez) {
     if (
@@ -455,6 +473,47 @@ function semanticRuntimeCorpCentralIceInstallScore<
   }
   if (centralThreat) return firstCentralIce ? 700 : 450;
   return firstCentralIce ? 450 : 250;
+}
+
+function semanticRuntimeCorpCentralInstallYieldsToActiveScoreline<
+  TServer extends CorpServerLike,
+>(
+  input: AiDecisionInput,
+  serverId: "hq" | "rd",
+  server: TServer | undefined,
+): boolean {
+  if (!semanticRuntimeCorpHasActiveRemoteScoreline(input)) return false;
+  if ((server?.ice.length ?? 0) === 0) return false;
+  const pressure = semanticRuntimeCorpCentralPressureAssessment(
+    input,
+    serverId,
+  );
+  return !semanticRuntimeCorpCentralInstallPressureIsCritical(input, pressure);
+}
+
+function semanticRuntimeCorpCentralInstallPressureIsCritical(
+  input: AiDecisionInput,
+  pressure: ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment>,
+): boolean {
+  if (
+    pressure.serverId === "rd" &&
+    pressure.successfulAccessEvents >= 2 &&
+    (pressure.visibleVirusPressure ||
+      pressure.visibleMultiaccess ||
+      pressure.eventMultiaccess ||
+      pressure.runOrAccessEvents >= 6)
+  ) {
+    return true;
+  }
+  const runnerAgendaPoints = input.playerView.opponent?.agendaPoints ?? 0;
+  return (
+    runnerAgendaPoints >= 5 &&
+    (pressure.hqAgendaExposure ||
+      pressure.visibleMultiaccess ||
+      pressure.visibleVirusPressure ||
+      pressure.eventMultiaccess ||
+      pressure.successfulAccessEvents > 0)
+  );
 }
 
 export function semanticRuntimeCorpCentralIceProfile(

@@ -92,6 +92,45 @@ describe("semanticRuntimeCorpInstallRemoteScore central ICE", () => {
     expect(rdScore).toBeGreaterThan(hqScore);
   });
 
+  it("deescalates extra R&D ICE while a non-critical active remote agenda exists", () => {
+    const etrIce = corpCard("extra-rd-barrier", "ice", {
+      definitionId: "simple_barrier_ice",
+      rezCost: 3,
+    });
+    const input = corpInputForCentralInstall(etrIce, {
+      agendaInHq: false,
+      runnerRig: [rdInterface()],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        {
+          id: "rd",
+          label: "R&D",
+          ice: [corpCard("rd-wall", "ice", { rezCost: 2 })],
+          root: [],
+        },
+        { id: "archives", label: "Archives", ice: [], root: [] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [
+            corpCard("remote-wall", "ice", {
+              definitionId: "simple_barrier_ice",
+              rezCost: 2,
+            }),
+          ],
+          root: [
+            corpCard("active-agenda", "agenda", {
+              advancementRequirement: 3,
+              advancementCounters: 1,
+            }),
+          ],
+        },
+      ],
+    });
+
+    expect(centralInstallScore(etrIce, "rd", input)).toBe(250);
+  });
+
   it("bounds visible central multiaccess fallback text to exact tokens", () => {
     const etrIce = corpCard("barrier", "ice", {
       definitionId: "simple_barrier_ice",
