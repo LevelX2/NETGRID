@@ -32,6 +32,7 @@ const BADTIMES = "onr_classic_016_badtimes";
 const BOOSTERGANG_CONNECTIONS = "onr_classic_034_boostergang-connections";
 const CORRUPTION = "onr_classic_035_corruption";
 const DO_THE_DRINE = "onr_classic_036_do-the-drine";
+const FINDERS_KEEPERS = "onr_classic_037_finders-keepers";
 const GYPSYTM_SCHEDULE_ANALYZER = "onr_classic_038_gypsytm-schedule-analyzer";
 const LIBRARY_SEARCH = "onr_classic_039_library-search";
 const RUNNING_INTERFERENCE = "onr_classic_043_running-interference";
@@ -87,6 +88,7 @@ const CLASSIC_09_RUNNER_DECK: DeckDefinition = {
     { id: BOOSTERGANG_CONNECTIONS, quantity: 1 },
     { id: CORRUPTION, quantity: 1 },
     { id: DO_THE_DRINE, quantity: 1 },
+    { id: FINDERS_KEEPERS, quantity: 1 },
     { id: GYPSYTM_SCHEDULE_ANALYZER, quantity: 1 },
     { id: LIBRARY_SEARCH, quantity: 1 },
     { id: RUNNING_INTERFERENCE, quantity: 1 },
@@ -437,6 +439,50 @@ describe("Classic Runner Rest Card Implementation Smokes", () => {
       damageCannotBePrevented: true,
       gainedCredits: 12,
       flatline: false,
+    });
+    expectValid(state);
+  });
+
+  it("publishes Finders Keepers three dice rolls and credit gain", () => {
+    let state = toRunnerClassic09Game("classic-09-finders-keepers-dice");
+    emptyRunnerGripForTest(state);
+    const eventId = moveRunnerCardCopyToGrip(state, FINDERS_KEEPERS);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" && action.payload?.cardId === eventId,
+    );
+
+    const payload = state.eventLog.at(-1)?.publicPayload ?? {};
+    const rolls = String(payload.randomDiceLoopRolls ?? "")
+      .split(",")
+      .map((value) => Number(value))
+      .filter((value) => Number.isInteger(value));
+    const gainedCredits = rolls.reduce((sum, roll) => sum + roll, 0);
+    expect(rolls).toHaveLength(3);
+    expect(payload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: FINDERS_KEEPERS,
+      v1921RunnerEventAbility: "three_dice_gain_credits",
+      randomDiceLoopRolledDice: 3,
+      randomDiceLoopComplete: true,
+      gainedCredits,
+      runnerCreditsAfter: state.runner.credits,
+    });
+    expect(state.runner.credits).toBe(Number(payload.runnerCreditsAfter));
+    expect(
+      getPlayerView(state, "runner").publicEvents.at(-1)?.publicPayload,
+    ).toMatchObject({
+      randomDiceLoopRolls: rolls.join(","),
+      gainedCredits,
+    });
+    expect(
+      getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload,
+    ).toMatchObject({
+      randomDiceLoopRolls: rolls.join(","),
+      gainedCredits,
     });
     expectValid(state);
   });

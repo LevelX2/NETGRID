@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-07-03-finders-keepers-dice-chronicle
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-07-03
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-07-04
+completedAt: 2026-07-04
+branch: codex/activities-worktree-20260704-090854
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+  - packages/engine/src/index-tests/mechanics/classic-runner-rest-cards.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/classic-runner-rest-cards.test.ts -t "Finders Keepers"
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts -t "Finders Keepers"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm format:changed
+  - git diff --check
 ---
 
 # Finders Keepers: Würfelwerte in der Spielchronik sichtbar machen
@@ -47,12 +56,12 @@ Die Spielchronik soll bei `Finders Keepers` nach dem Ausspielen die drei tatsäc
 
 ## Akzeptanzkriterien
 
-- [ ] Ein `Finders Keepers`-Resolve mit drei Würfeln erzeugt in der Spielchronik eine konkrete Zeile mit allen drei Werten, z. B. sinngemäß `Würfe 2, 5, 6`.
-- [ ] Dieselbe Chronikzeile nennt den gewonnenen Gesamtbetrag, der der Summe der drei Würfel entspricht.
-- [ ] Runner- und Korp-Ansicht erhalten dieselben öffentlichen Würfelwerte ohne verdeckte Kartendaten.
-- [ ] Falls `randomCounterAfter` oder ähnliche Diagnosefelder angezeigt werden, bleiben sie untergeordnet; die lesbaren Würfelwerte stehen im Vordergrund.
-- [ ] Fokussierte Web- oder PublicContext-Regression deckt den echten Feldnamenpfad `v1921RunnerEventAbility: "three_dice_gain_credits"` plus `randomDiceLoopRolls` ab.
-- [ ] Relevante Checks laufen oder werden begründet eingegrenzt; mindestens `git diff --check` nach Umsetzung.
+- [x] Ein `Finders Keepers`-Resolve mit drei Würfeln erzeugt in der Spielchronik eine konkrete Zeile mit allen drei Werten, z. B. sinngemäß `Würfe 2, 5, 6`.
+- [x] Dieselbe Chronikzeile nennt den gewonnenen Gesamtbetrag, der der Summe der drei Würfel entspricht.
+- [x] Runner- und Korp-Ansicht erhalten dieselben öffentlichen Würfelwerte ohne verdeckte Kartendaten.
+- [x] Falls `randomCounterAfter` oder ähnliche Diagnosefelder angezeigt werden, bleiben sie untergeordnet; die lesbaren Würfelwerte stehen im Vordergrund.
+- [x] Fokussierte Web- oder PublicContext-Regression deckt den echten Feldnamenpfad `v1921RunnerEventAbility: "three_dice_gain_credits"` plus `randomDiceLoopRolls` ab.
+- [x] Relevante Checks laufen oder werden begründet eingegrenzt; mindestens `git diff --check` nach Umsetzung.
 
 ## Umsetzungshinweise
 
@@ -63,4 +72,4 @@ Die Spielchronik soll bei `Finders Keepers` nach dem Ausspielen die drei tatsäc
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Die Chronik erkennt `v1921RunnerEventAbility: "three_dice_gain_credits"` und zeigt `Finders Keepers` mit allen drei öffentlichen Würfeln sowie dem daraus gewonnenen Creditbetrag an. Die bestehende Engine-/PublicContext-Payload war bereits ausreichend; ergänzt wurden eine echte Engine-Regression für PublicEvents/PlayerViews und eine Web-Chronik-Regression für die lesbare Darstellung.

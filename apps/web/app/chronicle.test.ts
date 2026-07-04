@@ -1705,6 +1705,40 @@ describe("formatChronicleEvent", () => {
     expect(gainAll.chips).not.toEqual(expect.arrayContaining(["Wurf 3"]));
   });
 
+  it("shows Finders Keepers three dice and gained credits in the chronicle", () => {
+    const item = formatChronicleEvent(
+      makeEvent("play_event", {
+        actor: "runner",
+        sourceDefinitionId: "onr_classic_037_finders-keepers",
+        cardDefinitionId: "onr_classic_037_finders-keepers",
+        v1921RunnerEventAbility: "three_dice_gain_credits",
+        randomDiceLoopRolls: "2,5,6",
+        randomDiceLoopRolledDice: 3,
+        randomDiceLoopComplete: true,
+        gainedCredits: 13,
+        runnerCreditsAfter: 20,
+      }),
+      "runner",
+    );
+
+    expect(item.title).toBe(
+      "Du hast Finders Keepers gespielt: Würfe 2, 5, 6 und 13 Credits erhalten.",
+    );
+    expect(item.description).toBe(
+      "Die drei öffentlichen Würfel ergeben 13 Credits.",
+    );
+    expect(item.category).toBe("economy");
+    expect(item.visibility).toBe("public");
+    expect(item.chips).toEqual(
+      expect.arrayContaining([
+        "Finders Keepers",
+        "Würfe 2, 5, 6",
+        "+13 Credits",
+      ]),
+    );
+    expect(JSON.stringify(item)).not.toContain("RandomDrawRecord");
+  });
+
   it("describes Edited Shipping Manifests access replacement without hidden card identities", () => {
     const item = formatChronicleEvent(
       makeEvent("play_event", {

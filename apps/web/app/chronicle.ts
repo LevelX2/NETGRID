@@ -2038,6 +2038,41 @@ export function formatChronicleEvent(
         );
         break;
       }
+      if (
+        actionType === "play_event" &&
+        stringValue(payload.v1921RunnerEventAbility) ===
+          "three_dice_gain_credits"
+      ) {
+        const dieRolls = numberArrayValue(payload.randomDiceLoopRolls);
+        const gainedCredits = numberValue(payload.gainedCredits) ?? 0;
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "Finders Keepers";
+        category = "economy";
+        importance = "important";
+        visibility = "public";
+        const rollTitlePart =
+          dieRolls.length > 0 ? `Würfe ${dieRolls.join(", ")} und ` : "";
+        title = phrase(
+          subject,
+          `${source} gespielt: ${rollTitlePart}${creditText(gainedCredits)} erhalten`,
+        );
+        description =
+          dieRolls.length > 0
+            ? `Die drei öffentlichen Würfel ergeben ${creditText(gainedCredits)}.`
+            : `${creditText(gainedCredits)} durch öffentliche Würfel erhalten.`;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = source;
+        chips.push(
+          "Event",
+          source,
+          dieRolls.length > 0 ? `Würfe ${dieRolls.join(", ")}` : "Würfel",
+          `+${gainedCredits} ${creditLabel(gainedCredits)}`,
+        );
+        break;
+      }
       if (payload.traceStarted === true) {
         const baseTraceStrength = numberValue(payload.baseTraceStrength);
         category = "danger";
