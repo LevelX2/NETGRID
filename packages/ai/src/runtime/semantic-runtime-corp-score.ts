@@ -7,7 +7,10 @@ import type {
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "./semantic-runtime-corp-effective-defense";
-import { semanticRuntimeCorpBoardTriageActionComponent } from "./semantic-runtime-corp-board-triage";
+import {
+  semanticRuntimeCorpBoardTriage,
+  semanticRuntimeCorpBoardTriageActionComponent,
+} from "./semantic-runtime-corp-board-triage";
 import { corpIcePlacementScoreComponent } from "./corp-ice-placement/corp-ice-placement";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { rolesMatch } from "./role-match";
@@ -123,6 +126,10 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
+  const boardTriageState = semanticRuntimeCorpBoardTriage(
+    input,
+    dependencies,
+  );
   const tacticalGoalFit = corpTacticalGoalFitScoreComponent(
     input,
     action,
@@ -268,6 +275,13 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         reason: "score_line",
       });
     }
+    const hqAgendaRelief = corpHqAgendaReliefScorelineContext(
+      input,
+      action,
+      dependencies,
+      roles,
+      boardTriageState,
+    );
     if (
       action.payload?.placement === "ice" ||
       rolesMatch(roles, ["ice", "protect"])
@@ -312,13 +326,19 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       actionSemanticCandidate,
     );
     if (remoteScore !== 0) {
+      const adjustedRemoteScore = hqAgendaRelief
+        ? Math.max(remoteScore, -350)
+        : remoteScore;
       components.push({
         key: "corp_install_remote_context",
         label: "Installations-Kontext",
-        value: remoteScore,
-        reason: scopeId,
+        value: adjustedRemoteScore,
+        reason: hqAgendaRelief
+          ? `${scopeId}|${hqAgendaRelief.evidence.join("|")}|remote_context_floor:-350`
+          : scopeId,
       });
     }
+    if (hqAgendaRelief) components.push(hqAgendaRelief.component);
     addCorpScoringWindowEvidenceComponent(
       components,
       dependencies.corpScoringWindowAssessment?.(input, action, roles),
@@ -358,11 +378,26 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   const contestableScoreLine =
     dependencies.corpRemoteScoreContestabilityAssessment(input, action);
   if (contestableScoreLine?.contestable) {
+    const hqAgendaRelief = corpHqAgendaReliefScorelineContext(
+      input,
+      action,
+      dependencies,
+      dependencies.rolesForAction(input, action),
+      boardTriageState,
+    );
     components.push({
       key: "corp_contestable_remote_score_penalty",
       label: "Contestable Remote-Scoreline",
-      value: -3000,
-      reason: contestableScoreLine.evidence.join("|"),
+      value: hqAgendaRelief ? -900 : -3000,
+      reason: [
+        ...contestableScoreLine.evidence,
+        ...(hqAgendaRelief
+          ? [
+              ...hqAgendaRelief.evidence,
+              "contestable_penalty_softened_for_hq_relief:true",
+            ]
+          : []),
+      ].join("|"),
     });
   }
   const advancementPlacement =
@@ -596,6 +631,109 @@ function corpReserveScoreComponent(
       `reserve_normalized_value:${normalizedValue}`,
     ].join("|"),
   };
+}
+
+function corpHqAgendaReliefScorelineContext<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  roles: string[],
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+):
+  | {
+      component: AiDecisionScoreComponent;
+      evidence: string[];
+    }
+  | undefined {
+  if (boardTriageState.primary !== "force_scoreline_clock") return undefined;
+  if (
+    !boardTriageState.evidence.includes("corp_hq_agenda_flood_pressure:true") ||
+    !boardTriageState.evidence.includes(
+      "corp_hq_agenda_relative_remote_relief:true",
+    )
+  ) {
+    return undefined;
+  }
+  if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
+    return undefined;
+  }
+  if (
+    action.type !== "advance_card" &&
+    !(
+      action.type === "install_card" &&
+      action.payload?.placement !== "ice"
+    )
+  ) {
+    return undefined;
+  }
+
+  const serverId = corpScorelineActionServerId(input, action);
+  if (
+    !serverId?.startsWith("remote_") ||
+    (boardTriageState.targetServerId !== undefined &&
+      boardTriageState.targetServerId !== serverId)
+  ) {
+    return undefined;
+  }
+
+  const assessment = dependencies.corpScoringWindowAssessment?.(
+    input,
+    action,
+    roles,
+  );
+  if (!assessment) return undefined;
+  const pointsToWin = input.playerView.agendaPointsToWin ?? 7;
+  const runnerAgendaPointsAfterSteal =
+    typeof assessment.runnerAgendaPointsAfterSteal === "number"
+      ? assessment.runnerAgendaPointsAfterSteal
+      : 0;
+  if (
+    assessment.windowKind !== "unsafe" ||
+    assessment.agendaStealSeverity === "game_ending" ||
+    runnerAgendaPointsAfterSteal >= pointsToWin ||
+    assessment.recommendedNextStep === "gain_credit" ||
+    assessment.corpCanRezRelevantIce === false ||
+    assessment.corpCanRezFullPathWithDynamicReserve === false ||
+    (assessment.dynamicProtectionWeaknessCount ?? 0) > 0 ||
+    (assessment.affordableDurableRelevantIceCount ?? 0) < 1
+  ) {
+    return undefined;
+  }
+
+  const evidence = [
+    "hq_agenda_relief_scoreline:true",
+    `server:${serverId}`,
+    `agenda_steal_severity:${assessment.agendaStealSeverity}`,
+    `runner_points_after_steal:${runnerAgendaPointsAfterSteal}`,
+    `affordable_durable_ice:${assessment.affordableDurableRelevantIceCount ?? 0}`,
+  ];
+  return {
+    component: {
+      key: "corp_hq_agenda_relief_scoreline",
+      label: "HQ-Agenda-Entlastung",
+      value: 3200,
+      reason: evidence.join("|"),
+    },
+    evidence,
+  };
+}
+
+function corpScorelineActionServerId(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string | undefined {
+  const direct =
+    action.payload?.serverId ??
+    action.payload?.targetServerId ??
+    action.payload?.attackedServerId;
+  if (typeof direct === "string") return direct;
+  const cardId =
+    typeof action.payload?.cardId === "string"
+      ? action.payload.cardId
+      : typeof action.source === "string"
+        ? action.source
+        : undefined;
+  return cardId ? corpServerIdForRootCard(input, cardId) : undefined;
 }
 
 function corpInputHasConcreteDevelopmentAction(

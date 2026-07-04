@@ -904,7 +904,7 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
   const playableScorelineEntries = actions.filter(
     (entry) =>
       actionPushesUnsafeScoreline(input, entry.action, dependencies) &&
-      scorelineEntryCanRelieveHqAgendaFlood(entry),
+      scorelineEntryCanRelieveHqAgendaFlood(input, entry, actions),
   );
   if (playableScorelineEntries.length === 0) return undefined;
 
@@ -951,6 +951,9 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
       ...(requiredRezFloor !== undefined
         ? [`corp_forced_scoreline_rez_floor:${requiredRezFloor}`]
         : []),
+      ...(preferred && scorelineEntryIsRelativeHqAgendaRelief(input, preferred, actions)
+        ? ["corp_hq_agenda_relative_remote_relief:true"]
+        : []),
       ...hqPressure.evidence.slice(0, 6),
       ...(preferred?.scoringWindow?.evidence ?? []).slice(0, 8),
     ],
@@ -979,7 +982,9 @@ function corpHqAgendaFloodIsPressured(
 }
 
 function scorelineEntryCanRelieveHqAgendaFlood(
+  input: AiDecisionInput,
   entry: ScoredLegalAction,
+  actions: readonly ScoredLegalAction[],
 ): boolean {
   if (!entry.serverId || entry.serverId === "new_remote") return false;
   if (!entry.serverId.startsWith("remote_")) return false;
@@ -1002,14 +1007,60 @@ function scorelineEntryCanRelieveHqAgendaFlood(
       (assessment.affordableDurableRelevantIceCount ?? 0) >= 1
     );
   }
+  return scorelineEntryIsRelativeHqAgendaRelief(input, entry, actions);
+}
+
+function scorelineEntryIsRelativeHqAgendaRelief(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  actions: readonly ScoredLegalAction[],
+): boolean {
+  const assessment = entry.scoringWindow;
+  if (!entry.serverId || !entry.serverId.startsWith("remote_")) return false;
+  if (!assessment) return false;
+  const pointsToWin =
+    corpTriagePositiveNumber(input.playerView.agendaPointsToWin) ?? 7;
+  const runnerAgendaPointsAfterSteal =
+    corpTriagePositiveNumber(assessment.runnerAgendaPointsAfterSteal) ?? 0;
   return (
     assessment.windowKind === "unsafe" &&
-    assessment.missingVisibleBreakerCoverage &&
-    !assessment.runnerCanReachAccessNow &&
-    !assessment.runnerCanContestBeforeScore &&
-    !assessment.runnerCanReachAccessBeforeScore &&
     assessment.agendaStealSeverity !== "game_ending" &&
-    (assessment.affordableDurableRelevantIceCount ?? 0) >= 1
+    runnerAgendaPointsAfterSteal < pointsToWin &&
+    assessment.recommendedNextStep !== "gain_credit" &&
+    assessment.corpCanRezRelevantIce !== false &&
+    assessment.corpCanRezFullPathWithDynamicReserve !== false &&
+    (assessment.dynamicProtectionWeaknessCount ?? 0) === 0 &&
+    (assessment.affordableDurableRelevantIceCount ?? 0) >= 1 &&
+    existingRemoteCanCarryRelativeHqRelief(input, entry) &&
+    !concreteRemoteProtectionActionExists(actions, entry.serverId)
+  );
+}
+
+function existingRemoteCanCarryRelativeHqRelief(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+): boolean {
+  if (!entry.serverId) return false;
+  if (entry.action.type === "advance_card") {
+    return remoteServerHasVisibleScoreline(input, entry.serverId);
+  }
+  return (
+    entry.action.type === "install_card" &&
+    entry.action.payload?.placement !== "ice" &&
+    existingReadyRemoteCanReceiveScoreline(input, entry.serverId)
+  );
+}
+
+function concreteRemoteProtectionActionExists(
+  actions: readonly ScoredLegalAction[],
+  serverId: string,
+): boolean {
+  return actions.some(
+    (entry) =>
+      entry.serverId === serverId &&
+      ((entry.action.type === "install_card" &&
+        entry.action.payload?.placement === "ice") ||
+        entry.action.type === "rez_ice"),
   );
 }
 
