@@ -4825,7 +4825,9 @@ function mergedCardResolverEventEffect(
       ? "danger"
       : parts.some((part) => part.category === "economy")
         ? "economy"
-        : "card",
+        : parts.some((part) => part.category === "turn")
+          ? "turn"
+          : "card",
     chips: parts.flatMap((part) => part.chips),
     ...(suffix ? { suffix } : {}),
     ...(sourceTitle ? { sourceTitle } : {}),
@@ -4850,6 +4852,12 @@ function cardResolverPlayEffectPart(
         ? `${sideLabel(effect.side)} erhält ${creditText(amount)}`
         : `${creditText(amount)} erhalten`,
       chips: [`+${amount} ${creditLabel(amount)}`],
+    };
+  if (effect.kind === "gain_actions")
+    return {
+      category: "turn",
+      suffix: `${amount} zusätzliche Aktion${amount === 1 ? "" : "en"} erhalten`,
+      chips: [`+${amount} Aktion${amount === 1 ? "" : "en"}`],
     };
   if (effect.kind === "lose_credits")
     return {
@@ -5116,6 +5124,7 @@ function shouldMergeCardResolverEffect(
     ![
       "draw_cards",
       "gain_credits",
+      "gain_actions",
       "lose_credits",
       "add_tags",
       "damage",

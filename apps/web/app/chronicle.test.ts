@@ -3525,6 +3525,40 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("merges Overtime Incentives action gain into the played operation entry", () => {
+    const event = makeEvent("play_operation", {
+      actor: "corp",
+      title: "Overtime Incentives",
+      cardDefinitionId: "onr_v1_297_overtime-incentives",
+      aiReasonCode: "corp.operation.extra_actions",
+      gainedActions: 2,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_297_overtime-incentives.effect.0.gain_actions",
+          kind: "gain_actions",
+          visibility: "public",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_297_overtime-incentives",
+          sourceTitle: "Overtime Incentives",
+          reason: "card_resolver",
+        },
+      ],
+    });
+
+    const item = formatChronicleEvent(event, "runner");
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe(
+      "Die Korp-KI hat Overtime Incentives gespielt und 2 zusätzliche Aktionen erhalten.",
+    );
+    expect(item.category).toBe("turn");
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["KI", "Operation", "+2 Aktionen"]),
+    );
+    expect(effects).toEqual([]);
+  });
+
   it("merges ordered Night Shift card resolver effects into the played card entry", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",
