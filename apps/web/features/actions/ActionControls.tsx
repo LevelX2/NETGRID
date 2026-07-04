@@ -179,6 +179,12 @@ const warningActionButtonStyle: CSSProperties = {
   color: "color-mix(in srgb, #f6b947 42%, var(--text) 58%)",
 };
 
+const dangerActionButtonStyle: CSSProperties = {
+  background: "var(--danger-button-bg)",
+  borderColor: "var(--danger-button-border)",
+  color: "var(--danger)",
+};
+
 export function OverflowAwareActionButton({
   action,
   label,
@@ -197,7 +203,11 @@ export function OverflowAwareActionButton({
       .filter(Boolean)
       .join(" ") || undefined;
   const tonedStyle =
-    tone === "warning" ? { ...warningActionButtonStyle, ...style } : style;
+    tone === "danger"
+      ? { ...dangerActionButtonStyle, ...style }
+      : tone === "warning"
+        ? { ...warningActionButtonStyle, ...style }
+        : style;
 
   useEffect(() => {
     const labelElement = labelRef.current;

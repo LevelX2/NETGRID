@@ -2075,6 +2075,7 @@ export function actionButtonTone(
   action: LegalAction,
 ): ActionButtonTone {
   if (isRunnerRunAbortAction(view, action)) return "danger";
+  if (isRunnerSubroutineResolutionAction(view, action)) return "danger";
   if (isUnnecessaryBreakerPumpAction(view, action)) return "warning";
   return "default";
 }
@@ -2086,6 +2087,22 @@ function isRunnerRunAbortAction(
   return (
     Boolean(view.run) && action.side === "runner" && action.type === "jack_out"
   );
+}
+
+function isRunnerSubroutineResolutionAction(
+  view: PlayerView,
+  action: LegalAction,
+): boolean {
+  const run = view.run;
+  if (
+    !run ||
+    run.phase !== "encounter_ice" ||
+    action.side !== "runner" ||
+    action.type !== "continue_run" ||
+    action.payload?.encounterContinue !== true
+  )
+    return false;
+  return /^Subroutinen auslösen\b/i.test(actionButtonLabel(action));
 }
 
 function isUnnecessaryBreakerPumpAction(

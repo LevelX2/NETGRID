@@ -708,7 +708,15 @@ describe("V1.0.5 action board UI helpers", () => {
       "continue_run",
       "game_rule",
       "Subroutinen auslösen (Run endet)",
-      undefined,
+      { encounterContinue: true, unbrokenSubroutineCount: 1 },
+      "run.encounter_ice",
+    );
+    const passIce = legalAction(
+      "runner",
+      "continue_run",
+      "game_rule",
+      "ICE passieren",
+      { encounterContinue: true, unbrokenSubroutineCount: 0 },
       "run.encounter_ice",
     );
     const pump = legalAction(
@@ -721,7 +729,8 @@ describe("V1.0.5 action board UI helpers", () => {
     );
 
     expect(actionButtonTone(running, jackOut)).toBe("danger");
-    expect(actionButtonTone(running, continueRun)).toBe("default");
+    expect(actionButtonTone(running, continueRun)).toBe("danger");
+    expect(actionButtonTone(running, passIce)).toBe("default");
     expect(actionButtonTone(running, pump)).toBe("warning");
     expect(actionButtonTone(underStrengthRunning, pump)).toBe("default");
   });
