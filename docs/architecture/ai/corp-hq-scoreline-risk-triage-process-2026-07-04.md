@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`complete`
 
 ## Quelle/Vorgabe
 
@@ -201,3 +201,15 @@ Commit:
 - Relevante Tests und Typecheck sind gelaufen oder begründet blockiert.
 - Review ist aktualisiert.
 - Arbeitsbranch ist lokal nach `main` integriert oder ein Merge-Blocker ist dokumentiert.
+
+## Abschlussnotiz
+
+Umgesetzt in vier Paket-Commits plus Abschlussreview:
+
+- HQ-Schutz-Triage zählt nicht mehr nur ICE-Layer, sondern erkennt sichtbar abgedeckte oder wirkungsarme Central-ICE als weiterhin gefährlich.
+- HQ-Agenda-Flood kann eine relative Agenda-Evakuierung in ein vorhandenes Remote erzwingen, wenn das Remote nicht game-ending frei stehlbar ist, relevante ICE bezahlbar bleibt und keine konkrete Schutzaktion legal ist.
+- `contestable_remote` und negativer Remote-Kontext werden nur für diese konkrete HQ-Entlastung abgefedert; bei legaler Remote-ICE-Schutzaktion gewinnt weiterhin Schutz.
+- Draw-/Burst-Economy mit Karten ziehen erhält bei HQ-Flood eine explizite Bremse.
+- Non-Agenda-Roots verlieren gegen eine legale Agenda-Installation in ein vorbereitetes Scoring-Remote.
+
+Finale Checks siehe `docs/reviews/ai/corp-hq-scoreline-risk-triage-review-2026-07-04.md`.
