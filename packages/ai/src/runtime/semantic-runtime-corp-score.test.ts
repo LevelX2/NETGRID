@@ -3235,6 +3235,348 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     expect(noiseKeys).not.toContain("corp_install_economy");
   });
 
+  it("hard-penalizes agenda-difficulty upgrades on central servers despite agenda roles", () => {
+    const washington = corpCard("washington", "upgrade", {
+      title: "Washington, D.C., City Grid",
+      definitionId: "onr_v1_374_washington-d-c-city-grid",
+    });
+    const installHq = corpAction(
+      "install-washington-hq",
+      "install_card",
+      { placement: "root", serverId: "hq", cardType: "upgrade" },
+      washington.instanceId,
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(7, [washington], [installHq]),
+      installHq,
+      "basic_install",
+      {
+        ...testDependencies(),
+        rolesForAction: () => ["upgrade", "agenda", "remote_upgrade_agenda_support"],
+        corpActionIsScoreLine: () => true,
+      },
+      semanticCandidate(
+        installHq.actionId,
+        "install.card",
+        ["remote.agenda_difficulty_discount", "score.agenda_difficulty_discount"],
+        "install_card",
+      ),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_install_score_line",
+          value: 550,
+        }),
+        expect.objectContaining({
+          key: "corp_upgrade_install_placement_mismatch",
+          value: -5200,
+          reason: expect.stringContaining(
+            "mismatch:agenda_difficulty_requires_remote_scoring_fort",
+          ),
+        }),
+      ]),
+    );
+    expect(totalScore(components)).toBeLessThan(0);
+  });
+
+  it("rewards agenda-difficulty upgrades only on prepared or active scoring remotes", () => {
+    const washington = corpCard("washington", "upgrade", {
+      title: "Washington, D.C., City Grid",
+      definitionId: "onr_v1_374_washington-d-c-city-grid",
+    });
+    const installRemote = corpAction(
+      "install-washington-remote",
+      "install_card",
+      { placement: "root", serverId: "remote_1", cardType: "upgrade" },
+      washington.instanceId,
+    );
+    const candidateForWashington = semanticCandidate(
+      installRemote.actionId,
+      "install.card",
+      ["remote.agenda_difficulty_discount", "score.agenda_difficulty_discount"],
+      "install_card",
+    );
+    const preparedComponents = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCardsAndServers(
+        7,
+        [washington],
+        [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [corpCard("remote-ice", "ice")],
+            root: [],
+          },
+        ],
+        [installRemote],
+      ),
+      installRemote,
+      "basic_install",
+      {
+        ...testDependencies(),
+        rolesForAction: () => ["upgrade", "agenda", "remote_upgrade_agenda_support"],
+        corpActionIsScoreLine: () => true,
+      },
+      candidateForWashington,
+    );
+    const activeComponents = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCardsAndServers(
+        7,
+        [washington],
+        [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [corpCard("remote-ice", "ice")],
+            root: [agendaCard("remote-agenda")],
+          },
+        ],
+        [installRemote],
+      ),
+      installRemote,
+      "basic_install",
+      {
+        ...testDependencies(),
+        rolesForAction: () => ["upgrade", "agenda", "remote_upgrade_agenda_support"],
+        corpActionIsScoreLine: () => true,
+      },
+      candidateForWashington,
+    );
+
+    expect(preparedComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_upgrade_install_placement_fit",
+          value: 850,
+          reason: expect.stringContaining(
+            "fit:agenda_difficulty_prepared_score_remote",
+          ),
+        }),
+      ]),
+    );
+    expect(activeComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_upgrade_install_placement_fit",
+          value: 1600,
+          reason: expect.stringContaining(
+            "fit:agenda_difficulty_active_scoreline_remote",
+          ),
+        }),
+      ]),
+    );
+  });
+
+  it("keeps central-only upgrades on their central servers", () => {
+    const panicButton = corpCard("panic-button", "upgrade", {
+      title: "Panic Button",
+      definitionId: "onr_proteus_067_panic-button",
+    });
+    const installPanicHq = corpAction(
+      "install-panic-hq",
+      "install_card",
+      { placement: "root", serverId: "hq", cardType: "upgrade" },
+      panicButton.instanceId,
+    );
+    const installPanicRemote = corpAction(
+      "install-panic-remote",
+      "install_card",
+      { placement: "root", serverId: "remote_1", cardType: "upgrade" },
+      panicButton.instanceId,
+    );
+    const panicCandidate = semanticCandidate(
+      installPanicHq.actionId,
+      "install.card",
+      ["draw.corp_draw", "condition.during_hq_run"],
+      "install_card",
+    );
+    const hqComponents = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(5, [panicButton], [installPanicHq]),
+      installPanicHq,
+      "basic_install",
+      {
+        ...testDependencies(),
+        rolesForAction: () => ["upgrade", "remote_support", "build_scoring_remote"],
+      },
+      panicCandidate,
+    );
+    const remoteComponents = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCardsAndServers(
+        5,
+        [panicButton],
+        [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [corpCard("remote-ice", "ice")],
+            root: [],
+          },
+        ],
+        [installPanicRemote],
+      ),
+      installPanicRemote,
+      "basic_install",
+      {
+        ...testDependencies(),
+        rolesForAction: () => ["upgrade", "remote_support", "build_scoring_remote"],
+      },
+      {
+        ...panicCandidate,
+        actionId: installPanicRemote.actionId,
+      },
+    );
+
+    expect(hqComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_upgrade_install_placement_fit",
+          reason: expect.stringContaining("fit:hq_run_condition"),
+        }),
+      ]),
+    );
+    expect(remoteComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_upgrade_install_placement_mismatch",
+          value: -5000,
+          reason: expect.stringContaining("mismatch:requires_hq_run"),
+        }),
+      ]),
+    );
+  });
+
+  it("keeps central-access reduction upgrades off remotes", () => {
+    const simon = corpCard("simon-francisco", "upgrade", {
+      title: "Simon Francisco",
+      definitionId: "onr_proteus_073_simon-francisco",
+    });
+    const installRd = corpAction(
+      "install-simon-rd",
+      "install_card",
+      { placement: "root", serverId: "rd", cardType: "upgrade" },
+      simon.instanceId,
+    );
+    const installRemote = corpAction(
+      "install-simon-remote",
+      "install_card",
+      { placement: "root", serverId: "remote_1", cardType: "upgrade" },
+      simon.instanceId,
+    );
+    const simonCandidate = semanticCandidate(
+      installRd.actionId,
+      "install.card",
+      ["access.corp_central_access_reduction"],
+      "install_card",
+    );
+    const rdComponents = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(5, [simon], [installRd]),
+      installRd,
+      "basic_install",
+      {
+        ...testDependencies(),
+        rolesForAction: () => ["upgrade", "remote_support", "build_scoring_remote"],
+      },
+      simonCandidate,
+    );
+    const remoteComponents = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCardsAndServers(
+        5,
+        [simon],
+        [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [corpCard("remote-ice", "ice")],
+            root: [],
+          },
+        ],
+        [installRemote],
+      ),
+      installRemote,
+      "basic_install",
+      {
+        ...testDependencies(),
+        rolesForAction: () => ["upgrade", "remote_support", "build_scoring_remote"],
+      },
+      {
+        ...simonCandidate,
+        actionId: installRemote.actionId,
+      },
+    );
+
+    expect(rdComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_upgrade_install_placement_fit",
+          reason: expect.stringContaining("fit:central_access_reduction"),
+        }),
+      ]),
+    );
+    expect(remoteComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_upgrade_install_placement_mismatch",
+          value: -4800,
+          reason: expect.stringContaining("mismatch:requires_hq_or_rd"),
+        }),
+      ]),
+    );
+  });
+
+  it("defers support-only upgrades that have no meaningful placement signal", () => {
+    const simpleUpgrade = corpCard("simple-upgrade", "upgrade", {
+      title: "Simple Upgrade",
+      definitionId: "simple_upgrade",
+    });
+    const installSimple = corpAction(
+      "install-simple-upgrade",
+      "install_card",
+      { placement: "root", serverId: "remote_1", cardType: "upgrade" },
+      simpleUpgrade.instanceId,
+    );
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCardsAndServers(
+        5,
+        [simpleUpgrade],
+        [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [corpCard("remote-ice", "ice")],
+            root: [],
+          },
+        ],
+        [installSimple],
+      ),
+      installSimple,
+      "basic_install",
+      {
+        ...testDependencies(),
+        rolesForAction: () => ["upgrade", "remote_support", "recover_economy"],
+      },
+      semanticCandidate(
+        installSimple.actionId,
+        "install.card",
+        ["install.card", "setup.install"],
+        "install_card",
+      ),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_upgrade_install_placement_defer",
+          value: -900,
+          reason: expect.stringContaining(
+            "defer_reason:no_upgrade_tactic_signal",
+          ),
+        }),
+      ]),
+    );
+  });
+
   it("surfaces Corp scoring-window assessment evidence in score components", () => {
     const components = semanticRuntimeCorpScoreComponents(
       corpInputWithGoals([]),
@@ -3807,6 +4149,22 @@ function corpInputWithHqCards(
         credits,
         gripOrHq: hqCards,
       },
+    },
+  } as unknown as AiDecisionInput;
+}
+
+function corpInputWithHqCardsAndServers(
+  credits: number,
+  hqCards: VisibleCard[],
+  servers: AiDecisionInput["playerView"]["servers"],
+  legalActions: LegalAction[] = [],
+): AiDecisionInput {
+  const base = corpInputWithHqCards(credits, hqCards, legalActions);
+  return {
+    ...base,
+    playerView: {
+      ...base.playerView,
+      servers,
     },
   } as unknown as AiDecisionInput;
 }
