@@ -7368,6 +7368,51 @@ describe("V1.9.5 Mechanikpaket N", () => {
     ).toBe(false);
   });
 
+  it("does not offer ACME root rez during a run when its agenda point cost cannot be paid", () => {
+    let state = toRunnerTurn(
+      v195CardReleaseGame("v195-acme-run-root-rez-no-agenda"),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const acmeId = putCorpRootInRemote(
+      state,
+      "onr_v1_308_acme-savings-and-loan",
+    );
+    const iceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_279_wall-of-static",
+    );
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[iceId]!,
+      faceup: true,
+      rezzed: true,
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+
+    expect(state).toMatchObject({
+      activeSide: "runner",
+      phase: "run",
+      timingPoint: "run.encounter_ice",
+    });
+    const corpActions = getLegalActions(state, "corp");
+    expect(
+      corpActions.some(
+        (action) =>
+          action.type === "rez_ice" && action.payload?.cardId === acmeId,
+      ),
+    ).toBe(false);
+    expect(corpActions.some((action) => action.type === "decline_rez")).toBe(
+      false,
+    );
+  });
+
   it("makes the Corp lose at end of turn when an ACME obligation cannot be paid", () => {
     let state = apply(
       v195CardReleaseGame("v195-acme-unpaid-loss"),
