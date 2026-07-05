@@ -686,6 +686,7 @@ describe("AI module boundaries", () => {
       "legacy/legacy-entrypoints.ts",
       "runtime/ai-action-entrypoints-composition.ts",
       "runtime/semantic-runtime-action-exclusion-composition.ts",
+      "simulation/legacy-baseline-simulation-context.ts",
     ]);
     const guardedSymbols = [
       "scoreActionsForLegacy",

@@ -1,10 +1,6 @@
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import {
   assessCorpScoreTerminalWindow,
-  chooseCorpPlanAction,
-  chooseRunnerPlanAction,
-  hasCorpPlanAction,
-  hasRunnerPlanAction,
 } from "./legacy/legacy-entrypoints";
 import {
   evaluateCorpOpeningHand,
@@ -55,7 +51,6 @@ import {
   mergedPublicHistory as mergedAiPublicHistory,
 } from "./runtime/public-event-history";
 import {
-  isCorpReactiveBaselineDecision,
   isRunnerReactiveBaselineDecision,
   semanticRuntimeActionTypeIsReactive,
   semanticRuntimeChoiceIsReactive,
@@ -329,12 +324,6 @@ const {
   tacticalPlanMappingOverrideEvidence,
   tacticalPlanRuntimeAlignedToChoice,
   rememberTacticalPlanRuntime,
-  hasCorpPlanAction,
-  isCorpReactiveBaselineDecision,
-  chooseCorpPlanAction,
-  hasRunnerPlanAction,
-  isRunnerReactiveBaselineDecision,
-  chooseRunnerPlanAction,
   corpIcePortfolioDiagnosticsForSimulationAction,
   summarizeMatchProgressionMetrics,
 });

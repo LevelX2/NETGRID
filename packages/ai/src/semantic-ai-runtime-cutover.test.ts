@@ -3218,7 +3218,7 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.evidence).toContain("tactical_step:rez_outer_ice");
   });
 
-  it("keeps legacy available only through the explicit runtime kill switch", () => {
+  it("ignores the historical legacy runtime kill switch in public runtime entrypoints", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "legacy";
     const input = aiInput("runner", [
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -3232,8 +3232,8 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.reasonCode).not.toContain(".semantic.");
-    expect(decision.evidence).toContain("semantic_runtime_force_legacy");
+    expect(decision.reasonCode).toContain(".semantic.");
+    expect(decision.evidence).not.toContain("semantic_runtime_force_legacy");
   });
 
   it("uses semantic coverage fallback instead of legacy when no choice is selectable", () => {

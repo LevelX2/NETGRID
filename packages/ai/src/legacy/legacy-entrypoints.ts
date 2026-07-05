@@ -24,6 +24,9 @@ export {
   type LegacyActionScoringCompositionDependencies,
 } from "./legacy-action-scoring-composition";
 export {
+  decisionFromLegacyChoices,
+} from "./decision-from-choices";
+export {
   createLegacyDecisionContext,
   type LegacyDecisionContextDependencies,
 } from "./legacy-decision-context";

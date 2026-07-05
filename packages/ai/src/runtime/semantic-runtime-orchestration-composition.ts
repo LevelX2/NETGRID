@@ -37,9 +37,6 @@ export type SemanticRuntimeOrchestrationCompositionDependencies =
       | "runnerComponents"
       | "selfDamageSurvivalAssessment"
       | "runnerSelfDamageImmediateWinSemanticChoice"
-      | "scoreRunnerAction"
-      | "scoreCorpAction"
-      | "runnerSelfDamageGuardedDecision"
     >;
 
 export function createSemanticRuntimeOrchestrationComposition(
@@ -74,9 +71,5 @@ export function createSemanticRuntimeOrchestrationComposition(
       actionExclusion.runnerSelfDamageSurvivalAssessment,
     runnerSelfDamageImmediateWinSemanticChoice:
       actionExclusion.runnerSelfDamageImmediateWinSemanticChoice,
-    runnerSelfDamageGuardedDecision:
-      actionExclusion.runnerSelfDamageGuardedDecision,
-    scoreRunnerAction: actionExclusion.scoreRunnerAction,
-    scoreCorpAction: actionExclusion.scoreCorpAction,
   });
 }

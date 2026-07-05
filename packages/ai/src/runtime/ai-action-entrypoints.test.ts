@@ -4,32 +4,13 @@ import { describe, expect, it } from "vitest";
 import { createAiActionEntrypoints } from "./ai-action-entrypoints";
 
 describe("AI action entrypoints", () => {
-  it("does not attach a legacy provider to default semantic decisions", () => {
-    const legacyProviders: Array<(() => AiDecision) | undefined> = [];
+  it("routes default decisions directly to the semantic runtime", () => {
+    const calls: AiDecisionInput["side"][] = [];
     const entrypoints = createAiActionEntrypoints({
-      chooseSemanticRuntimeAction: (_input, _options, legacyDecisionProvider) => {
-        legacyProviders.push(legacyDecisionProvider);
+      chooseSemanticRuntimeAction: (input) => {
+        calls.push(input.side);
         return decision("semantic-default");
       },
-      scoreActions: () => {
-        throw new Error("default semantic decisions must not score legacy actions");
-      },
-      decisionFromChoices: () => {
-        throw new Error("default semantic decisions must not build legacy choices");
-      },
-      hasCorpPlanAction: () => false,
-      isCorpReactiveBaselineDecision: () => false,
-      chooseCorpPlanAction: () => {
-        throw new Error("default semantic decisions must not choose legacy corp plans");
-      },
-      hasRunnerPlanAction: () => false,
-      isRunnerReactiveBaselineDecision: () => false,
-      baselineShellTradersPlanIsVisible: () => false,
-      runnerHasConditionalPaymentContinueDecision: () => false,
-      chooseRunnerPlanAction: () => {
-        throw new Error("default semantic decisions must not choose legacy runner plans");
-      },
-      runnerSelfDamageGuardedDecision: (_input, decision) => decision,
     });
 
     expect(entrypoints.chooseCorpAction(input("corp")).actionId).toBe(
@@ -38,7 +19,7 @@ describe("AI action entrypoints", () => {
     expect(entrypoints.chooseRunnerAction(input("runner")).actionId).toBe(
       "semantic-default",
     );
-    expect(legacyProviders).toEqual([undefined, undefined]);
+    expect(calls).toEqual(["corp", "runner"]);
   });
 });
 

@@ -2,6 +2,7 @@ import {
   createAiSimulationComposition,
   type AiSimulationCompositionDependencies,
 } from "../simulation/ai-simulation-composition";
+import { createLegacyBaselineSimulationContext } from "../simulation/legacy-baseline-simulation-context";
 import {
   createSemanticRuntimeOrchestrationComposition,
   type SemanticRuntimeOrchestrationCompositionDependencies,
@@ -268,6 +269,15 @@ export function createAiRuntimeSimulationComposition(
     corpScoring,
   );
 
+  const legacyBaselineEntrypoints =
+    createLegacyBaselineSimulationContext({
+      ...dependencies,
+      ...contextDiagnostics,
+      ...runnerSupport,
+      ...corpScoring,
+      extractAiFeatures: contextDiagnostics.extractAiFeatures,
+    });
+
   const runtimeEntrypoints =
     createSemanticRuntimeOrchestrationComposition(
       semanticRuntimeDependencies,
@@ -282,14 +292,16 @@ export function createAiRuntimeSimulationComposition(
     chooseRunnerAction: runtimeEntrypoints.chooseRunnerAction,
     chooseCorpAction: runtimeEntrypoints.chooseCorpAction,
     chooseRunnerBaselineAction:
-      runtimeEntrypoints.chooseRunnerBaselineAction,
-    chooseCorpBaselineAction: runtimeEntrypoints.chooseCorpBaselineAction,
+      legacyBaselineEntrypoints.chooseRunnerBaselineAction,
+    chooseCorpBaselineAction:
+      legacyBaselineEntrypoints.chooseCorpBaselineAction,
     tagPunishWindowDiagnosticsForSimulationAction:
       corpScoring.tagPunishWindowDiagnosticsForSimulationAction,
   });
 
   return {
     ...runtimeEntrypoints,
+    ...legacyBaselineEntrypoints,
     ...simulationEntrypoints,
   };
 }
