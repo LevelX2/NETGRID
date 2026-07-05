@@ -12,6 +12,7 @@ import {
   semanticRuntimeCorpBoardTriageActionComponent,
 } from "./semantic-runtime-corp-board-triage";
 import { corpIcePlacementScoreComponent } from "./corp-ice-placement/corp-ice-placement";
+import { corpUpgradeInstallPlacementComponent } from "./corp-upgrade-placement";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { rolesMatch } from "./role-match";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
@@ -287,6 +288,15 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   if (postPassIceLifecycle) components.push(postPassIceLifecycle);
   if (action.type === "install_card") {
     const roles = dependencies.rolesForAction(input, action);
+    const upgradePlacement = corpUpgradeInstallPlacementComponent({
+      input,
+      action,
+      roles,
+      actionSemanticCandidate,
+      sourceCard: visibleSourceCardForAction(input, action),
+      serverId: corpInstallServerId(action),
+    });
+    if (upgradePlacement) components.push(upgradePlacement);
     if (dependencies.corpActionIsScoreLine(input, action, roles)) {
       components.push({
         key: "corp_install_score_line",
