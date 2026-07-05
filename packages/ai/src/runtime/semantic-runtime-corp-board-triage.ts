@@ -181,13 +181,18 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     : undefined;
   if (
     centralPressure?.serverId === "rd" &&
-    centralPressureSeverity === "critical"
+    centralPressureSeverity === "critical" &&
+    centralServerNeedsProtection(input, "rd") &&
+    concreteCentralProtectionActionExists(actions, "rd")
   ) {
     return centralPressureTriage(
       centralPressure,
       centralPressureSeverity,
       currentCredits,
-      ["corp_board_triage_central_override:critical_before_remote"],
+      [
+        "corp_board_triage_central_override:critical_before_remote",
+        "corp_board_triage_central_override_requires_unanswered_protection:true",
+      ],
     );
   }
 
@@ -585,8 +590,7 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
       if (action.type === "draw_card" && !legalEconomyActionExists(input)) {
         return "match";
       }
-      return action.type === "advance_card" ||
-        (action.type === "install_card" && action.payload?.placement !== "ice")
+      return action.type === "advance_card" || action.type === "install_card"
         ? "mismatch"
         : "neutral";
     case "setup_score_remote":

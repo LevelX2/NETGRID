@@ -144,6 +144,26 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     actionSemanticCandidate,
   );
   if (boardTriage) components.push(boardTriage);
+  const activeScorelineAdvance =
+    corpActiveRemoteAgendaAdvanceClockComponent(
+      input,
+      action,
+      dependencies,
+      boardTriageState,
+    );
+  if (activeScorelineAdvance) components.push(activeScorelineAdvance);
+  const activeScoreRemoteFunding =
+    corpActiveScoreRemoteReserveFundingComponent(input, action);
+  if (activeScoreRemoteFunding) components.push(activeScoreRemoteFunding);
+  const activeScorelineOffPath =
+    corpActiveScorelineOffPathPenaltyComponent(
+      input,
+      action,
+      dependencies,
+      boardTriageState,
+      actionSemanticCandidate,
+    );
+  if (activeScorelineOffPath) components.push(activeScorelineOffPath);
   if (action.type === "score_agenda") {
     components.push({
       key: "corp_score_available_agenda",
@@ -345,6 +365,23 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       roles,
     );
     if (rootPayloadPlan) components.push(rootPayloadPlan);
+    const scoreRemotePipeline =
+      corpExistingScoreRemotePipelineComponent(
+        input,
+        action,
+        dependencies,
+        roles,
+        boardTriageState,
+      );
+    if (scoreRemotePipeline) components.push(scoreRemotePipeline);
+    const lowValueInstallDefer = corpLowValueInstallDeferComponent(
+      input,
+      action,
+      dependencies,
+      roles,
+      boardTriageState,
+    );
+    if (lowValueInstallDefer) components.push(lowValueInstallDefer);
     if (hqAgendaRelief) components.push(hqAgendaRelief.component);
     addCorpScoringWindowEvidenceComponent(
       components,
@@ -646,6 +683,374 @@ function corpReserveScoreComponent(
       `reserve_normalized_value:${normalizedValue}`,
     ].join("|"),
   };
+}
+
+type CorpActiveRemoteScorelineState = {
+  serverId: string;
+  cardId: string;
+  reserveFloor: number;
+  agendaPointsAtRisk: number;
+  advancesRemaining: number;
+  unrezzedRemoteRezCost: number;
+  evidence: string[];
+};
+
+function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "advance_card") return undefined;
+  const state = corpActiveRemoteScorelineState(input);
+  if (!state) return undefined;
+  const sourceCard = visibleSourceCardForAction(input, action);
+  if (!sourceCard || sourceCard.instanceId !== state.cardId) {
+    return undefined;
+  }
+  const roles = dependencies.rolesForAction(input, action);
+  const scoringWindow = dependencies.corpScoringWindowAssessment?.(
+    input,
+    action,
+    roles,
+  );
+  const rezFloor = dependencies.corpRemoteRezFloorAssessment(input, action);
+  if (rezFloor?.blockedByFloor) return undefined;
+  if (scoringWindow?.recommendedNextStep === "gain_credit") {
+    return undefined;
+  }
+  if (
+    boardTriageState.primary === "protect_hq" ||
+    boardTriageState.primary === "protect_rd"
+  ) {
+    if (boardTriageState.severity === "critical") return undefined;
+  }
+  const runnerAgendaPoints = positiveOrZeroNumber(
+    input.playerView.opponent?.agendaPoints,
+  ) ?? 0;
+  const severityBonus =
+    runnerAgendaPoints >= 5 ||
+    state.agendaPointsAtRisk >= 3 ||
+    scoringWindow?.agendaStealSeverity === "near_win" ||
+    scoringWindow?.agendaStealSeverity === "game_ending"
+      ? 700
+      : 0;
+  return {
+    key: "corp_active_remote_agenda_advance_clock",
+    label: "Aktive Remote-Agenda",
+    value: 2600 + severityBonus,
+    reason: [
+      "active_remote_agenda:true",
+      `server:${state.serverId}`,
+      `card:${state.cardId}`,
+      `advances_remaining:${state.advancesRemaining}`,
+      `agenda_points_at_risk:${state.agendaPointsAtRisk}`,
+      `runner_agenda_points:${runnerAgendaPoints}`,
+      ...(scoringWindow?.recommendedNextStep
+        ? [`recommended_next_step:${scoringWindow.recommendedNextStep}`]
+        : []),
+      ...state.evidence,
+    ].join("|"),
+  };
+}
+
+function corpActiveScoreRemoteReserveFundingComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "gain_credit") return undefined;
+  const state = corpActiveRemoteScorelineState(input);
+  if (!state) return undefined;
+  const credits = input.playerView.own.credits;
+  if (credits >= state.reserveFloor) return undefined;
+  return {
+    key: "corp_active_score_remote_reserve_funding",
+    label: "Score-Remote-Reserve",
+    value: 950,
+    reason: [
+      "active_remote_agenda:true",
+      `server:${state.serverId}`,
+      `credits:${credits}`,
+      `reserve_floor:${state.reserveFloor}`,
+      `advances_remaining:${state.advancesRemaining}`,
+      `unrezzed_remote_rez_cost:${state.unrezzedRemoteRezCost}`,
+      ...state.evidence,
+    ].join("|"),
+  };
+}
+
+function corpActiveScorelineOffPathPenaltyComponent<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card" && action.type !== "rez_ice") {
+    return undefined;
+  }
+  const state = corpActiveRemoteScorelineState(input);
+  if (!state) return undefined;
+  const actionServerId = corpScorelineActionServerId(input, action);
+  if (actionServerId === state.serverId) return undefined;
+  if (
+    (boardTriageState.primary === "protect_hq" ||
+      boardTriageState.primary === "protect_rd") &&
+    boardTriageState.severity === "critical" &&
+    actionServerId === boardTriageState.targetServerId
+  ) {
+    return undefined;
+  }
+  if (
+    action.type === "install_card" &&
+    action.payload?.placement === "root" &&
+    dependencies.corpActionIsScoreLine(
+      input,
+      action,
+      dependencies.rolesForAction(input, action),
+    )
+  ) {
+    return undefined;
+  }
+  const cost = semanticRuntimeCorpActionCreditCost(
+    dependencies,
+    action,
+    actionSemanticCandidate,
+  );
+  const creditsAfterAction = input.playerView.own.credits - cost;
+  const breaksReserve = creditsAfterAction < state.reserveFloor;
+  return {
+    key: "corp_active_scoreline_off_path_spend",
+    label: "Scoreline-Reservebruch",
+    value: breaksReserve ? -2600 : -1500,
+    reason: [
+      "active_remote_agenda:true",
+      `score_remote:${state.serverId}`,
+      `action_server:${actionServerId ?? "none"}`,
+      `action:${action.type}`,
+      `cost:${cost}`,
+      `credits_after_action:${creditsAfterAction}`,
+      `reserve_floor:${state.reserveFloor}`,
+      `breaks_reserve:${breaksReserve}`,
+      ...state.evidence,
+    ].join("|"),
+  };
+}
+
+function corpExistingScoreRemotePipelineComponent<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  roles: string[],
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card") return undefined;
+  if (
+    boardTriageState.primary === "protect_hq" ||
+    boardTriageState.primary === "protect_rd"
+  ) {
+    if (boardTriageState.severity === "critical") return undefined;
+  }
+  if (corpActiveRemoteScorelineState(input)) return undefined;
+  const pipeline = corpPreparedScoreRemotePipeline(input);
+  if (!pipeline) return undefined;
+  const serverId = corpInstallServerId(action);
+  const isScorelineRoot =
+    action.payload?.placement === "root" &&
+    dependencies.corpActionIsScoreLine(input, action, roles);
+  if (serverId === pipeline.serverId) {
+    if (isScorelineRoot) {
+      return {
+        key: "corp_existing_score_remote_pipeline",
+        label: "Vorbereitetes Scoring-Remote",
+        value: 1800,
+        reason: [
+          "existing_score_remote_pipeline:true",
+          `server:${pipeline.serverId}`,
+          `ice_count:${pipeline.iceCount}`,
+          "payload:scoreline_root",
+        ].join("|"),
+      };
+    }
+    if (action.payload?.placement === "ice") {
+      return {
+        key: "corp_existing_score_remote_pipeline",
+        label: "Vorbereitetes Scoring-Remote",
+        value: 700,
+        reason: [
+          "existing_score_remote_pipeline:true",
+          `server:${pipeline.serverId}`,
+          `ice_count:${pipeline.iceCount}`,
+          "payload:additional_remote_ice",
+        ].join("|"),
+      };
+    }
+    return undefined;
+  }
+  if (serverId === "new_remote") {
+    return {
+      key: "corp_remote_sprawl_penalty",
+      label: "Remote-Sprawl",
+      value: -3600,
+      reason: [
+        "existing_score_remote_pipeline:true",
+        `preferred_server:${pipeline.serverId}`,
+        "action_server:new_remote",
+        `placement:${String(action.payload?.placement ?? "unknown")}`,
+      ].join("|"),
+    };
+  }
+  if (serverId?.startsWith("remote_") && !isScorelineRoot) {
+    return {
+      key: "corp_remote_sprawl_penalty",
+      label: "Remote-Sprawl",
+      value: -1800,
+      reason: [
+        "existing_score_remote_pipeline:true",
+        `preferred_server:${pipeline.serverId}`,
+        `action_server:${serverId}`,
+        `placement:${String(action.payload?.placement ?? "unknown")}`,
+      ].join("|"),
+    };
+  }
+  return undefined;
+}
+
+function corpLowValueInstallDeferComponent<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  roles: string[],
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card") return undefined;
+  if (boardTriageState.primary !== "low_value") return undefined;
+  if (dependencies.corpActionIsScoreLine(input, action, roles)) {
+    return undefined;
+  }
+  if (rolesMatch(roles, ["economy"])) return undefined;
+  const serverId = corpInstallServerId(action);
+  const iceCount = serverId ? corpServerIceCount(input, serverId) : 0;
+  const emptyRemote =
+    serverId?.startsWith("remote_") === true &&
+    input.playerView.servers.find((server) => server.id === serverId)?.root
+      .length === 0;
+  if (
+    action.payload?.placement !== "ice" &&
+    action.payload?.placement !== "root"
+  ) {
+    return undefined;
+  }
+  if (iceCount < 2 && !emptyRemote && serverId !== "new_remote") {
+    return undefined;
+  }
+  return {
+    key: "corp_low_value_install_defer",
+    label: "Installation vertagen",
+    value: -1300,
+    reason: [
+      "triage_primary:low_value",
+      `server:${serverId ?? "none"}`,
+      `ice_count:${iceCount}`,
+      `empty_remote:${emptyRemote}`,
+      `placement:${String(action.payload?.placement ?? "unknown")}`,
+    ].join("|"),
+  };
+}
+
+function corpActiveRemoteScorelineState(
+  input: AiDecisionInput,
+): CorpActiveRemoteScorelineState | undefined {
+  return input.playerView.servers
+    .filter((server) => server.id.startsWith("remote_"))
+    .flatMap((server) =>
+      server.root
+        .filter((card) => card.known !== false && corpVisibleCardIsAgenda(card))
+        .map((card) => {
+          const requirement = corpVisibleAdvancementRequirement(card);
+          const counters = positiveOrZeroNumber(card.advancementCounters) ?? 0;
+          const advancesRemaining =
+            requirement === undefined
+              ? 0
+              : Math.max(0, requirement - counters);
+          const unrezzedRemoteRezCost = corpVisibleUnrezzedRezCost(server.ice);
+          const reserveFloor = Math.min(
+            8,
+            Math.max(2, advancesRemaining + unrezzedRemoteRezCost),
+          );
+          const agendaPointsAtRisk = corpVisibleAgendaPoints(card);
+          return {
+            serverId: server.id,
+            cardId: card.instanceId,
+            reserveFloor,
+            agendaPointsAtRisk,
+            advancesRemaining,
+            unrezzedRemoteRezCost,
+            evidence: [
+              `active_scoreline_server:${server.id}`,
+              `active_scoreline_card:${card.instanceId}`,
+              `active_scoreline_requirement:${requirement ?? "unknown"}`,
+              `active_scoreline_counters:${counters}`,
+              `active_scoreline_reserve_floor:${reserveFloor}`,
+            ],
+          };
+        }),
+    )
+    .sort(
+      (left, right) =>
+        right.agendaPointsAtRisk - left.agendaPointsAtRisk ||
+        right.reserveFloor - left.reserveFloor ||
+        left.serverId.localeCompare(right.serverId),
+    )[0];
+}
+
+function corpPreparedScoreRemotePipeline(
+  input: AiDecisionInput,
+): { serverId: string; iceCount: number } | undefined {
+  return input.playerView.servers
+    .filter(
+      (server) =>
+        server.id.startsWith("remote_") &&
+        server.root.length === 0 &&
+        server.ice.length > 0,
+    )
+    .map((server) => ({ serverId: server.id, iceCount: server.ice.length }))
+    .sort(
+      (left, right) =>
+        right.iceCount - left.iceCount ||
+        left.serverId.localeCompare(right.serverId),
+    )[0];
+}
+
+function corpVisibleUnrezzedRezCost(ice: readonly VisibleCard[]): number {
+  return ice
+    .filter((card) => card.known !== false && card.rezzed !== true)
+    .reduce((sum, card) => {
+      const definition = visibleCardDefinition(card);
+      const rezCost =
+        positiveOrZeroNumber(card.rezCost) ??
+        positiveOrZeroNumber(definition?.rezCost) ??
+        0;
+      return sum + rezCost;
+    }, 0);
+}
+
+function corpVisibleAgendaPoints(card: VisibleCard): number {
+  const definition = visibleCardDefinition(card);
+  return (
+    positiveOrZeroNumber(card.agendaPoints) ??
+    positiveOrZeroNumber(definition?.agendaPoints) ??
+    0
+  );
+}
+
+function corpServerIceCount(input: AiDecisionInput, serverId: string): number {
+  return (
+    input.playerView.servers.find((server) => server.id === serverId)?.ice
+      .length ?? 0
+  );
 }
 
 function corpHqAgendaReliefScorelineContext<TConsumer extends string>(
