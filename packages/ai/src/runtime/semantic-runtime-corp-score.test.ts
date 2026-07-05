@@ -1091,6 +1091,145 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("searches for an agenda instead of taking more credits when a score remote is prepared", () => {
+    const drawCard = corpAction("draw-card", "draw_card", {}, "basic_action");
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const accountsReceivable = corpAction(
+      "accounts-receivable",
+      "play_operation",
+      {},
+      "corp_accounts_receivable",
+    );
+    const input = corpInputWithHqCards(6, [accountsReceivableCard()], [
+      drawCard,
+      gainCredit,
+      accountsReceivable,
+    ]);
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-wall", { rezCost: 2, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      rolesForAction: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === accountsReceivable.actionId ? ["economy"] : [],
+    };
+
+    const drawComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      drawCard,
+      "basic_economy_draw",
+      dependencies,
+    );
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      dependencies,
+    );
+    const operationComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      accountsReceivable,
+      "basic_install",
+      dependencies,
+      semanticCandidate(
+        accountsReceivable.actionId,
+        "play.corp_operation",
+        ["economy.corp_credit_burst"],
+        "play_operation",
+      ),
+    );
+
+    expect(drawComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_prepared_score_remote_agenda_search",
+          reason: expect.stringContaining("server:remote_1"),
+        }),
+      ]),
+    );
+    expect(creditComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_prepared_score_remote_credit_loop_penalty",
+        }),
+      ]),
+    );
+    expect(operationComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_prepared_score_remote_credit_loop_penalty",
+        }),
+      ]),
+    );
+    expect(totalScore(drawComponents)).toBeGreaterThan(
+      totalScore(creditComponents),
+    );
+    expect(totalScore(drawComponents)).toBeGreaterThan(
+      totalScore(operationComponents),
+    );
+  });
+
+  it("does not push agenda search ahead of funding when a prepared remote rez floor is unmet", () => {
+    const drawCard = corpAction("draw-card", "draw_card", {}, "basic_action");
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithHqCards(2, [], [drawCard, gainCredit]);
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-wall", { rezCost: 4, rezzed: false })],
+        root: [],
+      },
+    ];
+
+    const drawComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      drawCard,
+      "basic_economy_draw",
+      testDependencies(),
+    );
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      testDependencies(),
+    );
+
+    expect(drawComponents).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_prepared_score_remote_agenda_search",
+        }),
+      ]),
+    );
+    expect(creditComponents).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_prepared_score_remote_credit_loop_penalty",
+        }),
+      ]),
+    );
+  });
+
   it("prefers scoring a scoreable non-overadvance agenda over adding extra counters", () => {
     const agenda = corpCard("marine-arcology", "agenda", {
       title: "Marine Arcology",
