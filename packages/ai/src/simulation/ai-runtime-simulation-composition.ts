@@ -1,24 +1,24 @@
 import {
   createAiSimulationComposition,
   type AiSimulationCompositionDependencies,
-} from "../simulation/ai-simulation-composition";
-import { createLegacyBaselineSimulationContext } from "../simulation/legacy-baseline-simulation-context";
+} from "./ai-simulation-composition";
+import { createLegacyBaselineSimulationContext } from "./legacy-baseline-simulation-context";
 import {
   createSemanticRuntimeOrchestrationComposition,
   type SemanticRuntimeOrchestrationCompositionDependencies,
-} from "./semantic-runtime-orchestration-composition";
+} from "../runtime/semantic-runtime-orchestration-composition";
 import {
   createSemanticRuntimeCorpScoringComposition,
   type SemanticRuntimeCorpScoringCompositionDependencies,
-} from "./semantic-runtime-corp-scoring-composition";
+} from "../runtime/semantic-runtime-corp-scoring-composition";
 import {
   createRunnerSemanticSupportComposition,
   type RunnerSemanticSupportCompositionDependencies,
-} from "./runner-semantic-support-composition";
+} from "../runtime/runner-semantic-support-composition";
 import {
   createAiContextDiagnosticsComposition,
   type AiContextDiagnosticsCompositionDependencies,
-} from "./ai-context-diagnostics-composition";
+} from "../runtime/ai-context-diagnostics-composition";
 
 type RuntimeScoringDependencyObjects = Pick<
   SemanticRuntimeOrchestrationCompositionDependencies,

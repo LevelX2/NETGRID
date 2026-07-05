@@ -124,10 +124,20 @@ describe("AI module boundaries", () => {
     ]);
     const violations = productionFiles("evaluation").flatMap((file) =>
       importsFrom(file).flatMap((reference) => {
-        if (!resolvesToSrcArea(file, reference.importSource, path.join("decision", "pilot"))) {
+        if (
+          !resolvesToSrcArea(
+            file,
+            reference.importSource,
+            path.join("decision", "pilot"),
+          )
+        ) {
           return [];
         }
-        if (allowedPilotImports.has(resolvedImportBasename(file, reference.importSource))) {
+        if (
+          allowedPilotImports.has(
+            resolvedImportBasename(file, reference.importSource),
+          )
+        ) {
           return [];
         }
         return [
@@ -150,7 +160,11 @@ describe("AI module boundaries", () => {
           resolvesToSrcArea(file, reference.importSource, "evaluation"),
         )
         .map((reference) =>
-          violation(file, reference, "runtime modules must not import evaluation"),
+          violation(
+            file,
+            reference,
+            "runtime modules must not import evaluation",
+          ),
         ),
     );
     const actionViolations = productionFiles("actions").flatMap((file) =>
@@ -159,7 +173,11 @@ describe("AI module boundaries", () => {
           resolvesToSrcArea(file, reference.importSource, "decision"),
         )
         .map((reference) =>
-          violation(file, reference, "actions modules must not import decision"),
+          violation(
+            file,
+            reference,
+            "actions modules must not import decision",
+          ),
         ),
     );
 
@@ -177,9 +195,15 @@ describe("AI module boundaries", () => {
             reference.importSource.startsWith("../legacy"),
         )
         .map((reference) =>
-          violation(file, reference, "diagnostics modules must not import selectors"),
+          violation(
+            file,
+            reference,
+            "diagnostics modules must not import selectors",
+          ),
         );
-      const chooserReferences = content.match(/\bchoose(?:Runner|Corp|Ai)Action\b/g);
+      const chooserReferences = content.match(
+        /\bchoose(?:Runner|Corp|Ai)Action\b/g,
+      );
       if (!chooserReferences) {
         return importViolations;
       }
@@ -277,8 +301,11 @@ describe("AI module boundaries", () => {
         ),
     );
 
-    expect([...reportViolations, ...evaluationViolations, ...runtimeViolations])
-      .toEqual([]);
+    expect([
+      ...reportViolations,
+      ...evaluationViolations,
+      ...runtimeViolations,
+    ]).toEqual([]);
   });
 
   it("keeps access intelligence modules below runtime, evaluation and public index", () => {
@@ -370,7 +397,11 @@ describe("AI module boundaries", () => {
     const requiredMarkers = [
       {
         file: path.join(srcDir, "legacy", "runner-plans.ts"),
-        markers: ["Legacy runner planner", "fallback", "Do not add new semantic"],
+        markers: [
+          "Legacy runner planner",
+          "fallback",
+          "Do not add new semantic",
+        ],
       },
       {
         file: path.join(srcDir, "legacy", "corp-plans.ts"),
@@ -378,7 +409,11 @@ describe("AI module boundaries", () => {
       },
       {
         file: path.join(srcDir, "index.ts"),
-        markers: ["Public package facade", "re-export", "intentional public contracts"],
+        markers: [
+          "Public package facade",
+          "re-export",
+          "intentional public contracts",
+        ],
       },
     ];
 
@@ -445,7 +480,11 @@ describe("AI module boundaries", () => {
   });
 
   it("routes productive doctrine context through the runtime doctrine context", () => {
-    const aiDecisionInput = path.join(srcDir, "runtime", "ai-decision-input.ts");
+    const aiDecisionInput = path.join(
+      srcDir,
+      "runtime",
+      "ai-decision-input.ts",
+    );
     const content = readFileSync(aiDecisionInput, "utf8");
     const violations = [
       ...(content.includes("buildDeckStrategyProfile")
@@ -502,9 +541,11 @@ describe("AI module boundaries", () => {
 
     const violations = [...expectedImportsByFile.entries()].flatMap(
       ([file, expectedImports]) => {
-        const actualImports = [...new Set(importsFrom(file).map(
-          (reference) => reference.importSource,
-        ))].sort();
+        const actualImports = [
+          ...new Set(
+            importsFrom(file).map((reference) => reference.importSource),
+          ),
+        ].sort();
         const expected = [...expectedImports].sort();
         return JSON.stringify(actualImports) === JSON.stringify(expected)
           ? []
@@ -586,32 +627,104 @@ describe("AI module boundaries", () => {
           resolvesToSrcEntry(file, reference.importSource, "tactical-plans"),
         )
         .map((reference) =>
-          violation(file, reference, "plan modules must not import tactical-plans.ts"),
+          violation(
+            file,
+            reference,
+            "plan modules must not import tactical-plans.ts",
+          ),
         );
     });
 
     expect([...violations, ...planModuleCycles]).toEqual([]);
   });
 
-  it("routes productive legacy planner access through the legacy entrypoint", () => {
-    const publicEntrypoints = path.join(srcDir, "ai-runtime-public-entrypoints.ts");
+  it("keeps the productive runtime tree zero legacy", () => {
+    const checkedFiles = [
+      ...productionFiles("runtime"),
+      path.join(srcDir, "ai-runtime-public-entrypoints.ts"),
+    ];
+    const forbiddenPatterns = [
+      /\blegacy\b/i,
+      /from\s+["'][^"']*legacy[^"']*["']/i,
+      /\bscoreActionsForLegacy\b/,
+      /\bcreateLegacyActionScoringComposition\b/,
+      /\bcreateLegacyDecisionContext\b/,
+      /\bsemanticRuntimeForcedLegacy\b/,
+      /\blegacyDecisionProvider\b/,
+      /\bchooseCorpLegacyBaselineAction\b/,
+      /\bchooseRunnerLegacyBaselineAction\b/,
+    ];
+    const violations = checkedFiles.flatMap((file) => {
+      const content = readFileSync(file, "utf8");
+      return forbiddenPatterns.flatMap((pattern) => {
+        const match = pattern.exec(content);
+        return match
+          ? [
+              `${relativeFile(file)} matches forbidden runtime legacy pattern ${pattern} at line ${lineForIndex(content, match.index)}`,
+            ]
+          : [];
+      });
+    });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps guarded legacy symbols outside productive runtime ownership", () => {
+    const allowedAreaPrefixes = ["legacy/", "simulation/", "evaluation/"];
+    const guardedSymbols = [
+      "scoreActionsForLegacy",
+      "createLegacyActionScoringComposition",
+      "createLegacyDecisionContext",
+      "chooseCorpLegacyBaselineAction",
+      "chooseRunnerLegacyBaselineAction",
+      "semanticRuntimeForcedLegacy",
+      "legacyDecisionProvider",
+    ];
+    const violations = collectSourceFiles(srcDir)
+      .filter((file) => !file.endsWith(".test.ts"))
+      .flatMap((file) => {
+        const content = readFileSync(file, "utf8");
+        const relative = relativeFile(file);
+        if (allowedAreaPrefixes.some((prefix) => relative.startsWith(prefix))) {
+          return [];
+        }
+        return guardedSymbols
+          .filter((symbol) => content.includes(symbol))
+          .map(
+            (symbol) =>
+              `${relative} references guarded legacy symbol ${symbol}`,
+          );
+      });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps productive runtime access away from legacy entrypoints", () => {
+    const publicEntrypoints = path.join(
+      srcDir,
+      "ai-runtime-public-entrypoints.ts",
+    );
     const content = readFileSync(publicEntrypoints, "utf8");
     const violations = [
       ...(content.includes('from "./corp-plans"')
-        ? ["ai-runtime-public-entrypoints.ts imports corp-plans facade directly"]
+        ? [
+            "ai-runtime-public-entrypoints.ts imports corp-plans facade directly",
+          ]
         : []),
       ...(content.includes('from "./runner-plans"')
-        ? ["ai-runtime-public-entrypoints.ts imports runner-plans facade directly"]
+        ? [
+            "ai-runtime-public-entrypoints.ts imports runner-plans facade directly",
+          ]
         : []),
-      ...(!content.includes('from "./legacy/legacy-entrypoints"')
-        ? ["ai-runtime-public-entrypoints.ts misses legacy entrypoint"]
+      ...(content.includes('from "./legacy/')
+        ? ["ai-runtime-public-entrypoints.ts imports legacy modules"]
         : []),
     ];
 
     expect(violations).toEqual([]);
   });
 
-  it("keeps historical public plan exports behind the legacy public contract", () => {
+  it("keeps the public package facade away from legacy plan contracts", () => {
     const publicIndex = path.join(srcDir, "index.ts");
     const content = readFileSync(publicIndex, "utf8");
     const violations = [
@@ -621,11 +734,12 @@ describe("AI module boundaries", () => {
       ...(content.includes('from "./runner-plans"')
         ? ["index.ts exports runner-plans facade directly"]
         : []),
-      ...(content.includes('from "./deck-doctrine"')
-        ? ["index.ts exports deck-doctrine v1 directly"]
+      ...(content.includes('from "./legacy/')
+        ? ["index.ts exports legacy modules"]
         : []),
-      ...(!content.includes('from "./legacy/legacy-public-contract"')
-        ? ["index.ts misses legacy public contract"]
+      ...(content.includes("chooseCorpBaselineAction") ||
+      content.includes("chooseRunnerBaselineAction")
+        ? ["index.ts exports baseline action selectors"]
         : []),
     ];
 
@@ -635,14 +749,15 @@ describe("AI module boundaries", () => {
   it("keeps runtime, simulation and diagnostics off legacy planner compatibility facades", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
-      productionFiles(area as Parameters<typeof productionFiles>[0])
-        .flatMap((file) =>
+      productionFiles(area as Parameters<typeof productionFiles>[0]).flatMap(
+        (file) =>
           importsFrom(file)
-            .filter((reference) =>
-              reference.importSource === "../corp-plans" ||
-              reference.importSource === "../runner-plans" ||
-              reference.importSource === "./corp-plans" ||
-              reference.importSource === "./runner-plans",
+            .filter(
+              (reference) =>
+                reference.importSource === "../corp-plans" ||
+                reference.importSource === "../runner-plans" ||
+                reference.importSource === "./corp-plans" ||
+                reference.importSource === "./runner-plans",
             )
             .map((reference) =>
               violation(
@@ -651,7 +766,7 @@ describe("AI module boundaries", () => {
                 "use legacy/legacy-entrypoints or a focused non-legacy module",
               ),
             ),
-        ),
+      ),
     );
 
     expect(violations).toEqual([]);
@@ -684,8 +799,6 @@ describe("AI module boundaries", () => {
       "legacy/legacy-action-scorer.ts",
       "legacy/legacy-action-scoring-composition.ts",
       "legacy/legacy-entrypoints.ts",
-      "runtime/ai-action-entrypoints-composition.ts",
-      "runtime/semantic-runtime-action-exclusion-composition.ts",
       "simulation/legacy-baseline-simulation-context.ts",
     ]);
     const guardedSymbols = [
@@ -1027,7 +1140,7 @@ describe("AI module boundaries", () => {
           "runtime/semantic-runtime-plan-memory-exclusion.ts",
           "runtime/runner-economy-commitment-composition.ts",
           "runtime/runner-development-support-composition.ts",
-          "runtime/ai-runtime-simulation-composition.ts",
+          "simulation/ai-runtime-simulation-composition.ts",
         ]),
       ],
     ]);
@@ -1054,13 +1167,14 @@ describe("AI module boundaries", () => {
   it("routes runtime, simulation and diagnostics legacy imports through the legacy entrypoint", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
-      productionFiles(area as Parameters<typeof productionFiles>[0])
-        .flatMap((file) =>
+      productionFiles(area as Parameters<typeof productionFiles>[0]).flatMap(
+        (file) =>
           importsFrom(file)
-            .filter((reference) =>
-              resolvesToSrcArea(file, reference.importSource, "legacy") &&
-              resolvedImportBasename(file, reference.importSource) !==
-                "legacy-entrypoints",
+            .filter(
+              (reference) =>
+                resolvesToSrcArea(file, reference.importSource, "legacy") &&
+                resolvedImportBasename(file, reference.importSource) !==
+                  "legacy-entrypoints",
             )
             .map((reference) =>
               violation(
@@ -1069,7 +1183,7 @@ describe("AI module boundaries", () => {
                 "runtime/simulation/diagnostics/evaluation must use legacy-entrypoints",
               ),
             ),
-        ),
+      ),
     );
 
     expect(violations).toEqual([]);
@@ -1137,7 +1251,10 @@ function collectSourceFiles(directory: string): string[] {
   });
 }
 
-function collectTextFiles(directory: string, extensions: readonly string[]): string[] {
+function collectTextFiles(
+  directory: string,
+  extensions: readonly string[],
+): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const entryPath = path.join(directory, entry.name);
     if (entry.isDirectory()) {
@@ -1199,7 +1316,11 @@ function lineForIndex(content: string, index: number): number {
   return content.slice(0, index).split(/\r?\n/).length;
 }
 
-function violation(file: string, reference: ImportReference, message: string): string {
+function violation(
+  file: string,
+  reference: ImportReference,
+  message: string,
+): string {
   return `${relativeFile(file)}:${reference.line} imports ${reference.importSource}: ${message}`;
 }
 

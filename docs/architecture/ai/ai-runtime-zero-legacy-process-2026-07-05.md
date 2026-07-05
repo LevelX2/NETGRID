@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`done`
 
 ## Quelle/Vorgabe
 
@@ -114,7 +114,7 @@ hard_gates -> blocker
 - Kernartefakte: `runtime/ai-action-entrypoints-composition.ts`, `runtime/semantic-runtime-action-exclusion-composition.ts`, `runtime/runner-baseline-support-composition.ts`, neue fokussierte Runtime-Helper falls nötig.
 - Tests/Checks: Runtime-/Boundary-/Cutover-Tests, `@netgrid/ai typecheck`, `git diff --check`.
 - Done-Gate: `rg "legacy|scoreActionsForLegacy|createLegacyDecisionContext" packages/ai/src/runtime -g "*.ts"` zeigt keine produktive Runtime-Treffer außer Testnamen/Text in `*.test.ts`.
-- Commit: `refactor(ai): replace legacy runtime composition dependencies`.
+- Commit: `refactor(ai): remove legacy scoring from runtime composition`.
 
 ### ZLG-3 Practical Micro, Public Facade und Tests legacy-isolieren
 
@@ -124,7 +124,7 @@ hard_gates -> blocker
 - Kernartefakte: `runtime/semantic-runtime-decision-context.ts`, `runtime/practical-micro-runtime.ts`, `ai-runtime-public-entrypoints.ts`, `index.ts`, betroffene Tests.
 - Tests/Checks: AI-Cutover-/Index-/Boundary-Tests, `@netgrid/ai typecheck`, `git diff --check`.
 - Done-Gate: kein produktiver Entrypoint liest `NETGRID_SEMANTIC_AI_RUNTIME=legacy`; kein Runtime-Typ enthält `legacyDecisionProvider`.
-- Commit: `refactor(ai): isolate legacy outside public runtime`.
+- Commit: `refactor(ai): isolate legacy public surfaces`.
 
 ### ZLG-4 Harte Zero-Legacy-Gates, Wissensrückführung und Integration
 
@@ -135,6 +135,24 @@ hard_gates -> blocker
 - Tests/Checks: `corepack pnpm --filter @netgrid/ai exec vitest run ...`, `@netgrid/ai typecheck`, Server-Smoke falls Entrypoint-Vertrag berührt, `git diff --check`.
 - Done-Gate: Runtime-Zero-Legacy-Gate ist grün, `main` enthält alle Paketcommits und Worktree ist entfernt.
 - Commit: `test(ai): enforce runtime zero legacy boundary`.
+
+## Ergebnis 2026-07-05
+
+- `packages/ai/src/runtime/**` ist frei von `legacy`-/`Legacy`-Text, Legacy-Imports, Legacy-Provider-Typen und Baseline-Adaptern.
+- `chooseAiAction`, `chooseCorpAction` und `chooseRunnerAction` laufen direkt über Semantic Runtime; `NETGRID_SEMANTIC_AI_RUNTIME=legacy` wird von produktiven Entrypoints ignoriert.
+- Legacy-Scoring und Legacy-Baseline liegen nur noch unter `legacy/**` bzw. `simulation/**`; die frühere Runtime-Simulationskomposition wurde nach `simulation/ai-runtime-simulation-composition.ts` verschoben.
+- `index.ts` exportiert keine Legacy-Plan-Fassade und keine Baseline-Action-Selectoren mehr; historische Regressionstests importieren Legacy-Planfunktionen explizit aus `legacy/legacy-public-contract`.
+- Boundary-Gates erzwingen den Zustand über `packages/ai/src/decision/module-boundaries.test.ts`.
+
+## Verifikation 2026-07-05
+
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/runtime/practical-micro-runtime.test.ts src/runtime/practical-micro-candidates-context.test.ts src/deck-doctrine-runtime-context.test.ts src/public-export-contract.test.ts src/runtime/semantic-runtime-corp-passive-scoreline.test.ts src/runtime/semantic-runtime-corp-score-safety.test.ts src/runtime/corp-scoreline/semantic-runtime-corp-scoreline-assessment.test.ts src/semantic-ai-runtime-cutover.test.ts --reporter dot`
+- `rg -n "legacy|Legacy|from ['\"]\\.\\.?/legacy|legacy-entrypoints" packages/ai/src/runtime packages/ai/src/ai-runtime-public-entrypoints.ts -g "*.ts"` ohne Treffer.
+- `rg -n "from \"\\.\\/legacy|legacy-public-contract|chooseCorpBaselineAction|chooseRunnerBaselineAction|chooseCorpPlanAction|chooseRunnerPlanAction|hasCorpPlanAction|hasRunnerPlanAction|frozenLegacy" packages/ai/src/index.ts packages/ai/src/public-export-contract.test.ts` ohne Treffer.
+- `git diff --check`
+
+Hinweis: `packages/ai/src/index.test.ts` bleibt als historischer Sammeltest teilweise auf Legacy-ReasonCodes und Legacy-Planverhalten ausgerichtet und ist kein Zero-Legacy-Abschlussgate. Die historischen Plan-/Baseline-Fälle sind jetzt explizit über Legacy- oder AI-Runtime-Simulationspfade importiert.
 
 ## Verifikationsregeln
 

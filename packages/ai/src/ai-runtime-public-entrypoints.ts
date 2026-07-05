@@ -28,7 +28,7 @@ import {
   buildServerFeatures,
   visibleCitySurveillanceSourceCount,
 } from "./runtime/ai-feature-server";
-import { createAiRuntimeSimulationComposition } from "./runtime/ai-runtime-simulation-composition";
+import { createAiRuntimeSimulationComposition } from "./simulation/ai-runtime-simulation-composition";
 import {
   cardDefinitionTypeForAi,
   demoCardDefinitionForAi,
