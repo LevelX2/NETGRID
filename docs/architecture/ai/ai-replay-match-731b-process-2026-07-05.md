@@ -1,6 +1,6 @@
 # AI Replay Match 731b Process
 
-Status: aktiv
+Status: Paketfolge abgeschlossen; lokaler Main-Merge offen
 
 Quelle/Vorgabe: Freigegebene Analyse des zuletzt abgeschlossenen Spiels `match_731b436e85fb2484` aus `C:\Projekte\NETGRID\data\runtime\multiplayer\netgrid.sqlite`.
 

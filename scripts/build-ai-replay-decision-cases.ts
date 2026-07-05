@@ -37,6 +37,22 @@ const rows = (
         )
         .all()
 ) as Array<Omit<ReplayDecisionTraceInput, "traceJson"> & { traceJson: string }>;
+const traceCoverageWarnings = selectAiMatchesWithoutTraceRows(db, maxCreatedAt);
+if (traceCoverageWarnings.length > 0) {
+  console.warn(
+    JSON.stringify(
+      {
+        warning: "ai_replay_trace_gap",
+        matchesWithoutTraces: traceCoverageWarnings.length,
+        sampleMatchIds: traceCoverageWarnings
+          .slice(0, 5)
+          .map((entry) => entry.matchId),
+      },
+      null,
+      2,
+    ),
+  );
+}
 
 function selectTraceRowsSql(): string {
   return `SELECT
@@ -76,10 +92,56 @@ const report = buildReplayDecisionCaseExtractionReport(
 
 mkdirSync(dirname(jsonOut), { recursive: true });
 writeFileSync(jsonOut, `${JSON.stringify(report, null, 2)}\n`, "utf8");
-writeFileSync(mdOut, renderMarkdown(report), "utf8");
+writeFileSync(mdOut, renderMarkdown(report, traceCoverageWarnings), "utf8");
 console.log(JSON.stringify(report.aggregate, null, 2));
 
-function renderMarkdown(report: ReplayDecisionCaseExtractionReport): string {
+type TraceCoverageWarning = {
+  matchId: string;
+  mode: string;
+  status: string;
+  updatedAt: string;
+  eventCount: number;
+};
+
+function selectAiMatchesWithoutTraceRows(
+  db: DatabaseSync,
+  maxCreatedAt?: string,
+): TraceCoverageWarning[] {
+  const sql = `SELECT
+       m.match_id AS matchId,
+       m.mode AS mode,
+       m.status AS status,
+       m.updated_at AS updatedAt,
+       COUNT(DISTINCT e.event_id) AS eventCount,
+       COUNT(DISTINCT t.trace_id) AS traceCount
+     FROM matches m
+     LEFT JOIN events e ON e.match_id = m.match_id
+     LEFT JOIN ai_decision_traces t ON t.match_id = m.match_id
+     WHERE m.mode LIKE '%ai%'
+       ${maxCreatedAt ? "AND m.created_at <= ?" : ""}
+     GROUP BY m.match_id, m.mode, m.status, m.updated_at
+     HAVING traceCount = 0
+     ORDER BY m.updated_at DESC
+     LIMIT 20`;
+  const rows = (maxCreatedAt
+    ? db.prepare(sql).all(maxCreatedAt)
+    : db.prepare(sql).all()) as Array<{
+    matchId: string;
+    mode: string;
+    status: string;
+    updatedAt: string;
+    eventCount: number;
+  }>;
+  return rows.map((row) => ({
+    ...row,
+    eventCount: Number(row.eventCount),
+  }));
+}
+
+function renderMarkdown(
+  report: ReplayDecisionCaseExtractionReport,
+  traceCoverageWarnings: readonly TraceCoverageWarning[],
+): string {
   return `# KI-Replay-DecisionCases
 
 Run-ID: \`${runId}\`
@@ -106,6 +168,8 @@ ${countRows(report.aggregate.bySide)}
 
 ${countRows(report.aggregate.byMode)}
 
+${renderTraceCoverageWarnings(traceCoverageWarnings)}
+
 ## Aktionstypen
 
 ${countRows(topEntries(report.aggregate.bySelectedActionType, 20))}
@@ -125,6 +189,26 @@ ${countRows(topEntries(report.aggregate.byPlanKind, 20))}
 
 - \`corepack pnpm --filter @netgrid/ai typecheck\`
 - \`corepack pnpm --filter @netgrid/ai exec vitest run src/evaluation/replay-decision-case-extraction.test.ts --maxWorkers=1 --testTimeout=30000\`
+`;
+}
+
+function renderTraceCoverageWarnings(
+  warnings: readonly TraceCoverageWarning[],
+): string {
+  if (warnings.length === 0) return "";
+  const rows = warnings
+    .map(
+      (warning) =>
+        `| \`${warning.matchId}\` | \`${warning.mode}\` | \`${warning.status}\` | ${warning.eventCount} | \`${warning.updatedAt}\` |`,
+    )
+    .join("\n");
+  return `## Trace-Coverage-Warnungen
+
+Diese AI-Matches haben Events, aber keine Rows in \`ai_decision_traces\`. Replay-Fehlersuchen dürfen dafür nur PublicEvents, LegalActions, PlayerViews/Snapshots und explizit als Post-hoc markierte aktuelle AI-Diagnostik nutzen.
+
+| Match | Modus | Status | Events | Updated |
+| --- | --- | --- | ---: | --- |
+${rows}
 `;
 }
 
