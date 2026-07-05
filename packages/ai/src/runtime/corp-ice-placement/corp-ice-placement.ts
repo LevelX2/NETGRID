@@ -7,6 +7,14 @@ import {
 } from "@netgrid/shared";
 
 import { createAiHintsByCard, RUNTIME_CARDS } from "../../ai-hints";
+import {
+  endTheRunSubroutineCount,
+  minimumCreditsToBreakEndTheRunSubroutines,
+} from "../../visible-run-analysis";
+import {
+  visibleBreakerCardCanAddressIce,
+  visibleBreakerRoles,
+} from "../runner-visible-breaker-coverage";
 import { rolesMatch } from "../role-match";
 
 export type CorpIcePlacementRecommendation =
@@ -117,6 +125,8 @@ export type CorpIcePlacementCandidate = {
     rezAffordability: number;
     deckDensityAdjustment: number;
     opportunityCost: number;
+    visibleZeroEffect: number;
+    postInstallReserve: number;
   };
   evidence: string[];
 };
@@ -197,6 +207,11 @@ export function corpIcePlacementCandidateForAction<
   const firstIce = serverNeed.iceCount === 0;
   const hasOutsideRezzedIce = serverNeed.existingRezzedIceCount > 0;
   const serverNeedScore = corpServerNeedScoreValue(profile, serverNeed);
+  const visibleDefenseFit = corpVisibleIceDefenseFit(
+    input,
+    sourceCard,
+    profile,
+  );
 
   const components = {
     serverNeed: serverNeedScore,
@@ -225,6 +240,13 @@ export function corpIcePlacementCandidateForAction<
       creditsAfterInstall,
       hasBetterImmediateIceAlternative:
         params.hasBetterImmediateIceAlternative === true,
+    }),
+    visibleZeroEffect: corpVisibleZeroEffectValue(visibleDefenseFit),
+    postInstallReserve: corpPostInstallReserveValue({
+      profile,
+      serverNeed,
+      creditsAfterInstall,
+      visibleDefenseFit,
     }),
   };
   const score = Object.values(components).reduce((sum, value) => sum + value, 0);
@@ -258,8 +280,11 @@ export function corpIcePlacementCandidateForAction<
       `server_need_score:${serverNeedScore}`,
       `recommendation:${recommendation}`,
       ...(deferReason ? [`defer_reason:${deferReason}`] : []),
+      `component_visible_zero_effect:${components.visibleZeroEffect}`,
+      `component_post_install_reserve:${components.postInstallReserve}`,
       ...serverNeed.evidence,
       ...profile.evidence,
+      ...visibleDefenseFit.evidence,
       ...deckDensity.evidence,
     ],
   };
@@ -936,6 +961,150 @@ function corpPlacementOpportunityCostValue(params: {
     return -350;
   }
   return 0;
+}
+
+type CorpVisibleIceDefenseFit = {
+  visibleBreakerCoverage: boolean;
+  visibleBreakCost?: number | undefined;
+  runnerCanAffordVisibleBreak?: boolean | undefined;
+  hasVisibleBreakerTax: boolean;
+  zeroEffectRisk: boolean;
+  evidence: string[];
+};
+
+function corpVisibleIceDefenseFit(
+  input: AiDecisionInput,
+  sourceCard: VisibleCard,
+  profile: CorpIceCardPlacementProfile,
+): CorpVisibleIceDefenseFit {
+  const visibleBreakerCoverage = (input.playerView.opponent?.rig ?? []).some(
+    (card) =>
+      card.known !== false &&
+      card.type === "program" &&
+      visibleBreakerCardCanAddressIce(card, sourceCard, {
+        visibleBreakerRoles,
+        visibleCardText: corpIcePlacementVisibleCardText,
+      }),
+  );
+  const visibleBreakCost = corpVisibleRunnerBreakCostForIce(input, sourceCard);
+  const runnerCredits = corpVisibleRunnerContestCredits(input);
+  const runnerCanAffordVisibleBreak =
+    visibleBreakCost !== undefined ? runnerCredits >= visibleBreakCost : undefined;
+  const hasVisibleBreakerTax =
+    visibleBreakerCoverage &&
+    visibleBreakCost !== undefined &&
+    visibleBreakCost > 0;
+  const zeroEffectRisk =
+    visibleBreakerCoverage &&
+    !hasVisibleBreakerTax &&
+    profile.immediateStop &&
+    !profile.tax &&
+    !profile.damage &&
+    !profile.programTrash &&
+    !profile.tagTrace;
+  return {
+    visibleBreakerCoverage,
+    ...(visibleBreakCost !== undefined ? { visibleBreakCost } : {}),
+    ...(runnerCanAffordVisibleBreak !== undefined
+      ? { runnerCanAffordVisibleBreak }
+      : {}),
+    hasVisibleBreakerTax,
+    zeroEffectRisk,
+    evidence: [
+      `visible_breaker_coverage:${visibleBreakerCoverage}`,
+      ...(visibleBreakCost !== undefined
+        ? [`visible_break_cost:${visibleBreakCost}`]
+        : []),
+      ...(runnerCanAffordVisibleBreak !== undefined
+        ? [`runner_can_afford_visible_break:${runnerCanAffordVisibleBreak}`]
+        : []),
+      `visible_breaker_tax:${hasVisibleBreakerTax}`,
+      `zero_effect_risk:${zeroEffectRisk}`,
+    ],
+  };
+}
+
+function corpVisibleZeroEffectValue(
+  visibleDefenseFit: CorpVisibleIceDefenseFit,
+): number {
+  return visibleDefenseFit.zeroEffectRisk ? -2200 : 0;
+}
+
+function corpPostInstallReserveValue(params: {
+  profile: CorpIceCardPlacementProfile;
+  serverNeed: CorpServerNeedProfile;
+  creditsAfterInstall: number;
+  visibleDefenseFit: CorpVisibleIceDefenseFit;
+}): number {
+  const centralPressure =
+    (params.serverNeed.serverKind === "hq" ||
+      params.serverNeed.serverKind === "rd") &&
+    (params.serverNeed.pressureActive || params.serverNeed.serverNeed >= 1000);
+  if (!centralPressure) return 0;
+  const reserveFloor = params.visibleDefenseFit.zeroEffectRisk ? 2 : 1;
+  if (params.creditsAfterInstall >= reserveFloor) return 0;
+  if (
+    params.profile.immediateStop &&
+    params.profile.rezCost === 0 &&
+    !params.visibleDefenseFit.zeroEffectRisk
+  ) {
+    return 0;
+  }
+  return params.creditsAfterInstall <= 0 ? -900 : -500;
+}
+
+function corpVisibleRunnerBreakCostForIce(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+): number | undefined {
+  const endTheRunCount = corpVisibleEndTheRunSubroutineCount(ice);
+  if (endTheRunCount <= 0) return undefined;
+  return minimumCreditsToBreakEndTheRunSubroutines(
+    ice,
+    [...(input.playerView.opponent?.rig ?? [])],
+    endTheRunCount,
+    new Map(),
+  )?.cost;
+}
+
+function corpVisibleEndTheRunSubroutineCount(ice: VisibleCard): number {
+  const quoteCount =
+    ice.effectiveRunQuote?.subroutines?.filter(
+      (subroutine) => subroutine.type === "end_the_run",
+    ).length ?? 0;
+  if (quoteCount > 0) return quoteCount;
+  return ice.definitionId ? endTheRunSubroutineCount(ice.definitionId) : 0;
+}
+
+function corpVisibleRunnerContestCredits(input: AiDecisionInput): number {
+  return (
+    (input.playerView.opponent?.credits ?? 0) +
+    (input.playerView.opponent?.rig ?? []).reduce((sum, card) => {
+      if (card.known === false) return sum;
+      return (
+        sum +
+        (card.counterDisplays ?? []).reduce((cardSum, display) => {
+          const uses = display.creditPool?.uses ?? [];
+          return uses.includes("using_icebreaker_during_run") ||
+            uses.includes("using_icebreaker_during_run_non_noisy") ||
+            uses.includes("using_killer_during_run")
+            ? cardSum + Math.max(0, Math.floor(display.amount))
+            : cardSum;
+        }, 0)
+      );
+    }, 0)
+  );
+}
+
+function corpIcePlacementVisibleCardText(card: VisibleCard): string {
+  return [
+    card.title,
+    card.rulesText,
+    card.definitionId,
+    ...(card.subtypes ?? []),
+  ]
+    .filter((value): value is string => typeof value === "string")
+    .join(" ");
 }
 
 function corpIcePlacementRecommendationForScore(

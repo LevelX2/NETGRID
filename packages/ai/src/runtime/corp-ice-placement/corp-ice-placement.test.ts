@@ -364,6 +364,43 @@ describe("corp ICE placement candidate scoring", () => {
     expect(rdCandidate?.evidence).toContain("rd_pressure:true");
   });
 
+  it("defers zero-effect R&D matchpoint ICE that drains post-install reserve", () => {
+    const rdWall = corpIce("rd-wall", {
+      title: "R&D Wall",
+      rulesText: "*End the run.",
+      subtypes: ["Barrier"],
+      rezCost: 0,
+    });
+    const input = corpInput({
+      credits: 6,
+      hq: [rdWall],
+      servers: [server("hq", []), server("rd", [])],
+      runnerRig: [
+        card("rd-interface", "hardware", {
+          title: "R&D Interface",
+          rulesText: "Whenever you access R&D, access 1 additional card.",
+        }),
+        card("runner-fracter", "program", {
+          title: "Runner Fracter",
+          subtypes: ["Icebreaker", "Fracter"],
+          rulesText: "Break barrier subroutines.",
+        }),
+      ],
+    });
+    input.playerView.opponent.agendaPoints = 5;
+
+    const candidate = candidateFor(input, rdWall, "rd", {
+      actionCreditCost: 6,
+      iceRezCost: 0,
+    });
+
+    expect(candidate?.components.visibleZeroEffect).toBeLessThan(0);
+    expect(candidate?.components.postInstallReserve).toBeLessThan(0);
+    expect(candidate?.recommendation).not.toBe("install_now");
+    expect(candidate?.evidence).toContain("zero_effect_risk:true");
+    expect(candidate?.evidence).toContain("component_post_install_reserve:-900");
+  });
+
   it("prioritizes a scoreline remote over quiet central over-icing", () => {
     const remoteWall = corpIce("remote-wall", {
       rulesText: "*End the run.",
