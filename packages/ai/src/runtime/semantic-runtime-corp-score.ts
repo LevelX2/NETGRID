@@ -704,7 +704,7 @@ function corpHqAgendaReliefScorelineContext<TConsumer extends string>(
       : 0;
   if (
     assessment.windowKind !== "unsafe" ||
-    assessment.agendaStealSeverity === "game_ending" ||
+    assessment.agendaStealSeverity !== "near_win" ||
     runnerAgendaPointsAfterSteal >= pointsToWin ||
     assessment.recommendedNextStep === "gain_credit" ||
     assessment.corpCanRezRelevantIce === false ||

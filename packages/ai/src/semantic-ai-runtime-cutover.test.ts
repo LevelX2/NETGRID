@@ -30,7 +30,6 @@ import {
 } from "./runtime/semantic-runtime";
 import type { SemanticRuntimeChoice } from "./runtime/semantic-runtime-types";
 import type {
-  AiDecision,
   AiDecisionInput,
   AiDifficulty,
   LegalAction,
@@ -266,7 +265,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      legacyDecision("run-hq", "legacy.runner.run"),
       {},
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: run.actionId,
@@ -359,7 +357,6 @@ describe("Semantic AI runtime cutover", () => {
 
     chooseSemanticRuntimeAction(
       input,
-      legacyDecision("draw", "legacy.runner.draw"),
       {},
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: gain.actionId,
@@ -471,7 +468,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const preview = chooseSemanticRuntimeAction(
       input,
-      legacyDecision("gain-credit", "legacy.runner.economy"),
       { persistTacticalPlanMemory: false },
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: gain.actionId,
@@ -483,7 +479,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const persisted = chooseSemanticRuntimeAction(
       input,
-      legacyDecision("gain-credit", "legacy.runner.economy"),
       {},
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: gain.actionId,
@@ -526,7 +521,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      legacyDecision("run-hq", "legacy.runner.run"),
       {},
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: run.actionId,
@@ -565,7 +559,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      legacyDecision("run-hq", "legacy.runner.run"),
       {},
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: run.actionId,
@@ -608,7 +601,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      legacyDecision("run-hq", "legacy.runner.run"),
       {},
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: gain.actionId,
@@ -654,7 +646,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      legacyDecision("gain-credit", "legacy.runner.economy"),
       {},
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: gain.actionId,
@@ -705,7 +696,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      legacyDecision("gain-credit", "legacy.runner.economy"),
       {},
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: gain.actionId,
@@ -753,7 +743,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      legacyDecision("gain-credit", "legacy.runner.economy"),
       {},
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: gain.actionId,
@@ -824,7 +813,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      legacyDecision(schlaghund.actionId, "legacy.corp.schlaghund"),
       {},
       semanticRuntimeDependencies(
         [
@@ -853,7 +841,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      legacyDecision(labelOnly.actionId, "legacy.corp.synthetic"),
       {},
       semanticRuntimeDependencies(
         [
@@ -886,7 +873,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      legacyDecision("gain-credit", "legacy.corp.economy"),
       {},
       semanticRuntimeDependencies(runtimeChoices, {
         initiallySelectedActionId: gain.actionId,
@@ -3260,9 +3246,6 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseSemanticRuntimeAction(
       input,
-      () => {
-        throw new Error("legacy provider must not run in semantic fallback");
-      },
       {},
       semanticRuntimeDependencies([], {
         initiallySelectedActionId: "none",
@@ -3524,17 +3507,6 @@ function legalAction(
   };
   if (options.payload) action.payload = options.payload;
   return action;
-}
-
-function legacyDecision(actionId: string, reasonCode: string): AiDecision {
-  return {
-    actionId,
-    reasonCode,
-    explanation: reasonCode,
-    consideredActionIds: [],
-    fallbackUsed: false,
-    evidence: ["legacy_reference"],
-  };
 }
 
 function semanticRuntimeChoice(

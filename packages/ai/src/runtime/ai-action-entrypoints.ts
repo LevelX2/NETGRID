@@ -4,17 +4,19 @@ import {
   chooseAiActionFromSides,
 } from "./choose-ai-action";
 import { memoizeLegacyDecision } from "./legacy-decision-provider";
+import { practicalMicroRuntimeMode } from "./practical-micro-runtime";
 import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
+  semanticRuntimeForcedLegacy,
   type LegacyBaselineChoice,
 } from "../legacy/legacy-entrypoints";
 
 export type AiActionEntrypointDependencies = {
   chooseSemanticRuntimeAction: (
     input: AiDecisionInput,
-    legacyDecisionProvider: () => AiDecision,
     options: AiDecisionRuntimeOptions,
+    legacyDecisionProvider?: () => AiDecision,
   ) => AiDecision;
   scoreActions: (
     input: AiDecisionInput,
@@ -82,17 +84,26 @@ export function createAiActionEntrypoints(
     input: AiDecisionInput,
     options: AiDecisionRuntimeOptions = {},
   ): AiDecision {
+    if (semanticRuntimeForcedLegacy()) {
+      return forcedLegacyDecision(corpLegacyDecision(input));
+    }
+    const legacyDecisionProvider =
+      practicalMicroRuntimeMode(options) === "off"
+        ? undefined
+        : memoizeLegacyDecision(() => corpLegacyDecision(input));
     return dependencies.chooseSemanticRuntimeAction(
       input,
-      memoizeLegacyDecision(() => {
-        const baselineDecision = chooseCorpBaselineAction(input);
-        return dependencies.hasCorpPlanAction(input) &&
-          !dependencies.isCorpReactiveBaselineDecision(baselineDecision)
-          ? dependencies.chooseCorpPlanAction(input, baselineDecision)
-          : baselineDecision;
-      }),
       options,
+      legacyDecisionProvider,
     );
+  }
+
+  function corpLegacyDecision(input: AiDecisionInput): AiDecision {
+    const baselineDecision = chooseCorpBaselineAction(input);
+    return dependencies.hasCorpPlanAction(input) &&
+      !dependencies.isCorpReactiveBaselineDecision(baselineDecision)
+      ? dependencies.chooseCorpPlanAction(input, baselineDecision)
+      : baselineDecision;
   }
 
   function chooseCorpBaselineAction(input: AiDecisionInput): AiDecision {
@@ -106,33 +117,42 @@ export function createAiActionEntrypoints(
     input: AiDecisionInput,
     options: AiDecisionRuntimeOptions = {},
   ): AiDecision {
+    if (semanticRuntimeForcedLegacy()) {
+      return forcedLegacyDecision(runnerLegacyDecision(input));
+    }
+    const legacyDecisionProvider =
+      practicalMicroRuntimeMode(options) === "off"
+        ? undefined
+        : memoizeLegacyDecision(() => runnerLegacyDecision(input));
     return dependencies.chooseSemanticRuntimeAction(
       input,
-      memoizeLegacyDecision(() => {
-        const baselineDecision = chooseRunnerBaselineAction(input);
-        const baselineAction = input.legalActions.find(
-          (candidate) => candidate.actionId === baselineDecision.actionId,
-        );
-        const shouldUsePlanAction =
-          dependencies.hasRunnerPlanAction(input) &&
-          (!dependencies.isRunnerReactiveBaselineDecision(baselineDecision) ||
-            dependencies.baselineShellTradersPlanIsVisible(
-              input,
-              baselineDecision,
-            )) &&
-          !dependencies.runnerHasConditionalPaymentContinueDecision(
-            input,
-            baselineAction,
-          );
-        const legacyDecision = shouldUsePlanAction
-          ? dependencies.chooseRunnerPlanAction(input, baselineDecision)
-          : baselineDecision;
-        return dependencies.runnerSelfDamageGuardedDecision(
-          input,
-          legacyDecision,
-        );
-      }),
       options,
+      legacyDecisionProvider,
+    );
+  }
+
+  function runnerLegacyDecision(input: AiDecisionInput): AiDecision {
+    const baselineDecision = chooseRunnerBaselineAction(input);
+    const baselineAction = input.legalActions.find(
+      (candidate) => candidate.actionId === baselineDecision.actionId,
+    );
+    const shouldUsePlanAction =
+      dependencies.hasRunnerPlanAction(input) &&
+      (!dependencies.isRunnerReactiveBaselineDecision(baselineDecision) ||
+        dependencies.baselineShellTradersPlanIsVisible(
+          input,
+          baselineDecision,
+        )) &&
+      !dependencies.runnerHasConditionalPaymentContinueDecision(
+        input,
+        baselineAction,
+      );
+    const legacyDecision = shouldUsePlanAction
+      ? dependencies.chooseRunnerPlanAction(input, baselineDecision)
+      : baselineDecision;
+    return dependencies.runnerSelfDamageGuardedDecision(
+      input,
+      legacyDecision,
     );
   }
 
@@ -149,5 +169,15 @@ export function createAiActionEntrypoints(
     chooseCorpBaselineAction,
     chooseRunnerAction,
     chooseRunnerBaselineAction,
+  };
+}
+
+function forcedLegacyDecision(decision: AiDecision): AiDecision {
+  return {
+    ...decision,
+    evidence: [
+      ...(decision.evidence ?? []),
+      "semantic_runtime_force_legacy",
+    ],
   };
 }

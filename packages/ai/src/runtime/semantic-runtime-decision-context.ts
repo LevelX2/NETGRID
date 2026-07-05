@@ -21,8 +21,8 @@ export type SemanticRuntimeDecisionContextDependencies =
 export type SemanticRuntimeDecisionContext = {
   chooseSemanticRuntimeAction: (
     input: AiDecisionInput,
-    legacyDecisionProvider: () => AiDecision,
     options: AiDecisionRuntimeOptions,
+    legacyDecisionProvider?: () => AiDecision,
   ) => AiDecision;
 };
 
@@ -31,19 +31,21 @@ export function createSemanticRuntimeDecisionContext(
 ): SemanticRuntimeDecisionContext {
   function chooseSemanticRuntimeAction(
     input: AiDecisionInput,
-    legacyDecisionProvider: () => AiDecision,
     options: AiDecisionRuntimeOptions,
+    legacyDecisionProvider?: () => AiDecision,
   ): AiDecision {
-    const lazyLegacyDecision = memoizeLegacyDecision(legacyDecisionProvider);
     const runtimeDecision = chooseSemanticRuntimeActionFromRuntime(
       input,
-      lazyLegacyDecision,
       options,
       dependencies,
     );
     if (practicalMicroRuntimeMode(options) === "off") {
       return applyPracticalTacticOverlay(input, runtimeDecision, options);
     }
+    if (!legacyDecisionProvider) {
+      return applyPracticalTacticOverlay(input, runtimeDecision, options);
+    }
+    const lazyLegacyDecision = memoizeLegacyDecision(legacyDecisionProvider);
     const legacyDecision = lazyLegacyDecision();
     const practicalMicroDecision = applyPracticalMicroRuntimeComparator(
       input,

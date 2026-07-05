@@ -34,7 +34,6 @@ import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame"
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { buildMergedTacticalGoals } from "../decision/tactical-goal-merge";
 import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
-import { semanticRuntimeForcedLegacy } from "../legacy/legacy-entrypoints";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
@@ -166,23 +165,9 @@ export type SemanticRuntimeDependencies = {
 
 export function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
-  legacyDecisionOrProvider: AiDecision | (() => AiDecision),
   options: AiDecisionRuntimeOptions,
   dependencies: SemanticRuntimeDependencies,
 ): AiDecision {
-  const legacyDecisionProvider = legacyDecisionProviderFrom(
-    legacyDecisionOrProvider,
-  );
-  if (semanticRuntimeForcedLegacy()) {
-    const legacyDecision = legacyDecisionProvider();
-    return {
-      ...legacyDecision,
-      evidence: [
-        ...(legacyDecision.evidence ?? []),
-        "semantic_runtime_force_legacy",
-      ],
-    };
-  }
   const actionSemanticCandidates = dependencies.buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: input.side,
@@ -661,14 +646,6 @@ function semanticCoverageFallbackWhyNot(evidence: readonly string[]): string[] {
   ];
 }
 
-function legacyDecisionProviderFrom(
-  legacyDecisionOrProvider: AiDecision | (() => AiDecision),
-): () => AiDecision {
-  if (typeof legacyDecisionOrProvider === "function") {
-    return legacyDecisionOrProvider;
-  }
-  return () => legacyDecisionOrProvider;
-}
 
 function visibleSourceDefinitionsByInstanceId(
   input: AiDecisionInput,
