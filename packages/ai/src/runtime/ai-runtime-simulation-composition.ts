@@ -29,16 +29,13 @@ type RuntimeScoringDependencyObjects = Pick<
   | "startRun"
 >;
 
-type AiRuntimeSimulationScoringDependencies =
-  Pick<
-    RuntimeScoringDependencyObjects["badPublicityRelevance"],
-    "sourceDefinitionIdForAction" | "actionCreditCost" | "fakedHitCardId"
-  > & {
-    runActionSpendingCapAssessment:
-      RuntimeScoringDependencyObjects["goalFit"]["runActionSpendingCapAssessment"];
-    handBufferNeedScoreComponent:
-      RuntimeScoringDependencyObjects["recoveryCommitment"]["handBufferNeedScoreComponent"];
-  };
+type AiRuntimeSimulationScoringDependencies = Pick<
+  RuntimeScoringDependencyObjects["badPublicityRelevance"],
+  "sourceDefinitionIdForAction" | "actionCreditCost" | "fakedHitCardId"
+> & {
+  runActionSpendingCapAssessment: RuntimeScoringDependencyObjects["goalFit"]["runActionSpendingCapAssessment"];
+  handBufferNeedScoreComponent: RuntimeScoringDependencyObjects["recoveryCommitment"]["handBufferNeedScoreComponent"];
+};
 
 type RunnerSemanticSupportOutputs = ReturnType<
   typeof createRunnerSemanticSupportComposition
@@ -88,42 +85,41 @@ type RuntimeContextDiagnosticsDependencyKeys =
   | "tagPunishAssessmentForAction"
   | "trashAccessContext";
 
-export type AiRuntimeSimulationCompositionDependencies =
+export type AiRuntimeSimulationCompositionDependencies = Omit<
+  SemanticRuntimeOrchestrationCompositionDependencies,
+  | "badPublicityRelevance"
+  | "corpAdvancementCounterPlacementAssessment"
+  | "corpComponents"
+  | "corpEvidence"
+  | "corpOntologyPayoffAvailableForTagSource"
+  | "goalFit"
+  | "recoveryCommitment"
+  | "install"
+  | "startRun"
+  | RuntimeRunnerSupportDependencyKeys
+  | RuntimeContextDiagnosticsDependencyKeys
+> &
   Omit<
-    SemanticRuntimeOrchestrationCompositionDependencies,
-    | "badPublicityRelevance"
-    | "corpAdvancementCounterPlacementAssessment"
-    | "corpComponents"
-    | "corpEvidence"
-    | "corpOntologyPayoffAvailableForTagSource"
-    | "goalFit"
-    | "recoveryCommitment"
-    | "install"
-    | "startRun"
+    AiSimulationCompositionDependencies,
+    | "chooseAiAction"
+    | "chooseRunnerAction"
+    | "chooseCorpAction"
+    | "chooseRunnerBaselineAction"
+    | "chooseCorpBaselineAction"
+    | "tagPunishWindowDiagnosticsForSimulationAction"
     | RuntimeRunnerSupportDependencyKeys
     | RuntimeContextDiagnosticsDependencyKeys
   > &
-    Omit<
-      AiSimulationCompositionDependencies,
-      | "chooseAiAction"
-      | "chooseRunnerAction"
-      | "chooseCorpAction"
-      | "chooseRunnerBaselineAction"
-      | "chooseCorpBaselineAction"
-      | "tagPunishWindowDiagnosticsForSimulationAction"
-      | RuntimeRunnerSupportDependencyKeys
-      | RuntimeContextDiagnosticsDependencyKeys
-    > &
-    AiContextDiagnosticsCompositionDependencies &
-    Omit<
-      SemanticRuntimeCorpScoringCompositionDependencies<string>,
-      RuntimeContextDiagnosticsDependencyKeys
-    > &
-    Omit<
-      RunnerSemanticSupportCompositionDependencies,
-      RuntimeContextDiagnosticsDependencyKeys
-    > &
-    AiRuntimeSimulationScoringDependencies;
+  AiContextDiagnosticsCompositionDependencies &
+  Omit<
+    SemanticRuntimeCorpScoringCompositionDependencies<string>,
+    RuntimeContextDiagnosticsDependencyKeys
+  > &
+  Omit<
+    RunnerSemanticSupportCompositionDependencies,
+    RuntimeContextDiagnosticsDependencyKeys
+  > &
+  AiRuntimeSimulationScoringDependencies;
 
 function createRuntimeComposedDependencies(
   dependencies: AiRuntimeSimulationCompositionDependencies,
@@ -136,8 +132,7 @@ function createRuntimeComposedDependencies(
     extractFeatures: contextDiagnostics.extractAiFeatures,
     hasKnownUnaffordableLegalRun:
       contextDiagnostics.runnerHasKnownUnaffordableLegalRun,
-    remoteTrashAccessContext:
-      contextDiagnostics.runnerRemoteTrashAccessContext,
+    remoteTrashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
     tagPunishAssessmentForAction:
       contextDiagnostics.corpTagPunishOntologyAssessmentForAction,
     trashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
@@ -157,8 +152,7 @@ function createSemanticRuntimeDependencies(
     closeout: contextDiagnostics.bestTrueCentralCloseoutProfileForMetrics,
     hasKnownUnaffordableLegalRun:
       contextDiagnostics.runnerHasKnownUnaffordableLegalRun,
-    remoteTrashAccessContext:
-      contextDiagnostics.runnerRemoteTrashAccessContext,
+    remoteTrashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
     trashAccessContext: contextDiagnostics.runnerRemoteTrashAccessContext,
     riskAssessment: runnerSupport.blinkRiskAssessmentForEncounterBreak,
     planMemoryActionExclusion:
@@ -166,8 +160,7 @@ function createSemanticRuntimeDependencies(
     evaluationForAction:
       runnerSupport.semanticRuntimeRunnerRunTargetEvaluationForAction,
     handFundingTarget: runnerSupport.runnerHandFundingTarget,
-    bankHasConcreteFundingNeed:
-      runnerSupport.runnerBankHasConcreteFundingNeed,
+    bankHasConcreteFundingNeed: runnerSupport.runnerBankHasConcreteFundingNeed,
     cardAddressesVisibleBreakerNeed:
       runnerSupport.runnerCardAddressesVisibleBreakerNeed,
     badPublicityOrTraceTechCard:
@@ -186,8 +179,7 @@ function createSemanticRuntimeDependencies(
       runnerSupport.runnerBankInvestmentCommitmentEvidence,
     noRunEconomyCommitmentEvidence:
       runnerSupport.runnerNoRunEconomyCommitmentEvidence,
-    blinkRiskEvidenceForAction:
-      runnerSupport.runnerBlinkRiskEvidenceForAction,
+    blinkRiskEvidenceForAction: runnerSupport.runnerBlinkRiskEvidenceForAction,
     persistentInstallEvidenceForAction:
       runnerSupport.runnerPersistentInstallEvidenceForAction,
     badPublicityRelevance: {
@@ -204,8 +196,7 @@ function createSemanticRuntimeDependencies(
     recoveryCommitment: {
       muPressureFundingScoreComponent:
         runnerSupport.runnerMuPressureFundingScoreComponent,
-      handBufferNeedScoreComponent:
-        dependencies.handBufferNeedScoreComponent,
+      handBufferNeedScoreComponent: dependencies.handBufferNeedScoreComponent,
       viral15JackOutScoreComponent:
         runnerSupport.runnerViral15JackOutScoreComponent,
       multiRunEventScoreComponent:
@@ -240,8 +231,6 @@ function createSemanticRuntimeDependencies(
     corpEvidence: corpScoring.semanticRuntimeCorpEvidence,
     scorelineWindowAssessment:
       corpScoring.semanticRuntimeCorpScorelineWindowAssessment,
-    corpOntologyPayoffAvailableForTagSource:
-      corpScoring.corpOntologyPayoffAvailableForTagSource,
   };
 }
 
@@ -269,19 +258,18 @@ export function createAiRuntimeSimulationComposition(
     corpScoring,
   );
 
-  const legacyBaselineEntrypoints =
-    createLegacyBaselineSimulationContext({
-      ...dependencies,
-      ...contextDiagnostics,
-      ...runnerSupport,
-      ...corpScoring,
-      extractAiFeatures: contextDiagnostics.extractAiFeatures,
-    });
+  const legacyBaselineEntrypoints = createLegacyBaselineSimulationContext({
+    ...dependencies,
+    ...contextDiagnostics,
+    ...runnerSupport,
+    ...corpScoring,
+    extractAiFeatures: contextDiagnostics.extractAiFeatures,
+    scrubEvidence: (evidence) => dependencies.scrubEvidence([...evidence]),
+  });
 
-  const runtimeEntrypoints =
-    createSemanticRuntimeOrchestrationComposition(
-      semanticRuntimeDependencies,
-    );
+  const runtimeEntrypoints = createSemanticRuntimeOrchestrationComposition(
+    semanticRuntimeDependencies,
+  );
 
   const simulationEntrypoints = createAiSimulationComposition({
     ...dependencies,

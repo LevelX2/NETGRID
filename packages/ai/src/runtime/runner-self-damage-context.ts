@@ -1,11 +1,9 @@
-import type { AiDecision, AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
-  runnerSelfDamageGuardedDecision,
   runnerSelfDamageImmediateWinSemanticChoice,
   runnerSelfDamageSurvivalAssessment,
   runnerSelfDamageSurvivalExclusion,
-  type RunnerSelfDamageGuardedDecisionDependencies,
   type RunnerSelfDamageSurvivalAssessment as RunnerSelfDamageSurvivalAssessmentResult,
   type RunnerSelfDamageSurvivalAssessmentDependencies,
 } from "./runner-self-damage-choice";
@@ -15,14 +13,9 @@ import type {
 } from "./semantic-runtime-types";
 
 export type RunnerSelfDamageContextDependencies =
-  RunnerSelfDamageSurvivalAssessmentDependencies &
-    Omit<RunnerSelfDamageGuardedDecisionDependencies, "survivalAssessment">;
+  RunnerSelfDamageSurvivalAssessmentDependencies;
 
 export type RunnerSelfDamageContext = {
-  runnerSelfDamageGuardedDecision: (
-    input: AiDecisionInput,
-    decision: AiDecision,
-  ) => AiDecision;
   runnerSelfDamageImmediateWinSemanticChoice: (
     input: AiDecisionInput,
     choices: readonly SemanticRuntimeChoice[],
@@ -56,11 +49,6 @@ export function createRunnerSelfDamageContext(
   }
 
   return {
-    runnerSelfDamageGuardedDecision: (input, decision) =>
-      runnerSelfDamageGuardedDecision(input, decision, {
-        ...dependencies,
-        survivalAssessment,
-      }),
     runnerSelfDamageImmediateWinSemanticChoice: (input, choices) =>
       runnerSelfDamageImmediateWinSemanticChoice(input, choices, {
         survivalAssessment,

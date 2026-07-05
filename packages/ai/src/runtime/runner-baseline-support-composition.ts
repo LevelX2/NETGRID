@@ -1,9 +1,9 @@
-import type { VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
-import {
-  createLegacyDecisionContext,
-  type LegacyDecisionContextDependencies,
-} from "../legacy/legacy-entrypoints";
 import { createDeckCapabilitiesContext } from "./deck-capabilities-context";
 import {
   createRunnerBaselinePlanGuardContext,
@@ -22,15 +22,18 @@ import {
   type RunnerRunOnlyActionAdjustmentDependencies,
 } from "./runner-run-only-action-adjustment";
 import { createRunnerStrategicIntentContext } from "./runner-strategic-intent-context";
+import {
+  selectedChoicesForDecision as selectedChoicesForRuntimeDecision,
+  type SelectedChoicesForDecisionDependencies,
+} from "./selected-choices-for-decision";
 import { createVisibleIcebreakerProgramPredicate } from "./visible-icebreaker-program";
 
 export type RunnerBaselineSupportCompositionDependencies =
   RunnerBaselinePlanGuardContextDependencies &
     RunnerRunOnlyActionAdjustmentDependencies & {
       visibleBreakerRolesForAi: (card: VisibleCard) => readonly string[];
-    } &
-    Omit<
-      LegacyDecisionContextDependencies,
+    } & Omit<
+      SelectedChoicesForDecisionDependencies,
       | "discardKeepScore"
       | "rolesForCardId"
       | "selectedRunnerProgramInstallTrashOptionIds"
@@ -49,18 +52,16 @@ export function createRunnerBaselineSupportComposition(
     runnerHasConditionalPaymentContinueDecision,
     baselineShellTradersPlanIsVisible,
   } = createRunnerBaselinePlanGuardContext({
-    delayedInstallAbilityForAction:
-      dependencies.delayedInstallAbilityForAction,
+    delayedInstallAbilityForAction: dependencies.delayedInstallAbilityForAction,
     runnerHasInstalledPrograms: dependencies.runnerHasInstalledPrograms,
   });
 
   const { deckCapabilitiesForInput } = createDeckCapabilitiesContext();
   const { runnerStrategicIntentForInput } =
     createRunnerStrategicIntentContext();
-  const isVisibleIcebreakerProgram =
-    createVisibleIcebreakerProgramPredicate(
-      dependencies.visibleBreakerRolesForAi,
-    );
+  const isVisibleIcebreakerProgram = createVisibleIcebreakerProgramPredicate(
+    dependencies.visibleBreakerRolesForAi,
+  );
   const { runnerRunOnlyActionAdjustedSemanticChoice } =
     createRunnerRunOnlyActionContext({
       compareAction: dependencies.compareAction,
@@ -111,25 +112,31 @@ export function createRunnerBaselineSupportComposition(
     rolesForAction: dependencies.rolesForAction,
   });
 
-  const { decisionFromChoices, selectedChoicesForDecision } =
-    createLegacyDecisionContext({
-      evaluateCorpOpeningHand: dependencies.evaluateCorpOpeningHand,
-      evaluateRunnerOpeningHand:
-        dependencies.evaluateRunnerOpeningHand,
-      discardKeepScore: (input, card) => discardKeepScore(input, card),
-      selectedRunnerProgramInstallTrashOptionIds:
-        selectedRunnerProgramInstallTrashOptionIds,
-      selectedRunnerForcedProgramTrashOptionIds:
-        selectedRunnerForcedProgramTrashOptionIds,
-      extractAiFeatures: dependencies.extractAiFeatures,
-      rolesForCardId: dependencies.rolesForCardId,
-      scrubEvidence: dependencies.scrubEvidence,
-    });
+  const selectedChoicesDependencies: SelectedChoicesForDecisionDependencies = {
+    evaluateCorpOpeningHand: dependencies.evaluateCorpOpeningHand,
+    evaluateRunnerOpeningHand: dependencies.evaluateRunnerOpeningHand,
+    discardKeepScore: (input, card) => discardKeepScore(input, card),
+    selectedRunnerProgramInstallTrashOptionIds:
+      selectedRunnerProgramInstallTrashOptionIds,
+    selectedRunnerForcedProgramTrashOptionIds:
+      selectedRunnerForcedProgramTrashOptionIds,
+    extractAiFeatures: dependencies.extractAiFeatures,
+    rolesForCardId: dependencies.rolesForCardId,
+  };
+  function selectedChoicesForDecision(
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) {
+    return selectedChoicesForRuntimeDecision(
+      input,
+      action,
+      selectedChoicesDependencies,
+    );
+  }
 
   return {
     runnerHasConditionalPaymentContinueDecision,
     baselineShellTradersPlanIsVisible,
-    decisionFromChoices,
     selectedChoicesForDecision,
     deckCapabilitiesForInput,
     runnerStrategicIntentForInput,
