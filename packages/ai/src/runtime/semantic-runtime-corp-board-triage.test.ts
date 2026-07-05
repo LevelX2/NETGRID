@@ -126,6 +126,84 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("does not override an active scoreline when R&D already has effective stop ICE", () => {
+    const remoteScoreline = corpAction("remote-scoreline", "advance_card", {
+      serverId: "remote_1",
+    });
+    const rdIce = corpAction("install-rd-extra-ice", "install_card", {
+      placement: "ice",
+      serverId: "rd",
+    });
+    const remoteIce = corpAction("install-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const input = corpInput({
+      runnerAgendaPoints: 5,
+      runnerRig: [rdVirusCard("highlighter")],
+      legalActions: [remoteScoreline, rdIce, remoteIce],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [
+          iceCard("rd-stop-1", { rezzed: false }),
+          iceCard("rd-stop-2", { rezzed: false }),
+          iceCard("rd-stop-3", { rezzed: false }),
+        ]),
+        remoteServer("remote_1", [iceCard("remote-ice")], [agendaCard()]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteScoreline.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "temporary_safe",
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "near_win",
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          recommendedNextStep: "score",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const rdIceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      rdIce,
+      dependencies,
+    );
+    const remoteIceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteIce,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_score_remote",
+      severity: "high",
+      targetServerId: "remote_1",
+    });
+    expect(triage.evidence).toContain(
+      "corp_board_triage_primary:protect_score_remote",
+    );
+    expect(rdIceComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+    expect(remoteIceComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+  });
+
   it("aligns same-target R&D rez under critical protect-rd triage", () => {
     const rdRez = corpRezIceAction("rez-rd-quandary", "rd-ice", 2);
     const declineRez = corpAction("decline-rez", "decline_rez");
