@@ -1860,7 +1860,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
-  it("converts critical HQ agenda pressure into a prepared remote before passive funding", () => {
+  it("funds before converting game-ending HQ pressure into an accessible remote", () => {
     const installAgenda = corpAction(
       "install-agenda-remote-1",
       "install_card",
@@ -1910,13 +1910,17 @@ describe("semanticRuntimeCorpScoreComponents", () => {
               serverId: "remote_1",
               windowKind: "unsafe",
               missingVisibleBreakerCoverage: false,
+              runnerCanContestNow: true,
               runnerCanReachAccessNow: true,
+              agendaStealRelevantNow: true,
               runnerCanContestBeforeScore: true,
               runnerCanReachAccessBeforeScore: true,
               agendaStealSeverity: "game_ending",
               agendaPointsAtRisk: 4,
               runnerAgendaPointsAfterSteal: 8,
               dynamicProtectionReserve: 7,
+              corpCanRezRelevantIce: false,
+              corpCanRezFullPathWithDynamicReserve: false,
               recommendedNextStep: "gain_credit",
               evidence: ["test_critical_hq_agenda_emergency_conversion"],
             })
@@ -1939,9 +1943,9 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     expect(installComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_board_triage_alignment",
+          key: "corp_board_triage_mismatch",
           reason: expect.stringContaining(
-            "corp_hq_agenda_emergency_remote_conversion:true",
+            "triage_primary:fund_score_remote",
           ),
         }),
       ]),
@@ -1949,15 +1953,15 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     expect(creditComponents).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          key: "corp_board_triage_mismatch",
+          key: "corp_board_triage_alignment",
           reason: expect.stringContaining(
-            "corp_hq_agenda_emergency_remote_conversion:true",
+            "triage_primary:fund_score_remote",
           ),
         }),
       ]),
     );
-    expect(totalScore(installComponents)).toBeGreaterThan(
-      totalScore(creditComponents),
+    expect(totalScore(creditComponents)).toBeGreaterThan(
+      totalScore(installComponents),
     );
   });
 

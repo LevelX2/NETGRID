@@ -476,6 +476,72 @@ describe("semantic runtime corp board triage", () => {
       value: -3200,
     });
   });
+
+  it("funds instead of forcing a game-ending accessible emergency remote", () => {
+    const remoteAgenda = corpAction("remote-scoreline", "install_card", {
+      placement: "root",
+      serverId: "remote_1",
+    });
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpHq: [agendaCard("hq-agenda-1", 4)],
+      corpCredits: 2,
+      runnerAgendaPoints: 4,
+      legalActions: [remoteAgenda, gainCredit],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", []),
+        remoteServer("remote_1", [iceCard("remote-ice")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          runnerCanContestNow: true,
+          runnerCanReachAccessNow: true,
+          agendaStealRelevantNow: true,
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealSeverity: "game_ending",
+          runnerAgendaPointsAfterSteal: 8,
+          corpCanRezRelevantIce: false,
+          corpCanRezFullPathWithDynamicReserve: false,
+          dynamicProtectionWeaknessCount: 0,
+          recommendedNextStep: "gain_credit",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const creditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      gainCredit,
+      dependencies,
+    );
+    const remoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteAgenda,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "fund_score_remote",
+      severity: "critical",
+      targetServerId: "remote_1",
+    });
+    expect(triage.evidence).not.toContain(
+      "corp_hq_agenda_emergency_remote_conversion:true",
+    );
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(remoteComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -3200,
+    });
+  });
 });
 
 function corpInput(overrides: {

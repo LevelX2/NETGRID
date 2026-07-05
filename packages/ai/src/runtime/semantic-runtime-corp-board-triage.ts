@@ -1062,6 +1062,9 @@ function scorelineEntryCanEmergencyRelieveHqAgendaFlood(
     corpTriagePositiveNumber(input.playerView.agendaPointsToWin) ?? 7;
   const runnerAgendaPointsAfterSteal =
     corpTriagePositiveNumber(assessment.runnerAgendaPointsAfterSteal) ?? 0;
+  if (scorelineEntryIsGameEndingAccessGift(entry)) {
+    return false;
+  }
   if (
     assessment.agendaStealSeverity !== "game_ending" &&
     assessment.agendaStealSeverity !== "near_win" &&
@@ -1093,6 +1096,26 @@ function scorelineEntryCanEmergencyRelieveHqAgendaFlood(
     rdPressure.active ||
     rdPressure.visibleMultiaccess ||
     rdPressure.successfulAccessEvents > 0
+  );
+}
+
+function scorelineEntryIsGameEndingAccessGift(
+  entry: ScoredLegalAction,
+): boolean {
+  const assessment = entry.scoringWindow;
+  if (!assessment) return false;
+  if (assessment.scoreHorizon === "immediate") return false;
+  if (assessment.agendaStealSeverity !== "game_ending") return false;
+  if (!assessment.runnerCanReachAccessNow || !assessment.agendaStealRelevantNow) {
+    return false;
+  }
+  return (
+    assessment.windowKind === "unsafe" ||
+    assessment.recommendedNextStep === "build_remote_ice" ||
+    assessment.recommendedNextStep === "gain_credit" ||
+    assessment.corpCanRezRelevantIce === false ||
+    assessment.corpCanRezFullPathWithDynamicReserve === false ||
+    (assessment.affordableDurableRelevantIceCount ?? 0) < 1
   );
 }
 
