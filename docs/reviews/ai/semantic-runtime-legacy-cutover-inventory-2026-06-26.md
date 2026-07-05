@@ -45,6 +45,14 @@
 - Opening/Mulligan und Discard lesen produktiv keine Doctrine-v1-PlanWeights/ArchetypeTags mehr; sie nutzen StrategyProfile, StrategicIntentState, DeckCapabilities, sichtbare Handrollen und neutrale Basisprioritaeten.
 - Normaler DecisionDebug enthaelt keine `legacy_reference_*`-Felder mehr; Coverage-Fallbacks und Candidate-Semantik bleiben sichtbar.
 
+## Nachtrag 2026-07-05: Legacy-Fallback-Removal
+
+- Server-Preview und `advance_ai` verwenden keine sortierte erste LegalAction mehr als Ersatz, wenn `AiDecision.actionId` fehlt oder nicht in den aktuellen Engine-`LegalActions` enthalten ist. Beide Pfade stoppen sichtbar mit `ai_decision_action_not_legal`.
+- `packages/ai/src/runtime/semantic-runtime.ts` hat keinen Legacy-Provider-Parameter und keinen direkten `semanticRuntimeForcedLegacy`-Notaus mehr.
+- Default-`chooseCorpAction` und Default-`chooseRunnerAction` übergeben keinen Legacy-Provider mehr an den Semantic-Context. Practical Micro erhält eine Legacy-Referenz nur noch bei explizitem Opt-in; der explizite Notaus `NETGRID_SEMANTIC_AI_RUNTIME=legacy` bleibt an der Public-/Compatibility-Fassade.
+- Boundary-Tests begrenzen Runtime-Imports aus `legacy/**` auf die aktuell expliziten Compatibility-Fassaden: `runtime/ai-action-entrypoints.ts`, `runtime/ai-action-entrypoints-composition.ts`, `runtime/runner-baseline-support-composition.ts` und `runtime/semantic-runtime-action-exclusion-composition.ts`.
+- Führende Artefakte: `docs/architecture/ai/legacy-fallback-removal-process-2026-07-05.md` und `docs/reviews/ai/semantic-runtime-legacy-fallback-removal-2026-07-05.md`.
+
 ## Verbleibende Grenzen
 
 - `packages/ai/src/legacy/*`, Doctrine-v1-Profilerstellung und doctrinebezogene Benchmark-/Shadow-Metriken bleiben als explizite Legacy-/Fixture-/Vergleichspfade im Repo.
