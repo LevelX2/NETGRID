@@ -398,6 +398,8 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         : "mismatch";
     case "force_scoreline_clock": {
       const activeScorelineLock = triageIsActiveScorelineLock(triage);
+      const emergencyRemoteConversion =
+        triageIsEmergencyHqAgendaRemoteConversion(triage);
       const needsFunding =
         triage.requiredRezFloor !== undefined &&
         triage.currentCredits !== undefined &&
@@ -424,6 +426,12 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         return "mismatch";
       }
       if (actionPushesUnsafeScoreline(input, action, dependencies)) {
+        if (
+          emergencyRemoteConversion &&
+          (!triage.targetServerId || actionServerId === triage.targetServerId)
+        ) {
+          return "match";
+        }
         return needsFunding && legalEconomyActionExists(input)
           ? "mismatch"
           : "match";
@@ -449,7 +457,7 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
           actionSemanticCandidate,
         )
       ) {
-        return "match";
+        return emergencyRemoteConversion ? "mismatch" : "match";
       }
       return actionDelaysForcedScoreline(
         input,
@@ -910,10 +918,30 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
       actionPushesUnsafeScoreline(input, entry.action, dependencies) &&
       scorelineEntryCanRelieveHqAgendaFlood(input, entry, actions),
   );
-  if (playableScorelineEntries.length === 0) return undefined;
+  const emergencyScorelineEntries =
+    playableScorelineEntries.length > 0
+      ? []
+      : actions.filter(
+          (entry) =>
+            actionPushesUnsafeScoreline(input, entry.action, dependencies) &&
+            scorelineEntryCanEmergencyRelieveHqAgendaFlood(
+              input,
+              entry,
+              actions,
+            ),
+        );
+  if (
+    playableScorelineEntries.length === 0 &&
+    emergencyScorelineEntries.length === 0
+  ) {
+    return undefined;
+  }
 
+  const emergencyRemoteConversion = playableScorelineEntries.length === 0;
   const preferred = highestPriorityDeckoutScorelineEntry(
-    playableScorelineEntries,
+    emergencyRemoteConversion
+      ? emergencyScorelineEntries
+      : playableScorelineEntries,
   );
   const requiredRezFloor =
     corpTriagePositiveNumber(
@@ -957,6 +985,9 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
         : []),
       ...(preferred && scorelineEntryIsRelativeHqAgendaRelief(input, preferred, actions)
         ? ["corp_hq_agenda_relative_remote_relief:true"]
+        : []),
+      ...(emergencyRemoteConversion
+        ? ["corp_hq_agenda_emergency_remote_conversion:true"]
         : []),
       ...hqPressure.evidence.slice(0, 6),
       ...(preferred?.scoringWindow?.evidence ?? []).slice(0, 8),
@@ -1012,6 +1043,57 @@ function scorelineEntryCanRelieveHqAgendaFlood(
     );
   }
   return scorelineEntryIsRelativeHqAgendaRelief(input, entry, actions);
+}
+
+function scorelineEntryCanEmergencyRelieveHqAgendaFlood(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  actions: readonly ScoredLegalAction[],
+): boolean {
+  const assessment = entry.scoringWindow;
+  if (!assessment) return false;
+  const serverId = entry.serverId;
+  if (!serverId) return false;
+  if (!existingRemoteCanCarryRelativeHqRelief(input, entry)) return false;
+  if (concreteRemoteProtectionActionExists(actions, serverId)) {
+    return false;
+  }
+  const pointsToWin =
+    corpTriagePositiveNumber(input.playerView.agendaPointsToWin) ?? 7;
+  const runnerAgendaPointsAfterSteal =
+    corpTriagePositiveNumber(assessment.runnerAgendaPointsAfterSteal) ?? 0;
+  if (
+    assessment.agendaStealSeverity !== "game_ending" &&
+    assessment.agendaStealSeverity !== "near_win" &&
+    runnerAgendaPointsAfterSteal < pointsToWin - 1
+  ) {
+    return false;
+  }
+  if (
+    assessment.recommendedNextStep !== "gain_credit" &&
+    entry.remoteRezFloor?.blockedByFloor !== true
+  ) {
+    return false;
+  }
+  const runnerAgendaPoints =
+    corpTriagePositiveNumber(input.playerView.opponent?.agendaPoints) ?? 0;
+  if (runnerAgendaPoints < 4 && runnerAgendaPointsAfterSteal < pointsToWin) {
+    return false;
+  }
+  const hqPressure = semanticRuntimeCorpCentralPressureAssessment(
+    inputWithOpponentDefaults(input),
+    "hq",
+  );
+  const rdPressure = semanticRuntimeCorpCentralPressureAssessment(
+    inputWithOpponentDefaults(input),
+    "rd",
+  );
+  return (
+    hqPressure.active ||
+    rdPressure.active ||
+    rdPressure.visibleMultiaccess ||
+    rdPressure.successfulAccessEvents > 0
+  );
 }
 
 function scorelineEntryIsRelativeHqAgendaRelief(
@@ -2109,6 +2191,14 @@ function triageReason(
 
 function triageIsActiveScorelineLock(triage: CorpBoardTriage): boolean {
   return triage.evidence.includes("corp_active_scoreline_clock:true");
+}
+
+function triageIsEmergencyHqAgendaRemoteConversion(
+  triage: CorpBoardTriage,
+): boolean {
+  return triage.evidence.includes(
+    "corp_hq_agenda_emergency_remote_conversion:true",
+  );
 }
 
 function corpBoardTriageMismatchComponentValue(

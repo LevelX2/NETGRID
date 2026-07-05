@@ -1721,6 +1721,107 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("converts critical HQ agenda pressure into a prepared remote before passive funding", () => {
+    const installAgenda = corpAction(
+      "install-agenda-remote-1",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "agenda-1",
+    );
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithHqCards(
+      5,
+      [agendaCard("agenda-1", 4)],
+      [installAgenda, gainCredit],
+    );
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 4,
+      credits: 8,
+    });
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-data-wall", { rezCost: 1, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              missingVisibleBreakerCoverage: false,
+              runnerCanReachAccessNow: true,
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealSeverity: "game_ending",
+              agendaPointsAtRisk: 4,
+              runnerAgendaPointsAfterSteal: 8,
+              dynamicProtectionReserve: 7,
+              recommendedNextStep: "gain_credit",
+              evidence: ["test_critical_hq_agenda_emergency_conversion"],
+            })
+          : undefined,
+    };
+
+    const installComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installAgenda,
+      "basic_install",
+      dependencies,
+    );
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      dependencies,
+    );
+
+    expect(installComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining(
+            "corp_hq_agenda_emergency_remote_conversion:true",
+          ),
+        }),
+      ]),
+    );
+    expect(creditComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_mismatch",
+          reason: expect.stringContaining(
+            "corp_hq_agenda_emergency_remote_conversion:true",
+          ),
+        }),
+      ]),
+    );
+    expect(totalScore(installComponents)).toBeGreaterThan(
+      totalScore(creditComponents),
+    );
+  });
+
   it("softens contestable remote penalties for relative HQ agenda relief", () => {
     const installAgenda = corpAction(
       "install-agenda-remote-1",
