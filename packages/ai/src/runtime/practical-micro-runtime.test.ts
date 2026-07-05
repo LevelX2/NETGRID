@@ -85,14 +85,6 @@ const visibleCard = (cardId: string): VisibleCard => ({
   controller: "runner",
 });
 
-const legacyDecision: AiDecision = {
-  actionId: "legacy-action",
-  reasonCode: "legacy",
-  explanation: "Legacy baseline.",
-  consideredActionIds: ["legacy-action"],
-  fallbackUsed: false,
-};
-
 const runtimeDecision: AiDecision = {
   actionId: "runtime-action",
   selectedChoices: { targetId: "stale-choice" },
@@ -121,7 +113,6 @@ describe("applyPracticalMicroRuntimeComparator", () => {
   it("leaves runtime decisions unchanged while the practical micro runtime is off", () => {
     const actual = applyPracticalMicroRuntimeComparator(
       input([legalAction("runtime-action"), legalAction("candidate-action")]),
-      legacyDecision,
       runtimeDecision,
       {},
       [candidate],
@@ -133,7 +124,6 @@ describe("applyPracticalMicroRuntimeComparator", () => {
   it("records compare evidence without changing the selected action", () => {
     const actual = applyPracticalMicroRuntimeComparator(
       input([legalAction("runtime-action"), legalAction("candidate-action")]),
-      legacyDecision,
       runtimeDecision,
       {
         practicalMicroRuntime: {
@@ -151,7 +141,6 @@ describe("applyPracticalMicroRuntimeComparator", () => {
     );
     expect(actual.decisionDebug?.detailSections?.at(-1)?.items).toEqual(
       expect.arrayContaining([
-        "legacy_action:legacy-action",
         "runtime_action:runtime-action",
         "micro_candidate:runner_visible_coverage_install:candidate-action",
       ]),
@@ -161,7 +150,6 @@ describe("applyPracticalMicroRuntimeComparator", () => {
   it("keeps apply-mode candidates compare-only when they are present in legalActions", () => {
     const actual = applyPracticalMicroRuntimeComparator(
       input([legalAction("runtime-action"), legalAction("candidate-action")]),
-      legacyDecision,
       runtimeDecision,
       {
         practicalMicroRuntime: {
@@ -183,7 +171,6 @@ describe("applyPracticalMicroRuntimeComparator", () => {
         "practical_micro_runtime_apply_requested:true",
         "practical_micro_runtime_actual_override:false",
         "practical_micro_candidate:runner_visible_coverage_install",
-        "practical_micro_legacy_action:legacy-action",
         "practical_micro_runtime_reference:runtime-action",
       ]),
     );
@@ -199,7 +186,6 @@ describe("applyPracticalMicroRuntimeComparator", () => {
   it("does not apply candidates outside legalActions", () => {
     const actual = applyPracticalMicroRuntimeComparator(
       input([legalAction("runtime-action")]),
-      legacyDecision,
       runtimeDecision,
       {
         practicalMicroRuntime: {
@@ -212,13 +198,14 @@ describe("applyPracticalMicroRuntimeComparator", () => {
 
     expect(actual.actionId).toBe("runtime-action");
     expect(actual.evidence).toContain("practical_micro_candidate:none");
-    expect(actual.decisionDebug?.warnings).toContain("practical_micro_no_candidate");
+    expect(actual.decisionDebug?.warnings).toContain(
+      "practical_micro_no_candidate",
+    );
   });
 
   it("keeps comparator diagnostics free of known hidden transport fields", () => {
     const actual = applyPracticalMicroRuntimeComparator(
       input([legalAction("runtime-action"), legalAction("candidate-action")]),
-      legacyDecision,
       runtimeDecision,
       {
         practicalMicroRuntime: {

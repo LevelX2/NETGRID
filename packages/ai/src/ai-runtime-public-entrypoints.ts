@@ -1,8 +1,5 @@
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import {
-  assessCorpScoreTerminalWindow,
-} from "./legacy/legacy-entrypoints";
-import {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
 } from "./deck-opening-hand";
@@ -252,7 +249,6 @@ const {
   runTargets: evaluateRunnerRunTargets,
   previousPlan: getTacticalPlanMemorySnapshot,
   mechanicsForDefinition: runnerCardMechanicsForAi,
-  scoreTerminalWindow: assessCorpScoreTerminalWindow,
   actionTypeIsReactive: semanticRuntimeActionTypeIsReactive,
   evaluatePracticalRunnerRunTargets: evaluateRunnerRunTargets,
   runnerRunTargetPlausibleForMultiRun,

@@ -22,9 +22,7 @@ export type SemanticRuntimeCorpScoreSafetyGate = {
 };
 
 export type SemanticRuntimeCorpScoreSafetyDependencies = {
-  scoreTerminalWindow: (
-    input: AiDecisionInput,
-  ) => CorpScoreTerminalWindowLike;
+  scoreTerminalWindow?: (input: AiDecisionInput) => CorpScoreTerminalWindowLike;
   scorelineWindowAssessment?: (
     input: AiDecisionInput,
   ) => CorpScorelineWindowAssessment;
@@ -52,22 +50,30 @@ export function semanticRuntimeCorpScoreNowSafetyGate(
   if (scoreline) {
     return scoreNowSafetyGateFromScoreline(action, scoreline);
   }
-  const terminal = dependencies.scoreTerminalWindow(input);
+  const terminal = dependencies.scoreTerminalWindow?.(input);
+  if (!terminal) {
+    return {
+      allowed: false,
+      evidence: [
+        "unsafe_score_unknown_higher_priority",
+        ...terminalOutcomeEvidence(false),
+      ],
+    };
+  }
   const scoreActionIdSet = new Set(terminal.scoreActionIds);
   const scoreLegal = scoreActionIdSet.has(action.actionId);
   const reasons = semanticRuntimeCorpUnsafeScoreReasons(terminal, scoreLegal);
   const allowed = reasons.length === 0;
   return {
     allowed,
-    evidence:
-      allowed
-        ? [
-            "corp_scoreline_safety_gate_passed:true",
-            `protected_remote_ready:${terminal.protectedRemoteIds.length > 0}`,
-            `runner_access_threat_high:${terminal.runnerAccessThreatHigh}`,
-            ...terminalOutcomeEvidence(true),
-          ]
-        : [...reasons, ...terminalOutcomeEvidence(false)],
+    evidence: allowed
+      ? [
+          "corp_scoreline_safety_gate_passed:true",
+          `protected_remote_ready:${terminal.protectedRemoteIds.length > 0}`,
+          `runner_access_threat_high:${terminal.runnerAccessThreatHigh}`,
+          ...terminalOutcomeEvidence(true),
+        ]
+      : [...reasons, ...terminalOutcomeEvidence(false)],
   };
 }
 

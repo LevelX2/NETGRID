@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecision, AiDecisionInput, LegalAction, PlayerView } from "@netgrid/shared";
+import type {
+  AiDecision,
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+} from "@netgrid/shared";
 
 import { createPracticalMicroCandidatesContext } from "./practical-micro-candidates-context";
 
@@ -87,17 +92,6 @@ function createContext(rolesByActionId: Record<string, string[]> = {}) {
       canReachAccess: false,
     }),
     rolesForAction: (_input, action) => rolesByActionId[action.actionId] ?? [],
-    scoreTerminalWindow: () => ({
-      terminalWindow: false,
-      blockedByCheapContest: false,
-      blockedByCredits: false,
-      blockedByRunnerContest: false,
-      blockedByHqThreat: false,
-      scoreActionIds: [],
-      advanceToScoreActionIds: [],
-      agendaInstallActionIds: [],
-      evidence: [],
-    }),
     actionTypeIsReactive: () => false,
     runnerRunTargets: () => [],
     runnerRunTargetPlausibleForMultiRun: () => false,

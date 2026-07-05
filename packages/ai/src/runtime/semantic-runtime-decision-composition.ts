@@ -37,22 +37,21 @@ type SemanticRuntimeDecisionPracticalRunTargetDependencies = {
   }) => ReturnType<PracticalRunnerRunTargets>;
 };
 
-export type SemanticRuntimeDecisionCompositionDependencies =
+export type SemanticRuntimeDecisionCompositionDependencies = Omit<
+  PracticalMicroCandidatesContextDependencies,
+  "knownPathAssessment" | "runnerRunTargets"
+> &
+  SemanticRuntimeDecisionKnownPathDependencies &
+  SemanticRuntimeDecisionPracticalRunTargetDependencies &
+  SemanticRuntimeChoiceCompositionDependencies &
+  Omit<SemanticRuntimeDebugContextDependencies, "scoreBreakdown"> &
   Omit<
-    PracticalMicroCandidatesContextDependencies,
-    "knownPathAssessment" | "runnerRunTargets"
-  > &
-    SemanticRuntimeDecisionKnownPathDependencies &
-    SemanticRuntimeDecisionPracticalRunTargetDependencies &
-    SemanticRuntimeChoiceCompositionDependencies &
-    Omit<SemanticRuntimeDebugContextDependencies, "scoreBreakdown"> &
-    Omit<
-      SemanticRuntimeDecisionContextDependencies,
-      | "practicalMicroRuntimeCandidates"
-      | "semanticRuntimeChoices"
-      | "semanticRuntimeCoverageSelectionDebug"
-      | "semanticRuntimeDecisionDebug"
-    >;
+    SemanticRuntimeDecisionContextDependencies,
+    | "practicalMicroRuntimeCandidates"
+    | "semanticRuntimeChoices"
+    | "semanticRuntimeCoverageSelectionDebug"
+    | "semanticRuntimeDecisionDebug"
+  >;
 
 export function createSemanticRuntimeDecisionComposition(
   dependencies: SemanticRuntimeDecisionCompositionDependencies,
@@ -72,7 +71,6 @@ export function createSemanticRuntimeDecisionComposition(
           server.root,
         ),
       rolesForAction: dependencies.rolesForAction,
-      scoreTerminalWindow: dependencies.scoreTerminalWindow,
       ...(dependencies.scorelineWindowAssessment
         ? { scorelineWindowAssessment: dependencies.scorelineWindowAssessment }
         : {}),
@@ -86,10 +84,8 @@ export function createSemanticRuntimeDecisionComposition(
       runnerRunTargetHighPayoff: dependencies.runnerRunTargetHighPayoff,
     });
 
-  const {
-    semanticRuntimeScoreBreakdown,
-    semanticRuntimeChoices,
-  } = createSemanticRuntimeChoiceComposition(dependencies);
+  const { semanticRuntimeScoreBreakdown, semanticRuntimeChoices } =
+    createSemanticRuntimeChoiceComposition(dependencies);
 
   const {
     semanticRuntimeDecisionDebug,
@@ -104,13 +100,10 @@ export function createSemanticRuntimeDecisionComposition(
     semanticRuntimeChoiceIsReactive:
       dependencies.semanticRuntimeChoiceIsReactive,
     buildActionSemanticCandidates: dependencies.buildActionSemanticCandidates,
-    getTacticalPlanMemorySnapshot:
-      dependencies.getTacticalPlanMemorySnapshot,
+    getTacticalPlanMemorySnapshot: dependencies.getTacticalPlanMemorySnapshot,
     deckCapabilitiesForInput: dependencies.deckCapabilitiesForInput,
-    runnerStrategicIntentForInput:
-      dependencies.runnerStrategicIntentForInput,
-    evaluateRunnerHandDevelopment:
-      dependencies.evaluateRunnerHandDevelopment,
+    runnerStrategicIntentForInput: dependencies.runnerStrategicIntentForInput,
+    evaluateRunnerHandDevelopment: dependencies.evaluateRunnerHandDevelopment,
     buildRunnerEconomyPosture: dependencies.buildRunnerEconomyPosture,
     evaluateRunnerRunTargets: dependencies.evaluateRunnerRunTargets,
     buildRunnerTacticalGoals: dependencies.buildRunnerTacticalGoals,

@@ -34,9 +34,7 @@ export {
   renderSemanticRuntimeWhyCoverageMarkdown,
   SEMANTIC_RUNTIME_WHY_COVERAGE_SCHEMA_VERSION,
 } from "./diagnostics/semantic-runtime-why-coverage";
-export type {
-  SemanticRuntimeWhyCoverageReport,
-} from "./diagnostics/semantic-runtime-why-coverage";
+export type { SemanticRuntimeWhyCoverageReport } from "./diagnostics/semantic-runtime-why-coverage";
 export {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
   buildAiDecisionInputDto,
@@ -187,40 +185,6 @@ export {
   structuredBreakerProfileCoversIce,
 } from "./breaker-ontology-consumer";
 export {
-  assessCorpIcePortfolioAction,
-  assessCorpScoreTerminalWindow,
-  chooseCorpPlanAction,
-  chooseCorpPlanDecision,
-  classifyCorpScoredAgendaAbility,
-  classifyScoredAgendaActionFromOntology,
-  corpPlanUsesOnlyAiSupportedCards,
-  evaluateAgendaRisk,
-  evaluateCorpPlan,
-  evaluateCorpScoringProgress,
-  evaluateEconomyReserve,
-  evaluateIceRez,
-  evaluateRemoteIntentMemory,
-  evaluateRemoteRezReserve,
-  evaluateRemoteScoreHorizon,
-  evaluateRunnerContestCapacity,
-  evaluateScoringWindow,
-  evaluateServerThreat,
-  generateCorpPlanCandidates,
-  hasCorpPlanAction,
-} from "./legacy/legacy-public-contract";
-export type {
-  CorpIcePortfolioActionAssessment,
-  CorpPlanCandidate,
-  CorpPlanDebug,
-  CorpPlanDecision,
-  CorpPlanEvaluatorResult,
-  CorpPlanKind,
-  CorpPlanScore,
-  CorpPlanStep,
-  RemoteScoreHorizon,
-  RunnerContestCapacity,
-} from "./legacy/legacy-public-contract";
-export {
   buildDeckCapabilityProfile,
   buildDeckCapabilityProfileFromInput,
   redactedDeckCapabilityFacts,
@@ -238,17 +202,17 @@ export type {
   MissingCapability,
   SearchAccessProfile,
 } from "./deck-capabilities";
+export { buildDeckDoctrineProfile } from "./deck-doctrine";
+export type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
 export {
-  buildDeckDoctrineProfile,
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
-} from "./legacy/legacy-public-contract";
+} from "./deck-opening-hand";
 export type {
-  AiDeckDoctrineDeckSnapshot,
   CorpOpeningHandEvaluation,
   OpeningHandEvaluation,
   RunnerOpeningHandEvaluation,
-} from "./legacy/legacy-public-contract";
+} from "./deck-opening-hand";
 export { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 export type {
   AiDeckStrategyProfile,
@@ -258,10 +222,7 @@ export type {
   DeckStrategyScore,
   RunnerDeckStrategyProfiles,
 } from "./deck-doctrine-strategy";
-export {
-  evaluatePracticalTacticBenchmark,
-  frozenLegacyPracticalTacticSelector,
-} from "./evaluation/practical-tactic-benchmark";
+export { evaluatePracticalTacticBenchmark } from "./evaluation/practical-tactic-benchmark";
 export type {
   PracticalTacticBenchmarkCase,
   PracticalTacticBenchmarkCategory,
@@ -308,29 +269,6 @@ export type {
   RunnerPersistentInstallEvaluation,
   RunnerPersistentInstallStackabilityClass,
 } from "./runner-hand-development";
-export {
-  chooseRunnerPlanAction,
-  chooseRunnerPlanDecision,
-  estimateRunCost,
-  evaluateCorpScoringThreat,
-  evaluateRemoteThreat,
-  evaluateRunnerEarlyTurnDoctrine,
-  evaluateRunnerPlan,
-  evaluateRunnerRig,
-  evaluateServerAccessValue,
-  generateRunnerPlanCandidates,
-  hasRunnerPlanAction,
-  runnerPlanUsesOnlyAiSupportedCards,
-} from "./legacy/legacy-public-contract";
-export type {
-  RunnerPlanCandidate,
-  RunnerPlanDebug,
-  RunnerPlanDecision,
-  RunnerPlanEvaluatorResult,
-  RunnerPlanKind,
-  RunnerPlanScore,
-  RunnerPlanStep,
-} from "./legacy/legacy-public-contract";
 export {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
@@ -398,12 +336,8 @@ export {
   benchmarkDeckFromSnapshot,
 } from "./simulation/benchmark-deck-snapshot-resolver";
 export { benchmarkDeckFromLocalEditableDeck } from "./simulation/benchmark-local-editable-deck-resolver";
-export {
-  buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries,
-} from "./simulation/selfplay-why-coverage";
-export {
-  buildSelfplayActionTypeDominanceReport,
-} from "./simulation/selfplay-action-type-dominance";
+export { buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries } from "./simulation/selfplay-why-coverage";
+export { buildSelfplayActionTypeDominanceReport } from "./simulation/selfplay-action-type-dominance";
 export type {
   AiSelfplayActionTypeDominanceBucket,
   AiSelfplayActionTypeDominanceReport,
@@ -420,9 +354,7 @@ export type {
 export {
   chooseAiAction,
   chooseCorpAction,
-  chooseCorpBaselineAction,
   chooseRunnerAction,
-  chooseRunnerBaselineAction,
   runAiSelfplayTraceMining,
   runDoctrineQualityBenchmark,
   runMatchProgressionBenchmark,

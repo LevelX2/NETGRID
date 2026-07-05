@@ -15,18 +15,6 @@ type KnownPathAssessment = {
   canReachAccess: boolean;
 };
 
-type CorpScoreTerminalWindow = {
-  terminalWindow: boolean;
-  blockedByCheapContest: boolean;
-  blockedByCredits: boolean;
-  blockedByRunnerContest: boolean;
-  blockedByHqThreat: boolean;
-  scoreActionIds: string[];
-  advanceToScoreActionIds: string[];
-  agendaInstallActionIds: string[];
-  evidence: string[];
-};
-
 export type PracticalMicroCandidatesContextDependencies = {
   visibleSourceCard: (
     input: AiDecisionInput,
@@ -43,7 +31,6 @@ export type PracticalMicroCandidatesContextDependencies = {
     input: AiDecisionInput,
   ) => KnownPathAssessment;
   rolesForAction: (input: AiDecisionInput, action: LegalAction) => string[];
-  scoreTerminalWindow: (input: AiDecisionInput) => CorpScoreTerminalWindow;
   scorelineWindowAssessment?: (
     input: AiDecisionInput,
   ) => CorpScorelineWindowAssessment;
@@ -101,9 +88,7 @@ export function createPracticalMicroCandidatesContext(
       const sourceCard = dependencies.visibleSourceCard(input, candidate);
       if (!sourceCard || !dependencies.isVisibleIcebreakerProgram(sourceCard))
         return false;
-      const alreadyInstalledSameBreaker = (
-        input.playerView.own.rig ?? []
-      ).some(
+      const alreadyInstalledSameBreaker = (input.playerView.own.rig ?? []).some(
         (card) =>
           card.known &&
           card.definitionId !== undefined &&
@@ -178,10 +163,7 @@ export function createPracticalMicroCandidatesContext(
   ): PracticalMicroCandidate | undefined {
     if (input.side !== "corp") return undefined;
     const runtimeAction = runtimeSelectedLegalAction(input, runtimeDecision);
-    if (
-      !runtimeAction ||
-      !corpActionLooksLikeStalePunish(input, runtimeAction)
-    )
+    if (!runtimeAction || !corpActionLooksLikeStalePunish(input, runtimeAction))
       return undefined;
     const action = input.legalActions.find((candidate) => {
       if (candidate.actionId === runtimeAction.actionId) return false;
@@ -225,43 +207,14 @@ export function createPracticalMicroCandidatesContext(
 
   function corpSafeScorelineCandidate(
     input: AiDecisionInput,
-    runtimeDecision: AiDecision,
+    _runtimeDecision: AiDecision,
   ): PracticalMicroCandidate | undefined {
     if (input.side !== "corp") return undefined;
     const scoreline = dependencies.scorelineWindowAssessment?.(input);
     if (scoreline) {
       return corpSafeScorelineCandidateFromAssessment(input, scoreline);
     }
-    const terminal = dependencies.scoreTerminalWindow(input);
-    if (!terminal.terminalWindow) return undefined;
-    if (
-      terminal.blockedByCheapContest ||
-      terminal.blockedByCredits ||
-      terminal.blockedByRunnerContest ||
-      terminal.blockedByHqThreat
-    )
-      return undefined;
-    const actionId =
-      terminal.scoreActionIds[0] ??
-      terminal.advanceToScoreActionIds[0] ??
-      terminal.agendaInstallActionIds[0];
-    const action = input.legalActions.find(
-      (candidate) => candidate.actionId === actionId,
-    );
-    if (!action) return undefined;
-    return {
-      ruleId: "corp_safe_scoreline",
-      actionId: action.actionId,
-      actionType: action.type,
-      reasonCode: "practical_micro.corp_safe_scoreline",
-      explanation:
-        "Die Corp vollzieht eine sichere Scoreline, statt das geöffnete Score-Fenster zu vertagen.",
-      evidence: [
-        "practical_micro_corp_safe_scoreline:true",
-        ...terminal.evidence.slice(0, 8),
-        `scoreline_action:${action.actionId}`,
-      ],
-    };
+    return undefined;
   }
 
   function corpSafeScorelineCandidateFromAssessment(

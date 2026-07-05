@@ -85,11 +85,11 @@ export function buildAiDecisionInput(
     ownDeckSnapshot?: AiDeckDoctrineDeckSnapshot;
     ownDeckDoctrine?: AiDecisionInput["ownDeckDoctrine"];
     /**
-     * Compatibility escape hatch for very low-level fixtures that intentionally
-     * exercise the pre-strategy DTO. Productive callers should omit this and
-     * receive an explicit neutral strategy context when no deck snapshot exists.
+     * Escape hatch for very low-level fixtures that intentionally exercise the
+     * pre-strategy DTO. Productive callers should omit this and receive an
+     * explicit neutral strategy context when no deck snapshot exists.
      */
-    missingDeckContextMode?: "explicit_neutral" | "legacy_compatible";
+    missingDeckContextMode?: "explicit_neutral" | "minimal_dto";
   } = {},
 ): AiDecisionInput {
   const playerView = getPlayerView(state, side);
@@ -107,12 +107,10 @@ export function buildAiDecisionInput(
     ...(options.ownDeckSnapshot
       ? { deckSnapshot: options.ownDeckSnapshot }
       : {}),
-    ...(options.ownDeckDoctrine
-      ? { legacyV1Profile: options.ownDeckDoctrine }
-      : {}),
+    ...(options.ownDeckDoctrine ? { v1Profile: options.ownDeckDoctrine } : {}),
     neutralDeckId: deckSnapshotId,
   });
-  const ownDeckDoctrine = deckDoctrineRuntimeContext.legacyV1Profile;
+  const ownDeckDoctrine = deckDoctrineRuntimeContext.v1Profile;
   const input = buildAiDecisionInputDto({
     side,
     playerView,
@@ -127,7 +125,7 @@ export function buildAiDecisionInput(
   });
   if (
     !options.ownDeckSnapshot &&
-    options.missingDeckContextMode === "legacy_compatible"
+    options.missingDeckContextMode === "minimal_dto"
   ) {
     return input;
   }
@@ -140,11 +138,12 @@ export function buildAiDecisionInput(
       : {}),
   });
   const ownDeckStrategyProfile = deckDoctrineRuntimeContext.strategyProfile;
-  const ownDeckDoctrineV2Diagnostic =
-    deckDoctrineRuntimeContext.v2Diagnostic;
+  const ownDeckDoctrineV2Diagnostic = deckDoctrineRuntimeContext.v2Diagnostic;
   const previousStrategicIntentState = options.ownDeckSnapshot
-    ? getStrategicIntentMemorySnapshot(input, options.ownDeckSnapshot.deckSnapshotId)
-        ?.state
+    ? getStrategicIntentMemorySnapshot(
+        input,
+        options.ownDeckSnapshot.deckSnapshotId,
+      )?.state
     : undefined;
   const strategicRuntimeContext = buildStrategicRuntimeContext({
     side,

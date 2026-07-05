@@ -3,9 +3,7 @@ import type {
   AiDecisionScoreComponent,
   LegalAction,
 } from "@netgrid/shared";
-import type {
-  CorpScorelineWindowAssessment,
-} from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
+import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 
 import { rolesMatch } from "./role-match";
 
@@ -21,9 +19,7 @@ type CorpScoreTerminalWindowLike = {
 };
 
 export type SemanticRuntimeCorpPassiveScoreLineDependencies = {
-  scoreTerminalWindow: (
-    input: AiDecisionInput,
-  ) => CorpScoreTerminalWindowLike;
+  scoreTerminalWindow?: (input: AiDecisionInput) => CorpScoreTerminalWindowLike;
   scorelineWindowAssessment?: (
     input: AiDecisionInput,
   ) => CorpScorelineWindowAssessment;
@@ -43,9 +39,15 @@ export function semanticRuntimeCorpPassiveScoreLinePenalty(
   if (input.side !== "corp") return undefined;
   const scoreline = dependencies.scorelineWindowAssessment?.(input);
   if (scoreline) {
-    return passiveScorelinePenaltyFromAssessment(input, action, dependencies, scoreline);
+    return passiveScorelinePenaltyFromAssessment(
+      input,
+      action,
+      dependencies,
+      scoreline,
+    );
   }
-  const terminal = dependencies.scoreTerminalWindow(input);
+  const terminal = dependencies.scoreTerminalWindow?.(input);
+  if (!terminal) return undefined;
   const terminalActionIds = new Set([
     ...terminal.scoreActionIds,
     ...terminal.advanceToScoreActionIds,
@@ -165,9 +167,7 @@ function semanticRuntimeCorpPassiveScoreLineActionKind(
     action.type === "activated_card_ability"
   ) {
     const roles = dependencies.rolesForAction(input, action);
-    return rolesMatch(roles, ["economy"])
-      ? "economy"
-      : "non_score_action";
+    return rolesMatch(roles, ["economy"]) ? "economy" : "non_score_action";
   }
   return undefined;
 }

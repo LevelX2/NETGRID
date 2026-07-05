@@ -10,14 +10,12 @@ const repoRoot = path.resolve(
 );
 
 describe("AI public export contract", () => {
-  it("keeps established runtime, benchmark and legacy facades exported", () => {
+  it("keeps established runtime and benchmark facades exported", () => {
     const publicKeys = Object.keys(ai);
     const expectedExports = [
       "chooseAiAction",
       "chooseCorpAction",
       "chooseRunnerAction",
-      "chooseCorpBaselineAction",
-      "chooseRunnerBaselineAction",
       "buildAiDecisionInput",
       "buildAiDecisionInputDto",
       "assertAiInputIsSideSafe",
@@ -44,6 +42,11 @@ describe("AI public export contract", () => {
       expect(publicKeys).toContain(exportName);
       expect(typeof ai[exportName as keyof typeof ai]).toBe("function");
     }
+
+    expect(publicKeys).not.toContain("chooseCorpBaselineAction");
+    expect(publicKeys).not.toContain("chooseRunnerBaselineAction");
+    expect(publicKeys).not.toContain("chooseCorpPlanAction");
+    expect(publicKeys).not.toContain("chooseRunnerPlanAction");
   });
 
   it("keeps new play-strength diagnostics and evaluation helpers internal by default", () => {
@@ -89,6 +92,8 @@ describe("AI public export contract", () => {
     );
     const forbiddenPublicModules = [
       "./diagnostics/semantic-runtime-debug",
+      "./legacy/legacy-public-contract",
+      "./legacy/legacy-entrypoints",
       "./diagnostics/coverage-selection-debug",
       "./diagnostics/semantic-runtime-action-alternatives",
       "./diagnostics/semantic-runtime-ranked-alternatives",
@@ -272,10 +277,14 @@ describe("AI public export contract", () => {
 
     for (const modulePath of forbiddenPublicModules) {
       expect(source).not.toMatch(
-        new RegExp(`export\\s+(?:type\\s+)?(?:\\{|\\*)[\\s\\S]*?from\\s+["']${escapeRegExp(modulePath)}["']`),
+        new RegExp(
+          `export\\s+(?:type\\s+)?(?:\\{|\\*)[\\s\\S]*?from\\s+["']${escapeRegExp(modulePath)}["']`,
+        ),
       );
     }
-    expect(source).not.toMatch(/export\s+(?:type\s+)?(?:\{|\*)[\s\S]*?\.test["']/);
+    expect(source).not.toMatch(
+      /export\s+(?:type\s+)?(?:\{|\*)[\s\S]*?\.test["']/,
+    );
   });
 });
 

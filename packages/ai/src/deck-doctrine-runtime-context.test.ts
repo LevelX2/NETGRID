@@ -9,9 +9,7 @@ describe("buildDeckDoctrineRuntimeContext", () => {
       neutralDeckId: "runner:missing-deck-snapshot",
     });
 
-    expect(context.strategyProfile.deckId).toBe(
-      "runner:missing-deck-snapshot",
-    );
+    expect(context.strategyProfile.deckId).toBe("runner:missing-deck-snapshot");
     expect(context.strategyProfile.primaryStrategies).toEqual([]);
     expect(context.strategyProfile.secondaryStrategies).toEqual([]);
     expect(context.strategyProfile.warnings).toContain(
@@ -30,20 +28,20 @@ describe("buildDeckDoctrineRuntimeContext", () => {
     expect(context.rolesStatus).toBe("unknown_snapshot");
   });
 
-  it("preserves explicit legacy v1 doctrine profiles for compatibility callers", () => {
+  it("preserves explicit v1 doctrine profiles for compatibility callers", () => {
     const snapshot = {
       deckSnapshotId: "runner-fixture",
       side: "runner" as const,
       cards: [{ cardId: "unknown_runner_support_only", quantity: 1 }],
     };
-    const legacyV1Profile = buildDeckDoctrineProfile(snapshot);
+    const v1Profile = buildDeckDoctrineProfile(snapshot);
     const context = buildDeckDoctrineRuntimeContext({
       side: "runner",
       deckSnapshot: snapshot,
-      legacyV1Profile,
+      v1Profile,
       neutralDeckId: "runner-fixture",
     });
 
-    expect(context.legacyV1Profile).toBe(legacyV1Profile);
+    expect(context.v1Profile).toBe(v1Profile);
   });
 });

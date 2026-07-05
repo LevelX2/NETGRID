@@ -22,7 +22,6 @@ export type PracticalMicroCandidate = {
 
 export function applyPracticalMicroRuntimeComparator(
   input: AiDecisionInput,
-  legacyDecision: AiDecision,
   runtimeDecision: AiDecision,
   options: AiDecisionRuntimeOptions,
   candidates: readonly PracticalMicroCandidate[] = [],
@@ -30,17 +29,20 @@ export function applyPracticalMicroRuntimeComparator(
   const mode = practicalMicroRuntimeMode(options);
   if (mode === "off") return runtimeDecision;
 
-  const enabledRules = new Set(options.practicalMicroRuntime?.enabledRules ?? []);
+  const enabledRules = new Set(
+    options.practicalMicroRuntime?.enabledRules ?? [],
+  );
   const allowedCandidates = candidates.filter(
     (candidate) =>
       enabledRules.has(candidate.ruleId) &&
-      input.legalActions.some((action) => action.actionId === candidate.actionId),
+      input.legalActions.some(
+        (action) => action.actionId === candidate.actionId,
+      ),
   );
   const selectedCandidate = allowedCandidates[0];
   if (mode === "apply" && selectedCandidate) {
     return practicalMicroCompareDecision(
       runtimeDecision,
-      legacyDecision,
       selectedCandidate,
       [selectedCandidate],
       true,
@@ -48,7 +50,6 @@ export function applyPracticalMicroRuntimeComparator(
   }
   return practicalMicroCompareDecision(
     runtimeDecision,
-    legacyDecision,
     selectedCandidate,
     candidates,
     false,
@@ -63,7 +64,6 @@ export function practicalMicroRuntimeMode(
 
 function practicalMicroCompareDecision(
   runtimeDecision: AiDecision,
-  legacyDecision: AiDecision,
   selectedCandidate: PracticalMicroCandidate | undefined,
   candidates: readonly PracticalMicroCandidate[],
   applyRequested: boolean,
@@ -75,7 +75,6 @@ function practicalMicroCompareDecision(
       "practical_micro_runtime_compare:true",
       `practical_micro_runtime_apply_requested:${applyRequested}`,
       "practical_micro_runtime_actual_override:false",
-      `practical_micro_legacy_action:${legacyDecision.actionId}`,
       `practical_micro_runtime_reference:${runtimeDecision.actionId}`,
       ...(selectedCandidate
         ? [
@@ -86,7 +85,6 @@ function practicalMicroCompareDecision(
     ],
     decisionDebug: practicalMicroDecisionDebug(
       runtimeDecision,
-      legacyDecision,
       selectedCandidate,
       candidates,
       applyRequested,
@@ -96,17 +94,15 @@ function practicalMicroCompareDecision(
 
 function practicalMicroDecisionDebug(
   runtimeDecision: AiDecision,
-  legacyDecision: AiDecision,
   selectedCandidate: PracticalMicroCandidate | undefined,
   candidates: readonly PracticalMicroCandidate[],
   applyRequested: boolean,
 ): NonNullable<AiDecision["decisionDebug"]> {
-  const base =
-    runtimeDecision.decisionDebug ?? {
-      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
-      aiLevel: 1,
-      fallbackUsed: runtimeDecision.fallbackUsed,
-    };
+  const base = runtimeDecision.decisionDebug ?? {
+    schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+    aiLevel: 1,
+    fallbackUsed: runtimeDecision.fallbackUsed,
+  };
   return {
     ...base,
     detailSections: [
@@ -115,7 +111,6 @@ function practicalMicroDecisionDebug(
         id: "practical_micro_runtime",
         title: "Practical Micro Runtime",
         items: [
-          `legacy_action:${legacyDecision.actionId}`,
           `runtime_action:${runtimeDecision.actionId}`,
           selectedCandidate
             ? `micro_candidate:${selectedCandidate.ruleId}:${selectedCandidate.actionId}`
