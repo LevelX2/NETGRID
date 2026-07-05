@@ -17,7 +17,7 @@ import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks 
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, type AiDecision, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 
 function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
   expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
@@ -6081,6 +6081,73 @@ describe("MVP 0.2 multiplayer service", () => {
     if (!first.ok) throw new Error(first.error.message);
     expect(first.requesterPayload.playerView.activeSide).toBe("runner");
     expect(first.requesterPayload.aiTurnPresentation?.canAdvanceAi).toBe(false);
+  });
+
+  it("does not preview or execute a substitute action when the AI decision action is unknown", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-invalid-decision-no-substitute",
+      chooseAiAction: (input): AiDecision => ({
+        actionId: "missing-ai-action",
+        reasonCode: "test.invalid_ai_action",
+        explanation: "Test decision references an action outside current LegalActions.",
+        consideredActionIds: input.legalActions.map((action) => action.actionId),
+        fallbackUsed: false,
+        evidence: ["test_invalid_ai_action"],
+        timeoutUsed: false,
+        profileId: input.profileId,
+        difficulty: input.difficulty,
+        confidence: 0,
+        reason: "test.invalid_ai_action",
+      }),
+    });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "ai-invalid-decision-no-substitute",
+      corpDifficulty: "normal"
+    });
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      "keep",
+      "invalid-ai-action-setup"
+    );
+    const before = await service.loadForTest(created.matchId);
+    if (!before?.gameState) throw new Error("Missing active match before invalid AI decision");
+    const beforeEventCount = before.eventLog.length;
+    const beforeStateVersion = before.gameState.stateVersion;
+
+    const preview = await service.previewAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: afterSetup.playerView.stateVersion,
+      knownMatchVersion: afterSetup.matchVersion,
+    });
+
+    expect(preview.ok).toBe(false);
+    if (preview.ok) throw new Error("Expected preview rejection");
+    expect(preview.error.code).toBe("ai_decision_action_not_legal");
+    const afterPreview = await service.loadForTest(created.matchId);
+    expect(afterPreview?.eventLog).toHaveLength(beforeEventCount);
+    expect(afterPreview?.gameState?.stateVersion).toBe(beforeStateVersion);
+
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: afterSetup.playerView.stateVersion,
+      knownMatchVersion: afterSetup.matchVersion,
+      mode: "single_step",
+    });
+
+    expect(advanced.ok).toBe(false);
+    if (advanced.ok) throw new Error("Expected advance rejection");
+    expect(advanced.error.code).toBe("ai_decision_action_not_legal");
+    const afterAdvance = await service.loadForTest(created.matchId);
+    expect(afterAdvance?.eventLog).toHaveLength(beforeEventCount);
+    expect(afterAdvance?.gameState?.stateVersion).toBe(beforeStateVersion);
   });
 
   it("advances Corp AI in a root-rez window even when activeSide is runner", async () => {

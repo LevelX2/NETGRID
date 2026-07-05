@@ -615,6 +615,12 @@ export type PreviewAiResult =
       payload?: SidePayload;
     };
 
+type AiDecisionChooser = typeof chooseAiAction;
+type AiStepFailureCode = "ai_no_action" | "ai_decision_action_not_legal";
+type AiStepResult =
+  | { ok: true }
+  | { ok: false; code: AiStepFailureCode };
+
 export class InMemoryMatchStorage implements MultiplayerStorage {
   private readonly records = new Map<string, StoredMatch>();
 
@@ -691,16 +697,25 @@ export class MultiplayerService {
   private readonly serverBaseUrl: string;
   private readonly allowHiddenInfoUndo: boolean;
   private readonly now: () => string;
+  private readonly chooseAiAction: AiDecisionChooser;
 
   constructor(
     private readonly storage: MultiplayerStorage = new InMemoryMatchStorage(),
-    options: { tokenSalt?: string; publicWebBaseUrl?: string; publicServerBaseUrl?: string; allowHiddenInfoUndo?: boolean; now?: () => string } = {}
+    options: {
+      tokenSalt?: string;
+      publicWebBaseUrl?: string;
+      publicServerBaseUrl?: string;
+      allowHiddenInfoUndo?: boolean;
+      now?: () => string;
+      chooseAiAction?: AiDecisionChooser;
+    } = {}
   ) {
     this.tokenSalt = options.tokenSalt ?? envValue(process.env, "NETGRID_TOKEN_SALT") ?? LOCAL_DEFAULT_TOKEN_SALT;
     this.webBaseUrl = trimTrailingSlash(options.publicWebBaseUrl ?? envValue(process.env, "NETGRID_WEB_BASE_URL") ?? LOCAL_DEFAULT_WEB_BASE_URL);
     this.serverBaseUrl = trimTrailingSlash(options.publicServerBaseUrl ?? envValue(process.env, "NETGRID_SERVER_BASE_URL") ?? LOCAL_DEFAULT_SERVER_BASE_URL);
     this.allowHiddenInfoUndo = options.allowHiddenInfoUndo ?? false;
     this.now = options.now ?? (() => new Date().toISOString());
+    this.chooseAiAction = options.chooseAiAction ?? chooseAiAction;
   }
 
   async createMatch(input: {
@@ -1593,8 +1608,18 @@ export class MultiplayerService {
       }
 
       const beforeEventCount = record.eventLog.length;
-      if (input.mode === "until_human") this.runAiUntilNextHuman(record);
-      else this.runAiStep(record);
+      const aiStepResult = input.mode === "until_human"
+        ? this.runAiUntilNextHuman(record)
+        : this.runAiStep(record);
+
+      if (!aiStepResult.ok && aiStepResult.code === "ai_decision_action_not_legal") {
+        await this.storage.save(record);
+        return {
+          ok: false,
+          error: safeError("ai_decision_action_not_legal", "Die KI wählte keine aktuell legale Aktion.", record.gameState, input.side),
+          payload: this.payloadFor(record, input.side)
+        };
+      }
 
       if (record.eventLog.length === beforeEventCount) {
         await this.storage.save(record);
@@ -1651,13 +1676,13 @@ export class MultiplayerService {
         actionNumber: record.gameState.stateVersion,
         ...(ownDeckSnapshot ? { ownDeckSnapshot } : {})
       });
-      const decision = chooseAiAction(
+      const decision = this.chooseAiAction(
         aiInput,
         { persistTacticalPlanMemory: false }
       );
-      const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
+      const legalAction = legalActionForAiDecision(decision, legalActions);
       if (!legalAction) {
-        return { ok: false, error: safeError("ai_no_action", "Die KI konnte aktuell keine Aktion bewerten.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+        return { ok: false, error: safeError("ai_decision_action_not_legal", "Die KI wählte keine aktuell legale Aktion.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
       }
       const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
       const detail = withAiPrivateHandPreview(
@@ -2598,29 +2623,33 @@ export class MultiplayerService {
 
   private maybeRunAiAfterTransition(record: StoredMatch): void {
     for (let count = 0; count < 4 && record.match.status === "active" && record.gameState?.pendingChoice?.source === "setup.mulligan" && this.aiControllableSide(record); count += 1) {
-      if (!this.runAiStep(record)) return;
+      if (!this.runAiStep(record).ok) return;
     }
     if (record.match.aiPacingMode === "fast") this.runAiUntilNextHuman(record);
   }
 
-  private runAiUntilNextHuman(record: StoredMatch): void {
+  private runAiUntilNextHuman(record: StoredMatch): AiStepResult {
     let state = record.gameState;
-    if (!state) return;
+    if (!state) return { ok: false, code: "ai_no_action" };
+    let lastResult: AiStepResult = { ok: false, code: "ai_no_action" };
     for (let count = 0; count < 40 && record.match.status === "active" && !state.winner && this.aiControllableSide(record); count += 1) {
-      if (!this.runAiStep(record)) return;
+      const stepResult = this.runAiStep(record);
+      if (!stepResult.ok) return stepResult;
+      lastResult = stepResult;
       state = record.gameState;
-      if (!state) return;
+      if (!state) return { ok: false, code: "ai_no_action" };
     }
+    return lastResult;
   }
 
-  private runAiStep(record: StoredMatch): boolean {
+  private runAiStep(record: StoredMatch): AiStepResult {
     const state = record.gameState;
-    if (!state || record.match.status !== "active" || state.winner || !this.aiControllableSide(record)) return false;
+    if (!state || record.match.status !== "active" || state.winner || !this.aiControllableSide(record)) return { ok: false, code: "ai_no_action" };
     const side = selectAiDecisionSideForState(state).side;
-    if (!side) return false;
-    if (!this.isAiSide(record, side)) return false;
+    if (!side) return { ok: false, code: "ai_no_action" };
+    if (!this.isAiSide(record, side)) return { ok: false, code: "ai_no_action" };
     const legalActions = getLegalActions(state, side);
-    if (legalActions.length === 0) return false;
+    if (legalActions.length === 0) return { ok: false, code: "ai_no_action" };
     const controller = record.match.aiControllers?.[side];
     const ownDeckSnapshot = record.privateDeckSnapshots?.[side];
     const input = buildAiDecisionInput(state, side, {
@@ -2630,9 +2659,9 @@ export class MultiplayerService {
       actionNumber: state.stateVersion,
       ...(ownDeckSnapshot ? { ownDeckSnapshot } : {})
     });
-    const decision = chooseAiAction(input);
-    const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
-    if (!legalAction) return false;
+    const decision = this.chooseAiAction(input);
+    const legalAction = legalActionForAiDecision(decision, legalActions);
+    if (!legalAction) return { ok: false, code: "ai_decision_action_not_legal" };
     const snapshot = this.snapshotFor(record.match.matchId, state, record.match.matchVersion, `snap_before_${state.stateVersion + 1}`, false);
     const result = applyAction(
       state,
@@ -2646,7 +2675,7 @@ export class MultiplayerService {
       },
       { publicEventsMode: "latest" }
     );
-    if (!result.ok) return false;
+    if (!result.ok) return { ok: false, code: "ai_no_action" };
     const event: GameEvent = {
       ...result.event,
       publicPayload: {
@@ -2673,7 +2702,7 @@ export class MultiplayerService {
     record.match.matchVersion += 1;
     record.match.updatedAt = occurredAt;
     if (result.state.winner) this.finalizeFinishedMatch(record);
-    return true;
+    return { ok: true };
   }
 
   private aiTurnPresentationFor(record: StoredMatch, side: Side): AiTurnPresentationState | undefined {
@@ -2963,6 +2992,11 @@ function replayIndexEntryFor(
     ...(checks ? { replayOk: checks.errors.length === 0 } : {}),
     participantNames: names
   };
+}
+
+function legalActionForAiDecision(decision: AiDecision, legalActions: readonly LegalAction[]): LegalAction | undefined {
+  if (!decision.actionId) return undefined;
+  return legalActions.find((candidate) => candidate.actionId === decision.actionId);
 }
 
 function participantNamesForReplay(record: StoredMatch): ReplayIndexEntry["participantNames"] {
