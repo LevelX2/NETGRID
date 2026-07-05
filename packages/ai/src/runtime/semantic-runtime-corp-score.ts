@@ -581,6 +581,17 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       ),
     );
   }
+  const preparedScoreRemoteAgendaSearch =
+    corpPreparedScoreRemoteAgendaSearchComponent(
+      input,
+      action,
+      dependencies,
+      actionSemanticCandidate,
+      boardTriageState,
+    );
+  if (preparedScoreRemoteAgendaSearch) {
+    components.push(preparedScoreRemoteAgendaSearch);
+  }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 4) {
     components.push({
       key: "corp_low_hand",
@@ -664,6 +675,12 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     }
   }
   return components;
+}
+
+function corpHqAgendaCount(input: AiDecisionInput): number {
+  return input.playerView.own.gripOrHq.filter(
+    (card) => card.known !== false && corpVisibleCardIsAgenda(card),
+  ).length;
 }
 
 export function normalizedCorpReserveScoreValue(rawValue: number): number {
@@ -1016,9 +1033,16 @@ function corpActiveRemoteScorelineState(
     )[0];
 }
 
+type CorpPreparedScoreRemotePipeline = {
+  serverId: string;
+  iceCount: number;
+  unrezzedRezCost: number;
+  reserveFloor: number;
+};
+
 function corpPreparedScoreRemotePipeline(
   input: AiDecisionInput,
-): { serverId: string; iceCount: number } | undefined {
+): CorpPreparedScoreRemotePipeline | undefined {
   return input.playerView.servers
     .filter(
       (server) =>
@@ -1026,12 +1050,92 @@ function corpPreparedScoreRemotePipeline(
         server.root.length === 0 &&
         server.ice.length > 0,
     )
-    .map((server) => ({ serverId: server.id, iceCount: server.ice.length }))
+    .map((server) => {
+      const unrezzedRezCost = corpVisibleUnrezzedRezCost(server.ice);
+      return {
+        serverId: server.id,
+        iceCount: server.ice.length,
+        unrezzedRezCost,
+        reserveFloor: Math.min(8, Math.max(3, unrezzedRezCost + 2)),
+      };
+    })
     .sort(
       (left, right) =>
         right.iceCount - left.iceCount ||
+        right.reserveFloor - left.reserveFloor ||
         left.serverId.localeCompare(right.serverId),
     )[0];
+}
+
+function corpPreparedScoreRemoteAgendaSearchComponent<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+): AiDecisionScoreComponent | undefined {
+  if (corpActiveRemoteScorelineState(input)) return undefined;
+  const pipeline = corpPreparedScoreRemotePipeline(input);
+  if (!pipeline) return undefined;
+  if (corpHqAgendaCount(input) > 0) return undefined;
+  const rdCount = positiveOrZeroNumber(input.playerView.own.stackOrRdCount) ?? 0;
+  if (rdCount <= 0) return undefined;
+  if (
+    (boardTriageState.primary === "protect_hq" ||
+      boardTriageState.primary === "protect_rd") &&
+    boardTriageState.severity === "critical"
+  ) {
+    return undefined;
+  }
+  const credits = input.playerView.own.credits;
+  if (credits < pipeline.reserveFloor) return undefined;
+  const roles = dependencies.rolesForAction(input, action);
+  const burstEconomy = corpBurstEconomyOperationForAction(
+    input,
+    action,
+    dependencies,
+    actionSemanticCandidate,
+  );
+  const drawsCards =
+    action.type === "draw_card" || (burstEconomy?.drawCards ?? 0) > 0;
+  const isEconomy =
+    action.type === "gain_credit" ||
+    Boolean(burstEconomy) ||
+    rolesMatch(roles, ["economy"]);
+  const evidence = [
+    "prepared_score_remote_agenda_search:true",
+    `server:${pipeline.serverId}`,
+    `ice_count:${pipeline.iceCount}`,
+    `credits:${credits}`,
+    `reserve_floor:${pipeline.reserveFloor}`,
+    `unrezzed_remote_rez_cost:${pipeline.unrezzedRezCost}`,
+    `rd_count:${rdCount}`,
+    `triage_primary:${boardTriageState.primary}`,
+    `triage_severity:${boardTriageState.severity}`,
+  ];
+  if (drawsCards) {
+    return {
+      key: "corp_prepared_score_remote_agenda_search",
+      label: "Agenda-Suche fuer vorbereitetes Remote",
+      value: action.type === "draw_card" ? 2200 : 1300,
+      reason: [...evidence, `action:${action.type}`, "draws_cards:true"].join(
+        "|",
+      ),
+    };
+  }
+  if (isEconomy) {
+    return {
+      key: "corp_prepared_score_remote_credit_loop_penalty",
+      label: "Credit-Loop trotz vorbereitetem Remote",
+      value: -1300,
+      reason: [...evidence, `action:${action.type}`, "draws_cards:false"].join(
+        "|",
+      ),
+    };
+  }
+  return undefined;
 }
 
 function corpVisibleUnrezzedRezCost(ice: readonly VisibleCard[]): number {
