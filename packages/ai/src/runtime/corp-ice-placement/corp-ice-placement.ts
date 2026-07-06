@@ -527,7 +527,6 @@ export function buildCorpIceCardPlacementProfile(
     rolesMatch([...hintRoles, ...hintEffectKinds], [
       "etr_ice",
       "end_run",
-      "run_lock",
       "etr",
     ]) ||
     tokensIncludePhrase(tokens, ["end", "the", "run"]);

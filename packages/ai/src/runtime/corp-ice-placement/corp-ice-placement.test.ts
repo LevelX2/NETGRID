@@ -71,6 +71,21 @@ describe("corp ICE placement profile", () => {
     expect(noisyText.nextIceModifier).toBe(false);
   });
 
+  it("does not treat next-encounter run locks as solo access stops", () => {
+    const profile = buildCorpIceCardPlacementProfile(
+      corpIce("shock-r", {
+        definitionId: "onr_v1_268_shock-r",
+        title: "Shock.r",
+      }),
+    );
+
+    expect(profile.nextIceModifier).toBe(true);
+    expect(profile.runLock).toBe(true);
+    expect(profile.positionDependent).toBe(true);
+    expect(profile.immediateStop).toBe(false);
+    expect(profile.deadAsFirstIce).toBe(true);
+  });
+
   it("consumes compiled ICE-v2 tactic signals in placement profiles", () => {
     const colonelFailure = buildCorpIceCardPlacementProfile(
       corpIce("colonel-failure", {

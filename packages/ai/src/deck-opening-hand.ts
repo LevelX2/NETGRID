@@ -20,13 +20,25 @@ export type RunnerOpeningHandEvaluation = OpeningHandEvaluation;
 export function evaluateCorpOpeningHand(
   input: AiDecisionInput,
 ): CorpOpeningHandEvaluation {
-  const handRoles = input.playerView.own.gripOrHq.flatMap((card) =>
+  const handRoleGroups = input.playerView.own.gripOrHq.map((card) =>
     rolesForDeckDoctrineCard(card.definitionId ?? ""),
   );
-  const agendaCount = handRoles.filter(deckDoctrineRoleIsAgenda).length;
-  const iceCount = handRoles.filter(deckDoctrineRoleIsIce).length;
-  const economyCount = handRoles.filter(openingRoleIsEconomy).length;
-  const remoteRootCount = handRoles.filter(corpOpeningRoleIsRemoteRoot).length;
+  const agendaCount = countOpeningCardsWithRole(
+    handRoleGroups,
+    deckDoctrineRoleIsAgenda,
+  );
+  const iceCount = countOpeningCardsWithRole(
+    handRoleGroups,
+    deckDoctrineRoleIsIce,
+  );
+  const economyCount = countOpeningCardsWithRole(
+    handRoleGroups,
+    openingRoleIsEconomy,
+  );
+  const remoteRootCount = countOpeningCardsWithRole(
+    handRoleGroups,
+    corpOpeningRoleIsRemoteRoot,
+  );
   const semanticContext = openingSemanticContext(input);
   const strategySet = new Set(semanticContext.strategies);
   const hasScorelineStrategy =
@@ -91,27 +103,35 @@ export function evaluateCorpOpeningHand(
 export function evaluateRunnerOpeningHand(
   input: AiDecisionInput,
 ): RunnerOpeningHandEvaluation {
-  const handRoles = input.playerView.own.gripOrHq.flatMap((card) =>
+  const handRoleGroups = input.playerView.own.gripOrHq.map((card) =>
     rolesForDeckDoctrineCard(card.definitionId ?? ""),
   );
-  const breakerCount = handRoles.filter(deckDoctrineRoleIsBreaker).length;
-  const economyCount = handRoles.filter(openingRoleIsEconomy).length;
-  const setupCount = handRoles.filter(
+  const breakerCount = countOpeningCardsWithRole(
+    handRoleGroups,
+    deckDoctrineRoleIsBreaker,
+  );
+  const economyCount = countOpeningCardsWithRole(
+    handRoleGroups,
+    openingRoleIsEconomy,
+  );
+  const setupCount = countOpeningCardsWithRole(
+    handRoleGroups,
     (role) =>
       role === "runner_program" ||
       role === "setup_runner" ||
       role === "setup_hardware" ||
       role === "runner_resource" ||
       role === "memory",
-  ).length;
-  const pressureCount = handRoles.filter(
+  );
+  const pressureCount = countOpeningCardsWithRole(
+    handRoleGroups,
     (role) =>
       role === "run_pressure" ||
       role === "pressure_rnd" ||
       role === "pressure_hq" ||
       role === "remote_contest" ||
       role === "multiaccess",
-  ).length;
+  );
   const handSize = input.playerView.own.gripOrHq.length;
   const semanticContext = openingSemanticContext(input);
   const strategySet = new Set(semanticContext.strategies);
@@ -255,6 +275,13 @@ function openingRoleIsEconomy(role: string): boolean {
 
 function corpOpeningRoleIsRemoteRoot(role: string): boolean {
   return rolesMatch([role], ["asset", "upgrade", "remote_support"]);
+}
+
+function countOpeningCardsWithRole(
+  roleGroups: readonly (readonly string[])[],
+  predicate: (role: string) => boolean,
+): number {
+  return roleGroups.filter((roles) => roles.some(predicate)).length;
 }
 
 function sortedUnique(values: string[]): string[] {
