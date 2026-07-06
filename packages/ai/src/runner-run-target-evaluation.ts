@@ -934,7 +934,7 @@ function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
         : payoff.payoff === "unknown"
           ? "unknown"
           : "known_payoff",
-    scoreAdjustment: 0,
+    scoreAdjustment: -payoff.penalty,
     evidence: payoff.evidence,
   };
 }

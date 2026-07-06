@@ -141,6 +141,23 @@ describe("visible run analysis text-derived breaker costs", () => {
       unpayableReason: "ice_unaffordable",
     });
   });
+
+  it("does not use plural wall-only breaker text against a code gate", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [classicCodeGateIce("remote-code-gate")],
+      [pileDriverBreaker("runner-pile-driver")],
+      4,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      knownPathBlockedByMissingCoverage: true,
+      missingCoverage: ["code_gate"],
+      noAccessReason: "missing_breaker_coverage",
+      unpayableReason: "ice_unbreakable",
+    });
+  });
 });
 
 describe("visible run analysis trace hazards", () => {
@@ -432,6 +449,19 @@ function classicWallIce(instanceId: string): VisibleCard {
   };
 }
 
+function classicCodeGateIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "simple_code_gate_ice",
+    title: "Simple Code Gate ICE",
+    type: "ice",
+    subtypes: ["code_gate"],
+    known: true,
+    rezzed: true,
+    strength: 2,
+  };
+}
+
 function earlyWormBreaker(instanceId: string): VisibleCard {
   return {
     instanceId,
@@ -441,6 +471,18 @@ function earlyWormBreaker(instanceId: string): VisibleCard {
     subtypes: ["icebreaker", "worm"],
     known: true,
     strength: 2,
+  };
+}
+
+function pileDriverBreaker(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_047_pile-driver",
+    title: "Pile Driver",
+    type: "program",
+    subtypes: ["icebreaker", "fracter", "noisy"],
+    known: true,
+    strength: 7,
   };
 }
 

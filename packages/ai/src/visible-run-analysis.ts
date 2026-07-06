@@ -1857,10 +1857,10 @@ function textPumpStrengthAbility(
 }
 
 function textBreakIceSubtype(clause: string): string | undefined {
-  if (/\bwall\b/.test(clause)) return "wall";
-  if (/\bbarrier\b/.test(clause)) return "barrier";
-  if (/\bcode\s*gate\b|\bcodegate\b/.test(clause)) return "code_gate";
-  if (/\bsentry\b/.test(clause)) return "sentry";
+  if (/\bwalls?\b/.test(clause)) return "wall";
+  if (/\bbarriers?\b/.test(clause)) return "barrier";
+  if (/\bcode\s*gates?\b|\bcodegates?\b/.test(clause)) return "code_gate";
+  if (/\bsentries\b|\bsentry\b/.test(clause)) return "sentry";
   if (/\bice\b/.test(clause)) return undefined;
   return undefined;
 }

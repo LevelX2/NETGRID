@@ -28,7 +28,20 @@ export function runnerKnownIcePathScoreComponents(
   if (action.type !== "start_run" || !server) return [];
   const assessment = dependencies.assessment(input, server);
   if (assessment.assessedKnownIceCount <= 0) return [];
-  if (!assessment.canReachAccess) return [];
+  if (!assessment.canReachAccess) {
+    const unbreakable =
+      assessment.knownPathBlockedByUnbreakableIce === true ||
+      assessment.knownPathBlockedByMissingCoverage === true ||
+      assessment.unpayableReason === "ice_unbreakable";
+    return [
+      {
+        key: "runner_known_ice_path_no_access",
+        label: "Bekannter ICE-Pfad blockiert Zugriff",
+        value: unbreakable ? -3200 : -2400,
+        reason: dependencies.reason(assessment, server.id),
+      },
+    ];
+  }
   if ((assessment.visibleBreakCost ?? 0) <= 0) return [];
   return [
     {

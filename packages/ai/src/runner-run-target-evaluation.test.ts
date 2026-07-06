@@ -1383,6 +1383,57 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("does not run Pile Driver into a known rezzed Code Gate to reach a 4-credit trash root", () => {
+    const input = aiInput({
+      credits: 4,
+      rig: [
+        visibleCard("runner-pile-driver", {
+          definitionId: "onr_v1_047_pile-driver",
+          title: "Pile Driver",
+          type: "program",
+          subtypes: ["icebreaker", "fracter", "noisy"],
+          known: true,
+        }),
+      ],
+      servers: [
+        server("remote_1", {
+          ice: [simpleCodeGateIce("remote-code-gate")],
+          root: [
+            visibleCard("remote-euromarket", {
+              definitionId: "onr_v1_322_euromarket-consortium",
+              title: "Euromarket Consortium",
+              type: "asset",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runAction("run-remote-1", "remote_1"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "trash_unaffordable",
+      knownAccessState: "known_no_current_payoff",
+      pathPassability: "blocked_missing_coverage",
+      recommendation: "find_breaker_first",
+    });
+    expect(evaluation?.score).toBeLessThan(-900);
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "path_passability:blocked_missing_coverage",
+        "trash_decline_reason:reserve_would_break",
+        "known_remote_root_credits_after_trash:0",
+        "access_payoff_score_adjustment:-720",
+      ]),
+    );
+  });
+
   it("keeps a known remote trash target valuable when trash preserves reserve", () => {
     const input = aiInput({
       credits: 8,
@@ -2361,6 +2412,34 @@ function wallOfStaticIce(instanceId: string): VisibleCard {
       iceDefinitionId: "onr_v1_279_wall-of-static",
       effectiveStrength: 2,
       subroutines: [
+        {
+          id: `${instanceId}_etr`,
+          type: "end_the_run",
+        },
+      ],
+    },
+  });
+}
+
+function simpleCodeGateIce(instanceId: string): VisibleCard {
+  return visibleCard(instanceId, {
+    definitionId: "simple_code_gate_ice",
+    title: "Simple Code Gate ICE",
+    type: "ice",
+    subtypes: ["code_gate"],
+    known: true,
+    rezzed: true,
+    strength: 2,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "simple_code_gate_ice",
+      effectiveStrength: 2,
+      subroutines: [
+        {
+          id: `${instanceId}_corp_gain_credit`,
+          type: "corp_gain_credit",
+          amount: 1,
+        },
         {
           id: `${instanceId}_etr`,
           type: "end_the_run",
