@@ -5,6 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { actionProvidesCredits } from "../actions/action-effect-classification";
 import { rolesMatch } from "./role-match";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import {
@@ -1432,6 +1433,12 @@ function scoreRemoteNeedsFunding<TConsumer extends string>(
     return false;
   }
   if (assessment.windowKind === "none") return false;
+  if (
+    existingScoreRemoteNeedsFundingBeforeProtection(input, entry) &&
+    !scoringWindowCanUseTriageScoreWindow(assessment)
+  ) {
+    return true;
+  }
   if (assessment.recommendedNextStep === "build_remote_ice") {
     return false;
   }
@@ -1465,6 +1472,34 @@ function scoreRemoteHasUnmetFundingNeed(
   );
   if (requiredRezFloor === undefined) return false;
   return input.playerView.own.credits < requiredRezFloor;
+}
+
+function existingScoreRemoteNeedsFundingBeforeProtection(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+): boolean {
+  const assessment = entry.scoringWindow;
+  if (!assessment) return false;
+  const reserveFloorCandidate = corpTriagePositiveNumber(
+    assessment.dynamicProtectionReserve,
+  );
+  const explicitReserveFloor =
+    reserveFloorCandidate !== undefined && reserveFloorCandidate > 0
+      ? reserveFloorCandidate
+      : undefined;
+  const belowExplicitReserve =
+    explicitReserveFloor !== undefined &&
+    input.playerView.own.credits < explicitReserveFloor;
+  const brokeFullPathAtLowCredits =
+    explicitReserveFloor === undefined &&
+    assessment.corpCanRezFullPathWithDynamicReserve === false &&
+    input.playerView.own.credits <= 2;
+  return (
+    entry.serverId !== undefined &&
+    entry.serverId !== "new_remote" &&
+    entry.serverId.startsWith("remote_") &&
+    (belowExplicitReserve || brokeFullPathAtLowCredits)
+  );
 }
 
 function scoreRemoteNeedsProtection<TConsumer extends string>(
@@ -2237,7 +2272,7 @@ function actionProvidesEconomy<TConsumer extends string>(
   dependencies: CorpBoardTriageDependencies<TConsumer>,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
-  if (action.type === "gain_credit") return true;
+  if (actionProvidesCredits(action)) return true;
   const payoffPressure = dependencies.corpTaggedRunnerPayoffPressure?.(
     input,
     action,
@@ -2368,7 +2403,7 @@ function corpBoardTriagePositiveInteger(token: string | undefined): number {
 
 function legalEconomyActionExists(input: AiDecisionInput): boolean {
   return corpLegalActions(input).some(
-    (action) => action.type === "gain_credit",
+    (action) => actionProvidesCredits(action),
   );
 }
 

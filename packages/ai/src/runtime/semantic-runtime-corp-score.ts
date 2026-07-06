@@ -5,6 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { actionProvidesCredits } from "../actions/action-effect-classification";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "./semantic-runtime-corp-effective-defense";
 import {
@@ -528,7 +529,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       reason: burstEconomyThreshold.evidence.join("|"),
     });
   }
-  if (action.type === "gain_credit" && credits < 6) {
+  if (actionProvidesCredits(action) && credits < 6) {
     components.push({
       key: "corp_low_credits",
       label: "Credit-Bedarf",
@@ -1389,7 +1390,7 @@ function corpLegalEconomyActionExists(input: AiDecisionInput): boolean {
   return legalActions.some(
     (candidate) =>
       candidate.side === "corp" &&
-      (candidate.type === "gain_credit" ||
+      (actionProvidesCredits(candidate) ||
         candidate.type === "play_operation" ||
         candidate.type === "activated_card_ability" ||
         candidate.type === "trigger_ability"),

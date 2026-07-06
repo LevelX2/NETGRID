@@ -7,6 +7,7 @@ import type {
   ActionSemanticConfidence,
   ActionSemanticSourceKind,
 } from "../action-semantic-candidate";
+import { knownNonCreditGainActionSemantics } from "./action-effect-classification";
 
 export type BasicActionSemanticClassification = {
   semanticActionType: string;
@@ -209,7 +210,15 @@ export function applyBasicActionSemantics(
   candidate: ActionSemanticCandidate,
   action: LegalAction,
 ): ActionSemanticCandidate {
-  const classification = BASIC_ACTION_SEMANTICS[action.type];
+  const actionEffectOverride = knownNonCreditGainActionSemantics(action);
+  const classification = actionEffectOverride
+    ? {
+        semanticActionType: actionEffectOverride.semanticActionType,
+        tacticSignals: actionEffectOverride.tacticSignals,
+        primaryProjectionStatus: "projected" as const,
+        confidence: "high" as const,
+      }
+    : BASIC_ACTION_SEMANTICS[action.type];
   if (!classification) return candidate;
 
   const sourceKind = basicSourceKindForAction(action);

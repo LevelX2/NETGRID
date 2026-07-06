@@ -211,6 +211,30 @@ describe("buildActionSemanticCandidates", () => {
     expect(breakSubroutine.projectionIssues).toEqual(["ability_unresolved"]);
   });
 
+  it("does not classify scored shuffle-draw agenda actions as credit economy", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("gain_credit", 1, {
+          side: "corp",
+          source: "scored-ai-cfo",
+          payload: {
+            cardId: "scored-ai-cfo",
+            agendaAbility: "hq_archives_shuffle_draw",
+            drawCardsAmount: 5,
+          },
+        }),
+      ],
+    });
+
+    if (!candidate) throw new Error("Expected AI CFO action candidate");
+    expect(candidate.semanticActionType).toBe("draw.card");
+    expect(candidate.actionTacticSignals).toEqual(
+      expect.arrayContaining(["draw.card", "setup.draw", "zone.shuffle_draw"]),
+    );
+    expect(candidate.actionTacticSignals).not.toContain("economy.basic");
+    expect(candidate.actionTacticSignals).not.toContain("economy.recover");
+  });
+
   it("covers the minimal runtime bridge action families", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [

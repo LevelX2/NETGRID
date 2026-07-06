@@ -103,6 +103,33 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("does not treat scored shuffle-draw agenda actions as low-credit funding", () => {
+    const aiCfoShuffleDraw = corpAction("ai-cfo-shuffle-draw", "gain_credit", {
+      agendaAbility: "hq_archives_shuffle_draw",
+      drawCardsAmount: 5,
+    });
+
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(0, [], [aiCfoShuffleDraw]),
+      aiCfoShuffleDraw,
+      "basic_economy_draw",
+      testDependencies(),
+      semanticCandidate(
+        aiCfoShuffleDraw.actionId,
+        "draw.card",
+        ["draw.card", "zone.shuffle_draw"],
+        "gain_credit",
+      ),
+    );
+
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_low_credits",
+    );
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_remote_instability_credit_reserve",
+    );
+  });
+
   it("scores playable Corp burst economy operations by net credit gain", () => {
     const accountsReceivable = corpAction(
       "play-accounts-receivable",
