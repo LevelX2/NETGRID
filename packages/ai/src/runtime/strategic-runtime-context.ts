@@ -13,6 +13,7 @@ import type {
 import type {
   AiDeckStrategyProfile,
 } from "../deck-doctrine-strategy";
+import { actionProvidesCredits } from "../actions/action-effect-classification";
 import type {
   StrategicIntentFamily,
   StrategicReserveRequirement,
@@ -430,7 +431,7 @@ function corpRoleStatuses(
     case "corp_economy_reserve":
       return [
         roleStatus("corp.economy", corpEconomyStatus(params), "capability", [
-          `legal_gain_credit:${hasLegalAction(params.legalActions, "gain_credit")}`,
+          `legal_gain_credit:${hasLegalCreditAction(params.legalActions)}`,
           `bank_tools:${params.deckCapabilities?.corp?.economyBankTools.length ?? 0}`,
           `rez_economy_tools:${params.deckCapabilities?.corp?.rezReserveProfile.rezEconomyToolsKnown ?? 0}`,
         ]),
@@ -481,7 +482,7 @@ function corpIceDefenseStatus(
 function corpEconomyStatus(
   params: BuildStrategicRuntimeContextParams,
 ): StrategicRoleStatus {
-  if (hasLegalAction(params.legalActions, "gain_credit")) return "active";
+  if (hasLegalCreditAction(params.legalActions)) return "active";
   if ((params.deckCapabilities?.corp?.economyBankTools.length ?? 0) > 0) {
     return "installable";
   }
@@ -763,7 +764,7 @@ function actionMatchesFamily(
       return action.type === "rez_ice" || hasInstallIcePayload(action);
     case "corp_asset_economy":
     case "corp_economy_reserve":
-      return action.type === "gain_credit" || action.type === "rez_ice";
+      return actionProvidesCredits(action) || action.type === "rez_ice";
     case "corp_tag_trace_punish":
     case "corp_damage_kill":
     case "corp_ambush":
@@ -863,6 +864,10 @@ function hasLegalAction(
   type: LegalAction["type"],
 ): boolean {
   return legalActions.some((action) => action.type === type);
+}
+
+function hasLegalCreditAction(legalActions: readonly LegalAction[]): boolean {
+  return legalActions.some(actionProvidesCredits);
 }
 
 function hasInstallIceAction(legalActions: readonly LegalAction[]): boolean {

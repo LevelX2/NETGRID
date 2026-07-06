@@ -2270,6 +2270,71 @@ describe("tactical plan model", () => {
       ]),
     );
   });
+
+  it("maps Corp scoreline installs into the score-window plan before punish pressure", () => {
+    const installAgenda = legalAction(
+      "install-scoreline-agenda",
+      "corp",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      { source: "agenda-1" },
+    );
+    const punish = legalAction(
+      "use-punish",
+      "corp",
+      "activated_card_ability",
+      {},
+      { source: "punish-card" },
+    );
+    const input = aiInput("corp", [installAgenda, punish]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-ice", "corp", "ice", {
+          definitionId: "simple_barrier_ice",
+          rezzed: true,
+          subtypes: ["Barrier"],
+        }),
+      ]),
+    ];
+    const scorelineCandidate = {
+      ...candidateForAction(installAgenda),
+      semanticActionType: "scoreline",
+      actionTacticSignals: ["install.card"],
+      evidence: ["scoreline"],
+    } satisfies ActionSemanticCandidate;
+    const punishCandidate = {
+      ...candidateForUntargetedAction(punish),
+      semanticActionType: "card_ability.unknown",
+      actionTacticSignals: ["tag.payoff"],
+      cardContextSignals: ["tag.source"],
+    } satisfies ActionSemanticCandidate;
+
+    const result = evaluateTacticalPlans({
+      input,
+      candidates: [scorelineCandidate, punishCandidate],
+      tacticalGoals: [
+        {
+          goalId: "corp.intent.punish",
+          family: "tag_punish",
+          priority: 900,
+          urgency: "high",
+          source: "strategic_intent",
+          evidence: ["test:corp_punish_intent"],
+        },
+      ],
+    });
+
+    expect(result.selectedPlan).toMatchObject({
+      planId: "corp.create_score_window:install-scoreline-agenda",
+      type: "corp.create_score_window",
+    });
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "install-scoreline-agenda",
+    ]);
+  });
 });
 
 function runnerHandDevelopmentEvaluation(

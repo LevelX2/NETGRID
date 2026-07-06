@@ -50,6 +50,7 @@ export function selfplayTraceFactsForDecision(
     ...(safeDebug.detailSections?.flatMap((section) =>
       section.items.slice(0, 4).map((item) => `${section.id}:${item}`),
     ) ?? []),
+    ...strategicDetailFacts(safeDebug.detailSections),
   ]);
   return {
     ...(safeDebug.planKind ? { planKind: safeDebug.planKind } : {}),
@@ -70,6 +71,29 @@ export function selfplayTraceFactsForSimulationDecision(
   const { actionAlternatives: _actionAlternatives, ...withoutAlternatives } =
     facts;
   return withoutAlternatives;
+}
+
+function strategicDetailFacts(
+  sections: AiDecisionDebug["detailSections"] | undefined,
+): string[] {
+  if (!sections) return [];
+  return sections
+    .flatMap((section) =>
+      section.items
+        .filter(strategicDetailItemIsRetained)
+        .map((item) => `${section.id}:${item}`),
+    )
+    .slice(0, 32);
+}
+
+function strategicDetailItemIsRetained(item: string): boolean {
+  return [
+    "corp_strategic_intent_used:",
+    "deck_strategy_",
+    "strategic_action_fit_",
+    "strategic_intent_",
+    "strategy_portfolio_",
+  ].some((prefix) => item.startsWith(prefix));
 }
 
 export function stripSelfplayActionAlternatives(

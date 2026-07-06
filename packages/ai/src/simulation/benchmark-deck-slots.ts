@@ -1,5 +1,12 @@
-import type { AiBenchmarkDeckSlotDefinition } from "./benchmark-deck-types";
+import type {
+  AiBenchmarkDeckSlotDefinition,
+  AiBenchmarkRunnerArchetype,
+} from "./benchmark-deck-types";
 import { benchmarkDeckManifestEntry } from "./benchmark-deck-manifest-entry";
+import {
+  benchmarkCorpArchetypeFromRole,
+  missingCorpStrategyPanelSlots,
+} from "./benchmark-deck-strategy-panel";
 import {
   LOCAL_REALISTIC_BENCHMARK_DECKS,
   REAL_SCENE_BENCHMARK_DECKS,
@@ -32,6 +39,8 @@ const LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
             kind: "pending_real_scene",
             label: `${slot.corpLocalDeckId}:missing_manifest_entry`,
           },
+      runnerArchetype: runnerArchetypeFromRole(runner?.role),
+      corpArchetype: benchmarkCorpArchetypeFromRole(corp?.role),
       tuningUse: slot.tuningUse,
       ...(!runner || !corp
         ? {
@@ -69,6 +78,8 @@ const REAL_SCENE_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
             kind: "pending_real_scene",
             label: `${slot.corpLocalDeckId}:missing_manifest_entry`,
           },
+      runnerArchetype: runnerArchetypeFromRole(runner?.role),
+      corpArchetype: benchmarkCorpArchetypeFromRole(corp?.role),
       tuningUse: slot.tuningUse,
       ...(!runner || !corp
         ? {
@@ -79,7 +90,7 @@ const REAL_SCENE_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
     };
   });
 
-export const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
+const CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
   [
     {
       slotId: "safety_smoke_demo_008",
@@ -88,6 +99,8 @@ export const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefiniti
       status: "runnable",
       runner: { kind: "runtime_deck_id", deckId: "demo_runner_008" },
       corp: { kind: "runtime_deck_id", deckId: "demo_corp_008" },
+      runnerArchetype: "starter",
+      corpArchetype: "starter_scoreline",
       tuningUse: "safety_regression",
     },
     {
@@ -100,6 +113,8 @@ export const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefiniti
         snapshotId: "onr_origin_runner_ai_snapshot_v1",
       },
       corp: { kind: "snapshot", snapshotId: "onr_origin_corp_ai_snapshot_v1" },
+      runnerArchetype: "rig_economy_pressure",
+      corpArchetype: "remote_scoring",
       tuningUse: "progression_tuning",
     },
     {
@@ -112,6 +127,8 @@ export const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefiniti
         snapshotId: "onr_origin_runner_ai_event_pressure_snapshot_v1",
       },
       corp: { kind: "snapshot", snapshotId: "onr_origin_corp_ai_snapshot_v1" },
+      runnerArchetype: "event_pressure",
+      corpArchetype: "remote_scoring",
       tuningUse: "progression_tuning",
     },
     {
@@ -127,8 +144,34 @@ export const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefiniti
         kind: "snapshot",
         snapshotId: "onr_origin_corp_ai_tag_ops_snapshot_v1",
       },
+      runnerArchetype: "event_pressure",
+      corpArchetype: "tag_punish",
       tuningUse: "holdout_only",
     },
     ...LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS,
     ...REAL_SCENE_BENCHMARK_DECK_SLOTS,
   ];
+
+export const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
+  [
+    ...CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS,
+    ...missingCorpStrategyPanelSlots(CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS),
+  ];
+
+function runnerArchetypeFromRole(
+  role: string | undefined,
+): AiBenchmarkRunnerArchetype {
+  if (!role) return "unknown";
+  if (role.includes("rnd") || role.includes("multiaccess")) {
+    return "central_multiaccess";
+  }
+  if (role.includes("event")) return "event_pressure";
+  if (
+    role.includes("rig") ||
+    role.includes("economy") ||
+    role.includes("pressure")
+  ) {
+    return "rig_economy_pressure";
+  }
+  return "unknown";
+}

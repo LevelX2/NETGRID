@@ -88,11 +88,13 @@ export type {
 export { createBeliefSimulationWorld } from "./simulation/belief-simulation-world";
 export { listMatchProgressionBenchmarkDeckSlots } from "./simulation/benchmark-deck-slot-list";
 export type {
+  AiBenchmarkCorpArchetype,
   AiBenchmarkDeckReference,
   AiBenchmarkDeckSlotDefinition,
   AiBenchmarkDeckSlotStatus,
   AiBenchmarkDeckSlotType,
   AiBenchmarkLocalEditableDeckResult,
+  AiBenchmarkRunnerArchetype,
   AiBenchmarkSnapshotDeck,
   AiLocalBenchmarkDeckClassification,
 } from "./simulation/benchmark-deck-types";

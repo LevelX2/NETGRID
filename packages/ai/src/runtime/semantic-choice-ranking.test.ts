@@ -146,6 +146,37 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
+  it("lets semantic ranking override a mapped Corp action that conflicts with board triage", () => {
+    const mappedInstall = legalAction("install-remote-ice", "install_card", {
+      serverId: "remote_1",
+      placement: "ice",
+    });
+    const economy = legalAction("burst-economy", "play_operation");
+    const mappedChoice = choice(mappedInstall, 1169, [
+      ...strategicEvidence("exact"),
+      ...scoreComponentEvidence("corp_board_triage_mismatch"),
+    ]);
+    const economyChoice = choice(economy, 1839, [
+      ...scoreComponentEvidence("corp_board_triage_context"),
+    ]);
+
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [economyChoice, mappedChoice],
+      remoteContestMapping([mappedInstall]),
+      economyChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("burst-economy");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe(
+      "install-remote-ice",
+    );
+    expect(result.overrideReason).toBe("corp_board_triage_mismatch_yield");
+    expect(result.scoreGap).toBe(670);
+    expect(result.overrideThreshold).toBe(900);
+  });
+
   it("uses a wider override gap for kind-level strategic fit", () => {
     const gain = legalAction("gain", "gain_credit");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
@@ -214,6 +245,10 @@ function strategicEvidence(targetMatch: "exact" | "kind"): string[] {
   ];
 }
 
+function scoreComponentEvidence(key: string): string[] {
+  return [`semantic_score_component:${key}`];
+}
+
 function coverageMapping(
   legalActions: LegalAction[],
 ): PlanStepMappingResult {
@@ -227,7 +262,7 @@ function remoteContestMapping(
 }
 
 function planMapping(
-  type: "runner.obtain_breaker_coverage" | "runner.contest_remote",
+  type: string,
   legalActions: LegalAction[],
 ): PlanStepMappingResult {
   return {

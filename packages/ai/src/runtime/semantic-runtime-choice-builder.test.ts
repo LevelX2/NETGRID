@@ -71,6 +71,32 @@ describe("buildSemanticRuntimeChoices", () => {
 
     expect(choice?.reasonCode).toBe("corp.semantic.basic_economy_draw");
   });
+
+  it("exposes Corp board triage component keys as structured choice evidence", () => {
+    const action = corpAction("corp-triage-mismatch");
+    const [choice] = buildSemanticRuntimeChoices(corpInput(action), [], {
+      ...dependencies(),
+      scoreBreakdown: () => [
+        {
+          key: "corp_board_triage_mismatch",
+          label: "Corp board triage",
+          value: -4200,
+        },
+        {
+          key: "corp_install_remote_context",
+          label: "Remote context",
+          value: 1350,
+        },
+      ],
+    });
+
+    expect(choice?.evidence).toContain(
+      "semantic_score_component:corp_board_triage_mismatch",
+    );
+    expect(choice?.evidence).not.toContain(
+      "semantic_score_component:corp_install_remote_context",
+    );
+  });
 });
 
 function paidAction(): LegalAction {

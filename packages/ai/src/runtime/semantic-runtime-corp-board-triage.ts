@@ -5,6 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { actionProvidesCredits } from "../actions/action-effect-classification";
 import { rolesMatch } from "./role-match";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import {
@@ -197,7 +198,9 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
   }
 
   const remoteFunding = highestPriorityScoreRemoteEntry(
-    actions.filter((entry) => scoreRemoteNeedsFunding(entry)),
+    actions.filter((entry) =>
+      scoreRemoteNeedsFunding(input, entry, dependencies),
+    ),
   );
   if (remoteFunding?.scoringWindow) {
     return {
@@ -212,6 +215,7 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
       evidence: [
         "corp_board_triage_primary:fund_score_remote",
         `corp_board_triage_target:${remoteFunding.serverId ?? "unknown"}`,
+        `corp_board_triage_source_action:${remoteFunding.action.actionId}`,
         ...remoteFunding.scoringWindow.evidence,
         ...(remoteFunding.remoteRezFloor?.evidence ?? []),
       ],
@@ -219,7 +223,9 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
   }
 
   const remoteProtection = highestPriorityScoreRemoteEntry(
-    actions.filter((entry) => scoreRemoteNeedsProtection(entry)),
+    actions.filter((entry) =>
+      scoreRemoteNeedsProtection(input, entry, dependencies),
+    ),
   );
   if (remoteProtection?.scoringWindow) {
     return {
@@ -233,6 +239,7 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
       evidence: [
         "corp_board_triage_primary:protect_score_remote",
         `corp_board_triage_target:${remoteProtection.serverId ?? "unknown"}`,
+        `corp_board_triage_source_action:${remoteProtection.action.actionId}`,
         ...remoteProtection.scoringWindow.evidence,
       ],
     };
@@ -259,7 +266,16 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     };
   }
 
-  if (centralPressure && centralPressureSeverity) {
+  if (
+    centralPressure &&
+    centralPressureSeverity &&
+    centralPressureShouldDriveTriage(
+      input,
+      actions,
+      centralPressure,
+      centralPressureSeverity,
+    )
+  ) {
     return centralPressureTriage(
       centralPressure,
       centralPressureSeverity,
@@ -294,6 +310,7 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
       evidence: [
         "corp_board_triage_primary:setup_score_remote",
         `corp_board_triage_target:${setupRemote.serverId ?? "unknown"}`,
+        ...corpRemoteScoringStrategyEvidence(input),
       ],
     };
   }
@@ -418,14 +435,14 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         return "mismatch";
       }
       if (
-        actionPushesUnsafeScoreline(input, action, dependencies) &&
+        actionPushesConcreteAgendaScoreline(input, action, dependencies) &&
         triage.targetServerId &&
         actionServerId &&
         actionServerId !== triage.targetServerId
       ) {
         return "mismatch";
       }
-      if (actionPushesUnsafeScoreline(input, action, dependencies)) {
+      if (actionPushesConcreteAgendaScoreline(input, action, dependencies)) {
         if (
           emergencyRemoteConversion &&
           (!triage.targetServerId || actionServerId === triage.targetServerId)
@@ -540,6 +557,7 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
       }
       return actionCreatesPurgeActionDebt(action) ||
         actionPushesUnsafeScoreline(input, action, dependencies) ||
+        actionIsOffTargetInstall(action, actionServerId, triage) ||
         actionIsExpensiveNonProtection(action, actionServerId, triage)
         ? "mismatch"
         : "neutral";
@@ -603,6 +621,14 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         : "neutral";
     case "setup_score_remote":
       if (
+        (action.type === "install_card" &&
+          action.payload?.placement !== "ice" &&
+          actionServerId === triage.targetServerId &&
+          dependencies.corpActionIsScoreLine(
+            input,
+            action,
+            dependencies.rolesForAction(input, action),
+          )) ||
         actionBuildsScoreRemote({
           action,
           roles: dependencies.rolesForAction(input, action),
@@ -610,6 +636,13 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         })
       ) {
         return "match";
+      }
+      if (
+        action.type === "install_card" &&
+        actionServerId !== undefined &&
+        actionServerId !== triage.targetServerId
+      ) {
+        return "mismatch";
       }
       return actionServerId === "archives" ? "mismatch" : "neutral";
     case "low_value":
@@ -713,7 +746,7 @@ function activeScorelineClockEntryIsPlayable<TConsumer extends string>(
 ): boolean {
   if (!entry.serverId || entry.serverId === "new_remote") return false;
   if (!entry.serverId.startsWith("remote_")) return false;
-  if (!actionPushesUnsafeScoreline(input, entry.action, dependencies)) {
+  if (!actionPushesConcreteAgendaScoreline(input, entry.action, dependencies)) {
     return false;
   }
   if (
@@ -722,7 +755,10 @@ function activeScorelineClockEntryIsPlayable<TConsumer extends string>(
   ) {
     return false;
   }
-  if (scoreRemoteNeedsProtection(entry) || scoreRemoteNeedsFunding(entry)) {
+  if (
+    scoreRemoteNeedsProtection(input, entry, dependencies) ||
+    scoreRemoteNeedsFunding(input, entry, dependencies)
+  ) {
     return false;
   }
   if (entry.remoteRezFloor?.blockedByFloor === true) return false;
@@ -744,6 +780,15 @@ function scorelineEntryHasPlayableClockWindow(
 ): boolean {
   const assessment = entry.scoringWindow;
   if (!assessment) return true;
+  if (scoringWindowCanUseNoContestScoreWindow(assessment)) {
+    return true;
+  }
+  if (
+    assessment.windowKind === "unsafe" &&
+    scoringWindowCanUseMissingCoverageScoreWindow(assessment)
+  ) {
+    return true;
+  }
   if (
     assessment.recommendedNextStep === "build_remote_ice" ||
     assessment.recommendedNextStep === "gain_credit" ||
@@ -762,14 +807,7 @@ function scorelineEntryHasPlayableClockWindow(
     );
   }
   if (assessment.windowKind === "unsafe") {
-    return (
-      assessment.missingVisibleBreakerCoverage &&
-      !assessment.runnerCanReachAccessNow &&
-      !assessment.runnerCanContestBeforeScore &&
-      !assessment.runnerCanReachAccessBeforeScore &&
-      assessment.agendaStealSeverity !== "game_ending" &&
-      (assessment.affordableDurableRelevantIceCount ?? 0) >= 1
-    );
+    return scoringWindowCanUseTriageScoreWindow(assessment);
   }
   return false;
 }
@@ -852,7 +890,7 @@ function corpDeckoutAgendaFloodPressure<TConsumer extends string>(
   if (hqAgendaCount < 2 && hqAgendaPoints < 4) return undefined;
 
   const scorelineEntries = actions.filter((entry) =>
-    actionPushesUnsafeScoreline(input, entry.action, dependencies),
+    actionPushesConcreteAgendaScoreline(input, entry.action, dependencies),
   );
   if (scorelineEntries.length === 0) return undefined;
 
@@ -915,7 +953,7 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
 
   const playableScorelineEntries = actions.filter(
     (entry) =>
-      actionPushesUnsafeScoreline(input, entry.action, dependencies) &&
+      actionPushesConcreteAgendaScoreline(input, entry.action, dependencies) &&
       scorelineEntryCanRelieveHqAgendaFlood(input, entry, actions),
   );
   const emergencyScorelineEntries =
@@ -923,7 +961,11 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
       ? []
       : actions.filter(
           (entry) =>
-            actionPushesUnsafeScoreline(input, entry.action, dependencies) &&
+            actionPushesConcreteAgendaScoreline(
+              input,
+              entry.action,
+              dependencies,
+            ) &&
             scorelineEntryCanEmergencyRelieveHqAgendaFlood(
               input,
               entry,
@@ -1376,14 +1418,35 @@ function scoreRemoteEntryPriority(entry: ScoredLegalAction): number {
   return severity + existingRemoteBonus + concreteScorelineBonus + contestBonus;
 }
 
-function scoreRemoteNeedsFunding(entry: ScoredLegalAction): boolean {
+function scoreRemoteNeedsFunding<TConsumer extends string>(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
   const assessment = entry.scoringWindow;
   if (!assessment) return false;
+  if (newRemoteScoreRemoteWouldSprawl(input, entry)) return false;
   if (
-    assessment.recommendedNextStep === "gain_credit" ||
-    entry.remoteRezFloor?.blockedByFloor === true
+    !scoreRemoteTriageEntryCanDriveSafety(input, entry, dependencies) &&
+    !remoteServerHasVisibleScoreline(input, entry.serverId ?? "")
+  ) {
+    return false;
+  }
+  if (assessment.windowKind === "none") return false;
+  if (
+    existingScoreRemoteNeedsFundingBeforeProtection(input, entry) &&
+    !scoringWindowCanUseTriageScoreWindow(assessment)
   ) {
     return true;
+  }
+  if (assessment.recommendedNextStep === "build_remote_ice") {
+    return false;
+  }
+  if (entry.remoteRezFloor?.blockedByFloor === true) {
+    return true;
+  }
+  if (assessment.recommendedNextStep === "gain_credit") {
+    return scoreRemoteHasUnmetFundingNeed(input, entry);
   }
   return (
     assessment.windowKind === "unsafe" &&
@@ -1392,11 +1455,73 @@ function scoreRemoteNeedsFunding(entry: ScoredLegalAction): boolean {
   );
 }
 
-function scoreRemoteNeedsProtection(entry: ScoredLegalAction): boolean {
+function scoreRemoteHasUnmetFundingNeed(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+): boolean {
   const assessment = entry.scoringWindow;
   if (!assessment) return false;
-  if (assessment.recommendedNextStep === "build_remote_ice") return true;
-  if (assessment.windowKind === "unsafe") return true;
+  if (
+    assessment.corpCanRezRelevantIce === false ||
+    assessment.corpCanRezFullPathWithDynamicReserve === false
+  ) {
+    return true;
+  }
+  const requiredRezFloor = corpTriagePositiveNumber(
+    assessment.dynamicProtectionReserve,
+  );
+  if (requiredRezFloor === undefined) return false;
+  return input.playerView.own.credits < requiredRezFloor;
+}
+
+function existingScoreRemoteNeedsFundingBeforeProtection(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+): boolean {
+  const assessment = entry.scoringWindow;
+  if (!assessment) return false;
+  const reserveFloorCandidate = corpTriagePositiveNumber(
+    assessment.dynamicProtectionReserve,
+  );
+  const explicitReserveFloor =
+    reserveFloorCandidate !== undefined && reserveFloorCandidate > 0
+      ? reserveFloorCandidate
+      : undefined;
+  const belowExplicitReserve =
+    explicitReserveFloor !== undefined &&
+    input.playerView.own.credits < explicitReserveFloor;
+  const brokeFullPathAtLowCredits =
+    explicitReserveFloor === undefined &&
+    assessment.corpCanRezFullPathWithDynamicReserve === false &&
+    input.playerView.own.credits <= 2;
+  return (
+    entry.serverId !== undefined &&
+    entry.serverId !== "new_remote" &&
+    entry.serverId.startsWith("remote_") &&
+    (belowExplicitReserve || brokeFullPathAtLowCredits)
+  );
+}
+
+function scoreRemoteNeedsProtection<TConsumer extends string>(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
+  const assessment = entry.scoringWindow;
+  if (!assessment) return false;
+  if (newRemoteScoreRemoteWouldSprawl(input, entry)) return false;
+  if (
+    !scoreRemoteTriageEntryCanDriveSafety(input, entry, dependencies) &&
+    !remoteServerHasVisibleScoreline(input, entry.serverId ?? "")
+  ) {
+    return false;
+  }
+  if (assessment.recommendedNextStep === "build_remote_ice") {
+    return !scoringWindowCanUseTriageScoreWindow(assessment);
+  }
+  if (assessment.windowKind === "unsafe") {
+    return !scoringWindowCanUseTriageScoreWindow(assessment);
+  }
   if (assessment.windowKind !== "temporary_safe") return false;
   return (
     assessment.runnerCanContestBeforeScore ||
@@ -1406,6 +1531,68 @@ function scoreRemoteNeedsProtection(entry: ScoredLegalAction): boolean {
     assessment.corpCanRezFullPathWithDynamicReserve === false ||
     (assessment.affordableDurableRelevantIceCount ?? 0) === 0 ||
     (assessment.dynamicProtectionWeaknessCount ?? 0) > 0
+  );
+}
+
+function newRemoteScoreRemoteWouldSprawl(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+): boolean {
+  return entry.serverId === "new_remote" && existingScoreRemoteOutletExists(input);
+}
+
+function scoringWindowCanUseMissingCoverageScoreWindow(
+  assessment: CorpScoringWindowAssessment,
+): boolean {
+  return (
+    assessment.missingVisibleBreakerCoverage &&
+    !assessment.runnerCanReachAccessNow &&
+    !assessment.runnerCanContestBeforeScore &&
+    !assessment.runnerCanReachAccessBeforeScore &&
+    assessment.agendaStealSeverity !== "game_ending" &&
+    assessment.corpCanRezRelevantIce !== false &&
+    assessment.corpCanRezFullPathWithDynamicReserve !== false &&
+    (assessment.affordableDurableRelevantIceCount ?? 0) >= 1 &&
+    (assessment.dynamicProtectionWeaknessCount ?? 0) === 0
+  );
+}
+
+function scoringWindowCanUseNoContestScoreWindow(
+  assessment: CorpScoringWindowAssessment,
+): boolean {
+  return (
+    !assessment.runnerCanContestNow &&
+    !assessment.runnerCanReachAccessNow &&
+    !assessment.agendaStealRelevantNow &&
+    !assessment.runnerCanContestBeforeScore &&
+    !assessment.runnerCanReachAccessBeforeScore &&
+    !assessment.agendaStealRelevantBeforeScore &&
+    assessment.agendaStealSeverity !== "game_ending" &&
+    assessment.corpCanRezRelevantIce !== false &&
+    (assessment.affordableDurableRelevantIceCount ?? 0) >= 1 &&
+    (assessment.dynamicProtectionWeaknessCount ?? 0) === 0
+  );
+}
+
+function scoringWindowCanUseTriageScoreWindow(
+  assessment: CorpScoringWindowAssessment,
+): boolean {
+  return (
+    scoringWindowCanUseMissingCoverageScoreWindow(assessment) ||
+    scoringWindowCanUseNoContestScoreWindow(assessment)
+  );
+}
+
+function existingScoreRemoteOutletExists(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some(
+    (server) =>
+      server.id.startsWith("remote_") &&
+      (server.root.some(
+        (card) =>
+          card.known !== false &&
+          corpTriageVisibleCardIsAgenda(card),
+      ) ||
+        (server.root.length === 0 && server.ice.length > 0)),
   );
 }
 
@@ -1497,6 +1684,27 @@ function centralPressureIsTriageAcute(
   return liveAccessSignal || pressure.pressure >= 0.7;
 }
 
+function centralPressureShouldDriveTriage(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+  pressure: ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment>,
+  severity: CorpBoardTriageSeverity,
+): boolean {
+  const serverId = pressure.serverId;
+  if (serverId !== "hq" && serverId !== "rd") return false;
+  const needsProtection = centralServerNeedsProtection(input, serverId);
+  const hasProtectionAction = concreteCentralProtectionActionExists(
+    actions,
+    serverId,
+  );
+  if (severity === "critical") return hasProtectionAction;
+  if (needsProtection && hasProtectionAction) return true;
+  const hasScoreRemoteDevelopment =
+    concreteScoreRemoteDevelopmentActionExists(actions);
+  if (!hasScoreRemoteDevelopment) return true;
+  return !corpRemoteScoringStrategyWantsRemoteDevelopment(input);
+}
+
 function highestPriorityTriageCentralPressure(
   input: AiDecisionInput,
 ): ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment> | undefined {
@@ -1518,6 +1726,48 @@ function highestPriorityTriageCentralPressure(
       : acuteRdPressure;
   }
   return acuteHqPressure ?? acuteRdPressure;
+}
+
+function concreteScoreRemoteDevelopmentActionExists(
+  actions: readonly ScoredLegalAction[],
+): boolean {
+  return actions.some((entry) => actionBuildsScoreRemote(entry));
+}
+
+function corpRemoteScoringStrategyWantsRemoteDevelopment(
+  input: AiDecisionInput,
+): boolean {
+  const intent = (
+    input as AiDecisionInput & {
+      ownCorpStrategicIntent?: {
+        primaryWinIntent?: string;
+        scorePlan?: readonly string[];
+      };
+    }
+  ).ownCorpStrategicIntent;
+  if (!intent) return false;
+  if (
+    intent.primaryWinIntent === "corp.score_agendas" ||
+    intent.primaryWinIntent === "corp.score_fast_advance" ||
+    intent.primaryWinIntent === "corp.tax_and_score"
+  ) {
+    return true;
+  }
+  return (
+    intent.scorePlan?.some((plan) =>
+      [
+        "corp.remote_scoreline",
+        "corp.rush_scoreline",
+        "corp.fast_advance_scoreline",
+      ].includes(plan),
+    ) === true
+  );
+}
+
+function corpRemoteScoringStrategyEvidence(input: AiDecisionInput): string[] {
+  return corpRemoteScoringStrategyWantsRemoteDevelopment(input)
+    ? ["corp_board_triage_deck_strategy:remote_score_development"]
+    : [];
 }
 
 function preScoreCentralProtectionTriage(
@@ -1775,6 +2025,47 @@ function actionPushesUnsafeScoreline<TConsumer extends string>(
   );
 }
 
+function scoreRemoteTriageEntryCanDriveSafety<TConsumer extends string>(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
+  return actionPushesConcreteAgendaScoreline(
+    input,
+    entry.action,
+    dependencies,
+    entry.roles,
+  );
+}
+
+function actionPushesConcreteAgendaScoreline<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  roles = dependencies.rolesForAction(input, action),
+): boolean {
+  if (
+    action.type !== "advance_card" &&
+    !(
+      action.type === "install_card" &&
+      action.payload?.placement !== "ice"
+    )
+  ) {
+    return false;
+  }
+  const sourceCard = semanticRuntimeVisibleSourceCard(input, action);
+  if (sourceCard?.known !== false && sourceCard !== undefined) {
+    return corpTriageVisibleCardIsAgenda(sourceCard);
+  }
+  if (
+    action.payload?.cardType === "agenda" ||
+    action.payload?.targetCardType === "agenda"
+  ) {
+    return true;
+  }
+  return dependencies.corpActionIsScoreLine(input, action, roles);
+}
+
 function actionAcceleratesScoreline(
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
@@ -1805,7 +2096,7 @@ function actionDelaysForcedScoreline<TConsumer extends string>(
     if (actionServerId !== triage.targetServerId) return true;
     return (
       action.payload?.placement !== "ice" &&
-      !actionPushesUnsafeScoreline(input, action, dependencies)
+      !actionPushesConcreteAgendaScoreline(input, action, dependencies)
     );
   }
   if (action.type === "rez_ice") {
@@ -1817,12 +2108,7 @@ function actionDelaysForcedScoreline<TConsumer extends string>(
     action.type === "activated_card_ability"
   ) {
     if (actionAcceleratesScoreline(actionSemanticCandidate)) return false;
-    return actionProvidesEconomy(
-      input,
-      action,
-      dependencies,
-      actionSemanticCandidate,
-    );
+    return true;
   }
   return false;
 }
@@ -1986,7 +2272,7 @@ function actionProvidesEconomy<TConsumer extends string>(
   dependencies: CorpBoardTriageDependencies<TConsumer>,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
-  if (action.type === "gain_credit") return true;
+  if (actionProvidesCredits(action)) return true;
   const payoffPressure = dependencies.corpTaggedRunnerPayoffPressure?.(
     input,
     action,
@@ -2117,7 +2403,7 @@ function corpBoardTriagePositiveInteger(token: string | undefined): number {
 
 function legalEconomyActionExists(input: AiDecisionInput): boolean {
   return corpLegalActions(input).some(
-    (action) => action.type === "gain_credit",
+    (action) => actionProvidesCredits(action),
   );
 }
 
@@ -2229,6 +2515,12 @@ function corpBoardTriageMismatchComponentValue(
   normalizedValue: number,
 ): number {
   if (
+    triage.primary === "force_scoreline_clock" &&
+    triage.severity === "critical"
+  ) {
+    return -5200;
+  }
+  if (
     (triage.primary === "score_now" ||
       triage.primary === "force_scoreline_clock" ||
       triage.primary === "protect_score_remote" ||
@@ -2238,6 +2530,17 @@ function corpBoardTriageMismatchComponentValue(
     (triage.severity === "critical" || triage.severity === "high")
   ) {
     return triage.severity === "critical" ? -3200 : -2400;
+  }
+  if (
+    triage.primary === "setup_score_remote" &&
+    triage.evidence.includes(
+      "corp_board_triage_deck_strategy:remote_score_development",
+    )
+  ) {
+    return -1600;
+  }
+  if (triage.primary === "setup_score_remote") {
+    return -1200;
   }
   return normalizedValue;
 }

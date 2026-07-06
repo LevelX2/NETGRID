@@ -127,8 +127,18 @@ describe("benchmark report formatting", () => {
     const realSceneSlots = suite.slots.filter(
       (slot) => slot.slotType === "real_scene_holdout",
     );
+    const strategyPanelGaps = suite.slots.filter(
+      (slot) => slot.slotType === "strategy_panel_gap",
+    );
+    const runnableCorpArchetypes = new Set(
+      suite.slots
+        .filter((slot) => slot.status === "runnable")
+        .map((slot) => slot.corpArchetype),
+    );
 
     expect(slots.some((slot) => slot.slotType === "smoke")).toBe(true);
+    expect(slots.every((slot) => slot.runnerArchetype)).toBe(true);
+    expect(slots.every((slot) => slot.corpArchetype)).toBe(true);
     expect(
       slots.filter((slot) => slot.slotType === "snapshot_tuning"),
     ).toHaveLength(2);
@@ -137,7 +147,9 @@ describe("benchmark report formatting", () => {
     ).toHaveLength(2);
     expect(smoke?.status).toBe("runnable");
     expect(smoke?.runnerDeckRef).toBe("demo_runner_008");
+    expect(smoke?.corpArchetype).toBe("starter_scoreline");
     expect(snapshot?.status).toBe("runnable");
+    expect(snapshot?.corpArchetype).toBe("remote_scoring");
     expect(snapshot?.benchmark?.runnerDeckId).toBe(
       "onr_origin_runner_ai_snapshot_v1",
     );
@@ -169,6 +181,19 @@ describe("benchmark report formatting", () => {
     expect(realSceneSlots.every((slot) => slot.status === "runnable")).toBe(
       true,
     );
+    expect(strategyPanelGaps).toHaveLength(4);
+    expect(strategyPanelGaps.every((slot) => slot.status === "pending")).toBe(
+      true,
+    );
+    expect(strategyPanelGaps.every((slot) => !slot.benchmark)).toBe(true);
+    expect(strategyPanelGaps.map((slot) => slot.corpArchetype)).toEqual(
+      expect.arrayContaining([
+        "fast_advance",
+        "net_damage",
+        "hybrid_score_punish",
+        "virus_damage",
+      ]),
+    );
     expect(
       realSceneSlots.every((slot) => !slot.runnerDeckRef.includes("demo_008")),
     ).toBe(true);
@@ -180,7 +205,21 @@ describe("benchmark report formatting", () => {
       expect(slot.benchmark?.candidate.illegalActions).toBe(0);
       expect(slot.benchmark?.candidate.replayFailures).toBe(0);
     }
+    expect([...runnableCorpArchetypes]).toEqual(
+      expect.arrayContaining([
+        "starter_scoreline",
+        "remote_scoring",
+        "tag_punish",
+      ]),
+    );
     expect(report).toContain("## Demo Smoke");
+    expect(report).toContain("## Strategy Panel Coverage");
+    expect(report).toContain("## Strategy Panel Gaps");
+    expect(report).toContain("Missing runnable Corp archetypes:");
+    expect(report).toContain("strategy_panel_gap_net_damage");
+    expect(report).toContain("strategy_panel_gap_hybrid_score_punish");
+    expect(report).toContain("net_damage");
+    expect(report).toContain("virus_damage");
     expect(report).toContain("## Snapshot Progression");
     expect(report).toContain("## Local Realistic Holdout");
     expect(report).toContain("## Real Scene Holdout");

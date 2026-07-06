@@ -9,9 +9,27 @@ export type AiBenchmarkDeckSlotType =
   | "snapshot_tuning"
   | "snapshot_holdout"
   | "local_realistic_holdout"
-  | "real_scene_holdout";
+  | "real_scene_holdout"
+  | "strategy_panel_gap";
 
 export type AiBenchmarkDeckSlotStatus = "runnable" | "disabled" | "pending";
+
+export type AiBenchmarkRunnerArchetype =
+  | "starter"
+  | "rig_economy_pressure"
+  | "central_multiaccess"
+  | "event_pressure"
+  | "unknown";
+
+export type AiBenchmarkCorpArchetype =
+  | "starter_scoreline"
+  | "remote_scoring"
+  | "fast_advance"
+  | "tag_punish"
+  | "net_damage"
+  | "hybrid_score_punish"
+  | "virus_damage"
+  | "unknown";
 
 export type AiLocalBenchmarkDeckClassification =
   | "runnable_ai_benchmark"
@@ -41,6 +59,8 @@ export type AiBenchmarkDeckSlotDefinition = {
   status: AiBenchmarkDeckSlotStatus;
   runner: AiBenchmarkDeckReference;
   corp: AiBenchmarkDeckReference;
+  runnerArchetype: AiBenchmarkRunnerArchetype;
+  corpArchetype: AiBenchmarkCorpArchetype;
   tuningUse: "safety_regression" | "progression_tuning" | "holdout_only";
   pendingReason?: string;
 };

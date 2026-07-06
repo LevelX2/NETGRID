@@ -1,4 +1,6 @@
 import type {
+  AiBenchmarkCorpArchetype,
+  AiBenchmarkDeckSlotResult,
   AiBenchmarkDeckSlotType,
   AiDoctrineQualityBenchmarkResult,
   AiDoctrineQualityGateResult,
@@ -7,6 +9,7 @@ import type {
   AiMatchProgressionBenchmarkSuiteResult,
 } from "../index";
 import type { AiSelfplayTraceMiningResult } from "./selfplay-trace-mining";
+import { CORP_STRATEGY_PANEL_TARGETS } from "./benchmark-deck-strategy-panel";
 import { buildSelfplayActionTypeDominanceReport } from "./selfplay-action-type-dominance";
 import { buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries } from "./selfplay-why-coverage";
 
@@ -1923,6 +1926,8 @@ export function formatMatchProgressionBenchmarkSuiteReport(
             slot.slotId,
             slot.slotType,
             slot.tuningUse,
+            slot.runnerArchetype,
+            slot.corpArchetype,
             profile,
             slot.runnerDeckRef,
             slot.corpDeckRef,
@@ -1998,6 +2003,18 @@ export function formatMatchProgressionBenchmarkSuiteReport(
     );
   const nonRunnableRows = suite.slots.filter(
     (slot) => slot.status !== "runnable",
+  );
+  const corpStrategyPanelRows = summarizeCorpStrategyPanelCoverage(
+    suite.slots,
+  );
+  const strategyPanelGapRows = suite.slots.filter(
+    (slot) => slot.slotType === "strategy_panel_gap",
+  );
+  const missingCorpStrategyTargets = CORP_STRATEGY_PANEL_TARGETS.filter(
+    (target) =>
+      !suite.slots.some(
+        (slot) => slot.status === "runnable" && slot.corpArchetype === target,
+      ),
   );
   const breakerOntologyRows = suite.slots
     .filter((slot) => slot.status === "runnable" && slot.benchmark)
@@ -2079,12 +2096,37 @@ export function formatMatchProgressionBenchmarkSuiteReport(
     "",
     "## Slot Status",
     "",
-    "| Slot | Type | Status | Use | Runner | Corp | Reason |",
-    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| Slot | Type | Status | Use | Runner Archetype | Corp Archetype | Runner | Corp | Reason |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- |",
     ...suite.slots.map(
       (slot) =>
-        `| ${slot.slotId} | ${slot.slotType} | ${slot.status} | ${slot.tuningUse} | ${slot.runnerDeckRef} | ${slot.corpDeckRef} | ${slot.reason ?? "ok"} |`,
+        `| ${slot.slotId} | ${slot.slotType} | ${slot.status} | ${slot.tuningUse} | ${slot.runnerArchetype} | ${slot.corpArchetype} | ${slot.runnerDeckRef} | ${slot.corpDeckRef} | ${slot.reason ?? "ok"} |`,
     ),
+    "",
+    "## Strategy Panel Coverage",
+    "",
+    `Target Corp archetypes: ${CORP_STRATEGY_PANEL_TARGETS.join(", ")}`,
+    `Missing runnable Corp archetypes: ${missingCorpStrategyTargets.join(", ") || "none"}`,
+    "",
+    "| Corp Archetype | Runnable Slots | Holdout Slots | Slots |",
+    "| --- | ---: | ---: | --- |",
+    ...corpStrategyPanelRows.map(
+      ([archetype, runnable, holdout, slots]) =>
+        `| ${archetype} | ${runnable} | ${holdout} | ${slots} |`,
+    ),
+    "",
+    "## Strategy Panel Gaps",
+    "",
+    "Pending slots are explicit placeholders for Corp archetypes that need stable benchmark decks before they can be used as evidence.",
+    "",
+    "| Slot | Corp Archetype | Status | Reason |",
+    "| --- | --- | --- | --- |",
+    ...(strategyPanelGapRows.length > 0
+      ? strategyPanelGapRows.map(
+          (slot) =>
+            `| ${slot.slotId} | ${slot.corpArchetype} | ${slot.status} | ${slot.reason ?? "pending"} |`,
+        )
+      : ["| none | none | runnable | none |"]),
     "",
     "## Demo Smoke",
     "",
@@ -2109,15 +2151,15 @@ export function formatMatchProgressionBenchmarkSuiteReport(
     "",
     "## Real Scene Holdout",
     "",
-    "Echte Szenedecks sind externe Reality-Check-Slots. Sie bleiben pending, bis echte Listen im Projekt vorliegen.",
+    "Echte Szenedecks sind externe Reality-Check-Slots und bleiben von der Progression-Tuningbasis getrennt.",
     "",
-    "| Slot | Status | Runner | Corp | Reason |",
-    "| --- | --- | --- | --- | --- |",
+    "| Slot | Status | Runner Archetype | Corp Archetype | Runner | Corp | Reason |",
+    "| --- | --- | --- | --- | --- | --- | --- |",
     ...nonRunnableRows
       .filter((slot) => slot.slotType === "real_scene_holdout")
       .map(
         (slot) =>
-          `| ${slot.slotId} | ${slot.status} | ${slot.runnerDeckRef} | ${slot.corpDeckRef} | ${slot.reason ?? "pending"} |`,
+          `| ${slot.slotId} | ${slot.status} | ${slot.runnerArchetype} | ${slot.corpArchetype} | ${slot.runnerDeckRef} | ${slot.corpDeckRef} | ${slot.reason ?? "pending"} |`,
       ),
     "",
     "## Breaker Ontology Metrics",
@@ -2204,8 +2246,8 @@ export function formatMatchProgressionBenchmarkSuiteReport(
 
 function suiteMetricHeader(): string {
   return [
-    "| Slot | Type | Use | Profile | Runner | Corp | Illegal | Replay Failures | Timeout Rate | Action Limit Rate | Avg Turns | Corp Scores | Score Available | Score Taken | Missed Score | Score Take Rate | Runner Steals | Advanced Steals | Adv Steal Remote | Adv Steal Central | Final Advances | Unsafe Final | Protected Final | Protect Before | Score/Steal per Match | Remote Build | Remote Advances | Remote Trash | Successful Remote Access | Remote Access Trashable | Affordable Relevant Trash Opp | Relevant Trash Taken | Relevant Trash Take Rate | Skipped Relevant Trash | Remote Runs vs Advanced | Skipped Advanced Remote | Central While Remote Threat | Runner Draw | Draw Share | Draw+Discard | Duplicate Installs | Low-Value Dup | Junkyard Dup | Economy Taken | Rig Installs | Remote Trash Opp | Remote Trash Taken | Hand Use Rate | Runner Avg Credits | Runner End Credits | End Below Reserve | Turns Below Reserve | Runs Below Reserve | Contest Blocked Credits | Spend Below Reserve | Known Unaffordable Runs | Avg Missing Path Credits | Low-Value Unaffordable Runs | Unique Advanced Threats | Contestable Threats | Threats Contested | Threat Contest Rate | Skipped Contestable Threats | Central Instead Contestable | Central Justified | Central Burned Reserve | Remote Contest Credit Block | Remote Contest Post-Run Block | Remote Runs Insufficient Reserve | Repeated Central Same Threat | Successful Central | Successful Remote | Run-window Rez |",
-    "| --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
+    "| Slot | Type | Use | Runner Archetype | Corp Archetype | Profile | Runner | Corp | Illegal | Replay Failures | Timeout Rate | Action Limit Rate | Avg Turns | Corp Scores | Score Available | Score Taken | Missed Score | Score Take Rate | Runner Steals | Advanced Steals | Adv Steal Remote | Adv Steal Central | Final Advances | Unsafe Final | Protected Final | Protect Before | Score/Steal per Match | Remote Build | Remote Advances | Remote Trash | Successful Remote Access | Remote Access Trashable | Affordable Relevant Trash Opp | Relevant Trash Taken | Relevant Trash Take Rate | Skipped Relevant Trash | Remote Runs vs Advanced | Skipped Advanced Remote | Central While Remote Threat | Runner Draw | Draw Share | Draw+Discard | Duplicate Installs | Low-Value Dup | Junkyard Dup | Economy Taken | Rig Installs | Remote Trash Opp | Remote Trash Taken | Hand Use Rate | Runner Avg Credits | Runner End Credits | End Below Reserve | Turns Below Reserve | Runs Below Reserve | Contest Blocked Credits | Spend Below Reserve | Known Unaffordable Runs | Avg Missing Path Credits | Low-Value Unaffordable Runs | Unique Advanced Threats | Contestable Threats | Threats Contested | Threat Contest Rate | Skipped Contestable Threats | Central Instead Contestable | Central Justified | Central Burned Reserve | Remote Contest Credit Block | Remote Contest Post-Run Block | Remote Runs Insufficient Reserve | Repeated Central Same Threat | Successful Central | Successful Remote | Run-window Rez |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
   ].join("\n");
 }
 
@@ -2218,6 +2260,8 @@ function formatSuiteMetricRow(row: readonly (string | number)[]): string {
     slotId,
     slotType,
     tuningUse,
+    runnerArchetype,
+    corpArchetype,
     profile,
     runnerDeckRef,
     corpDeckRef,
@@ -2289,5 +2333,28 @@ function formatSuiteMetricRow(row: readonly (string | number)[]): string {
     successfulRemoteRuns,
     rezIceDuringRun,
   ] = row;
-  return `| ${slotId} | ${slotType} | ${tuningUse} | ${profile} | ${runnerDeckRef} | ${corpDeckRef} | ${illegalActions} | ${replayFailures} | ${timeoutRate} | ${actionLimitRate} | ${averageTurns} | ${corpScores} | ${scoreActionsAvailable} | ${scoreActionsTaken} | ${missedScoreWindows} | ${scoreActionTakeRate} | ${runnerSteals} | ${advancedAgendaSteals} | ${advancedAgendaStealsFromRemote} | ${advancedAgendaStealsFromCentral} | ${finalAdvanceActions} | ${unsafeFinalAdvanceActions} | ${protectedFinalAdvanceActions} | ${protectBeforeAdvanceActions} | ${scoreOrStealActionsPerMatch} | ${remoteBuildActions} | ${remoteAdvanceActions} | ${remoteTrashActions} | ${successfulRemoteAccesses} | ${remoteAccessesWithTrashableCards} | ${affordableRelevantRemoteTrashOpportunities} | ${relevantRemoteTrashTaken} | ${relevantRemoteTrashTakeRate} | ${skippedAffordableRelevantRemoteTrash} | ${remoteRunsAgainstAdvancedRemote} | ${skippedAdvancedRemoteContest} | ${centralRunWhileRemoteScoreThreatVisible} | ${runnerDrawActions} | ${runnerDrawActionShare} | ${drawThenDiscardSameTurn} | ${runnerDuplicateInstallActions} | ${runnerLowValueDuplicateInstallActions} | ${runnerJunkyardBbsDuplicateInstalls} | ${runnerEconomyActionsTaken} | ${runnerRigInstallActions} | ${runnerRemoteTrashOpportunities} | ${runnerRemoteTrashTaken} | ${handUseRate} | ${runnerAverageCredits} | ${runnerEndTurnAverageCredits} | ${runnerEndTurnCreditsBelowReserve} | ${runnerTurnsBelowContestReserve} | ${runnerRunsStartedBelowReserve} | ${runnerContestBlockedByCredits} | ${runnerSpendBelowReserveActions} | ${runsStartedAgainstKnownUnaffordablePath} | ${creditsMissingForKnownPath} | ${lowValueUnaffordableRuns} | ${uniqueAdvancedRemoteThreats} | ${contestableAdvancedRemoteThreats} | ${advancedRemoteThreatsContested} | ${advancedRemoteThreatContestRate} | ${skippedContestableAdvancedRemoteThreats} | ${centralRunInsteadOfContestableAdvancedRemote} | ${centralRunInsteadWasJustified} | ${centralRunBurnedRemoteContestReserve} | ${remoteContestBlockedByCredits} | ${remoteContestBlockedByPostRunReserve} | ${remoteRunStartedWithInsufficientPostRunReserve} | ${repeatedCentralRunsWhileSameRemoteThreat} | ${successfulCentralRuns} | ${successfulRemoteRuns} | ${rezIceDuringRun} |`;
+  return `| ${slotId} | ${slotType} | ${tuningUse} | ${runnerArchetype} | ${corpArchetype} | ${profile} | ${runnerDeckRef} | ${corpDeckRef} | ${illegalActions} | ${replayFailures} | ${timeoutRate} | ${actionLimitRate} | ${averageTurns} | ${corpScores} | ${scoreActionsAvailable} | ${scoreActionsTaken} | ${missedScoreWindows} | ${scoreActionTakeRate} | ${runnerSteals} | ${advancedAgendaSteals} | ${advancedAgendaStealsFromRemote} | ${advancedAgendaStealsFromCentral} | ${finalAdvanceActions} | ${unsafeFinalAdvanceActions} | ${protectedFinalAdvanceActions} | ${protectBeforeAdvanceActions} | ${scoreOrStealActionsPerMatch} | ${remoteBuildActions} | ${remoteAdvanceActions} | ${remoteTrashActions} | ${successfulRemoteAccesses} | ${remoteAccessesWithTrashableCards} | ${affordableRelevantRemoteTrashOpportunities} | ${relevantRemoteTrashTaken} | ${relevantRemoteTrashTakeRate} | ${skippedAffordableRelevantRemoteTrash} | ${remoteRunsAgainstAdvancedRemote} | ${skippedAdvancedRemoteContest} | ${centralRunWhileRemoteScoreThreatVisible} | ${runnerDrawActions} | ${runnerDrawActionShare} | ${drawThenDiscardSameTurn} | ${runnerDuplicateInstallActions} | ${runnerLowValueDuplicateInstallActions} | ${runnerJunkyardBbsDuplicateInstalls} | ${runnerEconomyActionsTaken} | ${runnerRigInstallActions} | ${runnerRemoteTrashOpportunities} | ${runnerRemoteTrashTaken} | ${handUseRate} | ${runnerAverageCredits} | ${runnerEndTurnAverageCredits} | ${runnerEndTurnCreditsBelowReserve} | ${runnerTurnsBelowContestReserve} | ${runnerRunsStartedBelowReserve} | ${runnerContestBlockedByCredits} | ${runnerSpendBelowReserveActions} | ${runsStartedAgainstKnownUnaffordablePath} | ${creditsMissingForKnownPath} | ${lowValueUnaffordableRuns} | ${uniqueAdvancedRemoteThreats} | ${contestableAdvancedRemoteThreats} | ${advancedRemoteThreatsContested} | ${advancedRemoteThreatContestRate} | ${skippedContestableAdvancedRemoteThreats} | ${centralRunInsteadOfContestableAdvancedRemote} | ${centralRunInsteadWasJustified} | ${centralRunBurnedRemoteContestReserve} | ${remoteContestBlockedByCredits} | ${remoteContestBlockedByPostRunReserve} | ${remoteRunStartedWithInsufficientPostRunReserve} | ${repeatedCentralRunsWhileSameRemoteThreat} | ${successfulCentralRuns} | ${successfulRemoteRuns} | ${rezIceDuringRun} |`;
+}
+
+function summarizeCorpStrategyPanelCoverage(
+  slots: readonly AiBenchmarkDeckSlotResult[],
+): Array<readonly [AiBenchmarkCorpArchetype, number, number, string]> {
+  const archetypes = [
+    ...new Set([
+      ...CORP_STRATEGY_PANEL_TARGETS,
+      ...slots.map((slot) => slot.corpArchetype),
+    ]),
+  ].sort();
+  return archetypes.map((archetype) => {
+    const matching = slots.filter((slot) => slot.corpArchetype === archetype);
+    const runnable = matching.filter((slot) => slot.status === "runnable").length;
+    const holdout = matching.filter((slot) => slot.tuningUse === "holdout_only")
+      .length;
+    return [
+      archetype,
+      runnable,
+      holdout,
+      matching.map((slot) => slot.slotId).join(", ") || "-",
+    ] as const;
+  });
 }

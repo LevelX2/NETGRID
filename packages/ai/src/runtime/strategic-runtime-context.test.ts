@@ -197,6 +197,47 @@ describe("strategic runtime context", () => {
     ).toContain("corp.tag_trace_punish");
   });
 
+  it("does not treat scored shuffle-draw as active Corp economy", () => {
+    const context = buildStrategicRuntimeContext({
+      side: "corp",
+      playerView: playerView("corp", {
+        credits: 0,
+        servers: [server("hq"), server("rd"), server("archives")],
+      }),
+      legalActions: [
+        action("shuffle-draw", "corp", "gain_credit", 0, {
+          agendaAbility: "hq_archives_shuffle_draw",
+        }),
+      ],
+      strategyProfile: multiStrategyProfile("corp", {
+        primary: ["corp.economy_rez_reserve"],
+        scores: {
+          "corp.economy_rez_reserve": score("corp.economy_rez_reserve"),
+        },
+      }),
+      deckCapabilities: {
+        ...corpCapabilities(),
+        corp: {
+          ...corpCapabilities().corp!,
+          economyBankTools: [],
+          rezReserveProfile: {
+            iceKnownInDeck: 0,
+            rezEconomyToolsKnown: 0,
+            evidence: [],
+          },
+        },
+      },
+    });
+
+    expect(context.roleStatuses).toContainEqual(
+      expect.objectContaining({
+        roleId: "corp.economy",
+        status: "unknown",
+        evidence: expect.arrayContaining(["legal_gain_credit:false"]),
+      }),
+    );
+  });
+
   it("scores target opportunity evidence by exact flags", () => {
     expect(
       targetOpportunityBonus({

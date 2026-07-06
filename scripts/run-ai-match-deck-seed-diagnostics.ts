@@ -82,6 +82,13 @@ const RELEVANT_SCORE_COMPONENT_PATTERNS = [
   /contest/i,
   /window/i,
   /advance/i,
+  /strategy/i,
+  /strategic/i,
+  /intent/i,
+  /punish/i,
+  /tag/i,
+  /damage/i,
+  /virus/i,
 ];
 
 const repoRoot = findRepoRoot(process.cwd());
