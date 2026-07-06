@@ -18,7 +18,12 @@ const reviewCardPreviewStyle = {
 
 export type AccessReveal = {
   eventId: string;
-  kind: "access" | "archives_reveal" | "gypsy_rd_reveal" | "hq_agenda_reveal";
+  kind:
+    | "access"
+    | "archives_reveal"
+    | "gypsy_rd_reveal"
+    | "hq_agenda_reveal"
+    | "security_purge_reveal";
   actorSide: Side;
   viewerSide: Side;
   serverLabel: string;
@@ -83,20 +88,25 @@ export function AccessRevealModal({
   const isArchivesReveal = reveal.kind === "archives_reveal";
   const isGypsyReveal = reveal.kind === "gypsy_rd_reveal";
   const isHqAgendaReveal = reveal.kind === "hq_agenda_reveal";
+  const isSecurityPurgeReveal = reveal.kind === "security_purge_reveal";
   const title = isGypsyReveal
     ? "Gypsy Schedule Analyzer"
     : isArchivesReveal
       ? "Archivkarten aufgedeckt"
       : isHqAgendaReveal
         ? "HQ-Agenden vorgezeigt"
-        : `Zugriff auf ${reveal.serverTitleLabel}`;
+        : isSecurityPurgeReveal
+          ? "Security Purge"
+          : `Zugriff auf ${reveal.serverTitleLabel}`;
   const eyebrow = isGypsyReveal
     ? "R&D Reveal"
     : isArchivesReveal
       ? "Archiv"
       : isHqAgendaReveal
         ? "HQ Reveal"
-        : "Zugriff";
+        : isSecurityPurgeReveal
+          ? "R&D Reveal"
+          : "Zugriff";
   const visibleRevealedCards = reveal.revealedCards ?? [];
   const statusText = reveal.trashStatus;
   const choiceOptions =
@@ -132,7 +142,11 @@ export function AccessRevealModal({
           <div
             className="exposeReviewCards"
             data-testid={
-              isGypsyReveal ? "gypsy-rd-reveal-cards" : "archives-reveal-cards"
+              isGypsyReveal
+                ? "gypsy-rd-reveal-cards"
+                : isSecurityPurgeReveal
+                  ? "security-purge-reveal-cards"
+                  : "archives-reveal-cards"
             }
           >
             {visibleRevealedCards.map((card, index) => (
