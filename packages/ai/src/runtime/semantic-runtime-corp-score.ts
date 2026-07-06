@@ -166,6 +166,13 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       actionSemanticCandidate,
     );
   if (activeScorelineOffPath) components.push(activeScorelineOffPath);
+  const gameEndingExposure =
+    corpGameEndingScorelineExposurePenaltyComponent(
+      input,
+      action,
+      dependencies,
+    );
+  if (gameEndingExposure) components.push(gameEndingExposure);
   if (action.type === "score_agenda") {
     components.push({
       key: "corp_score_available_agenda",
@@ -709,6 +716,73 @@ function corpReserveScoreComponent(
       ...evidence,
       `reserve_raw_value:${rawValue}`,
       `reserve_normalized_value:${normalizedValue}`,
+    ].join("|"),
+  };
+}
+
+function corpGameEndingScorelineExposurePenaltyComponent<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card" && action.type !== "advance_card") {
+    return undefined;
+  }
+  const roles = dependencies.rolesForAction(input, action);
+  if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
+    return undefined;
+  }
+  if (dependencies.corpAdvanceCompletesScore?.(input, action) === true) {
+    return undefined;
+  }
+  const assessment = dependencies.corpScoringWindowAssessment?.(
+    input,
+    action,
+    roles,
+  );
+  if (!assessment || assessment.scoreHorizon === "immediate") {
+    return undefined;
+  }
+  const runnerCanAccessBeforeScore =
+    assessment.runnerCanContestBeforeScore ||
+    assessment.runnerCanReachAccessBeforeScore ||
+    assessment.agendaStealRelevantBeforeScore;
+  if (!runnerCanAccessBeforeScore) return undefined;
+  const pointsToWin = input.playerView.agendaPointsToWin ?? 7;
+  const runnerAgendaPointsAfterSteal =
+    typeof assessment.runnerAgendaPointsAfterSteal === "number"
+      ? assessment.runnerAgendaPointsAfterSteal
+      : 0;
+  const gameEndingSteal =
+    assessment.agendaStealSeverity === "game_ending" ||
+    runnerAgendaPointsAfterSteal >= pointsToWin;
+  if (!gameEndingSteal) return undefined;
+  if (
+    assessment.windowKind !== "unsafe" &&
+    assessment.recommendedNextStep !== "build_remote_ice" &&
+    assessment.recommendedNextStep !== "gain_credit"
+  ) {
+    return undefined;
+  }
+  return {
+    key: "corp_game_ending_scoreline_exposure_penalty",
+    label: "Game-ending Scoreline-Exposure",
+    value: -4600,
+    reason: [
+      "scoreline_exposes_game_ending_steal:true",
+      `action:${action.type}`,
+      `server:${assessment.serverId}`,
+      `score_horizon:${assessment.scoreHorizon}`,
+      `window_kind:${assessment.windowKind}`,
+      `recommended_next_step:${assessment.recommendedNextStep}`,
+      `runner_can_contest_before_score:${assessment.runnerCanContestBeforeScore}`,
+      `runner_can_reach_access_before_score:${assessment.runnerCanReachAccessBeforeScore}`,
+      `agenda_steal_relevant_before_score:${assessment.agendaStealRelevantBeforeScore}`,
+      `agenda_steal_severity:${assessment.agendaStealSeverity ?? "unknown"}`,
+      `runner_points_after_steal:${runnerAgendaPointsAfterSteal}`,
+      ...assessment.evidence,
     ].join("|"),
   };
 }

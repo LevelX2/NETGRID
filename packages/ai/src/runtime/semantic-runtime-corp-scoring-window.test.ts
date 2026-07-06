@@ -1,13 +1,22 @@
-import type {
+import {
+  DEMO_CARDS_BY_ID,
+  type CardDefinition,
   AiDecisionInput,
   LegalAction,
   VisibleCard,
 } from "@netgrid/shared";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 
 import { semanticRuntimeCorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 
+const DEFINITION_BACKED_AGENDA_ID =
+  "test_definition_backed_score_window_agenda";
+
 describe("semanticRuntimeCorpScoringWindowAssessment", () => {
+  afterEach(() => {
+    delete DEMO_CARDS_BY_ID[DEFINITION_BACKED_AGENDA_ID];
+  });
+
   it("allows an unprotected remote scoreline when the score completes before runner exposure", () => {
     const agenda = agendaCard("remote-agenda", {
       advancementCounters: 2,
@@ -418,6 +427,72 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
         "runner_exposure_credit_actions:3",
         "visible_runner_contest_credits:2",
         "visible_runner_exposure_contest_credits:5",
+      ]),
+    );
+  });
+
+  it("uses definition-backed advancement requirements for runner exposure before score", () => {
+    DEMO_CARDS_BY_ID[DEFINITION_BACKED_AGENDA_ID] = {
+      id: DEFINITION_BACKED_AGENDA_ID,
+      title: "Definition Backed Agenda",
+      side: "corp",
+      type: "agenda",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      advancementRequirement: 3,
+      agendaPoints: 2,
+      rulesText:
+        "Synthetic agenda whose visible card omits advancementRequirement.",
+      mechanics: ["agenda", "test_fixture"],
+    } satisfies CardDefinition;
+    const agenda = {
+      ...agendaCard("definition-backed-agenda"),
+      definitionId: DEFINITION_BACKED_AGENDA_ID,
+      advancementRequirement: undefined,
+      agendaPoints: undefined,
+    } as unknown as VisibleCard;
+    const action = corpAction(
+      "install-definition-backed-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 5,
+        runnerCredits: 2,
+        runnerRig: [simpleFracter("runner-fracter")],
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            wallIce("remote-wall", { rezzed: true, rezCost: 0 }),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(agenda.advancementRequirement).toBeUndefined();
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      scoreHorizon: "next_turn",
+      runnerCanReachAccessNow: false,
+      runnerCanReachAccessBeforeScore: true,
+      runnerCanContestBeforeScore: true,
+      agendaPointsAtRisk: 2,
+      recommendedNextStep: "build_remote_ice",
+    });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_exposure_credit_actions:3",
+        "visible_runner_contest_credits:2",
+        "visible_runner_exposure_contest_credits:5",
+        "agenda_points_at_risk:2",
       ]),
     );
   });

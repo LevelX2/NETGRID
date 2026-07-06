@@ -2487,6 +2487,89 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     ).toBeGreaterThan(totalScore(installComponents));
   });
 
+  it("penalizes game-ending next-turn scorelines when runner can access before score", () => {
+    const installAgenda = corpAction(
+      "install-game-ending-agenda",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "agenda-1",
+    );
+    const gainCredit = corpAction("gain-credit", "gain_credit", {});
+    const input = corpInputWithHqCards(
+      4,
+      [agendaCard("agenda-1", 2)],
+      [installAgenda, gainCredit],
+    );
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 5,
+      credits: 2,
+    });
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-data-wall", { rezCost: 1, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpInstallRemoteScore: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) => (action.actionId === installAgenda.actionId ? -2200 : 0),
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              scoreHorizon: "next_turn",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealRelevantBeforeScore: true,
+              agendaStealSeverity: "game_ending",
+              agendaPointsAtRisk: 2,
+              runnerAgendaPointsAfterSteal: 7,
+              recommendedNextStep: "build_remote_ice",
+              evidence: ["test_game_ending_exposure_scoreline"],
+            })
+          : undefined,
+    };
+
+    const installComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installAgenda,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(installComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_game_ending_scoreline_exposure_penalty",
+          value: -4600,
+          reason: expect.stringContaining(
+            "scoreline_exposes_game_ending_steal:true",
+          ),
+        }),
+      ]),
+    );
+    expect(
+      totalScoreFor(input, gainCredit, "basic_economy_draw", dependencies),
+    ).toBeGreaterThan(totalScore(installComponents));
+  });
+
   it("marks draw economy operations as mismatches during deckout agenda flood", () => {
     const dayShift = corpAction(
       "play-day-shift",

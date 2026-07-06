@@ -325,7 +325,7 @@ function scoringWindowHorizon<TServer extends CorpServerLike>(
     return "unknown";
   }
   const sourceCard = dependencies.actionSourceCard?.(input, action);
-  const requirement = sourceCard?.advancementRequirement;
+  const requirement = scoringWindowAdvancementRequirement(sourceCard);
   if (typeof requirement !== "number") return "unknown";
   const remainingCorpClicksAfterAction = Math.max(
     0,
@@ -372,6 +372,38 @@ function scoringWindowActionClickCost(action: LegalAction): number {
     return 1;
   }
   return 0;
+}
+
+function scoringWindowAdvancementRequirement(
+  card: VisibleCard | undefined,
+): number | undefined {
+  if (!card) return undefined;
+  if (
+    typeof card.advancementRequirement === "number" &&
+    Number.isFinite(card.advancementRequirement)
+  ) {
+    return Math.max(0, Math.floor(card.advancementRequirement));
+  }
+  const runtimeRequirement =
+    card.definitionId !== undefined
+      ? (RUNTIME_CARDS[card.definitionId] as
+          | { numeric?: { advancementRequirement?: number | null } }
+          | undefined)?.numeric?.advancementRequirement
+      : undefined;
+  if (
+    typeof runtimeRequirement === "number" &&
+    Number.isFinite(runtimeRequirement)
+  ) {
+    return Math.max(0, Math.floor(runtimeRequirement));
+  }
+  const demoRequirement =
+    card.definitionId !== undefined
+      ? DEMO_CARDS_BY_ID[card.definitionId]?.advancementRequirement
+      : undefined;
+  if (typeof demoRequirement === "number" && Number.isFinite(demoRequirement)) {
+    return Math.max(0, Math.floor(demoRequirement));
+  }
+  return undefined;
 }
 
 function scoringWindowVisibleInTurnAdvancementBurstAvailable<
