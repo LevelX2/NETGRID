@@ -197,7 +197,9 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
   }
 
   const remoteFunding = highestPriorityScoreRemoteEntry(
-    actions.filter((entry) => scoreRemoteNeedsFunding(input, entry)),
+    actions.filter((entry) =>
+      scoreRemoteNeedsFunding(input, entry, dependencies),
+    ),
   );
   if (remoteFunding?.scoringWindow) {
     return {
@@ -212,6 +214,7 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
       evidence: [
         "corp_board_triage_primary:fund_score_remote",
         `corp_board_triage_target:${remoteFunding.serverId ?? "unknown"}`,
+        `corp_board_triage_source_action:${remoteFunding.action.actionId}`,
         ...remoteFunding.scoringWindow.evidence,
         ...(remoteFunding.remoteRezFloor?.evidence ?? []),
       ],
@@ -219,7 +222,9 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
   }
 
   const remoteProtection = highestPriorityScoreRemoteEntry(
-    actions.filter((entry) => scoreRemoteNeedsProtection(input, entry)),
+    actions.filter((entry) =>
+      scoreRemoteNeedsProtection(input, entry, dependencies),
+    ),
   );
   if (remoteProtection?.scoringWindow) {
     return {
@@ -233,6 +238,7 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
       evidence: [
         "corp_board_triage_primary:protect_score_remote",
         `corp_board_triage_target:${remoteProtection.serverId ?? "unknown"}`,
+        `corp_board_triage_source_action:${remoteProtection.action.actionId}`,
         ...remoteProtection.scoringWindow.evidence,
       ],
     };
@@ -428,14 +434,14 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         return "mismatch";
       }
       if (
-        actionPushesUnsafeScoreline(input, action, dependencies) &&
+        actionPushesConcreteAgendaScoreline(input, action, dependencies) &&
         triage.targetServerId &&
         actionServerId &&
         actionServerId !== triage.targetServerId
       ) {
         return "mismatch";
       }
-      if (actionPushesUnsafeScoreline(input, action, dependencies)) {
+      if (actionPushesConcreteAgendaScoreline(input, action, dependencies)) {
         if (
           emergencyRemoteConversion &&
           (!triage.targetServerId || actionServerId === triage.targetServerId)
@@ -739,7 +745,7 @@ function activeScorelineClockEntryIsPlayable<TConsumer extends string>(
 ): boolean {
   if (!entry.serverId || entry.serverId === "new_remote") return false;
   if (!entry.serverId.startsWith("remote_")) return false;
-  if (!actionPushesUnsafeScoreline(input, entry.action, dependencies)) {
+  if (!actionPushesConcreteAgendaScoreline(input, entry.action, dependencies)) {
     return false;
   }
   if (
@@ -749,8 +755,8 @@ function activeScorelineClockEntryIsPlayable<TConsumer extends string>(
     return false;
   }
   if (
-    scoreRemoteNeedsProtection(input, entry) ||
-    scoreRemoteNeedsFunding(input, entry)
+    scoreRemoteNeedsProtection(input, entry, dependencies) ||
+    scoreRemoteNeedsFunding(input, entry, dependencies)
   ) {
     return false;
   }
@@ -773,6 +779,9 @@ function scorelineEntryHasPlayableClockWindow(
 ): boolean {
   const assessment = entry.scoringWindow;
   if (!assessment) return true;
+  if (scoringWindowCanUseNoContestScoreWindow(assessment)) {
+    return true;
+  }
   if (
     assessment.windowKind === "unsafe" &&
     scoringWindowCanUseMissingCoverageScoreWindow(assessment)
@@ -797,7 +806,7 @@ function scorelineEntryHasPlayableClockWindow(
     );
   }
   if (assessment.windowKind === "unsafe") {
-    return scoringWindowCanUseMissingCoverageScoreWindow(assessment);
+    return scoringWindowCanUseTriageScoreWindow(assessment);
   }
   return false;
 }
@@ -880,7 +889,7 @@ function corpDeckoutAgendaFloodPressure<TConsumer extends string>(
   if (hqAgendaCount < 2 && hqAgendaPoints < 4) return undefined;
 
   const scorelineEntries = actions.filter((entry) =>
-    actionPushesUnsafeScoreline(input, entry.action, dependencies),
+    actionPushesConcreteAgendaScoreline(input, entry.action, dependencies),
   );
   if (scorelineEntries.length === 0) return undefined;
 
@@ -943,7 +952,7 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
 
   const playableScorelineEntries = actions.filter(
     (entry) =>
-      actionPushesUnsafeScoreline(input, entry.action, dependencies) &&
+      actionPushesConcreteAgendaScoreline(input, entry.action, dependencies) &&
       scorelineEntryCanRelieveHqAgendaFlood(input, entry, actions),
   );
   const emergencyScorelineEntries =
@@ -951,7 +960,11 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
       ? []
       : actions.filter(
           (entry) =>
-            actionPushesUnsafeScoreline(input, entry.action, dependencies) &&
+            actionPushesConcreteAgendaScoreline(
+              input,
+              entry.action,
+              dependencies,
+            ) &&
             scorelineEntryCanEmergencyRelieveHqAgendaFlood(
               input,
               entry,
@@ -1404,13 +1417,20 @@ function scoreRemoteEntryPriority(entry: ScoredLegalAction): number {
   return severity + existingRemoteBonus + concreteScorelineBonus + contestBonus;
 }
 
-function scoreRemoteNeedsFunding(
+function scoreRemoteNeedsFunding<TConsumer extends string>(
   input: AiDecisionInput,
   entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
   const assessment = entry.scoringWindow;
   if (!assessment) return false;
   if (newRemoteScoreRemoteWouldSprawl(input, entry)) return false;
+  if (
+    !scoreRemoteTriageEntryCanDriveSafety(input, entry, dependencies) &&
+    !remoteServerHasVisibleScoreline(input, entry.serverId ?? "")
+  ) {
+    return false;
+  }
   if (assessment.windowKind === "none") return false;
   if (assessment.recommendedNextStep === "build_remote_ice") {
     return false;
@@ -1447,18 +1467,25 @@ function scoreRemoteHasUnmetFundingNeed(
   return input.playerView.own.credits < requiredRezFloor;
 }
 
-function scoreRemoteNeedsProtection(
+function scoreRemoteNeedsProtection<TConsumer extends string>(
   input: AiDecisionInput,
   entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
   const assessment = entry.scoringWindow;
   if (!assessment) return false;
   if (newRemoteScoreRemoteWouldSprawl(input, entry)) return false;
+  if (
+    !scoreRemoteTriageEntryCanDriveSafety(input, entry, dependencies) &&
+    !remoteServerHasVisibleScoreline(input, entry.serverId ?? "")
+  ) {
+    return false;
+  }
   if (assessment.recommendedNextStep === "build_remote_ice") {
-    return !scoringWindowCanUseMissingCoverageScoreWindow(assessment);
+    return !scoringWindowCanUseTriageScoreWindow(assessment);
   }
   if (assessment.windowKind === "unsafe") {
-    return !scoringWindowCanUseMissingCoverageScoreWindow(assessment);
+    return !scoringWindowCanUseTriageScoreWindow(assessment);
   }
   if (assessment.windowKind !== "temporary_safe") return false;
   return (
@@ -1492,6 +1519,32 @@ function scoringWindowCanUseMissingCoverageScoreWindow(
     assessment.corpCanRezFullPathWithDynamicReserve !== false &&
     (assessment.affordableDurableRelevantIceCount ?? 0) >= 1 &&
     (assessment.dynamicProtectionWeaknessCount ?? 0) === 0
+  );
+}
+
+function scoringWindowCanUseNoContestScoreWindow(
+  assessment: CorpScoringWindowAssessment,
+): boolean {
+  return (
+    !assessment.runnerCanContestNow &&
+    !assessment.runnerCanReachAccessNow &&
+    !assessment.agendaStealRelevantNow &&
+    !assessment.runnerCanContestBeforeScore &&
+    !assessment.runnerCanReachAccessBeforeScore &&
+    !assessment.agendaStealRelevantBeforeScore &&
+    assessment.agendaStealSeverity !== "game_ending" &&
+    assessment.corpCanRezRelevantIce !== false &&
+    (assessment.affordableDurableRelevantIceCount ?? 0) >= 1 &&
+    (assessment.dynamicProtectionWeaknessCount ?? 0) === 0
+  );
+}
+
+function scoringWindowCanUseTriageScoreWindow(
+  assessment: CorpScoringWindowAssessment,
+): boolean {
+  return (
+    scoringWindowCanUseMissingCoverageScoreWindow(assessment) ||
+    scoringWindowCanUseNoContestScoreWindow(assessment)
   );
 }
 
@@ -1937,6 +1990,47 @@ function actionPushesUnsafeScoreline<TConsumer extends string>(
   );
 }
 
+function scoreRemoteTriageEntryCanDriveSafety<TConsumer extends string>(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
+  return actionPushesConcreteAgendaScoreline(
+    input,
+    entry.action,
+    dependencies,
+    entry.roles,
+  );
+}
+
+function actionPushesConcreteAgendaScoreline<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+  roles = dependencies.rolesForAction(input, action),
+): boolean {
+  if (
+    action.type !== "advance_card" &&
+    !(
+      action.type === "install_card" &&
+      action.payload?.placement !== "ice"
+    )
+  ) {
+    return false;
+  }
+  const sourceCard = semanticRuntimeVisibleSourceCard(input, action);
+  if (sourceCard?.known !== false && sourceCard !== undefined) {
+    return corpTriageVisibleCardIsAgenda(sourceCard);
+  }
+  if (
+    action.payload?.cardType === "agenda" ||
+    action.payload?.targetCardType === "agenda"
+  ) {
+    return true;
+  }
+  return dependencies.corpActionIsScoreLine(input, action, roles);
+}
+
 function actionAcceleratesScoreline(
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
 ): boolean {
@@ -1967,7 +2061,7 @@ function actionDelaysForcedScoreline<TConsumer extends string>(
     if (actionServerId !== triage.targetServerId) return true;
     return (
       action.payload?.placement !== "ice" &&
-      !actionPushesUnsafeScoreline(input, action, dependencies)
+      !actionPushesConcreteAgendaScoreline(input, action, dependencies)
     );
   }
   if (action.type === "rez_ice") {

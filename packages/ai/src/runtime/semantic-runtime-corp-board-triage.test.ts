@@ -944,6 +944,110 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("does not let non-scoreline remote support funding override a playable scoreline", () => {
+    const remoteAgenda = corpAction("remote-scoreline", "install_card", {
+      placement: "root",
+      serverId: "remote_1",
+    });
+    const remoteSupport = corpAction("remote-scoreline-support", "install_card", {
+      placement: "root",
+      serverId: "remote_1",
+      cardDefinitionId: "support_asset",
+    });
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpHq: [agendaCard("hq-agenda-1", 2), assetCard("support-asset")],
+      corpCredits: 5,
+      legalActions: [remoteAgenda, remoteSupport, gainCredit],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [iceCard("rd-ice")]),
+        remoteServer("remote_1", [
+          iceCard("remote-ice", { rezCost: 3, rezzed: false }),
+        ]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "temporary_safe",
+          scoreHorizon: "slow",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 2,
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          dynamicProtectionReserve: 0,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          recommendedNextStep: "score",
+        }),
+        [remoteSupport.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          scoreHorizon: "slow",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "none",
+          runnerAgendaPointsAfterSteal: 0,
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          dynamicProtectionReserve: 8,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: false,
+          recommendedNextStep: "gain_credit",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const remoteAgendaComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteAgenda,
+      dependencies,
+    );
+    const supportComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteSupport,
+      dependencies,
+    );
+    const creditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      gainCredit,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "force_scoreline_clock",
+      severity: "high",
+      targetServerId: "remote_1",
+    });
+    expect(triage.evidence).not.toContain(
+      "corp_board_triage_primary:fund_score_remote",
+    );
+    expect(remoteAgendaComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(supportComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -2400,
+    });
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -2400,
+    });
+  });
+
   it("does not classify a ready score remote as funding when the rez floor is already met", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
@@ -1263,6 +1367,16 @@ function iceCard(
     definitionId: "simple_barrier_ice",
     rezCost: 2,
     ...overrides,
+  } as VisibleCard;
+}
+
+function assetCard(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "asset",
+    owner: "corp",
+    definitionId: "support_asset",
   } as VisibleCard;
 }
 
