@@ -4683,13 +4683,13 @@ describe("MVP 0.3 Runner AI", () => {
     });
     const serializedDecision = JSON.stringify(decision);
 
-    expect(decision.reasonCode).toBe("runner.plan.contest_remote");
+    expect(decision.reasonCode).toBe("runner.semantic.remote_contest");
     expect(decision.decisionDebug).toMatchObject({
       aiLevel: 2,
-      planKind: "contest_remote",
+      planKind: "runner.contest_remote",
     });
     expect((decision.evidence ?? []).join("|")).toContain(
-      "affordable_remote_contest:true",
+      "tactical_plan_type:runner.contest_remote",
     );
     expect(serializedDecision).not.toContain("Simple Agenda");
     expect(serializedDecision).not.toContain("Simple Economy Asset");
@@ -14595,6 +14595,79 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("keeps score-threat remote contest ahead of hidden Archives pokes", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-runner-remote-contest-blocks-archives-poke",
+      (state) => {
+        state.runner.credits = 7;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        const secondIceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
+        state.cardInstances[secondIceId] = {
+          ...state.cardInstances[secondIceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerProgramToRig(state, "simple_fracter");
+        moveCorpCardToArchives(state, "simple_economy_operation", false);
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const archivesRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(remoteRun).toBeDefined();
+    expect(archivesRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remoteRun || !archivesRun || !gainCredit)
+      throw new Error("Missing remote contest Archives fixture actions");
+
+    const decision = chooseRunnerAction(
+      scopedLegalActions(input, [remoteRun, archivesRun, gainCredit]),
+      { persistTacticalPlanMemory: false },
+    );
+    const archivesAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (entry) => entry.actionId === archivesRun.actionId,
+      );
+
+    expect(decision.actionId).not.toBe(archivesRun.actionId);
+    expect([remoteRun.actionId, gainCredit.actionId]).toContain(
+      decision.actionId,
+    );
+    expect(decision.decisionDebug?.planKind).toBe("remote_contest");
+    expect(decision.reasonCode).toBe("runner.semantic.remote_contest");
+    expect(archivesAlternative?.whyNot).toEqual(
+      expect.arrayContaining(["semantic_score_below_selected"]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|Simple Agenda|simple_agenda/,
+    );
+  });
+
   it("builds credits or draws when a visible blocker lacks an installable breaker answer", () => {
     const creditInput = runnerActionPhaseInput(
       "ai-runner-breaker-needs-credits",
@@ -15212,6 +15285,74 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
     expect(tacticalDebug).toContain(basicCredit.actionId);
     expect(tacticalDebug).toContain("selected_step_kind:gain_credits");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("installs deck-routed action economy before falling back to basic credits", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-v142-hand-economy-route-newsgroup-filter",
+      (state) => {
+        state.runner.credits = 5;
+        emptyRunnerGripForTest(state);
+        moveRunnerCardToGrip(state, "onr_v1_045_newsgroup-filter");
+      },
+      runnerLoanFromChibaDeckConfig("hand-economy-route"),
+    );
+    const installNewsgroup = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_045_newsgroup-filter",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(installNewsgroup).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!installNewsgroup || !basicCredit)
+      throw new Error("Missing hand economy route fixture actions");
+
+    const decision = chooseRunnerAction(
+      scopedLegalActions(input, [installNewsgroup, basicCredit]),
+      { persistTacticalPlanMemory: false },
+    );
+    const installAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (entry) => entry.actionId === installNewsgroup.actionId,
+      );
+    const basicAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === basicCredit.actionId,
+    );
+    const tacticalDebug =
+      decision.decisionDebug?.detailSections
+        ?.find((section) => section.id === "tactical_plan")
+        ?.items.join("\n") ?? "";
+
+    expect(decision.actionId).toBe(installNewsgroup.actionId);
+    expect(decision.decisionDebug?.planKind).toBe("runner.develop_hand_card");
+    expect(decision.evidence).toContain(
+      "tactical_plan_type:runner.develop_hand_card",
+    );
+    expect(installAlternative).toEqual(
+      expect.objectContaining({
+        selected: true,
+        whyChosen: expect.arrayContaining(["selected_by_plan_mapping"]),
+      }),
+    );
+    expect(basicAlternative?.whyNot).toEqual(
+      expect.arrayContaining([
+        "plan_mismatch",
+        "excluded_by_current_plan",
+      ]),
+    );
+    expect(tacticalDebug).toContain(
+      "runner_economy_route:hand_economy_engine",
+    );
+    expect(tacticalDebug).toContain("selected_step_kind:install_development_card");
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,
     );

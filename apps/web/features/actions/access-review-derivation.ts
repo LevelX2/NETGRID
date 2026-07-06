@@ -267,6 +267,74 @@ export function hqAgendaRevealFromLatestEvent(
   };
 }
 
+export function securityPurgeRevealFromLatestEvent(
+  event: PublicGameEvent | undefined,
+  detailsById: Record<string, CatalogCardDetail>,
+  viewerSide: Side,
+): AccessReveal | null {
+  if (!event || !isSecurityPurgeRevealEvent(event)) return null;
+  const definitionIds = payloadStringList(
+    event.publicPayload,
+    "publicRevealDefinitionIds",
+  );
+  if (definitionIds.length === 0) return null;
+  const titles = payloadPipeStringList(
+    event.publicPayload,
+    "publicRevealTitles",
+  );
+  const cards = definitionIds.map((definitionId, index) => {
+    const detail = detailsById[definitionId] ?? null;
+    const title = detail?.title ?? titles[index] ?? definitionId;
+    return detail
+      ? visibleCardFromCatalogDetail(detail)
+      : visibleCardFromPublicEvent(event, definitionId, title);
+  });
+  const actorSide = payloadSide(event.publicPayload, "actor") ?? "corp";
+  const revealedCount =
+    payloadPositiveInteger(event.publicPayload, "revealedCount") ??
+    cards.length;
+  const sourceTitle =
+    payloadString(event.publicPayload, "title") ??
+    payloadString(event.publicPayload, "sourceTitle") ??
+    "Security Purge";
+  const targetChoiceOpened = isSecurityPurgeTargetChoiceOpened(event);
+  const revealedIceCount =
+    payloadPositiveInteger(event.publicPayload, "revealedIceCount") ??
+    cards.filter((card) => card.type === "ice").length;
+  const trashedCount =
+    payloadPositiveInteger(event.publicPayload, "trashedCount") ??
+    (targetChoiceOpened
+      ? (payloadPositiveInteger(event.publicPayload, "pendingTrashCount") ??
+        Math.max(0, cards.length - revealedIceCount))
+      : cards.length);
+  return {
+    eventId: event.eventId,
+    kind: "security_purge_reveal",
+    actorSide,
+    viewerSide,
+    serverLabel: "R&D",
+    serverTitleLabel: accessServerTitleLabel("R&D"),
+    serverLocationPhrase: accessServerLocationPhrase("R&D"),
+    description: securityPurgeRevealDescription(
+      actorSide,
+      viewerSide,
+      revealedCount,
+      sourceTitle,
+    ),
+    revealedCards: cards,
+    actions: [],
+    trashStatus: securityPurgeRevealStatus(
+      targetChoiceOpened,
+      revealedIceCount,
+      trashedCount,
+    ),
+    revealedCardStatus: targetChoiceOpened
+      ? "Durch Security Purge aufgedeckt"
+      : "Durch Security Purge getrasht",
+    dismissLabel: targetChoiceOpened ? "Ansehen beenden" : "Gesehen",
+  };
+}
+
 export function gypsyScheduleAnalyzerRevealFromPendingChoice(
   view: PlayerView,
   detailsById: Record<string, CatalogCardDetail>,
@@ -403,6 +471,28 @@ export function retainedHqAgendaRevealEvent(
   return null;
 }
 
+export function retainedSecurityPurgeRevealEvent(
+  events: PublicGameEvent[],
+  dismissedEventIds: string[],
+  options: { suppressTargetChoiceOpened?: boolean } = {},
+): PublicGameEvent | null {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (!event) continue;
+    if (isSecurityPurgeTargetChoiceResolvedEvent(event)) return null;
+    if (!isSecurityPurgeRevealCandidateEvent(event)) continue;
+    if (
+      dismissedEventIds.includes(event.eventId) ||
+      !isSecurityPurgeRevealEvent(event) ||
+      (options.suppressTargetChoiceOpened &&
+        isSecurityPurgeTargetChoiceOpened(event))
+    )
+      return null;
+    return event;
+  }
+  return null;
+}
+
 function revealedEventCardId(event: PublicGameEvent): string | null {
   const cardId =
     event.publicPayload.cardDefinitionId ??
@@ -451,6 +541,44 @@ function hqAgendaRevealDescription(
       : `${accessActorSubject(actorSide)} hat`;
   const object = count === 1 ? "eine Agenda" : `${count} Agenden`;
   return `${subject} ${object} aus HQ durch ${sourceTitle} vorgezeigt.`;
+}
+
+function securityPurgeRevealDescription(
+  actorSide: Side,
+  viewerSide: Side,
+  count: number,
+  sourceTitle: string,
+): string {
+  const subject =
+    actorSide === viewerSide
+      ? "Du hast"
+      : `${accessActorSubject(actorSide)} hat`;
+  const object =
+    count === 1
+      ? "die oberste R&D-Karte"
+      : `die obersten ${count} R&D-Karten`;
+  return `${subject} ${object} durch ${sourceTitle} aufgedeckt.`;
+}
+
+function securityPurgeRevealStatus(
+  targetChoiceOpened: boolean,
+  revealedIceCount: number,
+  trashedCount: number,
+): string {
+  if (targetChoiceOpened) {
+    const iceText =
+      revealedIceCount === 1
+        ? "1 ICE kann installiert und gerezzt werden"
+        : `${revealedIceCount} ICE können installiert und gerezzt werden`;
+    const trashText =
+      trashedCount === 1
+        ? "die übrige Karte wird anschließend getrasht"
+        : `${trashedCount} übrige Karten werden anschließend getrasht`;
+    return `${iceText}; ${trashText}.`;
+  }
+  if (trashedCount === 1)
+    return "Kein ICE gefunden. Diese Karte wurde getrasht.";
+  return "Kein ICE gefunden. Diese Karten wurden getrasht.";
 }
 
 function payloadString(
@@ -598,6 +726,54 @@ function isCorpHqAgendaRevealCandidateEvent(event: PublicGameEvent): boolean {
   if (payload.publicRevealKind && payload.publicRevealKind !== "reveal")
     return false;
   return true;
+}
+
+function isSecurityPurgeRevealEvent(event: PublicGameEvent): boolean {
+  if (!isSecurityPurgeRevealCandidateEvent(event)) return false;
+  return (
+    payloadStringList(event.publicPayload, "publicRevealDefinitionIds").length >
+    0
+  );
+}
+
+function isSecurityPurgeRevealCandidateEvent(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload;
+  if (payload.actionType !== "score_agenda") return false;
+  const agendaAbility = payloadString(payload, "agendaAbility");
+  if (
+    agendaAbility !== "agenda_purge" &&
+    agendaAbility !== "v1922_security_purge"
+  )
+    return false;
+  const hiddenZoneAction = payloadString(payload, "hiddenZoneAction");
+  if (
+    hiddenZoneAction &&
+    hiddenZoneAction !== "agenda_purge_rd_top3" &&
+    hiddenZoneAction !== "agenda_purge_rd_top3_target_choice"
+  )
+    return false;
+  return true;
+}
+
+function isSecurityPurgeTargetChoiceOpened(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload;
+  return (
+    payload.agendaPurgeTargetChoiceOpened === true ||
+    payload.securityPurgeTargetChoiceOpened === true ||
+    payloadString(payload, "hiddenZoneAction") ===
+      "agenda_purge_rd_top3_target_choice"
+  );
+}
+
+function isSecurityPurgeTargetChoiceResolvedEvent(
+  event: PublicGameEvent,
+): boolean {
+  const payload = event.publicPayload;
+  return (
+    payload.agendaPurgeTargetChoiceResolved === true ||
+    payload.securityPurgeTargetChoiceResolved === true ||
+    payloadString(payload, "hiddenZoneAction") === "agenda_purge_install_targets"
+  );
 }
 
 function latestGypsyScheduleAnalyzerRevealEvent(

@@ -123,6 +123,7 @@ export function redactedRunnerEconomyPostureFacts(
     `runner_economy_bank_relevant:${posture.bankToolsRelevant}`,
     `runner_economy_funding_need:${posture.fundingNeed}`,
     `runner_economy_recommendation:${posture.recommendation}`,
+    `runner_economy_route:${posture.preferredEconomyRoute ?? "unknown"}`,
     `runner_credit_reserve_current_credits:${reservePolicy.currentCredits}`,
     `runner_credit_reserve_desired:${reservePolicy.desiredCreditReserve}`,
     `runner_credit_reserve_phase:${reservePolicy.phase}`,

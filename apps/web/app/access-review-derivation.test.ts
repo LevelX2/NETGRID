@@ -10,6 +10,8 @@ import {
   gypsyScheduleAnalyzerRevealFromPendingChoice,
   hqAgendaRevealFromLatestEvent,
   retainedHqAgendaRevealEvent,
+  retainedSecurityPurgeRevealEvent,
+  securityPurgeRevealFromLatestEvent,
 } from "../features/actions/access-review-derivation";
 
 describe("Gypsy Schedule Analyzer reveal review", () => {
@@ -103,6 +105,137 @@ describe("Gypsy Schedule Analyzer reveal review", () => {
       "finish",
     ]);
     expect(JSON.stringify(review)).not.toContain("cardInstances");
+  });
+});
+
+describe("Security Purge reveal review", () => {
+  it("shows the revealed R&D cards when Security Purge finds no ICE", () => {
+    const review = securityPurgeRevealFromLatestEvent(
+      event("evt_security_purge", {
+        actionType: "score_agenda",
+        actor: "corp",
+        title: "Security Purge",
+        agendaAbility: "agenda_purge",
+        hiddenZoneAction: "agenda_purge_rd_top3",
+        publicRevealDefinitionIds:
+          "simple_economy_asset,simple_economy_operation,simple_agenda",
+        publicRevealTitles:
+          "Simple Economy Asset||Simple Economy Operation||Simple Agenda",
+        revealedCount: 3,
+        revealedIceCount: 0,
+        trashedCount: 3,
+        agendaPurgeTargetChoiceOpened: false,
+      }),
+      {
+        simple_economy_asset: catalogCard(
+          "simple_economy_asset",
+          "Simple Economy Asset",
+          "asset",
+        ),
+        simple_economy_operation: catalogCard(
+          "simple_economy_operation",
+          "Simple Economy Operation",
+          "operation",
+        ),
+        simple_agenda: catalogCard("simple_agenda", "Simple Agenda"),
+      },
+      "corp",
+    );
+
+    expect(review).toMatchObject({
+      eventId: "evt_security_purge",
+      kind: "security_purge_reveal",
+      serverLabel: "R&D",
+      description:
+        "Du hast die obersten 3 R&D-Karten durch Security Purge aufgedeckt.",
+      trashStatus: "Kein ICE gefunden. Diese Karten wurden getrasht.",
+      revealedCardStatus: "Durch Security Purge getrasht",
+      dismissLabel: "Gesehen",
+    });
+    expect(review?.revealedCards?.map((card) => card.title)).toEqual([
+      "Simple Economy Asset",
+      "Simple Economy Operation",
+      "Simple Agenda",
+    ]);
+    expect(JSON.stringify(review)).not.toContain("cardInstances");
+  });
+
+  it("retains a no-ICE reveal until it is explicitly dismissed", () => {
+    const reveal = event("evt_security_purge", {
+      actionType: "score_agenda",
+      actor: "corp",
+      agendaAbility: "agenda_purge",
+      hiddenZoneAction: "agenda_purge_rd_top3",
+      publicRevealDefinitionIds: "simple_economy_asset",
+      revealedCount: 1,
+      revealedIceCount: 0,
+      trashedCount: 1,
+      agendaPurgeTargetChoiceOpened: false,
+    });
+    const laterAction = {
+      ...event("evt_later", {
+        actionType: "mandatory_draw",
+        actor: "corp",
+      }),
+      stateVersionAfter: 8,
+    };
+
+    expect(
+      retainedSecurityPurgeRevealEvent([reveal, laterAction], [])?.eventId,
+    ).toBe("evt_security_purge");
+    expect(
+      retainedSecurityPurgeRevealEvent([reveal, laterAction], [
+        "evt_security_purge",
+      ]),
+    ).toBeNull();
+  });
+
+  it("does not cover the active corp target-choice panel", () => {
+    const reveal = event("evt_security_purge_choice", {
+      actionType: "score_agenda",
+      actor: "corp",
+      agendaAbility: "agenda_purge",
+      hiddenZoneAction: "agenda_purge_rd_top3_target_choice",
+      publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+      revealedCount: 2,
+      revealedIceCount: 1,
+      pendingTrashCount: 1,
+      agendaPurgeTargetChoiceOpened: true,
+    });
+
+    expect(
+      retainedSecurityPurgeRevealEvent([reveal], [], {
+        suppressTargetChoiceOpened: true,
+      }),
+    ).toBeNull();
+    expect(
+      retainedSecurityPurgeRevealEvent([reveal], [], {
+        suppressTargetChoiceOpened: false,
+      })?.eventId,
+    ).toBe("evt_security_purge_choice");
+  });
+
+  it("stops retaining the initial reveal after Security Purge target choice resolves", () => {
+    const reveal = event("evt_security_purge_choice", {
+      actionType: "score_agenda",
+      actor: "corp",
+      agendaAbility: "agenda_purge",
+      hiddenZoneAction: "agenda_purge_rd_top3_target_choice",
+      publicRevealDefinitionIds: "simple_barrier_ice,simple_economy_asset",
+      revealedCount: 2,
+      revealedIceCount: 1,
+      pendingTrashCount: 1,
+      agendaPurgeTargetChoiceOpened: true,
+    });
+    const resolved = event("evt_security_purge_resolved", {
+      actionType: "resolve_choice",
+      actor: "corp",
+      agendaAbility: "agenda_purge",
+      hiddenZoneAction: "agenda_purge_install_targets",
+      agendaPurgeTargetChoiceResolved: true,
+    });
+
+    expect(retainedSecurityPurgeRevealEvent([reveal, resolved], [])).toBeNull();
   });
 });
 

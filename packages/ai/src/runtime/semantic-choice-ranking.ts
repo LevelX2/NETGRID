@@ -74,6 +74,22 @@ export function tacticalPlanMappedChoice(
       overrideChoice,
     );
     if (
+      tacticalPlanRemoteContestMappingBlocksRunOverride(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      )
+    ) {
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "remote_contest_plan_mapping",
+        scoreGap,
+        threshold: 3000,
+      });
+    }
+    if (
       tacticalPlanCoverageMappingBlocksRunOverride(
         mapping,
         mappedChoice,
@@ -125,6 +141,22 @@ export function tacticalPlanMappedChoice(
     }
     const mappedNonPositiveAgainstPositive =
       mappedChoice.score <= 0 && overrideChoice.score > 0;
+    if (
+      mappedNonPositiveAgainstPositive &&
+      tacticalPlanNonPositiveMappingStillProtected(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+      )
+    ) {
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "economy_route_plan_mapping",
+        scoreGap,
+        threshold: Math.max(threshold.scoreGap, 900),
+      });
+    }
     const repeatedRunShouldYield = tacticalPlanRepeatedRunMappingShouldYield(
       input,
       mappedChoice,
@@ -209,6 +241,50 @@ function tacticalPlanRepeatedRunMappingShouldYield(
   const serverId = semanticRuntimeServerId(mappedChoice.action);
   if (!serverId) return false;
   return semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) > 0;
+}
+
+function tacticalPlanRemoteContestMappingBlocksRunOverride(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  if (mapping.plan.type !== "runner.contest_remote") return false;
+  if (overrideChoice.action.type !== "start_run") return false;
+  if (mappedChoice.score < -2200) return false;
+  const planTarget =
+    mapping.plan.target?.kind === "server" ? mapping.plan.target.id : undefined;
+  if (!planTarget?.startsWith("remote_")) return false;
+  const overrideTarget = semanticRuntimeServerId(overrideChoice.action);
+  if (!overrideTarget || overrideTarget === planTarget) return false;
+  if (!mapping.plan.evidence.includes("runner_run_target_payoff:score_threat")) {
+    return false;
+  }
+  return scoreGap <= 3000;
+}
+
+function tacticalPlanNonPositiveMappingStillProtected(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  if (mappedChoice.score < -500) return false;
+  if (
+    mapping.plan.type !== "runner.develop_hand_card" ||
+    mapping.step.kind !== "install_development_card" ||
+    mapping.plan.priority < 900 ||
+    overrideChoice.action.type !== "gain_credit"
+  ) {
+    return false;
+  }
+  const route = mapping.plan.evidence.find((entry) =>
+    entry.startsWith("economy_route:"),
+  );
+  return Boolean(
+    route &&
+      route !== "economy_route:unknown" &&
+      route !== "economy_route:basic_credit_fallback",
+  );
 }
 
 export function tacticalPlanMappingOverrideEvidence(

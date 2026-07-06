@@ -189,13 +189,15 @@ export function MatchStartAdvancedOptions({
           Seed
           <input value={seed} onChange={(event) => onSeed(event.target.value)} />
         </label>
-        {hasAiOpponent ? (
-          <label>
-            Diagnose
-            <select value={aiTraceStartMode} onChange={(event) => onAiTraceStartMode(event.target.value as AiTraceStartMode)}>
-              <option value="off">Keine KI-Aufzeichnung</option>
-              <option value="detailed">KI-Trace ab Start</option>
-            </select>
+        {isHumanVsAi ? (
+          <label className={`deckBuilderToggle matchStartTraceToggle ${aiTraceStartMode !== "off" ? "checked" : ""}`}>
+            <input
+              data-testid="match-start-ai-trace-toggle"
+              checked={aiTraceStartMode !== "off"}
+              onChange={(event) => onAiTraceStartMode(event.target.checked ? "detailed" : "off")}
+              type="checkbox"
+            />
+            KI-Trace speichern
           </label>
         ) : null}
         {isHumanVsHuman ? (

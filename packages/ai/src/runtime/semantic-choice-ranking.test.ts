@@ -218,6 +218,29 @@ describe("tacticalPlanMappedChoice", () => {
     expect(structured.choice?.action.actionId).toBe("gain");
     expect(structured.overrideReason).toBe("repeated_run_mapping_yield");
   });
+
+  it("keeps score-threat remote contest funding over off-plan Archives runs", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const archives = legalAction("run-archives", "start_run", {
+      serverId: "archives",
+    });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(archives, 1359), choice(gain, 79)],
+      remoteContestMapping([gain], {
+        evidence: ["runner_run_target_payoff:score_threat"],
+        priority: 960,
+      }),
+      choice(archives, 1359),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("gain");
+    expect(result.overrideChoice).toBeUndefined();
+    expect(result.overrideBlockedChoice?.action.actionId).toBe("run-archives");
+    expect(result.overrideBlockedReason).toBe("remote_contest_plan_mapping");
+    expect(result.overrideThreshold).toBe(3000);
+  });
 });
 
 function choice(
@@ -257,13 +280,21 @@ function coverageMapping(
 
 function remoteContestMapping(
   legalActions: LegalAction[],
+  overrides: {
+    evidence?: string[];
+    priority?: number;
+  } = {},
 ): PlanStepMappingResult {
-  return planMapping("runner.contest_remote", legalActions);
+  return planMapping("runner.contest_remote", legalActions, overrides);
 }
 
 function planMapping(
   type: string,
   legalActions: LegalAction[],
+  overrides: {
+    evidence?: string[];
+    priority?: number;
+  } = {},
 ): PlanStepMappingResult {
   return {
     status: "matched",
@@ -272,7 +303,7 @@ function planMapping(
       side: "runner",
       type,
       status: "active",
-      priority: 100,
+      priority: overrides.priority ?? 100,
       horizonTurns: 1,
       target: { kind: "server", id: "remote_1" },
       requiredCapabilities: [],
@@ -283,7 +314,7 @@ function planMapping(
         requiredCapabilities: [],
         rationale: [],
       },
-      evidence: [],
+      evidence: overrides.evidence ?? [],
       scoreBreakdown: [],
       stateVersion: 1,
     },

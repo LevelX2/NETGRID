@@ -368,7 +368,9 @@ import {
   hqAgendaRevealFromLatestEvent,
   retainedArchivesRevealEvent,
   retainedHqAgendaRevealEvent,
+  retainedSecurityPurgeRevealEvent,
   revealedEventCardIds,
+  securityPurgeRevealFromLatestEvent,
 } from "../features/actions/access-review-derivation";
 import {
   eventActionType,
@@ -508,7 +510,7 @@ export default function Page() {
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [aiDeckPolicy, setAiDeckPolicy] = useState<AiDeckPolicy>("selected");
   const [aiTraceStartMode, setAiTraceStartMode] =
-    useState<AiTraceStartMode>("off");
+    useState<AiTraceStartMode>("detailed");
   const [testSetupMode, setTestSetupMode] = useState(false);
   const [displayName, setDisplayName] = useState("Teilnehmer A");
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] =
@@ -2118,6 +2120,26 @@ export default function Page() {
         payload.eventTail,
       )
     : null;
+  const securityPurgeInstallChoiceActive =
+    payload?.playerView.pendingChoice?.source.startsWith(
+      "card_implementation.agenda_purge_install_targets:",
+    ) === true;
+  const securityPurgeRevealEvent = payload
+    ? retainedSecurityPurgeRevealEvent(
+        payload.eventTail,
+        dismissedAccessEventIds,
+        {
+          suppressTargetChoiceOpened: securityPurgeInstallChoiceActive,
+        },
+      )
+    : null;
+  const securityPurgeReveal = payload
+    ? securityPurgeRevealFromLatestEvent(
+        securityPurgeRevealEvent ?? undefined,
+        catalogDetailsById,
+        payload.side,
+      )
+    : null;
   const currentAccessReveal = payload
     ? accessRevealFromCurrentRun(
         payload.playerView,
@@ -2141,6 +2163,7 @@ export default function Page() {
     gypsyReveal ??
     hqAgendaReveal ??
     archivesReveal ??
+    securityPurgeReveal ??
     currentAccessReveal ??
     retainedEventAccessReveal;
   const showAccessReveal = Boolean(

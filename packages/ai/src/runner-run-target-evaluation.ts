@@ -196,6 +196,15 @@ export type RunnerRemoteScoreThreat =
   | "visible"
   | "urgent";
 
+export type RunnerEconomyRoute =
+  | "bank_cashout"
+  | "bank_build"
+  | "installed_action_economy"
+  | "hand_bank_tool"
+  | "hand_economy_engine"
+  | "burst_event"
+  | "basic_credit_fallback";
+
 export type RunnerCreditReservePolicy = {
   schemaVersion: 1;
   phase: RunnerCreditReservePhase;
@@ -279,6 +288,7 @@ export type RunnerEconomyPosture = {
   desiredCreditReserve: number;
   creditReservePolicy: RunnerCreditReservePolicy;
   creditBasePlan: RunnerCreditBasePlan;
+  preferredEconomyRoute?: RunnerEconomyRoute;
   riskAdjustedRunReserve: boolean;
   buildEconomyBeforePressure: boolean;
   bankToolsRelevant: boolean;
