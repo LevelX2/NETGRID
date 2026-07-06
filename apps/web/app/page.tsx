@@ -508,7 +508,7 @@ export default function Page() {
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [aiDeckPolicy, setAiDeckPolicy] = useState<AiDeckPolicy>("selected");
   const [aiTraceStartMode, setAiTraceStartMode] =
-    useState<AiTraceStartMode>("off");
+    useState<AiTraceStartMode>("detailed");
   const [testSetupMode, setTestSetupMode] = useState(false);
   const [displayName, setDisplayName] = useState("Teilnehmer A");
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] =

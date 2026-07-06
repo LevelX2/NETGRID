@@ -700,6 +700,11 @@ select {
   gap: 8px;
 }
 
+.matchStartTraceToggle {
+  justify-self: start;
+  max-width: 100%;
+}
+
 .matchStartSummary span {
   min-height: 30px;
   display: inline-flex;
