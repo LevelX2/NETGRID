@@ -185,7 +185,7 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     centralPressure?.serverId === "rd" &&
     centralPressureSeverity === "critical" &&
     centralServerNeedsProtection(input, "rd") &&
-    concreteCentralProtectionActionExists(actions, "rd")
+    concreteCentralProtectionActionExists(input, actions, "rd", dependencies)
   ) {
     const activeScorelineClock = corpActiveScorelineClockPressure(
       input,
@@ -288,6 +288,7 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
       actions,
       centralPressure,
       centralPressureSeverity,
+      dependencies,
     )
   ) {
     return centralPressureTriage(
@@ -592,6 +593,14 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         )
       ) {
         return "match";
+      }
+      if (
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        actionServerId === triage.targetServerId &&
+        (triage.severity === "high" || triage.severity === "critical")
+      ) {
+        return "mismatch";
       }
       if (
         action.type === "rez_ice" &&
@@ -1713,18 +1722,21 @@ function centralPressureIsTriageAcute(
   return liveAccessSignal || pressure.pressure >= 0.7;
 }
 
-function centralPressureShouldDriveTriage(
+function centralPressureShouldDriveTriage<TConsumer extends string>(
   input: AiDecisionInput,
   actions: readonly ScoredLegalAction[],
   pressure: ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment>,
   severity: CorpBoardTriageSeverity,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
   const serverId = pressure.serverId;
   if (serverId !== "hq" && serverId !== "rd") return false;
   const needsProtection = centralServerNeedsProtection(input, serverId);
   const hasProtectionAction = concreteCentralProtectionActionExists(
+    input,
     actions,
     serverId,
+    dependencies,
   );
   if (severity === "critical") return hasProtectionAction;
   if (needsProtection && hasProtectionAction) return true;
@@ -1864,7 +1876,7 @@ function preScoreCentralProtectionTriage<TConsumer extends string>(
     centralPressureIsTriageAcute(pressureInput, rdPressure) &&
     rdSeverity === "critical" &&
     centralServerNeedsProtection(input, "rd") &&
-    concreteCentralProtectionActionExists(actions, "rd")
+    concreteCentralProtectionActionExists(input, actions, "rd", dependencies)
   ) {
     const activeScorelineClock = corpActiveScorelineClockPressure(
       input,
@@ -1895,7 +1907,7 @@ function preScoreCentralProtectionTriage<TConsumer extends string>(
   if (
     hqAgendaCount <= 0 ||
     !centralServerNeedsProtection(input, "hq") ||
-    !concreteCentralProtectionActionExists(actions, "hq") ||
+    !concreteCentralProtectionActionExists(input, actions, "hq", dependencies) ||
     !unprotectedHqAgendaExposureRequiresPreScoreProtection(
       pressureInput,
       hqAgendaCount,
@@ -2013,16 +2025,41 @@ function runnerHasVisibleCoverageForIce(
   );
 }
 
-function concreteCentralProtectionActionExists(
+function concreteCentralProtectionActionExists<TConsumer extends string>(
+  input: AiDecisionInput,
   actions: readonly ScoredLegalAction[],
   serverId: "hq" | "rd",
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
-  return actions.some(
-    (entry) =>
-      entry.serverId === serverId &&
-      ((entry.action.type === "install_card" &&
-        entry.action.payload?.placement === "ice") ||
-        entry.action.type === "rez_ice"),
+  return actions.some((entry) =>
+    centralProtectionEntryIsConcrete(input, entry, serverId, dependencies),
+  );
+}
+
+function centralProtectionEntryIsConcrete<TConsumer extends string>(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  serverId: "hq" | "rd",
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
+  if (entry.serverId !== serverId) return false;
+  if (entry.action.type === "install_card") {
+    return (
+      entry.action.payload?.placement === "ice" &&
+      installedIceProvidesConcreteCentralProtection(input, entry.action, serverId)
+    );
+  }
+  if (entry.action.type !== "rez_ice") return false;
+  const defense = semanticRuntimeCorpEffectiveDefenseContext(
+    input,
+    entry.action,
+    undefined,
+    { actionCreditCost: dependencies.actionCreditCost },
+  );
+  return (
+    defense?.isRezzableNow === true &&
+    !defense.zeroEffectRisk &&
+    (defense.hasImmediateStopPotential || defense.hasVisibleBreakerTax)
   );
 }
 
@@ -2052,7 +2089,12 @@ function actionProtectsServer<TConsumer extends string>(
   if (actionServerId !== triage.targetServerId) return false;
   if (action.type === "install_card" && action.payload?.placement === "ice") {
     if (triage.primary === "protect_hq" || triage.primary === "protect_rd") {
-      return installedIceHasImmediateStopPotential(input, action);
+      const serverId = triage.primary === "protect_hq" ? "hq" : "rd";
+      return installedIceProvidesConcreteCentralProtection(
+        input,
+        action,
+        serverId,
+      );
     }
     return true;
   }
@@ -2110,14 +2152,63 @@ function sameTargetRezMissesCriticalCentralStop<TConsumer extends string>(
   );
 }
 
-function installedIceHasImmediateStopPotential(
+function installedIceProvidesConcreteCentralProtection(
   input: AiDecisionInput,
   action: LegalAction,
+  serverId: "hq" | "rd",
 ): boolean {
   const source = semanticRuntimeVisibleSourceCard(input, action);
   if (!source || source.known === false) return true;
   const profile = semanticRuntimeCorpCentralIceProfile(source);
-  return profile.hasAccessStop && !profile.positionDependent;
+  if (profile.hasAccessStop && !profile.positionDependent) return true;
+  if (
+    serverId === "hq" &&
+    installedIceHasPunishTaxOrDamagePotential(source, profile) &&
+    punishPrimaryHqTaxOrDamageIceCanCountAsProtection(input)
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function installedIceHasPunishTaxOrDamagePotential(
+  source: VisibleCard,
+  profile: ReturnType<typeof semanticRuntimeCorpCentralIceProfile>,
+): boolean {
+  if (profile.hasTaxOrDamage) return true;
+  const tokens = corpBoardTriageRulesTextTokens(
+    corpBoardTriageVisibleCardCoverageText(source),
+  );
+  return tokens.some((token) =>
+    [
+      "damage",
+      "tag",
+      "tags",
+      "trace",
+      "trash",
+      "trashes",
+      "net",
+      "meat",
+      "brain",
+    ].includes(token),
+  );
+}
+
+function punishPrimaryHqTaxOrDamageIceCanCountAsProtection(
+  input: AiDecisionInput,
+): boolean {
+  const hqAgendaCards = input.playerView.own.gripOrHq.filter(
+    corpTriageVisibleCardIsAgenda,
+  );
+  const hqAgendaPoints = hqAgendaCards.reduce(
+    (sum, card) => sum + corpTriageVisibleAgendaPoints(card),
+    0,
+  );
+  return corpPunishPrimaryShouldPreferPunishOrCentralProtection(
+    input,
+    hqAgendaCards.length,
+    hqAgendaPoints,
+  );
 }
 
 function actionPushesUnsafeScoreline<TConsumer extends string>(

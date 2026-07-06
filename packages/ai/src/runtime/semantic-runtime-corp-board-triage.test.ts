@@ -630,6 +630,250 @@ describe("semantic runtime corp board triage", () => {
     expect(rezComponent?.reason).toContain("triage_action_server:rd");
   });
 
+  it("does not let non-stopping R&D ICE trigger critical central override over a playable scoreline", () => {
+    const remoteAgenda = {
+      ...corpAction("remote-scoreline", "install_card", {
+        placement: "root",
+        serverId: "remote_1",
+      }),
+      source: "hq-agenda",
+    } as LegalAction;
+    const rdHunter = {
+      ...corpAction("install-rd-hunter", "install_card", {
+        placement: "ice",
+        serverId: "rd",
+      }),
+      source: "rd-hunter",
+    } as LegalAction;
+    const input = corpInput({
+      corpHq: [
+        agendaCard("hq-agenda", 2),
+        iceCard("rd-hunter", {
+          title: "Hunter",
+          definitionId: "onr_v1_249_hunter",
+          subtypes: ["Sentry"],
+          rulesText: "Trace 3 - Give the Runner one tag.",
+        }),
+      ],
+      legalActions: [remoteAgenda, rdHunter],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+        publicCentralEvent("rd-run-3", "start_run", "rd"),
+        publicCentralEvent("rd-access-3", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", []),
+        remoteServer("remote_1", [iceCard("remote-ice")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "durable",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezFullPathWithDynamicReserve: true,
+          corpCanRezRelevantIce: true,
+          recommendedNextStep: "score",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const remoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteAgenda,
+      dependencies,
+    );
+    const hunterComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      rdHunter,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "force_scoreline_clock",
+      targetServerId: "remote_1",
+    });
+    expect(triage.evidence).not.toContain(
+      "corp_board_triage_central_override:pre_score_rd_exposure",
+    );
+    expect(remoteComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(hunterComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
+  it("mismatches same-target non-stopping central ICE while real R&D protection exists", () => {
+    const rdWall = {
+      ...corpAction("install-rd-wall", "install_card", {
+        placement: "ice",
+        serverId: "rd",
+      }),
+      source: "rd-wall",
+    } as LegalAction;
+    const rdHunter = {
+      ...corpAction("install-rd-hunter", "install_card", {
+        placement: "ice",
+        serverId: "rd",
+      }),
+      source: "rd-hunter",
+    } as LegalAction;
+    const input = corpInput({
+      runnerAgendaPoints: 5,
+      corpHq: [
+        iceCard("rd-wall", {
+          title: "Wall of Static",
+          definitionId: "onr_v1_279_wall-of-static",
+          subtypes: ["Wall"],
+          rulesText: "End the run.",
+        }),
+        iceCard("rd-hunter", {
+          title: "Hunter",
+          definitionId: "onr_v1_249_hunter",
+          subtypes: ["Sentry"],
+          rulesText: "Trace 3 - Give the Runner one tag.",
+        }),
+      ],
+      legalActions: [rdWall, rdHunter],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", []),
+      ],
+    });
+    const dependencies = testDependencies();
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const wallComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      rdWall,
+      dependencies,
+    );
+    const hunterComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      rdHunter,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_rd",
+      severity: "critical",
+      targetServerId: "rd",
+    });
+    expect(wallComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(hunterComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -3200,
+    });
+  });
+
+  it("lets punish-primary HQ tax or damage ICE count as non-game-ending central protection", () => {
+    const hqShock = {
+      ...corpAction("install-hq-shock", "install_card", {
+        placement: "ice",
+        serverId: "hq",
+      }),
+      source: "hq-shock",
+    } as LegalAction;
+    const remoteAgenda = {
+      ...corpAction("remote-scoreline", "install_card", {
+        placement: "root",
+        serverId: "remote_1",
+      }),
+      source: "hq-agenda",
+    } as LegalAction;
+    const input = {
+      ...corpInput({
+        corpHq: [
+          agendaCard("hq-agenda", 2),
+          agendaCard("hq-agenda-2", 2),
+          iceCard("hq-shock", {
+            title: "Shock.r",
+            definitionId: "onr_v1_268_shock-r",
+            subtypes: ["Sentry"],
+            rulesText: "Do 1 net damage.",
+          }),
+        ],
+        legalActions: [remoteAgenda, hqShock],
+        servers: [
+          centralServer("hq", []),
+          centralServer("rd", []),
+          remoteServer("remote_1", [iceCard("remote-ice")]),
+        ],
+      }),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "durable",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezFullPathWithDynamicReserve: true,
+          corpCanRezRelevantIce: true,
+          recommendedNextStep: "score",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const hqComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      hqShock,
+      dependencies,
+    );
+    const remoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteAgenda,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_hq",
+      targetServerId: "hq",
+    });
+    expect(hqComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(remoteComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
   it("treats end-turn as a mismatch while critical central protection is unresolved", () => {
     const endTurn = corpAction("end-turn", "end_turn");
     const rdIce = corpAction("install-rd-ice", "install_card", {
