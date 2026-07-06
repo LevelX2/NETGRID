@@ -276,10 +276,11 @@ function effectTacticSignals(effect: AiHintStructuredEffect): string[] {
     case "ambush":
       return [...base, "access.corp_ambush", "punish.payoff"];
     case "score_acceleration":
-    case "scored_agenda_action":
     case "advance":
     case "advance_burst":
       return [...base, "corp.score_progress", "corp.score_closeout"];
+    case "scored_agenda_action":
+      return [...base, "corp.score_progress"];
     case "remote_protection":
     case "remote_build":
     case "remote_tax":

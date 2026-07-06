@@ -22,6 +22,7 @@ export type SemanticRuntimeDebugContextDependencies = {
     action: LegalAction,
     scopeId: string,
     exclusion?: SemanticRuntimeExclusion,
+    actionSemanticCandidate?: ActionSemanticCandidate,
   ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
   visibleSourceCard: (
     input: AiDecisionInput,
@@ -66,6 +67,7 @@ export function createSemanticRuntimeDebugContext(
     input: AiDecisionInput,
     rankedChoices: SemanticRuntimeChoice[],
     selectedActionId: string,
+    candidatesByActionId: ReadonlyMap<string, ActionSemanticCandidate>,
   ): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
     return buildSemanticRuntimeRankedAlternatives({
       rankedChoices,
@@ -76,6 +78,7 @@ export function createSemanticRuntimeDebugContext(
           choice.action,
           choice.scopeId,
           choice.exclusion,
+          candidatesByActionId.get(choice.action.actionId),
         ),
     });
   }
@@ -85,6 +88,7 @@ export function createSemanticRuntimeDebugContext(
     rankedChoices: SemanticRuntimeChoice[],
     selectedActionId: string,
     planRuntime: TacticalPlanRuntimeResult,
+    candidatesByActionId: ReadonlyMap<string, ActionSemanticCandidate>,
   ): NonNullable<AiDecisionDebug["actionAlternatives"]> {
     const selectedChoice = rankedChoices.find(
       (choice) => choice.action.actionId === selectedActionId,
@@ -105,6 +109,7 @@ export function createSemanticRuntimeDebugContext(
           choice.action,
           choice.scopeId,
           choice.exclusion,
+          candidatesByActionId.get(choice.action.actionId),
         ),
     });
   }
@@ -117,6 +122,12 @@ export function createSemanticRuntimeDebugContext(
       planRuntime,
       actionSemanticCandidates,
     ) => {
+      const candidatesByActionId = new Map(
+        actionSemanticCandidates.map((candidate) => [
+          candidate.actionId,
+          candidate,
+        ]),
+      );
       const coverageSelection = coverageSelectionDebug(
         input,
         selected.action,
@@ -126,6 +137,8 @@ export function createSemanticRuntimeDebugContext(
         input,
         selected.action,
         selected.scopeId,
+        selected.exclusion,
+        candidatesByActionId.get(selected.action.actionId),
       );
       return buildSemanticRuntimeDecisionDebug({
         input,
@@ -138,12 +151,14 @@ export function createSemanticRuntimeDebugContext(
           input,
           rankedChoices,
           selected.action.actionId,
+          candidatesByActionId,
         ),
         actionAlternatives: actionAlternatives(
           input,
           rankedChoices,
           selected.action.actionId,
           planRuntime,
+          candidatesByActionId,
         ),
       });
     },

@@ -87,6 +87,19 @@ describe("ActionCardSemanticProfiles", () => {
     );
   });
 
+  it("does not turn generic scored-agenda actions into score closeout signals", () => {
+    const profiles = buildActionCardSemanticProfilesByDefinitionId();
+    const netwatch = profiles["onr_v1_207_netwatch-operations-office"];
+
+    expect(netwatch?.tacticSignals).toEqual(
+      expect.arrayContaining([
+        "effect:scored_agenda_action",
+        "corp.score_progress",
+      ]),
+    );
+    expect(netwatch?.tacticSignals).not.toContain("corp.score_closeout");
+  });
+
   it("matches StrategySupportPair payoff roles by bounded signal segments", () => {
     expect(strategySupportRoleForSignal("access.hq_multiaccess")).toBe(
       "payoff_anchor",

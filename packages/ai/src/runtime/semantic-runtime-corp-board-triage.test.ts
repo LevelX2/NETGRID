@@ -126,6 +126,94 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("does not let repeated non-game-ending R&D pressure override a playable active scoreline", () => {
+    const remoteScoreline = corpAction("remote-scoreline", "advance_card", {
+      serverId: "remote_1",
+    });
+    const rdIce = corpAction("install-rd-ice", "install_card", {
+      placement: "ice",
+      serverId: "rd",
+    });
+    const punishAbility = corpAction(
+      "netwatch-trace",
+      "activated_card_ability",
+    );
+    const input = corpInput({
+      runnerAgendaPoints: 0,
+      legalActions: [remoteScoreline, rdIce, punishAbility],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+        publicCentralEvent("rd-run-3", "start_run", "rd"),
+        publicCentralEvent("rd-access-3", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", []),
+        remoteServer("remote_1", [iceCard("remote-ice")], [agendaCard()]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteScoreline.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "durable",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 2,
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezFullPathWithDynamicReserve: true,
+          corpCanRezRelevantIce: true,
+          recommendedNextStep: "advance",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const scorelineComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteScoreline,
+      dependencies,
+    );
+    const rdIceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      rdIce,
+      dependencies,
+    );
+    const punishComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      punishAbility,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "force_scoreline_clock",
+      severity: "high",
+      targetServerId: "remote_1",
+    });
+    expect(triage.evidence).toContain("corp_active_scoreline_clock:true");
+    expect(triage.evidence).not.toContain(
+      "corp_board_triage_central_override:pre_score_rd_exposure",
+    );
+    expect(scorelineComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(rdIceComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+    expect(punishComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
   it("does not override an active scoreline when R&D already has effective stop ICE", () => {
     const remoteScoreline = corpAction("remote-scoreline", "advance_card", {
       serverId: "remote_1",

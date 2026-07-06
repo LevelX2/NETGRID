@@ -448,27 +448,46 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   const contestableScoreLine =
     dependencies.corpRemoteScoreContestabilityAssessment(input, action);
   if (contestableScoreLine?.contestable) {
-    const hqAgendaRelief = corpHqAgendaReliefScorelineContext(
+    const roles = dependencies.rolesForAction(input, action);
+    const scoringWindow = dependencies.corpScoringWindowAssessment?.(
       input,
       action,
-      dependencies,
-      dependencies.rolesForAction(input, action),
-      boardTriageState,
+      roles,
     );
-    components.push({
-      key: "corp_contestable_remote_score_penalty",
-      label: "Contestable Remote-Scoreline",
-      value: hqAgendaRelief ? -900 : -3000,
-      reason: [
-        ...contestableScoreLine.evidence,
-        ...(hqAgendaRelief
-          ? [
-              ...hqAgendaRelief.evidence,
-              "contestable_penalty_softened_for_hq_relief:true",
-            ]
-          : []),
-      ].join("|"),
-    });
+    if (corpScoringWindowSuppressesContestableRemotePenalty(scoringWindow)) {
+      components.push({
+        key: "corp_contestable_remote_score_penalty_suppressed",
+        label: "Scoring-Window hebt Contestability auf",
+        value: 0,
+        reason: [
+          ...contestableScoreLine.evidence,
+          ...(scoringWindow?.evidence ?? []),
+          "contestable_penalty_suppressed_by_scoring_window:true",
+        ].join("|"),
+      });
+    } else {
+      const hqAgendaRelief = corpHqAgendaReliefScorelineContext(
+        input,
+        action,
+        dependencies,
+        roles,
+        boardTriageState,
+      );
+      components.push({
+        key: "corp_contestable_remote_score_penalty",
+        label: "Contestable Remote-Scoreline",
+        value: hqAgendaRelief ? -900 : -3000,
+        reason: [
+          ...contestableScoreLine.evidence,
+          ...(hqAgendaRelief
+            ? [
+                ...hqAgendaRelief.evidence,
+                "contestable_penalty_softened_for_hq_relief:true",
+              ]
+            : []),
+        ].join("|"),
+      });
+    }
   }
   const advancementPlacement =
     dependencies.corpAdvancementCounterPlacementAssessment(input, action);
@@ -691,6 +710,23 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     }
   }
   return components;
+}
+
+function corpScoringWindowSuppressesContestableRemotePenalty(
+  assessment: CorpScoringWindowAssessment | undefined,
+): boolean {
+  if (!assessment) return false;
+  if (
+    assessment.windowKind !== "durable" &&
+    assessment.windowKind !== "temporary_safe"
+  ) {
+    return false;
+  }
+  if (assessment.runnerCanContestBeforeScore) return false;
+  if (assessment.agendaStealRelevantBeforeScore) return false;
+  if (!assessment.corpCanRezRelevantIce) return false;
+  if (assessment.corpCanRezFullPathWithDynamicReserve === false) return false;
+  return true;
 }
 
 function corpHqAgendaCount(input: AiDecisionInput): number {

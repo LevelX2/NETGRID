@@ -2349,6 +2349,109 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("suppresses stale contestable penalties when the scoring window is durable before runner exposure", () => {
+    const advanceAgenda = corpAction(
+      "advance-agenda-remote-1",
+      "advance_card",
+      {
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "agenda-1",
+    );
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithHqCards(6, [], [advanceAgenda, gainCredit]);
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 2,
+      credits: 5,
+    });
+    input.playerView.servers = [
+      {
+        id: "hq",
+        label: "HQ",
+        ice: [],
+        root: [],
+      },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-data-wall", { rezCost: 1, rezzed: true })],
+        root: [agendaCard("agenda-1", 2)],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId,
+      corpAdvanceRemoteScore: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) => (action.actionId === advanceAgenda.actionId ? 1450 : 0),
+      corpRemoteScoreContestabilityAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? { contestable: true, evidence: ["test_stale_contestable_remote"] }
+          : undefined,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "durable",
+              runnerCanContestNow: false,
+              runnerCanReachAccessNow: true,
+              agendaStealRelevantNow: false,
+              runnerCanContestBeforeScore: false,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealRelevantBeforeScore: false,
+              affordableDurableRelevantIceCount: 1,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: true,
+              recommendedNextStep: "advance",
+              evidence: ["test_durable_scoring_window_no_steal"],
+            })
+          : undefined,
+    };
+
+    const advanceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceAgenda,
+      "simple_score_advance",
+      dependencies,
+    );
+
+    expect(advanceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_contestable_remote_score_penalty_suppressed",
+          reason: expect.stringContaining(
+            "contestable_penalty_suppressed_by_scoring_window:true",
+          ),
+        }),
+      ]),
+    );
+    expect(advanceComponents).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_contestable_remote_score_penalty",
+        }),
+      ]),
+    );
+    expect(totalScore(advanceComponents)).toBeGreaterThan(
+      totalScoreFor(input, gainCredit, "basic_economy_draw", dependencies),
+    );
+  });
+
   it("keeps remote protection above relative HQ relief when protection is legal", () => {
     const installAgenda = corpAction(
       "install-agenda-remote-1",

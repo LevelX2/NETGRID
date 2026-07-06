@@ -151,6 +151,7 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     input,
     actions,
     currentCredits,
+    dependencies,
   );
   if (preScoreCentralProtection) return preScoreCentralProtection;
 
@@ -186,15 +187,28 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     centralServerNeedsProtection(input, "rd") &&
     concreteCentralProtectionActionExists(actions, "rd")
   ) {
-    return centralPressureTriage(
-      centralPressure,
-      centralPressureSeverity,
-      currentCredits,
-      [
-        "corp_board_triage_central_override:critical_before_remote",
-        "corp_board_triage_central_override_requires_unanswered_protection:true",
-      ],
+    const activeScorelineClock = corpActiveScorelineClockPressure(
+      input,
+      actions,
+      dependencies,
     );
+    if (
+      !activeScorelineClock ||
+      centralPressureMustInterruptActiveScoreline(
+        pressureInput,
+        centralPressure,
+      )
+    ) {
+      return centralPressureTriage(
+        centralPressure,
+        centralPressureSeverity,
+        currentCredits,
+        [
+          "corp_board_triage_central_override:critical_before_remote",
+          "corp_board_triage_central_override_requires_unanswered_protection:true",
+        ],
+      );
+    }
   }
 
   const remoteFunding = highestPriorityScoreRemoteEntry(
@@ -1834,10 +1848,11 @@ function corpPunishPrimaryShouldDeferSpeculativeScoreline(
   return true;
 }
 
-function preScoreCentralProtectionTriage(
+function preScoreCentralProtectionTriage<TConsumer extends string>(
   input: AiDecisionInput,
   actions: readonly ScoredLegalAction[],
   currentCredits: number,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): CorpBoardTriage | undefined {
   const pressureInput = inputWithOpponentDefaults(input);
   const rdPressure = semanticRuntimeCorpCentralPressureAssessment(
@@ -1851,6 +1866,17 @@ function preScoreCentralProtectionTriage(
     centralServerNeedsProtection(input, "rd") &&
     concreteCentralProtectionActionExists(actions, "rd")
   ) {
+    const activeScorelineClock = corpActiveScorelineClockPressure(
+      input,
+      actions,
+      dependencies,
+    );
+    if (
+      activeScorelineClock &&
+      !centralPressureMustInterruptActiveScoreline(pressureInput, rdPressure)
+    ) {
+      return undefined;
+    }
     return centralPressureTriage(rdPressure, rdSeverity, currentCredits, [
       "corp_board_triage_central_override:pre_score_rd_exposure",
     ]);
@@ -1908,6 +1934,25 @@ function preScoreCentralProtectionTriage(
       ...hqPressure.evidence.slice(0, 8),
     ],
   };
+}
+
+function centralPressureMustInterruptActiveScoreline(
+  input: AiDecisionInput,
+  pressure: ReturnType<typeof semanticRuntimeCorpCentralPressureAssessment>,
+): boolean {
+  const runnerAgendaPoints =
+    corpTriagePositiveNumber(input.playerView.opponent?.agendaPoints) ?? 0;
+  if (runnerAgendaPoints >= 5) return true;
+  if (
+    pressure.visibleMultiaccess ||
+    pressure.visibleVirusPressure ||
+    pressure.eventMultiaccess
+  ) {
+    return true;
+  }
+  const rdCount =
+    corpTriagePositiveNumber(input.playerView.own.stackOrRdCount) ?? 0;
+  return pressure.serverId === "rd" && rdCount <= 5;
 }
 
 function centralServerNeedsProtection(
