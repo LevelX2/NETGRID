@@ -816,11 +816,14 @@ function persistentFunctionalProfileForCard(
     runnerHandTextHasHandSizeSignal(text);
   const memorySupport = looksLikeMemorySupport(card, text);
   const bankTool = looksLikeBankTool(text);
+  const economyTool = looksLikeEconomyTool(text);
+  const actionEconomy = runnerHandTextHasActionEconomySignal(text);
   const accessSupport = looksLikeAccessPayoff(text);
   const searchSupport = looksLikeDrawOrSearch(text);
   const nonAdditiveUtilityFamilies =
     nonAdditiveUtilityFamiliesForPersistentCard(card, text);
-  const actionGatedUtility = nonAdditiveUtilityFamilies.length > 0;
+  const actionGatedUtility = nonAdditiveUtilityFamilies.length > 0 ||
+    actionEconomy;
   const absoluteNonStackable =
     runnerHandTextHasAbsoluteLinkSignal(text) &&
     !runnerHandTextHasTemporaryCounterSignal(text);
@@ -831,6 +834,8 @@ function persistentFunctionalProfileForCard(
     ...(damagePrevention ? ["damage_prevention"] : []),
     ...(handSizeSupport ? ["hand_size"] : []),
     ...(bankTool ? ["bank_tool"] : []),
+    ...(economyTool ? ["economy_engine"] : []),
+    ...(actionEconomy ? ["action_economy"] : []),
     ...(accessSupport ? ["access_support"] : []),
     ...(searchSupport ? ["search_support"] : []),
     ...(absoluteNonStackable ? ["absolute_link"] : []),
@@ -949,6 +954,15 @@ function runnerHandTextHasEconomyToolSignal(text: string): boolean {
       "loan",
       "savings",
     ]) || runnerHandTokensIncludeInOrder(tokens, "gain", "credit")
+  );
+}
+
+function runnerHandTextHasActionEconomySignal(text: string): boolean {
+  const tokens = runnerHandTextTokens(text);
+  return (
+    runnerHandTokensIncludePhrase(tokens, ["action", "economy"]) ||
+    runnerHandTokensIncludeInOrder(tokens, "action", "credits") ||
+    runnerHandTokensIncludeInOrder(tokens, "action", "credit")
   );
 }
 

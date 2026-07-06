@@ -125,6 +125,22 @@ export function tacticalPlanMappedChoice(
     }
     const mappedNonPositiveAgainstPositive =
       mappedChoice.score <= 0 && overrideChoice.score > 0;
+    if (
+      mappedNonPositiveAgainstPositive &&
+      tacticalPlanNonPositiveMappingStillProtected(
+        mapping,
+        mappedChoice,
+        overrideChoice,
+      )
+    ) {
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "economy_route_plan_mapping",
+        scoreGap,
+        threshold: Math.max(threshold.scoreGap, 900),
+      });
+    }
     const repeatedRunShouldYield = tacticalPlanRepeatedRunMappingShouldYield(
       input,
       mappedChoice,
@@ -209,6 +225,30 @@ function tacticalPlanRepeatedRunMappingShouldYield(
   const serverId = semanticRuntimeServerId(mappedChoice.action);
   if (!serverId) return false;
   return semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) > 0;
+}
+
+function tacticalPlanNonPositiveMappingStillProtected(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  if (mappedChoice.score < -500) return false;
+  if (
+    mapping.plan.type !== "runner.develop_hand_card" ||
+    mapping.step.kind !== "install_development_card" ||
+    mapping.plan.priority < 900 ||
+    overrideChoice.action.type !== "gain_credit"
+  ) {
+    return false;
+  }
+  const route = mapping.plan.evidence.find((entry) =>
+    entry.startsWith("economy_route:"),
+  );
+  return Boolean(
+    route &&
+      route !== "economy_route:unknown" &&
+      route !== "economy_route:basic_credit_fallback",
+  );
 }
 
 export function tacticalPlanMappingOverrideEvidence(

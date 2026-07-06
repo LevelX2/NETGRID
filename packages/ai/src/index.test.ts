@@ -15217,6 +15217,74 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("installs deck-routed action economy before falling back to basic credits", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-v142-hand-economy-route-newsgroup-filter",
+      (state) => {
+        state.runner.credits = 5;
+        emptyRunnerGripForTest(state);
+        moveRunnerCardToGrip(state, "onr_v1_045_newsgroup-filter");
+      },
+      runnerLoanFromChibaDeckConfig("hand-economy-route"),
+    );
+    const installNewsgroup = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_045_newsgroup-filter",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(installNewsgroup).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!installNewsgroup || !basicCredit)
+      throw new Error("Missing hand economy route fixture actions");
+
+    const decision = chooseRunnerAction(
+      scopedLegalActions(input, [installNewsgroup, basicCredit]),
+      { persistTacticalPlanMemory: false },
+    );
+    const installAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (entry) => entry.actionId === installNewsgroup.actionId,
+      );
+    const basicAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === basicCredit.actionId,
+    );
+    const tacticalDebug =
+      decision.decisionDebug?.detailSections
+        ?.find((section) => section.id === "tactical_plan")
+        ?.items.join("\n") ?? "";
+
+    expect(decision.actionId).toBe(installNewsgroup.actionId);
+    expect(decision.decisionDebug?.planKind).toBe("runner.develop_hand_card");
+    expect(decision.evidence).toContain(
+      "tactical_plan_type:runner.develop_hand_card",
+    );
+    expect(installAlternative).toEqual(
+      expect.objectContaining({
+        selected: true,
+        whyChosen: expect.arrayContaining(["selected_by_plan_mapping"]),
+      }),
+    );
+    expect(basicAlternative?.whyNot).toEqual(
+      expect.arrayContaining([
+        "plan_mismatch",
+        "excluded_by_current_plan",
+      ]),
+    );
+    expect(tacticalDebug).toContain(
+      "runner_economy_route:hand_economy_engine",
+    );
+    expect(tacticalDebug).toContain("selected_step_kind:install_development_card");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("separates Broker pool loading from visible pool payout", () => {
     const payoutInput = installedRunnerEconomyInput(
       "ai-v141-installed-broker-take",

@@ -9,6 +9,7 @@ import type {
   RunnerCreditBasePlanRecommendation,
   RunnerCreditReservePhase,
   RunnerCreditReservePolicy,
+  RunnerEconomyRoute,
   RunnerEconomyPosture,
   RunnerRemoteScoreThreat,
 } from "./runner-run-target-evaluation";
@@ -70,12 +71,19 @@ export function buildRunnerEconomyPosture(
     : fundingNeed || (buildEconomyBeforePressure && credits < desiredCreditReserve)
       ? "build_economy"
       : "stable";
+  const preferredEconomyRoute = runnerPreferredEconomyRoute(params, {
+    bankToolsRelevant,
+    buildEconomyBeforePressure,
+    fundingNeed,
+    hasCashOut,
+  });
   return {
     schemaVersion: RUNNER_ECONOMY_POSTURE_SCHEMA_VERSION,
     minimumCreditFloor,
     desiredCreditReserve,
     creditReservePolicy,
     creditBasePlan,
+    preferredEconomyRoute,
     riskAdjustedRunReserve,
     buildEconomyBeforePressure,
     bankToolsRelevant,
@@ -98,8 +106,99 @@ export function buildRunnerEconomyPosture(
       `bank_tools_relevant:${bankToolsRelevant}`,
       `funding_need:${fundingNeed}`,
       `economy_recommendation:${recommendation}`,
+      `economy_route:${preferredEconomyRoute}`,
     ],
   };
+}
+
+function runnerPreferredEconomyRoute(
+  params: EconomyPostureParams,
+  context: {
+    bankToolsRelevant: boolean;
+    buildEconomyBeforePressure: boolean;
+    fundingNeed: boolean;
+    hasCashOut: boolean;
+  },
+): RunnerEconomyRoute {
+  if (context.fundingNeed && context.hasCashOut) return "bank_cashout";
+  if (runnerHasInstalledActionEconomy(params.input)) {
+    return "installed_action_economy";
+  }
+  const handEconomyRoute = runnerHandEconomyRoute(
+    params.handDevelopmentEvaluations ?? [],
+  );
+  if (
+    handEconomyRoute &&
+    (context.buildEconomyBeforePressure ||
+      context.fundingNeed ||
+      context.bankToolsRelevant)
+  ) {
+    return handEconomyRoute;
+  }
+  if (runnerHasBurstEconomyEvent(params.input)) return "burst_event";
+  if (
+    context.bankToolsRelevant &&
+    params.deckCapabilities?.runner?.economyBankTools.some(
+      (tool) => tool.buildActionLegal,
+    ) === true &&
+    params.input.playerView.own.credits >= 4
+  ) {
+    return "bank_build";
+  }
+  if (handEconomyRoute) return handEconomyRoute;
+  return "basic_credit_fallback";
+}
+
+function runnerHandEconomyRoute(
+  evaluations: readonly RunnerHandDevelopmentEvaluation[],
+): RunnerEconomyRoute | undefined {
+  const legalEconomy = evaluations.find(
+    (evaluation) =>
+      evaluation.availability === "legal_now" &&
+      evaluation.legalActionId !== undefined &&
+      evaluation.currentNeed !== "none" &&
+      evaluation.currentNeed !== "later" &&
+      (evaluation.developmentRole === "bank_tool" ||
+        evaluation.developmentRole === "economy_engine"),
+  );
+  if (!legalEconomy) return undefined;
+  return legalEconomy.developmentRole === "bank_tool"
+    ? "hand_bank_tool"
+    : "hand_economy_engine";
+}
+
+function runnerHasInstalledActionEconomy(input: AiDecisionInput): boolean {
+  return input.legalActions.some(
+    (action) =>
+      (action.type === "activated_card_ability" ||
+        action.type === "trigger_ability") &&
+      (isBankPayoutAction(action) || runnerLegalActionPayloadCreditGain(action) > 1),
+  );
+}
+
+function runnerHasBurstEconomyEvent(input: AiDecisionInput): boolean {
+  return input.legalActions.some(
+    (action) =>
+      action.type === "play_event" &&
+      runnerLegalActionPayloadCreditGain(action) > 1,
+  );
+}
+
+function runnerLegalActionPayloadCreditGain(action: LegalAction): number {
+  return Math.max(
+    0,
+    runnerLegalActionNumberPayload(action, "gainCreditsAmount"),
+    runnerLegalActionNumberPayload(action, "gainedCredits"),
+    runnerLegalActionNumberPayload(action, "amount"),
+  );
+}
+
+function runnerLegalActionNumberPayload(
+  action: LegalAction,
+  key: string,
+): number {
+  const value = action.payload?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
 function buildRunnerCreditBasePlan(params: {

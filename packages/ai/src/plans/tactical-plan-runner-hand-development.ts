@@ -69,6 +69,10 @@ export function runnerHandDevelopmentPlanPriority(
     creditBase?.recommendation === "allow_setup_spend" ? 40 :
     creditBase?.recommendation === "preserve_reserve" ? -40 :
     0;
+  const economyRouteScore = runnerEconomyRouteDevelopmentScore(
+    context,
+    evaluation,
+  );
   const drawOverflowScore = runnerHandDevelopmentOverflowBonus(drawOverflow);
   return Math.max(
     0,
@@ -79,6 +83,7 @@ export function runnerHandDevelopmentPlanPriority(
         fitScore +
         installFitScore +
         creditBaseScore +
+        economyRouteScore +
         drawOverflowScore,
     ),
   );
@@ -123,6 +128,7 @@ export function runnerHandDevelopmentPlans(
           `hand_development_need:${evaluation.currentNeed}`,
           `hand_development_fit:${evaluation.strategicFit}`,
           `hand_development_priority:${evaluation.priority}`,
+          ...runnerEconomyRouteDevelopmentEvidence(context, evaluation),
           ...(evaluation.persistentInstallEvaluation
             ? [
                 `persistent_install_stackability:${evaluation.persistentInstallEvaluation.stackabilityClass}`,
@@ -144,7 +150,53 @@ export function runnerHandDevelopmentPlans(
         ],
         stateVersion,
       }),
-    );
+  );
+}
+
+function runnerEconomyRouteDevelopmentScore(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerHandDevelopmentEvaluation,
+): number {
+  if (!runnerDevelopmentIsEconomyRoute(evaluation)) return 0;
+  const posture = context.runnerEconomyPosture;
+  const creditBase = posture?.creditBasePlan;
+  let score = 0;
+  if (posture?.preferredEconomyRoute === "hand_bank_tool") {
+    score += evaluation.developmentRole === "bank_tool" ? 170 : 90;
+  } else if (posture?.preferredEconomyRoute === "hand_economy_engine") {
+    score += evaluation.developmentRole === "economy_engine" ? 170 : 90;
+  }
+  if (posture?.buildEconomyBeforePressure) score += 70;
+  if (posture?.recommendation === "build_economy") score += 90;
+  if (creditBase?.recommendation === "fund_useful_hand_card") score += 80;
+  if (creditBase?.economyPriority === "high") score += 70;
+  else if (creditBase?.economyPriority === "medium") score += 35;
+  return Math.min(260, score);
+}
+
+function runnerEconomyRouteDevelopmentEvidence(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerHandDevelopmentEvaluation,
+): string[] {
+  if (!runnerDevelopmentIsEconomyRoute(evaluation)) return [];
+  const posture = context.runnerEconomyPosture;
+  const creditBase = posture?.creditBasePlan;
+  return [
+    `economy_route:${posture?.preferredEconomyRoute ?? "unknown"}`,
+    `economy_route_build_before_pressure:${posture?.buildEconomyBeforePressure === true}`,
+    `economy_route_recommendation:${posture?.recommendation ?? "unknown"}`,
+    `economy_route_creditbase:${creditBase?.recommendation ?? "unknown"}`,
+    `economy_route_creditbase_priority:${creditBase?.economyPriority ?? "unknown"}`,
+  ];
+}
+
+function runnerDevelopmentIsEconomyRoute(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): boolean {
+  return (
+    evaluation.developmentRole === "economy_engine" ||
+    evaluation.developmentRole === "bank_tool"
+  );
 }
 
 function runnerHandDevelopmentRolePriority(

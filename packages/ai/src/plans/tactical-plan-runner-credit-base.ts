@@ -87,6 +87,7 @@ export function runnerCreditBasePlans(
               `credit_reserve_contest:${creditBase.creditReservePolicy.contestReserve}`,
               `credit_reserve_below_now:${creditBase.creditReservePolicy.belowReserveNow}`,
               `credit_base_blocked_hand_cards:${creditBase.usefulHandCardsBlockedByCredits}`,
+              `economy_route:${context.runnerEconomyPosture?.preferredEconomyRoute ?? "unknown"}`,
             ]
           : ["credit_base_recommendation:avoid_overdraw"]),
         ...(drawOverflowCreditPressure
