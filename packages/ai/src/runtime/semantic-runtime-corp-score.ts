@@ -2450,8 +2450,14 @@ function corpBurstEconomyAbilityForVisibleCard(
   if (card.known === false) return undefined;
   const definition = visibleCardDefinition(card);
   const rulesText = card.rulesText ?? definition?.rulesText;
-  const gain = corpCreditGainFromRulesText(rulesText);
-  const drawCards = corpDrawCountFromRulesText(rulesText);
+  const payloadGain = corpCreditGainFromActionPayload(action, card);
+  const payloadDrawCards = positiveIntegerPayloadNumber(
+    action.payload,
+    "drawCardsAmount",
+  );
+  const gain = payloadGain?.amount ?? corpCreditGainFromRulesText(rulesText);
+  const drawCards =
+    payloadDrawCards ?? corpDrawCountFromRulesText(rulesText);
   if (gain <= 0 && drawCards <= 0) return undefined;
   const cost = positiveOrZeroNumber(fallbackCost) ?? 0;
   const netGain = gain - cost;
@@ -2468,6 +2474,10 @@ function corpBurstEconomyAbilityForVisibleCard(
     netGain,
     actionValue,
     evidence: [
+      ...(payloadGain?.evidence ?? []),
+      ...(payloadDrawCards !== undefined
+        ? [`ability_payload_draw_cards:${payloadDrawCards}`]
+        : []),
       `ability_click_cost:${clickCost}`,
       `ability_credit_cost:${cost}`,
       `ability_gain:${gain}`,
@@ -2477,6 +2487,76 @@ function corpBurstEconomyAbilityForVisibleCard(
       `activated_economy_efficiency:${clickCost > 0 ? netGain / clickCost : netGain}`,
     ],
   };
+}
+
+function corpCreditGainFromActionPayload(
+  action: LegalAction,
+  sourceCard: VisibleCard,
+): { amount: number; evidence: string[] } | undefined {
+  const payloadGain = positiveIntegerPayloadNumber(
+    action.payload,
+    "gainCreditsAmount",
+  );
+  if (payloadGain === undefined) return undefined;
+
+  const evidence = [`ability_payload_gain_credits:${payloadGain}`];
+  let amount = payloadGain;
+  const hostedCreditTakeAmount = positiveIntegerPayloadNumber(
+    action.payload,
+    "hostedCreditTakeAmount",
+  );
+  const takesHostedCredits =
+    booleanPayloadValue(action.payload, "cardImplementationTakesHostedCredits") ===
+      true || hostedCreditTakeAmount !== undefined;
+  if (takesHostedCredits) {
+    evidence.push("ability_payload_takes_hosted_credits:true");
+    if (hostedCreditTakeAmount !== undefined) {
+      evidence.push(`ability_payload_hosted_credit_take:${hostedCreditTakeAmount}`);
+      amount = Math.min(amount, hostedCreditTakeAmount);
+    }
+    const visibleHostedCredits = visibleHostedCreditCounterAmount(sourceCard);
+    if (visibleHostedCredits !== undefined) {
+      evidence.push(`ability_visible_hosted_credits:${visibleHostedCredits}`);
+      amount = Math.min(amount, visibleHostedCredits);
+    }
+  }
+
+  if (amount <= 0) return undefined;
+  if (amount !== payloadGain) {
+    evidence.push(`ability_payload_effective_gain_credits:${amount}`);
+  }
+  return { amount, evidence };
+}
+
+function visibleHostedCreditCounterAmount(card: VisibleCard): number | undefined {
+  const counters = card.counters;
+  if (!counters) return undefined;
+  const counterValues = counters as Partial<Record<string, number>>;
+  for (const key of ["bit", "recurring_credit", "credit"]) {
+    const value = positiveOrZeroNumber(counterValues[key]);
+    if (value !== undefined) return value;
+  }
+  return undefined;
+}
+
+function positiveIntegerPayloadNumber(
+  payload: LegalAction["payload"],
+  key: string,
+): number | undefined {
+  if (!payload || typeof payload !== "object") return undefined;
+  const value = (payload as Record<string, unknown>)[key];
+  return typeof value === "number" && Number.isFinite(value) && value > 0
+    ? Math.floor(value)
+    : undefined;
+}
+
+function booleanPayloadValue(
+  payload: LegalAction["payload"],
+  key: string,
+): boolean | undefined {
+  if (!payload || typeof payload !== "object") return undefined;
+  const value = (payload as Record<string, unknown>)[key];
+  return typeof value === "boolean" ? value : undefined;
 }
 
 function corpImmediateEconomyOperationScoreValue(

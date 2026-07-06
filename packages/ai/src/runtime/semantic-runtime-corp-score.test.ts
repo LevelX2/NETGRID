@@ -286,6 +286,116 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("scores hosted-credit agenda abilities from structured legal action payloads", () => {
+    const corporateCoup = corpCard("corporate-coup", "agenda", {
+      title: "Corporate Coup",
+      definitionId: "onr_v1_193_corporate-coup",
+      rulesText:
+        "Put 15 from the bank on Corporate Coup when you score it.\n[A]: Take 3 from Corporate Coup, if it has any bits.",
+      counters: { bit: 15 },
+    });
+    const coupAbility = corpAction(
+      "corporate-coup-economy",
+      "activated_card_ability",
+      {
+        cardId: corporateCoup.instanceId,
+        cardImplementationTakesHostedCredits: true,
+        hostedCreditTakeAmount: 3,
+        hostedCreditTakeMode: "up_to_amount_if_available",
+        gainCreditsAmount: 3,
+      },
+      corporateCoup.instanceId,
+    );
+    coupAbility.costs = [{ clicks: 1 }];
+    const basicCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithScoreAreaCards(
+      0,
+      [corporateCoup],
+      [coupAbility, basicCredit],
+    );
+
+    const abilityComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      coupAbility,
+      "basic_economy_draw",
+      testDependencies(),
+    );
+
+    expect(abilityComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_activated_burst_economy",
+          value: 1890,
+          reason: expect.stringContaining("ability_payload_gain_credits:3"),
+        }),
+      ]),
+    );
+    expect(abilityComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_activated_burst_economy",
+          reason: expect.stringContaining("ability_visible_hosted_credits:15"),
+        }),
+      ]),
+    );
+    expect(totalScore(abilityComponents)).toBeGreaterThan(
+      totalScoreFor(
+        input,
+        basicCredit,
+        "basic_economy_draw",
+        testDependencies(),
+      ),
+    );
+  });
+
+  it("caps hosted-credit agenda ability value to visible remaining counters", () => {
+    const corporateCoup = corpCard("corporate-coup", "agenda", {
+      title: "Corporate Coup",
+      definitionId: "onr_v1_193_corporate-coup",
+      rulesText:
+        "Put 15 from the bank on Corporate Coup when you score it.\n[A]: Take 3 from Corporate Coup, if it has any bits.",
+      counters: { bit: 2 },
+    });
+    const coupAbility = corpAction(
+      "corporate-coup-economy",
+      "activated_card_ability",
+      {
+        cardId: corporateCoup.instanceId,
+        cardImplementationTakesHostedCredits: true,
+        hostedCreditTakeAmount: 3,
+        hostedCreditTakeMode: "up_to_amount_if_available",
+        gainCreditsAmount: 3,
+      },
+      corporateCoup.instanceId,
+    );
+    coupAbility.costs = [{ clicks: 1 }];
+    const input = corpInputWithScoreAreaCards(0, [corporateCoup], [coupAbility]);
+
+    const abilityComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      coupAbility,
+      "basic_economy_draw",
+      testDependencies(),
+    );
+
+    expect(abilityComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_activated_burst_economy",
+          value: 1530,
+          reason: expect.stringContaining(
+            "ability_payload_effective_gain_credits:2",
+          ),
+        }),
+      ]),
+    );
+  });
+
   it("suppresses scored-agenda economy when critical triage needs remote protection", () => {
     const agenda = agendaCard("agenda-in-hq", 2);
     const marineArcology = corpCard("marine-arcology", "agenda", {
