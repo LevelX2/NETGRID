@@ -135,6 +135,7 @@ export function buildRunnerRemoteTrashAccessContext(
       role === "remote_capacity" ||
       role === "economy" ||
       role === "tag_punish" ||
+      (role === "ambush" && generalCreditCost === 0) ||
       finitePoolEconomy);
   const acuteThreat = remoteAccess
     ? remoteTrashAccessProtectsAcuteThreatForMetrics(

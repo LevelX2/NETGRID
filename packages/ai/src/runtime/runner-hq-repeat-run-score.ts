@@ -30,6 +30,6 @@ export function staleKnownHqRepeatRunPenalty(
   return hqHandMemory.knownDefinitions.every((definitionId) =>
     isLowValueKnownAccessCard(definitionId, input.playerView.own.credits),
   )
-    ? 430
+    ? 1400
     : 0;
 }
