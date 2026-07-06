@@ -176,6 +176,53 @@ describe("known central access payoff HQ knownness", () => {
     );
   });
 
+  it("suppresses a repeated R&D run after the Runner declined the known top trash", () => {
+    const rdAccess = publicEvent("evt_rd_bbs_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverLabel: "R&D",
+      targets: { serverLabel: "R&D" },
+      cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      title: "BBS Whispering Campaign",
+    });
+    const declineTrash = publicEvent("evt_rd_bbs_decline", "decline_trash", 2, {
+      actor: "runner",
+      actionType: "decline_trash",
+    });
+    const input = aiInput({
+      handCount: 1,
+      publicEvents: [rdAccess, declineTrash],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const payoff = evaluateKnownCentralAccessPayoff(input, "rd");
+
+    expect(payoff).toMatchObject({
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+      penalty: 700,
+    });
+    expect(payoff.reasons).toEqual(
+      expect.arrayContaining([
+        "known_rnd_top_declined_trash_same_top",
+        "central_known_no_current_payoff",
+      ]),
+    );
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "rnd_freshness:stale_known_same_top",
+        "rnd_known_top_definition:onr_v1_309_bbs-whispering-campaign",
+        "rnd_known_top_trash_affordable:true",
+        "rd_run_suppressed_by_recent_declined_trash:true",
+        "central_memory_payoff:known_low_value",
+      ]),
+    );
+  });
+
   it("matches HQ memory invalidation reasons by exact reason code", () => {
     expect(
       hqMemoryInvalidationReasonMatches(
@@ -208,8 +255,10 @@ function aiInput(params: {
   handCount: number;
   rig?: VisibleCard[];
   publicEvents?: PublicGameEvent[];
+  legalActions?: LegalAction[];
+  servers?: PlayerView["servers"];
 }): AiDecisionInput {
-  const legalActions = [runAction("run-hq", "hq")];
+  const legalActions = params.legalActions ?? [runAction("run-hq", "hq")];
   const playerView: PlayerView = {
     stateVersion: 1,
     side: "runner",
@@ -241,7 +290,7 @@ function aiInput(params: {
       discardCount: 0,
       scoreArea: [],
     },
-    servers: [{ id: "hq", label: "HQ", ice: [], root: [] }],
+    servers: params.servers ?? [{ id: "hq", label: "HQ", ice: [], root: [] }],
     publicEvents: params.publicEvents ?? [],
     legalActions,
     winner: null,

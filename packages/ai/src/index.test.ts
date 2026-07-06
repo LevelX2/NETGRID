@@ -27559,6 +27559,56 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(decision.reasonCode).not.toBe("runner.plan.pressure_rnd");
   });
 
+  it("suppresses a label-only R&D repeat after declining a known trashable top card", () => {
+    const baseInput = runnerActionPhaseInput(
+      "ai-rnd-label-only-declined-trash-repeat",
+      (state) => {
+        state.runner.credits = 8;
+        state.corp.credits = 0;
+      },
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(rdRun).toBeDefined();
+    if (!rdRun) throw new Error("Missing label-only R&D repeat fixture action");
+
+    const input = {
+      ...baseInput,
+      profileId: "current_candidate",
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticCentralAccessEventByLabelOnly(
+          "ai-rnd-bbs-label-only-access",
+          100,
+          "R&D",
+          "onr_v1_309_bbs-whispering-campaign",
+        ),
+        syntheticDeclineTrashEvent("ai-rnd-bbs-decline-trash", 101),
+      ],
+    } satisfies AiDecisionInput;
+
+    const belief = reconstructBeliefState(input);
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(belief.runnerOpponentModel?.rndTopFreshness).toMatchObject({
+      freshness: "stale_known_same_top",
+      knownTopDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      knownTopIsAgenda: false,
+    });
+    expect(
+      selected?.type === "start_run" && selected.payload?.serverId === "rd",
+    ).toBe(false);
+    expect(debugText).toContain(
+      "runner_run_target:rd|kind:rd|payoff:known_low_value|known:known_no_current_payoff",
+    );
+  });
+
   it("keeps R&D pressure high when a known top agenda remains accessible", () => {
     const baseInput = runnerActionPhaseInput(
       "ai-rnd-stale-known-agenda",
@@ -29824,6 +29874,47 @@ function syntheticCentralAccessEvent(
       serverId,
       serverLabel,
       cardDefinitionId,
+    },
+  };
+}
+
+function syntheticCentralAccessEventByLabelOnly(
+  eventId: string,
+  stateVersionBefore: number,
+  serverLabel: "R&D" | "HQ" | "Archives",
+  cardDefinitionId: string,
+): PublicGameEvent {
+  return {
+    eventId,
+    type: "access_card",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor: "runner",
+      actionType: "access_card",
+      serverLabel,
+      targets: { serverLabel },
+      cardDefinitionId,
+    },
+  };
+}
+
+function syntheticDeclineTrashEvent(
+  eventId: string,
+  stateVersionBefore: number,
+): PublicGameEvent {
+  return {
+    eventId,
+    type: "decline_trash",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload: {
+      actor: "runner",
+      actionType: "decline_trash",
     },
   };
 }
