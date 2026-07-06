@@ -1,9 +1,12 @@
 import type {
-  AiBenchmarkCorpArchetype,
   AiBenchmarkDeckSlotDefinition,
   AiBenchmarkRunnerArchetype,
 } from "./benchmark-deck-types";
 import { benchmarkDeckManifestEntry } from "./benchmark-deck-manifest-entry";
+import {
+  benchmarkCorpArchetypeFromRole,
+  missingCorpStrategyPanelSlots,
+} from "./benchmark-deck-strategy-panel";
 import {
   LOCAL_REALISTIC_BENCHMARK_DECKS,
   REAL_SCENE_BENCHMARK_DECKS,
@@ -37,7 +40,7 @@ const LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
             label: `${slot.corpLocalDeckId}:missing_manifest_entry`,
           },
       runnerArchetype: runnerArchetypeFromRole(runner?.role),
-      corpArchetype: corpArchetypeFromRole(corp?.role),
+      corpArchetype: benchmarkCorpArchetypeFromRole(corp?.role),
       tuningUse: slot.tuningUse,
       ...(!runner || !corp
         ? {
@@ -76,7 +79,7 @@ const REAL_SCENE_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
             label: `${slot.corpLocalDeckId}:missing_manifest_entry`,
           },
       runnerArchetype: runnerArchetypeFromRole(runner?.role),
-      corpArchetype: corpArchetypeFromRole(corp?.role),
+      corpArchetype: benchmarkCorpArchetypeFromRole(corp?.role),
       tuningUse: slot.tuningUse,
       ...(!runner || !corp
         ? {
@@ -87,7 +90,7 @@ const REAL_SCENE_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
     };
   });
 
-export const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
+const CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
   [
     {
       slotId: "safety_smoke_demo_008",
@@ -149,6 +152,12 @@ export const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefiniti
     ...REAL_SCENE_BENCHMARK_DECK_SLOTS,
   ];
 
+export const MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
+  [
+    ...CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS,
+    ...missingCorpStrategyPanelSlots(CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS),
+  ];
+
 function runnerArchetypeFromRole(
   role: string | undefined,
 ): AiBenchmarkRunnerArchetype {
@@ -163,21 +172,6 @@ function runnerArchetypeFromRole(
     role.includes("pressure")
   ) {
     return "rig_economy_pressure";
-  }
-  return "unknown";
-}
-
-function corpArchetypeFromRole(
-  role: string | undefined,
-): AiBenchmarkCorpArchetype {
-  if (!role) return "unknown";
-  if (role.includes("tag") || role.includes("punish")) return "tag_punish";
-  if (
-    role.includes("glacier") ||
-    role.includes("remote_scoring") ||
-    role.includes("scoring")
-  ) {
-    return "remote_scoring";
   }
   return "unknown";
 }

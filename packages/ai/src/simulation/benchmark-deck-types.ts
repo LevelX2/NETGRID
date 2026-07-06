@@ -9,7 +9,8 @@ export type AiBenchmarkDeckSlotType =
   | "snapshot_tuning"
   | "snapshot_holdout"
   | "local_realistic_holdout"
-  | "real_scene_holdout";
+  | "real_scene_holdout"
+  | "strategy_panel_gap";
 
 export type AiBenchmarkDeckSlotStatus = "runnable" | "disabled" | "pending";
 

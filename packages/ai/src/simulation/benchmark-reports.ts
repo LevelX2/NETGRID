@@ -9,20 +9,12 @@ import type {
   AiMatchProgressionBenchmarkSuiteResult,
 } from "../index";
 import type { AiSelfplayTraceMiningResult } from "./selfplay-trace-mining";
+import { CORP_STRATEGY_PANEL_TARGETS } from "./benchmark-deck-strategy-panel";
 import { buildSelfplayActionTypeDominanceReport } from "./selfplay-action-type-dominance";
 import { buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries } from "./selfplay-why-coverage";
 
 // Simulation-only report helpers. Live AI decisions must not depend on these
 // aggregate benchmark outputs as an action source.
-
-const CORP_STRATEGY_PANEL_TARGETS = [
-  "remote_scoring",
-  "fast_advance",
-  "tag_punish",
-  "net_damage",
-  "hybrid_score_punish",
-  "virus_damage",
-] as const satisfies readonly AiBenchmarkCorpArchetype[];
 
 export function evaluateDoctrineQualityGate(
   benchmark: AiDoctrineQualityBenchmarkResult,
@@ -2015,6 +2007,9 @@ export function formatMatchProgressionBenchmarkSuiteReport(
   const corpStrategyPanelRows = summarizeCorpStrategyPanelCoverage(
     suite.slots,
   );
+  const strategyPanelGapRows = suite.slots.filter(
+    (slot) => slot.slotType === "strategy_panel_gap",
+  );
   const missingCorpStrategyTargets = CORP_STRATEGY_PANEL_TARGETS.filter(
     (target) =>
       !suite.slots.some(
@@ -2119,6 +2114,19 @@ export function formatMatchProgressionBenchmarkSuiteReport(
       ([archetype, runnable, holdout, slots]) =>
         `| ${archetype} | ${runnable} | ${holdout} | ${slots} |`,
     ),
+    "",
+    "## Strategy Panel Gaps",
+    "",
+    "Pending slots are explicit placeholders for Corp archetypes that need stable benchmark decks before they can be used as evidence.",
+    "",
+    "| Slot | Corp Archetype | Status | Reason |",
+    "| --- | --- | --- | --- |",
+    ...(strategyPanelGapRows.length > 0
+      ? strategyPanelGapRows.map(
+          (slot) =>
+            `| ${slot.slotId} | ${slot.corpArchetype} | ${slot.status} | ${slot.reason ?? "pending"} |`,
+        )
+      : ["| none | none | runnable | none |"]),
     "",
     "## Demo Smoke",
     "",

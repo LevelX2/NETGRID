@@ -127,6 +127,9 @@ describe("benchmark report formatting", () => {
     const realSceneSlots = suite.slots.filter(
       (slot) => slot.slotType === "real_scene_holdout",
     );
+    const strategyPanelGaps = suite.slots.filter(
+      (slot) => slot.slotType === "strategy_panel_gap",
+    );
     const runnableCorpArchetypes = new Set(
       suite.slots
         .filter((slot) => slot.status === "runnable")
@@ -178,6 +181,19 @@ describe("benchmark report formatting", () => {
     expect(realSceneSlots.every((slot) => slot.status === "runnable")).toBe(
       true,
     );
+    expect(strategyPanelGaps).toHaveLength(4);
+    expect(strategyPanelGaps.every((slot) => slot.status === "pending")).toBe(
+      true,
+    );
+    expect(strategyPanelGaps.every((slot) => !slot.benchmark)).toBe(true);
+    expect(strategyPanelGaps.map((slot) => slot.corpArchetype)).toEqual(
+      expect.arrayContaining([
+        "fast_advance",
+        "net_damage",
+        "hybrid_score_punish",
+        "virus_damage",
+      ]),
+    );
     expect(
       realSceneSlots.every((slot) => !slot.runnerDeckRef.includes("demo_008")),
     ).toBe(true);
@@ -198,7 +214,10 @@ describe("benchmark report formatting", () => {
     );
     expect(report).toContain("## Demo Smoke");
     expect(report).toContain("## Strategy Panel Coverage");
+    expect(report).toContain("## Strategy Panel Gaps");
     expect(report).toContain("Missing runnable Corp archetypes:");
+    expect(report).toContain("strategy_panel_gap_net_damage");
+    expect(report).toContain("strategy_panel_gap_hybrid_score_punish");
     expect(report).toContain("net_damage");
     expect(report).toContain("virus_damage");
     expect(report).toContain("## Snapshot Progression");
