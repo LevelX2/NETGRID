@@ -952,6 +952,89 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("does not treat ice-id rez on the active score remote as off-path spend", () => {
+    const agenda = corpCard("active-score-agenda", "agenda", {
+      advancementRequirement: 4,
+      advancementCounters: 2,
+      agendaPoints: 3,
+    });
+    const rezScoreRemoteIce = corpAction(
+      "rez-score-remote-ice",
+      "rez_ice",
+      { iceId: "score-remote-ice" },
+      "score-remote-ice",
+    );
+    rezScoreRemoteIce.costs = [{ credits: 1 }];
+    const rezOtherRemoteIce = corpAction(
+      "rez-other-remote-ice",
+      "rez_ice",
+      { iceId: "other-remote-ice" },
+      "other-remote-ice",
+    );
+    rezOtherRemoteIce.costs = [{ credits: 1 }];
+    const input = corpInputWithRemoteAgenda(3, 3, agenda, [
+      rezScoreRemoteIce,
+      rezOtherRemoteIce,
+    ]);
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 4,
+      credits: 5,
+    });
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("score-remote-ice", { rezCost: 1, rezzed: false })],
+        root: [agenda],
+      },
+      {
+        id: "remote_2",
+        label: "Remote 2",
+        ice: [corpIce("other-remote-ice", { rezCost: 1, rezzed: false })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      actionCreditCost: (action: LegalAction) =>
+        action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+    };
+
+    const scoreRemoteRezComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      rezScoreRemoteIce,
+      "simple_rez",
+      dependencies,
+    );
+    const otherRemoteRezComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      rezOtherRemoteIce,
+      "simple_rez",
+      dependencies,
+    );
+
+    expect(scoreRemoteRezComponents).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_active_scoreline_off_path_spend",
+        }),
+      ]),
+    );
+    expect(otherRemoteRezComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_active_scoreline_off_path_spend",
+          reason: expect.stringContaining("action_server:remote_2"),
+        }),
+      ]),
+    );
+    expect(totalScore(scoreRemoteRezComponents)).toBeGreaterThan(
+      totalScore(otherRemoteRezComponents),
+    );
+  });
+
   it("funds an active score remote before non-closing advances break reserve", () => {
     const agenda = corpCard("active-score-agenda", "agenda", {
       advancementRequirement: 4,

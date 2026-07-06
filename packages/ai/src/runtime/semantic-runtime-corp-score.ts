@@ -1484,10 +1484,14 @@ function corpScorelineActionServerId(
   const cardId =
     typeof action.payload?.cardId === "string"
       ? action.payload.cardId
-      : typeof action.source === "string"
-        ? action.source
-        : undefined;
-  return cardId ? corpServerIdForRootCard(input, cardId) : undefined;
+      : typeof action.payload?.targetCardId === "string"
+        ? action.payload.targetCardId
+        : typeof action.payload?.iceId === "string"
+          ? action.payload.iceId
+          : typeof action.source === "string"
+            ? action.source
+            : undefined;
+  return cardId ? corpServerIdForInstalledCard(input, cardId) : undefined;
 }
 
 function corpNonAgendaRootBlocksScoreRemoteComponent<TConsumer extends string>(
@@ -2177,6 +2181,17 @@ function corpServerIdForRootCard(
 ): string | undefined {
   return input.playerView.servers.find((server) =>
     (server.root ?? []).some((card) => card.instanceId === cardId),
+  )?.id;
+}
+
+function corpServerIdForInstalledCard(
+  input: AiDecisionInput,
+  cardId: string,
+): string | undefined {
+  return input.playerView.servers.find(
+    (server) =>
+      (server.root ?? []).some((card) => card.instanceId === cardId) ||
+      (server.ice ?? []).some((card) => card.instanceId === cardId),
   )?.id;
 }
 
