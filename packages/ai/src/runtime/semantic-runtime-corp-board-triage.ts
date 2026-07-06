@@ -299,7 +299,11 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     };
   }
 
-  const setupRemote = actions.find((entry) => actionBuildsScoreRemote(entry));
+  const setupRemote =
+    !corpTriageIsPunishPrimary(input) ||
+    corpRemoteScoringStrategyWantsRemoteDevelopment(input)
+      ? actions.find((entry) => actionBuildsScoreRemote(entry))
+      : undefined;
   if (setupRemote) {
     return {
       primary: "setup_score_remote",
@@ -695,8 +699,10 @@ function corpActiveScorelineClockPressure<TConsumer extends string>(
   actions: readonly ScoredLegalAction[],
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): ForcedScorelineClockPressure | undefined {
-  const entries = actions.filter((entry) =>
-    activeScorelineClockEntryIsPlayable(input, entry, dependencies),
+  const entries = actions.filter(
+    (entry) =>
+      activeScorelineClockEntryIsPlayable(input, entry, dependencies) &&
+      !corpPunishPrimaryShouldDeferSpeculativeScoreline(input, entry),
   );
   const preferred = highestPriorityActiveScorelineEntry(entries);
   if (!preferred) return undefined;
@@ -947,6 +953,15 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
   if (
     hqAgendaCount <= 0 ||
     !corpHqAgendaFloodIsPressured(input, hqAgendaCount, hqAgendaPoints)
+  ) {
+    return undefined;
+  }
+  if (
+    corpPunishPrimaryShouldPreferPunishOrCentralProtection(
+      input,
+      hqAgendaCount,
+      hqAgendaPoints,
+    )
   ) {
     return undefined;
   }
@@ -1737,15 +1752,15 @@ function concreteScoreRemoteDevelopmentActionExists(
 function corpRemoteScoringStrategyWantsRemoteDevelopment(
   input: AiDecisionInput,
 ): boolean {
-  const intent = (
-    input as AiDecisionInput & {
-      ownCorpStrategicIntent?: {
-        primaryWinIntent?: string;
-        scorePlan?: readonly string[];
-      };
-    }
-  ).ownCorpStrategicIntent;
+  const intent = corpTriageStrategicIntent(input);
   if (!intent) return false;
+  if (intent.primaryWinIntent === "corp.punish_runner") {
+    return (
+      intent.scorePlan?.some((plan) =>
+        ["corp.rush_scoreline", "corp.fast_advance_scoreline"].includes(plan),
+      ) === true
+    );
+  }
   if (
     intent.primaryWinIntent === "corp.score_agendas" ||
     intent.primaryWinIntent === "corp.score_fast_advance" ||
@@ -1768,6 +1783,55 @@ function corpRemoteScoringStrategyEvidence(input: AiDecisionInput): string[] {
   return corpRemoteScoringStrategyWantsRemoteDevelopment(input)
     ? ["corp_board_triage_deck_strategy:remote_score_development"]
     : [];
+}
+
+type CorpTriageStrategicIntentLike = {
+  primaryWinIntent?: string;
+  scorePlan?: readonly string[];
+  punishPlan?: readonly string[];
+};
+
+function corpTriageStrategicIntent(
+  input: AiDecisionInput,
+): CorpTriageStrategicIntentLike | undefined {
+  return (
+    input as AiDecisionInput & {
+      ownCorpStrategicIntent?: CorpTriageStrategicIntentLike;
+    }
+  ).ownCorpStrategicIntent;
+}
+
+function corpTriageIsPunishPrimary(input: AiDecisionInput): boolean {
+  const intent = corpTriageStrategicIntent(input);
+  return (
+    intent?.primaryWinIntent === "corp.punish_runner" ||
+    (intent?.punishPlan?.length ?? 0) > 0 &&
+      intent?.scorePlan?.some((plan) =>
+        ["corp.rush_scoreline", "corp.fast_advance_scoreline"].includes(plan),
+      ) !== true
+  );
+}
+
+function corpPunishPrimaryShouldPreferPunishOrCentralProtection(
+  input: AiDecisionInput,
+  hqAgendaCount: number,
+  hqAgendaPoints: number,
+): boolean {
+  if (!corpTriageIsPunishPrimary(input)) return false;
+  const runnerAgendaPoints =
+    corpTriagePositiveNumber(input.playerView.opponent?.agendaPoints) ?? 0;
+  return runnerAgendaPoints < 5 && hqAgendaPoints < 6 && hqAgendaCount < 3;
+}
+
+function corpPunishPrimaryShouldDeferSpeculativeScoreline(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+): boolean {
+  if (!corpTriageIsPunishPrimary(input)) return false;
+  if (entry.action.type !== "install_card") return false;
+  if (entry.action.payload?.placement === "ice") return false;
+  if (entry.scoringWindow?.scoreHorizon === "immediate") return false;
+  return true;
 }
 
 function preScoreCentralProtectionTriage(

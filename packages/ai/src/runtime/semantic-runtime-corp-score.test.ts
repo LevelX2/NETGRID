@@ -186,6 +186,52 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("dampens speculative scoreline installs for punish-primary corp decks", () => {
+    const remoteAgenda = corpAction("install-remote-agenda", "install_card", {
+      placement: "root",
+      serverId: "remote_1",
+    });
+    const input = {
+      ...corpInputWithHqCards(5, [agendaCard("hq-agenda")], [remoteAgenda]),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: () => true,
+      corpScoringWindowAssessment: () =>
+        scoringWindow({
+          serverId: "remote_1",
+          windowKind: "temporary_safe",
+          scoreHorizon: "next_turn",
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 2,
+        }),
+    };
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      remoteAgenda,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_punish_primary_speculative_scoreline_dampen",
+          value: -1800,
+          reason: expect.stringContaining(
+            "corp_primary_win_intent:punish_runner",
+          ),
+        }),
+      ]),
+    );
+  });
+
   it("scores visible activated scored-agenda economy abilities above basic credit", () => {
     const marineArcology = corpCard("marine-arcology", "agenda", {
       title: "Marine Arcology",

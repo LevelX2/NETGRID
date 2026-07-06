@@ -312,6 +312,14 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
         value: 550,
         reason: "score_line",
       });
+      const punishPrimaryDampen =
+        corpPunishPrimarySpeculativeScorelineDampenComponent(
+          input,
+          action,
+          dependencies,
+          roles,
+        );
+      if (punishPrimaryDampen) components.push(punishPrimaryDampen);
     }
     const hqAgendaRelief = corpHqAgendaReliefScorelineContext(
       input,
@@ -1359,6 +1367,73 @@ function corpHqAgendaReliefScorelineContext<TConsumer extends string>(
     },
     evidence,
   };
+}
+
+function corpPunishPrimarySpeculativeScorelineDampenComponent<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  roles: string[],
+): AiDecisionScoreComponent | undefined {
+  if (!corpScoreRuntimeIsPunishPrimary(input)) return undefined;
+  if (action.type !== "install_card" || action.payload?.placement === "ice") {
+    return undefined;
+  }
+  if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
+    return undefined;
+  }
+  const assessment = dependencies.corpScoringWindowAssessment?.(
+    input,
+    action,
+    roles,
+  );
+  if (assessment?.scoreHorizon === "immediate") return undefined;
+  const runnerAgendaPoints =
+    positiveOrZeroNumber(input.playerView.opponent?.agendaPoints) ?? 0;
+  const runnerAgendaPointsAfterSteal =
+    positiveOrZeroNumber(assessment?.runnerAgendaPointsAfterSteal) ?? 0;
+  const pointsToWin = input.playerView.agendaPointsToWin ?? 7;
+  if (
+    runnerAgendaPoints >= 5 ||
+    runnerAgendaPointsAfterSteal >= pointsToWin ||
+    assessment?.agendaStealSeverity === "game_ending"
+  ) {
+    return undefined;
+  }
+  return {
+    key: "corp_punish_primary_speculative_scoreline_dampen",
+    label: "Punish-Deck-Scoreline",
+    value: -1800,
+    reason: [
+      "corp_primary_win_intent:punish_runner",
+      "speculative_scoreline_install:true",
+      assessment?.scoreHorizon
+        ? `score_horizon:${assessment.scoreHorizon}`
+        : "score_horizon:unknown",
+    ].join("|"),
+  };
+}
+
+function corpScoreRuntimeIsPunishPrimary(input: AiDecisionInput): boolean {
+  const intent = (
+    input as AiDecisionInput & {
+      ownCorpStrategicIntent?: {
+        primaryWinIntent?: string;
+        scorePlan?: readonly string[];
+        punishPlan?: readonly string[];
+      };
+    }
+  ).ownCorpStrategicIntent;
+  if (!intent) return false;
+  if (intent.primaryWinIntent === "corp.punish_runner") return true;
+  return (
+    (intent.punishPlan?.length ?? 0) > 0 &&
+    intent.scorePlan?.some((plan) =>
+      ["corp.rush_scoreline", "corp.fast_advance_scoreline"].includes(plan),
+    ) !== true
+  );
 }
 
 function corpScorelineActionServerId(

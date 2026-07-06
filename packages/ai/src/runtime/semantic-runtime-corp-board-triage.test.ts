@@ -265,6 +265,110 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("does not let secondary remote score support make a punish deck build a speculative score remote", () => {
+    const rdIce = corpAction("install-rd-extra-ice", "install_card", {
+      placement: "ice",
+      serverId: "rd",
+    });
+    const remoteIce = corpAction("install-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const input = {
+      ...corpInput({
+        runnerAgendaPoints: 3,
+        legalActions: [rdIce, remoteIce],
+        servers: [
+          centralServer("hq", [iceCard("hq-ice")]),
+          centralServer("rd", [iceCard("rd-stop", { rezzed: false })]),
+          remoteServer("remote_1", []),
+        ],
+      }),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    const dependencies = testDependencies();
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const remoteIceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteIce,
+      dependencies,
+    );
+
+    expect(triage.primary).not.toBe("setup_score_remote");
+    expect(triage.evidence).not.toContain(
+      "corp_board_triage_deck_strategy:remote_score_development",
+    );
+    expect(remoteIceComponent?.key).not.toBe("corp_board_triage_alignment");
+  });
+
+  it("does not force noncritical HQ-flood scoreline conversion for a punish-primary deck", () => {
+    const remoteAgenda = corpAction("remote-scoreline", "install_card", {
+      placement: "root",
+      serverId: "remote_1",
+    });
+    const punishAbility = corpAction(
+      "punish-ability",
+      "activated_card_ability",
+    );
+    const input = {
+      ...corpInput({
+        corpHq: [agendaCard("hq-agenda-1", 2), agendaCard("hq-agenda-2", 2)],
+        corpCredits: 8,
+        runnerAgendaPoints: 3,
+        legalActions: [remoteAgenda, punishAbility],
+        servers: [
+          centralServer("hq", [iceCard("hq-ice")]),
+          centralServer("rd", [iceCard("rd-ice")]),
+          remoteServer("remote_1", [iceCard("remote-ice")]),
+        ],
+      }),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "durable",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 5,
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezFullPathWithDynamicReserve: true,
+          corpCanRezRelevantIce: true,
+          recommendedNextStep: "score",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const punishComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      punishAbility,
+      dependencies,
+    );
+
+    expect(triage.primary).not.toBe("force_scoreline_clock");
+    expect(triage.evidence).not.toContain(
+      "corp_hq_agenda_flood_pressure:true",
+    );
+    expect(punishComponent?.key).not.toBe("corp_board_triage_mismatch");
+  });
+
   it("does not treat a none score window as remote funding over remote setup", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",
