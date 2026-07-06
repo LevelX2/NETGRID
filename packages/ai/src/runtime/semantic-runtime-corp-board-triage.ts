@@ -15,6 +15,7 @@ import {
 import { semanticRuntimeCorpCentralPressureAssessment } from "./semantic-runtime-corp-central-pressure";
 import { semanticRuntimeCorpEffectiveDefenseContext } from "./semantic-runtime-corp-effective-defense";
 import { semanticRuntimeCorpCentralIceProfile } from "./semantic-runtime-corp-remote-score";
+import { corpIcePlacementCandidateForAction } from "./corp-ice-placement/corp-ice-placement";
 import type {
   CorpScoringWindowAssessment,
   CorpScoringWindowAgendaStealSeverity,
@@ -2046,7 +2047,12 @@ function centralProtectionEntryIsConcrete<TConsumer extends string>(
   if (entry.action.type === "install_card") {
     return (
       entry.action.payload?.placement === "ice" &&
-      installedIceProvidesConcreteCentralProtection(input, entry.action, serverId)
+      installedIceProvidesConcreteCentralProtection(
+        input,
+        entry.action,
+        serverId,
+        dependencies,
+      )
     );
   }
   if (entry.action.type !== "rez_ice") return false;
@@ -2094,6 +2100,7 @@ function actionProtectsServer<TConsumer extends string>(
         input,
         action,
         serverId,
+        dependencies,
       );
     }
     return true;
@@ -2156,11 +2163,26 @@ function installedIceProvidesConcreteCentralProtection(
   input: AiDecisionInput,
   action: LegalAction,
   serverId: "hq" | "rd",
+  dependencies: CorpBoardTriageDependencies<string>,
 ): boolean {
   const source = semanticRuntimeVisibleSourceCard(input, action);
   if (!source || source.known === false) return true;
   const profile = semanticRuntimeCorpCentralIceProfile(source);
-  if (profile.hasAccessStop && !profile.positionDependent) return true;
+  const placementCandidate = corpIcePlacementCandidateForAction({
+    input,
+    action,
+    serverId,
+    server: input.playerView.servers.find((server) => server.id === serverId),
+    sourceCard: source,
+    actionCreditCost: dependencies.actionCreditCost(action),
+    iceRezCost: source.rezCost,
+  });
+  const placementIsConcrete =
+    placementCandidate?.recommendation === "install_now" &&
+    placementCandidate.components.visibleZeroEffect >= 0;
+  if (profile.hasAccessStop && !profile.positionDependent) {
+    return placementIsConcrete;
+  }
   if (
     serverId === "hq" &&
     installedIceHasPunishTaxOrDamagePotential(source, profile) &&

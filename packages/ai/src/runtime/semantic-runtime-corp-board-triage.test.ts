@@ -718,6 +718,97 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("does not let zero-effect R&D ETR ICE trigger critical central override over a playable scoreline", () => {
+    const remoteAgenda = {
+      ...corpAction("remote-scoreline", "install_card", {
+        placement: "root",
+        serverId: "remote_1",
+      }),
+      source: "hq-agenda",
+    } as LegalAction;
+    const rdWall = {
+      ...corpAction("install-rd-wall", "install_card", {
+        placement: "ice",
+        serverId: "rd",
+      }),
+      source: "rd-wall",
+    } as LegalAction;
+    const input = corpInput({
+      runnerAgendaPoints: 5,
+      runnerRig: [fracterBreaker()],
+      corpHq: [
+        agendaCard("hq-agenda", 2),
+        iceCard("rd-wall", {
+          title: "R&D Wall",
+          definitionId: "onr_v1_279_wall-of-static",
+          subtypes: ["Wall"],
+          rulesText: "*End the run.",
+          rezCost: 0,
+        }),
+      ],
+      legalActions: [remoteAgenda, rdWall],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+        publicCentralEvent("rd-run-3", "start_run", "rd"),
+        publicCentralEvent("rd-access-3", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", []),
+        remoteServer("remote_1", [iceCard("remote-ice")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "durable",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezFullPathWithDynamicReserve: true,
+          corpCanRezRelevantIce: true,
+          recommendedNextStep: "score",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const remoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteAgenda,
+      dependencies,
+    );
+    const rdWallComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      rdWall,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "force_scoreline_clock",
+      targetServerId: "remote_1",
+    });
+    expect(triage.evidence).not.toContain(
+      "corp_board_triage_central_override:pre_score_rd_exposure",
+    );
+    expect(remoteComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(rdWallComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
   it("mismatches same-target non-stopping central ICE while real R&D protection exists", () => {
     const rdWall = {
       ...corpAction("install-rd-wall", "install_card", {
