@@ -38,6 +38,10 @@ import {
   enrichVisibleChoiceCardsFromView,
 } from "./CardChoicePanel";
 import { DiscardChoicePanel, FieldCardChoicePanel } from "./ChoicePanels";
+import {
+  SecurityPurgeChoicePanel,
+  isSecurityPurgeInstallTargetChoice,
+} from "./SecurityPurgeChoicePanel";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
 
 export function LegalActionsPanel({
@@ -169,6 +173,18 @@ export function LegalActionsPanel({
     ? primaryActions.find((action) => action.type === "resolve_choice")
     : undefined;
   if (genericChoice && genericChoiceAction) {
+    if (isSecurityPurgeInstallTargetChoice(genericChoice)) {
+      return (
+        <SecurityPurgeChoicePanel
+          choice={genericChoice}
+          action={genericChoiceAction}
+          disabled={disabled}
+          highlighted={highlighted}
+          enrichCard={enrichCard}
+          onChoiceOptions={onChoiceOptions}
+        />
+      );
+    }
     if (shouldUseFieldCardChoice(genericChoice, view)) {
       if (isSingleInstalledCorpExposeChoice(genericChoice)) return null;
       return (

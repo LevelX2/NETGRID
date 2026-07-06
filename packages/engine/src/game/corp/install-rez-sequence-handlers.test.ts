@@ -763,7 +763,14 @@ describe("corp install rez sequence handlers", () => {
       visibility: "hidden_info_barrier",
     });
     expect(
-      host.state.pendingChoice?.options.map((option) => option.value),
+      host.state.pendingChoice?.options
+        .filter((option) => option.selectable === false)
+        .map((option) => option.value),
+    ).toEqual(["ice_1", "operation_1", "ice_2"]);
+    expect(
+      host.state.pendingChoice?.options
+        .filter((option) => option.selectable !== false)
+        .map((option) => option.value),
     ).toEqual([
       "ice_1|hq",
       "ice_1|rd",
