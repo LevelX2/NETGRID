@@ -6,6 +6,7 @@ import type {
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
+import { runnerCoverageSearchSaturation } from "./runner-search-coverage-need";
 
 export type RunnerSourceCardAnswerRole = "search" | "draw";
 
@@ -28,6 +29,7 @@ export type RunnerGoalFitScoreDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerRunTargetEvaluation | undefined;
+  rolesForCardId?: (cardId: string | undefined) => readonly string[];
 };
 
 export function runnerSemanticGoalFitScoreComponent(
@@ -53,6 +55,22 @@ export function runnerSemanticGoalFitScoreComponent(
   }
   const sourceRole = dependencies.sourceCardAnswerRole(input, action);
   if (scopeId === "coverage_search" && sourceRole === "search") {
+    const saturation = runnerCoverageSearchSaturation(
+      input,
+      dependencies.rolesForCardId,
+    );
+    if (saturation) {
+      return {
+        key: "runner_goal_fit_coverage_search_saturated",
+        label: "Coverage-Suche gesaettigt",
+        value: -1200,
+        reason: [
+          `required:${saturation.requiredCoverage}`,
+          `server:${saturation.serverId}`,
+          `hand_answer:${saturation.handAnswerDefinitionId ?? "visible"}`,
+        ].join("|"),
+      };
+    }
     return {
       key: "runner_goal_fit_coverage_search",
       label: "Coverage-Suche",

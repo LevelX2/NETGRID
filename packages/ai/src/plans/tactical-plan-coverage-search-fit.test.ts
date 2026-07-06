@@ -251,9 +251,56 @@ describe("coverageSearchActionFit", () => {
       supportsActiveCapabilityNeed: false,
     });
   });
+
+  it("rejects further program search when a visible hand breaker covers the active need", () => {
+    const plan = coveragePlan("breaker_ap");
+    const searchAction = action({
+      actionId: "program-search",
+      source: "search-source",
+    });
+
+    const fit = coverageSearchActionFit(
+      plan,
+      plan.currentStep,
+      candidate(searchAction),
+      searchAction,
+      input(
+        [searchAction],
+        [
+          visibleCard({
+            instanceId: "search-source",
+            definitionId: "search-source",
+            title: "Search Source",
+            type: "program",
+            rulesText: "Search your stack for a program.",
+          }),
+        ],
+        [
+          visibleCard({
+            instanceId: "ap-breaker",
+            definitionId: "ap-breaker",
+            title: "AP Breaker",
+            type: "program",
+            subtypes: ["Icebreaker", "AP"],
+          }),
+        ],
+      ),
+      false,
+    );
+
+    expect(fit).toMatchObject({
+      answerRole: "not_coverage_answer",
+      supportsActiveCapabilityNeed: false,
+      supportsDrawOrSearchNeed: false,
+      recoveryLoopRisk: "high",
+    });
+    expect(fit?.evidence).toContain(
+      "rejectedFalseMatches:coverage_search_saturated_by_hand_answer",
+    );
+  });
 });
 
-function coveragePlan(requiredCoverage: "breaker_wall") {
+function coveragePlan(requiredCoverage: "breaker_wall" | "breaker_ap") {
   return createTacticalPlan({
     planId: "runner.obtain_breaker_coverage:remote_1",
     side: "runner",
@@ -281,10 +328,16 @@ function coveragePlan(requiredCoverage: "breaker_wall") {
 function input(
   legalActions: LegalAction[],
   visibleCards: VisibleCard[] = [],
+  handCards: VisibleCard[] = [],
 ): AiDecisionInput {
   const playerView = {
     side: "runner",
-    own: { rig: visibleCards, gripOrHq: [], heapOrArchives: [], scoreArea: [] },
+    own: {
+      rig: visibleCards,
+      gripOrHq: handCards,
+      heapOrArchives: [],
+      scoreArea: [],
+    },
     servers: [],
   } as unknown as PlayerView;
   return {

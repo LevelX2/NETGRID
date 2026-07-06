@@ -15,6 +15,7 @@ import {
   selectedSearchChoiceOptionIds,
   type SearchChoiceFeatureSnapshot,
 } from "./search-choice-option";
+import { runnerVisibleSearchCoverageNeed } from "./runner-search-coverage-need";
 import {
   selectedDefaultCardChoiceOptionIds,
   selectedFallbackChoiceOptionIds,
@@ -153,12 +154,15 @@ export function selectedChoicesForDecision(
     };
   }
   if (choice.kind === "select_cards") {
+    const requiredCoverage =
+      runnerVisibleSearchCoverageNeed(input)?.requiredCoverage;
     const searchSelected = selectedSearchChoiceOptionIds(
       choice,
       selectableOptions,
       {
         features: dependencies.extractAiFeatures(input),
         rolesForCardId: dependencies.rolesForCardId,
+        ...(requiredCoverage ? { requiredCoverage } : {}),
       },
     );
     if (searchSelected)

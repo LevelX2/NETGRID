@@ -252,28 +252,141 @@ describe("runnerSemanticGoalFitScoreComponent", () => {
       ),
     ).toBeUndefined();
   });
+
+  it("penalizes coverage search when a visible hand breaker already answers the need", () => {
+    const action = {
+      actionId: "program-search",
+      side: "runner",
+      type: "activated_card_ability",
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals([], {
+      playerView: {
+        own: {
+          tags: 0,
+          credits: 4,
+          gripOrHq: [
+            {
+              instanceId: "ap-breaker",
+              definitionId: "ap-breaker",
+              title: "AP Breaker",
+              type: "program",
+              known: true,
+              subtypes: ["Icebreaker", "AP"],
+            },
+          ],
+          rig: [],
+        },
+        servers: [
+          {
+            id: "rd",
+            label: "R&D",
+            root: [],
+            ice: [
+              {
+                instanceId: "ap-ice",
+                definitionId: "ap-ice",
+                title: "AP ICE",
+                type: "ice",
+                known: true,
+                rezzed: true,
+                subtypes: ["AP"],
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    const component = runnerSemanticGoalFitScoreComponent(
+      input,
+      action,
+      "coverage_search",
+      undefined,
+      testDependencies({ sourceRole: "search" }),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_goal_fit_coverage_search_saturated",
+      value: -1200,
+    });
+    expect(component?.reason).toContain("required:breaker_ap");
+    expect(component?.reason).toContain("hand_answer:ap-breaker");
+  });
+
+  it("keeps coverage-search bonus when no visible hand answer exists", () => {
+    const action = {
+      actionId: "program-search",
+      side: "runner",
+      type: "activated_card_ability",
+    } as unknown as LegalAction;
+    const input = runnerInputWithGoals([], {
+      playerView: {
+        own: {
+          tags: 0,
+          credits: 4,
+          gripOrHq: [],
+          rig: [],
+        },
+        servers: [
+          {
+            id: "rd",
+            label: "R&D",
+            root: [],
+            ice: [
+              {
+                instanceId: "ap-ice",
+                definitionId: "ap-ice",
+                title: "AP ICE",
+                type: "ice",
+                known: true,
+                rezzed: true,
+                subtypes: ["AP"],
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    const component = runnerSemanticGoalFitScoreComponent(
+      input,
+      action,
+      "coverage_search",
+      undefined,
+      testDependencies({ sourceRole: "search" }),
+    );
+
+    expect(component).toMatchObject({
+      key: "runner_goal_fit_coverage_search",
+      value: 1400,
+    });
+  });
 });
 
 function runnerInputWithGoals(
   goals: readonly RunnerTacticalGoal[],
+  overrides: Record<string, unknown> = {},
 ): AiDecisionInput {
   return {
     side: "runner",
-    playerView: { own: { tags: 0 } },
+    playerView: { own: { tags: 0 }, servers: [] },
     ownRunnerTacticalGoals: goals,
+    ...overrides,
   } as unknown as AiDecisionInput;
 }
 
 function testDependencies(params: {
   evaluation?: RunnerRunTargetEvaluation;
+  sourceRole?: "search" | "draw";
 } = {}) {
   return {
-    sourceCardAnswerRole: () => undefined,
+    sourceCardAnswerRole: () => params.sourceRole,
     runActionSpendingCapAssessment: () => ({
       ok: true,
       reason: "test",
       visibleBreakCost: 0,
     }),
     runTargetEvaluationForAction: () => params.evaluation,
+    rolesForCardId: () => [],
   };
 }

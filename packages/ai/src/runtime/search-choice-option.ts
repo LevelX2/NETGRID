@@ -3,6 +3,8 @@ import { type AiDecisionInput } from "@netgrid/shared";
 import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { boundedSelectionCount } from "./choice-option";
 import { rolesMatch } from "./role-match";
+import { visibleCardCoversRequiredCoverage } from "./runner-search-coverage-need";
+import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
 
 type PendingChoice = NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>;
 type PendingChoiceOption = PendingChoice["options"][number];
@@ -17,6 +19,7 @@ export type SearchChoiceFeatureSnapshot = {
 export type SearchChoiceScoringContext = {
   readonly features: SearchChoiceFeatureSnapshot;
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
+  readonly requiredCoverage?: RequiredCapabilityKind;
 };
 
 export function selectedSearchChoiceOptionIds(
@@ -31,12 +34,24 @@ export function selectedSearchChoiceOptionIds(
     selectableOptions.length,
   );
   if (count <= 0) return [];
+  const hasDirectCoverageAnswer = Boolean(
+    context.requiredCoverage &&
+      selectableOptions.some(
+        (option) =>
+          option.card &&
+          visibleCardCoversRequiredCoverage(
+            option.card,
+            context.requiredCoverage,
+            context.rolesForCardId,
+          ),
+      ),
+  );
   return selectableOptions
     .slice()
     .sort((left, right) => {
       const scoreDelta =
-        scoreSearchChoiceOption(choice, right, context) -
-        scoreSearchChoiceOption(choice, left, context);
+        scoreSearchChoiceOption(choice, right, context, hasDirectCoverageAnswer) -
+        scoreSearchChoiceOption(choice, left, context, hasDirectCoverageAnswer);
       return (
         scoreDelta ||
         left.label.localeCompare(right.label, "de") ||
@@ -69,6 +84,7 @@ function scoreSearchChoiceOption(
   choice: PendingChoice,
   option: PendingChoiceOption,
   context: SearchChoiceScoringContext,
+  hasDirectCoverageAnswer: boolean,
 ): number {
   const card = option.card;
   if (!card) return 0;
@@ -81,10 +97,23 @@ function scoreSearchChoiceOption(
   );
   const features = context.features;
   let score = 100;
+  const coversRequiredCoverage = visibleCardCoversRequiredCoverage(
+    card,
+    context.requiredCoverage,
+    context.rolesForCardId,
+  );
 
   if (card.type === "program")
     score += destination === "install_program" ? 1000 : 520;
   else if (destination === "install_program") score -= 600;
+
+  if (context.requiredCoverage) {
+    if (coversRequiredCoverage) {
+      score += 1450;
+    } else if (hasDirectCoverageAnswer && card.type === "program") {
+      score -= 650;
+    }
+  }
 
   if (destination === "install_program") {
     const memoryCost = card.memoryCost ?? 0;

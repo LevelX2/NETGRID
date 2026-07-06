@@ -15,6 +15,7 @@ import {
   recoveryTargetVisibleCard,
 } from "./tactical-plan-coverage-card-roles";
 import { cardProvidesBreakerCoverage } from "./tactical-plan-breaker-cards";
+import { runnerHandBreakerForCoverage } from "./tactical-plan-breaker-coverage";
 import {
   economyFalseMatchLoopPenalties,
   noRecoveryLoopPenalties,
@@ -98,6 +99,12 @@ export function coverageSearchActionFit(
     sourceRole &&
     coveragePlanRoleMatches(sourceRole, ["search"])
   ) {
+    const saturated = saturatedCoverageSearchActionFit(
+      input,
+      requiredCoverage,
+      sourceRole,
+    );
+    if (saturated) return saturated;
     const answerRole: CoverageAnswerRole =
       action.type === "install_card" ? "search_engine_setup" : "program_search";
     return {
@@ -177,6 +184,12 @@ export function coverageSearchActionFit(
   }
 
   if (candidateHasProgramSearchSignal(candidate)) {
+    const saturated = saturatedCoverageSearchActionFit(
+      input,
+      requiredCoverage,
+      "program_search",
+    );
+    if (saturated) return saturated;
     return {
       supportsActiveCapabilityNeed: true,
       answerRole: "program_search",
@@ -228,6 +241,39 @@ export function coverageSearchActionFit(
         ? "why_livewire_not_search:economy_does_not_satisfy_coverage"
         : "rejectedFalseMatches:action_does_not_satisfy_coverage",
       ...recoveryLoopPenaltyEvidence(penalties),
+    ],
+  };
+}
+
+function saturatedCoverageSearchActionFit(
+  input: AiDecisionInput,
+  requiredCoverage: RequiredCapabilityKind,
+  matchedActionRole: string,
+): CoverageSearchActionFit | undefined {
+  const handAnswer = runnerHandBreakerForCoverage(
+    input.playerView,
+    requiredCoverage,
+  );
+  if (!handAnswer) return undefined;
+  return {
+    supportsActiveCapabilityNeed: false,
+    answerRole: "not_coverage_answer",
+    recoveredCardRole: matchedActionRole,
+    supportsCreditNeed: false,
+    supportsDrawOrSearchNeed: false,
+    supportsSurvivalNeed: false,
+    recoveredCardPlanFit: "none",
+    recoveryLoopRisk: "high",
+    evidence: [
+      `activeRequiredCapability:${requiredCoverage}`,
+      "coverageAnswerRole:not_coverage_answer",
+      "planStepExpectedRole:install_or_fund_visible_answer",
+      `matchedActionRole:${matchedActionRole}`,
+      `visibleHandCoverageAnswer:${handAnswer.definitionId ?? handAnswer.title ?? "known"}`,
+      "rejectedFalseMatches:coverage_search_saturated_by_hand_answer",
+      ...recoveryLoopPenaltyEvidence(
+        recoveryLoopPenaltiesForCoverageSearch(false, false, false),
+      ),
     ],
   };
 }

@@ -58,14 +58,42 @@ describe("selectedSearchChoiceOptionIds", () => {
 
     expect(selected).toEqual(["fresh", "duplicate"]);
   });
+
+  it("prioritizes a direct required-coverage answer over generic programs", () => {
+    const choice = searchChoice(
+      [
+        option("generic", "Generic program", "program"),
+        option("memory", "Memory chip", "program", { memoryLimitBonus: 1 }),
+        option("ap-breaker", "AP Breaker", "program", {
+          subtypes: ["Icebreaker", "AP"],
+        }),
+      ],
+      1,
+    );
+    const selected = selectedSearchChoiceOptionIds(choice, choice.options, {
+      features: {
+        credits: 5,
+        memoryRemaining: 3,
+        rigRoles: new Set(["breaker_fracter"]),
+        rigDefinitionIds: new Set(),
+      },
+      rolesForCardId: () => [],
+      requiredCoverage: "breaker_ap",
+    });
+
+    expect(selected).toEqual(["ap-breaker"]);
+  });
 });
 
-function searchChoice(options: PendingChoice["options"]): PendingChoice {
+function searchChoice(
+  options: PendingChoice["options"],
+  maxSelections = 2,
+): PendingChoice {
   return {
     id: "search-choice",
     source: "stack search",
-    minSelections: 2,
-    maxSelections: 2,
+    minSelections: maxSelections,
+    maxSelections,
     options,
     cardSearchPresentation: {
       destination: "grip",
@@ -88,6 +116,7 @@ function option(
   id: string,
   label: string,
   type: string = "event",
+  cardOverrides: Record<string, unknown> = {},
 ): PendingChoice["options"][number] {
   return {
     id,
@@ -97,6 +126,7 @@ function option(
       title: label,
       type,
       known: true,
+      ...cardOverrides,
     },
   } as unknown as PendingChoice["options"][number];
 }
