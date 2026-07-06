@@ -1790,6 +1790,61 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("classifies reachable same-turn advance closeouts as score_now", () => {
+    const agenda = agendaCard("remote-agenda", 2);
+    const advanceAgenda = {
+      ...corpAction("advance-remote-agenda", "advance_card", {
+        serverId: "remote_1",
+      }),
+      source: agenda.instanceId,
+      costs: [{ clicks: 1, credits: 1 }],
+    } as LegalAction;
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpCredits: 4,
+      legalActions: [advanceAgenda, gainCredit],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [iceCard("rd-ice")]),
+        remoteServer("remote_1", [], [agenda]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [advanceAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          scoreHorizon: "next_turn",
+          recommendedNextStep: "build_remote_ice",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const advanceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      advanceAgenda,
+      dependencies,
+    );
+    const creditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      gainCredit,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "score_now",
+      severity: "critical",
+      targetServerId: "remote_1",
+    });
+    expect(advanceComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
   it("treats non-scoreline abilities as mismatches under forced scoreline clock", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",

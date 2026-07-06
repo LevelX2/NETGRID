@@ -1343,12 +1343,10 @@ function actionKeepsSideSafeSameTurnScoreCloseout<TConsumer extends string>(
   entry: ScoredLegalAction,
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
-  return (
-    actionKeepsSameTurnScoreCloseoutReachable(
-      input,
-      entry.action,
-      dependencies,
-    ) && scoringWindowAllowsSameTurnScoreNow(entry.scoringWindow)
+  return actionKeepsSameTurnScoreCloseoutReachable(
+    input,
+    entry.action,
+    dependencies,
   );
 }
 
@@ -1359,25 +1357,10 @@ function actionKeepsSideSafeSameTurnScoreCloseoutForAction<
   action: LegalAction,
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
-  if (!actionKeepsSameTurnScoreCloseoutReachable(input, action, dependencies)) {
-    return false;
-  }
-  const roles = dependencies.rolesForAction(input, action);
-  return scoringWindowAllowsSameTurnScoreNow(
-    dependencies.corpScoringWindowAssessment?.(input, action, roles),
-  );
-}
-
-function scoringWindowAllowsSameTurnScoreNow(
-  assessment: CorpScoringWindowAssessment | undefined,
-): boolean {
-  if (!assessment) return true;
-  return (
-    assessment.scoreHorizon === "immediate" &&
-    assessment.windowKind !== "unsafe" &&
-    assessment.windowKind !== "none" &&
-    !assessment.runnerCanContestBeforeScore &&
-    !assessment.runnerCanReachAccessBeforeScore
+  return actionKeepsSameTurnScoreCloseoutReachable(
+    input,
+    action,
+    dependencies,
   );
 }
 

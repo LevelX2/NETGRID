@@ -974,7 +974,7 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
-  it("does not advance a naked remote score line when safe alternatives are legal", () => {
+  it("advances a naked remote score line when same-turn closeout is reachable", () => {
     const remoteAgenda = visibleCard("remote-agenda", "corp", "agenda", {
       advancementCounters: 1,
       advancementRequirement: 3,
@@ -1001,14 +1001,11 @@ describe("Semantic AI runtime cutover", () => {
     ];
 
     const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
 
-    expect(decision.actionId).toBe("gain-credit");
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining([
-        "corp_remote_risk:naked_score_line_present",
-        "corp_safe_alternative:economy",
-      ]),
-    );
+    expect(decision.actionId).toBe("advance-naked-agenda");
+    expect(debugText).toContain("corp_same_turn_score_closeout_advance");
+    expect(debugText).toContain("corp_board_triage_primary:score_now");
   });
 
   it("keeps a protected remote score line selectable", () => {
@@ -1109,11 +1106,16 @@ describe("Semantic AI runtime cutover", () => {
     expect(debugText).toContain("remote_contestable_by_runner:true");
   });
 
-  it("does not advance a protected but contestable remote score line", () => {
-    const remoteAgenda = visibleCard("contestable-remote-agenda", "corp", "agenda", {
-      advancementCounters: 1,
-      advancementRequirement: 3,
-    });
+  it("advances a protected but contestable remote score line when same-turn closeout is reachable", () => {
+    const remoteAgenda = visibleCard(
+      "contestable-remote-agenda",
+      "corp",
+      "agenda",
+      {
+        advancementCounters: 1,
+        advancementRequirement: 3,
+      },
+    );
     const input = aiInput("corp", [
       legalAction(
         "advance-contestable-agenda",
@@ -1151,17 +1153,10 @@ describe("Semantic AI runtime cutover", () => {
     const decision = chooseCorpAction(input);
     const debugText = JSON.stringify(decision.decisionDebug);
 
-    expect(decision.actionId).toBe("gain-credit");
-    expect(debugText).toContain("corp_contestable_remote_score_penalty");
+    expect(decision.actionId).toBe("advance-contestable-agenda");
+    expect(debugText).toContain("corp_same_turn_score_closeout_advance");
+    expect(debugText).toContain("corp_board_triage_primary:score_now");
     expect(debugText).toContain("remote_contestable_by_runner:true");
-    expect(decision.decisionDebug?.detailSections).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          id: "tactical_plan",
-          items: expect.arrayContaining(["blocked_plan_count:1"]),
-        }),
-      ]),
-    );
   });
 
   it("funds remote rez floor before advancing a remote agenda behind unrezzed ice", () => {
