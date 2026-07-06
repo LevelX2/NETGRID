@@ -83,6 +83,51 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     });
   });
 
+  it("reserves same-turn advance credits before calling a one-ice advance safe", () => {
+    const agenda = agendaCard("agenda-in-remote", {
+      advancementRequirement: 3,
+    });
+    const action = corpAction(
+      "advance-agenda-with-thin-rez-floor",
+      "advance_card",
+      {
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 4,
+        servers: protectedCentralServers([
+          remoteServer(
+            "remote_1",
+            [wallIce("remote-wall", { rezCost: 3 })],
+            [agenda],
+          ),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      scoreHorizon: "next_turn",
+      missingVisibleBreakerCoverage: true,
+      corpCanRezRelevantIce: false,
+      runnerCanContestBeforeScore: false,
+      recommendedNextStep: "gain_credit",
+    });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "pre_exposure_advancement_credit_reserve:2",
+        "remote_rez_budget:pre_exposure_advancement_credit_reserve:2",
+        "remote_rez_budget:credits_after_pre_exposure_reserve:2",
+        "remote_rez_budget:min_relevant_rez_cost:3",
+      ]),
+    );
+  });
+
   it("downgrades delayed one-ice agenda installs when rich runner exposure exists", () => {
     const agenda = agendaCard("agenda-in-hq");
     const action = corpAction(

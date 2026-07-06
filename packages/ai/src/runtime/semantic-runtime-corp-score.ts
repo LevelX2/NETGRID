@@ -818,6 +818,40 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
   );
   const rezFloor = dependencies.corpRemoteRezFloorAssessment(input, action);
   if (rezFloor?.blockedByFloor) return undefined;
+  const creditsAfterAction =
+    input.playerView.own.credits - dependencies.actionCreditCost(action);
+  const closesBeforeRunner =
+    dependencies.corpAdvanceCompletesScore?.(input, action) === true ||
+    scoringWindow?.scoreHorizon === "immediate";
+  const scoringWindowNeedsFunding =
+    scoringWindow?.recommendedNextStep === "gain_credit" ||
+    scoringWindow?.corpCanRezRelevantIce === false ||
+    scoringWindow?.corpCanRezFullPathWithDynamicReserve === false;
+  if (
+    !closesBeforeRunner &&
+    scoringWindowNeedsFunding &&
+    creditsAfterAction < state.reserveFloor
+  ) {
+    return {
+      key: "corp_active_remote_agenda_underfunded_advance",
+      label: "Remote-Agenda-Funding",
+      value: -9000,
+      reason: [
+        "active_remote_agenda:true",
+        "advance_breaks_score_remote_reserve:true",
+        `server:${state.serverId}`,
+        `card:${state.cardId}`,
+        `credits_after_action:${creditsAfterAction}`,
+        `reserve_floor:${state.reserveFloor}`,
+        `advances_remaining:${state.advancesRemaining}`,
+        `unrezzed_remote_rez_cost:${state.unrezzedRemoteRezCost}`,
+        ...(scoringWindow?.recommendedNextStep
+          ? [`recommended_next_step:${scoringWindow.recommendedNextStep}`]
+          : []),
+        ...state.evidence,
+      ].join("|"),
+    };
+  }
   if (scoringWindow?.recommendedNextStep === "gain_credit") {
     return undefined;
   }

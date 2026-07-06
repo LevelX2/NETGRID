@@ -130,10 +130,19 @@ export function semanticRuntimeCorpScoringWindowAssessment<
   const scoreHorizon = scoringWindowHorizon(input, action, dependencies);
   const creditsAfterAction =
     input.playerView.own.credits - dependencies.actionCreditCost(action);
+  const preExposureAdvancementCreditReserve =
+    scoringWindowPreExposureAdvancementCreditReserve(
+      input,
+      action,
+      dependencies,
+      scoreHorizon,
+      scoreLineAction,
+    );
   const rezBudget = scoringWindowRezBudget(
     projectedServer,
     creditsAfterAction,
     dependencies,
+    preExposureAdvancementCreditReserve,
   );
   const access = scoringWindowAccessAssessment(input, projectedServer);
   const runnerExposureCreditActions = scoringWindowRunnerExposureCreditActions(
@@ -260,6 +269,7 @@ export function semanticRuntimeCorpScoringWindowAssessment<
       `agenda_steal_severity:${agendaStealSeverity}`,
       `delayed_score_exposure_risk:${delayedExposureRisk}`,
       `runner_exposure_credit_actions:${runnerExposureCreditActions}`,
+      `pre_exposure_advancement_credit_reserve:${preExposureAdvancementCreditReserve}`,
       `missing_visible_installed_coverage:${access.missingVisibleBreakerCoverage}`,
       `corp_can_rez_relevant_ice:${rezBudget.corpCanRezRelevantIce}`,
       `corp_can_rez_full_path:${rezBudget.corpCanRezFullPath}`,
@@ -372,6 +382,46 @@ function scoringWindowActionClickCost(action: LegalAction): number {
     return 1;
   }
   return 0;
+}
+
+function scoringWindowPreExposureAdvancementCreditReserve<
+  TServer extends CorpServerLike,
+>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoringWindowDependencies<TServer>,
+  scoreHorizon: CorpScoringWindowHorizon,
+  scoreLineAction: boolean,
+): number {
+  if (!scoreLineAction || scoreHorizon === "immediate") return 0;
+  if (scoreHorizon !== "next_turn" && scoreHorizon !== "slow") return 0;
+  if (action.type !== "advance_card") return 0;
+  const sourceCard = dependencies.actionSourceCard?.(input, action);
+  if (!sourceCard || sourceCard.type !== "agenda") return 0;
+  const requirement = scoringWindowAdvancementRequirement(sourceCard);
+  if (typeof requirement !== "number" || requirement <= 0) return 0;
+  const currentCounters = Math.max(
+    0,
+    Math.floor(
+      typeof sourceCard.advancementCounters === "number" &&
+        Number.isFinite(sourceCard.advancementCounters)
+        ? sourceCard.advancementCounters
+        : 0,
+    ),
+  );
+  const countersAfterAction =
+    action.type === "advance_card" ? currentCounters + 1 : currentCounters;
+  const advancesStillNeeded = Math.max(0, requirement - countersAfterAction);
+  if (advancesStillNeeded <= 0) return 0;
+  const remainingCorpClicksAfterAction = Math.max(
+    0,
+    Math.floor(
+      (typeof input.playerView.own.clicks === "number"
+        ? input.playerView.own.clicks
+        : 3) - scoringWindowActionClickCost(action),
+    ),
+  );
+  return Math.min(remainingCorpClicksAfterAction, advancesStillNeeded);
 }
 
 function scoringWindowAdvancementRequirement(
@@ -671,6 +721,7 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
     SemanticRuntimeCorpScoringWindowDependencies<TServer>,
     "visibleIceRezCost"
   >,
+  preExposureAdvancementCreditReserve = 0,
 ): {
   corpCanRezRelevantIce: boolean;
   corpCanRezFullPath: boolean;
@@ -685,6 +736,9 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
   corpCanRezFullPathWithDynamicReserve: boolean;
   evidence: string[];
 } {
+  const effectiveCreditsAfterReserve =
+    creditsAfterAction -
+    Math.max(0, Math.floor(preExposureAdvancementCreditReserve));
   if (!server || server.ice.length === 0) {
     return {
       corpCanRezRelevantIce: false,
@@ -698,7 +752,11 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
       dynamicProtectionWeaknessCount: 0,
       dynamicProtectionReserve: 0,
       corpCanRezFullPathWithDynamicReserve: false,
-      evidence: ["remote_rez_budget:no_ice"],
+      evidence: [
+        "remote_rez_budget:no_ice",
+        `remote_rez_budget:pre_exposure_advancement_credit_reserve:${preExposureAdvancementCreditReserve}`,
+        `remote_rez_budget:credits_after_pre_exposure_reserve:${effectiveCreditsAfterReserve}`,
+      ],
     };
   }
   const rezCosts = server.ice.map((ice) =>
@@ -718,13 +776,13 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
   const relevantIceCount = relevantRezCosts.length;
   const durableRelevantIceCount = durableRelevantRezCosts.length;
   const affordableIceCount = rezCosts.filter(
-    (cost) => cost <= Math.max(0, creditsAfterAction),
+    (cost) => cost <= Math.max(0, effectiveCreditsAfterReserve),
   ).length;
   const affordableRelevantIceCount = relevantRezCosts.filter(
-    (cost) => cost <= Math.max(0, creditsAfterAction),
+    (cost) => cost <= Math.max(0, effectiveCreditsAfterReserve),
   ).length;
   const affordableDurableRelevantIceCount = durableRelevantRezCosts.filter(
-    (cost) => cost <= Math.max(0, creditsAfterAction),
+    (cost) => cost <= Math.max(0, effectiveCreditsAfterReserve),
   ).length;
   const weakPositionScalingIceCount = qualities.filter(
     (quality) => quality.weakPositionScaling,
@@ -743,12 +801,14 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
     totalRezCost + dynamicProtectionReserve;
   return {
     corpCanRezRelevantIce:
-      relevantRezCosts.length > 0 && creditsAfterAction >= minimumRezCost,
+      relevantRezCosts.length > 0 &&
+      effectiveCreditsAfterReserve >= minimumRezCost,
     corpCanRezFullPath:
-      relevantRezCosts.length > 0 && creditsAfterAction >= totalRezCost,
+      relevantRezCosts.length > 0 &&
+      effectiveCreditsAfterReserve >= totalRezCost,
     corpCanRezFullPathWithDynamicReserve:
       relevantRezCosts.length > 0 &&
-      creditsAfterAction >= totalRezCostWithDynamicReserve,
+      effectiveCreditsAfterReserve >= totalRezCostWithDynamicReserve,
     affordableIceCount,
     relevantIceCount,
     affordableRelevantIceCount,
@@ -759,6 +819,8 @@ function scoringWindowRezBudget<TServer extends CorpServerLike>(
     dynamicProtectionReserve,
     evidence: [
       `remote_rez_budget:credits_after_action:${creditsAfterAction}`,
+      `remote_rez_budget:pre_exposure_advancement_credit_reserve:${preExposureAdvancementCreditReserve}`,
+      `remote_rez_budget:credits_after_pre_exposure_reserve:${effectiveCreditsAfterReserve}`,
       `remote_rez_budget:min_relevant_rez_cost:${Number.isFinite(minimumRezCost) ? minimumRezCost : "none"}`,
       `remote_rez_budget:full_relevant_path_rez_cost:${totalRezCost}`,
       `remote_rez_budget:full_relevant_path_with_dynamic_reserve:${totalRezCostWithDynamicReserve}`,
