@@ -183,13 +183,22 @@ export function estimateStructuredBreakerCostForIce(
   );
   const missingStrength = Math.max(0, iceStrength - baseStrength);
   if (missingStrength > 0 && !finiteNumber(profile.pumpCost)) return undefined;
-  const pumpCost =
-    missingStrength * Math.max(0, Math.floor(profile.pumpCost ?? 0));
+  const pumpStrengthAmount = Math.max(
+    1,
+    Math.floor(profile.pumpStrengthAmount ?? 1),
+  );
+  const pumpUses = Math.ceil(missingStrength / pumpStrengthAmount);
+  const pumpCost = pumpUses * Math.max(0, Math.floor(profile.pumpCost ?? 0));
   const breakCost = Math.max(0, Math.floor(profile.breakCost ?? 0));
   const subroutines = Math.max(1, Math.floor(subroutineCount));
+  const subroutinesPerBreak = Math.max(
+    1,
+    Math.floor(profile.maxSubroutinesPerBreak ?? 1),
+  );
+  const breakUses = Math.ceil(subroutines / subroutinesPerBreak);
   const additionalCost =
     subroutines * Math.max(0, Math.floor(additionalBreakCostPerSubroutine));
-  const cost = pumpCost + subroutines * breakCost + additionalCost;
+  const cost = pumpCost + breakUses * breakCost + additionalCost;
   const sideEffectPenalty = breakerSideEffectPenalty(profile);
   return {
     cost,

@@ -10,7 +10,12 @@ import {
 } from "@netgrid/shared";
 import { traceBaseLinkCardImplementationQuotesForDefinition } from "@netgrid/engine";
 import { RUNTIME_CARDS } from "./ai-hints";
-import { breakerCardBlocksAccessReachability } from "./breaker-ontology-consumer";
+import {
+  breakerCardBlocksAccessReachability,
+  estimateStructuredBreakerCostForIce,
+  getStructuredBreakerProfileForCard,
+  structuredBreakerProfileCoversIce,
+} from "./breaker-ontology-consumer";
 
 type IceCardLike = {
   definitionId?: string;
@@ -1672,18 +1677,43 @@ function creditsToBreakVisibleSubroutinesWithBreaker(
     return undefined;
   const iceSubtypes = ice.subtypes ?? iceDefinition.subtypes;
   const targetBreakTags = targetSubroutines.map(breakTagsForSubroutine);
+  const explicitBreakAbilities =
+    breakerDefinition.abilities?.filter(
+      (ability) => ability.type === "break_subroutine",
+    ) ?? [];
+  const matchingBreakAbility = explicitBreakAbilities.find((ability) => {
+    if (ability.iceSubtype && !hasSubtype(iceSubtypes, ability.iceSubtype)) {
+      return false;
+    }
+    const abilityBreakTags = ability.subroutineBreakTags ?? [];
+    if (abilityBreakTags.length === 0) return true;
+    return targetBreakTags.every((tags) =>
+      abilityBreakTags.some((tag) => tags.includes(subtypeKey(tag))),
+    );
+  });
+  const structuredBreakAssessment = matchingBreakAbility
+    ? undefined
+    : structuredBreakerAssessment({
+        breakerCard,
+        breakerDefinition,
+        ice,
+        subroutineCount: targetSubroutines.length,
+        currentBreakerStrength,
+        additionalBreakCostPerSubroutine,
+      });
+  if (structuredBreakAssessment) return structuredBreakAssessment;
+  const structuredProfile = getStructuredBreakerProfileForCard(
+    breakerCard.definitionId,
+  );
+  if (
+    !matchingBreakAbility &&
+    (explicitBreakAbilities.length > 0 || structuredProfile)
+  ) {
+    return undefined;
+  }
   const breakAbility =
-    breakerDefinition.abilities?.find((ability) => {
-      if (ability.type !== "break_subroutine") return false;
-      if (ability.iceSubtype && !hasSubtype(iceSubtypes, ability.iceSubtype)) {
-        return false;
-      }
-      const abilityBreakTags = ability.subroutineBreakTags ?? [];
-      if (abilityBreakTags.length === 0) return true;
-      return targetBreakTags.every((tags) =>
-        abilityBreakTags.some((tag) => tags.includes(subtypeKey(tag))),
-      );
-    }) ?? textBreakSubroutineAbility(breakerDefinition, iceSubtypes);
+    matchingBreakAbility ??
+    textBreakSubroutineAbility(breakerDefinition, iceSubtypes);
   if (!breakAbility) return undefined;
   const iceStrength = ice.strength ?? iceDefinition.strength ?? 0;
   const pumpAbility =
@@ -1772,12 +1802,37 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
   )
     return undefined;
   const iceSubtypes = ice.subtypes ?? iceDefinition.subtypes;
+  const explicitBreakAbilities =
+    breakerDefinition.abilities?.filter(
+      (ability) => ability.type === "break_subroutine",
+    ) ?? [];
+  const matchingBreakAbility = explicitBreakAbilities.find(
+    (ability) =>
+      !ability.iceSubtype || hasSubtype(iceSubtypes, ability.iceSubtype),
+  );
+  const structuredBreakAssessment = matchingBreakAbility
+    ? undefined
+    : structuredBreakerAssessment({
+        breakerCard,
+        breakerDefinition,
+        ice,
+        subroutineCount: endTheRunCount,
+        currentBreakerStrength,
+        additionalBreakCostPerSubroutine,
+      });
+  if (structuredBreakAssessment) return structuredBreakAssessment;
+  const structuredProfile = getStructuredBreakerProfileForCard(
+    breakerCard.definitionId,
+  );
+  if (
+    !matchingBreakAbility &&
+    (explicitBreakAbilities.length > 0 || structuredProfile)
+  ) {
+    return undefined;
+  }
   const breakAbility =
-    breakerDefinition.abilities?.find(
-      (ability) =>
-        ability.type === "break_subroutine" &&
-        (!ability.iceSubtype || hasSubtype(iceSubtypes, ability.iceSubtype)),
-    ) ?? textBreakSubroutineAbility(breakerDefinition, iceSubtypes);
+    matchingBreakAbility ??
+    textBreakSubroutineAbility(breakerDefinition, iceSubtypes);
   if (!breakAbility) return undefined;
   const iceStrength = ice.strength ?? iceDefinition.strength ?? 0;
   const pumpAbility =
@@ -1805,6 +1860,49 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
     endingStrength,
     carriesStrengthAcrossIce:
       breakerCarriesStrengthAcrossIce(breakerDefinition),
+  };
+}
+
+function structuredBreakerAssessment(params: {
+  breakerCard: VisibleCard;
+  breakerDefinition: CardDefinition;
+  ice: { definitionId?: string; subtypes?: string[]; strength?: number };
+  subroutineCount: number;
+  currentBreakerStrength: number;
+  additionalBreakCostPerSubroutine: number;
+}): BreakAssessment | undefined {
+  const profile = getStructuredBreakerProfileForCard(
+    params.breakerCard.definitionId,
+  );
+  if (!profile) return undefined;
+  const estimate = estimateStructuredBreakerCostForIce(
+    params.breakerCard.definitionId,
+    params.ice,
+    params.subroutineCount,
+    params.currentBreakerStrength,
+    params.additionalBreakCostPerSubroutine,
+  );
+  if (!estimate) return undefined;
+  const iceStrength =
+    params.ice.strength ?? cardDefinitionStrength(params.ice.definitionId);
+  const pumpStrengthAmount = Math.max(
+    1,
+    Math.floor(profile.pumpStrengthAmount ?? 1),
+  );
+  const requiredPumps = Math.max(
+    0,
+    Math.ceil(
+      (iceStrength - params.currentBreakerStrength) / pumpStrengthAmount,
+    ),
+  );
+  return {
+    cost: estimate.cost,
+    breakerInstanceId: params.breakerCard.instanceId,
+    endingStrength:
+      params.currentBreakerStrength + requiredPumps * pumpStrengthAmount,
+    carriesStrengthAcrossIce: breakerCarriesStrengthAcrossIce(
+      params.breakerDefinition,
+    ),
   };
 }
 
@@ -1903,13 +2001,23 @@ export function canBreakerDefinitionBreakIce(
   const breakerDefinition = visibleRunCardDefinition(breakerDefinitionId);
   const iceDefinition = visibleRunCardDefinition(iceDefinitionId);
   if (!breakerDefinition || !iceDefinition) return false;
-  return Boolean(
-    breakerDefinition.abilities?.some(
+  const explicitBreakAbilities =
+    breakerDefinition.abilities?.filter(
+      (ability) => ability.type === "break_subroutine",
+    ) ?? [];
+  if (
+    explicitBreakAbilities.some(
       (ability) =>
-        ability.type === "break_subroutine" &&
-        (!ability.iceSubtype ||
-          hasSubtype(iceDefinition.subtypes, ability.iceSubtype)),
-    ),
+        !ability.iceSubtype ||
+        hasSubtype(iceDefinition.subtypes, ability.iceSubtype),
+    )
+  ) {
+    return true;
+  }
+  if (explicitBreakAbilities.length > 0) return false;
+  return structuredBreakerProfileCoversIce(
+    breakerDefinitionId,
+    iceDefinitionId,
   );
 }
 

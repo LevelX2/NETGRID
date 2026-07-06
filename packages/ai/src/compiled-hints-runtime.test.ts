@@ -167,6 +167,48 @@ describe("compiled AI hints runtime full coverage", () => {
         breakCost: 2,
       }),
     );
+    expect(getStructuredBreakerProfileForCard("onr_v1_047_pile-driver")).toEqual(
+      expect.objectContaining({
+        coverage: ["wall"],
+        maxSubroutinesPerBreak: 4,
+        pumpCost: 1,
+        breakCost: 3,
+      }),
+    );
+  });
+
+  it("uses breaker ontology for coverage checks and multi-subroutine costs", () => {
+    expect(
+      canBreakerDefinitionBreakIce(
+        "onr_classic_027_early-worm",
+        "onr_v1_232_crystal-wall",
+      ),
+    ).toBe(true);
+    expect(
+      canBreakerDefinitionBreakIce(
+        "onr_v1_047_pile-driver",
+        "simple_code_gate_ice",
+      ),
+    ).toBe(false);
+    expect(
+      estimateStructuredBreakerCostForIce(
+        "onr_v1_047_pile-driver",
+        { definitionId: "onr_v1_232_crystal-wall", strength: 3 },
+        4,
+        7,
+      ),
+    ).toMatchObject({
+      coverage: "wall",
+      cost: 3,
+    });
+    expect(
+      estimateStructuredBreakerCostForIce(
+        "onr_v1_047_pile-driver",
+        { definitionId: "simple_code_gate_ice", strength: 2 },
+        1,
+        7,
+      ),
+    ).toBeUndefined();
   });
 
   it("keeps Dropp emergency breaker hints out of access reachability consumers", () => {
