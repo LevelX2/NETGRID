@@ -114,6 +114,35 @@ describe("semanticRuntimeStrategicActionFitEvidence", () => {
     ).toEqual([]);
   });
 
+  it("does not treat scored shuffle-draw as strategic credit economy", () => {
+    const basicCredit = action("basic-credit", "corp", "gain_credit");
+    const shuffleDraw = action("shuffle-draw", "corp", "gain_credit", {
+      agendaAbility: "hq_archives_shuffle_draw",
+    });
+    const input = corpStrategicInput([basicCredit, shuffleDraw], []);
+
+    expect(
+      semanticRuntimeStrategicActionFitEvidence(
+        input,
+        basicCredit,
+        "corp.semantic.economy",
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        "semantic_strategic_action_fit:true",
+        "strategic_action_fit_family:corp_asset_economy",
+        "strategic_action_fit_target_match:kind",
+      ]),
+    );
+    expect(
+      semanticRuntimeStrategicActionFitEvidence(
+        input,
+        shuffleDraw,
+        "corp.semantic.economy",
+      ),
+    ).toEqual([]);
+  });
+
   it("matches runner setup scopes by token instead of substring", () => {
     const actionWithNoIntrinsicSetupFit = action(
       "remove-tag",
