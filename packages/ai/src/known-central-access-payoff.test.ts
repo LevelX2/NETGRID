@@ -2,6 +2,7 @@ import type {
   AiDecisionInput,
   LegalAction,
   PlayerView,
+  PublicGameEvent,
   VisibleCard,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
@@ -122,6 +123,59 @@ describe("known central access payoff HQ knownness", () => {
     );
   });
 
+  it("suppresses a repeated HQ run after the only current HQ card was accessed", () => {
+    const hqLook = publicEvent("evt_hq_look", "resolve_choice", 1, {
+      actor: "runner",
+      actionType: "resolve_choice",
+      hiddenZoneAction: "p3_33_private_look",
+      privateLookZone: "hq",
+      privateLookCount: 2,
+      knownHqDefinitionIds: ["simple_economy_asset", "simple_upgrade"],
+    });
+    const hiddenRootInstall = publicEvent("evt_hidden_install", "install_card", 2, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1",
+      installPlacement: "root",
+    });
+    const currentHqAccess = publicEvent("evt_hq_access", "access_card", 3, {
+      actor: "runner",
+      actionType: "access_card",
+      serverLabel: "HQ",
+      cardDefinitionId: "onr_v1_297_overtime-incentives",
+      title: "Overtime Incentives",
+    });
+    const input = aiInput({
+      handCount: 1,
+      publicEvents: [hqLook, hiddenRootInstall, currentHqAccess],
+    });
+
+    const payoff = evaluateKnownCentralAccessPayoff(input, "hq");
+
+    expect(payoff).toMatchObject({
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+      penalty: 640,
+    });
+    expect(payoff.reasons).toEqual(
+      expect.arrayContaining([
+        "known_hq_hand_low_value",
+        "central_known_no_current_payoff",
+      ]),
+    );
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "central_memory_payoff:known",
+        "hq_hand_known_count:1",
+        "hq_hand_count:1",
+        "hq_all_cards_known:true",
+        "hq_unknown_rest_count:0",
+        "hq_knownness_payoff:mostly_known_low_value",
+        "hq_run_suppressed_by_fully_known_low_value_hand:true",
+      ]),
+    );
+  });
+
   it("matches HQ memory invalidation reasons by exact reason code", () => {
     expect(
       hqMemoryInvalidationReasonMatches(
@@ -153,6 +207,7 @@ describe("known central access payoff HQ knownness", () => {
 function aiInput(params: {
   handCount: number;
   rig?: VisibleCard[];
+  publicEvents?: PublicGameEvent[];
 }): AiDecisionInput {
   const legalActions = [runAction("run-hq", "hq")];
   const playerView: PlayerView = {
@@ -187,7 +242,7 @@ function aiInput(params: {
       scoreArea: [],
     },
     servers: [{ id: "hq", label: "HQ", ice: [], root: [] }],
-    publicEvents: [],
+    publicEvents: params.publicEvents ?? [],
     legalActions,
     winner: null,
     agendaPointsToWin: 7,
@@ -195,7 +250,7 @@ function aiInput(params: {
   return {
     side: "runner",
     playerView,
-    eventTail: [],
+    eventTail: params.publicEvents ?? [],
     legalActions,
     difficulty: "normal",
     seed: "known-central-hq-knownness-test",
@@ -203,6 +258,23 @@ function aiInput(params: {
     actionNumber: 1,
     profileId: "runner-ai-test",
   };
+}
+
+function publicEvent(
+  eventId: string,
+  type: string,
+  stateVersionBefore: number,
+  publicPayload: Record<string, unknown>,
+): PublicGameEvent {
+  return {
+    eventId,
+    type,
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `hash_${eventId}`,
+    visibilityClass: "hidden_info_barrier",
+    publicPayload,
+  } as PublicGameEvent;
 }
 
 function beliefWithHqMemory(params: {

@@ -706,12 +706,21 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
     if (adjustment.kind === "hidden_zone_reordered") knownRndTop = undefined;
   }
 
-  const knownEntries = knownCards
+  const handCount = input.playerView.opponent.handCount;
+  const reconciledKnownCards = currentHqKnownEntriesForHandCount(
+    knownCards,
+    handCount,
+  );
+  const knownEntries = reconciledKnownCards
     .slice()
     .sort((left, right) => left.key.localeCompare(right.key));
   const knownDefinitionIds = knownEntries.map((entry) => entry.definitionId);
-  const handCount = input.playerView.opponent.handCount;
-  const ledger = deriveHqHandLedger(knownEntries, handCount, invalidationReasons, candidateGroups);
+  const ledger = deriveHqHandLedger(
+    knownEntries,
+    handCount,
+    invalidationReasons,
+    candidateGroups,
+  );
   return {
     handCount,
     knownDefinitions: knownDefinitionIds,
@@ -744,7 +753,11 @@ function deriveHqHandLedger(
     ...definition,
     sourceEventIds: sortedUnique(sourceEventIdsByDefinition.get(definition.definitionId) ?? []),
   }));
-  const candidateRemainderCount = candidateGroups.reduce(
+  const activeCandidateGroups = hqCandidateGroupsWithinAvailableSlots(
+    candidateGroups,
+    Math.max(0, handCount - knownEntries.length),
+  );
+  const candidateRemainderCount = activeCandidateGroups.reduce(
     (sum, group) => sum + Math.max(0, group.candidateCount - group.departureCount),
     0,
   );
@@ -752,13 +765,39 @@ function deriveHqHandLedger(
   return {
     safeDefinitions,
     unknownRestCount: Math.max(0, handCount - knownEntries.length - candidateRemainderCount),
-    candidateGroups: candidateGroups.slice(-6),
+    candidateGroups: activeCandidateGroups,
     sourceEventIds: sortedUnique([
       ...knownEntries.map((entry) => entry.eventId),
-      ...candidateGroups.map((group) => group.sourceEventId),
+      ...activeCandidateGroups.map((group) => group.sourceEventId),
     ]),
     invalidationReasons: invalidationReasons.slice(),
   };
+}
+
+function currentHqKnownEntriesForHandCount(
+  knownEntries: KnownHqHandEntry[],
+  handCount: number,
+): KnownHqHandEntry[] {
+  if (handCount <= 0) return [];
+  if (knownEntries.length <= handCount) return knownEntries.slice();
+  return knownEntries.slice(-handCount);
+}
+
+function hqCandidateGroupsWithinAvailableSlots(
+  candidateGroups: HqHandCandidateGroupMemory[],
+  availableSlots: number,
+): HqHandCandidateGroupMemory[] {
+  if (availableSlots <= 0) return [];
+  let remainingSlots = availableSlots;
+  const selected: HqHandCandidateGroupMemory[] = [];
+  for (const group of candidateGroups.slice(-6).reverse()) {
+    const groupRemainder = Math.max(0, group.candidateCount - group.departureCount);
+    if (groupRemainder <= 0) continue;
+    selected.push(group);
+    remainingSlots -= groupRemainder;
+    if (remainingSlots <= 0) break;
+  }
+  return selected.reverse();
 }
 
 function hqHiddenInstallDepartureMemory(

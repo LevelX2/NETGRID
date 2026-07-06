@@ -296,6 +296,48 @@ describe("belief-state HQ hand memory retention", () => {
       "shuffle_changed_hq_hand:evt_reorder",
     );
   });
+
+  it("treats a current single-card HQ access as complete despite stale candidates", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "simple_economy_asset",
+      "simple_upgrade",
+    ]);
+    const hiddenRootInstall = publicEvent("evt_hidden_install", "install_card", 2, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1",
+      installPlacement: "root",
+    });
+    const currentHqAccess = publicEvent("evt_hq_access", "access_card", 3, {
+      actor: "runner",
+      actionType: "access_card",
+      serverLabel: "HQ",
+      cardDefinitionId: "onr_v1_297_overtime-incentives",
+      title: "Overtime Incentives",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([hqLook, hiddenRootInstall, currentHqAccess], 1),
+    );
+    const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+
+    expect(hqMemory).toMatchObject({
+      handCount: 1,
+      knownDefinitions: ["onr_v1_297_overtime-incentives"],
+      knownCount: 1,
+      allCardsKnown: true,
+    });
+    expect(hqMemory?.ledger).toMatchObject({
+      unknownRestCount: 0,
+      candidateGroups: [],
+      safeDefinitions: [
+        expect.objectContaining({
+          definitionId: "onr_v1_297_overtime-incentives",
+          count: 1,
+        }),
+      ],
+    });
+  });
 });
 
 describe("belief-state known position memory", () => {

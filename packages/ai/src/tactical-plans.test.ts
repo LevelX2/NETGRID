@@ -1122,6 +1122,63 @@ describe("tactical plan model", () => {
     expect(rdPlan?.status).toBe("active");
   });
 
+  it("abandons a repeated HQ probe after the only current HQ card was accessed", () => {
+    const input = aiInput("runner", [
+      legalAction("run-hq", "runner", "start_run", {
+        serverId: "hq",
+      }),
+      legalAction("run-rd", "runner", "start_run", {
+        serverId: "rd",
+      }),
+      legalAction("gain", "runner", "gain_credit"),
+    ]);
+    input.playerView.stateVersion = 4;
+    input.playerView.opponent.handCount = 1;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.eventTail = [
+      hqPrivateLookEvent("tactical-hq-stale-root-look", 1, [
+        "simple_economy_asset",
+        "simple_upgrade",
+      ]),
+      publicEvent("tactical-hq-hidden-root-install", 2, "install_card", {
+        actor: "corp",
+        actionType: "install_card",
+        serverId: "remote_1",
+        installPlacement: "root",
+      }),
+      publicEvent("tactical-hq-current-operation-access", 3, "access_card", {
+        actor: "runner",
+        actionType: "access_card",
+        serverLabel: "HQ",
+        cardDefinitionId: "onr_v1_297_overtime-incentives",
+        title: "Overtime Incentives",
+      }),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const hqPlan = plans.find(
+      (plan) => plan.planId === "runner.opportunistic_central_run:hq",
+    );
+    const rdPlan = plans.find(
+      (plan) => plan.planId === "runner.opportunistic_central_run:rd",
+    );
+
+    expect(hqPlan?.status).toBe("abandoned");
+    expect(hqPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "known_hq_hand_low_value",
+        "central_known_no_current_payoff",
+        "hq_run_suppressed_by_fully_known_low_value_hand:true",
+        "central_memory_payoff:known_low_value",
+      ]),
+    );
+    expect(hqPlan?.scoreBreakdown[0]).toMatchObject({
+      key: "central_known_no_current_payoff",
+      value: -640,
+    });
+    expect(rdPlan?.status).toBe("active");
+  });
+
   it("funds an unaffordable matching breaker in hand instead of drawing", () => {
     const input = aiInput("runner", [
       legalAction("run-rd", "runner", "start_run", {
