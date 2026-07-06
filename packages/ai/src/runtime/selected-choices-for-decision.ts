@@ -139,6 +139,19 @@ export function selectedChoicesForDecision(
       selectedOptionIds: selected ? [selected] : [],
     };
   }
+  if (
+    choice.kind === "select_cards" &&
+    isHqToNewRemoteInstallRezChoice(choice)
+  ) {
+    return {
+      choiceId: choice.choiceId,
+      selectedOptionIds: selectedHqToNewRemoteInstallRezOptionIds(
+        input,
+        choice,
+        selectableOptions,
+      ),
+    };
+  }
   if (choice.kind === "select_cards") {
     const searchSelected = selectedSearchChoiceOptionIds(
       choice,
@@ -191,4 +204,72 @@ export function selectedChoicesForDecision(
   return selectedOptionId !== undefined
     ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
     : { choiceId: choice.choiceId, selectedOptionIds: [] };
+}
+
+function isHqToNewRemoteInstallRezChoice(choice: PendingChoice): boolean {
+  return (
+    choice.source.startsWith(
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:",
+    ) ||
+    choice.source.startsWith(
+      "card_implementation.hq_to_new_remote_install_rez:",
+    )
+  );
+}
+
+function selectedHqToNewRemoteInstallRezOptionIds(
+  input: AiDecisionInput,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+): string[] {
+  const handByInstanceId = new Map(
+    input.playerView.own.gripOrHq.map((card) => [card.instanceId, card]),
+  );
+  const iceOptions: PendingChoiceOptions = [];
+  const upgradeOptions: PendingChoiceOptions = [];
+  const assetOptions: PendingChoiceOptions = [];
+  for (const option of selectableOptions) {
+    const card = handByInstanceId.get(choiceCardInstanceId(option));
+    if (!card) continue;
+    if (card.type === "ice") {
+      iceOptions.push(option);
+      continue;
+    }
+    if (card.type === "upgrade") {
+      upgradeOptions.push(option);
+      continue;
+    }
+    if (card.type === "asset") {
+      assetOptions.push(option);
+    }
+  }
+  const rootMain = assetOptions[0];
+  const maxSelections = Math.max(0, choice.maxSelections);
+  if (maxSelections === 0) return [];
+  const selected: PendingChoiceOptions = [];
+  const reserveRootSlot = rootMain ? 1 : 0;
+  for (const option of iceOptions) {
+    if (selected.length >= maxSelections - reserveRootSlot) break;
+    selected.push(option);
+  }
+  if (rootMain && selected.length < maxSelections) selected.push(rootMain);
+  for (const option of upgradeOptions) {
+    if (selected.length >= maxSelections) break;
+    selected.push(option);
+  }
+  if (selected.length < choice.minSelections) {
+    return selectedDefaultCardChoiceOptionIds(choice, selectableOptions).slice(
+      0,
+      choice.minSelections,
+    );
+  }
+  return selected.map((option) => option.id);
+}
+
+function choiceCardInstanceId(
+  option: PendingChoiceOptions[number],
+): string {
+  if (typeof option.value === "string" && option.value.length > 0)
+    return option.value;
+  return option.id.startsWith("card_") ? option.id.slice(5) : option.id;
 }

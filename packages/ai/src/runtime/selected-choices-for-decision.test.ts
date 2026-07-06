@@ -82,18 +82,94 @@ describe("selectedChoicesForDecision", () => {
       selectedOptionIds: ["card_hq_agenda_1", "card_hq_agenda_2"],
     });
   });
+
+  it("builds a valid Data Fort Reclamation selection instead of taking every HQ option", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_cards",
+          source:
+            "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez:data_fort_agenda:12",
+          minSelections: 0,
+          maxSelections: 4,
+          options: [
+            { id: "card_agenda_1", label: "Agenda", value: "agenda_1" },
+            { id: "card_asset_1", label: "Asset", value: "asset_1" },
+            { id: "card_ice_1", label: "ICE", value: "ice_1" },
+            { id: "card_asset_2", label: "Second Asset", value: "asset_2" },
+            { id: "card_upgrade_1", label: "Upgrade", value: "upgrade_1" },
+          ],
+        },
+        {
+          gripOrHq: [
+            visibleCard("agenda_1", "agenda"),
+            visibleCard("asset_1", "asset"),
+            visibleCard("ice_1", "ice"),
+            visibleCard("asset_2", "asset"),
+            visibleCard("upgrade_1", "upgrade"),
+          ],
+        },
+      ),
+      resolveChoiceAction(),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["card_ice_1", "card_asset_1", "card_upgrade_1"],
+    });
+  });
+
+  it("does not install agendas through a Data Fort Reclamation fallback choice", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_cards",
+          source:
+            "card_implementation.hq_to_new_remote_install_rez:data_fort_agenda:12",
+          minSelections: 0,
+          maxSelections: 2,
+          options: [
+            { id: "card_agenda_1", label: "Agenda", value: "agenda_1" },
+            { id: "card_agenda_2", label: "Agenda", value: "agenda_2" },
+          ],
+        },
+        {
+          gripOrHq: [
+            visibleCard("agenda_1", "agenda"),
+            visibleCard("agenda_2", "agenda"),
+          ],
+        },
+      ),
+      resolveChoiceAction(),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: [],
+    });
+  });
 });
 
-function inputWithChoice(choice: {
-  kind: "select_option" | "select_cards";
-  source?: string;
-  minSelections: number;
-  maxSelections: number;
-  options?: Array<{ id: string; label: string; value?: string }>;
-}): AiDecisionInput {
+function inputWithChoice(
+  choice: {
+    kind: "select_option" | "select_cards";
+    source?: string;
+    minSelections: number;
+    maxSelections: number;
+    options?: Array<{ id: string; label: string; value?: string }>;
+  },
+  options: {
+    gripOrHq?: AiDecisionInput["playerView"]["own"]["gripOrHq"];
+  } = {},
+): AiDecisionInput {
   return {
     side: "corp",
     playerView: {
+      own: {
+        gripOrHq: options.gripOrHq ?? [],
+      },
       pendingChoice: {
         choiceId: "choice_multi",
         side: "corp",
@@ -112,6 +188,17 @@ function inputWithChoice(choice: {
       },
     },
   } as unknown as AiDecisionInput;
+}
+
+function visibleCard(
+  instanceId: string,
+  type: "agenda" | "asset" | "ice" | "upgrade",
+): AiDecisionInput["playerView"]["own"]["gripOrHq"][number] {
+  return {
+    instanceId,
+    known: true,
+    type,
+  } as AiDecisionInput["playerView"]["own"]["gripOrHq"][number];
 }
 
 function resolveChoiceAction(): LegalAction {
