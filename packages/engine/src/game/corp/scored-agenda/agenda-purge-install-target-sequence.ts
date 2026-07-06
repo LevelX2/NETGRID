@@ -76,7 +76,11 @@ export function resolveAgendaPurgeInstallTargets(
       source: `${SECURITY_PURGE_INSTALL_TARGET_CHOICE_SOURCE}:${agendaId}:${revealedIds.join(",")}:${host.state.stateVersion + 1}`,
       prompt: "Security Purge: Zielserver fuer aufgedeckte ICE waehlen.",
       kind: "select_option",
-      options: agendaPurgeInstallTargetOptions(host, revealedIceIds),
+      options: agendaPurgeInstallTargetOptions(
+        host,
+        revealedIds,
+        revealedIceIds,
+      ),
       minSelections: revealedIceIds.length,
       maxSelections: revealedIceIds.length,
       stateVersion: host.state.stateVersion + 1,
@@ -275,6 +279,7 @@ function agendaPurgeIceIds(
 
 function agendaPurgeInstallTargetOptions(
   host: CorpInstallRezSequenceHandlerHost,
+  revealedIds: readonly CardInstanceId[],
   iceIds: readonly CardInstanceId[],
 ): ChoiceRequest["options"] {
   const serverTargets: Array<{
@@ -287,7 +292,14 @@ function agendaPurgeInstallTargetOptions(
     })),
     { serverId: "new_remote", label: "neues Remote" },
   ];
-  return iceIds.flatMap((cardId) => {
+  const revealedCardOptions = revealedIds.map((cardId) => ({
+    id: `agenda_purge_revealed_${cardId}`,
+    label: host.cards.definitionFor(cardId).title,
+    publicLabel: "Security-Purge-R&D-Karte",
+    value: cardId,
+    selectable: false,
+  }));
+  const targetOptions = iceIds.flatMap((cardId) => {
     const title = host.cards.definitionFor(cardId).title;
     return serverTargets.map((target) => ({
       id: `agenda_purge_${cardId}_${target.serverId}`,
@@ -296,6 +308,7 @@ function agendaPurgeInstallTargetOptions(
       value: `${cardId}|${target.serverId}`,
     }));
   });
+  return [...revealedCardOptions, ...targetOptions];
 }
 
 function agendaPurgeTargetLabel(target: {
@@ -336,7 +349,7 @@ function selectedAgendaPurgeTargets(
   const targetByCardId = new Map<CardInstanceId, ServerId>();
   for (const optionId of selectedOptionIds) {
     const option = optionById.get(optionId);
-    if (typeof option?.value !== "string")
+    if (typeof option?.value !== "string" || option.selectable === false)
       throw new Error("Die gewaehlte Security-Purge-Option ist ungueltig.");
     const [cardIdText, serverIdText] = option.value.split("|");
     const cardId = cardIdText as CardInstanceId | undefined;

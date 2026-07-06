@@ -5183,8 +5183,29 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       visibility: "hidden_info_barrier",
     });
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
-    expect(getPlayerView(state, "corp").pendingChoice?.options.length).toBe(
-      10,
+    const corpChoice = getPlayerView(state, "corp").pendingChoice;
+    expect(
+      corpChoice?.options.filter((option) => option.selectable === false),
+    ).toHaveLength(3);
+    expect(
+      corpChoice?.options
+        .filter((option) => option.selectable === false)
+        .map((option) => option.card?.definitionId),
+    ).toEqual([
+      "simple_barrier_ice",
+      "simple_code_gate_ice",
+      "simple_economy_operation",
+    ]);
+    expect(
+      corpChoice?.options.filter((option) => option.selectable !== false)
+        .length,
+    ).toBe(10);
+    expect(
+      corpChoice?.options
+        .filter((option) => option.selectable !== false)
+        .every((option) => option.card?.type === "ice"),
+    ).toBe(
+      true,
     );
     expect(
       state.corp.servers.some((server) =>

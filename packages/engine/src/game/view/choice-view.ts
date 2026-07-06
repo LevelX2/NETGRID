@@ -225,6 +225,12 @@ export function visibleChoiceCardForOption(
   option: ChoiceRequest["options"][number],
 ): VisibleCard | undefined {
   if (typeof option.value !== "string") return undefined;
+  const agendaPurgeCardId = agendaPurgeChoiceCardIdForOption(
+    state,
+    choice,
+    option,
+  );
+  if (agendaPurgeCardId) return visibleOwnCard(state, agendaPurgeCardId);
   const cardId = option.value as CardInstanceId;
   const cardSearchPresentation =
     choice.cardSearchPresentation ??
@@ -300,4 +306,31 @@ export function visibleChoiceCardForOption(
   )
     return undefined;
   return visibleOwnCard(state, cardId);
+}
+
+function agendaPurgeChoiceCardIdForOption(
+  state: GameState,
+  choice: ChoiceRequest,
+  option: ChoiceRequest["options"][number],
+): CardInstanceId | undefined {
+  if (
+    choice.kind !== "select_option" ||
+    !choice.source.startsWith("card_implementation.agenda_purge_install_targets:")
+  )
+    return undefined;
+  if (typeof option.value !== "string") return undefined;
+  const candidateId = option.value.split("|")[0] as CardInstanceId | undefined;
+  if (!candidateId) return undefined;
+  const [, , revealedText] = choice.source.split(":");
+  const revealedIds = new Set(
+    (revealedText ?? "")
+      .split(",")
+      .filter(Boolean)
+      .map((id) => id as CardInstanceId),
+  );
+  if (!revealedIds.has(candidateId)) return undefined;
+  const instance = state.cardInstances[candidateId];
+  if (!instance || instance.owner !== "corp") return undefined;
+  if (!state.corp.rd.slice(0, 3).includes(candidateId)) return undefined;
+  return candidateId;
 }
