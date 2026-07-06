@@ -144,6 +144,28 @@ export function evaluateKnownCentralAccessPayoff(
     const trashCost = cardDefinitionTrashCost(definitionId);
     if (trashCost !== undefined) {
       const affordable = path.creditsAfterPath >= trashCost;
+      if (
+        affordable &&
+        recentRunnerDeclinedKnownRdTopTrash(input, definitionId)
+      ) {
+        return {
+          payoff: "known_low_value",
+          knownNoCurrentPayoff: true,
+          score: 0,
+          penalty: 700,
+          reasons: [
+            "known_rnd_top_declined_trash_same_top",
+            "central_known_no_current_payoff",
+          ],
+          evidence: [
+            ...evidenceBase,
+            `rnd_known_top_trash_cost:${trashCost}`,
+            "rnd_known_top_trash_affordable:true",
+            "rd_run_suppressed_by_recent_declined_trash:true",
+            "central_memory_payoff:known_low_value",
+          ],
+        };
+      }
       return {
         payoff: affordable ? "trash_affordable" : "trash_unaffordable",
         knownNoCurrentPayoff: !affordable,
@@ -706,6 +728,161 @@ function cardDefinitionType(definitionId: string): string | undefined {
   return (
     RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type
   );
+}
+
+function recentRunnerDeclinedKnownRdTopTrash(
+  input: AiDecisionInput,
+  definitionId: string,
+): boolean {
+  const history = mergedPublicHistory(input);
+  const accessIndex = findLastHistoryIndex(
+    history,
+    (event) =>
+      publicActor(event) === "runner" &&
+      publicActionType(event) === "access_card" &&
+      eventServerId(event) === "rd" &&
+      stringPayloadValue(event, "cardDefinitionId") === definitionId,
+  );
+  if (accessIndex < 0) return false;
+  const accessEvent = history[accessIndex];
+  if (!accessEvent) return false;
+  if ((input.playerView.stateVersion ?? 0) - eventVersion(accessEvent) > 12)
+    return false;
+  let declined = false;
+  for (const event of history.slice(accessIndex + 1)) {
+    const actionType = publicActionType(event);
+    const actor = publicActor(event);
+    if (actor === "runner" && actionType === "decline_trash") {
+      declined = true;
+      continue;
+    }
+    if (eventRefreshesRdTop(event)) return false;
+    if (
+      actor === "runner" &&
+      (actionType === "gain_credit" ||
+        actionType === "draw_card" ||
+        actionType === "install_card" ||
+        actionType === "activated_card_ability" ||
+        actionType === "play_event")
+    ) {
+      return false;
+    }
+  }
+  return declined;
+}
+
+function mergedPublicHistory(input: AiDecisionInput) {
+  const byId = new Map<string, AiDecisionInput["eventTail"][number]>();
+  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
+    const previous = byId.get(event.eventId);
+    if (!previous || eventVersion(previous) <= eventVersion(event))
+      byId.set(event.eventId, event);
+  }
+  return [...byId.values()].sort(
+    (left, right) =>
+      eventVersion(left) - eventVersion(right) ||
+      left.eventId.localeCompare(right.eventId),
+  );
+}
+
+function findLastHistoryIndex<T>(
+  values: readonly T[],
+  predicate: (value: T) => boolean,
+): number {
+  for (let index = values.length - 1; index >= 0; index -= 1) {
+    if (predicate(values[index]!)) return index;
+  }
+  return -1;
+}
+
+function eventRefreshesRdTop(
+  event: AiDecisionInput["eventTail"][number],
+): boolean {
+  const actionType = publicActionType(event);
+  if (actionType === "trash_accessed_card" || actionType === "steal_agenda")
+    return true;
+  if (publicActor(event) === "corp") {
+    return (
+      actionType === "draw_card" ||
+      actionType === "mandatory_draw" ||
+      actionType === "shuffle_stack" ||
+      actionType === "reorder_cards"
+    );
+  }
+  return false;
+}
+
+function eventServerId(
+  event: AiDecisionInput["eventTail"][number],
+): string | undefined {
+  const payload = event.publicPayload;
+  const structured =
+    stringValue(payload.serverId) ??
+    stringValue(payload.attackedServerId) ??
+    stringValue(payload.targetServerId) ??
+    stringValue(payload.server);
+  if (structured) return canonicalServerId(structured);
+  return (
+    visibleServerLabelId(stringValue(payload.serverLabel)) ??
+    visibleServerLabelId(stringValue(payload.serverName)) ??
+    visibleServerLabelId(nestedStringPayload(payload, "targets", "serverLabel")) ??
+    visibleServerLabelId(nestedStringPayload(payload, "targets", "serverName"))
+  );
+}
+
+function canonicalServerId(value: string): string {
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "r&d" || normalized === "rd" || normalized === "rnd")
+    return "rd";
+  if (normalized === "hq") return "hq";
+  if (normalized === "archives") return "archives";
+  return value;
+}
+
+function visibleServerLabelId(label: string | undefined): string | undefined {
+  const normalized = label?.trim().toLowerCase();
+  if (!normalized) return undefined;
+  if (normalized === "r&d" || normalized === "rd") return "rd";
+  if (normalized === "hq") return "hq";
+  if (normalized === "archives") return "archives";
+  return undefined;
+}
+
+function publicActionType(event: AiDecisionInput["eventTail"][number]): string {
+  return stringValue(event.publicPayload.actionType) ?? event.type;
+}
+
+function publicActor(
+  event: AiDecisionInput["eventTail"][number],
+): string | undefined {
+  return stringValue(event.publicPayload.actor);
+}
+
+function eventVersion(event: AiDecisionInput["eventTail"][number]): number {
+  return typeof event.stateVersionAfter === "number"
+    ? event.stateVersionAfter
+    : 0;
+}
+
+function stringPayloadValue(
+  event: AiDecisionInput["eventTail"][number],
+  key: string,
+): string | undefined {
+  return stringValue(event.publicPayload[key]);
+}
+
+function nestedStringPayload(
+  payload: Record<string, unknown>,
+  objectKey: string,
+  valueKey: string,
+): string | undefined {
+  const nested = payload[objectKey];
+  if (!nested || typeof nested !== "object") return undefined;
+  return stringValue((nested as Record<string, unknown>)[valueKey]);
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
 function round(value: number): number {
