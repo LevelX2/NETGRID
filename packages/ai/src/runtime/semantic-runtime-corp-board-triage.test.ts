@@ -542,6 +542,313 @@ describe("semantic runtime corp board triage", () => {
       value: -3200,
     });
   });
+
+  it("treats build-remote-ice as protection before funding for a new score remote", () => {
+    const remoteAgenda = corpAction("new-remote-scoreline", "install_card", {
+      placement: "root",
+      serverId: "new_remote",
+    });
+    const remoteIce = corpAction("install-new-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "new_remote",
+    });
+    const hqIce = corpAction("install-extra-hq-ice", "install_card", {
+      placement: "ice",
+      serverId: "hq",
+    });
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpHq: [agendaCard("hq-agenda-1", 1), agendaCard("hq-agenda-2", 1)],
+      legalActions: [remoteAgenda, remoteIce, hqIce, gainCredit],
+      servers: [
+        centralServer("hq", [iceCard("hq-stop")]),
+        centralServer("rd", [iceCard("rd-stop")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "new_remote",
+          windowKind: "unsafe",
+          runnerCanContestNow: true,
+          runnerCanReachAccessNow: true,
+          agendaStealRelevantNow: true,
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 1,
+          corpCanRezRelevantIce: false,
+          corpCanRezFullPathWithDynamicReserve: false,
+          dynamicProtectionWeaknessCount: 0,
+          recommendedNextStep: "build_remote_ice",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const remoteIceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteIce,
+      dependencies,
+    );
+    const hqComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      hqIce,
+      dependencies,
+    );
+    const creditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      gainCredit,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_score_remote",
+      severity: "high",
+      targetServerId: "new_remote",
+    });
+    expect(remoteIceComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(hqComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
+  it("keeps funding triage on an existing score remote instead of a new-remote scoreline", () => {
+    const activeAdvance = corpAction("advance-active-scoreline", "advance_card", {
+      serverId: "remote_1",
+    });
+    const newRemoteAgenda = corpAction("new-remote-scoreline", "install_card", {
+      placement: "root",
+      serverId: "new_remote",
+    });
+    const newRemoteIce = corpAction("new-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "new_remote",
+    });
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpHq: [agendaCard("hq-agenda-1", 2), agendaCard("hq-agenda-2", 2)],
+      legalActions: [activeAdvance, newRemoteAgenda, newRemoteIce, gainCredit],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [iceCard("rd-ice")]),
+        remoteServer("remote_1", [iceCard("remote-ice")], [
+          agendaCard("active-agenda", 2),
+        ]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [activeAdvance.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 2,
+          corpCanRezRelevantIce: false,
+          corpCanRezFullPathWithDynamicReserve: false,
+          recommendedNextStep: "gain_credit",
+        }),
+        [newRemoteAgenda.actionId]: scoringWindow({
+          serverId: "new_remote",
+          windowKind: "unsafe",
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealSeverity: "game_ending",
+          runnerAgendaPointsAfterSteal: 7,
+          corpCanRezRelevantIce: false,
+          corpCanRezFullPathWithDynamicReserve: false,
+          recommendedNextStep: "gain_credit",
+        }),
+        [newRemoteIce.actionId]: scoringWindow({
+          serverId: "new_remote",
+          windowKind: "unsafe",
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealSeverity: "game_ending",
+          runnerAgendaPointsAfterSteal: 7,
+          corpCanRezRelevantIce: false,
+          corpCanRezFullPathWithDynamicReserve: false,
+          recommendedNextStep: "gain_credit",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const creditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      gainCredit,
+      dependencies,
+    );
+    const newRemoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      newRemoteAgenda,
+      dependencies,
+    );
+    const newRemoteIceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      newRemoteIce,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "fund_score_remote",
+      severity: "high",
+      targetServerId: "remote_1",
+    });
+    expect(triage.evidence).toContain("corp_board_triage_target:remote_1");
+    expect(triage.evidence).not.toContain("corp_board_triage_target:new_remote");
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(newRemoteComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+    expect(newRemoteIceComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
+  it("uses a missing-coverage score window instead of overprotecting the remote", () => {
+    const remoteAgenda = corpAction("remote-scoreline", "install_card", {
+      placement: "root",
+      serverId: "remote_1",
+    });
+    const remoteIce = corpAction("install-more-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpHq: [agendaCard("hq-agenda-1", 2)],
+      corpCredits: 5,
+      legalActions: [remoteAgenda, remoteIce, gainCredit],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [iceCard("rd-ice")]),
+        remoteServer("remote_1", [
+          iceCard("remote-ice", { rezCost: 3, rezzed: false }),
+        ]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          scoreHorizon: "next_turn",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          missingVisibleBreakerCoverage: true,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 2,
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          recommendedNextStep: "build_remote_ice",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const remoteAgendaComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteAgenda,
+      dependencies,
+    );
+    expect(triage).toMatchObject({
+      primary: "setup_score_remote",
+      severity: "medium",
+      targetServerId: "remote_1",
+    });
+    expect(triage.evidence).not.toContain(
+      "corp_board_triage_primary:protect_score_remote",
+    );
+    expect(remoteAgendaComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+  });
+
+  it("treats non-scoreline abilities as mismatches under forced scoreline clock", () => {
+    const remoteAgenda = corpAction("remote-scoreline", "install_card", {
+      placement: "root",
+      serverId: "remote_1",
+    });
+    const punishAbility = corpAction(
+      "punish-ability",
+      "activated_card_ability",
+    );
+    const input = corpInput({
+      corpHq: [
+        agendaCard("hq-agenda-1", 1),
+        agendaCard("hq-agenda-2", 1),
+        agendaCard("hq-agenda-3", 1),
+      ],
+      corpCredits: 12,
+      legalActions: [remoteAgenda, punishAbility],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [iceCard("rd-ice")]),
+        remoteServer("remote_1", [iceCard("remote-ice")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "durable",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezFullPathWithDynamicReserve: true,
+          corpCanRezRelevantIce: true,
+          recommendedNextStep: "score",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const remoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteAgenda,
+      dependencies,
+    );
+    const punishComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      punishAbility,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "force_scoreline_clock",
+      severity: "critical",
+      targetServerId: "remote_1",
+    });
+    expect(remoteComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(punishComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -5200,
+    });
+  });
 });
 
 function corpInput(overrides: {

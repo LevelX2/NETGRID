@@ -1451,7 +1451,11 @@ function corpRemoteScorelineIceFundingPenaltyComponent<
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
-  if (!corpServerHasVisibleScorelineRoot(server)) return undefined;
+  const hasActiveScoreline = corpServerHasVisibleScorelineRoot(server);
+  const preparedPipeline = corpPreparedScoreRemotePipeline(input);
+  const isPreparedScoreRemote =
+    !hasActiveScoreline && preparedPipeline?.serverId === serverId;
+  if (!hasActiveScoreline && !isPreparedScoreRemote) return undefined;
 
   const placementReason = icePlacement?.reason ?? "";
   const placementPrefersFunding =
@@ -1467,14 +1471,24 @@ function corpRemoteScorelineIceFundingPenaltyComponent<
     scoringWindow?.corpCanRezRelevantIce === false ||
     scoringWindow?.corpCanRezFullPathWithDynamicReserve === false;
   if (!placementPrefersFunding && !windowNeedsFunding) return undefined;
+  const value = -1900;
 
   return {
     key: "corp_remote_scoreline_unfunded_ice_install_penalty",
     label: "Remote-Scoreline-Funding",
-    value: -1900,
+    value,
     reason: [
-      "active_remote_scoreline:true",
+      hasActiveScoreline
+        ? "active_remote_scoreline:true"
+        : "prepared_score_remote:true",
       `server:${serverId}`,
+      `penalty_value:${value}`,
+      ...(isPreparedScoreRemote && preparedPipeline
+        ? [
+            `prepared_ice_count:${preparedPipeline.iceCount}`,
+            `prepared_reserve_floor:${preparedPipeline.reserveFloor}`,
+          ]
+        : []),
       `placement_prefers_funding:${placementPrefersFunding}`,
       `window_needs_funding:${windowNeedsFunding}`,
       ...(scoringWindow?.recommendedNextStep

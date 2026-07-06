@@ -1613,6 +1613,89 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("funds a prepared score remote before adding unaffordable ICE", () => {
+    const expensiveIce = corpIce("expensive-remote-ice", { rezCost: 13 });
+    const installRemoteIce = corpAction(
+      "install-expensive-remote-ice",
+      "install_card",
+      {
+        placement: "ice",
+        serverId: "remote_1",
+      },
+      expensiveIce.instanceId,
+    );
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithHqCards(3, [agendaCard("agenda-in-hq"), expensiveIce], [
+      installRemoteIce,
+      gainCredit,
+    ]);
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-wall", { rezCost: 2, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      rolesForAction: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installRemoteIce.actionId
+          ? ["ice", "protect"]
+          : [],
+      corpHasRemoteRezFloorFundingNeed: () => true,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installRemoteIce.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              corpCanRezRelevantIce: false,
+              corpCanRezFullPathWithDynamicReserve: false,
+              recommendedNextStep: "gain_credit",
+              evidence: ["test_prepared_remote:ice_needs_funding"],
+            })
+          : undefined,
+    };
+
+    const installComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installRemoteIce,
+      "basic_install",
+      dependencies,
+    );
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      dependencies,
+    );
+
+    expect(installComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_remote_scoreline_unfunded_ice_install_penalty",
+          value: -1900,
+          reason: expect.stringContaining("prepared_score_remote:true"),
+        }),
+      ]),
+    );
+    expect(totalScore(creditComponents)).toBeGreaterThan(
+      totalScore(installComponents),
+    );
+  });
+
   it("takes basic funding over ending the turn at zero credits with rez-floor pressure", () => {
     const gainCredit = corpAction(
       "gain-credit",

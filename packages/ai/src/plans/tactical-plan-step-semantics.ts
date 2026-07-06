@@ -59,6 +59,14 @@ export function candidateSemanticsMatchStep(
         "remote_protection",
         "corp_rez_ice",
       ]);
+    case "install_or_prepare_agenda":
+      return hasToken(tokens, "install.card") &&
+        hasAnyToken(tokens, [
+          "scoreline",
+          "score_line",
+          "corp_score_agenda",
+          "agenda",
+        ]);
     case "advance_score_card":
       return hasAnyToken(tokens, [
         "score.advance_card",
