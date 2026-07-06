@@ -1470,6 +1470,8 @@ export type AiBenchmarkDeckSlotResult = {
   slotType: AiBenchmarkDeckSlotType;
   status: AiBenchmarkDeckSlotStatus;
   tuningUse: AiBenchmarkDeckSlotDefinition["tuningUse"];
+  runnerArchetype: AiBenchmarkDeckSlotDefinition["runnerArchetype"];
+  corpArchetype: AiBenchmarkDeckSlotDefinition["corpArchetype"];
   runnerDeckRef: string;
   corpDeckRef: string;
   reason?: string;
