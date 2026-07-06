@@ -149,6 +149,7 @@ function scoreSemanticRuntimeAction(
         scopeId,
         actionSemanticCandidate,
       ),
+      ...semanticRuntimeScoreComponentEvidence(scoreBreakdown),
       ...dependencies.evidence(
         input,
         action,
@@ -178,3 +179,18 @@ function semanticRuntimeChoiceCreditCostEvidence(params: {
   }
   return params.dependencies.actionCreditCost(params.action);
 }
+
+function semanticRuntimeScoreComponentEvidence(
+  scoreBreakdown: NonNullable<AiDecisionDebug["scoreBreakdown"]>,
+): string[] {
+  return scoreBreakdown
+    .filter((component) =>
+      SEMANTIC_RUNTIME_CHOICE_SCORE_COMPONENT_EVIDENCE_KEYS.has(component.key),
+    )
+    .map((component) => `semantic_score_component:${component.key}`);
+}
+
+const SEMANTIC_RUNTIME_CHOICE_SCORE_COMPONENT_EVIDENCE_KEYS = new Set([
+  "corp_board_triage_alignment",
+  "corp_board_triage_mismatch",
+]);

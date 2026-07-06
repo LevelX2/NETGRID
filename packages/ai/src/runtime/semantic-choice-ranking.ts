@@ -131,7 +131,18 @@ export function tacticalPlanMappedChoice(
       overrideChoice,
       scoreGap,
     );
-    if (mappedNonPositiveAgainstPositive || repeatedRunShouldYield || scoreGap > threshold.scoreGap) {
+    const corpBoardTriageMismatchShouldYield =
+      tacticalPlanCorpBoardTriageMismatchShouldYield(
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      );
+    if (
+      mappedNonPositiveAgainstPositive ||
+      repeatedRunShouldYield ||
+      corpBoardTriageMismatchShouldYield ||
+      scoreGap > threshold.scoreGap
+    ) {
       const result = {
         outcome: "semantic_choice_selected" as const,
         overrideChoice,
@@ -140,7 +151,9 @@ export function tacticalPlanMappedChoice(
           ? "mapped_nonpositive_against_positive"
           : repeatedRunShouldYield
             ? "repeated_run_mapping_yield"
-            : threshold.reason,
+            : corpBoardTriageMismatchShouldYield
+              ? "corp_board_triage_mismatch_yield"
+              : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -454,6 +467,31 @@ function semanticRuntimeRecentRunnerStartRunsOnServer(
     if (seenRunnerActions >= 8) break;
   }
   return count;
+}
+
+function tacticalPlanCorpBoardTriageMismatchShouldYield(
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  return (
+    scoreGap > 0 &&
+    semanticRuntimeChoiceHasScoreComponent(
+      mappedChoice,
+      "corp_board_triage_mismatch",
+    ) &&
+    !semanticRuntimeChoiceHasScoreComponent(
+      overrideChoice,
+      "corp_board_triage_mismatch",
+    )
+  );
+}
+
+function semanticRuntimeChoiceHasScoreComponent(
+  choice: SemanticRuntimeChoice,
+  key: string,
+): boolean {
+  return choice.evidence.includes(`semantic_score_component:${key}`);
 }
 
 function mergedAiPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
