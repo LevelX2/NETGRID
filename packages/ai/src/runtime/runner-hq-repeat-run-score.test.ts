@@ -6,6 +6,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
+import { chooseRunnerAction } from "../ai-runtime-public-entrypoints";
 import { staleKnownHqRepeatRunPenalty } from "./runner-hq-repeat-run-score";
 
 describe("staleKnownHqRepeatRunPenalty", () => {
@@ -39,6 +40,41 @@ describe("staleKnownHqRepeatRunPenalty", () => {
     });
 
     expect(staleKnownHqRepeatRunPenalty(input, runHq)).toBe(0);
+  });
+
+  it("chooses economy over a repeated run on a fully known low-value one-card HQ", () => {
+    const runHq = runAction("run-hq", "hq");
+    const gain = action("gain", "gain_credit");
+    const input = runnerInput({
+      legalActions: [runHq, gain],
+      opponentHandCount: 1,
+      events: [
+        hqPrivateLookEvent("evt_hq_look", 1, [
+          "simple_economy_asset",
+          "simple_upgrade",
+        ]),
+        publicEvent("evt_hidden_install", "install_card", 2, {
+          actor: "corp",
+          actionType: "install_card",
+          serverId: "remote_1",
+          installPlacement: "root",
+        }),
+        publicEvent("evt_hq_access", "access_card", 3, {
+          actor: "runner",
+          actionType: "access_card",
+          serverLabel: "HQ",
+          cardDefinitionId: "onr_v1_297_overtime-incentives",
+          title: "Overtime Incentives",
+        }),
+      ],
+    });
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("gain");
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "hq_run_suppressed_by_fully_known_low_value_hand:true",
+    );
   });
 });
 
@@ -120,6 +156,23 @@ function hqPrivateLookEvent(
   } as PublicGameEvent;
 }
 
+function publicEvent(
+  eventId: string,
+  type: string,
+  stateVersionBefore: number,
+  publicPayload: Record<string, unknown>,
+): PublicGameEvent {
+  return {
+    eventId,
+    type,
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `hash_${eventId}`,
+    visibilityClass: "public",
+    publicPayload,
+  } as PublicGameEvent;
+}
+
 function runAction(actionId: string, serverId: string): LegalAction {
   return {
     actionId,
@@ -133,6 +186,22 @@ function runAction(actionId: string, serverId: string): LegalAction {
     visibility: "public",
     expiresAtStateVersion: 2,
     payload: { serverId },
+  };
+}
+
+function action(actionId: string, type: LegalAction["type"]): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type,
+    label: actionId,
+    source: "basic_action",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    payload: {},
   };
 }
 
