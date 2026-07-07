@@ -1,9 +1,12 @@
 import type { Side } from "@netgrid/shared";
 import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import {
+  assertValidAiDeckSnapshotForRuntime,
+  type AiDeckSnapshotRuntimeExpectation,
+} from "./deck-strategy-snapshot-validation";
+import {
   buildDeckDoctrineV2Diagnostic,
   buildDeckStrategyProfile,
-  buildNeutralDeckStrategyProfile,
   type AiDeckStrategyProfile,
   type DeckDoctrineV2Diagnostic,
   type DeckDoctrineV2DiagnosticStatus,
@@ -20,13 +23,18 @@ export type DeckDoctrineRuntimeContext = {
 
 export function buildDeckDoctrineRuntimeContext(params: {
   side: Side;
-  deckSnapshot?: AiDeckStrategyDeckSnapshot;
-  neutralDeckId: string;
+  deckSnapshot: AiDeckStrategyDeckSnapshot;
+  expectedDeckSnapshot?: Omit<AiDeckSnapshotRuntimeExpectation, "side">;
 }): DeckDoctrineRuntimeContext {
-  const strategyProfile = params.deckSnapshot
-    ? buildDeckStrategyProfile(params.deckSnapshot)
-    : buildNeutralDeckStrategyProfile(params.side, params.neutralDeckId);
-  const v2Diagnostic = buildDeckDoctrineV2Diagnostic(params.deckSnapshot);
+  const deckSnapshot = assertValidAiDeckSnapshotForRuntime(
+    params.deckSnapshot,
+    {
+      side: params.side,
+      ...params.expectedDeckSnapshot,
+    },
+  );
+  const strategyProfile = buildDeckStrategyProfile(deckSnapshot);
+  const v2Diagnostic = buildDeckDoctrineV2Diagnostic(deckSnapshot);
 
   return {
     strategyProfile,

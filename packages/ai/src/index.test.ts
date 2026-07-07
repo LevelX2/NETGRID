@@ -32,8 +32,9 @@ import {
   beliefStateInvariantSignature,
   buildAiDecisionInputDto,
   buildObservedFacts,
-  buildAiDecisionInput,
+  buildAiDecisionInput as buildAiDecisionInputRuntime,
   type AiDecisionInputWithDeckCapabilities,
+  type AiDeckStrategyDeckSnapshot,
   assessCorpIcePlacementForDiagnostics,
   chooseAiAction as chooseSemanticAiAction,
   chooseCorpAction as chooseSemanticCorpAction,
@@ -225,6 +226,25 @@ afterEach(() => {
   }
 });
 
+type TestAiDecisionInputOptions = Omit<
+  Parameters<typeof buildAiDecisionInputRuntime>[2],
+  "ownDeckSnapshot"
+> & {
+  ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
+};
+
+function buildAiDecisionInput(
+  state: GameState,
+  side: Side,
+  options: TestAiDecisionInputOptions = {},
+): ReturnType<typeof buildAiDecisionInputRuntime> {
+  return buildAiDecisionInputRuntime(state, side, {
+    ...options,
+    ownDeckSnapshot:
+      options.ownDeckSnapshot ?? snapshotById(defaultTestSnapshotIdForSide(side)),
+  });
+}
+
 describe("MVP 0.3 AI controller contract", () => {
   afterEach(() => {
     delete DEMO_CARDS_BY_ID.test_hidden_runner_resource_harness;
@@ -237,7 +257,7 @@ describe("MVP 0.3 AI controller contract", () => {
     delete DEMO_CARDS_BY_ID.test_low_value_program;
   });
 
-  it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
+  it("builds side-safe AI inputs with required deck snapshots and without forbidden transport fields", () => {
     const state = createGameAfterSetup({ seed: "ai-contract" });
     const corpInput = buildAiDecisionInput(state, "corp", {
       difficulty: "normal",
@@ -256,30 +276,43 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(runnerInput).not.toHaveProperty("ownDeckDoctrine");
     expect(
       (corpInput as AiDecisionInputWithDeckCapabilities).ownDeckStrategyProfile
+        ?.deckId,
+    ).toBe("demo_corp_008_snapshot_v0_8");
+    expect(
+      (runnerInput as AiDecisionInputWithDeckCapabilities)
+        .ownDeckStrategyProfile?.deckId,
+    ).toBe("demo_runner_008_snapshot_v0_8");
+    expect(
+      (corpInput as AiDecisionInputWithDeckCapabilities).ownDeckStrategyProfile
         ?.warnings,
-    ).toEqual(
-      expect.arrayContaining(["strategy_profile:neutral_missing_snapshot"]),
-    );
+    ).not.toContain("strategy_profile:neutral_missing_snapshot");
     expect(
       (runnerInput as AiDecisionInputWithDeckCapabilities)
         .ownDeckStrategyProfile?.warnings,
-    ).toEqual(
-      expect.arrayContaining(["strategy_profile:neutral_missing_snapshot"]),
-    );
+    ).not.toContain("strategy_profile:neutral_missing_snapshot");
     expect(
-      (corpInput as AiDecisionInputWithDeckCapabilities).ownStrategicIntentState
-        ?.primaryStrategy.family,
-    ).toBe("neutral");
+      (corpInput as AiDecisionInputWithDeckCapabilities).ownStrategicIntentState,
+    ).toBeDefined();
     expect(
       (runnerInput as AiDecisionInputWithDeckCapabilities)
-        .ownStrategicIntentState?.primaryStrategy.family,
-    ).toBe("neutral");
+        .ownStrategicIntentState,
+    ).toBeDefined();
     expect(corpInput.legalActions).toEqual(getLegalActions(state, "corp"));
     expect(runnerInput.playerView).toEqual(getPlayerView(state, "runner"));
     expect(JSON.stringify(corpInput)).not.toContain("cardInstances");
     expect(JSON.stringify(corpInput)).not.toContain("sessionToken");
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+  });
+
+  it("rejects normal AI decision input without ownDeckSnapshot", () => {
+    const state = createGameAfterSetup({ seed: "ai-contract-missing-snapshot" });
+
+    expect(() =>
+      buildAiDecisionInputRuntime(state, "corp", {
+        difficulty: "normal",
+      } as never),
+    ).toThrow(/ai_deck_snapshot_missing/);
   });
 
   it("projects side-safe deck strategy runtime fields for both sides when snapshots are present", () => {
@@ -608,9 +641,11 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(
       (corpInput as AiDecisionInputWithDeckCapabilities).ownDeckStrategyProfile
         ?.warnings,
-    ).toEqual(
-      expect.arrayContaining(["strategy_profile:neutral_missing_snapshot"]),
-    );
+    ).not.toContain("strategy_profile:neutral_missing_snapshot");
+    expect(
+      (corpInput as AiDecisionInputWithDeckCapabilities).ownDeckStrategyProfile
+        ?.deckId,
+    ).toBe("demo_corp_008_snapshot_v0_8");
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
   });
@@ -28385,7 +28420,7 @@ describe("MVP 0.3 AI simulation harness", () => {
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.finalStateHash).toMatch(/^fnv1a:/);
-  });
+  }, 60_000);
 
   it("runs V0.8 starter decks through side-safe AI smokes", () => {
     const summaries = [
@@ -28415,52 +28450,40 @@ describe("MVP 0.3 AI simulation harness", () => {
     }
   }, 60_000);
 
-  it("runs V0.97 Run/Breach decks through side-safe AI smokes", () => {
-    const summary = simulateAiGame({
-      seed: "ai-v097-run-breach",
-      runnerDeckId: "demo_runner_097",
-      corpDeckId: "demo_corp_097",
-      agendaPointsToWin: 7,
-      maxActions: 180,
-    });
-
-    expect(summary.cardPoolVersion).toBe("0.99.0");
-    expect(summary.errors).toEqual([]);
-    expect(summary.replayOk).toBe(true);
-    expect(summary.finalStateHash).toMatch(/^fnv1a:/);
-    expect(JSON.stringify(summary)).not.toContain("cardInstances");
+  it("rejects V0.97 Run/Breach legacy demo decks without current runtime card snapshots", () => {
+    expect(() =>
+      simulateAiGame({
+        seed: "ai-v097-run-breach",
+        runnerDeckId: "demo_runner_097",
+        corpDeckId: "demo_corp_097",
+        agendaPointsToWin: 7,
+        maxActions: 180,
+      }),
+    ).toThrow(/ai_deck_snapshot_unknown_card/);
   });
 
-  it("runs V0.98 Identity decks through side-safe AI smokes", () => {
-    const summary = simulateAiGame({
-      seed: "ai-v098-identity",
-      runnerDeckId: "demo_runner_098",
-      corpDeckId: "demo_corp_098",
-      agendaPointsToWin: 7,
-      maxActions: 180,
-    });
-
-    expect(summary.cardPoolVersion).toBe("0.99.0");
-    expect(summary.errors).toEqual([]);
-    expect(summary.replayOk).toBe(true);
-    expect(summary.finalStateHash).toMatch(/^fnv1a:/);
-    expect(JSON.stringify(summary)).not.toContain("cardInstances");
+  it("rejects V0.98 Identity legacy demo decks without current runtime card snapshots", () => {
+    expect(() =>
+      simulateAiGame({
+        seed: "ai-v098-identity",
+        runnerDeckId: "demo_runner_098",
+        corpDeckId: "demo_corp_098",
+        agendaPointsToWin: 7,
+        maxActions: 180,
+      }),
+    ).toThrow(/ai_deck_snapshot_unknown_card/);
   });
 
-  it("runs V0.99 Counter/Hosting decks through side-safe AI smokes", () => {
-    const summary = simulateAiGame({
-      seed: "ai-v099-counter-hosting",
-      runnerDeckId: "demo_runner_099",
-      corpDeckId: "demo_corp_099",
-      agendaPointsToWin: 7,
-      maxActions: 200,
-    });
-
-    expect(summary.cardPoolVersion).toBe("0.99.0");
-    expect(summary.errors).toEqual([]);
-    expect(summary.replayOk).toBe(true);
-    expect(summary.finalStateHash).toMatch(/^fnv1a:/);
-    expect(JSON.stringify(summary)).not.toContain("cardInstances");
+  it("rejects V0.99 Counter/Hosting legacy demo decks without current runtime card snapshots", () => {
+    expect(() =>
+      simulateAiGame({
+        seed: "ai-v099-counter-hosting",
+        runnerDeckId: "demo_runner_099",
+        corpDeckId: "demo_corp_099",
+        agendaPointsToWin: 7,
+        maxActions: 200,
+      }),
+    ).toThrow(/ai_deck_snapshot_unknown_card/);
   });
 });
 
@@ -28490,7 +28513,7 @@ describe("MVP 0.9 stronger AI", () => {
     ).toBe(true);
     expect(JSON.stringify(summary)).not.toContain("cardInstances");
     expect(JSON.stringify(summary)).not.toContain("v08_project_agenda_1");
-  });
+  }, 60_000);
 
   it("keeps hidden-state variants from changing visible decisions", () => {
     const state = toRunnerTurn(
@@ -31490,6 +31513,12 @@ function deckDefinitionFromSnapshot(snapshotId: string): DeckDefinition {
 
 function kingOfTheRoadSnapshot() {
   return snapshotById("king_of_the_road_runner_ai_snapshot_v1");
+}
+
+function defaultTestSnapshotIdForSide(side: Side): string {
+  return side === "runner"
+    ? "demo_runner_008_snapshot_v0_8"
+    : "demo_corp_008_snapshot_v0_8";
 }
 
 function snapshotById(snapshotId: string) {

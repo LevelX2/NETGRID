@@ -880,9 +880,13 @@ class RealEngineDecisionCorpusScenarioBuilder {
   }
 
   build(): RealEngineDecisionCorpusScenario {
+    const deckSnapshot = snapshotById(
+      this.deckSnapshotId ?? defaultSnapshotIdForSide(this.side),
+    );
     const input = buildAiDecisionInput(this.state, this.side, {
       decisionId: this.scenarioId,
       profileId: `${this.side}-ai-real-engine-corpus`,
+      ownDeckSnapshot: deckSnapshot,
     });
     return {
       scenarioId: this.scenarioId,
@@ -939,6 +943,12 @@ function expectation(
 
 function deckDoctrineForSnapshot(snapshotId: string) {
   return buildDeckDoctrineV2Diagnostic(snapshotById(snapshotId));
+}
+
+function defaultSnapshotIdForSide(side: Side): string {
+  return side === "runner"
+    ? "demo_runner_008_snapshot_v0_8"
+    : "demo_corp_008_snapshot_v0_8";
 }
 
 function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {

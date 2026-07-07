@@ -253,9 +253,7 @@ function simulateAiGame(
             `runner-ai-v0.9-${config.runnerDifficulty ?? "normal"}`)
           : (config.corpProfileId ??
             `corp-ai-v0.9-${config.corpDifficulty ?? "normal"}`),
-      ...(simulationSideUsesSemanticRuntime(side, config)
-        ? { ownDeckSnapshot: deckSnapshots[side] }
-        : {}),
+      ownDeckSnapshot: deckSnapshots[side],
     });
     if (!assertAiInputIsSideSafe(input)) {
       errors.push(

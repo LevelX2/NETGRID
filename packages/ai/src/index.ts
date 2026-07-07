@@ -206,6 +206,15 @@ export type {
 } from "./deck-capabilities";
 export type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 export {
+  AiDeckSnapshotRuntimeError,
+  assertValidAiDeckSnapshotForRuntime,
+  isAiDeckSnapshotRuntimeError,
+} from "./deck-strategy-snapshot-validation";
+export type {
+  AiDeckSnapshotRuntimeErrorCode,
+  AiDeckSnapshotRuntimeExpectation,
+} from "./deck-strategy-snapshot-validation";
+export {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
 } from "./deck-opening-hand";
