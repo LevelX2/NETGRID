@@ -1,6 +1,6 @@
 # Runner Coverage Search Fix Final 2026-07-07
 
-Status: umgesetzt auf Arbeitsbranch `codex/ai-runner-coverage-search-fix`
+Status: umgesetzt und im Worktree verifiziert auf Arbeitsbranch `codex/ai-runner-coverage-search-fix`
 
 ## Analysierte Spiele
 
@@ -21,12 +21,23 @@ Status: umgesetzt auf Arbeitsbranch `codex/ai-runner-coverage-search-fix`
 - Es wurde kein Broker-spezifischer Plan gebaut, weil die zwei analysierten Spiele keine freiwillige Broker-Fehlbehandlung belegen.
 - Keine Engine-, LegalAction-, PlayerView-, Replay-, StateHash-, Randomness-, Kartenpool- oder Hidden-Info-Vertragsänderung.
 
-## Fokussierte Checks
+## Checks
 
 - `corepack pnpm exec vitest run src/plans/tactical-plan-coverage-search-fit.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
 - `corepack pnpm exec vitest run src/tactical-plans.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot -t "blocks repeated The Short Circuit"`
 - `corepack pnpm exec vitest run src/semantic-ai-runtime-cutover.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot -t "does not repeat The Short Circuit"`
 - `corepack pnpm exec vitest run src/runtime/semantic-choice-ranking.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`
 - `corepack pnpm exec vitest run src/tactical-plans.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot -t "uses neutral remote score-threat"`
+- `corepack pnpm exec vitest run src/plans/tactical-plan-coverage-search-fit.test.ts src/runtime/semantic-choice-ranking.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`: 2 Dateien, 20 Tests grün.
+- `corepack pnpm exec vitest run src/tactical-plans.test.ts --maxWorkers=1 --testTimeout=30000 --reporter=dot`: 1 Datei, 50 Tests grün.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
+- `git diff --check`: grün.
 
-Finale Paket-7-Checks und lokaler Merge nach `main` folgen nach diesem Dokumentationspaket.
+Bekannte bestehende Testschuld: Die volle `src/semantic-ai-runtime-cutover.test.ts` ist im Worktree und unverändert auf `main` mit zwei `MissingRunnerRunPlanError`-Tests rot:
+
+- `does not spend the Runner's last credit on a pump that still cannot break the encountered ICE`
+- `does not spend the Runner's last credit on a break when the remaining ICE path is still unaffordable`
+
+Diese Fehler entstehen in Run-Encounter-Fixtures ohne gespeicherten RunnerRunPlan und sind keine Regression dieses Branches.
+
+Lokaler Merge nach `main` folgt nach diesem Verify-Update.
