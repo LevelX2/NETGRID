@@ -322,6 +322,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
           action,
           dependencies,
           roles,
+          boardTriageState,
         );
       if (punishPrimaryDampen) components.push(punishPrimaryDampen);
     }
@@ -1521,6 +1522,7 @@ function corpPunishPrimarySpeculativeScorelineDampenComponent<
   action: LegalAction,
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
   roles: string[],
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
 ): AiDecisionScoreComponent | undefined {
   if (!corpScoreRuntimeIsPunishPrimary(input)) return undefined;
   if (action.type !== "install_card" || action.payload?.placement === "ice") {
@@ -1535,6 +1537,16 @@ function corpPunishPrimarySpeculativeScorelineDampenComponent<
     roles,
   );
   if (assessment?.scoreHorizon === "immediate") return undefined;
+  if (
+    corpPunishPrimaryPreparedScoreRemoteCommitment(
+      input,
+      action,
+      assessment,
+      boardTriageState,
+    )
+  ) {
+    return undefined;
+  }
   const runnerAgendaPoints =
     positiveOrZeroNumber(input.playerView.opponent?.agendaPoints) ?? 0;
   const runnerAgendaPointsAfterSteal =
@@ -1559,6 +1571,70 @@ function corpPunishPrimarySpeculativeScorelineDampenComponent<
         : "score_horizon:unknown",
     ].join("|"),
   };
+}
+
+function corpPunishPrimaryPreparedScoreRemoteCommitment(
+  input: AiDecisionInput,
+  action: LegalAction,
+  assessment: CorpScoringWindowAssessment | undefined,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+): boolean {
+  if (action.payload?.placement !== "root") return false;
+  if (!assessment) return false;
+  const serverId = corpInstallServerId(action);
+  const pipeline = corpPreparedScoreRemotePipeline(input);
+  if (!serverId || pipeline?.serverId !== serverId) return false;
+  if (input.playerView.own.credits < pipeline.reserveFloor) return false;
+  if (
+    (boardTriageState.primary === "protect_hq" ||
+      boardTriageState.primary === "protect_rd") &&
+    (boardTriageState.severity === "high" ||
+      boardTriageState.severity === "critical")
+  ) {
+    return false;
+  }
+  if (assessment.serverId !== serverId) return false;
+  if (
+    assessment.windowKind !== "durable" &&
+    assessment.windowKind !== "temporary_safe"
+  ) {
+    return false;
+  }
+  if (
+    assessment.agendaStealSeverity &&
+    assessment.agendaStealSeverity !== "normal" &&
+    assessment.agendaStealSeverity !== "none"
+  ) {
+    return false;
+  }
+  const runnerAgendaPointsAfterSteal =
+    positiveOrZeroNumber(assessment.runnerAgendaPointsAfterSteal) ?? 0;
+  const pointsToWin = input.playerView.agendaPointsToWin ?? 7;
+  if (runnerAgendaPointsAfterSteal >= Math.max(1, pointsToWin - 2)) {
+    return false;
+  }
+  if (
+    assessment.runnerCanContestBeforeScore ||
+    assessment.runnerCanReachAccessBeforeScore ||
+    assessment.agendaStealRelevantBeforeScore
+  ) {
+    return false;
+  }
+  if (
+    assessment.recommendedNextStep === "build_remote_ice" ||
+    assessment.recommendedNextStep === "gain_credit"
+  ) {
+    return false;
+  }
+  if (
+    assessment.corpCanRezRelevantIce === false ||
+    assessment.corpCanRezFullPathWithDynamicReserve === false ||
+    (assessment.dynamicProtectionWeaknessCount ?? 0) > 0 ||
+    (assessment.affordableDurableRelevantIceCount ?? 0) < 1
+  ) {
+    return false;
+  }
+  return true;
 }
 
 function corpScoreRuntimeIsPunishPrimary(input: AiDecisionInput): boolean {

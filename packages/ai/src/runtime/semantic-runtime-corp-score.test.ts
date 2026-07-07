@@ -232,6 +232,206 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("does not dampen a punish-primary scoreline install into a prepared safe remote", () => {
+    const agenda = agendaCard("hq-agenda");
+    const remoteAgenda = corpAction(
+      "install-prepared-remote-agenda",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    const input = {
+      ...corpInputWithHqCards(9, [agenda], [remoteAgenda]),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-wall", { rezCost: 2, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: () => true,
+      corpScoringWindowAssessment: () =>
+        scoringWindow({
+          serverId: "remote_1",
+          windowKind: "temporary_safe",
+          scoreHorizon: "next_turn",
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 2,
+          affordableDurableRelevantIceCount: 1,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          dynamicProtectionWeaknessCount: 0,
+          recommendedNextStep: "score",
+        }),
+    };
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      remoteAgenda,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_existing_score_remote_pipeline",
+          reason: expect.stringContaining("payload:scoreline_root"),
+        }),
+      ]),
+    );
+    expect(components).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_punish_primary_speculative_scoreline_dampen",
+        }),
+      ]),
+    );
+  });
+
+  it("keeps the punish-primary scoreline dampen when a prepared remote is underfunded", () => {
+    const agenda = agendaCard("hq-agenda");
+    const remoteAgenda = corpAction(
+      "install-underfunded-prepared-remote-agenda",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    const input = {
+      ...corpInputWithHqCards(5, [agenda], [remoteAgenda]),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("expensive-unrezzed-wall", { rezCost: 7 })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: () => true,
+      corpScoringWindowAssessment: () =>
+        scoringWindow({
+          serverId: "remote_1",
+          windowKind: "temporary_safe",
+          scoreHorizon: "next_turn",
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 2,
+          affordableDurableRelevantIceCount: 1,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          dynamicProtectionWeaknessCount: 0,
+          recommendedNextStep: "score",
+        }),
+    };
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      remoteAgenda,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_punish_primary_speculative_scoreline_dampen",
+          value: -1800,
+        }),
+      ]),
+    );
+  });
+
+  it("keeps the punish-primary scoreline dampen for near-win prepared remote steals", () => {
+    const agenda = agendaCard("hq-agenda");
+    const remoteAgenda = corpAction(
+      "install-near-win-prepared-remote-agenda",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    const input = {
+      ...corpInputWithHqCards(9, [agenda], [remoteAgenda]),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    input.playerView.agendaPointsToWin = 7;
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [corpIce("remote-wall", { rezCost: 2, rezzed: true })],
+        root: [],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: () => true,
+      corpScoringWindowAssessment: () =>
+        scoringWindow({
+          serverId: "remote_1",
+          windowKind: "temporary_safe",
+          scoreHorizon: "next_turn",
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "near_win",
+          runnerAgendaPointsAfterSteal: 5,
+          affordableDurableRelevantIceCount: 1,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          dynamicProtectionWeaknessCount: 0,
+          recommendedNextStep: "score",
+        }),
+    };
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      remoteAgenda,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_punish_primary_speculative_scoreline_dampen",
+          value: -1800,
+        }),
+      ]),
+    );
+  });
+
   it("scores visible activated scored-agenda economy abilities above basic credit", () => {
     const marineArcology = corpCard("marine-arcology", "agenda", {
       title: "Marine Arcology",
