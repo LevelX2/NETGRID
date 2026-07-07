@@ -1371,6 +1371,53 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
       "remote_dynamic_protection_weakness_count:0",
     );
   });
+
+  it("does not count reachable trace ICE as durable scoring protection", () => {
+    const agenda = agendaCard("reachable-hazard-agenda", {
+      agendaPoints: 2,
+      advancementRequirement: 3,
+    });
+    const action = corpAction(
+      "install-hazard-protected-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 4,
+        runnerCredits: 6,
+        runnerAgendaPoints: 5,
+        runnerRig: [simpleKiller("runner-killer")],
+        hq: [agenda],
+        servers: protectedCentralServers([
+          remoteServer("remote_1", [
+            hunterTraceTagIce("remote-hunter", { rezCost: 2 }),
+          ]),
+        ]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "unsafe",
+      runnerCanReachAccessBeforeScore: true,
+      corpCanRezRelevantIce: true,
+      affordableDurableRelevantIceCount: 0,
+      recommendedNextStep: "build_remote_ice",
+    });
+    expect(assessment?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_rez_budget:relevant_ice_count:1",
+        "remote_rez_budget:durable_relevant_ice_count:0",
+      ]),
+    );
+  });
 });
 
 function assess(input: AiDecisionInput, action: LegalAction) {
@@ -1593,6 +1640,38 @@ function blankIce(
       iceDefinitionId: "blank_remote_ice",
       effectiveStrength: 0,
       subroutines: [],
+    },
+    ...overrides,
+  } as unknown as VisibleCard;
+}
+
+function hunterTraceTagIce(
+  instanceId: string,
+  overrides: Partial<VisibleCard> = {},
+): VisibleCard {
+  return {
+    instanceId,
+    known: true,
+    type: "ice",
+    title: "Hunter",
+    definitionId: "onr_v1_249_hunter",
+    subtypes: ["Sentry", "Bloodhound"],
+    rezzed: false,
+    rezCost: 2,
+    owner: "corp",
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_249_hunter",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: `${instanceId}_trace`,
+          type: "initiate_trace",
+          sourceDefinitionId: "onr_v1_249_hunter",
+          sourceTitle: "Hunter",
+          amount: 5,
+        },
+      ],
     },
     ...overrides,
   } as unknown as VisibleCard;

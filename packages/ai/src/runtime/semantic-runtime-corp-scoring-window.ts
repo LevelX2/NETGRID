@@ -846,6 +846,7 @@ function scoringWindowIceQuality(
   dynamicReserve: number;
 } {
   const relevant = iceHasPotentialScoringProtection(ice);
+  const durableAccessStop = iceHasDurableScoringAccessStop(ice);
   const weakPositionScaling =
     relevant && iceHasUnsupportedPositionScaling(server, ice, iceIndex);
   const dynamicProtectionWeakness =
@@ -853,7 +854,10 @@ function scoringWindowIceQuality(
   return {
     relevant,
     durableRelevant:
-      relevant && !weakPositionScaling && !dynamicProtectionWeakness,
+      relevant &&
+      durableAccessStop &&
+      !weakPositionScaling &&
+      !dynamicProtectionWeakness,
     weakPositionScaling,
     dynamicProtectionWeakness,
     dynamicReserve: relevant && iceHasSameFortRepositionRisk(ice) ? 1 : 0,
@@ -899,6 +903,33 @@ function iceHasPotentialScoringProtection(ice: VisibleCard): boolean {
     return true;
   }
   return !iceHasModeledRunImpact(ice);
+}
+
+function iceHasDurableScoringAccessStop(ice: VisibleCard): boolean {
+  const quoteSubroutines = ice.effectiveRunQuote?.subroutines ?? [];
+  if (
+    quoteSubroutines.some((subroutine) =>
+      [
+        "end_the_run",
+        "end_the_run_unless_runner_pays",
+        "set_run_future_end_the_run_subroutine",
+        "set_runner_run_lock_actions",
+      ].includes(subroutine.type),
+    )
+  ) {
+    return true;
+  }
+  if (ice.definitionId && endTheRunSubroutineCount(ice.definitionId) > 0) {
+    return true;
+  }
+  const signals = scoringWindowCardSignals(ice);
+  return signals.some((signal) =>
+    scoringWindowSignalMatches(signal, [
+      "etr_ice",
+      "end_run",
+      "run_lock",
+    ]),
+  );
 }
 
 function iceHasUnsupportedPositionScaling(
@@ -1320,6 +1351,18 @@ function scoringWindowRecommendedNextStep(params: {
     return !params.rezBudget.corpCanRezRelevantIce && !remoteHasIce
       ? "gain_credit"
       : "build_remote_ice";
+  }
+  if (
+    params.windowKind === "unsafe" &&
+    params.hasScorePressure &&
+    !params.centralPressure &&
+    scoringWindowHasSevereExposureRisk(
+      params.agendaStealSeverity,
+      params.runnerExposureCreditActions,
+    ) &&
+    (params.rezBudget.affordableDurableRelevantIceCount ?? 0) < 1
+  ) {
+    return "build_remote_ice";
   }
   if (
     params.windowKind === "unsafe" &&
