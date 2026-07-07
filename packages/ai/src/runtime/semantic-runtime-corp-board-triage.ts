@@ -229,16 +229,20 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
     ),
   );
   if (remoteFunding?.scoringWindow) {
+    const requiredRezFloor =
+      scorelineRequiredRezFloor(input, remoteFunding, dependencies) ??
+      sameTargetProtectionInstallRezFloor(
+        input,
+        actions,
+        remoteFunding.serverId,
+        dependencies,
+      );
     return {
       primary: "fund_score_remote",
       severity: triageSeverityFromScoringWindow(remoteFunding.scoringWindow),
       targetServerId: remoteFunding.serverId,
       scoreRemoteServerId: remoteFunding.serverId,
-      requiredRezFloor: scorelineRequiredRezFloor(
-        input,
-        remoteFunding,
-        dependencies,
-      ),
+      requiredRezFloor,
       currentCredits,
       runnerAgendaPointsAfterSteal:
         remoteFunding.scoringWindow.runnerAgendaPointsAfterSteal,
@@ -604,6 +608,19 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
       }
       if (action.type === "draw_card" && !legalEconomyActionExists(input)) {
         return "match";
+      }
+      if (
+        triageNeedsFunding(triage) &&
+        legalEconomyActionExists(input) &&
+        actionIsUnfundedTargetProtectionInstall(
+          input,
+          action,
+          actionServerId,
+          triage,
+          dependencies,
+        )
+      ) {
+        return "mismatch";
       }
       return actionCreatesPurgeActionDebt(action) ||
         actionPushesUnsafeScoreline(input, action, dependencies) ||
@@ -1785,7 +1802,15 @@ function scorelineRequiredRezFloor<TConsumer extends string>(
     return dynamicReserve;
   }
   if (entry.remoteRezFloor?.blockedByFloor !== true) {
-    return dynamicReserve;
+    const evidenceFloor = scorelineRequiredRezFloorFromScoringWindowEvidence(
+      input,
+      entry,
+      dependencies,
+    );
+    if (evidenceFloor !== undefined) return evidenceFloor;
+    return dynamicReserve !== undefined && dynamicReserve > 0
+      ? dynamicReserve
+      : undefined;
   }
   const requiredAfterAction = corpTriagePositiveNumber(
     entry.remoteRezFloor.requiredCreditsAfterAction,
@@ -1801,6 +1826,92 @@ function scorelineRequiredRezFloor<TConsumer extends string>(
     return Math.max(input.playerView.own.credits + 1, rezFloor);
   }
   return input.playerView.own.credits + 1;
+}
+
+function scorelineRequiredRezFloorFromScoringWindowEvidence<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): number | undefined {
+  const assessment = entry.scoringWindow;
+  if (!assessment) return undefined;
+  if (
+    assessment.recommendedNextStep !== "gain_credit" &&
+    assessment.corpCanRezRelevantIce !== false &&
+    assessment.corpCanRezFullPathWithDynamicReserve !== false
+  ) {
+    return undefined;
+  }
+  const minRelevantRezCost = scoringWindowEvidenceNumber(
+    assessment,
+    "remote_rez_budget:min_relevant_rez_cost:",
+  );
+  const fullPathWithDynamicReserve = scoringWindowEvidenceNumber(
+    assessment,
+    "remote_rez_budget:full_relevant_path_with_dynamic_reserve:",
+  );
+  const fullPathRezCost = scoringWindowEvidenceNumber(
+    assessment,
+    "remote_rez_budget:full_relevant_path_rez_cost:",
+  );
+  const preExposureReserve =
+    scoringWindowEvidenceNumber(
+      assessment,
+      "remote_rez_budget:pre_exposure_advancement_credit_reserve:",
+    ) ?? 0;
+  const actionCost = Math.max(0, dependencies.actionCreditCost(entry.action));
+  const floor =
+    assessment.corpCanRezRelevantIce === false
+      ? minRelevantRezCost
+      : assessment.corpCanRezFullPathWithDynamicReserve === false
+        ? fullPathWithDynamicReserve ?? fullPathRezCost ?? minRelevantRezCost
+        : minRelevantRezCost;
+  if (floor === undefined || floor <= 0) return undefined;
+  return Math.max(
+    input.playerView.own.credits + 1,
+    floor + actionCost + preExposureReserve,
+  );
+}
+
+function sameTargetProtectionInstallRezFloor<TConsumer extends string>(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+  serverId: string | undefined,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): number | undefined {
+  if (!serverId) return undefined;
+  const candidates = actions
+    .filter(
+      (entry) =>
+        entry.serverId === serverId &&
+        entry.action.type === "install_card" &&
+        entry.action.payload?.placement === "ice",
+    )
+    .map((entry) => {
+      const source = semanticRuntimeVisibleSourceCard(input, entry.action);
+      const rezCost =
+        source && source.known !== false
+          ? corpTriagePositiveNumber(source.rezCost)
+          : undefined;
+      if (rezCost === undefined) return undefined;
+      return rezCost + Math.max(0, dependencies.actionCreditCost(entry.action));
+    })
+    .filter((value): value is number => value !== undefined && value > 0)
+    .sort((left, right) => left - right);
+  return candidates[0];
+}
+
+function scoringWindowEvidenceNumber(
+  assessment: CorpScoringWindowAssessment,
+  prefix: string,
+): number | undefined {
+  const entry = assessment.evidence.find((value) => value.startsWith(prefix));
+  if (!entry) return undefined;
+  const rawValue = entry.slice(prefix.length);
+  const parsed = Number.parseFloat(rawValue);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
 }
 
 function existingScoreRemoteNeedsFundingBeforeProtection(
@@ -2789,6 +2900,36 @@ function actionIsExpensiveNonProtection(
     action.payload?.placement !== "ice" &&
     actionServerId !== triage.targetServerId
   );
+}
+
+function triageNeedsFunding(triage: CorpBoardTriage): boolean {
+  return (
+    triage.currentCredits !== undefined &&
+    triage.requiredRezFloor !== undefined &&
+    triage.currentCredits < triage.requiredRezFloor
+  );
+}
+
+function actionIsUnfundedTargetProtectionInstall<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  actionServerId: string | undefined,
+  triage: CorpBoardTriage,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
+  if (action.type !== "install_card") return false;
+  if (action.payload?.placement !== "ice") return false;
+  if (!triage.targetServerId || actionServerId !== triage.targetServerId) {
+    return false;
+  }
+  const source = semanticRuntimeVisibleSourceCard(input, action);
+  if (!source || source.known === false) return false;
+  const rezCost = corpTriagePositiveNumber(source.rezCost);
+  if (rezCost === undefined) return false;
+  const creditsAfterAction =
+    input.playerView.own.credits -
+    Math.max(0, dependencies.actionCreditCost(action));
+  return creditsAfterAction < rezCost;
 }
 
 function actionDistractsFromCentralProtection(

@@ -687,6 +687,167 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("funds a remote scoreline when scoring-window evidence has a zero dynamic reserve but relevant ICE is unaffordable", () => {
+    const remoteAgenda = {
+      ...corpAction("remote-scoreline", "install_card", {
+        placement: "root",
+        serverId: "new_remote",
+      }),
+      source: "hq-agenda",
+    } as LegalAction;
+    const remoteIce = {
+      ...corpAction("install-new-remote-ice", "install_card", {
+        placement: "ice",
+        serverId: "new_remote",
+      }),
+      source: "expensive-ice",
+    } as LegalAction;
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpCredits: 3,
+      runnerAgendaPoints: 3,
+      corpHq: [
+        agendaCard("hq-agenda", 3),
+        iceCard("expensive-ice", { rezCost: 7 }),
+      ],
+      legalActions: [remoteAgenda, remoteIce, gainCredit],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [iceCard("rd-ice")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "new_remote",
+          windowKind: "unsafe",
+          runnerCanContestNow: true,
+          runnerCanReachAccessNow: true,
+          agendaStealRelevantNow: true,
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealRelevantBeforeScore: true,
+          agendaStealSeverity: "near_win",
+          runnerAgendaPointsAfterSteal: 6,
+          dynamicProtectionReserve: 0,
+          corpCanRezRelevantIce: false,
+          corpCanRezFullPathWithDynamicReserve: false,
+          recommendedNextStep: "gain_credit",
+          evidence: [
+            "remote_rez_budget:credits_after_action:3",
+            "remote_rez_budget:pre_exposure_advancement_credit_reserve:0",
+            "remote_rez_budget:min_relevant_rez_cost:7",
+            "remote_rez_budget:full_relevant_path_rez_cost:7",
+            "remote_rez_budget:full_relevant_path_with_dynamic_reserve:7",
+          ],
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const creditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      gainCredit,
+      dependencies,
+    );
+    const iceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteIce,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "fund_score_remote",
+      severity: "high",
+      targetServerId: "new_remote",
+      requiredRezFloor: 7,
+      currentCredits: 3,
+    });
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(iceComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
+  it("uses same-target ICE install candidates as funding floor when a new remote scoreline has no ICE evidence yet", () => {
+    const remoteAgenda = {
+      ...corpAction("remote-scoreline", "install_card", {
+        placement: "root",
+        serverId: "new_remote",
+      }),
+      source: "hq-agenda",
+    } as LegalAction;
+    const remoteIce = {
+      ...corpAction("install-new-remote-ice", "install_card", {
+        placement: "ice",
+        serverId: "new_remote",
+      }),
+      source: "expensive-ice",
+    } as LegalAction;
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpCredits: 3,
+      runnerAgendaPoints: 3,
+      corpHq: [
+        agendaCard("hq-agenda", 3),
+        iceCard("expensive-ice", { rezCost: 7 }),
+      ],
+      legalActions: [remoteAgenda, remoteIce, gainCredit],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [iceCard("rd-ice")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "new_remote",
+          windowKind: "unsafe",
+          runnerCanContestNow: true,
+          runnerCanReachAccessNow: true,
+          agendaStealRelevantNow: true,
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealRelevantBeforeScore: true,
+          agendaStealSeverity: "near_win",
+          runnerAgendaPointsAfterSteal: 6,
+          dynamicProtectionReserve: 0,
+          corpCanRezRelevantIce: false,
+          corpCanRezFullPathWithDynamicReserve: false,
+          recommendedNextStep: "gain_credit",
+          evidence: ["remote_rez_budget:no_ice"],
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const creditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      gainCredit,
+      dependencies,
+    );
+    const iceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteIce,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "fund_score_remote",
+      targetServerId: "new_remote",
+      requiredRezFloor: 7,
+      currentCredits: 3,
+    });
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(iceComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+  });
+
   it("aligns same-target R&D rez under critical protect-rd triage", () => {
     const rdRez = corpRezIceAction("rez-rd-quandary", "rd-ice", 2);
     const declineRez = corpAction("decline-rez", "decline_rez");
