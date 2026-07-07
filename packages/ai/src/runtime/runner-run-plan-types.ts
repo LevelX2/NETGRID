@@ -44,6 +44,7 @@ export type RunnerRunObjective =
       expectedValue: number;
       expectedAccessCount: number;
     }
+  | { kind: "access_archives"; expectedValue: number }
   | { kind: "contest_remote_agenda"; urgency: number }
   | {
       kind: "trash_asset_or_upgrade";

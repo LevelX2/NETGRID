@@ -43,8 +43,12 @@ import type {
   SemanticRuntimeRunOnlyActionAdjustment,
   TacticalPlanMappedChoiceResult,
 } from "./semantic-runtime-types";
-import { requireActiveRunnerRunPlan } from "./runner-run-plan-memory";
+import {
+  rememberRunnerRunPlanMemorySnapshot,
+  requireActiveRunnerRunPlan,
+} from "./runner-run-plan-memory";
 import { runnerRunPlanSemanticChoice } from "./runner-run-plan-policy";
+import { createRunnerRunPlanForSelectedAction } from "./runner-run-plan-start";
 import { sourceDefinitionIdForAction } from "./visible-card-lookup";
 
 export type {
@@ -415,6 +419,22 @@ export function chooseSemanticRuntimeAction(
           : runOnlyActionAdjusted.memoryAction ?? selectedChoice.action,
       )
     : undefined;
+  const newRunnerRunPlan =
+    persistTacticalPlanMemory && input.side === "runner"
+      ? createRunnerRunPlanForSelectedAction({
+          input,
+          selectedAction: selectedChoice.action,
+          ...(runnerRunTargetEvaluations
+            ? { runnerRunTargetEvaluations }
+            : {}),
+          ...(runnerTacticalGoals ? { runnerTacticalGoals } : {}),
+          ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
+          actionSemanticCandidates,
+        })
+      : undefined;
+  const updatedRunnerRunPlanMemory = newRunnerRunPlan
+    ? rememberRunnerRunPlanMemorySnapshot(input, newRunnerRunPlan)
+    : undefined;
   const updatedStrategicIntentMemory =
     persistTacticalPlanMemory && strategicIntentState
       ? rememberStrategicIntentState(input, strategicIntentState)
@@ -452,6 +472,13 @@ export function chooseSemanticRuntimeAction(
         ? [
             `tactical_plan_memory_status:${updatedPlanMemory.status}`,
             `tactical_plan_progression:${updatedPlanMemory.planProgressionReason}`,
+          ]
+        : []),
+      ...(updatedRunnerRunPlanMemory
+        ? [
+            `runner_run_plan_created:${updatedRunnerRunPlanMemory.id}`,
+            `runner_run_plan_objective:${updatedRunnerRunPlanMemory.objective.kind}`,
+            `runner_run_plan_target:${updatedRunnerRunPlanMemory.targetServer.id}`,
           ]
         : []),
       ...(updatedStrategicIntentMemory

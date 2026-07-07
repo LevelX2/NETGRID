@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { AiDecisionDebug, AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { chooseSemanticRuntimeAction } from "./semantic-runtime";
 import type { SemanticRuntimeDependencies } from "./semantic-runtime";
 import {
@@ -10,8 +10,10 @@ import {
   resetRunnerRunPlanMemory,
 } from "./runner-run-plan-memory";
 import { runnerRunPlanSemanticChoice } from "./runner-run-plan-policy";
+import { createRunnerRunPlanForSelectedAction } from "./runner-run-plan-start";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
+import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
 
 describe("runner run plan memory", () => {
   beforeEach(() => {
@@ -61,15 +63,143 @@ describe("runner run plan memory", () => {
     expect(selected?.evidence).toContain("runner_run_plan_active:true");
     expect(selected?.evidence).toContain("runner_run_plan_id:runplan-1");
   });
+
+  it("creates a run plan from a selected start-run action and run target evaluation", () => {
+    const startRun = action("start_run", { serverId: "rd" });
+    const plan = createRunnerRunPlanForSelectedAction({
+      input: runnerInput({ activeRun: false, legalActions: [startRun] }),
+      selectedAction: startRun,
+      runnerRunTargetEvaluations: [runTargetEvaluation(startRun)],
+      runnerTacticalGoals: [
+        {
+          schemaVersion: "runner-tactical-goal-v1",
+          goalId: "runner.pressure_good_central_target",
+          family: "pressure",
+          priority: 100,
+          urgency: "medium",
+          targetServerId: "rd",
+          source: "run_target_evaluation",
+          evidence: ["goal:rd_pressure"],
+        },
+      ],
+      runnerStrategicIntent: {
+        schemaVersion: "runner-strategic-intent-profile-v1",
+        side: "runner",
+        source: {
+          deckStrategyProfile: "ai_internal_strategy_profile",
+          deckCapabilities: "ai_internal",
+          plannerEffect: "runtime_projection",
+        },
+        primaryWinIntent: "runner.steal_agendas_default",
+        setupEngine: [],
+        pressureVectors: ["runner.central_probe_pressure"],
+        riskProfile: [],
+        rejectedIntents: [],
+        confidence: "medium",
+        evidence: ["strategic_intent:central_probe"],
+      },
+    });
+
+    expect(plan?.objective.kind).toBe("access_rnd_top");
+    expect(plan?.targetServer.id).toBe("rd");
+    expect(plan?.runStartActionId).toBe("start_run");
+    expect(plan?.sourceTacticalGoalIds).toContain(
+      "runner.pressure_good_central_target",
+    );
+    expect(plan?.pathQuote.totalKnownCost).toBe(2);
+  });
+
+  it("remembers a run plan when the semantic runtime selects start_run", () => {
+    const startRun = action("start_run", { serverId: "rd" });
+    const input = runnerInput({ activeRun: false, legalActions: [startRun] });
+    const runtimeChoice = choice(startRun, "simple_hq_or_rnd_pressure", 500);
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      {},
+      runtimeDependenciesForStartRun(runtimeChoice, startRun),
+    );
+
+    const activeRunInput = runnerInput({ activeRun: true });
+    const remembered = getRunnerRunPlanMemorySnapshot(activeRunInput);
+    expect(decision.actionId).toBe("start_run");
+    expect(remembered?.runStartActionId).toBe("start_run");
+    expect(remembered?.objective.kind).toBe("access_rnd_top");
+  });
 });
 
-function minimalRuntimeDependencies(): SemanticRuntimeDependencies {
+function minimalRuntimeDependencies(
+  overrides: Partial<SemanticRuntimeDependencies> = {},
+): SemanticRuntimeDependencies {
   return {
     buildActionSemanticCandidates: () => [],
+    ...overrides,
   } as unknown as SemanticRuntimeDependencies;
 }
 
-function runnerInput(params: { activeRun: boolean }): AiDecisionInput {
+function runtimeDependenciesForStartRun(
+  runtimeChoice: SemanticRuntimeChoice,
+  startRun: LegalAction,
+): SemanticRuntimeDependencies {
+  const choices = [runtimeChoice];
+  return minimalRuntimeDependencies({
+    semanticRuntimeChoices: () => choices,
+    semanticRuntimeChoiceIsReactive: () => false,
+    getTacticalPlanMemorySnapshot: () => undefined,
+    deckCapabilitiesForInput: () => ({ side: "runner" }) as never,
+    runnerStrategicIntentForInput: () => ({
+      schemaVersion: "runner-strategic-intent-profile-v1",
+      side: "runner",
+      source: {
+        deckStrategyProfile: "ai_internal_strategy_profile",
+        deckCapabilities: "ai_internal",
+        plannerEffect: "runtime_projection",
+      },
+      primaryWinIntent: "runner.steal_agendas_default",
+      setupEngine: [],
+      pressureVectors: ["runner.central_probe_pressure"],
+      riskProfile: [],
+      rejectedIntents: [],
+      confidence: "medium",
+      evidence: ["strategic_intent:central_probe"],
+    }),
+    evaluateRunnerHandDevelopment: () => [],
+    buildRunnerEconomyPosture: () => ({}) as never,
+    evaluateRunnerRunTargets: () => [runTargetEvaluation(startRun)],
+    buildRunnerTacticalGoals: () => [],
+    evaluateTacticalPlans: () => ({ planAlternatives: [], blockedPlans: [] }),
+    bestSemanticRuntimeChoice: () => runtimeChoice,
+    bestSemanticRuntimeChoiceForTacticalPlanOverride: () => undefined,
+    tacticalPlanMappedChoice: () => ({}),
+    runnerSelfDamageImmediateWinSemanticChoice: () => undefined,
+    semanticRuntimeChoiceWithEvidence: (choiceValue) => choiceValue,
+    tacticalPlanMappingOverrideEvidence: () => [],
+    tacticalPlanRuntimeAlignedToChoice: (planRuntime) => planRuntime,
+    runnerRunOnlyActionAdjustedSemanticChoice: () => ({
+      choice: runtimeChoice,
+      rankedChoices: choices,
+    }),
+    semanticRuntimeCoverageSelectionDebug: () => undefined,
+    selectedChoicesForDecision: () => undefined,
+    rememberTacticalPlanRuntime: () => undefined,
+    scrubEvidence: (evidence) => evidence,
+    semanticRuntimeDecisionDebug: () =>
+      ({
+        schemaVersion: "ai-decision-debug-v1",
+        aiLevel: 2,
+        summary: "test",
+        planKind: "test",
+        score: 0,
+        fallbackUsed: false,
+        timeoutUsed: false,
+      }) as AiDecisionDebug,
+  });
+}
+
+function runnerInput(params: {
+  activeRun: boolean;
+  legalActions?: LegalAction[];
+}): AiDecisionInput {
   return {
     side: "runner",
     playerView: {
@@ -116,8 +246,8 @@ function runnerInput(params: { activeRun: boolean }): AiDecisionInput {
       publicEvents: [],
     },
     eventTail: [],
-    legalActions: [],
-    difficulty: "standard",
+    legalActions: params.legalActions ?? [],
+    difficulty: "normal",
     seed: "runner-run-plan-test",
     decisionId: "runner-run-plan-test:42:runner",
     actionNumber: 1,
@@ -204,7 +334,10 @@ function runPlan(): RunnerRunPlan {
   };
 }
 
-function action(type: LegalAction["type"]): LegalAction {
+function action(
+  type: LegalAction["type"],
+  payload: Record<string, string | number | boolean> = {},
+): LegalAction {
   return {
     actionId: type,
     side: "runner",
@@ -216,6 +349,7 @@ function action(type: LegalAction["type"]): LegalAction {
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 42,
+    payload,
   } as unknown as LegalAction;
 }
 
@@ -231,5 +365,65 @@ function choice(
     reasonCode: `runner.semantic.${scopeId}`,
     explanation: scopeId,
     evidence: [`action_type:${legalAction.type}`],
+  };
+}
+
+function runTargetEvaluation(
+  actionValue: LegalAction,
+): RunnerRunTargetEvaluation {
+  return {
+    schemaVersion: "runner-run-target-evaluation-v1",
+    targetServerId: "rd",
+    targetKind: "rd",
+    accessServerId: "rd",
+    accessTargetKind: "rd",
+    actionId: actionValue.actionId,
+    accessPayoff: "unknown",
+    knownAccessState: "unknown",
+    multiaccessAvailable: false,
+    pathPassability: "reachable",
+    pathCost: 2,
+    creditsAfterRun: 3,
+    stealOrTrashAffordable: "unknown",
+    installedRunPayoff: {
+      immediateAccessValue: 0,
+      futureSetupValue: 0,
+      purgeTaxValue: 0,
+      economyValue: 0,
+      riskPenalty: 0,
+      scoreBonus: 0,
+      multiaccessAvailable: false,
+      evidence: [],
+    },
+    runActionPayoff: {
+      immediateAccessValue: 0,
+      futureSetupValue: 0,
+      purgeTaxValue: 0,
+      economyValue: 0,
+      riskPenalty: 0,
+      scoreBonus: 0,
+      multiaccessAvailable: false,
+      evidence: [],
+    },
+    runActionProjection: {
+      actionId: actionValue.actionId,
+      actionType: actionValue.type,
+      sourceKind: "basic_action",
+      targetServerId: "rd",
+      targetKind: "rd",
+      structure: "direct_start_run",
+      accessPayoffSignals: [],
+      constraintSignals: [],
+      riskSignals: [],
+      noNoisyBreakers: false,
+      bypassFirstIce: false,
+      projectionStatus: "concrete_target",
+      evidence: [],
+    },
+    riskyUniversalCoverage: false,
+    scoreThreat: false,
+    recommendation: "run_now",
+    score: 100,
+    evidence: ["target:rd"],
   };
 }
