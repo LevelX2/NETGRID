@@ -258,6 +258,7 @@ function scorelinePathForAction<TServer extends VisibleCorpServer>(
     dependencies,
     roles,
     server,
+    centralThreatHigh,
   );
   if (actionRoles.length === 0) return undefined;
   const scoringWindow = semanticRuntimeCorpScoringWindowAssessment(
@@ -354,6 +355,7 @@ function scorelineActionRoles<TServer extends VisibleCorpServer>(
   dependencies: SemanticRuntimeCorpScorelineAssessmentDependencies<TServer>,
   roles: readonly string[],
   server: TServer | undefined,
+  centralThreatHigh: boolean,
 ): CorpScorelineActionRole[] {
   if (action.type === "score_agenda") return ["score_now"];
   if (action.type === "advance_card") {
@@ -367,7 +369,7 @@ function scorelineActionRoles<TServer extends VisibleCorpServer>(
   if (action.type === "install_card") {
     if (action.payload?.placement === "ice") {
       if (server?.id === "hq" || server?.id === "rd") {
-        return ["central_protection"];
+        return centralThreatHigh ? ["central_protection"] : [];
       }
       return dependencies.isRemoteServerTarget(server?.id)
         ? ["remote_protection"]

@@ -148,6 +148,38 @@ describe("assessCorpScorelineWindow", () => {
     );
   });
 
+  it("keeps central protection out of scoreline paths when central threat is not high", () => {
+    const installAgenda = action(
+      "install-agenda",
+      "install_card",
+      "agenda-hand",
+      "remote_1",
+    );
+    const protectHq = action("protect-hq", "install_card", "ice-hand", "hq", {
+      placement: "ice",
+    });
+    const input = inputWithActions([installAgenda, protectHq], {
+      credits: 10,
+      hand: [agenda("agenda-hand"), ice("ice-hand")],
+      servers: [
+        remote("remote_1", { ice: [ice("ice-1")] }),
+        central("hq"),
+      ],
+    });
+
+    const assessment = scoreline(input, { centralThreatHigh: false });
+
+    expect(pathFor(assessment, "install-agenda")).toMatchObject({
+      actionRoles: ["agenda_install"],
+    });
+    expect(
+      assessment.paths.some((path) => path.actionId === "protect-hq"),
+    ).toBe(false);
+    expect(assessment.evidence).not.toContain(
+      "corp_scoreline_best_action:install_card:central_protection:hq",
+    );
+  });
+
   it("keeps no-score-path states as none/defer without passive penalty", () => {
     const draw = action("draw", "draw_card", "basic_action");
     const endTurn = action("end", "end_turn", "game_rule");
@@ -371,7 +403,9 @@ function ice(instanceId: string): VisibleCard {
     known: true,
     rezCost: 0,
     rezzed: true,
-    effectiveRunQuote: "*End the run.",
+    effectiveRunQuote: {
+      subroutines: [{ type: "end_the_run" }],
+    },
   } as unknown as VisibleCard;
 }
 
