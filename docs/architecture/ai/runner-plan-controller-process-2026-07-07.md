@@ -1,6 +1,6 @@
 # Runner-KI Plancontroller Prozess 2026-07-07
 
-Status: in Umsetzung
+Status: abgeschlossen und lokal integrationsbereit
 
 ## Quelle
 
@@ -26,6 +26,7 @@ Die Runner-KI soll nicht mehr globale Aktionsscores als primäre Steuerung verwe
 - Runner-TacticalPlan-Auswahl und Plan-Mapping-Härtung.
 - Planinstanz-Priorität für Remote Contest, Central Pressure, Economy/Funding, Coverage Search und Handentwicklung.
 - Deckstrategie-Fit als Planprioritätskomponente, insbesondere für R&D/HQ/Remote-Decks.
+- R&D-Planbewertung wird durch die bekannte zugreifbare Sequenz moduliert: vollständig bekannte Sequenzen ohne Agenda- oder sicheren Trash-Payoff erzeugen keinen guten R&D-Plan.
 - Regressionen für Short-Circuit-Verdrängung, Remote-Funding und plan-dominante Auswahl.
 - Prozess-, Evidence-, Final-Report und Wissenslog.
 
@@ -73,7 +74,20 @@ Checks: fokussierte Plan-Tests, `git diff --check`.
 
 Commit: `fix(ai): apply deck strategy to runner plan priorities`
 
-### RPC-3 Regression, Dokumentation und Integration
+### RPC-3 R&D-Bekanntheit als Planmodulator
+
+Ziel: R&D-Planinstanzen dürfen nicht allein durch installierten Multiaccess gut bleiben, wenn die aktuell bekannte zugreifbare Sequenz vollständig aus nicht verwertbaren Karten besteht. Enthält die bekannte Sequenz eine Agenda oder einen sicheren Trash-Payoff, bleibt der Plan dagegen wertvoll.
+
+Kernartefakte:
+
+- `packages/ai/src/known-central-access-payoff.ts`
+- `packages/ai/src/known-central-access-payoff.test.ts`
+
+Checks: fokussierte Known-Central-Tests, Plancontroller-Regressionen, `@netgrid/ai` Typecheck, `git diff --check`.
+
+Commit: `fix(ai): suppress stale known R&D multiaccess plans`
+
+### RPC-4 Regression, Dokumentation und Integration
 
 Ziel: betroffene Runtime-/Plan-Regressionen, Typecheck, Final-Report, Wissenslog und lokaler Merge nach `main`.
 
@@ -84,8 +98,16 @@ Checks:
 - `git diff --check`
 - nach Merge relevante Checks im Hauptworkspace
 
-Commit: `test(ai): cover runner plan controller regressions`
+Commit: `docs(ai): finalize runner plan controller report`
 
 ## Sicherheitsblocker
 
 Stoppen ohne Workaround, wenn eine Lösung verdeckte Corp-Hand-/R&D-/Remote-Informationen benötigen würde, wenn eine benötigte LegalAction fehlt, oder wenn der lokale Merge nach `main` nicht kollisionsfrei lösbar ist.
+
+## Ergebnis
+
+- RPC-0 dokumentierte Match-Evidence und Prozessgrenzen.
+- RPC-1 härtete `tacticalPlanMappedChoice`: Runner-Pläne definieren die aktive Aktionsspur; off-plan Score-Overrides werden blockiert, außer ein expliziter Hard-Interrupt oder ein Plan-Abbruchgrund wie wiederholter Run ohne Fortschritt greift. Innerhalb der gemappten Planaktionen entscheidet der semantische Score.
+- RPC-2 ergänzte Planpriorität für score-bedrohte Remote-Ziele und Deckstrategie-Fit für R&D-, HQ- und Remote-Planinstanzen.
+- RPC-3 härtete R&D-Planbewertung gegen bekannte Multiaccess-Sequenzen ohne Zugriffspayoff. Ein installierter R&D-Access-Bonus überstimmt diese negative Bekanntheit nicht mehr; bekannte Agenda-Sequenzen bleiben positiver Druck.
+- RPC-4 dokumentierte Verifikation, Grenzen und lokalen Integrationsstand im Final-Report.
