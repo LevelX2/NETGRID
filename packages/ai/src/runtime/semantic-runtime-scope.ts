@@ -1,5 +1,6 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { actionProvidesCredits } from "../actions/action-effect-classification";
 
 export type SemanticRuntimeRunnerSourceCardAnswerRole = (
   input: AiDecisionInput,
@@ -68,7 +69,12 @@ export function semanticRuntimeScopeForAction(
     if (runnerCardScope) return runnerCardScope;
     return "basic_install";
   }
-  if (action.type === "gain_credit" || action.type === "draw_card") {
+  if (action.type === "gain_credit") {
+    return actionProvidesCredits(action)
+      ? "basic_economy_draw"
+      : `${input.side}_legal_action`;
+  }
+  if (action.type === "draw_card") {
     return "basic_economy_draw";
   }
   if (action.type === "break_subroutine" || action.type === "pump_breaker") {

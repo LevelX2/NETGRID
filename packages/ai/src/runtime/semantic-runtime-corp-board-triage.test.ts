@@ -1877,6 +1877,71 @@ describe("semantic runtime corp board triage", () => {
     expect(shuffleDrawComponent?.key).not.toBe("corp_board_triage_alignment");
   });
 
+  it("does not treat scored hidden-zone reveal agenda actions as remote funding", () => {
+    const remoteAgenda = corpAction("remote-scoreline", "install_card", {
+      placement: "root",
+      serverId: "remote_1",
+    });
+    const basicCredit = corpAction("gain-credit", "gain_credit");
+    const revealRdTop = corpAction(
+      "security-directors-reveal-rd",
+      "gain_credit",
+      {
+        cardId: "security-directors",
+        abilityFamily: "hidden-zone",
+        effectKind: "hidden_zone",
+        agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+      },
+      "security-directors",
+    );
+    const input = corpInput({
+      corpHq: [agendaCard("hq-agenda-1", 3)],
+      corpCredits: 0,
+      runnerAgendaPoints: 4,
+      legalActions: [remoteAgenda, revealRdTop, basicCredit],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [iceCard("rd-ice")]),
+        remoteServer("remote_1", [iceCard("remote-ice")]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          agendaStealSeverity: "game_ending",
+          runnerAgendaPointsAfterSteal: 7,
+          corpCanRezRelevantIce: false,
+          corpCanRezFullPathWithDynamicReserve: false,
+          recommendedNextStep: "gain_credit",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const basicCreditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      basicCredit,
+      dependencies,
+    );
+    const revealComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      revealRdTop,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "fund_score_remote",
+      severity: "critical",
+      targetServerId: "remote_1",
+    });
+    expect(basicCreditComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(revealComponent?.key).not.toBe("corp_board_triage_alignment");
+  });
+
   it("funds an existing score remote before protection when the rez path is unaffordable", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",

@@ -2411,7 +2411,17 @@ describe("tactical plan model", () => {
       { sourceDefinitionId: "corp-punish-card" },
       { source: "corp-punish-card" },
     );
-    const input = aiInput("corp", [punish]);
+    const reveal = legalAction(
+      "reveal-rd-top",
+      "corp",
+      "gain_credit",
+      {
+        abilityFamily: "hidden-zone",
+        effectKind: "hidden_zone",
+      },
+      { source: "scored-agenda" },
+    );
+    const input = aiInput("corp", [punish, reveal]);
     const candidates = buildActionSemanticCandidates({
       legalActions: input.legalActions,
       observerSide: "corp",
@@ -2422,7 +2432,27 @@ describe("tactical plan model", () => {
           tacticSignals: ["tag.source", "tag.payoff"],
         },
       },
-    });
+    }).map((candidate) =>
+      candidate.actionId === reveal.actionId
+        ? {
+            ...candidate,
+            semanticActionType: "card_ability.trigger",
+            actionTacticSignals: ["card_ability.trigger", "zone.reveal"],
+            strategySupport: [
+              {
+                strategyId: "corp.tag_trace_punish",
+                role: "support",
+                confidence: "high",
+                evidence: "deck supports punish",
+              },
+            ],
+            evidence: [
+              ...candidate.evidence,
+              "strategic_action_fit:corp.tag_trace_punish",
+            ],
+          } satisfies ActionSemanticCandidate
+        : candidate,
+    );
 
     const result = evaluateTacticalPlans({
       input,

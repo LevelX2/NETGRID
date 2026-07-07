@@ -48,6 +48,42 @@ describe("legalActionCreditGainForPlan", () => {
       ),
     ).toBe(2);
   });
+
+  it("does not give default gain value to non-credit gain_credit wrappers", () => {
+    const input = { side: "corp", playerView: {} } as AiDecisionInput;
+    const dependencies = {
+      aiHintsByCard: new Map(),
+      visibleCardForAction: () => undefined,
+    };
+
+    expect(
+      legalActionCreditGainForPlan(
+        input,
+        legalAction({
+          side: "corp",
+          type: "gain_credit",
+          source: "basic_action",
+        }),
+        dependencies,
+      ),
+    ).toBe(1);
+    expect(
+      legalActionCreditGainForPlan(
+        input,
+        legalAction({
+          side: "corp",
+          type: "gain_credit",
+          source: "scored-security-directors",
+          payload: {
+            abilityFamily: "hidden-zone",
+            effectKind: "hidden_zone",
+            agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+          },
+        }),
+        dependencies,
+      ),
+    ).toBe(0);
+  });
 });
 
 function legalAction(

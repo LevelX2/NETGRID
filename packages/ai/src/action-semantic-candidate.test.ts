@@ -235,6 +235,31 @@ describe("buildActionSemanticCandidates", () => {
     expect(candidate.actionTacticSignals).not.toContain("economy.recover");
   });
 
+  it("does not classify scored hidden-zone reveal agenda actions as credit economy", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("gain_credit", 1, {
+          side: "corp",
+          source: "scored-security-directors",
+          payload: {
+            cardId: "scored-security-directors",
+            abilityFamily: "hidden-zone",
+            effectKind: "hidden_zone",
+            agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+          },
+        }),
+      ],
+    });
+
+    if (!candidate) throw new Error("Expected reveal action candidate");
+    expect(candidate.semanticActionType).toBe("card_ability.trigger");
+    expect(candidate.actionTacticSignals).toEqual(
+      expect.arrayContaining(["card_ability.trigger", "zone.reveal"]),
+    );
+    expect(candidate.actionTacticSignals).not.toContain("economy.basic");
+    expect(candidate.actionTacticSignals).not.toContain("economy.recover");
+  });
+
   it("covers the minimal runtime bridge action families", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [

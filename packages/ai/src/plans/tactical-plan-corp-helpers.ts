@@ -50,10 +50,6 @@ function candidatePunishSignals(candidate: ActionSemanticCandidate): string[] {
     candidate.abilityId,
     ...candidate.cardContextSignals,
     ...candidate.actionTacticSignals,
-    ...candidate.strategySupport.flatMap((entry) => [
-      entry.strategyId,
-      entry.role,
-    ]),
     ...candidate.conditions.map((entry) => entry.kind),
     ...candidate.risks.map((entry) => entry.kind),
     ...candidate.constraints.map((entry) => entry.kind),
@@ -61,7 +57,6 @@ function candidatePunishSignals(candidate: ActionSemanticCandidate): string[] {
     ...(candidate.targetContext?.targetProfileMatches.flatMap(
       (entry) => entry.evidence,
     ) ?? []),
-    ...candidate.evidence,
   ]
     .filter((entry): entry is string => typeof entry === "string")
     .map((entry) => entry.toLocaleLowerCase("en-US"));

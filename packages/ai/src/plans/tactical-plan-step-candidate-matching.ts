@@ -100,6 +100,14 @@ export function candidateMatchesStep(
       return candidateTargetMatchesPlan(plan, candidate, action);
     }
   }
+  if (step.kind === "build_rez_reserve") {
+    if (legalActionCreditGainForPlan(input, action, dependencies) > 0) {
+      return candidateTargetMatchesPlan(plan, candidate, action);
+    }
+    return candidateSemanticsMatchStep(step, candidate) &&
+      candidateTargetMatchesPlan(plan, candidate, action) &&
+      bankStepMatchesCandidate(step, candidate, action);
+  }
   if (step.kind === "draw_hand_buffer") {
     return (
       action.type === "draw_card" &&

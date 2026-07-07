@@ -131,6 +131,67 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("does not treat scored hidden-zone reveal agenda actions as low-credit funding", () => {
+    const revealRdTop = corpAction("security-directors-reveal-rd", "gain_credit", {
+      cardId: "security-directors",
+      abilityFamily: "hidden-zone",
+      effectKind: "hidden_zone",
+      agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+    });
+
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(0, [], [revealRdTop]),
+      revealRdTop,
+      "basic_economy_draw",
+      testDependencies(),
+      semanticCandidate(
+        revealRdTop.actionId,
+        "card_ability.trigger",
+        ["card_ability.trigger", "zone.reveal"],
+        "gain_credit",
+      ),
+    );
+
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_low_credits",
+    );
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_remote_instability_credit_reserve",
+    );
+  });
+
+  it("penalizes non-credit gain wrappers when real credit actions are legal", () => {
+    const revealRdTop = corpAction("security-directors-reveal-rd", "gain_credit", {
+      cardId: "security-directors",
+      abilityFamily: "hidden-zone",
+      effectKind: "hidden_zone",
+      agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+    });
+    const basicCredit = corpAction(revealRdTop.actionId, "gain_credit");
+
+    const components = semanticRuntimeCorpScoreComponents(
+      corpInputWithHqCards(6, [], [revealRdTop, basicCredit]),
+      revealRdTop,
+      "corp_legal_action",
+      testDependencies(),
+      semanticCandidate(
+        revealRdTop.actionId,
+        "card_ability.trigger",
+        ["card_ability.trigger", "zone.reveal"],
+        "gain_credit",
+      ),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_noncredit_gain_wrapper_penalty",
+          value: -1200,
+        }),
+      ]),
+    );
+  });
+
   it("scores playable Corp burst economy operations by net credit gain", () => {
     const accountsReceivable = corpAction(
       "play-accounts-receivable",

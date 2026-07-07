@@ -1,4 +1,5 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import { actionProvidesCredits } from "../../actions/action-effect-classification";
 import type { CorpRemoteContestabilityAssessment } from "../corp-scoring-assessment-types";
 import {
   semanticRuntimeCorpScoringWindowAssessment,
@@ -321,6 +322,9 @@ function scorelineFundingPathForAction<TServer extends VisibleCorpServer>(
   scorelineNeedsFunding: boolean,
 ): CorpScorelinePathAssessment | undefined {
   if (!scorelineNeedsFunding) return undefined;
+  if (action.type === "gain_credit" && !actionProvidesCredits(action)) {
+    return undefined;
+  }
   const creditsBeforeAction = input.playerView.own.credits;
   const creditsAfterAction =
     dependencies.projectedCreditsAfterAction?.(input, action) ??
@@ -577,6 +581,9 @@ function projectedCreditsAfterEconomyAction<TServer extends VisibleCorpServer>(
 ): number {
   const creditsAfterCosts =
     input.playerView.own.credits - dependencies.actionCreditCost(action);
+  if (action.type === "gain_credit" && !actionProvidesCredits(action)) {
+    return creditsAfterCosts;
+  }
   const payloadGain = Math.max(
     0,
     numberPayload(action, "gainCreditsAmount"),

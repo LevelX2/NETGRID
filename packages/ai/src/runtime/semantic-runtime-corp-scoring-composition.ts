@@ -1,4 +1,5 @@
 import type { AiDecisionInput } from "@netgrid/shared";
+import { actionProvidesCredits } from "../actions/action-effect-classification";
 import {
   createCorpTagPunishWindowComposition,
   type CorpTagPunishWindowCompositionDependencies,
@@ -90,7 +91,7 @@ export function createSemanticRuntimeCorpScoringComposition<
         board.semanticRuntimeCorpRemoteScoreContestabilityAssessment,
       actionIsEconomy: (runtimeInput, action) => {
         if (action.type === "draw_card") return false;
-        if (action.type === "gain_credit") return true;
+        if (action.type === "gain_credit") return actionProvidesCredits(action);
         return dependencies
           .rolesForAction(runtimeInput, action)
           .some((role) => role.includes("economy"));

@@ -5,6 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { AiCardHint } from "../ai-hints";
+import { actionProvidesCredits } from "../actions/action-effect-classification";
 
 export type TacticalPlanCreditValueDependencies = {
   aiHintsByCard: ReadonlyMap<string, AiCardHint>;
@@ -41,7 +42,8 @@ export function legalActionCreditGainForPlan(
     legalActionNumberPayload(action, "amount"),
     legalActionCreditHintGain(input, action, dependencies),
   );
-  if (action.type === "gain_credit") return Math.max(1, knownGain);
+  if (action.type === "gain_credit")
+    return actionProvidesCredits(action) ? Math.max(1, knownGain) : knownGain;
   if (action.type === "play_event") return knownGain;
   if (
     action.type !== "activated_card_ability" &&

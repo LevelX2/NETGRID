@@ -613,6 +613,18 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
   }
   if (
     action.type === "gain_credit" &&
+    !actionProvidesCredits(action) &&
+    corpLegalCreditActionExists(input, action)
+  ) {
+    components.push({
+      key: "corp_noncredit_gain_wrapper_penalty",
+      label: "Keine echte Credit-Aktion",
+      value: -1200,
+      reason: "gain_credit_wrapper_without_credit_gain",
+    });
+  }
+  if (
+    action.type === "gain_credit" &&
     credits >= 4 &&
     !dependencies.corpHasRemoteInstability(input) &&
     !dependencies.corpHasRemoteRezFloorFundingNeed(input) &&
@@ -1932,6 +1944,20 @@ function corpLegalEconomyActionExists(input: AiDecisionInput): boolean {
         candidate.type === "play_operation" ||
         candidate.type === "activated_card_ability" ||
         candidate.type === "trigger_ability"),
+  );
+}
+
+function corpLegalCreditActionExists(
+  input: AiDecisionInput,
+  currentAction: LegalAction,
+): boolean {
+  const legalActions =
+    input.legalActions ?? input.playerView.legalActions ?? [];
+  return legalActions.some(
+    (candidate) =>
+      candidate !== currentAction &&
+      candidate.side === "corp" &&
+      actionProvidesCredits(candidate),
   );
 }
 

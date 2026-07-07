@@ -35,6 +35,17 @@ describe("corpPunishCandidates", () => {
         "flatliner",
       ],
     });
+    const strategyOnly = candidate("strategy-only", {
+      strategySupport: [
+        {
+          strategyId: "corp.tag_trace_punish",
+          role: "support",
+          confidence: "high",
+          evidence: "deck supports punish",
+        },
+      ],
+      evidence: ["strategic_action_fit:corp.tag_trace_punish"],
+    } as Partial<ActionSemanticCandidate>);
 
     expect(
       corpPunishCandidates(
@@ -45,6 +56,7 @@ describe("corpPunishCandidates", () => {
             compoundPunish,
             compoundFlatline,
             noise,
+            strategyOnly,
           ],
         } as unknown as TacticalPlanBuildContext,
         { goalId: "corp.apply_punish_pressure" } as TacticalGoalLike,

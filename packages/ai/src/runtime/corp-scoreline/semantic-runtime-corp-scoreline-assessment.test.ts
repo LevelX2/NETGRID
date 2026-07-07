@@ -78,6 +78,34 @@ describe("assessCorpScorelineWindow", () => {
     ).toBeUndefined();
   });
 
+  it("does not treat hidden-zone reveal wrappers as scoreline funding", () => {
+    const score = {
+      ...action("score", "score_agenda", "agenda-installed", "remote_1"),
+      costs: [{ credits: 5 }],
+    };
+    const gain = action("gain", "gain_credit", "basic_action");
+    const reveal = action("reveal-rd-top", "gain_credit", "agenda-scored", undefined, {
+      abilityFamily: "hidden-zone",
+      effectKind: "hidden_zone",
+      agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+    });
+    const input = inputWithActions([score, gain, reveal], {
+      credits: 0,
+      servers: [remote("remote_1", { ice: [ice("ice-1")], root: [agenda("agenda-installed")] })],
+    });
+    const assessment = scoreline(input, {
+      creditsAfterAction: { gain: 1, "reveal-rd-top": 1 },
+    });
+
+    expect(pathFor(assessment, "gain")).toMatchObject({
+      actionRoles: ["fund_scoreline"],
+      recommendedNextStep: "fund_scoreline",
+    });
+    expect(
+      assessment.paths.some((path) => path.actionId === "reveal-rd-top"),
+    ).toBe(false);
+  });
+
   it("lets central pressure support score-now while blocking agenda install and recommending central protection", () => {
     const score = action("score", "score_agenda", "agenda-installed", "remote_1");
     const installAgenda = action("install-agenda", "install_card", "agenda-hand", "remote_1");
