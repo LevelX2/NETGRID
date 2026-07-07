@@ -135,6 +135,14 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
       actionKeepsSideSafeSameTurnScoreCloseout(input, entry, dependencies),
   );
   if (scoreNow) {
+    const scoreNowCentralInterrupt = scoreNowCentralProtectionInterruptTriage(
+      input,
+      actions,
+      scoreNow,
+      currentCredits,
+      dependencies,
+    );
+    if (scoreNowCentralInterrupt) return scoreNowCentralInterrupt;
     return {
       primary: "score_now",
       severity: "critical",
@@ -1362,6 +1370,209 @@ function actionKeepsSideSafeSameTurnScoreCloseoutForAction<
     action,
     dependencies,
   );
+}
+
+function scoreNowCentralProtectionInterruptTriage<TConsumer extends string>(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+  scoreNow: ScoredLegalAction,
+  currentCredits: number,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): CorpBoardTriage | undefined {
+  const closeout = sameTurnScoreCloseoutResourceState(
+    input,
+    scoreNow.action,
+    dependencies,
+  );
+  if (!closeout) return undefined;
+  if (scoreNowCloseoutWinsGame(input, closeout.agendaPoints)) return undefined;
+  if (closeout.agendaPoints > 1) return undefined;
+  const runnerAgendaPoints =
+    corpTriagePositiveNumber(input.playerView.opponent?.agendaPoints) ?? 0;
+  if (runnerAgendaPoints < 3) return undefined;
+
+  const pressureInput = inputWithOpponentDefaults(input);
+  const rdPressure = semanticRuntimeCorpCentralPressureAssessment(
+    pressureInput,
+    "rd",
+  );
+  if (
+    !centralPressureIsTriageAcute(pressureInput, rdPressure) ||
+    centralTriageSeverity(pressureInput, rdPressure) !== "critical" ||
+    !centralServerNeedsProtection(input, "rd")
+  ) {
+    return undefined;
+  }
+
+  const rdProtectionFloor = fundableCentralProtectionFloor(
+    input,
+    actions,
+    "rd",
+    dependencies,
+  );
+  if (!rdProtectionFloor) return undefined;
+  const currentPlanCanProtect =
+    currentCredits + Math.max(0, input.playerView.own.clicks - 1) >=
+    rdProtectionFloor.requiredCredits;
+  const afterCloseoutCanProtect =
+    closeout.remainingCredits +
+      Math.max(0, closeout.remainingClicks - 1) >=
+    rdProtectionFloor.requiredCredits;
+  if (!currentPlanCanProtect || afterCloseoutCanProtect) return undefined;
+
+  const immediateProtection = concreteCentralProtectionActionExists(
+    input,
+    actions,
+    "rd",
+    dependencies,
+  );
+  if (immediateProtection) {
+    return centralPressureTriage(rdPressure, "critical", currentCredits, [
+      "corp_board_triage_score_now_deferred:critical_rd_protection",
+      `corp_score_now_action:${scoreNow.action.actionId}`,
+      `corp_score_now_agenda_points:${closeout.agendaPoints}`,
+      `corp_score_now_remaining_credits:${closeout.remainingCredits}`,
+      `corp_score_now_remaining_clicks:${closeout.remainingClicks}`,
+      `corp_rd_protection_floor:${rdProtectionFloor.requiredCredits}`,
+      `corp_runner_agenda_points:${runnerAgendaPoints}`,
+    ]);
+  }
+
+  if (!legalEconomyActionExists(input)) return undefined;
+  return {
+    primary: "recover_economy",
+    severity: "critical",
+    targetServerId: "rd",
+    requiredRezFloor: rdProtectionFloor.requiredCredits,
+    currentCredits,
+    evidence: [
+      "corp_board_triage_primary:recover_economy",
+      "corp_board_triage_score_now_deferred:critical_rd_rez_floor",
+      `corp_score_now_action:${scoreNow.action.actionId}`,
+      `corp_score_now_agenda_points:${closeout.agendaPoints}`,
+      `corp_score_now_remaining_credits:${closeout.remainingCredits}`,
+      `corp_score_now_remaining_clicks:${closeout.remainingClicks}`,
+      `corp_rd_protection_floor:${rdProtectionFloor.requiredCredits}`,
+      `corp_runner_agenda_points:${runnerAgendaPoints}`,
+      ...rdPressure.evidence.slice(0, 8),
+      ...rdProtectionFloor.evidence,
+    ],
+  };
+}
+
+function sameTurnScoreCloseoutResourceState<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+):
+  | {
+      agendaPoints: number;
+      remainingCredits: number;
+      remainingClicks: number;
+    }
+  | undefined {
+  const sourceCard = semanticRuntimeVisibleSourceCard(input, action);
+  if (!sourceCard || sourceCard.known === false) return undefined;
+  const agendaPoints = corpTriageVisibleAgendaPoints(sourceCard);
+  if (agendaPoints <= 0) return undefined;
+
+  if (action.type === "score_agenda") {
+    return {
+      agendaPoints,
+      remainingCredits: input.playerView.own.credits - dependencies.actionCreditCost(action),
+      remainingClicks:
+        input.playerView.own.clicks -
+        Math.max(1, corpTriageActionClickCost(action)),
+    };
+  }
+
+  if (
+    action.type !== "advance_card" ||
+    !actionKeepsSameTurnScoreCloseoutReachable(input, action, dependencies)
+  ) {
+    return undefined;
+  }
+  const requirement = corpTriageVisibleAdvancementRequirement(sourceCard);
+  if (requirement === undefined) return undefined;
+  const counters =
+    corpTriagePositiveNumber(sourceCard.advancementCounters) ?? 0;
+  const countersAfterAction = counters + 1;
+  const additionalAdvancesNeeded = Math.max(
+    0,
+    requirement - countersAfterAction,
+  );
+  const spentCredits =
+    dependencies.actionCreditCost(action) + additionalAdvancesNeeded;
+  const spentClicks =
+    Math.max(1, corpTriageActionClickCost(action)) +
+    additionalAdvancesNeeded +
+    1;
+  return {
+    agendaPoints,
+    remainingCredits: input.playerView.own.credits - spentCredits,
+    remainingClicks: input.playerView.own.clicks - spentClicks,
+  };
+}
+
+function scoreNowCloseoutWinsGame(
+  input: AiDecisionInput,
+  agendaPoints: number,
+): boolean {
+  const pointsToWin =
+    corpTriagePositiveNumber(input.playerView.agendaPointsToWin) ?? 7;
+  const corpAgendaPoints =
+    corpTriagePositiveNumber(input.playerView.own.agendaPoints) ?? 0;
+  return corpAgendaPoints + agendaPoints >= pointsToWin;
+}
+
+function fundableCentralProtectionFloor<TConsumer extends string>(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+  serverId: "hq" | "rd",
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): { requiredCredits: number; evidence: string[] } | undefined {
+  const candidates = actions
+    .filter(
+      (entry) =>
+        entry.serverId === serverId &&
+        entry.action.type === "install_card" &&
+        entry.action.payload?.placement === "ice",
+    )
+    .map((entry) =>
+      fundableCentralProtectionCandidate(input, entry.action, serverId, dependencies),
+    )
+    .filter(
+      (
+        candidate,
+      ): candidate is { requiredCredits: number; evidence: string[] } =>
+        candidate !== undefined,
+    )
+    .sort((left, right) => left.requiredCredits - right.requiredCredits);
+  return candidates[0];
+}
+
+function fundableCentralProtectionCandidate<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  serverId: "hq" | "rd",
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): { requiredCredits: number; evidence: string[] } | undefined {
+  const source = semanticRuntimeVisibleSourceCard(input, action);
+  if (!source || source.known === false) return undefined;
+  const profile = semanticRuntimeCorpCentralIceProfile(source);
+  if (!profile.hasAccessStop || profile.positionDependent) return undefined;
+  const actionCost = Math.max(0, dependencies.actionCreditCost(action));
+  const rezCost = corpTriagePositiveNumber(source.rezCost);
+  if (rezCost === undefined) return undefined;
+  return {
+    requiredCredits: actionCost + rezCost,
+    evidence: [
+      `corp_central_protection_floor_server:${serverId}`,
+      `corp_central_protection_floor_action:${action.actionId}`,
+      `corp_central_protection_floor_credits:${actionCost + rezCost}`,
+      `corp_central_protection_floor_rez_cost:${rezCost}`,
+    ],
+  };
 }
 
 function legalScoreActionExistsForSameSource(
@@ -2724,6 +2935,14 @@ function corpBoardTriageMismatchComponentValue(
     triage.severity === "critical"
   ) {
     return -5200;
+  }
+  if (
+    triage.severity === "critical" &&
+    triage.evidence.some((entry) =>
+      entry.startsWith("corp_board_triage_score_now_deferred:"),
+    )
+  ) {
+    return -12000;
   }
   if (
     (triage.primary === "score_now" ||

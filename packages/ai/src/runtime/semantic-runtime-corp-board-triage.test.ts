@@ -1914,6 +1914,217 @@ describe("semantic runtime corp board triage", () => {
       value: -5200,
     });
   });
+
+  it("defers a low-value same-turn closeout when it would leave critical R&D unfunded", () => {
+    const scoreNow = corpAction(
+      "low-value-score-now",
+      "advance_card",
+      { serverId: "remote_1" },
+      "low-value-agenda",
+    );
+    const rdIce = corpAction(
+      "install-rd-wall",
+      "install_card",
+      { placement: "ice", serverId: "rd" },
+      "rd-wall",
+    );
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpCredits: 1,
+      runnerAgendaPoints: 3,
+      corpHq: [iceCard("rd-wall", { rezCost: 3 })],
+      legalActions: [scoreNow, rdIce, gainCredit],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+        publicCentralEvent("rd-run-3", "start_run", "rd"),
+        publicCentralEvent("rd-access-3", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", []),
+        remoteServer("remote_1", [], [
+          agendaCard("low-value-agenda", 1, {
+            advancementRequirement: 6,
+            advancementCounters: 5,
+          }),
+        ]),
+      ],
+    });
+    const dependencies = testDependencies({
+      actionCreditCost: (action) => (action.type === "advance_card" ? 1 : 0),
+      corpAdvanceCompletesScore: (_input, action) =>
+        action.actionId === scoreNow.actionId,
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const scoreComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      scoreNow,
+      dependencies,
+    );
+    const creditComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      gainCredit,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "recover_economy",
+      severity: "critical",
+      targetServerId: "rd",
+      requiredRezFloor: 3,
+    });
+    expect(triage.evidence).toContain(
+      "corp_board_triage_score_now_deferred:critical_rd_rez_floor",
+    );
+    expect(scoreComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -12000,
+    });
+    expect(creditComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+  });
+
+  it("keeps low-value same-turn closeout when R&D pressure is not agenda-critical", () => {
+    const scoreNow = corpAction(
+      "low-value-score-now",
+      "advance_card",
+      { serverId: "remote_1" },
+      "low-value-agenda",
+    );
+    const rdIce = corpAction(
+      "install-rd-wall",
+      "install_card",
+      { placement: "ice", serverId: "rd" },
+      "rd-wall",
+    );
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpCredits: 1,
+      runnerAgendaPoints: 0,
+      corpHq: [iceCard("rd-wall", { rezCost: 3 })],
+      legalActions: [scoreNow, rdIce, gainCredit],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+        publicCentralEvent("rd-run-3", "start_run", "rd"),
+        publicCentralEvent("rd-access-3", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", []),
+        remoteServer("remote_1", [], [
+          agendaCard("low-value-agenda", 1, {
+            advancementRequirement: 6,
+            advancementCounters: 5,
+          }),
+        ]),
+      ],
+    });
+    const dependencies = testDependencies({
+      actionCreditCost: (action) => (action.type === "advance_card" ? 1 : 0),
+      corpAdvanceCompletesScore: (_input, action) =>
+        action.actionId === scoreNow.actionId,
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const scoreComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      scoreNow,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "score_now",
+      severity: "critical",
+      targetServerId: "remote_1",
+    });
+    expect(triage.evidence).not.toContain(
+      "corp_board_triage_score_now_deferred:critical_rd_rez_floor",
+    );
+    expect(scoreComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+  });
+
+  it("protects R&D once the deferred low-value closeout protection floor is funded", () => {
+    const scoreNow = corpAction(
+      "low-value-score-now",
+      "advance_card",
+      { serverId: "remote_1" },
+      "low-value-agenda",
+    );
+    const rdIce = corpAction(
+      "install-rd-wall",
+      "install_card",
+      { placement: "ice", serverId: "rd" },
+      "rd-wall",
+    );
+    const gainCredit = corpAction("gain-credit", "gain_credit");
+    const input = corpInput({
+      corpCredits: 3,
+      runnerAgendaPoints: 3,
+      corpHq: [iceCard("rd-wall", { rezCost: 3 })],
+      legalActions: [scoreNow, rdIce, gainCredit],
+      eventTail: [
+        publicCentralEvent("rd-run-1", "start_run", "rd"),
+        publicCentralEvent("rd-access-1", "access_card", "rd"),
+        publicCentralEvent("rd-run-2", "start_run", "rd"),
+        publicCentralEvent("rd-access-2", "access_card", "rd"),
+        publicCentralEvent("rd-run-3", "start_run", "rd"),
+        publicCentralEvent("rd-access-3", "access_card", "rd"),
+      ],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", []),
+        remoteServer("remote_1", [], [
+          agendaCard("low-value-agenda", 1, {
+            advancementRequirement: 6,
+            advancementCounters: 5,
+          }),
+        ]),
+      ],
+    });
+    const dependencies = testDependencies({
+      actionCreditCost: (action) => (action.type === "advance_card" ? 1 : 0),
+      corpAdvanceCompletesScore: (_input, action) =>
+        action.actionId === scoreNow.actionId,
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const scoreComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      scoreNow,
+      dependencies,
+    );
+    const rdIceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      rdIce,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_rd",
+      severity: "critical",
+      targetServerId: "rd",
+    });
+    expect(triage.evidence).toContain(
+      "corp_board_triage_score_now_deferred:critical_rd_protection",
+    );
+    expect(scoreComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -12000,
+    });
+    expect(rdIceComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+  });
 });
 
 function corpInput(overrides: {
@@ -1957,15 +2168,20 @@ function corpInput(overrides: {
 function testDependencies(
   options: {
     scoringWindowByActionId?: Record<string, CorpScoringWindowAssessment>;
+    actionCreditCost?: (action: LegalAction) => number;
+    corpAdvanceCompletesScore?: (
+      input: AiDecisionInput,
+      action: LegalAction,
+    ) => boolean;
   } = {},
 ): CorpBoardTriageDependencies<"test"> {
   return {
-    actionCreditCost: () => 0,
+    actionCreditCost: options.actionCreditCost ?? (() => 0),
     rolesForAction: () => [],
     corpScoreNowSafetyGate: () => ({ allowed: true, evidence: [] }),
     corpActionIsScoreLine: (_input, action) =>
       action.actionId.includes("scoreline") || action.type === "advance_card",
-    corpAdvanceCompletesScore: () => false,
+    corpAdvanceCompletesScore: options.corpAdvanceCompletesScore ?? (() => false),
     corpScoringWindowAssessment: (_input, action) =>
       options.scoringWindowByActionId?.[action.actionId],
     corpRemoteRezFloorAssessment: () => undefined,
@@ -2009,13 +2225,14 @@ function corpAction(
   actionId: string,
   type: LegalAction["type"],
   payload: LegalAction["payload"] = {},
+  source = "basic_action",
 ): LegalAction {
   return {
     actionId,
     type,
     side: "corp",
     label: actionId,
-    source: "basic_action",
+    source,
     costs: [],
     payload,
   } as unknown as LegalAction;
@@ -2055,6 +2272,7 @@ function remoteServer(
 function agendaCard(
   instanceId = "remote-agenda",
   agendaPoints = 2,
+  overrides: Partial<VisibleCard> = {},
 ): VisibleCard {
   return {
     instanceId,
@@ -2064,6 +2282,7 @@ function agendaCard(
     advancementRequirement: 3,
     advancementCounters: 1,
     agendaPoints,
+    ...overrides,
   } as VisibleCard;
 }
 
