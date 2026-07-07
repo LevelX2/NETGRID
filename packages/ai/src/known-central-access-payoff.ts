@@ -106,6 +106,14 @@ export function evaluateKnownCentralAccessPayoff(
     `rnd_known_sequence_count:${freshness.knownSequenceDefinitionIds?.length ?? 0}`,
   ];
 
+  const sequencePayoff = evaluateKnownRdAccessSequencePayoff(
+    input,
+    freshness.knownSequenceDefinitionIds,
+    path,
+    evidenceBase,
+  );
+  if (sequencePayoff) return sequencePayoff;
+
   if (type === "agenda" || freshness.knownTopIsAgenda === true) {
     return {
       payoff: "agenda",
@@ -242,6 +250,101 @@ export function evaluateKnownCentralAccessPayoff(
       ...evidenceBase,
       "rd_run_suppressed_by_known_low_value_top:true",
       "central_memory_payoff:known_low_value",
+    ],
+  };
+}
+
+function evaluateKnownRdAccessSequencePayoff(
+  input: AiDecisionInput,
+  knownSequenceDefinitionIds: readonly string[] | undefined,
+  path: { visibleBreakCost: number; creditsAfterPath: number },
+  evidenceBase: string[],
+): KnownCentralAccessPayoff | undefined {
+  const accessDepth = installedRdAccessDepthEstimate(input);
+  if (accessDepth <= 1) return undefined;
+  if (
+    !knownSequenceDefinitionIds ||
+    knownSequenceDefinitionIds.length < accessDepth
+  ) {
+    return undefined;
+  }
+
+  const accessedDefinitions = knownSequenceDefinitionIds.slice(0, accessDepth);
+  const sequenceEvidence = [
+    ...evidenceBase,
+    `rnd_known_access_depth_estimate:${accessDepth}`,
+    `rnd_known_sequence_evaluated_count:${accessedDefinitions.length}`,
+  ];
+  const agendaDefinitionId = accessedDefinitions.find(
+    (candidate) => cardDefinitionType(candidate) === "agenda",
+  );
+  if (agendaDefinitionId) {
+    return {
+      payoff: "agenda",
+      knownNoCurrentPayoff: false,
+      score: 520,
+      penalty: 0,
+      reasons: ["known_rnd_access_sequence_agenda_pressure"],
+      evidence: [
+        ...sequenceEvidence,
+        `rnd_known_sequence_agenda_definition:${agendaDefinitionId}`,
+        "central_memory_payoff:agenda",
+        "rd_run_boosted_by_known_sequence_agenda:true",
+      ],
+    };
+  }
+
+  const trashCandidate = accessedDefinitions
+    .map((definitionId) => {
+      const type = cardDefinitionType(definitionId);
+      if (type !== "asset" && type !== "upgrade") return undefined;
+      const trashCost = cardDefinitionTrashCost(definitionId);
+      if (trashCost === undefined) return undefined;
+      const creditsAfterTrash = path.creditsAfterPath - trashCost;
+      return {
+        definitionId,
+        trashCost,
+        affordable: path.creditsAfterPath >= trashCost,
+        reserveSafe: creditsAfterTrash >= RND_KNOWN_TOP_TRASH_RESERVE_FLOOR,
+        creditsAfterTrash,
+      };
+    })
+    .find((candidate) => candidate?.affordable && candidate.reserveSafe);
+
+  if (trashCandidate) {
+    return {
+      payoff: "trash_affordable",
+      knownNoCurrentPayoff: false,
+      score: 150,
+      penalty: 0,
+      reasons: [
+        "known_rnd_access_sequence_trash_affordable_after_ice",
+        "known_rnd_access_sequence_trash_target",
+      ],
+      evidence: [
+        ...sequenceEvidence,
+        `rnd_known_sequence_trash_definition:${trashCandidate.definitionId}`,
+        `rnd_known_sequence_trash_cost:${trashCandidate.trashCost}`,
+        `rnd_known_sequence_credits_after_trash:${trashCandidate.creditsAfterTrash}`,
+        "central_memory_payoff:trash_affordable",
+        "rd_run_boosted_by_known_sequence_trashable:true",
+      ],
+    };
+  }
+
+  return {
+    payoff: "known_low_value",
+    knownNoCurrentPayoff: true,
+    score: 0,
+    penalty: 760,
+    reasons: [
+      "known_rnd_access_sequence_low_value_stale",
+      "central_known_no_current_payoff",
+    ],
+    evidence: [
+      ...sequenceEvidence,
+      "central_memory_payoff:known_low_value",
+      "rd_run_suppressed_by_known_sequence_no_payoff:true",
     ],
   };
 }
@@ -732,7 +835,11 @@ function knownCentralPathCost(
 }
 
 function hasInstalledRdAccessBonus(input: AiDecisionInput): boolean {
-  return (input.playerView.own.rig ?? []).some((card) => {
+  return installedRdAccessDepthEstimate(input) > 1;
+}
+
+function installedRdAccessDepthEstimate(input: AiDecisionInput): number {
+  const hasAccessBonus = (input.playerView.own.rig ?? []).some((card) => {
     const definitionId = card.definitionId;
     return (
       definitionId === "onr_v1_024_expert-schedule-analyzer" ||
@@ -741,6 +848,7 @@ function hasInstalledRdAccessBonus(input: AiDecisionInput): boolean {
       definitionId === "onr_v1_105_priority-wreck"
     );
   });
+  return hasAccessBonus ? 2 : 1;
 }
 
 function cardDefinitionTrashCost(definitionId: string): number | undefined {

@@ -272,6 +272,113 @@ describe("known central access payoff HQ knownness", () => {
     );
   });
 
+  it("suppresses an R&D multiaccess plan when every known accessible card has no payoff", () => {
+    const input = aiInput({
+      handCount: 1,
+      rig: [
+        visibleInstalledRunnerCard(
+          "onr_v1_024_expert-schedule-analyzer",
+          "program",
+        ),
+      ],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const payoff = evaluateKnownCentralAccessPayoff(
+      input,
+      "rd",
+      beliefWithRndMemory({
+        lastKnownAccessEventId: "evt_rd_private_look",
+        knownToRunner: true,
+        freshness: "stale_known_same_top",
+        knownTopDefinitionId: "simple_economy_operation",
+        knownTopIsAgenda: false,
+        knownSequenceDefinitionIds: [
+          "simple_economy_operation",
+          "simple_barrier_ice",
+        ],
+        freshenedByRunnerAccess: false,
+        invalidationReasons: [],
+      }),
+    );
+
+    expect(payoff).toMatchObject({
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+      penalty: 760,
+    });
+    expect(payoff.reasons).toEqual(
+      expect.arrayContaining([
+        "known_rnd_access_sequence_low_value_stale",
+        "central_known_no_current_payoff",
+      ]),
+    );
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "rnd_known_access_depth_estimate:2",
+        "rnd_known_sequence_evaluated_count:2",
+        "central_memory_payoff:known_low_value",
+        "rd_run_suppressed_by_known_sequence_no_payoff:true",
+      ]),
+    );
+    expect(payoff.evidence).not.toContain("central_memory_payoff:access_bonus");
+  });
+
+  it("keeps R&D multiaccess pressure when the known accessible sequence contains an agenda", () => {
+    const input = aiInput({
+      handCount: 1,
+      rig: [
+        visibleInstalledRunnerCard(
+          "onr_v1_024_expert-schedule-analyzer",
+          "program",
+        ),
+      ],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const payoff = evaluateKnownCentralAccessPayoff(
+      input,
+      "rd",
+      beliefWithRndMemory({
+        lastKnownAccessEventId: "evt_rd_private_look",
+        knownToRunner: true,
+        freshness: "stale_known_same_top",
+        knownTopDefinitionId: "simple_economy_operation",
+        knownTopIsAgenda: false,
+        knownSequenceDefinitionIds: [
+          "simple_economy_operation",
+          "simple_agenda",
+        ],
+        freshenedByRunnerAccess: false,
+        invalidationReasons: [],
+      }),
+    );
+
+    expect(payoff).toMatchObject({
+      payoff: "agenda",
+      knownNoCurrentPayoff: false,
+      score: 520,
+      penalty: 0,
+    });
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "rnd_known_access_depth_estimate:2",
+        "rnd_known_sequence_evaluated_count:2",
+        "rnd_known_sequence_agenda_definition:simple_agenda",
+        "central_memory_payoff:agenda",
+        "rd_run_boosted_by_known_sequence_agenda:true",
+      ]),
+    );
+  });
+
   it("matches HQ memory invalidation reasons by exact reason code", () => {
     expect(
       hqMemoryInvalidationReasonMatches(
@@ -439,6 +546,24 @@ function beliefWithHqMemory(params: {
   };
 }
 
+function beliefWithRndMemory(
+  rndTopFreshness: RunnerOpponentModel["rndTopFreshness"],
+): BeliefState {
+  const base = beliefWithHqMemory({
+    handCount: 0,
+    knownDefinitions: [],
+    unknownRestCount: 0,
+  });
+  return {
+    ...base,
+    runnerOpponentModel: {
+      ...base.runnerOpponentModel!,
+      rndTopFreshness,
+    },
+    rndTopFreshness,
+  };
+}
+
 function runAction(actionId: string, serverId: string): LegalAction {
   return {
     actionId,
@@ -452,6 +577,21 @@ function runAction(actionId: string, serverId: string): LegalAction {
     visibility: "public",
     expiresAtStateVersion: 2,
     payload: { serverId },
+  };
+}
+
+function visibleInstalledRunnerCard(
+  definitionId: string,
+  type: NonNullable<VisibleCard["type"]>,
+): VisibleCard {
+  return {
+    instanceId: `${definitionId}_installed`,
+    definitionId,
+    title: definitionId,
+    owner: "runner",
+    controller: "runner",
+    type,
+    known: true,
   };
 }
 
