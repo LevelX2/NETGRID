@@ -1,12 +1,6 @@
-import {
-  DEMO_CARDS_BY_ID,
-  type AiDecisionInput,
-} from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type AiDecisionInput } from "@netgrid/shared";
 import { RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
-import {
-  reconstructBeliefState,
-  type BeliefState,
-} from "./belief-state";
+import { reconstructBeliefState, type BeliefState } from "./belief-state";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 
 export type KnownCentralAccessPayoffKind =
@@ -64,6 +58,7 @@ const HQ_REORDER_INVALIDATION_REASONS = [
   "arrange_changed_hq_hand",
   "swap_changed_hq_hand",
 ] as const;
+const RND_KNOWN_TOP_TRASH_RESERVE_FLOOR = 2;
 
 export function evaluateKnownCentralAccessPayoff(
   input: AiDecisionInput,
@@ -133,10 +128,7 @@ export function evaluateKnownCentralAccessPayoff(
       score: 120,
       penalty: 0,
       reasons: ["known_rnd_top_repeat_has_access_bonus"],
-      evidence: [
-        ...evidenceBase,
-        "central_memory_payoff:access_bonus",
-      ],
+      evidence: [...evidenceBase, "central_memory_payoff:access_bonus"],
     };
   }
 
@@ -162,6 +154,30 @@ export function evaluateKnownCentralAccessPayoff(
     const trashCost = cardDefinitionTrashCost(definitionId);
     if (trashCost !== undefined) {
       const affordable = path.creditsAfterPath >= trashCost;
+      const creditsAfterTrash = path.creditsAfterPath - trashCost;
+      const reserveSafe =
+        creditsAfterTrash >= RND_KNOWN_TOP_TRASH_RESERVE_FLOOR;
+      if (affordable && !reserveSafe) {
+        return {
+          payoff: "trash_unaffordable",
+          knownNoCurrentPayoff: true,
+          score: 0,
+          penalty: 700,
+          reasons: [
+            "known_rnd_top_trash_reserve_unsafe",
+            "central_known_no_current_payoff",
+          ],
+          evidence: [
+            ...evidenceBase,
+            `rnd_known_top_trash_cost:${trashCost}`,
+            "rnd_known_top_trash_affordable:true",
+            `rnd_known_top_credits_after_trash:${creditsAfterTrash}`,
+            `rnd_known_top_trash_reserve_floor:${RND_KNOWN_TOP_TRASH_RESERVE_FLOOR}`,
+            "rd_run_suppressed_by_known_trash_reserve:true",
+            "central_memory_payoff:trash_unaffordable",
+          ],
+        };
+      }
       if (
         affordable &&
         recentRunnerDeclinedKnownRdTopTrash(input, definitionId)
@@ -240,11 +256,7 @@ function evaluateKnownHqAccessPayoff(
   }
 
   const path = knownCentralPathCost(input, "hq");
-  const assessment = assessHqKnownness(
-    input,
-    memory,
-    path.creditsAfterPath,
-  );
+  const assessment = assessHqKnownness(input, memory, path.creditsAfterPath);
   const safeKnownDefinitions = expandHqSafeDefinitionIds(memory);
   const candidateGroupCount = memory.ledger.candidateGroups.length;
   const evidenceBase = [
@@ -283,10 +295,7 @@ function evaluateKnownHqAccessPayoff(
     assessment.candidateKnownCount === 0 &&
     candidateGroupCount === 0
   ) {
-    return unknownCentralPayoff("hq", [
-      "hq_hand_memory:none",
-      ...evidenceBase,
-    ]);
+    return unknownCentralPayoff("hq", ["hq_hand_memory:none", ...evidenceBase]);
   }
 
   if (assessment.knownAgendaCount > 0) {
@@ -680,12 +689,11 @@ function hqMemoryRetainedAfterDrawDeparture(
 function hqMemoryInvalidatedReason(
   memory: NonNullable<BeliefState["runnerOpponentModel"]>["hqHandMemory"],
 ): string {
-  const reason = memory.invalidationReasons.find(
-    (candidate) =>
-      hqMemoryInvalidationReasonMatches(
-        candidate,
-        HQ_REORDER_INVALIDATION_REASONS,
-      ),
+  const reason = memory.invalidationReasons.find((candidate) =>
+    hqMemoryInvalidationReasonMatches(
+      candidate,
+      HQ_REORDER_INVALIDATION_REASONS,
+    ),
   );
   return reason?.split(":")[0] ?? "none";
 }
@@ -843,7 +851,9 @@ function eventServerId(
   return (
     visibleServerLabelId(stringValue(payload.serverLabel)) ??
     visibleServerLabelId(stringValue(payload.serverName)) ??
-    visibleServerLabelId(nestedStringPayload(payload, "targets", "serverLabel")) ??
+    visibleServerLabelId(
+      nestedStringPayload(payload, "targets", "serverLabel"),
+    ) ??
     visibleServerLabelId(nestedStringPayload(payload, "targets", "serverName"))
   );
 }

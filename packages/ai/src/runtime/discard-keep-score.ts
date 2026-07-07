@@ -8,6 +8,7 @@ import { discardCurrentPlanKind } from "./discard-plan";
 import { sortedUnique } from "./collection";
 import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
+import { isRunnerNonAdditiveUtilityRole } from "./runner-role-classification";
 
 export type DiscardCandidateScore = {
   total: number;
@@ -19,7 +20,9 @@ export type DiscardCandidateScore = {
 
 export type DiscardKeepScoreDependencies = {
   readonly rolesForCardId: (cardId: string | undefined) => readonly string[];
-  readonly definitionTypeForCardId: (cardId: string | undefined) => string | undefined;
+  readonly definitionTypeForCardId: (
+    cardId: string | undefined,
+  ) => string | undefined;
   readonly visibleCardPlayOrInstallCost: (card: VisibleCard) => number;
   readonly runnerCardAddressesVisibleBreakerNeed: (
     input: AiDecisionInput,
@@ -48,7 +51,8 @@ export function discardKeepScore(
     };
   }
   const roles = dependencies.rolesForCardId(card.definitionId);
-  const type = card.type ?? dependencies.definitionTypeForCardId(card.definitionId);
+  const type =
+    card.type ?? dependencies.definitionTypeForCardId(card.definitionId);
   const cost = dependencies.visibleCardPlayOrInstallCost(card);
   const runnerPlanRelevantBreaker =
     input.side === "runner" &&
@@ -56,28 +60,36 @@ export function discardKeepScore(
   const runnerBadPublicityTraceTech =
     input.side === "runner" &&
     dependencies.runnerBadPublicityOrTraceTechCard(card, roles);
+  const runnerEconomyOrPayout =
+    input.side === "runner" &&
+    (roles.some((role) => dependencies.isRunnerEconomyRole(role)) ||
+      dependencies.runnerCardLooksLikeCreditPayout(card));
   const runnerFundingEconomyCard =
     input.side === "runner" &&
     cost > input.playerView.own.credits &&
-    (roles.some((role) => dependencies.isRunnerEconomyRole(role)) ||
-      dependencies.runnerCardLooksLikeCreditPayout(card));
+    runnerEconomyOrPayout;
   const duplicateCount = input.playerView.own.gripOrHq.filter(
     (candidate) => candidate.definitionId === card.definitionId,
   ).length;
+  const installedSameDefinition =
+    input.side === "runner" &&
+    (input.playerView.own.rig ?? []).some(
+      (candidate) => candidate.definitionId === card.definitionId,
+    );
+  const runnerNonAdditiveDuplicate =
+    input.side === "runner" &&
+    (duplicateCount > 1 || installedSameDefinition) &&
+    roles.some((role) => isRunnerNonAdditiveUtilityRole(role));
   let baseValue = 100;
 
   if (input.side === "corp") {
     if (type === "agenda") baseValue += 330;
-    if (
-      type === "ice" ||
-      rolesMatch(roles, ["ice", "etr_ice"])
-    )
+    if (type === "ice" || rolesMatch(roles, ["ice", "etr_ice"]))
       baseValue += 320;
     const economyRole = rolesMatch(roles, ["economy"]);
     if (type === "operation") baseValue += economyRole ? 120 : 40;
     if (economyRole) baseValue += input.playerView.own.credits < 5 ? 135 : 55;
-    if (rolesMatch(roles, ["score", "remote"]))
-      baseValue += 70;
+    if (rolesMatch(roles, ["score", "remote"])) baseValue += 70;
   } else {
     const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
     if (breakerRoleNeedles.length > 0) {
@@ -89,27 +101,38 @@ export function discardKeepScore(
       );
       baseValue += installedSameBreakerRole ? 95 : 210;
     }
-    if (rolesMatch(roles, ["economy", "tempo"]))
-      baseValue += input.playerView.own.credits < 4 ? 170 : 65;
-    if (rolesMatch(roles, ["memory", "setup", "build_rig"]))
-      baseValue += 80;
+    if (runnerEconomyOrPayout)
+      baseValue += input.playerView.own.credits < 4 ? 230 : 150;
+    if (rolesMatch(roles, ["memory", "setup", "build_rig"])) baseValue += 80;
     if (rolesMatch(roles, ["draw"])) baseValue += 55;
     if (rolesMatch(roles, ["run_pressure"]))
       baseValue += input.playerView.own.credits < 4 ? 20 : 90;
     if (runnerPlanRelevantBreaker) baseValue += 360;
     if (runnerBadPublicityTraceTech) baseValue += 240;
-    if (runnerFundingEconomyCard) baseValue += 190;
+    if (runnerFundingEconomyCard) baseValue += 260;
+    if (
+      duplicateCount <= 1 &&
+      !installedSameDefinition &&
+      (breakerRoleNeedles.length > 0 ||
+        runnerEconomyOrPayout ||
+        rolesMatch(roles, ["memory", "setup", "build_rig", "draw"]) ||
+        rolesMatch(roles, ["run_pressure"]) ||
+        runnerPlanRelevantBreaker ||
+        runnerBadPublicityTraceTech)
+    ) {
+      baseValue += 110;
+    }
   }
 
-  if (
-    input.legalActions.some(
-      (action) =>
-        action.source === card.instanceId && action.type !== "resolve_choice",
-    )
-  )
-    baseValue += 90;
+  const playableOrInstallableNow = input.legalActions.some(
+    (action) =>
+      action.source === card.instanceId && action.type !== "resolve_choice",
+  );
+  if (playableOrInstallableNow)
+    baseValue += input.side === "runner" && runnerEconomyOrPayout ? 150 : 90;
   if (duplicateCount > 1 && type !== "agenda")
-    baseValue -= 75 * (duplicateCount - 1);
+    baseValue -= (runnerNonAdditiveDuplicate ? 170 : 75) * (duplicateCount - 1);
+  if (runnerNonAdditiveDuplicate && installedSameDefinition) baseValue -= 180;
   if (
     cost > input.playerView.own.credits + 3 &&
     type !== "agenda" &&
