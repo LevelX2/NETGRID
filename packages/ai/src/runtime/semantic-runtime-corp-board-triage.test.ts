@@ -293,6 +293,86 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("does not align non-stopping tag ICE as score-remote protection", () => {
+    const remoteScoreline = corpAction("remote-scoreline", "advance_card", {
+      serverId: "remote_1",
+    });
+    const remoteHunter = {
+      ...corpAction("install-remote-hunter", "install_card", {
+        placement: "ice",
+        serverId: "remote_1",
+      }),
+      source: "remote-hunter",
+    } as LegalAction;
+    const remoteWall = {
+      ...corpAction("install-remote-wall", "install_card", {
+        placement: "ice",
+        serverId: "remote_1",
+      }),
+      source: "remote-wall",
+    } as LegalAction;
+    const input = corpInput({
+      corpHq: [
+        iceCard("remote-hunter", {
+          title: "Hunter",
+          definitionId: "onr_v1_249_hunter",
+          subtypes: ["Sentry"],
+          rulesText: "Trace 3 - Give the Runner one tag.",
+          rezCost: 1,
+        }),
+        iceCard("remote-wall", {
+          title: "Remote Wall",
+          definitionId: "onr_v1_279_wall-of-static",
+          subtypes: ["Wall"],
+          rulesText: "End the run.",
+          rezCost: 2,
+        }),
+      ],
+      legalActions: [remoteScoreline, remoteHunter, remoteWall],
+      servers: [
+        centralServer("hq", [iceCard("hq-ice")]),
+        centralServer("rd", [iceCard("rd-ice")]),
+        remoteServer("remote_1", [iceCard("remote-ice")], [agendaCard()]),
+      ],
+    });
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteScoreline.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          agendaStealSeverity: "game_ending",
+          recommendedNextStep: "build_remote_ice",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const hunterComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteHunter,
+      dependencies,
+    );
+    const wallComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteWall,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_score_remote",
+      targetServerId: "remote_1",
+    });
+    expect(hunterComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+    expect(hunterComponent?.reason).toContain(
+      "triage_primary:protect_score_remote",
+    );
+    expect(wallComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+  });
+
   it("lets a remote-scoring deck build a score remote instead of overlayering an already stopped central", () => {
     const rdIce = corpAction("install-rd-extra-ice", "install_card", {
       placement: "ice",
