@@ -1556,6 +1556,67 @@ describe("tactical plan model", () => {
     ]);
   });
 
+  it("uses neutral remote score-threat goals as remote-contest anchors", () => {
+    const remoteRun = legalAction("run-remote-2", "runner", "start_run", {
+      serverId: "remote_2",
+    });
+    const input = aiInput("runner", [remoteRun]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_2", [], [
+        {
+          instanceId: "advanced-remote-root",
+          definitionId: "advanced-remote-root",
+          title: "Advanced remote root",
+          owner: "corp",
+          controller: "corp",
+          type: "agenda",
+          known: false,
+          advancementCounters: 2,
+        } as VisibleCard,
+      ]),
+    ];
+
+    const plans = buildTacticalPlans({
+      input,
+      tacticalGoals: [
+        {
+          goalId: "runner.neutral.remote_contest_if_score_threat",
+          family: "remote_contest",
+          priority: 820,
+          urgency: "high",
+          targetServerId: "remote_2",
+          source: "neutral",
+          evidence: ["neutral_goal:remote_contest", "run_target:remote_score_threat"],
+        },
+      ],
+    });
+    const remotePlan = plans.find(
+      (plan) => plan.planId === "runner.contest_remote:remote_2",
+    );
+
+    expect(remotePlan?.priority).toBe(927);
+    expect(remotePlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "strategic_plan_goal:runner.neutral.remote_contest_if_score_threat",
+        "neutral_goal:remote_contest",
+        "run_target:remote_score_threat",
+      ]),
+    );
+    expect(remotePlan?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        {
+          key: "strategic_tactical_goal_fit",
+          label: "Strategic goal fit",
+          value: 107,
+          reason: "runner.neutral.remote_contest_if_score_threat",
+        },
+      ]),
+    );
+  });
+
   it("uses bank capability evidence for runner cashout plans", () => {
     const input = aiInput("runner", [
       legalAction(
