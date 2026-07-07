@@ -485,8 +485,8 @@ function unsafeScoreChosenReasonsForSummaries(
 ): Record<string, number> {
   const reasons: Record<string, number> = {};
   for (const summary of summaries) {
-    for (const entry of summary.actionSequence) {
-      if (!unsafeScoreChosenEntry(entry)) continue;
+    for (const [index, entry] of summary.actionSequence.entries()) {
+      if (!unsafeScoreChosenEntry(summary, entry, index)) continue;
       for (const reason of unsafeScoreChosenReasons(entry)) {
         reasons[reason] = (reasons[reason] ?? 0) + 1;
       }
@@ -495,13 +495,23 @@ function unsafeScoreChosenReasonsForSummaries(
   return reasons;
 }
 
-function unsafeScoreChosenEntry(entry: TraceMiningActionEntry): boolean {
-  return (
-    entry.side === "corp" &&
-    entry.actionType === "score_agenda" &&
-    entry.corpScoreTerminalWindow === true &&
-    entry.corpScoreTerminalWindowRunnerAccessThreatHigh === true &&
-    entry.corpScoreTerminalWindowProtectedRemoteReady !== true
+function unsafeScoreChosenEntry(
+  summary: TraceMiningSummary,
+  entry: TraceMiningActionEntry,
+  index: number,
+): boolean {
+  if (
+    entry.side !== "corp" ||
+    entry.actionType !== "score_agenda" ||
+    entry.corpScoreTerminalWindow !== true ||
+    entry.corpScoreTerminalWindowRunnerAccessThreatHigh !== true ||
+    entry.corpScoreTerminalWindowProtectedRemoteReady === true
+  ) {
+    return false;
+  }
+  return !(
+    summary.winner === "corp" &&
+    index === summary.actionSequence.length - 1
   );
 }
 

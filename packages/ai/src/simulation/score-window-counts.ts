@@ -17,6 +17,7 @@ type SimulationActionSequenceEntry = {
 };
 
 type SimulationSummaryWithActionSequence = {
+  winner?: string;
   actionSequence: SimulationActionSequenceEntry[];
 };
 
@@ -26,15 +27,30 @@ export function countUnsafeScoreChosen(
   return summaries.reduce(
     (sum, summary) =>
       sum +
-      summary.actionSequence.filter(
-        (entry) =>
-          entry.side === "corp" &&
-          entry.actionType === "score_agenda" &&
-          entry.corpScoreTerminalWindow === true &&
-          entry.corpScoreTerminalWindowRunnerAccessThreatHigh === true &&
-          entry.corpScoreTerminalWindowProtectedRemoteReady !== true,
+      summary.actionSequence.filter((entry, index) =>
+        unsafeScoreChosenEntry(summary, entry, index),
       ).length,
     0,
+  );
+}
+
+function unsafeScoreChosenEntry(
+  summary: SimulationSummaryWithActionSequence,
+  entry: SimulationActionSequenceEntry,
+  index: number,
+): boolean {
+  if (
+    entry.side !== "corp" ||
+    entry.actionType !== "score_agenda" ||
+    entry.corpScoreTerminalWindow !== true ||
+    entry.corpScoreTerminalWindowRunnerAccessThreatHigh !== true ||
+    entry.corpScoreTerminalWindowProtectedRemoteReady === true
+  ) {
+    return false;
+  }
+  return !(
+    summary.winner === "corp" &&
+    index === summary.actionSequence.length - 1
   );
 }
 
