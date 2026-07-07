@@ -1,0 +1,599 @@
+{
+  "schemaVersion": "ai-selfplay-trace-matrix-v1",
+  "generatedAt": "2026-07-07T07:15:21.687Z",
+  "gitHead": "45c6a6fe9",
+  "config": {
+    "pairIds": [],
+    "pairFiles": [
+      "docs/reviews/ai/corp-scoring-remote-iterations-pair-g-only-2026-07-07.json"
+    ],
+    "seeds": [
+      "ai-v143-tuning-001"
+    ],
+    "maxActions": 480,
+    "maxFindings": 50,
+    "includeActionAlternatives": false,
+    "maxAlternativesPerFinding": 5
+  },
+  "aggregate": {
+    "games": 1,
+    "decisions": 100,
+    "findings": 8,
+    "findingsBySeverity": {
+      "critical": 0,
+      "high": 0,
+      "medium": 8,
+      "low": 0
+    },
+    "findingsByDetector": {
+      "illegal_action": 0,
+      "replay_failure": 0,
+      "hidden_info_marker": 0,
+      "no_legal_action_failure": 0,
+      "action_limit_reached": 0,
+      "repeated_no_progress_run": 4,
+      "repeated_known_no_payoff_remote": 0,
+      "repeated_low_value_archives": 0,
+      "recovery_low_value_loop": 0,
+      "bank_over_target_without_funding_need": 0,
+      "risky_self_damage_action": 0,
+      "blink_low_hand_buffer_run": 0,
+      "duplicate_low_delta_install": 0,
+      "overdraw_without_urgency": 0,
+      "plan_step_action_mismatch": 4,
+      "semantic_override_suspicious": 0,
+      "corp_never_scores_long_game": 0,
+      "runner_never_accesses_long_game": 0
+    },
+    "illegalActions": 0,
+    "replayFailures": 0,
+    "actionLimitReached": 0,
+    "allRedactionSafe": true,
+    "redactionSafe": true,
+    "averageGameLength": 100,
+    "corpAgendaScores": 0,
+    "runnerAgendaSteals": 3,
+    "corpFlatlines": 0,
+    "scoreWindowMissed": 0,
+    "unsafeScoreChosen": 0,
+    "passiveActionWithScoreLineAvailable": 13,
+    "actionLimitClusters": {
+      "action_limit_runner_repeated_no_progress_run": 0,
+      "action_limit_runner_remote_contest_blocked": 0,
+      "action_limit_corp_scoreline_stall": 0,
+      "action_limit_setup_economy_loop": 0,
+      "action_limit_low_value_repeat": 0,
+      "action_limit_mixed_or_unknown": 0
+    },
+    "actionLimitSubclusters": {
+      "late_gain_credit_without_funding_need": 0,
+      "runner_late_gain_credit_without_funding_need": 0,
+      "runner_late_gain_credit_real_reserve": 0,
+      "runner_late_gain_credit_no_safe_alternative": 0,
+      "corp_late_gain_credit_without_rez_score_protection_need": 0,
+      "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+      "corp_late_gain_credit_no_safe_alternative": 0,
+      "late_draw_for_coverage_or_hand_goal": 0,
+      "late_draw_without_coverage_or_hand_goal": 0,
+      "late_ability_reuse_low_delta": 0,
+      "late_install_low_delta": 0,
+      "late_run_step_stall": 0,
+      "run_microstep_required": 0,
+      "continue_chain_to_access": 0,
+      "break_pump_required": 0,
+      "jackout_loop": 0,
+      "continue_without_progress": 0,
+      "access_pending": 0,
+      "breach_pending": 0,
+      "mixed_unknown": 0
+    }
+  },
+  "diagnostics": {
+    "unsafeScoreChosenByReason": {},
+    "actionLimitClusters": {
+      "action_limit_runner_repeated_no_progress_run": 0,
+      "action_limit_runner_remote_contest_blocked": 0,
+      "action_limit_corp_scoreline_stall": 0,
+      "action_limit_setup_economy_loop": 0,
+      "action_limit_low_value_repeat": 0,
+      "action_limit_mixed_or_unknown": 0
+    }
+  },
+  "matrix": [
+    {
+      "pair": {
+        "id": "G",
+        "label": "Stealth Interface Starter vs Ivory Bastion",
+        "runner": "real_scene_runner_stealth_interface_starter_snapshot_v1",
+        "corp": "local_realistic_corp_ivory_bastion_snapshot_v1"
+      },
+      "runner": {
+        "deckHash": "fnv1a:c0db223e"
+      },
+      "corp": {
+        "deckHash": "fnv1a:c5c32339"
+      },
+      "aggregate": {
+        "games": 1,
+        "decisions": 100,
+        "findings": 8,
+        "findingsBySeverity": {
+          "critical": 0,
+          "high": 0,
+          "medium": 8,
+          "low": 0
+        },
+        "findingsByDetector": {
+          "illegal_action": 0,
+          "replay_failure": 0,
+          "hidden_info_marker": 0,
+          "no_legal_action_failure": 0,
+          "action_limit_reached": 0,
+          "repeated_no_progress_run": 4,
+          "repeated_known_no_payoff_remote": 0,
+          "repeated_low_value_archives": 0,
+          "recovery_low_value_loop": 0,
+          "bank_over_target_without_funding_need": 0,
+          "risky_self_damage_action": 0,
+          "blink_low_hand_buffer_run": 0,
+          "duplicate_low_delta_install": 0,
+          "overdraw_without_urgency": 0,
+          "plan_step_action_mismatch": 4,
+          "semantic_override_suspicious": 0,
+          "corp_never_scores_long_game": 0,
+          "runner_never_accesses_long_game": 0
+        },
+        "illegalActions": 0,
+        "replayFailures": 0,
+        "actionLimitReached": 0,
+        "allRedactionSafe": true,
+        "redactionSafe": true,
+        "averageGameLength": 100,
+        "corpAgendaScores": 0,
+        "runnerAgendaSteals": 3,
+        "corpFlatlines": 0,
+        "scoreWindowMissed": 0,
+        "unsafeScoreChosen": 0,
+        "passiveActionWithScoreLineAvailable": 13,
+        "actionLimitClusters": {
+          "action_limit_runner_repeated_no_progress_run": 0,
+          "action_limit_runner_remote_contest_blocked": 0,
+          "action_limit_corp_scoreline_stall": 0,
+          "action_limit_setup_economy_loop": 0,
+          "action_limit_low_value_repeat": 0,
+          "action_limit_mixed_or_unknown": 0
+        },
+        "actionLimitSubclusters": {
+          "late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_real_reserve": 0,
+          "runner_late_gain_credit_no_safe_alternative": 0,
+          "corp_late_gain_credit_without_rez_score_protection_need": 0,
+          "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+          "corp_late_gain_credit_no_safe_alternative": 0,
+          "late_draw_for_coverage_or_hand_goal": 0,
+          "late_draw_without_coverage_or_hand_goal": 0,
+          "late_ability_reuse_low_delta": 0,
+          "late_install_low_delta": 0,
+          "late_run_step_stall": 0,
+          "run_microstep_required": 0,
+          "continue_chain_to_access": 0,
+          "break_pump_required": 0,
+          "jackout_loop": 0,
+          "continue_without_progress": 0,
+          "access_pending": 0,
+          "breach_pending": 0,
+          "mixed_unknown": 0
+        }
+      },
+      "diagnostics": {
+        "unsafeScoreChosenByReason": {},
+        "actionLimitClusters": {
+          "action_limit_runner_repeated_no_progress_run": 0,
+          "action_limit_runner_remote_contest_blocked": 0,
+          "action_limit_corp_scoreline_stall": 0,
+          "action_limit_setup_economy_loop": 0,
+          "action_limit_low_value_repeat": 0,
+          "action_limit_mixed_or_unknown": 0
+        },
+        "actionLimitSubclusters": {
+          "late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_real_reserve": 0,
+          "runner_late_gain_credit_no_safe_alternative": 0,
+          "corp_late_gain_credit_without_rez_score_protection_need": 0,
+          "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+          "corp_late_gain_credit_no_safe_alternative": 0,
+          "late_draw_for_coverage_or_hand_goal": 0,
+          "late_draw_without_coverage_or_hand_goal": 0,
+          "late_ability_reuse_low_delta": 0,
+          "late_install_low_delta": 0,
+          "late_run_step_stall": 0,
+          "run_microstep_required": 0,
+          "continue_chain_to_access": 0,
+          "break_pump_required": 0,
+          "jackout_loop": 0,
+          "continue_without_progress": 0,
+          "access_pending": 0,
+          "breach_pending": 0,
+          "mixed_unknown": 0
+        },
+        "whyCoverage": {
+          "schemaVersion": "semantic-runtime-why-coverage-v1",
+          "scope": "semantic_runtime_why_coverage_report_only",
+          "auditStatus": "complete",
+          "sampleCount": 100,
+          "decisionsRequiringWhyNot": 0,
+          "decisionsNotRequiringWhyNot": 100,
+          "decisionsWithTopLevelWhyNot": 59,
+          "decisionsMissingTopLevelWhyNot": 0,
+          "decisionsWithRuntimeWhyNotSection": 59,
+          "decisionsMissingRuntimeWhyNotSection": 0,
+          "actionAlternativeCount": 0,
+          "selectedActionAlternativeCount": 0,
+          "selectedActionAlternativesWithWhyChosen": 0,
+          "selectedActionAlternativesMissingWhyChosen": 0,
+          "nonSelectedActionAlternativeCount": 0,
+          "nonSelectedActionAlternativesWithWhyNot": 0,
+          "nonSelectedActionAlternativesMissingWhyNot": 0,
+          "actionAlternativesWithWhyChosen": 0,
+          "actionAlternativesMissingWhyChosen": 0,
+          "actionAlternativesWithWhyNot": 0,
+          "actionAlternativesMissingWhyNot": 0,
+          "rankedAlternativeCount": 0,
+          "rankedAlternativesWithWhyNot": 0,
+          "rankedAlternativesMissingWhyNot": 0,
+          "redactionStatus": "passed",
+          "productiveUseAllowed": false,
+          "noRuntimeEffect": true,
+          "missingCoverageSignals": [],
+          "evidence": [
+            "semantic_runtime_why_coverage:report_only",
+            "audit_status:complete",
+            "sample_count:100",
+            "decision_top_level_why_not_count:59",
+            "action_alternative_count:0",
+            "selected_action_alternative_count:0",
+            "non_selected_action_alternative_count:0",
+            "ranked_alternative_count:0"
+          ]
+        }
+      },
+      "summaries": [
+        {
+          "seed": "ai-v143-tuning-001",
+          "winner": "runner",
+          "actions": 100,
+          "turns": 13,
+          "finalAgendaPoints": {
+            "runner": 8,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:ea83474a",
+          "replayOk": true,
+          "replayErrors": [],
+          "lastActionTypes": [
+            "mandatory_draw",
+            "install_card",
+            "install_card",
+            "advance_card",
+            "end_turn",
+            "start_run",
+            "decline_rez",
+            "continue_run",
+            "access_card",
+            "steal_agenda"
+          ],
+          "last40ActionTypes": [
+            "install_card",
+            "end_turn",
+            "mandatory_draw",
+            "gain_credit",
+            "install_card",
+            "play_operation",
+            "gain_credit",
+            "gain_credit",
+            "end_turn",
+            "gain_credit",
+            "gain_credit",
+            "gain_credit",
+            "gain_credit",
+            "end_turn",
+            "mandatory_draw",
+            "play_operation",
+            "gain_credit",
+            "draw_card",
+            "end_turn",
+            "start_run",
+            "rez_ice",
+            "break_subroutine",
+            "continue_run",
+            "continue_run",
+            "access_card",
+            "steal_agenda",
+            "gain_credit",
+            "gain_credit",
+            "gain_credit",
+            "end_turn",
+            "mandatory_draw",
+            "install_card",
+            "install_card",
+            "advance_card",
+            "end_turn",
+            "start_run",
+            "decline_rez",
+            "continue_run",
+            "access_card",
+            "steal_agenda"
+          ]
+        }
+      ],
+      "topFindings": [
+        {
+          "matchId": "selfplay:ai-v143-tuning-001",
+          "seed": "ai-v143-tuning-001",
+          "actionIndex": 33,
+          "side": "runner",
+          "selectedActionType": "start_run",
+          "planKind": "simple_hq_or_rnd_pressure",
+          "detectorIds": [
+            "repeated_no_progress_run"
+          ],
+          "severity": "medium",
+          "shortReason": "Runner repeated hq without intervening progress.",
+          "relevantDebugFacts": [
+            "ability_semantic_binding:ability_binding:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:unresolved:none:onr_v1_047_pile-driver",
+            "ability_semantic_binding:ability_binding_status:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:unresolved",
+            "ability_semantic_binding:ability_tactic_signal:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:install.card",
+            "ability_semantic_binding:ability_tactic_signal:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:setup.install",
+            "action_semantic_candidate:run.start",
+            "action_semantic_projection:action_projection:runner.start_run.hq:start_run:run.start:basic_action:projected:high",
+            "action_semantic_projection:action_projection_candidate_count:10",
+            "action_semantic_projection:projected",
+            "action_semantic_projection:projection_signal_count:runner.start_run.hq:4",
+            "action_semantic_projection:semantic_origin:runner.start_run.hq:basic_action",
+            "action_type:start_run",
+            "compatibility_signals:compatibility_signal:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:role:icebreaker"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-001",
+            "stateVersion": 33,
+            "fromActionIndex": 31,
+            "toActionIndex": 34
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-001",
+          "seed": "ai-v143-tuning-001",
+          "actionIndex": 41,
+          "side": "runner",
+          "selectedActionType": "start_run",
+          "planKind": "simple_hq_or_rnd_pressure",
+          "detectorIds": [
+            "repeated_no_progress_run"
+          ],
+          "severity": "medium",
+          "shortReason": "Runner repeated rd without intervening progress.",
+          "relevantDebugFacts": [
+            "ability_semantic_binding:ability_binding:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:unresolved:none:onr_v1_047_pile-driver",
+            "ability_semantic_binding:ability_binding_status:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:unresolved",
+            "ability_semantic_binding:ability_tactic_signal:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:install.card",
+            "ability_semantic_binding:ability_tactic_signal:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:setup.install",
+            "action_semantic_candidate:run.start",
+            "action_semantic_projection:action_projection:runner.start_run.rd:start_run:run.start:basic_action:projected:high",
+            "action_semantic_projection:action_projection_candidate_count:10",
+            "action_semantic_projection:projected",
+            "action_semantic_projection:projection_signal_count:runner.start_run.rd:4",
+            "action_semantic_projection:semantic_origin:runner.start_run.rd:basic_action",
+            "action_type:start_run",
+            "compatibility_signals:compatibility_signal:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:role:icebreaker"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-001",
+            "stateVersion": 41,
+            "fromActionIndex": 39,
+            "toActionIndex": 42
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-001",
+          "seed": "ai-v143-tuning-001",
+          "actionIndex": 43,
+          "side": "runner",
+          "selectedActionType": "start_run",
+          "planKind": "simple_hq_or_rnd_pressure",
+          "detectorIds": [
+            "repeated_no_progress_run"
+          ],
+          "severity": "medium",
+          "shortReason": "Runner repeated hq without intervening progress.",
+          "relevantDebugFacts": [
+            "ability_semantic_binding:ability_binding:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:unresolved:none:onr_v1_047_pile-driver",
+            "ability_semantic_binding:ability_binding_status:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:unresolved",
+            "ability_semantic_binding:ability_tactic_signal:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:install.card",
+            "ability_semantic_binding:ability_tactic_signal:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:setup.install",
+            "action_semantic_candidate:run.start",
+            "action_semantic_projection:action_projection:runner.start_run.hq:start_run:run.start:basic_action:projected:high",
+            "action_semantic_projection:action_projection_candidate_count:10",
+            "action_semantic_projection:projected",
+            "action_semantic_projection:projection_signal_count:runner.start_run.hq:4",
+            "action_semantic_projection:semantic_origin:runner.start_run.hq:basic_action",
+            "action_type:start_run",
+            "compatibility_signals:compatibility_signal:runner.install_card.runner_onr_v1_047_pile-driver_1.runner_onr_v1_047_pile-driver_1:role:icebreaker"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-001",
+            "stateVersion": 43,
+            "fromActionIndex": 41,
+            "toActionIndex": 44
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-001",
+          "seed": "ai-v143-tuning-001",
+          "actionIndex": 45,
+          "side": "runner",
+          "selectedActionType": "continue_run",
+          "planKind": "simple_run_choice",
+          "detectorIds": [
+            "plan_step_action_mismatch"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category.",
+          "relevantDebugFacts": [
+            "ability_semantic_binding:ability_binding:runner.continue_run.card_implementation.onr_v1_265_rock-is-strong.printed_subroutine.1.end_the_run:unresolved:none:onr_v1_265_rock-is-st...",
+            "ability_semantic_binding:ability_binding_status:runner.continue_run.card_implementation.onr_v1_265_rock-is-strong.printed_subroutine.1.end_the_run:not_card_action",
+            "ability_semantic_binding:ability_tactic_signal:runner.continue_run.card_implementation.onr_v1_265_rock-is-strong.printed_subroutine.1.end_the_run:access_attempt",
+            "ability_semantic_binding:ability_tactic_signal:runner.continue_run.card_implementation.onr_v1_265_rock-is-strong.printed_subroutine.1.end_the_run:run.continue",
+            "action_semantic_candidate:run.continue",
+            "action_semantic_projection:action_projection:runner.continue_run.card_implementation.onr_v1_265_rock-is-strong.printed_subroutine.1.end_the_run:continue_run:run.continue:game_ru...",
+            "action_semantic_projection:action_projection_candidate_count:1",
+            "action_semantic_projection:projected",
+            "action_semantic_projection:projection_signal_count:runner.continue_run.card_implementation.onr_v1_265_rock-is-strong.printed_subroutine.1.end_the_run:2",
+            "action_semantic_projection:semantic_origin:runner.continue_run.card_implementation.onr_v1_265_rock-is-strong.printed_subroutine.1.end_the_run:ability_level",
+            "action_type:continue_run",
+            "credit_cost:0"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-001",
+            "stateVersion": 45,
+            "fromActionIndex": 43,
+            "toActionIndex": 46
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-001",
+          "seed": "ai-v143-tuning-001",
+          "actionIndex": 79,
+          "side": "runner",
+          "selectedActionType": "start_run",
+          "planKind": "runner.opportunistic_central_run",
+          "detectorIds": [
+            "repeated_no_progress_run"
+          ],
+          "severity": "medium",
+          "shortReason": "Runner repeated rd without intervening progress.",
+          "relevantDebugFacts": [
+            "ability_semantic_binding:ability_binding:runner.install_card.runner_onr_v1_144_tycho-mem-chip_2.runner_onr_v1_144_tycho-mem-chip_2:unresolved:none:onr_v1_144_tycho-mem-chip",
+            "ability_semantic_binding:ability_binding_status:runner.install_card.runner_onr_v1_144_tycho-mem-chip_2.runner_onr_v1_144_tycho-mem-chip_2:unresolved",
+            "ability_semantic_binding:ability_tactic_signal:runner.install_card.runner_onr_v1_144_tycho-mem-chip_2.runner_onr_v1_144_tycho-mem-chip_2:install.card",
+            "ability_semantic_binding:ability_tactic_signal:runner.install_card.runner_onr_v1_144_tycho-mem-chip_2.runner_onr_v1_144_tycho-mem-chip_2:setup.install",
+            "action_semantic_candidate:run.start",
+            "action_semantic_projection:action_projection:runner.start_run.rd:start_run:run.start:basic_action:projected:high",
+            "action_semantic_projection:action_projection_candidate_count:11",
+            "action_semantic_projection:projected",
+            "action_semantic_projection:projection_signal_count:runner.start_run.rd:4",
+            "action_semantic_projection:semantic_origin:runner.start_run.rd:basic_action",
+            "action_type:start_run",
+            "compatibility_signals:compatibility_signal:runner.install_card.runner_onr_v1_144_tycho-mem-chip_2.runner_onr_v1_144_tycho-mem-chip_2:role:hardware"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-001",
+            "stateVersion": 79,
+            "fromActionIndex": 77,
+            "toActionIndex": 80
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-001",
+          "seed": "ai-v143-tuning-001",
+          "actionIndex": 82,
+          "side": "runner",
+          "selectedActionType": "continue_run",
+          "planKind": "simple_run_choice",
+          "detectorIds": [
+            "plan_step_action_mismatch"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category.",
+          "relevantDebugFacts": [
+            "ability_semantic_binding:ability_binding:runner.continue_run:unresolved:none:onr_v1_232_crystal-wall",
+            "ability_semantic_binding:ability_binding_status:runner.continue_run:not_card_action",
+            "ability_semantic_binding:ability_tactic_signal:runner.continue_run:access_attempt",
+            "ability_semantic_binding:ability_tactic_signal:runner.continue_run:run.continue",
+            "action_semantic_candidate:run.continue",
+            "action_semantic_projection:action_projection:runner.continue_run:continue_run:run.continue:game_rule:projected:high",
+            "action_semantic_projection:action_projection_candidate_count:1",
+            "action_semantic_projection:projected",
+            "action_semantic_projection:projection_signal_count:runner.continue_run:2",
+            "action_semantic_projection:semantic_origin:runner.continue_run:ability_level",
+            "action_type:continue_run",
+            "credit_cost:0"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-001",
+            "stateVersion": 82,
+            "fromActionIndex": 80,
+            "toActionIndex": 83
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-001",
+          "seed": "ai-v143-tuning-001",
+          "actionIndex": 83,
+          "side": "runner",
+          "selectedActionType": "continue_run",
+          "planKind": "simple_run_choice",
+          "detectorIds": [
+            "plan_step_action_mismatch"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:run.continue",
+            "action_semantic_projection:action_projection:runner.continue_run:continue_run:run.continue:game_rule:projected:high",
+            "action_semantic_projection:action_projection_candidate_count:2",
+            "action_semantic_projection:projected",
+            "action_semantic_projection:projection_signal_count:runner.continue_run:2",
+            "action_semantic_projection:semantic_origin:runner.continue_run:ability_level",
+            "action_type:continue_run",
+            "credit_cost:0",
+            "own_clicks:3",
+            "own_credits:2",
+            "own_tags:0",
+            "planKind:simple_run_choice"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-001",
+            "stateVersion": 83,
+            "fromActionIndex": 81,
+            "toActionIndex": 84
+          }
+        },
+        {
+          "matchId": "selfplay:ai-v143-tuning-001",
+          "seed": "ai-v143-tuning-001",
+          "actionIndex": 97,
+          "side": "runner",
+          "selectedActionType": "continue_run",
+          "planKind": "simple_run_choice",
+          "detectorIds": [
+            "plan_step_action_mismatch"
+          ],
+          "severity": "medium",
+          "shortReason": "Selected action appears to mismatch the current plan category.",
+          "relevantDebugFacts": [
+            "action_semantic_candidate:run.continue",
+            "action_semantic_projection:action_projection:runner.continue_run:continue_run:run.continue:game_rule:projected:high",
+            "action_semantic_projection:action_projection_candidate_count:2",
+            "action_semantic_projection:projected",
+            "action_semantic_projection:projection_signal_count:runner.continue_run:2",
+            "action_semantic_projection:semantic_origin:runner.continue_run:ability_level",
+            "action_type:continue_run",
+            "credit_cost:0",
+            "own_clicks:3",
+            "own_credits:5",
+            "own_tags:0",
+            "planKind:simple_run_choice"
+          ],
+          "replaySafeReference": {
+            "seed": "ai-v143-tuning-001",
+            "stateVersion": 97,
+            "fromActionIndex": 95,
+            "toActionIndex": 98
+          }
+        }
+      ]
+    }
+  ]
+}

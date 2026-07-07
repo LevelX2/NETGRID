@@ -17,6 +17,7 @@ import {
 
 import type { AiDeckDoctrineDeckSnapshot } from "../deck-doctrine";
 import { buildAiDecisionInput, selectAiDecisionSideForState } from "../runtime/ai-decision-input";
+import { resetTacticalPlanMemory } from "../tactical-plans";
 import { sortedUniqueProgressionCardTargetTypes } from "../runtime/progression-card-target";
 import { advancementCountersAddedForSimulationAction } from "../runtime/simulation-action-event";
 import {
@@ -140,6 +141,7 @@ export function createAiGameSimulator(
 function simulateAiGame(
   config: AiSimulationConfig = {},
 ): AiSimulationSummary {
+  resetTacticalPlanMemory();
   const deckSupportErrors = validateSimulationDeckSupport(config);
   if (deckSupportErrors.length > 0) {
     return {
@@ -175,7 +177,14 @@ function simulateAiGame(
     config.runnerDeck ?? DEMO_DECKS[config.runnerDeckId ?? "demo_runner_001"];
   const corpDeckDefinition =
     config.corpDeck ?? DEMO_DECKS[config.corpDeckId ?? "demo_corp_001"];
+  const simulationScopeId = simulationDecisionScopeId({
+    seed,
+    ...(config.matchId ? { matchId: config.matchId } : {}),
+    runnerDeckId: runnerDeckDefinition.id,
+    corpDeckId: corpDeckDefinition.id,
+  });
   let state = createGame({
+    matchId: config.matchId ?? simulationScopeId,
     seed,
     agendaPointsToWin: config.agendaPointsToWin ?? 7,
     ...(config.runnerDeckId ? { runnerDeckId: config.runnerDeckId } : {}),
@@ -243,7 +252,7 @@ function simulateAiGame(
           ? (config.runnerDifficulty ?? "normal")
           : (config.corpDifficulty ?? "normal"),
       actionNumber: index,
-      decisionId: `${seed}:${index}:${side}`,
+      decisionId: `${simulationScopeId}:${index}:${side}`,
       profileId:
         side === "runner"
           ? (config.runnerProfileId ??
@@ -482,4 +491,22 @@ function simulateAiGame(
 }
 
   return { simulateAiGame };
+}
+
+function simulationDecisionScopeId(params: {
+  seed: string;
+  matchId?: string | undefined;
+  runnerDeckId: string;
+  corpDeckId: string;
+}): string {
+  return [
+    "ai-sim",
+    params.matchId ?? params.seed,
+    params.runnerDeckId,
+    params.corpDeckId,
+  ]
+    .map((part) => part.replace(/[^A-Za-z0-9_.-]+/g, "_"))
+    .filter((part) => part.length > 0)
+    .join("_")
+    .slice(0, 180);
 }

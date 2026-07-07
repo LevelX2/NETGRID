@@ -15,6 +15,7 @@ import {
 } from "./selfplay-trace-mining";
 import {
   benchmarkDeckFromFrozenLocalSnapshot,
+  benchmarkDeckFromSnapshot,
   detectAiSelfplaySuspiciousDecisions,
   listMatchProgressionBenchmarkDeckSlots,
   runAiSelfplayTraceMining,
@@ -23,6 +24,7 @@ import {
   runMatchProgressionBenchmarkSuite,
   type AiSimulationSummary,
 } from "../index";
+import { resetTacticalPlanMemory } from "../tactical-plans";
 
 describe("benchmark report formatting", () => {
   it("formats doctrine quality benchmark reports with gate interpretation", () => {
@@ -544,6 +546,55 @@ describe("benchmark report formatting", () => {
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
   }, 90_000);
+
+  it("keeps selfplay trace mining independent across deck pairs with the same seed", () => {
+    const seed = "ai-v143-tuning-001";
+    const pairF = selfplayDeckPair(
+      "demo_runner_008_snapshot_v0_8",
+      "demo_corp_008_snapshot_v0_8",
+    );
+    const pairG = selfplayDeckPair(
+      "real_scene_runner_stealth_interface_starter_snapshot_v1",
+      "local_realistic_corp_ivory_bastion_snapshot_v1",
+    );
+
+    resetTacticalPlanMemory();
+    const isolated = runAiSelfplayTraceMining({
+      seeds: [seed],
+      runnerDeck: pairG.runner.deck,
+      corpDeck: pairG.corp.deck,
+      runnerDeckMetadata: pairG.runner.metadata,
+      corpDeckMetadata: pairG.corp.metadata,
+      maxActions: 120,
+      maxFindings: 50,
+    }).summaries[0]!;
+
+    resetTacticalPlanMemory();
+    runAiSelfplayTraceMining({
+      seeds: [seed],
+      runnerDeck: pairF.runner.deck,
+      corpDeck: pairF.corp.deck,
+      runnerDeckMetadata: pairF.runner.metadata,
+      corpDeckMetadata: pairF.corp.metadata,
+      maxActions: 120,
+      maxFindings: 50,
+    });
+    const afterOtherPair = runAiSelfplayTraceMining({
+      seeds: [seed],
+      runnerDeck: pairG.runner.deck,
+      corpDeck: pairG.corp.deck,
+      runnerDeckMetadata: pairG.runner.metadata,
+      corpDeckMetadata: pairG.corp.metadata,
+      maxActions: 120,
+      maxFindings: 50,
+    }).summaries[0]!;
+
+    expect(afterOtherPair.finalStateHash).toBe(isolated.finalStateHash);
+    expect(afterOtherPair.winner).toBe(isolated.winner);
+    expect(afterOtherPair.finalAgendaPoints).toEqual(
+      isolated.finalAgendaPoints,
+    );
+  }, 120_000);
 
   it("keeps action alternatives scoped to action-limit finding windows", () => {
     const pair = JSON.parse(
@@ -1128,6 +1179,29 @@ function selfplayAction(
     qualityTags: overrides.qualityTags ?? [],
     stateHashAfter: overrides.stateHashAfter ?? `fnv1a:${stateVersionBefore}`,
   };
+}
+
+function selfplayDeckPair(runnerSnapshotId: string, corpSnapshotId: string) {
+  return {
+    runner: benchmarkDeckFromAnySnapshot(runnerSnapshotId),
+    corp: benchmarkDeckFromAnySnapshot(corpSnapshotId),
+  };
+}
+
+function benchmarkDeckFromAnySnapshot(
+  snapshotId: string,
+): ReturnType<typeof benchmarkDeckFromFrozenLocalSnapshot> {
+  try {
+    return benchmarkDeckFromFrozenLocalSnapshot(snapshotId);
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      !error.message.includes("Unknown frozen local benchmark deck snapshot")
+    ) {
+      throw error;
+    }
+  }
+  return benchmarkDeckFromSnapshot(snapshotId);
 }
 
 function selfplayMetricsFixture(): AiSimulationSummary["metrics"] {

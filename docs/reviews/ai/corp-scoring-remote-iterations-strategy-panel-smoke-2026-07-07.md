@@ -1,6 +1,6 @@
 # Corp Scoring Remote Iterations: Strategy Panel Smoke 2026-07-07
 
-Status: evidence_baseline
+Status: superseded_by_scope_fix
 
 ## Scope
 
@@ -55,6 +55,18 @@ Next candidate should therefore be narrow and side-safe:
 - keep hard access-stop as the default concrete scoring-remote protection;
 - only consider non-stopping access-punish as partial protection when the deck/runtime strategy has a concrete punish payoff and the action does not create a free agenda gift;
 - test against both the original latest-match benchmark and this strategy panel before merge.
+
+## Supersession
+
+This initial strategy-panel smoke was later found to be contaminated by simulation TacticalPlan/StrategicIntent memory leaking across deck pairs with the same seed. `createGame` used the default `local-demo-match`, and simulation `decisionId` used only `${seed}` as the first memory-key segment. As a result, later pairs in the same matrix process could inherit plan memory from earlier pairs.
+
+Use the post-fix artifacts instead:
+
+- `docs/reviews/ai/corp-scoring-remote-iterations-strategy-panel-after-scope-fix-20-2026-07-07.json`
+- `docs/reviews/ai/corp-scoring-remote-iterations-after-scope-fix-30-2026-07-07.json`
+- `docs/reviews/ai/corp-scoring-remote-iterations-after-scope-fix-30-2026-07-07.md`
+
+The original numbers remain useful only as evidence of the benchmark-scope bug.
 
 ## Decision
 

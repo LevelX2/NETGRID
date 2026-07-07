@@ -8,6 +8,7 @@ import type { SimulationControllerMode, SimulationWorld } from "./simulation-typ
 
 export type AiSimulationConfig = {
   seed?: string;
+  matchId?: string;
   maxActions?: number;
   agendaPointsToWin?: number;
   runnerDifficulty?: AiDifficulty;

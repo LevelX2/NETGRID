@@ -1,0 +1,9 @@
+{
+  "pair": {
+    "id": "G",
+    "label": "Stealth Interface Starter vs Ivory Bastion",
+    "runner": "real_scene_runner_stealth_interface_starter_snapshot_v1",
+    "corp": "local_realistic_corp_ivory_bastion_snapshot_v1"
+  },
+  "comparisonRole": "ice_breaker_coverage_pair"
+}
