@@ -12,7 +12,10 @@ import {
   semanticRuntimeCorpBoardTriage,
   semanticRuntimeCorpBoardTriageActionComponent,
 } from "./semantic-runtime-corp-board-triage";
-import { corpIcePlacementScoreComponent } from "./corp-ice-placement/corp-ice-placement";
+import {
+  corpIcePlacementCandidateForAction,
+  corpIcePlacementScoreComponent,
+} from "./corp-ice-placement/corp-ice-placement";
 import { corpUpgradeInstallPlacementComponent } from "./corp-upgrade-placement";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { rolesMatch } from "./role-match";
@@ -52,6 +55,7 @@ type CorpBurstEconomyOperation = {
 const CORP_IMMEDIATE_ECONOMY_MIN_ACTION_VALUE = 2;
 const CORP_IMMEDIATE_ECONOMY_STRONG_ACTION_VALUE = 3;
 const CORP_RESERVE_SCORE_NORMALIZATION_DIVISOR = 50;
+const CORP_SCORE_NOW_TEMPO_BLOCKING_REMOTE_ICE_SCORE = 1500;
 
 export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
   actionCreditCost: (action: LegalAction) => number;
@@ -871,10 +875,18 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
     scoringWindow?.recommendedNextStep === "gain_credit" ||
     scoringWindow?.corpCanRezRelevantIce === false ||
     scoringWindow?.corpCanRezFullPathWithDynamicReserve === false;
+  const tempoAdvanceUnderClock =
+    corpActiveRemoteAgendaCanTempoAdvanceUnderClock(
+      input,
+      dependencies,
+      boardTriageState,
+      state,
+    );
   if (
     !closesBeforeRunner &&
     scoringWindowNeedsFunding &&
-    creditsAfterAction < state.reserveFloor
+    creditsAfterAction < state.reserveFloor &&
+    !tempoAdvanceUnderClock.allowed
   ) {
     return {
       key: "corp_active_remote_agenda_underfunded_advance",
@@ -892,6 +904,7 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
         ...(scoringWindow?.recommendedNextStep
           ? [`recommended_next_step:${scoringWindow.recommendedNextStep}`]
           : []),
+        ...tempoAdvanceUnderClock.evidence,
         ...state.evidence,
       ].join("|"),
     };
@@ -912,15 +925,24 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
     runnerAgendaPoints >= 5 ||
     state.agendaPointsAtRisk >= 3 ||
     scoringWindow?.agendaStealSeverity === "near_win" ||
-    scoringWindow?.agendaStealSeverity === "game_ending"
+        scoringWindow?.agendaStealSeverity === "game_ending"
       ? 700
       : 0;
+  const tempoAdvanceBonus =
+    tempoAdvanceUnderClock.allowed && boardTriageState.severity === "critical"
+      ? 1600
+      : tempoAdvanceUnderClock.allowed
+        ? 800
+        : 0;
   return {
     key: "corp_active_remote_agenda_advance_clock",
     label: "Aktive Remote-Agenda",
-    value: 2600 + severityBonus,
+    value: 2600 + severityBonus + tempoAdvanceBonus,
     reason: [
       "active_remote_agenda:true",
+      ...(tempoAdvanceUnderClock.allowed
+        ? ["tempo_advance_under_scoreline_clock:true"]
+        : []),
       `server:${state.serverId}`,
       `card:${state.cardId}`,
       `advances_remaining:${state.advancesRemaining}`,
@@ -929,9 +951,96 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
       ...(scoringWindow?.recommendedNextStep
         ? [`recommended_next_step:${scoringWindow.recommendedNextStep}`]
         : []),
+      ...tempoAdvanceUnderClock.evidence,
       ...state.evidence,
     ].join("|"),
   };
+}
+
+function corpActiveRemoteAgendaCanTempoAdvanceUnderClock<
+  TConsumer extends string,
+>(
+  input: AiDecisionInput,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+  state: CorpActiveRemoteScorelineState,
+): { allowed: boolean; evidence: string[] } {
+  if (boardTriageState.primary !== "score_now") {
+    return { allowed: false, evidence: ["tempo_score_now:false"] };
+  }
+  const triageServer =
+    boardTriageState.scoreRemoteServerId ?? boardTriageState.targetServerId;
+  if (triageServer !== undefined && triageServer !== state.serverId) {
+    return {
+      allowed: false,
+      evidence: [`tempo_score_now_target_mismatch:${triageServer}`],
+    };
+  }
+  const blockingIce = corpStrongSameRemoteIceInstallForScoreline(
+    input,
+    dependencies,
+    state.serverId,
+  );
+  if (blockingIce) {
+    return {
+      allowed: false,
+      evidence: [
+        "tempo_score_now_blocked_by_remote_ice:true",
+        `blocking_ice_action:${blockingIce.actionId}`,
+        `blocking_ice_score:${blockingIce.score}`,
+        `blocking_ice_recommendation:${blockingIce.recommendation}`,
+      ],
+    };
+  }
+  return { allowed: true, evidence: ["tempo_score_now:true"] };
+}
+
+function corpStrongSameRemoteIceInstallForScoreline<TConsumer extends string>(
+  input: AiDecisionInput,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  serverId: string,
+):
+  | {
+      actionId: string;
+      score: number;
+      recommendation: string;
+    }
+  | undefined {
+  const legalActions = input.legalActions ?? input.playerView.legalActions ?? [];
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  return legalActions
+    .map((candidateAction) => {
+      if (
+        candidateAction.side !== "corp" ||
+        candidateAction.type !== "install_card" ||
+        candidateAction.payload?.placement !== "ice" ||
+        corpInstallServerId(candidateAction) !== serverId
+      ) {
+        return undefined;
+      }
+      const sourceCard = visibleSourceCardForAction(input, candidateAction);
+      return corpIcePlacementCandidateForAction({
+        input,
+        action: candidateAction,
+        serverId,
+        server,
+        sourceCard,
+        actionCreditCost: dependencies.actionCreditCost(candidateAction),
+        iceRezCost: sourceCard?.rezCost,
+        hasUrgentScoreline: true,
+      });
+    })
+    .filter((candidate): candidate is NonNullable<typeof candidate> =>
+      Boolean(candidate),
+    )
+    .filter(
+      (candidate) =>
+        candidate.recommendation === "install_now" &&
+        candidate.score >= CORP_SCORE_NOW_TEMPO_BLOCKING_REMOTE_ICE_SCORE,
+    )
+    .sort((left, right) => right.score - left.score)[0];
 }
 
 function corpActiveScoreRemoteReserveFundingComponent(
