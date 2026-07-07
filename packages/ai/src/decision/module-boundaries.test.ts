@@ -479,6 +479,60 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps productive AI runtime free of missing-snapshot and legacy doctrine fallbacks", () => {
+    const productiveFiles = [
+      path.join(srcDir, "runtime", "ai-decision-input.ts"),
+      path.join(srcDir, "deck-doctrine-runtime-context.ts"),
+      path.join(repoRoot, "apps", "server", "src", "multiplayer.ts"),
+      path.join(repoRoot, "apps", "server", "src", "index.ts"),
+      path.join(repoRoot, "apps", "web", "app", "api", "game", "route.ts"),
+    ];
+    const forbiddenTerms = [
+      "missingDeckContextMode",
+      "legacy_compatible",
+      "buildNeutralDeckStrategyProfile",
+      "buildDeckDoctrineProfile",
+      "archetypeTags",
+      "planWeights",
+      "mulliganWeights",
+    ];
+    const violations = productiveFiles.flatMap((file) => {
+      const content = readFileSync(file, "utf8");
+      return forbiddenTerms
+        .filter((term) => content.includes(term))
+        .map((term) => `${relativeFile(file)} uses forbidden productive AI runtime term ${term}`);
+    });
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps ownDeckSnapshot validation on the productive AI decision path", () => {
+    const aiDecisionInput = path.join(
+      srcDir,
+      "runtime",
+      "ai-decision-input.ts",
+    );
+    const runtimeContext = path.join(srcDir, "deck-doctrine-runtime-context.ts");
+    const decisionInputContent = readFileSync(aiDecisionInput, "utf8");
+    const runtimeContextContent = readFileSync(runtimeContext, "utf8");
+    const violations = [
+      ...(!decisionInputContent.includes("ownDeckSnapshot: AiDeckStrategyDeckSnapshot")
+        ? ["ai-decision-input.ts does not require ownDeckSnapshot in the runtime contract"]
+        : []),
+      ...(!decisionInputContent.includes("assertValidAiDeckSnapshotForRuntime")
+        ? ["ai-decision-input.ts does not validate ownDeckSnapshot"]
+        : []),
+      ...(!runtimeContextContent.includes("deckSnapshot: AiDeckStrategyDeckSnapshot")
+        ? ["deck-doctrine-runtime-context.ts does not require a deck snapshot"]
+        : []),
+      ...(!runtimeContextContent.includes("assertValidAiDeckSnapshotForRuntime")
+        ? ["deck-doctrine-runtime-context.ts does not validate deck snapshots"]
+        : []),
+    ];
+
+    expect(violations).toEqual([]);
+  });
+
   it("freezes legacy planner implementation imports", () => {
     const expectedImportsByFile = new Map<string, string[]>([
       [

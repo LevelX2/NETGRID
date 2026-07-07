@@ -90,31 +90,32 @@ export function buildAiDecisionInput(
     expectedDeckSnapshot?: Omit<AiDeckSnapshotRuntimeExpectation, "side">;
   },
 ): AiDecisionInput {
+  const expectedDeckSnapshot = options?.expectedDeckSnapshot;
   const ownDeckSnapshot = assertValidAiDeckSnapshotForRuntime(
-    options.ownDeckSnapshot,
+    options?.ownDeckSnapshot,
     {
       side,
-      ...options.expectedDeckSnapshot,
+      ...expectedDeckSnapshot,
     },
   );
   const playerView = getPlayerView(state, side);
   const legalActions = getLegalActions(state, side);
-  const difficulty = options.difficulty ?? "normal";
+  const difficulty = options?.difficulty ?? "normal";
   const decisionId =
-    options.decisionId ?? `${state.matchId}:${state.stateVersion}:${side}`;
-  const actionNumber = options.actionNumber ?? state.stateVersion;
-  const profileId = options.profileId ?? `${side}-ai-v0.9-${difficulty}`;
+    options?.decisionId ?? `${state.matchId}:${state.stateVersion}:${side}`;
+  const actionNumber = options?.actionNumber ?? state.stateVersion;
+  const profileId = options?.profileId ?? `${side}-ai-v0.9-${difficulty}`;
   const deckDoctrineRuntimeContext = buildDeckDoctrineRuntimeContext({
     side,
     deckSnapshot: ownDeckSnapshot,
-    ...(options.expectedDeckSnapshot
-      ? { expectedDeckSnapshot: options.expectedDeckSnapshot }
+    ...(expectedDeckSnapshot
+      ? { expectedDeckSnapshot }
       : {}),
   });
   const input = buildAiDecisionInputDto({
     side,
     playerView,
-    eventTail: options.eventTail ?? playerView.publicEvents,
+    eventTail: options?.eventTail ?? playerView.publicEvents,
     legalActions,
     difficulty,
     seed: state.seed,

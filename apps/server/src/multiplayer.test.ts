@@ -9,7 +9,7 @@ import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import { beliefStateInvariantSignature, buildAiDecisionInputDto, reconstructBeliefState } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
-import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
+import { computeDeckHash, createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
 import { applyAction, applyEffectCommands, checkWinConditions, createGameAfterSetup, DEMO_CARDS_BY_ID, DEMO_DECKS, getLegalActions, hashState } from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
 import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAddressAllowed, startNetgridServer } from "./http-server";
@@ -5157,6 +5157,8 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const stored = await service.loadForTest(created.matchId);
     expect(stored?.match.aiControllers?.corp?.type).toBe("ai");
+    expect(stored?.privateDeckSnapshots?.corp.deckSnapshotId).toBe(stored?.match.deckSetup.corpSnapshotId);
+    expect(stored?.privateDeckSnapshots?.corp.cards.length).toBeGreaterThan(0);
     expect(JSON.stringify(created)).not.toContain("cardInstances");
     expect(JSON.stringify(created)).not.toContain("Simple Agenda");
 
@@ -5183,6 +5185,114 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(advanced.publicEvent?.publicPayload.aiExplanation).toBeTruthy();
     expect(JSON.stringify(advanced.requesterPayload)).not.toContain("cardInstances");
     expect(JSON.stringify(advanced.requesterPayload)).not.toContain("Simple Agenda");
+  });
+
+  it("rejects AI match start when the selected AI snapshot is internally invalid", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-invalid-runtime-snapshot-start" });
+    const invalidCorpSnapshot = deckSnapshotByIdForTest("demo_corp_008_snapshot_v0_8");
+    invalidCorpSnapshot.publicMetadata = {
+      ...invalidCorpSnapshot.publicMetadata,
+      cardPoolSnapshotId: `${invalidCorpSnapshot.publicMetadata.cardPoolSnapshotId}:stale`,
+    };
+    const invalidHash = computeDeckHash(invalidCorpSnapshot);
+    invalidCorpSnapshot.deckHash = invalidHash;
+    invalidCorpSnapshot.publicMetadata.deckHash = invalidHash;
+
+    await expect(
+      service.createMatch({
+        mode: "human_runner_vs_corp_ai",
+        hostSide: "runner",
+        seed: "ai-invalid-runtime-snapshot-start",
+        participantADecks: {
+          runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+          corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+        },
+        participantBDecks: {
+          runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+          corpDeckSnapshot: invalidCorpSnapshot
+        },
+        aiDeckPolicy: "selected",
+        corpDifficulty: "normal"
+      })
+    ).rejects.toThrow(/ai_deck_snapshot_invalid/);
+  });
+
+  it("rejects AI advance when the stored ownDeckSnapshot is missing", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "ai-missing-runtime-snapshot-advance" });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "ai-missing-runtime-snapshot-advance",
+      corpDifficulty: "normal"
+    });
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      "keep",
+      "ai-missing-runtime-snapshot-setup"
+    );
+    const record = await storage.load(created.matchId);
+    if (!record?.privateDeckSnapshots || !record.gameState) throw new Error("Missing stored AI match");
+    const beforeEventCount = record.eventLog.length;
+    const beforeStateVersion = record.gameState.stateVersion;
+    delete (record.privateDeckSnapshots as Partial<typeof record.privateDeckSnapshots>).corp;
+    await storage.save(record);
+
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: afterSetup.playerView.stateVersion,
+      mode: "single_step"
+    });
+
+    expect(advanced.ok).toBe(false);
+    if (advanced.ok) throw new Error("Expected missing snapshot rejection");
+    expect(advanced.error.code).toBe("ai_deck_snapshot_missing");
+    const afterAdvance = await storage.load(created.matchId);
+    expect(afterAdvance?.eventLog).toHaveLength(beforeEventCount);
+    expect(afterAdvance?.gameState?.stateVersion).toBe(beforeStateVersion);
+  });
+
+  it("rejects AI advance when the stored ownDeckSnapshot is stale", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "ai-stale-runtime-snapshot-advance" });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "ai-stale-runtime-snapshot-advance",
+      corpDifficulty: "normal"
+    });
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      { side: "runner", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      "keep",
+      "ai-stale-runtime-snapshot-setup"
+    );
+    const record = await storage.load(created.matchId);
+    if (!record?.privateDeckSnapshots?.corp || !record.gameState) throw new Error("Missing stored AI match");
+    const beforeEventCount = record.eventLog.length;
+    const beforeStateVersion = record.gameState.stateVersion;
+    record.privateDeckSnapshots.corp.deckSnapshotId = `${record.privateDeckSnapshots.corp.deckSnapshotId}:stale`;
+    await storage.save(record);
+
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: afterSetup.playerView.stateVersion,
+      mode: "single_step"
+    });
+
+    expect(advanced.ok).toBe(false);
+    if (advanced.ok) throw new Error("Expected stale snapshot rejection");
+    expect(advanced.error.code).toBe("ai_deck_snapshot_stale");
+    const afterAdvance = await storage.load(created.matchId);
+    expect(afterAdvance?.eventLog).toHaveLength(beforeEventCount);
+    expect(afterAdvance?.gameState?.stateVersion).toBe(beforeStateVersion);
   });
 
   it("runs Human Corp vs Runner AI through the same action pipeline", async () => {
@@ -7450,6 +7560,14 @@ async function listBackupManifests(backupDir: string) {
 function restoreEnv(key: string, value: string | undefined): void {
   if (value === undefined) delete process.env[key];
   else process.env[key] = value;
+}
+
+function deckSnapshotByIdForTest(snapshotId: string): DeckSnapshot {
+  const snapshot = (snapshotsData08.snapshots as DeckSnapshot[]).find(
+    (candidate) => candidate.deckSnapshotId === snapshotId
+  );
+  if (!snapshot) throw new Error(`Missing test deck snapshot ${snapshotId}`);
+  return structuredClone(snapshot) as DeckSnapshot;
 }
 
 class FailingStorage implements MultiplayerStorage {
