@@ -109,6 +109,36 @@ describe("runner run plan memory", () => {
     expect(plan?.pathQuote.totalKnownCost).toBe(2);
   });
 
+  it("creates a run plan from a selected card run action with a concrete target evaluation", () => {
+    const runEvent = action("play_event", {
+      sourceDefinitionId: "simple_run_event",
+    });
+    const plan = createRunnerRunPlanForSelectedAction({
+      input: runnerInput({ activeRun: false, legalActions: [runEvent] }),
+      selectedAction: runEvent,
+      runnerRunTargetEvaluations: [runTargetEvaluation(runEvent)],
+    });
+
+    expect(plan?.origin).toBe("card_initiated_run");
+    expect(plan?.targetServer.id).toBe("rd");
+    expect(plan?.runStartActionId).toBe("play_event");
+    expect(plan?.objective.kind).toBe("access_rnd_top");
+  });
+
+  it("creates a run plan from a run-choice action with a public selected server", () => {
+    const runChoice = action("resolve_choice", {
+      selectedServerId: "hq",
+    });
+    const plan = createRunnerRunPlanForSelectedAction({
+      input: runnerInput({ activeRun: false, legalActions: [runChoice] }),
+      selectedAction: runChoice,
+    });
+
+    expect(plan?.targetServer.id).toBe("hq");
+    expect(plan?.runStartActionId).toBe("resolve_choice");
+    expect(plan?.objective.kind).toBe("access_hq_card");
+  });
+
   it("remembers a run plan when the semantic runtime selects start_run", () => {
     const startRun = action("start_run", { serverId: "rd" });
     const input = runnerInput({ activeRun: false, legalActions: [startRun] });
@@ -408,10 +438,12 @@ function runTargetEvaluation(
     runActionProjection: {
       actionId: actionValue.actionId,
       actionType: actionValue.type,
-      sourceKind: "basic_action",
       targetServerId: "rd",
       targetKind: "rd",
-      structure: "direct_start_run",
+      sourceKind:
+        actionValue.type === "start_run" ? "basic_action" : "event",
+      structure:
+        actionValue.type === "start_run" ? "direct_start_run" : "event_run",
       accessPayoffSignals: [],
       constraintSignals: [],
       riskSignals: [],

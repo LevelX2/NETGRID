@@ -1076,6 +1076,7 @@ export function evaluateCorpPlan(
     `plan:${candidate.kind}`,
     `difficulty:${input.difficulty}`,
     `deck_strategy_plan_weight:${strategyPlanWeight}`,
+    ...hqDensity.evidence,
     ...scoreConversion.evidence,
     ...protectionToScore.evidence,
     ...scoreWindowCompression.evidence,
@@ -1103,7 +1104,6 @@ export function evaluateCorpPlan(
     ...remoteIntent.evidence,
     ...remotePortfolio.evidence,
     ...centralIcePortfolio.evidence,
-    ...hqDensity.evidence,
     `belief_version:${beliefState.version}`,
     ...(beliefState.corpOpponentModel
       ? [

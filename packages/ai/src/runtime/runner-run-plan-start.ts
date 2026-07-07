@@ -27,34 +27,53 @@ export function createRunnerRunPlanForSelectedAction(params: {
   if (input.side !== "runner" || selectedAction.side !== "runner") {
     return undefined;
   }
-  if (!runnerRunStartActionCanCreatePlan(selectedAction)) return undefined;
-  const targetServerId = runnerRunPlanTargetServerId(selectedAction);
+  const targetEvaluation = runnerRunTargetEvaluationForSelectedAction({
+    action: selectedAction,
+    evaluations: params.runnerRunTargetEvaluations ?? [],
+  });
+  const payloadTargetServerId = runnerRunPlanTargetServerId(selectedAction);
+  if (
+    !runnerRunStartActionCanCreatePlan(
+      selectedAction,
+      targetEvaluation,
+      payloadTargetServerId,
+    )
+  ) {
+    return undefined;
+  }
+  const targetServerId =
+    payloadTargetServerId ??
+    runnerRunPlanTargetServerIdFromEvaluation(targetEvaluation);
   if (!targetServerId) return undefined;
-  const targetEvaluation = runnerRunTargetEvaluationForAction({
+  const matchingTargetEvaluation = runnerRunTargetEvaluationForAction({
     action: selectedAction,
     targetServerId,
     evaluations: params.runnerRunTargetEvaluations ?? [],
-  });
+  }) ?? targetEvaluation;
   const targetKind =
-    targetEvaluation?.accessTargetKind ?? targetKindForServerId(targetServerId);
+    matchingTargetEvaluation?.accessTargetKind ??
+    targetKindForServerId(targetServerId);
   if (!targetKind) return undefined;
-  const expectedValue = Math.max(0, targetEvaluation?.score ?? 0);
-  const expectedAccessCount = targetEvaluation?.multiaccessAvailable ? 2 : 1;
+  const expectedValue = Math.max(0, matchingTargetEvaluation?.score ?? 0);
+  const expectedAccessCount = matchingTargetEvaluation?.multiaccessAvailable
+    ? 2
+    : 1;
   const objective = runnerRunObjectiveFor({
     targetKind,
     expectedValue,
     expectedAccessCount,
-    evaluation: targetEvaluation,
+    evaluation: matchingTargetEvaluation,
   });
   const accessIntent = runnerRunAccessIntentFor({
     targetServerId,
     expectedAccessCount,
-    evaluation: targetEvaluation,
+    evaluation: matchingTargetEvaluation,
   });
   const now = input.playerView.stateVersion;
-  const pathCost = Math.max(0, targetEvaluation?.pathCost ?? 0);
+  const pathCost = Math.max(0, matchingTargetEvaluation?.pathCost ?? 0);
   const creditsAfterRun =
-    targetEvaluation?.creditsAfterRun ?? input.playerView.own.credits - pathCost;
+    matchingTargetEvaluation?.creditsAfterRun ??
+    input.playerView.own.credits - pathCost;
   const actionCandidate = params.actionSemanticCandidates?.find(
     (candidate) => candidate.actionId === selectedAction.actionId,
   );
@@ -101,7 +120,8 @@ export function createRunnerRunPlanForSelectedAction(params: {
       },
       tagSafetyReserve: {
         minimumCreditsAfterTags: 0,
-        expectedTagCount: targetEvaluation?.expectedTagsFromVisibleIce ?? 0,
+        expectedTagCount:
+          matchingTargetEvaluation?.expectedTagsFromVisibleIce ?? 0,
         evidence: [],
       },
     },
@@ -113,15 +133,17 @@ export function createRunnerRunPlanForSelectedAction(params: {
     },
     pathQuote: {
       server: targetServerId,
-      quoteStatus: targetEvaluation ? "partially_known" : "unknown",
+      quoteStatus: matchingTargetEvaluation ? "partially_known" : "unknown",
       iceQuotes: [],
       totalKnownCost: pathCost,
       expectedUnknownCost: 0,
       expectedRemainingCredits: creditsAfterRun,
       reserveViolation: creditsAfterRun < 0,
-      canReachAccess: targetEvaluation?.pathPassability === "reachable",
-      ...(targetEvaluation && targetEvaluation.pathPassability !== "reachable"
-        ? { cannotReachReason: targetEvaluation.pathPassability }
+      canReachAccess:
+        matchingTargetEvaluation?.pathPassability === "reachable",
+      ...(matchingTargetEvaluation &&
+      matchingTargetEvaluation.pathPassability !== "reachable"
+        ? { cannotReachReason: matchingTargetEvaluation.pathPassability }
         : {}),
       requiredSequences: [],
     },
@@ -152,11 +174,11 @@ export function createRunnerRunPlanForSelectedAction(params: {
         `objective:${objective.kind}`,
         `target:${targetServerId}`,
         `origin:${runnerRunPlanOriginFor(selectedAction)}`,
-        ...(targetEvaluation
+        ...(matchingTargetEvaluation
           ? [
-              `run_target_recommendation:${targetEvaluation.recommendation}`,
-              `run_target_path:${targetEvaluation.pathPassability}`,
-              `run_target_payoff:${targetEvaluation.accessPayoff}`,
+              `run_target_recommendation:${matchingTargetEvaluation.recommendation}`,
+              `run_target_path:${matchingTargetEvaluation.pathPassability}`,
+              `run_target_payoff:${matchingTargetEvaluation.accessPayoff}`,
             ]
           : ["run_target_evaluation:missing"]),
       ],
@@ -170,20 +192,62 @@ export function createRunnerRunPlanForSelectedAction(params: {
   };
 }
 
-function runnerRunStartActionCanCreatePlan(action: LegalAction): boolean {
-  return action.type === "start_run";
+function runnerRunStartActionCanCreatePlan(
+  action: LegalAction,
+  targetEvaluation: RunnerRunTargetEvaluation | undefined,
+  payloadTargetServerId: RunnerRunPlanServerId | undefined,
+): boolean {
+  if (targetEvaluation) return true;
+  if (action.type === "start_run") return true;
+  if (!payloadTargetServerId) return false;
+  return runnerRunPlanPayloadTargetActionTypes.has(action.type);
 }
+
+const runnerRunPlanPayloadTargetActionTypes = new Set<LegalAction["type"]>([
+  "play_event",
+  "activated_card_ability",
+  "resolve_choice",
+]);
 
 function runnerRunPlanTargetServerId(
   action: LegalAction,
 ): RunnerRunPlanServerId | undefined {
-  const value = action.payload?.serverId;
-  if (typeof value !== "string") return undefined;
-  return isRunnerRunPlanServerId(value) ? value : undefined;
+  for (const key of [
+    "serverId",
+    "targetServerId",
+    "runServerId",
+    "selectedServerId",
+  ]) {
+    const value = action.payload?.[key];
+    if (typeof value === "string" && isRunnerRunPlanServerId(value)) {
+      return value;
+    }
+  }
+  return undefined;
 }
 
 function isRunnerRunPlanServerId(value: string): value is RunnerRunPlanServerId {
   return value === "hq" || value === "rd" || value === "archives" || /^remote_\d+$/.test(value);
+}
+
+function runnerRunPlanTargetServerIdFromEvaluation(
+  evaluation: RunnerRunTargetEvaluation | undefined,
+): RunnerRunPlanServerId | undefined {
+  if (!evaluation) return undefined;
+  return isRunnerRunPlanServerId(evaluation.targetServerId)
+    ? evaluation.targetServerId
+    : undefined;
+}
+
+function runnerRunTargetEvaluationForSelectedAction(params: {
+  action: LegalAction;
+  evaluations: readonly RunnerRunTargetEvaluation[];
+}): RunnerRunTargetEvaluation | undefined {
+  return params.evaluations.find(
+    (evaluation) =>
+      evaluation.actionId === params.action.actionId &&
+      isRunnerRunPlanServerId(evaluation.targetServerId),
+  );
 }
 
 function targetKindForServerId(
