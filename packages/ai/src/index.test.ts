@@ -7646,6 +7646,102 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(decision.selectedActionId).not.toBe(hqIce.actionId);
   });
 
+  it("does not count underfunded agenda install as a missed portfolio-ready alternative", () => {
+    const input = corpActionPhaseInput(
+      "ai-v140-corp-overiced-underfunded-agenda-install-alternative",
+      (state) => {
+        state.corp.credits = 3;
+        ensureRemoteServer(state, "remote_1");
+        addCorpIceToServerForTest(state, "remote_1", "simple_sentry_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_barrier_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_code_gate_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_sentry_ice");
+        addCorpIceToServerForTest(state, "rd", "simple_tag_ice");
+        addCorpCardToHqForTest(state, "simple_taxing_barrier_ice");
+        addCorpCardToHqForTest(state, "simple_agenda");
+      },
+    );
+    const hqIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    );
+    const agendaInstall = input.legalActions.find((action) => {
+      const source = input.playerView.own.gripOrHq.find(
+        (card) => card.instanceId === action.source,
+      );
+      return (
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        source?.definitionId === "simple_agenda"
+      );
+    });
+
+    expect(hqIce).toBeDefined();
+    expect(agendaInstall).toBeDefined();
+    if (!hqIce || !agendaInstall)
+      throw new Error("Missing underfunded agenda install fixture actions");
+
+    const assessment = assessCorpIcePortfolioAction(input, hqIce);
+
+    expect(assessment.alternativeFamiliesLegal).toContain("agenda_install");
+    expect(assessment.fixGateSuspiciousCentralOverIce).toBe(true);
+    expect(assessment.extraCentralIceChosenOverAgendaInstall).toBe(false);
+    expect(assessment.evidence).toContain(
+      "corp_portfolio_agenda_install_alternative_ready:false",
+    );
+  });
+
+  it("counts funded protected agenda install as a missed central over-ice alternative", () => {
+    const input = corpActionPhaseInput(
+      "ai-v140-corp-overiced-funded-agenda-install-alternative",
+      (state) => {
+        state.corp.credits = 3;
+        ensureRemoteServer(state, "remote_1");
+        addCorpIceToServerForTest(state, "remote_1", "simple_code_gate_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_barrier_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_code_gate_ice");
+        addCorpIceToServerForTest(state, "hq", "simple_sentry_ice");
+        addCorpIceToServerForTest(state, "rd", "simple_tag_ice");
+        addCorpCardToHqForTest(state, "simple_taxing_barrier_ice");
+        addCorpCardToHqForTest(state, "simple_agenda");
+      },
+    );
+    const hqIce = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    );
+    const agendaInstall = input.legalActions.find((action) => {
+      const source = input.playerView.own.gripOrHq.find(
+        (card) => card.instanceId === action.source,
+      );
+      return (
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        source?.definitionId === "simple_agenda"
+      );
+    });
+
+    expect(hqIce).toBeDefined();
+    expect(agendaInstall).toBeDefined();
+    if (!hqIce || !agendaInstall)
+      throw new Error("Missing funded agenda install fixture actions");
+
+    const assessment = assessCorpIcePortfolioAction(input, hqIce);
+
+    expect(assessment.alternativeFamiliesLegal).toContain("agenda_install");
+    expect(assessment.fixGateSuspiciousCentralOverIce).toBe(true);
+    expect(assessment.extraCentralIceChosenOverAgendaInstall).toBe(true);
+    expect(assessment.evidence).toContain(
+      "corp_portfolio_agenda_install_alternative_ready:true",
+    );
+  });
+
   it("scores rez-reserve recovery above extra central ICE with many unrezzed ICE", () => {
     const input = corpActionPhaseInput(
       "ai-v140-corp-rez-reserve-deficit",

@@ -3228,6 +3228,8 @@ export function assessCorpIcePortfolioAction(
     action,
     context,
   );
+  const portfolioReadyAgendaInstallAlternative =
+    corpIcePortfolioReadyAgendaInstallAlternativeExists(input, action, context);
   const hqOverIced =
     hqIceCountBefore >= 4 ||
     (hqIceCountBefore >= 3 && hqUnrezzedIceCountBefore >= 2);
@@ -3352,6 +3354,7 @@ export function assessCorpIcePortfolioAction(
     agendaFlood,
     readyRemoteExists,
     agendaInHq,
+    portfolioReadyAgendaInstallAlternative,
     alternativeFamiliesLegal,
     classification,
   };
@@ -3421,8 +3424,7 @@ export function assessCorpIcePortfolioAction(
       rezReserveDeficit > 0 &&
       alternativeFamiliesLegal.includes("economy"),
     extraCentralIceChosenOverAgendaInstall:
-      extraCentralIceChosen &&
-      alternativeFamiliesLegal.includes("agenda_install"),
+      extraCentralIceChosen && portfolioReadyAgendaInstallAlternative,
     extraCentralIceChosenOverAdvanceOrScore:
       extraCentralIceChosen &&
       (alternativeFamiliesLegal.includes("advance") ||
@@ -3465,6 +3467,8 @@ export function assessCorpIcePortfolioAction(
         centralInstallServer === "rd" && rndPressure !== "low"
       }`,
       `corp_remote_scoring_underbuilt_while_centrals_overiced:${remoteScoringUnderbuiltWhileCentralsOverIced}`,
+      `corp_portfolio_agenda_install_alternative_legal:${alternativeFamiliesLegal.includes("agenda_install")}`,
+      `corp_portfolio_agenda_install_alternative_ready:${portfolioReadyAgendaInstallAlternative}`,
       `corp_ice_portfolio_fix_gate_eligible:${fixGateEligible}`,
       `corp_ice_portfolio_fix_gate_suspicious_central_over_ice:${fixGateSuspiciousCentralOverIce}`,
       `corp_ice_portfolio_fix_gate_blocked_by_agenda_flood:${fixGateBlockedByAgendaFlood}`,
@@ -3532,6 +3536,48 @@ function corpIcePortfolioAlternativeFamilies(
           family === "score",
       ),
   ) as CorpIcePortfolioActionFamily[];
+}
+
+function corpIcePortfolioReadyAgendaInstallAlternativeExists(
+  input: AiDecisionInput,
+  chosenAction: LegalAction,
+  context: CorpEvaluationContext,
+): boolean {
+  return input.legalActions.some(
+    (action) =>
+      action.actionId !== chosenAction.actionId &&
+      corpIcePortfolioActionFamily(input, action, context) ===
+        "agenda_install" &&
+      corpIcePortfolioAgendaInstallAlternativeReady(input, action, context),
+  );
+}
+
+function corpIcePortfolioAgendaInstallAlternativeReady(
+  input: AiDecisionInput,
+  action: LegalAction,
+  context: CorpEvaluationContext,
+): boolean {
+  const serverId = remoteServerIdForAction(input, action);
+  if (!serverId?.startsWith("remote_")) return false;
+  const safety = assessCorpEffectiveRemoteSafety(
+    input,
+    serverId,
+    context,
+    action,
+  );
+  if (!safety.sameTurnScoreAllowed) {
+    if (safety.cheaplyContestable) return false;
+    if (!safety.effectivelyProtected) return false;
+  }
+  const reserve = remoteRezReserveNeedForServer(input, serverId, context);
+  const creditsAfterAction = creditsAfterCorpPlanAction(input, action);
+  if (
+    reserve &&
+    reserve.reserveTarget > 0 &&
+    creditsAfterAction < reserve.reserveTarget
+  )
+    return false;
+  return remoteRootActionSecurityScore(input, action, context) > 0;
 }
 
 function corpCentralIceInstallNeedsDiminishingGuard(

@@ -112,3 +112,15 @@ Isolierter 5-Seed-/480-Actions-Beleglauf fuer die Active-Advance-Variante:
 | `strategy_panel_hybrid_score_punish_cheap_bag` | weiter 5/5 Corp-Agenda-Siege, deutlich weniger Central-over-ice | 20 / 37 | 13 | 8 | 0 | `averageActions` 247.6 statt 285.4; `corpCentralOverIcedWithoutPressure` 189 statt 280; `corpExtraCentralIceChosenOverAdvanceOrScore` 0 statt 2. |
 
 Bewertung: Die Active-Advance-Variante ist als kleine, belegte Verbesserung uebernehmbar. Sie veraendert keine LegalAction-Erzeugung, keine Engine-Regeln und keine Hidden-Info-Grenzen; sie nutzt nur bereits vorhandene Scoring-Window-Evidence strenger fuer die Corp-Scorewertung.
+
+## Nachtrag: Portfolio-Diagnose fuer Agenda-Install-Alternativen
+
+Bei der Nachanalyse von `strategy_panel_hybrid_score_punish_cheap_bag` Seed `ai-v143-tuning-004` blieb ein einzelnes `corpExtraCentralIceChosenOverAgendaInstall`-Signal stehen. Die Action-Alternativen zeigten aber, dass die vermeintlich bessere Agenda-Installation selbst unterfinanziert war: Remote 1 hatte zwar Schutz, aber der relevante Rez-Floor lag ueber den aktuellen Corp-Credits. Ein Testlauf, der diese Agenda-Install-Linie forciert haette, kippte den Seed deutlich zum Runner. Das Flag war damit kein belegter Gameplay-Fix-Zielpunkt, sondern ein Diagnose-False-Positive.
+
+Umgesetzt wurde deshalb keine neue Score-Gewichtung, sondern eine engere Portfolio-Diagnose: `corpExtraCentralIceChosenOverAgendaInstall` zaehlt nur noch, wenn die alternative Agenda-Installation wirklich portfolio-ready ist, also auf einen bestehenden Remote geht, nicht billig contestable ist und nach der Aktion den relevanten Remote-Rez-Floor halten kann.
+
+Verifikation:
+
+- Fokussierte Vitests fuer unterfinanzierte und finanzierte Agenda-Install-Alternativen sind gruen.
+- Einzelseed-Check `strategy_panel_hybrid_score_punish_cheap_bag` / `ai-v143-tuning-004` / 480 Actions bleibt bei Corp-Agenda-Sieg mit 7:6 AP und 198 Actions.
+- Das Diagnoseflag `corpExtraCentralIceChosenOverAgendaInstall` steht in diesem Seed jetzt auf 0; Outcome und zentrale Verlaufsmetriken bleiben unveraendert.
