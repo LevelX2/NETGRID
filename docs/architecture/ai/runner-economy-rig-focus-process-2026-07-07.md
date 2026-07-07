@@ -2,7 +2,7 @@
 
 ## Status
 
-In Umsetzung auf Branch `codex/ai-runner-economy-rig-focus` im Worktree `C:\Projekte\NETGRID_AI_RUNNER_ECONOMY_RIG_FOCUS`.
+Umsetzung abgeschlossen auf Branch `codex/ai-runner-economy-rig-focus` im Worktree `C:\Projekte\NETGRID_AI_RUNNER_ECONOMY_RIG_FOCUS`; finale lokale Integration nach `main` steht als letzter Schritt an.
 
 ## Quelle
 
@@ -127,7 +127,7 @@ Done-Gate:
 
 Commit:
 
-- `fix(ai): plan runner bank economy over multiple turns`
+- `fix(ai): treat broker as multi-load economy plan`
 
 ### Paket P3: Coverage-Install- und Discard-Disziplin
 
@@ -151,7 +151,7 @@ Done-Gate:
 
 Commit:
 
-- `fix(ai): protect useful runner cards from low-value discard`
+- `fix(ai): prefer useful runner hand cards`
 
 ### Paket P4: Run-Payoff und Remote-Fortsetzung
 
@@ -174,7 +174,7 @@ Done-Gate:
 
 Commit:
 
-- `fix(ai): bind runner runs to visible payoff`
+- `fix(ai): require reserve for known R&D trash payoff`
 
 ### Paket P5: Abschluss, Verifikation und lokale Integration
 
