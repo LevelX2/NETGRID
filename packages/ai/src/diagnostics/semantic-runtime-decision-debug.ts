@@ -107,6 +107,9 @@ export function buildSemanticRuntimeDecisionDebug({
     compatibilitySignalItems: actionPrecisionDebug.compatibilitySignalItems,
     coverageGapItems: actionPrecisionDebug.coverageGapItems,
     runtimeWhyNotItems: topLevelWhyNot,
+    runPlanItems: semanticRuntimeDecisionDebugRunnerRunPlanItems(
+      selected.evidence,
+    ),
     ...(planRuntime.planAlternatives.length > 0 || planRuntime.previousPlan
       ? {
           tacticalPlanItems: semanticRuntimeDebugTacticalPlanItems(planRuntime),
@@ -185,6 +188,33 @@ export function buildSemanticRuntimeDecisionDebug({
     profileId: input.profileId,
     timeoutUsed: false,
   };
+}
+
+export function semanticRuntimeDecisionDebugRunnerRunPlanItems(
+  evidence: readonly string[],
+): string[] {
+  const prefixes = [
+    "runner_run_plan_active:",
+    "runner_run_plan_id:",
+    "runner_run_plan_lifecycle:",
+    "runner_run_plan_origin:",
+    "runner_run_plan_objective:",
+    "runner_run_plan_target:",
+    "runner_run_plan_revalidation:",
+    "runner_run_plan_budget_",
+    "runner_run_plan_path_quote_",
+    "runner_run_plan_current_obligation:",
+    "runner_run_plan_sequence_",
+    "runner_run_plan_access_",
+    "runner_run_plan_abort_",
+  ];
+  return unique(
+    scrubEvidence(
+      evidence.filter((entry) =>
+        prefixes.some((prefix) => entry.startsWith(prefix)),
+      ),
+    ),
+  ).slice(0, 48);
 }
 
 export function semanticRuntimeDecisionDebugTopLevelWhyNot(

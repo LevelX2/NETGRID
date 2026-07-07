@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { semanticRuntimeDecisionDebugTopLevelWhyNot } from "./semantic-runtime-decision-debug";
+import {
+  semanticRuntimeDecisionDebugRunnerRunPlanItems,
+  semanticRuntimeDecisionDebugTopLevelWhyNot,
+} from "./semantic-runtime-decision-debug";
 
 describe("SemanticRuntimeDecisionDebug", () => {
   it("summarizes alternative why-not facts at top level", () => {
@@ -38,6 +41,24 @@ describe("SemanticRuntimeDecisionDebug", () => {
     ).toEqual([
       "alternative:draw_card:semantic_score_below_selected",
       "alternative:draw_card:rawSemanticScore:45",
+    ]);
+  });
+
+  it("extracts redacted Runner RunPlan diagnostics from selected evidence", () => {
+    expect(
+      semanticRuntimeDecisionDebugRunnerRunPlanItems([
+        "runner_run_plan_id:runplan-1",
+        "runner_run_plan_target:rd",
+        "runner_run_plan_path_quote_total_known_cost:2",
+        "runner_run_plan_sequence_selected:true",
+        "privatePayload:bad",
+        "unrelated:evidence",
+      ]),
+    ).toEqual([
+      "runner_run_plan_id:runplan-1",
+      "runner_run_plan_target:rd",
+      "runner_run_plan_path_quote_total_known_cost:2",
+      "runner_run_plan_sequence_selected:true",
     ]);
   });
 });

@@ -17,6 +17,7 @@ import {
 
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { buildAiDecisionInput, selectAiDecisionSideForState } from "../runtime/ai-decision-input";
+import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
 import { resetTacticalPlanMemory } from "../tactical-plans";
 import { sortedUniqueProgressionCardTargetTypes } from "../runtime/progression-card-target";
 import { advancementCountersAddedForSimulationAction } from "../runtime/simulation-action-event";
@@ -145,6 +146,7 @@ function simulateAiGame(
   config: AiSimulationConfig = {},
 ): AiSimulationSummary {
   resetTacticalPlanMemory();
+  resetRunnerRunPlanMemory();
   const deckSupportErrors = validateSimulationDeckSupport(config);
   if (deckSupportErrors.length > 0) {
     return {

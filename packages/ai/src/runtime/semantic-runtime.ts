@@ -43,6 +43,14 @@ import type {
   SemanticRuntimeRunOnlyActionAdjustment,
   TacticalPlanMappedChoiceResult,
 } from "./semantic-runtime-types";
+import {
+  clearRunnerRunPlanMemory,
+  rememberRunnerRunPlanMemorySnapshot,
+  requireActiveRunnerRunPlan,
+} from "./runner-run-plan-memory";
+import { runnerRunPlanSemanticChoice } from "./runner-run-plan-policy";
+import { revalidateRunnerRunPlan } from "./runner-run-plan-revalidation";
+import { createRunnerRunPlanForSelectedAction } from "./runner-run-plan-start";
 import { sourceDefinitionIdForAction } from "./visible-card-lookup";
 
 export type {
@@ -177,6 +185,13 @@ export function chooseSemanticRuntimeAction(
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),
   });
+  if (input.side === "runner" && !input.playerView.run) {
+    clearRunnerRunPlanMemory(input);
+  }
+  const activeRunnerRunPlanSnapshot = requireActiveRunnerRunPlan(input);
+  const activeRunnerRunPlan = activeRunnerRunPlanSnapshot
+    ? revalidateRunnerRunPlan(input, activeRunnerRunPlanSnapshot)
+    : undefined;
   const previousPlan = dependencies.getTacticalPlanMemorySnapshot(input);
   const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
   const runnerStrategicIntent =
@@ -262,18 +277,27 @@ export function chooseSemanticRuntimeAction(
     inputForSemanticChoices,
     actionSemanticCandidates,
   );
+  const runPlanChoice = activeRunnerRunPlan
+    ? runnerRunPlanSemanticChoice({
+        input,
+        plan: activeRunnerRunPlan,
+        choices,
+      })
+    : undefined;
   const reactiveChoice =
-    choices.find(
-      (candidate) =>
-        !candidate.exclusion &&
-        candidate.score > 0 &&
-        dependencies.semanticRuntimeChoiceIsReactive(candidate),
-    ) ??
-    choices.find(
-      (candidate) =>
-        !candidate.exclusion &&
-        dependencies.semanticRuntimeChoiceIsReactive(candidate),
-    );
+    activeRunnerRunPlan !== undefined
+      ? undefined
+      : choices.find(
+          (candidate) =>
+            !candidate.exclusion &&
+            candidate.score > 0 &&
+            dependencies.semanticRuntimeChoiceIsReactive(candidate),
+        ) ??
+        choices.find(
+          (candidate) =>
+            !candidate.exclusion &&
+            dependencies.semanticRuntimeChoiceIsReactive(candidate),
+        );
   const goalFrame = buildSemanticDecisionFrame({
     input,
     actionCandidates: actionSemanticCandidates,
@@ -326,6 +350,7 @@ export function chooseSemanticRuntimeAction(
   const selfDamageImmediateWinChoice =
     dependencies.runnerSelfDamageImmediateWinSemanticChoice(input, choices);
   const initialChoice =
+    runPlanChoice ??
     reactiveChoice ??
     selfDamageImmediateWinChoice ??
     mappedChoice.choice ??
@@ -402,6 +427,24 @@ export function chooseSemanticRuntimeAction(
           : runOnlyActionAdjusted.memoryAction ?? selectedChoice.action,
       )
     : undefined;
+  const newRunnerRunPlan =
+    persistTacticalPlanMemory && input.side === "runner"
+      ? createRunnerRunPlanForSelectedAction({
+          input,
+          selectedAction: selectedChoice.action,
+          ...(runnerRunTargetEvaluations
+            ? { runnerRunTargetEvaluations }
+            : {}),
+          ...(runnerTacticalGoals ? { runnerTacticalGoals } : {}),
+          ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
+          actionSemanticCandidates,
+        })
+      : undefined;
+  const updatedRunnerRunPlanMemory = newRunnerRunPlan
+    ? rememberRunnerRunPlanMemorySnapshot(input, newRunnerRunPlan)
+    : persistTacticalPlanMemory && activeRunnerRunPlan
+      ? rememberRunnerRunPlanMemorySnapshot(input, activeRunnerRunPlan)
+      : undefined;
   const updatedStrategicIntentMemory =
     persistTacticalPlanMemory && strategicIntentState
       ? rememberStrategicIntentState(input, strategicIntentState)
@@ -439,6 +482,15 @@ export function chooseSemanticRuntimeAction(
         ? [
             `tactical_plan_memory_status:${updatedPlanMemory.status}`,
             `tactical_plan_progression:${updatedPlanMemory.planProgressionReason}`,
+          ]
+        : []),
+      ...(updatedRunnerRunPlanMemory
+        ? [
+            `runner_run_plan_memory:${newRunnerRunPlan ? "created" : "updated"}`,
+            `runner_run_plan_id:${updatedRunnerRunPlanMemory.id}`,
+            `runner_run_plan_objective:${updatedRunnerRunPlanMemory.objective.kind}`,
+            `runner_run_plan_target:${updatedRunnerRunPlanMemory.targetServer.id}`,
+            `runner_run_plan_revalidation:${updatedRunnerRunPlanMemory.revalidation.status}`,
           ]
         : []),
       ...(updatedStrategicIntentMemory

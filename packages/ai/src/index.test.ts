@@ -118,6 +118,15 @@ import {
   minimumCreditsToBreakEndTheRunSubroutines,
 } from "./visible-run-analysis";
 import { resetTacticalPlanMemory } from "./plans/plan-memory";
+import {
+  getRunnerRunPlanMemorySnapshot,
+  rememberRunnerRunPlanMemorySnapshot,
+} from "./runtime/runner-run-plan-memory";
+import { quoteRunnerRunPath } from "./runtime/runner-run-plan-path-quote";
+import type {
+  RunnerRunPlan,
+  RunnerRunPlanServerId,
+} from "./runtime/runner-run-plan-types";
 import type {
   AiDecisionDebug,
   AiDecisionInput,
@@ -177,6 +186,7 @@ function chooseRunnerAction(
   if (process.env.NETGRID_SEMANTIC_AI_RUNTIME === "legacy") {
     return forcedLegacyDecision(runnerLegacyDecision(input));
   }
+  ensureRunnerRunPlanForActiveRunTestInput(input);
   return chooseSemanticRunnerAction(input, options);
 }
 
@@ -208,6 +218,139 @@ function forcedLegacyDecision(decision: ReturnType<typeof chooseSemanticAiAction
     ...decision,
     evidence: [...(decision.evidence ?? []), "semantic_runtime_force_legacy"],
   };
+}
+
+function ensureRunnerRunPlanForActiveRunTestInput(input: AiDecisionInput): void {
+  if (input.side !== "runner" || !input.playerView.run) return;
+  if (getRunnerRunPlanMemorySnapshot(input)) return;
+  rememberRunnerRunPlanMemorySnapshot(input, runnerRunPlanForActiveRunTestInput(input));
+}
+
+function runnerRunPlanForActiveRunTestInput(input: AiDecisionInput): RunnerRunPlan {
+  const run = input.playerView.run;
+  if (!run) throw new Error("runner_run_plan_test_input_requires_active_run");
+  const targetServerId = isRunnerRunPlanServerId(run.attackedServerId)
+    ? run.attackedServerId
+    : "rd";
+  const now = input.playerView.stateVersion;
+  const plan: RunnerRunPlan = {
+    id: `test_runner_run_plan:${input.decisionId}:${now}`,
+    side: "runner",
+    lifecycle: "active",
+    origin: "forced_run",
+    objective: runnerRunPlanTestObjective(targetServerId),
+    targetServer: { id: targetServerId },
+    accessIntent: {
+      server: targetServerId,
+      expectedAccessCount: 1,
+      stealAgendaPolicy: "steal_if_affordable",
+      trashPolicy: "trash_if_value_positive",
+      reserveForStealOrTrash: 0,
+    },
+    runStartActionId: "test_harness_existing_run",
+    sourceTacticalGoalIds: ["test_harness_existing_run"],
+    sourceStrategyEvidence: ["test_harness_existing_run:true"],
+    budget: {
+      availableCredits: input.playerView.own.credits,
+      runOnlyCredits: run.badPublicityCredits ?? 0,
+      recurringBreakerCredits: 0,
+      recurringKillerCredits: 0,
+      recurringLinkCredits: 0,
+      stealthCredits: 0,
+      nonNoisyBreakerCredits: 0,
+      reservedCreditsAfterRun: 0,
+      reservedCreditsForSteal: 0,
+      reservedCreditsForTrash: 0,
+      damageSafetyReserve: {
+        minimumGripAfterRun: 0,
+        preventionCreditsReserved: 0,
+        evidence: [],
+      },
+      tagSafetyReserve: {
+        minimumCreditsAfterTags: 0,
+        expectedTagCount: 0,
+        evidence: [],
+      },
+    },
+    reserve: {
+      minimumCreditsAfterRun: 0,
+      minimumGripAfterRun: 0,
+      preserveStealOrTrashCredits: 0,
+      evidence: [],
+    },
+    pathQuote: {
+      server: targetServerId,
+      quoteStatus: "unknown",
+      iceQuotes: [],
+      totalKnownCost: 0,
+      expectedUnknownCost: 0,
+      expectedRemainingCredits: input.playerView.own.credits,
+      reserveViolation: false,
+      canReachAccess: true,
+      requiredSequences: [],
+    },
+    ...runnerRunPlanCurrentEncounterForTestInput(input, targetServerId),
+    revalidation: {
+      status: "valid",
+      reasons: ["test_harness_existing_run"],
+      checkedAtStateVersion: now,
+    },
+    abortPolicy: {
+      allowJackOutWhenLegal: true,
+      abortBelowCredits: 0,
+      abortReasons: [],
+    },
+    visibilityEvidence: [{ kind: "player_view", ref: "run" }],
+    debug: {
+      summary: `Test RunPlan auf ${targetServerId}`,
+      items: ["test_harness_existing_run:true"],
+    },
+    createdAtStateVersion: now,
+    updatedAtStateVersion: now,
+  };
+  return {
+    ...plan,
+    pathQuote: quoteRunnerRunPath(input, plan),
+  };
+}
+
+function runnerRunPlanTestObjective(
+  serverId: RunnerRunPlanServerId,
+): RunnerRunPlan["objective"] {
+  if (serverId === "rd") return { kind: "access_rnd_top", expectedValue: 0 };
+  if (serverId === "hq") return { kind: "access_hq_card", expectedValue: 0 };
+  if (serverId === "archives") {
+    return { kind: "access_archives", expectedValue: 0 };
+  }
+  return { kind: "contest_remote_agenda", urgency: 0 };
+}
+
+function runnerRunPlanCurrentEncounterForTestInput(
+  input: AiDecisionInput,
+  serverId: RunnerRunPlanServerId,
+): Pick<RunnerRunPlan, "currentEncounter"> {
+  const run = input.playerView.run;
+  if (!run) return {};
+  const phase =
+    run.phase === "approach_ice" ||
+    run.phase === "encounter_ice" ||
+    run.phase === "access"
+      ? run.phase
+      : "movement";
+  const iceInstanceId =
+    run.encounteredIce?.instanceId ?? run.approachedIce?.instanceId;
+  return {
+    currentEncounter: {
+      server: serverId,
+      phase,
+      ...(iceInstanceId ? { iceInstanceId } : {}),
+      ...(run.position?.kind === "ice" ? { iceIndex: run.position.iceIndex } : {}),
+    },
+  };
+}
+
+function isRunnerRunPlanServerId(value: string): value is RunnerRunPlanServerId {
+  return value === "hq" || value === "rd" || value === "archives" || /^remote_\d+$/.test(value);
 }
 
 const originalSemanticAiRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
@@ -24333,7 +24476,7 @@ describe("V1.4.2 belief state and opponent model", () => {
     const jackAlternative = alternatives.get(jackOut.actionId);
 
     expect(decision.actionId).toBe(jackOut.actionId);
-    expect(decision.reasonCode).toBe("runner.semantic.simple_run_choice");
+    expect(decision.reasonCode).toBe("runner.run_plan.simple_run_choice");
     expect(jackAlternative?.scoreBreakdown).toContainEqual(
       expect.objectContaining({
         key: "runner_viral15_jack_out_prevents_program_trash",

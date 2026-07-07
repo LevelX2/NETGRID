@@ -279,6 +279,7 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
       <AiDecisionDebugChips title="Gründe" items={visibleReasons} />
       <AiDecisionDebugChips title="Ausschlüsse" items={relevantExclusions} />
       <AiDecisionDebugPlanLayer detail={detail} defaultOpen />
+      <AiDecisionDebugRunPlan detail={detail} />
       <AiDecisionDebugDeckStrategy detail={detail} />
       {actionRows.length > 0 ? (
         <AiDecisionDebugCollapsibleSection title={mode === "preview" ? "LegalAction-Ebene" : "Action-Level-Ranking"} defaultOpen>
@@ -377,6 +378,7 @@ function serializeAiDecisionDebugVisibleJsonExport(
         plans: planLayer.entries.map(aiDecisionDebugPlanExport),
         rawDiagnostic: planLayer.fallbackItems,
       },
+      runPlan: aiDecisionDebugRunPlanExport(detail),
       actionRanking: actionRows.map((action) => ({
         rank: action.rank,
         label: action.label,
@@ -618,6 +620,65 @@ function aiDecisionDebugPrivateHandExport(detail: Record<string, unknown>): {
       };
     })
   };
+}
+
+function AiDecisionDebugRunPlan({ detail }: { detail: Record<string, unknown> }) {
+  const items = aiDecisionDebugDetailSectionItems(detail, "runner_run_plan", 64);
+  if (items.length === 0) return null;
+  const rows = aiDecisionDebugRunPlanRows(items);
+  const chips = aiDecisionDebugRunPlanChips(items);
+  return (
+    <AiDecisionDebugCollapsibleSection title="Runner-RunPlan" defaultOpen>
+      <AiDecisionDebugRows rows={rows} />
+      <AiDecisionDebugChips title="RunPlan-Signale" items={chips} tone="muted" />
+    </AiDecisionDebugCollapsibleSection>
+  );
+}
+
+function aiDecisionDebugRunPlanExport(detail: Record<string, unknown>) {
+  const items = aiDecisionDebugDetailSectionItems(detail, "runner_run_plan", 64);
+  return {
+    rows: aiDecisionDebugRunPlanRows(items),
+    signals: aiDecisionDebugRunPlanChips(items),
+  };
+}
+
+function aiDecisionDebugRunPlanRows(items: string[]): Array<[string, string]> {
+  if (items.length === 0) return [];
+  const lifecycle = aiDecisionDebugTagValue(items, "runner_run_plan_lifecycle");
+  const revalidation = aiDecisionDebugTagValue(items, "runner_run_plan_revalidation");
+  const knownCost = aiDecisionDebugTagValue(items, "runner_run_plan_path_quote_total_known_cost");
+  const remaining = aiDecisionDebugTagValue(items, "runner_run_plan_path_quote_expected_remaining");
+  const canReach = aiDecisionDebugTagValue(items, "runner_run_plan_path_quote_can_reach");
+  const rows: Array<[string, string]> = [];
+  const id = aiDecisionDebugTagValue(items, "runner_run_plan_id");
+  if (id) rows.push(["Plan-ID", id]);
+  const target = aiDecisionDebugTagValue(items, "runner_run_plan_target");
+  const objective = aiDecisionDebugTagValue(items, "runner_run_plan_objective");
+  if (target || objective) rows.push(["Ziel", [target ? aiDecisionDebugServerLabel(target) : undefined, objective].filter(Boolean).join(" · ")]);
+  if (lifecycle || revalidation) rows.push(["Status", [lifecycle, revalidation ? `Revalidation ${revalidation}` : undefined].filter(Boolean).join(" · ")]);
+  const available = aiDecisionDebugTagValue(items, "runner_run_plan_budget_available");
+  const reserve = aiDecisionDebugTagValue(items, "runner_run_plan_budget_reserved");
+  if (available || reserve || remaining) rows.push(["Budget", [`verfügbar ${available ?? "-"}`, `Reserve ${reserve ?? "-"}`, `nach Pfad ${remaining ?? "-"}`].join(" · ")]);
+  const quoteStatus = aiDecisionDebugTagValue(items, "runner_run_plan_path_quote_status");
+  if (quoteStatus || knownCost || canReach) rows.push(["PathQuote", [`Status ${quoteStatus ?? "-"}`, `Kosten ${knownCost ?? "-"}`, `erreichbar ${canReach ?? "-"}`].join(" · ")]);
+  const cannotReach = aiDecisionDebugTagValue(items, "runner_run_plan_path_quote_cannot_reach");
+  if (cannotReach) rows.push(["Blocker", cannotReach]);
+  const obligation = aiDecisionDebugTagValue(items, "runner_run_plan_current_obligation");
+  if (obligation) rows.push(["Obligation", obligation]);
+  return rows;
+}
+
+function aiDecisionDebugRunPlanChips(items: string[]): string[] {
+  return uniqueDisplayStrings(
+    items
+      .filter((item) =>
+        item.startsWith("runner_run_plan_sequence_") ||
+        item.startsWith("runner_run_plan_access_") ||
+        item.startsWith("runner_run_plan_abort_"),
+      )
+      .slice(0, 12),
+  );
 }
 
 function aiDecisionDebugPrivateHandMissingRows(detail: Record<string, unknown>): Array<[string, string]> {
