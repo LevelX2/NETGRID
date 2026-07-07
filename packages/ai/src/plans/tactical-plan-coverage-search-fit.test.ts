@@ -3,6 +3,7 @@ import type {
   AiDecisionInput,
   LegalAction,
   PlayerView,
+  PublicGameEvent,
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
@@ -298,6 +299,106 @@ describe("coverageSearchActionFit", () => {
       "rejectedFalseMatches:coverage_search_saturated_by_hand_answer",
     );
   });
+
+  it("rejects repeated program search until the visible hand program is installed or funded", () => {
+    const plan = coveragePlan("breaker_wall");
+    const searchAction = action({
+      actionId: "short-circuit-search",
+      type: "activated_card_ability",
+      source: "short-circuit",
+    });
+
+    const fit = coverageSearchActionFit(
+      plan,
+      plan.currentStep,
+      candidate(searchAction),
+      searchAction,
+      input(
+        [searchAction],
+        [
+          visibleCard({
+            instanceId: "short-circuit",
+            definitionId: "onr_v1_177_the-short-circuit",
+            title: "The Short Circuit",
+            type: "resource",
+            rulesText: "Search your stack for a program.",
+          }),
+        ],
+        [
+          visibleCard({
+            instanceId: "pile-driver",
+            definitionId: "onr_v1_047_pile-driver",
+            title: "Pile Driver",
+            type: "program",
+          }),
+        ],
+        [
+          publicEvent("previous-short-circuit-search", 7, {
+            actor: "runner",
+            actionType: "activated_card_ability",
+            hiddenZoneAction: "p3_37_search_stack_to_grip",
+          }),
+        ],
+      ),
+      false,
+    );
+
+    expect(fit).toMatchObject({
+      answerRole: "not_coverage_answer",
+      supportsActiveCapabilityNeed: false,
+      supportsDrawOrSearchNeed: false,
+      recoveryLoopRisk: "high",
+    });
+    expect(fit?.evidence).toContain(
+      "rejectedFalseMatches:coverage_search_wait_for_install_or_fund",
+    );
+  });
+
+  it("rejects rig-based program search when the grip is already at hand limit", () => {
+    const plan = coveragePlan("breaker_wall");
+    const searchAction = action({
+      actionId: "short-circuit-search",
+      type: "activated_card_ability",
+      source: "short-circuit",
+    });
+
+    const fit = coverageSearchActionFit(
+      plan,
+      plan.currentStep,
+      candidate(searchAction),
+      searchAction,
+      input(
+        [searchAction],
+        [
+          visibleCard({
+            instanceId: "short-circuit",
+            definitionId: "onr_v1_177_the-short-circuit",
+            title: "The Short Circuit",
+            type: "resource",
+            rulesText: "Search your stack for a program.",
+          }),
+        ],
+        [
+          visibleCard({ instanceId: "card-1", type: "event" }),
+          visibleCard({ instanceId: "card-2", type: "event" }),
+          visibleCard({ instanceId: "card-3", type: "event" }),
+          visibleCard({ instanceId: "card-4", type: "event" }),
+          visibleCard({ instanceId: "card-5", type: "event" }),
+        ],
+      ),
+      false,
+    );
+
+    expect(fit).toMatchObject({
+      answerRole: "not_coverage_answer",
+      supportsActiveCapabilityNeed: false,
+      supportsDrawOrSearchNeed: false,
+      recoveryLoopRisk: "high",
+    });
+    expect(fit?.evidence).toContain(
+      "rejectedFalseMatches:coverage_search_blocked_by_hand_limit",
+    );
+  });
 });
 
 function coveragePlan(requiredCoverage: "breaker_wall" | "breaker_ap") {
@@ -329,6 +430,7 @@ function input(
   legalActions: LegalAction[],
   visibleCards: VisibleCard[] = [],
   handCards: VisibleCard[] = [],
+  publicEvents: PublicGameEvent[] = [],
 ): AiDecisionInput {
   const playerView = {
     side: "runner",
@@ -337,13 +439,16 @@ function input(
       gripOrHq: handCards,
       heapOrArchives: [],
       scoreArea: [],
+      maxHandSize: 5,
     },
     servers: [],
+    publicEvents,
   } as unknown as PlayerView;
   return {
     side: "runner",
     legalActions,
     playerView,
+    eventTail: publicEvents,
   } as unknown as AiDecisionInput;
 }
 
@@ -375,6 +480,22 @@ function action(overrides: Partial<LegalAction>): LegalAction {
     expiresAtStateVersion: 1,
     ...overrides,
   };
+}
+
+function publicEvent(
+  eventId: string,
+  stateVersionAfter: number,
+  publicPayload: Record<string, unknown>,
+): PublicGameEvent {
+  return {
+    eventId,
+    type: String(publicPayload.actionType ?? "test_event"),
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "private_to_side",
+    publicPayload,
+  } as unknown as PublicGameEvent;
 }
 
 function candidate(

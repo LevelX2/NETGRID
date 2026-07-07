@@ -875,6 +875,72 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("blocks repeated The Short Circuit searches while the fetched program waits in hand", () => {
+    const searchAction = legalAction(
+      "short-circuit-search",
+      "runner",
+      "activated_card_ability",
+      {},
+      {
+        source: "short-circuit",
+        label: "The Short Circuit: Stack nach Programm durchsuchen",
+      },
+    );
+    const input = wallCoverageInput([
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      searchAction,
+      legalAction("gain", "runner", "gain_credit"),
+    ]);
+    input.playerView.own.rig = [
+      visibleCard("short-circuit", "runner", "resource", {
+        definitionId: "onr_v1_177_the-short-circuit",
+        title: "The Short Circuit",
+        rulesText: "Search your stack for a program.",
+      }),
+    ];
+    input.playerView.own.gripOrHq = [
+      visibleCard("pile-driver", "runner", "program", {
+        definitionId: "onr_v1_047_pile-driver",
+        title: "Pile Driver",
+      }),
+    ];
+    input.playerView.publicEvents = [
+      publicEvent("previous-short-circuit-search", 74, "activated_card_ability", {
+        actor: "runner",
+        actionType: "activated_card_ability",
+        hiddenZoneAction: "p3_37_search_stack_to_grip",
+      }),
+    ];
+    input.eventTail = input.playerView.publicEvents;
+
+    const coveragePlan = coverageSearchPlan("breaker_wall");
+    const mapping = mapPlanStepToLegalActions(
+      coveragePlan,
+      coveragePlan.currentStep,
+      [
+        {
+          ...candidateForAction(searchAction),
+          sourceKind: "card",
+          sourceCardId: "onr_v1_177_the-short-circuit",
+          semanticActionType: "card_ability.trigger",
+          actionTacticSignals: ["setup.program_search", "program_search"],
+        },
+      ],
+      input,
+    );
+
+    expect(mapping.status).toBe("blocked_missing_capability");
+    expect(mapping.actionCandidateIds).toEqual([]);
+    expect(mapping.rationale.join("\n")).toContain(
+      "rejectedFalseMatches:coverage_search_wait_for_install_or_fund",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "blocked_no_valid_search_action",
+    );
+  });
+
   it("uses Bodyweight draw-for-answer before basic draw when no better search is legal", () => {
     const input = wallCoverageInput([
       legalAction("run-remote", "runner", "start_run", {
