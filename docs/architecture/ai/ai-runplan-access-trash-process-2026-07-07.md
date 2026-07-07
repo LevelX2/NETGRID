@@ -1,5 +1,9 @@
 # AI RunPlan Access Trash Process 2026-07-07
 
+## Status
+
+`completed`
+
 ## Kontext
 
 - Arbeitsbranch: `codex/ai-runplan-access-trash`
@@ -14,6 +18,14 @@
 3. Regressionstests und Debug-Evidence absichern.
 4. Fokussierte AI-Checks und Typecheck ausfuehren.
 5. Final-Report, Wissenspflege, lokale Integration nach `main`.
+
+## Ergebnis
+
+- Paket 1 abgeschlossen mit Commit `771ac6365`.
+- Paket 2 abgeschlossen mit Commit `85d4ae389`.
+- Paket 3 abgeschlossen mit Commit `1d542078e`.
+- Paket 4 abgeschlossen mit fokussierten Vitest-Regressionen, AI-Typecheck und Diff-Check.
+- Paket 5 abgeschlossen mit Final-Report und Monatslog; lokale Main-Integration folgt als Abschlussaktion.
 
 ## Akzeptanzkriterien
 
