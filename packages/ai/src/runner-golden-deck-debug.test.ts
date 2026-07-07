@@ -10,7 +10,7 @@ import type {
 } from "@netgrid/shared";
 import benchmarkSnapshotsData from "../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
 import { buildDeckCapabilityProfile, type DeckCapabilityProfile } from "./deck-capabilities";
-import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import { chooseRunnerAction } from "./index";
 import {
@@ -426,7 +426,7 @@ function goldenInput(params: {
   grip?: VisibleCard[];
   stateVersion?: number;
   eventTail?: PublicGameEvent[];
-  snapshot?: AiDeckDoctrineDeckSnapshot;
+  snapshot?: AiDeckStrategyDeckSnapshot;
 }): AiDecisionInputWithRunnerProjection {
   const snapshot = params.snapshot ?? goldenBlinkSnapshot();
   const view = playerView({
@@ -466,7 +466,7 @@ function goldenInput(params: {
   };
 }
 
-function goldenBlinkSnapshot(): AiDeckDoctrineDeckSnapshot {
+function goldenBlinkSnapshot(): AiDeckStrategyDeckSnapshot {
   const snapshot = benchmarkSnapshots.find(
     (candidate) =>
       candidate.deckSnapshotId ===

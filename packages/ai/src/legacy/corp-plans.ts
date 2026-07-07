@@ -4,7 +4,6 @@ import corpPlanProfilesData from "../../../../data/ai/corp-plan-profiles-1.4.0.j
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   DEMO_CARDS_BY_ID,
-  type AiDeckDoctrineProfile,
   type AiDecision,
   type AiDecisionActionAlternative,
   type AiDecisionDebug,
@@ -52,6 +51,10 @@ import {
   assessCorpScorelineWindow,
   scorelineAssessmentToTerminalWindowLike,
 } from "../runtime/corp-scoreline/semantic-runtime-corp-scoreline-assessment";
+import {
+  deckStrategyHasAny,
+  deckStrategyPlanWeightFor,
+} from "./deck-strategy-plan-weight";
 
 const TEAM_RESTRUCTURING_CARD_ID = "onr_v1_305_team-restructuring";
 
@@ -113,14 +116,6 @@ export type CorpPlanDebug = AiDecisionDebug & {
   invalidations?: string[];
   beliefUncertainty?: string[];
   opponentModel?: Record<string, unknown>;
-  ownDeckDoctrine?: {
-    deckSnapshotId: string;
-    side: Side;
-    confidence: number;
-    archetypeTags: string[];
-    riskFlags: string[];
-  };
-  doctrinePlanWeight?: number;
 };
 
 export type CorpPlanDecision = {
@@ -437,7 +432,7 @@ type CorpEffectiveRemoteSafetyAssessment = {
   evidence: string[];
 };
 
-type CorpDoctrineScoreConversionSignals = {
+type CorpStrategyScoreConversionSignals = {
   hasScoringRemoteTools: boolean;
   hasAdvanceBurstTools: boolean;
   hasTagPunishTools: boolean;
@@ -463,7 +458,7 @@ type CorpUnsafeRemoteScoreConversionContext = {
   advanceBurstOpportunity: boolean;
   hqProtectionRelevant: boolean;
   noScorePath: boolean;
-  doctrine: CorpDoctrineScoreConversionSignals;
+  strategy: CorpStrategyScoreConversionSignals;
 };
 
 type CorpProtectionToScoreConversionContext = {
@@ -797,10 +792,6 @@ export function chooseCorpPlanDecision(
     );
   const beliefSummary = beliefDebugSummary(beliefState);
   const opponentModel = toRecord(beliefSummary.corpOpponentModel);
-  const doctrinePlanWeight = doctrinePlanWeightFor(
-    input,
-    selected.candidate.kind,
-  );
   return {
     selectedPlanId: selected.candidate.planId,
     selectedActionId: action.actionId,
@@ -840,12 +831,6 @@ export function chooseCorpPlanDecision(
       profileId: profile.profileId,
       timeBudgetMs,
       timeoutUsed: false,
-      ...(input.ownDeckDoctrine
-        ? {
-            ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine),
-            doctrinePlanWeight,
-          }
-        : {}),
       memoryVersion: String(beliefSummary.memoryVersion ?? ""),
       facts: toStringArray(beliefSummary.facts),
       hypotheses: toStringArray(beliefSummary.hypotheses),
@@ -1049,10 +1034,10 @@ export function evaluateCorpPlan(
   );
   const tagWindow = evaluateCorpTagWindowPlan(input, candidate);
   const base = baseScoreForPlan(candidate.kind);
-  const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
+  const strategyPlanWeight = corpStrategyPlanWeightFor(input, candidate.kind);
   const score =
     base +
-    doctrinePlanWeight +
+    strategyPlanWeight +
     agendaRisk.score * profile.weights.agendaRisk +
     serverThreat.score * profile.weights.serverThreat +
     economyReserve.score * profile.weights.economyReserve +
@@ -1090,7 +1075,7 @@ export function evaluateCorpPlan(
   const evidence = [
     `plan:${candidate.kind}`,
     `difficulty:${input.difficulty}`,
-    `doctrine_plan_weight:${doctrinePlanWeight}`,
+    `deck_strategy_plan_weight:${strategyPlanWeight}`,
     ...scoreConversion.evidence,
     ...protectionToScore.evidence,
     ...scoreWindowCompression.evidence,
@@ -1101,11 +1086,6 @@ export function evaluateCorpPlan(
     ...effectiveRemoteSafety.evidence,
     ...outcomeFollowup.evidence,
     ...tagWindow.evidence,
-    ...(input.ownDeckDoctrine
-      ? [
-          `doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`,
-        ]
-      : ["doctrine:neutral"]),
     ...candidate.expectedBenefits,
     ...installedEconomy.evidence,
     ...scoredAgendaActions.evidence,
@@ -1138,11 +1118,11 @@ export function evaluateCorpPlan(
     scoreBreakdown: scoreComponents([
       ["base", "Grundplan", base, 1, `plan:${candidate.kind}`],
       [
-        "doctrine",
-        "Deck-Doctrine",
-        doctrinePlanWeight,
+        "deckStrategy",
+        "Deckstrategie",
+        strategyPlanWeight,
         1,
-        "doctrine_plan_weight",
+        "deck_strategy_plan_weight",
       ],
       [
         "agendaRisk",
@@ -1434,7 +1414,7 @@ function evaluateCorpUnsafeRemoteScoreConversion(
   candidate: CorpPlanCandidate,
   context: CorpEvaluationContext,
 ): CorpPlanEvaluatorResult {
-  if (!input.profileId.includes("v1.4.2") || !input.ownDeckDoctrine) {
+  if (!input.profileId.includes("v1.4.2")) {
     return {
       score: 0,
       reasons: [],
@@ -1448,7 +1428,7 @@ function evaluateCorpUnsafeRemoteScoreConversion(
       reasons: [],
       evidence: [
         "corp_unsafe_scoring_remote_detected:false",
-        ...conversion.doctrine.evidence,
+        ...conversion.strategy.evidence,
       ],
     };
   }
@@ -1524,11 +1504,11 @@ function evaluateCorpUnsafeRemoteScoreConversion(
     reasons.push("choose_better_effective_scoring_remote");
   }
   if (protectsUnsafeRemote) {
-    score += conversion.doctrine.hasScoringRemoteTools ? 170 : 145;
+    score += conversion.strategy.hasScoringRemoteTools ? 170 : 145;
     reasons.push("convert_unsafe_remote_to_protection");
   }
   if (choosesAdvanceBurst) {
-    score += conversion.doctrine.hasAdvanceBurstTools ? 195 : 165;
+    score += conversion.strategy.hasAdvanceBurstTools ? 195 : 165;
     reasons.push("convert_unsafe_remote_to_burst_score");
   }
   if (choosesHqProtection) {
@@ -1617,7 +1597,7 @@ function evaluateCorpUnsafeRemoteScoreConversion(
         ? ["corp_agenda_held_too_long_with_hq_pressure:true"]
         : []),
       ...primarySafety.evidence,
-      ...conversion.doctrine.evidence,
+      ...conversion.strategy.evidence,
     ],
   };
 }
@@ -2007,8 +1987,7 @@ function selectCorpStrategicLine(
   input: AiDecisionInput,
   context: CorpEvaluationContext,
 ): CorpStrategicLineSelection | undefined {
-  if (!input.ownDeckDoctrine || input.ownDeckDoctrine.side !== "corp")
-    return undefined;
+  if (corpDeckStrategyIds(input).length === 0) return undefined;
   if (input.difficulty === "easy") return undefined;
   const features = extractCorpPlanFeatures(input);
   const memory = evaluateRemoteIntentMemory(input, context.beliefState);
@@ -2149,11 +2128,9 @@ function selectCorpStrategicLine(
       ...candidate,
       weight: Math.round(
         candidate.weight +
-          Math.max(
-            0,
-            input.ownDeckDoctrine?.planWeights[
-              corpPlanKindForStrategicLine(candidate.kind)
-            ] ?? 0,
+          corpStrategyPlanWeightFor(
+            input,
+            corpPlanKindForStrategicLine(candidate.kind),
           ) *
             0.35,
       ),
@@ -2371,7 +2348,7 @@ function corpUnsafeRemoteScoreConversionContext(
     advanceBurstOpportunity,
     hqProtectionRelevant,
     noScorePath,
-    doctrine: corpDoctrineScoreConversionSignals(input),
+    strategy: corpStrategyScoreConversionSignals(input),
   };
 }
 
@@ -3995,59 +3972,36 @@ function candidateRepeatsProtectionOverScorePath(
   });
 }
 
-function corpDoctrineScoreConversionSignals(
+function corpStrategyScoreConversionSignals(
   input: AiDecisionInput,
-): CorpDoctrineScoreConversionSignals {
-  const doctrine = input.ownDeckDoctrine;
-  if (!doctrine || doctrine.side !== "corp") {
-    return {
-      hasScoringRemoteTools: false,
-      hasAdvanceBurstTools: false,
-      hasTagPunishTools: false,
-      hasTaxUpgradeTools: false,
-      hasCheapEtRProtection: false,
-      hasHighImpactIceAnchors: false,
-      evidence: [
-        "corp_deck_has_scoring_remote_tools:false",
-        "corp_deck_has_advance_burst_tools:false",
-        "corp_deck_has_tag_punish_tools:false",
-        "corp_deck_has_tax_upgrade_tools:false",
-        "corp_deck_has_cheap_etr_protection:false",
-        "corp_deck_has_high_impact_ice_anchors:false",
-      ],
-    };
-  }
-  const count = (role: string): number => doctrine.roleCounts[role] ?? 0;
-  const countIncludes = (...needles: string[]): number =>
-    Object.entries(doctrine.roleCounts).reduce(
-      (sum, [role, value]) =>
-        needles.some((needle) => role.includes(needle)) ? sum + value : sum,
-      0,
-    );
+): CorpStrategyScoreConversionSignals {
+  const profile = corpDeckStrategyProfile(input);
+  const count = (signal: string): number =>
+    profile?.functionSignalCounts?.[signal] ?? 0;
+  const strategy = (strategyIds: readonly string[]): boolean =>
+    corpHasAnyStrategy(input, strategyIds);
   const hasScoringRemoteTools =
-    count("remote_support") +
-      count("remote_protection") +
-      count("upgrade") +
-      count("run_tax") +
-      count("steal_tax") >
-    0;
+    strategy(["corp.remote_scoring", "corp.rush_score"]) ||
+    count("remote.scoring_protection") +
+      count("remote.agenda_steal_tax") +
+      count("tax.remote") >
+      0;
   const hasAdvanceBurstTools =
-    count("corp_agenda_operation") +
-      count("advance") +
-      count("advancement_counter") +
-      count("counter") >
-    0;
-  const hasTagPunishTools = countIncludes("tag", "trace", "punish") > 0;
+    strategy(["corp.fast_advance", "corp.overadvance_value"]) ||
+    count("score.advance_burst") + count("score.agenda_action") > 0;
+  const hasTagPunishTools =
+    strategy(["corp.tag_trace_punish", "corp.damage_kill"]) ||
+    count("tag.source") + count("trace.source") + count("tag.payoff") > 0;
   const hasTaxUpgradeTools =
-    count("run_tax") + count("steal_tax") + count("remote_support") > 0;
+    strategy(["corp.ice_tax_glacier", "corp.remote_scoring"]) ||
+    count("tax.ice") + count("tax.remote") + count("remote.agenda_steal_tax") >
+      0;
   const hasCheapEtRProtection =
-    count("etr_ice") + count("barrier_ice") + count("code_gate_ice") > 0;
+    strategy(["corp.central_stabilize", "corp.ice_tax_glacier"]) ||
+    count("ice.etr") > 0;
   const hasHighImpactIceAnchors =
-    count("taxing_ice") +
-      count("tag_ice") +
-      count("damage_ice") +
-      count("sentry_ice") >
-    0;
+    strategy(["corp.ice_tax_glacier", "corp.tag_trace_punish"]) ||
+    count("tax.ice") + count("ice.future_pressure") + count("tag.source") > 0;
   return {
     hasScoringRemoteTools,
     hasAdvanceBurstTools,
@@ -4623,7 +4577,7 @@ function evaluateCorpOutcomeFollowup(
   candidate: CorpPlanCandidate,
   context: CorpEvaluationContext,
 ): CorpPlanEvaluatorResult {
-  if (!input.profileId.includes("v1.4.2") || !input.ownDeckDoctrine) {
+  if (!input.profileId.includes("v1.4.2")) {
     return {
       score: 0,
       reasons: [],
@@ -9394,12 +9348,6 @@ function fallbackDebug(
     profileId: corpPlanProfile(input).profileId,
     timeBudgetMs: timeBudgetMs ?? corpPlanProfile(input).timeBudgetMs,
     timeoutUsed,
-    ...(input.ownDeckDoctrine
-      ? {
-          ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine),
-          doctrinePlanWeight: 0,
-        }
-      : {}),
     memoryVersion: String(beliefSummary.memoryVersion ?? ""),
     facts: toStringArray(beliefSummary.facts),
     hypotheses: toStringArray(beliefSummary.hypotheses),
@@ -9498,16 +9446,9 @@ function longTermPlanForCorp(
 ): string[] {
   return sortedUnique([
     `active_plan:${kind}`,
-    ...(input.ownDeckDoctrine?.side === "corp"
-      ? input.ownDeckDoctrine.archetypeTags
-          .slice(0, 3)
-          .map((tag) => `doctrine:${tag}`)
-      : ["doctrine:neutral"]),
-    ...(input.ownDeckDoctrine?.side === "corp"
-      ? input.ownDeckDoctrine.riskFlags
-          .slice(0, 2)
-          .map((flag) => `risk_flag:${flag}`)
-      : []),
+    ...corpDeckStrategyIds(input)
+      .slice(0, 4)
+      .map((strategyId) => `deck_strategy:${strategyId}`),
   ]).slice(0, 6);
 }
 
@@ -9554,29 +9495,77 @@ function baseScoreForPlan(kind: CorpPlanKind): number {
   }
 }
 
-function doctrinePlanWeightFor(
+function corpStrategyPlanWeightFor(
   input: AiDecisionInput,
   kind: CorpPlanKind,
 ): number {
-  const profile = input.ownDeckDoctrine;
-  if (!profile || profile.side !== "corp") return 0;
-  const raw = profile.planWeights[kind] ?? 0;
-  const confidence = Number.isFinite(profile.confidence)
-    ? profile.confidence
-    : 0.5;
-  return Math.round(raw * Math.max(0.25, Math.min(1, confidence)));
+  return deckStrategyPlanWeightFor(input, "corp", corpStrategyIdsForPlan(kind));
 }
 
-function deckDoctrineDebug(
-  profile: AiDeckDoctrineProfile,
-): NonNullable<CorpPlanDebug["ownDeckDoctrine"]> {
-  return {
-    deckSnapshotId: profile.deckSnapshotId,
-    side: profile.side,
-    confidence: profile.confidence,
-    archetypeTags: profile.archetypeTags.slice(0, 4),
-    riskFlags: profile.riskFlags.slice(0, 6),
-  };
+function corpStrategyIdsForPlan(kind: CorpPlanKind): readonly string[] {
+  switch (kind) {
+    case "score_now":
+    case "score_next_turn":
+      return [
+        "corp.remote_scoring",
+        "corp.rush_score",
+        "corp.fast_advance",
+        "corp.overadvance_value",
+      ];
+    case "build_scoring_remote":
+      return ["corp.remote_scoring", "corp.rush_score"];
+    case "protect_hq":
+    case "protect_rnd":
+      return ["corp.central_stabilize", "corp.ice_tax_glacier"];
+    case "create_tag_window":
+      return ["corp.tag_trace_punish", "corp.damage_kill"];
+    case "recover_economy":
+      return [
+        "corp.asset_economy",
+        "corp.economy_rez_reserve",
+        "corp.draw_engine",
+      ];
+    case "bait_runner":
+      return ["corp.ambush_bluff", "corp.remote_scoring"];
+  }
+}
+
+function corpHasAnyStrategy(
+  input: AiDecisionInput,
+  strategyIds: readonly string[],
+): boolean {
+  return deckStrategyHasAny(input, "corp", strategyIds);
+}
+
+function corpDeckStrategyProfile(input: AiDecisionInput):
+  | {
+      side?: Side;
+      primaryStrategies?: readonly string[];
+      secondaryStrategies?: readonly string[];
+      functionSignalCounts?: Record<string, number | undefined>;
+    }
+  | undefined {
+  const profile = (
+    input as AiDecisionInput & {
+      ownDeckStrategyProfile?: {
+        side?: Side;
+        primaryStrategies?: readonly string[];
+        secondaryStrategies?: readonly string[];
+        functionSignalCounts?: Record<string, number | undefined>;
+      };
+    }
+  ).ownDeckStrategyProfile;
+  if (!profile || profile.side !== "corp") return undefined;
+  return profile;
+}
+
+function corpDeckStrategyIds(input: AiDecisionInput): string[] {
+  const profile = corpDeckStrategyProfile(input);
+  if (!profile) return [];
+  return sortedUnique([
+    ...(profile.primaryStrategies ?? []),
+    ...(profile.secondaryStrategies ?? []),
+  ]);
 }
 
 function visibleRiskPenalty(

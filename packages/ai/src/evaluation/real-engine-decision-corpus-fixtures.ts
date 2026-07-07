@@ -5,7 +5,7 @@ import {
 } from "@netgrid/engine";
 import snapshotsData08 from "../../../../data/decks/deck-snapshots-0.8.json";
 import type { GameState, LegalAction, Side } from "@netgrid/shared";
-import type { AiDeckDoctrineDeckSnapshot } from "../deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { buildDeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import {
   buildRunnerEconomyPosture,
@@ -941,7 +941,7 @@ function deckDoctrineForSnapshot(snapshotId: string) {
   return buildDeckDoctrineV2Diagnostic(snapshotById(snapshotId));
 }
 
-function snapshotById(snapshotId: string): AiDeckDoctrineDeckSnapshot {
+function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
   const snapshot = snapshotsData08.snapshots.find(
     (candidate) => candidate.deckSnapshotId === snapshotId,
   );

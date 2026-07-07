@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
-import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import {
   buildDeckDoctrineV2Diagnostic,
   buildDeckStrategyProfile,
@@ -10,7 +10,7 @@ const snapshots = snapshotsData08.snapshots as Array<{
   deckSnapshotId: string;
   side: "runner" | "corp";
   formatProfileId?: string;
-  publicMetadata?: AiDeckDoctrineDeckSnapshot["publicMetadata"];
+  publicMetadata?: AiDeckStrategyDeckSnapshot["publicMetadata"];
   cards: Array<{ cardId: string; quantity: number }>;
 }>;
 const realDoctrineSnapshotIds = [
@@ -407,7 +407,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
   });
 });
 
-function snapshotById(snapshotId: string): AiDeckDoctrineDeckSnapshot {
+function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
   const snapshot = snapshots.find(
     (candidate) => candidate.deckSnapshotId === snapshotId,
   );

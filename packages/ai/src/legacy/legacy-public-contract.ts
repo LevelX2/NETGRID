@@ -1,11 +1,8 @@
 // Public compatibility surface for historical plan exports.
 // Keep runtime and simulation access on legacy-entrypoints.ts.
-export {
-  buildDeckDoctrineProfile,
-} from "../deck-doctrine";
 export type {
-  AiDeckDoctrineDeckSnapshot,
-} from "../deck-doctrine";
+  AiDeckStrategyDeckSnapshot,
+} from "../deck-strategy-snapshot";
 export {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
@@ -55,7 +52,7 @@ export {
   estimateRunCost,
   evaluateCorpScoringThreat,
   evaluateRemoteThreat,
-  evaluateRunnerEarlyTurnDoctrine,
+  evaluateRunnerEarlyTurnStrategy,
   evaluateRunnerPlan,
   evaluateRunnerRig,
   evaluateServerAccessValue,

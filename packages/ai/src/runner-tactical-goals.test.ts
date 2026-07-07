@@ -10,7 +10,7 @@ import type {
 } from "@netgrid/shared";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
-import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import {
   buildRunnerEconomyPosture,
@@ -667,7 +667,7 @@ describe("Runner TacticalGoalIntegration", () => {
   });
 });
 
-function benchmarkSnapshotById(snapshotId: string): AiDeckDoctrineDeckSnapshot {
+function benchmarkSnapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
   const snapshot = benchmarkSnapshots.find(
     (candidate) => candidate.deckSnapshotId === snapshotId,
   );

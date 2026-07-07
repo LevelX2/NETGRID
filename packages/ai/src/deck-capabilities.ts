@@ -1,6 +1,6 @@
 import type { AiDecisionInput, LegalAction, PlayerView, Side, VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
-import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { rolesMatch } from "./runtime/role-match";
 import {
   estimateBreakerCostProfileFromOntology,
@@ -175,7 +175,7 @@ export type BuildDeckCapabilityProfileParams = {
   side: Side;
   playerView?: PlayerView;
   legalActions?: readonly LegalAction[];
-  deckSnapshot?: AiDeckDoctrineDeckSnapshot;
+  deckSnapshot?: AiDeckStrategyDeckSnapshot;
 };
 
 type CardCapabilityRecord = {
@@ -217,7 +217,7 @@ export function buildDeckCapabilityProfile(
 
 export function buildDeckCapabilityProfileFromInput(
   input: AiDecisionInput,
-  deckSnapshot?: AiDeckDoctrineDeckSnapshot,
+  deckSnapshot?: AiDeckStrategyDeckSnapshot,
 ): DeckCapabilityProfile {
   return buildDeckCapabilityProfile({
     side: input.side,

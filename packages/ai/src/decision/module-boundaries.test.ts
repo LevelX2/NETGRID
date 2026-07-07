@@ -440,39 +440,11 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
-  it("keeps legacy doctrine v1 weights outside the deck doctrine builder", () => {
+  it("keeps the legacy doctrine v1 builder removed", () => {
     const deckDoctrine = path.join(srcDir, "deck-doctrine.ts");
-    const content = readFileSync(deckDoctrine, "utf8");
     const violations = [
-      ...(content.includes("DOCTRINE_PLAN_WEIGHTS")
-        ? ["deck-doctrine.ts declares doctrine plan weight constants"]
-        : []),
-      ...(content.includes("MULLIGAN_WEIGHTS")
-        ? ["deck-doctrine.ts declares mulligan weight constants"]
-        : []),
-      ...(content.includes("function planWeightsFor")
-        ? ["deck-doctrine.ts declares local planWeightsFor"]
-        : []),
-      ...(!content.includes('from "./legacy/deck-doctrine-legacy-weights"')
-        ? ["deck-doctrine.ts misses legacy doctrine weights module"]
-        : []),
-    ];
-
-    expect(violations).toEqual([]);
-  });
-
-  it("keeps opening hand evaluation outside the doctrine v1 profile builder", () => {
-    const deckDoctrine = path.join(srcDir, "deck-doctrine.ts");
-    const content = readFileSync(deckDoctrine, "utf8");
-    const violations = [
-      ...(content.includes("AiDecisionInput")
-        ? ["deck-doctrine.ts imports AiDecisionInput"]
-        : []),
-      ...(content.includes("evaluateCorpOpeningHand")
-        ? ["deck-doctrine.ts declares corp opening hand evaluation"]
-        : []),
-      ...(content.includes("evaluateRunnerOpeningHand")
-        ? ["deck-doctrine.ts declares runner opening hand evaluation"]
+      ...(existsSync(deckDoctrine)
+        ? ["deck-doctrine.ts legacy v1 builder must stay removed"]
         : []),
     ];
 
@@ -518,6 +490,7 @@ describe("AI module boundaries", () => {
           "../belief-state",
           "../breaker-ontology-consumer",
           "../visible-run-analysis",
+          "./deck-strategy-plan-weight",
           "./legacy-runner-access-payoff",
           "./runner-plan-metadata",
         ],
@@ -535,6 +508,7 @@ describe("AI module boundaries", () => {
           "../runtime/corp-scoreline/semantic-runtime-corp-scoreline-assessment",
           "../tag-punish-ontology-consumer",
           "../visible-run-analysis",
+          "./deck-strategy-plan-weight",
         ],
       ],
     ]);

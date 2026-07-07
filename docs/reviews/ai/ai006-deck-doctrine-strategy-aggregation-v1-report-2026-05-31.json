@@ -3,12 +3,12 @@
   "taskId": "AI006",
   "generatedAt": "2026-05-31",
   "source": {
-    "mode": "diagnostic_only",
+    "mode": "productive_strategy_profile",
     "strategyGoals": "data/ai/strategy-goals-v1.json",
     "compiledHints": "data/ai/ai-card-hints-compiled.json",
     "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
     "deckSnapshots": "data/decks/deck-snapshots-0.8.json",
-    "plannerEffect": "none"
+    "plannerEffect": "strategic_intent_input"
   },
   "analyzedDecks": [
     {
@@ -121,7 +121,12 @@
             "missing_wall_coverage",
             "weak_tag_damage_defense"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "supporting",
+          "runtimeBlockers": [
+            "hard_support_gap:missing_wall_coverage",
+            "supporting_only:runner.economy_first"
+          ]
         },
         "runner.hq_pressure": {
           "anchorScore": 0,
@@ -225,7 +230,13 @@
             "missing_wall_coverage",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:missing_wall_coverage",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.interface_closeout": {
           "anchorScore": 0,
@@ -316,7 +327,13 @@
             "missing_wall_coverage",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:missing_wall_coverage",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.remote_contest": {
           "anchorScore": 0,
@@ -421,7 +438,13 @@
             "missing_wall_coverage",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:missing_wall_coverage",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.remote_trash": {
           "anchorScore": 0,
@@ -525,7 +548,13 @@
             "missing_wall_coverage",
             "weak_remote_access_support"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:missing_wall_coverage",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.rig_first": {
           "anchorScore": 0,
@@ -699,7 +728,11 @@
             "missing_wall_coverage",
             "weak_tag_damage_defense"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "hard_support_gap:missing_wall_coverage"
+          ]
         },
         "runner.rnd_pressure": {
           "anchorScore": 0,
@@ -873,7 +906,13 @@
             "missing_wall_coverage",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:missing_wall_coverage",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.run_event_tempo": {
           "anchorScore": 0,
@@ -991,7 +1030,13 @@
             "missing_wall_coverage",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:missing_wall_coverage",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.search.breaker": {
           "anchorScore": 0,
@@ -1164,7 +1209,13 @@
           "supportGaps": [
             "missing_wall_coverage"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:missing_wall_coverage",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.survival_defense": {
           "anchorScore": 0,
@@ -1205,19 +1256,16 @@
             "low_pressurePayoff_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "supporting",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "supporting_only:runner.survival_defense"
+          ]
         }
       },
-      "primaryStrategies": [
-        "runner.rig_first",
-        "runner.economy_first"
-      ],
-      "secondaryStrategies": [
-        "runner.search.breaker",
-        "runner.run_event_tempo",
-        "runner.rnd_pressure",
-        "runner.hq_pressure"
-      ],
+      "primaryStrategies": [],
+      "secondaryStrategies": [],
       "functionSignalCounts": {
         "breaker.code_gate": 5,
         "breaker.sentry": 5,
@@ -1307,11 +1355,11 @@
         }
       },
       "source": {
-        "mode": "diagnostic_only",
+        "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
         "compiledHints": "data/ai/ai-card-hints-compiled.json",
         "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
-        "plannerEffect": "none"
+        "plannerEffect": "strategic_intent_input"
       }
     },
     {
@@ -1353,13 +1401,6 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -1416,7 +1457,14 @@
             "low_economy_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "supporting",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:low_economy_support",
+            "structural_density_too_weak_for_productive_line",
+            "supporting_only:runner.economy_first"
+          ]
         },
         "runner.hq_pressure": {
           "anchorScore": 100,
@@ -1503,13 +1551,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -1539,7 +1580,11 @@
             "low_economy_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "hard_support_gap:low_economy_support"
+          ]
         },
         "runner.interface_closeout": {
           "anchorScore": 100,
@@ -1649,13 +1694,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -1692,7 +1730,11 @@
             "low_economy_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "hard_support_gap:low_economy_support"
+          ]
         },
         "runner.remote_contest": {
           "anchorScore": 0,
@@ -1732,13 +1774,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -1769,7 +1804,13 @@
             "low_threat_assessment_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:low_economy_support",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.remote_trash": {
           "anchorScore": 0,
@@ -1803,13 +1844,6 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -1865,7 +1899,13 @@
           "supportGaps": [
             "low_economy_support"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:low_economy_support",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.rig_first": {
           "anchorScore": 0,
@@ -1940,13 +1980,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -1990,7 +2023,11 @@
             "low_economy_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "hard_support_gap:low_economy_support"
+          ]
         },
         "runner.rnd_pressure": {
           "anchorScore": 100,
@@ -2089,13 +2126,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2139,7 +2169,11 @@
             "low_economy_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "hard_support_gap:low_economy_support"
+          ]
         },
         "runner.run_event_tempo": {
           "anchorScore": 100,
@@ -2210,13 +2244,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2260,7 +2287,11 @@
             "low_economy_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "hard_support_gap:low_economy_support"
+          ]
         },
         "runner.search.breaker": {
           "anchorScore": 0,
@@ -2335,13 +2366,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2384,7 +2408,13 @@
           "supportGaps": [
             "low_economy_support"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:low_economy_support",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.survival_defense": {
           "anchorScore": 0,
@@ -2432,20 +2462,17 @@
             "low_economy_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "supporting",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:low_economy_support",
+            "supporting_only:runner.survival_defense"
+          ]
         }
       },
-      "primaryStrategies": [
-        "runner.interface_closeout",
-        "runner.rnd_pressure",
-        "runner.run_event_tempo"
-      ],
-      "secondaryStrategies": [
-        "runner.hq_pressure",
-        "runner.rig_first",
-        "runner.economy_first",
-        "runner.search.breaker"
-      ],
+      "primaryStrategies": [],
+      "secondaryStrategies": [],
       "functionSignalCounts": {
         "access.hq_multiaccess": 3,
         "access.rnd_multiaccess": 2,
@@ -2546,11 +2573,11 @@
         }
       },
       "source": {
-        "mode": "diagnostic_only",
+        "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
         "compiledHints": "data/ai/ai-card-hints-compiled.json",
         "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
-        "plannerEffect": "none"
+        "plannerEffect": "strategic_intent_input"
       }
     },
     {
@@ -2578,13 +2605,6 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -2647,7 +2667,11 @@
           "supportGaps": [
             "weak_tag_damage_defense"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "supporting",
+          "runtimeBlockers": [
+            "supporting_only:runner.economy_first"
+          ]
         },
         "runner.hq_pressure": {
           "anchorScore": 100,
@@ -2720,13 +2744,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2776,7 +2793,9 @@
           "supportGaps": [
             "weak_tag_damage_defense"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "runner.interface_closeout": {
           "anchorScore": 100,
@@ -2826,13 +2845,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2875,7 +2887,9 @@
           "supportGaps": [
             "weak_tag_damage_defense"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "runner.remote_contest": {
           "anchorScore": 0,
@@ -2895,13 +2909,6 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -2958,7 +2965,12 @@
             "low_threat_assessment_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.remote_trash": {
           "anchorScore": 0,
@@ -2978,13 +2990,6 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -3045,7 +3050,12 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.rig_first": {
           "anchorScore": 0,
@@ -3092,13 +3102,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -3169,7 +3172,9 @@
           "supportGaps": [
             "weak_tag_damage_defense"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "runner.rnd_pressure": {
           "anchorScore": 0,
@@ -3216,13 +3221,6 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -3293,7 +3291,12 @@
           "supportGaps": [
             "weak_tag_damage_defense"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.run_event_tempo": {
           "anchorScore": 0,
@@ -3313,13 +3316,6 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -3396,7 +3392,12 @@
           "supportGaps": [
             "weak_tag_damage_defense"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.search.breaker": {
           "anchorScore": 0,
@@ -3438,13 +3439,6 @@
               "source": "compiledHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.scaling_strength",
-              "reason": "support:breakerCoverage"
             },
             {
               "cardId": "onr_v1_066_snowball",
@@ -3518,7 +3512,12 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "runner.survival_defense": {
           "anchorScore": 0,
@@ -3572,21 +3571,20 @@
           "supportGaps": [
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "supporting",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "supporting_only:runner.survival_defense"
+          ]
         }
       },
       "primaryStrategies": [
         "runner.interface_closeout",
         "runner.hq_pressure",
-        "runner.economy_first"
+        "runner.rig_first"
       ],
-      "secondaryStrategies": [
-        "runner.rig_first",
-        "runner.remote_trash",
-        "runner.search.breaker",
-        "runner.rnd_pressure",
-        "runner.run_event_tempo"
-      ],
+      "secondaryStrategies": [],
       "functionSignalCounts": {
         "access.hq_multiaccess": 2,
         "access.hq_replacement_economy": 1,
@@ -3696,11 +3694,11 @@
         }
       },
       "source": {
-        "mode": "diagnostic_only",
+        "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
         "compiledHints": "data/ai/ai-card-hints-compiled.json",
         "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
-        "plannerEffect": "none"
+        "plannerEffect": "strategic_intent_input"
       }
     },
     {
@@ -3710,6 +3708,53 @@
       "side": "corp",
       "cardCount": 23,
       "strategyScores": {
+        "corp.action_tempo": {
+          "anchorScore": 0,
+          "supportScore": 25,
+          "finalScore": 10,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.counter",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:economy"
+            }
+          ],
+          "supportGaps": [
+            "low_boardSafety_support",
+            "low_scorePlan_support",
+            "low_tempoSource_support"
+          ],
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
+        },
         "corp.ambush_bluff": {
           "anchorScore": 0,
           "supportScore": 52,
@@ -3776,7 +3821,12 @@
           "supportGaps": [
             "low_ambush_support"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.asset_economy": {
           "anchorScore": 0,
@@ -3825,7 +3875,13 @@
             "low_bait_support",
             "weak_remote_protection"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:weak_remote_protection",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.central_stabilize": {
           "anchorScore": 0,
@@ -3928,7 +3984,12 @@
           "supportGaps": [
             "weak_remote_protection"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "supporting",
+          "runtimeBlockers": [
+            "hard_support_gap:weak_remote_protection",
+            "supporting_only:corp.central_stabilize"
+          ]
         },
         "corp.damage_kill": {
           "anchorScore": 40,
@@ -3947,7 +4008,7 @@
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
               "source": "strategicRole",
-              "role": "punish_payoff,win_condition",
+              "role": "punish_payoff",
               "strategyId": "corp.damage_kill",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
@@ -3993,7 +4054,125 @@
             "low_ambush_support",
             "low_tagOrTrace_support"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold"
+          ]
+        },
+        "corp.deck_recycle_engine": {
+          "anchorScore": 0,
+          "supportScore": 35,
+          "finalScore": 14,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "compiledHint",
+              "signal": "cardType:agenda",
+              "reason": "support:agendaDensity"
+            },
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:agenda",
+              "reason": "support:agendaDensity"
+            },
+            {
+              "cardId": "onr_v1_220_tycho-extension",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:agenda",
+              "reason": "support:agendaDensity"
+            },
+            {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.counter",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:economy"
+            }
+          ],
+          "supportGaps": [
+            "low_drawOrShuffle_support",
+            "low_recycleSource_support"
+          ],
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
+        },
+        "corp.draw_engine": {
+          "anchorScore": 0,
+          "supportScore": 20,
+          "finalScore": 8,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.counter",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:economy"
+            }
+          ],
+          "supportGaps": [
+            "low_drawSource_support",
+            "low_safety_support",
+            "low_scorePlan_support"
+          ],
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.economy_rez_reserve": {
           "anchorScore": 44,
@@ -4112,7 +4291,9 @@
           "supportGaps": [
             "low_scorePlan_support"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "corp.fast_advance": {
           "anchorScore": 0,
@@ -4236,7 +4417,12 @@
           "supportGaps": [
             "low_scoreAcceleration_support"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.ice_tax_glacier": {
           "anchorScore": 100,
@@ -4414,7 +4600,91 @@
           "supportGaps": [
             "weak_remote_protection"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "hard_support_gap:weak_remote_protection"
+          ]
+        },
+        "corp.overadvance_value": {
+          "anchorScore": 40,
+          "supportScore": 75,
+          "finalScore": 54,
+          "anchorEvidence": [
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "quantity": 1,
+              "source": "lineSupport",
+              "signal": "corp.overadvance_value",
+              "strategyId": "corp.overadvance_value",
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "win_condition",
+              "strategyId": "corp.overadvance_value",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            }
+          ],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "advance.overadvance_payoff",
+              "reason": "support:advancementWindow"
+            },
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "score.overadvance_bonus",
+              "reason": "support:advancementWindow"
+            },
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "score.overadvance_scaling",
+              "reason": "support:advancementWindow"
+            },
+            {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.counter",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:economy"
+            }
+          ],
+          "supportGaps": [
+            "low_scorePlan_support"
+          ],
+          "confidence": "medium",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "corp.remote_scoring": {
           "anchorScore": 0,
@@ -4536,7 +4806,12 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.rush_score": {
           "anchorScore": 0,
@@ -4660,7 +4935,12 @@
           "supportGaps": [
             "insufficient_etr_ice"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:insufficient_etr_ice"
+          ]
         },
         "corp.tag_trace_punish": {
           "anchorScore": 100,
@@ -4709,7 +4989,7 @@
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
               "source": "strategicRole",
-              "role": "punish_payoff,win_condition",
+              "role": "punish_payoff",
               "strategyId": "corp.tag_trace_punish",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
@@ -4769,28 +5049,35 @@
             "low_tag_sources",
             "low_traceSupport_support"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "hard_support_gap:low_tag_sources",
+            "tag_punish_source_payoff_pair_incomplete"
+          ]
         }
       },
       "primaryStrategies": [
-        "corp.ice_tax_glacier",
-        "corp.tag_trace_punish",
-        "corp.economy_rez_reserve"
+        "corp.economy_rez_reserve",
+        "corp.overadvance_value"
       ],
-      "secondaryStrategies": [
-        "corp.central_stabilize",
-        "corp.damage_kill",
-        "corp.rush_score",
-        "corp.remote_scoring"
-      ],
+      "secondaryStrategies": [],
       "functionSignalCounts": {
+        "action.corp_extra_action_burst": 2,
+        "action.corp_extra_action_support": 2,
+        "advance.overadvance_payoff": 1,
+        "corp_ice.end_run": 8,
         "damage.payoff": 1,
+        "draw.corp_draw": 4,
+        "economy.corp_credit_burst": 5,
         "economy.counter": 1,
         "economy.generic": 5,
         "economy.rez_discount": 1,
         "ice.corp_strength_support": 1,
         "ice.etr": 8,
         "ice.strength_modifier": 1,
+        "risk.overadvance_investment": 1,
+        "risk.requires_tagged_runner": 2,
         "score.conditional_bonus_agenda_points": 1,
         "score.economy_burst": 3,
         "score.high_agenda_value": 1,
@@ -4798,11 +5085,13 @@
         "score.overadvance_scaling": 1,
         "score.vanilla_points": 1,
         "tag.payoff": 2,
-        "tax.runner_credit": 1
+        "tax.runner_credit": 1,
+        "tempo.corp_action_burst": 2
       },
       "legacySignalCounts": {
         "lineSupport:corp.damage_kill": 1,
         "lineSupport:corp.ice_tax_glacier": 2,
+        "lineSupport:corp.overadvance_value": 1,
         "lineSupport:corp.tag_trace_punish": 2,
         "planRole:bait_runner": 3,
         "planRole:build_scoring_remote": 6,
@@ -4871,11 +5160,11 @@
         }
       },
       "source": {
-        "mode": "diagnostic_only",
+        "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
         "compiledHints": "data/ai/ai-card-hints-compiled.json",
         "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
-        "plannerEffect": "none"
+        "plannerEffect": "strategic_intent_input"
       }
     },
     {
@@ -4885,6 +5174,60 @@
       "side": "corp",
       "cardCount": 24,
       "strategyScores": {
+        "corp.action_tempo": {
+          "anchorScore": 0,
+          "supportScore": 25,
+          "finalScore": 10,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.counter",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:economy"
+            }
+          ],
+          "supportGaps": [
+            "low_boardSafety_support",
+            "low_scorePlan_support",
+            "low_tempoSource_support"
+          ],
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
+        },
         "corp.ambush_bluff": {
           "anchorScore": 0,
           "supportScore": 52,
@@ -4958,7 +5301,12 @@
           "supportGaps": [
             "low_ambush_support"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.asset_economy": {
           "anchorScore": 0,
@@ -5014,7 +5362,13 @@
             "low_bait_support",
             "weak_remote_protection"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:weak_remote_protection",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.central_stabilize": {
           "anchorScore": 0,
@@ -5159,7 +5513,12 @@
           "supportGaps": [
             "weak_remote_protection"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "supporting",
+          "runtimeBlockers": [
+            "hard_support_gap:weak_remote_protection",
+            "supporting_only:corp.central_stabilize"
+          ]
         },
         "corp.damage_kill": {
           "anchorScore": 0,
@@ -5249,7 +5608,134 @@
             "low_ambush_support",
             "low_punish_payoff_density"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:low_punish_payoff_density",
+            "missing_strategy_anchor"
+          ]
+        },
+        "corp.deck_recycle_engine": {
+          "anchorScore": 0,
+          "supportScore": 35,
+          "finalScore": 14,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "compiledHint",
+              "signal": "cardType:agenda",
+              "reason": "support:agendaDensity"
+            },
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_220_tycho-extension",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "cardType:agenda",
+              "reason": "support:agendaDensity"
+            },
+            {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.counter",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:economy"
+            }
+          ],
+          "supportGaps": [
+            "low_drawOrShuffle_support",
+            "low_recycleSource_support"
+          ],
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
+        },
+        "corp.draw_engine": {
+          "anchorScore": 0,
+          "supportScore": 20,
+          "finalScore": 8,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.counter",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:economy"
+            }
+          ],
+          "supportGaps": [
+            "low_drawSource_support",
+            "low_safety_support",
+            "low_scorePlan_support"
+          ],
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.economy_rez_reserve": {
           "anchorScore": 44,
@@ -5410,7 +5896,9 @@
           "supportGaps": [
             "low_scorePlan_support"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         },
         "corp.fast_advance": {
           "anchorScore": 0,
@@ -5569,7 +6057,12 @@
           "supportGaps": [
             "low_scoreAcceleration_support"
           ],
-          "confidence": "low"
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.ice_tax_glacier": {
           "anchorScore": 100,
@@ -5782,7 +6275,65 @@
           "supportGaps": [
             "weak_remote_protection"
           ],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "hard_support_gap:weak_remote_protection"
+          ]
+        },
+        "corp.overadvance_value": {
+          "anchorScore": 0,
+          "supportScore": 25,
+          "finalScore": 10,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.counter",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_295_night-shift",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.rez_discount",
+              "reason": "support:economy"
+            }
+          ],
+          "supportGaps": [
+            "low_advancementWindow_support",
+            "low_remoteSafety_support",
+            "low_scorePlan_support"
+          ],
+          "confidence": "low",
+          "runtimeStatus": "diagnostic_only",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.remote_scoring": {
           "anchorScore": 0,
@@ -5939,7 +6490,12 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "missing_strategy_anchor"
+          ]
         },
         "corp.rush_score": {
           "anchorScore": 0,
@@ -6098,7 +6654,12 @@
           "supportGaps": [
             "insufficient_etr_ice"
           ],
-          "confidence": "medium"
+          "confidence": "medium",
+          "runtimeStatus": "blocked",
+          "runtimeBlockers": [
+            "below_productive_score_threshold",
+            "hard_support_gap:insufficient_etr_ice"
+          ]
         },
         "corp.tag_trace_punish": {
           "anchorScore": 100,
@@ -6274,32 +6835,38 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "high"
+          "confidence": "high",
+          "runtimeStatus": "productive",
+          "runtimeBlockers": []
         }
       },
       "primaryStrategies": [
         "corp.tag_trace_punish",
-        "corp.ice_tax_glacier",
         "corp.economy_rez_reserve"
       ],
-      "secondaryStrategies": [
-        "corp.central_stabilize",
-        "corp.rush_score",
-        "corp.remote_scoring"
-      ],
+      "secondaryStrategies": [],
       "functionSignalCounts": {
+        "action.corp_extra_action_burst": 2,
+        "action.corp_extra_action_support": 2,
+        "corp_ice.end_run": 6,
+        "corp_ice.tag_source": 2,
+        "corp_ice.trace_source": 2,
+        "draw.corp_draw": 4,
+        "economy.corp_credit_burst": 6,
         "economy.counter": 2,
         "economy.generic": 6,
         "economy.rez_discount": 1,
         "ice.corp_strength_support": 1,
         "ice.etr": 6,
         "ice.strength_modifier": 1,
+        "risk.requires_tagged_runner": 4,
         "score.economy_burst": 3,
         "score.high_agenda_value": 1,
         "score.vanilla_points": 1,
         "tag.payoff": 4,
         "tag.source": 4,
         "tax.runner_credit": 2,
+        "tempo.corp_action_burst": 2,
         "trace.source": 2
       },
       "legacySignalCounts": {
@@ -6309,7 +6876,8 @@
         "planRole:build_scoring_remote": 5,
         "planRole:protect_hq": 10,
         "planRole:protect_rnd": 10,
-        "planRole:recover_economy": 10,
+        "planRole:punish_tagged_runner": 1,
+        "planRole:recover_economy": 9,
         "planRole:score_next_turn": 4,
         "role:agenda": 4,
         "role:agenda_1pt": 3,
@@ -6373,11 +6941,11 @@
         }
       },
       "source": {
-        "mode": "diagnostic_only",
+        "mode": "ai_internal_strategy_profile",
         "strategyGoals": "data/ai/strategy-goals-v1.json",
         "compiledHints": "data/ai/ai-card-hints-compiled.json",
         "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
-        "plannerEffect": "none"
+        "plannerEffect": "strategic_intent_input"
       }
     }
   ],
@@ -6401,20 +6969,17 @@
     ],
     "primaryStrategyCounts": {
       "corp.economy_rez_reserve": 2,
-      "corp.ice_tax_glacier": 2,
-      "corp.tag_trace_punish": 2,
-      "runner.economy_first": 2,
+      "corp.overadvance_value": 1,
+      "corp.tag_trace_punish": 1,
       "runner.hq_pressure": 1,
-      "runner.interface_closeout": 2,
-      "runner.rig_first": 1,
-      "runner.rnd_pressure": 1,
-      "runner.run_event_tempo": 1
+      "runner.interface_closeout": 1,
+      "runner.rig_first": 1
     },
     "warningCounts": {
       "inspector:deferred_requires_human_review": 3,
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "c4681595eca22150a6ee46b2259ee72a84a8b54a0490eadebae139e76e8b02e5"
+    "contentSha256": "d9723169406fc5d23045e7da8cafa76d6721d13acec5304ab5b3d8a324283ee8"
   }
 }

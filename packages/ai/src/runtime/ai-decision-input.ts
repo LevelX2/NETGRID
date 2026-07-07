@@ -11,7 +11,7 @@ import {
   buildDeckCapabilityProfile,
   type DeckCapabilityProfile,
 } from "../deck-capabilities";
-import { type AiDeckDoctrineDeckSnapshot } from "../deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import {
   type AiDeckStrategyProfile,
   type DeckDoctrineV2Diagnostic,
@@ -82,8 +82,7 @@ export function buildAiDecisionInput(
     actionNumber?: number;
     profileId?: string;
     eventTail?: PublicGameEvent[];
-    ownDeckSnapshot?: AiDeckDoctrineDeckSnapshot;
-    ownDeckDoctrine?: AiDecisionInput["ownDeckDoctrine"];
+    ownDeckSnapshot?: AiDeckStrategyDeckSnapshot;
     /**
      * Escape hatch for very low-level fixtures that intentionally exercise the
      * pre-strategy DTO. Productive callers should omit this and receive an
@@ -107,10 +106,8 @@ export function buildAiDecisionInput(
     ...(options.ownDeckSnapshot
       ? { deckSnapshot: options.ownDeckSnapshot }
       : {}),
-    ...(options.ownDeckDoctrine ? { v1Profile: options.ownDeckDoctrine } : {}),
     neutralDeckId: deckSnapshotId,
   });
-  const ownDeckDoctrine = deckDoctrineRuntimeContext.v1Profile;
   const input = buildAiDecisionInputDto({
     side,
     playerView,
@@ -121,7 +118,6 @@ export function buildAiDecisionInput(
     decisionId,
     actionNumber,
     profileId,
-    ...(ownDeckDoctrine ? { ownDeckDoctrine } : {}),
   });
   if (
     !options.ownDeckSnapshot &&

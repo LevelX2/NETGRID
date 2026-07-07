@@ -90,20 +90,20 @@ export function evaluateKnownCentralAccessPayoff(
     };
   }
   const definitionId = freshness.knownTopDefinitionId;
-  if (freshness.freshness !== "stale_known_same_top" || !definitionId) {
+  if (freshness.freshness !== "stale_known_same_top") {
     return unknownCentralPayoff("rd", [
       `rnd_freshness:${freshness.freshness}`,
       `rnd_known_top_definition:${definitionId ?? "unknown"}`,
     ]);
   }
 
-  const type = cardDefinitionType(definitionId);
+  const type = definitionId ? cardDefinitionType(definitionId) : undefined;
   const path = knownCentralPathCost(input, "rd");
   const evidenceBase = [
     "central_target:rd",
     "central_memory_payoff:known",
     `rnd_freshness:${freshness.freshness}`,
-    `rnd_known_top_definition:${definitionId}`,
+    `rnd_known_top_definition:${definitionId ?? "unknown"}`,
     `rnd_known_top_type:${type ?? "unknown"}`,
     `rnd_known_top_visible_break_cost:${path.visibleBreakCost}`,
     `rnd_known_top_credits_after_path:${path.creditsAfterPath}`,
@@ -136,6 +136,24 @@ export function evaluateKnownCentralAccessPayoff(
       evidence: [
         ...evidenceBase,
         "central_memory_payoff:access_bonus",
+      ],
+    };
+  }
+
+  if (!definitionId) {
+    return {
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+      score: 0,
+      penalty: 700,
+      reasons: [
+        "known_rnd_top_label_only_stale",
+        "central_known_no_current_payoff",
+      ],
+      evidence: [
+        ...evidenceBase,
+        "rd_run_suppressed_by_known_low_value_top:true",
+        "central_memory_payoff:known_low_value",
       ],
     };
   }

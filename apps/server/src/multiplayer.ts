@@ -3212,7 +3212,7 @@ function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, legalAction: L
     const value = debug[field];
     if (typeof value === "string") result[field] = value;
   }
-  for (const field of ["score", "confidence", "timeBudgetMs", "doctrinePlanWeight"] as const) {
+  for (const field of ["score", "confidence", "timeBudgetMs"] as const) {
     const value = debug[field];
     if (typeof value === "number" && Number.isFinite(value)) result[field] = value;
   }
@@ -3234,7 +3234,6 @@ function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, legalAction: L
     }
     if (Array.isArray(debug.detailSections)) result.detailSections = debug.detailSections.slice(0, 8);
     if (debug.opponentModel) result.opponentModel = debug.opponentModel;
-    if (debug.ownDeckDoctrine) result.ownDeckDoctrine = debug.ownDeckDoctrine;
   }
   return result;
 }

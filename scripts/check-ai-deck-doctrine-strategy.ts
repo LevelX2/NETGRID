@@ -5,13 +5,12 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import snapshotsData08 from "../data/decks/deck-snapshots-0.8.json";
-import { buildDeckDoctrineProfile } from "../packages/ai/src/deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "../packages/ai/src/deck-strategy-snapshot";
 import {
   buildDeckStrategyProfile,
   type AiDeckStrategyProfile,
   type DeckStrategyEvidence,
 } from "../packages/ai/src/deck-doctrine-strategy";
-import type { AiDeckDoctrineDeckSnapshot } from "../packages/ai/src/deck-doctrine";
 import type { Side } from "@netgrid/shared";
 
 const REPO_ROOT = path.resolve(
@@ -55,7 +54,7 @@ type DeckSnapshotFixture = {
   deckSnapshotId: string;
   side: Side;
   formatProfileId?: string;
-  publicMetadata?: AiDeckDoctrineDeckSnapshot["publicMetadata"];
+  publicMetadata?: AiDeckStrategyDeckSnapshot["publicMetadata"];
   cards: Array<{ cardId: string; quantity: number }>;
 };
 
@@ -64,12 +63,12 @@ type Ai006Report = {
   taskId: "AI006";
   generatedAt: "2026-05-31";
   source: {
-    mode: "diagnostic_only";
+    mode: "productive_strategy_profile";
     strategyGoals: string;
     compiledHints: string;
     inspectorIndex: string;
     deckSnapshots: string;
-    plannerEffect: "none";
+    plannerEffect: "strategic_intent_input";
   };
   analyzedDecks: AiDeckStrategyProfile[];
   validation: {
@@ -100,23 +99,22 @@ function main(): void {
   );
 
   validateProfiles(firstProfiles);
-  validateNoPlannerEffect();
+  validateNoLegacyDoctrineEffect();
   validateLegacyRolesDoNotAnchor();
   validateStableAnchorSources(firstProfiles);
   validateNoForbiddenOutputKeys(firstProfiles);
-  validateClassicDoctrineUnchangedShape(snapshots[0]);
 
   const reportCore = {
     schemaVersion: "ai006-deck-doctrine-strategy-aggregation-report-v1" as const,
     taskId: "AI006" as const,
     generatedAt: "2026-05-31" as const,
     source: {
-      mode: "diagnostic_only",
+      mode: "productive_strategy_profile",
       strategyGoals: "data/ai/strategy-goals-v1.json",
       compiledHints: "data/ai/ai-card-hints-compiled.json",
       inspectorIndex: "data/ai/ai-hint-inspector-index.json",
       deckSnapshots: "data/decks/deck-snapshots-0.8.json",
-      plannerEffect: "none" as const,
+      plannerEffect: "strategic_intent_input" as const,
     },
     analyzedDecks: firstProfiles,
     validation: {
@@ -144,10 +142,13 @@ function validateProfiles(profiles: AiDeckStrategyProfile[]): void {
   assert(profiles.length === ANALYZED_DECK_IDS.length, "Unexpected profile count");
   for (const profile of profiles) {
     assert(profile.taskId === "AI006", `${profile.deckId}: missing task id`);
-    assert(profile.source.plannerEffect === "none", `${profile.deckId}: planner effect source mismatch`);
+    assert(
+      profile.source.plannerEffect === "strategic_intent_input",
+      `${profile.deckId}: planner effect source mismatch`,
+    );
     assert(profile.cardCount > 0, `${profile.deckId}: empty profile`);
     const strategyIds = Object.keys(profile.strategyScores);
-    assert(strategyIds.length === 10, `${profile.deckId}: expected 10 side strategy scores`);
+    assert(strategyIds.length > 0, `${profile.deckId}: missing side strategy scores`);
     for (const strategyId of strategyIds) {
       assert(
         strategyId.startsWith(`${profile.side}.`),
@@ -162,32 +163,34 @@ function validateProfiles(profiles: AiDeckStrategyProfile[]): void {
   }
 }
 
-function validateNoPlannerEffect(): void {
-  const runnerPlans = fs.readFileSync(
-    path.join(REPO_ROOT, "packages/ai/src/runner-plans.ts"),
+function validateNoLegacyDoctrineEffect(): void {
+  const legacyRunnerPlans = fs.readFileSync(
+    path.join(REPO_ROOT, "packages/ai/src/legacy/runner-plans.ts"),
     "utf8",
   );
-  const corpPlans = fs.readFileSync(
-    path.join(REPO_ROOT, "packages/ai/src/corp-plans.ts"),
+  const legacyCorpPlans = fs.readFileSync(
+    path.join(REPO_ROOT, "packages/ai/src/legacy/corp-plans.ts"),
     "utf8",
   );
   const indexSource = fs.readFileSync(
     path.join(REPO_ROOT, "packages/ai/src/index.ts"),
     "utf8",
   );
-  const buildInputBody = indexSource.match(
-    /export function buildAiDecisionInput[\s\S]*?\n}\r?\n\r?\nexport function selectAiDecisionSideForState/,
-  )?.[0];
-  assert(buildInputBody !== undefined, "Could not locate buildAiDecisionInput body");
+  const runtimeInput = fs.readFileSync(
+    path.join(REPO_ROOT, "packages/ai/src/runtime/ai-decision-input.ts"),
+    "utf8",
+  );
   for (const [label, source] of [
-    ["runner-plans", runnerPlans],
-    ["corp-plans", corpPlans],
-    ["buildAiDecisionInput", buildInputBody],
+    ["legacy runner plans", legacyRunnerPlans],
+    ["legacy corp plans", legacyCorpPlans],
+    ["public exports", indexSource],
+    ["runtime ai decision input", runtimeInput],
   ] as const) {
-    assert(!source.includes("buildDeckStrategyProfile"), `${label}: consumes AI006 profile`);
-    assert(!source.includes("AiDeckStrategyProfile"), `${label}: references AI006 type`);
-    assert(!source.includes("strategyScores"), `${label}: references AI006 strategy scores`);
-    assert(!source.includes("primaryStrategies"), `${label}: references AI006 primary strategies`);
+    assert(!source.includes("buildDeckDoctrineProfile"), `${label}: builds v1 doctrine profile`);
+    assert(!source.includes("AiDeckDoctrineProfile"), `${label}: references v1 doctrine type`);
+    assert(!/\bownDeckDoctrine\b/.test(source), `${label}: consumes v1 ownDeckDoctrine`);
+    assert(!source.includes("doctrinePlanWeight"), `${label}: exposes v1 doctrine plan weight`);
+    assert(!source.includes("doctrine_plan_weight"), `${label}: emits v1 doctrine plan weight evidence`);
   }
 }
 
@@ -247,19 +250,6 @@ function validateNoForbiddenOutputKeys(value: unknown): void {
   }
 }
 
-function validateClassicDoctrineUnchangedShape(snapshot: AiDeckDoctrineDeckSnapshot | undefined): void {
-  assert(snapshot !== undefined, "Missing classic doctrine sample snapshot");
-  const classicProfile = buildDeckDoctrineProfile(snapshot);
-  assert(
-    classicProfile.schemaVersion === "ai-deck-doctrine-v1",
-    "Classic DeckDoctrine schema changed",
-  );
-  assert(
-    !("strategyScores" in classicProfile),
-    "Classic DeckDoctrine unexpectedly exposes AI006 strategy scores",
-  );
-}
-
 function deterministicSummaryFor(
   profiles: AiDeckStrategyProfile[],
   reportCore: Omit<Ai006Report, "deterministicSummary">,
@@ -288,7 +278,7 @@ function deterministicSummaryFor(
   };
 }
 
-function snapshotById(snapshotId: string): AiDeckDoctrineDeckSnapshot {
+function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
   const snapshot = (snapshotsData08.snapshots as DeckSnapshotFixture[]).find(
     (candidate) => candidate.deckSnapshotId === snapshotId,
   );

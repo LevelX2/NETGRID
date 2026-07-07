@@ -8,7 +8,6 @@ import {
   buildMaintenanceRecoveryLink,
   aiTraceActionRows,
   aiTraceDebugGapNotes,
-  aiTraceDoctrineRows,
   aiTraceMetaRows,
   aiTracePlanLabel,
   aiTraceScoreRows,
@@ -268,42 +267,29 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     );
   });
 
-  it("formats in-game AI trace score and doctrine rows without inventing missing values", () => {
+  it("formats in-game AI trace score rows without inventing missing values", () => {
     const detail = {
       planKind: "score_next_turn",
-      doctrinePlanWeight: 0.35,
       scoreBreakdown: [
         { key: "plan", label: "Plan", value: 12.5 },
-        { key: "cost", label: "Kosten", value: -2 }
+        { key: "cost", label: "Kosten", value: -2 },
+        { key: "deckStrategy", label: "Deckstrategie", value: 0.35 }
       ],
-      ownDeckDoctrine: {
-        side: "corp",
-        confidence: 0.8,
-        archetypeTags: ["remote", "economy"],
-        riskFlags: ["agenda_density"]
-      }
     };
 
     expect(aiTraceScoreRows(detail)).toEqual([
       ["Plan", "12.50"],
-      ["Kosten", "-2.00"]
-    ]);
-    expect(aiTraceDoctrineRows(detail)).toEqual([
-      ["Doctrine-Gewicht", "0.35"],
-      ["Doctrine-Seite", "Korp"],
-      ["Doctrine-Vertrauen", "80%"],
-      ["Archetypen", "remote, economy"],
-      ["Risiken", "agenda_density"]
+      ["Kosten", "-2.00"],
+      ["Deckstrategie", "0.35"]
     ]);
     expect(aiTraceDebugGapNotes(detail)).toEqual(["Keine Top-Alternativen im aktuellen Trace."]);
 
     const sparseDetail = { selectedActionType: "gain_credit" };
     expect(aiTraceScoreRows(sparseDetail)).toEqual([]);
-    expect(aiTraceDoctrineRows(sparseDetail)).toEqual([]);
     expect(aiTraceDebugGapNotes(sparseDetail)).toEqual([
       "Keine Top-Alternativen im aktuellen Trace.",
       "Keine Score-Komponenten im aktuellen Trace.",
-      "Keine Plan-/Doctrine-Beiträge im aktuellen Trace."
+      "Keine Planbeiträge im aktuellen Trace."
     ]);
     expect(JSON.stringify({ detail })).not.toMatch(/AIInput|DecisionDebug|cardInstances|privatePayload|decklist|C:\\Users/i);
   });

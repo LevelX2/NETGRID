@@ -4,7 +4,6 @@ import runnerPlanProfilesData from "../../../../data/ai/runner-plan-profiles-1.4
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   DEMO_CARDS_BY_ID,
-  type AiDeckDoctrineProfile,
   type AiDecision,
   type AiDecisionActionAlternative,
   type AiDecisionDebug,
@@ -54,6 +53,10 @@ import {
   type RunnerPlanKind,
 } from "./runner-plan-metadata";
 import { legacyRunnerKnownRemoteAccessPayoff } from "./legacy-runner-access-payoff";
+import {
+  deckStrategyHasAny,
+  deckStrategyPlanWeightFor,
+} from "./deck-strategy-plan-weight";
 const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
   "onr_v1_309_bbs-whispering-campaign";
 
@@ -109,14 +112,6 @@ export type RunnerPlanDebug = AiDecisionDebug & {
   invalidations?: string[];
   beliefUncertainty?: string[];
   opponentModel?: Record<string, unknown>;
-  ownDeckDoctrine?: {
-    schemaVersion: string;
-    side: Side;
-    confidence: number;
-    archetypeTags: string[];
-    riskFlags: string[];
-  };
-  doctrinePlanWeight?: number;
 };
 
 export type RunnerPlanDecision = {
@@ -191,7 +186,6 @@ type VisibleBreakerPressure = {
   recoveryActionIds: Set<string>;
   heapMatchingBreakerCount: number;
   ontologyHeapMatchingBreakerCount: number;
-  deckAnswerCount: number;
   missingAnswerCount: number;
   requiredCoverageCredits: number;
 };
@@ -590,10 +584,6 @@ export function chooseRunnerPlanDecision(
     );
   const beliefSummary = beliefDebugSummary(beliefState);
   const opponentModel = toRecord(beliefSummary.runnerOpponentModel);
-  const doctrinePlanWeight = doctrinePlanWeightFor(
-    input,
-    selected.candidate.kind,
-  );
   return {
     selectedPlanId: selected.candidate.planId,
     selectedActionId: action.actionId,
@@ -638,12 +628,6 @@ export function chooseRunnerPlanDecision(
       invalidations: toStringArray(beliefSummary.invalidations),
       beliefUncertainty: toStringArray(beliefSummary.uncertainty),
       ...(opponentModel ? { opponentModel } : {}),
-      ...(input.ownDeckDoctrine
-        ? {
-            ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine),
-            doctrinePlanWeight,
-          }
-        : {}),
     },
   };
 }
@@ -768,7 +752,7 @@ export function evaluateRunnerPlan(
   const access = evaluateServerAccessValue(input, candidate, beliefState);
   const remote = evaluateRemoteThreat(input, candidate, beliefState);
   const corpThreat = evaluateCorpScoringThreat(input, candidate, beliefState);
-  const earlyTurn = evaluateRunnerEarlyTurnDoctrine(input, candidate);
+  const earlyTurn = evaluateRunnerEarlyTurnStrategy(input, candidate);
   const breakerPlan = evaluateVisibleBreakerPlan(input, candidate);
   const twoTurnIntent = evaluateRunnerTwoTurnRunIntent(input, candidate);
   const citySurveillanceDrawRisk = evaluateCitySurveillanceDrawRisk(
@@ -820,12 +804,12 @@ export function evaluateRunnerPlan(
     input,
     candidate,
   );
-  const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
+  const strategyPlanWeight = runnerStrategyPlanWeightFor(input, candidate.kind);
   const easyRunPenalty =
     input.difficulty === "easy" && isRunPlan(candidate.kind) ? 260 : 0;
   const score =
     baseScoreForPlan(candidate.kind) +
-    doctrinePlanWeight +
+    strategyPlanWeight +
     earlyTurn.score +
     rig.score * profile.weights.runnerRig +
     runCost.score * profile.weights.runCost +
@@ -885,11 +869,11 @@ export function evaluateRunnerPlan(
         `plan:${candidate.kind}`,
       ],
       [
-        "doctrine",
-        "Deck-Doctrine",
-        doctrinePlanWeight,
+        "deckStrategy",
+        "Deckstrategie",
+        strategyPlanWeight,
         1,
-        "doctrine_plan_weight",
+        "deck_strategy_plan_weight",
       ],
       [
         "earlyTurn",
@@ -1056,12 +1040,7 @@ export function evaluateRunnerPlan(
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
-      `doctrine_plan_weight:${doctrinePlanWeight}`,
-      ...(input.ownDeckDoctrine
-        ? [
-            `doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`,
-          ]
-        : ["doctrine:neutral"]),
+      `deck_strategy_plan_weight:${strategyPlanWeight}`,
       ...outcomeFollowup.evidence,
       ...candidate.visibleBenefits,
       ...installedEconomy.evidence,
@@ -1161,8 +1140,7 @@ function selectRunnerStrategicLine(
   input: AiDecisionInput,
   beliefState: BeliefState,
 ): RunnerStrategicLineSelection | undefined {
-  if (!input.ownDeckDoctrine || input.ownDeckDoctrine.side !== "runner")
-    return undefined;
+  if (runnerDeckStrategyIds(input).length === 0) return undefined;
   if (input.difficulty === "easy") return undefined;
   const features = extractRunnerFeatures(input);
   const breakerPressure = assessVisibleBreakerPressure(input);
@@ -1332,9 +1310,10 @@ function selectRunnerStrategicLine(
         candidate.weight +
           Math.max(
             0,
-            input.ownDeckDoctrine?.planWeights[
-              runnerPlanKindForStrategicLine(candidate.kind)
-            ] ?? 0,
+            runnerStrategyPlanWeightFor(
+              input,
+              runnerPlanKindForStrategicLine(candidate.kind),
+            ),
           ) *
             0.35,
       ),
@@ -2269,7 +2248,7 @@ function evaluateRunnerOutcomeFollowup(
   candidate: RunnerPlanCandidate,
   beliefState: BeliefState,
 ): RunnerPlanEvaluatorResult {
-  if (!input.profileId.includes("v1.4.2") || !input.ownDeckDoctrine) {
+  if (!input.profileId.includes("v1.4.2")) {
     return {
       score: 0,
       reasons: [],
@@ -3133,7 +3112,6 @@ function evaluateVisibleBreakerPlan(
       `coverage_recovery_actions:${pressure.recoveryActionIds.size}`,
       `heap_matching_breakers:${pressure.heapMatchingBreakerCount}`,
       `structured_heap_matching_breakers:${pressure.ontologyHeapMatchingBreakerCount}`,
-      `deck_breaker_answers:${pressure.deckAnswerCount}`,
       `missing_breaker_answers:${pressure.missingAnswerCount}`,
       `coverage_required_credits:${pressure.requiredCoverageCredits}`,
       `coverage_needs_credits:${needsCreditsForCoverage}`,
@@ -3386,15 +3364,15 @@ function runnerSetupContinuationCandidate(
   });
 }
 
-export function evaluateRunnerEarlyTurnDoctrine(
+export function evaluateRunnerEarlyTurnStrategy(
   input: AiDecisionInput,
   candidate: RunnerPlanCandidate,
 ): RunnerPlanEvaluatorResult {
-  const doctrine = input.ownDeckDoctrine;
-  if (!doctrine || doctrine.side !== "runner") {
-    return { score: 0, reasons: [], evidence: ["early_turn_doctrine:none"] };
-  }
   const earlyTurn = isEarlyRunnerTurn(input);
+  const strategyIds = runnerDeckStrategyIds(input);
+  if (strategyIds.length === 0) {
+    return { score: 0, reasons: [], evidence: ["early_turn_strategy:none"] };
+  }
   const features = extractRunnerFeatures(input);
   const rigBreakerCount = [...features.rigRoles].filter((role) =>
     role.startsWith("breaker_"),
@@ -3409,12 +3387,21 @@ export function evaluateRunnerEarlyTurnDoctrine(
   const visibleIce = target
     ? (features.serverFeatures.get(target)?.iceCount ?? 0)
     : 0;
-  const tags = doctrine.archetypeTags.slice(0, 3);
-  const tagSet = new Set(tags);
+  const rigBuilder = runnerHasAnyStrategy(input, [
+    "runner.rig_first",
+    "runner.search.breaker",
+  ]);
+  const economyDense = runnerHasAnyStrategy(input, ["runner.economy_first"]);
+  const rndPressure = runnerHasAnyStrategy(input, [
+    "runner.rnd_pressure",
+    "runner.interface_closeout",
+  ]);
+  const hqPressure = runnerHasAnyStrategy(input, ["runner.hq_pressure"]);
+  const remoteContest = runnerHasAnyStrategy(input, ["runner.remote_contest"]);
   let score = 0;
   const reasons: string[] = [];
 
-  if (earlyTurn && tagSet.has("rig_builder")) {
+  if (earlyTurn && rigBuilder) {
     if (
       candidate.kind === "build_rig" &&
       rigBreakerCount === 0 &&
@@ -3437,7 +3424,7 @@ export function evaluateRunnerEarlyTurnDoctrine(
     }
   }
 
-  if (earlyTurn && tagSet.has("economy_dense")) {
+  if (earlyTurn && economyDense) {
     if (
       candidate.kind === "recover_economy" &&
       (features.credits < 5 || handEconomyCount > 0)
@@ -3461,7 +3448,7 @@ export function evaluateRunnerEarlyTurnDoctrine(
 
   if (
     earlyTurn &&
-    tagSet.has("rnd_pressure") &&
+    rndPressure &&
     candidate.kind === "pressure_rnd"
   ) {
     const pressureReady =
@@ -3475,7 +3462,7 @@ export function evaluateRunnerEarlyTurnDoctrine(
   }
   if (
     earlyTurn &&
-    tagSet.has("hq_pressure") &&
+    hqPressure &&
     candidate.kind === "pressure_hq"
   ) {
     const pressureReady =
@@ -3487,7 +3474,7 @@ export function evaluateRunnerEarlyTurnDoctrine(
   }
   if (
     earlyTurn &&
-    tagSet.has("remote_contest") &&
+    remoteContest &&
     candidate.kind === "contest_remote"
   ) {
     const server = target ? features.serverFeatures.get(target) : undefined;
@@ -3509,7 +3496,7 @@ export function evaluateRunnerEarlyTurnDoctrine(
     reasons,
     evidence: [
       `early_turn:${earlyTurn}`,
-      `early_turn_doctrine:${tags.join(",") || "neutral"}`,
+      `early_turn_strategy:${strategyIds.slice(0, 3).join(",") || "neutral"}`,
       `early_turn_score:${score}`,
       `early_rig_breakers:${rigBreakerCount}`,
       `early_hand_breakers:${handBreakerCount}`,
@@ -8268,9 +8255,6 @@ function assessVisibleBreakerPressure(
       .filter(() => matchingHeapBreakers.length > 0)
       .map((action) => action.actionId),
   );
-  const deckAnswerCount = [...missingBreakerRoles].filter(
-    (role) => (input.ownDeckDoctrine?.roleCounts[role] ?? 0) > 0,
-  ).length;
   const cheapestInstallCost =
     matchingInstallActionIds.size > 0
       ? Math.min(
@@ -8303,10 +8287,9 @@ function assessVisibleBreakerPressure(
     recoveryActionIds,
     heapMatchingBreakerCount: matchingHeapBreakers.length,
     ontologyHeapMatchingBreakerCount,
-    deckAnswerCount,
     missingAnswerCount:
       matchingGripBreakers.length === 0
-        ? Math.max(missingIceDefinitionIds.size, deckAnswerCount)
+        ? missingIceDefinitionIds.size
         : 0,
     requiredCoverageCredits:
       matchingInstallActionIds.size > 0
@@ -8685,12 +8668,6 @@ function fallbackDebug(
     invalidations: toStringArray(beliefSummary.invalidations),
     beliefUncertainty: toStringArray(beliefSummary.uncertainty),
     ...(opponentModel ? { opponentModel } : {}),
-    ...(input.ownDeckDoctrine
-      ? {
-          ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine),
-          doctrinePlanWeight: 0,
-        }
-      : {}),
   };
 }
 
@@ -8779,16 +8756,9 @@ function longTermPlanForRunner(
 ): string[] {
   return sortedUnique([
     `active_plan:${kind}`,
-    ...(input.ownDeckDoctrine?.side === "runner"
-      ? input.ownDeckDoctrine.archetypeTags
-          .slice(0, 3)
-          .map((tag) => `doctrine:${tag}`)
-      : ["doctrine:neutral"]),
-    ...(input.ownDeckDoctrine?.side === "runner"
-      ? input.ownDeckDoctrine.riskFlags
-          .slice(0, 2)
-          .map((flag) => `risk_flag:${flag}`)
-      : []),
+    ...runnerDeckStrategyIds(input)
+      .slice(0, 3)
+      .map((strategyId) => `deck_strategy:${strategyId}`),
   ]).slice(0, 6);
 }
 
@@ -8815,29 +8785,56 @@ function runnerDetailSections(
   ].filter((section) => section.items.length > 0);
 }
 
-function doctrinePlanWeightFor(
+function runnerStrategyPlanWeightFor(
   input: AiDecisionInput,
   kind: RunnerPlanKind,
 ): number {
-  const profile = input.ownDeckDoctrine;
-  if (!profile || profile.side !== "runner") return 0;
-  const raw = profile.planWeights[kind] ?? 0;
-  const confidence = Number.isFinite(profile.confidence)
-    ? profile.confidence
-    : 0.5;
-  return Math.round(raw * Math.max(0.25, Math.min(1, confidence)));
+  return deckStrategyPlanWeightFor(input, "runner", runnerStrategyIdsForPlan(kind));
 }
 
-function deckDoctrineDebug(
-  profile: AiDeckDoctrineProfile,
-): NonNullable<RunnerPlanDebug["ownDeckDoctrine"]> {
-  return {
-    schemaVersion: profile.schemaVersion,
-    side: profile.side,
-    confidence: profile.confidence,
-    archetypeTags: profile.archetypeTags.slice(0, 3),
-    riskFlags: profile.riskFlags.slice(0, 5),
-  };
+function runnerStrategyIdsForPlan(kind: RunnerPlanKind): readonly string[] {
+  switch (kind) {
+    case "pressure_rnd":
+      return ["runner.rnd_pressure", "runner.interface_closeout"];
+    case "pressure_hq":
+      return ["runner.hq_pressure"];
+    case "contest_remote":
+      return ["runner.remote_contest", "runner.remote_trash"];
+    case "trash_asset":
+      return ["runner.remote_trash", "runner.remote_contest"];
+    case "build_rig":
+      return ["runner.rig_first", "runner.search.breaker"];
+    case "draw_for_answers":
+      return ["runner.search.breaker", "runner.rig_first"];
+    case "recover_economy":
+      return ["runner.economy_first"];
+    case "safe_probe_run":
+      return ["runner.run_event_tempo", "runner.survival_defense"];
+  }
+}
+
+function runnerHasAnyStrategy(
+  input: AiDecisionInput,
+  strategyIds: readonly string[],
+): boolean {
+  return deckStrategyHasAny(input, "runner", strategyIds);
+}
+
+function runnerDeckStrategyIds(input: AiDecisionInput): string[] {
+  const profile = (
+    input as AiDecisionInput & {
+      ownDeckStrategyProfile?: {
+        side?: Side;
+        primaryStrategies?: readonly string[];
+        secondaryStrategies?: readonly string[];
+      };
+    }
+  ).ownDeckStrategyProfile;
+  if (!profile || profile.side !== "runner") return [];
+  return sortedUnique([
+    ...(profile.primaryStrategies ?? []),
+    ...(profile.secondaryStrategies ?? []),
+  ]);
 }
 
 function isEarlyRunnerTurn(input: AiDecisionInput): boolean {

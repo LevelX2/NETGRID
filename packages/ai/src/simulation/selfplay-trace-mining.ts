@@ -1761,6 +1761,9 @@ function sortedUnique(values: string[]): string[] {
 }
 
 function selfplayTraceContainsHiddenInfoMarker(value: string): boolean {
+  if (/\b(?:corp|runner)_(?:onr|v\d|simple)[a-z0-9_-]*_\d+\b/i.test(value)) {
+    return true;
+  }
   const tokenSet = new Set(selfplayTraceHiddenInfoTokens(value));
   return SELFPLAY_HIDDEN_INFO_MARKERS.some((marker) => tokenSet.has(marker));
 }

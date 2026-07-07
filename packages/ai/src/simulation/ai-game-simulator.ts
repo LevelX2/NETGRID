@@ -15,7 +15,7 @@ import {
   type Side,
 } from "@netgrid/shared";
 
-import type { AiDeckDoctrineDeckSnapshot } from "../deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { buildAiDecisionInput, selectAiDecisionSideForState } from "../runtime/ai-decision-input";
 import { sortedUniqueProgressionCardTargetTypes } from "../runtime/progression-card-target";
 import { advancementCountersAddedForSimulationAction } from "../runtime/simulation-action-event";
@@ -35,7 +35,10 @@ import {
   isProtectBeforeAdvanceSimulationAction,
 } from "./final-advance-assessment";
 import { isHoldoutSeed } from "./holdout-seed";
-import { selfplayTraceFactsForSimulationDecision } from "./selfplay-trace-facts-adapter";
+import {
+  safeEvidenceForSimulationDecision,
+  selfplayTraceFactsForSimulationDecision,
+} from "./selfplay-trace-facts-adapter";
 import { simulationSafeSelectedActionId } from "./selected-action-id";
 import { assertAiInputIsSideSafe } from "./side-safe-input";
 import { deckSnapshotForSimulation } from "./simulation-config-helpers";
@@ -212,7 +215,7 @@ function simulateAiGame(
     },
   });
   const initial = structuredClone(state);
-  const deckSnapshots: Record<Side, AiDeckDoctrineDeckSnapshot> = {
+  const deckSnapshots: Record<Side, AiDeckStrategyDeckSnapshot> = {
     runner: deckSnapshotForSimulation(
       runnerDeckDefinition,
       state.deckMetadata?.runner ?? config.runnerDeckMetadata,
@@ -403,7 +406,7 @@ function simulateAiGame(
       reasonCode: decision.reasonCode,
       explanation: decision.explanation,
       confidence: decision.confidence ?? 0,
-      evidence: decision.evidence ?? [],
+      evidence: safeEvidenceForSimulationDecision(decision),
       fallbackUsed: decision.fallbackUsed,
       timeoutUsed: decision.timeoutUsed ?? false,
       ...(targetServerId ? { targetServerId } : {}),

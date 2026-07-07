@@ -204,8 +204,7 @@ export type {
   MissingCapability,
   SearchAccessProfile,
 } from "./deck-capabilities";
-export { buildDeckDoctrineProfile } from "./deck-doctrine";
-export type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+export type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 export {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,

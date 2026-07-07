@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { chooseCorpAction, chooseRunnerAction } from "./index";
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
-import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import {
   buildDeckStrategyProfile,
   type AiDeckStrategyProfile,
@@ -31,7 +31,7 @@ describe("Deck strategy runtime vertical slices", () => {
 
   it("recognizes representative golden strategy fixtures", () => {
     const cases: Array<{
-      snapshot: AiDeckDoctrineDeckSnapshot;
+      snapshot: AiDeckStrategyDeckSnapshot;
       expectedStrategy: string;
     }> = [
       {
@@ -178,7 +178,7 @@ describe("Deck strategy runtime vertical slices", () => {
     const exposedAgenda = visibleCard("exposed-agenda", "corp", "agenda", {
       definitionId: "simple_agenda",
       title: "Simple Agenda",
-      advancementRequirement: 3,
+      advancementRequirement: 5,
       advancementCounters: 1,
     });
     const contestableAdvance = legalAction(
@@ -336,7 +336,7 @@ describe("Deck strategy runtime vertical slices", () => {
 
 function strategicInput(params: {
   side: Side;
-  snapshot: AiDeckDoctrineDeckSnapshot;
+  snapshot: AiDeckStrategyDeckSnapshot;
   actions: LegalAction[];
   credits: number;
   servers?: PlayerView["servers"];
@@ -552,7 +552,7 @@ function snapshot(
   deckSnapshotId: string,
   side: Side,
   cards: Array<[cardId: string, quantity: number]>,
-): AiDeckDoctrineDeckSnapshot {
+): AiDeckStrategyDeckSnapshot {
   return {
     deckSnapshotId,
     side,
@@ -561,7 +561,7 @@ function snapshot(
 }
 
 function productiveStrategyProfile(
-  snapshot: AiDeckDoctrineDeckSnapshot,
+  snapshot: AiDeckStrategyDeckSnapshot,
   strategyId: string,
 ): AiDeckStrategyProfile {
   const cardCount = snapshot.cards.reduce(
@@ -610,7 +610,7 @@ function productiveStrategyProfile(
   };
 }
 
-function runnerCentralPressureSnapshot(): AiDeckDoctrineDeckSnapshot {
+function runnerCentralPressureSnapshot(): AiDeckStrategyDeckSnapshot {
   return snapshot("dsr08-runner-central-pressure", "runner", [
     ["onr_v1_081_custodial-position", 2],
     ["onr_v1_085_executive-wiretaps", 2],
@@ -621,7 +621,7 @@ function runnerCentralPressureSnapshot(): AiDeckDoctrineDeckSnapshot {
   ]);
 }
 
-function runnerRemoteContestSnapshot(): AiDeckDoctrineDeckSnapshot {
+function runnerRemoteContestSnapshot(): AiDeckStrategyDeckSnapshot {
   return snapshot("dsr08-runner-remote-contest", "runner", [
     ["onr_v1_156_corporate-ally", 2],
     ["onr_v1_173_restrictive-net-zoning", 2],
@@ -632,7 +632,7 @@ function runnerRemoteContestSnapshot(): AiDeckDoctrineDeckSnapshot {
   ]);
 }
 
-function corpTagPunishSnapshot(): AiDeckDoctrineDeckSnapshot {
+function corpTagPunishSnapshot(): AiDeckStrategyDeckSnapshot {
   return snapshot("dsr08-corp-tag-punish", "corp", [
     ["onr_v1_285_closed-accounts", 2],
     ["onr_v1_299_power-grid-overload", 2],
@@ -642,7 +642,7 @@ function corpTagPunishSnapshot(): AiDeckDoctrineDeckSnapshot {
   ]);
 }
 
-function corpRemoteScoringSnapshot(): AiDeckDoctrineDeckSnapshot {
+function corpRemoteScoringSnapshot(): AiDeckStrategyDeckSnapshot {
   return snapshot("dsr08-corp-remote-scoring", "corp", [
     ["onr_v1_355_crystal-palace-station-grid", 2],
     ["onr_v1_279_wall-of-static", 3],
@@ -651,7 +651,7 @@ function corpRemoteScoringSnapshot(): AiDeckDoctrineDeckSnapshot {
   ]);
 }
 
-function corpIceTaxSnapshot(): AiDeckDoctrineDeckSnapshot {
+function corpIceTaxSnapshot(): AiDeckStrategyDeckSnapshot {
   return snapshot("dsr08-corp-ice-tax", "corp", [
     ["onr_v1_232_crystal-wall", 2],
     ["onr_v1_237_data-wall", 2],

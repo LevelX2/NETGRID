@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { buildDeckDoctrineProfile } from "./deck-doctrine";
 import { buildDeckDoctrineRuntimeContext } from "./deck-doctrine-runtime-context";
 
 describe("buildDeckDoctrineRuntimeContext", () => {
@@ -28,20 +27,19 @@ describe("buildDeckDoctrineRuntimeContext", () => {
     expect(context.rolesStatus).toBe("unknown_snapshot");
   });
 
-  it("preserves explicit v1 doctrine profiles for compatibility callers", () => {
-    const snapshot = {
-      deckSnapshotId: "runner-fixture",
-      side: "runner" as const,
-      cards: [{ cardId: "unknown_runner_support_only", quantity: 1 }],
-    };
-    const v1Profile = buildDeckDoctrineProfile(snapshot);
+  it("builds productive strategy context without a v1 doctrine profile", () => {
     const context = buildDeckDoctrineRuntimeContext({
       side: "runner",
-      deckSnapshot: snapshot,
-      v1Profile,
+      deckSnapshot: {
+        deckSnapshotId: "runner-fixture",
+        side: "runner",
+        cards: [{ cardId: "unknown_runner_support_only", quantity: 1 }],
+      },
       neutralDeckId: "runner-fixture",
     });
 
-    expect(context.v1Profile).toBe(v1Profile);
+    expect(context.strategyProfile.deckId).toBe("runner-fixture");
+    expect(context).not.toHaveProperty("v1Profile");
+    expect(context.v2Diagnostic.source.mode).toBe("report_only");
   });
 });

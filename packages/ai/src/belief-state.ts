@@ -792,7 +792,9 @@ function hqCandidateGroupsWithinAvailableSlots(
   const selected: HqHandCandidateGroupMemory[] = [];
   for (const group of candidateGroups.slice(-6).reverse()) {
     const groupRemainder = Math.max(0, group.candidateCount - group.departureCount);
-    if (groupRemainder <= 0) continue;
+    const ambiguousUnknownInstallCandidate =
+      group.candidateCount > 0 && group.unknownCandidateCount > 0;
+    if (groupRemainder <= 0 && !ambiguousUnknownInstallCandidate) continue;
     selected.push(group);
     remainingSlots -= groupRemainder;
     if (remainingSlots <= 0) break;
