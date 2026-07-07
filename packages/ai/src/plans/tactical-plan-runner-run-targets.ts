@@ -22,8 +22,12 @@ export function runnerAdjustedPlanPriority(
   basePriority: number,
 ): number {
   const evaluation = runnerRunTargetEvaluationForAction(context, action);
-  if (!evaluation) return basePriority;
-  return basePriority + runnerRunTargetTacticalPriorityDelta(evaluation);
+  const serverId = actionServerId(action);
+  return (
+    basePriority +
+    (evaluation ? runnerRunTargetPlanPriorityDelta(evaluation) : 0) +
+    runnerDeckStrategyPlanPriorityBoost(context, serverId)
+  );
 }
 
 export function runnerRunTargetPlanScoreBreakdown(
@@ -44,15 +48,17 @@ export function runnerRunTargetPlanScoreBreakdown(
           {
             key: "runner_run_target_recommendation",
             label: "RunTarget-Empfehlung",
-            value: runnerRunTargetTacticalPriorityDelta(evaluation),
+            value: runnerRunTargetPlanPriorityDelta(evaluation),
             reason: [
               evaluation.recommendation,
               `payoff:${evaluation.accessPayoff}`,
               `score:${evaluation.score}`,
+              ...(evaluation.scoreThreat ? ["score_threat:true"] : []),
             ].join(";"),
           },
         ]
       : []),
+    ...runnerDeckStrategyPlanScoreBreakdown(context, actionServerId(action)),
   ];
 }
 
@@ -65,7 +71,8 @@ export function runnerEconomyGoalPriority(
   if (posture.recommendation === "cash_out_bank") return basePriority + 160;
   if (posture.creditBasePlan.recommendation === "fund_useful_hand_card")
     return basePriority + 140;
-  if (posture.creditBasePlan.economyPriority === "high") return basePriority + 120;
+  if (posture.creditBasePlan.economyPriority === "high")
+    return basePriority + 120;
   if (posture.recommendation === "build_economy") return basePriority + 90;
   return basePriority;
 }
@@ -92,8 +99,9 @@ export function assessRunnerPressureBudget(
     reservePolicy.remoteScoreThreat !== "none" &&
     reservePolicy.belowReserveNow &&
     reservePolicy.canContestIfFunded;
-  const allowedProbeEvaluations = (context.runnerRunTargetEvaluations ?? [])
-    .filter((evaluation) => runnerPressureProbeTargetAllowed(evaluation));
+  const allowedProbeEvaluations = (
+    context.runnerRunTargetEvaluations ?? []
+  ).filter((evaluation) => runnerPressureProbeTargetAllowed(evaluation));
   const allowedProbeTargets = allowedProbeEvaluations
     .map((evaluation) => evaluation.targetServerId)
     .sort();
@@ -102,7 +110,9 @@ export function assessRunnerPressureBudget(
       targetServerId: evaluation.targetServerId,
       priority: runnerPressureProbeBasePriority(evaluation),
     }))
-    .sort((left, right) => left.targetServerId.localeCompare(right.targetServerId));
+    .sort((left, right) =>
+      left.targetServerId.localeCompare(right.targetServerId),
+    );
   const bestProbeBaseline = Math.max(
     0,
     ...probeBaselines.map((baseline) => baseline.priority),
@@ -116,7 +126,9 @@ export function assessRunnerPressureBudget(
     .map((baseline) => baseline.targetServerId);
   const blockedReasons = [
     ...(!reservePressureActive ? ["reserve_pressure_inactive"] : []),
-    ...(usefulHandDevelopmentAvailable ? ["useful_hand_development_available"] : []),
+    ...(usefulHandDevelopmentAvailable
+      ? ["useful_hand_development_available"]
+      : []),
     ...(remoteFundingNeed ? ["remote_contest_funding_need"] : []),
     ...(allowedProbeTargets.length === 0 ? ["no_safe_probe_target"] : []),
   ];
@@ -180,8 +192,7 @@ export function runnerPressureProbeAllowance(
       ? RUNNER_PRESSURE_PROBE_VARIATION_BONUS
       : 0;
   return {
-    priorityBonus:
-      RUNNER_PRESSURE_PROBE_PRIORITY_BONUS + variationBonus,
+    priorityBonus: RUNNER_PRESSURE_PROBE_PRIORITY_BONUS + variationBonus,
     evidence: [
       ...budget.evidence,
       "pressure_probe_allowed:true",
@@ -227,12 +238,15 @@ export function runnerRunTargetPlanEvidence(
   action: LegalAction,
 ): string[] {
   const evaluation = runnerRunTargetEvaluationForAction(context, action);
-  if (!evaluation) return [];
+  const serverId = actionServerId(action);
+  if (!evaluation) return runnerDeckStrategyPlanEvidence(context, serverId);
   return [
     `runner_run_target_recommendation:${evaluation.recommendation}`,
     `runner_run_target_payoff:${evaluation.accessPayoff}`,
     `runner_run_target_path:${evaluation.pathPassability}`,
     `runner_run_target_score:${evaluation.score}`,
+    ...(evaluation.scoreThreat ? ["runner_run_target_score_threat:true"] : []),
+    ...runnerDeckStrategyPlanEvidence(context, serverId),
     ...evaluation.evidence.filter(
       (entry) =>
         entry === "known_remote_no_current_payoff" ||
@@ -251,4 +265,102 @@ export function runnerRunTargetStepRationale(
     `RunTargetEvaluation recommends ${evaluation.recommendation}.`,
     `Access payoff is ${evaluation.accessPayoff}; path is ${evaluation.pathPassability}.`,
   ];
+}
+
+function runnerRunTargetPlanPriorityDelta(
+  evaluation: RunnerRunTargetEvaluation,
+): number {
+  return (
+    runnerRunTargetTacticalPriorityDelta(evaluation) +
+    runnerScoreThreatPlanUrgencyBoost(evaluation)
+  );
+}
+
+function runnerScoreThreatPlanUrgencyBoost(
+  evaluation: RunnerRunTargetEvaluation,
+): number {
+  if (!evaluation.scoreThreat) return 0;
+  return 520;
+}
+
+export function runnerDeckStrategyPlanPriorityBoost(
+  context: TacticalPlanBuildContext,
+  serverId: string | undefined,
+): number {
+  if (!serverId || !context.strategicIntentState) return 0;
+  const primaryFit = runnerDeckStrategyServerFit(
+    context.strategicIntentState.primaryStrategy.strategyId,
+    serverId,
+  );
+  if (primaryFit) return primaryFit === "exact" ? 120 : 90;
+  const secondaryFit = context.strategicIntentState.secondaryStrategies.some(
+    (strategy) => runnerDeckStrategyServerFit(strategy.strategyId, serverId),
+  );
+  return secondaryFit ? 60 : 0;
+}
+
+function runnerDeckStrategyPlanScoreBreakdown(
+  context: TacticalPlanBuildContext,
+  serverId: string | undefined,
+): PlanScoreBreakdown[] {
+  const boost = runnerDeckStrategyPlanPriorityBoost(context, serverId);
+  if (boost <= 0 || !context.strategicIntentState || !serverId) return [];
+  return [
+    {
+      key: "runner_deck_strategy_plan_fit",
+      label: "Deck strategy plan fit",
+      value: boost,
+      reason: runnerDeckStrategyPlanEvidence(context, serverId).join("|"),
+    },
+  ];
+}
+
+function runnerDeckStrategyPlanEvidence(
+  context: TacticalPlanBuildContext,
+  serverId: string | undefined,
+): string[] {
+  const state = context.strategicIntentState;
+  if (!state || !serverId) return [];
+  const primaryFit = runnerDeckStrategyServerFit(
+    state.primaryStrategy.strategyId,
+    serverId,
+  );
+  const secondaryFits = state.secondaryStrategies
+    .filter((strategy) =>
+      runnerDeckStrategyServerFit(strategy.strategyId, serverId),
+    )
+    .map((strategy) => strategy.strategyId);
+  if (!primaryFit && secondaryFits.length === 0) return [];
+  return [
+    `deck_strategy_plan_fit_target:${serverId}`,
+    ...(primaryFit
+      ? [
+          `deck_strategy_plan_fit_primary:${state.primaryStrategy.strategyId}`,
+          `deck_strategy_plan_fit_level:${primaryFit}`,
+        ]
+      : []),
+    ...(secondaryFits.length > 0
+      ? [`deck_strategy_plan_fit_secondary:${secondaryFits.join("|")}`]
+      : []),
+  ];
+}
+
+function runnerDeckStrategyServerFit(
+  strategyId: string,
+  serverId: string,
+): "exact" | "kind" | undefined {
+  if (strategyId === "runner.rnd_pressure" && serverId === "rd") {
+    return "exact";
+  }
+  if (strategyId === "runner.hq_pressure" && serverId === "hq") {
+    return "exact";
+  }
+  if (
+    (strategyId === "runner.remote_contest" ||
+      strategyId === "runner.remote_trash") &&
+    serverId.startsWith("remote_")
+  ) {
+    return "kind";
+  }
+  return undefined;
 }
