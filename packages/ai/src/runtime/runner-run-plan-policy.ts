@@ -43,6 +43,24 @@ function runnerRunPlanAccessChoice(params: {
     (choice) => !choice.exclusion && runnerRunPlanAccessActionTypes.has(choice.action.type),
   );
   if (accessChoices.length === 0) return undefined;
+  const scoreSelected = runnerRunPlanBestAccessChoice(accessChoices);
+  const reserveTarget = runnerRunPlanAccessReserveTarget(params.plan);
+  if (params.plan.revalidation.status === "invalid") {
+    if (!scoreSelected) return undefined;
+    return annotateRunnerRunPlanChoice({
+      choice: scoreSelected,
+      plan: params.plan,
+      explanation:
+        "RunnerRunPlan ist invalidiert; die Access-Entscheidung faellt auf die aktuelle semantische Bewertung zurueck.",
+      extraEvidence: [
+        `runner_run_plan_access_selected:${scoreSelected.action.type}`,
+        `runner_run_plan_access_trash_policy:${params.plan.accessIntent?.trashPolicy ?? "none"}`,
+        `runner_run_plan_access_reserve:${reserveTarget}`,
+        "runner_run_plan_access_score_fallback:true",
+        "runner_run_plan_access_fallback_reason:invalid_revalidation",
+      ],
+    });
+  }
   const stealChoice = accessChoices.find(
     (choice) => choice.action.type === "steal_agenda",
   );
@@ -71,24 +89,28 @@ function runnerRunPlanAccessChoice(params: {
   const declineChoice = accessChoices.find(
     (choice) => choice.action.type === "decline_trash",
   );
-  const reserveTarget = runnerRunPlanAccessReserveTarget(params.plan);
   const trashBreaksReserve =
     trashChoice !== undefined &&
     params.input.playerView.own.credits - actionCreditCost(trashChoice.action) <
       reserveTarget;
+  const trashPolicy = params.plan.accessIntent?.trashPolicy;
+  const declineLowValueChoice =
+    declineChoice &&
+    trashPolicy === "decline_low_value" &&
+    (trashChoice === undefined || declineChoice.score >= trashChoice.score)
+      ? declineChoice
+      : undefined;
+  const declineLowValueYieldedToScore =
+    trashPolicy === "decline_low_value" &&
+    trashChoice !== undefined &&
+    declineChoice !== undefined &&
+    trashChoice.score > declineChoice.score;
   const selected =
-    trashChoice && params.plan.accessIntent?.trashPolicy === "must_trash_target"
+    trashChoice && trashPolicy === "must_trash_target"
       ? trashChoice
-      : declineChoice && params.plan.accessIntent?.trashPolicy === "decline_low_value"
-        ? declineChoice
-        : declineChoice && trashBreaksReserve
+      : declineChoice && trashBreaksReserve
           ? declineChoice
-          : [...accessChoices].sort(
-              (left, right) =>
-                right.score - left.score ||
-                runnerRunPlanAccessTypePriority(right.action.type) -
-                  runnerRunPlanAccessTypePriority(left.action.type),
-            )[0];
+          : declineLowValueChoice ?? scoreSelected;
   if (!selected) return undefined;
   return annotateRunnerRunPlanChoice({
     choice: selected,
@@ -96,9 +118,12 @@ function runnerRunPlanAccessChoice(params: {
     explanation: "RunnerRunPlan entscheidet den Zugriff anhand AccessIntent und Reserve.",
     extraEvidence: [
       `runner_run_plan_access_selected:${selected.action.type}`,
-      `runner_run_plan_access_trash_policy:${params.plan.accessIntent?.trashPolicy ?? "none"}`,
+      `runner_run_plan_access_trash_policy:${trashPolicy ?? "none"}`,
       `runner_run_plan_access_reserve:${reserveTarget}`,
       ...(trashBreaksReserve ? ["runner_run_plan_access_trash_breaks_reserve:true"] : []),
+      ...(declineLowValueYieldedToScore
+        ? ["runner_run_plan_access_decline_low_value_yielded_to_score:true"]
+        : []),
     ],
   });
 }
@@ -246,6 +271,17 @@ function runnerRunPlanAccessTypePriority(actionType: string): number {
   if (actionType === "trash_accessed_card") return 2;
   if (actionType === "decline_trash") return 1;
   return 0;
+}
+
+function runnerRunPlanBestAccessChoice(
+  choices: readonly SemanticRuntimeChoice[],
+): SemanticRuntimeChoice | undefined {
+  return [...choices].sort(
+    (left, right) =>
+      right.score - left.score ||
+      runnerRunPlanAccessTypePriority(right.action.type) -
+        runnerRunPlanAccessTypePriority(left.action.type),
+  )[0];
 }
 
 const runnerRunPlanRelevantActionTypes = new Set([

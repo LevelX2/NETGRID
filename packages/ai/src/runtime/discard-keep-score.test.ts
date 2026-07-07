@@ -19,11 +19,15 @@ describe("discard keep score", () => {
     expect(
       score(corpCard("role-ice-operation", "operation"), ["remote_ice"])
         .baseValue,
-    ).toBeGreaterThan(score(corpCard("neutral-operation", "operation")).baseValue);
+    ).toBeGreaterThan(
+      score(corpCard("neutral-operation", "operation")).baseValue,
+    );
     expect(
       score(corpCard("role-economy-operation", "operation"), ["economy_asset"])
         .baseValue,
-    ).toBeGreaterThan(score(corpCard("neutral-operation", "operation")).baseValue);
+    ).toBeGreaterThan(
+      score(corpCard("neutral-operation", "operation")).baseValue,
+    );
   });
 
   it("ignores substring-only Corp discard role noise", () => {
@@ -116,6 +120,44 @@ describe("discard keep score", () => {
     expect(supportBreaker).toBe(freshBreaker);
     expect(candidateNoise).toBeLessThan(freshBreaker);
   });
+
+  it("keeps playable nonduplicate Runner economy well above neutral discard fodder", () => {
+    const economy = score(
+      runnerCard("runner-broker", "resource"),
+      ["economy"],
+      "runner",
+      [],
+      {},
+      { credits: 3, legalActionForCard: true },
+    ).baseValue;
+    const neutral = score(
+      runnerCard("runner-neutral", "resource"),
+      [],
+      "runner",
+      [],
+      {},
+      { credits: 3 },
+    ).baseValue;
+
+    expect(economy).toBeGreaterThan(neutral + 300);
+  });
+
+  it("devalues non-additive Runner utility duplicates already represented in the rig", () => {
+    const freshUtility = score(
+      runnerCard("runner-stack-filter", "resource"),
+      ["program_search"],
+      "runner",
+      [],
+    ).baseValue;
+    const installedDuplicate = score(
+      runnerCard("runner-stack-filter", "resource"),
+      ["program_search"],
+      "runner",
+      [runnerCard("runner-stack-filter", "resource")],
+    ).baseValue;
+
+    expect(installedDuplicate).toBeLessThan(freshUtility - 100);
+  });
 });
 
 function score(
@@ -124,10 +166,17 @@ function score(
   side: "corp" | "runner" = "corp",
   rig: readonly VisibleCard[] = [],
   rolesByCardId: Record<string, readonly string[]> = {},
+  options: {
+    credits?: number;
+    extraGrip?: readonly VisibleCard[];
+    legalActionForCard?: boolean;
+  } = {},
 ) {
-  return discardKeepScore(input(card, side, rig), card, {
+  return discardKeepScore(input(card, side, rig, options), card, {
     rolesForCardId: (cardId) =>
-      cardId === card.definitionId ? roles : rolesByCardId[cardId ?? ""] ?? [],
+      cardId === card.definitionId
+        ? roles
+        : (rolesByCardId[cardId ?? ""] ?? []),
     definitionTypeForCardId: () => card.type,
     visibleCardPlayOrInstallCost: () => 0,
     runnerCardAddressesVisibleBreakerNeed: () => false,
@@ -141,6 +190,11 @@ function input(
   card: VisibleCard,
   side: "corp" | "runner",
   rig: readonly VisibleCard[] = [],
+  options: {
+    credits?: number;
+    extraGrip?: readonly VisibleCard[];
+    legalActionForCard?: boolean;
+  } = {},
 ): AiDecisionInput {
   return {
     side,
@@ -155,10 +209,10 @@ function input(
           side === "corp"
             ? corpCard("corp-identity", "identity")
             : runnerCard("runner-identity", "identity"),
-        credits: 5,
+        credits: options.credits ?? 5,
         clicks: 0,
         agendaPoints: 0,
-        gripOrHq: [card],
+        gripOrHq: [card, ...(options.extraGrip ?? [])],
         rig: [...rig],
         stackOrRdCount: 20,
         heapOrArchives: [],
@@ -183,12 +237,30 @@ function input(
       },
       servers: [],
       publicEvents: [],
-      legalActions: [],
+      legalActions: options.legalActionForCard
+        ? [
+            {
+              actionId: "use-card",
+              side,
+              type: side === "runner" ? "install_card" : "play_operation",
+              source: card.instanceId,
+            },
+          ]
+        : [],
       winner: null,
       agendaPointsToWin: 7,
     },
     eventTail: [],
-    legalActions: [],
+    legalActions: options.legalActionForCard
+      ? [
+          {
+            actionId: "use-card",
+            side,
+            type: side === "runner" ? "install_card" : "play_operation",
+            source: card.instanceId,
+          },
+        ]
+      : [],
     difficulty: "normal",
     seed: "discard-score-test",
     decisionId: "discard-score-test",

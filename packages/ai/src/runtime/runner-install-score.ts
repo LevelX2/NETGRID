@@ -5,6 +5,10 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { rolesHaveBreakerRole } from "./breaker-role-match";
+import {
+  runnerVisibleSearchCoverageNeed,
+  visibleCardCoversRequiredCoverage,
+} from "./runner-search-coverage-need";
 
 type RunnerProgramSacrificeInstallAssessment = {
   memoryRequired: boolean;
@@ -81,6 +85,29 @@ export function runnerInstallScoreComponents(
       label: "Breaker-Aufbau",
       value: 750,
       reason: "breaker_role",
+    });
+  }
+  const visibleCoverageNeed = sourceCard
+    ? runnerVisibleSearchCoverageNeed(input)
+    : undefined;
+  if (
+    sourceCard &&
+    visibleCoverageNeed &&
+    visibleCardCoversRequiredCoverage(
+      sourceCard,
+      visibleCoverageNeed.requiredCoverage,
+      (definitionId) => (definitionId === sourceCard.definitionId ? roles : []),
+    )
+  ) {
+    components.push({
+      key: "runner_install_required_coverage_answer",
+      label: "Sichtbare Coverage-Antwort",
+      value: 1250,
+      reason: [
+        `required:${visibleCoverageNeed.requiredCoverage}`,
+        `server:${visibleCoverageNeed.serverId}`,
+        `source:${sourceCard.definitionId ?? sourceCard.instanceId}`,
+      ].join("|"),
     });
   }
   if (

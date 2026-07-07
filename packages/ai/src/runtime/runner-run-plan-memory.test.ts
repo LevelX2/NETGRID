@@ -120,6 +120,20 @@ describe("runner run plan memory", () => {
       "runner.pressure_good_central_target",
     );
     expect(plan?.pathQuote.totalKnownCost).toBe(2);
+    expect(plan?.accessIntent?.trashPolicy).toBe("trash_if_value_positive");
+  });
+
+  it("creates a decline-low-value access intent only for known low-value targets", () => {
+    const startRun = action("start_run", { serverId: "rd" });
+    const plan = createRunnerRunPlanForSelectedAction({
+      input: runnerInput({ activeRun: false, legalActions: [startRun] }),
+      selectedAction: startRun,
+      runnerRunTargetEvaluations: [
+        runTargetEvaluation(startRun, { accessPayoff: "known_low_value" }),
+      ],
+    });
+
+    expect(plan?.accessIntent?.trashPolicy).toBe("decline_low_value");
   });
 
   it("creates a run plan from a selected card run action with a concrete target evaluation", () => {
@@ -413,7 +427,11 @@ function choice(
 
 function runTargetEvaluation(
   actionValue: LegalAction,
+  options: {
+    accessPayoff?: RunnerRunTargetEvaluation["accessPayoff"];
+  } = {},
 ): RunnerRunTargetEvaluation {
+  const accessPayoff = options.accessPayoff ?? "unknown";
   return {
     schemaVersion: "runner-run-target-evaluation-v1",
     targetServerId: "rd",
@@ -421,8 +439,9 @@ function runTargetEvaluation(
     accessServerId: "rd",
     accessTargetKind: "rd",
     actionId: actionValue.actionId,
-    accessPayoff: "unknown",
-    knownAccessState: "unknown",
+    accessPayoff,
+    knownAccessState:
+      accessPayoff === "known_low_value" ? "known_no_current_payoff" : "unknown",
     multiaccessAvailable: false,
     pathPassability: "reachable",
     pathCost: 2,

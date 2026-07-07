@@ -164,7 +164,9 @@ describe("Semantic AI runtime cutover", () => {
     const decision = chooseRunnerAction(input);
 
     expect(decision.actionId).toBe("gain-credit");
-    expect(decision.evidence).toContain("semantic_runtime_scope:basic_economy_draw");
+    expect(decision.evidence).toContain(
+      "semantic_runtime_scope:basic_economy_draw",
+    );
   });
 
   it("keeps the replay cluster shape on the visible run path", () => {
@@ -226,7 +228,9 @@ describe("Semantic AI runtime cutover", () => {
     input.playerView.own.credits = 8;
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
-    const decision = chooseRunnerAction(input, { persistTacticalPlanMemory: false });
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
 
     expect(decision.actionId).toBe("run-rd");
     expect(
@@ -288,7 +292,9 @@ describe("Semantic AI runtime cutover", () => {
       credits: 0,
     });
     const input = aiInput("runner", [gain, draw]) as AiDecisionInput & {
-      ownDeckDoctrineV2Diagnostic?: ReturnType<typeof buildDeckDoctrineV2Diagnostic>;
+      ownDeckDoctrineV2Diagnostic?: ReturnType<
+        typeof buildDeckDoctrineV2Diagnostic
+      >;
       ownStrategicIntentState?: ReturnType<typeof buildStrategicIntentState>;
     };
     input.ownDeckDoctrineV2Diagnostic = buildDeckDoctrineV2Diagnostic({
@@ -474,7 +480,9 @@ describe("Semantic AI runtime cutover", () => {
     );
 
     expect(getStrategicIntentMemorySnapshot(input)).toBeUndefined();
-    expect(preview.evidence).toContain("strategic_intent_memory_preview_only:true");
+    expect(preview.evidence).toContain(
+      "strategic_intent_memory_preview_only:true",
+    );
 
     const persisted = chooseSemanticRuntimeAction(
       input,
@@ -801,13 +809,17 @@ describe("Semantic AI runtime cutover", () => {
     );
     const input = aiInput("corp", [schlaghund]);
     input.playerView.servers = [
-      server("remote_1", [], [
-        visibleCard("schlaghund_1", "corp", "asset", {
-          definitionId: "onr_v1_339_schlaghund",
-          title: "Schlaghund",
-          rezzed: true,
-        }),
-      ]),
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("schlaghund_1", "corp", "asset", {
+            definitionId: "onr_v1_339_schlaghund",
+            title: "Schlaghund",
+            rezzed: true,
+          }),
+        ],
+      ),
     ];
 
     const decision = chooseSemanticRuntimeAction(
@@ -842,13 +854,7 @@ describe("Semantic AI runtime cutover", () => {
       input,
       {},
       semanticRuntimeDependencies(
-        [
-          semanticRuntimeChoice(
-            labelOnly,
-            160,
-            "corp.semantic.generic_damage",
-          ),
-        ],
+        [semanticRuntimeChoice(labelOnly, 160, "corp.semantic.generic_damage")],
         { initiallySelectedActionId: labelOnly.actionId },
       ),
     );
@@ -1080,14 +1086,11 @@ describe("Semantic AI runtime cutover", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server(
-        "remote_1",
-        [
-          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-            rezzed: true,
-          }),
-        ],
-      ),
+      server("remote_1", [
+        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+          rezzed: true,
+        }),
+      ]),
     ];
 
     const decision = chooseCorpAction(input);
@@ -1159,10 +1162,15 @@ describe("Semantic AI runtime cutover", () => {
   });
 
   it("funds remote rez floor before advancing a remote agenda behind unrezzed ice", () => {
-    const remoteAgenda = visibleCard("remote-agenda-below-rez-floor", "corp", "agenda", {
-      advancementCounters: 1,
-      advancementRequirement: 3,
-    });
+    const remoteAgenda = visibleCard(
+      "remote-agenda-below-rez-floor",
+      "corp",
+      "agenda",
+      {
+        advancementCounters: 1,
+        advancementRequirement: 3,
+      },
+    );
     const input = aiInput("corp", [
       legalAction(
         "advance-below-rez-floor",
@@ -1178,7 +1186,9 @@ describe("Semantic AI runtime cutover", () => {
       legalAction("draw", "corp", "draw_card", "Draw 1", { credits: 0 }),
     ]);
     input.playerView.own.credits = 1;
-    input.playerView.own.gripOrHq = [visibleCard("corp-ice-in-hq", "corp", "ice")];
+    input.playerView.own.gripOrHq = [
+      visibleCard("corp-ice-in-hq", "corp", "ice"),
+    ];
     input.playerView.opponent.rig = [];
     input.playerView.servers = [
       server("hq"),
@@ -1214,10 +1224,15 @@ describe("Semantic AI runtime cutover", () => {
   });
 
   it("allows remote agenda advance when credits still cover the unrezzed ice rez floor", () => {
-    const remoteAgenda = visibleCard("remote-agenda-with-rez-floor", "corp", "agenda", {
-      advancementCounters: 1,
-      advancementRequirement: 3,
-    });
+    const remoteAgenda = visibleCard(
+      "remote-agenda-with-rez-floor",
+      "corp",
+      "agenda",
+      {
+        advancementCounters: 1,
+        advancementRequirement: 3,
+      },
+    );
     const input = aiInput("corp", [
       legalAction(
         "advance-with-rez-floor",
@@ -1285,11 +1300,7 @@ describe("Semantic AI runtime cutover", () => {
     ]);
     input.playerView.own.credits = 2;
     input.playerView.own.gripOrHq = [agenda, expensiveIce];
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
     const decision = chooseCorpAction(input);
     const debugText = JSON.stringify(decision.decisionDebug);
@@ -2020,10 +2031,15 @@ describe("Semantic AI runtime cutover", () => {
   });
 
   it("uses Broker build and payout as explicit credit-bank plans", () => {
-    const bankSource = visibleCard("runner-credit-bank-source", "runner", "resource", {
-      definitionId: "onr_v1_154_broker",
-      title: "Credit Bank Source",
-    });
+    const bankSource = visibleCard(
+      "runner-credit-bank-source",
+      "runner",
+      "resource",
+      {
+        definitionId: "onr_v1_154_broker",
+        title: "Credit Bank Source",
+      },
+    );
     const stableInput = aiInput("runner", [
       legalAction(
         "broker-load",
@@ -2078,11 +2094,16 @@ describe("Semantic AI runtime cutover", () => {
   });
 
   it("does not cash out Broker immediately after a stable bank-build plan", () => {
-    const bankSource = visibleCard("runner-credit-bank-source", "runner", "resource", {
-      definitionId: "onr_v1_154_broker",
-      title: "Credit Bank Source",
-      counters: { power: 3 },
-    });
+    const bankSource = visibleCard(
+      "runner-credit-bank-source",
+      "runner",
+      "resource",
+      {
+        definitionId: "onr_v1_154_broker",
+        title: "Credit Bank Source",
+        counters: { power: 3 },
+      },
+    );
     const stableInput = aiInput("runner", [
       legalAction(
         "broker-load",
@@ -2242,6 +2263,152 @@ describe("Semantic AI runtime cutover", () => {
           reason: expect.stringContaining(
             "why_run_over_bank_build:known_agenda",
           ),
+        }),
+      ]),
+    );
+  });
+
+  it("installs Broker as a multi-turn bank plan before generic credit", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "install-broker",
+        "runner",
+        "install_card",
+        "Install Broker",
+        { credits: 3 },
+        { source: "onr_v1_154_broker" },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.clicks = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("onr_v1_154_broker", "runner", "resource"),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("install-broker");
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_bank_install_commitment",
+          reason: expect.stringContaining("bankCommitmentStatus:install_ready"),
+        }),
+      ]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("keeps loading Broker below its multi-load value target", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "broker-load",
+        "runner",
+        "activated_card_ability",
+        "Broker: 3 Credits auf Broker legen",
+        { credits: 0 },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationAddsHostedCredits: true },
+        },
+      ),
+      legalAction(
+        "broker-take",
+        "runner",
+        "activated_card_ability",
+        "Broker: Credits von Broker nehmen",
+        { credits: 0 },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationTakesHostedCredits: true },
+        },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 6;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_154_broker", "runner", "resource", {
+        counters: { bit: 6 },
+        counterDisplays: [
+          {
+            id: "broker-bank",
+            amount: 6,
+            displayKind: "stored_credits",
+            label: "6",
+            ariaLabel: "6 stored credits",
+            usageHint: "spendable",
+          },
+        ],
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("broker-load");
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_bank_investment_commitment",
+          reason: expect.stringContaining(
+            "bankCommitmentStatus:build_second_load",
+          ),
+        }),
+      ]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "bankCashOutThreshold:false",
+    );
+  });
+
+  it("cashes out Broker after reaching its multi-load value target", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "broker-take",
+        "runner",
+        "activated_card_ability",
+        "Broker: Credits von Broker nehmen",
+        { credits: 0 },
+        {
+          source: "onr_v1_154_broker",
+          payload: { cardImplementationTakesHostedCredits: true },
+        },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 6;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_154_broker", "runner", "resource", {
+        counters: { bit: 12 },
+        counterDisplays: [
+          {
+            id: "broker-bank",
+            amount: 12,
+            displayKind: "stored_credits",
+            label: "12",
+            ariaLabel: "12 stored credits",
+            usageHint: "spendable",
+          },
+        ],
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("broker-take");
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_bank_cashout_gate",
+          reason: expect.stringContaining("why_cashout_now:bank_threshold"),
         }),
       ]),
     );
@@ -2612,6 +2779,62 @@ describe("Semantic AI runtime cutover", () => {
     );
     expect(JSON.stringify(decision.decisionDebug)).toContain(
       "coverageAnswerRole:search_engine_setup",
+    );
+  });
+
+  it("does not repeat The Short Circuit search while a fetched program waits in grip", () => {
+    const input = runnerWallCoverageInput([
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "short-circuit-search",
+        "runner",
+        "activated_card_ability",
+        "The Short Circuit: Stack nach Programm durchsuchen",
+        { credits: 1 },
+        { source: "short-circuit" },
+      ),
+      legalAction("gain", "runner", "gain_credit", "1 Credit nehmen", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.rig = [
+      visibleCard("short-circuit", "runner", "resource", {
+        definitionId: "onr_v1_177_the-short-circuit",
+        title: "The Short Circuit",
+        rulesText: "Search your stack for a program.",
+      }),
+    ];
+    input.playerView.own.gripOrHq = [
+      visibleCard("pile-driver", "runner", "program", {
+        definitionId: "onr_v1_047_pile-driver",
+        title: "Pile Driver",
+      }),
+    ];
+    input.playerView.publicEvents = [
+      publicEvent("previous-short-circuit-search", "activated_card_ability", 73, {
+        actor: "runner",
+        actionType: "activated_card_ability",
+        hiddenZoneAction: "p3_37_search_stack_to_grip",
+      }),
+    ];
+    input.eventTail = input.playerView.publicEvents;
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("gain");
+    expect(decision.actionId).not.toBe("short-circuit-search");
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "coverage_search_wait_for_install_or_fund",
     );
   });
 

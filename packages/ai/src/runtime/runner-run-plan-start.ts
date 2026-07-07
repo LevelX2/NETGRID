@@ -353,11 +353,11 @@ function runnerRunAccessIntentFor(params: {
         ? "must_steal"
         : "steal_if_affordable",
     trashPolicy:
-      payoff === "trash_affordable"
-        ? "trash_if_value_positive"
-        : payoff === "trash_unaffordable"
+      payoff === "trash_unaffordable"
           ? "must_trash_target"
-          : "decline_low_value",
+          : payoff === "known_low_value"
+            ? "decline_low_value"
+            : "trash_if_value_positive",
     reserveForStealOrTrash:
       payoff === "trash_affordable" || payoff === "agenda" ? 0 : 0,
   };

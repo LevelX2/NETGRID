@@ -66,6 +66,46 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideChoice).toBeUndefined();
   });
 
+  it("lets known-agenda runs override mapped coverage setup events", () => {
+    const bodyweight = legalAction("bodyweight", "play_event");
+    const run = legalAction("run-hq", "start_run", { serverId: "hq" });
+    const urgentRun = choice(run, 2703, [
+      ...scoreComponentEvidence("runner_goal_fit_reachable_run"),
+      ...scoreComponentEvidence("runner_hq_known_agenda"),
+    ]);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [urgentRun, choice(bodyweight, 1328)],
+      coverageMapping([bodyweight]),
+      urgentRun,
+    );
+
+    expect(result.overrideChoice?.action.actionId).toBe("run-hq");
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-hq");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe("bodyweight");
+  });
+
+  it("lets fresh R&D agenda-pressure runs override mapped coverage setup events", () => {
+    const draw = legalAction("draw", "draw_card");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const urgentRun = choice(run, 2603, [
+      ...scoreComponentEvidence("runner_goal_fit_reachable_run"),
+      ...scoreComponentEvidence("runner_rnd_fresh_memory"),
+    ]);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [urgentRun, choice(draw, 1328)],
+      coverageMapping([draw]),
+      urgentRun,
+    );
+
+    expect(result.overrideChoice?.action.actionId).toBe("run-rd");
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-rd");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe("draw");
+  });
+
   it("lets a positive run override nonpositive direct coverage answers", () => {
     const prepare = legalAction("prepare-stale", "trigger_ability");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });

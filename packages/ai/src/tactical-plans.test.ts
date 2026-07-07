@@ -875,6 +875,72 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("blocks repeated The Short Circuit searches while the fetched program waits in hand", () => {
+    const searchAction = legalAction(
+      "short-circuit-search",
+      "runner",
+      "activated_card_ability",
+      {},
+      {
+        source: "short-circuit",
+        label: "The Short Circuit: Stack nach Programm durchsuchen",
+      },
+    );
+    const input = wallCoverageInput([
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      searchAction,
+      legalAction("gain", "runner", "gain_credit"),
+    ]);
+    input.playerView.own.rig = [
+      visibleCard("short-circuit", "runner", "resource", {
+        definitionId: "onr_v1_177_the-short-circuit",
+        title: "The Short Circuit",
+        rulesText: "Search your stack for a program.",
+      }),
+    ];
+    input.playerView.own.gripOrHq = [
+      visibleCard("pile-driver", "runner", "program", {
+        definitionId: "onr_v1_047_pile-driver",
+        title: "Pile Driver",
+      }),
+    ];
+    input.playerView.publicEvents = [
+      publicEvent("previous-short-circuit-search", 74, "activated_card_ability", {
+        actor: "runner",
+        actionType: "activated_card_ability",
+        hiddenZoneAction: "p3_37_search_stack_to_grip",
+      }),
+    ];
+    input.eventTail = input.playerView.publicEvents;
+
+    const coveragePlan = coverageSearchPlan("breaker_wall");
+    const mapping = mapPlanStepToLegalActions(
+      coveragePlan,
+      coveragePlan.currentStep,
+      [
+        {
+          ...candidateForAction(searchAction),
+          sourceKind: "card",
+          sourceCardId: "onr_v1_177_the-short-circuit",
+          semanticActionType: "card_ability.trigger",
+          actionTacticSignals: ["setup.program_search", "program_search"],
+        },
+      ],
+      input,
+    );
+
+    expect(mapping.status).toBe("blocked_missing_capability");
+    expect(mapping.actionCandidateIds).toEqual([]);
+    expect(mapping.rationale.join("\n")).toContain(
+      "rejectedFalseMatches:coverage_search_wait_for_install_or_fund",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "blocked_no_valid_search_action",
+    );
+  });
+
   it("uses Bodyweight draw-for-answer before basic draw when no better search is legal", () => {
     const input = wallCoverageInput([
       legalAction("run-remote", "runner", "start_run", {
@@ -1488,6 +1554,67 @@ describe("tactical plan model", () => {
         reason: "run_now;payoff:trash_affordable;score:480",
       },
     ]);
+  });
+
+  it("uses neutral remote score-threat goals as remote-contest anchors", () => {
+    const remoteRun = legalAction("run-remote-2", "runner", "start_run", {
+      serverId: "remote_2",
+    });
+    const input = aiInput("runner", [remoteRun]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_2", [], [
+        {
+          instanceId: "advanced-remote-root",
+          definitionId: "advanced-remote-root",
+          title: "Advanced remote root",
+          owner: "corp",
+          controller: "corp",
+          type: "agenda",
+          known: false,
+          advancementCounters: 2,
+        } as VisibleCard,
+      ]),
+    ];
+
+    const plans = buildTacticalPlans({
+      input,
+      tacticalGoals: [
+        {
+          goalId: "runner.neutral.remote_contest_if_score_threat",
+          family: "remote_contest",
+          priority: 820,
+          urgency: "high",
+          targetServerId: "remote_2",
+          source: "neutral",
+          evidence: ["neutral_goal:remote_contest", "run_target:remote_score_threat"],
+        },
+      ],
+    });
+    const remotePlan = plans.find(
+      (plan) => plan.planId === "runner.contest_remote:remote_2",
+    );
+
+    expect(remotePlan?.priority).toBe(927);
+    expect(remotePlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "strategic_plan_goal:runner.neutral.remote_contest_if_score_threat",
+        "neutral_goal:remote_contest",
+        "run_target:remote_score_threat",
+      ]),
+    );
+    expect(remotePlan?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        {
+          key: "strategic_tactical_goal_fit",
+          label: "Strategic goal fit",
+          value: 107,
+          reason: "runner.neutral.remote_contest_if_score_threat",
+        },
+      ]),
+    );
   });
 
   it("uses bank capability evidence for runner cashout plans", () => {

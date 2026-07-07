@@ -126,9 +126,15 @@ export function runnerRemoteGoalForServer(
   return strongestTacticalGoal(
     context,
     (goal) =>
-      isStrategicTacticalGoal(goal) &&
       (goal.family === "remote_contest" || goalIdMatches(goal.goalId, ["remote"])) &&
-      (goal.targetServerId === undefined || goal.targetServerId === serverId),
+      (goal.targetServerId === undefined || goal.targetServerId === serverId) &&
+      (
+        isStrategicTacticalGoal(goal) ||
+        goal.source === "run_target_evaluation" ||
+        goal.source === "neutral" ||
+        goal.goalId === "runner.contest_remote_if_score_threat" ||
+        goal.goalId === "runner.neutral.remote_contest_if_score_threat"
+      ),
   );
 }
 

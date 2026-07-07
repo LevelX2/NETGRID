@@ -99,14 +99,16 @@ export function coverageSearchActionFit(
     sourceRole &&
     coveragePlanRoleMatches(sourceRole, ["search"])
   ) {
+    const answerRole: CoverageAnswerRole =
+      action.type === "install_card" ? "search_engine_setup" : "program_search";
     const saturated = saturatedCoverageSearchActionFit(
       input,
       requiredCoverage,
       sourceRole,
+      answerRole,
+      action,
     );
     if (saturated) return saturated;
-    const answerRole: CoverageAnswerRole =
-      action.type === "install_card" ? "search_engine_setup" : "program_search";
     return {
       supportsActiveCapabilityNeed: true,
       ...(sourceCard.definitionId
@@ -188,6 +190,8 @@ export function coverageSearchActionFit(
       input,
       requiredCoverage,
       "program_search",
+      "program_search",
+      action,
     );
     if (saturated) return saturated;
     return {
@@ -249,12 +253,38 @@ function saturatedCoverageSearchActionFit(
   input: AiDecisionInput,
   requiredCoverage: RequiredCapabilityKind,
   matchedActionRole: string,
+  answerRole: CoverageAnswerRole,
+  action: LegalAction,
 ): CoverageSearchActionFit | undefined {
   const handAnswer = runnerHandBreakerForCoverage(
     input.playerView,
     requiredCoverage,
   );
-  if (!handAnswer) return undefined;
+  if (handAnswer) {
+    return {
+      supportsActiveCapabilityNeed: false,
+      answerRole: "not_coverage_answer",
+      recoveredCardRole: matchedActionRole,
+      supportsCreditNeed: false,
+      supportsDrawOrSearchNeed: false,
+      supportsSurvivalNeed: false,
+      recoveredCardPlanFit: "none",
+      recoveryLoopRisk: "high",
+      evidence: [
+        `activeRequiredCapability:${requiredCoverage}`,
+        "coverageAnswerRole:not_coverage_answer",
+        "planStepExpectedRole:install_or_fund_visible_answer",
+        `matchedActionRole:${matchedActionRole}`,
+        `visibleHandCoverageAnswer:${handAnswer.definitionId ?? handAnswer.title ?? "known"}`,
+        "rejectedFalseMatches:coverage_search_saturated_by_hand_answer",
+        ...recoveryLoopPenaltyEvidence(
+          recoveryLoopPenaltiesForCoverageSearch(false, false, false),
+        ),
+      ],
+    };
+  }
+  const pause = coverageProgramSearchPauseReason(input, answerRole, action);
+  if (!pause) return undefined;
   return {
     supportsActiveCapabilityNeed: false,
     answerRole: "not_coverage_answer",
@@ -269,13 +299,120 @@ function saturatedCoverageSearchActionFit(
       "coverageAnswerRole:not_coverage_answer",
       "planStepExpectedRole:install_or_fund_visible_answer",
       `matchedActionRole:${matchedActionRole}`,
-      `visibleHandCoverageAnswer:${handAnswer.definitionId ?? handAnswer.title ?? "known"}`,
-      "rejectedFalseMatches:coverage_search_saturated_by_hand_answer",
+      ...pause.evidence,
       ...recoveryLoopPenaltyEvidence(
         recoveryLoopPenaltiesForCoverageSearch(false, false, false),
       ),
     ],
   };
+}
+
+function coverageProgramSearchPauseReason(
+  input: AiDecisionInput,
+  answerRole: CoverageAnswerRole,
+  action: LegalAction,
+): { evidence: string[] } | undefined {
+  if (answerRole !== "program_search") return undefined;
+  const handCards = input.playerView.own.gripOrHq ?? [];
+  const handCount = handCards.length;
+  const maxHandSize = input.playerView.own.maxHandSize;
+  const visibleProgramInHand = handCards.find(
+    (card) => card.known !== false && card.type === "program",
+  );
+  if (
+    maxHandSize !== undefined &&
+    handCount >= maxHandSize &&
+    !searchActionConsumesHandCard(input, action)
+  ) {
+    return {
+      evidence: [
+        `visibleHandCount:${handCount}`,
+        `maxHandSize:${maxHandSize}`,
+        "rejectedFalseMatches:coverage_search_blocked_by_hand_limit",
+      ],
+    };
+  }
+  if (visibleProgramInHand && recentRunnerProgramSearchWithoutProgress(input)) {
+    return {
+      evidence: [
+        `visibleHandProgram:${visibleProgramInHand.definitionId ?? visibleProgramInHand.title ?? "known"}`,
+        "recentProgramSearchWithoutInstallOrRun:true",
+        "rejectedFalseMatches:coverage_search_wait_for_install_or_fund",
+      ],
+    };
+  }
+  if (
+    visibleProgramInHand &&
+    maxHandSize !== undefined &&
+    handCount >= Math.max(0, maxHandSize - 1) &&
+    !searchActionConsumesHandCard(input, action)
+  ) {
+    return {
+      evidence: [
+        `visibleHandProgram:${visibleProgramInHand.definitionId ?? visibleProgramInHand.title ?? "known"}`,
+        `visibleHandCount:${handCount}`,
+        `maxHandSize:${maxHandSize}`,
+        "rejectedFalseMatches:coverage_search_wait_for_hand_program_before_more_search",
+      ],
+    };
+  }
+  return undefined;
+}
+
+function searchActionConsumesHandCard(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.type !== "play_event" && action.type !== "install_card") {
+    return false;
+  }
+  const source = String(action.source ?? "");
+  return (input.playerView.own.gripOrHq ?? []).some(
+    (card) => card.instanceId === source,
+  );
+}
+
+function recentRunnerProgramSearchWithoutProgress(input: AiDecisionInput): boolean {
+  const history = mergedAiHistory(input);
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const payload = history[index]?.publicPayload ?? {};
+    const actor = typeof payload.actor === "string" ? payload.actor : undefined;
+    const actionType =
+      typeof payload.actionType === "string"
+        ? payload.actionType
+        : history[index]?.type;
+    if (actor !== "runner") continue;
+    if (actionType === "install_card" || actionType === "start_run") {
+      return false;
+    }
+    if (actionType === "end_turn") return false;
+    const hiddenZoneAction =
+      typeof payload.hiddenZoneAction === "string"
+        ? payload.hiddenZoneAction
+        : "";
+    if (
+      hiddenZoneAction.includes("search") &&
+      hiddenZoneAction.includes("stack") &&
+      hiddenZoneAction.includes("grip")
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function mergedAiHistory(input: AiDecisionInput): AiDecisionInput["eventTail"] {
+  const byId = new Map<string, AiDecisionInput["eventTail"][number]>();
+  for (const event of [
+    ...(input.playerView.publicEvents ?? []),
+    ...(input.eventTail ?? []),
+  ]) {
+    byId.set(event.eventId, event);
+  }
+  return [...byId.values()].sort(
+    (left, right) =>
+      (left.stateVersionAfter ?? 0) - (right.stateVersionAfter ?? 0),
+  );
 }
 
 function candidateHasProgramSearchSignal(
