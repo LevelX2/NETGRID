@@ -1561,6 +1561,98 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("keeps punish-primary active remote advances behind the rez reserve", () => {
+    const agenda = corpCard("active-score-agenda", "agenda", {
+      advancementRequirement: 4,
+      advancementCounters: 0,
+      agendaPoints: 4,
+    });
+    const advanceAgenda = corpAction(
+      "advance-active-score-agenda",
+      "advance_card",
+      { serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    advanceAgenda.costs = [{ credits: 1 }];
+    const gainCredit = corpAction("gain-credit", "gain_credit", {});
+    const input = {
+      ...corpInputWithRemoteAgenda(4, 3, agenda, [advanceAgenda, gainCredit]),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 1,
+      credits: 4,
+      rig: [],
+    });
+    input.playerView.servers = [
+      { id: "hq", label: "HQ", ice: [], root: [] },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [
+          corpIce("remote-wall-1", { rezCost: 5, rezzed: false }),
+          corpIce("remote-wall-2", { rezCost: 5, rezzed: false }),
+        ],
+        root: [agenda],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      actionCreditCost: (action: LegalAction) =>
+        action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId,
+      corpAdvanceRemoteScore: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId ? 1250 : 0,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "temporary_safe",
+              scoreHorizon: "next_turn",
+              agendaPointsAtRisk: 4,
+              runnerAgendaPointsAfterSteal: 5,
+              agendaStealSeverity: "normal",
+              missingVisibleBreakerCoverage: true,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: false,
+              affordableDurableRelevantIceCount: 1,
+              recommendedNextStep: "advance",
+              evidence: ["test_punish_primary_requires_rez_reserve"],
+            })
+          : undefined,
+    };
+
+    const advanceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceAgenda,
+      "simple_score_advance",
+      dependencies,
+    );
+
+    expect(advanceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_active_remote_agenda_underfunded_advance",
+          reason: expect.stringContaining(
+            "punish_primary_uncontested_advance_requires_reserve:true",
+          ),
+        }),
+      ]),
+    );
+    expect(
+      totalScoreFor(input, gainCredit, "basic_economy_draw", dependencies),
+    ).toBeGreaterThan(totalScore(advanceComponents));
+  });
+
   it("keeps score-now advances ahead of reserve funding without a strong same-remote ICE alternative", () => {
     const agenda = corpCard("active-score-agenda", "agenda", {
       advancementRequirement: 5,

@@ -885,6 +885,9 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
     scoringWindow.runnerCanContestBeforeScore !== true &&
     scoringWindow.runnerCanReachAccessBeforeScore !== true &&
     scoringWindow.agendaStealRelevantBeforeScore !== true;
+  const punishPrimaryUncontestedAdvanceRequiresReserve =
+    corpScoreRuntimeIsPunishPrimary(input) &&
+    scoringWindowRecommendsUncontestedAdvance;
   const tempoAdvanceUnderClock =
     corpActiveRemoteAgendaCanTempoAdvanceUnderClock(
       input,
@@ -898,7 +901,8 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
     !closesBeforeRunner &&
     scoringWindowNeedsFunding &&
     creditsAfterAction < state.reserveFloor &&
-    !scoringWindowRecommendsUncontestedAdvance &&
+    (!scoringWindowRecommendsUncontestedAdvance ||
+      punishPrimaryUncontestedAdvanceRequiresReserve) &&
     !tempoAdvanceUnderClock.allowed
   ) {
     return {
@@ -914,6 +918,9 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
         `reserve_floor:${state.reserveFloor}`,
         `advances_remaining:${state.advancesRemaining}`,
         `unrezzed_remote_rez_cost:${state.unrezzedRemoteRezCost}`,
+        ...(punishPrimaryUncontestedAdvanceRequiresReserve
+          ? ["punish_primary_uncontested_advance_requires_reserve:true"]
+          : []),
         ...(scoringWindow?.recommendedNextStep
           ? [`recommended_next_step:${scoringWindow.recommendedNextStep}`]
           : []),
