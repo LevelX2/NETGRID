@@ -2374,8 +2374,9 @@ function installedIceProvidesConcreteCentralProtection(
   const placementIsConcrete =
     placementCandidate?.recommendation === "install_now" &&
     placementCandidate.components.visibleZeroEffect >= 0;
+  if (!placementIsConcrete) return false;
   if (profile.hasAccessStop && !profile.positionDependent) {
-    return placementIsConcrete;
+    return true;
   }
   if (
     serverId === "hq" &&

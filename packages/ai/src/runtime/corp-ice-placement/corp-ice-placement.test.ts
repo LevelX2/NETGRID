@@ -300,6 +300,35 @@ describe("corp ICE placement candidate scoring", () => {
     expect(layeredCandidate?.components.futureRunSynergy).toBeGreaterThan(0);
   });
 
+  it("hard-penalizes outside-scaling ICE as bad first remote protection", () => {
+    const huntingPack = corpIce("hunting-pack", {
+      title: "Hunting Pack",
+      rulesText:
+        "For each rezzed piece of ice installed outside Hunting Pack, Hunting Pack has one Trace subroutine.",
+      rezCost: 3,
+    });
+    const input = corpInput({
+      credits: 6,
+      hq: [huntingPack],
+      servers: [server("remote_1", [])],
+    });
+
+    const component = corpIcePlacementScoreComponent({
+      input,
+      action: installIceAction(huntingPack, "remote_1"),
+      serverId: "remote_1",
+      server: input.playerView.servers[0],
+      sourceCard: huntingPack,
+      actionCreditCost: 1,
+      iceRezCost: 3,
+    });
+
+    expect(component?.value).toBeLessThanOrEqual(-1800);
+    expect(component?.reason).toContain(
+      "defer_reason:bad_first_ice_wait_for_followup",
+    );
+  });
+
   it("exposes an AI score component with bounded evidence", () => {
     const ice = corpIce("data-wall", {
       rulesText: "*End the run.",

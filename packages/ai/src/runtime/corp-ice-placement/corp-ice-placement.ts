@@ -297,9 +297,14 @@ export function corpIcePlacementScoreComponent<
 ): AiDecisionScoreComponent | undefined {
   const candidate = corpIcePlacementCandidateForAction(params);
   if (!candidate) return undefined;
+  const badFirstIce = candidate.evidence.includes(
+    "defer_reason:bad_first_ice_wait_for_followup",
+  );
   const value =
     candidate.recommendation === "install_now"
       ? candidate.score
+      : badFirstIce
+        ? Math.min(candidate.score, -1800)
       : Math.min(candidate.score, 0);
   return {
     key: "corp_ice_placement_evaluator",

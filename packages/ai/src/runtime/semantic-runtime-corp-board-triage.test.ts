@@ -901,8 +901,8 @@ describe("semantic runtime corp board triage", () => {
           agendaCard("hq-agenda", 2),
           agendaCard("hq-agenda-2", 2),
           iceCard("hq-shock", {
-            title: "Shock.r",
-            definitionId: "onr_v1_268_shock-r",
+            title: "Damage Sentry",
+            definitionId: "damage_sentry",
             subtypes: ["Sentry"],
             rulesText: "Do 1 net damage.",
           }),
@@ -962,6 +962,105 @@ describe("semantic runtime corp board triage", () => {
     });
     expect(remoteComponent).toMatchObject({
       key: "corp_board_triage_mismatch",
+    });
+  });
+
+  it("does not let position-dependent punish ICE count as concrete HQ protection", () => {
+    const hqTrap = {
+      ...corpAction("install-hq-position-trap", "install_card", {
+        placement: "ice",
+        serverId: "hq",
+      }),
+      source: "hq-position-trap",
+    } as LegalAction;
+    const hqWall = {
+      ...corpAction("install-hq-wall", "install_card", {
+        placement: "ice",
+        serverId: "hq",
+      }),
+      source: "hq-wall",
+    } as LegalAction;
+    const remoteAgenda = {
+      ...corpAction("remote-scoreline", "install_card", {
+        placement: "root",
+        serverId: "remote_1",
+      }),
+      source: "hq-agenda",
+    } as LegalAction;
+    const input = {
+      ...corpInput({
+        corpHq: [
+          agendaCard("hq-agenda", 2),
+          agendaCard("hq-agenda-2", 2),
+          iceCard("hq-position-trap", {
+            title: "Position Trap",
+            definitionId: "position_trap",
+            subtypes: ["Sentry"],
+            rulesText:
+              "Trash 1 installed program if there is another rezzed ice outside this server.",
+          }),
+          iceCard("hq-wall", {
+            title: "HQ Wall",
+            definitionId: "hq_wall",
+            subtypes: ["Wall"],
+            rulesText: "End the run.",
+          }),
+        ],
+        legalActions: [remoteAgenda, hqTrap, hqWall],
+        servers: [
+          centralServer("hq", []),
+          centralServer("rd", []),
+          remoteServer("remote_1", [iceCard("remote-ice")]),
+        ],
+      }),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "durable",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezFullPathWithDynamicReserve: true,
+          corpCanRezRelevantIce: true,
+          recommendedNextStep: "score",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const trapComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      hqTrap,
+      dependencies,
+    );
+    const wallComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      hqWall,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_hq",
+      targetServerId: "hq",
+    });
+    expect(trapComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+    });
+    expect(wallComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
     });
   });
 
