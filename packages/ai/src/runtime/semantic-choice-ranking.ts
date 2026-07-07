@@ -351,6 +351,9 @@ function tacticalPlanCoverageMappingBlocksRunOverride(
   scoreGap: number,
   threshold: number,
 ): boolean {
+  if (coveragePlanRunOverrideHasUrgentPayoff(mapping, overrideChoice)) {
+    return false;
+  }
   if (
     mapping.plan.type === "runner.obtain_breaker_coverage" &&
     overrideChoice.action.type === "start_run" &&
@@ -365,6 +368,21 @@ function tacticalPlanCoverageMappingBlocksRunOverride(
     overrideChoice.action.type === "start_run" &&
     !mappedActionIds.has(overrideChoice.action.actionId) &&
     scoreGap <= threshold
+  );
+}
+
+function coveragePlanRunOverrideHasUrgentPayoff(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  return (
+    mapping.plan.type === "runner.obtain_breaker_coverage" &&
+    overrideChoice.action.type === "start_run" &&
+    semanticRuntimeChoiceHasAnyScoreComponent(overrideChoice, [
+      "runner_hq_known_agenda",
+      "runner_rnd_fresh_memory",
+      "runner_goal_fit_tactical_goal_run_target",
+    ])
   );
 }
 
@@ -568,6 +586,13 @@ function semanticRuntimeChoiceHasScoreComponent(
   key: string,
 ): boolean {
   return choice.evidence.includes(`semantic_score_component:${key}`);
+}
+
+function semanticRuntimeChoiceHasAnyScoreComponent(
+  choice: SemanticRuntimeChoice,
+  keys: readonly string[],
+): boolean {
+  return keys.some((key) => semanticRuntimeChoiceHasScoreComponent(choice, key));
 }
 
 function mergedAiPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
