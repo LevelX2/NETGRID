@@ -1428,6 +1428,139 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     ).toBeGreaterThan(totalScore(advanceComponents));
   });
 
+  it("continues an uncontested active remote agenda over quiet central over-ice", () => {
+    const agenda = corpCard("active-score-agenda", "agenda", {
+      advancementRequirement: 4,
+      advancementCounters: 0,
+      agendaPoints: 4,
+    });
+    const hqAgenda = agendaCard("agenda-in-hq", 2);
+    const hqIce = corpIce("hq-data-wall", {
+      title: "Data Wall",
+      rulesText: "End the run.",
+      rezCost: 1,
+    });
+    const advanceAgenda = corpAction(
+      "advance-active-score-agenda",
+      "advance_card",
+      { serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    advanceAgenda.costs = [{ credits: 1 }];
+    const installHqIce = corpAction(
+      "install-hq-ice",
+      "install_card",
+      { placement: "ice", serverId: "hq" },
+      hqIce.instanceId,
+    );
+    installHqIce.costs = [{ credits: 3 }];
+    const gainCredit = corpAction("gain-credit", "gain_credit", {});
+    const input = corpInputWithRemoteAgenda(4, 3, agenda, [
+      advanceAgenda,
+      installHqIce,
+      gainCredit,
+    ]);
+    input.playerView.own.gripOrHq = [hqAgenda, hqIce];
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 6,
+      credits: 4,
+      rig: [],
+    });
+    input.playerView.servers = [
+      {
+        id: "hq",
+        label: "HQ",
+        ice: [
+          corpIce("hq-existing-1", {
+            rezzed: true,
+            rezCost: 1,
+            rulesText: "End the run.",
+          }),
+          corpIce("hq-existing-2", {
+            rezzed: true,
+            rezCost: 1,
+            rulesText: "End the run.",
+          }),
+          corpIce("hq-existing-3", {
+            rezzed: false,
+            rezCost: 1,
+            rulesText: "End the run.",
+          }),
+        ],
+        root: [],
+      },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      {
+        id: "remote_1",
+        label: "Remote 1",
+        ice: [
+          corpIce("remote-wall-1", { rezCost: 5, rezzed: false }),
+          corpIce("remote-wall-2", { rezCost: 5, rezzed: false }),
+          corpIce("remote-wall-3", { rezCost: 5, rezzed: false }),
+          corpIce("remote-wall-4", { rezCost: 6, rezzed: false }),
+        ],
+        root: [agenda],
+      },
+    ];
+    const dependencies = {
+      ...testDependencies(),
+      actionCreditCost: (action: LegalAction) =>
+        action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+      rolesForAction: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installHqIce.actionId ? ["ice", "protect"] : [],
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId,
+      corpAdvanceRemoteScore: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId ? 1250 : 0,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "temporary_safe",
+              scoreHorizon: "next_turn",
+              agendaPointsAtRisk: 4,
+              runnerAgendaPointsAfterSteal: 10,
+              agendaStealSeverity: "game_ending",
+              missingVisibleBreakerCoverage: true,
+              corpCanRezRelevantIce: true,
+              corpCanRezFullPathWithDynamicReserve: false,
+              affordableDurableRelevantIceCount: 1,
+              recommendedNextStep: "advance",
+              evidence: ["test_uncontested_active_remote_advance"],
+            })
+          : undefined,
+    };
+
+    const advanceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceAgenda,
+      "simple_score_advance",
+      dependencies,
+    );
+
+    expect(advanceComponents).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_active_remote_agenda_underfunded_advance",
+        }),
+      ]),
+    );
+    expect(advanceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_active_remote_agenda_advance_clock",
+          reason: expect.stringContaining("recommended_next_step:advance"),
+        }),
+      ]),
+    );
+    expect(totalScore(advanceComponents)).toBeGreaterThan(
+      totalScoreFor(input, installHqIce, "basic_install", dependencies),
+    );
+  });
+
   it("keeps score-now advances ahead of reserve funding without a strong same-remote ICE alternative", () => {
     const agenda = corpCard("active-score-agenda", "agenda", {
       advancementRequirement: 5,

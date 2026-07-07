@@ -876,6 +876,15 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
     scoringWindow?.recommendedNextStep === "gain_credit" ||
     scoringWindow?.corpCanRezRelevantIce === false ||
     scoringWindow?.corpCanRezFullPathWithDynamicReserve === false;
+  const scoringWindowRecommendsUncontestedAdvance =
+    scoringWindow?.recommendedNextStep === "advance" &&
+    scoringWindow.windowKind !== "unsafe" &&
+    scoringWindow.runnerCanContestNow !== true &&
+    scoringWindow.runnerCanReachAccessNow !== true &&
+    scoringWindow.agendaStealRelevantNow !== true &&
+    scoringWindow.runnerCanContestBeforeScore !== true &&
+    scoringWindow.runnerCanReachAccessBeforeScore !== true &&
+    scoringWindow.agendaStealRelevantBeforeScore !== true;
   const tempoAdvanceUnderClock =
     corpActiveRemoteAgendaCanTempoAdvanceUnderClock(
       input,
@@ -889,6 +898,7 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
     !closesBeforeRunner &&
     scoringWindowNeedsFunding &&
     creditsAfterAction < state.reserveFloor &&
+    !scoringWindowRecommendsUncontestedAdvance &&
     !tempoAdvanceUnderClock.allowed
   ) {
     return {

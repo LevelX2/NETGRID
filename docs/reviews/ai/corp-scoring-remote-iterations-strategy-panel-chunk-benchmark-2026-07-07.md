@@ -96,3 +96,19 @@ Bereinigte Seed-Details:
 - Der `ERR_INVALID_TARGET` aus Seed `ai-v143-tuning-002` ist behoben; weitere Gewichtsaenderungen sollten auf dem bereinigten Post-Fix-Chunk aufsetzen.
 - Der Net-Damage-Slot darf nicht als Argument fuer bessere Scoreline-KI gelesen werden; die Siege kommen hier ueber Flatline.
 - Naechster belegter Optimierungspunkt bleibt Central-ICE-Uebergewicht gegenueber Score-Remote-/Scoreline-Fortsetzung, besonders im Hybrid-Slot.
+
+## Nachtrag: Active-Remote-Advance-Isolation
+
+Hypothese: Die Korp soll eine aktive, unkontestierte Remote-Agenda weiter advancen duerfen, wenn das Scoring-Window selbst `recommendedNextStep:advance` meldet und der Runner vor dem Score weder sichtbar contesten noch Access erreichen kann. In diesem engen Fall darf der Reserve-Floor die Advance-Aktion nicht weiterhin pauschal als `corp_active_remote_agenda_underfunded_advance` wegdruecken.
+
+Gegenhypothese verworfen: HQ-Agenda-Risiko nicht mehr als `hq_pressure` mitzuzahlen wirkte lokal plausibel, verschlechterte aber den Net-Damage-Slot stark. In der isolierten Central-only-Variante kippte `strategy_panel_net_damage_black_ice` Seed `ai-v143-tuning-001` von Corp-Flatline zu Runner-Sieg per `corp_deck_empty`, Seed `ai-v143-tuning-003` lief ins Action-Limit. Diese Variante wird deshalb nicht uebernommen.
+
+Isolierter 5-Seed-/480-Actions-Beleglauf fuer die Active-Advance-Variante:
+
+| Slot | Ergebnis gegen bereinigte Baseline | Agenda-Punkte Runner/Corp | Corp Scores | Runner Steals | Action-Limit | Auffaelligkeiten |
+| --- | --- | ---: | ---: | ---: | ---: | --- |
+| `strategy_panel_fast_advance_chrome_rush` | weiter 5/5 Corp-Agenda-Siege, leicht schneller | 6 / 35 | 23 | 3 | 0 | `averageActions` 222.8 statt 224.8; keine IllegalActions. |
+| `strategy_panel_net_damage_black_ice` | unveraendert 5/5 Corp-Flatline-Siege | 10 / 2 | 1 | 6 | 0 | Damage-Slot bleibt stabil; keine Verschlechterung durch Scoreline-Relaxation. |
+| `strategy_panel_hybrid_score_punish_cheap_bag` | weiter 5/5 Corp-Agenda-Siege, deutlich weniger Central-over-ice | 20 / 37 | 13 | 8 | 0 | `averageActions` 247.6 statt 285.4; `corpCentralOverIcedWithoutPressure` 189 statt 280; `corpExtraCentralIceChosenOverAdvanceOrScore` 0 statt 2. |
+
+Bewertung: Die Active-Advance-Variante ist als kleine, belegte Verbesserung uebernehmbar. Sie veraendert keine LegalAction-Erzeugung, keine Engine-Regeln und keine Hidden-Info-Grenzen; sie nutzt nur bereits vorhandene Scoring-Window-Evidence strenger fuer die Corp-Scorewertung.
