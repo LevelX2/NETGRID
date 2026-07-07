@@ -16,7 +16,8 @@ import type {
 } from "./semantic-runtime-types";
 import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 
-// Tactical plans may break close ties, but a clear semantic gap belongs to the current board.
+// Tactical plans define the active action lane. Scores rank choices inside that lane;
+// off-plan Runner overrides need explicit hard-interrupt evidence.
 const PLAN_MAPPED_CHOICE_MAX_SCORE_GAP = 600;
 const STRATEGIC_EXACT_OVERRIDE_SCORE_GAP = 320;
 const STRATEGIC_KIND_OVERRIDE_SCORE_GAP = 480;
@@ -61,8 +62,7 @@ export function tacticalPlanMappedChoice(
       ),
     )
     .filter((choice): choice is SemanticRuntimeChoice => Boolean(choice));
-  const mappedChoice =
-    mappedChoices.find((choice) => choice.score > 0) ?? mappedChoices[0];
+  const mappedChoice = bestPlanCompatibleSemanticChoice(mappedChoices);
   if (!mappedChoice) return {};
   if (
     overrideChoice &&
@@ -170,6 +170,25 @@ export function tacticalPlanMappedChoice(
         scoreGap,
       );
     if (
+      tacticalPlanRunnerMappingBlocksOffPlanOverride(
+        mapping,
+        overrideChoice,
+        mappedActionIds,
+        {
+          repeatedRunShouldYield,
+          corpBoardTriageMismatchShouldYield,
+        },
+      )
+    ) {
+      return tacticalPlanBlockedOverrideResult({
+        mappedChoice,
+        overrideChoice,
+        reason: "runner_plan_controller",
+        scoreGap,
+        threshold: Number.POSITIVE_INFINITY,
+      });
+    }
+    if (
       mappedNonPositiveAgainstPositive ||
       repeatedRunShouldYield ||
       corpBoardTriageMismatchShouldYield ||
@@ -214,6 +233,64 @@ export function tacticalPlanMappedChoice(
       "tactical_plan_mapping_outcome:plan_mapping_selected",
     ]),
   };
+}
+
+function bestPlanCompatibleSemanticChoice(
+  choices: readonly SemanticRuntimeChoice[],
+): SemanticRuntimeChoice | undefined {
+  const viable = choices.filter((choice) => !choice.exclusion);
+  if (viable.length === 0) return undefined;
+  return [...viable].sort(
+    (left, right) =>
+      positiveScoreRank(right.score) - positiveScoreRank(left.score) ||
+      right.score - left.score ||
+      left.action.actionId.localeCompare(right.action.actionId),
+  )[0];
+}
+
+function positiveScoreRank(score: number): number {
+  return score > 0 ? 1 : 0;
+}
+
+function tacticalPlanRunnerMappingBlocksOffPlanOverride(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+  mappedActionIds: ReadonlySet<string>,
+  exceptions: {
+    repeatedRunShouldYield: boolean;
+    corpBoardTriageMismatchShouldYield: boolean;
+  },
+): boolean {
+  if (mapping.plan.side !== "runner") return false;
+  if (!runnerPlanTypeRequiresPlanDominance(mapping.plan.type)) return false;
+  if (mappedActionIds.has(overrideChoice.action.actionId)) return false;
+  if (exceptions.repeatedRunShouldYield) return false;
+  if (exceptions.corpBoardTriageMismatchShouldYield) return false;
+  return !runnerPlanOverrideIsHardInterrupt(overrideChoice);
+}
+
+function runnerPlanTypeRequiresPlanDominance(type: TacticalPlan["type"]): boolean {
+  return (
+    type === "runner.contest_remote" ||
+    type === "runner.obtain_breaker_coverage" ||
+    type === "runner.opportunistic_central_run" ||
+    type === "runner.restore_hand_buffer" ||
+    type === "runner.develop_hand_card" ||
+    type === "runner.build_credit_base" ||
+    type === "runner.build_credit_bank" ||
+    type === "runner.cash_out_credit_bank"
+  );
+}
+
+function runnerPlanOverrideIsHardInterrupt(
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  if (overrideChoice.action.type !== "start_run") return false;
+  return semanticRuntimeChoiceHasAnyScoreComponent(overrideChoice, [
+    "runner_hq_known_agenda",
+    "runner_rnd_fresh_memory",
+    "runner_goal_fit_tactical_goal_run_target",
+  ]);
 }
 
 function tacticalPlanHandBufferMappingBlocksProbeRunOverride(
