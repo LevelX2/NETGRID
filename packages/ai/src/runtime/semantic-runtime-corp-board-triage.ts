@@ -225,18 +225,16 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
 
   const remoteFunding = highestPriorityScoreRemoteEntry(
     actions.filter((entry) =>
-      scoreRemoteNeedsFunding(input, entry, dependencies),
+      scoreRemoteNeedsFunding(input, entry, actions, dependencies),
     ),
   );
   if (remoteFunding?.scoringWindow) {
-    const requiredRezFloor =
-      scorelineRequiredRezFloor(input, remoteFunding, dependencies) ??
-      sameTargetProtectionInstallRezFloor(
-        input,
-        actions,
-        remoteFunding.serverId,
-        dependencies,
-      );
+    const requiredRezFloor = scoreRemoteRequiredRezFloor(
+      input,
+      actions,
+      remoteFunding,
+      dependencies,
+    );
     return {
       primary: "fund_score_remote",
       severity: triageSeverityFromScoringWindow(remoteFunding.scoringWindow),
@@ -772,7 +770,7 @@ function corpActiveScorelineClockPressure<TConsumer extends string>(
 ): ForcedScorelineClockPressure | undefined {
   const entries = actions.filter(
     (entry) =>
-      activeScorelineClockEntryIsPlayable(input, entry, dependencies) &&
+      activeScorelineClockEntryIsPlayable(input, entry, actions, dependencies) &&
       !corpPunishPrimaryShouldDeferSpeculativeScoreline(input, entry),
   );
   const preferred = highestPriorityActiveScorelineEntry(entries);
@@ -823,6 +821,7 @@ function corpActiveScorelineClockPressure<TConsumer extends string>(
 function activeScorelineClockEntryIsPlayable<TConsumer extends string>(
   input: AiDecisionInput,
   entry: ScoredLegalAction,
+  actions: readonly ScoredLegalAction[],
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
   if (!entry.serverId || entry.serverId === "new_remote") return false;
@@ -838,7 +837,7 @@ function activeScorelineClockEntryIsPlayable<TConsumer extends string>(
   }
   if (
     scoreRemoteNeedsProtection(input, entry, dependencies) ||
-    scoreRemoteNeedsFunding(input, entry, dependencies)
+    scoreRemoteNeedsFunding(input, entry, actions, dependencies)
   ) {
     return false;
   }
@@ -1737,6 +1736,7 @@ function scoreRemoteEntryPriority(entry: ScoredLegalAction): number {
 function scoreRemoteNeedsFunding<TConsumer extends string>(
   input: AiDecisionInput,
   entry: ScoredLegalAction,
+  actions: readonly ScoredLegalAction[],
   dependencies: CorpBoardTriageDependencies<TConsumer>,
 ): boolean {
   const assessment = entry.scoringWindow;
@@ -1750,7 +1750,12 @@ function scoreRemoteNeedsFunding<TConsumer extends string>(
   }
   if (assessment.windowKind === "none") return false;
   if (
-    existingScoreRemoteNeedsFundingBeforeProtection(input, entry) &&
+    existingScoreRemoteNeedsFundingBeforeProtection(
+      input,
+      entry,
+      actions,
+      dependencies,
+    ) &&
     !scoringWindowCanUseTriageScoreWindow(assessment)
   ) {
     return true;
@@ -1826,6 +1831,25 @@ function scorelineRequiredRezFloor<TConsumer extends string>(
     return Math.max(input.playerView.own.credits + 1, rezFloor);
   }
   return input.playerView.own.credits + 1;
+}
+
+function scoreRemoteRequiredRezFloor<TConsumer extends string>(
+  input: AiDecisionInput,
+  actions: readonly ScoredLegalAction[],
+  entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): number | undefined {
+  const scorelineFloor = scorelineRequiredRezFloor(input, entry, dependencies);
+  const protectionFloor = sameTargetProtectionInstallRezFloor(
+    input,
+    actions,
+    entry.serverId,
+    dependencies,
+  );
+  const floors = [scorelineFloor, protectionFloor].filter(
+    (value): value is number => value !== undefined && value > 0,
+  );
+  return floors.length > 0 ? Math.max(...floors) : undefined;
 }
 
 function scorelineRequiredRezFloorFromScoringWindowEvidence<
@@ -1917,6 +1941,8 @@ function scoringWindowEvidenceNumber(
 function existingScoreRemoteNeedsFundingBeforeProtection(
   input: AiDecisionInput,
   entry: ScoredLegalAction,
+  actions: readonly ScoredLegalAction[],
+  dependencies: CorpBoardTriageDependencies<string>,
 ): boolean {
   const assessment = entry.scoringWindow;
   if (!assessment) return false;
@@ -1934,11 +1960,39 @@ function existingScoreRemoteNeedsFundingBeforeProtection(
     explicitReserveFloor === undefined &&
     assessment.corpCanRezFullPathWithDynamicReserve === false &&
     input.playerView.own.credits <= 2;
+  const requiredEvidenceFloor = scorelineRequiredRezFloorFromScoringWindowEvidence(
+    input,
+    entry,
+    dependencies,
+  );
+  const belowFullPathEvidenceFloor =
+    explicitReserveFloor === undefined &&
+    requiredEvidenceFloor !== undefined &&
+    input.playerView.own.credits < requiredEvidenceFloor &&
+    assessment.corpCanRezRelevantIce !== false &&
+    assessment.corpCanRezFullPathWithDynamicReserve === false &&
+    assessment.runnerCanContestBeforeScore !== true &&
+    assessment.runnerCanReachAccessBeforeScore !== true;
+  const protectionInstallFloor = sameTargetProtectionInstallRezFloor(
+    input,
+    actions,
+    entry.serverId,
+    dependencies,
+  );
+  const belowProtectionInstallFloor =
+    assessment.recommendedNextStep === "build_remote_ice" &&
+    protectionInstallFloor !== undefined &&
+    input.playerView.own.credits < protectionInstallFloor &&
+    assessment.runnerCanContestBeforeScore !== true &&
+    assessment.runnerCanReachAccessBeforeScore !== true;
   return (
     entry.serverId !== undefined &&
     entry.serverId !== "new_remote" &&
     entry.serverId.startsWith("remote_") &&
-    (belowExplicitReserve || brokeFullPathAtLowCredits)
+    (belowExplicitReserve ||
+      brokeFullPathAtLowCredits ||
+      belowFullPathEvidenceFloor ||
+      belowProtectionInstallFloor)
   );
 }
 
