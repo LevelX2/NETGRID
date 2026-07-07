@@ -20,6 +20,7 @@ import { corpUpgradeInstallPlacementComponent } from "./corp-upgrade-placement";
 import { visibleCardDefinition } from "./card-definition-lookup";
 import { rolesMatch } from "./role-match";
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
+import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 
 type SemanticRuntimeCorpSafetyGate = {
   allowed: boolean;
@@ -102,6 +103,9 @@ export type SemanticRuntimeCorpScoreDependencies<TConsumer extends string> = {
         roles?: string[],
       ) => CorpScoringWindowAssessment | undefined)
     | undefined;
+  corpScorelineWindowAssessment?:
+    | ((input: AiDecisionInput) => CorpScorelineWindowAssessment)
+    | undefined;
   corpAdvancementCounterPlacementAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -177,6 +181,9 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       dependencies,
     );
   if (gameEndingExposure) components.push(gameEndingExposure);
+  const scorelineFunding =
+    corpScorelineFundingAssessmentComponent(input, action, dependencies);
+  if (scorelineFunding) components.push(scorelineFunding);
   if (action.type === "score_agenda") {
     components.push({
       key: "corp_score_available_agenda",
@@ -832,6 +839,81 @@ function corpGameEndingScorelineExposurePenaltyComponent<
       `agenda_steal_severity:${assessment.agendaStealSeverity ?? "unknown"}`,
       `runner_points_after_steal:${runnerAgendaPointsAfterSteal}`,
       ...assessment.evidence,
+    ].join("|"),
+  };
+}
+
+function corpScorelineFundingAssessmentComponent<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+): AiDecisionScoreComponent | undefined {
+  const assessment = dependencies.corpScorelineWindowAssessment?.(input);
+  if (!assessment || assessment.recommendedNextStep !== "fund_scoreline") {
+    return undefined;
+  }
+  const path = assessment.paths.find(
+    (candidate) => candidate.actionId === action.actionId,
+  );
+  const bestPath = assessment.bestPath;
+  const actionIsFundingPath =
+    path?.actionRoles.includes("fund_scoreline") === true ||
+    (actionProvidesCredits(action) &&
+      bestPath?.recommendedNextStep === "fund_scoreline" &&
+      bestPath.actionId === action.actionId);
+  if (actionIsFundingPath) {
+    return {
+      key: "corp_scoreline_funding_alignment",
+      label: "Scoreline-Funding",
+      value: 2600,
+      reason: [
+        "corp_scoreline_recommended_next_step:fund_scoreline",
+        `action:${action.type}`,
+        `action_id:${action.actionId}`,
+        ...(path
+          ? [`path_recommended_next_step:${path.recommendedNextStep}`]
+          : []),
+        ...(path?.blockers.map((blocker) => `path_blocker:${blocker}`) ?? []),
+        ...assessment.evidence,
+        ...(path?.evidence ?? []),
+      ].join("|"),
+    };
+  }
+  if (action.type !== "advance_card" && action.type !== "install_card") {
+    return undefined;
+  }
+  if (dependencies.corpAdvanceCompletesScore?.(input, action) === true) {
+    return undefined;
+  }
+  if (
+    corpSameTurnScoreCloseoutComponent(input, action, dependencies, undefined)
+  ) {
+    return undefined;
+  }
+  const roles = dependencies.rolesForAction(input, action);
+  if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
+    return undefined;
+  }
+  const actionNeedsFunding =
+    path?.recommendedNextStep === "fund_scoreline" ||
+    path?.blockers.includes("credits") === true ||
+    assessment.blockedByCredits === true;
+  if (!actionNeedsFunding) return undefined;
+  return {
+    key: "corp_scoreline_funding_mismatch",
+    label: "Scoreline-Funding fehlt",
+    value: -5200,
+    reason: [
+      "corp_scoreline_recommended_next_step:fund_scoreline",
+      "scoreline_action_before_funding:true",
+      `action:${action.type}`,
+      `action_id:${action.actionId}`,
+      ...(path
+        ? [`path_recommended_next_step:${path.recommendedNextStep}`]
+        : []),
+      ...(path?.blockers.map((blocker) => `path_blocker:${blocker}`) ?? []),
+      ...assessment.evidence,
+      ...(path?.evidence ?? []),
     ].join("|"),
   };
 }

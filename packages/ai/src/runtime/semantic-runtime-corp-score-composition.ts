@@ -33,6 +33,9 @@ export function createSemanticRuntimeCorpScoreComposition<
         : {}),
       corpInstallRemoteScore: dependencies.corpInstallRemoteScore,
       corpScoringWindowAssessment: dependencies.corpScoringWindowAssessment,
+      ...(dependencies.corpScorelineWindowAssessment
+        ? { corpScorelineWindowAssessment: dependencies.corpScorelineWindowAssessment }
+        : {}),
       corpAdvancementCounterPlacementAssessment:
         dependencies.corpAdvancementCounterPlacementAssessment,
       corpHasRemoteInstability: dependencies.corpHasRemoteInstability,

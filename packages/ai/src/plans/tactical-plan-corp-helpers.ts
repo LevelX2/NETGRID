@@ -2,6 +2,7 @@ import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import {
+  advanceCanCloseScoreThisTurn,
   advanceCompletesScore,
   corpRemoteContestabilityAssessment,
   remoteIsProtected,
@@ -90,6 +91,7 @@ export function corpScoreWindowBlockers(
   input: AiDecisionInput,
   serverId: string | undefined,
   action: LegalAction,
+  scorelineAssessment?: TacticalPlanBuildContext["corpScorelineWindowAssessment"],
 ): PlanBlocker[] {
   const blockers: PlanBlocker[] = [];
   const target = serverId ? { kind: "server" as const, id: serverId } : undefined;
@@ -126,11 +128,42 @@ export function corpScoreWindowBlockers(
       evidence: [`server:${serverId}`, ...remoteContestability.evidence],
     });
   }
+  const scorelineFundingPath = scorelineAssessment?.paths.find(
+    (path) => path.actionId === action.actionId,
+  );
+  const scorelineNeedsFunding =
+    scorelineAssessment?.recommendedNextStep === "fund_scoreline" &&
+    (scorelineFundingPath?.recommendedNextStep === "fund_scoreline" ||
+      scorelineFundingPath?.blockers.includes("credits") === true ||
+      scorelineAssessment.blockedByCredits === true);
+  if (
+    serverId &&
+    isRemoteServer(serverId) &&
+    scorelineNeedsFunding &&
+    !advanceCompletesScore(input.playerView, action) &&
+    !advanceCanCloseScoreThisTurn(input.playerView, action)
+  ) {
+    blockers.push({
+      blockerId: `missing_rez_reserve:${serverId}`,
+      kind: "missing_rez_reserve",
+      severity: "soft",
+      ...(target ? { target } : {}),
+      removalStepKind: "build_rez_reserve",
+      evidence: [
+        `server:${serverId}`,
+        `corp_credits:${input.playerView.own.credits}`,
+        "corp_scoreline_recommended_next_step:fund_scoreline",
+        "scoreline_funding_path_blocks_advance:true",
+        ...(scorelineFundingPath?.evidence ?? []),
+      ],
+    });
+  }
   if (
     serverId &&
     remoteIsProtected(input.playerView, serverId) &&
     serverHasUnrezzedIce(input.playerView, serverId) &&
-    input.playerView.own.credits < 4
+    input.playerView.own.credits < 4 &&
+    !blockers.some((blocker) => blocker.kind === "missing_rez_reserve")
   ) {
     blockers.push({
       blockerId: `missing_rez_reserve:${serverId}`,

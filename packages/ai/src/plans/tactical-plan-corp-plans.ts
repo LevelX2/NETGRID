@@ -71,7 +71,12 @@ export function buildCorpTacticalPlans(
   }
   for (const action of input.legalActions.filter((candidate) => candidate.type === "advance_card")) {
     const serverId = actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
-    const blockers = corpScoreWindowBlockers(input, serverId, action);
+    const blockers = corpScoreWindowBlockers(
+      input,
+      serverId,
+      action,
+      context.corpScorelineWindowAssessment,
+    );
     const currentStep = corpScoreWindowCurrentStep(action, blockers);
     const strategicBoost = tacticalGoalPriorityBoost(scorelineGoal);
     if (
@@ -120,7 +125,12 @@ export function buildCorpTacticalPlans(
   )) {
     const serverId = actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
     if (!serverId || !serverId.startsWith("remote_")) continue;
-    const blockers = corpScoreWindowBlockers(input, serverId, action);
+    const blockers = corpScoreWindowBlockers(
+      input,
+      serverId,
+      action,
+      context.corpScorelineWindowAssessment,
+    );
     const strategicBoost = tacticalGoalPriorityBoost(scorelineGoal);
     const currentStep =
       blockers.length > 0

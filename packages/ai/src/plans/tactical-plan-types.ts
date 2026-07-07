@@ -218,6 +218,22 @@ export type TacticalPlan = {
   updatedAtStateVersion: number;
 };
 
+export type TacticalPlanCorpScorelinePathAssessment = {
+  actionId: string;
+  serverId?: string;
+  recommendedNextStep: string;
+  blockers: readonly string[];
+  evidence: readonly string[];
+};
+
+export type TacticalPlanCorpScorelineAssessment = {
+  recommendedNextStep: string;
+  blockedByCredits: boolean;
+  bestPath?: TacticalPlanCorpScorelinePathAssessment;
+  paths: readonly TacticalPlanCorpScorelinePathAssessment[];
+  evidence: readonly string[];
+};
+
 export type TacticalPlanBuildContext = {
   input: AiDecisionInput;
   candidates?: readonly ActionSemanticCandidate[];
@@ -233,6 +249,7 @@ export type TacticalPlanBuildContext = {
   runnerTacticalGoals?: readonly RunnerTacticalGoal[];
   accessCommitment?: KnownRemoteAccessCommitment;
   accessOutcomeMemory?: AccessOutcomeMemoryStatus;
+  corpScorelineWindowAssessment?: TacticalPlanCorpScorelineAssessment;
 };
 
 export type PlanProgressionStatus =

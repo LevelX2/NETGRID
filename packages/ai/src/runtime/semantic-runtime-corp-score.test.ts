@@ -6,6 +6,7 @@ import type {
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
+import type { CorpScorelineWindowAssessment } from "./corp-scoreline/semantic-runtime-corp-scoreline-assessment";
 import {
   corpActionCandidateHasVisibleSignal,
   normalizedCorpReserveScoreValue,
@@ -1426,6 +1427,121 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     expect(
       totalScoreFor(input, gainCredit, "basic_economy_draw", dependencies),
     ).toBeGreaterThan(totalScore(advanceComponents));
+  });
+
+  it("aligns scoreline funding and suppresses the blocked scoreline action", () => {
+    const agenda = corpCard("remote-score-agenda", "agenda", {
+      advancementRequirement: 5,
+      advancementCounters: 1,
+      agendaPoints: 3,
+    });
+    const advanceAgenda = corpAction(
+      "advance-remote-score-agenda",
+      "advance_card",
+      { serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    advanceAgenda.costs = [{ credits: 1 }];
+    const gainCredit = corpAction("gain-credit", "gain_credit", {});
+    const input = corpInputWithRemoteAgenda(4, 3, agenda, [
+      advanceAgenda,
+      gainCredit,
+    ]);
+    const dependencies = {
+      ...testDependencies(),
+      actionCreditCost: (action: LegalAction) =>
+        action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId,
+      corpScorelineWindowAssessment: () =>
+        scorelineFundingAssessment({
+          advanceAction: advanceAgenda,
+          fundingAction: gainCredit,
+        }),
+    };
+
+    const advanceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceAgenda,
+      "simple_score_advance",
+      dependencies,
+    );
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      dependencies,
+    );
+
+    expect(advanceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_scoreline_funding_mismatch",
+          value: -5200,
+        }),
+      ]),
+    );
+    expect(creditComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_scoreline_funding_alignment",
+          value: 2600,
+        }),
+      ]),
+    );
+    expect(totalScore(creditComponents)).toBeGreaterThan(
+      totalScore(advanceComponents),
+    );
+  });
+
+  it("does not suppress a funded active scoreline advance that can close this turn", () => {
+    const agenda = corpCard("same-turn-score-agenda", "agenda", {
+      advancementRequirement: 3,
+      advancementCounters: 1,
+      agendaPoints: 2,
+    });
+    const advanceAgenda = corpAction(
+      "advance-same-turn-score-agenda",
+      "advance_card",
+      { serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    advanceAgenda.costs = [{ credits: 1 }];
+    const input = corpInputWithRemoteAgenda(8, 3, agenda, [advanceAgenda]);
+    const dependencies = {
+      ...testDependencies(),
+      actionCreditCost: (action: LegalAction) =>
+        action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId,
+      corpScorelineWindowAssessment: () =>
+        scorelineFundingAssessment({
+          advanceAction: advanceAgenda,
+          blockedByCredits: true,
+        }),
+    };
+
+    const advanceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceAgenda,
+      "simple_score_advance",
+      dependencies,
+    );
+
+    expect(advanceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_same_turn_score_closeout_advance",
+        }),
+      ]),
+    );
+    expect(advanceComponents).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_scoreline_funding_mismatch",
+        }),
+      ]),
+    );
   });
 
   it("continues an uncontested active remote agenda over quiet central over-ice", () => {
@@ -6061,6 +6177,61 @@ function scoringWindow(
     recommendedNextStep: "build_remote_ice",
     evidence: ["test_scoring_window"],
     ...overrides,
+  };
+}
+
+function scorelineFundingAssessment(params: {
+  advanceAction: LegalAction;
+  fundingAction?: LegalAction;
+  blockedByCredits?: boolean;
+}): CorpScorelineWindowAssessment {
+  const fundingAction = params.fundingAction;
+  const advancePath = {
+    actionId: params.advanceAction.actionId,
+    actionType: params.advanceAction.type,
+    serverId: "remote_1",
+    actionRoles: ["advance_agenda" as const],
+    windowKind: "blocked" as const,
+    recommendedNextStep: "fund_scoreline" as const,
+    safe: false,
+    blocked: true,
+    blockers: ["credits" as const],
+    creditsBeforeAction: 4,
+    creditsAfterAction: 3,
+    evidence: ["test_scoreline_advance_needs_funding"],
+  };
+  const fundingPath = fundingAction
+    ? {
+        actionId: fundingAction.actionId,
+        actionType: fundingAction.type,
+        serverId: "remote_1",
+        actionRoles: ["fund_scoreline" as const],
+        windowKind: "blocked" as const,
+        recommendedNextStep: "fund_scoreline" as const,
+        safe: true,
+        blocked: false,
+        blockers: [],
+        creditsBeforeAction: 4,
+        creditsAfterAction: 5,
+        evidence: ["test_scoreline_funding_path"],
+      }
+    : undefined;
+  return {
+    windowKind: "blocked",
+    terminalWindow: false,
+    recommendedNextStep: "fund_scoreline",
+    bestPath: fundingPath ?? advancePath,
+    paths: fundingPath ? [advancePath, fundingPath] : [advancePath],
+    scoreActionIds: [],
+    advanceToScoreActionIds: [],
+    agendaInstallActionIds: [],
+    protectedRemoteIds: ["remote_1"],
+    blockedByCredits: params.blockedByCredits ?? true,
+    blockedByCheapContest: false,
+    blockedByRunnerContest: false,
+    blockedByHqThreat: false,
+    runnerAccessThreatHigh: false,
+    evidence: ["test_scoreline_window_recommends_funding"],
   };
 }
 

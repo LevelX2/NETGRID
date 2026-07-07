@@ -45,6 +45,7 @@ import type {
 } from "./semantic-runtime-types";
 import {
   clearRunnerRunPlanMemory,
+  MissingRunnerRunPlanError,
   rememberRunnerRunPlanMemorySnapshot,
   requireActiveRunnerRunPlan,
 } from "./runner-run-plan-memory";
@@ -107,6 +108,9 @@ export type SemanticRuntimeDependencies = {
   evaluateTacticalPlans: (
     context: TacticalPlanBuildContext,
   ) => TacticalPlanRuntimeResult;
+  scorelineWindowAssessment?: (
+    input: AiDecisionInput,
+  ) => TacticalPlanBuildContext["corpScorelineWindowAssessment"];
   bestSemanticRuntimeChoice: (
     choices: readonly SemanticRuntimeChoice[],
   ) => SemanticRuntimeChoice | undefined;
@@ -188,7 +192,19 @@ export function chooseSemanticRuntimeAction(
   if (input.side === "runner" && !input.playerView.run) {
     clearRunnerRunPlanMemory(input);
   }
-  const activeRunnerRunPlanSnapshot = requireActiveRunnerRunPlan(input);
+  const activeRunnerRunPlanRecoveryEvidence: string[] = [];
+  const activeRunnerRunPlanSnapshot = (() => {
+    try {
+      return requireActiveRunnerRunPlan(input);
+    } catch (error) {
+      if (!(error instanceof MissingRunnerRunPlanError)) throw error;
+      activeRunnerRunPlanRecoveryEvidence.push(
+        "active_runner_run_plan_missing:true",
+        "active_runner_run_plan_recovery:semantic_runtime_fallback",
+      );
+      return undefined;
+    }
+  })();
   const activeRunnerRunPlan = activeRunnerRunPlanSnapshot
     ? revalidateRunnerRunPlan(input, activeRunnerRunPlanSnapshot)
     : undefined;
@@ -317,6 +333,10 @@ export function chooseSemanticRuntimeAction(
     frame: goalFrame,
     tacticalGoals: semanticChoiceTacticalGoals,
   });
+  const corpScorelineWindowAssessment =
+    input.side === "corp"
+      ? dependencies.scorelineWindowAssessment?.(input)
+      : undefined;
   const planRuntime = reactiveChoice
     ? emptyTacticalPlanRuntimeResult()
     : dependencies.evaluateTacticalPlans({
@@ -333,6 +353,9 @@ export function chooseSemanticRuntimeAction(
           ? { runnerHandDevelopmentEvaluations }
           : {}),
         ...(runnerTacticalGoals ? { runnerTacticalGoals } : {}),
+        ...(corpScorelineWindowAssessment
+          ? { corpScorelineWindowAssessment }
+          : {}),
         candidates: actionSemanticCandidates,
       });
   const bestChoice = dependencies.bestSemanticRuntimeChoice(choices);
@@ -466,6 +489,7 @@ export function chooseSemanticRuntimeAction(
       : {}),
     evidence: dependencies.scrubEvidence([
       ...selectedChoice.evidence,
+      ...activeRunnerRunPlanRecoveryEvidence,
       ...(coverageSelectionDebug?.evidence ?? []),
       `semantic_runtime_default:true`,
       `semantic_runtime_scope:${selectedChoice.scopeId}`,

@@ -108,6 +108,9 @@ export function createSemanticRuntimeDecisionComposition(
     evaluateRunnerRunTargets: dependencies.evaluateRunnerRunTargets,
     buildRunnerTacticalGoals: dependencies.buildRunnerTacticalGoals,
     evaluateTacticalPlans: dependencies.evaluateTacticalPlans,
+    ...(dependencies.scorelineWindowAssessment
+      ? { scorelineWindowAssessment: dependencies.scorelineWindowAssessment }
+      : {}),
     bestSemanticRuntimeChoice: dependencies.bestSemanticRuntimeChoice,
     bestSemanticRuntimeChoiceForTacticalPlanOverride:
       dependencies.bestSemanticRuntimeChoiceForTacticalPlanOverride,

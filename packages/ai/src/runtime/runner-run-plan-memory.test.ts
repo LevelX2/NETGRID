@@ -39,12 +39,25 @@ describe("runner run plan memory", () => {
     expect(getRunnerRunPlanMemorySnapshot(activeInput)).toBeUndefined();
   });
 
-  it("makes missing active run plans fail through the semantic runtime entry", () => {
-    const input = runnerInput({ activeRun: true });
+  it("lets the semantic runtime recover from a missing active run plan", () => {
+    const continueRun = action("continue_run");
+    const runtimeChoice = choice(continueRun, "simple_run_choice", 300);
+    const input = runnerInput({
+      activeRun: true,
+      legalActions: [continueRun],
+    });
 
-    expect(() =>
-      chooseSemanticRuntimeAction(input, {}, minimalRuntimeDependencies()),
-    ).toThrow(MissingRunnerRunPlanError);
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      {},
+      runtimeDependenciesForStartRun(runtimeChoice, continueRun),
+    );
+
+    expect(decision.actionId).toBe("continue_run");
+    expect(decision.evidence).toContain("active_runner_run_plan_missing:true");
+    expect(decision.evidence).toContain(
+      "active_runner_run_plan_recovery:semantic_runtime_fallback",
+    );
   });
 
   it("selects active run actions through a run plan annotated choice", () => {

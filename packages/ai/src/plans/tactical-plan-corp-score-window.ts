@@ -96,6 +96,32 @@ export function advanceCompletesScore(
   return requirement !== undefined && currentAdvancement + 1 >= requirement;
 }
 
+export function advanceCanCloseScoreThisTurn(
+  playerView: PlayerView,
+  action: LegalAction,
+): boolean {
+  const sourceCard = visibleCardByInstanceId(playerView, String(action.source));
+  if (!sourceCard) return false;
+  const requirement = sourceCard.advancementRequirement;
+  if (requirement === undefined) return false;
+  const currentAdvancement = sourceCard.advancementCounters ?? 0;
+  if (currentAdvancement >= requirement) return false;
+  const countersAfterCurrentAction = currentAdvancement + 1;
+  const additionalAdvancesNeeded = Math.max(
+    0,
+    requirement - countersAfterCurrentAction,
+  );
+  if (additionalAdvancesNeeded === 0) {
+    return advanceCompletesScore(playerView, action);
+  }
+  const remainingClicks = playerView.own.clicks - 1;
+  const remainingCredits = playerView.own.credits - 1;
+  return (
+    remainingClicks >= additionalAdvancesNeeded &&
+    remainingCredits >= additionalAdvancesNeeded
+  );
+}
+
 export function corpHasSafeScoreAlternative(
   input: AiDecisionInput,
   actionToSkip: LegalAction,

@@ -1770,7 +1770,7 @@ function scoreRemoteNeedsFunding<TConsumer extends string>(
     return true;
   }
   if (assessment.recommendedNextStep === "gain_credit") {
-    return scoreRemoteHasUnmetFundingNeed(input, entry);
+    return scoreRemoteHasUnmetFundingNeed(input, entry, dependencies);
   }
   return (
     assessment.windowKind === "unsafe" &&
@@ -1782,12 +1782,24 @@ function scoreRemoteNeedsFunding<TConsumer extends string>(
 function scoreRemoteHasUnmetFundingNeed(
   input: AiDecisionInput,
   entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<string>,
 ): boolean {
   const assessment = entry.scoringWindow;
   if (!assessment) return false;
   if (
     assessment.corpCanRezRelevantIce === false ||
     assessment.corpCanRezFullPathWithDynamicReserve === false
+  ) {
+    return true;
+  }
+  const evidenceFloor = scorelineRequiredRezFloorFromScoringWindowEvidence(
+    input,
+    entry,
+    dependencies,
+  );
+  if (
+    evidenceFloor !== undefined &&
+    input.playerView.own.credits < evidenceFloor
   ) {
     return true;
   }
@@ -1894,6 +1906,8 @@ function scorelineRequiredRezFloorFromScoringWindowEvidence<
       ? minRelevantRezCost
       : assessment.corpCanRezFullPathWithDynamicReserve === false
         ? fullPathWithDynamicReserve ?? fullPathRezCost ?? minRelevantRezCost
+        : assessment.recommendedNextStep === "gain_credit"
+          ? fullPathWithDynamicReserve ?? fullPathRezCost ?? minRelevantRezCost
         : minRelevantRezCost;
   if (floor === undefined || floor <= 0) return undefined;
   return Math.max(
