@@ -353,6 +353,71 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("does not let critical R&D history overlayer an already stopped central before remote setup", () => {
+    const rdIce = corpAction("install-rd-extra-ice", "install_card", {
+      placement: "ice",
+      serverId: "rd",
+    });
+    const remoteIce = corpAction("install-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
+    const input = {
+      ...corpInput({
+        runnerAgendaPoints: 5,
+        runnerRig: [rdVirusCard("highlighter")],
+        legalActions: [rdIce, remoteIce],
+        eventTail: [
+          publicCentralEvent("rd-run-1", "start_run", "rd"),
+          publicCentralEvent("rd-access-1", "access_card", "rd"),
+          publicCentralEvent("rd-run-2", "start_run", "rd"),
+          publicCentralEvent("rd-access-2", "access_card", "rd"),
+        ],
+        servers: [
+          centralServer("hq", [iceCard("hq-ice")]),
+          centralServer("rd", [iceCard("rd-stop", { rezzed: false })]),
+          remoteServer("remote_1", []),
+        ],
+      }),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.score_agendas",
+        scorePlan: ["corp.remote_scoreline"],
+      },
+    } as unknown as AiDecisionInput;
+    const dependencies = testDependencies();
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const rdIceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      rdIce,
+      dependencies,
+    );
+    const remoteIceComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteIce,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "setup_score_remote",
+      severity: "medium",
+      targetServerId: "remote_1",
+    });
+    expect(triage.evidence).toContain(
+      "corp_board_triage_deck_strategy:remote_score_development",
+    );
+    expect(triage.evidence).not.toContain(
+      "corp_board_triage_primary:protect_rd",
+    );
+    expect(rdIceComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -1600,
+    });
+    expect(remoteIceComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+  });
+
   it("does not let secondary remote score support make a punish deck build a speculative score remote", () => {
     const rdIce = corpAction("install-rd-extra-ice", "install_card", {
       placement: "ice",

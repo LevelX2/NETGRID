@@ -1933,7 +1933,16 @@ function centralPressureShouldDriveTriage<TConsumer extends string>(
     serverId,
     dependencies,
   );
-  if (severity === "critical") return hasProtectionAction;
+  if (severity === "critical") {
+    if (needsProtection && hasProtectionAction) return true;
+    const hasScoreRemoteDevelopment =
+      concreteScoreRemoteDevelopmentActionExists(actions);
+    if (!hasScoreRemoteDevelopment) return hasProtectionAction;
+    return (
+      hasProtectionAction &&
+      !corpRemoteScoringStrategyWantsRemoteDevelopment(input)
+    );
+  }
   if (needsProtection && hasProtectionAction) return true;
   const hasScoreRemoteDevelopment =
     concreteScoreRemoteDevelopmentActionExists(actions);
