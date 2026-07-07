@@ -8,6 +8,10 @@ import type { RunnerRunTargetEvaluation } from "../runner-run-target-evaluation"
 import { runnerBankInvestmentCommitmentScoreComponents as buildRunnerBankInvestmentCommitmentScoreComponents } from "./runner-economy-commitment-score";
 import { rolesMatch } from "./role-match";
 
+const RUNNER_BANK_FIRST_LOAD_TARGET = 3;
+const RUNNER_BANK_URGENT_CASHOUT_TARGET = 6;
+const RUNNER_BANK_VALUE_CASHOUT_TARGET = 12;
+
 type RunnerBankInvestmentCommitmentStatus =
   | "inactive"
   | "install_ready"
@@ -208,7 +212,8 @@ export function createRunnerBankInvestmentContext(
     const overDesiredTarget =
       storedCredits > 0 && storedCredits >= desiredBankTarget;
     const combinedCreditAccess = input.playerView.own.credits + storedCredits;
-    const cashOutThresholdMet = storedCredits >= 6 && !comfortableCreditPool;
+    const cashOutThresholdMet =
+      storedCredits >= desiredBankTarget && !comfortableCreditPool;
     const runOverride =
       action.type === "start_run"
         ? runnerBankCommitmentRunOverride(input, action)
@@ -415,9 +420,10 @@ export function createRunnerBankInvestmentContext(
       criticalReserve: boolean;
     },
   ): number {
-    if (storedCredits <= 0) return 3;
-    if (context.criticalReserve || context.concreteFundingNeed) return 6;
-    return context.comfortableCreditPool ? 3 : 6;
+    if (storedCredits <= 0) return RUNNER_BANK_FIRST_LOAD_TARGET;
+    if (context.criticalReserve || context.concreteFundingNeed)
+      return RUNNER_BANK_URGENT_CASHOUT_TARGET;
+    return RUNNER_BANK_VALUE_CASHOUT_TARGET;
   }
 
   function isRunnerBankInstallAction(
@@ -557,10 +563,7 @@ export function createRunnerBankInvestmentContext(
         ? "cash_out_credit_bank"
         : "",
     ];
-    return [
-      resourceAbility,
-      ...payloadSignals,
-    ]
+    return [resourceAbility, ...payloadSignals]
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
@@ -594,16 +597,13 @@ export function createRunnerBankInvestmentContext(
           .join(":"),
       )
       .join(" ");
-    const text = [
-      definition?.rulesText,
-      mechanics,
-      hintEffects,
-      ...roles,
-    ]
+    const text = [definition?.rulesText, mechanics, hintEffects, ...roles]
       .filter(Boolean)
       .join(" ")
       .toLowerCase();
-    return rolesMatch(roles, ["economy"]) && runnerTextLooksLikeCreditBank(text);
+    return (
+      rolesMatch(roles, ["economy"]) && runnerTextLooksLikeCreditBank(text)
+    );
   }
 
   function runnerTextLooksLikeCreditBank(text: string): boolean {
@@ -612,7 +612,11 @@ export function createRunnerBankInvestmentContext(
       runnerBankTokensIncludePhrase(tokens, ["stored", "credit"]) ||
       runnerBankTokensIncludePhrase(tokens, ["stored", "credits"]) ||
       runnerBankTokensIncludePhrase(tokens, ["counter", "bank"]) ||
-      runnerBankTokensIncludePhrase(tokens, ["temporary", "resource", "bank"]) ||
+      runnerBankTokensIncludePhrase(tokens, [
+        "temporary",
+        "resource",
+        "bank",
+      ]) ||
       runnerBankTokensIncludePhrase(tokens, ["finite", "economy", "pool"]) ||
       runnerBankTokensIncludeCreditCounterPair(tokens)
     );
@@ -676,7 +680,10 @@ export function createRunnerBankInvestmentContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): string {
-    const definitionId = dependencies.sourceDefinitionIdForAction(input, action);
+    const definitionId = dependencies.sourceDefinitionIdForAction(
+      input,
+      action,
+    );
     if (definitionId) return definitionId;
     const sourceCard = dependencies.findVisibleCard(input, action.source);
     if (sourceCard?.definitionId) return sourceCard.definitionId;
@@ -707,16 +714,22 @@ export function createRunnerBankInvestmentContext(
     input: AiDecisionInput,
     action: LegalAction,
   ): boolean {
+    if (input.playerView.own.clicks < 2) return false;
+    if (
+      input.legalActions.some(
+        (candidate) =>
+          candidate.type === "start_run" &&
+          Boolean(runnerBankCommitmentRunOverride(input, candidate)),
+      )
+    )
+      return false;
+
     const creditsAfterInstall =
       input.playerView.own.credits - dependencies.actionCreditCost(action);
-    if (creditsAfterInstall < 4) return false;
-    if (input.playerView.own.clicks < 2) return false;
-    if (runnerBankHasConcreteFundingNeed(input)) return false;
-    return !input.legalActions.some(
-      (candidate) =>
-        candidate.type === "start_run" &&
-        Boolean(runnerBankCommitmentRunOverride(input, candidate)),
-    );
+    if (creditsAfterInstall < 0) return false;
+    if (creditsAfterInstall >= 4 && !runnerBankHasConcreteFundingNeed(input))
+      return true;
+    return input.playerView.own.credits >= 3;
   }
 
   function runnerBankCommitmentRunOverride(
