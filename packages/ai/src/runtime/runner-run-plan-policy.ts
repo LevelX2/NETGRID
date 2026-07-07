@@ -11,6 +11,8 @@ export function runnerRunPlanSemanticChoice(params: {
   if (params.input.side !== "runner" || !params.input.playerView.run) {
     return undefined;
   }
+  const abortChoice = runnerRunPlanAbortChoice(params);
+  if (abortChoice) return abortChoice;
   const encounterChoice = runnerRunPlanEncounterChoice(params);
   if (encounterChoice) return encounterChoice;
   const selected =
@@ -26,6 +28,35 @@ export function runnerRunPlanSemanticChoice(params: {
     extraEvidence: [],
     explanation:
       "RunnerRunPlan führt die Entscheidung im aktiven Run anhand aktueller LegalActions.",
+  });
+}
+
+function runnerRunPlanAbortChoice(params: {
+  plan: RunnerRunPlan;
+  choices: readonly SemanticRuntimeChoice[];
+}): SemanticRuntimeChoice | undefined {
+  if (
+    params.plan.revalidation.status !== "abort_recommended" &&
+    params.plan.revalidation.status !== "invalid"
+  ) {
+    return undefined;
+  }
+  const jackOutChoice = params.choices.find(
+    (choice) => !choice.exclusion && choice.action.type === "jack_out",
+  );
+  if (!jackOutChoice) return undefined;
+  return annotateRunnerRunPlanChoice({
+    choice: jackOutChoice,
+    plan: params.plan,
+    explanation:
+      "RunnerRunPlan bricht den Run nach Revalidation ab, weil das Ziel nicht mehr belastbar erreichbar ist.",
+    extraEvidence: [
+      "runner_run_plan_abort_recommended:true",
+      `runner_run_plan_abort_status:${params.plan.revalidation.status}`,
+      ...params.plan.revalidation.reasons.map(
+        (reason) => `runner_run_plan_abort_reason:${reason}`,
+      ),
+    ],
   });
 }
 
