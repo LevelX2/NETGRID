@@ -55,6 +55,7 @@ describe("benchmark report formatting", () => {
       runnerDeckId: "demo_runner_008",
       corpDeckId: "demo_corp_008",
       maxActions: 20,
+      seeds: ["match-progression-seed-001"],
       baselineProfile: "belief_ai_v1_4_2",
       candidateProfile: "current_candidate",
     });
@@ -67,7 +68,7 @@ describe("benchmark report formatting", () => {
     expect(benchmark.runnerDeckId).toBe("demo_runner_008");
     expect(benchmark.corpDeckId).toBe("demo_corp_008");
     expect(benchmark.maxActions).toBe(20);
-    expect(benchmark.seeds.length).toBeGreaterThan(0);
+    expect(benchmark.seeds).toEqual(["match-progression-seed-001"]);
     expect(benchmark.baseline.games).toBe(benchmark.seeds.length);
     expect(benchmark.candidate.games).toBe(benchmark.seeds.length);
     expect(benchmark.baseline.actionLimitRate).toBeGreaterThanOrEqual(0);
@@ -107,6 +108,7 @@ describe("benchmark report formatting", () => {
     const suite = runMatchProgressionBenchmarkSuite({
       includeHoldout: false,
       maxActions: 10,
+      seeds: ["strategy-suite-seed-001"],
       baselineProfile: "belief_ai_v1_4_2",
       candidateProfile: "current_candidate",
       comparisonProfiles: [
@@ -138,6 +140,7 @@ describe("benchmark report formatting", () => {
         .map((slot) => slot.corpArchetype),
     );
 
+    expect(suite.seeds).toEqual(["strategy-suite-seed-001"]);
     expect(slots.some((slot) => slot.slotType === "smoke")).toBe(true);
     expect(slots.every((slot) => slot.runnerArchetype)).toBe(true);
     expect(slots.every((slot) => slot.corpArchetype)).toBe(true);

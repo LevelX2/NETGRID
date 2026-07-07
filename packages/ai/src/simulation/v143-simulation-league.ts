@@ -1,8 +1,9 @@
 import type { SimulationBenchmarkProfile } from "./simulation-types";
-import type {
-  V143LeagueConfig,
-  V143SimulationRunResult,
-  V143SoakResult,
+import {
+  type V143LeagueConfig,
+  type V143SimulationRunResult,
+  type V143SoakResult,
+  v143BenchmarkSeeds,
 } from "./v143-tuning-gate";
 import { BENCHMARK_PROFILES_143 } from "./v143-data";
 import { SOAK_SEEDS_143 } from "./soak-seed-data";
@@ -25,10 +26,7 @@ export function createV143SimulationLeagueRunner(
   ): V143SoakResult {
     const tuningSeeds = SOAK_SEEDS_143.tuningSeeds;
     const holdoutSeeds = SOAK_SEEDS_143.holdoutSeeds;
-    const seeds =
-      config.includeHoldout === false
-        ? tuningSeeds
-        : [...tuningSeeds, ...holdoutSeeds];
+    const seeds = v143BenchmarkSeeds(config);
     const profiles = BENCHMARK_PROFILES_143.profiles.map((profile) =>
       dependencies.runV143Profile(profile, seeds, config),
     );

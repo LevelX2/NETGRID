@@ -10,7 +10,10 @@ import type {
   SimulationBenchmarkProfile,
   SimulationBenchmarkProfileId,
 } from "./simulation-types";
-import type { V143SimulationRunResult } from "./v143-tuning-gate";
+import {
+  type V143SimulationRunResult,
+  v143BenchmarkSeeds,
+} from "./v143-tuning-gate";
 import { BENCHMARK_PROFILES_143 } from "./v143-data";
 import { SOAK_SEEDS_143 } from "./soak-seed-data";
 
@@ -45,10 +48,7 @@ export function createMatchProgressionBenchmarkRunner(
       candidateProfileId,
       BENCHMARK_PROFILES_143.profiles,
     );
-    const seeds =
-      config.includeHoldout === false
-        ? SOAK_SEEDS_143.tuningSeeds
-        : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
+    const seeds = v143BenchmarkSeeds(config);
     const baselineRun = dependencies.runV143Profile(
       baselineProfile,
       seeds,

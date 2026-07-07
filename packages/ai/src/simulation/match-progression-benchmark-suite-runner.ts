@@ -7,7 +7,7 @@ import { MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS } from "./benchmark-deck-slots";
 import { runMatchProgressionBenchmarkSlot } from "./benchmark-deck-slot-runner";
 import type { AiDoctrineQualityBenchmarkConfig } from "./doctrine-quality-benchmark-types";
 import type { SimulationBenchmarkProfileId } from "./simulation-types";
-import { SOAK_SEEDS_143 } from "./soak-seed-data";
+import { v143BenchmarkSeeds } from "./v143-tuning-gate";
 
 export type MatchProgressionBenchmarkSuiteDependencies = {
   runMatchProgressionBenchmark: (
@@ -37,10 +37,7 @@ export function createMatchProgressionBenchmarkSuiteRunner(
       baselineProfile,
       candidateProfile,
     ]) as SimulationBenchmarkProfileId[];
-    const seeds =
-      config.includeHoldout === false
-        ? SOAK_SEEDS_143.tuningSeeds
-        : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
+    const seeds = v143BenchmarkSeeds(config);
     const slots = MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.map((slot) =>
       runMatchProgressionBenchmarkSlot(
         slot,

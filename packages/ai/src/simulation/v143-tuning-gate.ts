@@ -3,6 +3,7 @@ import type {
   AiSimulationSummary,
 } from "../index";
 import { roundNumber as round } from "../runtime/number-rounding";
+import { SOAK_SEEDS_143 } from "./soak-seed-data";
 import type { SimulationBenchmarkProfileId } from "./simulation-types";
 
 export type V143SimulationRunResult = {
@@ -41,7 +42,17 @@ export type V143SoakResult = {
 
 export type V143LeagueConfig = Partial<AiSimulationConfig> & {
   includeHoldout?: boolean;
+  seeds?: string[];
 };
+
+export function v143BenchmarkSeeds(config: V143LeagueConfig): string[] {
+  if (config.seeds && config.seeds.length > 0) {
+    return [...config.seeds];
+  }
+  return config.includeHoldout === false
+    ? SOAK_SEEDS_143.tuningSeeds
+    : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
+}
 
 export function evaluateV143TuningGate(
   candidate: V143SimulationRunResult,

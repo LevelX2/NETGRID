@@ -10,10 +10,10 @@ import {
 } from "./simulation-metric-aggregation";
 import type { SimulationBenchmarkProfile } from "./simulation-types";
 import {
-  V143SimulationRunResult,
+  type V143SimulationRunResult,
+  v143BenchmarkSeeds,
 } from "./v143-tuning-gate";
 import { BENCHMARK_PROFILES_143 } from "./v143-data";
-import { SOAK_SEEDS_143 } from "./soak-seed-data";
 
 export type DoctrineQualityBenchmarkDependencies = {
   runV143Profile: (
@@ -43,10 +43,7 @@ export function createDoctrineQualityBenchmarkRunner(
       candidateProfileId,
       BENCHMARK_PROFILES_143.profiles,
     );
-    const seeds =
-      config.includeHoldout === false
-        ? SOAK_SEEDS_143.tuningSeeds
-        : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
+    const seeds = v143BenchmarkSeeds(config);
     const baselineRun = dependencies.runV143Profile(
       baselineProfile,
       seeds,
