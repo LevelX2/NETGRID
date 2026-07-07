@@ -3,7 +3,7 @@ import compiledAiHintsData from "../../../data/ai/ai-card-hints-compiled.json";
 import inspectorIndexData from "../../../data/ai/ai-hint-inspector-index.json";
 import strategyGoalsData from "../../../data/ai/strategy-goals-v1.json";
 import { RUNTIME_CARDS } from "./ai-hints";
-import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 
 export type DeckStrategyConfidence = "low" | "medium" | "high";
 
@@ -377,7 +377,7 @@ const HARD_PRODUCTIVE_GAPS = new Set([
 ]);
 
 export function buildDeckStrategyProfile(
-  snapshot: AiDeckDoctrineDeckSnapshot,
+  snapshot: AiDeckStrategyDeckSnapshot,
 ): AiDeckStrategyProfile {
   const stats = deckStrategyStats(snapshot);
   const anchorEvidenceByStrategy = collectAnchorEvidence(stats);
@@ -489,7 +489,7 @@ export function buildNeutralDeckStrategyProfile(
 }
 
 export function buildDeckDoctrineV2Diagnostic(
-  snapshot?: AiDeckDoctrineDeckSnapshot,
+  snapshot?: AiDeckStrategyDeckSnapshot,
 ): DeckDoctrineV2Diagnostic {
   if (snapshot === undefined || snapshot.cards.length === 0) {
     return {
@@ -565,7 +565,7 @@ export function buildDeckDoctrineV2Diagnostic(
 }
 
 function deckStrategyStats(
-  snapshot: AiDeckDoctrineDeckSnapshot,
+  snapshot: AiDeckStrategyDeckSnapshot,
 ): DeckStrategyStats {
   const functionSignalCounts: Record<string, number> = {};
   const legacySignalCounts: Record<string, number> = {};
@@ -667,7 +667,7 @@ function deckStrategyStats(
 }
 
 function deckDoctrineV2CardRoles(
-  snapshot: AiDeckDoctrineDeckSnapshot,
+  snapshot: AiDeckStrategyDeckSnapshot,
 ): DeckDoctrineV2CardRoleDiagnostic[] {
   return snapshot.cards
     .slice()

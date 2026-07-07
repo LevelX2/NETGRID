@@ -5,7 +5,7 @@ import {
 } from "@netgrid/engine";
 import snapshotsData08 from "../../../../data/decks/deck-snapshots-0.8.json";
 import type { GameState, LegalAction, Side } from "@netgrid/shared";
-import type { AiDeckDoctrineDeckSnapshot } from "../deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { buildDeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import {
   buildRunnerEconomyPosture,
@@ -880,9 +880,13 @@ class RealEngineDecisionCorpusScenarioBuilder {
   }
 
   build(): RealEngineDecisionCorpusScenario {
+    const deckSnapshot = snapshotById(
+      this.deckSnapshotId ?? defaultSnapshotIdForSide(this.side),
+    );
     const input = buildAiDecisionInput(this.state, this.side, {
       decisionId: this.scenarioId,
       profileId: `${this.side}-ai-real-engine-corpus`,
+      ownDeckSnapshot: deckSnapshot,
     });
     return {
       scenarioId: this.scenarioId,
@@ -941,7 +945,13 @@ function deckDoctrineForSnapshot(snapshotId: string) {
   return buildDeckDoctrineV2Diagnostic(snapshotById(snapshotId));
 }
 
-function snapshotById(snapshotId: string): AiDeckDoctrineDeckSnapshot {
+function defaultSnapshotIdForSide(side: Side): string {
+  return side === "runner"
+    ? "demo_runner_008_snapshot_v0_8"
+    : "demo_corp_008_snapshot_v0_8";
+}
+
+function snapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
   const snapshot = snapshotsData08.snapshots.find(
     (candidate) => candidate.deckSnapshotId === snapshotId,
   );

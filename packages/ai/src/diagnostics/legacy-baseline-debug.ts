@@ -1,6 +1,5 @@
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
-  type AiDeckDoctrineProfile,
   type AiDecisionDebug,
   type AiDecisionInput,
 } from "@netgrid/shared";
@@ -22,9 +21,6 @@ export function buildLegacyBaselineDecisionDebug(
     hypotheses: toStringArray(beliefSummary.hypotheses),
     uncertainty: toStringArray(beliefSummary.uncertainty),
     invalidations: toStringArray(beliefSummary.invalidations),
-    ...(input.ownDeckDoctrine
-      ? { ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine) }
-      : {}),
     ...(opponentModel ? { opponentModel } : {}),
   };
 }
@@ -38,16 +34,4 @@ function toRecord(value: unknown): Record<string, unknown> | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value))
     return undefined;
   return value as Record<string, unknown>;
-}
-
-function deckDoctrineDebug(
-  profile: AiDeckDoctrineProfile,
-): NonNullable<AiDecisionDebug["ownDeckDoctrine"]> {
-  return {
-    schemaVersion: profile.schemaVersion,
-    side: profile.side,
-    confidence: profile.confidence,
-    archetypeTags: profile.archetypeTags.slice(0, 4),
-    riskFlags: profile.riskFlags.slice(0, 6),
-  };
 }

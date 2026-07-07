@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 import { buildLegacyBaselineDecisionDebug } from "./legacy-baseline-debug";
 
 describe("legacy-baseline-debug", () => {
@@ -9,13 +9,7 @@ describe("legacy-baseline-debug", () => {
     expect(debug.schemaVersion).toBe("ai-decision-debug-v1");
     expect(debug.aiLevel).toBe(1);
     expect(debug.memoryVersion).toBeDefined();
-    expect(debug.ownDeckDoctrine).toEqual({
-      schemaVersion: "ai-deck-doctrine-v1",
-      side: "runner",
-      confidence: "high",
-      archetypeTags: ["run_pressure", "economy", "tempo", "extra"],
-      riskFlags: ["damage_risk", "tag_risk"],
-    });
+    expect(debug).not.toHaveProperty("ownDeckDoctrine");
     expect(JSON.stringify(debug)).not.toMatch(
       /cardInstances|privatePayload|secretGripIds|sessionToken|joinToken|reconnectToken/i,
     );
@@ -69,18 +63,7 @@ function input(): AiDecisionInput {
     decisionId: "legacy-debug:runner",
     actionNumber: 1,
     profileId: "runner:test",
-    ownDeckDoctrine: {
-      schemaVersion: "ai-deck-doctrine-v1",
-      side: "runner",
-      confidence: "high",
-      archetypeTags: ["run_pressure", "economy", "tempo", "extra", "hidden"],
-      strategyAnchors: [],
-      supportSignals: [],
-      gaps: [],
-      riskFlags: ["damage_risk", "tag_risk"],
-      evidence: ["test"],
-    },
-  } as unknown as AiDecisionInput;
+  };
 }
 
 function legalAction(
@@ -101,15 +84,12 @@ function legalAction(
   };
 }
 
-function visibleCard(cardId: string) {
+function visibleCard(cardId: string): VisibleCard {
   return {
     instanceId: `${cardId}-instance`,
     definitionId: cardId,
     title: cardId,
-    side: "runner",
     type: "identity",
-    zone: "identity",
-    visibility: "public",
     known: true,
   };
 }

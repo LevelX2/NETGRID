@@ -251,7 +251,6 @@ describe("compiled hint index pilot report", () => {
     );
     expect(aiHintsSource).toContain("ai-card-hints-compiled.json");
     for (const relativePath of [
-      "packages/ai/src/deck-doctrine.ts",
       "packages/ai/src/legacy/corp-plans.ts",
       "packages/ai/src/legacy/runner-plans.ts",
     ]) {

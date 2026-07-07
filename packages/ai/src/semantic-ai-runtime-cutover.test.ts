@@ -225,7 +225,6 @@ describe("Semantic AI runtime cutover", () => {
     const input = aiInput("runner", [rdRun]);
     input.playerView.own.credits = 8;
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
-    input.ownDeckDoctrine = runnerDoctrine({ pressure_rnd: 24 });
 
     const decision = chooseRunnerAction(input, { persistTacticalPlanMemory: false });
 
@@ -3346,25 +3345,6 @@ function aiInput(side: Side, legalActions: LegalAction[]): AiDecisionInput {
     decisionId: `semantic-runtime-cutover:${side}`,
     actionNumber: 1,
     profileId: `${side}-semantic-runtime-cutover-test`,
-  };
-}
-
-function runnerDoctrine(
-  planWeights: Record<string, number>,
-): NonNullable<AiDecisionInput["ownDeckDoctrine"]> {
-  return {
-    schemaVersion: "ai-deck-doctrine-v1",
-    deckSnapshotId: "semantic-runtime-doctrine-debug",
-    deckHash: "test:semantic-runtime-doctrine-debug",
-    side: "runner",
-    confidence: 0.9,
-    archetypeTags: ["rnd_pressure"],
-    roleCounts: {},
-    roleDensity: {},
-    planWeights,
-    mulliganWeights: {},
-    riskFlags: [],
-    evidence: [],
   };
 }
 

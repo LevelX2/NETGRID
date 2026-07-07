@@ -187,9 +187,6 @@ function scoreRunnerAction(
       reasonCode = "runner.access.steal_agenda";
       explanation = "Eine sichtbare Agenda kann legal gestohlen werden.";
       evidence.push("access_agenda_visible");
-      if (input.profileId.includes("v1.4.2") && input.ownDeckDoctrine) {
-        evidence.push("steal_trash_protected_from_followup:true");
-      }
       break;
     case "access_card":
       score = 850;
@@ -229,9 +226,6 @@ function scoreRunnerAction(
       reasonCode = "runner.access.trash_value";
       explanation = "Eine zugreifbare Karte kann legal entfernt werden.";
       evidence.push("trash_legal");
-      if (input.profileId.includes("v1.4.2") && input.ownDeckDoctrine) {
-        evidence.push("steal_trash_protected_from_followup:true");
-      }
       break;
     case "decline_trash":
       {

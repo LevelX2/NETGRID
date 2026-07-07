@@ -11,12 +11,16 @@ import {
   buildDeckCapabilityProfile,
   type DeckCapabilityProfile,
 } from "../deck-capabilities";
-import { type AiDeckDoctrineDeckSnapshot } from "../deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import {
   type AiDeckStrategyProfile,
   type DeckDoctrineV2Diagnostic,
 } from "../deck-doctrine-strategy";
 import { buildDeckDoctrineRuntimeContext } from "../deck-doctrine-runtime-context";
+import {
+  assertValidAiDeckSnapshotForRuntime,
+  type AiDeckSnapshotRuntimeExpectation,
+} from "../deck-strategy-snapshot-validation";
 import {
   buildCorpStrategicIntentProfile,
   type CorpStrategicIntentProfile,
@@ -82,69 +86,55 @@ export function buildAiDecisionInput(
     actionNumber?: number;
     profileId?: string;
     eventTail?: PublicGameEvent[];
-    ownDeckSnapshot?: AiDeckDoctrineDeckSnapshot;
-    ownDeckDoctrine?: AiDecisionInput["ownDeckDoctrine"];
-    /**
-     * Escape hatch for very low-level fixtures that intentionally exercise the
-     * pre-strategy DTO. Productive callers should omit this and receive an
-     * explicit neutral strategy context when no deck snapshot exists.
-     */
-    missingDeckContextMode?: "explicit_neutral" | "minimal_dto";
-  } = {},
+    ownDeckSnapshot: AiDeckStrategyDeckSnapshot;
+    expectedDeckSnapshot?: Omit<AiDeckSnapshotRuntimeExpectation, "side">;
+  },
 ): AiDecisionInput {
+  const expectedDeckSnapshot = options?.expectedDeckSnapshot;
+  const ownDeckSnapshot = assertValidAiDeckSnapshotForRuntime(
+    options?.ownDeckSnapshot,
+    {
+      side,
+      ...expectedDeckSnapshot,
+    },
+  );
   const playerView = getPlayerView(state, side);
   const legalActions = getLegalActions(state, side);
-  const difficulty = options.difficulty ?? "normal";
+  const difficulty = options?.difficulty ?? "normal";
   const decisionId =
-    options.decisionId ?? `${state.matchId}:${state.stateVersion}:${side}`;
-  const actionNumber = options.actionNumber ?? state.stateVersion;
-  const profileId = options.profileId ?? `${side}-ai-v0.9-${difficulty}`;
-  const deckSnapshotId =
-    options.ownDeckSnapshot?.deckSnapshotId ??
-    `${profileId}:missing-deck-snapshot`;
+    options?.decisionId ?? `${state.matchId}:${state.stateVersion}:${side}`;
+  const actionNumber = options?.actionNumber ?? state.stateVersion;
+  const profileId = options?.profileId ?? `${side}-ai-v0.9-${difficulty}`;
   const deckDoctrineRuntimeContext = buildDeckDoctrineRuntimeContext({
     side,
-    ...(options.ownDeckSnapshot
-      ? { deckSnapshot: options.ownDeckSnapshot }
+    deckSnapshot: ownDeckSnapshot,
+    ...(expectedDeckSnapshot
+      ? { expectedDeckSnapshot }
       : {}),
-    ...(options.ownDeckDoctrine ? { v1Profile: options.ownDeckDoctrine } : {}),
-    neutralDeckId: deckSnapshotId,
   });
-  const ownDeckDoctrine = deckDoctrineRuntimeContext.v1Profile;
   const input = buildAiDecisionInputDto({
     side,
     playerView,
-    eventTail: options.eventTail ?? playerView.publicEvents,
+    eventTail: options?.eventTail ?? playerView.publicEvents,
     legalActions,
     difficulty,
     seed: state.seed,
     decisionId,
     actionNumber,
     profileId,
-    ...(ownDeckDoctrine ? { ownDeckDoctrine } : {}),
   });
-  if (
-    !options.ownDeckSnapshot &&
-    options.missingDeckContextMode === "minimal_dto"
-  ) {
-    return input;
-  }
   const ownDeckCapabilities = buildDeckCapabilityProfile({
     side,
     playerView,
     legalActions,
-    ...(options.ownDeckSnapshot
-      ? { deckSnapshot: options.ownDeckSnapshot }
-      : {}),
+    deckSnapshot: ownDeckSnapshot,
   });
   const ownDeckStrategyProfile = deckDoctrineRuntimeContext.strategyProfile;
   const ownDeckDoctrineV2Diagnostic = deckDoctrineRuntimeContext.v2Diagnostic;
-  const previousStrategicIntentState = options.ownDeckSnapshot
-    ? getStrategicIntentMemorySnapshot(
-        input,
-        options.ownDeckSnapshot.deckSnapshotId,
-      )?.state
-    : undefined;
+  const previousStrategicIntentState = getStrategicIntentMemorySnapshot(
+    input,
+    ownDeckSnapshot.deckSnapshotId,
+  )?.state;
   const strategicRuntimeContext = buildStrategicRuntimeContext({
     side,
     playerView,

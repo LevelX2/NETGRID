@@ -5,7 +5,7 @@ import {
   redactedDeckCapabilityFacts,
 } from "./deck-capabilities";
 import { CARD_ROLES_BY_CARD } from "./ai-hints";
-import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import type {
   LegalAction,
   PlayerView,
@@ -745,7 +745,7 @@ describe("DeckCapabilityProfile", () => {
 
 function runnerSnapshot(
   cards: Array<[cardId: string, quantity: number]>,
-): AiDeckDoctrineDeckSnapshot {
+): AiDeckStrategyDeckSnapshot {
   return {
     deckSnapshotId: "deck-capability-test-runner",
     side: "runner",

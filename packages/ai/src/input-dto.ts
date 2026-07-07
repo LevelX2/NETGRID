@@ -2,7 +2,6 @@ import {
   LEGACY_ABILITY_PAYLOAD_FIELDS,
   type AiDecisionInput,
   type AiDifficulty,
-  type AiDeckDoctrineProfile,
   type CounterDisplay,
   type ChoiceRequirement,
   type Cost,
@@ -38,7 +37,6 @@ export type BuildAiDecisionInputDtoParams = {
   decisionId: string;
   actionNumber: number;
   profileId: string;
-  ownDeckDoctrine?: AiDeckDoctrineProfile;
 };
 
 export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
@@ -51,7 +49,6 @@ export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
   "decisionId",
   "actionNumber",
   "profileId",
-  "ownDeckDoctrine",
 ] as const;
 
 // Nested AI-input payloads are positive allowlists. New engine/public payload
@@ -343,7 +340,6 @@ export function buildAiDecisionInputDto(params: BuildAiDecisionInputDtoParams): 
     decisionId: params.decisionId,
     actionNumber: params.actionNumber,
     profileId: params.profileId,
-    ...(params.ownDeckDoctrine ? { ownDeckDoctrine: sanitizeAiDeckDoctrineProfile(params.ownDeckDoctrine) } : {}),
   };
 }
 
@@ -875,27 +871,5 @@ function sanitizeCardSearchPresentation(value: VisibleChoiceRequest["cardSearchP
     ...(value.temporaryReturnAtEndOfTurn
       ? { temporaryReturnAtEndOfTurn: value.temporaryReturnAtEndOfTurn }
       : {}),
-  };
-}
-
-function sanitizeAiDeckDoctrineProfile(profile: AiDeckDoctrineProfile): AiDeckDoctrineProfile {
-  return {
-    schemaVersion: profile.schemaVersion,
-    deckSnapshotId: profile.deckSnapshotId,
-    deckHash: profile.deckHash,
-    side: profile.side,
-    ...(profile.formatProfileId ? { formatProfileId: profile.formatProfileId } : {}),
-    confidence: profile.confidence,
-    archetypeTags: profile.archetypeTags.slice(),
-    roleCounts: { ...profile.roleCounts },
-    roleDensity: { ...profile.roleDensity },
-    planWeights: { ...profile.planWeights },
-    mulliganWeights: { ...profile.mulliganWeights },
-    riskFlags: profile.riskFlags.slice(),
-    evidence: profile.evidence.map((entry) => ({
-      kind: entry.kind,
-      label: entry.label,
-      value: entry.value,
-    })),
   };
 }

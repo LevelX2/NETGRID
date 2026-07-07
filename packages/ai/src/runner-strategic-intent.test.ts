@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import benchmarkSnapshotsData from "../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
-import type { AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import type { AiDeckStrategyDeckSnapshot } from "./deck-strategy-snapshot";
 import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 import { buildRunnerStrategicIntentProfile } from "./runner-strategic-intent";
 
@@ -318,7 +318,7 @@ describe("Runner StrategicIntentProjection", () => {
 });
 
 function runnerStrategicIntentForSnapshot(
-  snapshot: AiDeckDoctrineDeckSnapshot,
+  snapshot: AiDeckStrategyDeckSnapshot,
 ) {
   return buildRunnerStrategicIntentProfile({
     strategyProfile: buildDeckStrategyProfile(snapshot),
@@ -333,7 +333,7 @@ function runnerStrategicIntentForSnapshot(
 function syntheticSnapshot(
   deckSnapshotId: string,
   cards: Array<[cardId: string, quantity: number]>,
-): AiDeckDoctrineDeckSnapshot {
+): AiDeckStrategyDeckSnapshot {
   return {
     deckSnapshotId,
     side: "runner",
@@ -341,7 +341,7 @@ function syntheticSnapshot(
   };
 }
 
-function benchmarkSnapshotById(snapshotId: string): AiDeckDoctrineDeckSnapshot {
+function benchmarkSnapshotById(snapshotId: string): AiDeckStrategyDeckSnapshot {
   const snapshot = benchmarkSnapshots.find(
     (candidate) => candidate.deckSnapshotId === snapshotId,
   );

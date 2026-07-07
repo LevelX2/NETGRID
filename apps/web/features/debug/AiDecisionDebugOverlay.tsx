@@ -7,7 +7,6 @@ import { aiDecisionDebugDeckStrategySummary, aiDecisionDebugHqHandRows } from ".
 import {
   aiTraceActionRows,
   aiTraceDebugGapNotes,
-  aiTraceDoctrineRows,
   aiTraceMetaRows,
   aiTracePlanLabel,
   aiTraceScoreRows,
@@ -261,7 +260,6 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
   const actionRows = aiTraceActionRows(detail, mode === "preview" ? 32 : 8);
   const rankedAlternatives = aiDecisionDebugRecordList(detail.rankedAlternatives).slice(0, mode === "preview" ? 12 : 4);
   const scoreRows = aiTraceScoreRows(detail, 8);
-  const doctrineRows = aiTraceDoctrineRows(detail);
   const notes = aiTraceDebugGapNotes(detail).slice(0, 3);
   const statusWarnings = [
     ...(detail.fallbackUsed === true ? ["Fallback genutzt"] : []),
@@ -323,11 +321,6 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
       {scoreRows.length > 0 ? (
         <AiDecisionDebugCollapsibleSection title="Score-Komponenten" defaultOpen>
           <AiDecisionDebugRows rows={scoreRows} />
-        </AiDecisionDebugCollapsibleSection>
-      ) : null}
-      {doctrineRows.length > 0 ? (
-        <AiDecisionDebugCollapsibleSection title="Deck-Doctrine" defaultOpen={false}>
-          <AiDecisionDebugRows rows={doctrineRows} />
         </AiDecisionDebugCollapsibleSection>
       ) : null}
       <AiDecisionDebugMemory detail={detail} />
@@ -402,7 +395,6 @@ function serializeAiDecisionDebugVisibleJsonExport(
         score: typeof alternative.score === "number" ? alternative.score : undefined,
       })),
       scoreRows: aiTraceScoreRows(detail, 8),
-      doctrineRows: aiTraceDoctrineRows(detail),
       deckStrategy: aiDecisionDebugDeckStrategySummary(detail),
       memory,
       privateHand,

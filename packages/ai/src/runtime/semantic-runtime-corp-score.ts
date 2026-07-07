@@ -879,9 +879,11 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
   const tempoAdvanceUnderClock =
     corpActiveRemoteAgendaCanTempoAdvanceUnderClock(
       input,
+      action,
       dependencies,
       boardTriageState,
       state,
+      scoringWindow,
     );
   if (
     !closesBeforeRunner &&
@@ -962,9 +964,11 @@ function corpActiveRemoteAgendaCanTempoAdvanceUnderClock<
   TConsumer extends string,
 >(
   input: AiDecisionInput,
+  action: LegalAction,
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
   boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
   state: CorpActiveRemoteScorelineState,
+  scoringWindow: CorpScoringWindowAssessment | undefined,
 ): { allowed: boolean; evidence: string[] } {
   if (boardTriageState.primary !== "score_now") {
     return { allowed: false, evidence: ["tempo_score_now:false"] };
@@ -990,6 +994,33 @@ function corpActiveRemoteAgendaCanTempoAdvanceUnderClock<
         `blocking_ice_action:${blockingIce.actionId}`,
         `blocking_ice_score:${blockingIce.score}`,
         `blocking_ice_recommendation:${blockingIce.recommendation}`,
+      ],
+    };
+  }
+  const sameTurnCloseout =
+    corpSameTurnScoreCloseoutComponent(input, action, dependencies, undefined) !==
+    undefined;
+  if (
+    scoringWindow?.windowKind === "unsafe" ||
+    scoringWindow?.runnerCanContestBeforeScore === true ||
+    scoringWindow?.recommendedNextStep === "build_remote_ice"
+  ) {
+    if (sameTurnCloseout) {
+      return {
+        allowed: true,
+        evidence: [
+          "tempo_score_now:true",
+          "tempo_score_now_contestable_allowed_by_same_turn_closeout:true",
+        ],
+      };
+    }
+    return {
+      allowed: false,
+      evidence: [
+        "tempo_score_now_blocked_by_contestable_remote:true",
+        ...(scoringWindow?.recommendedNextStep
+          ? [`recommended_next_step:${scoringWindow.recommendedNextStep}`]
+          : []),
       ],
     };
   }

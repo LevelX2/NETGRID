@@ -4,7 +4,7 @@ import {
   type Side,
 } from "@netgrid/shared";
 
-import { type AiDeckDoctrineDeckSnapshot } from "../deck-doctrine";
+import { type AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { type SimulationControllerMode } from "./simulation-types";
 
 type SimulationControllerConfig = {
@@ -57,7 +57,7 @@ export function controllerModeForSide(
 export function deckSnapshotForSimulation(
   deck: DeckDefinition,
   publicMetadata?: DeckPublicMetadata,
-): AiDeckDoctrineDeckSnapshot {
+): AiDeckStrategyDeckSnapshot {
   return {
     deckSnapshotId: `${deck.id}:simulation`,
     side: deck.side,

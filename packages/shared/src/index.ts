@@ -800,33 +800,6 @@ export type DeckPublicMetadata = {
   deckHash: string;
 };
 
-export type AiDeckDoctrineProfile = {
-  schemaVersion: "ai-deck-doctrine-v1";
-  deckSnapshotId: string;
-  deckHash: string;
-  side: Side;
-  formatProfileId?: string;
-  confidence: number;
-  archetypeTags: string[];
-  roleCounts: Record<string, number>;
-  roleDensity: Record<string, number>;
-  planWeights: Record<string, number>;
-  mulliganWeights: Record<string, number>;
-  riskFlags: string[];
-  evidence: Array<{
-    kind:
-      | "role_count"
-      | "density"
-      | "missing_role"
-      | "curve"
-      | "agenda_density"
-      | "ice_mix"
-      | "economy_mix";
-    label: string;
-    value: number | string;
-  }>;
-};
-
 export type PlayerController = {
   controllerId: string;
   side: Side;
@@ -1893,7 +1866,6 @@ export type AiDecisionInput = {
   decisionId: string;
   actionNumber: number;
   profileId: string;
-  ownDeckDoctrine?: AiDeckDoctrineProfile;
 };
 
 export const AI_DECISION_DEBUG_SCHEMA_VERSION = "ai-decision-debug-v1";
@@ -2003,14 +1975,6 @@ export type AiDecisionDebug = {
   invalidations?: string[];
   beliefUncertainty?: string[];
   opponentModel?: Record<string, unknown>;
-  ownDeckDoctrine?: {
-    schemaVersion?: string;
-    side: Side;
-    confidence: number;
-    archetypeTags: string[];
-    riskFlags: string[];
-  };
-  doctrinePlanWeight?: number;
 };
 
 const AI_DECISION_DEBUG_FORBIDDEN_KEY_PATTERN =
@@ -2049,7 +2013,6 @@ export function sanitizeAiDecisionDebug(
     "score",
     "confidence",
     "timeBudgetMs",
-    "doctrinePlanWeight",
   ] as const;
   for (const field of numberFields) {
     const value = source[field];
@@ -2100,10 +2063,6 @@ export function sanitizeAiDecisionDebug(
     !Array.isArray(opponentModel)
   )
     result.opponentModel = opponentModel as Record<string, unknown>;
-  const ownDeckDoctrine = sanitizeAiDecisionDebugDoctrine(
-    source.ownDeckDoctrine,
-  );
-  if (ownDeckDoctrine) result.ownDeckDoctrine = ownDeckDoctrine;
   return result;
 }
 
@@ -2290,33 +2249,6 @@ function sanitizeAiDecisionDetailSections(
     })
     .filter((entry): entry is AiDecisionDetailSection => entry !== undefined);
   return sections.length > 0 ? sections : undefined;
-}
-
-function sanitizeAiDecisionDebugDoctrine(
-  value: unknown,
-): AiDecisionDebug["ownDeckDoctrine"] | undefined {
-  if (!value || typeof value !== "object" || Array.isArray(value))
-    return undefined;
-  const source = value as Record<string, unknown>;
-  const side =
-    source.side === "runner" || source.side === "corp"
-      ? source.side
-      : undefined;
-  const confidence =
-    typeof source.confidence === "number" && Number.isFinite(source.confidence)
-      ? source.confidence
-      : undefined;
-  if (!side || confidence === undefined) return undefined;
-  return {
-    ...(typeof source.schemaVersion === "string"
-      ? { schemaVersion: source.schemaVersion }
-      : {}),
-    side,
-    confidence,
-    archetypeTags:
-      sanitizeAiDecisionDebugStringArray(source.archetypeTags) ?? [],
-    riskFlags: sanitizeAiDecisionDebugStringArray(source.riskFlags) ?? [],
-  };
 }
 
 function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {

@@ -467,24 +467,6 @@ export function aiTraceScoreRows(detail: Record<string, unknown>, limit = 8): Ar
     });
 }
 
-export function aiTraceDoctrineRows(detail: Record<string, unknown>): Array<[string, string]> {
-  const rows: Array<[string, string]> = [];
-  if (typeof detail.doctrinePlanWeight === "number" && Number.isFinite(detail.doctrinePlanWeight)) {
-    rows.push(["Doctrine-Gewicht", detail.doctrinePlanWeight.toFixed(2)]);
-  }
-  const doctrine = detail.ownDeckDoctrine && typeof detail.ownDeckDoctrine === "object" && !Array.isArray(detail.ownDeckDoctrine)
-    ? detail.ownDeckDoctrine as Record<string, unknown>
-    : undefined;
-  if (!doctrine) return rows;
-  if (doctrine.side === "runner" || doctrine.side === "corp") rows.push(["Doctrine-Seite", doctrine.side === "runner" ? "Runner" : "Korp"]);
-  if (typeof doctrine.confidence === "number" && Number.isFinite(doctrine.confidence)) rows.push(["Doctrine-Vertrauen", `${Math.round(doctrine.confidence * 100)}%`]);
-  const archetypeTags = safeStringList(doctrine.archetypeTags, 4);
-  if (archetypeTags.length > 0) rows.push(["Archetypen", archetypeTags.join(", ")]);
-  const riskFlags = safeStringList(doctrine.riskFlags, 4);
-  if (riskFlags.length > 0) rows.push(["Risiken", riskFlags.join(", ")]);
-  return rows;
-}
-
 export function aiTraceDebugGapNotes(detail: Record<string, unknown>): string[] {
   const notes: string[] = [];
   const actionRows = aiTraceActionRows(detail);
@@ -500,8 +482,8 @@ export function aiTraceDebugGapNotes(detail: Record<string, unknown>): string[] 
   if (aiTraceScoreRows(detail).length === 0) {
     notes.push("Keine Score-Komponenten im aktuellen Trace.");
   }
-  if (safeStringList(detail.longTermPlan, 1).length === 0 && aiTraceDoctrineRows(detail).length === 0 && typeof detail.planKind !== "string") {
-    notes.push("Keine Plan-/Doctrine-Beiträge im aktuellen Trace.");
+  if (safeStringList(detail.longTermPlan, 1).length === 0 && typeof detail.planKind !== "string") {
+    notes.push("Keine Planbeiträge im aktuellen Trace.");
   }
   return notes;
 }

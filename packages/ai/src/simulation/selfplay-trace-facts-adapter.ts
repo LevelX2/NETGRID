@@ -26,3 +26,9 @@ export function selfplayTraceFactsForSimulationDecision(
     },
   );
 }
+
+export function safeEvidenceForSimulationDecision(
+  decision: AiDecision,
+): string[] {
+  return safeSelfplayFacts(decision.evidence ?? []);
+}

@@ -3,7 +3,7 @@ import { networkInterfaces } from "node:os";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
-import { simulateAiGame } from "@netgrid/ai";
+import { isAiDeckSnapshotRuntimeError, simulateAiGame } from "@netgrid/ai";
 import type { ApiMatchCardPool } from "@netgrid/shared";
 import { createConnectionAuditLoggerFromEnv, noopConnectionAuditLogger, type ConnectionAuditLogger } from "./connection-audit";
 import {
@@ -865,7 +865,7 @@ async function routeHttp(
         const created = await service.createMatch(createInput);
         sendJson(response, 201, created);
       } catch (error) {
-        sendJson(response, 400, { error: { code: "deck_invalid", message: deckErrorMessage(error) } });
+        sendJson(response, 400, { error: { code: deckErrorCode(error), message: deckErrorMessage(error) } });
       }
       return;
     }
@@ -894,7 +894,15 @@ async function routeHttp(
         if (body.runnerDeckId === "demo_runner_001" || body.runnerDeckId === "demo_runner_004") config.runnerDeckId = body.runnerDeckId;
         if (body.corpDeckId === "demo_corp_001" || body.corpDeckId === "demo_corp_004") config.corpDeckId = body.corpDeckId;
       }
-      sendJson(response, 200, { mode: "ai_vs_ai", summary: simulateAiGame(config) });
+      try {
+        sendJson(response, 200, { mode: "ai_vs_ai", summary: simulateAiGame(config) });
+      } catch (error) {
+        if (isAiDeckSnapshotRuntimeError(error)) {
+          sendJson(response, 400, { error: { code: error.code, message: deckErrorMessage(error) } });
+          return;
+        }
+        throw error;
+      }
       return;
     }
 
@@ -1448,6 +1456,7 @@ function aiDeckPolicyFromValue(value: unknown): AiDeckPolicy | undefined {
 }
 
 function deckErrorMessage(error: unknown): string {
+  if (isAiDeckSnapshotRuntimeError(error)) return aiDeckSnapshotHttpErrorMessage(error.code);
   const code = error instanceof Error ? error.message : String(error);
   if (code === "deck_snapshot_wrong_side") return "Das gewählte Deck hat die falsche Seite.";
   if (code === "deck_snapshot_not_validated" || code === "deck_snapshot_invalid") return "Das gewählte Deck ist nicht matchstartfähig. Bitte prüfe die Validierungsfehler.";
@@ -1456,4 +1465,27 @@ function deckErrorMessage(error: unknown): string {
   if (code === "deck_snapshot_needs_revalidation") return "Das gewählte Deck muss nach der aktuellen Formatversion neu validiert werden.";
   if (code === "deck_snapshot_not_found") return "Das gewählte Deck wurde nicht gefunden.";
   return "Die gewählten Decks sind nicht matchstartfähig.";
+}
+
+function deckErrorCode(error: unknown): string {
+  return isAiDeckSnapshotRuntimeError(error) ? error.code : "deck_invalid";
+}
+
+function aiDeckSnapshotHttpErrorMessage(code: string): string {
+  switch (code) {
+    case "ai_deck_snapshot_missing":
+      return "Der KI-Deck-Snapshot fehlt.";
+    case "ai_deck_snapshot_empty":
+      return "Der KI-Deck-Snapshot enthält keine Karten.";
+    case "ai_deck_snapshot_side_mismatch":
+      return "Der KI-Deck-Snapshot passt nicht zur KI-Seite.";
+    case "ai_deck_snapshot_unknown_card":
+      return "Der KI-Deck-Snapshot enthält eine Karte außerhalb des Runtime-Card-Pools.";
+    case "ai_deck_snapshot_stale":
+      return "Der KI-Deck-Snapshot passt nicht zum gewählten Deck.";
+    case "ai_deck_snapshot_invalid":
+      return "Der KI-Deck-Snapshot ist ungültig.";
+    default:
+      return "Der KI-Deck-Snapshot ist nicht matchstartfähig.";
+  }
 }
