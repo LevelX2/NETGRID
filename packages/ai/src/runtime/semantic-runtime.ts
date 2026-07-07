@@ -44,6 +44,7 @@ import type {
   TacticalPlanMappedChoiceResult,
 } from "./semantic-runtime-types";
 import {
+  clearRunnerRunPlanMemory,
   rememberRunnerRunPlanMemorySnapshot,
   requireActiveRunnerRunPlan,
 } from "./runner-run-plan-memory";
@@ -184,6 +185,9 @@ export function chooseSemanticRuntimeAction(
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),
   });
+  if (input.side === "runner" && !input.playerView.run) {
+    clearRunnerRunPlanMemory(input);
+  }
   const activeRunnerRunPlanSnapshot = requireActiveRunnerRunPlan(input);
   const activeRunnerRunPlan = activeRunnerRunPlanSnapshot
     ? revalidateRunnerRunPlan(input, activeRunnerRunPlanSnapshot)

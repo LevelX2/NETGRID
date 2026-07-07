@@ -1,5 +1,6 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
+import { actionCreditCost } from "./action-cost";
 import { runnerRunPlanCurrentEncounterSequence } from "./runner-run-plan-path-quote";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
 
@@ -15,6 +16,8 @@ export function runnerRunPlanSemanticChoice(params: {
   if (abortChoice) return abortChoice;
   const encounterChoice = runnerRunPlanEncounterChoice(params);
   if (encounterChoice) return encounterChoice;
+  const accessChoice = runnerRunPlanAccessChoice(params);
+  if (accessChoice) return accessChoice;
   const selected =
     params.choices.find(
       (choice) =>
@@ -28,6 +31,75 @@ export function runnerRunPlanSemanticChoice(params: {
     extraEvidence: [],
     explanation:
       "RunnerRunPlan führt die Entscheidung im aktiven Run anhand aktueller LegalActions.",
+  });
+}
+
+function runnerRunPlanAccessChoice(params: {
+  input: AiDecisionInput;
+  plan: RunnerRunPlan;
+  choices: readonly SemanticRuntimeChoice[];
+}): SemanticRuntimeChoice | undefined {
+  const accessChoices = params.choices.filter(
+    (choice) => !choice.exclusion && runnerRunPlanAccessActionTypes.has(choice.action.type),
+  );
+  if (accessChoices.length === 0) return undefined;
+  const stealChoice = accessChoices.find(
+    (choice) => choice.action.type === "steal_agenda",
+  );
+  if (stealChoice) {
+    return annotateRunnerRunPlanChoice({
+      choice: stealChoice,
+      plan: params.plan,
+      explanation: "RunnerRunPlan setzt den Run-Zweck durch Agenda-Steal fort.",
+      extraEvidence: ["runner_run_plan_access_selected:steal_agenda"],
+    });
+  }
+  const openAccessChoice = accessChoices.find(
+    (choice) => choice.action.type === "access_card",
+  );
+  if (openAccessChoice) {
+    return annotateRunnerRunPlanChoice({
+      choice: openAccessChoice,
+      plan: params.plan,
+      explanation: "RunnerRunPlan setzt den Run-Zweck durch Zugriff fort.",
+      extraEvidence: ["runner_run_plan_access_selected:access_card"],
+    });
+  }
+  const trashChoice = accessChoices.find(
+    (choice) => choice.action.type === "trash_accessed_card",
+  );
+  const declineChoice = accessChoices.find(
+    (choice) => choice.action.type === "decline_trash",
+  );
+  const reserveTarget = runnerRunPlanAccessReserveTarget(params.plan);
+  const trashBreaksReserve =
+    trashChoice !== undefined &&
+    params.input.playerView.own.credits - actionCreditCost(trashChoice.action) <
+      reserveTarget;
+  const selected =
+    trashChoice && params.plan.accessIntent?.trashPolicy === "must_trash_target"
+      ? trashChoice
+      : declineChoice && params.plan.accessIntent?.trashPolicy === "decline_low_value"
+        ? declineChoice
+        : declineChoice && trashBreaksReserve
+          ? declineChoice
+          : [...accessChoices].sort(
+              (left, right) =>
+                right.score - left.score ||
+                runnerRunPlanAccessTypePriority(right.action.type) -
+                  runnerRunPlanAccessTypePriority(left.action.type),
+            )[0];
+  if (!selected) return undefined;
+  return annotateRunnerRunPlanChoice({
+    choice: selected,
+    plan: params.plan,
+    explanation: "RunnerRunPlan entscheidet den Zugriff anhand AccessIntent und Reserve.",
+    extraEvidence: [
+      `runner_run_plan_access_selected:${selected.action.type}`,
+      `runner_run_plan_access_trash_policy:${params.plan.accessIntent?.trashPolicy ?? "none"}`,
+      `runner_run_plan_access_reserve:${reserveTarget}`,
+      ...(trashBreaksReserve ? ["runner_run_plan_access_trash_breaks_reserve:true"] : []),
+    ],
   });
 }
 
@@ -145,11 +217,37 @@ function encounterContinueWillEndRun(input: AiDecisionInput): boolean {
   );
 }
 
+function runnerRunPlanAccessReserveTarget(plan: RunnerRunPlan): number {
+  return Math.max(
+    0,
+    plan.accessIntent?.reserveForStealOrTrash ?? 0,
+    plan.reserve.preserveStealOrTrashCredits,
+    plan.budget.reservedCreditsForSteal,
+    plan.budget.reservedCreditsForTrash,
+    plan.budget.reservedCreditsAfterRun,
+  );
+}
+
+function runnerRunPlanAccessTypePriority(actionType: string): number {
+  if (actionType === "steal_agenda") return 4;
+  if (actionType === "access_card") return 3;
+  if (actionType === "trash_accessed_card") return 2;
+  if (actionType === "decline_trash") return 1;
+  return 0;
+}
+
 const runnerRunPlanRelevantActionTypes = new Set([
   "pump_breaker",
   "break_subroutine",
   "continue_run",
   "jack_out",
+  "access_card",
+  "steal_agenda",
+  "trash_accessed_card",
+  "decline_trash",
+]);
+
+const runnerRunPlanAccessActionTypes = new Set([
   "access_card",
   "steal_agenda",
   "trash_accessed_card",
