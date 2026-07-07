@@ -124,3 +124,5 @@ Verifikation:
 - Fokussierte Vitests fuer unterfinanzierte und finanzierte Agenda-Install-Alternativen sind gruen.
 - Einzelseed-Check `strategy_panel_hybrid_score_punish_cheap_bag` / `ai-v143-tuning-004` / 480 Actions bleibt bei Corp-Agenda-Sieg mit 7:6 AP und 198 Actions.
 - Das Diagnoseflag `corpExtraCentralIceChosenOverAgendaInstall` steht in diesem Seed jetzt auf 0; Outcome und zentrale Verlaufsmetriken bleiben unveraendert.
+
+Verworfener Folge-Kandidat: Eine Triage-Aenderung, die vorhandene Score-Remote-Linien schon bei Full-Path-Floor knapp oberhalb der aktuellen Credits von `protect_score_remote` auf `fund_score_remote` umstellt, wurde im selben Seed getestet. Der erste betroffene Klick wechselte zwar von HQ-ICE zu `gain_credit`, erzeugte aber neue Suspicious-Economy-Flags und im naechsten Klick erneut HQ-ICE mit wieder aktivem `corpExtraCentralIceChosenOverAgendaInstall`. Outcome und Laenge blieben gleich. Diese Variante wurde deshalb nicht uebernommen; die Ursache liegt eher in der anschliessenden Scoreline-/Central-Protection-Abwaegung als in einem simplen Funding-vor-Protection-Switch.
