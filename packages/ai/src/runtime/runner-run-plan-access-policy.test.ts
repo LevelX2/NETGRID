@@ -69,6 +69,60 @@ describe("runner run plan access policy", () => {
       "runner_run_plan_access_trash_policy:must_trash_target",
     );
   });
+
+  it("lets semantic trash value override decline-low-value access intent", () => {
+    const trash = action("trash_accessed_card");
+    const decline = action("decline_trash");
+
+    const selected = runnerRunPlanSemanticChoice({
+      input: accessInput([decline, trash], { credits: 5 }),
+      plan: runPlan({ trashPolicy: "decline_low_value" }),
+      choices: [choice(decline, -1745), choice(trash, -575)],
+    });
+
+    expect(selected?.action.actionId).toBe(trash.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_access_decline_low_value_yielded_to_score:true",
+    );
+  });
+
+  it("keeps decline-low-value when decline is at least as good as trash", () => {
+    const trash = action("trash_accessed_card", { costs: [{ credits: 1 }] });
+    const decline = action("decline_trash");
+
+    const selected = runnerRunPlanSemanticChoice({
+      input: accessInput([trash, decline], { credits: 5 }),
+      plan: runPlan({ trashPolicy: "decline_low_value" }),
+      choices: [choice(trash, -900), choice(decline, 100)],
+    });
+
+    expect(selected?.action.actionId).toBe(decline.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_access_trash_policy:decline_low_value",
+    );
+  });
+
+  it("falls back to score selection when the run plan is invalid during access", () => {
+    const trash = action("trash_accessed_card");
+    const decline = action("decline_trash");
+
+    const selected = runnerRunPlanSemanticChoice({
+      input: accessInput([trash, decline], { credits: 5 }),
+      plan: runPlan({
+        trashPolicy: "must_trash_target",
+        revalidationStatus: "invalid",
+      }),
+      choices: [choice(trash, 100), choice(decline, 900)],
+    });
+
+    expect(selected?.action.actionId).toBe(decline.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_access_score_fallback:true",
+    );
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_access_fallback_reason:invalid_revalidation",
+    );
+  });
 });
 
 function accessInput(
@@ -132,6 +186,7 @@ function runPlan(
   options: {
     trashPolicy?: NonNullable<RunnerRunPlan["accessIntent"]>["trashPolicy"];
     reserveForStealOrTrash?: number;
+    revalidationStatus?: RunnerRunPlan["revalidation"]["status"];
   } = {},
 ): RunnerRunPlan {
   const reserveForStealOrTrash = options.reserveForStealOrTrash ?? 0;
@@ -196,7 +251,7 @@ function runPlan(
       phase: "access",
     },
     revalidation: {
-      status: "valid",
+      status: options.revalidationStatus ?? "valid",
       reasons: [],
       checkedAtStateVersion: 300,
     },
