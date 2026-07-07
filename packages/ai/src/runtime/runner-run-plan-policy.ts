@@ -203,6 +203,18 @@ function annotateRunnerRunPlanChoice(params: {
       `runner_run_plan_objective:${plan.objective.kind}`,
       `runner_run_plan_target:${plan.targetServer.id}`,
       `runner_run_plan_revalidation:${plan.revalidation.status}`,
+      `runner_run_plan_budget_available:${plan.budget.availableCredits}`,
+      `runner_run_plan_budget_reserved:${runnerRunPlanAccessReserveTarget(plan)}`,
+      `runner_run_plan_path_quote_status:${plan.pathQuote.quoteStatus}`,
+      `runner_run_plan_path_quote_total_known_cost:${plan.pathQuote.totalKnownCost}`,
+      `runner_run_plan_path_quote_expected_remaining:${plan.pathQuote.expectedRemainingCredits}`,
+      `runner_run_plan_path_quote_can_reach:${plan.pathQuote.canReachAccess}`,
+      ...(plan.pathQuote.cannotReachReason
+        ? [`runner_run_plan_path_quote_cannot_reach:${plan.pathQuote.cannotReachReason}`]
+        : []),
+      ...(plan.currentObligation
+        ? [`runner_run_plan_current_obligation:${plan.currentObligation.kind}`]
+        : []),
       ...params.extraEvidence,
     ],
   };

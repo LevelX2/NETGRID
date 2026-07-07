@@ -44,6 +44,7 @@ export type SemanticDecisionDebugDiagnosticsInput = {
   compatibilitySignalItems?: readonly string[];
   coverageGapItems?: readonly string[];
   runtimeWhyNotItems?: readonly string[];
+  runPlanItems?: readonly string[];
   tacticalPlanItems?: readonly string[];
   memoryItems?: readonly string[];
   memorySectionTitle?: string;
@@ -251,6 +252,15 @@ export function buildSemanticDecisionDebugDiagnostics(
             id: "runtime_why_not",
             title: "Runtime Why Not",
             items: sideSafeDebugItems(input.runtimeWhyNotItems),
+          },
+        ]
+      : []),
+    ...(input.runPlanItems && input.runPlanItems.length > 0
+      ? [
+          {
+            id: "runner_run_plan",
+            title: "Runner RunPlan",
+            items: sideSafeDebugItems(input.runPlanItems),
           },
         ]
       : []),

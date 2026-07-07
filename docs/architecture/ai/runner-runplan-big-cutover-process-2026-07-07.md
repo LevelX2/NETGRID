@@ -1,6 +1,7 @@
 # Runner-RunPlan Big-Cutover ohne Fallback
 
-Status: in Umsetzung
+Status: Paketumsetzung abgeschlossen; Final-Verify und lokaler Main-Merge stehen
+noch aus.
 
 ## Quelle/Vorgabe
 
