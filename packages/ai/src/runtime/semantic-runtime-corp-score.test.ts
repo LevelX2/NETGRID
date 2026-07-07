@@ -3349,6 +3349,125 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("funds an emergency HQ-flood scoreline when dynamic reserve is zero but remote rez floor is unmet", () => {
+    const remoteAgenda = agendaCard("remote-agenda", 4);
+    const advanceAgenda = {
+      ...corpAction("advance-agenda", "advance_card", {
+        serverId: "remote_1",
+      }),
+      source: remoteAgenda.instanceId,
+    } as LegalAction;
+    const gainCredit = corpAction(
+      "gain-credit",
+      "gain_credit",
+      {},
+      "basic_action",
+    );
+    const input = corpInputWithHqCardsAndServers(
+      1,
+      [agendaCard("hq-agenda", 4)],
+      [
+        {
+          id: "hq",
+          label: "HQ",
+          ice: [],
+          root: [],
+        },
+        {
+          id: "rd",
+          label: "R&D",
+          ice: [],
+          root: [],
+        },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [corpIce("remote-ice")],
+          root: [remoteAgenda],
+        },
+      ],
+      [advanceAgenda, gainCredit],
+    );
+    const dependencies = {
+      ...testDependencies(),
+      actionCreditCost: (action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId ? 1 : 0,
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId,
+      corpRemoteRezFloorAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? {
+              blockedByFloor: true,
+              rezFloor: 7,
+              requiredCreditsAfterAction: 7,
+              creditsAfterAction: 0,
+              evidence: [
+                "remote_rez_floor:7",
+                "remote_rez_floor_required_after_action:7",
+                "agenda_development_risk:below_remote_rez_floor",
+              ],
+            }
+          : undefined,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === advanceAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealSeverity: "game_ending",
+              runnerAgendaPointsAfterSteal: 9,
+              dynamicProtectionReserve: 0,
+              corpCanRezRelevantIce: false,
+              corpCanRezFullPathWithDynamicReserve: false,
+              recommendedNextStep: "gain_credit",
+              evidence: ["test_hq_flood_zero_dynamic_reserve_needs_funding"],
+            })
+          : undefined,
+    };
+
+    const creditComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      gainCredit,
+      "basic_economy_draw",
+      dependencies,
+    );
+    const advanceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      advanceAgenda,
+      "simple_score_advance",
+      dependencies,
+    );
+
+    expect(creditComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining(
+            "triage_primary:force_scoreline_clock",
+          ),
+        }),
+      ]),
+    );
+    expect(advanceComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_mismatch",
+          reason: expect.stringContaining("triage_required_rez_floor:8"),
+        }),
+      ]),
+    );
+    expect(totalScore(creditComponents)).toBeGreaterThan(
+      totalScore(advanceComponents),
+    );
+  });
+
   it("does not force unsafe scoreline when low R&D has no visible HQ agenda flood", () => {
     const installAgenda = corpAction(
       "install-agenda-remote-1",

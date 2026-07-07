@@ -48,6 +48,9 @@ export type CorpBoardTriage = {
 
 type RezFloorAssessment = {
   blockedByFloor: boolean;
+  rezFloor?: number | undefined;
+  requiredCreditsAfterAction?: number | undefined;
+  creditsAfterAction?: number | undefined;
   evidence: string[];
 };
 
@@ -231,7 +234,11 @@ export function semanticRuntimeCorpBoardTriage<TConsumer extends string>(
       severity: triageSeverityFromScoringWindow(remoteFunding.scoringWindow),
       targetServerId: remoteFunding.serverId,
       scoreRemoteServerId: remoteFunding.serverId,
-      requiredRezFloor: remoteFunding.scoringWindow.dynamicProtectionReserve,
+      requiredRezFloor: scorelineRequiredRezFloor(
+        input,
+        remoteFunding,
+        dependencies,
+      ),
       currentCredits,
       runnerAgendaPointsAfterSteal:
         remoteFunding.scoringWindow.runnerAgendaPointsAfterSteal,
@@ -449,13 +456,19 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         triage.requiredRezFloor !== undefined &&
         triage.currentCredits !== undefined &&
         triage.currentCredits < triage.requiredRezFloor;
+      const legalEconomyAvailable = legalEconomyActionExists(input);
       if (
         actionKeepsSideSafeSameTurnScoreCloseoutForAction(
           input,
           action,
           dependencies,
-        ) ||
-        actionAcceleratesScoreline(actionSemanticCandidate)
+        )
+      ) {
+        return "match";
+      }
+      if (
+        actionAcceleratesScoreline(actionSemanticCandidate) &&
+        (!needsFunding || !legalEconomyAvailable)
       ) {
         return "match";
       }
@@ -471,15 +484,16 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
         return "mismatch";
       }
       if (actionPushesConcreteAgendaScoreline(input, action, dependencies)) {
+        if (needsFunding && legalEconomyAvailable) {
+          return "mismatch";
+        }
         if (
           emergencyRemoteConversion &&
           (!triage.targetServerId || actionServerId === triage.targetServerId)
         ) {
           return "match";
         }
-        return needsFunding && legalEconomyActionExists(input)
-          ? "mismatch"
-          : "match";
+        return "match";
       }
       if (
         actionProtectsServer(
@@ -502,7 +516,7 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
           actionSemanticCandidate,
         )
       ) {
-        return emergencyRemoteConversion ? "mismatch" : "match";
+        return "match";
       }
       return actionDelaysForcedScoreline(
         input,
@@ -764,7 +778,11 @@ function corpActiveScorelineClockPressure<TConsumer extends string>(
       targetServerId && targetServerId.startsWith("remote_")
         ? targetServerId
         : undefined,
-    requiredRezFloor: preferred.scoringWindow?.dynamicProtectionReserve,
+    requiredRezFloor: scorelineRequiredRezFloor(
+      input,
+      preferred,
+      dependencies,
+    ),
     hqAgendaCount: input.playerView.own.gripOrHq.filter(
       corpTriageVisibleCardIsAgenda,
     ).length,
@@ -941,13 +959,9 @@ function corpDeckoutAgendaFloodPressure<TConsumer extends string>(
   if (scorelineEntries.length === 0) return undefined;
 
   const preferred = highestPriorityDeckoutScorelineEntry(scorelineEntries);
-  const requiredRezFloor =
-    corpTriagePositiveNumber(
-      preferred?.scoringWindow?.dynamicProtectionReserve,
-    ) ??
-    (preferred?.remoteRezFloor?.blockedByFloor
-      ? input.playerView.own.credits + 1
-      : undefined);
+  const requiredRezFloor = preferred
+    ? scorelineRequiredRezFloor(input, preferred, dependencies)
+    : undefined;
   const targetServerId = preferred?.serverId;
   const severity =
     rdCount <= 2 || (rdCount <= 4 && hqAgendaPoints >= 6) ? "critical" : "high";
@@ -1046,13 +1060,9 @@ function corpHqAgendaFloodScorelinePressure<TConsumer extends string>(
       ? emergencyScorelineEntries
       : playableScorelineEntries,
   );
-  const requiredRezFloor =
-    corpTriagePositiveNumber(
-      preferred?.scoringWindow?.dynamicProtectionReserve,
-    ) ??
-    (preferred?.remoteRezFloor?.blockedByFloor
-      ? input.playerView.own.credits + 1
-      : undefined);
+  const requiredRezFloor = preferred
+    ? scorelineRequiredRezFloor(input, preferred, dependencies)
+    : undefined;
   const targetServerId = preferred?.serverId;
   const runnerAgendaPoints =
     corpTriagePositiveNumber(input.playerView.opponent?.agendaPoints) ?? 0;
@@ -1761,6 +1771,36 @@ function scoreRemoteHasUnmetFundingNeed(
   );
   if (requiredRezFloor === undefined) return false;
   return input.playerView.own.credits < requiredRezFloor;
+}
+
+function scorelineRequiredRezFloor<TConsumer extends string>(
+  input: AiDecisionInput,
+  entry: ScoredLegalAction,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): number | undefined {
+  const dynamicReserve = corpTriagePositiveNumber(
+    entry.scoringWindow?.dynamicProtectionReserve,
+  );
+  if (dynamicReserve !== undefined && dynamicReserve > 0) {
+    return dynamicReserve;
+  }
+  if (entry.remoteRezFloor?.blockedByFloor !== true) {
+    return dynamicReserve;
+  }
+  const requiredAfterAction = corpTriagePositiveNumber(
+    entry.remoteRezFloor.requiredCreditsAfterAction,
+  );
+  if (requiredAfterAction !== undefined) {
+    return (
+      requiredAfterAction +
+      Math.max(0, dependencies.actionCreditCost(entry.action))
+    );
+  }
+  const rezFloor = corpTriagePositiveNumber(entry.remoteRezFloor.rezFloor);
+  if (rezFloor !== undefined && rezFloor > 0) {
+    return Math.max(input.playerView.own.credits + 1, rezFloor);
+  }
+  return input.playerView.own.credits + 1;
 }
 
 function existingScoreRemoteNeedsFundingBeforeProtection(
