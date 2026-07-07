@@ -2782,6 +2782,62 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("does not repeat The Short Circuit search while a fetched program waits in grip", () => {
+    const input = runnerWallCoverageInput([
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "short-circuit-search",
+        "runner",
+        "activated_card_ability",
+        "The Short Circuit: Stack nach Programm durchsuchen",
+        { credits: 1 },
+        { source: "short-circuit" },
+      ),
+      legalAction("gain", "runner", "gain_credit", "1 Credit nehmen", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.rig = [
+      visibleCard("short-circuit", "runner", "resource", {
+        definitionId: "onr_v1_177_the-short-circuit",
+        title: "The Short Circuit",
+        rulesText: "Search your stack for a program.",
+      }),
+    ];
+    input.playerView.own.gripOrHq = [
+      visibleCard("pile-driver", "runner", "program", {
+        definitionId: "onr_v1_047_pile-driver",
+        title: "Pile Driver",
+      }),
+    ];
+    input.playerView.publicEvents = [
+      publicEvent("previous-short-circuit-search", "activated_card_ability", 73, {
+        actor: "runner",
+        actionType: "activated_card_ability",
+        hiddenZoneAction: "p3_37_search_stack_to_grip",
+      }),
+    ];
+    input.eventTail = input.playerView.publicEvents;
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("gain");
+    expect(decision.actionId).not.toBe("short-circuit-search");
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "coverage_search_wait_for_install_or_fund",
+    );
+  });
+
   it("uses Bodyweight draw-for-answer before basic draw when search is not legal", () => {
     const input = runnerWallCoverageInput([
       legalAction(
