@@ -121,6 +121,7 @@ export type RunnerRunEncounterActionSequence = {
   preservesAccessObjective: boolean;
   violatesReserve: boolean;
   riskTags: string[];
+  evidence?: string[];
 };
 
 export type RunnerRunSubroutineThreatClass =

@@ -13,6 +13,7 @@ import type {
   RunnerRunPlanOrigin,
   RunnerRunPlanServerId,
 } from "./runner-run-plan-types";
+import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 
 export function createRunnerRunPlanForSelectedAction(params: {
   input: AiDecisionInput;
@@ -62,7 +63,7 @@ export function createRunnerRunPlanForSelectedAction(params: {
     (goal) =>
       goal.targetServerId === undefined || goal.targetServerId === targetServerId,
   );
-  return {
+  const plan: RunnerRunPlan = {
     id: [
       "runner_run_plan",
       input.decisionId,
@@ -162,6 +163,10 @@ export function createRunnerRunPlanForSelectedAction(params: {
     },
     createdAtStateVersion: now,
     updatedAtStateVersion: now,
+  };
+  return {
+    ...plan,
+    pathQuote: quoteRunnerRunPath(input, plan),
   };
 }
 
