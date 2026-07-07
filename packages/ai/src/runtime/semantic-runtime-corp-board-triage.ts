@@ -406,8 +406,11 @@ export function semanticRuntimeCorpBoardTriageActionComponent<
         : TRIAGE_MISMATCH_HIGH;
     const normalizedValue = normalizedCorpBoardTriageValue(rawValue);
     const componentValue = corpBoardTriageMismatchComponentValue(
+      input,
       triage,
       normalizedValue,
+      action,
+      actionServerId,
     );
     return {
       key: "corp_board_triage_mismatch",
@@ -3268,8 +3271,11 @@ function triageIsEmergencyHqAgendaRemoteConversion(
 }
 
 function corpBoardTriageMismatchComponentValue(
+  input: AiDecisionInput,
   triage: CorpBoardTriage,
   normalizedValue: number,
+  action: LegalAction,
+  actionServerId: string | undefined,
 ): number {
   if (
     triage.primary === "force_scoreline_clock" &&
@@ -3284,6 +3290,16 @@ function corpBoardTriageMismatchComponentValue(
     )
   ) {
     return -12000;
+  }
+  if (
+    triage.primary === "protect_score_remote" &&
+    (triage.severity === "critical" || triage.severity === "high") &&
+    action.type === "install_card" &&
+    action.payload?.placement === "ice" &&
+    actionServerId !== triage.targetServerId &&
+    corpRemoteScoringStrategyWantsRemoteDevelopment(input)
+  ) {
+    return -5200;
   }
   if (
     (triage.primary === "score_now" ||

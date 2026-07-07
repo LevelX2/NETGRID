@@ -226,26 +226,32 @@ describe("semantic runtime corp board triage", () => {
       placement: "ice",
       serverId: "remote_1",
     });
-    const input = corpInput({
-      runnerAgendaPoints: 5,
-      runnerRig: [rdVirusCard("highlighter")],
-      legalActions: [remoteScoreline, rdIce, remoteIce],
-      eventTail: [
-        publicCentralEvent("rd-run-1", "start_run", "rd"),
-        publicCentralEvent("rd-access-1", "access_card", "rd"),
-        publicCentralEvent("rd-run-2", "start_run", "rd"),
-        publicCentralEvent("rd-access-2", "access_card", "rd"),
-      ],
-      servers: [
-        centralServer("hq", [iceCard("hq-ice")]),
-        centralServer("rd", [
-          iceCard("rd-stop-1", { rezzed: false }),
-          iceCard("rd-stop-2", { rezzed: false }),
-          iceCard("rd-stop-3", { rezzed: false }),
-        ]),
-        remoteServer("remote_1", [iceCard("remote-ice")], [agendaCard()]),
-      ],
-    });
+    const input = {
+      ...corpInput({
+        runnerAgendaPoints: 5,
+        runnerRig: [rdVirusCard("highlighter")],
+        legalActions: [remoteScoreline, rdIce, remoteIce],
+        eventTail: [
+          publicCentralEvent("rd-run-1", "start_run", "rd"),
+          publicCentralEvent("rd-access-1", "access_card", "rd"),
+          publicCentralEvent("rd-run-2", "start_run", "rd"),
+          publicCentralEvent("rd-access-2", "access_card", "rd"),
+        ],
+        servers: [
+          centralServer("hq", [iceCard("hq-ice")]),
+          centralServer("rd", [
+            iceCard("rd-stop-1", { rezzed: false }),
+            iceCard("rd-stop-2", { rezzed: false }),
+            iceCard("rd-stop-3", { rezzed: false }),
+          ]),
+          remoteServer("remote_1", [iceCard("remote-ice")], [agendaCard()]),
+        ],
+      }),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.score_agendas",
+        scorePlan: ["corp.remote_scoreline"],
+      },
+    } as unknown as AiDecisionInput;
     const dependencies = testDependencies({
       scoringWindowByActionId: {
         [remoteScoreline.actionId]: scoringWindow({
@@ -286,9 +292,110 @@ describe("semantic runtime corp board triage", () => {
     );
     expect(rdIceComponent).toMatchObject({
       key: "corp_board_triage_mismatch",
-      value: -2400,
+      value: -5200,
     });
     expect(remoteIceComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+  });
+
+  it("penalizes off-target HQ ice hard enough while a score remote needs protection", () => {
+    const remoteScoreline = corpAction("remote-scoreline", "advance_card", {
+      serverId: "remote_1",
+    });
+    const hqIce = {
+      ...corpAction("install-hq-extra-ice", "install_card", {
+        placement: "ice",
+        serverId: "hq",
+      }),
+      source: "hq-extra-ice",
+    } as LegalAction;
+    const remoteWall = {
+      ...corpAction("install-remote-wall", "install_card", {
+        placement: "ice",
+        serverId: "remote_1",
+      }),
+      source: "remote-wall",
+    } as LegalAction;
+    const input = {
+      ...corpInput({
+        corpCredits: 13,
+        corpHq: [
+          agendaCard("hq-agenda", 3),
+          iceCard("hq-extra-ice", {
+            title: "HQ Extra ICE",
+            rulesText: "End the run.",
+            rezCost: 3,
+          }),
+          iceCard("remote-wall", {
+            title: "Remote Wall",
+            rulesText: "End the run.",
+            rezCost: 2,
+          }),
+        ],
+        legalActions: [remoteScoreline, hqIce, remoteWall],
+        servers: [
+          centralServer("hq", [
+            iceCard("hq-ice-1"),
+            iceCard("hq-ice-2"),
+            iceCard("hq-ice-3"),
+          ]),
+          centralServer("rd", [iceCard("rd-ice")]),
+          remoteServer(
+            "remote_1",
+            [iceCard("remote-ice-1"), iceCard("remote-ice-2")],
+            [agendaCard("remote-agenda", 3)],
+          ),
+        ],
+      }),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.score_agendas",
+        scorePlan: ["corp.remote_scoreline"],
+      },
+    } as unknown as AiDecisionInput;
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteScoreline.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "temporary_safe",
+          runnerCanContestBeforeScore: true,
+          runnerCanReachAccessBeforeScore: true,
+          agendaStealRelevantBeforeScore: true,
+          agendaStealSeverity: "near_win",
+          runnerAgendaPointsAfterSteal: 6,
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          recommendedNextStep: "build_remote_ice",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const hqComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      hqIce,
+      dependencies,
+    );
+    const remoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteWall,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_score_remote",
+      severity: "high",
+      targetServerId: "remote_1",
+    });
+    expect(hqComponent).toMatchObject({
+      key: "corp_board_triage_mismatch",
+      value: -5200,
+    });
+    expect(hqComponent?.reason).toContain("triage_action_server:hq");
+    expect(hqComponent?.reason).toContain("triage_target:remote_1");
+    expect(remoteComponent).toMatchObject({
       key: "corp_board_triage_alignment",
     });
   });
