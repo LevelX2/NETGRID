@@ -38,7 +38,14 @@ export function createMatchProgressionBenchmarkSuiteRunner(
       candidateProfile,
     ]) as SimulationBenchmarkProfileId[];
     const seeds = v143BenchmarkSeeds(config);
-    const slots = MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.map((slot) =>
+    const slotIdFilter = new Set(config.slotIds ?? []);
+    const selectedSlotDefinitions =
+      slotIdFilter.size > 0
+        ? MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS.filter((slot) =>
+            slotIdFilter.has(slot.slotId),
+          )
+        : MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS;
+    const slots = selectedSlotDefinitions.map((slot) =>
       runMatchProgressionBenchmarkSlot(
         slot,
         config,

@@ -30,4 +30,5 @@ export type AiDoctrineQualityBenchmarkConfig = V143LeagueConfig & {
   baselineProfile?: SimulationBenchmarkProfileId;
   candidateProfile?: SimulationBenchmarkProfileId;
   comparisonProfiles?: SimulationBenchmarkProfileId[];
+  slotIds?: string[];
 };

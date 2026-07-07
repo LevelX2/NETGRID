@@ -38,6 +38,7 @@ const suite = runMatchProgressionBenchmarkSuite({
     ? { comparisonProfiles: args.comparisonProfiles }
     : {}),
   ...(args.seeds ? { seeds: args.seeds } : {}),
+  ...(args.slotIds ? { slotIds: args.slotIds } : {}),
 });
 const report = formatMatchProgressionBenchmarkSuiteReport(suite);
 const outJson = resolve(repoRoot, args.outJson);
@@ -63,6 +64,7 @@ console.log(
       disabledSlots: suite.slots.filter((slot) => slot.status === "disabled")
         .length,
       seeds: suite.seeds.length,
+      ...(args.slotIds ? { slotIds: args.slotIds } : {}),
     },
     null,
     2,
@@ -78,6 +80,7 @@ function parseArgs(argv: string[]): {
   candidateProfile?: SimulationBenchmarkProfileId;
   comparisonProfiles?: SimulationBenchmarkProfileId[];
   seeds?: string[];
+  slotIds?: string[];
   listSlots: boolean;
 } {
   let outJson: string | undefined;
@@ -87,6 +90,7 @@ function parseArgs(argv: string[]): {
   let candidateProfile: SimulationBenchmarkProfileId | undefined;
   let comparisonProfiles: SimulationBenchmarkProfileId[] | undefined;
   let seeds: string[] | undefined;
+  let slotIds: string[] | undefined;
   let includeHoldout = false;
   let listSlots = false;
 
@@ -135,6 +139,14 @@ function parseArgs(argv: string[]): {
       index += 1;
       continue;
     }
+    if (arg === "--slot-ids" && next) {
+      slotIds = next
+        .split(",")
+        .map((value) => value.trim())
+        .filter((value) => value.length > 0);
+      index += 1;
+      continue;
+    }
     if (arg === "--include-holdout") {
       includeHoldout = true;
       continue;
@@ -161,6 +173,7 @@ function parseArgs(argv: string[]): {
     ...(candidateProfile ? { candidateProfile } : {}),
     ...(comparisonProfiles ? { comparisonProfiles } : {}),
     ...(seeds ? { seeds } : {}),
+    ...(slotIds ? { slotIds } : {}),
     listSlots,
   };
 }

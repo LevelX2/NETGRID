@@ -235,6 +235,33 @@ describe("benchmark report formatting", () => {
     );
   }, 120_000);
 
+  it("runs a filtered strategy panel suite for chunked long benchmarks", () => {
+    const suite = runMatchProgressionBenchmarkSuite({
+      includeHoldout: false,
+      maxActions: 10,
+      seeds: ["strategy-suite-filter-seed-001"],
+      baselineProfile: "belief_ai_v1_4_2",
+      candidateProfile: "current_candidate",
+      comparisonProfiles: ["belief_ai_v1_4_2", "current_candidate"],
+      slotIds: ["strategy_panel_fast_advance_chrome_rush"],
+    });
+
+    expect(suite.slots).toHaveLength(1);
+    expect(suite.slots[0]?.slotId).toBe(
+      "strategy_panel_fast_advance_chrome_rush",
+    );
+    expect(suite.slots[0]?.status).toBe("runnable");
+    expect(suite.slots[0]?.corpArchetype).toBe("fast_advance");
+    expect(suite.slots[0]?.benchmark?.seeds).toEqual([
+      "strategy-suite-filter-seed-001",
+    ]);
+    expect(
+      suite.slots[0]?.benchmark?.profileComparisons.map(
+        (entry) => entry.profile,
+      ),
+    ).toEqual(["belief_ai_v1_4_2", "current_candidate"]);
+  }, 120_000);
+
   it("detects suspicious selfplay decisions from redaction-safe synthetic traces", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-detector-synthetic",
