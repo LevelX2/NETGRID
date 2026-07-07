@@ -149,7 +149,7 @@ describe("benchmark report formatting", () => {
     ).toHaveLength(2);
     expect(
       slots.filter((slot) => slot.slotType === "local_realistic_holdout"),
-    ).toHaveLength(2);
+    ).toHaveLength(5);
     expect(smoke?.status).toBe("runnable");
     expect(smoke?.runnerDeckRef).toBe("demo_runner_008");
     expect(smoke?.corpArchetype).toBe("starter_scoreline");
@@ -164,7 +164,7 @@ describe("benchmark report formatting", () => {
     expect(snapshot?.benchmark?.runnerDeckId).not.toBe("demo_runner_008");
     expect(snapshot?.benchmark?.candidate.illegalActions).toBe(0);
     expect(snapshot?.benchmark?.candidate.replayFailures).toBe(0);
-    expect(localRealisticSlots).toHaveLength(2);
+    expect(localRealisticSlots).toHaveLength(5);
     expect(
       localRealisticSlots.every((slot) => slot.status === "runnable"),
     ).toBe(true);
@@ -186,19 +186,14 @@ describe("benchmark report formatting", () => {
     expect(realSceneSlots.every((slot) => slot.status === "runnable")).toBe(
       true,
     );
-    expect(strategyPanelGaps).toHaveLength(4);
+    expect(strategyPanelGaps).toHaveLength(1);
     expect(strategyPanelGaps.every((slot) => slot.status === "pending")).toBe(
       true,
     );
     expect(strategyPanelGaps.every((slot) => !slot.benchmark)).toBe(true);
-    expect(strategyPanelGaps.map((slot) => slot.corpArchetype)).toEqual(
-      expect.arrayContaining([
-        "fast_advance",
-        "net_damage",
-        "hybrid_score_punish",
-        "virus_damage",
-      ]),
-    );
+    expect(strategyPanelGaps.map((slot) => slot.corpArchetype)).toEqual([
+      "virus_damage",
+    ]);
     expect(
       realSceneSlots.every((slot) => !slot.runnerDeckRef.includes("demo_008")),
     ).toBe(true);
@@ -214,16 +209,22 @@ describe("benchmark report formatting", () => {
       expect.arrayContaining([
         "starter_scoreline",
         "remote_scoring",
+        "fast_advance",
         "tag_punish",
+        "net_damage",
+        "hybrid_score_punish",
       ]),
     );
     expect(report).toContain("## Demo Smoke");
     expect(report).toContain("## Strategy Panel Coverage");
     expect(report).toContain("## Strategy Panel Gaps");
     expect(report).toContain("Missing runnable Corp archetypes:");
-    expect(report).toContain("strategy_panel_gap_net_damage");
-    expect(report).toContain("strategy_panel_gap_hybrid_score_punish");
+    expect(report).not.toContain("strategy_panel_gap_net_damage");
+    expect(report).not.toContain("strategy_panel_gap_hybrid_score_punish");
+    expect(report).toContain("strategy_panel_gap_virus_damage");
+    expect(report).toContain("fast_advance");
     expect(report).toContain("net_damage");
+    expect(report).toContain("hybrid_score_punish");
     expect(report).toContain("virus_damage");
     expect(report).toContain("## Snapshot Progression");
     expect(report).toContain("## Local Realistic Holdout");

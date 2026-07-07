@@ -90,6 +90,60 @@ const REAL_SCENE_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
     };
   });
 
+const STRATEGY_PANEL_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] = [
+  {
+    slotId: "strategy_panel_fast_advance_chrome_rush",
+    label: "Strategy Panel: Fast Advance",
+    slotType: "local_realistic_holdout",
+    status: "runnable",
+    runner: {
+      kind: "frozen_local_snapshot",
+      snapshotId: "local_realistic_runner_blink_pressure_rig_snapshot_v1",
+    },
+    corp: {
+      kind: "frozen_local_snapshot",
+      snapshotId: "local_realistic_corp_chrome_rush_bureau_snapshot_v1",
+    },
+    runnerArchetype: "rig_economy_pressure",
+    corpArchetype: "fast_advance",
+    tuningUse: "holdout_only",
+  },
+  {
+    slotId: "strategy_panel_net_damage_black_ice",
+    label: "Strategy Panel: Net Damage",
+    slotType: "local_realistic_holdout",
+    status: "runnable",
+    runner: {
+      kind: "frozen_local_snapshot",
+      snapshotId: "local_realistic_runner_rnd_interface_dig_snapshot_v1",
+    },
+    corp: {
+      kind: "frozen_local_snapshot",
+      snapshotId: "local_realistic_corp_black_ice_ambush_lab_snapshot_v1",
+    },
+    runnerArchetype: "central_multiaccess",
+    corpArchetype: "net_damage",
+    tuningUse: "holdout_only",
+  },
+  {
+    slotId: "strategy_panel_hybrid_score_punish_cheap_bag",
+    label: "Strategy Panel: Hybrid Score Punish",
+    slotType: "local_realistic_holdout",
+    status: "runnable",
+    runner: {
+      kind: "frozen_local_snapshot",
+      snapshotId: "local_realistic_runner_blink_pressure_rig_snapshot_v1",
+    },
+    corp: {
+      kind: "frozen_local_snapshot",
+      snapshotId: "local_realistic_corp_cheap_bag_tricks_snapshot_v1",
+    },
+    runnerArchetype: "rig_economy_pressure",
+    corpArchetype: "hybrid_score_punish",
+    tuningUse: "holdout_only",
+  },
+];
+
 const CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition[] =
   [
     {
@@ -149,6 +203,7 @@ const CORE_MATCH_PROGRESSION_BENCHMARK_DECK_SLOTS: AiBenchmarkDeckSlotDefinition
       tuningUse: "holdout_only",
     },
     ...LOCAL_REALISTIC_BENCHMARK_DECK_SLOTS,
+    ...STRATEGY_PANEL_BENCHMARK_DECK_SLOTS,
     ...REAL_SCENE_BENCHMARK_DECK_SLOTS,
   ];
 
