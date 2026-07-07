@@ -127,7 +127,7 @@ const matrix = pairs.map(({ pair }) => {
       replayOk: summary.replayOk,
       replayErrors: summary.replayErrors,
       redactionSafe: summary.redactionSafe,
-      actionLimitReached: summary.actionLimitReached,
+      actionLimitReached: summary.winner === "action_limit_reached",
       lastActionTypes: summary.actionSequence
         .slice(-10)
         .map((entry) => entry.actionType),

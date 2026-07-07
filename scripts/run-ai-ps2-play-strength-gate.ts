@@ -249,7 +249,7 @@ function summarize(result: TraceMiningResult) {
       finalAgendaPoints: summary.finalAgendaPoints,
       replayOk: summary.replayOk,
       redactionSafe: summary.redactionSafe,
-      actionLimitReached: summary.actionLimitReached,
+      actionLimitReached: summary.winner === "action_limit_reached",
     })),
   };
 }
