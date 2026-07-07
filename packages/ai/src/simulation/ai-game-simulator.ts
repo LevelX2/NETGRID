@@ -296,7 +296,14 @@ function simulateAiGame(
     });
     if (!result.ok) {
       errors.push(
-        `${result.error.code} at stateVersion ${state.stateVersion}.`,
+        [
+          `${result.error.code} at stateVersion ${state.stateVersion}`,
+          `side:${side}`,
+          `action:${simulationSafeSelectedActionId(action, actionPlacement(action))}`,
+          `timing:${action.timingPoint}`,
+          `choiceKeys:${Object.keys(decision.selectedChoices ?? {}).join(",") || "none"}`,
+          `message:${result.error.message}`,
+        ].join(" "),
       );
       break;
     }
@@ -492,6 +499,12 @@ function simulateAiGame(
 }
 
   return { simulateAiGame };
+}
+
+function actionPlacement(action: LegalAction): string | undefined {
+  return typeof action.payload?.placement === "string"
+    ? action.payload.placement
+    : undefined;
 }
 
 function simulationDecisionScopeId(params: {

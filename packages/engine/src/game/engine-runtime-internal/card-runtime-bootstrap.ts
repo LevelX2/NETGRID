@@ -1193,6 +1193,8 @@ export function configureCardRuntimeBootstrap() {
           trashCorpInstalledCardsInScoredSourceServer,
         awardRunnerEventAgendaPoint,
         scoreSourceAsAgenda: scoreInstalledRunnerProgramAsAgenda,
+        installedAdvanceableCorpCardTargetCount: (state) =>
+          advanceableInstalledCardTargets(state).length,
         discardRandomCorpHqCards: (state, sourceDefinitionId, count) =>
           discardRandomCorpHqCards(
             state,

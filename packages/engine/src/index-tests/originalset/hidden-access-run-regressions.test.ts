@@ -3864,6 +3864,41 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     );
   });
 
+  it("does not offer Chicago Branch activation without an installed advanceable target", () => {
+    let state = apply(
+      originalsetReorderCounterRunlockGame("chicago-branch-no-target"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 50;
+    state.corp.clicks = 50;
+
+    const chicagoId = putCorpRootInRemote(state, "onr_v1_312_chicago-branch");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        String(action.payload?.cardId) === chicagoId,
+    );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === chicagoId,
+      ),
+    ).toBe(false);
+
+    putCorpRootInRemote(state, "simple_agenda");
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === chicagoId,
+      ),
+    ).toBe(true);
+  });
+
   it("keeps Chicago Branch, Vapor Ops and Corporate Retreat source-bound", () => {
     let state = apply(
       originalsetReorderCounterRunlockGame("spotcheck-assets-agenda"),

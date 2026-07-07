@@ -54,9 +54,45 @@ Hybrid Score Punish:
 - `ai-v143-tuning-002`: Action-Limit, 6/6 AP, 312 Actions, `ERR_INVALID_TARGET`.
 - Die uebrigen 4 Seeds gewinnt die Corp per Agenda.
 
+## Nachtrag: Chicago-Branch-Fix und bereinigter Chunk
+
+Der `ERR_INVALID_TARGET` aus Seed `ai-v143-tuning-002` wurde auf `Chicago Branch` zurueckgefuehrt: Die Engine bot die aktivierte Faehigkeit an, obwohl kein installiertes advancebares Corp-Ziel vorhanden war. Beim Anwenden oeffnete der Advancement-Distribution-Pfad dann ohne Zieloption und brach ab. Das war ein LegalAction-Angebotsfehler, keine reine KI-Gewichtung.
+
+Umgesetzt wurde ein generischer LegalAction-Guard fuer aktivierte `distribute_advancement_counters`-Faehigkeiten mit Ziel `installed_advanceable_cards`: ohne vorhandenes installiertes advancebares Corp-Ziel wird die Aktion nicht angeboten. Zusaetzlich gibt der AI-Simulator bei `applyAction`-Fehlern jetzt side-safe Action-Typ, Timing, Choice-Keys und die oeffentliche Engine-Meldung aus.
+
+Bereinigter Wiederholungslauf:
+
+```powershell
+corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-ai-match-progression-suite.ts `
+  --out-json $env:TEMP\netgrid-strategy-panel-5x480-post-chicago-fix-2026-07-07.json `
+  --seeds ai-v143-tuning-001,ai-v143-tuning-002,ai-v143-tuning-003,ai-v143-tuning-004,ai-v143-tuning-005 `
+  --max-actions 480 `
+  --baseline-profile current_candidate `
+  --candidate-profile current_candidate `
+  --comparison-profiles current_candidate `
+  --slot-ids strategy_panel_fast_advance_chrome_rush,strategy_panel_net_damage_black_ice,strategy_panel_hybrid_score_punish_cheap_bag
+```
+
+Laufzeit: 746.8 Sekunden fuer 3 Slots * 5 Seeds * 2 Profile = 30 simulierte Spiele.
+
+Bereinigte Ergebnisuebersicht `current_candidate`:
+
+| Slot | Corp-Archetyp | Seeds | Gewinner | Agenda-Punkte Runner/Corp | Corp Scores | Runner Steals | Action-Limit | IllegalActions | Auffaelligkeiten |
+| --- | --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `strategy_panel_fast_advance_chrome_rush` | `fast_advance` | 5 | Corp 5 per Agenda | 6 / 35 | 23 | 3 | 0 | 0 | Scoring sauber abgeschlossen; `corpCentralOverIcedWithoutPressure` steigt im bereinigten Vollspiel auf 84, `corpRemoteScoringUnderbuiltWhileCentralsOverIced` nur 1. |
+| `strategy_panel_net_damage_black_ice` | `net_damage` | 5 | Corp 5 per Flatline | 10 / 2 | 1 | 6 | 0 | 0 | Damage-Plan bleibt stark; `corpRemoteScoringUnderbuiltWhileCentralsOverIced` 96 und `corpCentralOverIcedWithoutPressure` 67 bleiben als nicht-scoreline-optimale Muster sichtbar. |
+| `strategy_panel_hybrid_score_punish_cheap_bag` | `hybrid_score_punish` | 5 | Corp 5 per Agenda | 20 / 37 | 13 | 8 | 0 | 0 | Seed 002 und 004 gehen jetzt zu Ende; `corpCentralOverIcedWithoutPressure` 280, `corpExtraCentralIceChosenOverAdvanceOrScore` 2 bleiben die wichtigste Folgediagnose. |
+
+Bereinigte Seed-Details:
+
+- Fast Advance: alle 5 Seeds enden ohne Fehler mit Corp-Agenda-Sieg; Seed `ai-v143-tuning-002` endet jetzt bei 0/7 AP nach 289 Actions statt `ERR_INVALID_TARGET`.
+- Net Damage: alle 5 Seeds enden ohne Fehler mit Corp-Flatline-Sieg.
+- Hybrid Score Punish: alle 5 Seeds enden ohne Fehler mit Corp-Agenda-Sieg; Seed `ai-v143-tuning-002` endet jetzt bei 6/7 AP nach 349 Actions statt `ERR_INVALID_TARGET`.
+
 ## Bewertung fuer weitere Arbeit
 
 - Der neue Slot-Filter ist notwendig: Der grosse Benchmark muss chunked/per Slot laufen, sonst sind Iterationen zu langsam und schlecht kontrollierbar.
 - Die Strategie-Panel-Baseline bestaetigt, dass Fast-Advance und Hybrid grundsaetzlich scoren koennen, aber die Central-Over-Ice-Metriken bleiben auffaellig hoch.
-- Vor weiteren Gewichtsaenderungen sollte der `ERR_INVALID_TARGET` aus Seed `ai-v143-tuning-002` gesondert untersucht werden, weil illegale/ungueltige Zielaktionen Benchmark-Ergebnisse verfaelschen koennen.
+- Der `ERR_INVALID_TARGET` aus Seed `ai-v143-tuning-002` ist behoben; weitere Gewichtsaenderungen sollten auf dem bereinigten Post-Fix-Chunk aufsetzen.
 - Der Net-Damage-Slot darf nicht als Argument fuer bessere Scoreline-KI gelesen werden; die Siege kommen hier ueber Flatline.
+- Naechster belegter Optimierungspunkt bleibt Central-ICE-Uebergewicht gegenueber Score-Remote-/Scoreline-Fortsetzung, besonders im Hybrid-Slot.

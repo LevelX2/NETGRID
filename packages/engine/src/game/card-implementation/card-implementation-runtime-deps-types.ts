@@ -113,6 +113,7 @@ export type GameCardImplementationRuntimeDepsHost = {
       sourceDefinitionId: CardDefinition["id"],
     ) => void;
     scoreSourceAsAgenda: CardImplementationRuntimeDependencies["scoreSourceAsAgenda"];
+    installedAdvanceableCorpCardTargetCount: CardImplementationRuntimeDependencies["installedAdvanceableCorpCardTargetCount"];
     discardRandomCorpHqCards: (
       state: RuntimeState,
       sourceDefinitionId: CardDefinition["id"],

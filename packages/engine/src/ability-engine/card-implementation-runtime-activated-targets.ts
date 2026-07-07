@@ -232,6 +232,20 @@ export function doubleChosenIceStrengthEffect(
     : undefined;
 }
 
+export function distributeAdvancementCountersEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<
+      CardEffectImplementation,
+      { kind: "distribute_advancement_counters" }
+    >
+  | undefined {
+  return ability.effects.length === 1 &&
+    ability.effects[0]?.kind === "distribute_advancement_counters"
+    ? ability.effects[0]
+    : undefined;
+}
+
 export function ownRezzedIceTargetIds(state: GameState): CardInstanceId[] {
   return state.corp.servers
     .flatMap((server) => server.ice)

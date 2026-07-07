@@ -128,6 +128,8 @@ export function createGameCardImplementationRuntimeDeps(
     corpScoredAgendaSubtypeLastTurn: (state, subtype) =>
       subtype === "black_ops" &&
       state.corpTurnFlags?.scoredBlackOpsAgendaLastTurn === true,
+    installedAdvanceableCorpCardTargetCount:
+      host.callbacks.installedAdvanceableCorpCardTargetCount,
     startCorpDiscardHqWithRetainPayment:
       host.hiddenZone.startCorpDiscardHqWithRetainPayment,
     shuffleSourceIntoCorpRd: host.callbacks.shuffleSourceIntoCorpRd,

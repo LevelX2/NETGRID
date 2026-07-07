@@ -15,6 +15,7 @@ import {
   activatedAbilityPayload,
   copySameFortIceSubroutineEffect,
   doubleChosenIceStrengthEffect,
+  distributeAdvancementCountersEffect,
   exposeInstalledCardEffect,
   moveTopTrashToGripEffect,
   ownRezzedIceTargetIds,
@@ -220,6 +221,13 @@ export function pushActivatedCardImplementationActionsForTiming(
       }
       continue;
     }
+    const distributeAdvancementEffect =
+      distributeAdvancementCountersEffect(ability);
+    if (
+      distributeAdvancementEffect?.target === "installed_advanceable_cards" &&
+      deps.installedAdvanceableCorpCardTargetCount(state) === 0
+    )
+      continue;
     actions.push(
       deps.createAction(
         state,
