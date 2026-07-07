@@ -1,6 +1,6 @@
 # Runner Coverage Search Fix Prozess 2026-07-07
 
-Status: in Umsetzung
+Status: umgesetzt, finale Integration läuft
 
 ## Quelle und Ziel
 
@@ -107,3 +107,21 @@ Done-Gate: Arbeitsbranch ist lokal nach `main` integriert und der Worktree ist e
 ## Sicherheitsblocker
 
 Stoppe ohne Workaround, wenn eine Lösung verdeckte Informationen benötigt, nicht aus LegalActions ableitbar ist oder eine Engine-/PlayerView-Erweiterung statt AI-Scoring erfordert.
+
+## Umsetzungsergebnis
+
+- Coverage-Programmsuche wird nicht mehr als Planfortschritt gemappt, wenn seit der letzten Programmsuche ein sichtbares Programm in der Runner-Hand auf Installation oder Funding wartet.
+- Rig-basierte Programmsuche wird bei erreichtem Handlimit als unproduktiver Coverage-Search-Fit abgelehnt.
+- Der Runtime-Folgefall ist regressionsgeschützt: Nach einer `The Short Circuit`-Suche und sichtbarem Programm in der Hand wählt die Runner-KI Funding statt erneuter Suche.
+- Coverage-Setup schützt echte Coverage-Antworten weiter, lässt aber bekannte HQ-Agenda- und frische R&D-Payoff-Runs bei deutlichem Score-Vorsprung durch.
+- Remote-Contest-Pläne akzeptieren jetzt auch neutrale oder aus RunTarget-Evaluationen erzeugte Remote-Score-Threat-Goals als Plananker.
+
+## Paketstatus
+
+- Paket 1: abgeschlossen, Commit `acd5dc2e1`.
+- Paket 2: abgeschlossen, Commit `32bc4e77d`.
+- Paket 3: abgeschlossen, Commit `661af7a46`.
+- Paket 4: abgeschlossen, Commit `84dcba3a4`.
+- Paket 5: abgeschlossen, Commit `ce78eb54a`.
+- Paket 6: in diesem Dokumentationspaket abgeschlossen.
+- Paket 7: finale Verifikation und lokale Main-Integration stehen noch aus.

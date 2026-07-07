@@ -72,3 +72,17 @@ Erwartung: fortgeschrittene Remotes erzeugen kurzfristig Contest-Druck; Low-Payo
 ## Nicht aus diesen Spielen freigegeben
 
 Ein Broker-spezifischer Plan bleibt außerhalb dieses Prozesses. In `match_e05dbb4eadd9a5f4` ging `Broker` durch Net Damage verloren, in `match_13f99872809e6a66` blieb er im Stack.
+
+## Umgesetzte Gegenmaßnahmen
+
+- `packages/ai/src/plans/tactical-plan-coverage-search-fit.ts` blockiert wiederholte Coverage-Programmsuche, wenn ein sichtbares Programm aus einer vorherigen Suche in der Hand auf Installation oder Funding wartet.
+- Derselbe Fit-Pfad blockiert rig-basierte Programmsuche bei erreichtem Handlimit, damit Suchergebnisse nicht direkt in die Discard-Phase laufen.
+- `packages/ai/src/runtime/semantic-choice-ranking.ts` lässt bekannte HQ-Agenda- und frische R&D-Payoff-Runs Coverage-Setup übersteuern, sofern der Run in der semantischen Bewertung deutlich besser ist.
+- `packages/ai/src/plans/tactical-plan-goal-evidence.ts` akzeptiert neutrale und RunTarget-basierte Remote-Contest-Goals als Score-Threat-Anker.
+
+## Regressionen
+
+- `packages/ai/src/plans/tactical-plan-coverage-search-fit.test.ts`: Fit-Rejection für wiederholte Programmsuche und Handlimit.
+- `packages/ai/src/tactical-plans.test.ts`: Mapping blockiert erneute `The Short Circuit`-Suche; neutrale Remote-Score-Threat-Goals boosten Remote-Contest.
+- `packages/ai/src/semantic-ai-runtime-cutover.test.ts`: Nach sichtbarem Suchtreffer wählt die Runner-Runtime Funding statt erneuter Suche.
+- `packages/ai/src/runtime/semantic-choice-ranking.test.ts`: bekannte HQ-Agenda und frischer R&D-Payoff übersteuern Coverage-Setup; echte Coverage-Antworten bleiben geschützt.
