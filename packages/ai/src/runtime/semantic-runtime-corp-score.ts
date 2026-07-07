@@ -1584,13 +1584,16 @@ function corpHqAgendaReliefScorelineContext<TConsumer extends string>(
       evidence: string[];
     }
   | undefined {
-  if (boardTriageState.primary !== "force_scoreline_clock") return undefined;
-  if (
-    !boardTriageState.evidence.includes("corp_hq_agenda_flood_pressure:true") ||
-    !boardTriageState.evidence.includes(
+  const forceScorelineRelativeRelief =
+    boardTriageState.primary === "force_scoreline_clock" &&
+    boardTriageState.evidence.includes("corp_hq_agenda_flood_pressure:true") &&
+    boardTriageState.evidence.includes(
       "corp_hq_agenda_relative_remote_relief:true",
-    )
-  ) {
+    );
+  const highHqProtectionRelief =
+    boardTriageState.primary === "protect_hq" &&
+    boardTriageState.severity === "high";
+  if (!forceScorelineRelativeRelief && !highHqProtectionRelief) {
     return undefined;
   }
   if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
@@ -1609,7 +1612,8 @@ function corpHqAgendaReliefScorelineContext<TConsumer extends string>(
   const serverId = corpScorelineActionServerId(input, action);
   if (
     !serverId?.startsWith("remote_") ||
-    (boardTriageState.targetServerId !== undefined &&
+    (forceScorelineRelativeRelief &&
+      boardTriageState.targetServerId !== undefined &&
       boardTriageState.targetServerId !== serverId)
   ) {
     return undefined;
@@ -1626,15 +1630,28 @@ function corpHqAgendaReliefScorelineContext<TConsumer extends string>(
     typeof assessment.runnerAgendaPointsAfterSteal === "number"
       ? assessment.runnerAgendaPointsAfterSteal
       : 0;
+  const hqPressureRelief =
+    highHqProtectionRelief &&
+    corpScorelineActionRelievesHqAgendaPressure(
+      input,
+      action,
+      assessment,
+      boardTriageState,
+      serverId,
+    );
   if (
-    assessment.windowKind !== "unsafe" ||
-    assessment.agendaStealSeverity !== "near_win" ||
-    runnerAgendaPointsAfterSteal >= pointsToWin ||
-    assessment.recommendedNextStep === "gain_credit" ||
-    assessment.corpCanRezRelevantIce === false ||
-    assessment.corpCanRezFullPathWithDynamicReserve === false ||
-    (assessment.dynamicProtectionWeaknessCount ?? 0) > 0 ||
-    (assessment.affordableDurableRelevantIceCount ?? 0) < 1
+    !(
+      (forceScorelineRelativeRelief &&
+        assessment.windowKind === "unsafe" &&
+        assessment.agendaStealSeverity === "near_win" &&
+        runnerAgendaPointsAfterSteal < pointsToWin &&
+        assessment.recommendedNextStep !== "gain_credit" &&
+        assessment.corpCanRezRelevantIce !== false &&
+        assessment.corpCanRezFullPathWithDynamicReserve !== false &&
+        (assessment.dynamicProtectionWeaknessCount ?? 0) === 0 &&
+        (assessment.affordableDurableRelevantIceCount ?? 0) >= 1) ||
+      hqPressureRelief
+    )
   ) {
     return undefined;
   }
@@ -1645,6 +1662,7 @@ function corpHqAgendaReliefScorelineContext<TConsumer extends string>(
     `agenda_steal_severity:${assessment.agendaStealSeverity}`,
     `runner_points_after_steal:${runnerAgendaPointsAfterSteal}`,
     `affordable_durable_ice:${assessment.affordableDurableRelevantIceCount ?? 0}`,
+    ...(hqPressureRelief ? ["hq_pressure_safe_remote_relief:true"] : []),
   ];
   return {
     component: {
@@ -1727,18 +1745,36 @@ function corpPunishPrimaryPreparedScoreRemoteCommitment(
   const pipeline = corpPreparedScoreRemotePipeline(input);
   if (!serverId || pipeline?.serverId !== serverId) return false;
   if (input.playerView.own.credits < pipeline.reserveFloor) return false;
+  const relievesHqAgendaPressure = corpScorelineActionRelievesHqAgendaPressure(
+    input,
+    action,
+    assessment,
+    boardTriageState,
+    serverId,
+  );
   if (
     (boardTriageState.primary === "protect_hq" ||
       boardTriageState.primary === "protect_rd") &&
     (boardTriageState.severity === "high" ||
       boardTriageState.severity === "critical")
   ) {
-    return false;
+    if (!relievesHqAgendaPressure) return false;
   }
   if (assessment.serverId !== serverId) return false;
+  if (!corpPreparedRemoteScorelineCommitmentIsSafe(input, assessment)) {
+    return false;
+  }
+  return true;
+}
+
+function corpPreparedRemoteScorelineCommitmentIsSafe(
+  input: AiDecisionInput,
+  assessment: CorpScoringWindowAssessment,
+): boolean {
   if (
     assessment.windowKind !== "durable" &&
-    assessment.windowKind !== "temporary_safe"
+    assessment.windowKind !== "temporary_safe" &&
+    assessment.windowKind !== "unsafe"
   ) {
     return false;
   }
@@ -1776,7 +1812,40 @@ function corpPunishPrimaryPreparedScoreRemoteCommitment(
   ) {
     return false;
   }
+  if (
+    assessment.windowKind === "unsafe" &&
+    (assessment.runnerCanContestNow ||
+      assessment.runnerCanReachAccessNow ||
+      assessment.agendaStealRelevantNow)
+  ) {
+    return false;
+  }
   return true;
+}
+
+function corpScorelineActionRelievesHqAgendaPressure(
+  input: AiDecisionInput,
+  action: LegalAction,
+  assessment: CorpScoringWindowAssessment | undefined,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+  serverId: string | undefined,
+): boolean {
+  if (!assessment) return false;
+  if (boardTriageState.primary !== "protect_hq") return false;
+  if (boardTriageState.severity !== "high") return false;
+  if (!serverId?.startsWith("remote_")) return false;
+  const pipeline = corpPreparedScoreRemotePipeline(input);
+  if (pipeline?.serverId !== serverId) return false;
+  const source = visibleSourceCardForAction(input, action);
+  if (!source || !corpVisibleCardIsAgenda(source)) return false;
+  if (
+    !input.playerView.own.gripOrHq.some(
+      (card) => card.instanceId === source.instanceId,
+    )
+  ) {
+    return false;
+  }
+  return corpPreparedRemoteScorelineCommitmentIsSafe(input, assessment);
 }
 
 function corpScoreRuntimeIsPunishPrimary(input: AiDecisionInput): boolean {

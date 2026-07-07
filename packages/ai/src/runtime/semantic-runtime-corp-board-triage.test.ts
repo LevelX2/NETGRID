@@ -1753,6 +1753,97 @@ describe("semantic runtime corp board triage", () => {
     });
   });
 
+  it("treats safe prepared remote agenda install as high HQ-pressure relief", () => {
+    const remoteAgenda = {
+      ...corpAction("remote-scoreline", "install_card", {
+        placement: "root",
+        serverId: "remote_1",
+      }),
+      source: "hq-agenda",
+    } as LegalAction;
+    const hqIce = {
+      ...corpAction("install-hq-ice", "install_card", {
+        placement: "ice",
+        serverId: "hq",
+      }),
+      source: "hq-wall",
+    } as LegalAction;
+    const input = {
+      ...corpInput({
+        corpHq: [
+          agendaCard("hq-agenda", 2),
+          iceCard("hq-wall", {
+            title: "HQ Wall",
+            definitionId: "onr_v1_279_wall-of-static",
+            subtypes: ["Wall"],
+            rulesText: "End the run.",
+          }),
+        ],
+        legalActions: [remoteAgenda, hqIce],
+        servers: [
+          centralServer("hq", []),
+          centralServer("rd", [iceCard("rd-ice")]),
+          remoteServer("remote_1", [
+            iceCard("remote-ice-1"),
+            iceCard("remote-ice-2"),
+          ]),
+        ],
+      }),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    const dependencies = testDependencies({
+      scoringWindowByActionId: {
+        [remoteAgenda.actionId]: scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          scoreHorizon: "slow",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 2,
+          affordableDurableRelevantIceCount: 1,
+          dynamicProtectionWeaknessCount: 0,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          recommendedNextStep: "none",
+        }),
+      },
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, dependencies);
+    const remoteComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      remoteAgenda,
+      dependencies,
+    );
+    const hqComponent = semanticRuntimeCorpBoardTriageActionComponent(
+      input,
+      hqIce,
+      dependencies,
+    );
+
+    expect(triage).toMatchObject({
+      primary: "protect_hq",
+      severity: "high",
+      targetServerId: "hq",
+    });
+    expect(remoteComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+    expect(remoteComponent?.reason).toContain("triage_action_server:remote_1");
+    expect(hqComponent).toMatchObject({
+      key: "corp_board_triage_alignment",
+    });
+  });
+
   it("funds instead of forcing a game-ending accessible emergency remote", () => {
     const remoteAgenda = corpAction("remote-scoreline", "install_card", {
       placement: "root",

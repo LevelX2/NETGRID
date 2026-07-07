@@ -365,6 +365,115 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("does not dampen punish-primary HQ agenda relief into a safe prepared remote under high HQ triage", () => {
+    const agenda = agendaCard("hq-agenda", 3);
+    const remoteAgenda = corpAction(
+      "install-hq-agenda-into-prepared-remote",
+      "install_card",
+      { placement: "root", serverId: "remote_1" },
+      agenda.instanceId,
+    );
+    const hqIceAction = corpAction(
+      "install-hq-wall",
+      "install_card",
+      { placement: "ice", serverId: "hq" },
+      "hq-wall",
+    );
+    const input = {
+      ...corpInputWithHqCardsAndServers(
+        9,
+        [
+          agenda,
+          corpIce("hq-wall", {
+            title: "HQ Wall",
+            definitionId: "onr_v1_279_wall-of-static",
+            subtypes: ["Wall"],
+            rulesText: "End the run.",
+            rezCost: 2,
+          }),
+        ],
+        [
+          { id: "hq", label: "HQ", ice: [], root: [] },
+          { id: "rd", label: "R&D", ice: [corpIce("rd-ice")], root: [] },
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [
+              corpIce("remote-wall", { rezCost: 2, rezzed: true }),
+              corpIce("remote-codegate", { rezCost: 3, rezzed: true }),
+            ],
+            root: [],
+          },
+        ],
+        [remoteAgenda, hqIceAction],
+      ),
+      ownCorpStrategicIntent: {
+        primaryWinIntent: "corp.punish_runner",
+        scorePlan: ["corp.remote_scoreline"],
+        punishPlan: ["corp.damage_kill", "corp.tag_trace_punish"],
+      },
+    } as unknown as AiDecisionInput;
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === remoteAgenda.actionId,
+      corpInstallRemoteScore: () => -2200,
+      corpScoringWindowAssessment: () =>
+        scoringWindow({
+          serverId: "remote_1",
+          windowKind: "unsafe",
+          scoreHorizon: "slow",
+          runnerCanContestNow: false,
+          runnerCanReachAccessNow: false,
+          agendaStealRelevantNow: false,
+          runnerCanContestBeforeScore: false,
+          runnerCanReachAccessBeforeScore: false,
+          agendaStealRelevantBeforeScore: false,
+          agendaStealSeverity: "normal",
+          runnerAgendaPointsAfterSteal: 3,
+          affordableDurableRelevantIceCount: 1,
+          corpCanRezRelevantIce: true,
+          corpCanRezFullPathWithDynamicReserve: true,
+          dynamicProtectionWeaknessCount: 0,
+          recommendedNextStep: "none",
+        }),
+    };
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      remoteAgenda,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_board_triage_alignment",
+          reason: expect.stringContaining("triage_primary:protect_hq"),
+        }),
+        expect.objectContaining({
+          key: "corp_hq_agenda_relief_scoreline",
+          value: 3200,
+          reason: expect.stringContaining(
+            "hq_pressure_safe_remote_relief:true",
+          ),
+        }),
+        expect.objectContaining({
+          key: "corp_install_remote_context",
+          value: -350,
+        }),
+      ]),
+    );
+    expect(components).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_punish_primary_speculative_scoreline_dampen",
+        }),
+      ]),
+    );
+  });
+
   it("keeps the punish-primary scoreline dampen when a prepared remote is underfunded", () => {
     const agenda = agendaCard("hq-agenda");
     const remoteAgenda = corpAction(

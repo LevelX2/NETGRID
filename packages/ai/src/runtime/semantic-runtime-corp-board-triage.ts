@@ -632,6 +632,17 @@ function corpBoardTriageActionAlignment<TConsumer extends string>(
     case "protect_hq":
     case "protect_rd":
       if (
+        actionRelievesHqAgendaPressureViaSafeRemote(
+          input,
+          action,
+          actionServerId,
+          triage,
+          dependencies,
+        )
+      ) {
+        return "match";
+      }
+      if (
         actionProtectsServer(
           input,
           action,
@@ -3023,6 +3034,72 @@ function actionDistractsFromCentralProtection(
     return action.type === "gain_credit" || action.type === "draw_card";
   }
   return false;
+}
+
+function actionRelievesHqAgendaPressureViaSafeRemote<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  actionServerId: string | undefined,
+  triage: CorpBoardTriage,
+  dependencies: CorpBoardTriageDependencies<TConsumer>,
+): boolean {
+  if (triage.primary !== "protect_hq" || triage.severity !== "high") {
+    return false;
+  }
+  if (
+    action.type !== "install_card" ||
+    action.payload?.placement === "ice" ||
+    !actionServerId?.startsWith("remote_")
+  ) {
+    return false;
+  }
+  const source = semanticRuntimeVisibleSourceCard(input, action);
+  if (!source || !corpTriageVisibleCardIsAgenda(source)) return false;
+  if (
+    !input.playerView.own.gripOrHq.some(
+      (card) => card.instanceId === source.instanceId,
+    )
+  ) {
+    return false;
+  }
+  const roles = dependencies.rolesForAction(input, action);
+  if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
+    return false;
+  }
+  if (!existingReadyRemoteCanReceiveScoreline(input, actionServerId)) {
+    return false;
+  }
+  const assessment = dependencies.corpScoringWindowAssessment?.(
+    input,
+    action,
+    roles,
+  );
+  return assessmentCanSafelyRelieveHqAgendaPressure(assessment);
+}
+
+function assessmentCanSafelyRelieveHqAgendaPressure(
+  assessment: CorpScoringWindowAssessment | undefined,
+): boolean {
+  if (!assessment) return false;
+  if (
+    assessment.recommendedNextStep === "build_remote_ice" ||
+    assessment.recommendedNextStep === "gain_credit" ||
+    assessment.corpCanRezRelevantIce === false ||
+    assessment.corpCanRezFullPathWithDynamicReserve === false ||
+    (assessment.dynamicProtectionWeaknessCount ?? 0) > 0 ||
+    (assessment.affordableDurableRelevantIceCount ?? 0) < 1 ||
+    assessment.agendaStealSeverity === "game_ending"
+  ) {
+    return false;
+  }
+  return (
+    !assessment.runnerCanContestNow &&
+    !assessment.runnerCanReachAccessNow &&
+    !assessment.agendaStealRelevantNow &&
+    !assessment.runnerCanContestBeforeScore &&
+    !assessment.runnerCanReachAccessBeforeScore &&
+    !assessment.agendaStealRelevantBeforeScore
+  );
 }
 
 function actionCreatesPurgeActionDebt(action: LegalAction): boolean {
