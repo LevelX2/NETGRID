@@ -43,6 +43,8 @@ import type {
   SemanticRuntimeRunOnlyActionAdjustment,
   TacticalPlanMappedChoiceResult,
 } from "./semantic-runtime-types";
+import { requireActiveRunnerRunPlan } from "./runner-run-plan-memory";
+import { runnerRunPlanSemanticChoice } from "./runner-run-plan-policy";
 import { sourceDefinitionIdForAction } from "./visible-card-lookup";
 
 export type {
@@ -177,6 +179,7 @@ export function chooseSemanticRuntimeAction(
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),
   });
+  const activeRunnerRunPlan = requireActiveRunnerRunPlan(input);
   const previousPlan = dependencies.getTacticalPlanMemorySnapshot(input);
   const deckCapabilities = dependencies.deckCapabilitiesForInput(input);
   const runnerStrategicIntent =
@@ -262,18 +265,27 @@ export function chooseSemanticRuntimeAction(
     inputForSemanticChoices,
     actionSemanticCandidates,
   );
+  const runPlanChoice = activeRunnerRunPlan
+    ? runnerRunPlanSemanticChoice({
+        input,
+        plan: activeRunnerRunPlan,
+        choices,
+      })
+    : undefined;
   const reactiveChoice =
-    choices.find(
-      (candidate) =>
-        !candidate.exclusion &&
-        candidate.score > 0 &&
-        dependencies.semanticRuntimeChoiceIsReactive(candidate),
-    ) ??
-    choices.find(
-      (candidate) =>
-        !candidate.exclusion &&
-        dependencies.semanticRuntimeChoiceIsReactive(candidate),
-    );
+    activeRunnerRunPlan !== undefined
+      ? undefined
+      : choices.find(
+          (candidate) =>
+            !candidate.exclusion &&
+            candidate.score > 0 &&
+            dependencies.semanticRuntimeChoiceIsReactive(candidate),
+        ) ??
+        choices.find(
+          (candidate) =>
+            !candidate.exclusion &&
+            dependencies.semanticRuntimeChoiceIsReactive(candidate),
+        );
   const goalFrame = buildSemanticDecisionFrame({
     input,
     actionCandidates: actionSemanticCandidates,
@@ -326,6 +338,7 @@ export function chooseSemanticRuntimeAction(
   const selfDamageImmediateWinChoice =
     dependencies.runnerSelfDamageImmediateWinSemanticChoice(input, choices);
   const initialChoice =
+    runPlanChoice ??
     reactiveChoice ??
     selfDamageImmediateWinChoice ??
     mappedChoice.choice ??

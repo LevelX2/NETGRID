@@ -8,6 +8,7 @@ import type {
   TacticalPlanMemorySnapshot,
   TacticalPlanRuntimeResult,
 } from "./tactical-plan-types";
+import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
 
 const tacticalPlanMemoryByKey = new Map<string, TacticalPlanMemorySnapshot>();
 
@@ -52,6 +53,7 @@ export function rememberTacticalPlanRuntime(
 
 export function resetTacticalPlanMemory(): void {
   tacticalPlanMemoryByKey.clear();
+  resetRunnerRunPlanMemory();
   resetStrategicIntentMemory();
 }
 
