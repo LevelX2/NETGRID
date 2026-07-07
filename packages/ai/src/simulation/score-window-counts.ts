@@ -2,8 +2,13 @@ type SimulationActionSequenceEntry = {
   side?: string;
   actionType?: string;
   corpScoreTerminalWindow?: boolean;
+  corpScoreTerminalWindowScoreLegal?: boolean;
+  corpScoreTerminalWindowAdvanceToScoreLegal?: boolean;
+  corpScoreTerminalWindowAgendaInstallLegal?: boolean;
   corpScoreTerminalWindowRunnerAccessThreatHigh?: boolean;
   corpScoreTerminalWindowProtectedRemoteReady?: boolean;
+  corpScoreTerminalWindowRemoteContestLow?: boolean;
+  corpScoreTerminalWindowCreditsSufficient?: boolean;
   corpScoreTerminalSkipped?: boolean;
   corpScoreTerminalSkippedForEconomy?: boolean;
   corpScoreTerminalSkippedForDraw?: boolean;
@@ -14,6 +19,10 @@ type SimulationActionSequenceEntry = {
   corpScoreTerminalSkippedForRndProtection?: boolean;
   corpScoreTerminalSkippedForRemotePortfolio?: boolean;
   corpScoreTerminalSkippedForUnknownHigherPriority?: boolean;
+  corpScoreConversionFixGateBlockedByCheapContest?: boolean;
+  corpScoreConversionFixGateBlockedByCredits?: boolean;
+  corpScoreConversionFixGateBlockedByRunnerContest?: boolean;
+  corpScoreConversionFixGateBlockedByHqThreat?: boolean;
 };
 
 type SimulationSummaryWithActionSequence = {
@@ -64,10 +73,34 @@ export function countPassiveActionWithScoreLineAvailable(
         (entry) =>
           entry.side === "corp" &&
           entry.corpScoreTerminalWindow === true &&
+          hasConcretePassiveScoreLineAvailable(entry) &&
           entry.corpScoreTerminalSkipped === true &&
           isPassiveCorpScoreLineSkip(entry),
       ).length,
     0,
+  );
+}
+
+export function hasConcretePassiveScoreLineAvailable(
+  entry: SimulationActionSequenceEntry,
+): boolean {
+  if (entry.corpScoreTerminalWindowScoreLegal === true) return true;
+  if (entry.corpScoreTerminalWindowAdvanceToScoreLegal === true) return true;
+  if (entry.corpScoreTerminalWindowAgendaInstallLegal !== true) return false;
+  return (
+    entry.corpScoreTerminalWindowProtectedRemoteReady === true &&
+    entry.corpScoreTerminalWindowRemoteContestLow === true &&
+    entry.corpScoreTerminalWindowCreditsSufficient === true &&
+    !corpScoreLineBlocked(entry)
+  );
+}
+
+function corpScoreLineBlocked(entry: SimulationActionSequenceEntry): boolean {
+  return (
+    entry.corpScoreConversionFixGateBlockedByCheapContest === true ||
+    entry.corpScoreConversionFixGateBlockedByCredits === true ||
+    entry.corpScoreConversionFixGateBlockedByRunnerContest === true ||
+    entry.corpScoreConversionFixGateBlockedByHqThreat === true
   );
 }
 

@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { countUnsafeScoreChosen } from "./score-window-counts";
+import {
+  countPassiveActionWithScoreLineAvailable,
+  countUnsafeScoreChosen,
+} from "./score-window-counts";
 
 describe("score window counts", () => {
   it("does not count a final corp score closeout as unsafe", () => {
@@ -41,5 +44,94 @@ describe("score window counts", () => {
     ];
 
     expect(countUnsafeScoreChosen(summaries)).toBe(1);
+  });
+
+  it("does not count passive setup windows without a concrete scoreline action", () => {
+    const summaries = [
+      {
+        actionSequence: [
+          {
+            side: "corp",
+            actionType: "gain_credit",
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForEconomy: true,
+          },
+        ],
+      },
+    ];
+
+    expect(countPassiveActionWithScoreLineAvailable(summaries)).toBe(0);
+  });
+
+  it("does not count agenda-install-only windows blocked by runner contest", () => {
+    const summaries = [
+      {
+        actionSequence: [
+          {
+            side: "corp",
+            actionType: "gain_credit",
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowAgendaInstallLegal: true,
+            corpScoreTerminalWindowProtectedRemoteReady: true,
+            corpScoreTerminalWindowCreditsSufficient: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForEconomy: true,
+            corpScoreConversionFixGateBlockedByRunnerContest: true,
+          },
+        ],
+      },
+    ];
+
+    expect(countPassiveActionWithScoreLineAvailable(summaries)).toBe(0);
+  });
+
+  it("counts passive skips when score or final advance is legal", () => {
+    const summaries = [
+      {
+        actionSequence: [
+          {
+            side: "corp",
+            actionType: "draw_card",
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowScoreLegal: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForDraw: true,
+          },
+          {
+            side: "corp",
+            actionType: "gain_credit",
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowAdvanceToScoreLegal: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForEconomy: true,
+          },
+        ],
+      },
+    ];
+
+    expect(countPassiveActionWithScoreLineAvailable(summaries)).toBe(2);
+  });
+
+  it("counts safe ready-remote agenda installs as passive scoreline opportunities", () => {
+    const summaries = [
+      {
+        actionSequence: [
+          {
+            side: "corp",
+            actionType: "gain_credit",
+            corpScoreTerminalWindow: true,
+            corpScoreTerminalWindowAgendaInstallLegal: true,
+            corpScoreTerminalWindowProtectedRemoteReady: true,
+            corpScoreTerminalWindowRemoteContestLow: true,
+            corpScoreTerminalWindowCreditsSufficient: true,
+            corpScoreTerminalSkipped: true,
+            corpScoreTerminalSkippedForEconomy: true,
+          },
+        ],
+      },
+    ];
+
+    expect(countPassiveActionWithScoreLineAvailable(summaries)).toBe(1);
   });
 });

@@ -1,5 +1,6 @@
 import type { AiDecisionActionAlternative, LegalAction, Side } from "@netgrid/shared";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
+import { hasConcretePassiveScoreLineAvailable } from "./score-window-counts";
 import type {
   AiSimulationConfig,
   AiSimulationSummary,
@@ -415,7 +416,8 @@ function classifySelfplayActionLimitCluster(
   const corpScorelineStall = window.filter(
     (entry) =>
       entry.side === "corp" &&
-      (entry.corpScoreTerminalSkipped === true ||
+      ((entry.corpScoreTerminalSkipped === true &&
+        hasConcretePassiveScoreLineAvailable(entry)) ||
         ((entry.scoreActionsAvailable ?? 0) > 0 &&
           entry.actionType !== "score_agenda")),
   ).length;
