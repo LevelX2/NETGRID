@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
-import { buildAiDecisionInput, chooseCorpAction } from "@netgrid/ai";
+import { buildAiDecisionInput, chooseCorpAction, isAiDeckSnapshotRuntimeError } from "@netgrid/ai";
+import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import { applyAction, createGame, getLegalActions, getPlayerView } from "@netgrid/engine";
 import type { GameState } from "@netgrid/shared";
+import snapshotsData08 from "../../../../../data/decks/deck-snapshots-0.8.json";
+
+const WEB_LOCAL_RUNNER_SNAPSHOT = snapshotById("demo_runner_008_snapshot_v0_8");
+const WEB_LOCAL_CORP_SNAPSHOT = snapshotById("demo_corp_008_snapshot_v0_8");
 
 let gameState = startGame("mvp-0.1-web-demo");
 
@@ -39,7 +44,24 @@ export async function POST(request: Request) {
 
   if (body.kind === "corp_step") {
     const legalActions = getLegalActions(gameState, "corp");
-    const decision = chooseCorpAction(buildAiDecisionInput(gameState, "corp", { difficulty: "easy" }));
+    let decision: ReturnType<typeof chooseCorpAction>;
+    try {
+      decision = chooseCorpAction(buildAiDecisionInput(gameState, "corp", {
+        difficulty: "easy",
+        ownDeckSnapshot: WEB_LOCAL_CORP_SNAPSHOT,
+        expectedDeckSnapshot: {
+          deckSnapshotId: WEB_LOCAL_CORP_SNAPSHOT.deckSnapshotId,
+          cardPoolSnapshotId: gameState.deckMetadata?.corp.cardPoolSnapshotId ?? WEB_LOCAL_CORP_SNAPSHOT.cardPoolSnapshotId,
+          formatProfileId: gameState.deckMetadata?.corp.formatProfileId ?? WEB_LOCAL_CORP_SNAPSHOT.formatProfileId,
+          deckHash: gameState.deckMetadata?.corp.deckHash ?? WEB_LOCAL_CORP_SNAPSHOT.deckHash
+        }
+      }));
+    } catch (error) {
+      if (isAiDeckSnapshotRuntimeError(error)) {
+        return NextResponse.json({ ...toClientPayload(gameState), error: error.code }, { status: 500 });
+      }
+      throw error;
+    }
     const selected = legalActions.find((action) => action.actionId === decision.actionId);
     if (!selected) return NextResponse.json(toClientPayload(gameState));
     const result = applyAction(gameState, {
@@ -57,7 +79,14 @@ export async function POST(request: Request) {
 }
 
 function startGame(seed: string): GameState {
-  let state = createGame({ seed, matchId: "web-local-demo" });
+  let state = createGame({
+    seed,
+    matchId: "web-local-demo",
+    runnerDeck: buildEngineDeck(WEB_LOCAL_RUNNER_SNAPSHOT),
+    corpDeck: buildEngineDeck(WEB_LOCAL_CORP_SNAPSHOT),
+    runnerDeckMetadata: WEB_LOCAL_RUNNER_SNAPSHOT.publicMetadata,
+    corpDeckMetadata: WEB_LOCAL_CORP_SNAPSHOT.publicMetadata
+  });
   const mandatory = getLegalActions(state, "corp").find((action) => action.type === "mandatory_draw");
   if (!mandatory) return state;
   const result = applyAction(state, {
@@ -69,6 +98,14 @@ function startGame(seed: string): GameState {
   });
   if (result.ok) state = result.state;
   return state;
+}
+
+function snapshotById(snapshotId: string): DeckSnapshot {
+  const snapshot = (snapshotsData08.snapshots as DeckSnapshot[]).find(
+    (candidate) => candidate.deckSnapshotId === snapshotId,
+  );
+  if (!snapshot) throw new Error(`Missing deck snapshot ${snapshotId}`);
+  return snapshot;
 }
 
 function toClientPayload(state: GameState) {

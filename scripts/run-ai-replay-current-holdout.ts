@@ -174,6 +174,13 @@ function evaluateTrace(db: DatabaseSync, trace: TraceRow): CurrentAiHoldoutEvalu
     }
     const controller = aiControllerFor(db, trace.matchId, trace.side);
     const ownDeckSnapshot = ownDeckSnapshotFor(db, trace.matchId, trace.side);
+    if (!ownDeckSnapshot) {
+      return {
+        ...base,
+        status: "reconstruction_error",
+        errorCode: "ai_deck_snapshot_missing",
+      };
+    }
     const input = buildAiDecisionInput(state, trace.side, {
       difficulty: controller?.difficulty ?? "normal",
       profileId:
@@ -181,7 +188,7 @@ function evaluateTrace(db: DatabaseSync, trace: TraceRow): CurrentAiHoldoutEvalu
         `${trace.side}-current-holdout-ai-${controller?.difficulty ?? "normal"}`,
       decisionId: `${trace.matchId}:${state.stateVersion}:${trace.side}:current-holdout`,
       actionNumber: state.stateVersion,
-      ...(ownDeckSnapshot ? { ownDeckSnapshot } : {}),
+      ownDeckSnapshot,
     });
     assertSemanticObjectSideSafe(input, "CurrentAiHoldoutAiInput");
     const decision = chooseAiAction(input);

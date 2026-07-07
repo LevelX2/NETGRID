@@ -1,7 +1,15 @@
 import { createHash, randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { buildAiDecisionInput, chooseAiAction, selectAiDecisionSideForState } from "@netgrid/ai";
+import {
+  assertValidAiDeckSnapshotForRuntime,
+  buildAiDecisionInput,
+  chooseAiAction,
+  isAiDeckSnapshotRuntimeError,
+  selectAiDecisionSideForState,
+  type AiDeckSnapshotRuntimeErrorCode,
+  type AiDeckSnapshotRuntimeExpectation
+} from "@netgrid/ai";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, replayEvents } from "@netgrid/engine";
 import {
@@ -616,7 +624,10 @@ export type PreviewAiResult =
     };
 
 type AiDecisionChooser = typeof chooseAiAction;
-type AiStepFailureCode = "ai_no_action" | "ai_decision_action_not_legal";
+type AiStepFailureCode =
+  | "ai_no_action"
+  | "ai_decision_action_not_legal"
+  | AiDeckSnapshotRuntimeErrorCode;
 type AiStepResult =
   | { ok: true }
   | { ok: false; code: AiStepFailureCode };
@@ -887,6 +898,7 @@ export class MultiplayerService {
       runnerDifficulty: input.runnerDifficulty ?? "normal",
       corpDifficulty: input.corpDifficulty ?? "normal"
     });
+    assertValidAiDeckSnapshotsForControllers(deckSetup, controllers);
     const gameState = createGame({
       matchId,
       seed,
@@ -1620,6 +1632,14 @@ export class MultiplayerService {
           payload: this.payloadFor(record, input.side)
         };
       }
+      if (!aiStepResult.ok && isAiDeckSnapshotErrorCode(aiStepResult.code)) {
+        await this.storage.save(record);
+        return {
+          ok: false,
+          error: safeError(aiStepResult.code, aiDeckSnapshotErrorMessage(aiStepResult.code), record.gameState, input.side),
+          payload: this.payloadFor(record, input.side)
+        };
+      }
 
       if (record.eventLog.length === beforeEventCount) {
         await this.storage.save(record);
@@ -1668,14 +1688,27 @@ export class MultiplayerService {
         return { ok: false, error: safeError("ai_no_action", "Die KI hat aktuell keine legalen Aktionen.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
       }
       const controller = record.match.aiControllers?.[activeAiSide];
-      const ownDeckSnapshot = record.privateDeckSnapshots?.[activeAiSide];
-      const aiInput = buildAiDecisionInput(record.gameState, activeAiSide, {
-        difficulty: controller?.difficulty ?? "normal",
-        profileId: controller?.profileId ?? `${activeAiSide}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
-        decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${activeAiSide}`,
-        actionNumber: record.gameState.stateVersion,
-        ...(ownDeckSnapshot ? { ownDeckSnapshot } : {})
-      });
+      let aiInput: AiDecisionInput;
+      try {
+        const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(record, activeAiSide);
+        aiInput = buildAiDecisionInput(record.gameState, activeAiSide, {
+          difficulty: controller?.difficulty ?? "normal",
+          profileId: controller?.profileId ?? `${activeAiSide}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
+          decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${activeAiSide}`,
+          actionNumber: record.gameState.stateVersion,
+          ownDeckSnapshot,
+          expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, activeAiSide)
+        });
+      } catch (error) {
+        if (isAiDeckSnapshotRuntimeError(error)) {
+          return {
+            ok: false,
+            error: safeError(error.code, aiDeckSnapshotErrorMessage(error.code), record.gameState, input.side),
+            payload: this.payloadFor(record, input.side)
+          };
+        }
+        throw error;
+      }
       const decision = this.chooseAiAction(
         aiInput,
         { persistTacticalPlanMemory: false }
@@ -2564,6 +2597,7 @@ export class MultiplayerService {
     const deckSetup = deckSetupForParticipants(resolved, lobby.sideAssignment);
     const baseline = baselineForMode(record.match.mode, deckSetup);
     const controllers = controllersForMode(record.match.mode, hostSide, { runnerDifficulty: "normal", corpDifficulty: "normal" });
+    assertValidAiDeckSnapshotsForControllers(deckSetup, controllers);
     const gameState = createGame({
       matchId: record.match.matchId,
       seed: record.match.seed ?? record.match.matchId,
@@ -2651,14 +2685,21 @@ export class MultiplayerService {
     const legalActions = getLegalActions(state, side);
     if (legalActions.length === 0) return { ok: false, code: "ai_no_action" };
     const controller = record.match.aiControllers?.[side];
-    const ownDeckSnapshot = record.privateDeckSnapshots?.[side];
-    const input = buildAiDecisionInput(state, side, {
-      difficulty: controller?.difficulty ?? "normal",
-      profileId: controller?.profileId ?? `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
-      decisionId: `${record.match.matchId}:${state.stateVersion}:${side}`,
-      actionNumber: state.stateVersion,
-      ...(ownDeckSnapshot ? { ownDeckSnapshot } : {})
-    });
+    let input: AiDecisionInput;
+    try {
+      const ownDeckSnapshot = assertRecordAiDeckSnapshotForRuntime(record, side);
+      input = buildAiDecisionInput(state, side, {
+        difficulty: controller?.difficulty ?? "normal",
+        profileId: controller?.profileId ?? `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
+        decisionId: `${record.match.matchId}:${state.stateVersion}:${side}`,
+        actionNumber: state.stateVersion,
+        ownDeckSnapshot,
+        expectedDeckSnapshot: aiDeckSnapshotExpectationFor(record, side)
+      });
+    } catch (error) {
+      if (isAiDeckSnapshotRuntimeError(error)) return { ok: false, code: error.code };
+      throw error;
+    }
     const decision = this.chooseAiAction(input);
     const legalAction = legalActionForAiDecision(decision, legalActions);
     if (!legalAction) return { ok: false, code: "ai_decision_action_not_legal" };
@@ -3740,6 +3781,7 @@ function legacyParticipantDeckPair(input: MatchDeckSelectionInput): ParticipantD
 }
 
 function deckErrorMessage(error: unknown): string {
+  if (isAiDeckSnapshotRuntimeError(error)) return aiDeckSnapshotErrorMessage(error.code);
   const code = error instanceof Error ? error.message : String(error);
   if (code === "deck_snapshot_wrong_side") return "Das gewählte Deck hat die falsche Seite.";
   if (code === "deck_snapshot_not_validated" || code === "deck_snapshot_invalid") return "Das gewählte Deck ist nicht matchstartfähig. Bitte prüfe die Validierungsfehler.";
@@ -3789,6 +3831,100 @@ function safeError(code: string, message: string, state?: GameState, side?: Side
     ...(state ? { currentStateVersion: state.stateVersion } : {}),
     ...(state && side ? { playerView: getPlayerView(state, side) } : {})
   };
+}
+
+function assertValidAiDeckSnapshotsForControllers(
+  deckSetup: ResolvedDeckSetup,
+  controllers: { runner: PlayerController; corp: PlayerController }
+): void {
+  if (controllers.runner.type === "ai") {
+    assertValidAiDeckSnapshotForRuntime(deckSetup.runnerSnapshot, {
+      side: "runner",
+      ...aiDeckSnapshotExpectationFromSnapshot(deckSetup.runnerSnapshot)
+    });
+  }
+  if (controllers.corp.type === "ai") {
+    assertValidAiDeckSnapshotForRuntime(deckSetup.corpSnapshot, {
+      side: "corp",
+      ...aiDeckSnapshotExpectationFromSnapshot(deckSetup.corpSnapshot)
+    });
+  }
+}
+
+function assertRecordAiDeckSnapshotForRuntime(record: StoredMatch, side: Side): DeckSnapshot {
+  return assertValidAiDeckSnapshotForRuntime(record.privateDeckSnapshots?.[side], {
+    side,
+    ...aiDeckSnapshotExpectationFor(record, side)
+  }) as DeckSnapshot;
+}
+
+function aiDeckSnapshotExpectationFor(
+  record: StoredMatch,
+  side: Side
+): Omit<AiDeckSnapshotRuntimeExpectation, "side"> {
+  const metadata = side === "runner" ? record.match.deckSetup.runner : record.match.deckSetup.corp;
+  return aiDeckSnapshotExpectationFromMetadata(
+    side === "runner"
+      ? record.match.deckSetup.runnerSnapshotId
+      : record.match.deckSetup.corpSnapshotId,
+    metadata
+  );
+}
+
+function aiDeckSnapshotExpectationFromSnapshot(
+  snapshot: DeckSnapshot
+): Omit<AiDeckSnapshotRuntimeExpectation, "side"> {
+  return {
+    deckSnapshotId: snapshot.deckSnapshotId,
+    cardPoolSnapshotId: snapshot.cardPoolSnapshotId,
+    formatProfileId: snapshot.formatProfileId,
+    deckHash: snapshot.deckHash
+  };
+}
+
+function aiDeckSnapshotExpectationFromMetadata(
+  deckSnapshotId: string,
+  metadata: DeckPublicMetadata
+): Omit<AiDeckSnapshotRuntimeExpectation, "side"> {
+  return {
+    deckSnapshotId,
+    cardPoolSnapshotId: metadata.cardPoolSnapshotId,
+    formatProfileId: metadata.formatProfileId,
+    deckHash: metadata.deckHash
+  };
+}
+
+function isAiDeckSnapshotErrorCode(
+  code: AiStepFailureCode
+): code is AiDeckSnapshotRuntimeErrorCode {
+  switch (code) {
+    case "ai_deck_snapshot_missing":
+    case "ai_deck_snapshot_empty":
+    case "ai_deck_snapshot_side_mismatch":
+    case "ai_deck_snapshot_unknown_card":
+    case "ai_deck_snapshot_invalid":
+    case "ai_deck_snapshot_stale":
+      return true;
+    default:
+      return false;
+  }
+}
+
+function aiDeckSnapshotErrorMessage(code: AiDeckSnapshotRuntimeErrorCode): string {
+  switch (code) {
+    case "ai_deck_snapshot_missing":
+      return "Der KI-Deck-Snapshot fehlt. Die KI-Entscheidung wurde abgebrochen.";
+    case "ai_deck_snapshot_empty":
+      return "Der KI-Deck-Snapshot enthält keine Karten. Die KI-Entscheidung wurde abgebrochen.";
+    case "ai_deck_snapshot_side_mismatch":
+      return "Der KI-Deck-Snapshot passt nicht zur KI-Seite. Die KI-Entscheidung wurde abgebrochen.";
+    case "ai_deck_snapshot_unknown_card":
+      return "Der KI-Deck-Snapshot enthält eine Karte außerhalb des Runtime-Card-Pools. Die KI-Entscheidung wurde abgebrochen.";
+    case "ai_deck_snapshot_stale":
+      return "Der KI-Deck-Snapshot passt nicht zum gestarteten Deck. Die KI-Entscheidung wurde abgebrochen.";
+    case "ai_deck_snapshot_invalid":
+      return "Der KI-Deck-Snapshot ist ungültig. Die KI-Entscheidung wurde abgebrochen.";
+  }
 }
 
 function opposite(side: Side): Side {
