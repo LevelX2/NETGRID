@@ -132,12 +132,17 @@ describe("known central access payoff HQ knownness", () => {
       privateLookCount: 2,
       knownHqDefinitionIds: ["simple_economy_asset", "simple_upgrade"],
     });
-    const hiddenRootInstall = publicEvent("evt_hidden_install", "install_card", 2, {
-      actor: "corp",
-      actionType: "install_card",
-      serverId: "remote_1",
-      installPlacement: "root",
-    });
+    const hiddenRootInstall = publicEvent(
+      "evt_hidden_install",
+      "install_card",
+      2,
+      {
+        actor: "corp",
+        actionType: "install_card",
+        serverId: "remote_1",
+        installPlacement: "root",
+      },
+    );
     const currentHqAccess = publicEvent("evt_hq_access", "access_card", 3, {
       actor: "runner",
       actionType: "access_card",
@@ -223,6 +228,50 @@ describe("known central access payoff HQ knownness", () => {
     );
   });
 
+  it("suppresses a repeated R&D run when trashing the known top would drain the reserve", () => {
+    const rdAccess = publicEvent("evt_rd_bbs_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverLabel: "R&D",
+      targets: { serverLabel: "R&D" },
+      cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      title: "BBS Whispering Campaign",
+    });
+    const input = aiInput({
+      handCount: 1,
+      credits: 4,
+      publicEvents: [rdAccess],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const payoff = evaluateKnownCentralAccessPayoff(input, "rd");
+
+    expect(payoff).toMatchObject({
+      payoff: "trash_unaffordable",
+      knownNoCurrentPayoff: true,
+      penalty: 700,
+    });
+    expect(payoff.reasons).toEqual(
+      expect.arrayContaining([
+        "known_rnd_top_trash_reserve_unsafe",
+        "central_known_no_current_payoff",
+      ]),
+    );
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "rnd_known_top_trash_affordable:true",
+        "rnd_known_top_credits_after_trash:0",
+        "rnd_known_top_trash_reserve_floor:2",
+        "rd_run_suppressed_by_known_trash_reserve:true",
+        "central_memory_payoff:trash_unaffordable",
+      ]),
+    );
+  });
+
   it("matches HQ memory invalidation reasons by exact reason code", () => {
     expect(
       hqMemoryInvalidationReasonMatches(
@@ -253,6 +302,7 @@ describe("known central access payoff HQ knownness", () => {
 
 function aiInput(params: {
   handCount: number;
+  credits?: number;
   rig?: VisibleCard[];
   publicEvents?: PublicGameEvent[];
   legalActions?: LegalAction[];
@@ -267,7 +317,7 @@ function aiInput(params: {
     timingPoint: "runner_action.main",
     own: {
       identity: visibleIdentity("runner"),
-      credits: 6,
+      credits: params.credits ?? 6,
       clicks: 3,
       agendaPoints: 0,
       gripOrHq: [],
