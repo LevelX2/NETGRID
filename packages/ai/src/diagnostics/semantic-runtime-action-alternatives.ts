@@ -20,9 +20,6 @@ export type BuildSemanticRuntimeActionAlternativesInput = {
   planRuntime: TacticalPlanRuntimeResult;
   coverageSelection?: SemanticRuntimeCoverageSelectionDebug;
   sourceTitleForChoice: (choice: SemanticRuntimeChoice) => string | undefined;
-  scoreBreakdownForChoice: (
-    choice: SemanticRuntimeChoice,
-  ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
 };
 
 export function buildSemanticRuntimeActionAlternatives({
@@ -31,7 +28,6 @@ export function buildSemanticRuntimeActionAlternatives({
   planRuntime,
   coverageSelection,
   sourceTitleForChoice,
-  scoreBreakdownForChoice,
 }: BuildSemanticRuntimeActionAlternativesInput): NonNullable<
   AiDecisionDebug["actionAlternatives"]
 > {
@@ -79,7 +75,7 @@ export function buildSemanticRuntimeActionAlternatives({
       selected,
       ...(choice.exclusion ? { excluded: true } : { priority: displayScore }),
       scoreBreakdown: [
-        ...scoreBreakdownForChoice(choice),
+        ...choice.scoreBreakdown,
         ...coverageScoreBreakdown,
         ...planScoreBreakdown,
       ],

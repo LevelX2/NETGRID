@@ -17,17 +17,20 @@ describe("SemanticRuntimeDebugContext", () => {
   it("uses action semantic candidates for selected and alternative score breakdowns", () => {
     const selectedAction = legalAction("install-agenda", "corp", "install_card");
     const alternativeAction = legalAction("gain-credit", "corp", "gain_credit");
-    const selectedChoice = choice(
-      selectedAction,
-      "scoreline",
-      100,
-      "selected candidate evidence",
-    );
+    const selectedChoice = choice(selectedAction, "scoreline", 100, {
+      evidence: "selected candidate evidence",
+      scoreKey: "candidate_candidate.install_scoreline",
+      scoreReason: "install-agenda",
+    });
     const alternativeChoice = choice(
       alternativeAction,
       "basic_economy_draw",
       50,
-      "alternative candidate evidence",
+      {
+        evidence: "alternative candidate evidence",
+        scoreKey: "candidate_candidate.basic_economy",
+        scoreReason: "gain-credit",
+      },
     );
     const selectedCandidate = candidate(
       selectedAction,
@@ -38,14 +41,6 @@ describe("SemanticRuntimeDebugContext", () => {
       "candidate.basic_economy",
     );
     const context = createSemanticRuntimeDebugContext({
-      scoreBreakdown: (_input, action, _scopeId, _exclusion, actionCandidate) => [
-        {
-          key: `candidate_${actionCandidate?.semanticActionType ?? "missing"}`,
-          label: action.actionId,
-          value: actionCandidate ? 1 : -1,
-          ...(actionCandidate ? { reason: actionCandidate.actionId } : {}),
-        },
-      ],
       visibleSourceCard: () => undefined,
     });
 
@@ -139,15 +134,27 @@ function choice(
   action: LegalAction,
   scopeId: string,
   score: number,
-  evidence: string,
+  options: {
+    evidence: string;
+    scoreKey: string;
+    scoreReason: string;
+  },
 ): SemanticRuntimeChoice {
   return {
     action,
     scopeId,
     score,
+    scoreBreakdown: [
+      {
+        key: options.scoreKey,
+        label: action.actionId,
+        value: score,
+        reason: options.scoreReason,
+      },
+    ],
     reasonCode: `corp.semantic.${scopeId}`,
     explanation: scopeId,
-    evidence: [evidence],
+    evidence: [options.evidence],
   };
 }
 

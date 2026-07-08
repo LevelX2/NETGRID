@@ -55,9 +55,9 @@ describe("SemanticShadowLeague", () => {
     expect(report.metrics.scopeAllowedCount).toBe(45);
     expect(report.metrics.pilotWouldOverrideCount).toBe(45);
     expect(report.metrics.pilotActualOverrideCount).toBe(0);
-    expect(report.metrics.averageScoreGap).toBe(24.52);
+    expect(report.metrics.averageScoreGap).toBe(21.8);
     expect(report.metrics.blockedByReason).toMatchObject({
-      basic_setup_action_type_blocked: 30,
+      basic_setup_action_type_blocked: 34,
       corp_score_window_wrong_side: 27,
       runner_safe_access_wrong_side: 27,
     });
@@ -74,8 +74,8 @@ describe("SemanticShadowLeague", () => {
       wouldOverrideCount: 23,
       eligibleRate: 0.852,
     });
-    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(23);
-    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(18);
+    expect(report.metrics.scopeBreakdown.basic_setup.eligibleCount).toBe(19);
+    expect(report.metrics.scopeBreakdown.runner_safe_access.eligibleCount).toBe(22);
     expect(report.metrics.scopeBreakdown.corp_score_window.eligibleCount).toBe(4);
     expect(report.metrics.pilotCutoverReadiness).toMatchObject({
       productiveUseAllowed: false,
@@ -84,8 +84,8 @@ describe("SemanticShadowLeague", () => {
       scopes: {
         basic_setup: {
           candidate: 54,
-          allowed: 23,
-          wouldOverride: 23,
+          allowed: 19,
+          wouldOverride: 19,
           actualOverride: 0,
           safeToEnableLocally: true,
           recommendedForDefaultOffPilot: true,
@@ -94,8 +94,8 @@ describe("SemanticShadowLeague", () => {
         },
         runner_safe_access: {
           candidate: 54,
-          allowed: 18,
-          wouldOverride: 18,
+          allowed: 22,
+          wouldOverride: 22,
           actualOverride: 0,
           safeToEnableLocally: true,
           recommendedForDefaultOffPilot: true,
@@ -199,15 +199,15 @@ describe("SemanticShadowLeague", () => {
     });
     expect(
       scenario(report, "runner_real_low_credits").expectedTopActionTypes,
-    ).toEqual(["draw_card", "gain_credit"]);
+    ).toEqual(["start_run"]);
     expect(
       scenario(report, "runner_real_low_credits").expectedPilotEligibleScopes,
-    ).toEqual(["basic_setup"]);
+    ).toEqual(["runner_safe_access"]);
     expect(scenario(report, "runner_real_low_credits").forbiddenMistakes).toEqual([
-      "economy_starvation",
+      "missed_safe_access",
     ]);
     expect(scenario(report, "runner_real_low_credits").expectationNotes).toEqual([
-      "low credits should prefer economy or draw stabilization",
+      "low credits should still take free unknown R&D access",
     ]);
     expect(scenario(report, "runner_real_low_credits").evidence).toEqual(
       expect.arrayContaining([
@@ -242,11 +242,11 @@ describe("SemanticShadowLeague", () => {
       scopeAllowedCount: 1,
       wouldOverride: true,
       actualOverride: false,
-      scopes: ["basic_setup"],
-      scoreGap: 37,
+      scopes: ["runner_safe_access"],
+      scoreGap: 3,
       blockedByReason: {
+        basic_setup_action_type_blocked: 1,
         corp_score_window_wrong_side: 1,
-        runner_safe_access_action_type_blocked: 1,
       },
       reportOnly: true,
       productiveUseAllowed: false,
@@ -256,10 +256,10 @@ describe("SemanticShadowLeague", () => {
         "pilot_scope_allowed_count:1",
         "pilot_would_override:true",
         "pilot_actual_override:false",
-        "score_gap:37",
+        "score_gap:3",
         "pilot_eligibility:report_only",
         "productive_use_allowed:false",
-        "pilot_scope:basic_setup:eligible",
+        "pilot_scope:runner_safe_access:eligible",
       ]),
     });
     expect(scenario(report, "runner_real_safe_hq_access").pilotEligibility).toMatchObject({
@@ -335,8 +335,8 @@ describe("SemanticShadowLeague", () => {
     expect(dryRun).toMatchObject({
       scope: "basic_setup",
       scenarioCount: 54,
-      eligible: 23,
-      wouldOverride: 23,
+      eligible: 19,
+      wouldOverride: 19,
       badOverrideRisk: 0,
       knownNoGoCases: [],
       recommendation: "local_default_dry_run_candidate",
@@ -344,7 +344,7 @@ describe("SemanticShadowLeague", () => {
       runtimeConsumerStatus: "none",
       noRuntimeEffect: true,
     });
-    expect(dryRun.blockedReasons.basic_setup_action_type_blocked).toBe(30);
+    expect(dryRun.blockedReasons.basic_setup_action_type_blocked).toBe(34);
     expect(dryRun.evidence).toEqual(
       expect.arrayContaining([
         "local_default_dry_run_scope:basic_setup",
@@ -367,15 +367,15 @@ describe("SemanticShadowLeague", () => {
     expect(dryRun).toMatchObject({
       scope: "runner_safe_access",
       scenarioCount: 54,
-      eligible: 18,
-      wouldOverride: 18,
+      eligible: 22,
+      wouldOverride: 22,
       badOverrideRisk: 0,
       knownNoGoCases: [],
       recommendation: "local_default_dry_run_candidate",
       centralOnlyCases: expect.any(Number),
       riskBlockedCases: expect.any(Number),
       evidenceOnlyBlockedCases: expect.any(Number),
-      structuredAlignmentCases: 18,
+      structuredAlignmentCases: 22,
       falsePositiveCandidates: 0,
       productiveUseAllowed: false,
       runtimeConsumerStatus: "none",

@@ -97,9 +97,7 @@ export function progressTacticalPlans(
         {
           key: "previous_plan_continuity",
           label: "Planfortschreibung",
-          value: normalizedPlanContinuityValue(
-            PLAN_CONTINUITY_PRIORITY_BONUS,
-          ),
+          value: PLAN_CONTINUITY_PRIORITY_BONUS,
           reason: [
             previousPlan.planId,
             `plan_continuity_raw_value:${PLAN_CONTINUITY_PRIORITY_BONUS}`,

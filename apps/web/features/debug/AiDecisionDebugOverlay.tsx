@@ -379,7 +379,7 @@ function aiDecisionDebugWindowHeaderStatusLabel(
     selectedPlan !== undefined
       ? aiDecisionDebugPlanTitle(selectedPlan)
       : aiDecisionDebugMetaRowValue(metaRows, "Plan");
-  const scoreLabel = aiDecisionDebugMetaRowValue(metaRows, "Score");
+  const scoreLabel = aiDecisionDebugOverlayScoreValue(metaRows);
   const parts = uniqueDisplayStrings(
     [
       actionLabel,
@@ -387,7 +387,7 @@ function aiDecisionDebugWindowHeaderStatusLabel(
         ? planLabel
         : undefined,
       scoreLabel && scoreLabel !== "-"
-        ? `Score ${scoreLabel}`
+        ? `${aiDecisionDebugOverlayScoreLabel(metaRows)} ${scoreLabel}`
         : selectedPlan
           ? aiDecisionDebugPlanScoreLabel(selectedPlan)
           : undefined,
@@ -689,7 +689,12 @@ function aiDecisionDebugOverlayMetaRows(
   const hiddenPreviewLabels = new Set(["Entscheidung", "Ausgeführt"]);
   return aiTraceMetaRows(trace)
     .filter(([label]) => AI_DECISION_DEBUG_OVERLAY_META_LABELS.has(label))
-    .filter(([label]) => mode !== "preview" || !hiddenPreviewLabels.has(label));
+    .filter(([label]) => mode !== "preview" || !hiddenPreviewLabels.has(label))
+    .map(([label, value]) =>
+      mode === "preview" && label === "Score"
+        ? ["Action-Rohscore", value]
+        : [label, value],
+    );
 }
 
 function aiDecisionDebugIsCurrentWhyNot(item: string): boolean {
@@ -742,13 +747,13 @@ function aiDecisionDebugOverviewSummary(
     selectedPlan !== undefined
       ? aiDecisionDebugPlanTitle(selectedPlan)
       : aiDecisionDebugMetaRowValue(metaRows, "Plan");
-  const scoreLabel = aiDecisionDebugMetaRowValue(metaRows, "Score");
+  const scoreLabel = aiDecisionDebugOverlayScoreValue(metaRows);
   const handLabel = aiDecisionDebugHandSummary(detail);
   const parts = uniqueDisplayStrings(
     [
       planLabel && planLabel !== "-" ? planLabel : undefined,
       scoreLabel && scoreLabel !== "-"
-        ? `Score ${scoreLabel}`
+        ? `${aiDecisionDebugOverlayScoreLabel(metaRows)} ${scoreLabel}`
         : selectedPlan
           ? aiDecisionDebugPlanScoreLabel(selectedPlan)
           : undefined,
@@ -757,6 +762,23 @@ function aiDecisionDebugOverviewSummary(
     ].filter((part): part is string => Boolean(part)),
   );
   return parts.join(" · ");
+}
+
+function aiDecisionDebugOverlayScoreValue(
+  rows: Array<[string, string]>,
+): string | undefined {
+  return (
+    aiDecisionDebugMetaRowValue(rows, "Action-Rohscore") ??
+    aiDecisionDebugMetaRowValue(rows, "Score")
+  );
+}
+
+function aiDecisionDebugOverlayScoreLabel(
+  rows: Array<[string, string]>,
+): string {
+  return aiDecisionDebugMetaRowValue(rows, "Action-Rohscore") !== undefined
+    ? "Action-Rohscore"
+    : "Score";
 }
 
 function aiDecisionDebugHandSummary(

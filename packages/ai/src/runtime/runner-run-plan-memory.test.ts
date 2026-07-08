@@ -538,6 +538,14 @@ function choice(
     action: legalAction,
     scopeId,
     score,
+    scoreBreakdown: [
+      {
+        key: "test_score",
+        label: "Test score",
+        value: score,
+        reason: "test",
+      },
+    ],
     reasonCode: `runner.semantic.${scopeId}`,
     explanation: scopeId,
     evidence: [`action_type:${legalAction.type}`],

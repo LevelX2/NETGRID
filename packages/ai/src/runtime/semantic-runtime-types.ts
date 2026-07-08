@@ -1,4 +1,4 @@
-import type { LegalAction } from "@netgrid/shared";
+import type { AiDecisionDebug, LegalAction } from "@netgrid/shared";
 
 export type SemanticRuntimeExclusion = {
   key: string;
@@ -11,6 +11,7 @@ export type SemanticRuntimeChoice = {
   scopeId: string;
   exclusion?: SemanticRuntimeExclusion;
   score: number;
+  scoreBreakdown: NonNullable<AiDecisionDebug["scoreBreakdown"]>;
   reasonCode: string;
   explanation: string;
   evidence: string[];

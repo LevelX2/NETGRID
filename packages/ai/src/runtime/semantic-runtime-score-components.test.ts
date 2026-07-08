@@ -31,7 +31,15 @@ describe("semantic runtime score components", () => {
     const choice: SemanticRuntimeChoice = {
       action,
       scopeId: "runner.semantic.basic_economy_draw",
-      score: 420.123,
+      score: 420.12,
+      scoreBreakdown: [
+        {
+          key: "base",
+          label: "Base",
+          value: 420.12,
+          reason: "test",
+        },
+      ],
       reasonCode: "runner.semantic.basic_economy_draw",
       explanation: "base",
       evidence: ["base_evidence"],
@@ -46,10 +54,29 @@ describe("semantic runtime score components", () => {
 
     expect(adjusted.action).toBe(action);
     expect(adjusted.score).toBe(500.46);
+    expect(adjusted.scoreBreakdown).toEqual([
+      {
+        key: "base",
+        label: "Base",
+        value: 420.12,
+        reason: "test",
+      },
+      {
+        key: "semantic_runtime_minimum_score_floor",
+        label: "Semantic-Runtime-Mindestscore",
+        value: 80.34,
+        reason:
+          "previousScore:420.12|minimumScore:500.46|finalScore:500.46|score_floor:true",
+      },
+    ]);
     expect(adjusted.reasonCode).toBe("runner.adjusted");
     expect(adjusted.explanation).toBe("adjusted");
     expect(adjusted.confidence).toBe(0.51);
-    expect(adjusted.evidence).toEqual(["safe:evidence", "base_evidence"]);
+    expect(adjusted.evidence).toEqual([
+      "safe:evidence",
+      "semantic_score_component:semantic_runtime_minimum_score_floor",
+      "base_evidence",
+    ]);
   });
 
   it("scrubs forbidden evidence fields without dropping side-safe ids", () => {

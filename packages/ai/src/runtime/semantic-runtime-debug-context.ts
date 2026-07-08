@@ -13,17 +13,9 @@ import type { TacticalPlanRuntimeResult } from "../tactical-plans";
 import type {
   SemanticRuntimeChoice,
   SemanticRuntimeCoverageSelectionDebug,
-  SemanticRuntimeExclusion,
 } from "./semantic-runtime-types";
 
 export type SemanticRuntimeDebugContextDependencies = {
-  scoreBreakdown: (
-    input: AiDecisionInput,
-    action: LegalAction,
-    scopeId: string,
-    exclusion?: SemanticRuntimeExclusion,
-    actionSemanticCandidate?: ActionSemanticCandidate,
-  ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
   visibleSourceCard: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -64,22 +56,12 @@ export function createSemanticRuntimeDebugContext(
   }
 
   function rankedAlternatives(
-    input: AiDecisionInput,
     rankedChoices: SemanticRuntimeChoice[],
     selectedActionId: string,
-    candidatesByActionId: ReadonlyMap<string, ActionSemanticCandidate>,
   ): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
     return buildSemanticRuntimeRankedAlternatives({
       rankedChoices,
       selectedActionId,
-      scoreBreakdownForChoice: (choice) =>
-        dependencies.scoreBreakdown(
-          input,
-          choice.action,
-          choice.scopeId,
-          choice.exclusion,
-          candidatesByActionId.get(choice.action.actionId),
-        ),
     });
   }
 
@@ -88,7 +70,6 @@ export function createSemanticRuntimeDebugContext(
     rankedChoices: SemanticRuntimeChoice[],
     selectedActionId: string,
     planRuntime: TacticalPlanRuntimeResult,
-    candidatesByActionId: ReadonlyMap<string, ActionSemanticCandidate>,
   ): NonNullable<AiDecisionDebug["actionAlternatives"]> {
     const selectedChoice = rankedChoices.find(
       (choice) => choice.action.actionId === selectedActionId,
@@ -103,14 +84,6 @@ export function createSemanticRuntimeDebugContext(
       ...(coverageSelection ? { coverageSelection } : {}),
       sourceTitleForChoice: (choice) =>
         dependencies.visibleSourceCard(input, choice.action)?.title,
-      scoreBreakdownForChoice: (choice) =>
-        dependencies.scoreBreakdown(
-          input,
-          choice.action,
-          choice.scopeId,
-          choice.exclusion,
-          candidatesByActionId.get(choice.action.actionId),
-        ),
     });
   }
 
@@ -122,23 +95,10 @@ export function createSemanticRuntimeDebugContext(
       planRuntime,
       actionSemanticCandidates,
     ) => {
-      const candidatesByActionId = new Map(
-        actionSemanticCandidates.map((candidate) => [
-          candidate.actionId,
-          candidate,
-        ]),
-      );
       const coverageSelection = coverageSelectionDebug(
         input,
         selected.action,
         planRuntime,
-      );
-      const selectedScoreBreakdown = dependencies.scoreBreakdown(
-        input,
-        selected.action,
-        selected.scopeId,
-        selected.exclusion,
-        candidatesByActionId.get(selected.action.actionId),
       );
       return buildSemanticRuntimeDecisionDebug({
         input,
@@ -146,19 +106,16 @@ export function createSemanticRuntimeDebugContext(
         actionSemanticCandidates,
         planRuntime,
         ...(coverageSelection ? { coverageSelection } : {}),
-        selectedScoreBreakdown,
+        selectedScoreBreakdown: selected.scoreBreakdown,
         rankedAlternatives: rankedAlternatives(
-          input,
           rankedChoices,
           selected.action.actionId,
-          candidatesByActionId,
         ),
         actionAlternatives: actionAlternatives(
           input,
           rankedChoices,
           selected.action.actionId,
           planRuntime,
-          candidatesByActionId,
         ),
       });
     },

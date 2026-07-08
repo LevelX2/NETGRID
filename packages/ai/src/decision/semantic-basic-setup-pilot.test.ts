@@ -384,6 +384,14 @@ function choice(
     },
     scopeId: "test",
     score,
+    scoreBreakdown: [
+      {
+        key: "test_score",
+        label: "Test score",
+        value: score,
+        reason: "test",
+      },
+    ],
     reasonCode: "test",
     explanation: "test",
     evidence: ["test_choice"],

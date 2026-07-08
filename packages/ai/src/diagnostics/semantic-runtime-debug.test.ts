@@ -407,8 +407,16 @@ describe("SemanticRuntimeDebug", () => {
     ]);
   });
 
-  it("formats ranked alternatives through caller-provided score rows", () => {
-    const selected = choice(action("run-hq", "start_run"), 90);
+  it("formats ranked alternatives from final choice score rows", () => {
+    const selected = choice(action("run-hq", "start_run"), 90, {
+      scoreBreakdown: [
+        {
+          key: "semantic_type_priority",
+          label: "Action-Typ-Priorität",
+          value: 100,
+        },
+      ],
+    });
     const lower = choice(action("draw", "draw_card"), 55, {
       reasonCode: "runner.semantic.hand_development",
       scopeId: "basic_economy_draw",
@@ -424,13 +432,6 @@ describe("SemanticRuntimeDebug", () => {
     const ranked = semanticRuntimeDebugRankedAlternatives({
       rankedChoices: [selected, lower, blocked],
       selectedActionId: "run-hq",
-      scoreBreakdownForChoice: () => [
-        {
-          key: "semantic_type_priority",
-          label: "Action-Typ-Priorität",
-          value: 100,
-        },
-      ],
       scrubEvidence: (evidence) => evidence.filter((entry) => entry !== "bad"),
     });
 
@@ -600,6 +601,51 @@ describe("SemanticRuntimeDebug", () => {
     expect(rankItem).toContain("capabilities=breaker_wall");
     expect(rankItem).toContain("scores=Coverage:12.35");
   });
+
+  it("exports the source continuity contribution for tactical plan ranking scores", () => {
+    const plan = tacticalPlan({
+      planId: "runner.build_credit_base",
+      type: "runner.build_credit_base",
+      priority: 1050,
+      scoreBreakdown: [
+        {
+          key: "runner_credit_base",
+          label: "Runner creditbase",
+          value: 930,
+          reason: "fund_useful_hand_card",
+        },
+        {
+          key: "previous_plan_continuity",
+          label: "Planfortschreibung",
+          value: 120,
+          reason:
+            "runner.build_credit_base|plan_continuity_raw_value:120|plan_continuity_normalized_value:12",
+        },
+      ],
+    });
+    const runtime: TacticalPlanRuntimeResult = {
+      planAlternatives: [plan],
+      blockedPlans: [],
+      selectedPlan: plan,
+      selectedStep: plan.currentStep,
+      selectedMapping: {
+        plan,
+        step: plan.currentStep,
+        status: "matched",
+        actionCandidateIds: ["gain"],
+        legalActions: [action("gain", "gain_credit")],
+        rationale: [],
+      },
+    };
+
+    const rankItem = semanticRuntimeDebugTacticalPlanItems(runtime).find(
+      (entry) => entry.startsWith("plan_rank|"),
+    );
+
+    expect(rankItem).toContain(
+      "scores=Runner creditbase:930,Planfortschreibung:120",
+    );
+  });
 });
 
 function choice(
@@ -611,6 +657,14 @@ function choice(
     action: actionValue,
     scopeId: "runner_safe_access",
     score,
+    scoreBreakdown: [
+      {
+        key: "test_score",
+        label: "Test score",
+        value: score,
+        reason: "test",
+      },
+    ],
     reasonCode: "semantic.runtime",
     explanation: "Synthetic semantic runtime choice.",
     evidence: ["safe"],
@@ -684,6 +738,7 @@ function tacticalPlan({
   requiredCapabilityKind = "credits",
   blockerKind = "missing_credits",
   scoreReason = "base",
+  scoreBreakdown,
 }: {
   planId: string;
   type: TacticalPlan["type"];
@@ -692,6 +747,7 @@ function tacticalPlan({
   requiredCapabilityKind?: TacticalPlan["requiredCapabilities"][number]["kind"];
   blockerKind?: TacticalPlan["blockers"][number]["kind"];
   scoreReason?: string;
+  scoreBreakdown?: TacticalPlan["scoreBreakdown"];
 }): TacticalPlan {
   return {
     schemaVersion: "tactical-plan-v1",
@@ -728,7 +784,7 @@ function tacticalPlan({
     },
     nextSteps: [],
     evidence,
-    scoreBreakdown: [
+    scoreBreakdown: scoreBreakdown ?? [
       {
         key: `${planId}-score`,
         label: "Coverage",

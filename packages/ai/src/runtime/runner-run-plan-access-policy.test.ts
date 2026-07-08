@@ -275,6 +275,14 @@ function choice(
     action: legalAction,
     scopeId: "access_trash_steal",
     score,
+    scoreBreakdown: [
+      {
+        key: "test_score",
+        label: "Test score",
+        value: score,
+        reason: "test",
+      },
+    ],
     reasonCode: "runner.semantic.access_trash_steal",
     explanation: "access",
     evidence: [`action_type:${legalAction.type}`],

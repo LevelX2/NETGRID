@@ -400,6 +400,14 @@ function choice(
         ? "simple_hq_or_rnd_pressure"
         : "basic_economy_draw",
     score,
+    scoreBreakdown: [
+      {
+        key: "test_score",
+        label: "Test score",
+        value: score,
+        reason: "test",
+      },
+    ],
     reasonCode: `runner.semantic.${action.type}`,
     explanation: action.label,
     evidence,

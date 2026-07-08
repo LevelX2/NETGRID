@@ -1,4 +1,8 @@
-import type { AiDecisionDebug, LegalAction } from "@netgrid/shared";
+import type {
+  AiDecisionDebug,
+  AiDecisionScoreComponent,
+  LegalAction,
+} from "@netgrid/shared";
 
 import { containsForbiddenSemanticMarker } from "../diagnostics/semantic-redaction";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
@@ -17,13 +21,54 @@ export function semanticRuntimeChoiceWithEvidence(
       ? Math.max(choice.score, options.minimumScore)
       : choice.score,
   );
+  const minimumScoreComponent = semanticRuntimeMinimumScoreFloorComponent(
+    choice.score,
+    score,
+    options.minimumScore,
+  );
+  const scoreBreakdown =
+    minimumScoreComponent !== undefined
+      ? [...choice.scoreBreakdown, minimumScoreComponent]
+      : choice.scoreBreakdown.slice();
+  const scoreComponentEvidence =
+    minimumScoreComponent !== undefined
+      ? [`semantic_score_component:${minimumScoreComponent.key}`]
+      : [];
   return {
     ...choice,
     score,
+    scoreBreakdown,
     reasonCode: options.reasonCode ?? choice.reasonCode,
     explanation: options.explanation ?? choice.explanation,
-    evidence: scrubEvidence([...options.evidence, ...choice.evidence]),
+    evidence: scrubEvidence([
+      ...options.evidence,
+      ...scoreComponentEvidence,
+      ...choice.evidence,
+    ]),
     confidence: semanticRuntimeConfidence(choice.scopeId, score),
+  };
+}
+
+function semanticRuntimeMinimumScoreFloorComponent(
+  previousScore: number,
+  finalScore: number,
+  minimumScore: number | undefined,
+): AiDecisionScoreComponent | undefined {
+  if (minimumScore === undefined || finalScore <= previousScore) {
+    return undefined;
+  }
+  const value = roundSemanticRuntimeScore(finalScore - previousScore);
+  if (value <= 0) return undefined;
+  return {
+    key: "semantic_runtime_minimum_score_floor",
+    label: "Semantic-Runtime-Mindestscore",
+    value,
+    reason: [
+      `previousScore:${roundSemanticRuntimeScore(previousScore)}`,
+      `minimumScore:${roundSemanticRuntimeScore(minimumScore)}`,
+      `finalScore:${finalScore}`,
+      "score_floor:true",
+    ].join("|"),
   };
 }
 

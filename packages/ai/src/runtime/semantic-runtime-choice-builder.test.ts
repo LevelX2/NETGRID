@@ -53,6 +53,14 @@ describe("buildSemanticRuntimeChoices", () => {
     });
 
     expect(choice?.reasonCode).toBe("corp.semantic.corp_tag_punish");
+    expect(choice?.score).toBe(80);
+    expect(choice?.scoreBreakdown).toEqual([
+      {
+        key: "corp_tagged_meat_damage_payoff_pressure",
+        label: "Tagged payoff",
+        value: 80,
+      },
+    ]);
   });
 
   it("ignores tag punish text in score component reasons without the structured key", () => {

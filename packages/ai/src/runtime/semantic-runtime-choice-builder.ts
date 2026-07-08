@@ -121,6 +121,7 @@ function scoreSemanticRuntimeAction(
     reasonCode,
     explanation: dependencies.explanation(input.side, scopeId),
     score,
+    scoreBreakdown,
     evidence: [
       `action_type:${action.type}`,
       `semantic_scope:${scopeId}`,

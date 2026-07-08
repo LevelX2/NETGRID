@@ -129,15 +129,15 @@ describe("RealEngineDecisionCorpus", () => {
     expect(
       sampleFor(samples, "runner_real_low_credits").leagueExpectation
         ?.expectedTopActionTypes,
-    ).toEqual(["gain_credit", "draw_card"]);
+    ).toEqual(["start_run"]);
     expect(
       sampleFor(samples, "runner_real_low_credits").leagueExpectation
         ?.pilotEligibleScopes,
-    ).toEqual(["basic_setup"]);
+    ).toEqual(["runner_safe_access"]);
     expect(
       sampleFor(samples, "runner_real_low_credits").leagueExpectation
         ?.forbiddenMistakes,
-    ).toEqual(["economy_starvation"]);
+    ).toEqual(["missed_safe_access"]);
     expect(
       sampleFor(samples, "runner_real_low_credits").leagueExpectation?.evidence,
     ).toEqual(
@@ -502,7 +502,7 @@ describe("RealEngineDecisionCorpus", () => {
     const scenarios = buildRealEngineDecisionCorpusScenarios();
     const samples = buildRealEngineDecisionCorpus(scenarios);
 
-    const basicPositive = sampleFor(samples, "runner_real_low_credits");
+    const basicPositive = sampleFor(samples, "corp_real_basic_economy_draw");
     expect(
       pilotDecisionFor(scenarios, basicPositive, BASIC_SETUP_PILOT_MODE).allowed,
     ).toBe(true);
@@ -714,6 +714,17 @@ function runtimeChoicesFor(
     action,
     scopeId: "real_engine_corpus",
     score: action.actionId === top.actionId ? top.score : Math.max(top.score - 40, 0),
+    scoreBreakdown: [
+      {
+        key: "real_engine_corpus_score",
+        label: "Real engine corpus score",
+        value:
+          action.actionId === top.actionId
+            ? top.score
+            : Math.max(top.score - 40, 0),
+        reason: sample.scenarioId,
+      },
+    ],
     reasonCode: `real_engine_corpus.${sample.scenarioId}`,
     explanation: "real engine corpus candidate",
     evidence: [`scenario:${sample.scenarioId}`, `action:${action.actionId}`],
@@ -733,6 +744,14 @@ function fallbackRuntimeChoice(
     action: fallbackAction,
     scopeId: "real_engine_corpus_fallback",
     score: Math.max(top.score - 40, 0),
+    scoreBreakdown: [
+      {
+        key: "real_engine_corpus_fallback_score",
+        label: "Real engine corpus fallback score",
+        value: Math.max(top.score - 40, 0),
+        reason: sample.scenarioId,
+      },
+    ],
     reasonCode: `real_engine_corpus.fallback.${sample.scenarioId}`,
     explanation: "real engine corpus fallback",
     evidence: [`fallback:${fallbackAction.actionId}`],

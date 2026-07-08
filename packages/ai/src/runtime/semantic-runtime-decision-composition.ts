@@ -44,7 +44,7 @@ export type SemanticRuntimeDecisionCompositionDependencies = Omit<
   SemanticRuntimeDecisionKnownPathDependencies &
   SemanticRuntimeDecisionPracticalRunTargetDependencies &
   SemanticRuntimeChoiceCompositionDependencies &
-  Omit<SemanticRuntimeDebugContextDependencies, "scoreBreakdown"> &
+  SemanticRuntimeDebugContextDependencies &
   Omit<
     SemanticRuntimeDecisionContextDependencies,
     | "practicalMicroRuntimeCandidates"
@@ -84,14 +84,13 @@ export function createSemanticRuntimeDecisionComposition(
       runnerRunTargetHighPayoff: dependencies.runnerRunTargetHighPayoff,
     });
 
-  const { semanticRuntimeScoreBreakdown, semanticRuntimeChoices } =
+  const { semanticRuntimeChoices } =
     createSemanticRuntimeChoiceComposition(dependencies);
 
   const {
     semanticRuntimeDecisionDebug,
     semanticRuntimeCoverageSelectionDebug,
   } = createSemanticRuntimeDebugContext({
-    scoreBreakdown: semanticRuntimeScoreBreakdown,
     visibleSourceCard: dependencies.visibleSourceCard,
   });
 

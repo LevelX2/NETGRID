@@ -14,7 +14,7 @@ describe("tactical plan progression", () => {
     expect(normalizedPlanContinuityValue(-1500)).toBe(-100);
   });
 
-  it("keeps priority continuity while exposing normalized scoring evidence", () => {
+  it("keeps priority continuity while exposing raw scoring contribution", () => {
     const plan = createTacticalPlan({
       planId: "runner.contest_remote:remote_1",
       side: "runner",
@@ -61,7 +61,7 @@ describe("tactical plan progression", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "previous_plan_continuity",
-          value: 12,
+          value: 120,
           reason: expect.stringContaining(
             "plan_continuity_normalized_value:12",
           ),

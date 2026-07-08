@@ -3740,6 +3740,14 @@ function semanticRuntimeChoice(
     action,
     scopeId: reasonCode,
     score,
+    scoreBreakdown: [
+      {
+        key: "test_score",
+        label: "Test score",
+        value: score,
+        reason: "test",
+      },
+    ],
     reasonCode,
     explanation: reasonCode,
     evidence: [`choice:${action.actionId}`],

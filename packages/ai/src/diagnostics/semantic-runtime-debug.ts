@@ -690,9 +690,6 @@ export function semanticRuntimeDebugSelectionScoreItems(
 export function semanticRuntimeDebugRankedAlternatives(params: {
   rankedChoices: readonly SemanticRuntimeChoice[];
   selectedActionId: string;
-  scoreBreakdownForChoice: (
-    choice: SemanticRuntimeChoice,
-  ) => NonNullable<AiDecisionDebug["scoreBreakdown"]>;
   scrubEvidence: (evidence: string[]) => string[];
 }): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
   const selectedChoice = params.rankedChoices.find(
@@ -718,7 +715,7 @@ export function semanticRuntimeDebugRankedAlternatives(params: {
           ? { confidence: choice.confidence }
           : {}),
         visibleReasons: params.scrubEvidence(choice.evidence).slice(0, 4),
-        scoreBreakdown: params.scoreBreakdownForChoice(choice),
+        scoreBreakdown: choice.scoreBreakdown,
         whyNot: selected
           ? ["selected_action", ...semanticRuntimeDebugActionWhyChosen(choice, context)]
           : semanticRuntimeDebugActionWhyNot(choice, choice.score, context),

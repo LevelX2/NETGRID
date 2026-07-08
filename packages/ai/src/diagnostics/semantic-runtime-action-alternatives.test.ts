@@ -29,7 +29,6 @@ describe("SemanticRuntimeActionAlternatives", () => {
       selectedActionId: "gain",
       planRuntime: emptyPlanRuntime(),
       sourceTitleForChoice: () => undefined,
-      scoreBreakdownForChoice: () => [],
     });
 
     expect(alternatives).toEqual([
@@ -73,6 +72,59 @@ describe("SemanticRuntimeActionAlternatives", () => {
       }),
     ]);
   });
+
+  it("shows the final choice score breakdown instead of adding debug score repairs", () => {
+    const lifted = choice(action("draw", "draw_card"), 1128, {
+      reasonCode: "runner.semantic.basic_economy_draw",
+      scopeId: "basic_economy_draw",
+      scoreBreakdown: [
+        {
+          key: "semantic_type_tie_breaker",
+          label: "Action-Typ-Tiebreaker",
+          value: 53,
+          reason: "draw_card",
+        },
+        {
+          key: "runner_hand_buffer_need",
+          label: "Handpuffer-Bedarf",
+          value: 150,
+          reason: "hand_buffer",
+        },
+        {
+          key: "actor_private_action",
+          label: "Akteur-private Action",
+          value: 25,
+          reason: "private",
+        },
+        {
+          key: "semantic_runtime_minimum_score_floor",
+          label: "Semantic-Runtime-Mindestscore",
+          value: 900,
+          reason:
+            "previousScore:228|minimumScore:1128|finalScore:1128|score_floor:true",
+        },
+      ],
+    });
+
+    const alternatives = buildSemanticRuntimeActionAlternatives({
+      rankedChoices: [lifted],
+      selectedActionId: "draw",
+      planRuntime: emptyPlanRuntime(),
+      sourceTitleForChoice: () => undefined,
+    });
+
+    expect(alternatives[0]?.priority).toBe(1128);
+    expect(alternatives[0]?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "semantic_runtime_minimum_score_floor",
+          label: "Semantic-Runtime-Mindestscore",
+          value: 900,
+          reason: expect.stringContaining("score_floor:true"),
+        }),
+      ]),
+    );
+  });
 });
 
 function emptyPlanRuntime(): TacticalPlanRuntimeResult {
@@ -91,6 +143,14 @@ function choice(
     action: actionValue,
     scopeId: "runner_safe_access",
     score,
+    scoreBreakdown: [
+      {
+        key: "test_score",
+        label: "Test score",
+        value: score,
+        reason: "test",
+      },
+    ],
     reasonCode: "semantic.runtime",
     explanation: "Synthetic semantic runtime choice.",
     evidence: ["safe"],
