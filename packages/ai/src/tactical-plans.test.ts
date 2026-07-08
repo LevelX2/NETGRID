@@ -335,8 +335,8 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("still maps Livewire's Contacts to credit blockers outside coverage search", () => {
-    const action = legalAction(
+  it("prioritizes visible burst economy over the basic credit action for credit blockers", () => {
+    const livewireAction = legalAction(
       "play-livewire",
       "runner",
       "play_event",
@@ -345,6 +345,13 @@ describe("tactical plan model", () => {
         source: "onr_v1_097_livewires-contacts",
         label: "Livewire's Contacts",
       },
+    );
+    const basicCreditAction = legalAction(
+      "basic-credit",
+      "runner",
+      "gain_credit",
+      {},
+      { source: "basic_action", label: "1 Credit nehmen" },
     );
     const plan = createTacticalPlan({
       planId: "runner.build_credit_base",
@@ -376,26 +383,48 @@ describe("tactical plan model", () => {
       ],
       stateVersion: 1,
     });
-    const candidate: ActionSemanticCandidate = {
-      ...candidateForAction(action),
+    const livewireCandidate: ActionSemanticCandidate = {
+      ...candidateForAction(livewireAction),
       sourceKind: "card",
       sourceCardId: "onr_v1_097_livewires-contacts",
       semanticActionType: "play.runner_event",
       actionTacticSignals: ["recover_economy"],
       evidence: ["candidate carries burst economy semantics"],
     };
-    const input = aiInput("runner", [action]);
+    const basicCreditCandidate: ActionSemanticCandidate = {
+      ...candidateForAction(basicCreditAction),
+      semanticActionType: "economy.gain_credit",
+      actionTacticSignals: ["economy.gain_credit"],
+      evidence: ["candidate carries basic economy semantics"],
+    };
+    const input = aiInput("runner", [livewireAction, basicCreditAction]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("livewire-card", "runner", "event", {
+        definitionId: "onr_v1_097_livewires-contacts",
+        title: "Livewire's Contacts",
+      }),
+    ];
 
     const mapping = mapPlanStepToLegalActions(
       plan,
       plan.currentStep,
-      [candidate],
+      [basicCreditCandidate, livewireCandidate],
       input,
     );
 
     expect(mapping.status).toBe("matched");
-    expect(mapping.actionCandidateIds).toEqual(["play-livewire"]);
-    expect(mapping.legalActions[0]).toBe(input.legalActions[0]);
+    expect(mapping.actionCandidateIds).toEqual([
+      "play-livewire",
+      "basic-credit",
+    ]);
+    expect(mapping.actionPriorities).toEqual([
+      { actionId: "play-livewire", priority: 300 },
+      { actionId: "basic-credit", priority: 100 },
+    ]);
+    expect(mapping.legalActions.map((action) => action.actionId)).toEqual([
+      "play-livewire",
+      "basic-credit",
+    ]);
     expect(mapping.rationale.join("\n")).not.toContain(
       "blocked_no_valid_search_action",
     );

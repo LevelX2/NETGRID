@@ -37,38 +37,45 @@ export function mapPlanStepToLegalActionsWithDependencies(
     input.legalActions.map((action) => [action.actionId, action]),
   );
   const matchedCandidates = candidates
-    .filter((candidate) =>
+    .map((candidate) => ({
+      candidate,
+      action: legalActionsById.get(candidate.actionId),
+    }))
+    .filter(({ candidate, action }) =>
       candidateMatchesStep(
         plan,
         step,
         candidate,
-        legalActionsById.get(candidate.actionId),
+        action,
         input,
         dependencies,
       ),
     )
-    .sort((left, right) =>
-      planStepCandidatePriority(
+    .map(({ candidate, action }) => ({
+      candidate,
+      priority: planStepCandidatePriority(
         plan,
         step,
-        right,
-        legalActionsById.get(right.actionId),
+        candidate,
+        action,
         input,
         dependencies,
-      ) -
-        planStepCandidatePriority(
-          plan,
-          step,
-          left,
-          legalActionsById.get(left.actionId),
-          input,
-          dependencies,
-        ) ||
-      left.actionId.localeCompare(right.actionId),
+      ),
+    }))
+    .sort((left, right) =>
+      right.priority - left.priority ||
+      left.candidate.actionId.localeCompare(right.candidate.actionId),
     );
   const matchedCandidateIds = matchedCandidates.map(
-    (candidate) => candidate.actionId,
+    ({ candidate }) => candidate.actionId,
   );
+  const matchedCandidateValues = matchedCandidates.map(
+    ({ candidate }) => candidate,
+  );
+  const actionPriorities = matchedCandidates.map(({ candidate, priority }) => ({
+    actionId: candidate.actionId,
+    priority,
+  }));
   const legalActions = matchedCandidateIds
     .map((actionId) => legalActionsById.get(actionId))
     .filter((action): action is LegalAction => Boolean(action));
@@ -85,7 +92,7 @@ export function mapPlanStepToLegalActionsWithDependencies(
   const matchedCoverageSearchFits = matchedCoverageSearchRationales(
     plan,
     step,
-    matchedCandidates,
+    matchedCandidateValues,
     legalActionsById,
     input,
     coverageSearchFundingNeed,
@@ -99,6 +106,7 @@ export function mapPlanStepToLegalActionsWithDependencies(
     },
     status,
     actionCandidateIds: matchedCandidateIds,
+    actionPriorities,
     legalActions,
     rationale: [
       ...step.rationale,
@@ -110,7 +118,7 @@ export function mapPlanStepToLegalActionsWithDependencies(
         : []),
       ...rejectedFalseMatches.slice(0, 6),
       ...matchedCoverageSearchFits.slice(0, 4),
-      ...matchedCandidates.slice(0, 4).map(candidateMappingRationale),
+      ...matchedCandidateValues.slice(0, 4).map(candidateMappingRationale),
     ],
   };
 }

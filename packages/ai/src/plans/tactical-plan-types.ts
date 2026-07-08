@@ -289,6 +289,10 @@ export type PlanStepMappingResult = {
   step: PlanStep;
   status: PlanMappingStatus;
   actionCandidateIds: string[];
+  actionPriorities: Array<{
+    actionId: string;
+    priority: number;
+  }>;
   legalActions: LegalAction[];
   rationale: string[];
 };

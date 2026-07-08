@@ -62,11 +62,16 @@ export function tacticalPlanMappedChoice(
       ),
     )
     .filter((choice): choice is SemanticRuntimeChoice => Boolean(choice));
-  const mappedChoice = bestPlanCompatibleSemanticChoice(mappedChoices);
+  const mappedChoice = bestPlanCompatibleSemanticChoice(mappedChoices, mapping);
   if (!mappedChoice) return {};
   if (
     overrideChoice &&
-    overrideChoice.action.actionId !== mappedChoice.action.actionId
+    overrideChoice.action.actionId !== mappedChoice.action.actionId &&
+    !tacticalPlanStepPriorityKeepsMappedChoice(
+      mapping,
+      mappedChoice,
+      overrideChoice,
+    )
   ) {
     const scoreGap = roundScore(overrideChoice.score - mappedChoice.score);
     const threshold = tacticalPlanOverrideScoreGapThreshold(
@@ -229,23 +234,89 @@ export function tacticalPlanMappedChoice(
   }
   return {
     outcome: "plan_mapping_selected",
-    choice: semanticRuntimeChoiceWithAddedEvidence(mappedChoice, [
-      "tactical_plan_mapping_outcome:plan_mapping_selected",
-    ]),
+    choice: semanticRuntimeChoiceWithAddedEvidence(
+      mappedChoice,
+      tacticalPlanMappingSelectedEvidence(mapping, mappedChoice),
+    ),
   };
 }
 
 function bestPlanCompatibleSemanticChoice(
   choices: readonly SemanticRuntimeChoice[],
+  mapping: PlanStepMappingResult,
 ): SemanticRuntimeChoice | undefined {
   const viable = choices.filter((choice) => !choice.exclusion);
   if (viable.length === 0) return undefined;
+  const priorityByActionId = tacticalPlanStepPriorityByActionId(mapping);
+  const hasStepPriority = viable.some(
+    (choice) => (priorityByActionId.get(choice.action.actionId) ?? 0) > 0,
+  );
+  if (hasStepPriority) {
+    return [...viable].sort(
+      (left, right) =>
+        (priorityByActionId.get(right.action.actionId) ?? 0) -
+          (priorityByActionId.get(left.action.actionId) ?? 0) ||
+        positiveScoreRank(right.score) - positiveScoreRank(left.score) ||
+        right.score - left.score ||
+        left.action.actionId.localeCompare(right.action.actionId),
+    )[0];
+  }
   return [...viable].sort(
     (left, right) =>
       positiveScoreRank(right.score) - positiveScoreRank(left.score) ||
       right.score - left.score ||
       left.action.actionId.localeCompare(right.action.actionId),
   )[0];
+}
+
+function tacticalPlanStepPriorityKeepsMappedChoice(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+): boolean {
+  if (
+    !mapping.legalActions.some(
+      (action) => action.actionId === overrideChoice.action.actionId,
+    )
+  ) {
+    return false;
+  }
+  const priorityByActionId = tacticalPlanStepPriorityByActionId(mapping);
+  const mappedPriority =
+    priorityByActionId.get(mappedChoice.action.actionId) ?? 0;
+  const overridePriority =
+    priorityByActionId.get(overrideChoice.action.actionId) ?? 0;
+  return mappedPriority > 0 && mappedPriority > overridePriority;
+}
+
+function tacticalPlanStepPriorityByActionId(
+  mapping: PlanStepMappingResult,
+): ReadonlyMap<string, number> {
+  return new Map(
+    (mapping.actionPriorities ?? []).map((entry) => [
+      entry.actionId,
+      entry.priority,
+    ]),
+  );
+}
+
+function tacticalPlanMappingSelectedEvidence(
+  mapping: PlanStepMappingResult,
+  mappedChoice: SemanticRuntimeChoice,
+): string[] {
+  const priority =
+    tacticalPlanStepPriorityByActionId(mapping).get(
+      mappedChoice.action.actionId,
+    ) ?? 0;
+  return [
+    "tactical_plan_mapping_outcome:plan_mapping_selected",
+    ...(priority > 0
+      ? [
+          "tactical_plan_step_priority_selected:true",
+          `tactical_plan_step_priority:${priority}`,
+        ]
+      : []),
+  ];
 }
 
 function positiveScoreRank(score: number): number {

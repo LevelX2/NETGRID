@@ -96,9 +96,10 @@ export function candidateMatchesStep(
   }
   if (step.kind === "gain_credits") {
     const creditGain = legalActionCreditGainForPlan(input, action, dependencies);
-    if (creditGain > 0) {
-      return candidateTargetMatchesPlan(plan, candidate, action);
-    }
+    return (
+      creditGain > 0 &&
+      candidateTargetMatchesPlan(plan, candidate, action)
+    );
   }
   if (step.kind === "build_rez_reserve") {
     if (legalActionCreditGainForPlan(input, action, dependencies) > 0) {

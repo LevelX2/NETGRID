@@ -53,7 +53,7 @@ export type RunnerScoringSupportCompositionDependencies =
     > &
     Omit<
       RunnerScoreComponentsDependencies,
-      "recoveryCommitment" | "install" | "startRun" | "followup"
+      "creditYield" | "recoveryCommitment" | "install" | "startRun" | "followup"
     > & {
       badPublicityRelevance: Omit<
         Parameters<typeof createRunnerBadPublicityRelevanceContext>[0],
@@ -214,6 +214,11 @@ export function createRunnerScoringSupportComposition(
 
   return createRunnerScoreComponentsContext({
     loanLiabilityAssessment: dependencies.loanLiabilityAssessment,
+    creditYield: {
+      sourceDefinitionIdForAction: dependencies.sourceDefinitionIdForAction,
+      hintForDefinitionId: dependencies.hintForDefinitionId,
+      actionCreditCost: dependencies.actionCreditCost,
+    },
     goalFit: dependencies.goalFit,
     handFundingTarget: dependencies.handFundingTarget,
     recoveryCommitment: {

@@ -10,6 +10,10 @@ import {
   type RunnerCreditNeedScoreDependencies,
 } from "./runner-credit-need-score";
 import {
+  runnerCreditYieldScoreComponent,
+  type RunnerCreditYieldScoreDependencies,
+} from "./runner-credit-yield-score";
+import {
   runnerFollowupScoreComponents,
   type RunnerFollowupScoreDependencies,
 } from "./runner-followup-score";
@@ -43,6 +47,7 @@ export type RunnerScoreComponentsDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => RunnerLoanLiabilityScoreAssessment | undefined;
+  creditYield: RunnerCreditYieldScoreDependencies;
   goalFit: RunnerGoalFitScoreDependencies;
   handFundingTarget: RunnerCreditNeedScoreDependencies["handFundingTarget"];
   recoveryCommitment: RunnerRecoveryCommitmentScoreDependencies;
@@ -117,6 +122,12 @@ export function runnerScoreComponents(
     tagCleanup,
   );
   if (tagCleanupFallback) components.push(tagCleanupFallback);
+  const creditYield = runnerCreditYieldScoreComponent(
+    input,
+    action,
+    dependencies.creditYield,
+  );
+  if (creditYield) components.push(creditYield);
   components.push(
     ...runnerCreditNeedScoreComponents(input, action, {
       handFundingTarget: dependencies.handFundingTarget,

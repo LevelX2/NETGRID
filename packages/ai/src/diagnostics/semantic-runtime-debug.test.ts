@@ -553,6 +553,7 @@ describe("SemanticRuntimeDebug", () => {
         step: selectedPlan.currentStep,
         status: "matched",
         actionCandidateIds: ["candidate-1"],
+        actionPriorities: [{ actionId: "candidate-1", priority: 1 }],
         legalActions: [selectedAction],
         rationale: [
           "older",
@@ -648,6 +649,7 @@ describe("SemanticRuntimeDebug", () => {
         step: selectedPlan.currentStep,
         status: "matched",
         actionCandidateIds: ["draw"],
+        actionPriorities: [{ actionId: "draw", priority: 1 }],
         legalActions: [action("draw", "draw_card")],
         rationale: ["selected_for_coverage"],
       },
@@ -721,6 +723,7 @@ describe("SemanticRuntimeDebug", () => {
         step: plan.currentStep,
         status: "matched",
         actionCandidateIds: ["gain"],
+        actionPriorities: [{ actionId: "gain", priority: 1 }],
         legalActions: [action("gain", "gain_credit")],
         rationale: [],
       },

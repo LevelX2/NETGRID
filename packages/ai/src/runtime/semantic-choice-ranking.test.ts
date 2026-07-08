@@ -51,6 +51,32 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
+  it("uses plan-step priority before generic score for mapped credit actions", () => {
+    const basicCredit = legalAction("basic-credit", "gain_credit");
+    const economyEvent = legalAction("economy-event", "play_event");
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(basicCredit, 1679), choice(economyEvent, 87)],
+      creditBaseMapping([economyEvent, basicCredit], {
+        actionPriorities: [
+          { actionId: "economy-event", priority: 300 },
+          { actionId: "basic-credit", priority: 100 },
+        ],
+      }),
+      choice(basicCredit, 1679),
+    );
+
+    expect(result.outcome).toBe("plan_mapping_selected");
+    expect(result.choice?.action.actionId).toBe("economy-event");
+    expect(result.choice?.evidence).toEqual(
+      expect.arrayContaining([
+        "tactical_plan_mapping_outcome:plan_mapping_selected",
+        "tactical_plan_step_priority_selected:true",
+        "tactical_plan_step_priority:300",
+      ]),
+    );
+  });
+
   it("lets meaningful runs override generic creditbase mapping", () => {
     const gain = legalAction("gain", "gain_credit");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
@@ -449,8 +475,11 @@ function coverageMapping(
 
 function creditBaseMapping(
   legalActions: LegalAction[],
+  overrides: {
+    actionPriorities?: PlanStepMappingResult["actionPriorities"];
+  } = {},
 ): PlanStepMappingResult {
-  return planMapping("runner.build_credit_base", legalActions);
+  return planMapping("runner.build_credit_base", legalActions, overrides);
 }
 
 function centralRunMapping(
@@ -484,6 +513,7 @@ function planMapping(
     evidence?: string[];
     priority?: number;
     stepKind?: PlanStepMappingResult["step"]["kind"];
+    actionPriorities?: PlanStepMappingResult["actionPriorities"];
   } = {},
 ): PlanStepMappingResult {
   const stepKind = overrides.stepKind ?? "gain_credits";
@@ -518,6 +548,7 @@ function planMapping(
     },
     legalActions,
     actionCandidateIds: legalActions.map((action) => action.actionId),
+    actionPriorities: overrides.actionPriorities ?? [],
     rationale: [],
   } as unknown as PlanStepMappingResult;
 }
