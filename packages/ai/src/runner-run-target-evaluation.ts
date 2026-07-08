@@ -403,6 +403,7 @@ function evaluateRunnerRunTarget(
     accessTargetKind === "remote" && remoteHasScoreThreat(accessServer);
   const accessPayoff = accessPayoffWithInstalledRunPayoff({
     basePayoff: payoff.accessPayoff,
+    knownAccessState: payoff.knownAccessState,
     installedRunPayoff: combinedRunPayoff,
     scoreThreat,
   });
@@ -850,9 +851,13 @@ function uniqueStrings(values: readonly string[]): string[] {
 
 function accessPayoffWithInstalledRunPayoff(params: {
   basePayoff: RunnerAccessPayoff;
+  knownAccessState: RunnerKnownAccessState;
   installedRunPayoff: RunnerInstalledRunPayoff;
   scoreThreat: boolean;
 }): RunnerAccessPayoff {
+  if (params.knownAccessState === "known_no_current_payoff") {
+    return params.basePayoff;
+  }
   if (params.scoreThreat && params.basePayoff === "unknown") {
     return "score_threat";
   }

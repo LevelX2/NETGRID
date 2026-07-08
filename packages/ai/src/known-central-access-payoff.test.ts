@@ -181,6 +181,67 @@ describe("known central access payoff HQ knownness", () => {
     );
   });
 
+  it("does not keep trashed HQ assets or upgrades as affordable trash payoff", () => {
+    const hqLook = publicEvent("evt_hq_look", "resolve_choice", 1, {
+      actor: "runner",
+      actionType: "resolve_choice",
+      hiddenZoneAction: "p3_33_private_look",
+      privateLookZone: "hq",
+      privateLookCount: 3,
+      knownHqDefinitionIds: [
+        "onr_proteus_062_lesley-major",
+        "onr_v1_297_overtime-incentives",
+        "onr_v1_340_setup",
+      ],
+    });
+    const trashLesley = publicEvent("evt_trash_lesley", "trash_accessed_card", 2, {
+      actor: "runner",
+      actionType: "trash_accessed_card",
+      serverLabel: "HQ",
+      cardDefinitionId: "onr_proteus_062_lesley-major",
+      title: "Lesley Major",
+    });
+    const trashSetup = publicEvent("evt_trash_setup", "trash_accessed_card", 3, {
+      actor: "runner",
+      actionType: "trash_accessed_card",
+      serverLabel: "HQ",
+      cardDefinitionId: "onr_v1_340_setup",
+      title: "Setup!",
+    });
+    const input = aiInput({
+      credits: 6,
+      handCount: 1,
+      publicEvents: [hqLook, trashLesley, trashSetup],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+      ],
+      legalActions: [runAction("run-hq", "hq")],
+    });
+
+    const payoff = evaluateKnownCentralAccessPayoff(input, "hq");
+
+    expect(payoff).toMatchObject({
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+    });
+    expect(payoff.reasons).toEqual(
+      expect.arrayContaining([
+        "known_hq_hand_low_value",
+        "central_known_no_current_payoff",
+      ]),
+    );
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_hand_known_count:1",
+        "hq_hand_count:1",
+        "hq_known_trash_payoff_count:0",
+        "central_memory_payoff:known_low_value",
+      ]),
+    );
+    expect(payoff.evidence).not.toContain("central_memory_payoff:trash_affordable");
+  });
+
   it("suppresses a repeated R&D run after the Runner declined the known top trash", () => {
     const rdAccess = publicEvent("evt_rd_bbs_access", "access_card", 1, {
       actor: "runner",

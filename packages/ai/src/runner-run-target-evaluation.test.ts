@@ -1016,6 +1016,46 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("does not let HQ multiaccess upgrade a confirmed no-payoff HQ hand", () => {
+    const [evaluation] = evaluateRunnerRunTargets({
+      input: aiInput({
+        credits: 6,
+        servers: [server("hq")],
+        legalActions: [runAction("run-hq", "hq")],
+        rig: [
+          visibleCard("hq-interface", {
+            definitionId: "onr_v1_129_hq-interface",
+            title: "HQ Interface",
+            type: "hardware",
+          }),
+        ],
+      }),
+      beliefState: beliefWithKnownHq(["onr_v1_297_overtime-incentives"], {
+        handCount: 1,
+        unknownRestCount: 0,
+      }),
+    });
+    if (!evaluation) throw new Error("Expected HQ evaluation");
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "hq",
+      accessPayoff: "known_low_value",
+      knownAccessState: "known_no_current_payoff",
+      multiaccessAvailable: true,
+      recommendation: "do_not_run_now",
+    });
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "access_payoff:known_low_value",
+        "known_access_state:known_no_current_payoff",
+        "multiaccess_available:true",
+        "installed_run_payoff:hq:multiaccess",
+        "central_memory_payoff:known_low_value",
+      ]),
+    );
+    expect(evaluation.evidence).not.toContain("access_payoff:access_bonus");
+  });
+
   it("projects Wilson's constrained run ability into HQ knownness evaluation", () => {
     const wilson = wilsonRunAbilityAction("wilson-hq-run", "hq");
     const input = aiInput({

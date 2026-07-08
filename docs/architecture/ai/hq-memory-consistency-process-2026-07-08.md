@@ -1,6 +1,6 @@
 # HQ-Memory-Konsistenz Prozess 2026-07-08
 
-Status: in Arbeit
+Status: abgeschlossen
 
 Quelle/Vorgabe: Analyse des beendeten Matches `match_427831dbf32a303c` nach Playtest-Beobachtung zu falschem HQ-Inhalt, wiederholten HQ-Runs und bereits behobenem Post-ICE-Access-Verhalten.
 
@@ -95,3 +95,7 @@ Der Hauptworkspace `C:\Projekte\NETGRID` wird nur für den finalen lokalen Merge
 - Fokussierte Tests und AI-Typecheck laufen grün.
 - Arbeitsbranch ist lokal nach `main` gemerged.
 - Worktree ist nach erfolgreichem Merge entfernt.
+
+## Abschlussstand
+
+Die Pakete 1 bis 3 wurden umgesetzt. Die technische Finaldokumentation liegt in `docs/reviews/ai/hq-memory-consistency-final-2026-07-08.md`.
