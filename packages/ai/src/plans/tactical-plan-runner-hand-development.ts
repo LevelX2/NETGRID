@@ -6,6 +6,10 @@ import {
   runnerHandDevelopmentOverflowBonus,
 } from "./runner-draw-overflow";
 import {
+  legalActionCreditGainForPlan,
+  type TacticalPlanCreditValueDependencies,
+} from "./tactical-plan-action-values";
+import {
   createPlanStep,
   createTacticalPlan,
 } from "./tactical-plan-builders";
@@ -133,6 +137,7 @@ export function runnerHandDevelopmentPlans(
   context: TacticalPlanBuildContext,
   stateVersion: number,
   runnerGoalEvidence: readonly string[],
+  dependencies: TacticalPlanCreditValueDependencies,
 ): TacticalPlan[] {
   const handEvaluations = context.runnerHandDevelopmentEvaluations ?? [];
   const usefulEvaluations = handEvaluations
@@ -141,12 +146,18 @@ export function runnerHandDevelopmentPlans(
       (evaluation) =>
         !runnerHandDevelopmentOwnedByBreakerCoverage(context, evaluation),
     );
-  const fundableEvaluations = handEvaluations
-    .filter(usefulFundableRunnerHandDevelopment)
-    .filter(
-      (evaluation) =>
-        !runnerHandDevelopmentOwnedByBreakerCoverage(context, evaluation),
-    );
+  const canFundHandCardsNow = runnerHandFundingActionAvailable(
+    context,
+    dependencies,
+  );
+  const fundableEvaluations = canFundHandCardsNow
+    ? handEvaluations
+        .filter(usefulFundableRunnerHandDevelopment)
+        .filter(
+          (evaluation) =>
+            !runnerHandDevelopmentOwnedByBreakerCoverage(context, evaluation),
+        )
+    : [];
   const bestEvaluation = runnerBestHandCardEvaluation(context, usefulEvaluations);
   const bestPriority = bestEvaluation
     ? runnerPlayBestHandCardPlanPriority(context, bestEvaluation)
@@ -376,6 +387,16 @@ function runnerHandFundingPlan(params: {
     runnerGoalEvidence: params.runnerGoalEvidence,
     stateVersion: params.stateVersion,
   });
+}
+
+function runnerHandFundingActionAvailable(
+  context: TacticalPlanBuildContext,
+  dependencies: TacticalPlanCreditValueDependencies,
+): boolean {
+  return context.input.legalActions.some(
+    (action) =>
+      legalActionCreditGainForPlan(context.input, action, dependencies) > 0,
+  );
 }
 
 function runnerHandDevelopmentPlanEvidence(

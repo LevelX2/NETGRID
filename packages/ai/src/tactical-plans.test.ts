@@ -2212,6 +2212,57 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("does not offer hand-card funding plans when no credit action is currently legal", () => {
+    const endTurn = legalAction(
+      "end-turn",
+      "runner",
+      "end_turn",
+      {},
+      { source: "game_rule" },
+    );
+    const input = aiInput("runner", [endTurn]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 0;
+    input.playerView.own.gripOrHq = [
+      visibleCard("expensive-economy", "runner", "resource", {
+        installCost: 4,
+      }),
+    ];
+
+    const plans = buildTacticalPlans({
+      input,
+      runnerHandDevelopmentEvaluations: [
+        runnerHandDevelopmentEvaluation({
+          cardInstanceId: "expensive-economy",
+          availability: "missing_credits",
+          developmentRole: "economy_engine",
+          strategicFit: "blocked",
+          currentNeed: "useful_now",
+          priority: 650,
+          fundingNeed: {
+            installOrPlayCost: 4,
+            missingCredits: 3,
+            reason: "cannot_pay",
+          },
+          deferReason: "missing_credits",
+        }),
+      ],
+      runnerEconomyPosture: runnerEconomyPosture({
+        currentCredits: 1,
+        usefulHandCardsBlockedByCredits: 1,
+        recommendation: "fund_useful_hand_card",
+        economyPriority: "high",
+      }),
+    });
+
+    expect(plans.map((plan) => plan.planId)).not.toContain(
+      "runner.develop_hand_card:expensive-economy",
+    );
+    expect(plans.map((plan) => plan.currentStep.kind)).not.toContain(
+      "gain_credits",
+    );
+  });
+
   it("treats generic credit and draw setup as support when open R&D is available", () => {
     const rdRun = legalAction("run-rd", "runner", "start_run", {
       serverId: "rd",

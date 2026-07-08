@@ -654,7 +654,12 @@ export function buildRunnerTacticalPlans(
     ),
   );
   plans.push(
-    ...runnerHandDevelopmentPlans(context, stateVersion, runnerGoalEvidence),
+    ...runnerHandDevelopmentPlans(
+      context,
+      stateVersion,
+      runnerGoalEvidence,
+      dependencies,
+    ),
   );
   plans.push(
     ...runnerCreditBasePlans(
