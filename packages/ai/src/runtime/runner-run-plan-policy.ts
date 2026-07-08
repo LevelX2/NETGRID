@@ -43,7 +43,9 @@ function runnerRunPlanAccessChoice(params: {
   choices: readonly SemanticRuntimeChoice[];
 }): SemanticRuntimeChoice | undefined {
   const accessChoices = params.choices.filter(
-    (choice) => !choice.exclusion && runnerRunPlanAccessActionTypes.has(choice.action.type),
+    (choice) =>
+      !choice.exclusion &&
+      runnerRunPlanAccessActionTypes.has(choice.action.type),
   );
   if (accessChoices.length === 0) return undefined;
   const scoreSelected = runnerRunPlanBestAccessChoice(accessChoices);
@@ -112,18 +114,21 @@ function runnerRunPlanAccessChoice(params: {
     trashChoice && trashPolicy === "must_trash_target"
       ? trashChoice
       : declineChoice && trashBreaksReserve
-          ? declineChoice
-          : declineLowValueChoice ?? scoreSelected;
+        ? declineChoice
+        : (declineLowValueChoice ?? scoreSelected);
   if (!selected) return undefined;
   return annotateRunnerRunPlanChoice({
     choice: selected,
     plan: params.plan,
-    explanation: "RunnerRunPlan entscheidet den Zugriff anhand AccessIntent und Reserve.",
+    explanation:
+      "RunnerRunPlan entscheidet den Zugriff anhand AccessIntent und Reserve.",
     extraEvidence: [
       `runner_run_plan_access_selected:${selected.action.type}`,
       `runner_run_plan_access_trash_policy:${trashPolicy ?? "none"}`,
       `runner_run_plan_access_reserve:${reserveTarget}`,
-      ...(trashBreaksReserve ? ["runner_run_plan_access_trash_breaks_reserve:true"] : []),
+      ...(trashBreaksReserve
+        ? ["runner_run_plan_access_trash_breaks_reserve:true"]
+        : []),
       ...(declineLowValueYieldedToScore
         ? ["runner_run_plan_access_decline_low_value_yielded_to_score:true"]
         : []),
@@ -172,7 +177,8 @@ function runnerRunPlanEncounterChoice(params: {
   const sequenceActionId = sequence?.steps[0]?.actionId;
   if (sequenceActionId) {
     const sequenceChoice = params.choices.find(
-      (choice) => !choice.exclusion && choice.action.actionId === sequenceActionId,
+      (choice) =>
+        !choice.exclusion && choice.action.actionId === sequenceActionId,
     );
     if (sequenceChoice) {
       return annotateRunnerRunPlanChoice({
@@ -241,12 +247,15 @@ function annotateRunnerRunPlanChoice(params: {
       `runner_run_plan_revalidation:${plan.revalidation.status}`,
       `runner_run_plan_budget_available:${plan.budget.availableCredits}`,
       `runner_run_plan_budget_reserved:${runnerRunPlanAccessReserveTarget(plan)}`,
+      ...runnerRunPlanSpecialBudgetEvidence(plan),
       `runner_run_plan_path_quote_status:${plan.pathQuote.quoteStatus}`,
       `runner_run_plan_path_quote_total_known_cost:${plan.pathQuote.totalKnownCost}`,
       `runner_run_plan_path_quote_expected_remaining:${plan.pathQuote.expectedRemainingCredits}`,
       `runner_run_plan_path_quote_can_reach:${plan.pathQuote.canReachAccess}`,
       ...(plan.pathQuote.cannotReachReason
-        ? [`runner_run_plan_path_quote_cannot_reach:${plan.pathQuote.cannotReachReason}`]
+        ? [
+            `runner_run_plan_path_quote_cannot_reach:${plan.pathQuote.cannotReachReason}`,
+          ]
         : []),
       ...(plan.currentObligation
         ? [`runner_run_plan_current_obligation:${plan.currentObligation.kind}`]
@@ -254,6 +263,32 @@ function annotateRunnerRunPlanChoice(params: {
       ...params.extraEvidence,
     ],
   };
+}
+
+function runnerRunPlanSpecialBudgetEvidence(plan: RunnerRunPlan): string[] {
+  return [
+    plan.budget.runOnlyCredits > 0
+      ? `runner_run_plan_budget_run_only:${plan.budget.runOnlyCredits}`
+      : undefined,
+    plan.budget.recurringBreakerCredits > 0
+      ? `runner_run_plan_budget_recurring_breaker:${plan.budget.recurringBreakerCredits}`
+      : undefined,
+    plan.budget.recurringKillerCredits > 0
+      ? `runner_run_plan_budget_recurring_killer:${plan.budget.recurringKillerCredits}`
+      : undefined,
+    plan.budget.recurringLinkCredits > 0
+      ? `runner_run_plan_budget_recurring_link:${plan.budget.recurringLinkCredits}`
+      : undefined,
+    plan.budget.stealthCredits > 0
+      ? `runner_run_plan_budget_stealth:${plan.budget.stealthCredits}`
+      : undefined,
+    plan.budget.nonNoisyBreakerCredits > 0
+      ? `runner_run_plan_budget_non_noisy_breaker:${plan.budget.nonNoisyBreakerCredits}`
+      : undefined,
+    plan.budget.maxSpendThisRun !== undefined
+      ? `runner_run_plan_budget_max_spend:${plan.budget.maxSpendThisRun}`
+      : undefined,
+  ].filter((entry): entry is string => entry !== undefined);
 }
 
 function encounterContinueWillEndRun(input: AiDecisionInput): boolean {

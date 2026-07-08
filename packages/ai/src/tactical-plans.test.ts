@@ -108,7 +108,9 @@ describe("tactical plan model", () => {
       stateVersion: 1,
     });
 
-    expect(rankTacticalPlans([blocked, active]).map((plan) => plan.planId)).toEqual([
+    expect(
+      rankTacticalPlans([blocked, active]).map((plan) => plan.planId),
+    ).toEqual([
       "runner.opportunistic_central_run:hq",
       "runner.contest_remote:remote_1",
     ]);
@@ -148,11 +150,17 @@ describe("tactical plan model", () => {
       stateVersion: 2,
     });
 
-    expect(rankTacticalPlans([freshActive, progressing]).map((plan) => plan.planId)).toEqual([
+    expect(
+      rankTacticalPlans([freshActive, progressing]).map((plan) => plan.planId),
+    ).toEqual([
       "runner.contest_remote:remote_2",
       "runner.obtain_breaker_coverage:rd",
     ]);
-    expect(rankTacticalPlans([freshActive, strongerProgressing]).map((plan) => plan.planId)).toEqual([
+    expect(
+      rankTacticalPlans([freshActive, strongerProgressing]).map(
+        (plan) => plan.planId,
+      ),
+    ).toEqual([
       "runner.obtain_breaker_coverage:rd",
       "runner.contest_remote:remote_2",
     ]);
@@ -232,10 +240,16 @@ describe("tactical plan model", () => {
   });
 
   it("maps search steps from candidate program-search semantics without label hints", () => {
-    const action = legalAction("use-smc", "runner", "trigger_ability", {}, {
-      source: "smc-1",
-      label: "Use ability",
-    });
+    const action = legalAction(
+      "use-smc",
+      "runner",
+      "trigger_ability",
+      {},
+      {
+        source: "smc-1",
+        label: "Use ability",
+      },
+    );
     const plan = createTacticalPlan({
       planId: "runner.obtain_breaker_coverage:remote_1",
       side: "runner",
@@ -278,10 +292,16 @@ describe("tactical plan model", () => {
   });
 
   it("rejects pure economy events as breaker-coverage search matches", () => {
-    const action = legalAction("play-livewire", "runner", "play_event", {}, {
-      source: "onr_v1_097_livewires-contacts",
-      label: "Livewire's Contacts",
-    });
+    const action = legalAction(
+      "play-livewire",
+      "runner",
+      "play_event",
+      {},
+      {
+        source: "onr_v1_097_livewires-contacts",
+        label: "Livewire's Contacts",
+      },
+    );
     const plan = coverageSearchPlan("breaker_wall");
     const candidate: ActionSemanticCandidate = {
       ...candidateForAction(action),
@@ -316,10 +336,16 @@ describe("tactical plan model", () => {
   });
 
   it("still maps Livewire's Contacts to credit blockers outside coverage search", () => {
-    const action = legalAction("play-livewire", "runner", "play_event", {}, {
-      source: "onr_v1_097_livewires-contacts",
-      label: "Livewire's Contacts",
-    });
+    const action = legalAction(
+      "play-livewire",
+      "runner",
+      "play_event",
+      {},
+      {
+        source: "onr_v1_097_livewires-contacts",
+        label: "Livewire's Contacts",
+      },
+    );
     const plan = createTacticalPlan({
       planId: "runner.build_credit_base",
       side: "runner",
@@ -527,10 +553,16 @@ describe("tactical plan model", () => {
   });
 
   it("maps bank steps from candidate bank semantics without label hints", () => {
-    const action = legalAction("use-bank", "runner", "trigger_ability", {}, {
-      source: "broker-1",
-      label: "Use ability",
-    });
+    const action = legalAction(
+      "use-bank",
+      "runner",
+      "trigger_ability",
+      {},
+      {
+        source: "broker-1",
+        label: "Use ability",
+      },
+    );
     const plan = createTacticalPlan({
       planId: "runner.cash_out_credit_bank",
       side: "runner",
@@ -578,12 +610,16 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("simple_barrier_ice", "corp", "ice", {
-          rezzed: true,
-          subtypes: ["Wall"],
-        }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("simple_barrier_ice", "corp", "ice", {
+            rezzed: true,
+            subtypes: ["Wall"],
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
 
     const plans = buildTacticalPlans({ input });
@@ -647,10 +683,16 @@ describe("tactical plan model", () => {
       legalAction("run-remote", "runner", "start_run", {
         serverId: "remote_1",
       }),
-      legalAction("smc-search", "runner", "trigger_ability", {}, {
-        source: "onr_v1_059_self-modifying-code",
-        label: "Self-Modifying Code: search your stack for a program",
-      }),
+      legalAction(
+        "smc-search",
+        "runner",
+        "trigger_ability",
+        {},
+        {
+          source: "onr_v1_059_self-modifying-code",
+          label: "Self-Modifying Code: search your stack for a program",
+        },
+      ),
     ]);
     input.playerView.own.rig = [
       visibleCard("onr_v1_059_self-modifying-code", "runner", "program"),
@@ -659,12 +701,16 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("simple_barrier_ice", "corp", "ice", {
-          rezzed: true,
-          subtypes: ["Wall"],
-        }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("simple_barrier_ice", "corp", "ice", {
+            rezzed: true,
+            subtypes: ["Wall"],
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
     const deckCapabilities = buildDeckCapabilityProfile({
       side: "runner",
@@ -686,9 +732,15 @@ describe("tactical plan model", () => {
     );
 
     expect(coveragePlan?.evidence).toEqual(
-      expect.arrayContaining(["deck_capability:breaker_wall=in_deck/searchable"]),
+      expect.arrayContaining([
+        "deck_capability:breaker_wall=in_deck/searchable",
+      ]),
     );
-    expect(coveragePlan?.blockers.some((blocker) => blocker.kind === "coverage_not_in_deck")).toBe(false);
+    expect(
+      coveragePlan?.blockers.some(
+        (blocker) => blocker.kind === "coverage_not_in_deck",
+      ),
+    ).toBe(false);
   });
 
   it("adds granular blockers when deck capabilities have no matching coverage", () => {
@@ -703,12 +755,16 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("simple_barrier_ice", "corp", "ice", {
-          rezzed: true,
-          subtypes: ["Wall"],
-        }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("simple_barrier_ice", "corp", "ice", {
+            rezzed: true,
+            subtypes: ["Wall"],
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
     const deckCapabilities = buildDeckCapabilityProfile({
       side: "runner",
@@ -755,12 +811,16 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("simple_barrier_ice", "corp", "ice", {
-          rezzed: true,
-          subtypes: ["Wall"],
-        }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("simple_barrier_ice", "corp", "ice", {
+            rezzed: true,
+            subtypes: ["Wall"],
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
     const deckCapabilities = buildDeckCapabilityProfile({
       side: "runner",
@@ -789,14 +849,26 @@ describe("tactical plan model", () => {
       legalAction("run-remote", "runner", "start_run", {
         serverId: "remote_1",
       }),
-      legalAction("mantis", "runner", "play_event", {}, {
-        source: "mantis-card",
-        label: "Mantis, Fixer-at-Large spielen",
-      }),
-      legalAction("bodyweight", "runner", "play_event", {}, {
-        source: "bodyweight-card",
-        label: "Bodyweight Synthetic Blood spielen",
-      }),
+      legalAction(
+        "mantis",
+        "runner",
+        "play_event",
+        {},
+        {
+          source: "mantis-card",
+          label: "Mantis, Fixer-at-Large spielen",
+        },
+      ),
+      legalAction(
+        "bodyweight",
+        "runner",
+        "play_event",
+        {},
+        {
+          source: "bodyweight-card",
+          label: "Bodyweight Synthetic Blood spielen",
+        },
+      ),
       legalAction("draw", "runner", "draw_card"),
     ]);
     input.playerView.own.gripOrHq = [
@@ -839,10 +911,16 @@ describe("tactical plan model", () => {
       legalAction("run-remote", "runner", "start_run", {
         serverId: "remote_1",
       }),
-      legalAction("install-short-circuit", "runner", "install_card", {}, {
-        source: "short-circuit-card",
-        label: "The Short Circuit installieren",
-      }),
+      legalAction(
+        "install-short-circuit",
+        "runner",
+        "install_card",
+        {},
+        {
+          source: "short-circuit-card",
+          label: "The Short Circuit installieren",
+        },
+      ),
       legalAction("draw", "runner", "draw_card"),
     ]);
     input.playerView.own.gripOrHq = [
@@ -907,11 +985,16 @@ describe("tactical plan model", () => {
       }),
     ];
     input.playerView.publicEvents = [
-      publicEvent("previous-short-circuit-search", 74, "activated_card_ability", {
-        actor: "runner",
-        actionType: "activated_card_ability",
-        hiddenZoneAction: "p3_37_search_stack_to_grip",
-      }),
+      publicEvent(
+        "previous-short-circuit-search",
+        74,
+        "activated_card_ability",
+        {
+          actor: "runner",
+          actionType: "activated_card_ability",
+          hiddenZoneAction: "p3_37_search_stack_to_grip",
+        },
+      ),
     ];
     input.eventTail = input.playerView.publicEvents;
 
@@ -946,10 +1029,16 @@ describe("tactical plan model", () => {
       legalAction("run-remote", "runner", "start_run", {
         serverId: "remote_1",
       }),
-      legalAction("bodyweight", "runner", "play_event", {}, {
-        source: "bodyweight-card",
-        label: "Bodyweight Synthetic Blood spielen",
-      }),
+      legalAction(
+        "bodyweight",
+        "runner",
+        "play_event",
+        {},
+        {
+          source: "bodyweight-card",
+          label: "Bodyweight Synthetic Blood spielen",
+        },
+      ),
       legalAction("draw", "runner", "draw_card"),
     ]);
     input.playerView.own.gripOrHq = [
@@ -1029,12 +1118,16 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("simple_barrier_ice", "corp", "ice", {
-          rezzed: true,
-          subtypes: ["Wall"],
-        }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("simple_barrier_ice", "corp", "ice", {
+            rezzed: true,
+            subtypes: ["Wall"],
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
     const deckCapabilities = buildDeckCapabilityProfile({
       side: "runner",
@@ -1329,11 +1422,15 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_2", [], [
-        visibleCard("spent-event", "corp", "event", {
-          definitionId: "spent-event",
-        }),
-      ]),
+      server(
+        "remote_2",
+        [],
+        [
+          visibleCard("spent-event", "corp", "event", {
+            definitionId: "spent-event",
+          }),
+        ],
+      ),
     ];
 
     const result = evaluateTacticalPlans({
@@ -1412,12 +1509,16 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [
-        visibleCard("remote-root", "corp", "asset", {
-          definitionId: "onr_v1_317_data-masons",
-          trashCost: 1,
-        }),
-      ]),
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("remote-root", "corp", "asset", {
+            definitionId: "onr_v1_317_data-masons",
+            trashCost: 1,
+          }),
+        ],
+      ),
     ];
     const runnerRunTargetEvaluations = evaluateRunnerRunTargets({ input });
 
@@ -1467,11 +1568,15 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_2", [], [
-        visibleCard("onr_v1_317_data-masons", "corp", "asset", {
-          trashCost: 1,
-        }),
-      ]),
+      server(
+        "remote_2",
+        [],
+        [
+          visibleCard("onr_v1_317_data-masons", "corp", "asset", {
+            trashCost: 1,
+          }),
+        ],
+      ),
     ];
     const runnerRunTargetEvaluations: RunnerRunTargetEvaluation[] = [
       {
@@ -1565,18 +1670,22 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_2", [], [
-        {
-          instanceId: "advanced-remote-root",
-          definitionId: "advanced-remote-root",
-          title: "Advanced remote root",
-          owner: "corp",
-          controller: "corp",
-          type: "agenda",
-          known: false,
-          advancementCounters: 2,
-        } as VisibleCard,
-      ]),
+      server(
+        "remote_2",
+        [],
+        [
+          {
+            instanceId: "advanced-remote-root",
+            definitionId: "advanced-remote-root",
+            title: "Advanced remote root",
+            owner: "corp",
+            controller: "corp",
+            type: "agenda",
+            known: false,
+            advancementCounters: 2,
+          } as VisibleCard,
+        ],
+      ),
     ];
 
     const plans = buildTacticalPlans({
@@ -1589,7 +1698,10 @@ describe("tactical plan model", () => {
           urgency: "high",
           targetServerId: "remote_2",
           source: "neutral",
-          evidence: ["neutral_goal:remote_contest", "run_target:remote_score_threat"],
+          evidence: [
+            "neutral_goal:remote_contest",
+            "run_target:remote_score_threat",
+          ],
         },
       ],
     });
@@ -1636,10 +1748,10 @@ describe("tactical plan model", () => {
         counterDisplays: [
           {
             id: "broker-bank",
-            amount: 3,
+            amount: 6,
             displayKind: "stored_credits",
-            label: "3",
-            ariaLabel: "3 gespeicherte Credits",
+            label: "6",
+            ariaLabel: "6 gespeicherte Credits",
             usageHint: "spendable",
           },
         ],
@@ -1661,20 +1773,97 @@ describe("tactical plan model", () => {
       (plan) => plan.type === "runner.cash_out_credit_bank",
     );
 
-    expect(cashoutPlan?.currentStep.requiredCapabilities[0]?.kind).toBe("bank_payout");
+    expect(cashoutPlan?.currentStep.requiredCapabilities[0]?.kind).toBe(
+      "bank_payout",
+    );
     expect(cashoutPlan?.evidence).toEqual(
       expect.arrayContaining([
         "bank_tool_count:1",
-        "bank_estimated_payout:3",
+        "bank_estimated_payout:6",
+        "runner_bank_cashout_reason:urgent_credit_floor",
       ]),
     );
   });
 
+  it("keeps building runner credit banks below the urgent cashout floor", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "broker-build",
+        "runner",
+        "trigger_ability",
+        { cardImplementationAddsHostedCredits: true },
+        {
+          source: "onr_v1_154_broker",
+          label: "Use ability",
+        },
+      ),
+      legalAction(
+        "broker-cash",
+        "runner",
+        "trigger_ability",
+        { cardImplementationTakesHostedCredits: true },
+        {
+          source: "onr_v1_154_broker",
+          label: "Use ability",
+        },
+      ),
+    ]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_154_broker", "runner", "resource", {
+        counterDisplays: [
+          {
+            id: "broker-bank",
+            amount: 3,
+            displayKind: "stored_credits",
+            label: "3",
+            ariaLabel: "3 gespeicherte Credits",
+            usageHint: "spendable",
+          },
+        ],
+      }),
+    ];
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+      deckSnapshot: {
+        deckSnapshotId: "tactical-plan-runner-bank-build-floor-test",
+        side: "runner",
+        cards: [{ cardId: "onr_v1_154_broker", quantity: 1 }],
+      },
+    });
+
+    const plans = buildTacticalPlans({ input, deckCapabilities });
+    const buildPlan = plans.find(
+      (plan) => plan.type === "runner.build_credit_bank",
+    );
+
+    expect(buildPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "bank_build_action:broker-build",
+        "runner_bank_current_stored:3",
+        "runner_bank_build_target:12",
+        "runner_bank_cashout_minimum:6",
+        "runner_bank_cashout_deferred_below_minimum:true",
+      ]),
+    );
+    expect(
+      plans.some((plan) => plan.type === "runner.cash_out_credit_bank"),
+    ).toBe(false);
+  });
+
   it("labels hand-development plans with the concrete own hand card title", () => {
     const input = aiInput("runner", [
-      legalAction("install-access-card", "runner", "install_card", {}, {
-        source: "access-card",
-      }),
+      legalAction(
+        "install-access-card",
+        "runner",
+        "install_card",
+        {},
+        {
+          source: "access-card",
+        },
+      ),
     ]);
     const handDevelopmentEvaluations: RunnerHandDevelopmentEvaluation[] = [
       {
@@ -1745,7 +1934,10 @@ describe("tactical plan model", () => {
     });
 
     expect(
-      plans.some((plan) => plan.planId === "runner.develop_hand_card:second-risky-breaker"),
+      plans.some(
+        (plan) =>
+          plan.planId === "runner.develop_hand_card:second-risky-breaker",
+      ),
     ).toBe(false);
   });
 
@@ -1768,22 +1960,26 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("simple_barrier_ice", "corp", "ice", {
-          rezzed: true,
-          subtypes: ["Wall"],
-          effectiveRunQuote: {
-            iceInstanceId: "simple_barrier_ice",
-            iceDefinitionId: "simple_barrier_ice",
-            effectiveStrength: 1,
-            subroutines: [{ id: "etr", type: "end_the_run" }],
-          },
-        }),
-      ], [
-        visibleCard("simple_agenda", "corp", "agenda", {
-          advancementCounters: 1,
-        }),
-      ]),
+      server(
+        "remote_1",
+        [
+          visibleCard("simple_barrier_ice", "corp", "ice", {
+            rezzed: true,
+            subtypes: ["Wall"],
+            effectiveRunQuote: {
+              iceInstanceId: "simple_barrier_ice",
+              iceDefinitionId: "simple_barrier_ice",
+              effectiveStrength: 1,
+              subroutines: [{ id: "etr", type: "end_the_run" }],
+            },
+          }),
+        ],
+        [
+          visibleCard("simple_agenda", "corp", "agenda", {
+            advancementCounters: 1,
+          }),
+        ],
+      ),
     ];
     const handDevelopmentEvaluations = [
       runnerHandDevelopmentEvaluation({
@@ -1843,9 +2039,15 @@ describe("tactical plan model", () => {
     const drawTwo = legalAction("draw-two", "runner", "draw_card", {
       amount: 2,
     });
-    const install = legalAction("install-access-card", "runner", "install_card", {}, {
-      source: "access-card",
-    });
+    const install = legalAction(
+      "install-access-card",
+      "runner",
+      "install_card",
+      {},
+      {
+        source: "access-card",
+      },
+    );
     const input = aiInput("runner", [rdRun, drawTwo, install]);
     input.playerView.own.gripOrHq = [
       visibleCard("access-card", "runner", "hardware"),
@@ -1891,7 +2093,9 @@ describe("tactical plan model", () => {
     );
 
     expect(result.selectedPlan?.type).toBe("runner.develop_hand_card");
-    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(install.actionId);
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
+      install.actionId,
+    );
     expect(drawPlan?.evidence).toEqual(
       expect.arrayContaining([
         "hand_limit_pressure:moderate",
@@ -1910,7 +2114,9 @@ describe("tactical plan model", () => {
     const input = aiInput("runner", [rdRun, draw, gain]);
     input.playerView.own.credits = 1;
     input.playerView.own.gripOrHq = [
-      visibleCard("expensive-economy", "runner", "resource", { installCost: 4 }),
+      visibleCard("expensive-economy", "runner", "resource", {
+        installCost: 4,
+      }),
       visibleCard("filler-1", "runner", "event"),
       visibleCard("filler-2", "runner", "event"),
       visibleCard("filler-3", "runner", "event"),
@@ -1963,7 +2169,9 @@ describe("tactical plan model", () => {
     });
 
     expect(result.selectedPlan?.type).toBe("runner.build_credit_base");
-    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(gain.actionId);
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
+      gain.actionId,
+    );
     expect(input.legalActions.map((action) => action.actionId)).toContain(
       result.selectedMapping?.legalActions[0]?.actionId,
     );
@@ -2078,25 +2286,37 @@ describe("tactical plan model", () => {
     });
 
     expect(result.selectedPlan?.type).toBe("runner.build_credit_base");
-    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(gain.actionId);
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
+      gain.actionId,
+    );
   });
 
   it("blocks corp score windows that are not protected yet", () => {
     const input = aiInput("corp", [
-      legalAction("advance-agenda", "corp", "advance_card", {}, {
-        source: "agenda-1",
-      }),
+      legalAction(
+        "advance-agenda",
+        "corp",
+        "advance_card",
+        {},
+        {
+          source: "agenda-1",
+        },
+      ),
     ]);
     input.playerView.servers = [
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [], [
-        visibleCard("agenda-1", "corp", "agenda", {
-          advancementCounters: 0,
-          advancementRequirement: 3,
-        }),
-      ]),
+      server(
+        "remote_1",
+        [],
+        [
+          visibleCard("agenda-1", "corp", "agenda", {
+            advancementCounters: 0,
+            advancementRequirement: 3,
+          }),
+        ],
+      ),
     ];
 
     const plans = buildTacticalPlans({ input });
@@ -2122,9 +2342,15 @@ describe("tactical plan model", () => {
 
   it("builds a rez reserve before advancing in a protected low-credit remote", () => {
     const input = aiInput("corp", [
-      legalAction("advance-agenda", "corp", "advance_card", {}, {
-        source: "agenda-1",
-      }),
+      legalAction(
+        "advance-agenda",
+        "corp",
+        "advance_card",
+        {},
+        {
+          source: "agenda-1",
+        },
+      ),
       legalAction("gain", "corp", "gain_credit"),
     ]);
     input.playerView.own.credits = 2;
@@ -2132,16 +2358,20 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("remote-ice", "corp", "ice", {
-          rezzed: false,
-        }),
-      ], [
-        visibleCard("agenda-1", "corp", "agenda", {
-          advancementCounters: 0,
-          advancementRequirement: 3,
-        }),
-      ]),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-ice", "corp", "ice", {
+            rezzed: false,
+          }),
+        ],
+        [
+          visibleCard("agenda-1", "corp", "agenda", {
+            advancementCounters: 0,
+            advancementRequirement: 3,
+          }),
+        ],
+      ),
     ];
 
     const plans = buildTacticalPlans({ input });
@@ -2177,16 +2407,20 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
-          rezzed: true,
-        }),
-      ], [
-        visibleCard("agenda-1", "corp", "agenda", {
-          advancementCounters: 0,
-          advancementRequirement: 3,
-        }),
-      ]),
+      server(
+        "remote_1",
+        [
+          visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+            rezzed: true,
+          }),
+        ],
+        [
+          visibleCard("agenda-1", "corp", "agenda", {
+            advancementCounters: 0,
+            advancementRequirement: 3,
+          }),
+        ],
+      ),
     ];
 
     const plans = buildTacticalPlans({ input });
@@ -2238,18 +2472,22 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("remote-ice-1", "corp", "ice", {
-          definitionId: "simple_barrier_ice",
-          rezzed: true,
-          subtypes: ["Barrier"],
-        }),
-      ], [
-        visibleCard("agenda-1", "corp", "agenda", {
-          advancementCounters: 1,
-          advancementRequirement: 4,
-        }),
-      ]),
+      server(
+        "remote_1",
+        [
+          visibleCard("remote-ice-1", "corp", "ice", {
+            definitionId: "simple_barrier_ice",
+            rezzed: true,
+            subtypes: ["Barrier"],
+          }),
+        ],
+        [
+          visibleCard("agenda-1", "corp", "agenda", {
+            advancementCounters: 1,
+            advancementRequirement: 4,
+          }),
+        ],
+      ),
     ];
 
     const plans = buildTacticalPlans({ input });
@@ -2274,9 +2512,9 @@ describe("tactical plan model", () => {
       "runner_visible_exposure_contest_credits:5",
     );
     expect(mapping && mapping.status).toBe("matched");
-    expect(mapping && mapping.legalActions.map((action) => action.actionId)).toEqual([
-      "install-remote-ice",
-    ]);
+    expect(
+      mapping && mapping.legalActions.map((action) => action.actionId),
+    ).toEqual(["install-remote-ice"]);
   });
 
   it("isolates tactical plan memory by decision context", () => {
@@ -2330,12 +2568,16 @@ describe("tactical plan model", () => {
       server("hq"),
       server("rd"),
       server("archives"),
-      server("remote_1", [
-        visibleCard("simple_barrier_ice", "corp", "ice", {
-          rezzed: true,
-          subtypes: ["Wall"],
-        }),
-      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+      server(
+        "remote_1",
+        [
+          visibleCard("simple_barrier_ice", "corp", "ice", {
+            rezzed: true,
+            subtypes: ["Wall"],
+          }),
+        ],
+        [visibleCard("simple_agenda", "corp", "agenda")],
+      ),
     ];
     const deckCapabilities = buildDeckCapabilityProfile({
       side: "runner",
@@ -2361,8 +2603,12 @@ describe("tactical plan model", () => {
   });
 
   it("translates Runner strategic central pressure into a targeted central plan", () => {
-    const hqRun = legalAction("run-hq", "runner", "start_run", { serverId: "hq" });
-    const rdRun = legalAction("run-rd", "runner", "start_run", { serverId: "rd" });
+    const hqRun = legalAction("run-hq", "runner", "start_run", {
+      serverId: "hq",
+    });
+    const rdRun = legalAction("run-rd", "runner", "start_run", {
+      serverId: "rd",
+    });
     const input = aiInput("runner", [hqRun, rdRun]);
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     const candidates = buildActionSemanticCandidates({
@@ -2392,9 +2638,9 @@ describe("tactical plan model", () => {
       type: "runner.opportunistic_central_run",
       priority: expect.any(Number),
     });
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "run-hq",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["run-hq"]);
     expect(result.selectedPlan?.evidence).toEqual(
       expect.arrayContaining([
         "strategic_plan_goal:runner.strategic.central_pressure",
@@ -2426,9 +2672,9 @@ describe("tactical plan model", () => {
         kind: "clear_tags",
       }),
     });
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "remove-tag",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["remove-tag"]);
     expect(result.selectedPlan?.evidence).toEqual(
       expect.arrayContaining([
         "runner_current_tags:1",
@@ -2479,9 +2725,9 @@ describe("tactical plan model", () => {
         kind: "convert_success_window",
       }),
     });
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "credit-subversion-followup",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["credit-subversion-followup"]);
     expect(result.selectedPlan?.evidence).toEqual(
       expect.arrayContaining([
         "runner_success_window_plan_active:true",
@@ -2521,7 +2767,7 @@ describe("tactical plan model", () => {
       },
     }).map((candidate) =>
       candidate.actionId === reveal.actionId
-        ? {
+        ? ({
             ...candidate,
             semanticActionType: "card_ability.trigger",
             actionTacticSignals: ["card_ability.trigger", "zone.reveal"],
@@ -2537,7 +2783,7 @@ describe("tactical plan model", () => {
               ...candidate.evidence,
               "strategic_action_fit:corp.tag_trace_punish",
             ],
-          } satisfies ActionSemanticCandidate
+          } satisfies ActionSemanticCandidate)
         : candidate,
     );
 
@@ -2560,9 +2806,9 @@ describe("tactical plan model", () => {
       planId: "corp.apply_punish_pressure:play-punish",
       type: "corp.apply_punish_pressure",
     });
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "play-punish",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["play-punish"]);
     expect(result.selectedPlan?.evidence).toEqual(
       expect.arrayContaining([
         "strategic_plan_goal:corp.intent.punish",
@@ -2632,9 +2878,9 @@ describe("tactical plan model", () => {
       planId: "corp.create_score_window:install-scoreline-agenda",
       type: "corp.create_score_window",
     });
-    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "install-scoreline-agenda",
-    ]);
+    expect(
+      result.selectedMapping?.legalActions.map((action) => action.actionId),
+    ).toEqual(["install-scoreline-agenda"]);
   });
 });
 
@@ -2819,11 +3065,7 @@ function visibleCard(
   type: NonNullable<VisibleCard["type"]>,
   overrides: Omit<
     Partial<VisibleCard>,
-    | "instanceId"
-    | "owner"
-    | "controller"
-    | "type"
-    | "known"
+    "instanceId" | "owner" | "controller" | "type" | "known"
   > = {},
 ): VisibleCard {
   return {
@@ -2937,12 +3179,16 @@ function wallCoverageInput(actions: LegalAction[]): AiDecisionInput {
     server("hq"),
     server("rd"),
     server("archives"),
-    server("remote_1", [
-      visibleCard("simple_barrier_ice", "corp", "ice", {
-        rezzed: true,
-        subtypes: ["Wall"],
-      }),
-    ], [visibleCard("simple_agenda", "corp", "agenda")]),
+    server(
+      "remote_1",
+      [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ],
+      [visibleCard("simple_agenda", "corp", "agenda")],
+    ),
   ];
   return input;
 }
@@ -3047,12 +3293,17 @@ function candidateForAction(action: LegalAction): ActionSemanticCandidate {
   };
 }
 
-function candidateForUntargetedAction(action: LegalAction): ActionSemanticCandidate {
+function candidateForUntargetedAction(
+  action: LegalAction,
+): ActionSemanticCandidate {
   const semanticActionType: ActionSemanticCandidate["semanticActionType"] =
-    action.type === "draw_card" ? "draw.card" :
-    action.type === "gain_credit" ? "economy.gain_credit" :
-    action.type === "install_card" ? "install.card" :
-    "run";
+    action.type === "draw_card"
+      ? "draw.card"
+      : action.type === "gain_credit"
+        ? "economy.gain_credit"
+        : action.type === "install_card"
+          ? "install.card"
+          : "run";
   const candidate = candidateForAction(action);
   if (!candidate.targetContext) return { ...candidate, semanticActionType };
   return {
@@ -3064,7 +3315,9 @@ function candidateForUntargetedAction(action: LegalAction): ActionSemanticCandid
 
 function candidateForActionWithSelectedTargets(
   action: LegalAction,
-  selectedTargets: NonNullable<ActionSemanticCandidate["targetContext"]>["selectedTargets"],
+  selectedTargets: NonNullable<
+    ActionSemanticCandidate["targetContext"]
+  >["selectedTargets"],
 ): ActionSemanticCandidate {
   const candidate = candidateForAction(action);
   const targetContext = candidate.targetContext;

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { createRunnerBankInvestmentContext } from "./runner-bank-investment-context";
 
 describe("createRunnerBankInvestmentContext", () => {
@@ -60,9 +64,7 @@ describe("createRunnerBankInvestmentContext", () => {
   it("ignores substring-only economy roles for credit-bank detection", () => {
     const context = createContext({
       rolesForCardId: (definitionId) =>
-        definitionId === "custom-runner-credit-bank"
-          ? ["microeconomy"]
-          : [],
+        definitionId === "custom-runner-credit-bank" ? ["microeconomy"] : [],
       hintEffectsForDefinition: (definitionId) =>
         definitionId === "custom-runner-credit-bank"
           ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
@@ -200,9 +202,53 @@ describe("createRunnerBankInvestmentContext", () => {
       context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
     ).toContain("bankBuildLegal:true");
     expect(context.isRunnerBankCashOutAction(input, cashOutAction)).toBe(true);
-    expect(context.isRunnerBankCashOutAction(input, labelOnlyCashOutAction)).toBe(
+    expect(
+      context.isRunnerBankCashOutAction(input, labelOnlyCashOutAction),
+    ).toBe(false);
+  });
+
+  it("defers first-load cashout when only the runner credit pool is low", () => {
+    const context = createContext({
+      hintEffectsForDefinition: (definitionId) =>
+        definitionId === "custom-runner-credit-bank"
+          ? [{ kind: "economy", target: "economy.temporary_resource_bank" }]
+          : [],
+    });
+    const bank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 3 },
+    });
+    const buildAction = runnerAction("activated_card_ability", {
+      actionId: "structured-build",
+      source: bank.instanceId,
+      cardImplementationAddsHostedCredits: true,
+    });
+    const cashOutAction = runnerAction("trigger_ability", {
+      actionId: "structured-cashout",
+      source: bank.instanceId,
+      cardImplementationTakesHostedCredits: true,
+    });
+    const input = runnerInput({
+      credits: 2,
+      rig: [bank],
+      legalActions: [buildAction, cashOutAction],
+    });
+
+    expect(context.runnerBankCashOutIsUsefulNow(input, cashOutAction)).toBe(
       false,
     );
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, cashOutAction),
+    ).toEqual(
+      expect.arrayContaining([
+        "bankStoredCredits:3",
+        "desiredBankTarget:6",
+        "bankCashOutThreshold:false",
+        "why_cashout_now:no_funding_need",
+      ]),
+    );
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
+    ).toContain("bankCommitmentStatus:build_second_load");
   });
 
   it("ignores build-action substring noise in credit-bank action text", () => {
@@ -294,6 +340,7 @@ function createContext(
 function runnerInput(input: {
   rig: VisibleCard[];
   legalActions: LegalAction[];
+  credits?: number;
 }): AiDecisionInput {
   return {
     side: "runner",
@@ -305,7 +352,7 @@ function runnerInput(input: {
       phase: "runner_action_phase",
       own: {
         identity: visibleRunnerCard("runner-identity"),
-        credits: 5,
+        credits: input.credits ?? 5,
         clicks: 4,
         agendaPoints: 0,
         gripOrHq: [],

@@ -221,9 +221,7 @@ export function createRunnerBankInvestmentContext(
     const previousPlan = dependencies.previousPlan(input);
     const bankSource = runnerBankSourceLabel(input, action);
     const stableBuildWindow =
-      input.playerView.own.credits >= 4 &&
-      input.playerView.own.clicks >= 1 &&
-      !concreteFundingNeed;
+      input.playerView.own.clicks >= 1 && !concreteFundingNeed;
     const active =
       buildActionLegal ||
       cashOutActionLegal ||
@@ -302,8 +300,7 @@ export function createRunnerBankInvestmentContext(
     }
 
     if (isRunnerBankCashOutAction(input, action)) {
-      const usefulNow =
-        criticalReserve || concreteFundingNeed || cashOutThresholdMet;
+      const usefulNow = concreteFundingNeed || cashOutThresholdMet;
       return {
         active: true,
         status: usefulNow ? "cashout_ready" : "cashout_deferred",
@@ -401,11 +398,7 @@ export function createRunnerBankInvestmentContext(
     action: LegalAction,
   ): boolean {
     const assessment = runnerBankInvestmentCommitmentAssessment(input, action);
-    return (
-      assessment.criticalReserve ||
-      assessment.concreteFundingNeed ||
-      assessment.cashOutThresholdMet
-    );
+    return assessment.concreteFundingNeed || assessment.cashOutThresholdMet;
   }
 
   function runnerBankHasComfortableCreditPool(input: AiDecisionInput): boolean {

@@ -3,19 +3,12 @@ import { accessOutcomeMemoryPlanEvidence } from "../access/access-outcome-memory
 import { evaluateKnownCentralAccessPayoff } from "../known-central-access-payoff";
 import { evaluateKnownRemoteAccessPayoff } from "../known-remote-access-payoff";
 import {
-  bankBuildActions,
-  bankPayoutActions,
   bankToolEvidence,
-  largestBankPayout,
+  runnerCreditBankAssessment,
 } from "./tactical-plan-bank-tools";
 import { accessCommitmentPlanEvidence } from "./tactical-plan-access-commitment";
-import {
-  createPlanStep,
-  createTacticalPlan,
-} from "./tactical-plan-builders";
-import {
-  missingBreakerCoverageKind,
-} from "./tactical-plan-breaker-coverage";
+import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
+import { missingBreakerCoverageKind } from "./tactical-plan-breaker-coverage";
 import {
   coveragePlanStatusForRequiredCoverage,
   deckCapabilityBlockersForRequiredCoverage,
@@ -56,7 +49,7 @@ import {
   runnerRunTargetStepRationale,
 } from "./tactical-plan-runner-run-targets";
 import { runnerHandDevelopmentPlans } from "./tactical-plan-runner-hand-development";
-import { runnerHasConcreteFundingNeed } from "./tactical-plan-runner-funding-need";
+import { runnerHasConcretePlanFundingNeed } from "./tactical-plan-runner-funding-need";
 import type {
   TacticalPlan,
   TacticalPlanBuildContext,
@@ -161,7 +154,9 @@ export function buildRunnerTacticalPlans(
         }),
         evidence: [
           "runner_success_window_plan_active:true",
-          ...(currentRunTarget ? [`runner_success_window_target:${currentRunTarget}`] : []),
+          ...(currentRunTarget
+            ? [`runner_success_window_target:${currentRunTarget}`]
+            : []),
           ...successWindowActions
             .slice(0, 4)
             .map((action) => `success_window_action:${action.actionId}`),
@@ -179,7 +174,8 @@ export function buildRunnerTacticalPlans(
     );
   }
   const remoteRunActions = input.legalActions.filter(
-    (action) => action.type === "start_run" && isRemoteServer(actionServerId(action)),
+    (action) =>
+      action.type === "start_run" && isRemoteServer(actionServerId(action)),
   );
   const noPayoffRemoteRunActions: LegalAction[] = [];
   const noPayoffByActionId = new Map<
@@ -193,14 +189,16 @@ export function buildRunnerTacticalPlans(
     noPayoffRemoteRunActions.push(action);
     noPayoffByActionId.set(action.actionId, payoff);
   }
-  const emptyRemoteRunActions = remoteRunActions.filter((action) =>
-    !noPayoffRemoteRunActions.includes(action) &&
-    remoteRunHasNoRootValue(input.playerView, actionServerId(action)),
+  const emptyRemoteRunActions = remoteRunActions.filter(
+    (action) =>
+      !noPayoffRemoteRunActions.includes(action) &&
+      remoteRunHasNoRootValue(input.playerView, actionServerId(action)),
   );
-  const blockedRemoteRuns = remoteRunActions.filter((action) =>
-    !noPayoffRemoteRunActions.includes(action) &&
-    !emptyRemoteRunActions.includes(action) &&
-    runNeedsBreakerCoverage(input.playerView, actionServerId(action)),
+  const blockedRemoteRuns = remoteRunActions.filter(
+    (action) =>
+      !noPayoffRemoteRunActions.includes(action) &&
+      !emptyRemoteRunActions.includes(action) &&
+      runNeedsBreakerCoverage(input.playerView, actionServerId(action)),
   );
   const centralRunActions = input.legalActions.filter(
     (action) =>
@@ -219,14 +217,18 @@ export function buildRunnerTacticalPlans(
     noPayoffCentralRunActions.push(action);
     noPayoffCentralByActionId.set(action.actionId, payoff);
   }
-  const blockedCentralRuns = centralRunActions.filter((action) =>
-    !noPayoffCentralRunActions.includes(action) &&
-    runNeedsBreakerCoverage(input.playerView, actionServerId(action)),
+  const blockedCentralRuns = centralRunActions.filter(
+    (action) =>
+      !noPayoffCentralRunActions.includes(action) &&
+      runNeedsBreakerCoverage(input.playerView, actionServerId(action)),
   );
   for (const action of blockedRemoteRuns) {
     const serverId = actionServerId(action);
     if (!serverId) continue;
-    const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
+    const missingCoverage = missingBreakerCoverageKind(
+      input.playerView,
+      serverId,
+    );
     const deckCapabilityEvidence = deckCapabilityEvidenceForRequiredCoverage(
       context,
       missingCoverage,
@@ -482,7 +484,8 @@ export function buildRunnerTacticalPlans(
       blockedRemoteRuns.includes(action) ||
       emptyRemoteRunActions.includes(action) ||
       noPayoffRemoteRunActions.includes(action)
-    ) continue;
+    )
+      continue;
     const remoteGoal = runnerRemoteGoalForServer(context, serverId);
     const strategicBoost = tacticalGoalPriorityBoost(remoteGoal);
     plans.push(
@@ -526,7 +529,10 @@ export function buildRunnerTacticalPlans(
     if (!serverId) continue;
     if (noPayoffCentralRunActions.includes(action)) continue;
     if (blockedCentralRuns.includes(action)) {
-      const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
+      const missingCoverage = missingBreakerCoverageKind(
+        input.playerView,
+        serverId,
+      );
       const deckCapabilityEvidence = deckCapabilityEvidenceForRequiredCoverage(
         context,
         missingCoverage,
@@ -581,7 +587,10 @@ export function buildRunnerTacticalPlans(
           planId: `runner.obtain_breaker_coverage:${serverId}`,
           side: "runner",
           type: "runner.obtain_breaker_coverage",
-          status: coveragePlanStatusForRequiredCoverage(context, missingCoverage),
+          status: coveragePlanStatusForRequiredCoverage(
+            context,
+            missingCoverage,
+          ),
           priority: serverId === "rd" ? 900 : 880,
           horizonTurns: 1,
           target: { kind: "server", id: serverId },
@@ -603,7 +612,9 @@ export function buildRunnerTacticalPlans(
               stepId: `runner.opportunistic_central_run:${serverId}`,
               kind: "probe_central",
               desiredActionSemantics: ["run.start"],
-              rationale: ["return to the blocked central after coverage improves"],
+              rationale: [
+                "return to the blocked central after coverage improves",
+              ],
             }),
           ],
           evidence: [
@@ -659,7 +670,10 @@ export function buildRunnerTacticalPlans(
           ...tacticalGoalEvidence(pressureGoal),
           ...runnerGoalEvidence,
         ],
-        scoreBreakdown: tacticalGoalScoreBreakdown(pressureGoal, strategicBoost),
+        scoreBreakdown: tacticalGoalScoreBreakdown(
+          pressureGoal,
+          strategicBoost,
+        ),
         stateVersion,
       }),
     );
@@ -683,18 +697,17 @@ export function buildRunnerTacticalPlans(
       dependencies,
     ),
   );
-  const bankBuildActionList = bankBuildActions(context, "runner", input.legalActions);
   const runnerBankToolEvidence = bankToolEvidence(context, "runner");
-  const runnerBankPayout = largestBankPayout(context, "runner");
-  const runnerFundingNeed = runnerHasConcreteFundingNeed(input, [
+  const runnerFundingNeed = runnerHasConcretePlanFundingNeed(input, [
     ...blockedRemoteRuns,
     ...blockedCentralRuns,
   ]);
-  if (
-    bankBuildActionList.length > 0 &&
-    input.playerView.own.credits >= 4 &&
-    !runnerFundingNeed
-  ) {
+  const runnerBankAssessment = runnerCreditBankAssessment(
+    context,
+    input.legalActions,
+    runnerFundingNeed,
+  );
+  if (runnerBankAssessment.shouldBuild) {
     plans.push(
       createTacticalPlan({
         planId: "runner.build_credit_bank",
@@ -707,7 +720,10 @@ export function buildRunnerTacticalPlans(
         currentStep: createPlanStep({
           stepId: "build_bank_counter:runner",
           kind: "build_bank_counter",
-          desiredActionSemantics: ["card_ability.trigger", "card_ability.unknown"],
+          desiredActionSemantics: [
+            "card_ability.trigger",
+            "card_ability.unknown",
+          ],
           requiredCapabilities: [
             {
               capabilityId: "runner.bank_capacity",
@@ -717,21 +733,24 @@ export function buildRunnerTacticalPlans(
               evidence: runnerBankToolEvidence,
             },
           ],
-          rationale: ["credits are stable enough to bank for later plan execution"],
+          rationale: [
+            "no concrete funding need blocks building the credit bank toward its value target",
+          ],
         }),
         evidence: [
-          ...bankBuildActionList.map((action) => `bank_build_action:${action.actionId}`),
+          ...runnerBankAssessment.buildActions.map(
+            (action) => `bank_build_action:${action.actionId}`,
+          ),
           ...runnerBankToolEvidence,
+          ...runnerBankAssessment.evidence,
           ...runnerGoalEvidence,
         ],
         stateVersion,
       }),
     );
   }
-  const bankPayoutActionList = bankPayoutActions(context, "runner", input.legalActions);
   const mayCashOutBank =
-    bankPayoutActionList.length > 0 &&
-    (input.playerView.own.credits <= 3 || runnerFundingNeed) &&
+    runnerBankAssessment.shouldCashOut &&
     !(
       previousPlan?.type === "runner.build_credit_bank" &&
       input.playerView.own.credits > 3 &&
@@ -750,7 +769,10 @@ export function buildRunnerTacticalPlans(
         currentStep: createPlanStep({
           stepId: "cash_out_bank:runner",
           kind: "cash_out_bank",
-          desiredActionSemantics: ["card_ability.trigger", "card_ability.unknown"],
+          desiredActionSemantics: [
+            "card_ability.trigger",
+            "card_ability.unknown",
+          ],
           requiredCapabilities: [
             {
               capabilityId: "runner.bank_payout",
@@ -759,24 +781,23 @@ export function buildRunnerTacticalPlans(
               target: { kind: "bank", id: "runner_credit_bank" },
               evidence: [
                 ...runnerBankToolEvidence,
-                ...(runnerBankPayout !== undefined
-                  ? [`bank_estimated_payout:${runnerBankPayout}`]
-                  : []),
+                ...runnerBankAssessment.evidence,
               ],
             },
           ],
           rationale: [
             runnerFundingNeed
               ? "stored credits can fund an active plan"
-              : "low credits make stored bank credits immediately useful",
-            ...(runnerBankPayout !== undefined
-              ? [`bank_estimated_payout:${runnerBankPayout}`]
-              : []),
+              : "stored bank credits reached a useful cashout threshold",
+            `runner_bank_cashout_reason:${runnerBankAssessment.cashOutReason ?? "unknown"}`,
           ],
         }),
         evidence: [
-          ...bankPayoutActionList.map((action) => `bank_payout_action:${action.actionId}`),
+          ...runnerBankAssessment.payoutActions.map(
+            (action) => `bank_payout_action:${action.actionId}`,
+          ),
           ...runnerBankToolEvidence,
+          ...runnerBankAssessment.evidence,
           ...runnerGoalEvidence,
         ],
         stateVersion,
@@ -815,7 +836,8 @@ function runnerSuccessWindowActionMatches(
   action: LegalAction,
   candidate: NonNullable<TacticalPlanBuildContext["candidates"]>[number],
 ): boolean {
-  if (action.side !== "runner" || candidate.actorSide !== "runner") return false;
+  if (action.side !== "runner" || candidate.actorSide !== "runner")
+    return false;
   if (
     action.type === "start_run" ||
     action.type === "continue_run" ||
@@ -847,12 +869,16 @@ function runnerSuccessWindowSignals(
     candidate.abilityId,
     ...candidate.cardContextSignals,
     ...candidate.actionTacticSignals,
-    ...candidate.strategySupport.map((entry) => `${entry.strategyId}:${entry.role}`),
+    ...candidate.strategySupport.map(
+      (entry) => `${entry.strategyId}:${entry.role}`,
+    ),
     ...candidate.conditions.map((entry) => entry.kind),
     ...candidate.risks.map((entry) => entry.kind),
     ...candidate.constraints.map((entry) => entry.kind),
     ...candidate.costProfile.additionalCosts,
-    ...(candidate.targetContext?.targetProfileMatches.flatMap((entry) => entry.evidence) ?? []),
+    ...(candidate.targetContext?.targetProfileMatches.flatMap(
+      (entry) => entry.evidence,
+    ) ?? []),
     ...candidate.evidence,
     ...payloadStringSignals(action.payload),
   ].filter((entry): entry is string => typeof entry === "string");
@@ -878,7 +904,9 @@ function payloadStringSignals(payload: LegalAction["payload"]): string[] {
   return Object.values(payload).flatMap((value): string[] => {
     if (typeof value === "string") return [value];
     if (Array.isArray(value)) {
-      return value.filter((entry): entry is string => typeof entry === "string");
+      return value.filter(
+        (entry): entry is string => typeof entry === "string",
+      );
     }
     return [];
   });
