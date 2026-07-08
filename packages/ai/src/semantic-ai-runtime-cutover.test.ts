@@ -398,6 +398,11 @@ describe("Semantic AI runtime cutover", () => {
       ownStrategicIntentState?: ReturnType<typeof buildStrategicIntentState>;
     };
     input.playerView.own.credits = 6;
+    input.playerView.own.gripOrHq = [
+      visibleCard("strategic-grip-1", "runner", "event"),
+      visibleCard("strategic-grip-2", "runner", "resource"),
+      visibleCard("strategic-grip-3", "runner", "program"),
+    ];
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
     input.ownStrategicIntentState = buildStrategicIntentState({
       side: "runner",
@@ -2066,6 +2071,25 @@ describe("Semantic AI runtime cutover", () => {
       "runner.build_credit_bank",
     );
 
+    const payoutBankSource = visibleCard(
+      "runner-credit-bank-source",
+      "runner",
+      "resource",
+      {
+        definitionId: "onr_v1_154_broker",
+        title: "Credit Bank Source",
+        counterDisplays: [
+          {
+            id: "broker-bank",
+            amount: 3,
+            displayKind: "stored_credits",
+            label: "3",
+            ariaLabel: "3 stored credits",
+            usageHint: "spendable",
+          },
+        ],
+      },
+    );
     const lowCreditInput = aiInput("runner", [
       legalAction(
         "broker-take",
@@ -2074,7 +2098,7 @@ describe("Semantic AI runtime cutover", () => {
         "Credits aus Bank nehmen",
         { credits: 0 },
         {
-          source: bankSource.instanceId,
+          source: payoutBankSource.instanceId,
           payload: { cardImplementationTakesHostedCredits: true },
         },
       ),
@@ -2083,7 +2107,7 @@ describe("Semantic AI runtime cutover", () => {
       }),
     ]);
     lowCreditInput.playerView.own.credits = 2;
-    lowCreditInput.playerView.own.rig = [bankSource];
+    lowCreditInput.playerView.own.rig = [payoutBankSource];
 
     const lowCreditDecision = chooseRunnerAction(lowCreditInput);
 

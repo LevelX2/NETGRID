@@ -112,6 +112,12 @@ export type SeriesPlayerSlot = ApiSeriesPlayerSlot;
 export type SeriesStatus = ApiSeriesStatus;
 export type ConnectionQuality = ApiConnectionQuality;
 
+const AI_DECISION_DETAIL_SECTION_TRACE_LIMIT = 8;
+const AI_DECISION_DETAIL_SECTION_PRIORITY_IDS = [
+  "runner_run_plan",
+  "tactical_plan",
+] as const;
+
 export type MatchSettings = {
   agendaPointsToWin: number;
   matchFormat: MatchFormat;
@@ -3194,7 +3200,11 @@ function replayDecisionDebug(debug: unknown, actor: Side | undefined): Record<st
   if (Array.isArray(safeDebug.whyNot)) result.whyNot = safeDebug.whyNot.slice(0, 8);
   if (Array.isArray(safeDebug.longTermPlan)) result.longTermPlan = safeDebug.longTermPlan.slice(0, 8);
   if (Array.isArray(safeDebug.warnings)) result.warnings = safeDebug.warnings.slice(0, 8);
-  if (Array.isArray(safeDebug.detailSections)) result.detailSections = safeDebug.detailSections.slice(0, 8);
+  if (Array.isArray(safeDebug.detailSections)) {
+    result.detailSections = aiDecisionTraceDetailSections(
+      safeDebug.detailSections,
+    );
+  }
   if (Array.isArray(safeDebug.facts)) result.facts = safeDebug.facts.slice(0, 8);
   if (Array.isArray(safeDebug.hypotheses)) result.hypotheses = safeDebug.hypotheses.slice(0, 8);
   if (Array.isArray(safeDebug.uncertainty)) result.uncertainty = safeDebug.uncertainty.slice(0, 8);
@@ -3273,10 +3283,50 @@ function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, legalAction: L
       const value = debug[field];
       if (Array.isArray(value)) result[field] = value.slice(0, 12);
     }
-    if (Array.isArray(debug.detailSections)) result.detailSections = debug.detailSections.slice(0, 8);
+    if (Array.isArray(debug.detailSections)) {
+      result.detailSections = aiDecisionTraceDetailSections(
+        debug.detailSections,
+      );
+    }
     if (debug.opponentModel) result.opponentModel = debug.opponentModel;
   }
   return result;
+}
+
+function aiDecisionTraceDetailSections(
+  sections: NonNullable<AiDecisionDebug["detailSections"]>,
+): NonNullable<AiDecisionDebug["detailSections"]> {
+  const selected = sections.slice(0, AI_DECISION_DETAIL_SECTION_TRACE_LIMIT);
+  for (const priorityId of AI_DECISION_DETAIL_SECTION_PRIORITY_IDS) {
+    if (selected.some((section) => section.id === priorityId)) continue;
+    const prioritySection = sections.find(
+      (section) => section.id === priorityId,
+    );
+    if (!prioritySection) continue;
+    let replacementIndex = -1;
+    for (let index = selected.length - 1; index >= 0; index -= 1) {
+      if (!aiDecisionDetailSectionIsPriority(selected[index]?.id)) {
+        replacementIndex = index;
+        break;
+      }
+    }
+    if (replacementIndex >= 0) {
+      selected[replacementIndex] = prioritySection;
+    } else if (selected.length < AI_DECISION_DETAIL_SECTION_TRACE_LIMIT) {
+      selected.push(prioritySection);
+    }
+  }
+  return selected.sort(
+    (left, right) => sections.indexOf(left) - sections.indexOf(right),
+  );
+}
+
+function aiDecisionDetailSectionIsPriority(
+  id: string | undefined,
+): boolean {
+  return AI_DECISION_DETAIL_SECTION_PRIORITY_IDS.some(
+    (priorityId) => priorityId === id,
+  );
 }
 
 function minimalAiPreviewDetail(actor: Side, legalAction: LegalAction, decision: AiDecision): Record<string, unknown> {

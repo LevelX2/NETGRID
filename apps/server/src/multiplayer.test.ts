@@ -6260,6 +6260,139 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(afterAdvance?.gameState?.stateVersion).toBe(beforeStateVersion);
   });
 
+  it("keeps tactical plan ranking detail sections in AI previews", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "ai-preview-tactical-plan-sections",
+      chooseAiAction: (input): AiDecision => {
+        const action = input.legalActions[0];
+        if (!action) throw new Error("Missing legal action for AI preview test");
+        return {
+          actionId: action.actionId,
+          reasonCode: "test.preview_tactical_plan",
+          explanation: "Test decision with late tactical-plan diagnostics.",
+          consideredActionIds: input.legalActions.map(
+            (candidate) => candidate.actionId,
+          ),
+          fallbackUsed: false,
+          evidence: ["test_preview_tactical_plan"],
+          timeoutUsed: false,
+          profileId: input.profileId,
+          confidence: 0.9,
+          decisionDebug: {
+            schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+            aiLevel: 2,
+            planKind: "runner.build_credit_base",
+            selectedActionType: action.type,
+            score: 100,
+            actionAlternatives: [
+              {
+                rank: 1,
+                actionId: action.actionId,
+                actionType: action.type,
+                label: action.label,
+                selected: true,
+                priority: 100,
+              },
+            ],
+            detailSections: [
+              {
+                id: "semantic_runtime",
+                title: "Semantic Runtime",
+                items: ["semantic_runtime_scope:test"],
+              },
+              {
+                id: "strategic_runtime",
+                title: "Strategic Runtime",
+                items: ["strategy:test"],
+              },
+              {
+                id: "strategy_portfolio",
+                title: "Strategy Portfolio",
+                items: ["portfolio:test"],
+              },
+              {
+                id: "selection_score",
+                title: "Selection Score",
+                items: ["selection:test"],
+              },
+              {
+                id: "action_semantic_projection",
+                title: "Action Semantic Projection",
+                items: ["projection:test"],
+              },
+              {
+                id: "ability_semantic_binding",
+                title: "Ability Semantic Binding",
+                items: ["ability:test"],
+              },
+              {
+                id: "target_context",
+                title: "Target Context",
+                items: ["target:test"],
+              },
+              {
+                id: "compatibility_signals",
+                title: "Compatibility Signals",
+                items: ["compatibility:test"],
+              },
+              {
+                id: "coverage_gaps",
+                title: "Coverage Gaps",
+                items: ["coverage:test"],
+              },
+              {
+                id: "tactical_plan",
+                title: "Tactical Plan",
+                items: [
+                  "plan_alternative_count:2",
+                  "plan_rank|rank=1|id=runner.build_credit_base|type=runner.build_credit_base|priority=100|status=active|step=gain_credits|selected=true|scores=Credit-Bedarf:700",
+                ],
+              },
+            ],
+          },
+        };
+      },
+    });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "ai-preview-tactical-plan-sections",
+      corpDifficulty: "normal",
+    });
+    const afterSetup = await submitChoice(
+      service,
+      created.matchId,
+      {
+        side: "runner",
+        sessionToken: created.hostSessionToken,
+        reconnectToken: created.hostReconnectToken,
+      },
+      "keep",
+      "preview-tactical-plan-setup",
+    );
+
+    const preview = await service.previewAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: afterSetup.playerView.stateVersion,
+      knownMatchVersion: afterSetup.matchVersion,
+    });
+
+    expect(preview.ok).toBe(true);
+    if (!preview.ok) throw new Error(preview.error.message);
+    const detailSections = preview.preview.detail.detailSections as
+      | Array<{ id?: string; items?: string[] }>
+      | undefined;
+    expect(detailSections?.length ?? 0).toBeLessThanOrEqual(8);
+    const tacticalPlanSection = detailSections?.find(
+      (section) => section.id === "tactical_plan",
+    );
+    expect(tacticalPlanSection?.items).toEqual(
+      expect.arrayContaining([expect.stringContaining("plan_rank|")]),
+    );
+  });
+
   it("advances Corp AI in a root-rez window even when activeSide is runner", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, { tokenSalt: "server-corp-ai-root-rez-active-runner" });

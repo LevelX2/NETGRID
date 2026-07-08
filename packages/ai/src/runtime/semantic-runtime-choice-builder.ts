@@ -193,4 +193,7 @@ function semanticRuntimeScoreComponentEvidence(
 const SEMANTIC_RUNTIME_CHOICE_SCORE_COMPONENT_EVIDENCE_KEYS = new Set([
   "corp_board_triage_alignment",
   "corp_board_triage_mismatch",
+  "runner_bank_cashout_gate",
+  "runner_bank_investment_commitment",
+  "runner_no_run_economy_setup_hold",
 ]);

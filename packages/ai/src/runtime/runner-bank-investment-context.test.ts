@@ -207,7 +207,7 @@ describe("createRunnerBankInvestmentContext", () => {
     ).toBe(false);
   });
 
-  it("defers first-load cashout when only the runner credit pool is low", () => {
+  it("uses first-load cashout at critical reserve but defers smaller payouts", () => {
     const context = createContext({
       hintEffectsForDefinition: (definitionId) =>
         definitionId === "custom-runner-credit-bank"
@@ -234,7 +234,7 @@ describe("createRunnerBankInvestmentContext", () => {
     });
 
     expect(context.runnerBankCashOutIsUsefulNow(input, cashOutAction)).toBe(
-      false,
+      true,
     );
     expect(
       context.runnerBankInvestmentCommitmentEvidence(input, cashOutAction),
@@ -243,12 +243,45 @@ describe("createRunnerBankInvestmentContext", () => {
         "bankStoredCredits:3",
         "desiredBankTarget:6",
         "bankCashOutThreshold:false",
-        "why_cashout_now:no_funding_need",
+        "why_cashout_now:critical_reserve",
       ]),
     );
     expect(
       context.runnerBankInvestmentCommitmentEvidence(input, buildAction),
     ).toContain("bankCommitmentStatus:build_second_load");
+
+    const underloadedBank = visibleRunnerCard("custom-runner-credit-bank", {
+      counters: { power: 1 },
+    });
+    const underloadedCashOut = runnerAction("trigger_ability", {
+      actionId: "underloaded-cashout",
+      source: underloadedBank.instanceId,
+      cardImplementationTakesHostedCredits: true,
+    });
+    const underloadedInput = runnerInput({
+      credits: 2,
+      rig: [underloadedBank],
+      legalActions: [underloadedCashOut],
+    });
+
+    expect(
+      context.runnerBankCashOutIsUsefulNow(
+        underloadedInput,
+        underloadedCashOut,
+      ),
+    ).toBe(false);
+    expect(
+      context.runnerBankInvestmentCommitmentEvidence(
+        underloadedInput,
+        underloadedCashOut,
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        "bankStoredCredits:1",
+        "bankCommitmentStatus:cashout_deferred",
+        "why_cashout_now:no_funding_need",
+      ]),
+    );
   });
 
   it("ignores build-action substring noise in credit-bank action text", () => {

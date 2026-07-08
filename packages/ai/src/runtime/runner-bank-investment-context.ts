@@ -300,7 +300,10 @@ export function createRunnerBankInvestmentContext(
     }
 
     if (isRunnerBankCashOutAction(input, action)) {
-      const usefulNow = concreteFundingNeed || cashOutThresholdMet;
+      const criticalCashOutReady =
+        criticalReserve && storedCredits >= RUNNER_BANK_FIRST_LOAD_TARGET;
+      const usefulNow =
+        criticalCashOutReady || concreteFundingNeed || cashOutThresholdMet;
       return {
         active: true,
         status: usefulNow ? "cashout_ready" : "cashout_deferred",
@@ -398,7 +401,12 @@ export function createRunnerBankInvestmentContext(
     action: LegalAction,
   ): boolean {
     const assessment = runnerBankInvestmentCommitmentAssessment(input, action);
-    return assessment.concreteFundingNeed || assessment.cashOutThresholdMet;
+    return (
+      (assessment.criticalReserve &&
+        assessment.storedCredits >= RUNNER_BANK_FIRST_LOAD_TARGET) ||
+      assessment.concreteFundingNeed ||
+      assessment.cashOutThresholdMet
+    );
   }
 
   function runnerBankHasComfortableCreditPool(input: AiDecisionInput): boolean {

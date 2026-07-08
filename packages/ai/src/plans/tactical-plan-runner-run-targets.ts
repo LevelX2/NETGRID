@@ -36,12 +36,16 @@ export function runnerRunTargetPlanScoreBreakdown(
   basePriority: number,
 ): PlanScoreBreakdown[] {
   const evaluation = runnerRunTargetEvaluationForAction(context, action);
+  const serverId = actionServerId(action);
   return [
     {
       key: "runner_run_target_base",
-      label: "Remote-Run-Basis",
+      label:
+        serverId === "hq" || serverId === "rd"
+          ? "Zentral-Run-Basis"
+          : "Remote-Run-Basis",
       value: basePriority,
-      reason: actionServerId(action) ?? action.actionId,
+      reason: serverId ?? action.actionId,
     },
     ...(evaluation
       ? [
@@ -60,6 +64,65 @@ export function runnerRunTargetPlanScoreBreakdown(
       : []),
     ...runnerDeckStrategyPlanScoreBreakdown(context, actionServerId(action)),
   ];
+}
+
+export function runnerCentralRunOpportunityFloor(
+  context: TacticalPlanBuildContext,
+  action: LegalAction,
+): { priority: number; reason: string; evidence: string[] } | undefined {
+  const serverId = actionServerId(action);
+  if (serverId !== "rd") return undefined;
+  const creditBasePriority =
+    context.runnerEconomyPosture?.creditBasePlan.economyPriority;
+  const competesWithCreditBase =
+    creditBasePriority === "high" ||
+    creditBasePriority === "medium" ||
+    context.runnerEconomyPosture?.recommendation === "build_economy";
+  if (!competesWithCreditBase) return undefined;
+  const server = context.input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  const evaluation = runnerRunTargetEvaluationForAction(context, action);
+  if (evaluation) {
+    const lowCostReachable =
+      evaluation.pathPassability === "reachable" &&
+      evaluation.creditsAfterRun >= 0 &&
+      evaluation.pathCost <= 1;
+    const unknownOrUsefulTop =
+      evaluation.knownAccessState === "unknown" ||
+      evaluation.accessPayoff === "fresh" ||
+      evaluation.accessPayoff === "access_bonus";
+    const runRecommended =
+      evaluation.recommendation === "run_now" ||
+      evaluation.recommendation === "run_if_free";
+    if (!lowCostReachable || !unknownOrUsefulTop || !runRecommended) {
+      return undefined;
+    }
+  } else if ((server?.ice.length ?? 0) > 0) {
+    return undefined;
+  }
+  const unguarded = (server?.ice.length ?? 0) === 0;
+  const priority = 940;
+  const reason = [
+    "target:rd",
+    evaluation
+      ? `recommendation:${evaluation.recommendation}`
+      : "recommendation:visible_unguarded",
+    evaluation
+      ? `known_access_state:${evaluation.knownAccessState}`
+      : "known_access_state:unknown",
+    evaluation ? `path_cost:${evaluation.pathCost}` : "path_cost:0",
+    `unguarded:${unguarded}`,
+  ].join("|");
+  return {
+    priority,
+    reason,
+    evidence: [
+      "rd_unknown_low_cost_opportunity_floor:true",
+      `rd_opportunity_floor:${priority}`,
+      ...(evaluation ? evaluation.evidence.slice(0, 10) : []),
+    ],
+  };
 }
 
 export function runnerEconomyGoalPriority(

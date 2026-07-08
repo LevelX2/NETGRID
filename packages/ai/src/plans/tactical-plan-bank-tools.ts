@@ -1,7 +1,7 @@
 import type { LegalAction, Side } from "@netgrid/shared";
 import type { TacticalPlanBuildContext } from "./tactical-plan-types";
 
-const RUNNER_BANK_URGENT_CASHOUT_TARGET = 6;
+const RUNNER_BANK_MIN_CRITICAL_CASHOUT = 3;
 const RUNNER_BANK_VALUE_BUILD_TARGET = 12;
 const RUNNER_BANK_COMFORTABLE_CREDITS = 10;
 
@@ -112,7 +112,7 @@ export function runnerCreditBankAssessment(
   const cashOutMinimum = concreteFundingNeed
     ? 1
     : ownCredits <= 3
-      ? RUNNER_BANK_URGENT_CASHOUT_TARGET
+      ? RUNNER_BANK_MIN_CRITICAL_CASHOUT
       : RUNNER_BANK_VALUE_BUILD_TARGET;
   const shouldBuild =
     buildActions.length > 0 &&
@@ -124,7 +124,7 @@ export function runnerCreditBankAssessment(
       : concreteFundingNeed
         ? "concrete_funding_need"
         : ownCredits <= 3 &&
-            estimatedPayout >= RUNNER_BANK_URGENT_CASHOUT_TARGET
+            estimatedPayout >= RUNNER_BANK_MIN_CRITICAL_CASHOUT
           ? "urgent_credit_floor"
           : ownCredits < RUNNER_BANK_COMFORTABLE_CREDITS &&
               estimatedPayout >= RUNNER_BANK_VALUE_BUILD_TARGET

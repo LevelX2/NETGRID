@@ -10736,6 +10736,7 @@ select,
 
 .aiDecisionDebugTitle {
   min-width: 0;
+  flex: 1 1 auto;
   display: inline-flex;
   align-items: center;
   gap: 7px;
@@ -10750,9 +10751,13 @@ select,
 }
 
 .aiDecisionDebugTitle span {
-  flex: 0 0 auto;
+  min-width: 0;
+  flex: 1 1 auto;
   color: var(--muted);
   font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .aiDecisionDebugBody {
@@ -10854,6 +10859,14 @@ select,
 .aiDecisionDebugCollapsible > summary {
   display: list-item;
   min-width: 0;
+}
+
+.aiDecisionDebugSectionSummary {
+  margin-left: 6px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
 }
 
 .aiDecisionDebugCollapsible[open] > summary {

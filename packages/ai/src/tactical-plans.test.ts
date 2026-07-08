@@ -1785,7 +1785,7 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("keeps building runner credit banks below the urgent cashout floor", () => {
+  it("keeps building runner credit banks below the minimum critical payout", () => {
     const input = aiInput("runner", [
       legalAction(
         "broker-build",
@@ -1814,10 +1814,10 @@ describe("tactical plan model", () => {
         counterDisplays: [
           {
             id: "broker-bank",
-            amount: 3,
+            amount: 2,
             displayKind: "stored_credits",
-            label: "3",
-            ariaLabel: "3 gespeicherte Credits",
+            label: "2",
+            ariaLabel: "2 gespeicherte Credits",
             usageHint: "spendable",
           },
         ],
@@ -1842,9 +1842,9 @@ describe("tactical plan model", () => {
     expect(buildPlan?.evidence).toEqual(
       expect.arrayContaining([
         "bank_build_action:broker-build",
-        "runner_bank_current_stored:3",
+        "runner_bank_current_stored:2",
         "runner_bank_build_target:12",
-        "runner_bank_cashout_minimum:6",
+        "runner_bank_cashout_minimum:3",
         "runner_bank_cashout_deferred_below_minimum:true",
       ]),
     );
@@ -2696,6 +2696,73 @@ describe("tactical plan model", () => {
       expect.arrayContaining([
         "strategic_plan_goal:runner.strategic.central_pressure",
         "test:strategic_hq_pressure",
+      ]),
+    );
+  });
+
+  it("selects unguarded unknown R&D pressure before high creditbase setup", () => {
+    const rdRun = legalAction("run-rd", "runner", "start_run", {
+      serverId: "rd",
+    });
+    const gain = legalAction("gain", "runner", "gain_credit");
+    const input = aiInput("runner", [rdRun, gain]);
+    input.playerView.own.credits = 4;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const runnerRunTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const rdEvaluation = runnerRunTargetEvaluations.find(
+      (evaluation) => evaluation.targetServerId === "rd",
+    );
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerRunTargetEvaluations,
+      runnerEconomyPosture: runnerEconomyPosture({
+        currentCredits: 4,
+        usefulHandCardsBlockedByCredits: 1,
+        recommendation: "fund_useful_hand_card",
+        economyPriority: "high",
+      }),
+      candidates,
+    });
+    const rdPlan = result.planAlternatives.find(
+      (plan) => plan.planId === "runner.opportunistic_central_run:rd",
+    );
+    const creditPlan = result.planAlternatives.find(
+      (plan) => plan.planId === "runner.build_credit_base",
+    );
+
+    expect(rdEvaluation).toMatchObject({
+      knownAccessState: "unknown",
+      pathPassability: "reachable",
+      pathCost: 0,
+      recommendation: "run_now",
+    });
+    expect(result.selectedPlan?.planId).toBe(
+      "runner.opportunistic_central_run:rd",
+    );
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
+      rdRun.actionId,
+    );
+    expect(rdPlan?.priority).toBeGreaterThan(creditPlan?.priority ?? -Infinity);
+    expect(rdPlan?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_rd_unknown_low_cost_opportunity_floor",
+          label: "R&D unbekannte Topkarte",
+        }),
+      ]),
+    );
+    expect(creditPlan?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_credit_base",
+          value: 930,
+        }),
       ]),
     );
   });

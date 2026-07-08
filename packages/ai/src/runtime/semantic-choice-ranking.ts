@@ -266,7 +266,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (mappedActionIds.has(overrideChoice.action.actionId)) return false;
   if (exceptions.repeatedRunShouldYield) return false;
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
-  return !runnerPlanOverrideIsHardInterrupt(overrideChoice);
+  return !runnerPlanOverrideIsHardInterrupt(mapping.plan, overrideChoice);
 }
 
 function runnerPlanTypeRequiresPlanDominance(type: TacticalPlan["type"]): boolean {
@@ -285,14 +285,34 @@ function runnerPlanTypeRequiresPlanDominance(type: TacticalPlan["type"]): boolea
 }
 
 function runnerPlanOverrideIsHardInterrupt(
+  mappedPlan: TacticalPlan,
   overrideChoice: SemanticRuntimeChoice,
 ): boolean {
+  if (
+    runnerEconomyCommitmentCanInterruptPlan(mappedPlan.type) &&
+    semanticRuntimeChoiceHasAnyScoreComponent(overrideChoice, [
+      "runner_bank_cashout_gate",
+      "runner_bank_investment_commitment",
+      "runner_no_run_economy_setup_hold",
+    ])
+  ) {
+    return true;
+  }
   if (overrideChoice.action.type !== "start_run") return false;
   return semanticRuntimeChoiceHasAnyScoreComponent(overrideChoice, [
     "runner_hq_known_agenda",
     "runner_rnd_fresh_memory",
     "runner_goal_fit_tactical_goal_run_target",
   ]);
+}
+
+function runnerEconomyCommitmentCanInterruptPlan(
+  type: TacticalPlan["type"],
+): boolean {
+  return (
+    type === "runner.opportunistic_central_run" ||
+    type === "runner.build_credit_base"
+  );
 }
 
 function tacticalPlanHandBufferMappingBlocksProbeRunOverride(

@@ -149,12 +149,12 @@ export function FloatingAiDecisionDebugOverlay({
           transform: "none",
         }
       : {};
-  const statusText = preview
-    ? aiDecisionDebugPreviewHeaderStatusLabel(preview)
-    : aiDecisionDebugStatusLabel(status, traceCount);
-  const windowClassName = `aiDecisionDebugWindow ${collapsed ? "is-collapsed" : ""}`;
   const exportTrace = preview ? aiDecisionPreviewAsTrace(preview) : trace;
   const exportMode: "trace" | "preview" = preview ? "preview" : "trace";
+  const statusText = exportTrace
+    ? aiDecisionDebugWindowHeaderStatusLabel(exportTrace, exportMode)
+    : aiDecisionDebugStatusLabel(status, traceCount);
+  const windowClassName = `aiDecisionDebugWindow ${collapsed ? "is-collapsed" : ""}`;
   const exportButtonTitle = aiDecisionDebugHeaderExportTitle(
     exportStatus,
     Boolean(exportTrace),
@@ -356,15 +356,6 @@ function aiDecisionPreviewTitle(trace: MaintenanceAiTraceDetail): string {
   return `Nächster KI-Schritt · ${side} · ${aiDecisionTraceSelectedActionLabel(trace)}`;
 }
 
-function aiDecisionDebugPreviewHeaderStatusLabel(
-  preview: AiDecisionPreview,
-): string {
-  const currentStep = aiDecisionDebugPlanLayer(preview.detail).summaryRows.find(
-    ([label]) => label === "Aktueller Schritt",
-  )?.[1];
-  return preview.actionLabel || currentStep || String(preview.actionType);
-}
-
 function aiDecisionTraceSelectedActionLabel(
   trace: MaintenanceAiTraceDetail,
 ): string {
@@ -374,6 +365,35 @@ function aiDecisionTraceSelectedActionLabel(
     (entry) => entry.actionId === trace.selectedActionId,
   )?.label;
   return String(label ?? action);
+}
+
+function aiDecisionDebugWindowHeaderStatusLabel(
+  trace: MaintenanceAiTraceDetail,
+  mode: "trace" | "preview",
+): string {
+  const metaRows = aiDecisionDebugOverlayMetaRows(trace, mode);
+  const planLayer = aiDecisionDebugPlanLayer(trace.detail);
+  const selectedPlan = planLayer.entries.find((entry) => entry.selected);
+  const actionLabel = aiDecisionTraceSelectedActionLabel(trace);
+  const planLabel =
+    selectedPlan !== undefined
+      ? aiDecisionDebugPlanTitle(selectedPlan)
+      : aiDecisionDebugMetaRowValue(metaRows, "Plan");
+  const scoreLabel = aiDecisionDebugMetaRowValue(metaRows, "Score");
+  const parts = uniqueDisplayStrings(
+    [
+      actionLabel,
+      planLabel && planLabel !== "-" && planLabel !== actionLabel
+        ? planLabel
+        : undefined,
+      scoreLabel && scoreLabel !== "-"
+        ? `Score ${scoreLabel}`
+        : selectedPlan
+          ? aiDecisionDebugPlanScoreLabel(selectedPlan)
+          : undefined,
+    ].filter((part): part is string => Boolean(part)),
+  );
+  return parts.length > 0 ? parts.join(" · ") : "KI-Entscheidung";
 }
 
 function AiDecisionDebugTraceView({
@@ -391,6 +411,12 @@ function AiDecisionDebugTraceView({
   ).slice(0, mode === "preview" ? 12 : 4);
   const scoreRows = aiTraceScoreRows(detail, 8);
   const notes = aiTraceDebugGapNotes(detail).slice(0, 3);
+  const planLayer = aiDecisionDebugPlanLayer(detail);
+  const overviewSummary = aiDecisionDebugOverviewSummary(
+    metaRows,
+    planLayer,
+    detail,
+  );
   const statusWarnings = [
     ...(detail.fallbackUsed === true ? ["Fallback genutzt"] : []),
     ...(detail.timeoutUsed === true ? ["Timeout genutzt"] : []),
@@ -403,25 +429,35 @@ function AiDecisionDebugTraceView({
     mode === "preview" ? aiDecisionPreviewTitle(trace) : aiTraceTitle(trace);
   return (
     <div className="aiDecisionDebugContent">
-      <div className="aiDecisionDebugTraceHead">
-        <strong>{title}</strong>
-        <span>
-          {new Date(trace.createdAt).toLocaleTimeString("de-DE", {
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-          })}
-        </span>
-      </div>
-      <AiDecisionDebugRows rows={metaRows} />
-      <AiDecisionDebugChips
-        title="Hinweise"
-        items={statusWarnings}
-        tone="warning"
+      <AiDecisionDebugCollapsibleSection
+        title="Übersicht"
+        summary={overviewSummary}
+        defaultOpen
+      >
+        <div className="aiDecisionDebugTraceHead">
+          <strong>{title}</strong>
+          <span>
+            {new Date(trace.createdAt).toLocaleTimeString("de-DE", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit",
+            })}
+          </span>
+        </div>
+        <AiDecisionDebugRows rows={metaRows} />
+        <AiDecisionDebugChips
+          title="Hinweise"
+          items={statusWarnings}
+          tone="warning"
+        />
+        <AiDecisionDebugChips title="Gründe" items={visibleReasons} />
+        <AiDecisionDebugChips title="Ausschlüsse" items={relevantExclusions} />
+      </AiDecisionDebugCollapsibleSection>
+      <AiDecisionDebugPlanLayer
+        detail={detail}
+        planLayer={planLayer}
+        defaultOpen
       />
-      <AiDecisionDebugChips title="Gründe" items={visibleReasons} />
-      <AiDecisionDebugChips title="Ausschlüsse" items={relevantExclusions} />
-      <AiDecisionDebugPlanLayer detail={detail} defaultOpen />
       <AiDecisionDebugRunPlan detail={detail} />
       <AiDecisionDebugDeckStrategy detail={detail} />
       {actionRows.length > 0 ? (
@@ -681,7 +717,105 @@ type AiDecisionDebugPlanEntry = {
   scores: Array<[string, string]>;
 };
 
+type AiDecisionDebugPlanLayerView = {
+  summaryRows: Array<[string, string]>;
+  entries: AiDecisionDebugPlanEntry[];
+  fallbackItems: string[];
+};
+
 const AI_DECISION_DEBUG_TACTICAL_PLAN_ITEM_LIMIT = Number.MAX_SAFE_INTEGER;
+
+function aiDecisionDebugMetaRowValue(
+  rows: Array<[string, string]>,
+  label: string,
+): string | undefined {
+  return rows.find(([rowLabel]) => rowLabel === label)?.[1];
+}
+
+function aiDecisionDebugOverviewSummary(
+  metaRows: Array<[string, string]>,
+  planLayer: AiDecisionDebugPlanLayerView,
+  detail: Record<string, unknown>,
+): string {
+  const selectedPlan = planLayer.entries.find((entry) => entry.selected);
+  const planLabel =
+    selectedPlan !== undefined
+      ? aiDecisionDebugPlanTitle(selectedPlan)
+      : aiDecisionDebugMetaRowValue(metaRows, "Plan");
+  const scoreLabel = aiDecisionDebugMetaRowValue(metaRows, "Score");
+  const handLabel = aiDecisionDebugHandSummary(detail);
+  const parts = uniqueDisplayStrings(
+    [
+      planLabel && planLabel !== "-" ? planLabel : undefined,
+      scoreLabel && scoreLabel !== "-"
+        ? `Score ${scoreLabel}`
+        : selectedPlan
+          ? aiDecisionDebugPlanScoreLabel(selectedPlan)
+          : undefined,
+      aiDecisionDebugPlanCandidateSummary(planLayer),
+      handLabel,
+    ].filter((part): part is string => Boolean(part)),
+  );
+  return parts.join(" · ");
+}
+
+function aiDecisionDebugHandSummary(
+  detail: Record<string, unknown>,
+): string | undefined {
+  const handCount = aiDecisionDebugMetaRowValue(
+    aiDecisionDebugPrivateHandExport(detail).rows,
+    "Handkarten",
+  );
+  if (!handCount || handCount === "-") return undefined;
+  return handCount.includes("Karte") ? handCount : `${handCount} Handkarten`;
+}
+
+function aiDecisionDebugPlanCandidateSummary(
+  planLayer: AiDecisionDebugPlanLayerView,
+): string | undefined {
+  if (planLayer.entries.length === 0) {
+    return aiDecisionDebugMetaRowValue(planLayer.summaryRows, "Plan-Kandidaten")
+      ?.replace(/\s*\(.*\)\s*$/, "");
+  }
+  const blockedPlans = planLayer.entries.filter(
+    (entry) => entry.status === "blocked",
+  ).length;
+  return blockedPlans > 0
+    ? `${planLayer.entries.length} Pläne · ${blockedPlans} blockiert`
+    : `${planLayer.entries.length} Pläne`;
+}
+
+function aiDecisionDebugPlanLayerSummary(
+  planLayer: AiDecisionDebugPlanLayerView,
+): string {
+  const selectedPlan = planLayer.entries.find((entry) => entry.selected);
+  const selectedLabel =
+    selectedPlan !== undefined
+      ? [
+          aiDecisionDebugPlanTitle(selectedPlan),
+          aiDecisionDebugPlanScoreLabel(selectedPlan),
+        ]
+          .filter(Boolean)
+          .join(" · ")
+      : aiDecisionDebugMetaRowValue(planLayer.summaryRows, "Ausgewählter Plan");
+  return uniqueDisplayStrings(
+    [
+      selectedLabel,
+      aiDecisionDebugPlanCandidateSummary(planLayer),
+    ].filter((part): part is string => Boolean(part)),
+  ).join(" · ");
+}
+
+function aiDecisionDebugPlanScoreLabel(
+  plan: AiDecisionDebugPlanEntry,
+): string | undefined {
+  if (plan.priority === undefined) return undefined;
+  return `Bewertung ${aiDecisionDebugFormatScore(plan.priority)}`;
+}
+
+function aiDecisionDebugFormatScore(value: number): string {
+  return Number.isInteger(value) ? value.toFixed(0) : value.toFixed(2);
+}
 
 function aiDecisionDebugSemanticRankingLabel(
   alternative: Record<string, unknown>,
@@ -1155,12 +1289,14 @@ function aiDecisionDebugPrivateHandAvailabilityLabel(
 
 function AiDecisionDebugPlanLayer({
   detail,
+  planLayer: providedPlanLayer,
   defaultOpen = true,
 }: {
   detail: Record<string, unknown>;
+  planLayer?: AiDecisionDebugPlanLayerView;
   defaultOpen?: boolean;
 }) {
-  const planLayer = aiDecisionDebugPlanLayer(detail);
+  const planLayer = providedPlanLayer ?? aiDecisionDebugPlanLayer(detail);
   if (
     planLayer.summaryRows.length === 0 &&
     planLayer.entries.length === 0 &&
@@ -1170,6 +1306,7 @@ function AiDecisionDebugPlanLayer({
   return (
     <AiDecisionDebugCollapsibleSection
       title="Planebene"
+      summary={aiDecisionDebugPlanLayerSummary(planLayer)}
       defaultOpen={defaultOpen}
     >
       {planLayer.summaryRows.length > 0 ? (
@@ -1191,9 +1328,7 @@ function AiDecisionDebugPlanLayer({
                   <span>
                     {[
                       aiDecisionDebugPlanSecondaryLabel(plan, titleUsesTarget),
-                      plan.priority !== undefined
-                        ? `Priorität ${plan.priority.toFixed(0)}`
-                        : undefined,
+                      aiDecisionDebugPlanScoreLabel(plan),
                       aiDecisionDebugPlanStatusLabel(plan.status),
                     ]
                       .filter(Boolean)
@@ -1235,8 +1370,8 @@ function AiDecisionDebugPlanLayer({
                   </div>
                 ) : null}
                 {plan.scores.length > 0 ? (
-                  <details className="aiDecisionDebugActionDetails">
-                    <summary>Plan-Score</summary>
+                  <details className="aiDecisionDebugActionDetails" open>
+                    <summary>Bewertungsfaktoren</summary>
                     <AiDecisionDebugRows rows={plan.scores} />
                   </details>
                 ) : null}
@@ -1256,11 +1391,9 @@ function AiDecisionDebugPlanLayer({
   );
 }
 
-function aiDecisionDebugPlanLayer(detail: Record<string, unknown>): {
-  summaryRows: Array<[string, string]>;
-  entries: AiDecisionDebugPlanEntry[];
-  fallbackItems: string[];
-} {
+function aiDecisionDebugPlanLayer(
+  detail: Record<string, unknown>,
+): AiDecisionDebugPlanLayerView {
   const longTermPlan = safeStringList(detail.longTermPlan, 12);
   const tacticalPlanItems = aiDecisionDebugDetailSectionItems(
     detail,
@@ -1284,10 +1417,11 @@ function aiDecisionDebugPlanLayer(detail: Record<string, unknown>): {
     selectedEntry?.step ??
     aiDecisionDebugTagValue(items, "selected_step_kind") ??
     aiDecisionDebugTagValue(items, "tactical_step");
-  const selectedPriority =
-    selectedEntry?.priority !== undefined
-      ? ` · Priorität ${selectedEntry.priority.toFixed(0)}`
-      : "";
+  const selectedScoreLabel =
+    selectedEntry !== undefined
+      ? aiDecisionDebugPlanScoreLabel(selectedEntry)
+      : undefined;
+  const selectedPriority = selectedScoreLabel ? ` · ${selectedScoreLabel}` : "";
   const previousType = aiDecisionDebugTagValue(items, "previous_plan_type");
   const previousStatus = aiDecisionDebugTagValue(items, "previous_plan_status");
   const previousTtl = aiDecisionDebugTagValue(items, "previous_plan_ttl");
@@ -1746,10 +1880,12 @@ function aiDecisionDebugPlanCapabilityLabel(value: string): string {
 
 function AiDecisionDebugCollapsibleSection({
   title,
+  summary,
   children,
   defaultOpen = true,
 }: {
   title: string;
+  summary?: string;
   children: ReactNode;
   defaultOpen?: boolean;
 }) {
@@ -1760,6 +1896,9 @@ function AiDecisionDebugCollapsibleSection({
     >
       <summary>
         <strong>{title}</strong>
+        {summary ? (
+          <span className="aiDecisionDebugSectionSummary">{summary}</span>
+        ) : null}
       </summary>
       {children}
     </details>

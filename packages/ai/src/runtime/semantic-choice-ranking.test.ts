@@ -103,6 +103,63 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideChoice).toBeUndefined();
   });
 
+  it("lets explicit runner economy commitments interrupt generic central pressure", () => {
+    const broker = legalAction("broker-load", "trigger_ability");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const brokerChoice = choice(broker, 2400, [
+      ...scoreComponentEvidence("runner_bank_investment_commitment"),
+    ]);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [brokerChoice, choice(run, 950)],
+      centralRunMapping([run]),
+      brokerChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("broker-load");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe("run-rd");
+    expect(result.overrideBlockedReason).toBeUndefined();
+  });
+
+  it("lets no-run economy setup hold interrupt generic central pressure", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const gainChoice = choice(gain, 1300, [
+      ...scoreComponentEvidence("runner_no_run_economy_setup_hold"),
+    ]);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [gainChoice, choice(run, -1000)],
+      centralRunMapping([run]),
+      gainChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("gain");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe("run-rd");
+    expect(result.overrideBlockedReason).toBeUndefined();
+  });
+
+  it("does not let economy commitments bypass coverage-plan dominance", () => {
+    const prepare = legalAction("prepare-shell-traders", "trigger_ability");
+    const broker = legalAction("broker-load", "trigger_ability");
+    const brokerChoice = choice(broker, 8200, [
+      ...scoreComponentEvidence("runner_bank_investment_commitment"),
+    ]);
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [brokerChoice, choice(prepare, 0)],
+      coverageMapping([prepare]),
+      brokerChoice,
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("prepare-shell-traders");
+    expect(result.overrideBlockedChoice?.action.actionId).toBe("broker-load");
+    expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
   it("lets known-agenda runs override mapped coverage setup events", () => {
     const bodyweight = legalAction("bodyweight", "play_event");
     const run = legalAction("run-hq", "start_run", { serverId: "hq" });
@@ -370,6 +427,12 @@ function creditBaseMapping(
   legalActions: LegalAction[],
 ): PlanStepMappingResult {
   return planMapping("runner.build_credit_base", legalActions);
+}
+
+function centralRunMapping(
+  legalActions: LegalAction[],
+): PlanStepMappingResult {
+  return planMapping("runner.opportunistic_central_run", legalActions);
 }
 
 function bestHandCardMapping(

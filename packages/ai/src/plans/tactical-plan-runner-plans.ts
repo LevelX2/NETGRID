@@ -40,6 +40,7 @@ import { runnerCreditBasePlans } from "./tactical-plan-runner-credit-base";
 import { runnerBreakerCoverageStep } from "./tactical-plan-runner-breaker-coverage-step";
 import {
   assessRunnerPressureBudget,
+  runnerCentralRunOpportunityFloor,
   runnerAdjustedPlanPriority,
   runnerEconomyGoalPriority,
   runnerPressureProbeAllowance,
@@ -641,17 +642,24 @@ export function buildRunnerTacticalPlans(
     const basePriority = serverId === "rd" ? 760 : 740;
     const pressureGoal = runnerPressureGoalForServer(context, serverId);
     const strategicBoost = tacticalGoalPriorityBoost(pressureGoal);
+    const rawPriority = runnerAdjustedPlanPriority(
+      context,
+      action,
+      basePriority + pressureAllowance.priorityBonus + strategicBoost,
+    );
+    const opportunityFloor = runnerCentralRunOpportunityFloor(context, action);
+    const opportunityFloorBoost = opportunityFloor
+      ? Math.max(0, opportunityFloor.priority - rawPriority)
+      : 0;
     plans.push(
       createTacticalPlan({
         planId: `runner.opportunistic_central_run:${serverId}`,
         side: "runner",
         type: "runner.opportunistic_central_run",
         status: "active",
-        priority: runnerAdjustedPlanPriority(
-          context,
-          action,
-          basePriority + pressureAllowance.priorityBonus + strategicBoost,
-        ),
+        priority: opportunityFloor
+          ? Math.max(rawPriority, opportunityFloor.priority)
+          : rawPriority,
         horizonTurns: 1,
         target: { kind: "server", id: serverId },
         currentStep: runnerRunTargetCurrentStep(context, action, {
@@ -669,11 +677,32 @@ export function buildRunnerTacticalPlans(
           ...runnerRunTargetPlanEvidence(context, action),
           ...tacticalGoalEvidence(pressureGoal),
           ...runnerGoalEvidence,
+          ...(opportunityFloor?.evidence ?? []),
         ],
-        scoreBreakdown: tacticalGoalScoreBreakdown(
-          pressureGoal,
-          strategicBoost,
-        ),
+        scoreBreakdown: [
+          ...runnerRunTargetPlanScoreBreakdown(context, action, basePriority),
+          ...(pressureAllowance.priorityBonus > 0
+            ? [
+                {
+                  key: "runner_pressure_probe_allowance",
+                  label: "Pressure probe allowance",
+                  value: pressureAllowance.priorityBonus,
+                  reason: pressureAllowance.evidence.join("|"),
+                },
+              ]
+            : []),
+          ...tacticalGoalScoreBreakdown(pressureGoal, strategicBoost),
+          ...(opportunityFloor
+            ? [
+                {
+                  key: "runner_rd_unknown_low_cost_opportunity_floor",
+                  label: "R&D unbekannte Topkarte",
+                  value: opportunityFloorBoost,
+                  reason: opportunityFloor.reason,
+                },
+              ]
+            : []),
+        ],
         stateVersion,
       }),
     );
