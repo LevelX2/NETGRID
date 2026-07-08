@@ -278,7 +278,6 @@ function runnerPlanTypeRequiresPlanDominance(type: TacticalPlan["type"]): boolea
     type === "runner.restore_hand_buffer" ||
     type === "runner.develop_hand_card" ||
     type === "runner.play_best_hand_card" ||
-    type === "runner.build_credit_base" ||
     type === "runner.build_credit_bank" ||
     type === "runner.cash_out_credit_bank"
   );

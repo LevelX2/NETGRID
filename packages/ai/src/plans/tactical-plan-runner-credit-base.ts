@@ -13,6 +13,7 @@ import {
   createPlanStep,
   createTacticalPlan,
 } from "./tactical-plan-builders";
+import { runnerMeaningfulRunOpportunityAvailable } from "./tactical-plan-runner-support-actions";
 import type {
   TacticalPlan,
   TacticalPlanBuildContext,
@@ -36,6 +37,9 @@ export function runnerCreditBasePlans(
   const drawOverflow = assessRunnerDrawOverflow(context);
   const drawOverflowCreditPressure =
     drawOverflow && runnerDrawOverflowSupportsCreditPlan(drawOverflow);
+  if (runnerMeaningfulRunOpportunityAvailable(context)) {
+    return [];
+  }
   if (
     (!creditBase || creditBase.economyPriority === "low") &&
     !drawOverflowCreditPressure

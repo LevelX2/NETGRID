@@ -18,6 +18,7 @@ import {
   actionServerId,
   isRemoteServer,
 } from "./tactical-plan-server-targets";
+import { runnerMeaningfulRunOpportunityAvailable } from "./tactical-plan-runner-support-actions";
 import type {
   TacticalPlan,
   TacticalPlanBuildContext,
@@ -136,6 +137,12 @@ export function runnerHandBufferPlans(
   if (runnerHasNonBasicHandBufferAlternative(context.input)) return [];
   const assessment = runnerHandBufferAssessment(context.input);
   if (!assessment.active) return [];
+  if (
+    !assessment.damagePressure &&
+    runnerMeaningfulRunOpportunityAvailable(context)
+  ) {
+    return [];
+  }
   if (
     !assessment.damagePressure &&
     runnerEconomyActionPreferredOverHandBuffer(context, dependencies)

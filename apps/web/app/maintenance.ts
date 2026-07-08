@@ -118,12 +118,15 @@ export type MaintenanceAiTraceDetail = MaintenanceAiTraceIndexEntry & {
 
 export type MaintenanceAiTraceActionRow = {
   key: string;
+  actionId: string;
+  actionType: string;
   rank: number;
   label: string;
   selected: boolean;
   debugSelected: boolean;
   excluded: boolean;
   source: string;
+  score?: string;
   priority: string;
   metrics: string[];
   scoreRows: Array<[string, string]>;
@@ -441,12 +444,15 @@ export function aiTraceActionRows(detail: Record<string, unknown>, limit = 8): M
       const debugOnlySelection = debugSelected && !selected;
       return {
         key: `${rank}:${actionId}`,
+        actionId,
+        actionType,
         rank,
         label: aiTraceActionLabel(rawLabel, actionType, sourceTitle, economy),
         selected,
         debugSelected,
         excluded,
         source: sourceTitle || (typeof action.source === "string" ? action.source : "-"),
+        ...(typeof action.score === "number" && Number.isFinite(action.score) ? { score: action.score.toFixed(2) } : {}),
         priority: excluded ? "-" : typeof action.priority === "number" && Number.isFinite(action.priority) ? action.priority.toFixed(0) : "-",
         metrics: aiTraceActionMetrics(economy),
         scoreRows: aiTraceScoreRows(action, 12),

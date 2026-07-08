@@ -2228,6 +2228,53 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("treats generic credit and draw setup as support when open R&D is available", () => {
+    const rdRun = legalAction("run-rd", "runner", "start_run", {
+      serverId: "rd",
+    });
+    const draw = legalAction("draw", "runner", "draw_card");
+    const gain = legalAction("gain", "runner", "gain_credit");
+    const input = aiInput("runner", [rdRun, draw, gain]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.gripOrHq = [
+      visibleCard("single-card", "runner", "event"),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerEconomyPosture: runnerEconomyPosture({
+        currentCredits: 1,
+        usefulHandCardsBlockedByCredits: 1,
+        recommendation: "fund_useful_hand_card",
+        economyPriority: "high",
+      }),
+      candidates: [
+        candidateForAction(rdRun),
+        candidateForUntargetedAction(draw),
+        candidateForUntargetedAction(gain),
+      ],
+    });
+
+    expect(result.selectedPlan).toMatchObject({
+      planId: "runner.opportunistic_central_run:rd",
+      type: "runner.opportunistic_central_run",
+    });
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
+      rdRun.actionId,
+    );
+    expect(result.planAlternatives.map((plan) => plan.type)).not.toContain(
+      "runner.build_credit_base",
+    );
+    expect(result.planAlternatives.map((plan) => plan.type)).not.toContain(
+      "runner.restore_hand_buffer",
+    );
+  });
+
   it("reduces draw overflow penalty when clear discard fodder covers the overflow", () => {
     const rdRun = legalAction("run-rd", "runner", "start_run", {
       serverId: "rd",
@@ -2791,23 +2838,9 @@ describe("tactical plan model", () => {
         }),
       ]),
     );
-    expect(creditPlan?.scoreBreakdown).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "runner_credit_base",
-          value: 930,
-        }),
-        expect.objectContaining({
-          key: "previous_plan_continuity_suppressed",
-        }),
-      ]),
-    );
-    expect(creditPlan?.scoreBreakdown).not.toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          key: "previous_plan_continuity",
-        }),
-      ]),
+    expect(creditPlan).toBeUndefined();
+    expect(result.planProgressionReason).toBe(
+      "previous_credit_base_interrupted_by_rd_opportunity",
     );
   });
 

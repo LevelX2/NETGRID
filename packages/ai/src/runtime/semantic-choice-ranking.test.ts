@@ -51,6 +51,22 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
+  it("lets meaningful runs override generic creditbase mapping", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(run, 6800), choice(gain, 5400)],
+      creditBaseMapping([gain]),
+      choice(run, 6800),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-rd");
+    expect(result.overriddenMappedChoice?.action.actionId).toBe("gain");
+    expect(result.overrideReason).toBe("semantic_score_gap");
+  });
+
   it("keeps best-hand-card plan mapping over off-plan basic credit", () => {
     const install = legalAction("install-economy", "install_card");
     const gain = legalAction("gain", "gain_credit");

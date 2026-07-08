@@ -1932,6 +1932,7 @@ export type AiDecisionActionAlternative = {
   sourceTitle?: string;
   selected: boolean;
   excluded?: boolean;
+  score?: number;
   priority?: number;
   scoreBreakdown?: AiDecisionScoreComponent[];
   whyChosen?: string[];
@@ -2148,9 +2149,11 @@ function sanitizeAiDecisionActionAlternatives(
         const sanitized = sanitizeAiDecisionDebugString(source[field]);
         if (sanitized !== undefined) result[field] = sanitized;
       }
-      const priority = source.priority;
-      if (typeof priority === "number" && Number.isFinite(priority))
-        result.priority = priority;
+      for (const field of ["score", "priority"] as const) {
+        const numberValue = source[field];
+        if (typeof numberValue === "number" && Number.isFinite(numberValue))
+          result[field] = numberValue;
+      }
       const scoreBreakdown = sanitizeAiDecisionScoreComponents(
         source.scoreBreakdown,
       );

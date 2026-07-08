@@ -30,6 +30,7 @@ import {
   findForbiddenMaintenanceMarkers,
   safeStringList,
   type MaintenanceAiTraceDetail,
+  type MaintenanceAiTraceActionRow,
 } from "../../app/maintenance";
 import { copyTextToClipboard } from "../../lib/clipboard";
 import {
@@ -379,18 +380,21 @@ function aiDecisionDebugWindowHeaderStatusLabel(
     selectedPlan !== undefined
       ? aiDecisionDebugPlanTitle(selectedPlan)
       : aiDecisionDebugMetaRowValue(metaRows, "Plan");
-  const scoreLabel = aiDecisionDebugOverlayScoreValue(metaRows);
+  const planScoreLabel =
+    selectedPlan !== undefined
+      ? aiDecisionDebugPlanScoreLabel(selectedPlan)
+      : undefined;
+  const actionScoreLabel = aiDecisionDebugOverlayScoreValue(metaRows);
   const parts = uniqueDisplayStrings(
     [
       actionLabel,
       planLabel && planLabel !== "-" && planLabel !== actionLabel
         ? planLabel
         : undefined,
-      scoreLabel && scoreLabel !== "-"
-        ? `${aiDecisionDebugOverlayScoreLabel(metaRows)} ${scoreLabel}`
-        : selectedPlan
-          ? aiDecisionDebugPlanScoreLabel(selectedPlan)
-          : undefined,
+      planScoreLabel,
+      actionScoreLabel && actionScoreLabel !== "-"
+        ? `${aiDecisionDebugOverlayScoreLabel(metaRows)} ${actionScoreLabel}`
+        : undefined,
     ].filter((part): part is string => Boolean(part)),
   );
   return parts.length > 0 ? parts.join(" · ") : "KI-Entscheidung";
@@ -406,6 +410,8 @@ function AiDecisionDebugTraceView({
   const detail = trace.detail;
   const metaRows = aiDecisionDebugOverlayMetaRows(trace, mode);
   const actionRows = aiTraceActionRows(detail, mode === "preview" ? 32 : 8);
+  const planFocusActionRows =
+    mode === "preview" ? actionRows : aiTraceActionRows(detail, 32);
   const rankedAlternatives = aiDecisionDebugRecordList(
     detail.rankedAlternatives,
   ).slice(0, mode === "preview" ? 12 : 4);
@@ -444,7 +450,11 @@ function AiDecisionDebugTraceView({
             })}
           </span>
         </div>
-        <AiDecisionDebugRows rows={metaRows} />
+        <AiDecisionDebugSelectedPlanOverview
+          planLayer={planLayer}
+          actionRows={planFocusActionRows}
+          metaRows={metaRows}
+        />
         <AiDecisionDebugChips
           title="Hinweise"
           items={statusWarnings}
@@ -547,7 +557,7 @@ function serializeAiDecisionDebugVisibleJsonExport(
   exportedAt: string,
 ): string {
   const detail = trace.detail;
-  const actionRows = aiTraceActionRows(detail, mode === "preview" ? 32 : 8);
+  const actionRows = aiTraceActionRows(detail, 32);
   const rankedAlternatives = aiDecisionDebugRecordList(
     detail.rankedAlternatives,
   ).slice(0, mode === "preview" ? 12 : 4);
@@ -592,6 +602,7 @@ function serializeAiDecisionDebugVisibleJsonExport(
       ),
       planLayer: {
         summaryRows: planLayer.summaryRows,
+        mappedActionIds: planLayer.mappedActionIds,
         plans: planLayer.entries.map(aiDecisionDebugPlanExport),
         rawDiagnostic: planLayer.fallbackItems,
       },
@@ -602,7 +613,10 @@ function serializeAiDecisionDebugVisibleJsonExport(
         selected: action.selected,
         debugSelected: action.debugSelected,
         excluded: action.excluded,
+        actionId: action.actionId,
+        actionType: action.actionType,
         source: action.source,
+        score: action.score,
         priority: action.priority,
         metrics: action.metrics,
         reason: action.reason,
@@ -691,7 +705,7 @@ function aiDecisionDebugOverlayMetaRows(
     .filter(([label]) => AI_DECISION_DEBUG_OVERLAY_META_LABELS.has(label))
     .filter(([label]) => mode !== "preview" || !hiddenPreviewLabels.has(label))
     .map(([label, value]) =>
-      mode === "preview" && label === "Score"
+      label === "Score"
         ? ["Action-Rohscore", value]
         : [label, value],
     );
@@ -726,6 +740,7 @@ type AiDecisionDebugPlanLayerView = {
   summaryRows: Array<[string, string]>;
   entries: AiDecisionDebugPlanEntry[];
   fallbackItems: string[];
+  mappedActionIds: string[];
 };
 
 const AI_DECISION_DEBUG_TACTICAL_PLAN_ITEM_LIMIT = Number.MAX_SAFE_INTEGER;
@@ -747,16 +762,19 @@ function aiDecisionDebugOverviewSummary(
     selectedPlan !== undefined
       ? aiDecisionDebugPlanTitle(selectedPlan)
       : aiDecisionDebugMetaRowValue(metaRows, "Plan");
-  const scoreLabel = aiDecisionDebugOverlayScoreValue(metaRows);
+  const planScoreLabel =
+    selectedPlan !== undefined
+      ? aiDecisionDebugPlanScoreLabel(selectedPlan)
+      : undefined;
+  const actionScoreLabel = aiDecisionDebugOverlayScoreValue(metaRows);
   const handLabel = aiDecisionDebugHandSummary(detail);
   const parts = uniqueDisplayStrings(
     [
       planLabel && planLabel !== "-" ? planLabel : undefined,
-      scoreLabel && scoreLabel !== "-"
-        ? `${aiDecisionDebugOverlayScoreLabel(metaRows)} ${scoreLabel}`
-        : selectedPlan
-          ? aiDecisionDebugPlanScoreLabel(selectedPlan)
-          : undefined,
+      planScoreLabel,
+      actionScoreLabel && actionScoreLabel !== "-"
+        ? `${aiDecisionDebugOverlayScoreLabel(metaRows)} ${actionScoreLabel}`
+        : undefined,
       aiDecisionDebugPlanCandidateSummary(planLayer),
       handLabel,
     ].filter((part): part is string => Boolean(part)),
@@ -826,6 +844,286 @@ function aiDecisionDebugPlanLayerSummary(
       aiDecisionDebugPlanCandidateSummary(planLayer),
     ].filter((part): part is string => Boolean(part)),
   ).join(" · ");
+}
+
+function AiDecisionDebugSelectedPlanOverview({
+  planLayer,
+  actionRows,
+  metaRows,
+}: {
+  planLayer: AiDecisionDebugPlanLayerView;
+  actionRows: MaintenanceAiTraceActionRow[];
+  metaRows: Array<[string, string]>;
+}) {
+  const selectedPlan = planLayer.entries.find((entry) => entry.selected);
+  const planActions = aiDecisionDebugPlanRelevantActions(
+    planLayer,
+    actionRows,
+  );
+  const selectedAction =
+    planActions.find((action) => action.selected) ??
+    actionRows.find((action) => action.selected);
+  if (!selectedPlan && planActions.length === 0) {
+    return <AiDecisionDebugRows rows={metaRows} />;
+  }
+  const titleUsesTarget = selectedPlan
+    ? aiDecisionDebugPlanTitleUsesTarget(selectedPlan)
+    : false;
+  const selectedPlanRows = selectedPlan
+    ? aiDecisionDebugSelectedPlanRows(
+        selectedPlan,
+        planLayer,
+        titleUsesTarget,
+        selectedAction,
+      )
+    : metaRows;
+  return (
+    <div className="aiDecisionDebugPlanFocus">
+      <div className="aiDecisionDebugPlanFocusCard">
+        <div>
+          <strong>Ausgewählter Plan</strong>
+          <span>
+            {selectedPlan
+              ? [
+                  aiDecisionDebugPlanTitle(selectedPlan),
+                  aiDecisionDebugPlanScoreLabel(selectedPlan),
+                  aiDecisionDebugPlanStatusLabel(selectedPlan.status),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
+              : aiDecisionDebugMetaRowValue(metaRows, "Plan") ?? "-"}
+          </span>
+        </div>
+        <AiDecisionDebugRows rows={selectedPlanRows} />
+        {selectedPlan?.scores.length ? (
+          <details className="aiDecisionDebugActionDetails" open>
+            <summary>Plan-Bewertungsfaktoren</summary>
+            <AiDecisionDebugRows rows={selectedPlan.scores} />
+          </details>
+        ) : null}
+      </div>
+      <div className="aiDecisionDebugPlanActions">
+        <div className="aiDecisionDebugPlanActionsTitle">
+          <strong>Planrelevante Aktionen</strong>
+          <span>
+            {planActions.length > 0
+              ? `${planActions.length} bewertete LegalAction${planActions.length === 1 ? "" : "s"}`
+              : "keine gemappte LegalAction im Debug-Ranking"}
+          </span>
+        </div>
+        {planActions.length > 0 ? (
+          <div className="aiDecisionDebugActions">
+            {planActions.map((action) => (
+              <div
+                className={`aiDecisionDebugAction ${action.selected ? "selected" : ""} ${action.excluded ? "excluded" : ""}`}
+                key={`plan-action:${action.key}`}
+              >
+                <div>
+                  <strong>
+                    #{action.rank} {action.label}
+                  </strong>
+                  <span>
+                    {aiDecisionDebugPlanActionRelation(action, planLayer)}
+                  </span>
+                </div>
+                <AiDecisionDebugRows
+                  rows={aiDecisionDebugPlanActionRows(action)}
+                />
+                <p>{aiDecisionDebugPlanActionReasonLabel(action.reason)}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="aiDecisionDebugPlanFocusEmpty">
+            Der ausgewählte Plan hat in diesem Snapshot keine sichtbare
+            LegalAction gemappt oder bewertet.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function aiDecisionDebugSelectedPlanRows(
+  plan: AiDecisionDebugPlanEntry,
+  planLayer: AiDecisionDebugPlanLayerView,
+  titleUsesTarget: boolean,
+  selectedAction: MaintenanceAiTraceActionRow | undefined,
+): Array<[string, string]> {
+  return [
+    ["Plan", aiDecisionDebugPlanTitle(plan)],
+    ["Planbewertung", aiDecisionDebugPlanScoreLabel(plan) ?? "-"],
+    ["Status", aiDecisionDebugPlanStatusLabel(plan.status)],
+    ...(selectedAction
+      ? ([
+          [
+            "Ausgelöste Action",
+            aiDecisionDebugSelectedActionSummary(selectedAction),
+          ],
+        ] as Array<[string, string]>)
+      : []),
+    ...(plan.step
+      ? ([["Aktueller Schritt", aiDecisionDebugPlanStepLabel(plan.step, plan)]] as Array<
+          [string, string]
+        >)
+      : []),
+    ...(aiDecisionDebugPlanSecondaryLabel(plan, titleUsesTarget)
+      ? ([
+          [
+            titleUsesTarget ? "Rolle" : "Ziel",
+            aiDecisionDebugPlanSecondaryLabel(plan, titleUsesTarget) ?? "",
+          ],
+        ] as Array<[string, string]>)
+      : []),
+    ...(planLayer.mappedActionIds.length > 0
+      ? ([
+          [
+            "Gemappte LegalActions",
+            String(planLayer.mappedActionIds.length),
+          ],
+        ] as Array<[string, string]>)
+      : []),
+    ...aiDecisionDebugPlanSummaryRows(planLayer, [
+      "Step-Mapping",
+      "Vorheriger Plan",
+      "Fortschreibung",
+    ]),
+  ];
+}
+
+function aiDecisionDebugSelectedActionSummary(
+  action: MaintenanceAiTraceActionRow,
+): string {
+  return [
+    action.label,
+    action.score ? `Action-Score ${action.score}` : undefined,
+    action.priority !== "-" ? `Planangepasst ${action.priority}` : undefined,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+function aiDecisionDebugPlanSummaryRows(
+  planLayer: AiDecisionDebugPlanLayerView,
+  labels: string[],
+): Array<[string, string]> {
+  const labelSet = new Set(labels);
+  return planLayer.summaryRows.filter(([label]) => labelSet.has(label));
+}
+
+function aiDecisionDebugPlanRelevantActions(
+  planLayer: AiDecisionDebugPlanLayerView,
+  actionRows: MaintenanceAiTraceActionRow[],
+): MaintenanceAiTraceActionRow[] {
+  const mappedActionIds = new Set(planLayer.mappedActionIds);
+  return actionRows
+    .filter(
+      (action) =>
+        mappedActionIds.has(action.actionId) ||
+        action.selected ||
+        action.debugSelected ||
+        aiDecisionDebugActionHasSelectedPlanScore(action),
+    );
+}
+
+function aiDecisionDebugActionHasSelectedPlanScore(
+  action: MaintenanceAiTraceActionRow,
+): boolean {
+  return action.scoreRows.some(([label]) => label === "Plan-Auswahl");
+}
+
+function aiDecisionDebugPlanActionRelation(
+  action: MaintenanceAiTraceActionRow,
+  planLayer: AiDecisionDebugPlanLayerView,
+): string {
+  if (action.excluded) return "ausgeschlossen";
+  if (action.selected) return "gewählte Planaktion";
+  if (planLayer.mappedActionIds.includes(action.actionId))
+    return "vom Plan gemappt";
+  if (action.debugSelected) return "Debug-Auswahl";
+  return "planrelevant";
+}
+
+function aiDecisionDebugPlanActionRows(
+  action: MaintenanceAiTraceActionRow,
+): Array<[string, string]> {
+  const visibleComponentScore =
+    aiDecisionDebugActionVisibleComponentScore(action);
+  const planAdjustment = aiDecisionDebugActionPlanAdjustment(action);
+  return [
+    ...(action.score !== undefined
+      ? ([["Semantischer Action-Score", action.score]] as Array<
+          [string, string]
+        >)
+      : []),
+    ...(action.score === undefined && visibleComponentScore !== undefined
+      ? ([
+          [
+            "Sichtbare Action-Komponenten",
+            aiDecisionDebugFormatScore(visibleComponentScore),
+          ],
+        ] as Array<[string, string]>)
+      : []),
+    ...(planAdjustment !== undefined
+      ? ([
+          [
+            aiDecisionDebugPlanAdjustmentLabel(action),
+            aiDecisionDebugFormatScore(planAdjustment),
+          ],
+        ] as Array<[string, string]>)
+      : []),
+    ["Planangepasster Action-Score", action.priority],
+    [
+      "Action-Typ",
+      aiDecisionDebugActionTypeLabel(action.actionType) || action.actionType,
+    ],
+    ["Quelle", action.source],
+  ];
+}
+
+function aiDecisionDebugActionVisibleComponentScore(
+  action: MaintenanceAiTraceActionRow,
+): number | undefined {
+  const rawValues = action.scoreRows
+    .filter(([label]) => !aiDecisionDebugScoreRowIsPlanAdjustment(label))
+    .map(([, value]) => aiDecisionDebugScoreValue(value))
+    .filter((value): value is number => value !== undefined);
+  if (rawValues.length === 0) return undefined;
+  return rawValues.reduce((sum, value) => sum + value, 0);
+}
+
+function aiDecisionDebugActionPlanAdjustment(
+  action: MaintenanceAiTraceActionRow,
+): number | undefined {
+  const row = action.scoreRows.find(([label]) =>
+    aiDecisionDebugScoreRowIsPlanAdjustment(label),
+  );
+  return row ? aiDecisionDebugScoreValue(row[1]) : undefined;
+}
+
+function aiDecisionDebugPlanAdjustmentLabel(
+  action: MaintenanceAiTraceActionRow,
+): string {
+  return action.scoreRows.some(([label]) => label === "Plan-Auswahl")
+    ? "Plan-Zuschlag"
+    : "Plan-Abgleich";
+}
+
+function aiDecisionDebugScoreRowIsPlanAdjustment(label: string): boolean {
+  return label === "Plan-Auswahl" || label === "Plan-Abgleich";
+}
+
+function aiDecisionDebugScoreValue(value: string): number | undefined {
+  const parsed = Number(value.replace(",", "."));
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+function aiDecisionDebugPlanActionReasonLabel(reason: string): string {
+  const labels: Record<string, string> = {
+    selected_by_plan_mapping: "vom ausgewählten Plan ausgewählt",
+    plan_mismatch: "nicht Teil des aktuell ausgewählten Plans",
+  };
+  return labels[reason] ?? reason;
 }
 
 function aiDecisionDebugPlanScoreLabel(
@@ -1525,7 +1823,12 @@ function aiDecisionDebugPlanLayer(
     entries.length === 0
       ? items.filter((item) => !item.startsWith("plan_rank|")).slice(0, 16)
       : [];
-  return { summaryRows, entries, fallbackItems };
+  return {
+    summaryRows,
+    entries,
+    fallbackItems,
+    mappedActionIds: mappedActions?.split("|").filter(Boolean) ?? [],
+  };
 }
 
 function aiDecisionDebugParsePlanEntry(

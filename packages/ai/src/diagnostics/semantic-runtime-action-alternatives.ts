@@ -73,6 +73,7 @@ export function buildSemanticRuntimeActionAlternatives({
       source: String(choice.action.source),
       ...(sourceTitle ? { sourceTitle } : {}),
       selected,
+      score: choice.score,
       ...(choice.exclusion ? { excluded: true } : { priority: displayScore }),
       scoreBreakdown: [
         ...choice.scoreBreakdown,

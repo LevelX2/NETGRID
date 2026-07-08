@@ -35,6 +35,7 @@ describe("SemanticRuntimeActionAlternatives", () => {
       expect.objectContaining({
         actionId: "gain",
         selected: true,
+        score: 90,
         whyChosen: expect.arrayContaining([
           "semantic_runtime_actual",
           "rawSemanticScore:90",
@@ -47,6 +48,7 @@ describe("SemanticRuntimeActionAlternatives", () => {
       expect.objectContaining({
         actionId: "draw",
         selected: false,
+        score: 45,
         whyNot: expect.arrayContaining([
           "semantic_score_below_selected",
           "rawSemanticScore:45",
@@ -59,6 +61,7 @@ describe("SemanticRuntimeActionAlternatives", () => {
         actionId: "run-hq",
         selected: false,
         excluded: true,
+        score: 50,
         whyNot: expect.arrayContaining([
           "semantic_excluded:known_central_no_current_payoff",
           "hq_payoff_low",

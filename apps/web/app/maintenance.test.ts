@@ -135,6 +135,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
           label: "1 Credit nehmen",
           source: "basic_action",
           selected: true,
+          score: 65,
           priority: 65,
           whyChosen: ["selected_action"],
           economy: {
@@ -154,6 +155,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
           source: "visible_card",
           sourceTitle: "Broker",
           selected: false,
+          score: 42,
           priority: 42,
           whyNot: ["pool_build_deferred_for_credit_need"],
           economy: {
@@ -171,19 +173,25 @@ describe("Backend 0.5 maintenance UI helpers", () => {
 
     expect(rows).toHaveLength(2);
     expect(rows[0]).toMatchObject({
+      actionId: "runner.gain_credit",
+      actionType: "gain_credit",
       label: "Credit nehmen",
       selected: true,
       debugSelected: true,
       source: "basic_action",
+      score: "65.00",
       priority: "65",
       reason: "selected_action"
     });
     expect(rows[0]?.metrics).toEqual(["jetzt +1", "Pool nachher 0", "Bedarf acute"]);
     expect(rows[1]).toMatchObject({
+      actionId: "runner.broker.load",
+      actionType: "activated_card_ability",
       label: "Broker laden",
       selected: false,
       debugSelected: false,
       source: "Broker",
+      score: "42.00",
       priority: "42",
       reason: "pool_build_deferred_for_credit_need"
     });

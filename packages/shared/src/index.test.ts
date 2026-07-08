@@ -93,4 +93,26 @@ describe("AI decision debug sanitizing", () => {
     expect(sanitized?.detailSections).toHaveLength(16);
     expect(sanitized?.detailSections?.at(-1)?.id).toBe("section_16");
   });
+
+  it("keeps action alternative raw scores distinct from display priority", () => {
+    const sanitized = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      actionAlternatives: [
+        {
+          rank: 1,
+          actionId: "runner.gain_credit",
+          actionType: "gain_credit",
+          selected: true,
+          score: 979,
+          priority: 1229,
+        },
+      ],
+    });
+
+    expect(sanitized?.actionAlternatives?.[0]).toMatchObject({
+      score: 979,
+      priority: 1229,
+    });
+  });
 });
