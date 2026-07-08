@@ -1,4 +1,6 @@
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
+import { cardProvidesBreakerCoverage } from "./tactical-plan-breaker-cards";
+import { missingBreakerCoverageKind } from "./tactical-plan-breaker-coverage";
 import {
   assessRunnerDrawOverflow,
   runnerHandDevelopmentOverflowBonus,
@@ -7,6 +9,10 @@ import {
   createPlanStep,
   createTacticalPlan,
 } from "./tactical-plan-builders";
+import {
+  runNeedsBreakerCoverage,
+} from "./tactical-plan-run-reachability";
+import { actionServerId } from "./tactical-plan-server-targets";
 import type {
   TacticalPlan,
   TacticalPlanBuildContext,
@@ -94,62 +100,222 @@ export function runnerHandDevelopmentPlans(
   stateVersion: number,
   runnerGoalEvidence: readonly string[],
 ): TacticalPlan[] {
-  return (context.runnerHandDevelopmentEvaluations ?? [])
+  const usefulEvaluations = (context.runnerHandDevelopmentEvaluations ?? [])
     .filter(usefulLegalRunnerHandDevelopment)
-    .slice(0, 6)
-    .map((evaluation) =>
-      createTacticalPlan({
-        planId: `runner.develop_hand_card:${evaluation.cardInstanceId}`,
-        side: "runner",
-        type: "runner.develop_hand_card",
-        status: "active",
-        priority: runnerHandDevelopmentPlanPriority(context, evaluation),
-        horizonTurns: 1,
-        target: {
-          kind: "card",
-          id: evaluation.cardInstanceId,
-          label: runnerHandDevelopmentTargetLabel(evaluation),
-        },
-        currentStep: createPlanStep({
-          stepId: `install_development_card:${evaluation.cardInstanceId}`,
-          kind: "install_development_card",
-          desiredActionSemantics: [
-            "install.card",
-            "play.runner_event",
-            `runner_hand_development.${evaluation.developmentRole}`,
-          ],
-          rationale: [
-            `hand development role ${evaluation.developmentRole} is ${evaluation.currentNeed}`,
-            `hand development priority ${evaluation.priority}`,
-          ],
-        }),
-        evidence: [
-          `hand_development_role:${evaluation.developmentRole}`,
-          `hand_development_need:${evaluation.currentNeed}`,
-          `hand_development_fit:${evaluation.strategicFit}`,
-          `hand_development_priority:${evaluation.priority}`,
-          ...runnerEconomyRouteDevelopmentEvidence(context, evaluation),
-          ...(evaluation.persistentInstallEvaluation
-            ? [
-                `persistent_install_stackability:${evaluation.persistentInstallEvaluation.stackabilityClass}`,
-                `persistent_install_delta:${evaluation.persistentInstallEvaluation.capabilityDelta}`,
-                `persistent_install_duplicate:${evaluation.persistentInstallEvaluation.duplicateRole}`,
-                `persistent_install_fit:${evaluation.persistentInstallEvaluation.finalInstallFit}`,
-              ]
-            : []),
-          ...evaluation.evidence.slice(0, 6),
-          ...runnerGoalEvidence,
+    .filter(
+      (evaluation) =>
+        !runnerHandDevelopmentOwnedByBreakerCoverage(context, evaluation),
+    );
+  const bestEvaluation = runnerBestHandCardEvaluation(context, usefulEvaluations);
+  const bestPriority = bestEvaluation
+    ? runnerPlayBestHandCardPlanPriority(context, bestEvaluation)
+    : undefined;
+  const plans: TacticalPlan[] = [];
+  if (bestEvaluation) {
+    plans.push(
+      runnerHandDevelopmentPlan({
+        context,
+        evaluation: bestEvaluation,
+        type: "runner.play_best_hand_card",
+        planId: `runner.play_best_hand_card:${bestEvaluation.cardInstanceId}`,
+        stepId: `play_best_hand_card:${bestEvaluation.cardInstanceId}`,
+        priority: bestPriority ?? 0,
+        scoreKey: "runner_play_best_hand_card",
+        scoreLabel: "Runner best hand card",
+        extraDesiredSemantics: ["runner_hand.best_card"],
+        extraRationale: ["play the best currently useful legal hand card"],
+        extraEvidence: [
+          "best_hand_card_plan:true",
+          `best_hand_card_role:${bestEvaluation.developmentRole}`,
+          `best_hand_card_need:${bestEvaluation.currentNeed}`,
+          `best_hand_card_priority:${bestEvaluation.priority}`,
+          `best_hand_card_candidate_count:${usefulEvaluations.length}`,
         ],
-        scoreBreakdown: [
-          {
-            key: "runner_hand_development",
-            label: "Runner hand development",
-            value: runnerHandDevelopmentPlanPriority(context, evaluation),
-            reason: evaluation.developmentRole,
-          },
-        ],
+        runnerGoalEvidence,
         stateVersion,
       }),
+    );
+  }
+  const secondaryPriorityCeiling =
+    bestPriority !== undefined ? Math.max(0, bestPriority - 20) : undefined;
+  plans.push(
+    ...usefulEvaluations
+      .filter(
+        (evaluation) =>
+          evaluation.cardInstanceId !== bestEvaluation?.cardInstanceId,
+      )
+      .slice(0, bestEvaluation ? 5 : 6)
+      .map((evaluation) =>
+        runnerHandDevelopmentPlan({
+          context,
+          evaluation,
+          type: "runner.develop_hand_card",
+          planId: `runner.develop_hand_card:${evaluation.cardInstanceId}`,
+          stepId: `install_development_card:${evaluation.cardInstanceId}`,
+          priority:
+            secondaryPriorityCeiling !== undefined
+              ? Math.min(
+                  runnerHandDevelopmentPlanPriority(context, evaluation),
+                  secondaryPriorityCeiling,
+                )
+              : runnerHandDevelopmentPlanPriority(context, evaluation),
+          scoreKey: "runner_hand_development",
+          scoreLabel: "Runner hand development",
+          runnerGoalEvidence,
+          stateVersion,
+        }),
+      ),
+  );
+  return plans;
+}
+
+function runnerHandDevelopmentPlan(params: {
+  context: TacticalPlanBuildContext;
+  evaluation: RunnerHandDevelopmentEvaluation;
+  type: "runner.develop_hand_card" | "runner.play_best_hand_card";
+  planId: string;
+  stepId: string;
+  priority: number;
+  scoreKey: string;
+  scoreLabel: string;
+  extraDesiredSemantics?: readonly string[];
+  extraRationale?: readonly string[];
+  extraEvidence?: readonly string[];
+  runnerGoalEvidence: readonly string[];
+  stateVersion: number;
+}): TacticalPlan {
+  const { context, evaluation } = params;
+  return createTacticalPlan({
+    planId: params.planId,
+    side: "runner",
+    type: params.type,
+    status: "active",
+    priority: params.priority,
+    horizonTurns: 1,
+    target: {
+      kind: "card",
+      id: evaluation.cardInstanceId,
+      label: runnerHandDevelopmentTargetLabel(evaluation),
+    },
+    currentStep: createPlanStep({
+      stepId: params.stepId,
+      kind: "install_development_card",
+      desiredActionSemantics: [
+        "install.card",
+        "play.runner_event",
+        `runner_hand_development.${evaluation.developmentRole}`,
+        ...(params.extraDesiredSemantics ?? []),
+      ],
+      rationale: [
+        `hand development role ${evaluation.developmentRole} is ${evaluation.currentNeed}`,
+        `hand development priority ${evaluation.priority}`,
+        ...(params.extraRationale ?? []),
+      ],
+    }),
+    evidence: [
+      `hand_development_role:${evaluation.developmentRole}`,
+      `hand_development_need:${evaluation.currentNeed}`,
+      `hand_development_fit:${evaluation.strategicFit}`,
+      `hand_development_priority:${evaluation.priority}`,
+      ...runnerEconomyRouteDevelopmentEvidence(context, evaluation),
+      ...(evaluation.persistentInstallEvaluation
+        ? [
+            `persistent_install_stackability:${evaluation.persistentInstallEvaluation.stackabilityClass}`,
+            `persistent_install_delta:${evaluation.persistentInstallEvaluation.capabilityDelta}`,
+            `persistent_install_duplicate:${evaluation.persistentInstallEvaluation.duplicateRole}`,
+            `persistent_install_fit:${evaluation.persistentInstallEvaluation.finalInstallFit}`,
+          ]
+        : []),
+      ...(params.extraEvidence ?? []),
+      ...evaluation.evidence.slice(0, 6),
+      ...params.runnerGoalEvidence,
+    ],
+    scoreBreakdown: [
+      {
+        key: params.scoreKey,
+        label: params.scoreLabel,
+        value: params.priority,
+        reason: evaluation.developmentRole,
+      },
+    ],
+    stateVersion: params.stateVersion,
+  });
+}
+
+function runnerBestHandCardEvaluation(
+  context: TacticalPlanBuildContext,
+  evaluations: readonly RunnerHandDevelopmentEvaluation[],
+): RunnerHandDevelopmentEvaluation | undefined {
+  return [...evaluations].sort(
+    (left, right) =>
+      runnerPlayBestHandCardPlanPriority(context, right) -
+        runnerPlayBestHandCardPlanPriority(context, left) ||
+      right.priority - left.priority ||
+      left.developmentRole.localeCompare(right.developmentRole) ||
+      left.cardInstanceId.localeCompare(right.cardInstanceId),
+  )[0];
+}
+
+function runnerPlayBestHandCardPlanPriority(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerHandDevelopmentEvaluation,
+): number {
+  const planPriority = runnerHandDevelopmentPlanPriority(context, evaluation);
+  const minimumPriority = runnerDevelopmentIsEconomyRoute(evaluation)
+    ? 740
+    : evaluation.currentNeed === "acute"
+      ? 780
+      : 680;
+  const maximumPriority =
+    evaluation.currentNeed === "acute" ||
+    context.runnerEconomyPosture?.buildEconomyBeforePressure
+      ? 890
+      : 870;
+  return Math.max(minimumPriority, Math.min(maximumPriority, planPriority));
+}
+
+function runnerHandDevelopmentOwnedByBreakerCoverage(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerHandDevelopmentEvaluation,
+): boolean {
+  if (evaluation.developmentRole !== "breaker_or_rig_piece") return false;
+  if (!evaluation.legalActionId) return false;
+  const legalAction = context.input.legalActions.find(
+    (action) => action.actionId === evaluation.legalActionId,
+  );
+  if (!legalAction || legalAction.type !== "install_card") return false;
+  if (!runnerLegalActionReferencesCard(legalAction, evaluation.cardInstanceId)) {
+    return false;
+  }
+  const handCard = context.input.playerView.own.gripOrHq.find(
+    (card) =>
+      card.known !== false && card.instanceId === evaluation.cardInstanceId,
+  );
+  if (!handCard) return false;
+  return context.input.legalActions.some((action) => {
+    if (action.type !== "start_run") return false;
+    const serverId = actionServerId(action);
+    if (!runNeedsBreakerCoverage(context.input.playerView, serverId)) {
+      return false;
+    }
+    return cardProvidesBreakerCoverage(
+      handCard,
+      missingBreakerCoverageKind(context.input.playerView, serverId!),
+    );
+  });
+}
+
+function runnerLegalActionReferencesCard(
+  action: { source?: string; payload?: Record<string, unknown> },
+  cardId: string,
+): boolean {
+  const payload = action.payload ?? {};
+  return (
+    action.source === cardId ||
+    payload.cardId === cardId ||
+    payload.sourceCardId === cardId ||
+    payload.targetCardId === cardId ||
+    payload.selectedCardId === cardId
   );
 }
 

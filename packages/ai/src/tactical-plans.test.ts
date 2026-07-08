@@ -1853,7 +1853,7 @@ describe("tactical plan model", () => {
     ).toBe(false);
   });
 
-  it("labels hand-development plans with the concrete own hand card title", () => {
+  it("labels the best hand-card plan with the concrete own hand card title", () => {
     const input = aiInput("runner", [
       legalAction(
         "install-access-card",
@@ -1888,7 +1888,7 @@ describe("tactical plan model", () => {
       runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
     });
     const handPlan = plans.find(
-      (plan) => plan.type === "runner.develop_hand_card",
+      (plan) => plan.type === "runner.play_best_hand_card",
     );
 
     expect(handPlan?.target).toMatchObject({
@@ -1897,6 +1897,7 @@ describe("tactical plan model", () => {
       label: "Concrete Access Tool",
     });
     expect(handPlan?.evidence).toContain("hand_development_role:access_payoff");
+    expect(handPlan?.evidence).toContain("best_hand_card_plan:true");
   });
 
   it("does not plan a redundant persistent duplicate as hand development", () => {
@@ -1936,7 +1937,57 @@ describe("tactical plan model", () => {
     expect(
       plans.some(
         (plan) =>
+          plan.planId === "runner.play_best_hand_card:second-risky-breaker" ||
           plan.planId === "runner.develop_hand_card:second-risky-breaker",
+      ),
+    ).toBe(false);
+  });
+
+  it("leaves an urgent direct breaker install to the coverage plan", () => {
+    const runRemote = legalAction("run-remote", "runner", "start_run", {
+      serverId: "remote_1",
+    });
+    const installBreaker = legalAction(
+      "install-fracter",
+      "runner",
+      "install_card",
+      {},
+      { source: "fracter-card" },
+    );
+    const input = wallCoverageInput([runRemote, installBreaker]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("fracter-card", "runner", "program", {
+        title: "Concrete Fracter",
+        subtypes: ["Icebreaker", "Fracter"],
+      }),
+    ];
+    const handDevelopmentEvaluations = [
+      runnerHandDevelopmentEvaluation({
+        cardInstanceId: "fracter-card",
+        title: "Concrete Fracter",
+        cardType: "program",
+        developmentRole: "breaker_or_rig_piece",
+        strategicFit: "strong",
+        currentNeed: "acute",
+        priority: 980,
+        legalActionId: installBreaker.actionId,
+      }),
+    ];
+
+    const plans = buildTacticalPlans({
+      input,
+      runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
+    });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
+    );
+
+    expect(coveragePlan?.currentStep.kind).toBe("install_breaker");
+    expect(
+      plans.some(
+        (plan) =>
+          plan.planId === "runner.play_best_hand_card:fracter-card" ||
+          plan.planId === "runner.develop_hand_card:fracter-card",
       ),
     ).toBe(false);
   });
@@ -2092,7 +2143,7 @@ describe("tactical plan model", () => {
       (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
     );
 
-    expect(result.selectedPlan?.type).toBe("runner.develop_hand_card");
+    expect(result.selectedPlan?.type).toBe("runner.play_best_hand_card");
     expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
       install.actionId,
     );

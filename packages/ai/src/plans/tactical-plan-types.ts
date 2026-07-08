@@ -31,6 +31,7 @@ export type TacticalPlanType =
   | "runner.convert_success_window"
   | "runner.restore_hand_buffer"
   | "runner.develop_hand_card"
+  | "runner.play_best_hand_card"
   | "runner.build_credit_base"
   | "runner.build_credit_bank"
   | "runner.cash_out_credit_bank"
