@@ -104,6 +104,50 @@ describe("runner run plan policy", () => {
     expect(selected?.evidence).toContain("required_subroutine_indexes:0");
   });
 
+  it("conserves credits when breaking the current ICE cannot make the remaining known path reachable", () => {
+    const breakSubroutine = breakAction({
+      actionId: "break-current-code-gate",
+      costs: [{ credits: 2 }],
+      subroutineIndex: 0,
+    });
+    const continueRun = continueAction({
+      encounterWillEndRun: true,
+      unbrokenSubroutineCount: 1,
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      breakerStrength: 2,
+      futureIce: [
+        visibleIce({
+          instanceId: "future-wall",
+          iceDefinitionId: "onr_v1_253_laser-wire",
+          iceTitle: "Laser Wire",
+          iceStrength: 2,
+        }),
+      ],
+      legalActions: [breakSubroutine, continueRun],
+    });
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: runPlan(),
+      choices: [
+        choice(breakSubroutine, "encounter_survival", 100),
+        choice(continueRun, "simple_run_choice", -2397),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(continueRun.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_conserve_credits:true",
+    );
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_conserve_reason:known_ice_unbreakable",
+    );
+  });
+
   it("chooses jack out when continue would end the run and no access-preserving sequence exists", () => {
     const pump = pumpAction({ costs: [{ credits: 1 }] });
     const continueRun = continueAction({
@@ -228,6 +272,70 @@ describe("runner run plan policy", () => {
       "runner_run_plan_abort_recommended:true",
     );
   });
+
+  it("does not let abort revalidation override a better movement continue choice", () => {
+    const continueRun = action("continue_run", {
+      actionId: "continue-run-to-next-ice",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "run.jack_out_window",
+      expiresAtStateVersion: 168,
+      payload: {},
+    });
+    const jackOut = action("jack_out", {
+      actionId: "jack-out",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "run.jack_out_window",
+      expiresAtStateVersion: 168,
+      payload: {},
+    });
+    const input = runnerServerMovementInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      credits: 15,
+      legalActions: [jackOut, continueRun],
+    });
+    const abortingPlan: RunnerRunPlan = {
+      ...runPlan(),
+      lifecycle: "abort_recommended",
+      currentEncounter: {
+        server: "rd",
+        phase: "movement",
+      },
+      revalidation: {
+        status: "abort_recommended",
+        reasons: [
+          "path_quote_changed",
+          "cannot_reach:insufficient_credits_after_reserve",
+        ],
+        checkedAtStateVersion: 168,
+      },
+      pathQuote: {
+        ...runPlan().pathQuote,
+        canReachAccess: false,
+        cannotReachReason: "insufficient_credits_after_reserve",
+      },
+    };
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: abortingPlan,
+      choices: [
+        choice(jackOut, "simple_run_choice", -351),
+        choice(continueRun, "simple_run_choice", 103),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(continueRun.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_abort_yielded_to_continue:true",
+    );
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_revalidation:abort_recommended",
+    );
+  });
 });
 
 function runnerEncounterInput(params: {
@@ -236,9 +344,11 @@ function runnerEncounterInput(params: {
   iceStrength: number;
   breakerStrength?: number;
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
+  futureIce?: VisibleCard[];
   legalActions: LegalAction[];
 }): AiDecisionInput {
   const ice = visibleIce(params);
+  const futureIce = params.futureIce ?? [];
   return {
     side: "runner",
     playerView: {
@@ -287,14 +397,14 @@ function runnerEncounterInput(params: {
         {
           id: "rd",
           label: "R&D",
-          ice: [ice],
+          ice: [...futureIce, ice],
           root: [],
         },
       ],
       run: {
         attackedServerId: "rd",
         phase: "encounter_ice",
-        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        position: { kind: "ice", serverId: "rd", iceIndex: futureIce.length },
         encounteredIce: ice,
         successful: false,
       },
@@ -390,13 +500,14 @@ function runnerServerMovementInput(params: {
 }
 
 function visibleIce(params: {
+  instanceId?: string;
   iceDefinitionId: string;
   iceTitle: string;
   iceStrength: number;
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
 }): VisibleCard {
   return {
-    instanceId: "ice-1",
+    instanceId: params.instanceId ?? "ice-1",
     known: true,
     title: params.iceTitle,
     definitionId: params.iceDefinitionId,
@@ -537,11 +648,12 @@ function pumpAction(params: { costs: LegalAction["costs"] }): LegalAction {
 }
 
 function breakAction(params: {
+  actionId?: string;
   costs: LegalAction["costs"];
   subroutineIndex?: number;
 }): LegalAction {
   return action("break_subroutine", {
-    actionId: "break-codecracker",
+    actionId: params.actionId ?? "break-codecracker",
     source: "codecracker-1",
     costs: params.costs,
     payload: {

@@ -19,6 +19,7 @@ import {
 import { actionServerId } from "./tactical-plan-server-targets";
 import type {
   PlanBlocker,
+  PlanLifecycle,
   PlanStep,
   RequiredCapability,
   TacticalPlan,
@@ -93,6 +94,39 @@ export function usefulFundableRunnerHandDevelopment(
   return evaluation.priority >= 500;
 }
 
+function deferredLegalRunnerHandDevelopment(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): boolean {
+  if (evaluation.availability !== "legal_now") return false;
+  if (!evaluation.legalActionId) return false;
+  if (
+    evaluation.developmentRole === "duplicate_or_low_value" ||
+    evaluation.developmentRole === "unknown"
+  ) {
+    return false;
+  }
+  if (evaluation.currentNeed === "none" || evaluation.currentNeed === "later") {
+    return false;
+  }
+  if (
+    evaluation.developmentRole === "defense_support" &&
+    evaluation.currentNeed !== "acute"
+  ) {
+    return false;
+  }
+  if (
+    evaluation.persistentInstallEvaluation?.duplicateRole ===
+    "redundant_duplicate"
+  ) {
+    return false;
+  }
+  return (
+    evaluation.priority >= 300 ||
+    (evaluation.persistentInstallEvaluation !== undefined &&
+      evaluation.persistentInstallEvaluation.finalInstallFit <= 0)
+  );
+}
+
 export function runnerHandDevelopmentPlanPriority(
   context: TacticalPlanBuildContext,
   evaluation: RunnerHandDevelopmentEvaluation,
@@ -158,6 +192,24 @@ export function runnerHandDevelopmentPlans(
             !runnerHandDevelopmentOwnedByBreakerCoverage(context, evaluation),
         )
     : [];
+  const deferredEvaluations = handEvaluations
+    .filter(
+      (evaluation) =>
+        !usefulLegalRunnerHandDevelopment(evaluation) &&
+        !usefulFundableRunnerHandDevelopment(evaluation) &&
+        deferredLegalRunnerHandDevelopment(evaluation),
+    )
+    .filter(
+      (evaluation) =>
+        !runnerHandDevelopmentOwnedByBreakerCoverage(context, evaluation),
+    )
+    .sort(
+      (left, right) =>
+        runnerHandDevelopmentPlanPriority(context, right) -
+          runnerHandDevelopmentPlanPriority(context, left) ||
+        right.priority - left.priority ||
+        left.cardInstanceId.localeCompare(right.cardInstanceId),
+    );
   const bestEvaluation = runnerBestHandCardEvaluation(context, usefulEvaluations);
   const bestPriority = bestEvaluation
     ? runnerPlayBestHandCardPlanPriority(context, bestEvaluation)
@@ -228,6 +280,16 @@ export function runnerHandDevelopmentPlans(
       }),
     ),
   );
+  plans.push(
+    ...deferredEvaluations.slice(0, 4).map((evaluation) =>
+      runnerDeferredHandDevelopmentPlan({
+        context,
+        evaluation,
+        runnerGoalEvidence,
+        stateVersion,
+      }),
+    ),
+  );
   return plans;
 }
 
@@ -245,6 +307,7 @@ function runnerHandDevelopmentPlan(params: {
   extraEvidence?: readonly string[];
   requiredCapabilities?: readonly RequiredCapability[];
   blockers?: readonly PlanBlocker[];
+  status?: PlanLifecycle;
   currentStep?: PlanStep;
   nextSteps?: readonly PlanStep[];
   runnerGoalEvidence: readonly string[];
@@ -255,7 +318,7 @@ function runnerHandDevelopmentPlan(params: {
     planId: params.planId,
     side: "runner",
     type: params.type,
-    status: "active",
+    status: params.status ?? "active",
     priority: params.priority,
     horizonTurns: 1,
     target: {
@@ -297,6 +360,44 @@ function runnerHandDevelopmentPlan(params: {
         reason: evaluation.developmentRole,
       },
     ],
+    stateVersion: params.stateVersion,
+  });
+}
+
+function runnerDeferredHandDevelopmentPlan(params: {
+  context: TacticalPlanBuildContext;
+  evaluation: RunnerHandDevelopmentEvaluation;
+  runnerGoalEvidence: readonly string[];
+  stateVersion: number;
+}): TacticalPlan {
+  const { context, evaluation } = params;
+  return runnerHandDevelopmentPlan({
+    context,
+    evaluation,
+    type: "runner.develop_hand_card",
+    status: "abandoned",
+    planId: `runner.develop_hand_card:${evaluation.cardInstanceId}`,
+    stepId: `deferred_hand_card:${evaluation.cardInstanceId}`,
+    priority: runnerHandDevelopmentPlanPriority(context, evaluation),
+    scoreKey: "runner_hand_development_deferred",
+    scoreLabel: "Runner hand development deferred",
+    blockers: [runnerHandDevelopmentDeferredBlocker(evaluation)],
+    extraRationale: [
+      "hand card has useful text but the current install route is deferred",
+      `hand development defer reason ${evaluation.deferReason}`,
+    ],
+    extraEvidence: [
+      "hand_card_deferred_plan:true",
+      `hand_card_deferred_reason:${evaluation.deferReason}`,
+      ...(evaluation.persistentInstallEvaluation
+        ? [
+            `hand_card_deferred_install_fit:${evaluation.persistentInstallEvaluation.finalInstallFit}`,
+            `hand_card_deferred_mu_penalty:${evaluation.persistentInstallEvaluation.muPressurePenalty}`,
+            `hand_card_deferred_displacement_penalty:${evaluation.persistentInstallEvaluation.displacementPenalty}`,
+          ]
+        : []),
+    ],
+    runnerGoalEvidence: params.runnerGoalEvidence,
     stateVersion: params.stateVersion,
   });
 }
@@ -423,6 +524,76 @@ function runnerHandDevelopmentPlanEvidence(
     ...evaluation.evidence.slice(0, 6),
     ...runnerGoalEvidence,
   ];
+}
+
+function runnerHandDevelopmentDeferredBlocker(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): PlanBlocker {
+  const target = {
+    kind: "card" as const,
+    id: evaluation.cardInstanceId,
+    label: runnerHandDevelopmentTargetLabel(evaluation),
+  };
+  const persistent = evaluation.persistentInstallEvaluation;
+  if (
+    evaluation.deferReason === "missing_mu" ||
+    (persistent &&
+      (persistent.muPressurePenalty < 0 ||
+        persistent.displacementPenalty < 0))
+  ) {
+    return {
+      blockerId: `deferred_hand_card_mu:${evaluation.cardInstanceId}`,
+      kind: "missing_mu",
+      severity: "soft",
+      target,
+      removalStepKind: "resolve_missing_mu",
+      evidence: [
+        `hand_development_defer_reason:${evaluation.deferReason}`,
+        ...(persistent
+          ? [
+              `mu_pressure_penalty:${persistent.muPressurePenalty}`,
+              `displacement_penalty:${persistent.displacementPenalty}`,
+            ]
+          : []),
+      ],
+    };
+  }
+  if (
+    evaluation.deferReason === "preserve_credit_floor" ||
+    evaluation.fundingNeed
+  ) {
+    return {
+      blockerId: `deferred_hand_card_credits:${evaluation.cardInstanceId}`,
+      kind: "too_expensive",
+      severity: "soft",
+      target,
+      removalStepKind: "gain_credits",
+      evidence: [
+        `hand_development_defer_reason:${evaluation.deferReason}`,
+        ...(evaluation.fundingNeed
+          ? [
+              `funding_missing_credits:${evaluation.fundingNeed.missingCredits}`,
+              `funding_required_credits:${evaluation.fundingNeed.installOrPlayCost}`,
+            ]
+          : []),
+        ...(persistent
+          ? [`reserve_penalty:${persistent.reservePenalty}`]
+          : []),
+      ],
+    };
+  }
+  return {
+    blockerId: `deferred_hand_card_route:${evaluation.cardInstanceId}`,
+    kind: "target_unreachable",
+    severity: "soft",
+    target,
+    evidence: [
+      `hand_development_defer_reason:${evaluation.deferReason}`,
+      ...(persistent
+        ? [`final_install_fit:${persistent.finalInstallFit}`]
+        : []),
+    ],
+  };
 }
 
 function runnerBestHandCardEvaluation(

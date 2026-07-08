@@ -67,6 +67,56 @@ describe("runner run plan path quote", () => {
     expect(quote.canReachAccess).toBe(true);
   });
 
+  it("prefers same-cost multi-break when it clears damage and ETR together", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_269_shotgun-wire",
+      iceTitle: "Shotgun Wire",
+      iceStrength: 5,
+      breakerStrength: 7,
+      subroutines: [
+        {
+          id: "shotgun-wire-net-damage",
+          type: "do_damage",
+          unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+        },
+        {
+          id: "shotgun-wire-etr",
+          type: "end_the_run",
+        },
+      ],
+      legalActions: [
+        breakAction({
+          actionId: "pile-driver-break-damage",
+          costs: [{ credits: 3 }],
+          subroutineIndexes: "0",
+        }),
+        breakAction({
+          actionId: "pile-driver-break-both",
+          costs: [{ credits: 3 }],
+          subroutineIndexes: "0,1",
+        }),
+        breakAction({
+          actionId: "pile-driver-break-etr",
+          costs: [{ credits: 3 }],
+          subroutineIndexes: "1",
+        }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 2,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+
+    expect(sequence?.steps.map((step) => step.actionId)).toEqual([
+      "pile-driver-break-both",
+    ]);
+    expect(sequence?.totalCost).toBe(3);
+    expect(sequence?.evidence).toContain("required_subroutine_indexes:0,1");
+  });
+
   it("targets the required ETR subroutine instead of a cheaper harmless break", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_261_quandary",
@@ -488,6 +538,7 @@ function breakAction(params: {
   actionId?: string;
   costs: LegalAction["costs"];
   subroutineIndex?: number;
+  subroutineIndexes?: string;
 }): LegalAction {
   return action("break_subroutine", {
     actionId: params.actionId ?? "break-codecracker",
@@ -496,7 +547,9 @@ function breakAction(params: {
     payload: {
       breakerId: "codecracker-1",
       iceId: "ice-1",
-      subroutineIndex: params.subroutineIndex ?? 0,
+      ...(params.subroutineIndexes
+        ? { subroutineIndexes: params.subroutineIndexes }
+        : { subroutineIndex: params.subroutineIndex ?? 0 }),
     },
   });
 }

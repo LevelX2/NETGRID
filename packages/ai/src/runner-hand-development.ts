@@ -467,6 +467,7 @@ function currentNeedAdjustedByPersistentInstall(
 ): RunnerHandDevelopmentCurrentNeed {
   if (!evaluation) return currentNeed;
   if (evaluation.finalInstallFit <= -650) {
+    if (persistentInstallRouteBlocked(evaluation)) return currentNeed;
     return currentNeed === "acute" ? "later" : "none";
   }
   if (
@@ -712,6 +713,18 @@ function deferReasonForCard(
     persistentInstallEvaluation.finalInstallFit <= 0
   ) {
     return "preserve_credit_floor";
+  }
+  if (
+    persistentInstallEvaluation &&
+    persistentInstallEvaluation.finalInstallFit <= 0
+  ) {
+    if (
+      persistentInstallEvaluation.displacementPenalty < 0 ||
+      persistentInstallEvaluation.muPressurePenalty < 0
+    ) {
+      return "missing_mu";
+    }
+    return "stronger_override";
   }
   if (role === "duplicate_or_low_value") return "duplicate";
   if (availability === "missing_credits") return "missing_credits";
@@ -996,8 +1009,14 @@ function runnerHandTextHasAccessPayoffSignal(text: string): boolean {
       "multiaccess",
       "interface",
       "access",
+      "expose",
+      "exposes",
+      "reveal",
+      "reveals",
     ]) ||
     runnerHandTokensIncludePhrase(tokens, ["access", "payoff"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["hidden", "zone", "tool"]) ||
+    runnerHandTokensIncludePhrase(tokens, ["installed", "corp", "card"]) ||
     runnerHandTokensIncludePhrase(tokens, ["r", "d"]) ||
     runnerHandTokensIncludePhrase(tokens, ["rd", "pressure"]) ||
     runnerHandTokensIncludePhrase(tokens, ["hq", "pressure"]) ||
@@ -1974,19 +1993,34 @@ function intentHasPressure(
 }
 
 function visibleRunnerThreat(input: AiDecisionInput): boolean {
+  if ((input.playerView.own.tags ?? 0) > 0) return true;
+  return input.playerView.servers.some((server) =>
+    [...server.root, ...server.ice].some(visibleCardShowsRunnerThreat),
+  );
+}
+
+function visibleCardShowsRunnerThreat(card: VisibleCard): boolean {
+  if (!card.known) return false;
+  return runnerHandTextHasVisibleThreatSignal(
+    [
+      card.title,
+      card.rulesText,
+      card.definitionId,
+      ...(card.subtypes ?? []),
+    ]
+      .filter((entry): entry is string => typeof entry === "string")
+      .join(" "),
+  );
+}
+
+function persistentInstallRouteBlocked(
+  evaluation: RunnerPersistentInstallEvaluation,
+): boolean {
   return (
-    (input.playerView.own.tags ?? 0) > 0 ||
-    input.playerView.servers.some((server) =>
-      server.root.some(
-        (card) =>
-          card.known &&
-          runnerHandTextHasVisibleThreatSignal(
-            [card.title, card.rulesText, card.definitionId]
-              .filter(Boolean)
-              .join(" "),
-          ),
-      ),
-    )
+    evaluation.displacementPenalty < 0 ||
+    evaluation.muPressurePenalty < 0 ||
+    evaluation.reservePenalty <= -900 ||
+    evaluation.handBufferPenalty <= -780
   );
 }
 

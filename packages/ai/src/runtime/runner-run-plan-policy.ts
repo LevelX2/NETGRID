@@ -1,7 +1,10 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 import { actionCreditCost } from "./action-cost";
+import { currentEncounteredIceCard } from "./current-encounter";
+import { isImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
 import {
+  quoteRunnerRunPath,
   runnerRunPlanCurrentEncounterRequiresBreak,
   runnerRunPlanCurrentEncounterSequence,
 } from "./runner-run-plan-path-quote";
@@ -15,6 +18,8 @@ export function runnerRunPlanSemanticChoice(params: {
   if (params.input.side !== "runner" || !params.input.playerView.run) {
     return undefined;
   }
+  const abortYieldChoice = runnerRunPlanAbortYieldContinueChoice(params);
+  if (abortYieldChoice) return abortYieldChoice;
   const abortChoice = runnerRunPlanAbortChoice(params);
   if (abortChoice) return abortChoice;
   const encounterChoice = runnerRunPlanEncounterChoice(params);
@@ -31,6 +36,47 @@ export function runnerRunPlanSemanticChoice(params: {
     extraEvidence: [],
     explanation:
       "RunnerRunPlan führt die Entscheidung im aktiven Run anhand aktueller LegalActions.",
+  });
+}
+
+function runnerRunPlanAbortYieldContinueChoice(params: {
+  input: AiDecisionInput;
+  plan: RunnerRunPlan;
+  choices: readonly SemanticRuntimeChoice[];
+}): SemanticRuntimeChoice | undefined {
+  if (params.plan.revalidation.status !== "abort_recommended") {
+    return undefined;
+  }
+  const run = params.input.playerView.run;
+  if (!run || run.phase !== "movement") return undefined;
+  const jackOutChoice = params.choices.find(
+    (choice) => !choice.exclusion && choice.action.type === "jack_out",
+  );
+  const continueChoice = [...params.choices]
+    .filter(
+      (choice) =>
+        !choice.exclusion &&
+        choice.action.type === "continue_run" &&
+        choice.action.payload?.encounterWillEndRun !== true,
+    )
+    .sort((left, right) => right.score - left.score)[0];
+  if (!jackOutChoice || !continueChoice) return undefined;
+  if (continueChoice.score <= jackOutChoice.score) return undefined;
+  if (currentEncounterHasUnbrokenSafetyThreat(params.input)) return undefined;
+  return annotateRunnerRunPlanChoice({
+    choice: continueChoice,
+    plan: params.plan,
+    explanation:
+      "RunnerRunPlan setzt den Run im Bewegungsfenster fort, weil Fortsetzen sichtbar besser ist als Jack-out und kein Encounter-Ende droht.",
+    extraEvidence: [
+      "runner_run_plan_abort_yielded_to_continue:true",
+      `runner_run_plan_abort_status:${params.plan.revalidation.status}`,
+      `runner_run_plan_continue_score:${continueChoice.score}`,
+      `runner_run_plan_jack_out_score:${jackOutChoice.score}`,
+      ...params.plan.revalidation.reasons.map(
+        (reason) => `runner_run_plan_abort_yield_reason:${reason}`,
+      ),
+    ],
   });
 }
 
@@ -173,6 +219,12 @@ function runnerRunPlanEncounterChoice(params: {
   });
   const sequenceActionId = sequence?.steps[0]?.actionId;
   if (sequenceActionId) {
+    const conserveChoice = runnerRunPlanConserveCreditsChoice({
+      input: params.input,
+      plan: params.plan,
+      choices: params.choices,
+    });
+    if (conserveChoice) return conserveChoice;
     const sequenceChoice = params.choices.find(
       (choice) =>
         !choice.exclusion && choice.action.actionId === sequenceActionId,
@@ -220,6 +272,62 @@ function runnerRunPlanEncounterChoice(params: {
         : []),
     ],
   });
+}
+
+function runnerRunPlanConserveCreditsChoice(params: {
+  input: AiDecisionInput;
+  plan: RunnerRunPlan;
+  choices: readonly SemanticRuntimeChoice[];
+}): SemanticRuntimeChoice | undefined {
+  const pathQuote = quoteRunnerRunPath(params.input, params.plan);
+  if (pathQuote.canReachAccess) return undefined;
+  const continueChoice = params.choices.find(
+    (choice) =>
+      !choice.exclusion &&
+      choice.action.type === "continue_run" &&
+      choice.action.payload?.encounterContinue === true &&
+      choice.action.payload?.encounterWillEndRun === true,
+  );
+  if (!continueChoice) return undefined;
+  if (currentEncounterHasUnbrokenSafetyThreat(params.input)) return undefined;
+  return annotateRunnerRunPlanChoice({
+    choice: continueChoice,
+    plan: params.plan,
+    explanation:
+      "RunnerRunPlan spart Encounter-Kosten, weil der bekannte Restpfad den Zugriff nicht mehr erreicht.",
+    extraEvidence: [
+      "runner_run_plan_conserve_credits:true",
+      `runner_run_plan_conserve_reason:${pathQuote.cannotReachReason ?? "cannot_reach_access"}`,
+      `runner_run_plan_conserve_total_known_cost:${pathQuote.totalKnownCost}`,
+      `runner_run_plan_conserve_expected_remaining:${pathQuote.expectedRemainingCredits}`,
+    ],
+  });
+}
+
+function currentEncounterHasUnbrokenSafetyThreat(input: AiDecisionInput): boolean {
+  const continueAction = input.legalActions.find(
+    (action) =>
+      action.type === "continue_run" &&
+      action.payload?.encounterContinue === true,
+  );
+  const subroutines =
+    currentEncounteredIceCard(input)?.effectiveRunQuote?.subroutines ?? [];
+  if (subroutines.length === 0) return false;
+  const subroutineIds =
+    typeof continueAction?.payload?.encounterSubroutineIds === "string"
+      ? new Set(
+          continueAction.payload.encounterSubroutineIds
+            .split(",")
+            .filter((id) => id.length > 0),
+        )
+      : undefined;
+  const unbrokenSubroutines =
+    subroutineIds && subroutineIds.size > 0
+      ? subroutines.filter((subroutine) => subroutineIds.has(subroutine.id))
+      : continueAction?.payload?.unbrokenSubroutineCount
+        ? subroutines
+        : [];
+  return unbrokenSubroutines.some(isImmediateSafetyThreatSubroutine);
 }
 
 function annotateRunnerRunPlanChoice(params: {

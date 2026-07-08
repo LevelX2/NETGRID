@@ -22,13 +22,17 @@ export function runnerBasicActionPenaltyScoreComponents(
     action.type === "continue_run" &&
     scopeId === "simple_run_choice" &&
     action.payload?.encounterWillEndRun === true &&
-    input.legalActions.some((candidate) => candidate.type === "break_subroutine")
+    input.legalActions.some(
+      (candidate) =>
+        candidate.type === "break_subroutine" ||
+        candidate.type === "pump_breaker",
+    )
   ) {
     components.push({
       key: "runner_continue_run_ends_run_with_break_available",
       label: "Ungebrochene ETR-Subroutine auslösen",
       value: -2500,
-      reason: "break_subroutine_available",
+      reason: "break_or_pump_available",
     });
   }
   if (action.type === "end_turn" && input.playerView.own.clicks > 0) {

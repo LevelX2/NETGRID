@@ -213,6 +213,109 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.priority).toBeLessThan(500);
   });
 
+  it("treats visible net-damage ICE as a current defense-support need", () => {
+    const prevention = visibleCard("green-knight-1", {
+      definitionId: "onr_v1_128_green-knight-surge-buffers",
+      title: '"Green Knight" Surge Buffers',
+      type: "hardware",
+      installCost: 0,
+      rulesText: "Prevents 1 net damage each turn.",
+    });
+    const input = runnerInput({
+      credits: 4,
+      hand: [prevention],
+      legalActions: [installAction("install-green-knight", prevention, 0)],
+      servers: [
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [
+            {
+              instanceId: "shotgun-wire-1",
+              owner: "corp",
+              controller: "corp",
+              known: true,
+              rezzed: true,
+              definitionId: "onr_v1_269_shotgun-wire",
+              title: "Shotgun Wire",
+              type: "ice",
+              subtypes: ["wall"],
+              rulesText: "Do 2 net damage. End the run.",
+            },
+          ],
+          root: [],
+        },
+      ],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "green-knight-1",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "defense_support",
+      availability: "legal_now",
+      currentNeed: "acute",
+      strategicFit: "strong",
+      deferReason: "none",
+      persistentInstallEvaluation: {
+        capabilityDelta: "cumulative_capacity",
+        stackabilityClass: "cumulative_capacity",
+      },
+    });
+    expect(evaluation.priority).toBeGreaterThanOrEqual(500);
+  });
+
+  it("keeps expose tools relevant when the current route needs program displacement", () => {
+    const mouse = visibleCard("mouse-1", {
+      definitionId: "onr_v1_042_mouse",
+      title: "Mouse",
+      type: "program",
+      installCost: 2,
+      memoryCost: 1,
+      rulesText:
+        "Installed Hidden-Zone helper: expose one unrezzed installed Corp card in a chosen fort.",
+    });
+    const installMouse = {
+      ...installAction("install-mouse-with-trash", mouse, 2),
+      payload: {
+        cardId: mouse.instanceId,
+        cardDefinitionId: "onr_v1_042_mouse",
+        runnerProgramTrashBeforeInstall: true,
+      },
+    };
+    const input = runnerInput({
+      credits: 15,
+      hand: [mouse],
+      legalActions: [installMouse],
+      memoryUsed: 4,
+      memoryLimit: 4,
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: strategicIntent({
+          pressureVectors: ["runner.central_probe_pressure"],
+        }),
+      }),
+      "mouse-1",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "access_payoff",
+      availability: "legal_now",
+      currentNeed: "useful_now",
+      deferReason: "missing_mu",
+      persistentInstallEvaluation: {
+        displacementPenalty: -1200,
+      },
+    });
+    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(0);
+    expect(evaluation.priority).toBeGreaterThanOrEqual(300);
+  });
+
   it("bounds visible remote threat text to exact tokens", () => {
     const shield = visibleCard("shield-noise-1", {
       definitionId: "test-shield-noise",
@@ -801,6 +904,7 @@ function runnerInput(params: {
   rig?: VisibleCard[];
   memoryUsed?: number;
   memoryLimit?: number;
+  servers?: PlayerView["servers"];
 }): AiDecisionInput {
   const playerView: PlayerView = {
     stateVersion: 1,
@@ -835,7 +939,7 @@ function runnerInput(params: {
       discardCount: 0,
       scoreArea: [],
     },
-    servers: [],
+    servers: params.servers ?? [],
     publicEvents: [],
     legalActions: params.legalActions,
     winner: null,

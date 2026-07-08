@@ -13,6 +13,7 @@ import {
   runnerCreditYieldScoreComponent,
   type RunnerCreditYieldScoreDependencies,
 } from "./runner-credit-yield-score";
+import { runnerEncounterBreakScoreComponents } from "./runner-encounter-break-score";
 import {
   runnerFollowupScoreComponents,
   type RunnerFollowupScoreDependencies,
@@ -151,6 +152,7 @@ export function runnerScoreComponents(
   components.push(
     ...runnerStartRunScoreComponents(input, action, dependencies.startRun),
   );
+  components.push(...runnerEncounterBreakScoreComponents(input, action));
   components.push(
     ...runnerFollowupScoreComponents(input, action, dependencies.followup),
   );

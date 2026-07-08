@@ -2,6 +2,11 @@ import type { AiDecisionInput, PlayerView, VisibleCard } from "@netgrid/shared";
 import { cardProvidesBreakerCoverage } from "../plans/tactical-plan-breaker-cards";
 import { missingBreakerCoverageKind } from "../plans/tactical-plan-breaker-coverage";
 import type { RequiredCapabilityKind } from "../plans/tactical-plan-types";
+import {
+  assessKnownRezzedIcePath,
+  runnerKnownPathAssessmentIsUnbreakableNoAccess,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 import { rolesMatch } from "./role-match";
 
 export type RunnerVisibleSearchCoverageNeed = {
@@ -35,6 +40,16 @@ export function runnerVisibleSearchCoverageNeed(
       (ice) => ice.known && ice.rezzed === true,
     );
     if (!hasKnownRezzedIce) continue;
+    const assessment = assessKnownRezzedIcePath(
+      server.ice ?? [],
+      playerView.own.rig ?? [],
+      runnerRunPathCreditBudgetWithVisiblePools(
+        playerView.own.credits,
+        playerView.own.rig ?? [],
+      ),
+      server.root ?? [],
+    );
+    if (!runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment)) continue;
     const requiredCoverage = missingBreakerCoverageKind(
       playerView as PlayerView,
       server.id,

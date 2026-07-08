@@ -24,7 +24,34 @@ describe("runnerBasicActionPenaltyScoreComponents", () => {
         expect.objectContaining({
           key: "runner_continue_run_ends_run_with_break_available",
           value: -2500,
-          reason: "break_subroutine_available",
+          reason: "break_or_pump_available",
+        }),
+      ]),
+    );
+  });
+
+  it("penalizes continuing through an end-the-run subroutine when a pump can lead to a break", () => {
+    const continueRun = action("continue_run", {
+      encounterContinue: true,
+      encounterWillEndRun: true,
+    });
+    const input = inputWithActions([
+      continueRun,
+      action("pump_breaker", { encounterWillEndRun: false }),
+    ]);
+
+    expect(
+      runnerBasicActionPenaltyScoreComponents(
+        input,
+        continueRun,
+        "simple_run_choice",
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_continue_run_ends_run_with_break_available",
+          value: -2500,
+          reason: "break_or_pump_available",
         }),
       ]),
     );

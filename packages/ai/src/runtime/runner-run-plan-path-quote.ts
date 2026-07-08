@@ -645,6 +645,8 @@ function selectBreakActionsForRequiredSubroutines(
         (left, right) =>
           right.coveredIndexes.size - left.coveredIndexes.size ||
           actionCreditCost(left.action) - actionCreditCost(right.action) ||
+          breakSubroutineIndexesForAction(right.action).size -
+            breakSubroutineIndexesForAction(left.action).size ||
           left.action.actionId.localeCompare(right.action.actionId),
       )[0];
     if (!candidate) return undefined;

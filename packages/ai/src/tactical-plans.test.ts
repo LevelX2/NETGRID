@@ -1959,6 +1959,79 @@ describe("tactical plan model", () => {
     expect(handPlan?.evidence).toContain("best_hand_card_plan:true");
   });
 
+  it("keeps useful but currently blocked hand cards visible as deferred plan alternatives", () => {
+    const installMouse = legalAction(
+      "install-mouse-with-trash",
+      "runner",
+      "install_card",
+      { runnerProgramTrashBeforeInstall: true },
+      { source: "mouse-card" },
+    );
+    const input = aiInput("runner", [installMouse]);
+    const handDevelopmentEvaluations: RunnerHandDevelopmentEvaluation[] = [
+      runnerHandDevelopmentEvaluation({
+        cardInstanceId: "mouse-card",
+        definitionId: "onr_v1_042_mouse",
+        title: "Mouse",
+        cardType: "program",
+        availability: "legal_now",
+        developmentRole: "access_payoff",
+        strategicFit: "weak",
+        currentNeed: "useful_now",
+        priority: 360,
+        deferReason: "missing_mu",
+        legalActionId: installMouse.actionId,
+        persistentInstallEvaluation: persistentInstallEvaluation({
+          actionId: installMouse.actionId,
+          cardId: "onr_v1_042_mouse",
+          title: "Mouse",
+          cardType: "program",
+          installCost: 2,
+          memoryCost: 1,
+          memoryAfterInstall: -1,
+          capabilityDelta: "none",
+          stackabilityClass: "unknown",
+          duplicateRole: "none",
+          displacementPenalty: -1200,
+          muPressurePenalty: -820,
+          finalInstallFit: -920,
+        }),
+      }),
+    ];
+
+    const plans = buildTacticalPlans({
+      input,
+      runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
+    });
+    const deferredPlan = plans.find(
+      (plan) => plan.planId === "runner.develop_hand_card:mouse-card",
+    );
+
+    expect(deferredPlan).toMatchObject({
+      type: "runner.develop_hand_card",
+      status: "abandoned",
+      target: {
+        kind: "card",
+        id: "mouse-card",
+        label: "Mouse",
+      },
+    });
+    expect(deferredPlan?.blockers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "missing_mu",
+          removalStepKind: "resolve_missing_mu",
+        }),
+      ]),
+    );
+    expect(deferredPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "hand_card_deferred_plan:true",
+        "hand_card_deferred_reason:missing_mu",
+      ]),
+    );
+  });
+
   it("does not plan a redundant persistent duplicate as hand development", () => {
     const installDuplicate = legalAction(
       "install-second-risky-breaker",
