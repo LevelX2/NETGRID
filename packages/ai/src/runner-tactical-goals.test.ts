@@ -546,7 +546,7 @@ describe("Runner TacticalGoalIntegration", () => {
 
     const result = tacticalResultFor(input, handDevelopmentEvaluations);
 
-    expect(result.selectedPlan?.type).toBe("runner.develop_hand_card");
+    expect(result.selectedPlan?.type).toBe("runner.play_best_hand_card");
     expect(result.selectedStep?.kind).toBe("install_development_card");
     expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
       "install-access-card",
@@ -585,7 +585,7 @@ describe("Runner TacticalGoalIntegration", () => {
       }),
     ]);
 
-    expect(result.selectedPlan?.type).toBe("runner.develop_hand_card");
+    expect(result.selectedPlan?.type).toBe("runner.play_best_hand_card");
     expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
       "install-memory",
     ]);
@@ -622,6 +622,9 @@ describe("Runner TacticalGoalIntegration", () => {
 
     expect(result.planAlternatives.map((plan) => plan.type)).not.toContain(
       "runner.develop_hand_card",
+    );
+    expect(result.planAlternatives.map((plan) => plan.type)).not.toContain(
+      "runner.play_best_hand_card",
     );
     expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).not.toContain(
       "install-defense",
@@ -660,7 +663,7 @@ describe("Runner TacticalGoalIntegration", () => {
       }),
     ]);
 
-    expect(result.selectedPlan?.type).toBe("runner.develop_hand_card");
+    expect(result.selectedPlan?.type).toBe("runner.play_best_hand_card");
     expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
       "install-access-card",
     ]);

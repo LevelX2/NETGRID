@@ -2633,14 +2633,14 @@ describe("Semantic AI runtime cutover", () => {
     expect(
       tacticalDebugItems(decision).some(
         (item) =>
-          item.includes("id=runner.develop_hand_card:mantis-card") &&
+          item.includes("id=runner.play_best_hand_card:mantis-card") &&
           item.includes("card_type=event"),
       ),
     ).toBe(true);
     expect(
       tacticalDebugItems(decision).some(
         (item) =>
-          item.includes("id=runner.develop_hand_card:mantis-card") &&
+          item.includes("id=runner.play_best_hand_card:mantis-card") &&
           item.includes("step=install_development_card"),
       ),
     ).toBe(true);
@@ -2686,7 +2686,7 @@ describe("Semantic AI runtime cutover", () => {
     expect(
       tacticalDebugItems(decision).some(
         (item) =>
-          item.includes("id=runner.develop_hand_card:bodyweight-card") &&
+          item.includes("id=runner.play_best_hand_card:bodyweight-card") &&
           item.includes("card_type=event"),
       ),
     ).toBe(true);
@@ -2733,7 +2733,7 @@ describe("Semantic AI runtime cutover", () => {
     expect(
       tacticalDebugItems(decision).some(
         (item) =>
-          item.includes("id=runner.develop_hand_card:short-circuit-card") &&
+          item.includes("id=runner.play_best_hand_card:short-circuit-card") &&
           item.includes("card_type=resource"),
       ),
     ).toBe(true);

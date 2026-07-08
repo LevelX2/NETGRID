@@ -15610,9 +15610,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         ?.items.join("\n") ?? "";
 
     expect(decision.actionId).toBe(installNewsgroup.actionId);
-    expect(decision.decisionDebug?.planKind).toBe("runner.develop_hand_card");
+    expect(decision.decisionDebug?.planKind).toBe("runner.play_best_hand_card");
     expect(decision.evidence).toContain(
-      "tactical_plan_type:runner.develop_hand_card",
+      "tactical_plan_type:runner.play_best_hand_card",
     );
     expect(installAlternative).toEqual(
       expect.objectContaining({
