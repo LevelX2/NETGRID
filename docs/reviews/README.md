@@ -11,4 +11,8 @@
 
 ## Regel
 
-Review-Artefakte bleiben versioniert, solange sie als Audit-, Gate-, Test- oder Entscheidungsnachweis dienen. Verdichtung oder Entfernung erfolgt nur über ein eigenes Cleanup-Paket mit Linkaudit.
+Review-Artefakte bleiben nur dann dauerhaft versioniert, wenn sie aktuell als Audit-, Gate-, Test-, Entscheidungs-, Architektur- oder Removal-Condition-Nachweis dienen. Historische Update-, Prozess-, Benchmark-, Trace- und Zwischenstandsartefakte sind nach dem Current-State-Prinzip nicht automatisch aufzubewahren.
+
+Führende Retention-Regel: `docs/decisions/docs-retention-current-state-policy-2026-07-08.md`.
+
+Verdichtung oder Entfernung erfolgt weiter nur über ein eigenes Cleanup-Paket mit Inventar und Linkprüfung.
