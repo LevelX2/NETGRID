@@ -20,9 +20,9 @@ Dieses Rollup hält den aktuellen Dokumentationszustand und die Cleanup-Folgerun
 
 Historische Einzelreviews, alte Benchmarks und Prozessberichte sind keine primäre Einstiegsschicht mehr.
 
-## Dokumentationsbefund
+## Ausgangsbefund vor der ersten Löschwelle
 
-Der aktuelle Arbeitsbaum enthält eine sehr große Menge an Review- und Update-Artefakten:
+Der Arbeitsbaum enthielt vor der ersten Löschwelle eine sehr große Menge an Review- und Update-Artefakten:
 
 | Bereich | Dateien | Größe |
 | --- | ---: | ---: |
@@ -32,7 +32,7 @@ Der aktuelle Arbeitsbaum enthält eine sehr große Menge an Review- und Update-A
 | `docs/activities/` | 409 | ca. 1,94 MB |
 | `KI-Wissen-NETGRID/` | wenige führende Wissensseiten | unter 1 MB |
 
-Die Größe und Unübersichtlichkeit des Problems sitzt fast vollständig in `docs/reviews/ai/`:
+Die Größe und Unübersichtlichkeit des Problems saß fast vollständig in `docs/reviews/ai/`:
 
 | Klasse | Dateien | Größe |
 | --- | ---: | ---: |
@@ -41,7 +41,19 @@ Die Größe und Unübersichtlichkeit des Problems sitzt fast vollständig in `do
 | heuristische Runtime-/Benchmark-Evidence | 242 | ca. 222,92 MB |
 | heuristische Summary-/Decision-Dateien | 242 | ca. 3,92 MB |
 
-Die wichtigsten Cleanup-Kandidaten sind große JSON-Rohartefakte wie Seed-Diagnosen, Benchmark-Suites, Selfplay-/Trace-Mining-Dumps, Candidate-Reports und Iterationssummaries. Sie sind als historische Arbeitsprodukte nützlich gewesen, aber nicht als dauerhafte tägliche Projektdokumentation.
+Die wichtigsten Cleanup-Kandidaten waren große JSON-Rohartefakte wie Seed-Diagnosen, Benchmark-Suites, Selfplay-/Trace-Mining-Dumps, Candidate-Reports und Iterationssummaries. Sie sind als historische Arbeitsprodukte nützlich gewesen, aber nicht als dauerhafte tägliche Projektdokumentation.
+
+## Stand nach der ersten Löschwelle
+
+Die erste Löschwelle hat 13 unreferenzierte große AI-Review-JSONs entfernt.
+
+| Bereich | Dateien | Größe |
+| --- | ---: | ---: |
+| entfernte `docs/reviews/ai/*.json` | 13 | ca. 162,96 MB |
+| verbleibende `docs/reviews/ai/*.json` | 346 | ca. 76,86 MB |
+| verbleibende `docs/reviews/ai/*.md` | 651 | ca. 5,06 MB |
+
+Nachweis: `docs/reviews/docs-cleanup/current-state-docs-cleanup-removal-report-2026-07-08.md`.
 
 ## Aktueller AI-/Review-Ist-Stand für den Cleanup
 
