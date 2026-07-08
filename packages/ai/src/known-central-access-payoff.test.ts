@@ -277,8 +277,8 @@ describe("known central access payoff HQ knownness", () => {
       handCount: 1,
       rig: [
         visibleInstalledRunnerCard(
-          "onr_v1_024_expert-schedule-analyzer",
-          "program",
+          "onr_v1_139_r-and-d-interface",
+          "hardware",
         ),
       ],
       servers: [
@@ -333,8 +333,8 @@ describe("known central access payoff HQ knownness", () => {
       handCount: 1,
       rig: [
         visibleInstalledRunnerCard(
-          "onr_v1_024_expert-schedule-analyzer",
-          "program",
+          "onr_v1_139_r-and-d-interface",
+          "hardware",
         ),
       ],
       servers: [
@@ -375,6 +375,59 @@ describe("known central access payoff HQ knownness", () => {
         "rnd_known_sequence_agenda_definition:simple_agenda",
         "central_memory_payoff:agenda",
         "rd_run_boosted_by_known_sequence_agenda:true",
+      ]),
+    );
+  });
+
+  it("does not treat R&D information tools as installed R&D multiaccess", () => {
+    const input = aiInput({
+      handCount: 1,
+      rig: [
+        visibleInstalledRunnerCard(
+          "onr_v1_024_expert-schedule-analyzer",
+          "program",
+        ),
+      ],
+      servers: [
+        { id: "hq", label: "HQ", ice: [], root: [] },
+        { id: "rd", label: "R&D", ice: [], root: [] },
+      ],
+      legalActions: [runAction("run-rd", "rd")],
+    });
+
+    const payoff = evaluateKnownCentralAccessPayoff(
+      input,
+      "rd",
+      beliefWithRndMemory({
+        lastKnownAccessEventId: "evt_rd_private_look",
+        knownToRunner: true,
+        freshness: "stale_known_same_top",
+        knownTopDefinitionId: "simple_economy_operation",
+        knownTopIsAgenda: false,
+        knownSequenceDefinitionIds: [
+          "simple_economy_operation",
+          "simple_agenda",
+        ],
+        freshenedByRunnerAccess: false,
+        invalidationReasons: [],
+      }),
+    );
+
+    expect(payoff).toMatchObject({
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+      penalty: 640,
+    });
+    expect(payoff.reasons).toEqual(
+      expect.arrayContaining([
+        "known_rnd_top_low_value_stale",
+        "central_known_no_current_payoff",
+      ]),
+    );
+    expect(payoff.evidence).not.toEqual(
+      expect.arrayContaining([
+        "rnd_known_access_depth_estimate:2",
+        "rnd_known_sequence_agenda_definition:simple_agenda",
       ]),
     );
   });
