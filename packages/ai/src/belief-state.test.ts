@@ -94,6 +94,90 @@ describe("belief-state R&D top freshness", () => {
 });
 
 describe("belief-state HQ hand memory retention", () => {
+  it("moves a known R&D top card into HQ on Corp draw and removes it when played", () => {
+    const rdAccess = publicEvent("evt_rd_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "rd",
+      cardDefinitionId: "simple_economy_operation",
+    });
+    const knownDraw = publicEvent("evt_draw", "mandatory_draw", 2, {
+      actor: "corp",
+      actionType: "mandatory_draw",
+    });
+    const playedOperation = publicEvent("evt_play", "play_operation", 3, {
+      actor: "corp",
+      actionType: "play_operation",
+      sourceDefinitionId: "simple_economy_operation",
+    });
+
+    const afterDraw = reconstructBeliefState(
+      runnerInput([rdAccess, knownDraw], 1),
+    ).runnerOpponentModel?.hqHandMemory;
+    const afterPlay = reconstructBeliefState(
+      runnerInput([rdAccess, knownDraw, playedOperation], 0),
+    ).runnerOpponentModel?.hqHandMemory;
+
+    expect(afterDraw).toMatchObject({
+      handCount: 1,
+      knownDefinitions: ["simple_economy_operation"],
+      knownCount: 1,
+      allCardsKnown: true,
+    });
+    expect(afterDraw?.invalidationReasons).toContain(
+      "known_rnd_top_moved_to_hq:evt_rd_access->evt_draw",
+    );
+    expect(afterPlay).toMatchObject({
+      handCount: 0,
+      knownDefinitions: [],
+      knownCount: 0,
+    });
+    expect(afterPlay?.invalidationReasons).toContain(
+      "known_hq_card_played:evt_play",
+    );
+  });
+
+  it("keeps a known R&D-drawn operation in HQ after an unrelated hidden ICE install", () => {
+    const rdAccess = publicEvent("evt_rd_access", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "rd",
+      cardDefinitionId: "simple_economy_operation",
+    });
+    const knownDraw = publicEvent("evt_draw", "mandatory_draw", 2, {
+      actor: "corp",
+      actionType: "mandatory_draw",
+    });
+    const hiddenIceInstall = publicEvent("evt_install", "install_card", 3, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1",
+      installPlacement: "ice",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([rdAccess, knownDraw, hiddenIceInstall], 1),
+    );
+    const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+
+    expect(hqMemory).toMatchObject({
+      handCount: 1,
+      knownDefinitions: ["simple_economy_operation"],
+      knownCount: 1,
+      allCardsKnown: true,
+    });
+    expect(hqMemory?.ledger).toMatchObject({
+      unknownRestCount: 0,
+      candidateGroups: [],
+      safeDefinitions: [
+        expect.objectContaining({
+          definitionId: "simple_economy_operation",
+          count: 1,
+        }),
+      ],
+    });
+  });
+
   it("keeps known safe HQ ICE after an unknown draw and unrelated known operation play", () => {
     const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
       "onr_v1_230_cortical-scanner",

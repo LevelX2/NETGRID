@@ -409,7 +409,9 @@ function revealedOpponentEntries(input: AiDecisionInput, classifications: Belief
 
   for (const classification of classifications) {
     const event = input.playerView.publicEvents.find((candidate) => candidate.eventId === classification.eventId) ?? input.eventTail.find((candidate) => candidate.eventId === classification.eventId);
-    const definitionId = event ? stringValue(event.publicPayload.cardDefinitionId) : undefined;
+    const definitionId = event
+      ? publicKnownCardDefinitionId(event, classification)
+      : undefined;
     if (!definitionId) continue;
     const revealedOpponentFamilySet = new Set(["access", "reveal", "expose", "rez", "score", "steal", "trash"]);
     if (!revealedOpponentFamilySet.has(classification.family)) continue;
@@ -508,7 +510,9 @@ function deriveKnownPositionMemory(playerView: PlayerView, history: PublicGameEv
     }
 
     const event = eventsById.get(classification.eventId);
-    const definitionId = event ? stringValue(event.publicPayload.cardDefinitionId) : undefined;
+    const definitionId = event
+      ? publicKnownCardDefinitionId(event, classification)
+      : undefined;
     const knownDefinitions = event
       ? knownDefinitionsFromEvent(event, classification, definitionId)
       : [];
@@ -631,7 +635,9 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
 
   for (const classification of classifications) {
     const event = eventsById.get(classification.eventId);
-    const definitionId = event ? stringValue(event.publicPayload.cardDefinitionId) : undefined;
+    const definitionId = event
+      ? publicKnownCardDefinitionId(event, classification)
+      : undefined;
     const fullHqRevealDefinitions = event ? hqPrivateLookDefinitions(event) : [];
     const rndTopDefinition = event
       ? rndTopDefinitionFromEvent(event, classification, definitionId)
@@ -816,6 +822,41 @@ function hqHiddenInstallDepartureMemory(
       : knownCards.filter((card) =>
           hqDefinitionMatchesInstallPlacement(card.definitionId, placement),
         );
+  const handCountBeforeDeparture = Math.max(
+    handCountAfterDeparture + 1,
+    knownCards.length,
+  );
+  const unknownCandidateCount = Math.max(
+    0,
+    handCountBeforeDeparture - knownCards.length,
+  );
+  if (placement !== "unknown" && matchingCandidateEntries.length === 0) {
+    const candidateGroup =
+      unknownCandidateCount > 0
+        ? {
+            groupId: `${event.eventId}:hidden_install:${placement}:${event.serverId ?? "unknown"}`,
+            reason: `hidden_${placement}_install_unknown_candidates`,
+            sourceEventId: event.eventId,
+            ...(event.serverId ? { serverId: event.serverId } : {}),
+            installPlacement: placement,
+            candidateDefinitions: [],
+            candidateCount: 0,
+            unknownCandidateCount,
+            departureCount: 1,
+            basis: [
+              `install_placement:${placement}`,
+              ...(event.serverId ? [`server:${event.serverId}`] : []),
+              "known_candidates:0",
+              `unknown_candidates:${unknownCandidateCount}`,
+              "known_cards_do_not_match_install_placement",
+            ],
+          }
+        : undefined;
+    return {
+      safeEntries: knownCards.slice(),
+      ...(candidateGroup ? { candidateGroup } : {}),
+    };
+  }
   const useAllKnownAsFallback = matchingCandidateEntries.length === 0;
   const candidateEntries = useAllKnownAsFallback
     ? knownCards.slice()
@@ -830,14 +871,6 @@ function hqHiddenInstallDepartureMemory(
   const candidateCount = candidateDefinitions.reduce(
     (sum, candidate) => sum + candidate.count,
     0,
-  );
-  const handCountBeforeDeparture = Math.max(
-    handCountAfterDeparture + 1,
-    knownCards.length,
-  );
-  const unknownCandidateCount = Math.max(
-    0,
-    handCountBeforeDeparture - knownCards.length,
   );
 
   return {
@@ -965,7 +998,9 @@ function deriveHiddenRemoteCandidateMemory(
 
   for (const classification of classifications) {
     const event = eventsById.get(classification.eventId);
-    const definitionId = event ? stringValue(event.publicPayload.cardDefinitionId) : undefined;
+    const definitionId = event
+      ? publicKnownCardDefinitionId(event, classification)
+      : undefined;
     const fullHqRevealDefinitions = event ? hqPrivateLookDefinitions(event) : [];
     const rndTopDefinition = event
       ? rndTopDefinitionFromEvent(event, classification, definitionId)
@@ -1209,6 +1244,37 @@ function rndTopDefinitionFromEvent(
   return undefined;
 }
 
+function publicKnownCardDefinitionId(
+  event: PublicGameEvent,
+  classification: BeliefEventClassification,
+): string | undefined {
+  const cardDefinitionId = stringValue(event.publicPayload.cardDefinitionId);
+  if (cardDefinitionId) return cardDefinitionId;
+  if (classification.actor !== "corp") return undefined;
+  if (
+    classification.actionType === "play_operation" ||
+    classification.actionType === "install_card"
+  ) {
+    return stringValue(event.publicPayload.sourceDefinitionId);
+  }
+  if (classification.actionType === "rez_ice") {
+    return (
+      stringValue(event.publicPayload.rezzedCardDefinitionId) ??
+      stringValue(event.publicPayload.sourceDefinitionId)
+    );
+  }
+  return undefined;
+}
+
+function publicCardOrSourceDefinitionId(
+  event: PublicGameEvent,
+): string | undefined {
+  return (
+    stringValue(event.publicPayload.cardDefinitionId) ??
+    stringValue(event.publicPayload.sourceDefinitionId)
+  );
+}
+
 function installPlacementFromEvent(event: PublicGameEvent): HqInstallPlacementMemory | undefined {
   const placement =
     stringValue(event.publicPayload.installPlacement) ??
@@ -1273,6 +1339,7 @@ function hqDefinitionMatchesInstallPlacement(
   placement: HqInstallPlacementMemory,
 ): boolean {
   const type = beliefDefinitionType(definitionId);
+  if (!type) return true;
   if (placement === "ice") return type === "ice";
   if (placement === "root") {
     return type === "agenda" || type === "asset" || type === "upgrade";
@@ -1632,7 +1699,8 @@ function invalidationReasonForEvent(
   if (family === "score" || family === "steal" || family === "trash") return "card_resolution_event";
   if (family === "reveal" || family === "expose") return "reveal_expose_event";
   if (serverId?.startsWith("remote_") && (family === "install" || family === "advance")) return "remote_state_changed";
-  if (stringValue(event.publicPayload.cardDefinitionId) === RD_SWAP_OPERATION_DEFINITION_ID) return "rd_swap_operation";
+  if (publicCardOrSourceDefinitionId(event) === RD_SWAP_OPERATION_DEFINITION_ID)
+    return "rd_swap_operation";
   return undefined;
 }
 
@@ -1657,7 +1725,11 @@ function eventFamily(actionType: string, event: PublicGameEvent): BeliefEventFam
     if (revealKind(event) === "reveal") return "reveal";
   }
 
-  if (actionType === "play_operation" && stringValue(event.publicPayload.cardDefinitionId) === RD_SWAP_OPERATION_DEFINITION_ID) return "swap";
+  if (
+    actionType === "play_operation" &&
+    publicCardOrSourceDefinitionId(event) === RD_SWAP_OPERATION_DEFINITION_ID
+  )
+    return "swap";
   if (revealKind(event) === "reveal") return "reveal";
   if (revealKind(event) === "expose") return "expose";
   return "other";
