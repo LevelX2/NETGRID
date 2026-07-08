@@ -382,6 +382,7 @@ export function aiTracePlanLabel(value: string): string {
     "runner.obtain_breaker_coverage": "Breaker-Abdeckung vorbereiten",
     "runner.contest_remote": "Remote-Run prüfen",
     "runner.opportunistic_central_run": "Zentralserver-Run prüfen",
+    "runner.clear_tags_or_survive": "Tags entfernen / überleben",
     "runner.develop_hand_card": "Handkarte entwickeln",
     "runner.build_credit_base": "Credit-Basis aufbauen",
     "runner.build_credit_bank": "Credit-Bank aufbauen",

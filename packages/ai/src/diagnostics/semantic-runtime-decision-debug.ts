@@ -207,6 +207,13 @@ export function semanticRuntimeDecisionDebugRunnerRunPlanItems(
     "runner_run_plan_sequence_",
     "runner_run_plan_access_",
     "runner_run_plan_abort_",
+    "current_encounter_direct_break_sequence:",
+    "current_encounter_pump_break_sequence:",
+    "break_action_count:",
+    "pump_required_count:",
+    "pump_total_cost:",
+    "break_estimated_cost_after_pump:",
+    "required_subroutine_indexes:",
   ];
   return unique(
     scrubEvidence(

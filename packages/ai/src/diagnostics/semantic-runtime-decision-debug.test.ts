@@ -51,6 +51,9 @@ describe("SemanticRuntimeDecisionDebug", () => {
         "runner_run_plan_target:rd",
         "runner_run_plan_path_quote_total_known_cost:2",
         "runner_run_plan_sequence_selected:true",
+        "current_encounter_direct_break_sequence:true",
+        "break_action_count:1",
+        "required_subroutine_indexes:0,1",
         "privatePayload:bad",
         "unrelated:evidence",
       ]),
@@ -59,6 +62,9 @@ describe("SemanticRuntimeDecisionDebug", () => {
       "runner_run_plan_target:rd",
       "runner_run_plan_path_quote_total_known_cost:2",
       "runner_run_plan_sequence_selected:true",
+      "current_encounter_direct_break_sequence:true",
+      "break_action_count:1",
+      "required_subroutine_indexes:0,1",
     ]);
   });
 });

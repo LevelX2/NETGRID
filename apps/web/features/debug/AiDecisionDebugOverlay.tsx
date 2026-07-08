@@ -650,6 +650,10 @@ function aiDecisionDebugRunPlanRows(items: string[]): Array<[string, string]> {
   const knownCost = aiDecisionDebugTagValue(items, "runner_run_plan_path_quote_total_known_cost");
   const remaining = aiDecisionDebugTagValue(items, "runner_run_plan_path_quote_expected_remaining");
   const canReach = aiDecisionDebugTagValue(items, "runner_run_plan_path_quote_can_reach");
+  const sequenceCost = aiDecisionDebugTagValue(items, "runner_run_plan_sequence_cost");
+  const requiredSubroutines = aiDecisionDebugTagValue(items, "required_subroutine_indexes");
+  const directBreak = aiDecisionDebugTagValue(items, "current_encounter_direct_break_sequence");
+  const pumpBreak = aiDecisionDebugTagValue(items, "current_encounter_pump_break_sequence");
   const rows: Array<[string, string]> = [];
   const id = aiDecisionDebugTagValue(items, "runner_run_plan_id");
   if (id) rows.push(["Plan-ID", id]);
@@ -659,11 +663,23 @@ function aiDecisionDebugRunPlanRows(items: string[]): Array<[string, string]> {
   if (lifecycle || revalidation) rows.push(["Status", [lifecycle, revalidation ? `Revalidation ${revalidation}` : undefined].filter(Boolean).join(" · ")]);
   const available = aiDecisionDebugTagValue(items, "runner_run_plan_budget_available");
   const reserve = aiDecisionDebugTagValue(items, "runner_run_plan_budget_reserved");
-  if (available || reserve || remaining) rows.push(["Budget", [`verfügbar ${available ?? "-"}`, `Reserve ${reserve ?? "-"}`, `nach Pfad ${remaining ?? "-"}`].join(" · ")]);
+  const accessReserve = aiDecisionDebugTagValue(items, "runner_run_plan_access_reserve") ?? reserve;
+  if (available || reserve || remaining) rows.push(["Budget", [`verfügbar ${available ?? "-"}`, `Steal/Trash-Reserve ${accessReserve ?? "-"}`, `nach Pfad ${remaining ?? "-"}`].join(" · ")]);
   const quoteStatus = aiDecisionDebugTagValue(items, "runner_run_plan_path_quote_status");
   if (quoteStatus || knownCost || canReach) rows.push(["PathQuote", [`Status ${quoteStatus ?? "-"}`, `Kosten ${knownCost ?? "-"}`, `erreichbar ${canReach ?? "-"}`].join(" · ")]);
   const cannotReach = aiDecisionDebugTagValue(items, "runner_run_plan_path_quote_cannot_reach");
   if (cannotReach) rows.push(["Blocker", cannotReach]);
+  if (requiredSubroutines) rows.push(["Pflicht-Breaks", aiDecisionDebugSubroutineIndexesLabel(requiredSubroutines)]);
+  if (directBreak === "true" || pumpBreak === "true" || sequenceCost) {
+    rows.push([
+      "Break-Sequenz",
+      [
+        directBreak === "true" ? "direkter Break" : undefined,
+        pumpBreak === "true" ? "Pump + Break" : undefined,
+        sequenceCost ? `Kosten ${sequenceCost}` : undefined,
+      ].filter(Boolean).join(" · ")
+    ]);
+  }
   const obligation = aiDecisionDebugTagValue(items, "runner_run_plan_current_obligation");
   if (obligation) rows.push(["Obligation", obligation]);
   return rows;
@@ -675,10 +691,22 @@ function aiDecisionDebugRunPlanChips(items: string[]): string[] {
       .filter((item) =>
         item.startsWith("runner_run_plan_sequence_") ||
         item.startsWith("runner_run_plan_access_") ||
-        item.startsWith("runner_run_plan_abort_"),
+        item.startsWith("runner_run_plan_abort_") ||
+        item.startsWith("current_encounter_") ||
+        item.startsWith("required_subroutine_indexes:") ||
+        item.startsWith("break_action_count:") ||
+        item.startsWith("pump_required_count:") ||
+        item.startsWith("pump_total_cost:") ||
+        item.startsWith("break_estimated_cost_after_pump:"),
       )
       .slice(0, 12),
   );
+}
+
+function aiDecisionDebugSubroutineIndexesLabel(value: string): string {
+  const indexes = value.split(",").map((entry) => entry.trim()).filter(Boolean);
+  if (indexes.length === 0) return "-";
+  return indexes.map((index) => `Subroutine #${index}`).join(", ");
 }
 
 function aiDecisionDebugPrivateHandMissingRows(detail: Record<string, unknown>): Array<[string, string]> {
@@ -987,6 +1015,7 @@ function aiDecisionDebugPlanTargetLabel(plan: AiDecisionDebugPlanEntry): string 
   const [kind, id = plan.target] = plan.target.split(":");
   if (kind === "server") return aiDecisionDebugPlanServerTargetLabel(plan);
   if (kind === "capability" && id === "runner_credit_base") return "Credits";
+  if (kind === "capability" && id === "runner_tag_clear") return "Tags entfernen";
   if (kind === "bank" && id === "runner_credit_bank") return "Credit-Bank";
   return id;
 }
@@ -1034,6 +1063,7 @@ function aiDecisionDebugPlanStepLabel(value: string, plan?: AiDecisionDebugPlanE
     advance_score_card: "Score-Karte advancen",
     build_bank_counter: "Credit-Bank aufbauen",
     cash_out_bank: "Credit-Bank auszahlen",
+    clear_tags: "Tags entfernen",
     draw_for_answer: coverage ? `Karten ziehen, um ${coverage} zu finden` : "Karten ziehen, um Antwort zu finden",
     gain_credits: "Credits nehmen",
     install_development_card: handCard ? `${handCard} ${developmentVerb}` : `Handkarte ${developmentVerb}`,
@@ -1118,7 +1148,8 @@ function aiDecisionDebugPlanCapabilityLabel(value: string): string {
     credits: "Credits",
     remote_protection: "Remote-Schutz",
     rez_window: "Rez-Fenster",
-    server_access: "Serverzugriff"
+    server_access: "Serverzugriff",
+    tag_clear: "Tags entfernen"
   };
   return labels[value] ?? value;
 }
