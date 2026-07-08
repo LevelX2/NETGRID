@@ -148,6 +148,30 @@ describe("SemanticRuntimeDebug", () => {
     ]);
   });
 
+  it("does not call a higher raw-score rejection below-selected after runtime override", () => {
+    const rejected = choice(action("continue-run", "continue_run"), 103, {
+      reasonCode: "runner.semantic.simple_run_choice",
+      scopeId: "simple_run_choice",
+    });
+    const context = buildSemanticRuntimeDebugPlanContext({
+      selectedActionId: "jack-out",
+      selectedChoice: choice(action("jack-out", "jack_out"), -351, {
+        reasonCode: "runner.semantic.simple_run_choice",
+        scopeId: "simple_run_choice",
+      }),
+      mappedActionIds: [],
+    });
+
+    expect(context.selectedByPlanMapping).toBe(false);
+    expect(semanticRuntimeDebugActionWhyNot(rejected, 103, context)).toEqual([
+      "semantic_score_above_selected_runtime_override",
+      "rawSemanticScore:103",
+      "finalSelectionScore:103",
+      "scope:simple_run_choice",
+      "reasonCode:runner.semantic.simple_run_choice",
+    ]);
+  });
+
   it("formats strategic runtime and selection-score contracts", () => {
     const selected = choice(action("run-rd", "start_run"), 140, {
       evidence: [

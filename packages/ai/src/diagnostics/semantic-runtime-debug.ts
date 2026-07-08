@@ -499,8 +499,12 @@ export function semanticRuntimeDebugActionWhyNot(
         : []),
     ]);
   }
+  const scoreRelation =
+    choice.score > context.selectedRawScore
+      ? "semantic_score_above_selected_runtime_override"
+      : "semantic_score_below_selected";
   return scrubEvidence([
-    "semantic_score_below_selected",
+    scoreRelation,
     `rawSemanticScore:${choice.score}`,
     `finalSelectionScore:${displayScore}`,
     ...(choice.scopeId ? [`scope:${choice.scopeId}`] : []),

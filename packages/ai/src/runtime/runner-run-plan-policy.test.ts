@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import { runnerRunPlanSemanticChoice } from "./runner-run-plan-policy";
+import { revalidateRunnerRunPlan } from "./runner-run-plan-revalidation";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
 
@@ -30,7 +35,9 @@ describe("runner run plan policy", () => {
 
     expect(selected?.action.actionId).toBe(pump.actionId);
     expect(selected?.reasonCode).toBe("runner.run_plan.encounter_survival");
-    expect(selected?.evidence).toContain("runner_run_plan_sequence_selected:true");
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_sequence_selected:true",
+    );
     expect(selected?.evidence).toContain("pump_required_count:2");
   });
 
@@ -58,7 +65,9 @@ describe("runner run plan policy", () => {
     });
 
     expect(selected?.action.actionId).toBe(breakSubroutine.actionId);
-    expect(selected?.evidence).toContain("current_encounter_direct_break_sequence:true");
+    expect(selected?.evidence).toContain(
+      "current_encounter_direct_break_sequence:true",
+    );
   });
 
   it("chooses a direct break over continuing through visible non-ETR damage", () => {
@@ -125,7 +134,9 @@ describe("runner run plan policy", () => {
     });
 
     expect(selected?.action.actionId).toBe(jackOut.actionId);
-    expect(selected?.evidence).toContain("runner_run_plan_abort_recommended:true");
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_abort_recommended:true",
+    );
   });
 
   it("continues after all encounter subroutines are already broken", () => {
@@ -148,7 +159,74 @@ describe("runner run plan policy", () => {
     });
 
     expect(selected?.action.actionId).toBe(continueRun.actionId);
-    expect(selected?.evidence).toContain("encounter_no_etr_break_required:true");
+    expect(selected?.evidence).toContain(
+      "encounter_no_etr_break_required:true",
+    );
+  });
+
+  it("continues from the server movement window after passed ICE was already paid", () => {
+    const continueRun = action("continue_run", {
+      actionId: "continue-run-to-access",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "run.jack_out_window",
+      expiresAtStateVersion: 167,
+      payload: {},
+    });
+    const jackOut = action("jack_out", {
+      actionId: "jack-out",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "run.jack_out_window",
+      expiresAtStateVersion: 167,
+      payload: {},
+    });
+    const input = runnerServerMovementInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      credits: 0,
+      legalActions: [continueRun, jackOut],
+    });
+    const basePlan = runPlan();
+    const planAfterPaidIce: RunnerRunPlan = {
+      ...basePlan,
+      budget: {
+        ...basePlan.budget,
+        availableCredits: 4,
+      },
+      pathQuote: {
+        ...basePlan.pathQuote,
+        totalKnownCost: 4,
+        expectedRemainingCredits: 0,
+        canReachAccess: true,
+      },
+      revalidation: {
+        ...basePlan.revalidation,
+        reasons: ["fingerprint:previous"],
+      },
+    };
+
+    const revalidated = revalidateRunnerRunPlan(input, planAfterPaidIce);
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: revalidated,
+      choices: [
+        choice(continueRun, "simple_run_choice", 103),
+        choice(jackOut, "simple_run_choice", -351),
+      ],
+    });
+
+    expect(revalidated.revalidation.status).toBe("adjusted");
+    expect(revalidated.pathQuote.totalKnownCost).toBe(0);
+    expect(revalidated.pathQuote.canReachAccess).toBe(true);
+    expect(selected?.action.actionId).toBe(continueRun.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_revalidation:adjusted",
+    );
+    expect(selected?.evidence).not.toContain(
+      "runner_run_plan_abort_recommended:true",
+    );
   });
 });
 
@@ -228,6 +306,85 @@ function runnerEncounterInput(params: {
     seed: "runner-run-plan-policy-test",
     decisionId: "runner-run-plan-policy-test:143:runner",
     actionNumber: 1,
+    profileId: "runner-run-plan-profile",
+  } as unknown as AiDecisionInput;
+}
+
+function runnerServerMovementInput(params: {
+  iceDefinitionId: string;
+  iceTitle: string;
+  iceStrength: number;
+  credits: number;
+  legalActions: LegalAction[];
+}): AiDecisionInput {
+  const ice = visibleIce(params);
+  return {
+    side: "runner",
+    playerView: {
+      stateVersion: 167,
+      side: "runner",
+      activeSide: "runner",
+      timingPoint: "run.jack_out_window",
+      phase: "runner_action",
+      turn: 1,
+      click: 3,
+      winner: null,
+      agendaPointsToWin: 7,
+      own: {
+        identity: { instanceId: "runner-id", known: true },
+        gripOrHq: [],
+        heapOrArchives: [],
+        scoreArea: [],
+        rig: [
+          {
+            instanceId: "codecracker-1",
+            known: true,
+            title: "Codecracker",
+            definitionId: "onr_v1_014_codecracker",
+            type: "program",
+            subtypes: ["icebreaker"],
+            strength: params.iceStrength,
+          },
+        ],
+        clicks: 1,
+        credits: params.credits,
+        tags: 0,
+        badPublicity: 0,
+      },
+      opponent: {
+        identity: { instanceId: "corp-id", known: true },
+        gripOrHqCount: 5,
+        heapOrArchives: [],
+        scoreArea: [],
+        rig: [],
+        clicks: 3,
+        credits: 5,
+        tags: 0,
+        badPublicity: 0,
+      },
+      servers: [
+        {
+          id: "rd",
+          label: "R&D",
+          ice: [ice],
+          root: [],
+        },
+      ],
+      run: {
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+        encounteredIce: ice,
+        successful: false,
+      },
+      publicEvents: [],
+    },
+    eventTail: [],
+    legalActions: params.legalActions,
+    difficulty: "normal",
+    seed: "runner-run-plan-policy-server-movement-test",
+    decisionId: "runner-run-plan-policy-server-movement-test:167:runner",
+    actionNumber: 3,
     profileId: "runner-run-plan-profile",
   } as unknown as AiDecisionInput;
 }
@@ -417,6 +574,8 @@ function action(
     actionId: string;
     source: LegalAction["source"];
     costs: LegalAction["costs"];
+    timingPoint?: string;
+    expiresAtStateVersion?: number;
     payload: NonNullable<LegalAction["payload"]>;
   },
 ): LegalAction {
@@ -426,11 +585,11 @@ function action(
     type,
     label: params.actionId,
     source: params.source,
-    timingPoint: "run.encounter",
+    timingPoint: params.timingPoint ?? "run.encounter",
     costs: params.costs,
     targetRequirements: [],
     visibility: "public",
-    expiresAtStateVersion: 143,
+    expiresAtStateVersion: params.expiresAtStateVersion ?? 143,
     payload: params.payload,
   } as unknown as LegalAction;
 }
