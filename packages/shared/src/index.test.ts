@@ -10,6 +10,7 @@ import {
   DEMO_DECK_IDS,
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
+  DEMO_CARDS_BY_ID,
   DEMO_DECKS as INDEX_DEMO_DECKS,
   LEGACY_ABILITY_PAYLOAD_FIELDS as INDEX_LEGACY_ABILITY_PAYLOAD_FIELDS,
   sanitizeAiDecisionDebug,
@@ -73,6 +74,27 @@ describe("rules baseline registry", () => {
     expect(CURRENT_RULES_BASELINE.cardTextSnapshotId).toBe("mvp-0.99-demo");
     expect(CURRENT_RULES_BASELINE.simulationSchemaVersion).toBe("0.99.0");
     expect(INDEX_CURRENT_RULES_BASELINE).toBe(CURRENT_RULES_BASELINE);
+  });
+});
+
+describe("shared card definition registry", () => {
+  it("keeps Raven Microcyb Eagle on its real deck text and subtype", () => {
+    const raven = DEMO_CARDS_BY_ID["onr_v1_140_raven-microcyb-eagle"];
+
+    expect(raven?.subtypes).toEqual(["deck"]);
+    expect(raven?.rulesText).toContain("Provides +1 MU");
+    expect(raven?.rulesText).toContain("Prevents up to 1 Net damage");
+    expect(raven?.rulesText).toContain(
+      "Use this bit only to pay for using icebreakers during runs",
+    );
+    expect(raven?.mechanics).toEqual(
+      expect.arrayContaining([
+        "memory",
+        "damage_prevention",
+        "recurring_credit",
+        "deck_unique",
+      ]),
+    );
   });
 });
 

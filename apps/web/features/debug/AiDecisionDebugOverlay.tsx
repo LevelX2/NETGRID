@@ -747,6 +747,15 @@ type AiDecisionDebugPlanLayerView = {
 
 const AI_DECISION_DEBUG_TACTICAL_PLAN_ITEM_LIMIT = Number.MAX_SAFE_INTEGER;
 
+type AiDecisionDebugPlanCandidateCounts = {
+  evaluated: number;
+  active: number;
+  blocked: number;
+  abandoned: number;
+  terminal: number;
+  hidden: number;
+};
+
 function aiDecisionDebugMetaRowValue(
   rows: Array<[string, string]>,
   label: string,
@@ -815,19 +824,79 @@ function aiDecisionDebugHandSummary(
 function aiDecisionDebugPlanCandidateSummary(
   planLayer: AiDecisionDebugPlanLayerView,
 ): string | undefined {
-  const evaluatedPlans =
-    planLayer.evaluatedPlanCount ?? planLayer.entries.length;
-  const blockedPlans =
-    planLayer.blockedPlanCount ??
-    planLayer.entries.filter((entry) => entry.status === "blocked").length;
-  if (evaluatedPlans <= 0) {
-    return aiDecisionDebugMetaRowValue(planLayer.summaryRows, "Plan-Kandidaten")
-      ?.replace(/\s*\(.*\)\s*$/, "");
+  const counts = aiDecisionDebugPlanCandidateCounts({
+    entries: planLayer.entries,
+    evaluatedPlanCount: planLayer.evaluatedPlanCount,
+    blockedPlanCount: planLayer.blockedPlanCount,
+  });
+  if (counts.evaluated > 0) {
+    return aiDecisionDebugPlanCandidateSummaryText(counts);
   }
-  const possiblePlans = Math.max(0, evaluatedPlans - blockedPlans);
-  return blockedPlans > 0
-    ? `${evaluatedPlans} bewertet · ${possiblePlans} möglich · ${blockedPlans} blockiert`
-    : `${evaluatedPlans} bewertet · ${possiblePlans} möglich`;
+  return aiDecisionDebugMetaRowValue(planLayer.summaryRows, "Plan-Kandidaten")
+    ?.replace(/\s*\(.*\)\s*$/, "");
+}
+
+function aiDecisionDebugPlanCandidateCounts(params: {
+  entries: readonly AiDecisionDebugPlanEntry[];
+  evaluatedPlanCount: number | undefined;
+  blockedPlanCount: number | undefined;
+}): AiDecisionDebugPlanCandidateCounts {
+  const evaluatedPlans =
+    Math.max(params.evaluatedPlanCount ?? 0, params.entries.length);
+  const visibleActivePlans = params.entries.filter((entry) =>
+    aiDecisionDebugPlanStatusIsActive(entry.status),
+  ).length;
+  const visibleBlockedPlans = params.entries.filter(
+    (entry) => entry.status === "blocked",
+  ).length;
+  const visibleAbandonedPlans = params.entries.filter(
+    (entry) => entry.status === "abandoned",
+  ).length;
+  const visibleTerminalPlans = params.entries.filter((entry) =>
+    aiDecisionDebugPlanStatusIsTerminal(entry.status),
+  ).length;
+  const blockedPlans = params.blockedPlanCount ?? visibleBlockedPlans;
+  return {
+    evaluated: evaluatedPlans,
+    active:
+      params.entries.length > 0
+        ? visibleActivePlans
+        : Math.max(0, evaluatedPlans - blockedPlans),
+    blocked: blockedPlans,
+    abandoned: visibleAbandonedPlans,
+    terminal: visibleTerminalPlans,
+    hidden: Math.max(0, evaluatedPlans - params.entries.length),
+  };
+}
+
+function aiDecisionDebugPlanCandidateSummaryText(
+  counts: AiDecisionDebugPlanCandidateCounts,
+): string {
+  return [
+    `${counts.evaluated} bewertet`,
+    `${counts.active} aktiv/möglich`,
+    counts.blocked > 0 ? `${counts.blocked} blockiert` : undefined,
+    counts.abandoned > 0 ? `${counts.abandoned} verworfen` : undefined,
+    counts.terminal > 0 ? `${counts.terminal} abgeschlossen` : undefined,
+    counts.hidden > 0 ? `${counts.hidden} ohne Rangdetails` : undefined,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
+}
+
+function aiDecisionDebugPlanStatusIsActive(status: string | undefined): boolean {
+  return (
+    status === undefined ||
+    status === "active" ||
+    status === "progressing" ||
+    status === "proposed"
+  );
+}
+
+function aiDecisionDebugPlanStatusIsTerminal(
+  status: string | undefined,
+): boolean {
+  return status === "failed" || status === "expired" || status === "satisfied";
 }
 
 function aiDecisionDebugPlanLayerSummary(
@@ -1769,7 +1838,11 @@ function aiDecisionDebugPlanLayer(
   ).length;
   const candidateCount = evaluatedPlanCount ?? entries.length;
   const unavailablePlanCount = blockedPlanCount ?? visibleBlockedPlanCount;
-  const possiblePlanCount = Math.max(0, candidateCount - unavailablePlanCount);
+  const candidateCounts = aiDecisionDebugPlanCandidateCounts({
+    entries,
+    evaluatedPlanCount,
+    blockedPlanCount,
+  });
   const summaryRows: Array<[string, string]> = [];
   if (selectedType) {
     const selectedPlanLabel = selectedEntry
@@ -1830,7 +1903,7 @@ function aiDecisionDebugPlanLayer(
   if (candidateCount > 0 || unavailablePlanCount > 0)
     summaryRows.push([
       "Plan-Kandidaten",
-      `${candidateCount} bewertet · ${possiblePlanCount} aktuell möglich · ${unavailablePlanCount} blockiert`,
+      aiDecisionDebugPlanCandidateSummaryText(candidateCounts),
     ]);
   if (candidateCount > entries.length) {
     summaryRows.push([
