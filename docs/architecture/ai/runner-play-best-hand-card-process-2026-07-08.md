@@ -2,7 +2,7 @@
 
 ## Status
 
-In Arbeit im Worktree `C:\Projekte\NETGRID_RUNNER_PLAY_BEST_HAND_CARD` auf Branch `codex/runner-play-best-hand-card`.
+Umgesetzt und final verifiziert im Worktree `C:\Projekte\NETGRID_RUNNER_PLAY_BEST_HAND_CARD` auf Branch `codex/runner-play-best-hand-card`.
 
 ## Quelle/Vorgabe
 
@@ -164,3 +164,11 @@ Arbeite RPBC-0 bis RPBC-4 sequenziell ab. Genau ein Paket ist aktiv. Committe je
 - Debug- und Maintenance-Anzeigen zeigen den Plan verständlich.
 - Fokussierte Tests und Typechecks sind dokumentiert.
 - Arbeitsbranch ist lokal nach `main` integriert.
+
+## Umsetzungsergebnis
+
+- RPBC-0 bis RPBC-3 wurden sequenziell mit Einzelcommits abgeschlossen.
+- `runner.play_best_hand_card` nutzt den bestehenden `install_development_card`-Mappingpfad für Installieren, Events und Kartenfähigkeiten.
+- Direkte Breaker-Installationen, die einen blockierten Run entsperren, werden aus der generischen Handkartenplanung herausgenommen und bleiben im Coverage-Plan.
+- Debug-/Maintenance-Anzeigen übersetzen den Plan als "Beste Handkarte spielen" und zeigen Zielkarte sowie Entwicklungsrolle.
+- Die komplette `semantic-ai-runtime-cutover.test.ts` bleibt wegen vier bereits auf `main` reproduzierbarer Altfehler rot; die von dieser Änderung betroffenen Cutover-Fälle wurden gezielt grün geprüft.
