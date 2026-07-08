@@ -1982,6 +1982,7 @@ const AI_DECISION_DEBUG_FORBIDDEN_KEY_PATTERN =
   /(?:privatePayload|cardInstances|fullGameState|FullState|sessionToken|reconnectToken|joinToken|tokenHash|privateDeckSnapshots|decklist|deckList|deckContents|runnerDeck|corpDeck|opponentHand|opponentHq|hqContents|rdContents|rndContents|stackContents|handContents|deckCards|sessions?)/i;
 const AI_DECISION_DEBUG_FORBIDDEN_VALUE_PATTERN =
   /(?:privatePayload|cardInstances|fullGameState|FullState|sessionToken|reconnectToken|joinToken|tokenHash|decklist|hidden-card|hidden-deck-card)/i;
+const AI_DECISION_DEBUG_DETAIL_SECTION_ITEM_LIMIT = 256;
 
 export function sanitizeAiDecisionDebug(
   debug: unknown,
@@ -2246,7 +2247,10 @@ function sanitizeAiDecisionDetailSections(
       const source = entry as Record<string, unknown>;
       const id = sanitizeAiDecisionDebugString(source.id);
       const title = sanitizeAiDecisionDebugString(source.title);
-      const items = sanitizeAiDecisionDebugStringArray(source.items, 96);
+      const items = sanitizeAiDecisionDebugStringArray(
+        source.items,
+        AI_DECISION_DEBUG_DETAIL_SECTION_ITEM_LIMIT,
+      );
       if (!id || !title || !items) return undefined;
       return { id, title, items };
     })

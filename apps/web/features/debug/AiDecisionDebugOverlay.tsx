@@ -741,6 +741,8 @@ type AiDecisionDebugPlanLayerView = {
   entries: AiDecisionDebugPlanEntry[];
   fallbackItems: string[];
   mappedActionIds: string[];
+  evaluatedPlanCount?: number;
+  blockedPlanCount?: number;
 };
 
 const AI_DECISION_DEBUG_TACTICAL_PLAN_ITEM_LIMIT = Number.MAX_SAFE_INTEGER;
@@ -813,16 +815,19 @@ function aiDecisionDebugHandSummary(
 function aiDecisionDebugPlanCandidateSummary(
   planLayer: AiDecisionDebugPlanLayerView,
 ): string | undefined {
-  if (planLayer.entries.length === 0) {
+  const evaluatedPlans =
+    planLayer.evaluatedPlanCount ?? planLayer.entries.length;
+  const blockedPlans =
+    planLayer.blockedPlanCount ??
+    planLayer.entries.filter((entry) => entry.status === "blocked").length;
+  if (evaluatedPlans <= 0) {
     return aiDecisionDebugMetaRowValue(planLayer.summaryRows, "Plan-Kandidaten")
       ?.replace(/\s*\(.*\)\s*$/, "");
   }
-  const blockedPlans = planLayer.entries.filter(
-    (entry) => entry.status === "blocked",
-  ).length;
+  const possiblePlans = Math.max(0, evaluatedPlans - blockedPlans);
   return blockedPlans > 0
-    ? `${planLayer.entries.length} Pläne · ${blockedPlans} blockiert`
-    : `${planLayer.entries.length} Pläne`;
+    ? `${evaluatedPlans} bewertet · ${possiblePlans} möglich · ${blockedPlans} blockiert`
+    : `${evaluatedPlans} bewertet · ${possiblePlans} möglich`;
 }
 
 function aiDecisionDebugPlanLayerSummary(
@@ -1757,6 +1762,14 @@ function aiDecisionDebugPlanLayer(
     "plan_alternative_count",
   );
   const blockedCount = aiDecisionDebugTagValue(items, "blocked_plan_count");
+  const evaluatedPlanCount = aiDecisionDebugNumber(alternativeCount);
+  const blockedPlanCount = aiDecisionDebugNumber(blockedCount);
+  const visibleBlockedPlanCount = entries.filter(
+    (entry) => entry.status === "blocked",
+  ).length;
+  const candidateCount = evaluatedPlanCount ?? entries.length;
+  const unavailablePlanCount = blockedPlanCount ?? visibleBlockedPlanCount;
+  const possiblePlanCount = Math.max(0, candidateCount - unavailablePlanCount);
   const summaryRows: Array<[string, string]> = [];
   if (selectedType) {
     const selectedPlanLabel = selectedEntry
@@ -1814,11 +1827,17 @@ function aiDecisionDebugPlanLayer(
       aiDecisionDebugPlanProgressionLabel(planProgression),
     ]);
   if (whyAbandoned) summaryRows.push(["Verworfen", whyAbandoned]);
-  if (alternativeCount || blockedCount)
+  if (candidateCount > 0 || unavailablePlanCount > 0)
     summaryRows.push([
       "Plan-Kandidaten",
-      `${alternativeCount ?? entries.length} bewertet · ${blockedCount ?? entries.filter((entry) => entry.status === "blocked").length} blockiert (aktuell nicht ausführbar)`,
+      `${candidateCount} bewertet · ${possiblePlanCount} aktuell möglich · ${unavailablePlanCount} blockiert`,
     ]);
+  if (candidateCount > entries.length) {
+    summaryRows.push([
+      "Planliste",
+      `${entries.length} von ${candidateCount} Rangdetails sichtbar`,
+    ]);
+  }
   const fallbackItems =
     entries.length === 0
       ? items.filter((item) => !item.startsWith("plan_rank|")).slice(0, 16)
@@ -1828,6 +1847,8 @@ function aiDecisionDebugPlanLayer(
     entries,
     fallbackItems,
     mappedActionIds: mappedActions?.split("|").filter(Boolean) ?? [],
+    ...(evaluatedPlanCount !== undefined ? { evaluatedPlanCount } : {}),
+    ...(blockedPlanCount !== undefined ? { blockedPlanCount } : {}),
   };
 }
 

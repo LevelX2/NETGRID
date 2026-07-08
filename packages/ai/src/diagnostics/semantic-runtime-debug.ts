@@ -826,6 +826,13 @@ export function semanticRuntimeDebugTacticalPlanItems(
   const selectedStep = planRuntime.selectedStep;
   const selectedMapping = planRuntime.selectedMapping;
   const previousPlan = planRuntime.previousPlan;
+  const planRankItems = planRuntime.planAlternatives.map((plan, index) =>
+    tacticalPlanRankDebugItem(
+      plan,
+      index + 1,
+      selectedPlan?.planId === plan.planId,
+    ),
+  );
   return [
     ...(previousPlan
       ? [
@@ -841,33 +848,6 @@ export function semanticRuntimeDebugTacticalPlanItems(
     ...(planRuntime.whyPlanAbandoned
       ? [`why_plan_abandoned:${planRuntime.whyPlanAbandoned}`]
       : []),
-    ...(planRuntime.deckCapabilitiesUsed ?? [])
-      .slice(0, 12)
-      .map((fact) => `deck_capability_used:${fact}`),
-    ...(planRuntime.strategicIntentStateUsed ?? [])
-      .slice(0, 12)
-      .map((fact) => `strategic_intent_state_used:${fact}`),
-    ...(planRuntime.corpStrategicIntentUsed ?? [])
-      .slice(0, 12)
-      .map((fact) => `corp_strategic_intent_used:${fact}`),
-    ...(planRuntime.tacticalGoalsUsed ?? [])
-      .slice(0, 16)
-      .map((fact) => `tactical_goal_used:${fact}`),
-    ...(planRuntime.runnerStrategicIntentUsed ?? [])
-      .slice(0, 12)
-      .map((fact) => `runner_strategic_intent_used:${fact}`),
-    ...(planRuntime.runnerRunTargetEvaluationsUsed ?? [])
-      .slice(0, 12)
-      .map((fact) => `runner_run_target_used:${fact}`),
-    ...(planRuntime.runnerEconomyPostureUsed ?? [])
-      .slice(0, 28)
-      .map((fact) => `runner_economy_posture_used:${fact}`),
-    ...(planRuntime.runnerHandDevelopmentEvaluationsUsed ?? [])
-      .slice(0, 12)
-      .map((fact) => `runner_hand_development_used:${fact}`),
-    ...(planRuntime.runnerTacticalGoalsUsed ?? [])
-      .slice(0, 12)
-      .map((fact) => `runner_tactical_goal_used:${fact}`),
     `plan_alternative_count:${planRuntime.planAlternatives.length}`,
     `blocked_plan_count:${planRuntime.blockedPlans.length}`,
     ...(selectedPlan
@@ -908,13 +888,34 @@ export function semanticRuntimeDebugTacticalPlanItems(
             .map((blocker) => blocker.kind)
             .join(",")}`,
       ),
-    ...planRuntime.planAlternatives.map((plan, index) =>
-      tacticalPlanRankDebugItem(
-        plan,
-        index + 1,
-        selectedPlan?.planId === plan.planId,
-      ),
-    ),
+    ...planRankItems,
+    ...(planRuntime.deckCapabilitiesUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `deck_capability_used:${fact}`),
+    ...(planRuntime.strategicIntentStateUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `strategic_intent_state_used:${fact}`),
+    ...(planRuntime.corpStrategicIntentUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `corp_strategic_intent_used:${fact}`),
+    ...(planRuntime.tacticalGoalsUsed ?? [])
+      .slice(0, 16)
+      .map((fact) => `tactical_goal_used:${fact}`),
+    ...(planRuntime.runnerStrategicIntentUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_strategic_intent_used:${fact}`),
+    ...(planRuntime.runnerRunTargetEvaluationsUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_run_target_used:${fact}`),
+    ...(planRuntime.runnerEconomyPostureUsed ?? [])
+      .slice(0, 28)
+      .map((fact) => `runner_economy_posture_used:${fact}`),
+    ...(planRuntime.runnerHandDevelopmentEvaluationsUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_hand_development_used:${fact}`),
+    ...(planRuntime.runnerTacticalGoalsUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_tactical_goal_used:${fact}`),
   ];
 }
 

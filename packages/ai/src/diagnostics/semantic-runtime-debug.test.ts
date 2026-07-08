@@ -1,4 +1,4 @@
-import type { LegalAction } from "@netgrid/shared";
+import { sanitizeAiDecisionDebug, type LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { SemanticRuntimeChoice } from "../runtime/semantic-runtime-types";
@@ -602,6 +602,94 @@ describe("SemanticRuntimeDebug", () => {
     expect(rankItem).toContain("scores=Coverage:12.35");
   });
 
+  it("keeps all ranked tactical plans visible when context diagnostics are large", () => {
+    const selectedPlan = tacticalPlan({
+      planId: "plan-coverage",
+      type: "runner.obtain_breaker_coverage",
+      priority: 880,
+    });
+    const secondPlan = tacticalPlan({
+      planId: "plan-credit",
+      type: "runner.build_credit_base",
+      priority: 760,
+    });
+    const thirdPlan = tacticalPlan({
+      planId: "plan-hand",
+      type: "runner.play_best_hand_card",
+      priority: 700,
+    });
+    const blockedPlan: TacticalPlan = {
+      ...tacticalPlan({
+        planId: "plan-hq",
+        type: "runner.opportunistic_central_run",
+        priority: 640,
+      }),
+      status: "blocked",
+    };
+    const runtime: TacticalPlanRuntimeResult = {
+      previousPlan: {
+        schemaVersion: "tactical-plan-v1",
+        memoryId: "previous-memory",
+        side: "runner",
+        planId: "previous-plan",
+        type: "runner.play_best_hand_card",
+        status: "active",
+        blockedBy: [],
+        ttlDecisionsRemaining: 2,
+        planProgressionReason: "continued",
+        updatedAtStateVersion: 7,
+      },
+      planAlternatives: [selectedPlan, secondPlan, thirdPlan, blockedPlan],
+      blockedPlans: [blockedPlan],
+      selectedPlan,
+      selectedStep: selectedPlan.currentStep,
+      selectedMapping: {
+        plan: selectedPlan,
+        step: selectedPlan.currentStep,
+        status: "matched",
+        actionCandidateIds: ["draw"],
+        legalActions: [action("draw", "draw_card")],
+        rationale: ["selected_for_coverage"],
+      },
+      deckCapabilitiesUsed: numberedFacts("deck_capability", 12),
+      strategicIntentStateUsed: numberedFacts("strategic_intent", 12),
+      corpStrategicIntentUsed: numberedFacts("corp_intent", 12),
+      tacticalGoalsUsed: numberedFacts("tactical_goal", 16),
+      runnerStrategicIntentUsed: numberedFacts("runner_intent", 12),
+      runnerRunTargetEvaluationsUsed: numberedFacts("runner_target", 12),
+      runnerEconomyPostureUsed: numberedFacts("runner_economy", 28),
+      runnerHandDevelopmentEvaluationsUsed: numberedFacts(
+        "runner_hand_development",
+        12,
+      ),
+      runnerTacticalGoalsUsed: numberedFacts("runner_tactical_goal", 12),
+    };
+
+    const items = semanticRuntimeDebugTacticalPlanItems(runtime);
+    const firstContextIndex = items.findIndex((entry) =>
+      entry.startsWith("deck_capability_used:"),
+    );
+    const planRankIndexes = items
+      .map((entry, index) => (entry.startsWith("plan_rank|") ? index : -1))
+      .filter((index) => index >= 0);
+    const sanitized = sanitizeAiDecisionDebug({
+      aiLevel: 2,
+      detailSections: [{ id: "tactical_plan", title: "Tactical Plan", items }],
+    });
+    const sanitizedItems = sanitized?.detailSections?.[0]?.items ?? [];
+
+    expect(planRankIndexes).toHaveLength(4);
+    expect(Math.max(...planRankIndexes)).toBeLessThan(firstContextIndex);
+    expect(
+      sanitizedItems.filter((item) => item.startsWith("plan_rank|")),
+    ).toHaveLength(4);
+    expect(sanitizedItems).toContain("plan_alternative_count:4");
+    expect(sanitizedItems).toContain("blocked_plan_count:1");
+    expect(sanitizedItems).toContain(
+      "runner_tactical_goal_used:runner_tactical_goal_12",
+    );
+  });
+
   it("exports the source continuity contribution for tactical plan ranking scores", () => {
     const plan = tacticalPlan({
       planId: "runner.build_credit_base",
@@ -685,6 +773,10 @@ function action(actionId: string, type: LegalAction["type"]): LegalAction {
     visibility: "private_to_actor",
     expiresAtStateVersion: 1,
   };
+}
+
+function numberedFacts(prefix: string, count: number): string[] {
+  return Array.from({ length: count }, (_, index) => `${prefix}_${index + 1}`);
 }
 
 function actionSemanticCandidate(

@@ -94,6 +94,38 @@ describe("AI decision debug sanitizing", () => {
     expect(sanitized?.detailSections?.at(-1)?.id).toBe("section_16");
   });
 
+  it("keeps extended detail section items for rich AI plan diagnostics", () => {
+    const items = Array.from(
+      { length: 160 },
+      (_, index) => `item_${index + 1}`,
+    );
+
+    const sanitized = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      detailSections: [{ id: "tactical_plan", title: "Tactical Plan", items }],
+    });
+
+    expect(sanitized?.detailSections?.[0]?.items).toHaveLength(160);
+    expect(sanitized?.detailSections?.[0]?.items.at(-1)).toBe("item_160");
+  });
+
+  it("still bounds oversized detail section item payloads", () => {
+    const items = Array.from(
+      { length: 300 },
+      (_, index) => `item_${index + 1}`,
+    );
+
+    const sanitized = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      detailSections: [{ id: "tactical_plan", title: "Tactical Plan", items }],
+    });
+
+    expect(sanitized?.detailSections?.[0]?.items).toHaveLength(256);
+    expect(sanitized?.detailSections?.[0]?.items.at(-1)).toBe("item_256");
+  });
+
   it("keeps action alternative raw scores distinct from display priority", () => {
     const sanitized = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
