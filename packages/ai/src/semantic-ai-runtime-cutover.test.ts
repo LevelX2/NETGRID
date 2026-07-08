@@ -1722,6 +1722,138 @@ describe("Semantic AI runtime cutover", () => {
     expect(debugText).toContain("pump_required_count:1");
   });
 
+  it("uses visible non-noisy run credits when deciding whether pumps can reach a break", () => {
+    const codecracker: VisibleCard = {
+      instanceId: "runner-codecracker",
+      definitionId: "onr_v1_014_codecracker",
+      title: "Codecracker",
+      owner: "runner",
+      controller: "runner",
+      type: "program",
+      subtypes: ["icebreaker"],
+      known: true,
+      strength: 0,
+    };
+    const quiet: VisibleCard = {
+      instanceId: "runner-quiet",
+      definitionId: "onr_v1_071_vewy-vewy-quiet",
+      title: "Vewy Vewy Quiet",
+      owner: "runner",
+      controller: "runner",
+      type: "resource",
+      subtypes: ["stealth"],
+      known: true,
+      counters: { bit: 2 },
+      counterDisplays: [
+        {
+          id: "restricted_pool",
+          amount: 2,
+          displayKind: "restricted_pool",
+          label: "Run-Bits",
+          ariaLabel: "2 Run-Bits",
+          counterType: "bit",
+          usageHint: "spendable",
+          creditPool: {
+            kind: "restricted_credit",
+            capacity: 2,
+            uses: ["using_icebreaker_during_run_non_noisy"],
+            refresh: {
+              timing: "start_of_runner_turn",
+              behavior: "refill_to_capacity_if_used",
+            },
+          },
+        },
+      ],
+    };
+    const keeper: VisibleCard = {
+      instanceId: "corp-keeper",
+      definitionId: "onr_v1_252_keeper",
+      title: "Keeper",
+      owner: "corp",
+      controller: "corp",
+      type: "ice",
+      subtypes: ["code_gate"],
+      known: true,
+      rezzed: true,
+      strength: 4,
+      effectiveRunQuote: {
+        iceInstanceId: "corp-keeper",
+        iceDefinitionId: "onr_v1_252_keeper",
+        effectiveStrength: 4,
+        subroutines: [{ id: "keeper-etr", type: "end_the_run" }],
+      },
+    };
+    const pump = legalAction(
+      "pump-codecracker",
+      "runner",
+      "pump_breaker",
+      "Codecracker: Stärke +1",
+      { credits: 1 },
+      {
+        source: codecracker.instanceId,
+        visibility: "private_to_actor",
+        payload: {
+          breakerId: codecracker.instanceId,
+          iceId: keeper.instanceId,
+        },
+      },
+    );
+    const continueIntoEtr = legalAction(
+      "continue-keeper-etr",
+      "runner",
+      "continue_run",
+      "Subroutinen auslösen (Run endet)",
+      { credits: 0 },
+      {
+        visibility: "private_to_actor",
+        payload: {
+          encounterContinue: true,
+          unbrokenSubroutineCount: 1,
+          encounterWillEndRun: true,
+          sourceDefinitionId: "onr_v1_252_keeper",
+        },
+      },
+    );
+    pump.timingPoint = "run.encounter_ice";
+    continueIntoEtr.timingPoint = "run.encounter_ice";
+    const input = aiInput("runner", [pump, continueIntoEtr]);
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 2;
+    input.playerView.own.clicks = 0;
+    input.playerView.own.rig = [codecracker, quiet];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [keeper]),
+      server("archives"),
+    ];
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      encounteredIce: keeper,
+      successful: false,
+    };
+
+    const decision = chooseRunnerAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(pump.actionId);
+    expect(decision.reasonCode).toBe("runner.semantic.encounter_survival");
+    expect(debugText).not.toContain("pump_cannot_reach_break_strength:true");
+
+    input.playerView.own.rig = [codecracker];
+    const unaffordableDecision = chooseRunnerAction(input);
+    const unaffordableDebugText = JSON.stringify(
+      unaffordableDecision.decisionDebug,
+    );
+
+    expect(unaffordableDecision.actionId).toBe(continueIntoEtr.actionId);
+    expect(unaffordableDebugText).toContain(
+      "pump_cannot_reach_break_strength:true",
+    );
+    expect(unaffordableDebugText).toContain("pump_required_count:4");
+  });
+
   it("does not spend the Runner's last credit on a break when the remaining ICE path is still unaffordable", () => {
     const dwarf: VisibleCard = {
       instanceId: "runner-dwarf",

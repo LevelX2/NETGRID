@@ -5,6 +5,8 @@ import {
   cardDefinitionStrength,
   creditsToBreakEndTheRunSubroutinesWithBreaker,
   endTheRunSubroutineCount,
+  type RunnerRunPathCreditBudget,
+  visibleRunnerRunPathCreditBudgetForRig,
 } from "../visible-run-analysis";
 import { currentEncounteredIceCard } from "./current-encounter";
 import {
@@ -18,6 +20,7 @@ import {
 import type { EncounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
 
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
+type MutableEncounterCreditBudget = Required<RunnerRunPathCreditBudget>;
 
 export type RunnerPumpViabilityContextDependencies = {
   findVisibleCard: (
@@ -159,9 +162,12 @@ export function createRunnerPumpViabilityContext(
     );
     const requiredPumps = Math.max(1, Math.ceil(missingStrength / pumpAmount));
     const totalPumpCost = requiredPumps * pumpCost;
-    const remainingCreditsAfterPumps =
-      input.playerView.own.credits - totalPumpCost;
-    if (remainingCreditsAfterPumps < 0)
+    const pumpPayment = spendIcebreakerCredits(
+      encounterCreditBudget(input),
+      breaker,
+      totalPumpCost,
+    );
+    if (!pumpPayment.affordable)
       return {
         canLeadToBreak: false,
         evidence: [
@@ -182,7 +188,11 @@ export function createRunnerPumpViabilityContext(
         : dependencies.estimatedEncounterBreakCost(input, action);
     if (
       estimatedBreakCost === undefined ||
-      estimatedBreakCost > remainingCreditsAfterPumps
+      !spendIcebreakerCredits(
+        pumpPayment.budget,
+        breaker,
+        estimatedBreakCost,
+      ).affordable
     )
       return {
         canLeadToBreak: false,
@@ -192,8 +202,12 @@ export function createRunnerPumpViabilityContext(
         ],
       };
 
-    const creditsAfterPumpAndBreak =
-      remainingCreditsAfterPumps - estimatedBreakCost;
+    const breakPayment = spendIcebreakerCredits(
+      pumpPayment.budget,
+      breaker,
+      estimatedBreakCost,
+    );
+    const creditsAfterPumpAndBreak = breakPayment.budget.credits;
     const run = input.playerView.run;
     const server =
       run?.position?.kind === "ice"
@@ -265,10 +279,78 @@ export function createRunnerPumpViabilityContext(
       evidence: [
         "pump_can_reach_useful_break:true",
         `pump_required_count:${requiredPumps}`,
+        `pump_restricted_credits_spent:${pumpPayment.restrictedSpent}`,
+        `break_restricted_credits_spent:${breakPayment.restrictedSpent}`,
         ...runEffect.evidence,
       ],
     };
   };
 
   return { pumpViabilityAssessment };
+}
+
+function encounterCreditBudget(
+  input: AiDecisionInput,
+): MutableEncounterCreditBudget {
+  const visiblePools = visibleRunnerRunPathCreditBudgetForRig(
+    input.playerView.own.rig ?? [],
+  );
+  return {
+    credits: normalizeCreditAmount(input.playerView.own.credits),
+    icebreakerCredits: visiblePools.icebreakerCredits,
+    nonNoisyIcebreakerCredits: visiblePools.nonNoisyIcebreakerCredits,
+    killerCredits: visiblePools.killerCredits,
+  };
+}
+
+function spendIcebreakerCredits(
+  budget: MutableEncounterCreditBudget,
+  breaker: VisibleCard,
+  cost: number,
+): {
+  affordable: boolean;
+  budget: MutableEncounterCreditBudget;
+  restrictedSpent: number;
+} {
+  const next = { ...budget };
+  let remaining = normalizeCreditAmount(cost);
+  let restrictedSpent = 0;
+  const spendRestricted = (
+    key: Exclude<keyof MutableEncounterCreditBudget, "credits">,
+  ) => {
+    const spent = Math.min(next[key], remaining);
+    next[key] -= spent;
+    remaining -= spent;
+    restrictedSpent += spent;
+  };
+  if (breakerHasSubtype(breaker, "killer")) spendRestricted("killerCredits");
+  if (!breakerHasSubtype(breaker, "noisy")) {
+    spendRestricted("nonNoisyIcebreakerCredits");
+  }
+  spendRestricted("icebreakerCredits");
+  const cashSpent = Math.min(next.credits, remaining);
+  next.credits -= cashSpent;
+  remaining -= cashSpent;
+  return {
+    affordable: remaining === 0,
+    budget: next,
+    restrictedSpent,
+  };
+}
+
+function breakerHasSubtype(breaker: VisibleCard, subtype: string): boolean {
+  return (breaker.subtypes ?? []).some(
+    (candidate) => subtypeKey(candidate) === subtype,
+  );
+}
+
+function subtypeKey(subtype: string): string {
+  return subtype
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function normalizeCreditAmount(value: number): number {
+  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
 }
