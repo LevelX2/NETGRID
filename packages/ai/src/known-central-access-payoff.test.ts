@@ -13,6 +13,37 @@ import {
 } from "./known-central-access-payoff";
 
 describe("known central access payoff HQ knownness", () => {
+  it("suppresses HQ access when the visible HQ count is zero", () => {
+    const payoff = evaluateKnownCentralAccessPayoff(
+      aiInput({ handCount: 0 }),
+      "hq",
+      beliefWithHqMemory({
+        handCount: 0,
+        knownDefinitions: [],
+        unknownRestCount: 0,
+      }),
+    );
+
+    expect(payoff).toMatchObject({
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+      penalty: 900,
+    });
+    expect(payoff.reasons).toEqual(
+      expect.arrayContaining([
+        "hq_empty_no_access_payoff",
+        "central_known_no_current_payoff",
+      ]),
+    );
+    expect(payoff.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_hand_count:0",
+        "hq_empty_no_access_payoff:true",
+        "hq_run_suppressed_by_empty_hq:true",
+      ]),
+    );
+  });
+
   it("does not treat ledger-only hidden install candidates as missing HQ memory", () => {
     const payoff = evaluateKnownCentralAccessPayoff(
       aiInput({ handCount: 1 }),

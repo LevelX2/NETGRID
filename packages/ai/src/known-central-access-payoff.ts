@@ -355,6 +355,23 @@ function evaluateKnownHqAccessPayoff(
   input: AiDecisionInput,
   beliefState: BeliefState,
 ): KnownCentralAccessPayoff {
+  if (input.playerView.opponent.handCount <= 0) {
+    return {
+      payoff: "known_low_value",
+      knownNoCurrentPayoff: true,
+      score: 0,
+      penalty: 900,
+      reasons: ["hq_empty_no_access_payoff", "central_known_no_current_payoff"],
+      evidence: [
+        "central_target:hq",
+        "central_memory_payoff:known_low_value",
+        "hq_hand_count:0",
+        "hq_empty_no_access_payoff:true",
+        "hq_run_suppressed_by_empty_hq:true",
+      ],
+    };
+  }
+
   const memory = beliefState.runnerOpponentModel?.hqHandMemory;
   if (!memory) {
     return unknownCentralPayoff("hq", ["hq_hand_memory:none"]);

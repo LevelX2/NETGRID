@@ -29,6 +29,31 @@ const SHREDDER_UPLINK_PROTOCOL_DEFINITION_ID =
 const KRASH_DEFINITION_ID = "onr_v1_039_krash";
 
 describe("Runner RunTargetEvaluation + EconomyPosture", () => {
+  it("does not recommend an HQ run when the visible HQ count is zero", () => {
+    const input = aiInput({
+      credits: 3,
+      opponentHandCount: 0,
+      servers: [server("hq")],
+      legalActions: [runAction("run-hq", "hq")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "hq",
+      accessPayoff: "known_low_value",
+      knownAccessState: "known_no_current_payoff",
+      recommendation: "do_not_run_now",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_hand_count:0",
+        "hq_empty_no_access_payoff:true",
+        "recommendation:do_not_run_now",
+      ]),
+    );
+  });
+
   it("recommends an unknown reachable R&D run", () => {
     const input = aiInput({
       credits: 6,
@@ -2221,6 +2246,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 function aiInput(params: {
   credits: number;
   opponentCredits?: number;
+  opponentHandCount?: number;
   servers: PlayerView["servers"];
   legalActions: LegalAction[];
   rig?: VisibleCard[];
@@ -2252,7 +2278,7 @@ function aiInput(params: {
       clicks: 3,
       agendaPoints: 0,
       tags: 0,
-      handCount: 5,
+      handCount: params.opponentHandCount ?? 5,
       maxHandSize: 5,
       deckCount: 20,
       discardCount: 0,

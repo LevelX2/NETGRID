@@ -50,6 +50,14 @@ export function runnerStartRunScoreComponents(
     (entry) => entry.id === serverId,
   );
   if (serverId === "hq") {
+    if (input.playerView.opponent.handCount <= 0) {
+      components.push({
+        key: "runner_hq_empty_no_access_payoff",
+        label: "HQ leer",
+        value: -3200,
+        reason: "opponent_hand_count:0",
+      });
+    }
     components.push({
       key: "runner_hq_pressure",
       label: "HQ-Druck",
