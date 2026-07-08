@@ -880,7 +880,7 @@ export function semanticRuntimeDebugTacticalPlanItems(
           `selected_plan_status:${selectedPlan.status}`,
         ]
       : ["selected_plan:none"]),
-    ...(selectedPlan?.type === "runner.develop_hand_card"
+    ...(tacticalPlanIsRunnerHandCardPlan(selectedPlan)
       ? selectedPlan.evidence
           .filter((entry) => entry.startsWith("hand_development_"))
           .slice(0, 6)
@@ -985,10 +985,19 @@ function tacticalPlanTargetDebugValue(target: TacticalPlan["target"]): string {
 function tacticalPlanTargetRoleDebugValue(
   plan: TacticalPlan,
 ): string | undefined {
-  if (plan.type !== "runner.develop_hand_card") return undefined;
+  if (!tacticalPlanIsRunnerHandCardPlan(plan)) return undefined;
   const prefix = "hand_development_role:";
   const role = plan.evidence.find((entry) => entry.startsWith(prefix));
   return role ? role.slice(prefix.length) : undefined;
+}
+
+function tacticalPlanIsRunnerHandCardPlan(
+  plan: TacticalPlan | undefined,
+): plan is TacticalPlan {
+  return (
+    plan?.type === "runner.develop_hand_card" ||
+    plan?.type === "runner.play_best_hand_card"
+  );
 }
 
 function tacticalPlanEvidenceValue(

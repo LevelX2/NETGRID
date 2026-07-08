@@ -277,6 +277,7 @@ function runnerPlanTypeRequiresPlanDominance(type: TacticalPlan["type"]): boolea
     type === "runner.convert_success_window" ||
     type === "runner.restore_hand_buffer" ||
     type === "runner.develop_hand_card" ||
+    type === "runner.play_best_hand_card" ||
     type === "runner.build_credit_base" ||
     type === "runner.build_credit_bank" ||
     type === "runner.cash_out_credit_bank"
@@ -348,7 +349,8 @@ function tacticalPlanNonPositiveMappingStillProtected(
 ): boolean {
   if (mappedChoice.score < -500) return false;
   if (
-    mapping.plan.type !== "runner.develop_hand_card" ||
+    (mapping.plan.type !== "runner.develop_hand_card" &&
+      mapping.plan.type !== "runner.play_best_hand_card") ||
     mapping.step.kind !== "install_development_card" ||
     mapping.plan.priority < 900 ||
     overrideChoice.action.type !== "gain_credit"

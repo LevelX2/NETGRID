@@ -51,6 +51,23 @@ describe("tacticalPlanMappedChoice", () => {
     );
   });
 
+  it("keeps best-hand-card plan mapping over off-plan basic credit", () => {
+    const install = legalAction("install-economy", "install_card");
+    const gain = legalAction("gain", "gain_credit");
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(gain, 2500), choice(install, 80)],
+      bestHandCardMapping([install]),
+      choice(gain, 2500),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("install-economy");
+    expect(result.overrideChoice).toBeUndefined();
+    expect(result.overrideBlockedChoice?.action.actionId).toBe("gain");
+    expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
   it("keeps coverage-plan mapping for close semantic run gaps", () => {
     const gain = legalAction("gain", "gain_credit");
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
@@ -355,6 +372,14 @@ function creditBaseMapping(
   return planMapping("runner.build_credit_base", legalActions);
 }
 
+function bestHandCardMapping(
+  legalActions: LegalAction[],
+): PlanStepMappingResult {
+  return planMapping("runner.play_best_hand_card", legalActions, {
+    stepKind: "install_development_card",
+  });
+}
+
 function remoteContestMapping(
   legalActions: LegalAction[],
   overrides: {
@@ -371,8 +396,10 @@ function planMapping(
   overrides: {
     evidence?: string[];
     priority?: number;
+    stepKind?: PlanStepMappingResult["step"]["kind"];
   } = {},
 ): PlanStepMappingResult {
+  const stepKind = overrides.stepKind ?? "gain_credits";
   return {
     status: "matched",
     plan: {
@@ -386,7 +413,7 @@ function planMapping(
       requiredCapabilities: [],
       currentStep: {
         stepId: "gain_for_breaker",
-        kind: "gain_credits",
+        kind: stepKind,
         desiredActionSemantics: ["economy.gain_credit"],
         requiredCapabilities: [],
         rationale: [],
@@ -397,7 +424,7 @@ function planMapping(
     },
     step: {
       stepId: "gain_for_breaker",
-      kind: "gain_credits",
+      kind: stepKind,
       desiredActionSemantics: ["economy.gain_credit"],
       requiredCapabilities: [],
       rationale: [],

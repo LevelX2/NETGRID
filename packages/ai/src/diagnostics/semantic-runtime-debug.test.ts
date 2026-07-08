@@ -508,7 +508,7 @@ describe("SemanticRuntimeDebug", () => {
     const selectedAction = action("install-breaker", "install_card");
     const selectedPlan = tacticalPlan({
       planId: "plan-coverage",
-      type: "runner.develop_hand_card",
+      type: "runner.play_best_hand_card",
       priority: 320,
       evidence: [
         "hand_development_role:breaker|bad",

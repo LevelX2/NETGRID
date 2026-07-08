@@ -1469,6 +1469,12 @@ function aiDecisionDebugPlanTitle(plan: AiDecisionDebugPlanEntry): string {
       ? `${targetRun} vorbereiten: ${coverage}`
       : `Breaker-Abdeckung vorbereiten: ${coverage}`;
   }
+  if (plan.type === "runner.play_best_hand_card") {
+    const cardLabel = aiDecisionDebugPlanTargetLabel(plan);
+    return cardLabel
+      ? `Beste Handkarte spielen: ${cardLabel}`
+      : aiTracePlanLabel(plan.type);
+  }
   if (plan.type === "runner.develop_hand_card") {
     const cardLabel = aiDecisionDebugPlanTargetLabel(plan);
     return cardLabel
@@ -1495,7 +1501,8 @@ function aiDecisionDebugPlanTitleUsesTarget(
       aiDecisionDebugPlanTargetRunAction(plan)) ||
     (plan.type === "runner.obtain_breaker_coverage" &&
       aiDecisionDebugPlanTargetRunNoun(plan)) ||
-    (plan.type === "runner.develop_hand_card" &&
+    ((plan.type === "runner.develop_hand_card" ||
+      plan.type === "runner.play_best_hand_card") &&
       Boolean(aiDecisionDebugPlanTargetLabel(plan))),
   );
 }
@@ -1504,7 +1511,10 @@ function aiDecisionDebugPlanSecondaryLabel(
   plan: AiDecisionDebugPlanEntry,
   titleUsesTarget: boolean,
 ): string | undefined {
-  if (plan.type === "runner.develop_hand_card") {
+  if (
+    plan.type === "runner.develop_hand_card" ||
+    plan.type === "runner.play_best_hand_card"
+  ) {
     return aiDecisionDebugPlanTargetRoleLabel(plan) || undefined;
   }
   return titleUsesTarget
@@ -1620,7 +1630,8 @@ function aiDecisionDebugPlanStepLabel(
     ? aiDecisionDebugPlanCapabilityLabel(plan.capabilities[0])
     : "";
   const handCard =
-    plan?.type === "runner.develop_hand_card"
+    plan?.type === "runner.develop_hand_card" ||
+    plan?.type === "runner.play_best_hand_card"
       ? aiDecisionDebugPlanTargetLabel(plan)
       : "";
   const developmentVerb = aiDecisionDebugDevelopmentCardVerb(plan);
