@@ -13,6 +13,7 @@ import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
 } from "./encounter-action";
+import { breakSubroutineIndexesForAction } from "./subroutine-indexes";
 import { findVisibleCard } from "./visible-card-lookup";
 import type {
   RunnerRunBreakerCoverageQuote,
@@ -103,7 +104,7 @@ export function quoteRunnerRunPath(
       quote.rezzed !== false &&
       !quote.cheapestAccessPreservingSequence &&
       quote.subroutineQuotes.some(
-        (subroutine) => subroutine.threatClass === "must_break_for_access",
+        (subroutine) => subroutineRequiresBreak(subroutine.threatClass),
       ),
   );
   const canReachAccess = !blockedQuote && !reserveViolation;
@@ -141,6 +142,16 @@ export function runnerRunPlanCurrentEncounterSequence(params: {
       quote.iceRef.instanceId ===
       currentEncounteredIceCard(params.input)?.instanceId,
   )?.cheapestAccessPreservingSequence;
+}
+
+export function runnerRunPlanCurrentEncounterRequiresBreak(params: {
+  input: AiDecisionInput;
+}): boolean {
+  const currentEncounter = currentEncounteredIceCard(params.input);
+  return currentEncounter
+    ? currentRequiredBreakSubroutineIndexes(params.input, currentEncounter)
+        .size > 0
+    : false;
 }
 
 function quoteIceEncounter(params: {
@@ -186,8 +197,11 @@ function cheapestCurrentEncounterSequence(params: {
 }): RunnerRunEncounterActionSequence | undefined {
   const { input, plan, ice } = params;
   if (!ice.known || !ice.definitionId) return undefined;
-  const endRunThreatCount = currentEndTheRunThreatCount(input, ice);
-  if (endRunThreatCount <= 0) {
+  const requiredSubroutineIndexes = currentRequiredBreakSubroutineIndexes(
+    input,
+    ice,
+  );
+  if (requiredSubroutineIndexes.size <= 0) {
     const continueAction = encounterContinueAction(input);
     if (!continueAction) return undefined;
     return sequenceForActions({
@@ -205,13 +219,13 @@ function cheapestCurrentEncounterSequence(params: {
     input,
     plan,
     ice,
-    endRunThreatCount,
+    requiredSubroutineIndexes,
   });
   const pumpBreak = cheapestPumpBreakSequence({
     input,
     plan,
     ice,
-    endRunThreatCount,
+    requiredSubroutineIndexes,
   });
   return [directBreak, pumpBreak]
     .filter(
@@ -260,12 +274,14 @@ function cheapestDirectBreakSequence(params: {
   input: AiDecisionInput;
   plan: RunnerRunPlan;
   ice: VisibleCard;
-  endRunThreatCount: number;
+  requiredSubroutineIndexes: ReadonlySet<number>;
 }): RunnerRunEncounterActionSequence | undefined {
-  const { input, plan, ice, endRunThreatCount } = params;
-  const directBreakActions = breakActionsForIce(input, ice);
-  if (directBreakActions.length === 0) return undefined;
-  const selectedBreakActions = directBreakActions.slice(0, endRunThreatCount);
+  const { input, plan, ice, requiredSubroutineIndexes } = params;
+  const selectedBreakActions = selectBreakActionsForRequiredSubroutines(
+    breakActionsForIce(input, ice),
+    requiredSubroutineIndexes,
+  );
+  if (!selectedBreakActions) return undefined;
   const totalCost = selectedBreakActions.reduce(
     (sum, action) => sum + actionCreditCost(action),
     0,
@@ -278,6 +294,7 @@ function cheapestDirectBreakSequence(params: {
     evidence: [
       "current_encounter_direct_break_sequence:true",
       `break_action_count:${selectedBreakActions.length}`,
+      `required_subroutine_indexes:${formatSubroutineIndexes(requiredSubroutineIndexes)}`,
     ],
     plan,
     input,
@@ -288,9 +305,9 @@ function cheapestPumpBreakSequence(params: {
   input: AiDecisionInput;
   plan: RunnerRunPlan;
   ice: VisibleCard;
-  endRunThreatCount: number;
+  requiredSubroutineIndexes: ReadonlySet<number>;
 }): RunnerRunEncounterActionSequence | undefined {
-  const { input, plan, ice, endRunThreatCount } = params;
+  const { input, plan, ice, requiredSubroutineIndexes } = params;
   if (!ice.definitionId) return undefined;
   const candidates = input.legalActions
     .filter((action) => action.type === "pump_breaker")
@@ -300,7 +317,7 @@ function cheapestPumpBreakSequence(params: {
         plan,
         ice,
         pumpAction,
-        endRunThreatCount,
+        requiredSubroutineIndexes,
       }),
     )
     .filter(
@@ -321,9 +338,9 @@ function pumpBreakSequenceForAction(params: {
   plan: RunnerRunPlan;
   ice: VisibleCard;
   pumpAction: LegalAction;
-  endRunThreatCount: number;
+  requiredSubroutineIndexes: ReadonlySet<number>;
 }): RunnerRunEncounterActionSequence | undefined {
-  const { input, plan, ice, pumpAction, endRunThreatCount } = params;
+  const { input, plan, ice, pumpAction, requiredSubroutineIndexes } = params;
   const breakerId = breakerIdForEncounterAction(pumpAction);
   if (!breakerId || !ice.definitionId) return undefined;
   if (
@@ -354,7 +371,7 @@ function pumpBreakSequenceForAction(params: {
     creditsToBreakEndTheRunSubroutinesWithBreaker(
       breaker,
       iceBreakEstimateInput(ice, requiredStrength),
-      endRunThreatCount,
+      requiredSubroutineIndexes.size,
       strengthAfterPumps,
       ice.effectiveRunQuote?.breakSubroutineAdditionalCostPerSubroutine ?? 0,
     )?.cost;
@@ -362,9 +379,11 @@ function pumpBreakSequenceForAction(params: {
   const totalPumpCost = requiredPumps * pumpCost;
   const totalCost = totalPumpCost + postPumpBreakCost;
   const pumpSteps = Array.from({ length: requiredPumps }, () => pumpAction);
-  const currentBreakSteps = breakActionsForBreakerAndIce(input, breakerId, ice);
   const selectedBreakSteps =
-    currentBreakSteps.length > 0 ? currentBreakSteps.slice(0, endRunThreatCount) : [];
+    selectBreakActionsForRequiredSubroutines(
+      breakActionsForBreakerAndIce(input, breakerId, ice),
+      requiredSubroutineIndexes,
+    ) ?? [];
   return sequenceForActions({
     actions: [...pumpSteps, ...selectedBreakSteps],
     totalCost,
@@ -380,6 +399,7 @@ function pumpBreakSequenceForAction(params: {
       `pump_required_count:${requiredPumps}`,
       `pump_total_cost:${totalPumpCost}`,
       `break_estimated_cost_after_pump:${postPumpBreakCost}`,
+      `required_subroutine_indexes:${formatSubroutineIndexes(requiredSubroutineIndexes)}`,
     ],
     plan,
     input,
@@ -523,6 +543,15 @@ function threatClassForSubroutine(
   return "may_allow";
 }
 
+function subroutineRequiresBreak(
+  threatClass: RunnerRunSubroutineThreatClass,
+): boolean {
+  return (
+    threatClass === "must_break_for_access" ||
+    threatClass === "must_break_for_survival"
+  );
+}
+
 function modifierQuotesForIce(ice: VisibleCard): RunnerRunModifierQuote[] {
   return (ice.effectiveRunQuote?.subroutines ?? []).flatMap((subroutine) => {
     const effect = subroutine.unbrokenRunEffect;
@@ -582,6 +611,47 @@ function breakActionsForBreakerAndIce(
   );
 }
 
+function selectBreakActionsForRequiredSubroutines(
+  actions: readonly LegalAction[],
+  requiredSubroutineIndexes: ReadonlySet<number>,
+): LegalAction[] | undefined {
+  const remaining = new Set(requiredSubroutineIndexes);
+  const selected: LegalAction[] = [];
+  while (remaining.size > 0) {
+    const candidate = actions
+      .map((action) => ({
+        action,
+        coveredIndexes: breakActionCoveredRequiredIndexes(action, remaining),
+      }))
+      .filter((candidate) => candidate.coveredIndexes.size > 0)
+      .sort(
+        (left, right) =>
+          right.coveredIndexes.size - left.coveredIndexes.size ||
+          actionCreditCost(left.action) - actionCreditCost(right.action) ||
+          left.action.actionId.localeCompare(right.action.actionId),
+      )[0];
+    if (!candidate) return undefined;
+    selected.push(candidate.action);
+    for (const index of candidate.coveredIndexes) remaining.delete(index);
+  }
+  return selected;
+}
+
+function breakActionCoveredRequiredIndexes(
+  action: LegalAction,
+  remainingRequiredIndexes: ReadonlySet<number>,
+): Set<number> {
+  const indexes = breakSubroutineIndexesForAction(action);
+  if (indexes.size === 0) {
+    return remainingRequiredIndexes.size === 1
+      ? new Set(remainingRequiredIndexes)
+      : new Set();
+  }
+  return new Set(
+    [...indexes].filter((index) => remainingRequiredIndexes.has(index)),
+  );
+}
+
 function actionTargetsIce(action: LegalAction, ice: VisibleCard): boolean {
   return (
     typeof action.payload?.iceId !== "string" ||
@@ -613,6 +683,44 @@ function currentEndTheRunThreatCount(
     return quotedEndRunCount || unbrokenCount || 1;
   }
   return quotedEndRunCount;
+}
+
+function currentRequiredBreakSubroutineIndexes(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+): Set<number> {
+  const continueAction = encounterContinueAction(input);
+  const unbrokenCount =
+    typeof continueAction?.payload?.unbrokenSubroutineCount === "number"
+      ? continueAction.payload.unbrokenSubroutineCount
+      : undefined;
+  if (unbrokenCount === 0) return new Set();
+
+  const quoteSubroutines = ice.effectiveRunQuote?.subroutines ?? [];
+  if (quoteSubroutines.length > 0) {
+    const continueWillEndRun =
+      continueAction?.payload?.encounterWillEndRun === true;
+    return new Set(
+      quoteSubroutines.flatMap((subroutine, index) => {
+        const threatClass = threatClassForSubroutine(subroutine);
+        if (threatClass === "must_break_for_access") {
+          return continueWillEndRun ? [index] : [];
+        }
+        return threatClass === "must_break_for_survival" ? [index] : [];
+      }),
+    );
+  }
+
+  return new Set(
+    Array.from(
+      { length: currentEndTheRunThreatCount(input, ice) },
+      (_, index) => index,
+    ),
+  );
+}
+
+function formatSubroutineIndexes(indexes: ReadonlySet<number>): string {
+  return [...indexes].sort((left, right) => left - right).join(",");
 }
 
 function encounterContinueAction(input: AiDecisionInput): LegalAction | undefined {

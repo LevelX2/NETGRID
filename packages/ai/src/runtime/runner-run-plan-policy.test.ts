@@ -61,6 +61,40 @@ describe("runner run plan policy", () => {
     expect(selected?.evidence).toContain("current_encounter_direct_break_sequence:true");
   });
 
+  it("chooses a direct break over continuing through visible non-ETR damage", () => {
+    const breakSubroutine = breakAction({ costs: [], subroutineIndex: 0 });
+    const continueRun = continueAction({
+      encounterWillEndRun: false,
+      unbrokenSubroutineCount: 1,
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      breakerStrength: 2,
+      subroutines: [
+        {
+          id: "damage-subroutine",
+          type: "do_damage",
+          unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+        },
+      ],
+      legalActions: [breakSubroutine, continueRun],
+    });
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: runPlan(),
+      choices: [
+        choice(continueRun, "simple_run_choice", 900),
+        choice(breakSubroutine, "encounter_survival", 100),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(breakSubroutine.actionId);
+    expect(selected?.evidence).toContain("required_subroutine_indexes:0");
+  });
+
   it("chooses jack out when continue would end the run and no access-preserving sequence exists", () => {
     const pump = pumpAction({ costs: [{ credits: 1 }] });
     const continueRun = continueAction({
@@ -123,6 +157,7 @@ function runnerEncounterInput(params: {
   iceTitle: string;
   iceStrength: number;
   breakerStrength?: number;
+  subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
   legalActions: LegalAction[];
 }): AiDecisionInput {
   const ice = visibleIce(params);
@@ -201,6 +236,7 @@ function visibleIce(params: {
   iceDefinitionId: string;
   iceTitle: string;
   iceStrength: number;
+  subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
 }): VisibleCard {
   return {
     instanceId: "ice-1",
@@ -218,7 +254,7 @@ function visibleIce(params: {
       iceInstanceId: "ice-1",
       iceDefinitionId: params.iceDefinitionId,
       effectiveStrength: params.iceStrength,
-      subroutines: [
+      subroutines: params.subroutines ?? [
         {
           id: `${params.iceDefinitionId}:etr`,
           type: "end_the_run",
@@ -335,7 +371,10 @@ function pumpAction(params: { costs: LegalAction["costs"] }): LegalAction {
   });
 }
 
-function breakAction(params: { costs: LegalAction["costs"] }): LegalAction {
+function breakAction(params: {
+  costs: LegalAction["costs"];
+  subroutineIndex?: number;
+}): LegalAction {
   return action("break_subroutine", {
     actionId: "break-codecracker",
     source: "codecracker-1",
@@ -343,7 +382,7 @@ function breakAction(params: { costs: LegalAction["costs"] }): LegalAction {
     payload: {
       breakerId: "codecracker-1",
       iceId: "ice-1",
-      subroutineIndex: 0,
+      subroutineIndex: params.subroutineIndex ?? 0,
     },
   });
 }

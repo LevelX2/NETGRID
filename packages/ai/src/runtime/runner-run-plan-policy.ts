@@ -1,7 +1,10 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 import { actionCreditCost } from "./action-cost";
-import { runnerRunPlanCurrentEncounterSequence } from "./runner-run-plan-path-quote";
+import {
+  runnerRunPlanCurrentEncounterRequiresBreak,
+  runnerRunPlanCurrentEncounterSequence,
+} from "./runner-run-plan-path-quote";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
 
 export function runnerRunPlanSemanticChoice(params: {
@@ -191,7 +194,12 @@ function runnerRunPlanEncounterChoice(params: {
     }
   }
 
-  if (!encounterContinueWillEndRun(params.input)) return undefined;
+  const requiredBreakMissing = runnerRunPlanCurrentEncounterRequiresBreak({
+    input: params.input,
+  });
+  if (!encounterContinueWillEndRun(params.input) && !requiredBreakMissing) {
+    return undefined;
+  }
   const jackOutChoice = params.choices.find(
     (choice) => !choice.exclusion && choice.action.type === "jack_out",
   );
@@ -204,6 +212,9 @@ function runnerRunPlanEncounterChoice(params: {
     extraEvidence: [
       "runner_run_plan_abort_recommended:true",
       "runner_run_plan_encounter_sequence_missing:true",
+      ...(requiredBreakMissing
+        ? ["runner_run_plan_encounter_required_break_missing:true"]
+        : []),
     ],
   });
 }

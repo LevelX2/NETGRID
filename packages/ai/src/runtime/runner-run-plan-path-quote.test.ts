@@ -28,6 +28,70 @@ describe("runner run plan path quote", () => {
     expect(sequence?.totalCost).toBe(0);
   });
 
+  it("quotes a direct break for visible non-ETR survival damage", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      breakerStrength: 2,
+      subroutines: [
+        {
+          id: "damage-subroutine",
+          type: "do_damage",
+          unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+        },
+      ],
+      legalActions: [
+        breakAction({ costs: [], subroutineIndex: 0 }),
+        continueAction({ encounterWillEndRun: false, unbrokenSubroutineCount: 1 }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+
+    expect(sequence?.steps.map((step) => step.actionType)).toEqual([
+      "break_subroutine",
+    ]);
+    expect(sequence?.evidence).toContain("required_subroutine_indexes:0");
+    expect(quote.canReachAccess).toBe(true);
+  });
+
+  it("targets the required ETR subroutine instead of a cheaper harmless break", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      breakerStrength: 2,
+      subroutines: [
+        { id: "harmless-subroutine", type: "corp_gain_credit" },
+        { id: "etr-subroutine", type: "end_the_run" },
+      ],
+      legalActions: [
+        breakAction({
+          actionId: "break-harmless",
+          costs: [],
+          subroutineIndex: 0,
+        }),
+        breakAction({
+          actionId: "break-etr",
+          costs: [{ credits: 3 }],
+          subroutineIndex: 1,
+        }),
+        continueAction({ encounterWillEndRun: true, unbrokenSubroutineCount: 2 }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+
+    expect(sequence?.steps.map((step) => step.actionId)).toEqual([
+      "break-etr",
+    ]);
+    expect(sequence?.totalCost).toBe(3);
+    expect(sequence?.evidence).toContain("required_subroutine_indexes:1");
+  });
+
   it("quotes Codecracker pumping before a future break against Quandary generically", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_261_quandary",
@@ -103,6 +167,7 @@ function runnerEncounterInput(params: {
   iceTitle: string;
   iceStrength: number;
   breakerStrength?: number;
+  subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
   legalActions: LegalAction[];
 }): AiDecisionInput {
   const ice = visibleIce(params);
@@ -181,6 +246,7 @@ function visibleIce(params: {
   iceDefinitionId: string;
   iceTitle: string;
   iceStrength: number;
+  subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
 }): VisibleCard {
   return {
     instanceId: "ice-1",
@@ -198,7 +264,7 @@ function visibleIce(params: {
       iceInstanceId: "ice-1",
       iceDefinitionId: params.iceDefinitionId,
       effectiveStrength: params.iceStrength,
-      subroutines: [
+      subroutines: params.subroutines ?? [
         {
           id: `${params.iceDefinitionId}:etr`,
           type: "end_the_run",
@@ -300,15 +366,19 @@ function pumpAction(params: { costs: LegalAction["costs"] }): LegalAction {
   });
 }
 
-function breakAction(params: { costs: LegalAction["costs"] }): LegalAction {
+function breakAction(params: {
+  actionId?: string;
+  costs: LegalAction["costs"];
+  subroutineIndex?: number;
+}): LegalAction {
   return action("break_subroutine", {
-    actionId: "break-codecracker",
+    actionId: params.actionId ?? "break-codecracker",
     source: "codecracker-1",
     costs: params.costs,
     payload: {
       breakerId: "codecracker-1",
       iceId: "ice-1",
-      subroutineIndex: 0,
+      subroutineIndex: params.subroutineIndex ?? 0,
     },
   });
 }
