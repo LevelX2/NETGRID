@@ -1,6 +1,6 @@
 # Current-State-Docs-Cleanup 2026-07-08
 
-Status: `in_progress`
+Status: `ready_for_final_merge`
 Datum: 2026-07-08
 Primärer Agent: `release-implementation-agent`
 Branch: `codex/docs-cleanup-current-state`
