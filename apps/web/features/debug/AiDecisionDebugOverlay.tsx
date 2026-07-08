@@ -454,6 +454,7 @@ function AiDecisionDebugTraceView({
           planLayer={planLayer}
           actionRows={planFocusActionRows}
           metaRows={metaRows}
+          selectedScoreRows={scoreRows}
         />
         <AiDecisionDebugChips
           title="Hinweise"
@@ -534,14 +535,6 @@ function AiDecisionDebugTraceView({
               </div>
             ))}
           </div>
-        </AiDecisionDebugCollapsibleSection>
-      ) : null}
-      {scoreRows.length > 0 ? (
-        <AiDecisionDebugCollapsibleSection
-          title="Score-Komponenten"
-          defaultOpen
-        >
-          <AiDecisionDebugRows rows={scoreRows} />
         </AiDecisionDebugCollapsibleSection>
       ) : null}
       <AiDecisionDebugMemory detail={detail} />
@@ -924,10 +917,12 @@ function AiDecisionDebugSelectedPlanOverview({
   planLayer,
   actionRows,
   metaRows,
+  selectedScoreRows,
 }: {
   planLayer: AiDecisionDebugPlanLayerView;
   actionRows: MaintenanceAiTraceActionRow[];
   metaRows: Array<[string, string]>;
+  selectedScoreRows: Array<[string, string]>;
 }) {
   const selectedPlan = planLayer.entries.find((entry) => entry.selected);
   const planActions = aiDecisionDebugPlanRelevantActions(
@@ -953,8 +948,8 @@ function AiDecisionDebugSelectedPlanOverview({
     : metaRows;
   return (
     <div className="aiDecisionDebugPlanFocus">
-      <div className="aiDecisionDebugPlanFocusCard">
-        <div>
+      <details className="aiDecisionDebugPlanFocusCard" open>
+        <summary>
           <strong>Ausgewählter Plan</strong>
           <span>
             {selectedPlan
@@ -967,44 +962,39 @@ function AiDecisionDebugSelectedPlanOverview({
                   .join(" · ")
               : aiDecisionDebugMetaRowValue(metaRows, "Plan") ?? "-"}
           </span>
-        </div>
+        </summary>
         <AiDecisionDebugRows rows={selectedPlanRows} />
         {selectedPlan?.scores.length ? (
-          <details className="aiDecisionDebugActionDetails" open>
-            <summary>Plan-Bewertungsfaktoren</summary>
+          <details className="aiDecisionDebugActionDetails">
+            <summary>
+              Planbewertung {aiDecisionDebugPlanScoreLabel(selectedPlan) ?? ""}
+            </summary>
             <AiDecisionDebugRows rows={selectedPlan.scores} />
           </details>
         ) : null}
-      </div>
-      <div className="aiDecisionDebugPlanActions">
-        <div className="aiDecisionDebugPlanActionsTitle">
+      </details>
+      <details className="aiDecisionDebugPlanActions" open>
+        <summary className="aiDecisionDebugPlanActionsTitle">
           <strong>Planrelevante Aktionen</strong>
           <span>
             {planActions.length > 0
               ? `${planActions.length} bewertete LegalAction${planActions.length === 1 ? "" : "s"}`
               : "keine gemappte LegalAction im Debug-Ranking"}
           </span>
-        </div>
+        </summary>
         {planActions.length > 0 ? (
           <div className="aiDecisionDebugActions">
             {planActions.map((action) => (
-              <div
-                className={`aiDecisionDebugAction ${action.selected ? "selected" : ""} ${action.excluded ? "excluded" : ""}`}
+              <AiDecisionDebugPlanActionCard
+                action={action}
+                planLayer={planLayer}
+                scoreRows={
+                  action.selected && action.scoreRows.length === 0
+                    ? selectedScoreRows
+                    : action.scoreRows
+                }
                 key={`plan-action:${action.key}`}
-              >
-                <div>
-                  <strong>
-                    #{action.rank} {action.label}
-                  </strong>
-                  <span>
-                    {aiDecisionDebugPlanActionRelation(action, planLayer)}
-                  </span>
-                </div>
-                <AiDecisionDebugRows
-                  rows={aiDecisionDebugPlanActionRows(action)}
-                />
-                <p>{aiDecisionDebugPlanActionReasonLabel(action.reason)}</p>
-              </div>
+              />
             ))}
           </div>
         ) : (
@@ -1013,7 +1003,42 @@ function AiDecisionDebugSelectedPlanOverview({
             LegalAction gemappt oder bewertet.
           </p>
         )}
+      </details>
+    </div>
+  );
+}
+
+function AiDecisionDebugPlanActionCard({
+  action,
+  planLayer,
+  scoreRows,
+}: {
+  action: MaintenanceAiTraceActionRow;
+  planLayer: AiDecisionDebugPlanLayerView;
+  scoreRows: Array<[string, string]>;
+}) {
+  return (
+    <div
+      className={`aiDecisionDebugAction ${action.selected ? "selected" : ""} ${action.excluded ? "excluded" : ""}`}
+    >
+      <div>
+        <strong>
+          #{action.rank} {action.label}
+        </strong>
+        <span>{aiDecisionDebugPlanActionRelation(action, planLayer)}</span>
       </div>
+      <AiDecisionDebugRows rows={aiDecisionDebugPlanActionRows(action)} />
+      {scoreRows.length > 0 ? (
+        <details className="aiDecisionDebugActionDetails">
+          <summary>
+            {action.score !== undefined
+              ? `Action-Score ${action.score} aufklappen`
+              : "Action-Score aufklappen"}
+          </summary>
+          <AiDecisionDebugRows rows={scoreRows} />
+        </details>
+      ) : null}
+      <p>{aiDecisionDebugPlanActionReasonLabel(action.reason)}</p>
     </div>
   );
 }
