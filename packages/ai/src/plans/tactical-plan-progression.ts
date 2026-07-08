@@ -25,12 +25,41 @@ export function progressTacticalPlans(
   whyPlanAbandoned?: string;
 } {
   if (!previousPlan) return { plans: [...plans] };
+  const creditBaseShouldYieldToRdOpportunity =
+    previousPlan.type === "runner.build_credit_base" &&
+    plans.some(isCheapUnknownRdOpportunityPlan);
   const previousCentralProbeSatisfied =
     previousPlan.type === "runner.opportunistic_central_run" &&
     previousPlan.status === "satisfied" &&
     previousPlan.ttlDecisionsRemaining <= 0;
   const continued = plans.map((plan) => {
     if (!samePlanLine(plan, previousPlan)) return plan;
+    if (
+      creditBaseShouldYieldToRdOpportunity &&
+      plan.type === "runner.build_credit_base"
+    ) {
+      return {
+        ...plan,
+        evidence: [
+          ...plan.evidence,
+          `previous_plan:${previousPlan.planId}`,
+          `plan_progression:${previousPlan.status}->interrupted_by_rd_opportunity`,
+          "plan_continuity_suppressed:rd_unknown_low_cost_opportunity",
+        ],
+        scoreBreakdown: [
+          ...plan.scoreBreakdown,
+          {
+            key: "previous_plan_continuity_suppressed",
+            label: "Planfortschreibung unterbrochen",
+            value: 0,
+            reason: [
+              previousPlan.planId,
+              "rd_unknown_low_cost_opportunity:true",
+            ].join("|"),
+          },
+        ],
+      } satisfies TacticalPlan;
+    }
     if (previousCentralProbeSatisfied) {
       return {
         ...plan,
@@ -109,6 +138,13 @@ export function progressTacticalPlans(
       planProgressionReason: "previous_central_probe_satisfied",
     };
   }
+  if (creditBaseShouldYieldToRdOpportunity) {
+    return {
+      plans: continued,
+      planProgressionReason:
+        "previous_credit_base_interrupted_by_rd_opportunity",
+    };
+  }
   return {
     plans: continued,
     planProgressionReason: "previous_plan_considered",
@@ -145,6 +181,16 @@ function samePlanLine(
   return (
     plan.target?.kind === previousPlan.target?.kind &&
     plan.target?.id === previousPlan.target?.id
+  );
+}
+
+function isCheapUnknownRdOpportunityPlan(plan: TacticalPlan): boolean {
+  return (
+    plan.type === "runner.opportunistic_central_run" &&
+    plan.target?.kind === "server" &&
+    plan.target.id === "rd" &&
+    plan.status === "active" &&
+    plan.evidence.includes("rd_unknown_low_cost_opportunity_floor:true")
   );
 }
 

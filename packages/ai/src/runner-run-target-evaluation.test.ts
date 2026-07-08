@@ -394,7 +394,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
-  it("keeps known-low R&D damped even when installed R&D payoff exists", () => {
+  it("keeps installed R&D multiaccess live despite a stale low-value top card", () => {
     const input = aiInput({
       credits: 6,
       servers: [server("rd")],
@@ -419,10 +419,10 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
 
     expect(evaluation).toMatchObject({
       targetServerId: "rd",
-      accessPayoff: "known_low_value",
-      knownAccessState: "known_no_current_payoff",
+      accessPayoff: "access_bonus",
+      knownAccessState: "known_payoff",
       multiaccessAvailable: true,
-      recommendation: "do_not_run_now",
+      recommendation: "run_now",
     });
     expect(evaluation.evidence).toContain(
       "installed_run_payoff:rd:multiaccess",
@@ -1985,6 +1985,48 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluation).toMatchObject({
       targetServerId: "hq",
       recommendation: "gain_credits_first",
+    });
+  });
+
+  it("keeps free unknown R&D pressure live despite useful hand-card funding need", () => {
+    const input = aiInput({
+      credits: 5,
+      servers: [server("rd")],
+      legalActions: [runAction("run-rd", "rd"), gainCreditAction("gain")],
+    });
+    const handDevelopmentEvaluations = [
+      handDevelopmentEvaluation({
+        cardInstanceId: "runner-useful-missing-credit",
+        fundingNeed: {
+          installOrPlayCost: 6,
+          missingCredits: 1,
+          reason: "cannot_pay",
+        },
+      }),
+    ];
+
+    const posture = buildRunnerEconomyPosture({
+      input,
+      handDevelopmentEvaluations,
+    });
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      handDevelopmentEvaluations,
+    });
+
+    expect(posture.creditBasePlan).toMatchObject({
+      fundingNeed: true,
+      usefulHandCardsBlockedByCredits: 1,
+      recommendation: "fund_useful_hand_card",
+      economyPriority: "high",
+    });
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      accessPayoff: "unknown",
+      knownAccessState: "unknown",
+      pathPassability: "reachable",
+      pathCost: 0,
+      recommendation: "run_now",
     });
   });
 

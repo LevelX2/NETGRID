@@ -1078,6 +1078,14 @@ function recommendationForRunTarget(params: {
   ) {
     return "gain_credits_first";
   }
+  if (
+    params.targetKind === "rd" &&
+    params.knownAccessState === "unknown" &&
+    params.pathPassability === "reachable" &&
+    params.creditsAfterRun >= 0
+  ) {
+    return "run_now";
+  }
   if (highValuePayoff(params.accessPayoff)) return "run_now";
   if (
     params.creditsAfterRun < params.economyPosture.minimumCreditFloor ||
@@ -1089,9 +1097,6 @@ function recommendationForRunTarget(params: {
     params.installedRunPayoff.immediateAccessValue >= 50 &&
     params.pathPassability === "reachable"
   ) {
-    return "run_now";
-  }
-  if (params.targetKind === "rd" && params.knownAccessState === "unknown") {
     return "run_now";
   }
   if (params.scoreThreat) return "run_now";

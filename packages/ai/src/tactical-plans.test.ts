@@ -2700,15 +2700,33 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("selects unguarded unknown R&D pressure before high creditbase setup", () => {
+  it("selects unguarded unknown R&D pressure before continued high creditbase setup", () => {
     const rdRun = legalAction("run-rd", "runner", "start_run", {
       serverId: "rd",
     });
     const gain = legalAction("gain", "runner", "gain_credit");
     const input = aiInput("runner", [rdRun, gain]);
-    input.playerView.own.credits = 4;
+    input.playerView.own.credits = 5;
     input.playerView.servers = [server("hq"), server("rd"), server("archives")];
-    const runnerRunTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const handDevelopmentEvaluations = [
+      runnerHandDevelopmentEvaluation({
+        cardInstanceId: "runner-useful-missing-credit",
+        availability: "missing_credits",
+        developmentRole: "access_payoff",
+        currentNeed: "useful_now",
+        priority: 650,
+        fundingNeed: {
+          installOrPlayCost: 6,
+          missingCredits: 1,
+          reason: "cannot_pay",
+        },
+        deferReason: "missing_credits",
+      }),
+    ];
+    const runnerRunTargetEvaluations = evaluateRunnerRunTargets({
+      input,
+      handDevelopmentEvaluations,
+    });
     const rdEvaluation = runnerRunTargetEvaluations.find(
       (evaluation) => evaluation.targetServerId === "rd",
     );
@@ -2721,12 +2739,28 @@ describe("tactical plan model", () => {
     const result = evaluateTacticalPlans({
       input,
       runnerRunTargetEvaluations,
+      runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
       runnerEconomyPosture: runnerEconomyPosture({
-        currentCredits: 4,
+        currentCredits: 5,
         usefulHandCardsBlockedByCredits: 1,
         recommendation: "fund_useful_hand_card",
         economyPriority: "high",
       }),
+      previousPlan: {
+        schemaVersion: "tactical-plan-v1",
+        memoryId: "previous-credit-base",
+        side: "runner",
+        planId: "runner.build_credit_base",
+        type: "runner.build_credit_base",
+        status: "progressing",
+        target: { kind: "capability", id: "runner_credit_base" },
+        selectedStepKind: "gain_credits",
+        selectedActionId: "gain",
+        blockedBy: [],
+        ttlDecisionsRemaining: 2,
+        planProgressionReason: "previous_plan_considered",
+        updatedAtStateVersion: 43,
+      },
       candidates,
     });
     const rdPlan = result.planAlternatives.find(
@@ -2762,6 +2796,16 @@ describe("tactical plan model", () => {
         expect.objectContaining({
           key: "runner_credit_base",
           value: 930,
+        }),
+        expect.objectContaining({
+          key: "previous_plan_continuity_suppressed",
+        }),
+      ]),
+    );
+    expect(creditPlan?.scoreBreakdown).not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "previous_plan_continuity",
         }),
       ]),
     );
