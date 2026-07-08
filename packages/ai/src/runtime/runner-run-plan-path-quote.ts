@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import {
   canBreakerDefinitionBreakIce,
@@ -8,7 +12,10 @@ import {
   minimumCreditsToBreakEndTheRunSubroutines,
 } from "../visible-run-analysis";
 import { actionCreditCost } from "./action-cost";
-import { currentEncounteredIceCard, currentRunRemainingIce } from "./current-encounter";
+import {
+  currentEncounteredIceCard,
+  currentRunRemainingIce,
+} from "./current-encounter";
 import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
@@ -49,6 +56,8 @@ export function quoteRunnerRunPath(
   }
 
   const activeRun = input.playerView.run;
+  const activeRunTargetsPlan =
+    activeRun?.attackedServerId === plan.targetServer.id;
   const currentEncounter =
     activeRun?.phase === "encounter_ice"
       ? currentEncounteredIceCard(input)
@@ -63,13 +72,17 @@ export function quoteRunnerRunPath(
     : undefined;
   const currentIceInstanceId = currentEncounter?.instanceId;
   const remainingCurrentRunIce =
-    activeRun && activeRun.position?.kind === "ice"
+    activeRunTargetsPlan && activeRun.position?.kind === "ice"
       ? currentRunRemainingIce(input)
       : [];
   const serverIce =
-    activeRun && remainingCurrentRunIce.length > 0
-      ? remainingCurrentRunIce
-      : (server?.ice ?? []);
+    activeRunTargetsPlan && activeRun.position?.kind === "server"
+      ? []
+      : activeRunTargetsPlan && activeRun.phase === "access"
+        ? []
+        : activeRunTargetsPlan && remainingCurrentRunIce.length > 0
+          ? remainingCurrentRunIce
+          : (server?.ice ?? []);
   const otherIceQuotes = serverIce
     .filter((ice) => ice.instanceId !== currentIceInstanceId)
     .map((ice) =>
@@ -93,7 +106,8 @@ export function quoteRunnerRunPath(
     0,
   );
   const reserveTarget = runnerRunPlanReserveTarget(plan);
-  const expectedRemainingCredits = input.playerView.own.credits - totalKnownCost;
+  const expectedRemainingCredits =
+    input.playerView.own.credits - totalKnownCost;
   const reserveViolation = expectedRemainingCredits < reserveTarget;
   const unknownVisibleIce = (server?.ice ?? []).some(
     (ice) => !ice.known || ice.rezzed === false,
@@ -103,8 +117,8 @@ export function quoteRunnerRunPath(
       quote.known &&
       quote.rezzed !== false &&
       !quote.cheapestAccessPreservingSequence &&
-      quote.subroutineQuotes.some(
-        (subroutine) => subroutineRequiresBreak(subroutine.threatClass),
+      quote.subroutineQuotes.some((subroutine) =>
+        subroutineRequiresBreak(subroutine.threatClass),
       ),
   );
   const canReachAccess = !blockedQuote && !reserveViolation;
@@ -361,20 +375,20 @@ function pumpBreakSequenceForAction(params: {
   const pumpCost = actionCreditCost(pumpAction);
   if (pumpAmount <= 0 || pumpCost < 0) return undefined;
   const requiredStrength = effectiveIceStrength(ice) ?? 0;
-  const currentStrength = breaker.strength ?? cardDefinitionStrength(breaker.definitionId);
+  const currentStrength =
+    breaker.strength ?? cardDefinitionStrength(breaker.definitionId);
   const requiredPumps = Math.max(
     1,
     Math.ceil(Math.max(0, requiredStrength - currentStrength) / pumpAmount),
   );
   const strengthAfterPumps = currentStrength + requiredPumps * pumpAmount;
-  const postPumpBreakCost =
-    creditsToBreakEndTheRunSubroutinesWithBreaker(
-      breaker,
-      iceBreakEstimateInput(ice, requiredStrength),
-      requiredSubroutineIndexes.size,
-      strengthAfterPumps,
-      ice.effectiveRunQuote?.breakSubroutineAdditionalCostPerSubroutine ?? 0,
-    )?.cost;
+  const postPumpBreakCost = creditsToBreakEndTheRunSubroutinesWithBreaker(
+    breaker,
+    iceBreakEstimateInput(ice, requiredStrength),
+    requiredSubroutineIndexes.size,
+    strengthAfterPumps,
+    ice.effectiveRunQuote?.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+  )?.cost;
   if (postPumpBreakCost === undefined) return undefined;
   const totalPumpCost = requiredPumps * pumpCost;
   const totalCost = totalPumpCost + postPumpBreakCost;
@@ -456,7 +470,7 @@ function breakerCoverageQuotesForIce(
     .map((breaker): RunnerRunBreakerCoverageQuote => {
       const canBreak = Boolean(
         breaker.definitionId &&
-          canBreakerDefinitionBreakIce(breaker.definitionId, ice.definitionId!),
+        canBreakerDefinitionBreakIce(breaker.definitionId, ice.definitionId!),
       );
       const endRunThreatCount = ice.definitionId
         ? endTheRunSubroutineCount(ice.definitionId)
@@ -468,7 +482,8 @@ function breakerCoverageQuotesForIce(
               iceBreakEstimateInput(ice),
               endRunThreatCount,
               breaker.strength ?? cardDefinitionStrength(breaker.definitionId),
-              ice.effectiveRunQuote?.breakSubroutineAdditionalCostPerSubroutine ?? 0,
+              ice.effectiveRunQuote
+                ?.breakSubroutineAdditionalCostPerSubroutine ?? 0,
             )
           : undefined;
       const currentStrength =
@@ -525,7 +540,9 @@ function subroutineQuotesForIce(
 }
 
 function threatClassForSubroutine(
-  subroutine: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number],
+  subroutine: NonNullable<
+    VisibleCard["effectiveRunQuote"]
+  >["subroutines"][number],
 ): RunnerRunSubroutineThreatClass {
   if (subroutine.type === "end_the_run") return "must_break_for_access";
   if (subroutine.unbrokenRunEffect?.causesDamageOrProgramTrash === true) {
@@ -723,7 +740,9 @@ function formatSubroutineIndexes(indexes: ReadonlySet<number>): string {
   return [...indexes].sort((left, right) => left - right).join(",");
 }
 
-function encounterContinueAction(input: AiDecisionInput): LegalAction | undefined {
+function encounterContinueAction(
+  input: AiDecisionInput,
+): LegalAction | undefined {
   return input.legalActions.find(
     (action) =>
       action.type === "continue_run" &&
@@ -736,7 +755,9 @@ function effectiveIceStrength(ice: VisibleCard): number | undefined {
     return ice.effectiveRunQuote.effectiveStrength;
   }
   if (typeof ice.strength === "number") return ice.strength;
-  return ice.definitionId ? cardDefinitionStrength(ice.definitionId) : undefined;
+  return ice.definitionId
+    ? cardDefinitionStrength(ice.definitionId)
+    : undefined;
 }
 
 function iceBreakEstimateInput(

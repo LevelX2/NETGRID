@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 import { quoteRunnerRunPath } from "./runner-run-plan-path-quote";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
@@ -13,7 +17,10 @@ describe("runner run plan path quote", () => {
       breakerStrength: 2,
       legalActions: [
         breakAction({ costs: [] }),
-        continueAction({ encounterWillEndRun: true, unbrokenSubroutineCount: 1 }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
       ],
     });
 
@@ -43,7 +50,10 @@ describe("runner run plan path quote", () => {
       ],
       legalActions: [
         breakAction({ costs: [], subroutineIndex: 0 }),
-        continueAction({ encounterWillEndRun: false, unbrokenSubroutineCount: 1 }),
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+        }),
       ],
     });
 
@@ -78,16 +88,17 @@ describe("runner run plan path quote", () => {
           costs: [{ credits: 3 }],
           subroutineIndex: 1,
         }),
-        continueAction({ encounterWillEndRun: true, unbrokenSubroutineCount: 2 }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 2,
+        }),
       ],
     });
 
     const quote = quoteRunnerRunPath(input, runPlan());
     const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
 
-    expect(sequence?.steps.map((step) => step.actionId)).toEqual([
-      "break-etr",
-    ]);
+    expect(sequence?.steps.map((step) => step.actionId)).toEqual(["break-etr"]);
     expect(sequence?.totalCost).toBe(3);
     expect(sequence?.evidence).toContain("required_subroutine_indexes:1");
   });
@@ -99,7 +110,10 @@ describe("runner run plan path quote", () => {
       iceStrength: 2,
       legalActions: [
         pumpAction({ costs: [{ credits: 1 }] }),
-        continueAction({ encounterWillEndRun: true, unbrokenSubroutineCount: 1 }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
       ],
     });
 
@@ -125,7 +139,10 @@ describe("runner run plan path quote", () => {
       iceStrength: 4,
       legalActions: [
         pumpAction({ costs: [{ credits: 1 }] }),
-        continueAction({ encounterWillEndRun: true, unbrokenSubroutineCount: 1 }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
       ],
     });
 
@@ -143,6 +160,24 @@ describe("runner run plan path quote", () => {
     expect(quote.expectedRemainingCredits).toBe(3);
   });
 
+  it("does not re-quote passed ICE after the active run reaches the server", () => {
+    const input = runnerServerMovementInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      credits: 0,
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+
+    expect(quote.iceQuotes).toEqual([]);
+    expect(quote.totalKnownCost).toBe(0);
+    expect(quote.expectedRemainingCredits).toBe(0);
+    expect(quote.reserveViolation).toBe(false);
+    expect(quote.canReachAccess).toBe(true);
+    expect(quote.cannotReachReason).toBeUndefined();
+  });
+
   it("does not quote a pump-break sequence when the breaker cannot cover the ICE", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_253_laser-wire",
@@ -150,13 +185,18 @@ describe("runner run plan path quote", () => {
       iceStrength: 2,
       legalActions: [
         pumpAction({ costs: [{ credits: 1 }] }),
-        continueAction({ encounterWillEndRun: true, unbrokenSubroutineCount: 1 }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
       ],
     });
 
     const quote = quoteRunnerRunPath(input, runPlan());
 
-    expect(quote.iceQuotes[0]?.cheapestAccessPreservingSequence).toBeUndefined();
+    expect(
+      quote.iceQuotes[0]?.cheapestAccessPreservingSequence,
+    ).toBeUndefined();
     expect(quote.canReachAccess).toBe(false);
     expect(quote.cannotReachReason).toBe("known_ice_unbreakable");
   });
@@ -238,6 +278,84 @@ function runnerEncounterInput(params: {
     seed: "runner-run-plan-path-quote-test",
     decisionId: "runner-run-plan-path-quote-test:86:runner",
     actionNumber: 1,
+    profileId: "runner-run-plan-profile",
+  } as unknown as AiDecisionInput;
+}
+
+function runnerServerMovementInput(params: {
+  iceDefinitionId: string;
+  iceTitle: string;
+  iceStrength: number;
+  credits: number;
+}): AiDecisionInput {
+  const ice = visibleIce(params);
+  return {
+    side: "runner",
+    playerView: {
+      stateVersion: 167,
+      side: "runner",
+      activeSide: "runner",
+      timingPoint: "run.jack_out_window",
+      phase: "runner_action",
+      turn: 1,
+      click: 3,
+      winner: null,
+      agendaPointsToWin: 7,
+      own: {
+        identity: { instanceId: "runner-id", known: true },
+        gripOrHq: [],
+        heapOrArchives: [],
+        scoreArea: [],
+        rig: [
+          {
+            instanceId: "codecracker-1",
+            known: true,
+            title: "Codecracker",
+            definitionId: "onr_v1_014_codecracker",
+            type: "program",
+            subtypes: ["icebreaker"],
+            strength: params.iceStrength,
+          },
+        ],
+        clicks: 1,
+        credits: params.credits,
+        tags: 0,
+        badPublicity: 0,
+      },
+      opponent: {
+        identity: { instanceId: "corp-id", known: true },
+        gripOrHqCount: 5,
+        heapOrArchives: [],
+        scoreArea: [],
+        rig: [],
+        clicks: 3,
+        credits: 5,
+        tags: 0,
+        badPublicity: 0,
+      },
+      servers: [
+        {
+          id: "rd",
+          label: "R&D",
+          ice: [ice],
+          root: [],
+        },
+      ],
+      run: {
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+        encounteredIce: ice,
+        successful: false,
+      },
+      publicEvents: [],
+    },
+    eventTail: [],
+    legalActions: [],
+    difficulty: "normal",
+    seed: "runner-run-plan-path-quote-server-movement-test",
+    decisionId: "runner-run-plan-path-quote-server-movement-test:167:runner",
+    actionNumber: 3,
     profileId: "runner-run-plan-profile",
   } as unknown as AiDecisionInput;
 }
