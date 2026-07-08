@@ -2437,6 +2437,59 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("selects a successful-run follow-up before ordinary economy", () => {
+    const successFollowup = {
+      ...legalAction(
+        "credit-subversion-followup",
+        "runner",
+        "trigger_ability",
+        {
+          serverId: "hq",
+          cardImplementationAbilityKey: "successful_run_before_access:0",
+        },
+        { source: "credit-subversion" },
+      ),
+      timingPoint: "run.access" as LegalAction["timingPoint"],
+    };
+    const gain = legalAction("gain-credit", "runner", "gain_credit");
+    const input = aiInput("runner", [gain, successFollowup]);
+    input.playerView.run = {
+      attackedServerId: "hq",
+      phase: "access",
+      successful: true,
+    };
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const successCandidate = {
+      ...candidateForAction(successFollowup),
+      semanticActionType: "card_ability.trigger",
+      actionTacticSignals: ["run.success_followup", "access.payoff"],
+      evidence: ["successful_run_before_access_effect"],
+    } as ActionSemanticCandidate;
+    const gainCandidate = candidateForUntargetedAction(gain);
+
+    const result = evaluateTacticalPlans({
+      input,
+      candidates: [gainCandidate, successCandidate],
+    });
+
+    expect(result.selectedPlan).toMatchObject({
+      planId: "runner.convert_success_window:hq",
+      type: "runner.convert_success_window",
+      currentStep: expect.objectContaining({
+        kind: "convert_success_window",
+      }),
+    });
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "credit-subversion-followup",
+    ]);
+    expect(result.selectedPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_success_window_plan_active:true",
+        "runner_success_window_target:hq",
+      ]),
+    );
+  });
+
   it("translates Corp punish intent into a mapped punish pressure plan", () => {
     const punish = legalAction(
       "play-punish",

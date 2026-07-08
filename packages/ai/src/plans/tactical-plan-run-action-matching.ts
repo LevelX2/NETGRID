@@ -34,6 +34,7 @@ function actionCandidateCanStartRun(
 
 const RUN_START_SIGNAL_CODES = new Set([
   "start_run",
+  "run_start",
   "make_run",
   "bonus_run",
   "followup_run",
@@ -42,8 +43,17 @@ const RUN_START_SIGNAL_CODES = new Set([
   "extra_run",
   "run_bypass",
   "bypass_first_ice",
+  "bypass",
   "future_run_effect",
   "run_pressure",
+  "multiaccess",
+  "hq_multiaccess",
+  "rnd_multiaccess",
+  "archives_multiaccess",
+  "remote_multiaccess",
+  "access_multiaccess",
+  "access_payoff",
+  "free_trash",
 ]);
 
 function runStartSignals(

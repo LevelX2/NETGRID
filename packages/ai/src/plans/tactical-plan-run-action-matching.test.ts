@@ -82,6 +82,38 @@ describe("runPlanStepMatchesAction", () => {
       ),
     ).toBe(true);
   });
+
+  it("treats structured access payoff events as run target actions", () => {
+    const step = { kind: "run_target" } as PlanStep;
+    const actionTypeMatchesStep = () => true;
+    const multiaccess = legalAction({
+      actionId: "hq-multiaccess-event",
+      payload: { serverId: "hq" },
+    });
+
+    expect(
+      runPlanStepMatchesAction(
+        step,
+        candidate({
+          actionId: multiaccess.actionId,
+          actionTacticSignals: ["access.hq_multiaccess"],
+        }),
+        multiaccess,
+        actionTypeMatchesStep,
+      ),
+    ).toBe(true);
+    expect(
+      runPlanStepMatchesAction(
+        step,
+        candidate({
+          actionId: multiaccess.actionId,
+          actionTacticSignals: ["access.hq_multiaccessory_noise"],
+        }),
+        multiaccess,
+        actionTypeMatchesStep,
+      ),
+    ).toBe(false);
+  });
 });
 
 function legalAction(overrides: Partial<LegalAction>): LegalAction {

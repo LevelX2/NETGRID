@@ -1064,6 +1064,7 @@ function aiDecisionDebugPlanStepLabel(value: string, plan?: AiDecisionDebugPlanE
     build_bank_counter: "Credit-Bank aufbauen",
     cash_out_bank: "Credit-Bank auszahlen",
     clear_tags: "Tags entfernen",
+    convert_success_window: "Run-Erfolg nutzen",
     draw_for_answer: coverage ? `Karten ziehen, um ${coverage} zu finden` : "Karten ziehen, um Antwort zu finden",
     gain_credits: "Credits nehmen",
     install_development_card: handCard ? `${handCard} ${developmentVerb}` : `Handkarte ${developmentVerb}`,

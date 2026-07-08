@@ -126,6 +126,58 @@ export function buildRunnerTacticalPlans(
       }),
     );
   }
+  const successWindowActions = runnerSuccessWindowActions(context);
+  if (successWindowActions.length > 0) {
+    const currentRunTarget = input.playerView.run?.attackedServerId;
+    plans.push(
+      createTacticalPlan({
+        planId: currentRunTarget
+          ? `runner.convert_success_window:${currentRunTarget}`
+          : "runner.convert_success_window",
+        side: "runner",
+        type: "runner.convert_success_window",
+        status: "active",
+        priority: 980,
+        horizonTurns: 1,
+        ...(currentRunTarget
+          ? { target: { kind: "server", id: currentRunTarget } }
+          : {}),
+        currentStep: createPlanStep({
+          stepId: currentRunTarget
+            ? `convert_success_window:${currentRunTarget}`
+            : "convert_success_window",
+          kind: "convert_success_window",
+          desiredActionSemantics: [
+            "run.success_followup",
+            "successful_run_before_access_effect",
+            "access.payoff",
+          ],
+          rationale: [
+            "current legal Runner action converts an already successful run window",
+            ...successWindowActions
+              .slice(0, 3)
+              .map((action) => `success_window_action:${action.actionId}`),
+          ],
+        }),
+        evidence: [
+          "runner_success_window_plan_active:true",
+          ...(currentRunTarget ? [`runner_success_window_target:${currentRunTarget}`] : []),
+          ...successWindowActions
+            .slice(0, 4)
+            .map((action) => `success_window_action:${action.actionId}`),
+        ],
+        scoreBreakdown: [
+          {
+            key: "runner_convert_success_window",
+            label: "Runner success window",
+            value: 980,
+            reason: currentRunTarget ?? "current_run_window",
+          },
+        ],
+        stateVersion,
+      }),
+    );
+  }
   const remoteRunActions = input.legalActions.filter(
     (action) => action.type === "start_run" && isRemoteServer(actionServerId(action)),
   );
@@ -732,4 +784,102 @@ export function buildRunnerTacticalPlans(
     );
   }
   return applyRunnerDrawOverflowAdjustments(context, plans);
+}
+
+function runnerSuccessWindowActions(
+  context: TacticalPlanBuildContext,
+): LegalAction[] {
+  const legalActionsById = new Map(
+    context.input.legalActions.map((action) => [action.actionId, action]),
+  );
+  return (context.candidates ?? [])
+    .map((candidate) => ({
+      candidate,
+      action: legalActionsById.get(candidate.actionId),
+    }))
+    .filter(
+      (
+        entry,
+      ): entry is {
+        candidate: NonNullable<TacticalPlanBuildContext["candidates"]>[number];
+        action: LegalAction;
+      } =>
+        entry.action !== undefined &&
+        runnerSuccessWindowActionMatches(entry.action, entry.candidate),
+    )
+    .map((entry) => entry.action)
+    .sort((left, right) => left.actionId.localeCompare(right.actionId));
+}
+
+function runnerSuccessWindowActionMatches(
+  action: LegalAction,
+  candidate: NonNullable<TacticalPlanBuildContext["candidates"]>[number],
+): boolean {
+  if (action.side !== "runner" || candidate.actorSide !== "runner") return false;
+  if (
+    action.type === "start_run" ||
+    action.type === "continue_run" ||
+    action.type === "jack_out" ||
+    action.type === "access_card" ||
+    action.type === "steal_agenda" ||
+    action.type === "trash_accessed_card"
+  ) {
+    return false;
+  }
+  const supportedActionType =
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability" ||
+    action.type === "play_event" ||
+    action.type === "resolve_choice";
+  if (!supportedActionType) return false;
+  const signals = runnerSuccessWindowSignals(action, candidate);
+  return signals.some(signalIsRunnerSuccessWindow);
+}
+
+function runnerSuccessWindowSignals(
+  action: LegalAction,
+  candidate: NonNullable<TacticalPlanBuildContext["candidates"]>[number],
+): string[] {
+  return [
+    action.timingPoint,
+    candidate.semanticActionType,
+    candidate.sourceCardId,
+    candidate.abilityId,
+    ...candidate.cardContextSignals,
+    ...candidate.actionTacticSignals,
+    ...candidate.strategySupport.map((entry) => `${entry.strategyId}:${entry.role}`),
+    ...candidate.conditions.map((entry) => entry.kind),
+    ...candidate.risks.map((entry) => entry.kind),
+    ...candidate.constraints.map((entry) => entry.kind),
+    ...candidate.costProfile.additionalCosts,
+    ...(candidate.targetContext?.targetProfileMatches.flatMap((entry) => entry.evidence) ?? []),
+    ...candidate.evidence,
+    ...payloadStringSignals(action.payload),
+  ].filter((entry): entry is string => typeof entry === "string");
+}
+
+function signalIsRunnerSuccessWindow(signal: string): boolean {
+  const normalized = signal.toLocaleLowerCase("en-US");
+  return (
+    normalized.includes("successful_run") ||
+    normalized.includes("success_followup") ||
+    normalized.includes("requires_successful_run") ||
+    normalized.includes("extra_run_after_success") ||
+    normalized.includes("run.followup_run") ||
+    normalized.includes("access.payoff") ||
+    normalized.includes("ice.trash_rezzed") ||
+    normalized.includes("fort.all_rezzed_ice_trash") ||
+    normalized.includes("free_trash")
+  );
+}
+
+function payloadStringSignals(payload: LegalAction["payload"]): string[] {
+  if (!payload) return [];
+  return Object.values(payload).flatMap((value): string[] => {
+    if (typeof value === "string") return [value];
+    if (Array.isArray(value)) {
+      return value.filter((entry): entry is string => typeof entry === "string");
+    }
+    return [];
+  });
 }

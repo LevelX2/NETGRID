@@ -274,6 +274,7 @@ function runnerPlanTypeRequiresPlanDominance(type: TacticalPlan["type"]): boolea
     type === "runner.contest_remote" ||
     type === "runner.obtain_breaker_coverage" ||
     type === "runner.opportunistic_central_run" ||
+    type === "runner.convert_success_window" ||
     type === "runner.restore_hand_buffer" ||
     type === "runner.develop_hand_card" ||
     type === "runner.build_credit_base" ||
