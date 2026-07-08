@@ -71,6 +71,61 @@ export function buildRunnerTacticalPlans(
   const stateVersion = input.playerView.stateVersion;
   const plans: TacticalPlan[] = [];
   const runnerGoalEvidence = runnerTacticalGoalEvidence(context);
+  const currentRunnerTags = Math.max(0, input.playerView.own.tags ?? 0);
+  if (currentRunnerTags > 0) {
+    plans.push(
+      createTacticalPlan({
+        planId: "runner.clear_tags_or_survive",
+        side: "runner",
+        type: "runner.clear_tags_or_survive",
+        status: "active",
+        priority: 990 + Math.min(3, currentRunnerTags) * 20,
+        horizonTurns: 1,
+        target: { kind: "capability", id: "runner_tag_clear" },
+        requiredCapabilities: [
+          {
+            capabilityId: "runner.tag_clear",
+            kind: "tag_clear",
+            side: "runner",
+            target: { kind: "capability", id: "runner_tag_clear" },
+            evidence: [`runner_current_tags:${currentRunnerTags}`],
+          },
+        ],
+        currentStep: createPlanStep({
+          stepId: "clear_runner_tags",
+          kind: "clear_tags",
+          desiredActionSemantics: ["tag.remove"],
+          requiredCapabilities: [
+            {
+              capabilityId: "runner.tag_clear",
+              kind: "tag_clear",
+              side: "runner",
+              target: { kind: "capability", id: "runner_tag_clear" },
+              evidence: [`runner_current_tags:${currentRunnerTags}`],
+            },
+          ],
+          rationale: [
+            "current Runner tags create an acute survival cleanup obligation",
+            `runner_current_tags:${currentRunnerTags}`,
+          ],
+        }),
+        evidence: [
+          `runner_current_tags:${currentRunnerTags}`,
+          "runner_tag_clear_plan_active:true",
+          ...runnerGoalEvidence,
+        ],
+        scoreBreakdown: [
+          {
+            key: "runner_tag_clear_survival",
+            label: "Runner tag cleanup",
+            value: 990 + Math.min(3, currentRunnerTags) * 20,
+            reason: `runner_current_tags:${currentRunnerTags}`,
+          },
+        ],
+        stateVersion,
+      }),
+    );
+  }
   const remoteRunActions = input.legalActions.filter(
     (action) => action.type === "start_run" && isRemoteServer(actionServerId(action)),
   );

@@ -52,6 +52,8 @@ export function candidateSemanticsMatchStep(
         "corp_economy",
         "operation_economy",
       ]);
+    case "clear_tags":
+      return hasToken(tokens, "tag.remove");
     case "protect_remote":
       return hasAnyToken(tokens, [
         "corp_window.rez",
@@ -168,6 +170,13 @@ export function actionTypeMatchesStep(step: PlanStep, actionType: string): boole
       return actionType === "install_card";
     case "gain_credits":
       return actionType === "gain_credit";
+    case "clear_tags":
+      return (
+        actionType === "remove_tag" ||
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability" ||
+        actionType === "play_event"
+      );
     case "install_development_card":
       return (
         actionType === "install_card" ||

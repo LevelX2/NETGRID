@@ -2403,6 +2403,40 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("selects tag cleanup before ordinary runner pressure plans", () => {
+    const removeTag = legalAction("remove-tag", "runner", "remove_tag");
+    const rdRun = legalAction("run-rd", "runner", "start_run", {
+      serverId: "rd",
+    });
+    const input = aiInput("runner", [rdRun, removeTag]);
+    input.playerView.own.tags = 1;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    const candidates = buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    });
+
+    const result = evaluateTacticalPlans({ input, candidates });
+
+    expect(result.selectedPlan).toMatchObject({
+      planId: "runner.clear_tags_or_survive",
+      type: "runner.clear_tags_or_survive",
+      currentStep: expect.objectContaining({
+        kind: "clear_tags",
+      }),
+    });
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "remove-tag",
+    ]);
+    expect(result.selectedPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_current_tags:1",
+        "runner_tag_clear_plan_active:true",
+      ]),
+    );
+  });
+
   it("translates Corp punish intent into a mapped punish pressure plan", () => {
     const punish = legalAction(
       "play-punish",
