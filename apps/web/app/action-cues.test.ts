@@ -329,9 +329,10 @@ describe("deriveOpponentActionCues", () => {
   });
 
   it("adds related cards only when the card is visible to the viewer", () => {
+    const innerIce = { instanceId: "ice_0", known: true, title: "Inner ICE", definitionId: "inner_ice", type: "ice" as const };
     const visibleIce = { instanceId: "ice_1", known: true, title: "Gate ICE", definitionId: "gate_ice", type: "ice" as const };
     const playerView = view("runner", {
-      servers: [{ id: "remote_1", label: "Remote 1", ice: [visibleIce], root: [] }]
+      servers: [{ id: "remote_1", label: "Remote 1", ice: [innerIce, visibleIce], root: [] }]
     });
 
     const cues = deriveOpponentActionCues({
@@ -342,6 +343,7 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues).toHaveLength(1);
     expect(cues[0]?.relatedCard).toEqual(visibleIce);
+    expect(cues[0]?.relatedCardPositionBadge).toBe("2");
     expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
   });
 

@@ -2917,13 +2917,42 @@ describe("formatChronicleEvent", () => {
         encounterContinue: true,
         encounterWillEndRun: false,
         unbrokenSubroutineCount: 0,
+        sourceDefinitionId: "onr_v1_238_data-wall-2-0",
       }),
       "runner",
     );
 
-    expect(item.title).toBe("Du hast das ICE passiert.");
+    expect(item.title).toBe("Du hast das ICE Data Wall 2.0 passiert.");
     expect(item.chips).toContain("ICE passiert");
+    expect(item.chips).toContain("Data Wall 2.0");
     expect(JSON.stringify(item)).not.toContain("ungebrochene Subroutinen");
+  });
+
+  it("does not summarize printed ICE damage text when fully broken ICE is passed", () => {
+    const item = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        result: "continued",
+        encounterContinue: true,
+        encounterWillEndRun: false,
+        unbrokenSubroutineCount: 0,
+        cardDefinitionId: "test_cortical_scrub",
+        title: "Cortical Scrub",
+      }),
+      "runner",
+      {
+        cardTitle: "Cortical Scrub",
+        cardText: "[Subroutine] Do 1 Core Damage. [Subroutine] End the run.",
+        cardType: "ice",
+      },
+    );
+
+    expect(item.title).toBe("Du hast das ICE Cortical Scrub passiert.");
+    expect(item.description).toBeUndefined();
+    expect(item.chips).toContain("ICE passiert");
+    expect(item.chips).toContain("Cortical Scrub");
+    expect(item.chips).not.toContain("1 Core");
+    expect(item.cardText).toContain("1 Core Damage");
   });
 
   it("describes breaker pump and break actions with action-specific effects", () => {

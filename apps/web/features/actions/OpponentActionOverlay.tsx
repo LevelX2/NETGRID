@@ -57,6 +57,7 @@ export function OpponentActionOverlay({
   const relatedCard = cue.relatedCard ? enrichVisibleCard(cue.relatedCard, cardDetailsById) : null;
   const cueCardDisplayMode: CardDisplayMode = displayMode === "placeholder" ? displayMode : "placeholder";
   const showHiddenCardBack = cue.visibility === "redacted" && cue.actionType === "install_card";
+  const hasCueVisual = Boolean(relatedCard || showHiddenCardBack);
   const showAiAdvanceButton = Boolean(cue.source === "ai" && canAdvanceAi && onAdvanceAi);
   const dismissLabel = showAiAdvanceButton ? "Weiter" : "Ausblenden";
   const startDrag = (event: ReactPointerEvent<HTMLButtonElement>) => {
@@ -116,13 +117,19 @@ export function OpponentActionOverlay({
           <Move size={15} />
         </button>
       </div>
-      <div className="opponentCueBody">
+      <div className={`opponentCueBody${hasCueVisual ? " hasVisual" : ""}`}>
         {relatedCard || showHiddenCardBack ? (
           <div className="opponentCueVisual">
-            <span className="opponentCueActionBadge">{cueVisualLabel(cue)}</span>
             {relatedCard ? (
               <div className="opponentCueCard">
-                <CardView card={relatedCard} displayMode={cueCardDisplayMode} compact preview />
+                <CardView
+                  card={relatedCard}
+                  displayMode={cueCardDisplayMode}
+                  preview
+                  {...(cue.relatedCardPositionBadge
+                    ? { positionBadge: cue.relatedCardPositionBadge }
+                    : {})}
+                />
               </div>
             ) : (
               <div className="opponentCueCardBack" aria-hidden="true">
@@ -151,30 +158,4 @@ function cueActionUseLabel(cue: OpponentActionCue): string {
   const actor = cue.actor === "corp" ? "Korp" : cue.actor === "runner" ? "Runner" : "Spiel";
   if (!cue.actionUse) return actor;
   return cue.actionUse.start === cue.actionUse.end ? `${cue.actionUse.start}. ${actor}-Aktion` : `${actor}-Aktionen ${cue.actionUse.start}-${cue.actionUse.end}`;
-}
-
-function cueVisualLabel(cue: OpponentActionCue): string {
-  if (cue.source === "system") return "Auto-Effekt";
-  switch (cue.actionType) {
-    case "install_card":
-      return cue.visibility === "redacted" ? "verdeckt installiert" : "installiert";
-    case "play_event":
-    case "play_operation":
-      return "gespielt";
-    case "access_card":
-      return "gezeigt";
-    case "rez_ice":
-      return "gerezzt";
-    case "score_agenda":
-      return "erzielt";
-    case "steal_agenda":
-      return "gestohlen";
-    case "advance_card":
-      return "entwickelt";
-    case "trash_accessed_card":
-    case "trash_resource":
-      return "getrasht";
-    default:
-      return "Karte";
-  }
 }

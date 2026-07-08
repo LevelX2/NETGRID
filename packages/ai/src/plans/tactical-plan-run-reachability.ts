@@ -1,6 +1,7 @@
 import type { PlayerView } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
+  runnerKnownPathAssessmentIsUnbreakableNoAccess,
   runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
 import { isRemoteServer } from "./tactical-plan-server-targets";
@@ -33,7 +34,11 @@ export function runNeedsBreakerCoverage(
     ),
     server.root,
   );
-  return assessment.assessedKnownIceCount > 0 && !assessment.canReachAccess;
+  return (
+    assessment.assessedKnownIceCount > 0 &&
+    !assessment.canReachAccess &&
+    runnerKnownPathAssessmentIsUnbreakableNoAccess(assessment)
+  );
 }
 
 export function remoteRunHasNoRootValue(

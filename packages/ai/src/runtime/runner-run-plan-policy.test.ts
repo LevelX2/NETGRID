@@ -186,7 +186,7 @@ describe("runner run plan policy", () => {
       iceTitle: "Keeper",
       iceStrength: 4,
       credits: 0,
-      legalActions: [continueRun, jackOut],
+      legalActions: [jackOut, continueRun],
     });
     const basePlan = runPlan();
     const planAfterPaidIce: RunnerRunPlan = {
@@ -212,8 +212,8 @@ describe("runner run plan policy", () => {
       input,
       plan: revalidated,
       choices: [
-        choice(continueRun, "simple_run_choice", 103),
         choice(jackOut, "simple_run_choice", -351),
+        choice(continueRun, "simple_run_choice", 103),
       ],
     });
 

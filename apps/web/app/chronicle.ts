@@ -138,7 +138,7 @@ export function formatChronicleEvent(
     stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode),
   );
   const subject = subjectFor(actor, side, isAi);
-  const effect = summarizeEffect(cardText);
+  const effect = summarizeContextCardEffect(actionType, cardText);
   const mergedCardResolverEffect = mergedCardResolverEventEffect(event);
   const agendaAbility = stringValue(payload.agendaAbility);
   const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
@@ -2734,9 +2734,26 @@ export function formatChronicleEvent(
                 stringValue(payload.trashedCardDefinitionId),
               ) ?? stringValue(payload.trashedCardTitle))
             : undefined;
+        const passedIceDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        const passedIceTitle =
+          cardTitle ??
+          sourceTitle ??
+          titleForDefinitionId(passedIceDefinitionId);
         if (encounterContinue && unbrokenSubroutineCount === 0) {
-          title = phrase(subject, "das ICE passiert");
-          chips.push("Run", "ICE passiert");
+          if (passedIceDefinitionId)
+            cardDefinitionId = cardDefinitionId ?? passedIceDefinitionId;
+          if (passedIceTitle) cardTitle = passedIceTitle;
+          title = phrase(
+            subject,
+            passedIceTitle
+              ? `das ICE ${passedIceTitle} passiert`
+              : "das ICE passiert",
+          );
+          chips.push(
+            "Run",
+            "ICE passiert",
+            ...(passedIceTitle ? [passedIceTitle] : []),
+          );
         } else {
           if (encounterContinue && trashedProgramTitle) {
             title = phrase(
@@ -4741,6 +4758,22 @@ function summarizeEffect(cardText: string | undefined): EffectSummary {
   if (/Run auf einen Server/i.test(cardText))
     return { category: "run", suffix: "Run-Druck aufgebaut", chips: ["Run"] };
   return { chips: [] };
+}
+
+function summarizeContextCardEffect(
+  actionType: string,
+  cardText: string | undefined,
+): EffectSummary {
+  if (!actionCanUseContextCardEffectSummary(actionType)) return { chips: [] };
+  return summarizeEffect(cardText);
+}
+
+function actionCanUseContextCardEffectSummary(actionType: string): boolean {
+  return (
+    actionType === "play_event" ||
+    actionType === "play_operation" ||
+    actionType === "activated_card_ability"
+  );
 }
 
 function scoreAgendaPayloadEffect(

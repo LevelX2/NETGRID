@@ -651,7 +651,8 @@ describe("tactical plan model", () => {
       ),
     ];
 
-    const plans = buildTacticalPlans({ input });
+    const runnerRunTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const plans = buildTacticalPlans({ input, runnerRunTargetEvaluations });
     const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
 
     expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe("breaker_wall");
@@ -689,7 +690,8 @@ describe("tactical plan model", () => {
       server("archives"),
     ];
 
-    const plans = buildTacticalPlans({ input });
+    const runnerRunTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const plans = buildTacticalPlans({ input, runnerRunTargetEvaluations });
     const coveragePlan = runnerCoverageTargetPlan(plans, "rd");
 
     expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe(
@@ -1197,6 +1199,57 @@ describe("tactical plan model", () => {
     expect(centralPlan?.currentStep.kind).toBe("draw_for_answer");
     expect(coveragePlan?.status).toBe("active");
     expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe("breaker_wall");
+  });
+
+  it("treats visible sentry coverage with insufficient credits as funding, not missing coverage", () => {
+    const input = aiInput("runner", [
+      legalAction("run-rd", "runner", "start_run", {
+        serverId: "rd",
+      }),
+      legalAction("gain", "runner", "gain_credit"),
+    ]);
+    input.playerView.own.credits = 3;
+    input.playerView.own.rig = [
+      visibleCard("runner_raptor", "runner", "program", {
+        definitionId: "onr_v1_054_raptor",
+        title: "Raptor",
+        subtypes: ["Icebreaker", "Killer"],
+        strength: 1,
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("rd_cortical_scrub", "corp", "ice", {
+          definitionId: "onr_v1_231_cortical-scrub",
+          title: "Cortical Scrub",
+          rezzed: true,
+          subtypes: ["Sentry", "Black ICE", "AP", "Brainwipe"],
+          strength: 3,
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    const runnerRunTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const plans = buildTacticalPlans({ input, runnerRunTargetEvaluations });
+    const rdPlan = plans.find(
+      (plan) => plan.planId === "runner.opportunistic_central_run:rd",
+    );
+
+    expect(rdPlan?.status).toBe("active");
+    expect(rdPlan?.currentStep.kind).toBe("gain_credits");
+    expect(rdPlan?.blockers.map((blocker) => blocker.kind)).not.toContain(
+      "missing_breaker_coverage",
+    );
+    expect(rdPlan?.requiredCapabilities.map((capability) => capability.kind))
+      .not.toContain("breaker_sentry");
+    expect(rdPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_run_target_recommendation:gain_credits_first",
+        "runner_run_target_path:blocked_unpayable",
+      ]),
+    );
   });
 
   it("abandons an R&D probe when the known top card is stale and low-value", () => {

@@ -3628,7 +3628,7 @@ select {
   --opponent-cue-side: var(--cue);
   position: fixed;
   z-index: 72;
-  width: min(420px, calc(100vw - 28px));
+  width: min(540px, calc(100vw - 28px));
   display: grid;
   gap: 10px;
   padding: 10px;
@@ -3736,9 +3736,15 @@ select {
 
 .opponentCueBody {
   display: grid;
+  align-items: center;
   justify-items: center;
-  gap: 9px;
+  gap: 12px;
   min-width: 0;
+}
+
+.opponentCueBody.hasVisual {
+  grid-template-columns: minmax(122px, 146px) minmax(0, 1fr);
+  justify-items: stretch;
 }
 
 .opponentCueText {
@@ -3747,6 +3753,11 @@ select {
   justify-items: center;
   gap: 4px;
   text-align: center;
+}
+
+.opponentCueBody.hasVisual .opponentCueText {
+  justify-items: start;
+  text-align: left;
 }
 
 .opponentCueOverlay small {
@@ -3775,33 +3786,21 @@ select {
 
 .opponentCueVisual {
   display: grid;
+  align-items: center;
   justify-items: center;
-  gap: 5px;
-}
-
-.opponentCueActionBadge {
-  max-width: 100%;
-  padding: 2px 8px;
-  border: 1px solid color-mix(in srgb, var(--opponent-cue-side), transparent 55%);
-  border-radius: 999px;
-  color: color-mix(in srgb, var(--opponent-cue-side), var(--text) 16%);
-  background: color-mix(in srgb, var(--opponent-cue-side), transparent 88%);
-  font-size: 11px;
-  line-height: 1.3;
-  white-space: nowrap;
 }
 
 .opponentCueCard {
-  width: 82px;
+  width: min(146px, 34vw);
 }
 
 .opponentCueCard .card {
-  min-height: 112px;
+  min-height: 190px;
   box-shadow: 0 10px 22px rgb(0 0 0 / 0.26);
 }
 
 .opponentCueCard .cardTitle {
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.15;
 }
 
@@ -3812,7 +3811,7 @@ select {
 
 .opponentCueCardBack {
   position: relative;
-  width: 82px;
+  width: min(146px, 34vw);
   aspect-ratio: 5 / 7;
   display: grid;
   place-items: end center;
@@ -13038,13 +13037,23 @@ select,
     display: none;
   }
 
+  .opponentCueBody.hasVisual {
+    grid-template-columns: 1fr;
+    justify-items: center;
+  }
+
+  .opponentCueBody.hasVisual .opponentCueText {
+    justify-items: center;
+    text-align: center;
+  }
+
   .opponentCueCard,
   .opponentCueCardBack {
-    width: 74px;
+    width: 112px;
   }
 
   .opponentCueCard .card {
-    min-height: 101px;
+    min-height: 154px;
   }
 
   .cardTooltip {

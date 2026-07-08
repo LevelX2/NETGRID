@@ -26,6 +26,7 @@ export type OpponentActionCue = {
   importance: ChronicleImportance;
   highlight?: BoardHighlight;
   relatedCard?: VisibleCard;
+  relatedCardPositionBadge?: string;
   sound?: ActionSoundKind;
   soundCount?: number;
   requiresLocalAttention: boolean;
@@ -133,6 +134,9 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
     const visibility = item.visibility;
     const highlight = deriveHighlight(actionType, payload, actor, visibility, visibleCards);
     const relatedCard = deriveRelatedCard(payload, visibility, visibleCards);
+    const relatedCardPositionBadge = relatedCard
+      ? relatedIcePositionBadge(input.playerView, relatedCard)
+      : undefined;
     const sound = actionSoundForActionType(actionType, visibility);
     const soundCount = sound ? actionSoundCountForAction(actionType, payload) : 1;
 
@@ -154,6 +158,7 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       importance: item.importance,
       ...(highlight ? { highlight } : {}),
       ...(relatedCard ? { relatedCard } : {}),
+      ...(relatedCardPositionBadge ? { relatedCardPositionBadge } : {}),
       ...(sound ? { sound } : {}),
       ...(sound && soundCount > 1 ? { soundCount } : {}),
       requiresLocalAttention: localAttention,
@@ -162,6 +167,9 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
     const effectCues = forcedEffectCueItems.map((effectItem, index): OpponentActionCue => {
       const relatedCard =
         effectItem.cardDefinitionId ? visibleCards.get(effectItem.cardDefinitionId) : undefined;
+      const relatedCardPositionBadge = relatedCard
+        ? relatedIcePositionBadge(input.playerView, relatedCard)
+        : undefined;
       return {
         cueId: `${input.viewerSide}:${event.eventId}:effect:${index}`,
         eventId: event.eventId,
@@ -179,6 +187,7 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
         visibility: effectItem.visibility,
         importance: effectItem.importance,
         ...(relatedCard ? { relatedCard } : {}),
+        ...(relatedCardPositionBadge ? { relatedCardPositionBadge } : {}),
         sound: "tag_or_damage",
         requiresLocalAttention: localAttention,
       };
@@ -318,6 +327,35 @@ function deriveRelatedCard(payload: Record<string, unknown>, visibility: Chronic
   const cardDefinitionId = stringValue(payload.cardDefinitionId) ?? stringValue(payload.sourceDefinitionId);
   const visibleCard = cardDefinitionId ? visibleCards.get(cardDefinitionId) : undefined;
   return visibleCard?.known ? visibleCard : undefined;
+}
+
+function relatedIcePositionBadge(
+  view: PlayerView,
+  card: VisibleCard,
+): string | undefined {
+  if (card.instanceId) {
+    for (const server of view.servers) {
+      const index = server.ice.findIndex(
+        (ice) => ice.instanceId === card.instanceId,
+      );
+      if (index >= 0) return String(index + 1);
+    }
+  }
+  if (!card.definitionId) return undefined;
+
+  let uniqueIndex: number | undefined;
+  let matches = 0;
+  for (const server of view.servers) {
+    server.ice.forEach((ice, index) => {
+      if (ice.known && ice.definitionId === card.definitionId) {
+        matches += 1;
+        uniqueIndex = index;
+      }
+    });
+  }
+  return matches === 1 && uniqueIndex !== undefined
+    ? String(uniqueIndex + 1)
+    : undefined;
 }
 
 function serverHighlight(payload: Record<string, unknown>): BoardHighlight {

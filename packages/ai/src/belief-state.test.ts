@@ -69,27 +69,66 @@ describe("belief-state R&D top freshness", () => {
     );
   });
 
-  it("ignores label-only R&D server text for top-card freshness", () => {
+  it("forgets a known R&D top card after the Runner steals it with engine-style label-only origin context", () => {
     const accessEvent = publicEvent("evt_label_1", "access_card", 1, {
       actor: "runner",
       actionType: "access_card",
       serverLabel: "R&D",
+      targets: { serverLabel: "R&D" },
       cardDefinitionId: "onr_v1_343_south-african-mining-corp",
     });
-    const trashEvent = publicEvent("evt_label_2", "trash_accessed_card", 2, {
+    const stealEvent = publicEvent("evt_label_2", "steal_agenda", 2, {
       actor: "runner",
-      actionType: "trash_accessed_card",
+      actionType: "steal_agenda",
       serverLabel: "R&D",
+      targets: { serverLabel: "R&D" },
       cardDefinitionId: "onr_v1_343_south-african-mining-corp",
     });
 
     const belief = reconstructBeliefState(
-      runnerInput([accessEvent, trashEvent]),
+      runnerInput([accessEvent, stealEvent]),
     );
+    const freshness = belief.runnerOpponentModel?.rndTopFreshness;
 
-    expect(
-      belief.runnerOpponentModel?.rndTopFreshness?.invalidationReasons ?? [],
-    ).not.toContain("rd_access_removed_top_card:evt_label_2");
+    expect(freshness).toMatchObject({
+      freshness: "fresh_after_top_removed",
+      knownToRunner: true,
+      freshenedByRunnerAccess: true,
+    });
+    expect(freshness?.knownTopDefinitionId).toBeUndefined();
+    expect(freshness?.invalidationReasons).toContain(
+      "rd_access_removed_top_card:evt_label_2",
+    );
+  });
+
+  it("does not treat label-only R&D text on unrelated events as top-card removal", () => {
+    const accessEvent = publicEvent("evt_label_1", "access_card", 1, {
+      actor: "runner",
+      actionType: "access_card",
+      serverLabel: "R&D",
+      targets: { serverLabel: "R&D" },
+      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+    });
+    const unrelatedEvent = publicEvent("evt_label_noise", "gain_credit", 2, {
+      actor: "runner",
+      actionType: "gain_credit",
+      serverLabel: "R&D",
+      targets: { serverLabel: "R&D" },
+      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([accessEvent, unrelatedEvent]),
+    );
+    const freshness = belief.runnerOpponentModel?.rndTopFreshness;
+
+    expect(freshness?.freshness).toBe("stale_known_same_top");
+    expect(freshness?.knownTopDefinitionId).toBe(
+      "onr_v1_343_south-african-mining-corp",
+    );
+    expect(freshness?.invalidationReasons).not.toContain(
+      "rd_access_removed_top_card:evt_label_noise",
+    );
   });
 });
 

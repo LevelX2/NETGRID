@@ -198,7 +198,7 @@ export type BeliefState = {
   knownPositionMemory?: KnownPositionMemory[];
 };
 
-const BELIEF_VERSION_PREFIX = "belief-v1.4.2";
+const BELIEF_VERSION_PREFIX = "belief-v1.4.3";
 const RD_SWAP_OPERATION_DEFINITION_ID = "v098_hq_rd_swap_operation";
 const HQ_ALL_KNOWN_CONTRADICTION_WARNING =
   "belief_warning:hq_all_known_contradiction";
@@ -334,7 +334,7 @@ function beliefHistory(input: AiDecisionInput): PublicGameEvent[] {
 
 function classifyBeliefEvent(event: PublicGameEvent): BeliefEventClassification {
   const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
-  const serverId = publicServerId(event);
+  const serverId = publicServerId(event, actionType);
   const runTargetServerId = publicRunTargetServerId(event, actionType);
   const actor = parseActor(event.publicPayload.actor);
   const family = eventFamily(actionType, event);
@@ -1816,7 +1816,10 @@ export function hiddenZoneActionEventFamily(
   return undefined;
 }
 
-function publicServerId(event: PublicGameEvent): string | undefined {
+function publicServerId(
+  event: PublicGameEvent,
+  actionType?: string,
+): string | undefined {
   const raw =
     stringValue(event.publicPayload.serverId) ??
     stringValue(event.publicPayload.attackedServerId) ??
@@ -1826,8 +1829,23 @@ function publicServerId(event: PublicGameEvent): string | undefined {
   const exposedServerId = stringValue(event.publicPayload.exposedServerId);
   if (exposedServerId) return canonicalStructuredServerId(exposedServerId);
   const labelId = publicServerLabelId(event);
-  if (labelId === "hq") return labelId;
+  if (labelId === "hq" || actionCanUsePublicServerLabelAsOrigin(actionType))
+    return labelId;
   return undefined;
+}
+
+function actionCanUsePublicServerLabelAsOrigin(
+  actionType: string | undefined,
+): boolean {
+  return (
+    actionType === "access_card" ||
+    actionType === "steal_agenda" ||
+    actionType === "trash_accessed_card" ||
+    actionType === "decline_trash" ||
+    actionType === "move_to_removed_from_game" ||
+    actionType === "move_to_set_aside" ||
+    actionType === "return_from_set_aside"
+  );
 }
 
 function publicRunTargetServerId(
@@ -1837,7 +1855,7 @@ function publicRunTargetServerId(
   if (actionType !== "start_run" && actionType !== "access_card")
     return undefined;
   return (
-    publicServerId(event) ??
+    publicServerId(event, actionType) ??
     publicServerLabelId(event)
   );
 }

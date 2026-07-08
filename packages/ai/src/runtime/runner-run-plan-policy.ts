@@ -22,11 +22,8 @@ export function runnerRunPlanSemanticChoice(params: {
   const accessChoice = runnerRunPlanAccessChoice(params);
   if (accessChoice) return accessChoice;
   const selected =
-    params.choices.find(
-      (choice) =>
-        !choice.exclusion &&
-        runnerRunPlanRelevantActionTypes.has(choice.action.type),
-    ) ?? params.choices.find((choice) => !choice.exclusion);
+    runnerRunPlanBestRelevantChoice(params.choices) ??
+    params.choices.find((choice) => !choice.exclusion);
   if (!selected) return undefined;
   return annotateRunnerRunPlanChoice({
     choice: selected,
@@ -340,6 +337,35 @@ const runnerRunPlanRelevantActionTypes = new Set([
   "trash_accessed_card",
   "decline_trash",
 ]);
+
+function runnerRunPlanBestRelevantChoice(
+  choices: readonly SemanticRuntimeChoice[],
+): SemanticRuntimeChoice | undefined {
+  return [...choices]
+    .filter(
+      (choice) =>
+        !choice.exclusion &&
+        runnerRunPlanRelevantActionTypes.has(choice.action.type),
+    )
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        runnerRunPlanFallbackTypePriority(right.action.type) -
+          runnerRunPlanFallbackTypePriority(left.action.type),
+    )[0];
+}
+
+function runnerRunPlanFallbackTypePriority(actionType: string): number {
+  if (actionType === "steal_agenda") return 8;
+  if (actionType === "access_card") return 7;
+  if (actionType === "trash_accessed_card") return 6;
+  if (actionType === "decline_trash") return 5;
+  if (actionType === "continue_run") return 4;
+  if (actionType === "break_subroutine") return 3;
+  if (actionType === "pump_breaker") return 2;
+  if (actionType === "jack_out") return 1;
+  return 0;
+}
 
 const runnerRunPlanAccessActionTypes = new Set([
   "access_card",
