@@ -67,9 +67,12 @@ describe("runner run plan memory", () => {
 
   it("selects active run actions through a run plan annotated choice", () => {
     const input = runnerInput({ activeRun: true });
+    const activePlan = runPlan();
+    activePlan.budget.runOnlyCredits = 2;
+    activePlan.budget.stealthCredits = 1;
     const selected = runnerRunPlanSemanticChoice({
       input,
-      plan: runPlan(),
+      plan: activePlan,
       choices: [
         choice(action("gain_credit"), "basic_economy_draw", 200),
         choice(action("continue_run"), "simple_run_choice", 100),
@@ -80,6 +83,8 @@ describe("runner run plan memory", () => {
     expect(selected?.reasonCode).toBe("runner.run_plan.simple_run_choice");
     expect(selected?.evidence).toContain("runner_run_plan_active:true");
     expect(selected?.evidence).toContain("runner_run_plan_id:runplan-1");
+    expect(selected?.evidence).toContain("runner_run_plan_budget_run_only:2");
+    expect(selected?.evidence).toContain("runner_run_plan_budget_stealth:1");
   });
 
   it("creates a run plan from a selected start-run action and run target evaluation", () => {
@@ -126,6 +131,66 @@ describe("runner run plan memory", () => {
     );
     expect(plan?.pathQuote.totalKnownCost).toBe(2);
     expect(plan?.accessIntent?.trashPolicy).toBe("trash_if_value_positive");
+  });
+
+  it("records specialized run credits in the run plan budget", () => {
+    const startRun = action("start_run", {
+      serverId: "rd",
+      runOnlyCredits: 2,
+      recurringLinkCredits: 1,
+    });
+    const input = runnerInput({
+      activeRun: false,
+      legalActions: [startRun],
+      rig: [
+        {
+          instanceId: "stealth-rig",
+          definitionId: "stealth-rig",
+          title: "Stealth Rig",
+          owner: "runner",
+          controller: "runner",
+          type: "hardware",
+          known: true,
+          subtypes: ["stealth"],
+          counterDisplays: [
+            {
+              id: "stealth-recurring",
+              amount: 2,
+              displayKind: "recurring_credit",
+              label: "2",
+              ariaLabel: "2 recurring credits",
+              creditPool: {
+                kind: "recurring_credit",
+                uses: [
+                  "using_icebreaker_during_run",
+                  "using_icebreaker_during_run_non_noisy",
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    });
+    const plan = createRunnerRunPlanForSelectedAction({
+      input,
+      selectedAction: startRun,
+      runnerRunTargetEvaluations: [runTargetEvaluation(startRun)],
+    });
+
+    expect(plan?.budget.runOnlyCredits).toBe(2);
+    expect(plan?.budget.recurringBreakerCredits).toBe(2);
+    expect(plan?.budget.recurringLinkCredits).toBe(1);
+    expect(plan?.budget.stealthCredits).toBe(2);
+    expect(plan?.budget.nonNoisyBreakerCredits).toBe(2);
+    expect(plan?.debug.items).toEqual(
+      expect.arrayContaining([
+        "runner_run_plan_budget_run_only:2",
+        "runner_run_plan_budget_recurring_breaker:2",
+        "runner_run_plan_budget_recurring_link:1",
+        "runner_run_plan_budget_stealth:2",
+        "runner_run_plan_budget_non_noisy_breaker:2",
+      ]),
+    );
   });
 
   it("creates a decline-low-value access intent only for known low-value targets", () => {
@@ -309,6 +374,7 @@ function runnerInput(params: {
   legalActions?: LegalAction[];
   credits?: number;
   servers?: PlayerView["servers"];
+  rig?: PlayerView["own"]["rig"];
 }): AiDecisionInput {
   return {
     side: "runner",
@@ -325,7 +391,7 @@ function runnerInput(params: {
         gripOrHq: [],
         heapOrArchives: [],
         scoreArea: [],
-        rig: [],
+        rig: params.rig ?? [],
         clicks: 3,
         credits: params.credits ?? 5,
         tags: 0,
@@ -498,7 +564,9 @@ function runTargetEvaluation(
     actionId: actionValue.actionId,
     accessPayoff,
     knownAccessState:
-      accessPayoff === "known_low_value" ? "known_no_current_payoff" : "unknown",
+      accessPayoff === "known_low_value"
+        ? "known_no_current_payoff"
+        : "unknown",
     multiaccessAvailable: false,
     pathPassability: "reachable",
     pathCost: 2,
@@ -529,8 +597,7 @@ function runTargetEvaluation(
       actionType: actionValue.type,
       targetServerId,
       targetKind,
-      sourceKind:
-        actionValue.type === "start_run" ? "basic_action" : "event",
+      sourceKind: actionValue.type === "start_run" ? "basic_action" : "event",
       structure:
         actionValue.type === "start_run" ? "direct_start_run" : "event_run",
       accessPayoffSignals: [],

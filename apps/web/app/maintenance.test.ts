@@ -119,6 +119,8 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     expect(aiTracePlanLabel("access_trash_steal")).toBe("Zugriff / Trash / Steal");
     expect(aiTracePlanLabel("runner.obtain_breaker_coverage")).toBe("Breaker-Abdeckung vorbereiten");
     expect(aiTracePlanLabel("runner.contest_remote")).toBe("Remote-Run prüfen");
+    expect(aiTracePlanLabel("runner.clear_tags_or_survive")).toBe("Tags entfernen / überleben");
+    expect(aiTracePlanLabel("runner.convert_success_window")).toBe("Run-Erfolg nutzen");
     expect(aiTracePlanLabel("runner.build_credit_base")).toBe("Credit-Basis aufbauen");
   });
 

@@ -54,6 +54,22 @@ export function candidateSemanticsMatchStep(
       ]);
     case "clear_tags":
       return hasToken(tokens, "tag.remove");
+    case "convert_success_window":
+      return hasAnyToken(tokens, [
+        "successful_run",
+        "successful_run_before_access",
+        "successful_run_before_access_effect",
+        "requires_successful_run",
+        "run.success_followup",
+        "success_followup",
+        "run.extra_run_after_success",
+        "extra_run_after_success",
+        "run.followup_run",
+        "access.payoff",
+        "ice.trash_rezzed",
+        "fort.all_rezzed_ice_trash",
+        "free_trash",
+      ]);
     case "protect_remote":
       return hasAnyToken(tokens, [
         "corp_window.rez",
@@ -176,6 +192,13 @@ export function actionTypeMatchesStep(step: PlanStep, actionType: string): boole
         actionType === "trigger_ability" ||
         actionType === "activated_card_ability" ||
         actionType === "play_event"
+      );
+    case "convert_success_window":
+      return (
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability" ||
+        actionType === "play_event" ||
+        actionType === "resolve_choice"
       );
     case "install_development_card":
       return (
