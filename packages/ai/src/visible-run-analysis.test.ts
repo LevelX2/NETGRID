@@ -159,6 +159,23 @@ describe("visible run analysis text-derived breaker costs", () => {
       unpayableReason: "ice_unbreakable",
     });
   });
+
+  it("uses effective variable ICE subtypes instead of the printed definition subtype", () => {
+    const assessment = assessKnownRezzedIcePath(
+      [caryatidAsCodeGateIce("hq-caryatid")],
+      [pileDriverBreaker("runner-pile-driver")],
+      4,
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      knownPathBlockedByMissingCoverage: true,
+      missingCoverage: ["code_gate"],
+      noAccessReason: "missing_breaker_coverage",
+      unpayableReason: "ice_unbreakable",
+    });
+  });
 });
 
 describe("visible run analysis runner run credit pools", () => {
@@ -500,6 +517,30 @@ function classicCodeGateIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 2,
+  };
+}
+
+function caryatidAsCodeGateIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_proteus_013_caryatid",
+    title: "Caryatid",
+    type: "ice",
+    subtypes: ["code_gate"],
+    known: true,
+    rezzed: true,
+    strength: 5,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_proteus_013_caryatid",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: "onr_proteus_013_caryatid_etr",
+          type: "end_the_run",
+        },
+      ],
+    },
   };
 }
 

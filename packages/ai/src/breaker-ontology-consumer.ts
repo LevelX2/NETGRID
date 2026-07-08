@@ -169,7 +169,7 @@ export function estimateStructuredBreakerCostForIce(
   ) {
     return undefined;
   }
-  const coverage = structuredIceCoverageRequirements(ice.definitionId).find(
+  const coverage = structuredIceCoverageRequirementsForVisibleIce(ice).find(
     (target) => profileCoversCoverage(profile, target),
   );
   if (!coverage) return undefined;
@@ -226,6 +226,21 @@ export function structuredIceCoverageRequirements(
       ),
   );
   return coverage.length > 0 ? coverage : ["unknown_special"];
+}
+
+function structuredIceCoverageRequirementsForVisibleIce(
+  ice: Pick<VisibleCard, "definitionId" | "subtypes">,
+): KnownHintBreakerCoverage[] {
+  const visibleCoverage = sortedUnique(
+    (ice.subtypes ?? [])
+      .map(coverageForIceSubtype)
+      .filter(
+        (value): value is KnownHintBreakerCoverage => value !== undefined,
+      ),
+  );
+  return visibleCoverage.length > 0
+    ? visibleCoverage
+    : structuredIceCoverageRequirements(ice.definitionId);
 }
 
 function coverageForIceSubtype(

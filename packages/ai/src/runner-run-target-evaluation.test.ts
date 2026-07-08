@@ -1499,6 +1499,44 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("does not run Pile Driver into Caryatid when it was rezzed as a Code Gate", () => {
+    const input = aiInput({
+      credits: 4,
+      opponentHandCount: 4,
+      rig: [
+        visibleCard("runner-pile-driver", {
+          definitionId: "onr_v1_047_pile-driver",
+          title: "Pile Driver",
+          type: "program",
+          subtypes: ["icebreaker", "fracter", "noisy"],
+          known: true,
+          strength: 7,
+        }),
+      ],
+      servers: [
+        server("hq", {
+          ice: [caryatidAsCodeGateIce("hq-caryatid")],
+        }),
+      ],
+      legalActions: [runAction("run-hq", "hq"), gainCreditAction("gain-credit")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "hq",
+      pathPassability: "blocked_missing_coverage",
+      recommendation: "find_breaker_first",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "path_passability:blocked_missing_coverage",
+        "missing_coverage:code_gate",
+        "recommendation:find_breaker_first",
+      ]),
+    );
+  });
+
   it("keeps a known remote trash target valuable when trash preserves reserve", () => {
     const input = aiInput({
       credits: 8,
@@ -2550,6 +2588,29 @@ function simpleCodeGateIce(instanceId: string): VisibleCard {
         },
         {
           id: `${instanceId}_etr`,
+          type: "end_the_run",
+        },
+      ],
+    },
+  });
+}
+
+function caryatidAsCodeGateIce(instanceId: string): VisibleCard {
+  return visibleCard(instanceId, {
+    definitionId: "onr_proteus_013_caryatid",
+    title: "Caryatid",
+    type: "ice",
+    subtypes: ["code_gate"],
+    known: true,
+    rezzed: true,
+    strength: 5,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_proteus_013_caryatid",
+      effectiveStrength: 5,
+      subroutines: [
+        {
+          id: "onr_proteus_013_caryatid_etr",
           type: "end_the_run",
         },
       ],

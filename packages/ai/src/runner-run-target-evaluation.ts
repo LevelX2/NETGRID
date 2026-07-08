@@ -521,6 +521,9 @@ function evaluateRunnerRunTarget(
       `access_payoff:${accessPayoff}`,
       `known_access_state:${payoff.knownAccessState}`,
       `path_passability:${pathPassability}`,
+      ...(path.missingCoverage?.length
+        ? [`missing_coverage:${path.missingCoverage.join("|")}`]
+        : []),
       `path_cost:${path.visibleBreakCost ?? 0}`,
       `credits_after_run:${creditsAfterRun}`,
       `visible_ice_hazard_penalty:${visibleIceHazardPenalty}`,
