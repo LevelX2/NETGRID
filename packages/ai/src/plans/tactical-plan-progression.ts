@@ -109,27 +109,6 @@ export function progressTacticalPlans(
       ],
     } satisfies TacticalPlan;
   });
-  if (
-    previousPlan.type === "runner.opportunistic_central_run" &&
-    previousPlan.ttlDecisionsRemaining <= 0 &&
-    continued.some((plan) => plan.type === "runner.obtain_breaker_coverage")
-  ) {
-    return {
-      plans: continued.map((plan) =>
-        plan.type === "runner.opportunistic_central_run"
-          ? {
-              ...plan,
-              status: "abandoned",
-              priority: plan.priority - 600,
-              evidence: [...plan.evidence, "central_probe_ttl_expired"],
-            }
-          : plan,
-      ),
-      planProgressionReason: "previous_central_probe_ttl_expired",
-      whyPlanAbandoned:
-        "opportunistic central run was a one-decision probe; returning to blocker plan",
-    };
-  }
   if (previousCentralProbeSatisfied) {
     return {
       plans: continued,

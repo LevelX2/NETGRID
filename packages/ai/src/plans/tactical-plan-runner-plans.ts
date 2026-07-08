@@ -10,6 +10,7 @@ import { accessCommitmentPlanEvidence } from "./tactical-plan-access-commitment"
 import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import { missingBreakerCoverageKind } from "./tactical-plan-breaker-coverage";
 import {
+  breakerCoverageCapability,
   coveragePlanStatusForRequiredCoverage,
   deckCapabilityBlockersForRequiredCoverage,
   deckCapabilityEvidenceForRequiredCoverage,
@@ -240,9 +241,16 @@ export function buildRunnerTacticalPlans(
         planId: `runner.contest_remote:${serverId}`,
         side: "runner",
         type: "runner.contest_remote",
-        priority: 920,
+        status: coveragePlanStatusForRequiredCoverage(
+          context,
+          missingCoverage,
+        ),
+        priority: 940,
         horizonTurns: 2,
         target: { kind: "server", id: serverId },
+        requiredCapabilities: [
+          breakerCoverageCapability(missingCoverage, serverId),
+        ],
         blockers: [
           {
             blockerId: `missing_breaker_coverage:${serverId}`,
@@ -263,59 +271,23 @@ export function buildRunnerTacticalPlans(
           ),
         ],
         currentStep: coverageStep,
-        evidence: [
-          `blocked_remote_run_action:${action.actionId}`,
-          ...deckCapabilityEvidence,
-        ],
-        scoreBreakdown: [
-          {
-            key: "remote_contest_blocked",
-            label: "Remote contest blocked",
-            value: 920,
-            reason: serverId,
-          },
-        ],
-        stateVersion,
-      }),
-    );
-    plans.push(
-      createTacticalPlan({
-        planId: `runner.obtain_breaker_coverage:${serverId}`,
-        side: "runner",
-        type: "runner.obtain_breaker_coverage",
-        status: coveragePlanStatusForRequiredCoverage(context, missingCoverage),
-        priority: 940,
-        horizonTurns: 1,
-        target: { kind: "server", id: serverId },
-        requiredCapabilities: [
-          {
-            capabilityId: `breaker_coverage:${serverId}`,
-            kind: missingCoverage,
-            side: "runner",
-            target: { kind: "server", id: serverId },
-            evidence: [
-              "required to resume blocked remote contest",
-              `server:${serverId}`,
-            ],
-          },
-        ],
-        currentStep: coverageStep,
         nextSteps: [
           createPlanStep({
-            stepId: `runner.contest_remote:${serverId}`,
+            stepId: `run_target:${serverId}`,
             kind: "run_target",
             desiredActionSemantics: ["run.start"],
-            rationale: ["return to the blocked remote after coverage improves"],
+            rationale: ["run the contested remote after coverage improves"],
           }),
         ],
         evidence: [
-          `unblocks_plan:runner.contest_remote:${serverId}`,
+          `blocked_remote_run_action:${action.actionId}`,
+          `target_plan_requires_coverage:${missingCoverage}`,
           ...deckCapabilityEvidence,
         ],
         scoreBreakdown: [
           {
-            key: "unblocks_remote_contest",
-            label: "Unblocks remote contest",
+            key: "remote_contest_requires_coverage",
+            label: "Remote contest requires coverage",
             value: 940,
             reason: serverId,
           },
@@ -539,15 +511,22 @@ export function buildRunnerTacticalPlans(
         missingCoverage,
       );
       const coverageStep = runnerBreakerCoverageStep(context, serverId);
-      const basePriority = serverId === "rd" ? 760 : 740;
+      const basePriority = serverId === "rd" ? 900 : 880;
       plans.push(
         createTacticalPlan({
           planId: `runner.opportunistic_central_run:${serverId}`,
           side: "runner",
           type: "runner.opportunistic_central_run",
+          status: coveragePlanStatusForRequiredCoverage(
+            context,
+            missingCoverage,
+          ),
           priority: basePriority,
           horizonTurns: 1,
           target: { kind: "server", id: serverId },
+          requiredCapabilities: [
+            breakerCoverageCapability(missingCoverage, serverId),
+          ],
           blockers: [
             {
               blockerId: `missing_breaker_coverage:${serverId}`,
@@ -568,65 +547,24 @@ export function buildRunnerTacticalPlans(
             ),
           ],
           currentStep: coverageStep,
-          evidence: [
-            `blocked_central_run_action:${action.actionId}`,
-            ...deckCapabilityEvidence,
-          ],
-          scoreBreakdown: [
-            {
-              key: "central_run_blocked",
-              label: "Central run blocked",
-              value: basePriority,
-              reason: serverId,
-            },
-          ],
-          stateVersion,
-        }),
-      );
-      plans.push(
-        createTacticalPlan({
-          planId: `runner.obtain_breaker_coverage:${serverId}`,
-          side: "runner",
-          type: "runner.obtain_breaker_coverage",
-          status: coveragePlanStatusForRequiredCoverage(
-            context,
-            missingCoverage,
-          ),
-          priority: serverId === "rd" ? 900 : 880,
-          horizonTurns: 1,
-          target: { kind: "server", id: serverId },
-          requiredCapabilities: [
-            {
-              capabilityId: `breaker_coverage:${serverId}`,
-              kind: missingCoverage,
-              side: "runner",
-              target: { kind: "server", id: serverId },
-              evidence: [
-                "required to resume blocked central pressure",
-                `server:${serverId}`,
-              ],
-            },
-          ],
-          currentStep: coverageStep,
           nextSteps: [
             createPlanStep({
-              stepId: `runner.opportunistic_central_run:${serverId}`,
+              stepId: `probe_central:${serverId}`,
               kind: "probe_central",
               desiredActionSemantics: ["run.start"],
-              rationale: [
-                "return to the blocked central after coverage improves",
-              ],
+              rationale: ["run the central server after coverage improves"],
             }),
           ],
           evidence: [
-            `unblocks_plan:runner.opportunistic_central_run:${serverId}`,
+            `blocked_central_run_action:${action.actionId}`,
+            `target_plan_requires_coverage:${missingCoverage}`,
             ...deckCapabilityEvidence,
           ],
           scoreBreakdown: [
             {
-              key: "unblocks_central_pressure",
-              label: "Unblocks central pressure",
-              value: serverId === "rd" ? 900 : 880,
+              key: "central_run_requires_coverage",
+              label: "Central run requires coverage",
+              value: basePriority,
               reason: serverId,
             },
           ],

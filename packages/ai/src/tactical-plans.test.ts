@@ -623,9 +623,7 @@ describe("tactical plan model", () => {
     ];
 
     const plans = buildTacticalPlans({ input });
-    const coveragePlan = plans.find(
-      (plan) => plan.type === "runner.obtain_breaker_coverage",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
 
     expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe("breaker_wall");
     expect(coveragePlan?.currentStep.rationale[0]).toContain("breaker_wall");
@@ -663,9 +661,7 @@ describe("tactical plan model", () => {
     ];
 
     const plans = buildTacticalPlans({ input });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "rd");
 
     expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe(
       "breaker_code_gate",
@@ -727,9 +723,7 @@ describe("tactical plan model", () => {
     });
 
     const plans = buildTacticalPlans({ input, deckCapabilities });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
 
     expect(coveragePlan?.evidence).toEqual(
       expect.arrayContaining([
@@ -781,9 +775,7 @@ describe("tactical plan model", () => {
     const contestPlan = plans.find(
       (plan) => plan.planId === "runner.contest_remote:remote_1",
     );
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
 
     expect(contestPlan?.blockers.map((blocker) => blocker.kind)).toEqual(
       expect.arrayContaining([
@@ -834,9 +826,7 @@ describe("tactical plan model", () => {
     });
 
     const plans = buildTacticalPlans({ input, deckCapabilities });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
 
     expect(coveragePlan?.currentStep.kind).toBe("draw_for_answer");
     expect(coveragePlan?.currentStep.rationale).toEqual(
@@ -886,9 +876,7 @@ describe("tactical plan model", () => {
     ];
 
     const plans = buildTacticalPlans({ input });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
     const mapping = mapPlanStepToLegalActions(
       coveragePlan!,
       coveragePlan!.currentStep,
@@ -933,9 +921,7 @@ describe("tactical plan model", () => {
     ];
 
     const plans = buildTacticalPlans({ input });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
     const mapping = mapPlanStepToLegalActions(
       coveragePlan!,
       coveragePlan!.currentStep,
@@ -1050,9 +1036,7 @@ describe("tactical plan model", () => {
     ];
 
     const plans = buildTacticalPlans({ input });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
     const mapping = mapPlanStepToLegalActions(
       coveragePlan!,
       coveragePlan!.currentStep,
@@ -1079,9 +1063,7 @@ describe("tactical plan model", () => {
     ]);
 
     const plans = buildTacticalPlans({ input });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
     const mapping = mapPlanStepToLegalActions(
       coveragePlan!,
       coveragePlan!.currentStep,
@@ -1141,9 +1123,7 @@ describe("tactical plan model", () => {
     });
 
     const plans = buildTacticalPlans({ input, deckCapabilities });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
     const contestPlan = plans.find(
       (plan) => plan.planId === "runner.contest_remote:remote_1",
     );
@@ -1154,7 +1134,7 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("marks blocked central pressure as needing breaker coverage", () => {
+  it("keeps central pressure as the target plan when breaker coverage is needed", () => {
     const input = aiInput("runner", [
       legalAction("run-rd", "runner", "start_run", {
         serverId: "rd",
@@ -1177,11 +1157,10 @@ describe("tactical plan model", () => {
     const centralPlan = plans.find(
       (plan) => plan.planId === "runner.opportunistic_central_run:rd",
     );
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "rd");
 
-    expect(centralPlan?.status).toBe("blocked");
+    expect(coveragePlan).toBe(centralPlan);
+    expect(centralPlan?.status).toBe("active");
     expect(centralPlan?.blockers[0]).toMatchObject({
       kind: "missing_breaker_coverage",
       target: { kind: "server", id: "rd" },
@@ -1367,9 +1346,7 @@ describe("tactical plan model", () => {
     ];
 
     const plans = buildTacticalPlans({ input });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "rd");
     const centralPlan = plans.find(
       (plan) => plan.planId === "runner.opportunistic_central_run:rd",
     );
@@ -1978,9 +1955,7 @@ describe("tactical plan model", () => {
       input,
       runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
     });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
 
     expect(coveragePlan?.currentStep.kind).toBe("install_breaker");
     expect(
@@ -2047,9 +2022,7 @@ describe("tactical plan model", () => {
       input,
       runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
     });
-    const coveragePlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
-    );
+    const coveragePlan = runnerCoverageTargetPlan(plans, "remote_1");
     if (!coveragePlan) throw new Error("Missing urgent draw coverage plan");
     expect(coveragePlan.currentStep.kind).toBe("draw_for_answer");
     const mapping = mapPlanStepToLegalActions(
@@ -2139,9 +2112,7 @@ describe("tactical plan model", () => {
         candidateForUntargetedAction(install),
       ],
     });
-    const drawPlan = result.planAlternatives.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
-    );
+    const drawPlan = runnerCoverageTargetPlan(result.planAlternatives, "rd");
 
     expect(result.selectedPlan?.type).toBe("runner.play_best_hand_card");
     expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
@@ -2325,9 +2296,7 @@ describe("tactical plan model", () => {
       input,
       runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
     });
-    const drawPlan = plans.find(
-      (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
-    );
+    const drawPlan = runnerCoverageTargetPlan(plans, "rd");
 
     expect(drawPlan?.evidence).toEqual(
       expect.arrayContaining([
@@ -3324,6 +3293,18 @@ function legalAction(
     expiresAtStateVersion: 2,
     ...(Object.keys(payload).length > 0 ? { payload } : {}),
   };
+}
+
+type TestTacticalPlan = ReturnType<typeof buildTacticalPlans>[number];
+
+function runnerCoverageTargetPlan(
+  plans: readonly TestTacticalPlan[],
+  serverId: string,
+): TestTacticalPlan | undefined {
+  const planType = serverId.startsWith("remote_")
+    ? "runner.contest_remote"
+    : "runner.opportunistic_central_run";
+  return plans.find((plan) => plan.planId === `${planType}:${serverId}`);
 }
 
 function coverageSearchPlan(kind: "breaker_wall" | "breaker_code_gate") {
