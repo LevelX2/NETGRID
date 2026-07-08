@@ -1,5 +1,11 @@
-import type { AiDecisionInput, LegalAction, ServerId } from "@netgrid/shared";
+import {
+  DEMO_CARDS_BY_ID,
+  type AiDecisionInput,
+  type LegalAction,
+  type ServerId,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
+import { RUNTIME_CARDS } from "../ai-hints";
 import type {
   RunnerRunTargetEvaluation,
   RunnerRunTargetKind,
@@ -64,10 +70,16 @@ export function createRunnerRunPlanForSelectedAction(params: {
     expectedAccessCount,
     evaluation: matchingTargetEvaluation,
   });
+  const accessReserve = runnerRunAccessReserveForStealOrTrash({
+    input,
+    targetServerId,
+    evaluation: matchingTargetEvaluation,
+  });
   const accessIntent = runnerRunAccessIntentFor({
     targetServerId,
     expectedAccessCount,
     evaluation: matchingTargetEvaluation,
+    reserveForStealOrTrash: accessReserve.reserveForStealOrTrash,
   });
   const now = input.playerView.stateVersion;
   const pathCost = Math.max(0, matchingTargetEvaluation?.pathCost ?? 0);
@@ -111,8 +123,8 @@ export function createRunnerRunPlanForSelectedAction(params: {
       nonNoisyBreakerCredits: 0,
       ...(maxSpendThisRun !== undefined ? { maxSpendThisRun } : {}),
       reservedCreditsAfterRun: 0,
-      reservedCreditsForSteal: accessIntent.reserveForStealOrTrash,
-      reservedCreditsForTrash: accessIntent.reserveForStealOrTrash,
+      reservedCreditsForSteal: accessReserve.reservedCreditsForSteal,
+      reservedCreditsForTrash: accessReserve.reservedCreditsForTrash,
       damageSafetyReserve: {
         minimumGripAfterRun: 0,
         preventionCreditsReserved: 0,
@@ -129,7 +141,7 @@ export function createRunnerRunPlanForSelectedAction(params: {
       minimumCreditsAfterRun: 0,
       minimumGripAfterRun: 0,
       preserveStealOrTrashCredits: accessIntent.reserveForStealOrTrash,
-      evidence: [],
+      evidence: accessReserve.evidence,
     },
     pathQuote: {
       server: targetServerId,
@@ -179,6 +191,7 @@ export function createRunnerRunPlanForSelectedAction(params: {
               `run_target_recommendation:${matchingTargetEvaluation.recommendation}`,
               `run_target_path:${matchingTargetEvaluation.pathPassability}`,
               `run_target_payoff:${matchingTargetEvaluation.accessPayoff}`,
+              `run_target_access_reserve:${accessReserve.reserveForStealOrTrash}`,
             ]
           : ["run_target_evaluation:missing"]),
       ],
@@ -343,6 +356,7 @@ function runnerRunAccessIntentFor(params: {
   targetServerId: RunnerRunPlanServerId;
   expectedAccessCount: number;
   evaluation: RunnerRunTargetEvaluation | undefined;
+  reserveForStealOrTrash: number;
 }): RunnerRunAccessIntent {
   const payoff = params.evaluation?.accessPayoff;
   return {
@@ -358,9 +372,113 @@ function runnerRunAccessIntentFor(params: {
           : payoff === "known_low_value"
             ? "decline_low_value"
             : "trash_if_value_positive",
-    reserveForStealOrTrash:
-      payoff === "trash_affordable" || payoff === "agenda" ? 0 : 0,
+    reserveForStealOrTrash: params.reserveForStealOrTrash,
   };
+}
+
+type RunnerRunAccessReserveQuote = {
+  reserveForStealOrTrash: number;
+  reservedCreditsForSteal: number;
+  reservedCreditsForTrash: number;
+  evidence: string[];
+};
+
+function runnerRunAccessReserveForStealOrTrash(params: {
+  input: AiDecisionInput;
+  targetServerId: RunnerRunPlanServerId;
+  evaluation: RunnerRunTargetEvaluation | undefined;
+}): RunnerRunAccessReserveQuote {
+  const payoff = params.evaluation?.accessPayoff;
+  if (payoff === "trash_affordable" || payoff === "trash_unaffordable") {
+    const trashReserve =
+      evidenceNumberValue(params.evaluation?.evidence, [
+        "known_remote_root_trash_cost",
+        "rnd_known_top_trash_cost",
+        "rnd_known_sequence_trash_cost",
+      ]) ??
+      cheapestKnownRemoteTrashCost(params.input, params.targetServerId) ??
+      0;
+    return {
+      reserveForStealOrTrash: trashReserve,
+      reservedCreditsForSteal: 0,
+      reservedCreditsForTrash: trashReserve,
+      evidence:
+        trashReserve > 0
+          ? [
+              `runner_run_plan_reserve_trash_cost:${trashReserve}`,
+              `runner_run_plan_reserve_payoff:${payoff}`,
+            ]
+          : [`runner_run_plan_reserve_trash_cost:unknown_or_zero`],
+    };
+  }
+
+  if (payoff === "agenda" || payoff === "score_threat") {
+    return {
+      reserveForStealOrTrash: 0,
+      reservedCreditsForSteal: 0,
+      reservedCreditsForTrash: 0,
+      evidence: ["runner_run_plan_reserve_steal_cost:unknown_or_zero"],
+    };
+  }
+
+  return {
+    reserveForStealOrTrash: 0,
+    reservedCreditsForSteal: 0,
+    reservedCreditsForTrash: 0,
+    evidence: [],
+  };
+}
+
+function cheapestKnownRemoteTrashCost(
+  input: AiDecisionInput,
+  targetServerId: RunnerRunPlanServerId,
+): number | undefined {
+  if (!targetServerId.startsWith("remote_")) return undefined;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  const costs = (server?.root ?? [])
+    .filter((card) => card.known !== false)
+    .map((card) => {
+      const type = card.type ?? cardDefinitionType(card.definitionId);
+      if (type !== "asset" && type !== "upgrade") return undefined;
+      return card.trashCost ?? cardDefinitionTrashCost(card.definitionId);
+    })
+    .filter((cost): cost is number => cost !== undefined)
+    .map((cost) => Math.max(0, Math.floor(cost)))
+    .sort((left, right) => left - right);
+  return costs[0];
+}
+
+function evidenceNumberValue(
+  evidence: readonly string[] | undefined,
+  keys: readonly string[],
+): number | undefined {
+  for (const key of keys) {
+    const prefix = `${key}:`;
+    const entry = evidence?.find((candidate) => candidate.startsWith(prefix));
+    if (!entry) continue;
+    const value = Number(entry.slice(prefix.length));
+    if (Number.isFinite(value)) return Math.max(0, Math.floor(value));
+  }
+  return undefined;
+}
+
+function cardDefinitionTrashCost(
+  definitionId: string | undefined,
+): number | undefined {
+  if (!definitionId) return undefined;
+  return (
+    RUNTIME_CARDS[definitionId]?.numeric.trashCost ??
+    DEMO_CARDS_BY_ID[definitionId]?.trashCost
+  );
+}
+
+function cardDefinitionType(definitionId: string | undefined): string | undefined {
+  if (!definitionId) return undefined;
+  return (
+    RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type
+  );
 }
 
 function runnerRunPlanOriginFor(action: LegalAction): RunnerRunPlanOrigin {

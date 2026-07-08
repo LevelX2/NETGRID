@@ -1,5 +1,10 @@
 import { describe, expect, it, beforeEach } from "vitest";
-import type { AiDecisionDebug, AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type {
+  AiDecisionDebug,
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+} from "@netgrid/shared";
 import { chooseSemanticRuntimeAction } from "./semantic-runtime";
 import type { SemanticRuntimeDependencies } from "./semantic-runtime";
 import {
@@ -136,6 +141,52 @@ describe("runner run plan memory", () => {
     expect(plan?.accessIntent?.trashPolicy).toBe("decline_low_value");
   });
 
+  it("reserves known remote trash cost when creating a remote trash run plan", () => {
+    const startRun = action("start_run", { serverId: "remote_1" });
+    const plan = createRunnerRunPlanForSelectedAction({
+      input: runnerInput({
+        activeRun: false,
+        legalActions: [startRun],
+        servers: [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [],
+            root: [
+              {
+                instanceId: "asset-1",
+                known: true,
+                title: "Simple Economy Asset",
+                definitionId: "simple_economy_asset",
+                type: "asset",
+                rezzed: true,
+              },
+            ],
+          },
+        ],
+      }),
+      selectedAction: startRun,
+      runnerRunTargetEvaluations: [
+        runTargetEvaluation(startRun, {
+          targetServerId: "remote_1",
+          targetKind: "remote",
+          accessPayoff: "trash_affordable",
+        }),
+      ],
+    });
+
+    expect(plan?.accessIntent?.reserveForStealOrTrash).toBe(3);
+    expect(plan?.budget.reservedCreditsForSteal).toBe(0);
+    expect(plan?.budget.reservedCreditsForTrash).toBe(3);
+    expect(plan?.reserve.preserveStealOrTrashCredits).toBe(3);
+    expect(plan?.reserve.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_run_plan_reserve_trash_cost:3",
+        "runner_run_plan_reserve_payoff:trash_affordable",
+      ]),
+    );
+  });
+
   it("creates a run plan from a selected card run action with a concrete target evaluation", () => {
     const runEvent = action("play_event", {
       sourceDefinitionId: "simple_run_event",
@@ -256,6 +307,8 @@ function runtimeDependenciesForStartRun(
 function runnerInput(params: {
   activeRun: boolean;
   legalActions?: LegalAction[];
+  credits?: number;
+  servers?: PlayerView["servers"];
 }): AiDecisionInput {
   return {
     side: "runner",
@@ -274,7 +327,7 @@ function runnerInput(params: {
         scoreArea: [],
         rig: [],
         clicks: 3,
-        credits: 5,
+        credits: params.credits ?? 5,
         tags: 0,
         badPublicity: 0,
       },
@@ -289,7 +342,7 @@ function runnerInput(params: {
         tags: 0,
         badPublicity: 0,
       },
-      servers: [],
+      servers: params.servers ?? [],
       ...(params.activeRun
         ? {
             run: {
@@ -429,15 +482,19 @@ function runTargetEvaluation(
   actionValue: LegalAction,
   options: {
     accessPayoff?: RunnerRunTargetEvaluation["accessPayoff"];
+    targetServerId?: string;
+    targetKind?: RunnerRunTargetEvaluation["targetKind"];
   } = {},
 ): RunnerRunTargetEvaluation {
   const accessPayoff = options.accessPayoff ?? "unknown";
+  const targetServerId = options.targetServerId ?? "rd";
+  const targetKind = options.targetKind ?? "rd";
   return {
     schemaVersion: "runner-run-target-evaluation-v1",
-    targetServerId: "rd",
-    targetKind: "rd",
-    accessServerId: "rd",
-    accessTargetKind: "rd",
+    targetServerId,
+    targetKind,
+    accessServerId: targetServerId,
+    accessTargetKind: targetKind,
     actionId: actionValue.actionId,
     accessPayoff,
     knownAccessState:
@@ -470,8 +527,8 @@ function runTargetEvaluation(
     runActionProjection: {
       actionId: actionValue.actionId,
       actionType: actionValue.type,
-      targetServerId: "rd",
-      targetKind: "rd",
+      targetServerId,
+      targetKind,
       sourceKind:
         actionValue.type === "start_run" ? "basic_action" : "event",
       structure:
@@ -488,6 +545,6 @@ function runTargetEvaluation(
     scoreThreat: false,
     recommendation: "run_now",
     score: 100,
-    evidence: ["target:rd"],
+    evidence: [`target:${targetServerId}`],
   };
 }
