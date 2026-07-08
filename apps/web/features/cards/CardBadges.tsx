@@ -62,13 +62,13 @@ export function IceModifierBadges({ badges }: { badges: IceModifierBadgeView[] }
     <span className="iceModifierBadges" aria-hidden="true">
       {badges.map((badge) => (
         <span
-          className="iceModifierBadge"
+          className={`iceModifierBadge${badge.tone ? ` ${badge.tone}` : ""}`}
           key={badge.key}
           data-testid={badge.testId}
           onPointerEnter={(event) => showBadgeTooltip(event.currentTarget, badge)}
           onPointerLeave={() => setTooltipBadge(null)}
         >
-          <SubroutineIcon />
+          {badge.icon === "none" ? null : <SubroutineIcon />}
           <span>{badge.shortLabel}</span>
         </span>
       ))}
@@ -153,13 +153,17 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
     );
   }
   const className =
-    display.displayKind === "shell"
+    display.id === "corporate_retreat_active"
+      ? "agendaActiveCounterBadge"
+      : display.displayKind === "shell"
       ? "shellCounterBadge"
       : display.id === "trace_tag_counter"
         ? "dataRavenCounterBadge"
         : "ablativeCounterBadge";
   const testId =
-    display.displayKind === "shell"
+    display.id === "corporate_retreat_active"
+      ? "corporate-retreat-active-badge"
+      : display.displayKind === "shell"
       ? "shell-counter-badge"
       : display.id === "trace_tag_counter"
         ? "data-raven-counter-badge"
@@ -174,6 +178,7 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
 }
 
 function counterDisplayBadgeText(display: NonNullable<VisibleCard["counterDisplays"]>[number], amount: number): string {
+  if (display.id === "corporate_retreat_active") return "Aktiv";
   if (display.displayKind === "shell") return `${amount} Shell`;
   if (display.id === "trace_tag_counter") return `${amount} Raven`;
   return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;

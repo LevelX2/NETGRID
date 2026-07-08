@@ -21,6 +21,7 @@ export type DisplayVisibleCard = VisibleCard & {
   imageUrl?: string;
   strengthModifier?: number;
   printedStrength?: number | null;
+  printedSubtypes?: string[];
   setId?: string;
   setName?: string;
   collectorNumber?: string;
@@ -54,6 +55,7 @@ export function enrichVisibleCard(card: VisibleCard, detailsById: Record<string,
   };
   if (!detail) return enriched;
   addCatalogSetDisplay(enriched, detail);
+  enriched.printedSubtypes = detail.subtypes.slice();
   const rulesText = visibleKnownCardRulesText({
     catalogText: detail.text,
     visibleRulesText: card.rulesText ?? null,

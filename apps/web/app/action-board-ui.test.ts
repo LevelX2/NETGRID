@@ -78,6 +78,7 @@ import {
   runnerRigMemorySummary,
   serverBoardRows,
   serverCounterChipsForDisplays,
+  variableIceSubtypeBadgeForCard,
   serverDisplayLabel,
   selectedSubtypeDetailLabel,
   selectedTargetDetailLabel,
@@ -465,6 +466,32 @@ describe("V1.0.5 action board UI helpers", () => {
         root: [{ ...tesseract, known: false }],
       }),
     ).toEqual([]);
+  });
+
+  it("marks rezzed variable ICE when the effective subtype differs from the printed subtype", () => {
+    expect(
+      variableIceSubtypeBadgeForCard({
+        ...card("caryatid_1", "Caryatid", "ice", true),
+        subtypes: ["code_gate"],
+        printedSubtypes: ["wall"],
+      }),
+    ).toEqual({
+      key: "variable-subtype-caryatid_1-code_gate",
+      shortLabel: "Code Gate",
+      ariaLabel: "Caryatid ist aktuell als Code Gate gerezzt",
+      tooltip:
+        "Caryatid ist aktuell als Code Gate gerezzt. Gedruckte Subtypen: Wall.",
+      testId: "variable-ice-subtype-badge",
+      icon: "none",
+      tone: "subtype",
+    });
+    expect(
+      variableIceSubtypeBadgeForCard({
+        ...card("caryatid_2", "Caryatid", "ice", true),
+        subtypes: ["wall"],
+        printedSubtypes: ["wall"],
+      }),
+    ).toBeNull();
   });
 
   it("keeps card-sourced gain-credit actions on their specific labels", () => {
@@ -2201,6 +2228,19 @@ describe("V1.0.6 resource and card-display helpers", () => {
       }),
     ).toBe(
       "Ice Transmutation: Das gewählte ICE hat +1 Stärke. Jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
+    );
+    expect(
+      counterDisplayTooltipText({
+        id: "corporate_retreat_active",
+        amount: 1,
+        displayKind: "generic_counter",
+        label: "Noch aktiv",
+        ariaLabel: "1 Corporate Retreat noch aktiv",
+        counterType: "mark",
+        usageHint: "status_marker",
+      }),
+    ).toBe(
+      "Corporate Retreat: Die Agenda-Fähigkeit ist noch aktiv. Die Korp kann für 1 Aktion 2 Credits nehmen. Sobald die Korp eine Karte installiert oder rezzt, erlischt die Fähigkeit und der Marker verschwindet.",
     );
   });
 

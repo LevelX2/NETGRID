@@ -33,6 +33,7 @@ const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   serverDifficultyIncreaseFromRunCounters,
   serverDifficultyReductionFromUpgrades,
 };
+const CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 
 export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
   return visibleKnownCardWithReferenceViewer(state, id, "own");
@@ -449,6 +450,26 @@ function specialCounterDisplays(
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
   const counters = instance.counters ?? {};
+  const markCounterDisplay =
+    definition.id === CORPORATE_RETREAT_ID
+      ? {
+          id: "corporate_retreat_active",
+          displayKind: "generic_counter" as const,
+          label: "Noch aktiv",
+          ariaLabelName: "Corporate Retreat noch aktiv",
+          counterType: "mark" as const,
+          usageHint: "status_marker" as const,
+        }
+      : {
+          id: definition.type === "ice" ? "ice_mark_modifier" : "mark",
+          displayKind: "generic_counter" as const,
+          label:
+            definition.type === "ice" ? "ICE-Mark-Counter" : "Mark-Counter",
+          ariaLabelName:
+            definition.type === "ice" ? "ICE-Mark-Counter" : "Mark-Counter",
+          counterType: "mark" as const,
+          usageHint: "status_marker" as const,
+        };
   return [
     ...singleCounterDisplay(counters.shell, {
       id: "shell",
@@ -556,15 +577,7 @@ function specialCounterDisplays(
       counterType: "breaker_strength_penalty",
       usageHint: "status_marker",
     }),
-    ...singleCounterDisplay(counters.mark, {
-      id: definition.type === "ice" ? "ice_mark_modifier" : "mark",
-      displayKind: "generic_counter",
-      label: definition.type === "ice" ? "ICE-Mark-Counter" : "Mark-Counter",
-      ariaLabelName:
-        definition.type === "ice" ? "ICE-Mark-Counter" : "Mark-Counter",
-      counterType: "mark",
-      usageHint: "status_marker",
-    }),
+    ...singleCounterDisplay(counters.mark, markCounterDisplay),
   ];
 }
 

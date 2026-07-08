@@ -202,6 +202,8 @@ export type IceModifierBadgeView = {
   ariaLabel: string;
   tooltip: string;
   testId: string;
+  icon?: "subroutine" | "none";
+  tone?: "subtype";
 };
 
 export type AdvancementCounterDisplay = {
@@ -240,6 +242,74 @@ function serverHasRezzedTesseractFortConstruction(
       card.rezzed === true &&
       card.definitionId === TESSERACT_FORT_CONSTRUCTION_ID,
   );
+}
+
+export function variableIceSubtypeBadgeForCard(
+  card: Pick<
+    VisibleCard,
+    "instanceId" | "known" | "title" | "type" | "subtypes" | "rezzed"
+  > & { printedSubtypes?: readonly string[] },
+): IceModifierBadgeView | null {
+  if (
+    !card.known ||
+    card.type !== "ice" ||
+    card.rezzed !== true ||
+    !card.printedSubtypes ||
+    !card.subtypes
+  ) {
+    return null;
+  }
+  const printedSubtypes = stableSubtypeList(card.printedSubtypes);
+  const currentSubtypes = stableSubtypeList(card.subtypes);
+  if (
+    printedSubtypes.length === 0 ||
+    currentSubtypes.length === 0 ||
+    printedSubtypes.join(",") === currentSubtypes.join(",")
+  ) {
+    return null;
+  }
+  const currentLabel = currentSubtypes.map(formatSubtypeLabel).join(" / ");
+  const printedLabel = printedSubtypes.map(formatSubtypeLabel).join(" / ");
+  return {
+    key: `variable-subtype-${card.instanceId}-${currentSubtypes.join("-")}`,
+    shortLabel: currentLabel,
+    ariaLabel: `${card.title ?? "ICE"} ist aktuell als ${currentLabel} gerezzt`,
+    tooltip: `${card.title ?? "Dieses ICE"} ist aktuell als ${currentLabel} gerezzt. Gedruckte Subtypen: ${printedLabel}.`,
+    testId: "variable-ice-subtype-badge",
+    icon: "none",
+    tone: "subtype",
+  };
+}
+
+function stableSubtypeList(subtypes: readonly string[]): string[] {
+  return [
+    ...new Set(subtypes.map((subtype) => normalizeSubtypeLabel(subtype))),
+  ].sort();
+}
+
+function normalizeSubtypeLabel(subtype: string): string {
+  return subtype
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function formatSubtypeLabel(subtype: string): string {
+  switch (normalizeSubtypeLabel(subtype)) {
+    case "code_gate":
+      return "Code Gate";
+    case "wall":
+      return "Wall";
+    case "sentry":
+      return "Sentry";
+    default:
+      return subtype
+        .replace(/[_-]+/g, " ")
+        .split(" ")
+        .filter(Boolean)
+        .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+        .join(" ");
+  }
 }
 
 export function storedCreditSourceLabel(
@@ -352,6 +422,8 @@ export function counterDisplayTooltipText(
     case "mark":
       if (display.id === "ice_transmutation")
         return `Ice Transmutation: Das gewählte ICE hat +1 Stärke. Jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.`;
+      if (display.id === "corporate_retreat_active")
+        return "Corporate Retreat: Die Agenda-Fähigkeit ist noch aktiv. Die Korp kann für 1 Aktion 2 Credits nehmen. Sobald die Korp eine Karte installiert oder rezzt, erlischt die Fähigkeit und der Marker verschwindet.";
       return display.ariaLabel;
     case "bad_publicity":
       return `Bad Publicity: Jede Bad Publicity gibt dem Runner zu Beginn eines Runs 1 temporären Credit. Bei 7 Bad Publicity verliert die Korp.`;

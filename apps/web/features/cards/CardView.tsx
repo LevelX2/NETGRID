@@ -19,6 +19,7 @@ import {
   inactiveCardZoneBadgeLabel,
   inactiveCardZoneClassName,
   isConcealedRunnerResourceCard,
+  variableIceSubtypeBadgeForCard,
   type IceModifierBadgeView,
   type InactiveCardZone
 } from "../../app/action-board-ui";
@@ -198,6 +199,10 @@ export function CardView({
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const iceStrength = iceStrengthBadgeValue(card, { preview, forceCardBack: Boolean(forceCardBack) });
+  const variableSubtypeBadge = preview ? null : variableIceSubtypeBadgeForCard(card);
+  const effectiveModifierBadges = variableSubtypeBadge
+    ? [...modifierBadges, variableSubtypeBadge]
+    : modifierBadges;
   const tapped = card.known && card.tapped === true && !preview && !forceCardBack;
   const scoreStateBadges = explicitScoreStateBadges.length > 0 ? explicitScoreStateBadges : showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const renderedCounterDisplays = preview ? [] : counterDisplaysForRendering(card);
@@ -208,7 +213,7 @@ export function CardView({
   const concealedRunnerResourceAriaSuffix = knownConcealedRunnerResource ? "verdeckte Runner-Resource, für die Korp nicht aufgedeckt" : "";
   const cardStateAriaText = [tappedAriaSuffix, concealedRunnerResourceAriaSuffix, iceStrengthAriaSuffix, counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
   const cardStateAria = cardStateAriaText ? `, ${cardStateAriaText}` : "";
-  const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
+  const modifierBadgeAria = effectiveModifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
   const setBadgeLabel = card.known && showSetBadges ? card.setShortLabel : undefined;
   const setBadgeTitle = card.known && showSetBadges ? card.setDetailLabel : undefined;
@@ -531,7 +536,7 @@ export function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${concealedRunnerResourceClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${tapped ? " tappedCard" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${concealedRunnerResourceClass}${archiveFacedownClass}${inactiveZoneClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${tapped ? " tappedCard" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${effectiveModifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -622,7 +627,7 @@ export function CardView({
             Getappt
           </span>
         ) : null}
-        {modifierBadges.length > 0 ? <IceModifierBadges badges={modifierBadges} /> : null}
+        {effectiveModifierBadges.length > 0 ? <IceModifierBadges badges={effectiveModifierBadges} /> : null}
         {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
         {showRulesPreview ? (
           <span className="cardRulesPreview">

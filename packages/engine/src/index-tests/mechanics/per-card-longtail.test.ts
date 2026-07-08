@@ -4569,6 +4569,19 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         action.type === "score_agenda" &&
         sourceDefinition(state, action) === "onr_v1_195_corporate-retreat",
     );
+    const retreatView = getPlayerView(state, "corp").own.scoreArea.find(
+      (visibleCard) =>
+        visibleCard.definitionId === "onr_v1_195_corporate-retreat",
+    );
+    expect(retreatView?.counterDisplays).toContainEqual({
+      id: "corporate_retreat_active",
+      amount: 1,
+      displayKind: "generic_counter",
+      label: "Noch aktiv",
+      ariaLabel: "1 Corporate Retreat noch aktiv",
+      counterType: "mark",
+      usageHint: "status_marker",
+    });
 
     const legal = mustAction(
       state,

@@ -611,6 +611,35 @@ describe("formatChronicleEvent", () => {
     );
   });
 
+  it("describes variable ICE rez subtype and paid cost", () => {
+    const item = formatChronicleEvent(
+      makeEvent("rez_ice", {
+        actor: "corp",
+        label: "Caryatid als code_gate rezzen",
+        cardDefinitionId: "onr_proteus_013_caryatid",
+        title: "Caryatid",
+        cardType: "ice",
+        baseRezCost: 7,
+        rezCostPaid: 8,
+        variableRezKind: "alternate_subtype",
+        variableRezAdditionalCost: 1,
+        selectedSubtypesAfterRez: "code_gate",
+      }),
+      "corp",
+      { cardTitle: "Caryatid", cardType: "ice" },
+    );
+
+    expect(item.title).toBe(
+      "Du hast Caryatid als Code Gate gerezzt. Die Begegnung beginnt.",
+    );
+    expect(item.description).toBe(
+      "Rez-Kosten: 8 Credits, davon 1 Credit über den Basis-Rez-Kosten. Aktiver ICE-Subtyp: Code Gate.",
+    );
+    expect(item.chips).toEqual(
+      expect.arrayContaining(["Rez", "Code Gate", "8 Credits", "Begegnung"]),
+    );
+  });
+
   it("formats hosted Coup agenda credits with the remaining amount", () => {
     const item = formatChronicleEvent(
       makeEvent("activated_card_ability", {

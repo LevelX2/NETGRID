@@ -2320,6 +2320,9 @@ export function formatChronicleEvent(
     case "rez_ice":
       {
         const rezEffect = mergedCardResolverEffect ?? effect;
+        const selectedSubtypes = subtypeLabelListFromPayload(
+          payload.selectedSubtypesAfterRez,
+        );
         category =
           rezEffect.category ??
           (context.cardType === "asset" || context.cardType === "upgrade"
@@ -2339,12 +2342,28 @@ export function formatChronicleEvent(
             "Temporär",
           );
         } else {
+          const paid = numberValue(payload.rezCostPaid);
+          const additionalCost = numberValue(payload.variableRezAdditionalCost);
           title = phrase(
             subject,
-            `${cardTitle ?? "eine Karte"} gerezzt${rezSuffix(context.cardType, rezEffect)}`,
+            `${cardTitle ?? "eine Karte"}${selectedSubtypes ? ` als ${selectedSubtypes}` : ""} gerezzt${rezSuffix(context.cardType, rezEffect)}`,
           );
+          const descriptionParts = [
+            paid !== undefined
+              ? `Rez-Kosten: ${creditText(paid)}${additionalCost && additionalCost > 0 ? `, davon ${creditText(additionalCost)} über den Basis-Rez-Kosten` : ""}.`
+              : undefined,
+            selectedSubtypes
+              ? `Aktiver ICE-Subtyp: ${selectedSubtypes}.`
+              : undefined,
+          ].filter((part): part is string => part !== undefined);
+          if (descriptionParts.length > 0) {
+            description = descriptionParts.join(" ");
+          }
         }
         chips.push("Rez", ...rezEffect.chips);
+        if (selectedSubtypes) chips.push(selectedSubtypes);
+        const paid = numberValue(payload.rezCostPaid);
+        if (paid !== undefined) chips.push(`${paid} ${creditLabel(paid)}`);
         if (context.cardType === "ice" || cardTitle?.includes("ICE"))
           chips.push("Begegnung");
       }
@@ -5257,6 +5276,38 @@ function creditText(amount: number): string {
 
 function creditLabel(amount: number): string {
   return amount === 1 ? "Credit" : "Credits";
+}
+
+function subtypeLabelListFromPayload(value: unknown): string | undefined {
+  const raw = stringValue(value);
+  if (!raw) return undefined;
+  const labels = raw
+    .split(",")
+    .map((subtype) => subtypeLabel(subtype.trim()))
+    .filter(Boolean);
+  return labels.length > 0 ? labels.join(" / ") : undefined;
+}
+
+function subtypeLabel(value: string): string {
+  const normalized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+  switch (normalized) {
+    case "code_gate":
+      return "Code Gate";
+    case "wall":
+      return "Wall";
+    case "sentry":
+      return "Sentry";
+    default:
+      return value
+        .replace(/[_-]+/g, " ")
+        .split(" ")
+        .filter(Boolean)
+        .map((part) => `${part.charAt(0).toUpperCase()}${part.slice(1)}`)
+        .join(" ");
+  }
 }
 
 function socialEngineeringAmountDetail(
