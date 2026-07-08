@@ -14,6 +14,9 @@ import {
 } from "./tactical-plan-run-reachability";
 import { actionServerId } from "./tactical-plan-server-targets";
 import type {
+  PlanBlocker,
+  PlanStep,
+  RequiredCapability,
   TacticalPlan,
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
@@ -29,6 +32,37 @@ export function usefulLegalRunnerHandDevelopment(
 ): boolean {
   if (evaluation.availability !== "legal_now") return false;
   if (!evaluation.legalActionId) return false;
+  if (
+    evaluation.persistentInstallEvaluation &&
+    (evaluation.persistentInstallEvaluation.finalInstallFit <= 0 ||
+      evaluation.persistentInstallEvaluation.duplicateRole ===
+        "redundant_duplicate")
+  ) {
+    return false;
+  }
+  if (
+    evaluation.developmentRole === "duplicate_or_low_value" ||
+    evaluation.developmentRole === "unknown"
+  ) {
+    return false;
+  }
+  if (evaluation.currentNeed === "none" || evaluation.currentNeed === "later") {
+    return false;
+  }
+  if (
+    evaluation.developmentRole === "defense_support" &&
+    evaluation.currentNeed !== "acute"
+  ) {
+    return false;
+  }
+  return evaluation.priority >= 500;
+}
+
+export function usefulFundableRunnerHandDevelopment(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): boolean {
+  if (evaluation.availability !== "missing_credits") return false;
+  if (!evaluation.fundingNeed) return false;
   if (
     evaluation.persistentInstallEvaluation &&
     (evaluation.persistentInstallEvaluation.finalInstallFit <= 0 ||
@@ -100,8 +134,15 @@ export function runnerHandDevelopmentPlans(
   stateVersion: number,
   runnerGoalEvidence: readonly string[],
 ): TacticalPlan[] {
-  const usefulEvaluations = (context.runnerHandDevelopmentEvaluations ?? [])
+  const handEvaluations = context.runnerHandDevelopmentEvaluations ?? [];
+  const usefulEvaluations = handEvaluations
     .filter(usefulLegalRunnerHandDevelopment)
+    .filter(
+      (evaluation) =>
+        !runnerHandDevelopmentOwnedByBreakerCoverage(context, evaluation),
+    );
+  const fundableEvaluations = handEvaluations
+    .filter(usefulFundableRunnerHandDevelopment)
     .filter(
       (evaluation) =>
         !runnerHandDevelopmentOwnedByBreakerCoverage(context, evaluation),
@@ -166,6 +207,16 @@ export function runnerHandDevelopmentPlans(
         }),
       ),
   );
+  plans.push(
+    ...fundableEvaluations.slice(0, 6).map((evaluation) =>
+      runnerHandFundingPlan({
+        context,
+        evaluation,
+        runnerGoalEvidence,
+        stateVersion,
+      }),
+    ),
+  );
   return plans;
 }
 
@@ -181,6 +232,10 @@ function runnerHandDevelopmentPlan(params: {
   extraDesiredSemantics?: readonly string[];
   extraRationale?: readonly string[];
   extraEvidence?: readonly string[];
+  requiredCapabilities?: readonly RequiredCapability[];
+  blockers?: readonly PlanBlocker[];
+  currentStep?: PlanStep;
+  nextSteps?: readonly PlanStep[];
   runnerGoalEvidence: readonly string[];
   stateVersion: number;
 }): TacticalPlan {
@@ -197,39 +252,32 @@ function runnerHandDevelopmentPlan(params: {
       id: evaluation.cardInstanceId,
       label: runnerHandDevelopmentTargetLabel(evaluation),
     },
-    currentStep: createPlanStep({
-      stepId: params.stepId,
-      kind: "install_development_card",
-      desiredActionSemantics: [
-        "install.card",
-        "play.runner_event",
-        `runner_hand_development.${evaluation.developmentRole}`,
-        ...(params.extraDesiredSemantics ?? []),
-      ],
-      rationale: [
-        `hand development role ${evaluation.developmentRole} is ${evaluation.currentNeed}`,
-        `hand development priority ${evaluation.priority}`,
-        ...(params.extraRationale ?? []),
-      ],
-    }),
-    evidence: [
-      `hand_development_role:${evaluation.developmentRole}`,
-      `hand_development_need:${evaluation.currentNeed}`,
-      `hand_development_fit:${evaluation.strategicFit}`,
-      `hand_development_priority:${evaluation.priority}`,
-      ...runnerEconomyRouteDevelopmentEvidence(context, evaluation),
-      ...(evaluation.persistentInstallEvaluation
-        ? [
-            `persistent_install_stackability:${evaluation.persistentInstallEvaluation.stackabilityClass}`,
-            `persistent_install_delta:${evaluation.persistentInstallEvaluation.capabilityDelta}`,
-            `persistent_install_duplicate:${evaluation.persistentInstallEvaluation.duplicateRole}`,
-            `persistent_install_fit:${evaluation.persistentInstallEvaluation.finalInstallFit}`,
-          ]
-        : []),
-      ...(params.extraEvidence ?? []),
-      ...evaluation.evidence.slice(0, 6),
-      ...params.runnerGoalEvidence,
-    ],
+    requiredCapabilities: [...(params.requiredCapabilities ?? [])],
+    blockers: [...(params.blockers ?? [])],
+    currentStep:
+      params.currentStep ??
+      createPlanStep({
+        stepId: params.stepId,
+        kind: "install_development_card",
+        desiredActionSemantics: [
+          "install.card",
+          "play.runner_event",
+          `runner_hand_development.${evaluation.developmentRole}`,
+          ...(params.extraDesiredSemantics ?? []),
+        ],
+        rationale: [
+          `hand development role ${evaluation.developmentRole} is ${evaluation.currentNeed}`,
+          `hand development priority ${evaluation.priority}`,
+          ...(params.extraRationale ?? []),
+        ],
+      }),
+    nextSteps: [...(params.nextSteps ?? [])],
+    evidence: runnerHandDevelopmentPlanEvidence(
+      context,
+      evaluation,
+      params.extraEvidence ?? [],
+      params.runnerGoalEvidence,
+    ),
     scoreBreakdown: [
       {
         key: params.scoreKey,
@@ -240,6 +288,120 @@ function runnerHandDevelopmentPlan(params: {
     ],
     stateVersion: params.stateVersion,
   });
+}
+
+function runnerHandFundingPlan(params: {
+  context: TacticalPlanBuildContext;
+  evaluation: RunnerHandDevelopmentEvaluation;
+  runnerGoalEvidence: readonly string[];
+  stateVersion: number;
+}): TacticalPlan {
+  const { context, evaluation } = params;
+  const fundingNeed = evaluation.fundingNeed;
+  const missingCredits = fundingNeed?.missingCredits ?? 0;
+  const requiredCredits = fundingNeed?.installOrPlayCost ?? 0;
+  const fundingReason = fundingNeed?.reason ?? "unknown";
+  const target = {
+    kind: "card" as const,
+    id: evaluation.cardInstanceId,
+    label: runnerHandDevelopmentTargetLabel(evaluation),
+  };
+  const priority = runnerHandFundingPlanPriority(context, evaluation);
+  return runnerHandDevelopmentPlan({
+    context,
+    evaluation,
+    type: "runner.develop_hand_card",
+    planId: `runner.develop_hand_card:${evaluation.cardInstanceId}`,
+    stepId: `fund_hand_card:${evaluation.cardInstanceId}`,
+    priority,
+    scoreKey: "runner_hand_development_funding",
+    scoreLabel: "Runner hand development funding",
+    requiredCapabilities: [
+      {
+        capabilityId: `credits_for_hand_card:${evaluation.cardInstanceId}`,
+        kind: "credits",
+        side: "runner",
+        target,
+        minimumCredits: requiredCredits,
+        evidence: [
+          `funding_missing_credits:${missingCredits}`,
+          `funding_reason:${fundingReason}`,
+        ],
+      },
+    ],
+    blockers: [
+      {
+        blockerId: `missing_credits:${evaluation.cardInstanceId}`,
+        kind: "missing_credits",
+        severity: "soft",
+        target,
+        removalStepKind: "gain_credits",
+        evidence: [
+          `funding_missing_credits:${missingCredits}`,
+          `funding_required_credits:${requiredCredits}`,
+          `funding_reason:${fundingReason}`,
+        ],
+      },
+    ],
+    currentStep: createPlanStep({
+      stepId: `gain_credits_for_hand_card:${evaluation.cardInstanceId}`,
+      kind: "gain_credits",
+      desiredActionSemantics: ["economy.gain_credit"],
+      rationale: [
+        `fund hand card ${runnerHandDevelopmentTargetLabel(evaluation)}`,
+        `hand development role ${evaluation.developmentRole} is ${evaluation.currentNeed}`,
+        `missing credits ${missingCredits}`,
+      ],
+    }),
+    nextSteps: [
+      createPlanStep({
+        stepId: `install_development_card:${evaluation.cardInstanceId}`,
+        kind: "install_development_card",
+        desiredActionSemantics: [
+          "install.card",
+          "play.runner_event",
+          `runner_hand_development.${evaluation.developmentRole}`,
+        ],
+        rationale: [
+          "install or play the funded hand card after the credit gap closes",
+        ],
+      }),
+    ],
+    extraEvidence: [
+      "hand_card_funding_plan:true",
+      `funding_missing_credits:${missingCredits}`,
+      `funding_required_credits:${requiredCredits}`,
+      `funding_reason:${fundingReason}`,
+    ],
+    runnerGoalEvidence: params.runnerGoalEvidence,
+    stateVersion: params.stateVersion,
+  });
+}
+
+function runnerHandDevelopmentPlanEvidence(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerHandDevelopmentEvaluation,
+  extraEvidence: readonly string[],
+  runnerGoalEvidence: readonly string[],
+): string[] {
+  return [
+    `hand_development_role:${evaluation.developmentRole}`,
+    `hand_development_need:${evaluation.currentNeed}`,
+    `hand_development_fit:${evaluation.strategicFit}`,
+    `hand_development_priority:${evaluation.priority}`,
+    ...runnerEconomyRouteDevelopmentEvidence(context, evaluation),
+    ...(evaluation.persistentInstallEvaluation
+      ? [
+          `persistent_install_stackability:${evaluation.persistentInstallEvaluation.stackabilityClass}`,
+          `persistent_install_delta:${evaluation.persistentInstallEvaluation.capabilityDelta}`,
+          `persistent_install_duplicate:${evaluation.persistentInstallEvaluation.duplicateRole}`,
+          `persistent_install_fit:${evaluation.persistentInstallEvaluation.finalInstallFit}`,
+        ]
+      : []),
+    ...extraEvidence,
+    ...evaluation.evidence.slice(0, 6),
+    ...runnerGoalEvidence,
+  ];
 }
 
 function runnerBestHandCardEvaluation(
@@ -274,19 +436,43 @@ function runnerPlayBestHandCardPlanPriority(
   return Math.max(minimumPriority, Math.min(maximumPriority, planPriority));
 }
 
+function runnerHandFundingPlanPriority(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerHandDevelopmentEvaluation,
+): number {
+  const planPriority = runnerHandDevelopmentPlanPriority(context, evaluation);
+  const missingCredits = evaluation.fundingNeed?.missingCredits ?? 0;
+  const missingCreditDrag = Math.min(80, Math.max(0, missingCredits - 1) * 15);
+  const economyRoute = runnerDevelopmentIsEconomyRoute(evaluation);
+  const creditBase = context.runnerEconomyPosture?.creditBasePlan;
+  const economyFundingBoost =
+    economyRoute && creditBase?.recommendation === "fund_useful_hand_card"
+      ? 50
+      : 0;
+  const minimumPriority = economyRoute
+    ? 780
+    : evaluation.currentNeed === "acute"
+      ? 800
+      : 700;
+  const maximumPriority = economyRoute
+    ? 960
+    : evaluation.currentNeed === "acute"
+      ? 920
+      : 900;
+  return Math.max(
+    minimumPriority,
+    Math.min(
+      maximumPriority,
+      planPriority + economyFundingBoost - missingCreditDrag,
+    ),
+  );
+}
+
 function runnerHandDevelopmentOwnedByBreakerCoverage(
   context: TacticalPlanBuildContext,
   evaluation: RunnerHandDevelopmentEvaluation,
 ): boolean {
   if (evaluation.developmentRole !== "breaker_or_rig_piece") return false;
-  if (!evaluation.legalActionId) return false;
-  const legalAction = context.input.legalActions.find(
-    (action) => action.actionId === evaluation.legalActionId,
-  );
-  if (!legalAction || legalAction.type !== "install_card") return false;
-  if (!runnerLegalActionReferencesCard(legalAction, evaluation.cardInstanceId)) {
-    return false;
-  }
   const handCard = context.input.playerView.own.gripOrHq.find(
     (card) =>
       card.known !== false && card.instanceId === evaluation.cardInstanceId,
@@ -303,20 +489,6 @@ function runnerHandDevelopmentOwnedByBreakerCoverage(
       missingBreakerCoverageKind(context.input.playerView, serverId!),
     );
   });
-}
-
-function runnerLegalActionReferencesCard(
-  action: { source?: string; payload?: Record<string, unknown> },
-  cardId: string,
-): boolean {
-  const payload = action.payload ?? {};
-  return (
-    action.source === cardId ||
-    payload.cardId === cardId ||
-    payload.sourceCardId === cardId ||
-    payload.targetCardId === cardId ||
-    payload.selectedCardId === cardId
-  );
 }
 
 function runnerEconomyRouteDevelopmentScore(

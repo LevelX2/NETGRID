@@ -2127,7 +2127,7 @@ describe("tactical plan model", () => {
     );
   });
 
-  it("prefers credit base when overdraw would risk a useful card blocked by credits", () => {
+  it("funds a useful hand-card plan when that card is blocked by credits", () => {
     const rdRun = legalAction("run-rd", "runner", "start_run", {
       serverId: "rd",
     });
@@ -2190,7 +2190,20 @@ describe("tactical plan model", () => {
       ],
     });
 
-    expect(result.selectedPlan?.type).toBe("runner.build_credit_base");
+    expect(result.selectedPlan).toMatchObject({
+      planId: "runner.develop_hand_card:expensive-economy",
+      type: "runner.develop_hand_card",
+    });
+    expect(result.selectedStep?.kind).toBe("gain_credits");
+    expect(result.selectedPlan?.blockers.map((blocker) => blocker.kind)).toEqual(
+      expect.arrayContaining(["missing_credits"]),
+    );
+    expect(result.selectedPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "hand_card_funding_plan:true",
+        "funding_missing_credits:3",
+      ]),
+    );
     expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
       gain.actionId,
     );
