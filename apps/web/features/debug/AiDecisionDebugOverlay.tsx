@@ -456,13 +456,22 @@ function AiDecisionDebugTraceView({
           metaRows={metaRows}
           selectedScoreRows={scoreRows}
         />
-        <AiDecisionDebugChips
+        <AiDecisionDebugCollapsibleChips
           title="Hinweise"
           items={statusWarnings}
           tone="warning"
+          defaultOpen={false}
         />
-        <AiDecisionDebugChips title="Gründe" items={visibleReasons} />
-        <AiDecisionDebugChips title="Ausschlüsse" items={relevantExclusions} />
+        <AiDecisionDebugCollapsibleChips
+          title="Gründe"
+          items={visibleReasons}
+          defaultOpen={false}
+        />
+        <AiDecisionDebugCollapsibleChips
+          title="Ausschlüsse"
+          items={relevantExclusions}
+          defaultOpen={false}
+        />
       </AiDecisionDebugCollapsibleSection>
       <AiDecisionDebugPlanLayer
         detail={detail}
@@ -476,6 +485,7 @@ function AiDecisionDebugTraceView({
           title={
             mode === "preview" ? "LegalAction-Ebene" : "Action-Level-Ranking"
           }
+          summary={aiDecisionDebugActionLevelSummary(actionRows, mode)}
           defaultOpen
         >
           <div className="aiDecisionDebugActions">
@@ -516,6 +526,7 @@ function AiDecisionDebugTraceView({
       {rankedAlternatives.length > 0 ? (
         <AiDecisionDebugCollapsibleSection
           title="Semantic-Action-Ranking"
+          summary={`${rankedAlternatives.length} Einträge`}
           defaultOpen={false}
         >
           <div className="aiDecisionDebugCompactList">
@@ -771,16 +782,16 @@ function aiDecisionDebugOverviewSummary(
       ? aiDecisionDebugPlanScoreLabel(selectedPlan)
       : undefined;
   const actionScoreLabel = aiDecisionDebugOverlayScoreValue(metaRows);
-  const handLabel = aiDecisionDebugHandSummary(detail);
+  const fallbackActionScore =
+    planScoreLabel === undefined && actionScoreLabel && actionScoreLabel !== "-"
+      ? `${aiDecisionDebugOverlayScoreLabel(metaRows)} ${actionScoreLabel}`
+      : undefined;
   const parts = uniqueDisplayStrings(
     [
       planLabel && planLabel !== "-" ? planLabel : undefined,
       planScoreLabel,
-      actionScoreLabel && actionScoreLabel !== "-"
-        ? `${aiDecisionDebugOverlayScoreLabel(metaRows)} ${actionScoreLabel}`
-        : undefined,
+      fallbackActionScore,
       aiDecisionDebugPlanCandidateSummary(planLayer),
-      handLabel,
     ].filter((part): part is string => Boolean(part)),
   );
   return parts.join(" · ");
@@ -1285,6 +1296,53 @@ function aiDecisionDebugActionTypeLabel(
   return actionType ? (labels[actionType] ?? actionType) : "";
 }
 
+function aiDecisionDebugActionLevelSummary(
+  actionRows: MaintenanceAiTraceActionRow[],
+  mode: "trace" | "preview",
+): string {
+  const selectedAction = actionRows.find((action) => action.selected);
+  return [
+    `${actionRows.length} bewertet`,
+    selectedAction
+      ? `${mode === "preview" ? "geplant" : "ausgeführt"} #${selectedAction.rank}`
+      : undefined,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
+}
+
+function aiDecisionDebugDeckStrategyHeaderSummary(
+  summary: ReturnType<typeof aiDecisionDebugDeckStrategySummary>,
+): string {
+  return [
+    `${summary.rows.length} Werte`,
+    summary.blockers.length > 0
+      ? `${summary.blockers.length} Blocker`
+      : undefined,
+    summary.warnings.length > 0
+      ? `${summary.warnings.length} Warnungen`
+      : undefined,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
+}
+
+function aiDecisionDebugPrivateHandHeaderSummary(
+  privateHand: ReturnType<typeof aiDecisionDebugPrivateHandExport>,
+): string {
+  const handCount =
+    aiDecisionDebugMetaRowValue(privateHand.rows, "Handkarten") ??
+    String(privateHand.cards.length);
+  return [
+    `${handCount} Handkarten`,
+    privateHand.cards.length > 0
+      ? `${privateHand.cards.length} Details`
+      : undefined,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
+}
+
 function AiDecisionDebugDeckStrategy({
   detail,
 }: {
@@ -1300,6 +1358,7 @@ function AiDecisionDebugDeckStrategy({
   return (
     <AiDecisionDebugCollapsibleSection
       title="Deckstrategie"
+      summary={aiDecisionDebugDeckStrategyHeaderSummary(summary)}
       defaultOpen={false}
     >
       <AiDecisionDebugRows rows={summary.rows} />
@@ -1329,6 +1388,7 @@ function AiDecisionDebugPrivateHand({
     return (
       <AiDecisionDebugCollapsibleSection
         title="KI-Privathand"
+        summary={aiDecisionDebugPrivateHandHeaderSummary(privateHand)}
         defaultOpen={false}
       >
         <AiDecisionDebugRows rows={rows} />
@@ -1338,6 +1398,7 @@ function AiDecisionDebugPrivateHand({
   return (
     <AiDecisionDebugCollapsibleSection
       title="KI-Privathand"
+      summary={aiDecisionDebugPrivateHandHeaderSummary(privateHand)}
       defaultOpen={false}
     >
       <AiDecisionDebugRows rows={privateHand.rows} />
@@ -1463,7 +1524,11 @@ function AiDecisionDebugRunPlan({
   const rows = aiDecisionDebugRunPlanRows(items);
   const chips = aiDecisionDebugRunPlanChips(items);
   return (
-    <AiDecisionDebugCollapsibleSection title="Runner-RunPlan" defaultOpen>
+    <AiDecisionDebugCollapsibleSection
+      title="Runner-RunPlan"
+      summary={`${rows.length} Werte · ${chips.length} Signale`}
+      defaultOpen
+    >
       <AiDecisionDebugRows rows={rows} />
       <AiDecisionDebugChips
         title="RunPlan-Signale"
@@ -2410,8 +2475,17 @@ function AiDecisionDebugMemory({
   )
     return null;
   return (
-    <details className="aiDecisionDebugSection aiDecisionMemoryDetails">
-      <summary>KI-Speicher</summary>
+    <AiDecisionDebugCollapsibleSection
+      title="KI-Speicher"
+      summary={aiDecisionDebugMemoryHeaderSummary({
+        rows,
+        facts,
+        hypotheses,
+        uncertainty,
+        invalidations,
+      })}
+      defaultOpen={false}
+    >
       <AiDecisionDebugRows rows={rows} />
       <AiDecisionDebugChips title="Bekannt" items={facts} tone="muted" />
       <AiDecisionDebugChips
@@ -2429,8 +2503,34 @@ function AiDecisionDebugMemory({
         items={invalidations}
         tone="muted"
       />
-    </details>
+    </AiDecisionDebugCollapsibleSection>
   );
+}
+
+function aiDecisionDebugMemoryHeaderSummary({
+  rows,
+  facts,
+  hypotheses,
+  uncertainty,
+  invalidations,
+}: {
+  rows: Array<[string, string]>;
+  facts: string[];
+  hypotheses: string[];
+  uncertainty: string[];
+  invalidations: string[];
+}): string {
+  return [
+    `${rows.length} Werte`,
+    facts.length > 0 ? `${facts.length} bekannt` : undefined,
+    hypotheses.length > 0 ? `${hypotheses.length} Hypothesen` : undefined,
+    uncertainty.length > 0 ? `${uncertainty.length} unsicher` : undefined,
+    invalidations.length > 0
+      ? `${invalidations.length} Invalidierungen`
+      : undefined,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(" · ");
 }
 
 function aiDecisionDebugMemoryRows(

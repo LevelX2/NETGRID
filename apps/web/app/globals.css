@@ -10848,35 +10848,128 @@ select,
   padding: 2px 0 0;
 }
 
+.aiDecisionDebugCollapsible .aiDecisionDebugCollapsible {
+  margin-left: 10px;
+  padding: 6px 0 0 9px;
+  border-left: 2px solid color-mix(in srgb, var(--runner), var(--line) 40%);
+}
+
+.aiDecisionDebugCollapsible .aiDecisionDebugCollapsible .aiDecisionDebugCollapsible {
+  margin-left: 8px;
+  border-left-color: color-mix(in srgb, var(--cue), var(--line) 45%);
+}
+
+.aiDecisionDebugActionDetails {
+  margin-left: 8px;
+  padding-left: 8px;
+  border-left: 2px solid color-mix(in srgb, var(--cue), var(--line) 50%);
+}
+
 .aiDecisionDebugCollapsible > summary,
-.aiDecisionMemoryDetails > summary,
-.aiDecisionDebugActionDetails > summary {
+.aiDecisionDebugActionDetails > summary,
+.aiDecisionDebugPlanFocusCard > summary,
+.aiDecisionDebugPlanActions > summary {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  list-style: none;
   cursor: pointer;
   color: var(--text);
   font-weight: 800;
 }
 
-.aiDecisionDebugCollapsible > summary {
-  display: list-item;
+.aiDecisionDebugCollapsible > summary::-webkit-details-marker,
+.aiDecisionDebugActionDetails > summary::-webkit-details-marker,
+.aiDecisionDebugPlanFocusCard > summary::-webkit-details-marker,
+.aiDecisionDebugPlanActions > summary::-webkit-details-marker {
+  display: none;
+}
+
+.aiDecisionDebugCollapsible > summary::before,
+.aiDecisionDebugActionDetails > summary::before,
+.aiDecisionDebugPlanFocusCard > summary::before,
+.aiDecisionDebugPlanActions > summary::before {
+  content: "";
+  width: 0;
+  height: 0;
+  flex: 0 0 auto;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  border-left: 5px solid var(--runner);
+  transform: translateY(-1px);
+  transform-origin: center;
+}
+
+.aiDecisionDebugCollapsible .aiDecisionDebugCollapsible > summary::before,
+.aiDecisionDebugActionDetails > summary::before {
+  border-left-color: var(--cue);
+}
+
+.aiDecisionDebugCollapsible .aiDecisionDebugCollapsible .aiDecisionDebugCollapsible > summary::before {
+  border-left-color: var(--corp);
+}
+
+.aiDecisionDebugCollapsible[open] > summary::before,
+.aiDecisionDebugActionDetails[open] > summary::before,
+.aiDecisionDebugPlanFocusCard[open] > summary::before,
+.aiDecisionDebugPlanActions[open] > summary::before {
+  transform: translateY(-1px) rotate(90deg);
+}
+
+.aiDecisionDebugCollapsible > summary strong,
+.aiDecisionDebugActionDetails > summary strong,
+.aiDecisionDebugPlanFocusCard > summary strong,
+.aiDecisionDebugPlanActions > summary strong {
   min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aiDecisionDebugContent > .aiDecisionDebugCollapsible > summary {
+  flex-wrap: wrap;
+  align-items: flex-start;
+  row-gap: 2px;
+}
+
+.aiDecisionDebugContent > .aiDecisionDebugCollapsible > summary strong,
+.aiDecisionDebugContent > .aiDecisionDebugCollapsible > summary .aiDecisionDebugSectionSummary {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.aiDecisionDebugContent > .aiDecisionDebugCollapsible > summary .aiDecisionDebugSectionSummary {
+  flex: 1 1 170px;
+}
+
+.aiDecisionDebugCollapsible .aiDecisionDebugCollapsible > summary strong,
+.aiDecisionDebugPlanFocus > details > summary strong {
+  color: color-mix(in srgb, var(--text), var(--runner) 22%);
+}
+
+.aiDecisionDebugCollapsible .aiDecisionDebugCollapsible .aiDecisionDebugCollapsible > summary strong,
+.aiDecisionDebugActionDetails > summary strong {
+  color: color-mix(in srgb, var(--text), var(--cue) 28%);
 }
 
 .aiDecisionDebugSectionSummary {
-  margin-left: 6px;
+  min-width: 0;
+  flex: 1 1 auto;
+  margin-left: 0;
   color: var(--muted);
   font-size: 11px;
   font-weight: 600;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .aiDecisionDebugCollapsible[open] > summary {
   margin-bottom: 2px;
-}
-
-.aiDecisionDebugCollapsible > summary::marker,
-.aiDecisionMemoryDetails > summary::marker,
-.aiDecisionDebugActionDetails > summary::marker {
-  color: var(--runner);
 }
 
 .aiDecisionDebugSection.warning .aiDecisionDebugChipRow span {
@@ -10913,6 +11006,9 @@ select,
   min-width: 0;
   display: grid;
   gap: 8px;
+  margin-left: 10px;
+  padding-left: 9px;
+  border-left: 2px solid color-mix(in srgb, var(--runner), var(--line) 40%);
 }
 
 .aiDecisionDebugPlanFocusCard {
@@ -10928,22 +11024,18 @@ select,
 .aiDecisionDebugPlanFocusCard > summary,
 .aiDecisionDebugPlanActionsTitle {
   min-width: 0;
-  display: grid;
-  gap: 2px;
-  cursor: pointer;
 }
 
 .aiDecisionDebugPlanFocusCard > summary span,
 .aiDecisionDebugPlanActionsTitle span,
 .aiDecisionDebugPlanFocusEmpty {
+  min-width: 0;
+  flex: 1 1 auto;
   margin: 0;
   color: var(--muted);
-  overflow-wrap: anywhere;
-}
-
-.aiDecisionDebugPlanFocusCard > summary::marker,
-.aiDecisionDebugPlanActions > summary::marker {
-  color: var(--runner);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .aiDecisionDebugPlanActions {
