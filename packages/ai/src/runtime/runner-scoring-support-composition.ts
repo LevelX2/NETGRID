@@ -1,17 +1,9 @@
-import {
-  createRunnerBadPublicityRelevanceContext,
-} from "./runner-bad-publicity-relevance-context";
-import {
-  createRunnerCentralMemoryContext,
-} from "./runner-central-memory-context";
-import {
-  createRunnerRecentHistoryContext,
-} from "./runner-recent-history-context";
+import { createRunnerBadPublicityRelevanceContext } from "./runner-bad-publicity-relevance-context";
+import { createRunnerCentralMemoryContext } from "./runner-central-memory-context";
+import { createRunnerRecentHistoryContext } from "./runner-recent-history-context";
 import { createRunnerRecoveryContext } from "./runner-recovery-context";
 import { createRunnerRunComponentsContext } from "./runner-run-components-context";
-import {
-  createRunnerRunTargetGuidanceContext,
-} from "./runner-run-target-guidance-context";
+import { createRunnerRunTargetGuidanceContext } from "./runner-run-target-guidance-context";
 import {
   createRunnerScoreComponentsContext,
   type RunnerScoreComponentsDependencies,
@@ -19,7 +11,11 @@ import {
 import type { AiDecisionInput } from "@netgrid/shared";
 import { reconstructBeliefState } from "../belief-state";
 import type { RunnerPressureReadyForMetrics } from "../simulation/runner-pressure-metric-types";
-import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  runnerRunPathCreditBudgetWithVisiblePools,
+  type RunnerRunPathCreditBudget,
+  type assessKnownRezzedIcePath,
+} from "../visible-run-analysis";
 import { demoCardRulesTextForAi } from "./card-definition-lookup";
 import { stringRecordValue } from "./record-value";
 
@@ -31,79 +27,74 @@ type RunnerScoringKnownPathAssessment = ReturnType<
   typeof assessKnownRezzedIcePath
 >;
 
-export type RunnerScoringSupportCompositionDependencies =
-  Parameters<typeof createRunnerRunTargetGuidanceContext>[0] &
-    Omit<
-      Parameters<typeof createRunnerCentralMemoryContext>[0],
-      "rndTopFreshness" | "hqHandMemory"
-    > &
-    Omit<
-      Parameters<typeof createRunnerRecentHistoryContext>[0],
-      "pressureReadyTargets"
-    > &
-    Omit<
-      Parameters<typeof createRunnerRunComponentsContext>[0],
-      | "recentStartRunsOnServer"
-      | "candidateMemory"
-      | "knownIcePathAssessment"
-    > &
-    Omit<
-      Parameters<typeof createRunnerRecoveryContext>[0],
-      "recentBasicCreditActions" | "safeProgressTargets"
-    > &
-    Omit<
-      RunnerScoreComponentsDependencies,
-      "creditYield" | "recoveryCommitment" | "install" | "startRun" | "followup"
-    > & {
-      badPublicityRelevance: Omit<
-        Parameters<typeof createRunnerBadPublicityRelevanceContext>[0],
-        "cardSupport"
-      >;
-      hintForDefinitionId: (
-        definitionId: string,
-      ) => RunnerScoringSupportHint | undefined;
-      assessRunnerPressureReadyForMetrics: (
-        input: AiDecisionInput,
-      ) => RunnerPressureReadyForMetrics;
-      assessKnownRezzedIcePath: (
-        iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
-        rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-        runnerCredits: number,
-        rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
-      ) => RunnerScoringKnownPathAssessment;
-      recoveryCommitment: Omit<
-        RunnerScoreComponentsDependencies["recoveryCommitment"],
-        | "blinkRecoveryScoreComponent"
-        | "junkyardRecoveryScoreComponent"
-        | "lowValueRecoveryRepeatScoreComponent"
-        | "lateNoFundingCreditRepeatScoreComponent"
-      >;
-      install: Omit<
-        RunnerScoreComponentsDependencies["install"],
-        "sourceCard"
-      >;
-      startRun: Omit<
-        RunnerScoreComponentsDependencies["startRun"],
-        | "hqMemoryComponents"
-        | "rndMemoryComponents"
-        | "archivesComponents"
-        | "remoteComponents"
-        | "knownIcePathComponents"
-        | "repeatedRunTargetComponents"
-      >;
-    };
+export type RunnerScoringSupportCompositionDependencies = Parameters<
+  typeof createRunnerRunTargetGuidanceContext
+>[0] &
+  Omit<
+    Parameters<typeof createRunnerCentralMemoryContext>[0],
+    "rndTopFreshness" | "hqHandMemory"
+  > &
+  Omit<
+    Parameters<typeof createRunnerRecentHistoryContext>[0],
+    "pressureReadyTargets"
+  > &
+  Omit<
+    Parameters<typeof createRunnerRunComponentsContext>[0],
+    "recentStartRunsOnServer" | "candidateMemory" | "knownIcePathAssessment"
+  > &
+  Omit<
+    Parameters<typeof createRunnerRecoveryContext>[0],
+    "recentBasicCreditActions" | "safeProgressTargets"
+  > &
+  Omit<
+    RunnerScoreComponentsDependencies,
+    "creditYield" | "recoveryCommitment" | "install" | "startRun" | "followup"
+  > & {
+    badPublicityRelevance: Omit<
+      Parameters<typeof createRunnerBadPublicityRelevanceContext>[0],
+      "cardSupport"
+    >;
+    hintForDefinitionId: (
+      definitionId: string,
+    ) => RunnerScoringSupportHint | undefined;
+    assessRunnerPressureReadyForMetrics: (
+      input: AiDecisionInput,
+    ) => RunnerPressureReadyForMetrics;
+    assessKnownRezzedIcePath: (
+      iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
+      rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
+      runnerCredits: number | RunnerRunPathCreditBudget,
+      rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
+    ) => RunnerScoringKnownPathAssessment;
+    recoveryCommitment: Omit<
+      RunnerScoreComponentsDependencies["recoveryCommitment"],
+      | "blinkRecoveryScoreComponent"
+      | "junkyardRecoveryScoreComponent"
+      | "lowValueRecoveryRepeatScoreComponent"
+      | "lateNoFundingCreditRepeatScoreComponent"
+    >;
+    install: Omit<RunnerScoreComponentsDependencies["install"], "sourceCard">;
+    startRun: Omit<
+      RunnerScoreComponentsDependencies["startRun"],
+      | "hqMemoryComponents"
+      | "rndMemoryComponents"
+      | "archivesComponents"
+      | "remoteComponents"
+      | "knownIcePathComponents"
+      | "repeatedRunTargetComponents"
+    >;
+  };
 
 export function createRunnerScoringSupportComposition(
   dependencies: RunnerScoringSupportCompositionDependencies,
 ) {
-  const {
-    semanticRuntimeRunnerRunTargetGuidanceComponent,
-  } = createRunnerRunTargetGuidanceContext({
-    evaluationForAction: dependencies.evaluationForAction,
-    guidanceValue: dependencies.guidanceValue,
-    isRemoteServerTarget: dependencies.isRemoteServerTarget,
-    remoteRootTrashCost: dependencies.remoteRootTrashCost,
-  });
+  const { semanticRuntimeRunnerRunTargetGuidanceComponent } =
+    createRunnerRunTargetGuidanceContext({
+      evaluationForAction: dependencies.evaluationForAction,
+      guidanceValue: dependencies.guidanceValue,
+      isRemoteServerTarget: dependencies.isRemoteServerTarget,
+      remoteRootTrashCost: dependencies.remoteRootTrashCost,
+    });
 
   const {
     semanticRuntimeRunnerRndMemoryComponents,
@@ -111,8 +102,7 @@ export function createRunnerScoringSupportComposition(
   } = createRunnerCentralMemoryContext({
     rndTopFreshness: (input) =>
       reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness,
-    staleKnownRndRepeatRunPenalty:
-      dependencies.staleKnownRndRepeatRunPenalty,
+    staleKnownRndRepeatRunPenalty: dependencies.staleKnownRndRepeatRunPenalty,
     rndFreshRepeatRunBoost: dependencies.rndFreshRepeatRunBoost,
     hqHandMemory: (input) =>
       reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory,
@@ -147,7 +137,10 @@ export function createRunnerScoringSupportComposition(
       dependencies.assessKnownRezzedIcePath(
         server.ice,
         input.playerView.own.rig ?? [],
-        input.playerView.own.credits,
+        runnerRunPathCreditBudgetWithVisiblePools(
+          input.playerView.own.credits,
+          input.playerView.own.rig ?? [],
+        ),
         server.root,
       ),
     rootTrashCost: dependencies.rootTrashCost,
@@ -194,23 +187,22 @@ export function createRunnerScoringSupportComposition(
       dependencies.junkyardBbsReturnTopHeapAbility,
   });
 
-  const {
-    runnerBadPublicityRelevanceScoreComponent,
-  } = createRunnerBadPublicityRelevanceContext({
-    ...dependencies.badPublicityRelevance,
-    cardSupport: {
-      rolesForCardId: (definitionId) => [
-        ...dependencies.rolesForCardId(definitionId),
-      ],
-      hintEffectsForCard: (definitionId: string) =>
-        dependencies.hintForDefinitionId(definitionId)?.effects,
-      rulesTextForCard: demoCardRulesTextForAi,
-      effectTarget: (effect: unknown) =>
-        effect && typeof effect === "object"
-          ? stringRecordValue(effect as Record<string, unknown>, "target")
-          : undefined,
-    },
-  });
+  const { runnerBadPublicityRelevanceScoreComponent } =
+    createRunnerBadPublicityRelevanceContext({
+      ...dependencies.badPublicityRelevance,
+      cardSupport: {
+        rolesForCardId: (definitionId) => [
+          ...dependencies.rolesForCardId(definitionId),
+        ],
+        hintEffectsForCard: (definitionId: string) =>
+          dependencies.hintForDefinitionId(definitionId)?.effects,
+        rulesTextForCard: demoCardRulesTextForAi,
+        effectTarget: (effect: unknown) =>
+          effect && typeof effect === "object"
+            ? stringRecordValue(effect as Record<string, unknown>, "target")
+            : undefined,
+      },
+    });
 
   return createRunnerScoreComponentsContext({
     loanLiabilityAssessment: dependencies.loanLiabilityAssessment,

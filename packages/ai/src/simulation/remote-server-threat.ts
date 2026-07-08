@@ -5,7 +5,11 @@ import {
 } from "./card-metric-lookup";
 import { remoteTrashRoleForVisibleCard } from "./remote-trash-role";
 import { isRemoteServerTarget } from "../runtime/server-target";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerKnownPathAssessmentIsCostNoAccess,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 import { actionCreditCost } from "../runtime/action-cost";
 
 export type RunnerRemoteThreatProfile = {
@@ -112,11 +116,13 @@ export function runnerRemoteThreatProfile(
   const assessment = assessKnownRezzedIcePath(
     server?.ice ?? [],
     input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     server?.root ?? [],
   );
-  const visibleBreakCost = assessment.visibleBreakCost ?? 0;
-  const creditsAfterPath = input.playerView.own.credits - visibleBreakCost;
+  const creditsAfterPath = assessment.creditsAfterPath;
   const postRunReserveTarget = runnerPostRunReserveTargetForRemoteInput(
     input,
     serverId,
@@ -126,7 +132,8 @@ export function runnerRemoteThreatProfile(
     input,
     serverId,
   );
-  const blockedByKnownIceCost = visibleBreakCost > input.playerView.own.credits;
+  const blockedByKnownIceCost =
+    assessment.blocked && runnerKnownPathAssessmentIsCostNoAccess(assessment);
   const blockedByBreakerCoverage =
     assessment.blocked === true && !blockedByKnownIceCost;
   const blockedByPostRunReserve =
@@ -306,29 +313,27 @@ export function runnerRemoteThreatTargetingDiagnosticsForAction(
   };
 }
 
-export function createRunnerRemoteThreatTargetingDiagnosticsForAction(
-  dependencies: {
-    runnerRemoteThreatProfile: (
-      input: AiDecisionInput,
-      serverId: string,
-    ) => RunnerRemoteThreatProfile;
-    runnerCentralRunHasClearPressureJustification: (
-      input: AiDecisionInput,
-      targetServerId: string,
-      contestableRemoteThreatVisible: boolean,
-    ) => boolean;
-    runnerCentralRunPressureJustificationReasons: (
-      input: AiDecisionInput,
-      targetServerId: string,
-      contestableRemoteThreatVisible: boolean,
-    ) => string[];
-    runnerCentralRunBurnsRemoteContestReserve: (
-      input: AiDecisionInput,
-      targetServerId: string,
-      contestableProfiles: RunnerRemoteThreatProfile[],
-    ) => boolean;
-  },
-): (
+export function createRunnerRemoteThreatTargetingDiagnosticsForAction(dependencies: {
+  runnerRemoteThreatProfile: (
+    input: AiDecisionInput,
+    serverId: string,
+  ) => RunnerRemoteThreatProfile;
+  runnerCentralRunHasClearPressureJustification: (
+    input: AiDecisionInput,
+    targetServerId: string,
+    contestableRemoteThreatVisible: boolean,
+  ) => boolean;
+  runnerCentralRunPressureJustificationReasons: (
+    input: AiDecisionInput,
+    targetServerId: string,
+    contestableRemoteThreatVisible: boolean,
+  ) => string[];
+  runnerCentralRunBurnsRemoteContestReserve: (
+    input: AiDecisionInput,
+    targetServerId: string,
+    contestableProfiles: RunnerRemoteThreatProfile[],
+  ) => boolean;
+}): (
   input: AiDecisionInput,
   action: LegalAction,
   targetServerId: string | undefined,
@@ -359,23 +364,24 @@ export function runnerContestBlockedByCredits(
       (candidate) => candidate.id === action.payload?.serverId,
     );
     if (!server) return false;
-    const path =
-      assessKnownRezzedIcePath(
-        server.ice,
-        input.playerView.own.rig ?? [],
+    const assessment = assessKnownRezzedIcePath(
+      server.ice,
+      input.playerView.own.rig ?? [],
+      runnerRunPathCreditBudgetWithVisiblePools(
         input.playerView.own.credits,
-        server.root,
-      ).visibleBreakCost ?? 0;
+        input.playerView.own.rig ?? [],
+      ),
+      server.root,
+    );
     return (
-      input.playerView.own.credits < path ||
-      input.playerView.own.credits - path < Math.min(3, reserveTarget - 2)
+      (assessment.blocked &&
+        runnerKnownPathAssessmentIsCostNoAccess(assessment)) ||
+      assessment.creditsAfterPath < Math.min(3, reserveTarget - 2)
     );
   });
 }
 
-export function runnerTrashBlockedByCredits(
-  input: AiDecisionInput,
-): boolean {
+export function runnerTrashBlockedByCredits(input: AiDecisionInput): boolean {
   const run = input.playerView.run;
   const accessed = run?.accessedCard;
   if (!run || !isRemoteServerTarget(run.attackedServerId) || !accessed?.known)

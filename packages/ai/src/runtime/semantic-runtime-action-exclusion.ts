@@ -1,6 +1,9 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 import type { SemanticRuntimeExclusion } from "./semantic-runtime-types";
 
@@ -99,21 +102,20 @@ export function semanticRuntimeActionExclusion(
     action,
   );
   if (multiRunEventExclusion) return multiRunEventExclusion;
-  const runTargetEvaluation =
-    dependencies.runnerRunTargetEvaluationForAction(input, action);
+  const runTargetEvaluation = dependencies.runnerRunTargetEvaluationForAction(
+    input,
+    action,
+  );
   const serverId =
     runTargetEvaluation?.targetServerId ?? semanticRuntimeServerId(action);
   const accessServerId = runTargetEvaluation?.accessServerId ?? serverId;
-  if (
-    input.side !== "runner" ||
-    !serverId ||
-    !accessServerId
-  )
-    return undefined;
+  if (input.side !== "runner" || !serverId || !accessServerId) return undefined;
   const blinkRunExclusion = dependencies.runnerBlinkRunExclusion(input, action);
   if (blinkRunExclusion) return blinkRunExclusion;
-  const knownCentralPayoffExclusion =
-    dependencies.knownCentralPayoffExclusion(input, accessServerId);
+  const knownCentralPayoffExclusion = dependencies.knownCentralPayoffExclusion(
+    input,
+    accessServerId,
+  );
   if (knownCentralPayoffExclusion) return knownCentralPayoffExclusion;
   const server = input.playerView.servers.find(
     (entry) => entry.id === serverId,
@@ -135,7 +137,10 @@ export function semanticRuntimeActionExclusion(
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     server.root,
   );
   if (assessment.assessedKnownIceCount <= 0 || assessment.canReachAccess)

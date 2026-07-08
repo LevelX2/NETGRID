@@ -1,5 +1,8 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 import { semanticRuntimeChoiceWithEvidence } from "./semantic-runtime-score-components";
 import { semanticRuntimeServerId } from "./semantic-runtime-scope";
 import { sortSemanticRuntimeChoices } from "./semantic-runtime-choice-builder";
@@ -148,7 +151,10 @@ export function runnerRunActionSpendingCapAssessment(
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     server.root,
   );
   const visibleBreakCost = assessment.visibleBreakCost ?? 0;

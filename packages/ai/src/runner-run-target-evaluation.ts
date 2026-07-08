@@ -22,6 +22,7 @@ import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development"
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import {
   assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
   type VisibleIceRunHazard,
 } from "./visible-run-analysis";
 import { buildRunnerEconomyPosture } from "./runner-economy-posture";
@@ -378,7 +379,10 @@ function evaluateRunnerRunTarget(
   const path = assessKnownRezzedIcePath(
     server?.ice ?? [],
     params.input.playerView.own.rig ?? [],
-    params.input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      params.input.playerView.own.credits,
+      params.input.playerView.own.rig ?? [],
+    ),
     server?.root ?? [],
     params.input.playerView.opponent.credits,
   );
@@ -649,7 +653,9 @@ function projectionHasAccessSignal(
   if (kind === "hq_info") {
     return (
       targetKind === "hq" &&
-      signals.some((signal) => projectionSignalHasPhrase(signal, ["hq", "info"]))
+      signals.some((signal) =>
+        projectionSignalHasPhrase(signal, ["hq", "info"]),
+      )
     );
   }
   if (kind === "topdeck_info") {
@@ -679,9 +685,12 @@ function projectionSignalHasPhrase(
   phrase: readonly string[],
 ): boolean {
   const tokens = projectionSignalTokens(signal);
-  return tokens.some((entry, index) =>
-    entry === phrase[0] &&
-    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+  return tokens.some(
+    (entry, index) =>
+      entry === phrase[0] &&
+      phrase.every(
+        (phraseToken, offset) => tokens[index + offset] === phraseToken,
+      ),
   );
 }
 
@@ -1489,12 +1498,10 @@ function hasRiskyUniversalPressure(
   const riskProfile = new Set(params.strategicIntent?.riskProfile ?? []);
   return (
     riskProfile.has("runner.risky_universal_breaker_pressure") ||
-    (params.deckCapabilities?.runner?.breakerInventory.some(
-      (breaker) => {
-        const coverage = new Set(breaker.coverage);
-        return coverage.has("universal") && breaker.risks.length > 0;
-      },
-    ) ??
+    (params.deckCapabilities?.runner?.breakerInventory.some((breaker) => {
+      const coverage = new Set(breaker.coverage);
+      return coverage.has("universal") && breaker.risks.length > 0;
+    }) ??
       false)
   );
 }

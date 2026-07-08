@@ -2,6 +2,7 @@ import {
   DEMO_CARDS_BY_ID,
   type CardDefinition,
   type CardDefinitionId,
+  type CounterCreditUse,
   type PublicGameEvent,
   type TraceSuccessEffect,
   type VisibleCard,
@@ -40,8 +41,24 @@ type HardUnbrokenRunEffectKind =
 type BreakAssessment = {
   cost: number;
   breakerInstanceId: string;
+  breakerDefinitionId: string;
+  breakerSubtypes: string[];
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
+};
+export type RunnerRunPathCreditBudget = {
+  credits: number;
+  icebreakerCredits?: number;
+  nonNoisyIcebreakerCredits?: number;
+  killerCredits?: number;
+};
+type RunnerRunPathCreditBudgetInput = number | RunnerRunPathCreditBudget;
+type MutableRunnerRunPathCreditBudget = Required<RunnerRunPathCreditBudget>;
+type CreditPaymentProjection = {
+  affordable: boolean;
+  cost: number;
+  cashSpent: number;
+  creditsAfterPath: number;
 };
 type BreakSubroutineAbilityLike = {
   cost: { credits?: number };
@@ -175,10 +192,204 @@ export function serverIdFromEvent(event: PublicGameEvent): string | undefined {
   return undefined;
 }
 
+export function runnerRunPathCreditBudgetWithVisiblePools(
+  credits: number,
+  rigCards: readonly VisibleCard[],
+): RunnerRunPathCreditBudget {
+  const rigBudget = visibleRunnerRunPathCreditBudgetForRig(rigCards);
+  return {
+    credits: normalizeCreditAmount(credits),
+    ...(rigBudget.icebreakerCredits > 0
+      ? { icebreakerCredits: rigBudget.icebreakerCredits }
+      : {}),
+    ...(rigBudget.nonNoisyIcebreakerCredits > 0
+      ? { nonNoisyIcebreakerCredits: rigBudget.nonNoisyIcebreakerCredits }
+      : {}),
+    ...(rigBudget.killerCredits > 0
+      ? { killerCredits: rigBudget.killerCredits }
+      : {}),
+  };
+}
+
+export function visibleRunnerRunPathCreditBudgetForRig(
+  rigCards: readonly VisibleCard[],
+): Omit<Required<RunnerRunPathCreditBudget>, "credits"> {
+  const budget = {
+    icebreakerCredits: 0,
+    nonNoisyIcebreakerCredits: 0,
+    killerCredits: 0,
+  };
+  for (const card of rigCards) {
+    if (card.known === false) continue;
+    for (const display of card.counterDisplays ?? []) {
+      const amount = normalizeCreditAmount(display.amount);
+      if (amount <= 0) continue;
+      const use = runPathCreditPoolUse(display.creditPool?.uses ?? []);
+      if (use) budget[use] += amount;
+    }
+  }
+  return budget;
+}
+
+function runPathCreditPoolUse(
+  uses: readonly CounterCreditUse[],
+): keyof Omit<Required<RunnerRunPathCreditBudget>, "credits"> | undefined {
+  if (uses.includes("using_icebreaker_during_run")) {
+    return "icebreakerCredits";
+  }
+  if (uses.includes("using_icebreaker_during_run_non_noisy")) {
+    return "nonNoisyIcebreakerCredits";
+  }
+  if (uses.includes("using_killer_during_run")) return "killerCredits";
+  return undefined;
+}
+
+function normalizeRunnerRunPathCreditBudget(
+  budget: RunnerRunPathCreditBudgetInput,
+): MutableRunnerRunPathCreditBudget {
+  if (typeof budget === "number") {
+    return {
+      credits: normalizeCreditAmount(budget),
+      icebreakerCredits: 0,
+      nonNoisyIcebreakerCredits: 0,
+      killerCredits: 0,
+    };
+  }
+  return {
+    credits: normalizeCreditAmount(budget.credits),
+    icebreakerCredits: normalizeCreditAmount(budget.icebreakerCredits ?? 0),
+    nonNoisyIcebreakerCredits: normalizeCreditAmount(
+      budget.nonNoisyIcebreakerCredits ?? 0,
+    ),
+    killerCredits: normalizeCreditAmount(budget.killerCredits ?? 0),
+  };
+}
+
+function cloneRunnerRunPathCreditBudget(
+  budget: MutableRunnerRunPathCreditBudget,
+): MutableRunnerRunPathCreditBudget {
+  return { ...budget };
+}
+
+function normalizeCreditAmount(value: number): number {
+  return Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+}
+
+function projectGeneralCreditPayment(
+  budget: MutableRunnerRunPathCreditBudget,
+  cost: number,
+): CreditPaymentProjection {
+  const normalizedCost = normalizeCreditAmount(cost);
+  const creditsAfterPath = budget.credits - normalizedCost;
+  return {
+    affordable: creditsAfterPath >= 0,
+    cost: normalizedCost,
+    cashSpent: normalizedCost,
+    creditsAfterPath,
+  };
+}
+
+function spendGeneralCredits(
+  budget: MutableRunnerRunPathCreditBudget,
+  cost: number,
+): void {
+  budget.credits -= normalizeCreditAmount(cost);
+}
+
+function projectBreakerCreditPayment(
+  budget: MutableRunnerRunPathCreditBudget,
+  breakAssessment: BreakAssessment,
+): CreditPaymentProjection {
+  const cost = normalizeCreditAmount(breakAssessment.cost);
+  const restrictedCredits = applicableRestrictedBreakerCredits(
+    budget,
+    breakAssessment,
+  );
+  const cashNeeded = Math.max(0, cost - restrictedCredits);
+  const creditsAfterPath = budget.credits - cashNeeded;
+  return {
+    affordable: creditsAfterPath >= 0,
+    cost,
+    cashSpent: Math.min(budget.credits, cashNeeded),
+    creditsAfterPath,
+  };
+}
+
+function spendBreakerCredits(
+  budget: MutableRunnerRunPathCreditBudget,
+  breakAssessment: BreakAssessment,
+): void {
+  let remainingCost = normalizeCreditAmount(breakAssessment.cost);
+  const spend = (
+    key: Exclude<keyof MutableRunnerRunPathCreditBudget, "credits">,
+  ) => {
+    const amount = Math.min(budget[key], remainingCost);
+    budget[key] -= amount;
+    remainingCost -= amount;
+  };
+  if (breakerCanUseKillerCredits(breakAssessment)) spend("killerCredits");
+  if (breakerCanUseNonNoisyCredits(breakAssessment)) {
+    spend("nonNoisyIcebreakerCredits");
+  }
+  spend("icebreakerCredits");
+  const cash = Math.min(budget.credits, remainingCost);
+  budget.credits -= cash;
+}
+
+function applicableRestrictedBreakerCredits(
+  budget: MutableRunnerRunPathCreditBudget,
+  breakAssessment: BreakAssessment,
+): number {
+  return (
+    budget.icebreakerCredits +
+    (breakerCanUseNonNoisyCredits(breakAssessment)
+      ? budget.nonNoisyIcebreakerCredits
+      : 0) +
+    (breakerCanUseKillerCredits(breakAssessment) ? budget.killerCredits : 0)
+  );
+}
+
+function breakerCanUseNonNoisyCredits(
+  breakAssessment: BreakAssessment,
+): boolean {
+  return !breakAssessment.breakerSubtypes.some(
+    (subtype) => subtypeKey(subtype) === "noisy",
+  );
+}
+
+function breakerCanUseKillerCredits(breakAssessment: BreakAssessment): boolean {
+  return breakAssessment.breakerSubtypes.some(
+    (subtype) => subtypeKey(subtype) === "killer",
+  );
+}
+
+function bestAccessPreservingPayment(
+  budget: MutableRunnerRunPathCreditBudget,
+  payCost: number,
+  breakAssessment: BreakAssessment | undefined,
+): CreditPaymentProjection & { breakAssessment?: BreakAssessment } {
+  const paymentOptions: Array<
+    CreditPaymentProjection & { breakAssessment?: BreakAssessment }
+  > = [projectGeneralCreditPayment(budget, payCost)];
+  if (breakAssessment) {
+    paymentOptions.push({
+      ...projectBreakerCreditPayment(budget, breakAssessment),
+      breakAssessment,
+    });
+  }
+  const bestPayment = paymentOptions.sort(
+    (left, right) =>
+      Number(right.affordable) - Number(left.affordable) ||
+      left.cashSpent - right.cashSpent ||
+      left.cost - right.cost,
+  )[0];
+  return bestPayment ?? projectGeneralCreditPayment(budget, payCost);
+}
+
 export function assessKnownRezzedIcePath(
   iceCards: IceCardLike[],
   rigCards: VisibleCard[],
-  runnerCredits: number,
+  runnerCredits: RunnerRunPathCreditBudgetInput,
   rootCards: RootCardLike[] = [],
   visibleCorpBidCapacity = 0,
 ): KnownRezzedIcePathAssessment {
@@ -196,16 +407,16 @@ export function assessKnownRezzedIcePath(
 function assessKnownRezzedIcePathInternal(
   iceCards: IceCardLike[],
   rigCards: VisibleCard[],
-  runnerCredits: number,
+  runnerCredits: RunnerRunPathCreditBudgetInput,
   rootCards: RootCardLike[],
   visibleCorpBidCapacity: number,
   initialRunPathEffects: RunPathProjectionEffect[],
   options: { allowBreakingRunPathEffects: boolean },
   initialBreakerStrengths?: Map<string, number>,
 ): KnownRezzedIcePathAssessment {
+  const creditBudget = normalizeRunnerRunPathCreditBudget(runnerCredits);
   let visibleBreakCost = 0;
-  let remainingCredits = runnerCredits;
-  let creditsAfterAvoidingVisibleIceHazards = runnerCredits;
+  let creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
   const visibleIceRunHazards: VisibleIceRunHazard[] = [];
   let assessedKnownIceCount = 0;
   let firstKnownIceBreakable = false;
@@ -244,10 +455,11 @@ function assessKnownRezzedIcePathInternal(
       0,
     );
     if (encounterTax > 0) {
-      if (encounterTax > remainingCredits) {
+      const payment = projectGeneralCreditPayment(creditBudget, encounterTax);
+      if (!payment.affordable) {
         return blockedPathAssessment(
           visibleBreakCost + encounterTax,
-          remainingCredits - encounterTax,
+          payment.creditsAfterPath,
           iceIndex,
           effectiveIce.definitionId,
           effectiveIce.subtypes,
@@ -260,8 +472,8 @@ function assessKnownRezzedIcePathInternal(
         );
       }
       visibleBreakCost += encounterTax;
-      remainingCredits -= encounterTax;
-      creditsAfterAvoidingVisibleIceHazards -= encounterTax;
+      spendGeneralCredits(creditBudget, encounterTax);
+      creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
     }
     if (endTheRunCount > 0) {
       const breakAssessment = runPathEffectsPreventFutureBreaking(
@@ -278,7 +490,7 @@ function assessKnownRezzedIcePathInternal(
       if (!breakAssessment) {
         return blockedPathAssessment(
           visibleBreakCost,
-          remainingCredits,
+          creditBudget.credits,
           iceIndex,
           effectiveIce.definitionId,
           effectiveIce.subtypes,
@@ -288,10 +500,14 @@ function assessKnownRezzedIcePathInternal(
           "ice_unbreakable",
         );
       }
-      if (breakAssessment.cost > remainingCredits) {
+      const payment = projectBreakerCreditPayment(
+        creditBudget,
+        breakAssessment,
+      );
+      if (!payment.affordable) {
         return blockedPathAssessment(
           visibleBreakCost + breakAssessment.cost,
-          remainingCredits - breakAssessment.cost,
+          payment.creditsAfterPath,
           iceIndex,
           effectiveIce.definitionId,
           effectiveIce.subtypes,
@@ -304,8 +520,8 @@ function assessKnownRezzedIcePathInternal(
         );
       }
       visibleBreakCost += breakAssessment.cost;
-      remainingCredits -= breakAssessment.cost;
-      creditsAfterAvoidingVisibleIceHazards -= breakAssessment.cost;
+      spendBreakerCredits(creditBudget, breakAssessment);
+      creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
       firstKnownIceBreakable = true;
       if (breakAssessment.carriesStrengthAcrossIce) {
         breakerStrengths.set(
@@ -331,11 +547,15 @@ function assessKnownRezzedIcePathInternal(
             breakerStrengths,
             additionalBreakCostPerSubroutine,
           );
-      const handlingCost = Math.min(payCost, breakAssessment?.cost ?? payCost);
-      if (handlingCost > remainingCredits) {
+      const payment = bestAccessPreservingPayment(
+        creditBudget,
+        payCost,
+        breakAssessment,
+      );
+      if (!payment.affordable) {
         return blockedPathAssessment(
-          visibleBreakCost + handlingCost,
-          remainingCredits - handlingCost,
+          visibleBreakCost + payment.cost,
+          payment.creditsAfterPath,
           iceIndex,
           effectiveIce.definitionId,
           effectiveIce.subtypes,
@@ -347,18 +567,18 @@ function assessKnownRezzedIcePathInternal(
             : "ice_unaffordable",
         );
       }
-      visibleBreakCost += handlingCost;
-      remainingCredits -= handlingCost;
-      creditsAfterAvoidingVisibleIceHazards -= handlingCost;
+      visibleBreakCost += payment.cost;
+      if (payment.breakAssessment) {
+        spendBreakerCredits(creditBudget, payment.breakAssessment);
+      } else {
+        spendGeneralCredits(creditBudget, payment.cost);
+      }
+      creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
       firstKnownIceBreakable = true;
-      if (
-        breakAssessment &&
-        handlingCost === breakAssessment.cost &&
-        breakAssessment.carriesStrengthAcrossIce
-      ) {
+      if (payment.breakAssessment?.carriesStrengthAcrossIce) {
         breakerStrengths.set(
-          breakAssessment.breakerInstanceId,
-          breakAssessment.endingStrength,
+          payment.breakAssessment.breakerInstanceId,
+          payment.breakAssessment.endingStrength,
         );
       }
     }
@@ -387,7 +607,7 @@ function assessKnownRezzedIcePathInternal(
       const unavoidableTraceRunLock = unbrokenEffectIsUnavoidableTraceRunLock(
         effect,
         sourceSubroutine,
-        remainingCredits,
+        creditBudget.credits,
       );
       const hardEffectKinds = hardUnbrokenRunEffectKinds(
         effect,
@@ -408,10 +628,13 @@ function assessKnownRezzedIcePathInternal(
                 additionalBreakCostPerSubroutine,
               )
             : undefined;
-        if (breakAssessment && breakAssessment.cost <= remainingCredits) {
+        const payment = breakAssessment
+          ? projectBreakerCreditPayment(creditBudget, breakAssessment)
+          : undefined;
+        if (breakAssessment && payment?.affordable) {
           visibleBreakCost += breakAssessment.cost;
-          remainingCredits -= breakAssessment.cost;
-          creditsAfterAvoidingVisibleIceHazards -= breakAssessment.cost;
+          spendBreakerCredits(creditBudget, breakAssessment);
+          creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
           firstKnownIceBreakable = true;
           if (breakAssessment.carriesStrengthAcrossIce) {
             breakerStrengths.set(
@@ -425,9 +648,9 @@ function assessKnownRezzedIcePathInternal(
           visibleBreakCost:
             visibleBreakCost + Math.max(0, breakAssessment?.cost ?? 0),
           creditsAfterPath:
-            breakAssessment && breakAssessment.cost > remainingCredits
-              ? remainingCredits - breakAssessment.cost
-              : remainingCredits,
+            payment && !payment.affordable
+              ? payment.creditsAfterPath
+              : creditBudget.credits,
           iceIndex,
           iceDefinitionId: effectiveIce.definitionId,
           iceSubtypes: effectiveIce.subtypes,
@@ -456,7 +679,7 @@ function assessKnownRezzedIcePathInternal(
             activeRunPathEffects,
             rigCards,
             rootCards,
-            remainingCredits,
+            creditBudget,
             visibleCorpBidCapacity,
             breakerStrengths,
             additionalBreakCostPerSubroutine,
@@ -464,8 +687,8 @@ function assessKnownRezzedIcePathInternal(
         : undefined;
       if (breakAssessment) {
         visibleBreakCost += breakAssessment.cost;
-        remainingCredits -= breakAssessment.cost;
-        creditsAfterAvoidingVisibleIceHazards -= breakAssessment.cost;
+        spendBreakerCredits(creditBudget, breakAssessment);
+        creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
         firstKnownIceBreakable = true;
         if (breakAssessment.carriesStrengthAcrossIce) {
           breakerStrengths.set(
@@ -489,7 +712,7 @@ function assessKnownRezzedIcePathInternal(
     knownPathBlockedByUnbreakableIce: false,
     knownPathBlockedByMissingCoverage: false,
     knownPathBlockedByEtr: false,
-    creditsAfterPath: remainingCredits,
+    creditsAfterPath: creditBudget.credits,
     canBreakNextIceButNotFullPath: false,
     hasBypassOrSpecialAccessPlan: false,
     reachableAccessReason: "known_path_reachable",
@@ -507,7 +730,7 @@ function runPathEffectBreakAssessment(params: {
   activeRunPathEffects: RunPathProjectionEffect[];
   rigCards: VisibleCard[];
   rootCards: RootCardLike[];
-  remainingCredits: number;
+  creditBudget: MutableRunnerRunPathCreditBudget;
   visibleCorpBidCapacity: number;
   breakerStrengths: Map<string, number>;
   additionalBreakCostPerSubroutine: number;
@@ -522,13 +745,17 @@ function runPathEffectBreakAssessment(params: {
     params.breakerStrengths,
     params.additionalBreakCostPerSubroutine,
   );
-  if (!breakAssessment || breakAssessment.cost > params.remainingCredits)
-    return undefined;
+  if (!breakAssessment) return undefined;
+  const payment = projectBreakerCreditPayment(
+    params.creditBudget,
+    breakAssessment,
+  );
+  if (!payment.affordable) return undefined;
 
   const futureWithoutEffect = assessKnownRezzedIcePathInternal(
     futureIce,
     params.rigCards,
-    params.remainingCredits,
+    cloneRunnerRunPathCreditBudget(params.creditBudget),
     params.rootCards,
     params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
@@ -538,7 +765,7 @@ function runPathEffectBreakAssessment(params: {
   const futureWithEffect = assessKnownRezzedIcePathInternal(
     futureIce,
     params.rigCards,
-    params.remainingCredits,
+    cloneRunnerRunPathCreditBudget(params.creditBudget),
     params.rootCards,
     params.visibleCorpBidCapacity,
     [...params.activeRunPathEffects, params.effect],
@@ -552,10 +779,12 @@ function runPathEffectBreakAssessment(params: {
       breakAssessment.endingStrength,
     );
   }
+  const budgetAfterBreak = cloneRunnerRunPathCreditBudget(params.creditBudget);
+  spendBreakerCredits(budgetAfterBreak, breakAssessment);
   const futureAfterBreak = assessKnownRezzedIcePathInternal(
     futureIce,
     params.rigCards,
-    params.remainingCredits - breakAssessment.cost,
+    budgetAfterBreak,
     params.rootCards,
     params.visibleCorpBidCapacity,
     params.activeRunPathEffects,
@@ -1738,6 +1967,8 @@ function creditsToBreakVisibleSubroutinesWithBreaker(
       breakUses * (breakAbility.cost.credits ?? 0) +
       targetSubroutines.length * Math.max(0, additionalBreakCostPerSubroutine),
     breakerInstanceId: breakerCard.instanceId,
+    breakerDefinitionId: breakerCard.definitionId,
+    breakerSubtypes: breakerDefinition.subtypes.slice(),
     endingStrength,
     carriesStrengthAcrossIce:
       breakerCarriesStrengthAcrossIce(breakerDefinition),
@@ -1857,6 +2088,8 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
       breakUses * (breakAbility.cost.credits ?? 0) +
       endTheRunCount * Math.max(0, additionalBreakCostPerSubroutine),
     breakerInstanceId: breakerCard.instanceId,
+    breakerDefinitionId: breakerCard.definitionId,
+    breakerSubtypes: breakerDefinition.subtypes.slice(),
     endingStrength,
     carriesStrengthAcrossIce:
       breakerCarriesStrengthAcrossIce(breakerDefinition),
@@ -1898,6 +2131,9 @@ function structuredBreakerAssessment(params: {
   return {
     cost: estimate.cost,
     breakerInstanceId: params.breakerCard.instanceId,
+    breakerDefinitionId:
+      params.breakerCard.definitionId ?? params.breakerDefinition.id,
+    breakerSubtypes: params.breakerDefinition.subtypes.slice(),
     endingStrength:
       params.currentBreakerStrength + requiredPumps * pumpStrengthAmount,
     carriesStrengthAcrossIce: breakerCarriesStrengthAcrossIce(

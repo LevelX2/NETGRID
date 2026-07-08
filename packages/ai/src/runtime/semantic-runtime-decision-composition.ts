@@ -1,5 +1,9 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import {
+  runnerRunPathCreditBudgetWithVisiblePools,
+  type RunnerRunPathCreditBudget,
+} from "../visible-run-analysis";
+import {
   createPracticalMicroCandidatesContext,
   type PracticalMicroCandidatesContextDependencies,
 } from "./practical-micro-candidates-context";
@@ -26,7 +30,7 @@ type SemanticRuntimeDecisionKnownPathDependencies = {
   assessKnownRezzedIcePath: (
     ice: VisibleCard[],
     rig: VisibleCard[],
-    credits: number,
+    credits: number | RunnerRunPathCreditBudget,
     root: VisibleCard[],
   ) => KnownPathAssessment;
 };
@@ -67,7 +71,10 @@ export function createSemanticRuntimeDecisionComposition(
         dependencies.assessKnownRezzedIcePath(
           server.ice,
           runtimeInput.playerView.own.rig ?? [],
-          runtimeInput.playerView.own.credits,
+          runnerRunPathCreditBudgetWithVisiblePools(
+            runtimeInput.playerView.own.credits,
+            runtimeInput.playerView.own.rig ?? [],
+          ),
           server.root,
         ),
       rolesForAction: dependencies.rolesForAction,

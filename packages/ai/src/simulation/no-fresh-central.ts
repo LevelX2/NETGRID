@@ -1,6 +1,10 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { rolesMatch } from "../runtime/role-match";
-import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
+import {
+  runnerRunPathCreditBudgetWithVisiblePools,
+  type KnownRezzedIcePathAssessment,
+  type RunnerRunPathCreditBudget,
+} from "../visible-run-analysis";
 import {
   centralPressureTargetsForCard,
   isCentralPressureCardForMetrics,
@@ -48,7 +52,7 @@ type TrueCentralCloseoutDependencies = {
   assessKnownRezzedIcePath: (
     iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
     rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number,
+    runnerCredits: number | RunnerRunPathCreditBudget,
     rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
   ) => KnownRezzedIcePathAssessment;
   rolesForCardId: (definitionId: string | undefined) => string[];
@@ -128,7 +132,10 @@ export function trueCentralCloseoutProfile(
   const assessment = dependencies.assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     server.root,
   );
   if (assessment.blocked) return { opportunity: false, reasons: [] };
@@ -274,12 +281,14 @@ export function runnerNoFreshCentralContext(
         return true;
       if (action.type !== "play_event" && action.type !== "resolve_choice")
         return false;
-      return dependencies.rolesForAction(input, action).some(
-        (role) =>
-          role === "draw" ||
-          role === "setup" ||
-          rolesMatch([role], ["search", "tutor"]),
-      );
+      return dependencies
+        .rolesForAction(input, action)
+        .some(
+          (role) =>
+            role === "draw" ||
+            role === "setup" ||
+            rolesMatch([role], ["search", "tutor"]),
+        );
     })
   )
     better.add("setup_search");
@@ -309,7 +318,10 @@ export function runnerNoFreshCentralContext(
     const assessment = dependencies.assessKnownRezzedIcePath(
       server?.ice ?? [],
       input.playerView.own.rig ?? [],
-      input.playerView.own.credits,
+      runnerRunPathCreditBudgetWithVisiblePools(
+        input.playerView.own.credits,
+        input.playerView.own.rig ?? [],
+      ),
       server?.root ?? [],
     );
     if (
@@ -391,9 +403,7 @@ export function noFreshCentralSubstitutionTypeForAction(
     );
     if (isCentralPressureCardForMetrics(definitionId, true))
       return "pressure_install";
-    if (
-      rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"])
-    )
+    if (rolesMatch(dependencies.rolesForAction(input, action), ["breaker_"]))
       return "rig_unlock";
   }
   if (

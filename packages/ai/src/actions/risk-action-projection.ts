@@ -3,7 +3,10 @@ import {
   type AiDecisionInput,
   type LegalAction,
 } from "@netgrid/shared";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 import type {
   BlinkRiskAssessment,
   BlinkRiskPayoffOverride,
@@ -34,7 +37,6 @@ export const BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE: RandomBreakOrDamageRiskP
 const RANDOM_BREAK_OR_DAMAGE_RISK_PROFILES = [
   BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
 ] as const;
-
 
 export function randomBreakOrDamageRiskProfileForDefinitionId(
   definitionId: string | undefined,
@@ -101,10 +103,9 @@ export function buildBlinkRiskAssessment(params: {
     : { recentFailure: false, recentDamageAmount: 0 };
   const sameServerRepeatedRiskPenalty =
     recent.recentFailure && noProgressRunExpected ? -900 : 0;
-  const disposition =
-    blockedByHandBuffer
-      ? "why_blink_run_deferred_for_hand_buffer:self_net_damage_buffer_too_low"
-      : params.payoffOverride !== "none"
+  const disposition = blockedByHandBuffer
+    ? "why_blink_run_deferred_for_hand_buffer:self_net_damage_buffer_too_low"
+    : params.payoffOverride !== "none"
       ? `why_blink_run_allowed_despite_risk:${params.payoffOverride}`
       : blinkRiskShouldAvoidRunSeverity(riskSeverity)
         ? `why_blink_run_blocked:${riskSeverity}`
@@ -196,7 +197,10 @@ export function assessBlinkRiskForRunAction(
   const fullPath = assessKnownRezzedIcePath(
     server.ice,
     rig,
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      rig,
+    ),
     server.root,
   );
   const visibleEndRunSubroutineCount = visibleEndRunSubroutineCountForPath(
@@ -216,7 +220,10 @@ export function assessBlinkRiskForRunAction(
   const stablePath = assessKnownRezzedIcePath(
     server.ice,
     stableRig,
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      stableRig,
+    ),
     server.root,
   );
   const stableCoverageAvailable =
@@ -249,7 +256,9 @@ export function assessBlinkRiskForRunAction(
       `blinkRiskKnownIceCount:${fullPath.assessedKnownIceCount}`,
       `blinkRiskPathCost:${fullPath.visibleBreakCost ?? 0}`,
       ...recentBlinkFailureEvidence(input, targetServerId),
-      ...(params.accessPayoff ? [`blinkRiskAccessPayoff:${params.accessPayoff}`] : []),
+      ...(params.accessPayoff
+        ? [`blinkRiskAccessPayoff:${params.accessPayoff}`]
+        : []),
       ...(params.scoreThreat !== undefined
         ? [`blinkRiskScoreThreat:${params.scoreThreat}`]
         : []),
@@ -313,7 +322,9 @@ export function blinkRiskScorePenalty(
 function blinkRiskHandBufferOverrideAllowed(
   payoffOverride: BlinkRiskPayoffOverride,
 ): boolean {
-  return payoffOverride === "known_agenda" || payoffOverride === "immediate_win";
+  return (
+    payoffOverride === "known_agenda" || payoffOverride === "immediate_win"
+  );
 }
 
 function recentBlinkFailureEvidence(
@@ -387,7 +398,11 @@ function recentBlinkFailureFromEvents(
     if (!blinkFailure) continue;
     const failureServerId =
       serverId ?? activeRunServerId ?? nearestPriorRunServer(history, index);
-    if (targetServerId && failureServerId && failureServerId !== targetServerId) {
+    if (
+      targetServerId &&
+      failureServerId &&
+      failureServerId !== targetServerId
+    ) {
       continue;
     }
     return {
@@ -440,14 +455,11 @@ function nearestPriorRunServer(
   return undefined;
 }
 
-function numberEvidenceValue(
-  evidence: readonly string[],
-  key: string,
-): number {
+function numberEvidenceValue(evidence: readonly string[], key: string): number {
   const prefix = `${key}:`;
-  const raw = evidence.find((entry) => entry.startsWith(prefix))?.slice(
-    prefix.length,
-  );
+  const raw = evidence
+    .find((entry) => entry.startsWith(prefix))
+    ?.slice(prefix.length);
   const value = raw !== undefined ? Number(raw) : 0;
   return Number.isFinite(value) ? value : 0;
 }
@@ -514,7 +526,8 @@ function randomBreakOrDamageRiskProfilesForRig(
   return rig
     .map(randomBreakOrDamageRiskProfileForVisibleBreaker)
     .filter(
-      (profile): profile is RandomBreakOrDamageRiskProfile => profile !== undefined,
+      (profile): profile is RandomBreakOrDamageRiskProfile =>
+        profile !== undefined,
     );
 }
 
@@ -547,9 +560,10 @@ function visibleEndRunSubroutineCountForIce(ice: VisibleServerIce): number {
   if (!ice.known || ice.rezzed !== true || !ice.definitionId) return 0;
   const quote = ice.effectiveRunQuote;
   if (quote && quote.iceDefinitionId === ice.definitionId) {
-    return quote.subroutines.filter((subroutine) =>
-      subroutine.type === "end_the_run" ||
-      subroutine.type === "end_the_run_unless_runner_pays",
+    return quote.subroutines.filter(
+      (subroutine) =>
+        subroutine.type === "end_the_run" ||
+        subroutine.type === "end_the_run_unless_runner_pays",
     ).length;
   }
   return (

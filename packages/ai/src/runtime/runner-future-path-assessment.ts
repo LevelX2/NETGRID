@@ -8,6 +8,7 @@ import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 import {
   assessKnownRezzedIcePath,
   cardDefinitionStrength,
+  runnerRunPathCreditBudgetWithVisiblePools,
 } from "../visible-run-analysis";
 
 type UnbrokenRunEffectEntry = {
@@ -34,7 +35,10 @@ export function currentRunFuturePathAssessment(
   const assessment = assessKnownRezzedIcePath(
     futureIce,
     input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     server.root,
   );
   const encounterTax = effects.reduce((sum, { effect }) => {
@@ -45,8 +49,7 @@ export function currentRunFuturePathAssessment(
   }, 0);
   const visibleBreakCost = (assessment.visibleBreakCost ?? 0) + encounterTax;
   return {
-    blocked:
-      assessment.blocked || visibleBreakCost > input.playerView.own.credits,
+    blocked: assessment.blocked || assessment.creditsAfterPath < encounterTax,
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
   };
 }

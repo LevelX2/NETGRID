@@ -1,7 +1,10 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 import { rolesMatch } from "../runtime/role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 import { remoteTrashCostForVisibleCard } from "./card-metric-lookup";
 import { remoteTrashRoleForVisibleCard } from "./remote-trash-role";
 
@@ -17,7 +20,10 @@ export function runnerCreditReserveTargetForInput(
       assessKnownRezzedIcePath(
         server.ice,
         input.playerView.own.rig ?? [],
-        input.playerView.own.credits,
+        runnerRunPathCreditBudgetWithVisiblePools(
+          input.playerView.own.credits,
+          input.playerView.own.rig ?? [],
+        ),
         server.root,
       ).visibleBreakCost ?? 0;
     const hasThreat = server.root.some(

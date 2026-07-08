@@ -2011,11 +2011,7 @@ export function sanitizeAiDecisionDebug(
     const value = sanitizeAiDecisionDebugString(source[field]);
     if (value !== undefined) result[field] = value;
   }
-  const numberFields = [
-    "score",
-    "confidence",
-    "timeBudgetMs",
-  ] as const;
+  const numberFields = ["score", "confidence", "timeBudgetMs"] as const;
   for (const field of numberFields) {
     const value = source[field];
     if (typeof value === "number" && Number.isFinite(value))
@@ -6177,7 +6173,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 0,
     rulesText:
-      "Runner event with per-card longtail surface. Resolution remains LegalAction-gated.",
+      "Look through the top five cards of your stack. Bring one of those cards into your hand, and arrange the rest in any order you choose.",
     mechanics: ["play_event", "per_card_longtail", ONR_V1_LOCAL_PRIVATE],
   },
   {

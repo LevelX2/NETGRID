@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
   runnerKnownPathAssessmentIsCostNoAccess,
   runnerKnownPathAssessmentIsKnownNoAccess,
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
@@ -156,6 +157,46 @@ describe("visible run analysis text-derived breaker costs", () => {
       missingCoverage: ["code_gate"],
       noAccessReason: "missing_breaker_coverage",
       unpayableReason: "ice_unbreakable",
+    });
+  });
+});
+
+describe("visible run analysis runner run credit pools", () => {
+  it("uses visible non-noisy breaker credits for a Codecracker known path", () => {
+    const rig = [
+      codecrackerBreaker("runner-codecracker"),
+      nonNoisyBreakerCreditPool("runner-cloak", 2),
+    ];
+    const assessment = assessKnownRezzedIcePath(
+      [classicCodeGateIce("remote-code-gate")],
+      rig,
+      runnerRunPathCreditBudgetWithVisiblePools(0, rig),
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 2,
+      creditsAfterPath: 0,
+    });
+  });
+
+  it("does not spend non-noisy breaker credits through a noisy breaker", () => {
+    const rig = [
+      pileDriverBreaker("runner-pile-driver"),
+      nonNoisyBreakerCreditPool("runner-cloak", 3),
+    ];
+    const assessment = assessKnownRezzedIcePath(
+      [classicWallIce("remote-wall")],
+      rig,
+      runnerRunPathCreditBudgetWithVisiblePools(0, rig),
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      noAccessReason: "known_path_unpayable",
+      unpayableReason: "ice_unaffordable",
     });
   });
 });
@@ -483,6 +524,45 @@ function pileDriverBreaker(instanceId: string): VisibleCard {
     subtypes: ["icebreaker", "fracter", "noisy"],
     known: true,
     strength: 7,
+  };
+}
+
+function codecrackerBreaker(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_014_codecracker",
+    title: "Codecracker",
+    type: "program",
+    subtypes: ["icebreaker"],
+    known: true,
+    strength: 0,
+  };
+}
+
+function nonNoisyBreakerCreditPool(
+  instanceId: string,
+  amount: number,
+): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_011_cloak",
+    title: "Cloak",
+    type: "program",
+    subtypes: ["stealth"],
+    known: true,
+    counterDisplays: [
+      {
+        id: `${instanceId}-recurring`,
+        amount,
+        displayKind: "recurring_credit",
+        label: "Recurring credits",
+        ariaLabel: "Recurring credits",
+        creditPool: {
+          kind: "recurring_credit",
+          uses: ["using_icebreaker_during_run_non_noisy"],
+        },
+      },
+    ],
   };
 }
 

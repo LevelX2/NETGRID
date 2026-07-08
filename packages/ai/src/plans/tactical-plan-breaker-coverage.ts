@@ -1,5 +1,8 @@
 import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 import { cardProvidesBreakerCoverage } from "./tactical-plan-breaker-cards";
 import { coverageKindForAssessment } from "./tactical-plan-coverage-kinds";
 import type { RequiredCapabilityKind } from "./tactical-plan-types";
@@ -16,7 +19,10 @@ export function missingBreakerCoverageKind(
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     playerView.own.rig ?? [],
-    playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      playerView.own.credits,
+      playerView.own.rig ?? [],
+    ),
     server.root,
   );
   const preciseMissingCoverage = coverageKindForAssessment(assessment);

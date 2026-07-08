@@ -6,7 +6,10 @@ import type { CentralServerId } from "../runtime/server-target";
 import { sortedUnique } from "../runtime/collection";
 import type { AiDecisionInput } from "@netgrid/shared";
 import { definitionTypeForMetrics } from "./card-metric-lookup";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 
 const CENTRAL_PRESSURE_AI_HINTS = createAiHintsByCard();
 
@@ -67,7 +70,10 @@ export function centralPressureTargetIsGoodForMetrics(
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     server.root,
   );
   if (assessment.blocked) return false;

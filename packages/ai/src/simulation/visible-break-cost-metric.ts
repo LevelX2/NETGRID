@@ -1,6 +1,9 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 
 export function visibleBreakCostForKnownIceDefinition(
   input: AiDecisionInput,
@@ -24,7 +27,10 @@ export function visibleBreakCostForKnownIceDefinition(
       } as VisibleCard,
     ],
     input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
   );
   return assessment.visibleBreakCost ?? 0;
 }

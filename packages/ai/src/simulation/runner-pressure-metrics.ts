@@ -6,7 +6,11 @@ import {
 
 import type { KnownPositionMemory } from "../belief-state";
 import { centralServerId } from "../runtime/server-target";
-import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
+import {
+  runnerRunPathCreditBudgetWithVisiblePools,
+  type KnownRezzedIcePathAssessment,
+  type RunnerRunPathCreditBudget,
+} from "../visible-run-analysis";
 import { centralPressureTargetIsGoodForMetrics } from "./central-pressure-card";
 import type {
   RunnerCoveragePressureForMetrics,
@@ -21,10 +25,12 @@ export type RunnerPressureMetricDependencies = {
   assessKnownRezzedIcePath: (
     iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
     rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number,
+    runnerCredits: number | RunnerRunPathCreditBudget,
     rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
   ) => KnownRezzedIcePathAssessment;
-  knownPositionMemoryForInput: (input: AiDecisionInput) => KnownPositionMemory[];
+  knownPositionMemoryForInput: (
+    input: AiDecisionInput,
+  ) => KnownPositionMemory[];
   definitionTypeForMetrics: (definitionId: string) => string | undefined;
   remoteRootTrashCostForMetrics: (card: VisibleCard) => number | undefined;
   canBreakerDefinitionBreakIce: (
@@ -64,7 +70,8 @@ export function createRunnerPressureMetricContext(
         entry.zone === server.id && entry.positionKey.startsWith("root:"),
     );
     const knownAgenda = knownRemoteEntries.some(
-      (entry) => dependencies.definitionTypeForMetrics(entry.definitionId) === "agenda",
+      (entry) =>
+        dependencies.definitionTypeForMetrics(entry.definitionId) === "agenda",
     );
     const relevantTrash = server.root.some((card) => {
       if (!card.known) return false;
@@ -114,15 +121,20 @@ export function createRunnerPressureMetricContext(
       const assessment = dependencies.assessKnownRezzedIcePath(
         server.ice,
         input.playerView.own.rig ?? [],
-        input.playerView.own.credits,
+        runnerRunPathCreditBudgetWithVisiblePools(
+          input.playerView.own.credits,
+          input.playerView.own.rig ?? [],
+        ),
         server.root,
       );
       const visibleBreakCost = assessment.visibleBreakCost ?? 0;
-      const creditsAfterPath = input.playerView.own.credits - visibleBreakCost;
+      const creditsAfterPath = assessment.creditsAfterPath;
       if (!assessment.blocked) broadReady = true;
       if (assessment.blocked) {
         blockers.add(
-          visibleBreakCost > input.playerView.own.credits
+          assessment.unpayableReason === "ice_unaffordable" ||
+            assessment.unpayableReason ===
+              "later_ice_unaffordable_after_prior_ice_cost"
             ? "insufficient_credits"
             : "no_valuable_target",
         );
@@ -180,7 +192,10 @@ export function createRunnerPressureMetricContext(
       const assessment = dependencies.assessKnownRezzedIcePath(
         server.ice,
         rigCards,
-        input.playerView.own.credits,
+        runnerRunPathCreditBudgetWithVisiblePools(
+          input.playerView.own.credits,
+          rigCards,
+        ),
         server.root,
       );
       const rezzedMissing = assessment.blocked
@@ -190,9 +205,7 @@ export function createRunnerPressureMetricContext(
                 ice.known &&
                 ice.rezzed === true &&
                 ice.definitionId &&
-                dependencies.runnerVisibleIceCreatesCoverageNeedForMetrics(
-                  ice,
-                ),
+                dependencies.runnerVisibleIceCreatesCoverageNeedForMetrics(ice),
             )
             .map((ice) => ice.definitionId!)
             .filter(

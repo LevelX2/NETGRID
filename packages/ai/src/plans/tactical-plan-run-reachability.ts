@@ -1,5 +1,8 @@
 import type { PlayerView } from "@netgrid/shared";
-import { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import {
+  assessKnownRezzedIcePath,
+  runnerRunPathCreditBudgetWithVisiblePools,
+} from "../visible-run-analysis";
 import { isRemoteServer } from "./tactical-plan-server-targets";
 
 export function serverHasUnrezzedIce(
@@ -24,7 +27,10 @@ export function runNeedsBreakerCoverage(
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     playerView.own.rig ?? [],
-    playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      playerView.own.credits,
+      playerView.own.rig ?? [],
+    ),
     server.root,
   );
   return assessment.assessedKnownIceCount > 0 && !assessment.canReachAccess;

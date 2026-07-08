@@ -1,6 +1,10 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
 import { rolesMatch } from "../runtime/role-match";
-import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
+import {
+  runnerRunPathCreditBudgetWithVisiblePools,
+  type KnownRezzedIcePathAssessment,
+  type RunnerRunPathCreditBudget,
+} from "../visible-run-analysis";
 import {
   centralPressureTargetsForCard,
   isCentralPressureCardForMetrics,
@@ -12,7 +16,7 @@ type CentralRunPressureJustificationDependencies = {
   assessKnownRezzedIcePath: (
     iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
     rigCards: VisibleCard[],
-    runnerCredits: number,
+    runnerCredits: number | RunnerRunPathCreditBudget,
     rootCards?: AiDecisionInput["playerView"]["servers"][number]["root"],
   ) => KnownRezzedIcePathAssessment;
   recentCentralRunSameTargetWithoutRefresh: (
@@ -118,7 +122,10 @@ export function runnerCentralRunPressureJustificationReasons(
   const assessment = dependencies.assessKnownRezzedIcePath(
     server?.ice ?? [],
     input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     server?.root ?? [],
   );
   if (assessment.blocked) return [];
@@ -137,7 +144,7 @@ export function runnerCentralRunPressureJustificationReasons(
   );
   const openOrCheap = visibleBreakCost <= 1 || (server?.ice.length ?? 0) === 0;
   const preservesReserve =
-    input.playerView.own.credits - visibleBreakCost >=
+    assessment.creditsAfterPath >=
     dependencies.runnerCreditReserveTargetForInput(input);
   if (!openOrCheap || !preservesReserve) return [];
   const closeout = dependencies.trueCentralCloseoutProfileForMetrics(
@@ -188,12 +195,14 @@ export function runnerCentralRunBurnsRemoteContestReserve(
   const assessment = dependencies.assessKnownRezzedIcePath(
     server?.ice ?? [],
     input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     server?.root ?? [],
   );
   if (assessment.blocked || contestableProfiles.length === 0) return false;
-  const visibleBreakCost = assessment.visibleBreakCost ?? 0;
-  const creditsAfterPath = input.playerView.own.credits - visibleBreakCost;
+  const creditsAfterPath = assessment.creditsAfterPath;
   const requiredReserve = Math.max(
     ...contestableProfiles.map((profile) => profile.postRunReserveTarget),
   );

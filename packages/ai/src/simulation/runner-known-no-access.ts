@@ -1,7 +1,12 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import { rolesMatch } from "../runtime/role-match";
 import { isRemoteServerTarget } from "../runtime/server-target";
-import type { KnownRezzedIcePathAssessment } from "../visible-run-analysis";
+import {
+  runnerRunPathCreditBudgetWithVisiblePools,
+  runnerKnownPathAssessmentIsCostNoAccess,
+  type KnownRezzedIcePathAssessment,
+  type RunnerRunPathCreditBudget,
+} from "../visible-run-analysis";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 type VisibleCardDefinitionLookup = (
@@ -18,7 +23,7 @@ type RunnerKnownNoAccessDependencies = {
   assessKnownRezzedIcePath: (
     iceCards: AiDecisionInput["playerView"]["servers"][number]["ice"],
     rigCards: NonNullable<AiDecisionInput["playerView"]["own"]["rig"]>,
-    runnerCredits: number,
+    runnerCredits: number | RunnerRunPathCreditBudget,
     rootCards: AiDecisionInput["playerView"]["servers"][number]["root"],
   ) => KnownRezzedIcePathAssessment;
   runnerKnownPathAssessmentIsKnownNoAccess: (
@@ -49,7 +54,10 @@ export function runnerRunKnownPathCost(
     dependencies.assessKnownRezzedIcePath(
       server.ice,
       input.playerView.own.rig ?? [],
-      input.playerView.own.credits,
+      runnerRunPathCreditBudgetWithVisiblePools(
+        input.playerView.own.credits,
+        input.playerView.own.rig ?? [],
+      ),
       server.root,
     ).visibleBreakCost ?? 0
   );
@@ -66,9 +74,21 @@ export function runnerHasKnownUnaffordableLegalRun(
       typeof action.payload?.serverId !== "string"
     )
       return false;
+    const server = input.playerView.servers.find(
+      (candidate) => candidate.id === action.payload?.serverId,
+    );
+    if (!server) return false;
+    const assessment = dependencies.assessKnownRezzedIcePath(
+      server.ice,
+      input.playerView.own.rig ?? [],
+      runnerRunPathCreditBudgetWithVisiblePools(
+        input.playerView.own.credits,
+        input.playerView.own.rig ?? [],
+      ),
+      server.root,
+    );
     return (
-      runnerRunKnownPathCost(input, action.payload.serverId, dependencies) >
-      input.playerView.own.credits
+      assessment.blocked && runnerKnownPathAssessmentIsCostNoAccess(assessment)
     );
   });
 }
@@ -111,7 +131,10 @@ export function runnerKnownNoAccessLegalRunTargets(
       const assessment = dependencies.assessKnownRezzedIcePath(
         server.ice,
         input.playerView.own.rig ?? [],
-        input.playerView.own.credits,
+        runnerRunPathCreditBudgetWithVisiblePools(
+          input.playerView.own.credits,
+          input.playerView.own.rig ?? [],
+        ),
         server.root,
       );
       if (
@@ -211,7 +234,10 @@ export function runnerKnownPathDiagnosticsForAction(
       dependencies.assessKnownRezzedIcePath(
         [currentIce],
         input.playerView.own.rig ?? [],
-        input.playerView.own.credits,
+        runnerRunPathCreditBudgetWithVisiblePools(
+          input.playerView.own.credits,
+          input.playerView.own.rig ?? [],
+        ),
         server?.root ?? [],
       ).blocked
     ) {
@@ -220,7 +246,10 @@ export function runnerKnownPathDiagnosticsForAction(
           ? dependencies.assessKnownRezzedIcePath(
               server.ice,
               input.playerView.own.rig ?? [],
-              input.playerView.own.credits,
+              runnerRunPathCreditBudgetWithVisiblePools(
+                input.playerView.own.credits,
+                input.playerView.own.rig ?? [],
+              ),
               server.root,
             )
           : undefined;
@@ -342,15 +371,18 @@ export function runnerKnownPathDiagnosticsForAction(
   const assessment = dependencies.assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
-    input.playerView.own.credits,
+    runnerRunPathCreditBudgetWithVisiblePools(
+      input.playerView.own.credits,
+      input.playerView.own.rig ?? [],
+    ),
     server.root,
   );
   const knownPathCost = assessment.visibleBreakCost ?? 0;
-  const creditsAfterPath = input.playerView.own.credits - knownPathCost;
-  const creditsMissing = Math.max(
-    0,
-    knownPathCost - input.playerView.own.credits,
-  );
+  const creditsAfterPath = assessment.creditsAfterPath;
+  const creditsMissing =
+    assessment.blocked && runnerKnownPathAssessmentIsCostNoAccess(assessment)
+      ? Math.max(0, -assessment.creditsAfterPath)
+      : 0;
   const remote = isRemoteServerTarget(targetServerId);
   const central =
     targetServerId === "hq" ||
@@ -516,8 +548,7 @@ export function runnerKnownPathDiagnosticsForAction(
     ...(assessment.creditsSpentBeforeUnpayableIce > 0
       ? { runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: true }
       : {}),
-    ...(knownNoAccess &&
-    (assessment.visibleBreakCost ?? 0) > input.playerView.own.credits
+    ...(knownNoAccess && runnerKnownPathAssessmentIsCostNoAccess(assessment)
       ? { runnerRunCostQuoteUnderestimatedFullPath: true }
       : {}),
     ...(knownNoAccess &&
