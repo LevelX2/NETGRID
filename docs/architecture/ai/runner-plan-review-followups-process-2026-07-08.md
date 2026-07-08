@@ -1,6 +1,6 @@
 # Runner-Plancontroller Review-Followups Prozess 2026-07-08
 
-Status: in Umsetzung
+Status: abgeschlossen, lokaler Merge nach `main` vorbereitet
 
 ## Quelle/Vorgabe
 
@@ -174,3 +174,11 @@ Commit: `docs(ai): finalize runner plan review followups`
 - Finale Checks sind grün oder Abweichungen sind als bestehende, nicht paketbedingte Testschulden belegt.
 - Branch ist lokal nach `main` integriert.
 - Keine nicht klassifizierten Arbeitsdateien bleiben offen.
+
+## Abschlussstand 2026-07-08
+
+- RPF-1 umgesetzt: R&D-Access-Depth nutzt semantische R&D-Multiaccess-Rollen, Tactic-Signals und zielgerichtete `multiaccess`-Effekte statt harter Karten-ID-Liste.
+- RPF-2 umgesetzt: RunnerRunPlan Required-Break-Sequenzen adressieren konkrete Subroutine-Indizes und behandeln sichtbare Damage-/Program-Trash-Survival-Routinen als Break-/Abort-Pflicht.
+- RPF-3 umgesetzt: RunPlan-Start reserviert sichtbare oder aus Evidence side-safe projizierte Trash-Kosten getrennt in Steal-/Trash-Budgetfeldern.
+- RPF-4 umgesetzt: `runner.clear_tags_or_survive` ist als TacticalPlan-Linie aktiv, wenn der Runner Tags hat, und mappt auf `tag.remove`.
+- Keine Engine-, LegalAction-, PlayerView-, Replay-, StateHash-, Randomness-, Kartenpool- oder Hidden-Info-Vertragsänderung.
