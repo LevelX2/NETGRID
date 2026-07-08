@@ -47,6 +47,44 @@ describe("semanticRuntimeMemoryDebug", () => {
     );
   });
 
+  it("surfaces HQ all-known contradiction warnings as belief uncertainty", () => {
+    const input = aiInput("runner", [], [
+      publicEvent("evt_hq_look", "resolve_choice", 1, {
+        actor: "runner",
+        actionType: "resolve_choice",
+        hiddenZoneAction: "p3_33_private_look",
+        privateLookZone: "hq",
+        privateLookCount: 4,
+        knownHqDefinitionIds: [
+          "onr_proteus_062_lesley-major",
+          "onr_v1_297_overtime-incentives",
+          "onr_v1_340_setup",
+          "onr_v1_304_systematic-layoffs",
+        ],
+      }),
+      publicEvent("evt_hq_access_data_wall", "access_card", 2, {
+        actor: "runner",
+        actionType: "access_card",
+        serverLabel: "HQ",
+        cardDefinitionId: "onr_v1_238_data-wall-2-0",
+        title: "Data Wall 2.0",
+      }),
+    ]);
+    input.playerView.opponent.handCount = 4;
+
+    const debug = semanticRuntimeMemoryDebug(input);
+
+    expect(debug.beliefUncertainty).toContain(
+      "belief_warning:hq_all_known_contradiction",
+    );
+    expect(debug.items).toContain(
+      "uncertainty:belief_warning:hq_all_known_contradiction",
+    );
+    expect(JSON.stringify(debug.opponentModel)).toContain(
+      "belief_warning:hq_all_known_contradiction:evt_hq_access_data_wall",
+    );
+  });
+
   it("projects corp opponent pressure memory items separately", () => {
     const debug = semanticRuntimeMemoryDebug(aiInput("corp", []));
 

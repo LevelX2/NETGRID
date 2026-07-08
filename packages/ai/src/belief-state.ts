@@ -200,6 +200,8 @@ export type BeliefState = {
 
 const BELIEF_VERSION_PREFIX = "belief-v1.4.2";
 const RD_SWAP_OPERATION_DEFINITION_ID = "v098_hq_rd_swap_operation";
+const HQ_ALL_KNOWN_CONTRADICTION_WARNING =
+  "belief_warning:hq_all_known_contradiction";
 
 type KnownHqHandEntry = {
   key: string;
@@ -231,11 +233,14 @@ export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
     }))
   );
 
-  const uncertainty = buildUncertainty(entries, input.side);
   const assumptions = buildAssumptions(input.side, entries, classifications);
   const rndTopFreshness = input.side === "runner" ? deriveRndTopFreshness(history, classifications) : undefined;
   const knownPositionMemory = input.side === "runner" ? deriveKnownPositionMemory(input.playerView, history, classifications) : [];
   const hqHandMemory = input.side === "runner" ? deriveKnownHqHandMemory(input, history, classifications) : undefined;
+  const uncertainty = buildBeliefUncertaintyWithMemoryWarnings(
+    buildUncertainty(entries, input.side),
+    hqHandMemory,
+  );
   const hiddenRemoteCandidateMemory = input.side === "runner" ? deriveHiddenRemoteCandidateMemory(input, history, classifications) : [];
   const runnerOpponentModel =
     input.side === "runner" ? deriveRunnerOpponentModel(input, entries, classifications, rndTopFreshness, knownPositionMemory, hqHandMemory, hiddenRemoteCandidateMemory) : undefined;
@@ -662,7 +667,14 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
       };
     }
     if (isRunnerHqAccess(classification) && definitionId) {
-      rememberObservedHqAccessDefinition(knownCards, classification.eventId, definitionId);
+      rememberObservedHqAccessDefinitionWithConsistencyCheck(
+        knownCards,
+        candidateGroups,
+        input.playerView.opponent.handCount,
+        classification.eventId,
+        definitionId,
+        invalidationReasons,
+      );
       continue;
     }
     reconcileHqCandidateGroups(
@@ -1024,7 +1036,13 @@ function deriveHiddenRemoteCandidateMemory(
       };
     }
     if (isRunnerHqAccess(classification) && definitionId) {
-      rememberObservedHqAccessDefinition(knownCards, classification.eventId, definitionId);
+      rememberObservedHqAccessDefinitionWithConsistencyCheck(
+        knownCards,
+        [],
+        input.playerView.opponent.handCount,
+        classification.eventId,
+        definitionId,
+      );
       continue;
     }
     reconcileHiddenRemoteCandidateMemories(classification, definitionId, memories);
@@ -1172,6 +1190,43 @@ function rememberObservedHqAccessDefinition(
     definitionId,
     eventId,
   });
+}
+
+function rememberObservedHqAccessDefinitionWithConsistencyCheck(
+  knownCards: KnownHqHandEntry[],
+  candidateGroups: HqHandCandidateGroupMemory[],
+  handCount: number,
+  eventId: string,
+  definitionId: string,
+  invalidationReasons?: string[],
+): void {
+  if (
+    hqAccessContradictsCompleteHandMemory(
+      knownCards,
+      candidateGroups,
+      handCount,
+      definitionId,
+    )
+  ) {
+    knownCards.length = 0;
+    candidateGroups.length = 0;
+    invalidationReasons?.push(`${HQ_ALL_KNOWN_CONTRADICTION_WARNING}:${eventId}`);
+  }
+  rememberObservedHqAccessDefinition(knownCards, eventId, definitionId);
+}
+
+function hqAccessContradictsCompleteHandMemory(
+  knownCards: KnownHqHandEntry[],
+  candidateGroups: HqHandCandidateGroupMemory[],
+  handCount: number,
+  definitionId: string,
+): boolean {
+  return (
+    handCount > 0 &&
+    knownCards.length >= handCount &&
+    candidateGroups.length === 0 &&
+    !knownCards.some((card) => card.definitionId === definitionId)
+  );
 }
 
 function countKnownDefinitionEntries(definitionIds: string[]): KnownDefinitionCountMemory[] {
@@ -1660,6 +1715,21 @@ function buildUncertainty(entries: BeliefEntry[], side: Side): string[] {
   return sortedUnique(uncertainty);
 }
 
+function buildBeliefUncertaintyWithMemoryWarnings(
+  baseUncertainty: string[],
+  hqHandMemory: KnownHqHandMemory | undefined,
+): string[] {
+  const hasHqContradiction =
+    hqHandMemory?.invalidationReasons.some((reason) =>
+      reason.startsWith(HQ_ALL_KNOWN_CONTRADICTION_WARNING),
+    ) === true;
+  if (!hasHqContradiction) return baseUncertainty;
+  return sortedUnique([
+    ...baseUncertainty.filter((entry) => entry !== "known_projection_only"),
+    HQ_ALL_KNOWN_CONTRADICTION_WARNING,
+  ]);
+}
+
 function buildAssumptions(side: Side, entries: BeliefEntry[], classifications: BeliefEventClassification[]): string[] {
   const assumptions = [
     "hidden_corp_information_not_used",
@@ -1755,6 +1825,8 @@ function publicServerId(event: PublicGameEvent): string | undefined {
   if (raw) return canonicalStructuredServerId(raw);
   const exposedServerId = stringValue(event.publicPayload.exposedServerId);
   if (exposedServerId) return canonicalStructuredServerId(exposedServerId);
+  const labelId = publicServerLabelId(event);
+  if (labelId === "hq") return labelId;
   return undefined;
 }
 
@@ -1766,8 +1838,17 @@ function publicRunTargetServerId(
     return undefined;
   return (
     publicServerId(event) ??
+    publicServerLabelId(event)
+  );
+}
+
+function publicServerLabelId(event: PublicGameEvent): string | undefined {
+  const targets = objectValue(event.publicPayload.targets);
+  return (
     visibleServerLabelId(stringValue(event.publicPayload.serverLabel)) ??
-    visibleServerLabelId(stringValue(event.publicPayload.serverName))
+    visibleServerLabelId(stringValue(event.publicPayload.serverName)) ??
+    visibleServerLabelId(stringValue(targets?.serverLabel)) ??
+    visibleServerLabelId(stringValue(targets?.serverName))
   );
 }
 
@@ -1833,6 +1914,12 @@ function dedupeEntries(entries: BeliefEntry[]): BeliefEntry[] {
 
 function stringValue(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
+}
+
+function objectValue(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : undefined;
 }
 
 function numberValue(value: unknown): number | undefined {

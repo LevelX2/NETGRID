@@ -422,6 +422,88 @@ describe("belief-state HQ hand memory retention", () => {
       ],
     });
   });
+
+  it("removes trashed accessed HQ cards when the event only exposes a server label", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "onr_proteus_062_lesley-major",
+      "onr_v1_297_overtime-incentives",
+      "onr_v1_340_setup",
+    ]);
+    const trashAccessedHqCard = publicEvent("evt_hq_trash", "trash_accessed_card", 2, {
+      actor: "runner",
+      actionType: "trash_accessed_card",
+      serverLabel: "HQ",
+      cardDefinitionId: "onr_proteus_062_lesley-major",
+      title: "Lesley Major",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([hqLook, trashAccessedHqCard], 2),
+    );
+    const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+
+    expect(hqMemory).toMatchObject({
+      handCount: 2,
+      knownCount: 2,
+      allCardsKnown: true,
+    });
+    expect(hqMemory?.knownDefinitions).toEqual(
+      expect.arrayContaining([
+        "onr_v1_297_overtime-incentives",
+        "onr_v1_340_setup",
+      ]),
+    );
+    expect(hqMemory?.knownDefinitions).not.toContain(
+      "onr_proteus_062_lesley-major",
+    );
+    expect(hqMemory?.invalidationReasons).toContain(
+      "known_hq_card_trash:evt_hq_trash",
+    );
+  });
+
+  it("invalidates complete HQ hand memory when a later HQ access contradicts it", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "onr_proteus_062_lesley-major",
+      "onr_v1_297_overtime-incentives",
+      "onr_v1_340_setup",
+      "onr_v1_304_systematic-layoffs",
+    ]);
+    const contradictingHqAccess = publicEvent("evt_hq_access_data_wall", "access_card", 2, {
+      actor: "runner",
+      actionType: "access_card",
+      serverLabel: "HQ",
+      cardDefinitionId: "onr_v1_238_data-wall-2-0",
+      title: "Data Wall 2.0",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([hqLook, contradictingHqAccess], 4),
+    );
+    const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+
+    expect(hqMemory).toMatchObject({
+      handCount: 4,
+      knownDefinitions: ["onr_v1_238_data-wall-2-0"],
+      knownCount: 1,
+      allCardsKnown: false,
+    });
+    expect(hqMemory?.ledger).toMatchObject({
+      unknownRestCount: 3,
+      candidateGroups: [],
+      safeDefinitions: [
+        expect.objectContaining({
+          definitionId: "onr_v1_238_data-wall-2-0",
+          count: 1,
+        }),
+      ],
+    });
+    expect(hqMemory?.invalidationReasons).toContain(
+      "belief_warning:hq_all_known_contradiction:evt_hq_access_data_wall",
+    );
+    expect(belief.uncertainty).toContain(
+      "belief_warning:hq_all_known_contradiction",
+    );
+  });
 });
 
 describe("belief-state known position memory", () => {
