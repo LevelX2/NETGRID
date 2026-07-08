@@ -1,6 +1,6 @@
 # Runner-Plan Debug/Payload/Broker Prozess 2026-07-08
 
-Status: in Arbeit
+Status: umgesetzt, vor lokalem Merge nach `main`
 
 ## Quelle/Vorgabe
 
@@ -140,7 +140,21 @@ Kernartefakte:
 
 Checks: Bank-/TacticalPlan-/RunPlan-Tests, `@netgrid/ai` Typecheck, `git diff --check`.
 
-Commit: `fix(ai): improve runner broker and special credit budgeting`
+Commit: `fix(ai): improve runner bank and run credit budgets`
+
+Umgesetzt:
+
+- Runner-Credit-Banks verwenden eine explizite Hysterese: Aufbauziel 12 gespeicherte Credits, dringende Auszahlung erst ab 6 gespeicherten Credits bei niedrigem Creditpool oder sofort bei konkretem Plan-FundingNeed.
+- Die Score-Hilfe für Bank-Cashout wurde an diese Hysterese angeglichen, damit niedrige Credits allein keinen einmal geladenen Broker entladen.
+- RunnerRunPlans erfassen Run-only-, recurring Breaker-/Killer-/Link-, Stealth- und Non-noisy-Breaker-Credits aus LegalAction-Payloads und sichtbaren Rig-Counter-Displays.
+- Die Debug-Anzeige zeigt diese Zweckcredits als eigene Runner-RunPlan-Zeile.
+
+Checks:
+
+- `corepack pnpm exec vitest run packages/ai/src/tactical-plans.test.ts packages/ai/src/runtime/runner-bank-investment-context.test.ts packages/ai/src/runtime/runner-run-plan-memory.test.ts packages/ai/src/diagnostics/semantic-runtime-decision-debug.test.ts apps/web/app/maintenance.test.ts --maxWorkers=1 --testTimeout=30000`
+- `corepack pnpm --filter @netgrid/ai typecheck`
+- `corepack pnpm --filter @netgrid/web typecheck`
+- `git diff --check`
 
 ### RPPB-4 Abschluss und Integration
 
