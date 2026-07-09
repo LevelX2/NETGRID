@@ -611,6 +611,18 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     );
     expect(state.cardInstances[veniceId]?.counters?.mark).toBe(1);
     expect(state.corp.clicks).toBe(clicksBeforeScore + 1);
+    const veniceView = getPlayerView(state, "corp").own.scoreArea.find(
+      (visibleCard) => visibleCard.instanceId === veniceId,
+    );
+    expect(veniceView?.counterDisplays).toContainEqual({
+      id: "project_venice_actions_per_turn",
+      amount: 1,
+      displayKind: "generic_counter",
+      label: "Aktion/Zug",
+      ariaLabel: "1 Project Venice zusätzliche Aktion pro Corp-Zug",
+      counterType: "mark",
+      usageHint: "status_marker",
+    });
 
     state = nextCorpActionPhase(toRunnerTurnFromCorpAction(state));
     expect(state.corp.clicks).toBe(4);

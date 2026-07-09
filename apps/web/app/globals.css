@@ -7807,7 +7807,8 @@ select {
   cursor: help;
 }
 
-.agendaActiveCounterBadge {
+.agendaActiveCounterBadge,
+.projectVeniceActionCounterBadge {
   position: absolute;
   right: 6px;
   top: 30px;
@@ -7831,6 +7832,7 @@ select {
   font-weight: 900;
   letter-spacing: 0;
   line-height: 1;
+  white-space: nowrap;
   text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
   pointer-events: auto;
   cursor: help;

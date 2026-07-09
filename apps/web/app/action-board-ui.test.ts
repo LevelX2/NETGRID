@@ -2242,6 +2242,19 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe(
       "Corporate Retreat: Die Agenda-Fähigkeit ist noch aktiv. Die Korp kann für 1 Aktion 2 Credits nehmen. Sobald die Korp eine Karte installiert oder rezzt, erlischt die Fähigkeit und der Marker verschwindet.",
     );
+    expect(
+      counterDisplayTooltipText({
+        id: "project_venice_actions_per_turn",
+        amount: 2,
+        displayKind: "generic_counter",
+        label: "Aktion/Zug",
+        ariaLabel: "2 Project Venice zusätzliche Aktionen pro Corp-Zug",
+        counterType: "mark",
+        usageHint: "status_marker",
+      }),
+    ).toBe(
+      "Project Venice: 2 zusätzliche Aktionen pro Corp-Zug. Beim Scoren wurde der aktuelle Zug sofort angepasst; spätere Corp-Züge erhalten den Wert zu Zugbeginn.",
+    );
   });
 
   it("keeps advancement counters as separate gems until ten counters", () => {
