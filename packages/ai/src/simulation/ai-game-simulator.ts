@@ -102,18 +102,6 @@ export type AiGameSimulatorDependencies = {
     input: AiDecisionInput,
     action: LegalAction,
   ) => ActionSequenceEntryDiagnostics;
-  corpIcePortfolioDiagnosticsForSimulationAction: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => ActionSequenceEntryDiagnostics;
-  corpScoreTerminalDiagnosticsForSimulationAction: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => ActionSequenceEntryDiagnostics;
-  corpEconomyBeforeScoreDiagnosticsForSimulationAction: (
-    input: AiDecisionInput,
-    action: LegalAction,
-  ) => ActionSequenceEntryDiagnostics;
   qualityTagsForAction: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -136,9 +124,6 @@ export function createAiGameSimulator(
     runnerEconomySetupDiagnosticsForSimulationAction,
     tagPunishWindowDiagnosticsForSimulationAction,
     corpFutureRunIceDiagnosticsForSimulationAction,
-    corpIcePortfolioDiagnosticsForSimulationAction,
-    corpScoreTerminalDiagnosticsForSimulationAction,
-    corpEconomyBeforeScoreDiagnosticsForSimulationAction,
     qualityTagsForAction,
   } = dependencies;
 
@@ -399,16 +384,6 @@ function simulateAiGame(
       input,
       action,
     );
-    const corpIcePortfolio = corpIcePortfolioDiagnosticsForSimulationAction(
-      input,
-      action,
-    );
-    const corpScoreTerminal = corpScoreTerminalDiagnosticsForSimulationAction(
-      input,
-      action,
-    );
-    const corpEconomyBeforeScore =
-      corpEconomyBeforeScoreDiagnosticsForSimulationAction(input, action);
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
@@ -459,9 +434,6 @@ function simulateAiGame(
       ...runnerEconomySetup,
       ...tagPunishDiagnostics,
       ...corpFutureRunIce,
-      ...corpIcePortfolio,
-      ...corpScoreTerminal,
-      ...corpEconomyBeforeScore,
       ...(typeof action.payload?.placement === "string"
         ? { installPlacement: action.payload.placement }
         : {}),

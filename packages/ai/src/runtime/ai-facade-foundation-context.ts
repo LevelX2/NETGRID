@@ -67,8 +67,6 @@ export function createAiFacadeFoundationContext(
   const {
     sourceDefinitionIdForSimulationAction,
     corpFutureRunIceDiagnosticsForSimulationAction,
-    corpScoreTerminalDiagnosticsForSimulationAction,
-    corpEconomyBeforeScoreDiagnosticsForSimulationAction,
     definitionForSimulationAction,
   } = createSimulationActionDiagnosticsContext({
     findVisibleCard: dependencies.findVisibleCard,
@@ -114,8 +112,6 @@ export function createAiFacadeFoundationContext(
     extractAiFeatures,
     sourceDefinitionIdForSimulationAction,
     corpFutureRunIceDiagnosticsForSimulationAction,
-    corpScoreTerminalDiagnosticsForSimulationAction,
-    corpEconomyBeforeScoreDiagnosticsForSimulationAction,
     definitionForSimulationAction,
     strongestCorpTagSourceOpportunity,
     corpTagPunishOntologyAssessmentForAction,

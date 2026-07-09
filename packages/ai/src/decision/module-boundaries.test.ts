@@ -773,6 +773,17 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps the transitive live package graph free of legacy modules", () => {
+    const liveGraph = transitiveRuntimeFiles(path.join(srcDir, "index.ts"));
+    const violations = [...liveGraph]
+      .map(relativeFile)
+      .filter(
+        (file) => file === "legacy" || file.startsWith("legacy/"),
+      );
+
+    expect(violations).toEqual([]);
+  });
+
   it("keeps the public package facade away from legacy plan contracts", () => {
     const publicIndex = path.join(srcDir, "index.ts");
     const content = readFileSync(publicIndex, "utf8");
@@ -1420,5 +1431,34 @@ function isRuntimeChooserImport(
     basename === "choose-ai-action" ||
     basename === "semantic-runtime" ||
     basename === "semantic-runtime-score-components"
+  );
+}
+
+function transitiveRuntimeFiles(entrypoint: string): Set<string> {
+  const visited = new Set<string>();
+  const pending = [entrypoint];
+  while (pending.length > 0) {
+    const file = pending.pop();
+    if (!file || visited.has(file)) continue;
+    visited.add(file);
+    for (const reference of importsFrom(file)) {
+      if (reference.isTypeOnly) continue;
+      const importedFile = resolveSourceImport(file, reference.importSource);
+      if (importedFile && !visited.has(importedFile)) pending.push(importedFile);
+    }
+  }
+  return visited;
+}
+
+function resolveSourceImport(
+  file: string,
+  importSource: string,
+): string | undefined {
+  if (!importSource.startsWith(".")) return undefined;
+  const base = path.resolve(path.dirname(file), importSource);
+  const candidates = [base, `${base}.ts`, path.join(base, "index.ts")];
+  return candidates.find(
+    (candidate) =>
+      candidate.startsWith(`${srcDir}${path.sep}`) && existsSync(candidate),
   );
 }

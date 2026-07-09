@@ -169,7 +169,14 @@ integrate_main -> blocker
   Boundarytests sichern die Trennung. Die Entfernung der intern noch von
   Simulationsdiagnostik referenzierten Legacy-Implementierung ist bewusst das
   unmittelbar folgende Retirement-Paket AICSC-4.
-- `AICSC-4`: `pending`.
+- `AICSC-4`: `done`; der transitive Live-Modulgraph ist durch ein ausführbares
+  Boundary-Gate nachweislich frei von `legacy/`. Drei nur noch von den alten
+  Corp-Planern gespeiste Selfplay-Diagnostikpfade sind entfernt; Tag-/Punish-
+  Erkennung nutzt im Live-Pfad ausschließlich strukturierte Ontologie und
+  aktuelle Hint-Rollen. Die beiden monolithischen V1.4-Planer-Testblöcke sind
+  aus `index.test.ts` entfernt. Der nur noch simulations-/testseitige
+  Legacy-Quarantänebestand wird zusammen mit den übrigen historischen
+  Testflächen in AICSC-7 physisch gelöscht.
 - `AICSC-5`: `pending`.
 - `AICSC-6`: `pending`.
 - `AICSC-7`: `pending`.

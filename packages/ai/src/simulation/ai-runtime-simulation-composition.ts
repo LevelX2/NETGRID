@@ -104,8 +104,6 @@ export type AiRuntimeSimulationCompositionDependencies = Omit<
     | "chooseAiAction"
     | "chooseRunnerAction"
     | "chooseCorpAction"
-    | "chooseRunnerBaselineAction"
-    | "chooseCorpBaselineAction"
     | "tagPunishWindowDiagnosticsForSimulationAction"
     | RuntimeRunnerSupportDependencyKeys
     | RuntimeContextDiagnosticsDependencyKeys

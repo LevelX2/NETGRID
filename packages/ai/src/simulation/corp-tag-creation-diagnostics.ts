@@ -7,7 +7,7 @@ import type {
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 
 import { RUNTIME_CARDS } from "../ai-hints";
-import { classifyCorpScoredAgendaAbility } from "../legacy/legacy-entrypoints";
+import { classifyTagSourceFromOntology } from "../tag-punish-ontology-consumer";
 import { rolesMatch } from "../runtime/role-match";
 import type { AiSimulationSummary } from "./ai-simulation-summary";
 
@@ -46,8 +46,8 @@ export function createCorpTagCreationDiagnosticsContext(
     const sourceType =
       RUNTIME_CARDS[sourceDefinitionId]?.type ??
       DEMO_CARDS_BY_ID[sourceDefinitionId]?.type;
-    const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
-    if (scoredAgenda?.kind === "scored_agenda_trace_tag")
+    const tagSourceProfile = classifyTagSourceFromOntology(sourceDefinitionId);
+    if (sourceType === "agenda" && tagSourceProfile?.traceTagSource)
       diagnostics.corpTagCreatedByScoredAgendaAction = true;
     else if (action.type === "play_operation")
       diagnostics.corpTagCreatedByOperation = true;

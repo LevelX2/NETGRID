@@ -1,6 +1,5 @@
 import { aiLiveRuntimeDependencies } from "./ai-runtime-public-entrypoints";
 import { createAiRuntimeSimulationComposition } from "./simulation/ai-runtime-simulation-composition";
-import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/corp-ice-portfolio-diagnostics";
 import { summarizeMatchProgressionMetrics } from "./simulation/match-progression-summary";
 
 const {
@@ -16,7 +15,6 @@ const {
   simulateAiSoak,
 } = createAiRuntimeSimulationComposition({
   ...aiLiveRuntimeDependencies,
-  corpIcePortfolioDiagnosticsForSimulationAction,
   summarizeMatchProgressionMetrics,
 });
 

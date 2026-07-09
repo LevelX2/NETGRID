@@ -58,12 +58,6 @@ export function createAiSimulationComposition(
       dependencies.tagPunishWindowDiagnosticsForSimulationAction,
     corpFutureRunIceDiagnosticsForSimulationAction:
       dependencies.corpFutureRunIceDiagnosticsForSimulationAction,
-    corpIcePortfolioDiagnosticsForSimulationAction:
-      dependencies.corpIcePortfolioDiagnosticsForSimulationAction,
-    corpScoreTerminalDiagnosticsForSimulationAction:
-      dependencies.corpScoreTerminalDiagnosticsForSimulationAction,
-    corpEconomyBeforeScoreDiagnosticsForSimulationAction:
-      dependencies.corpEconomyBeforeScoreDiagnosticsForSimulationAction,
     qualityTagsForAction,
   });
 

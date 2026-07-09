@@ -1,6 +1,5 @@
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 
-import { classifyCorpScoredAgendaAbility } from "../legacy/legacy-entrypoints";
 import {
   classifyTagPunishLegalActionFromOntology,
   type StructuredTagPunishLegalActionAssessment,
@@ -67,11 +66,6 @@ export function createCorpTagPunishActionContext(
     if (ontology?.isPunishPayoff)
       return corpPunishKindFromOntologyPayoff(ontology.payoffKind);
     if (action.type === "trash_resource") return "resource_trash_like";
-    const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
-    if (scoredAgenda?.kind === "scored_agenda_damage_punish")
-      return "scored_agenda_damage_like";
-    if (scoredAgenda?.kind === "scored_agenda_trace_tag")
-      return "scored_agenda_trace_tag_like";
     const roles = dependencies.rolesForAction(input, action);
     if (rolesMatch(roles, ["tag_punishment"])) return "unknown";
     return undefined;
@@ -83,8 +77,6 @@ export function createCorpTagPunishActionContext(
   ): boolean {
     const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
     if (ontology?.isTagSource) return true;
-    const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
-    if (scoredAgenda?.kind === "scored_agenda_trace_tag") return true;
     const roles = dependencies.rolesForAction(input, action);
     return rolesMatch(roles, ["tag_source", "tag_enabler", "trace_tag"]);
   }
@@ -95,8 +87,6 @@ export function createCorpTagPunishActionContext(
   ): boolean {
     const ontology = corpTagPunishOntologyAssessmentForAction(input, action);
     if (ontology?.isTraceTagSource) return true;
-    const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
-    if (scoredAgenda?.kind === "scored_agenda_trace_tag") return true;
     return rolesMatch(dependencies.rolesForAction(input, action), ["trace"]);
   }
 
@@ -105,19 +95,12 @@ export function createCorpTagPunishActionContext(
     action: LegalAction,
   ): StructuredTagPunishLegalActionAssessment | undefined {
     if (input.side !== "corp" || action.side !== "corp") return undefined;
-    const scoredAgenda = classifyCorpScoredAgendaAbility(input, action);
     return classifyTagPunishLegalActionFromOntology(
       action,
       dependencies.sourceDefinitionIdForAction(input, action),
       {
         runnerTagged: input.playerView.opponent.tags > 0,
         legacyRoles: dependencies.rolesForAction(input, action),
-        scoredAgendaKind:
-          scoredAgenda?.kind === "scored_agenda_trace_tag"
-            ? "trace_tag"
-            : scoredAgenda?.kind === "scored_agenda_damage_punish"
-              ? "damage_punish"
-              : undefined,
       },
     );
   }
