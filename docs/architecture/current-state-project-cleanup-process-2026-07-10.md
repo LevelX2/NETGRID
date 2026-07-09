@@ -127,8 +127,18 @@ integrate_main -> blocker
    Card-Function-Abstraction-Gate sind grün; alle Root-Scriptziele existieren.
    `docs/codex/CODEX_STATUS.md` bleibt bis zum Proteus-Merge parallel besessen
    und wird in PCS-8 abschließend konsolidiert.
-5. `PCS-4 Shared- und Kartenregistrierungsgrenzen modularisieren` – `in_progress`
-6. `PCS-5 Fachliche Web-/Server-/AI-Modulschnitte` – `pending`
+5. `PCS-4 Shared- und Kartenregistrierungsgrenzen modularisieren` – `done`;
+   9.487 Zeilen konkrete Kartenregistrierung liegen nun in
+   `card-definitions.ts`, während das Shared-Barrel von 11.683 auf rund 2.200
+   Zeilen sinkt. `CARD_DEFINITIONS` und `CARD_DEFINITIONS_BY_ID` sind die
+   neutralen Current-State-Namen; alte `DEMO_*`-Aliase bleiben nur bis zur
+   Integration paralleler Consumer bestehen und werden in PCS-8 entfernt.
+   Ein Boundarytest verhindert konkrete Kartendaten im Barrel. Shared-Tests
+   (10), alle sechs Package-/App-Typechecks und Card-Function-Abstraction sind
+   grün. Das bereits auf `main` rote Engine-Architektur-Gate meldet weiterhin
+   drei kartenspezifische IDs in `game/view/card-view.ts`; dieser getrennte
+   Befund wird nicht durch eine Baselineänderung kaschiert.
+6. `PCS-5 Fachliche Web-/Server-/AI-Modulschnitte` – `in_progress`
 7. `PCS-6 Teststufen, Sharding und Package-Boundaries` – `pending`
 8. `PCS-7 Asset- und Worktree-Hygiene` – `pending`
 9. `PCS-8 Main-Abgleich, Full Gate und Integration` – `pending`

@@ -234,8 +234,8 @@ function definitionSlugForId(id) {
 }
 
 function deriveCatalogWatchTokens() {
-  const sharedIndexPath = `${repoRoot}/packages/shared/src/index.ts`;
-  const text = readFileSync(sharedIndexPath, "utf8");
+  const cardDefinitionsPath = `${repoRoot}/packages/shared/src/card-definitions.ts`;
+  const text = readFileSync(cardDefinitionsPath, "utf8");
   const cards = [];
   const cardPattern =
     /id:\s*"(?<id>onr_(?:v1|proteus|classic)_\d+_[^"]+)",\s*\r?\n\s*title:\s*"(?<title>[^"]+)"/g;
@@ -463,7 +463,7 @@ const abstractionPlan = [
 
 const functionalFiles = new Set([
   "packages/engine/src/ability-engine/definition-types.ts",
-  "packages/shared/src/index.ts",
+  "packages/shared/src/card-definitions.ts",
 ]);
 
 function listFiles() {
@@ -548,7 +548,7 @@ function isDerivedAllowedContext(path, snippet) {
   if (snippet.includes("cardDefinitionId")) return true;
   if (snippet.includes("card-implementations/")) return true;
   if (snippet.includes("Implementation.")) return true;
-  if (path === "packages/shared/src/index.ts") {
+  if (path === "packages/shared/src/card-definitions.ts") {
     if (
       snippet.includes("id:") ||
       snippet.includes("title:") ||
@@ -740,7 +740,7 @@ const report = {
   derivedCatalogGuard: {
     status: "baseline_enforced",
     tokenSource:
-      "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/index.ts",
+      "Kartentitel und cardDefinitionId-Slug-/CamelCase-Varianten aus packages/shared/src/card-definitions.ts",
     tokenCount: derivedWatchTokens().length,
     baselineCount: derivedFindings.length,
     summary: summary(derivedFindings),

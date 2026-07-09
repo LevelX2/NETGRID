@@ -133,7 +133,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/terrorist-reprisal.ts",
   "onr_v1_117_valu-pak-software-bundle":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/valu-pak-software-bundle.ts",
-  "onr_v1_349_aardvark":
+  onr_v1_349_aardvark:
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/aardvark.ts",
   "onr_v1_351_bizarre-encryption-scheme":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/bizarre-encryption-scheme.ts",
@@ -193,23 +193,23 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/omni-kismet-ph-d.ts",
   "onr_v1_369_singapore-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/singapore-city-grid.ts",
-  "onr_v1_330_krumz":
+  onr_v1_330_krumz:
     "packages/engine/src/card-implementations/onr-v1/corp/assets/krumz.ts",
   "onr_v1_332_newsgroup-taunting":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/newsgroup-taunting.ts",
   "onr_v1_333_omniscience-foundation":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/omniscience-foundation.ts",
-  "onr_v1_336_rescheduler":
+  onr_v1_336_rescheduler:
     "packages/engine/src/card-implementations/onr-v1/corp/assets/rescheduler.ts",
-  "onr_v1_001_afreet":
+  onr_v1_001_afreet:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/afreet.ts",
-  "onr_v1_012_clown":
+  onr_v1_012_clown:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/clown.ts",
   "onr_v1_045_newsgroup-filter":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/newsgroup-filter.ts",
   "onr_v1_003_baedekers-net-map":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/baedekers-net-map.ts",
-  "onr_v1_004_bakdoor":
+  onr_v1_004_bakdoor:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/bakdoor.ts",
   "onr_v1_002_ai-boon":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/ai-boon.ts",
@@ -217,15 +217,15 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/bartmoss-memorial-icebreaker.ts",
   "onr_v1_006_black-dahlia":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/black-dahlia.ts",
-  "onr_v1_007_blink":
+  onr_v1_007_blink:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/blink.ts",
-  "onr_v1_008_boardwalk":
+  onr_v1_008_boardwalk:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/boardwalk.ts",
   "onr_v1_009_butcher-boy":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/butcher-boy.ts",
-  "onr_v1_010_cascade":
+  onr_v1_010_cascade:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/cascade.ts",
-  "onr_v1_013_cockroach":
+  onr_v1_013_cockroach:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/cockroach.ts",
   "onr_v1_017_deep-thought":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
@@ -233,87 +233,87 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/fait-accompli.ts",
   "onr_v1_026_false-echo":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/false-echo.ts",
-  "onr_v1_029_gremlins":
+  onr_v1_029_gremlins:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/gremlins.ts",
-  "onr_v1_034_incubator":
+  onr_v1_034_incubator:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/incubator.ts",
   "onr_v1_046_pattels-virus":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/pattels-virus.ts",
-  "onr_v1_049_pox":
+  onr_v1_049_pox:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/pox.ts",
-  "onr_v1_064_skivviss":
+  onr_v1_064_skivviss:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/skivviss.ts",
-  "onr_v1_065_smarteye":
+  onr_v1_065_smarteye:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/smarteye.ts",
   "onr_v1_067_speed-trap":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/speed-trap.ts",
-  "onr_v1_014_codecracker":
+  onr_v1_014_codecracker:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts",
-  "onr_v1_015_codeslinger":
+  onr_v1_015_codeslinger:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/codeslinger.ts",
-  "onr_v1_016_cyfermaster":
+  onr_v1_016_cyfermaster:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/cyfermaster.ts",
-  "onr_v1_018_dogcatcher":
+  onr_v1_018_dogcatcher:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/dogcatcher.ts",
-  "onr_v1_019_dropp":
+  onr_v1_019_dropp:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/dropp.ts",
-  "onr_v1_020_dupre":
+  onr_v1_020_dupre:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/dupre.ts",
-  "onr_v1_021_dwarf":
+  onr_v1_021_dwarf:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/dwarf.ts",
   "onr_v1_023_evil-twin":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/evil-twin.ts",
-  "onr_v1_027_flak":
+  onr_v1_027_flak:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/flak.ts",
-  "onr_v1_030_grubb":
+  onr_v1_030_grubb:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/grubb.ts",
-  "onr_v1_031_hammer":
+  onr_v1_031_hammer:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/hammer.ts",
-  "onr_v1_033_imp":
+  onr_v1_033_imp:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/imp.ts",
-  "onr_v1_036_jackhammer":
+  onr_v1_036_jackhammer:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/jackhammer.ts",
   "onr_v1_037_japanese-water-torture":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
-  "onr_v1_039_krash":
+  onr_v1_039_krash:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts",
   "onr_v1_040_loony-goon":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/loony-goon.ts",
   "onr_v1_047_pile-driver":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/pile-driver.ts",
-  "onr_v1_052_raffles":
+  onr_v1_052_raffles:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/raffles.ts",
   "onr_v1_053_ramming-piston":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/ramming-piston.ts",
-  "onr_v1_054_raptor":
+  onr_v1_054_raptor:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/raptor.ts",
-  "onr_v1_055_reflector":
+  onr_v1_055_reflector:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/reflector.ts",
-  "onr_v1_056_replicator":
+  onr_v1_056_replicator:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/replicator.ts",
-  "onr_v1_060_shaka":
+  onr_v1_060_shaka:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/shaka.ts",
-  "onr_v1_066_snowball":
+  onr_v1_066_snowball:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/snowball.ts",
-  "onr_v1_069_succubus":
+  onr_v1_069_succubus:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/succubus.ts",
-  "onr_v1_070_tinweasel":
+  onr_v1_070_tinweasel:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/tinweasel.ts",
   "onr_v1_072_wild-card":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/wild-card.ts",
   "onr_v1_073_wizards-book":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/wizards-book.ts",
-  "onr_v1_074_worm":
+  onr_v1_074_worm:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/worm.ts",
-  "onr_v1_011_cloak":
+  onr_v1_011_cloak:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/cloak.ts",
-  "onr_v1_035_invisibility":
+  onr_v1_035_invisibility:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/invisibility.ts",
-  "onr_v1_048_poltergeist":
+  onr_v1_048_poltergeist:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/poltergeist.ts",
   "onr_v1_057_scatter-shot":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/scatter-shot.ts",
-  "onr_v1_063_signpost":
+  onr_v1_063_signpost:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/signpost.ts",
   "onr_v1_071_vewy-vewy-quiet":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/vewy-vewy-quiet.ts",
@@ -321,7 +321,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/zetatech-software-installer.ts",
   "onr_v1_028_force-shield":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/force-shield.ts",
-  "onr_v1_061_shield":
+  onr_v1_061_shield:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/shield.ts",
   "onr_v1_038_joan-of-arc":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/joan-of-arc.ts",
@@ -385,7 +385,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/zetatech-mem-chip.ts",
   "onr_v1_147_zz22-speed-chip":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/zz22-speed-chip.ts",
-  "onr_v1_154_broker":
+  onr_v1_154_broker:
     "packages/engine/src/card-implementations/onr-v1/runner/resources/broker.ts",
   "onr_v1_079_bodyweight-synthetic-blood":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
@@ -453,7 +453,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/total-genetic-retrofit.ts",
   "onr_v1_024_expert-schedule-analyzer":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
-  "onr_v1_042_mouse":
+  onr_v1_042_mouse:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/mouse.ts",
   "onr_v1_041_microtech-ai-interface":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/microtech-ai-interface.ts",
@@ -463,7 +463,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/r-d-protocol-files.ts",
   "onr_v1_059_self-modifying-code":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/self-modifying-code.ts",
-  "onr_v1_058_seeya":
+  onr_v1_058_seeya:
     "packages/engine/src/card-implementations/onr-v1/runner/programs/seeya.ts",
   "onr_v1_062_shredder-uplink-protocol":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
@@ -473,7 +473,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/r-d-interface.ts",
   "onr_v1_142_record-reconstructor":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/record-reconstructor.ts",
-  "onr_v1_151_aujourdoui":
+  onr_v1_151_aujourdoui:
     "packages/engine/src/card-implementations/onr-v1/runner/resources/aujourdhui.ts",
   "onr_v1_163_floating-runner-bbs":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/floating-runner-bbs.ts",
@@ -541,9 +541,9 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
   "onr_v1_218_subsidiary-branch":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/subsidiary-branch.ts",
-  "onr_v1_221_asp":
+  onr_v1_221_asp:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/asp.ts",
-  "onr_v1_223_banpei":
+  onr_v1_223_banpei:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/banpei.ts",
   "onr_v1_224_bolter-cluster":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/bolter-cluster.ts",
@@ -551,7 +551,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/canis-major.ts",
   "onr_v1_226_canis-minor":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/canis-minor.ts",
-  "onr_v1_227_cerberus":
+  onr_v1_227_cerberus:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/cerberus.ts",
   "onr_v1_229_code-corpse":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/code-corpse.ts",
@@ -575,7 +575,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/data-wall-2-0.ts",
   "onr_v1_239_endless-corridor":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/endless-corridor.ts",
-  "onr_v1_240_fang":
+  onr_v1_240_fang:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fang.ts",
   "onr_v1_241_fang-2-0":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fang-2-0.ts",
@@ -583,7 +583,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fatal-attractor.ts",
   "onr_v1_243_fetch-4-0-1":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fetch-4-0-1.ts",
-  "onr_v1_244_filter":
+  onr_v1_244_filter:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/filter.ts",
   "onr_v1_245_fire-wall":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fire-wall.ts",
@@ -591,21 +591,21 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fragmentation-storm.ts",
   "onr_v1_247_haunting-inquisition":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/haunting-inquisition.ts",
-  "onr_v1_249_hunter":
+  onr_v1_249_hunter:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/hunter.ts",
   "onr_v1_250_ice-pick-willie":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/ice-pick-willie.ts",
   "onr_v1_251_jack-attack":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/jack-attack.ts",
-  "onr_v1_252_keeper":
+  onr_v1_252_keeper:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/keeper.ts",
   "onr_v1_253_laser-wire":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/laser-wire.ts",
-  "onr_v1_254_liche":
+  onr_v1_254_liche:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/liche.ts",
-  "onr_v1_255_mastiff":
+  onr_v1_255_mastiff:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/mastiff.ts",
-  "onr_v1_256_mazer":
+  onr_v1_256_mazer:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/mazer.ts",
   "onr_v1_257_nerve-labyrinth":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/nerve-labyrinth.ts",
@@ -613,17 +613,17 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/neural-blade.ts",
   "onr_v1_259_in-the-face":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/pi-in-the-face.ts",
-  "onr_v1_261_quandary":
+  onr_v1_261_quandary:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/quandary.ts",
   "onr_v1_262_razor-wire":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/razor-wire.ts",
   "onr_v1_263_reinforced-wall":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/reinforced-wall.ts",
-  "onr_v1_264_rex":
+  onr_v1_264_rex:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/rex.ts",
   "onr_v1_265_rock-is-strong":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/rock-is-strong.ts",
-  "onr_v1_266_scramble":
+  onr_v1_266_scramble:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/scramble.ts",
   "onr_v1_267_sentinels-prime":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/sentinels-prime.ts",
@@ -631,21 +631,21 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/shock-r.ts",
   "onr_v1_269_shotgun-wire":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/shotgun-wire.ts",
-  "onr_v1_270_sleeper":
+  onr_v1_270_sleeper:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/sleeper.ts",
   "onr_v1_271_tko-2-0":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/tko-2-0.ts",
-  "onr_v1_273_triggerman":
+  onr_v1_273_triggerman:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/triggerman.ts",
-  "onr_v1_274_tutor":
+  onr_v1_274_tutor:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/tutor.ts",
-  "onr_v1_277_virizz":
+  onr_v1_277_virizz:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/virizz.ts",
   "onr_v1_278_wall-of-ice":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/wall-of-ice.ts",
   "onr_v1_279_wall-of-static":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/wall-of-static.ts",
-  "onr_v1_280_zombie":
+  onr_v1_280_zombie:
     "packages/engine/src/card-implementations/onr-v1/corp/ice/zombie.ts",
   "onr_v1_281_accounts-receivable":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/accounts-receivable.ts",
@@ -729,9 +729,9 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/corprunners-shattered-remains.ts",
   "onr_v1_323_experimental-ai":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/experimental-ai.ts",
-  "onr_v1_340_setup":
+  onr_v1_340_setup:
     "packages/engine/src/card-implementations/onr-v1/corp/assets/setup.ts",
-  "onr_v1_345_trap":
+  onr_v1_345_trap:
     "packages/engine/src/card-implementations/onr-v1/corp/assets/trap.ts",
   "onr_v1_346_vacant-soulkiller":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/vacant-soulkiller.ts",
@@ -741,9 +741,9 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
   "onr_v1_352_chester-mix":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chester-mix.ts",
-  "onr_v1_353_chimera":
+  onr_v1_353_chimera:
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chimera.ts",
-  "onr_v1_354_crybaby":
+  onr_v1_354_crybaby:
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crybaby.ts",
   "onr_v1_355_crystal-palace-station-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
@@ -763,35 +763,35 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/washington-d-c-city-grid.ts",
   "onr_proteus_011_brain-wash":
     "packages/engine/src/card-implementations/proteus/corp/ice/brain-wash.ts",
-  "onr_proteus_014_chihuahua":
+  onr_proteus_014_chihuahua:
     "packages/engine/src/card-implementations/proteus/corp/ice/chihuahua.ts",
   "onr_proteus_015_colonel-failure":
     "packages/engine/src/card-implementations/proteus/corp/ice/colonel-failure.ts",
-  "onr_proteus_016_coyote":
+  onr_proteus_016_coyote:
     "packages/engine/src/card-implementations/proteus/corp/ice/coyote.ts",
-  "onr_proteus_018_datacomb":
+  onr_proteus_018_datacomb:
     "packages/engine/src/card-implementations/proteus/corp/ice/datacomb.ts",
   "onr_proteus_019_death-yo-yo":
     "packages/engine/src/card-implementations/proteus/corp/ice/death-yo-yo.ts",
-  "onr_proteus_027_iceberg":
+  onr_proteus_027_iceberg:
     "packages/engine/src/card-implementations/proteus/corp/ice/iceberg.ts",
-  "onr_proteus_029_marionette":
+  onr_proteus_029_marionette:
     "packages/engine/src/card-implementations/proteus/corp/ice/marionette.ts",
-  "onr_proteus_031_minotaur":
+  onr_proteus_031_minotaur:
     "packages/engine/src/card-implementations/proteus/corp/ice/minotaur.ts",
   "onr_proteus_032_misleading-access-menus":
     "packages/engine/src/card-implementations/proteus/corp/ice/misleading-access-menus.ts",
   "onr_proteus_033_mobile-barricade":
     "packages/engine/src/card-implementations/proteus/corp/ice/mobile-barricade.ts",
-  "onr_proteus_034_riddler":
+  onr_proteus_034_riddler:
     "packages/engine/src/card-implementations/proteus/corp/ice/riddler.ts",
-  "onr_proteus_035_roadblock":
+  onr_proteus_035_roadblock:
     "packages/engine/src/card-implementations/proteus/corp/ice/roadblock.ts",
-  "onr_proteus_037_scaffolding":
+  onr_proteus_037_scaffolding:
     "packages/engine/src/card-implementations/proteus/corp/ice/scaffolding.ts",
-  "onr_proteus_038_snowbank":
+  onr_proteus_038_snowbank:
     "packages/engine/src/card-implementations/proteus/corp/ice/snowbank.ts",
-  "onr_proteus_042_tumblers":
+  onr_proteus_042_tumblers:
     "packages/engine/src/card-implementations/proteus/corp/ice/tumblers.ts",
   "onr_proteus_043_twisty-passages":
     "packages/engine/src/card-implementations/proteus/corp/ice/twisty-passages.ts",
@@ -809,7 +809,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/operations/data-sifters.ts",
   "onr_proteus_049_emergency-rig":
     "packages/engine/src/card-implementations/proteus/corp/operations/emergency-rig.ts",
-  "onr_proteus_050_manhunt":
+  onr_proteus_050_manhunt:
     "packages/engine/src/card-implementations/proteus/corp/operations/manhunt.ts",
   "onr_proteus_051_rent-to-own-contract":
     "packages/engine/src/card-implementations/proteus/corp/operations/rent-to-own-contract.ts",
@@ -857,7 +857,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/corp/upgrades/simon-francisco.ts",
   "onr_proteus_077_weapons-depot":
     "packages/engine/src/card-implementations/proteus/corp/upgrades/weapons-depot.ts",
-  "onr_proteus_078_armageddon":
+  onr_proteus_078_armageddon:
     "packages/engine/src/card-implementations/proteus/runner/programs/armageddon.ts",
   "onr_proteus_079_big-frackin-gun":
     "packages/engine/src/card-implementations/proteus/runner/programs/big-frackin-gun.ts",
@@ -865,35 +865,35 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/programs/black-widow.ts",
   "onr_proteus_081_boring-bit":
     "packages/engine/src/card-implementations/proteus/runner/programs/boring-bit.ts",
-  "onr_proteus_082_bulldozer":
+  onr_proteus_082_bulldozer:
     "packages/engine/src/card-implementations/proteus/runner/programs/bulldozer.ts",
-  "onr_proteus_083_corrosion":
+  onr_proteus_083_corrosion:
     "packages/engine/src/card-implementations/proteus/runner/programs/corrosion.ts",
-  "onr_proteus_084_crumble":
+  onr_proteus_084_crumble:
     "packages/engine/src/card-implementations/proteus/runner/programs/crumble.ts",
   "onr_proteus_086_enterprise-inc-shields":
     "packages/engine/src/card-implementations/proteus/runner/programs/enterprise-inc-shields.ts",
   "onr_proteus_087_forwards-legacy":
     "packages/engine/src/card-implementations/proteus/runner/programs/forwards-legacy.ts",
-  "onr_proteus_088_fubar":
+  onr_proteus_088_fubar:
     "packages/engine/src/card-implementations/proteus/runner/programs/fubar.ts",
   "onr_proteus_089_garbage-in":
     "packages/engine/src/card-implementations/proteus/runner/programs/garbage-in.ts",
-  "onr_proteus_090_highlighter":
+  onr_proteus_090_highlighter:
     "packages/engine/src/card-implementations/proteus/runner/programs/highlighter.ts",
-  "onr_proteus_091_lockjaw":
+  onr_proteus_091_lockjaw:
     "packages/engine/src/card-implementations/proteus/runner/programs/lockjaw.ts",
   "onr_proteus_092_morphing-tool":
     "packages/engine/src/card-implementations/proteus/runner/programs/morphing-tool.ts",
-  "onr_proteus_093_redecorator":
+  onr_proteus_093_redecorator:
     "packages/engine/src/card-implementations/proteus/runner/programs/redecorator.ts",
-  "onr_proteus_094_scaldan":
+  onr_proteus_094_scaldan:
     "packages/engine/src/card-implementations/proteus/runner/programs/scaldan.ts",
   "onr_proteus_095_skeleton-passkeys":
     "packages/engine/src/card-implementations/proteus/runner/programs/skeleton-passkeys.ts",
-  "onr_proteus_096_skullcap":
+  onr_proteus_096_skullcap:
     "packages/engine/src/card-implementations/proteus/runner/programs/skullcap.ts",
-  "onr_proteus_097_taxman":
+  onr_proteus_097_taxman:
     "packages/engine/src/card-implementations/proteus/runner/programs/taxman.ts",
   "onr_proteus_098_vienna-22":
     "packages/engine/src/card-implementations/proteus/runner/programs/vienna-22.ts",
@@ -915,7 +915,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/events/personal-touch-the.ts",
   "onr_proteus_123_senatorial-field-trip":
     "packages/engine/src/card-implementations/proteus/runner/events/senatorial-field-trip.ts",
-  "onr_proteus_124_stakeout":
+  onr_proteus_124_stakeout:
     "packages/engine/src/card-implementations/proteus/runner/events/stakeout.ts",
   "onr_proteus_125_subliminal-corruption":
     "packages/engine/src/card-implementations/proteus/runner/events/subliminal-corruption.ts",
@@ -945,7 +945,7 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/proteus/runner/resources/precision-bribery.ts",
   "onr_proteus_147_r-and-d-mole":
     "packages/engine/src/card-implementations/proteus/runner/resources/r-and-d-mole.ts",
-  "onr_proteus_149_simulacrum":
+  onr_proteus_149_simulacrum:
     "packages/engine/src/card-implementations/proteus/runner/resources/simulacrum.ts",
   "onr_proteus_150_streetware-distributor":
     "packages/engine/src/card-implementations/proteus/runner/resources/streetware-distributor.ts",
@@ -969,14 +969,18 @@ function implementedCoverageFor(
   const reasons: string[] = [];
   const currentLocations = new Set<string>();
 
-  if (implementation.modifiers?.some((modifier) => modifier.kind === "rez_cost")) {
+  if (
+    implementation.modifiers?.some((modifier) => modifier.kind === "rez_cost")
+  ) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for passive Corp rez-cost modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_REZ_COST_MODIFIER_LOCATION);
   }
   if (
-    implementation.modifiers?.some((modifier) => modifier.kind === "ice_strength")
+    implementation.modifiers?.some(
+      (modifier) => modifier.kind === "ice_strength",
+    )
   ) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for passive ICE-strength modifier behavior.",
@@ -984,7 +988,9 @@ function implementedCoverageFor(
     currentLocations.add(IMPLEMENTED_ICE_STRENGTH_MODIFIER_LOCATION);
   }
   if (
-    implementation.modifiers?.some((modifier) => modifier.kind === "install_cost")
+    implementation.modifiers?.some(
+      (modifier) => modifier.kind === "install_cost",
+    )
   ) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for passive Corp install-cost modifier behavior.",
@@ -1019,14 +1025,18 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_ADDITIONAL_SUBROUTINE_MODIFIER_LOCATION);
   }
-  if (implementation.modifiers?.some((modifier) => modifier.kind === "hand_size")) {
+  if (
+    implementation.modifiers?.some((modifier) => modifier.kind === "hand_size")
+  ) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for passive hand-size modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION);
   }
   if (
-    implementation.modifiers?.some((modifier) => modifier.kind === "memory_units")
+    implementation.modifiers?.some(
+      (modifier) => modifier.kind === "memory_units",
+    )
   ) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for passive memory-unit modifier behavior.",
@@ -1062,7 +1072,9 @@ function implementedCoverageFor(
     currentLocations.add(IMPLEMENTED_BREAK_SUBROUTINE_COST_MODIFIER_LOCATION);
   }
   if (
-    implementation.modifiers?.some((modifier) => modifier.kind === "access_count")
+    implementation.modifiers?.some(
+      (modifier) => modifier.kind === "access_count",
+    )
   ) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for passive access-count modifier behavior.",
@@ -1306,7 +1318,7 @@ export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementation
       status: "no_engine_behavior_required",
       reason:
         "Tycho Extension has no additional rules text; normal agenda scoring and agenda points come from the CardDefinition data.",
-      currentLocations: ["packages/shared/src/index.ts"],
+      currentLocations: ["packages/shared/src/card-definitions.ts"],
     },
   ];
 

@@ -1,14 +1,14 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { CURRENT_RULES_BASELINE } from "./baselines";
 import { LEGACY_ABILITY_PAYLOAD_FIELDS } from "./ability-payload";
-import {
-  CORE_DEMO_DECK_IDS,
-  LEGACY_FIXTURE_DECK_IDS,
-} from "./demo-fixtures";
+import { CORE_DEMO_DECK_IDS, LEGACY_FIXTURE_DECK_IDS } from "./demo-fixtures";
 import { DEMO_DECKS } from "./demo-decks";
 import {
   DEMO_DECK_IDS,
   AI_DECISION_DEBUG_SCHEMA_VERSION,
+  CARD_DEFINITIONS,
+  CARD_DEFINITIONS_BY_ID,
   CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
   DEMO_CARDS_BY_ID,
   DEMO_DECKS as INDEX_DEMO_DECKS,
@@ -62,9 +62,7 @@ describe("demo deck fixture registry", () => {
       ...CORE_DEMO_DECK_IDS,
       ...LEGACY_FIXTURE_DECK_IDS,
     ]);
-    expect(Object.keys(DEMO_DECKS).sort()).toEqual(
-      [...DEMO_DECK_IDS].sort(),
-    );
+    expect(Object.keys(DEMO_DECKS).sort()).toEqual([...DEMO_DECK_IDS].sort());
     expect(INDEX_DEMO_DECKS).toBe(DEMO_DECKS);
   });
 });
@@ -78,6 +76,21 @@ describe("rules baseline registry", () => {
 });
 
 describe("shared card definition registry", () => {
+  it("keeps concrete card data out of the shared contract barrel", () => {
+    const barrel = readFileSync(new URL("./index.ts", import.meta.url), "utf8");
+
+    expect(barrel).toContain('from "./card-definitions"');
+    expect(barrel).not.toContain("ONR_V1_LIMITED_PLAYABLE_CARDS");
+    expect(barrel).not.toContain('id: "onr_v1_');
+  });
+
+  it("exposes a current-state registry independent from the shared barrel implementation", () => {
+    expect(CARD_DEFINITIONS.length).toBeGreaterThan(0);
+    expect(CARD_DEFINITIONS_BY_ID["onr_v1_140_raven-microcyb-eagle"]).toBe(
+      DEMO_CARDS_BY_ID["onr_v1_140_raven-microcyb-eagle"],
+    );
+  });
+
   it("keeps Raven Microcyb Eagle on its real deck text and subtype", () => {
     const raven = DEMO_CARDS_BY_ID["onr_v1_140_raven-microcyb-eagle"];
 
