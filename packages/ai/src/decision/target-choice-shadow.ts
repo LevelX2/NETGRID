@@ -14,13 +14,31 @@ export const TARGET_CHOICE_SHADOW_SCHEMA_VERSION =
 
 export type TargetChoiceShadowOptionKind = "choice_option" | "target_option";
 
+export type TargetChoiceShadowOptionClass =
+  | "card"
+  | "server"
+  | "ice"
+  | "program"
+  | "resource"
+  | "hardware"
+  | "agenda"
+  | "counter"
+  | "side"
+  | "subroutine"
+  | "decline"
+  | "pass"
+  | "choice"
+  | "unknown";
+
 export type TargetChoiceShadowOption = {
   requirementId: string;
   optionId: string;
   kind: TargetChoiceShadowOptionKind;
+  optionClass: TargetChoiceShadowOptionClass;
   rank: number;
   score: number;
   evidence: string[];
+  whyNot: string[];
 };
 
 export type TargetChoiceShadowBlockedRequirement = {
@@ -44,6 +62,7 @@ export type TargetChoiceShadowScorecardV2 = {
         requirementId: string;
         optionId: string;
         kind: TargetChoiceShadowOptionKind;
+        optionClass: TargetChoiceShadowOptionClass;
         score: number;
       }
     | undefined;
@@ -164,7 +183,9 @@ export type BuildTargetChoiceShadowReportParams = {
   candidate?: ActionSemanticCandidate;
   preferredOptionIds?: readonly string[];
   avoidOptionIds?: readonly string[];
-  sideSafeTargetIdsByRequirementId?: Readonly<Record<string, readonly string[]>>;
+  sideSafeTargetIdsByRequirementId?: Readonly<
+    Record<string, readonly string[]>
+  >;
   utilityFamilies?: readonly TacticalGoalUtilityFamily[];
   threats?: readonly AiThreatProjection[];
   opportunities?: readonly AiOpportunityProjection[];
@@ -218,7 +239,9 @@ function targetChoiceWouldSelect(
   rankedOptions: readonly TargetChoiceShadowOption[],
   blocked: readonly TargetChoiceShadowBlockedRequirement[],
 ): Pick<TargetChoiceShadowReport["selectionOutput"], "wouldSelect"> {
-  if (blocked.some((requirement) => requirement.reason === "engine_only_target")) {
+  if (
+    blocked.some((requirement) => requirement.reason === "engine_only_target")
+  ) {
     return {};
   }
   if (
@@ -251,7 +274,9 @@ function targetChoiceWouldSelect(
   };
 }
 
-export function targetChoiceEvidenceHasHiddenInfoMarker(entry: string): boolean {
+export function targetChoiceEvidenceHasHiddenInfoMarker(
+  entry: string,
+): boolean {
   return entry
     .toLowerCase()
     .split(/[.:-]+/)
@@ -272,6 +297,7 @@ function choiceOptions(
         requirement.choiceId,
         optionId,
         "choice_option",
+        choiceOptionClass(optionId),
         index,
         preferred,
         avoid,
@@ -299,6 +325,7 @@ function targetOptions(
           requirement.id,
           optionId,
           "target_option",
+          targetOptionClass(params, requirement, optionId),
           index,
           preferred,
           avoid,
@@ -319,11 +346,15 @@ function option(
   requirementId: string,
   optionId: string,
   kind: TargetChoiceShadowOptionKind,
+  optionClass: TargetChoiceShadowOptionClass,
   index: number,
   preferred: ReadonlySet<string>,
   avoid: ReadonlySet<string>,
   evidence: readonly string[],
-  contextScore: TargetChoiceShadowContextScore = { scoreDelta: 0, evidence: [] },
+  contextScore: TargetChoiceShadowContextScore = {
+    scoreDelta: 0,
+    evidence: [],
+  },
 ): TargetChoiceShadowOption {
   const safeOptionId = safe(optionId);
   const preferenceBonus = preferred.has(safeOptionId) ? 25 : 0;
@@ -333,6 +364,7 @@ function option(
     requirementId: safe(requirementId),
     optionId: safeOptionId,
     kind,
+    optionClass,
     rank: 0,
     score:
       100 -
@@ -347,6 +379,11 @@ function option(
       `context_score_delta:${contextScore.scoreDelta}`,
       `preferred:${preferenceBonus > 0}`,
       `avoid:${avoidPenalty > 0}`,
+      `option_class:${optionClass}`,
+    ],
+    whyNot: [
+      ...(avoidPenalty > 0 ? ["explicitly_avoided"] : []),
+      ...(contextScore.scoreDelta < 0 ? ["negative_context_score"] : []),
     ],
   };
 }
@@ -354,7 +391,7 @@ function option(
 function rankOptions(
   options: readonly TargetChoiceShadowOption[],
 ): TargetChoiceShadowOption[] {
-  return [...options]
+  const ranked = [...options]
     .sort(
       (left, right) =>
         right.score - left.score ||
@@ -362,6 +399,16 @@ function rankOptions(
         left.optionId.localeCompare(right.optionId),
     )
     .map((option, index) => ({ ...option, rank: index + 1 }));
+  const topScore = ranked[0]?.score;
+  return ranked.map((option) => ({
+    ...option,
+    whyNot: [
+      ...option.whyNot,
+      ...(topScore !== undefined && option.rank > 1
+        ? ["lower_score_than_top", `score_gap:${topScore - option.score}`]
+        : []),
+    ],
+  }));
 }
 
 function blockedRequirements(
@@ -384,7 +431,10 @@ function blockedRequirements(
         requirementId: safe(requirement.id),
         kind: requirement.kind,
         reason: "no_side_safe_options",
-        evidence: ["target_requirement_options:none", ...targetOptions.evidence],
+        evidence: [
+          "target_requirement_options:none",
+          ...targetOptions.evidence,
+        ],
       });
     }
   }
@@ -431,6 +481,7 @@ function buildTargetChoiceShadowScorecardV2(
           requirementId: topOption.requirementId,
           optionId: topOption.optionId,
           kind: topOption.kind,
+          optionClass: topOption.optionClass,
           score: topOption.score,
         }
       : undefined,
@@ -552,9 +603,10 @@ function targetContextScore(
 
   if (
     utilityFamilies.has("run_access") &&
-    matchingOpportunities.some((opportunity) =>
-      opportunity.opportunity === "known_agenda_payoff" ||
-      opportunity.opportunity === "safe_central_access",
+    matchingOpportunities.some(
+      (opportunity) =>
+        opportunity.opportunity === "known_agenda_payoff" ||
+        opportunity.opportunity === "safe_central_access",
     )
   ) {
     const delta = isCentralTarget(safeOptionId) ? 18 : 10;
@@ -598,7 +650,9 @@ function opportunityPriorityBonus(
   }
 }
 
-function threatSeverityPenalty(severity: AiThreatProjection["severity"]): number {
+function threatSeverityPenalty(
+  severity: AiThreatProjection["severity"],
+): number {
   switch (severity) {
     case "critical":
       return 32;
@@ -637,7 +691,8 @@ function hasTargetlessScoreWindow(
 ): boolean {
   return opportunities.some(
     (opportunity) =>
-      opportunity.opportunity === "score_window" && opportunity.targetId === undefined,
+      opportunity.opportunity === "score_window" &&
+      opportunity.targetId === undefined,
   );
 }
 
@@ -651,7 +706,14 @@ function targetOptionIdsForRequirement(
       evidence: ["target_option_source:legal_action_allowed_servers"],
     };
   }
-  const explicitOptions = params.sideSafeTargetIdsByRequirementId?.[requirement.id];
+  if (requirement.kind === "side" && requirement.allowedSides !== undefined) {
+    return {
+      optionIds: uniqueStrings(requirement.allowedSides),
+      evidence: ["target_option_source:legal_action_allowed_sides"],
+    };
+  }
+  const explicitOptions =
+    params.sideSafeTargetIdsByRequirementId?.[requirement.id];
   if (explicitOptions !== undefined) {
     return {
       optionIds: uniqueStrings(explicitOptions),
@@ -691,6 +753,7 @@ function payloadTargetOptions(
       target.requirementId,
       target.optionId,
       "target_option",
+      target.optionClass,
       index,
       preferred,
       avoid,
@@ -704,18 +767,18 @@ function payloadTargetOptions(
   );
 }
 
-function sideSafePayloadTargets(
-  action: LegalAction,
-): {
+function sideSafePayloadTargets(action: LegalAction): {
   requirementId: string;
   optionId: string;
   kind: LegalAction["targetRequirements"][number]["kind"];
+  optionClass: TargetChoiceShadowOptionClass;
   payloadKey: string;
 }[] {
   const targets: {
     requirementId: string;
     optionId: string;
     kind: LegalAction["targetRequirements"][number]["kind"];
+    optionClass: TargetChoiceShadowOptionClass;
     payloadKey: string;
   }[] = [];
   const serverId = action.payload?.serverId;
@@ -724,6 +787,7 @@ function sideSafePayloadTargets(
       requirementId: "payload.serverId",
       optionId: serverId,
       kind: "server",
+      optionClass: "server",
       payloadKey: "serverId",
     });
   }
@@ -733,6 +797,7 @@ function sideSafePayloadTargets(
       requirementId: "payload.cardId",
       optionId: cardId,
       kind: "card",
+      optionClass: "card",
       payloadKey: "cardId",
     });
   }
@@ -754,25 +819,63 @@ function candidateTargetIdsForRequirement(
 ): string[] {
   const context = candidate?.targetContext;
   if (!context || context.hiddenInfoPolicy === "hidden_info_blocked") return [];
-  const targetKind = targetKindFromRequirement(requirementKind);
-  if (targetKind === "unknown") return [];
+  const targetKinds = targetKindsFromRequirement(requirementKind);
+  if (targetKinds.length === 0) return [];
   return uniqueStrings(
-    [
-      ...context.selectedTargets,
-      ...(context.availableTargets ?? []),
-    ]
-      .filter((target) => target.targetKind === targetKind)
+    [...context.selectedTargets, ...(context.availableTargets ?? [])]
+      .filter((target) => targetKinds.includes(target.targetKind))
       .map((target) => target.targetId),
   );
 }
 
-function targetKindFromRequirement(
+function targetKindsFromRequirement(
   kind: LegalAction["targetRequirements"][number]["kind"],
-): "card" | "server" | "subroutine" | "unknown" {
-  if (kind === "card") return "card";
-  if (kind === "server") return "server";
-  if (kind === "subroutine") return "subroutine";
-  return "unknown";
+): NonNullable<ActionSemanticCandidate["targetContext"]>["targetKind"][] {
+  if (kind === "card") {
+    return ["card", "ice", "program", "resource", "hardware", "agenda"];
+  }
+  if (kind === "server") return ["server"];
+  if (kind === "subroutine") return ["subroutine"];
+  if (kind === "side") return ["choice"];
+  return [];
+}
+
+function targetOptionClass(
+  params: BuildTargetChoiceShadowReportParams,
+  requirement: LegalAction["targetRequirements"][number],
+  optionId: string,
+): TargetChoiceShadowOptionClass {
+  if (requirement.kind === "server") return "server";
+  if (requirement.kind === "subroutine") return "subroutine";
+  if (requirement.kind === "side") return "side";
+  const context = params.candidate?.targetContext;
+  const matchingTarget = [
+    ...(context?.selectedTargets ?? []),
+    ...(context?.availableTargets ?? []),
+  ].find((target) => safe(target.targetId) === safe(optionId));
+  const targetKind = matchingTarget?.targetKind;
+  if (
+    targetKind === "card" ||
+    targetKind === "ice" ||
+    targetKind === "program" ||
+    targetKind === "resource" ||
+    targetKind === "hardware" ||
+    targetKind === "agenda"
+  ) {
+    return targetKind;
+  }
+  return "card";
+}
+
+function choiceOptionClass(optionId: string): TargetChoiceShadowOptionClass {
+  const normalized = safe(optionId).toLowerCase();
+  if (["decline", "none", "no", "skip", "do_not_use"].includes(normalized)) {
+    return "decline";
+  }
+  if (normalized === "pass") return "pass";
+  if (normalized === "runner" || normalized === "corp") return "side";
+  if (normalized.includes("counter")) return "counter";
+  return "choice";
 }
 
 function uniqueStrings(values: readonly string[]): string[] {
@@ -786,7 +889,10 @@ function safe(value: string): string {
 function assertTargetChoiceShadowReportSideSafe(
   report: TargetChoiceShadowReport,
 ): void {
-  const forbiddenPath = findForbiddenSemanticPath(report, "TargetChoiceShadowReport");
+  const forbiddenPath = findForbiddenSemanticPath(
+    report,
+    "TargetChoiceShadowReport",
+  );
   if (!forbiddenPath) return;
   throw new Error(
     `TargetChoiceShadowReport contains forbidden hidden-info marker: ${forbiddenPath}`,
