@@ -10,6 +10,7 @@ import { applyTagEffectSemantics } from "./actions/tag-effect-semantics";
 import { applyTargetContextProjection } from "./actions/action-target-context";
 import { applyBasicActionSemantics } from "./actions/basic-action-semantics";
 import { applyRunAccessDecisionModel } from "./actions/run-access-decision-model";
+import { applyRandomBadPublicityModel } from "./actions/random-bad-publicity-model";
 
 export const ACTION_SEMANTIC_CANDIDATE_SCHEMA_VERSION =
   "action-semantic-candidate-v1" as const;
@@ -286,6 +287,35 @@ export type ActionRunAccessDecisionModel = {
   evidence: string[];
 };
 
+export type ActionRandomOutcomeModel = {
+  schemaVersion: "random-outcome-model-v1";
+  outcomeStatus: "not_drawn";
+  purpose?: string;
+  randomCounterAfter?: number;
+  source: "engine_random_draw_records_only";
+  futureOutcomeAccess: "forbidden";
+  deterministicProjection: true;
+  evidence: string[];
+};
+
+export type ActionBadPublicityDecisionModel = {
+  schemaVersion: "bad-publicity-decision-model-v1";
+  delta?: number;
+  current?: number;
+  after?: number;
+  lossThreshold: 7;
+  thresholdStatus: "reached" | "not_reached" | "unknown";
+  actorRelevance: "payoff" | "risk" | "support";
+  source: "legal_action_payload" | "side_safe_semantics";
+  hiddenInfoPolicy: "side_safe_visible_only";
+  evidence: string[];
+};
+
+export type ActionRandomBadPublicityModel = {
+  randomOutcome?: ActionRandomOutcomeModel;
+  badPublicity?: ActionBadPublicityDecisionModel;
+};
+
 export type ActionTagEffectProfile = {
   kind: "remove_tags" | "avoid_tag" | "avoid_next_tag" | "tag_clear_support";
   recipient: "runner";
@@ -357,6 +387,7 @@ export type ActionSemanticCandidate = {
   targetContext?: ActionTargetContext;
   runProjectionSummary?: ActionRunProjectionSummary;
   runAccessDecisionModel?: ActionRunAccessDecisionModel;
+  randomBadPublicityModel?: ActionRandomBadPublicityModel;
   tagEffectProfile?: ActionTagEffectProfile;
   boardContext: BoardContextSummary;
   confidence: ActionSemanticConfidence;
@@ -502,7 +533,11 @@ function projectActionSemanticCandidate(
     tagEffectCandidate,
     cardSemanticProfilesByDefinitionId,
   );
-  return applyRunAccessDecisionModel(cardSemanticCandidate, action);
+  const runAccessCandidate = applyRunAccessDecisionModel(
+    cardSemanticCandidate,
+    action,
+  );
+  return applyRandomBadPublicityModel(runAccessCandidate, action);
 }
 
 export function buildNeutralActionSemanticCandidate(

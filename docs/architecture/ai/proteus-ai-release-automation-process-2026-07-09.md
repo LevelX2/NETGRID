@@ -99,8 +99,9 @@ Jeder Zustand kann bei einem Sicherheitsbefund nach `blocked` wechseln. Normale 
 | PAI-2A | `done` | TargetChoiceShadow klassifiziert Karten-, ICE-, Programm-, Hardware-, Server-, Side-, Counter-, Decline- und Pass-Optionen aus LegalAction-/side-safe Candidate-Evidence und liefert WhyNot-Gründe. |
 | PAI-2B | `done` | ActionSemanticCandidate trägt ein side-sicheres Run-/Access-Modell für Bypass, Zusatzsubroutinen, Redirect, Replacement, Post-run, Ambush-, Damage-, Tag-, Disruption-, Tax- und Payoff-Achsen. |
 | PAI-2C | `done` | Cost-/Timing-Profile binden X-Min/Max/Choice, gewählten Wert, explizite Restreserve sowie Action-, Encounter-, Run-, Turn- und Action-Debt-Dauer ausschließlich aus LegalAction-Payloads. |
-| PAI-2D | `next` | Zufalls- und Bad-Publicity-Modell. |
-| PAI-2E bis PAI-6 | `pending` | Noch nicht begonnen. |
+| PAI-2D | `done` | ActionSemanticCandidate bildet Zufall ausschließlich als noch nicht gezogenen Engine-RandomDrawRecord ab und bewertet sichtbare Bad-Publicity-Deltas, Akteursrelevanz und die Verlustschwelle ohne Ergebnisvorwegnahme. |
+| PAI-2E | `next` | Hidden-Resource-, Virus-/Antibody-Counter- und Purge-Modell. |
+| PAI-3 bis PAI-6 | `pending` | Noch nicht begonnen. |
 
 ## Paketfolge
 
