@@ -216,6 +216,49 @@ describe("visible run analysis runner run credit pools", () => {
       unpayableReason: "ice_unaffordable",
     });
   });
+
+  it.each([4, 5, 6])(
+    "spends Pile Driver stealth loss before a later Codecracker quote with %i cash",
+    (cash) => {
+      const rig = [
+        pileDriverBreaker("runner-pile-driver"),
+        codecrackerBreaker("runner-codecracker"),
+        nonNoisyBreakerCreditPool("runner-cloak", 3),
+      ];
+      const assessment = assessKnownRezzedIcePath(
+        [keeperIce("rd-keeper"), fireWallIce("rd-fire-wall")],
+        rig,
+        runnerRunPathCreditBudgetWithVisiblePools(cash, rig),
+      );
+
+      expect(assessment).toMatchObject({
+        blocked: true,
+        canReachAccess: false,
+        noAccessReason: "known_path_unpayable",
+        unpayableReason: "later_ice_unaffordable_after_prior_ice_cost",
+      });
+    },
+  );
+
+  it("reaches the same path with seven cash but no stale Cloak reserve", () => {
+    const rig = [
+      pileDriverBreaker("runner-pile-driver"),
+      codecrackerBreaker("runner-codecracker"),
+      nonNoisyBreakerCreditPool("runner-cloak", 3),
+    ];
+    const assessment = assessKnownRezzedIcePath(
+      [keeperIce("rd-keeper"), fireWallIce("rd-fire-wall")],
+      rig,
+      runnerRunPathCreditBudgetWithVisiblePools(7, rig),
+    );
+
+    expect(assessment).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 7,
+      creditsAfterPath: 0,
+    });
+  });
 });
 
 describe("visible run analysis trace hazards", () => {
@@ -517,6 +560,32 @@ function classicCodeGateIce(instanceId: string): VisibleCard {
     known: true,
     rezzed: true,
     strength: 2,
+  };
+}
+
+function fireWallIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_245_fire-wall",
+    title: "Fire Wall",
+    type: "ice",
+    subtypes: ["wall"],
+    known: true,
+    rezzed: true,
+    strength: 4,
+  };
+}
+
+function keeperIce(instanceId: string): VisibleCard {
+  return {
+    instanceId,
+    definitionId: "onr_v1_252_keeper",
+    title: "Keeper",
+    type: "ice",
+    subtypes: ["code_gate"],
+    known: true,
+    rezzed: true,
+    strength: 4,
   };
 }
 

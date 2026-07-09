@@ -3,6 +3,36 @@ import { describe, expect, it } from "vitest";
 import { publicContextForAction } from "./public-context";
 
 describe("publicContextForAction", () => {
+  it("publishes the structured server id for start-run history", () => {
+    const state = {
+      run: { attackedServerId: "rd", accessCount: 1 },
+      corp: { servers: [] },
+      cardInstances: {},
+    } as unknown as GameState;
+    const action = {
+      side: "runner",
+      type: "start_run",
+      payload: { serverId: "rd" },
+    } as unknown as LegalAction;
+
+    expect(
+      publicContextForAction(state, action, {
+        agendaPointsForScoredCard: () => 0,
+        cardCounter: () => 0,
+        cardStrengthModifier: () => 0,
+        creditCostForAction: () => 0,
+        definitionFor: () => {
+          throw new Error("not needed");
+        },
+        pumpAmountForLegalAction: () => 0,
+        runnerHqAccessBonus: () => 0,
+        v1915InstalledAccessBonus: () => 0,
+      }),
+    ).toMatchObject({
+      serverId: "rd",
+    });
+  });
+
   it("forwards Corp install placement without exposing hidden card identity", () => {
     const state = {
       corp: { servers: [] },

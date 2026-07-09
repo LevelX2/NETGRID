@@ -6,6 +6,7 @@ import {
   runnerAdjustedPlanPriority,
   runnerDeckStrategyPlanPriorityBoost,
   runnerPressureProbeAllowance,
+  runnerRunTargetCurrentStep,
   runnerRunTargetPlanScoreBreakdown,
 } from "./tactical-plan-runner-run-targets";
 import type {
@@ -87,6 +88,48 @@ describe("runnerPressureProbeAllowance", () => {
       ]),
     );
   });
+
+  it("preserves the last click for an urgent reachable remote contest", () => {
+    const remoteRun = runAction("run-remote-1", "remote_1");
+    const evaluation = runTargetEvaluation({
+      actionId: remoteRun.actionId,
+      targetServerId: "remote_1",
+      targetKind: "remote",
+      recommendation: "gain_credits_first",
+      accessPayoff: "score_threat",
+      scoreThreat: true,
+      score: 1521,
+    });
+    const lastClickContext = planContext({
+      primaryStrategyId: "runner.remote_contest",
+      runnerClicks: 1,
+      runTargetEvaluations: [evaluation],
+    });
+    const twoClickContext = planContext({
+      primaryStrategyId: "runner.remote_contest",
+      runnerClicks: 2,
+      runTargetEvaluations: [evaluation],
+    });
+    const defaultStep = {
+      stepId: "run_target:remote_1",
+      kind: "run_target" as const,
+      desiredActionSemantics: ["run.start"],
+      rationale: ["urgent reachable score threat"],
+    };
+
+    expect(
+      runnerRunTargetCurrentStep(lastClickContext, remoteRun, defaultStep),
+    ).toMatchObject({
+      kind: "run_target",
+      desiredActionSemantics: ["run.start"],
+    });
+    expect(
+      runnerRunTargetCurrentStep(twoClickContext, remoteRun, defaultStep),
+    ).toMatchObject({
+      kind: "gain_credits",
+      desiredActionSemantics: ["economy.gain_credit"],
+    });
+  });
 });
 
 function pressureBudget(
@@ -109,10 +152,14 @@ function pressureBudget(
 function planContext(input: {
   primaryStrategyId: string;
   secondaryStrategyIds?: string[];
+  runnerClicks?: number;
   runTargetEvaluations?: RunnerRunTargetEvaluation[];
 }): TacticalPlanBuildContext {
   return {
-    input: { side: "runner" } as AiDecisionInput,
+    input: {
+      side: "runner",
+      playerView: { own: { clicks: input.runnerClicks ?? 4 } },
+    } as AiDecisionInput,
     strategicIntentState: {
       primaryStrategy: { strategyId: input.primaryStrategyId },
       secondaryStrategies: (input.secondaryStrategyIds ?? []).map(

@@ -35,6 +35,41 @@ describe("belief-state hidden zone action classification", () => {
   });
 });
 
+describe("belief-state revealed opponent ownership", () => {
+  it("does not classify the Runner's own searched card as an opponent card", () => {
+    const ownSearchResult = publicEvent("evt_runner_search", "resolve_choice", 1, {
+      actor: "runner",
+      actionType: "resolve_choice",
+      hiddenZoneAction: "p3_37_search_stack_to_grip",
+      cardDefinitionId: "onr_v1_047_pile-driver",
+      title: "Pile Driver",
+      revealKind: "reveal",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "onr_v1_047_pile-driver",
+    });
+    const opponentAccess = publicEvent("evt_corp_access", "access_card", 2, {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "rd",
+      cardDefinitionId: "onr_v1_206_marine-arcology",
+      title: "Marine Arcology",
+    });
+
+    const revealedOpponentSubjects = reconstructBeliefState(
+      runnerInput([ownSearchResult, opponentAccess]),
+    ).entries
+      .filter((entry) => entry.kind === "revealed_opponent_fact")
+      .map((entry) => entry.subject);
+
+    expect(revealedOpponentSubjects).toContain(
+      "revealed_opponent_card:onr_v1_206_marine-arcology",
+    );
+    expect(revealedOpponentSubjects).not.toContain(
+      "revealed_opponent_card:onr_v1_047_pile-driver",
+    );
+  });
+});
+
 describe("belief-state R&D top freshness", () => {
   it("forgets a single known R&D top card after the Runner trashes it with public origin context", () => {
     const accessEvent = publicEvent("evt_1", "access_card", 1, {
