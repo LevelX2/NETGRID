@@ -2,12 +2,13 @@ param(
   [string]$OpenUrl = "",
   [string]$OpenPath = "/",
   [switch]$ServerDevMode,
-  [switch]$RestartServer
+  [switch]$RestartServer,
+  [switch]$RestartWeb
 )
 
 $ErrorActionPreference = "Stop"
 
-$projectRoot = "C:\Projekte\NETGRID"
+$projectRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 $localWebUrl = "http://127.0.0.1:3100"
 $localServerUrl = "http://127.0.0.1:8787/health"
 $logDir = Join-Path $env:TEMP "netgrid"
@@ -319,6 +320,12 @@ if (-not $serverReadyLanBefore) {
 $webReadyLanBefore = Test-Endpoint -Url $webUrl
 $webReadyLocalBefore = Test-Endpoint -Url $localWebUrl
 Write-LauncherLog "Web precheck lan=$webReadyLanBefore local=$webReadyLocalBefore"
+
+if ($RestartWeb) {
+  Stop-PortListeners -Ports @(3100)
+  $webReadyLanBefore = $false
+  $webReadyLocalBefore = $false
+}
 
 if (-not $webReadyLanBefore) {
   Stop-PortListeners -Ports @(3100)

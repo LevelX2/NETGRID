@@ -420,7 +420,7 @@ describe("Action semantic invariants", () => {
     ).toHaveLength(expectedReadinessAreas.length);
   });
 
-  it("keeps proteus random and bad-publicity readiness diagnostic", () => {
+  it("keeps proteus random and bad-publicity readiness evidence", () => {
     const report = readFileSync(
       path.join(
         repoRoot,
@@ -444,12 +444,12 @@ describe("Action semantic invariants", () => {
     expect(report).toContain("needs_random_model");
     expect(report).toContain("needs_bad_publicity_model");
     expect(report).toContain("ready_for_semantic_annotation");
-    expect(report).toContain("productiveUseAllowed: false");
-    expect(report).toContain("runtimeConsumerStatus: none");
-    expect(report).toContain("proteus_ai_supported: false");
+    expect(report).toContain("productiveUseAllowed: true");
+    expect(report).toContain("runtimeConsumerStatus: action_semantic_candidate_v1");
+    expect(report).toContain("defaultPoolReady: true");
   });
 
-  it("keeps proteus hidden resource ambush readiness diagnostic", () => {
+  it("keeps proteus hidden resource ambush readiness evidence", () => {
     const report = readFileSync(
       path.join(
         repoRoot,
@@ -476,8 +476,9 @@ describe("Action semantic invariants", () => {
     expect(report).toContain("target_choice_gaps");
     expect(report).toContain("access_ambush_precision");
     expect(report).toContain("virus_counter_risk");
-    expect(report).toContain("productiveUseAllowed: false");
-    expect(report).toContain("proteus_ai_supported: false");
+    expect(report).toContain("productiveUseAllowed: true");
+    expect(report).toContain("runtimeConsumerStatus: action_semantic_candidate_v1");
+    expect(report).toContain("defaultPoolReady: true");
   });
 
   it("covers runner breaker-search worklist package one as diagnostic semantics", () => {

@@ -280,6 +280,7 @@ export function MatchHostConsole({
         isHumanVsHuman={isHumanVsHuman}
         isHumanVsAi={isHumanVsAi}
         hasAiOpponent={hasAiOpponent}
+        matchCardPool={matchCardPool}
         humanSideSelection={humanSideSelection}
         humanAiSideSelection={humanAiSideSelection}
         countdownSeconds={countdownSeconds}

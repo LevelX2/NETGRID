@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveMatchStart, matchCardPoolCardLabel, matchFormatCardLabel, matchStartLobbyBlocksSetup, matchStartPlayerClockLabel, matchStartSummary, parseJoinLinkInput, playModeCardLabel } from "./match-start";
+import { aiDeckReadinessLabel, deriveMatchStart, matchCardPoolCardLabel, matchFormatCardLabel, matchStartLobbyBlocksSetup, matchStartPlayerClockLabel, matchStartSummary, parseJoinLinkInput, playModeCardLabel } from "./match-start";
 
 describe("V1.0.4 match start derivation", () => {
   it("keeps Human-vs-Human side assignment server-readable", () => {
@@ -95,6 +95,26 @@ describe("V1.0.4 match start derivation", () => {
 
     expect(summary).toContain("KI-Decks: wie Teilnehmer A");
     expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
+  });
+
+  it("distinguishes Proteus selected-deck and default-pool readiness", () => {
+    expect(aiDeckReadinessLabel("selected", "originalset_proteus")).toEqual({
+      title: "Protheus-KI: Selected/Pilot freigegeben",
+      detail: "Explizit gewählte KI-Decks · side-sicherer Playtest-Stand",
+      ready: true
+    });
+    expect(aiDeckReadinessLabel("same_as_participant_a", "originalset_classic_proteus").title).toBe("Protheus-KI: Selected/Pilot freigegeben");
+    expect(aiDeckReadinessLabel("fixed", "originalset_proteus")).toEqual({
+      title: "Protheus-KI: Standardpool freigegeben",
+      detail: "Vier qualifizierte Pilotdecks · Fixed und Seeded Random",
+      ready: true
+    });
+    expect(aiDeckReadinessLabel("seeded_random", "originalset_classic_proteus").title).toBe("Protheus-KI: Standardpool freigegeben");
+  });
+
+  it("keeps non-Proteus readiness labels pool-generic", () => {
+    expect(aiDeckReadinessLabel("selected", "originalset")).toMatchObject({ title: "Auswahlmodus freigegeben", ready: true });
+    expect(aiDeckReadinessLabel("fixed", "originalset_classic")).toMatchObject({ title: "Standardpool freigegeben", ready: true });
   });
 
   it("does not let terminal lobby statuses block the match-start setup", () => {

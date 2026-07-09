@@ -7,24 +7,24 @@ import {
 } from "./ai-support-readiness";
 
 describe("AI support readiness contract", () => {
-  it("separates Proteus technical eligibility from default pool readiness", () => {
+  it("tracks Proteus technical eligibility and promoted default pool readiness", () => {
     const contract = activeAiSupportReadinessContract();
     const proteus = aiSupportReadinessForSet("proteus");
 
     expect(contract.schemaVersion).toBe("netgrid.ai-support-readiness.v1");
     expect(proteus).toMatchObject({
       technicalEligibilityStatus: "ai_supported",
-      highestApprovedStage: "selected_ai_playtest_ready",
+      highestApprovedStage: "default_pool_ready",
       stages: {
         hint_ready: { ready: true },
         selected_ai_playtest_ready: { ready: true },
-        default_pool_ready: { ready: false },
+        default_pool_ready: { ready: true },
       },
     });
     expect(aiSupportStageReady("proteus", "selected_ai_playtest_ready")).toBe(
       true,
     );
-    expect(aiSupportStageReady("proteus", "default_pool_ready")).toBe(false);
+    expect(aiSupportStageReady("proteus", "default_pool_ready")).toBe(true);
   });
 
   it("returns defensive copies of the active contract", () => {

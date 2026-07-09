@@ -1,6 +1,8 @@
 # AI Proteus Hidden Resource/Ambush/Virus Readiness
 
-Status: diagnostic_readiness_only
+Status: historical_diagnostic_review_superseded_by_default_pool_ready
+
+Aktualisierung 2026-07-09: Hidden Resources, abstraktes gegnerisches Risiko, Access/Ambush sowie Runner-Virus- und Corp-Antibody-Counter sind side-safe modelliert und durch Familien-/Pilotgates qualifiziert. Der folgende Text bleibt als historischer Vorbereitungsstand erhalten.
 
 ## Ziel
 
@@ -24,15 +26,15 @@ Proteus-Karten mit Hidden-Resource-, Ambush- und Virus/Antibody-Bezug diagnostis
 ## Gates
 
 ```text
-productiveUseAllowed: false
-semanticExecutionAllowed: false
-runtimeConsumerStatus: none
-noRuntimeEffect: true
+productiveUseAllowed: true
+semanticExecutionAllowed: true
+runtimeConsumerStatus: action_semantic_candidate_v1
+noRuntimeEffect: false
 technicalAiDeckEligibility: true
 selectedAiPlaytestReady: true
-defaultPoolReady: false
+defaultPoolReady: true
 ```
 
 ## Schluss
 
-Proteus bleibt ohne Runtime-Effekt. Hidden-Resource-Constraints, TargetChoice-Gaps, Access-Ambush-Präzision und Virus-Counter-Risiken werden erst nach Originalset-Stabilisierung weiter geöffnet.
+Die damaligen Removal Conditions sind geschlossen. Aktuelle Evidence steht im Proteus-Reconciliation-Final-Review vom 2026-07-09.

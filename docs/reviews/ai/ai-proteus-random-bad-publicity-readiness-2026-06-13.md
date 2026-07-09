@@ -1,6 +1,8 @@
 # AI Proteus Random/Bad Publicity Readiness
 
-Status: diagnostic_readiness_only
+Status: historical_diagnostic_review_superseded_by_default_pool_ready
+
+Aktualisierung 2026-07-09: Das Random-/Bad-Publicity-Modell ist umgesetzt, Zufall bleibt bis zum Engine-RandomDrawRecord unvorhergesagt, sichtbare Bad-Publicity-Schwellen werden side-safe bewertet und die Familien-/Pilotgates sind grün. Der folgende Text bleibt als historischer Vorbereitungsstand erhalten.
 
 ## Ziel
 
@@ -22,15 +24,15 @@ Proteus-Karten mit Random-Outcome- und Bad-Publicity-Bezug diagnostisch klassifi
 ## Gates
 
 ```text
-productiveUseAllowed: false
-semanticExecutionAllowed: false
-runtimeConsumerStatus: none
-noRuntimeEffect: true
+productiveUseAllowed: true
+semanticExecutionAllowed: true
+runtimeConsumerStatus: action_semantic_candidate_v1
+noRuntimeEffect: false
 technicalAiDeckEligibility: true
 selectedAiPlaytestReady: true
-defaultPoolReady: false
+defaultPoolReady: true
 ```
 
 ## Schluss
 
-Proteus bleibt hinter Originalset-Stabilität zurückgestellt. Diese Liste bereitet nur spätere Semantikannotation vor.
+Die damaligen Removal Conditions sind geschlossen. Aktuelle Evidence steht im Proteus-Reconciliation-Final-Review vom 2026-07-09.

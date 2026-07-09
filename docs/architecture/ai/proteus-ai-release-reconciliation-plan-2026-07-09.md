@@ -1,6 +1,6 @@
 # Proteus-KI-Freigabe: Reconciliation- und Rollout-Plan
 
-Status: `planned`
+Status: `implemented`
 
 Datum: 2026-07-09
 
@@ -10,14 +10,14 @@ Handoff: `release-implementation-agent`
 
 ## Kurzentscheidung
 
-Proteus ist technisch bereits teilweise für KI-Spiel freigegeben, aber nicht als belastbar kalibrierter Standard-KI-Pool abgeschlossen:
+Proteus ist technisch und als qualifizierter Standard-KI-Pool freigegeben:
 
 - 154/154 Karten stehen im aktiven Manifest auf `ai_supported: true` und besitzen aktive sowie kompilierte AI-Hints.
-- Ein explizit ausgewähltes Proteus-KI-Deck wird von Deckvalidierung und Server akzeptiert; der Multiplayer-Smoke dafür ist grün.
-- Die vier Proteus-Snapshots fehlen im versionierten `data/ai/ai-deck-pool-1.0.1.json`. Die Policies `fixed` und `seeded_random` wählen deshalb weiterhin keine Proteus-Decks. `selected` und bei passender Teilnehmerauswahl `same_as_participant_a` können Proteus bereits verwenden.
-- Die 154 Hints teilen nur eine gemeinsame generische Szenario-Referenz. Aktuell sind 146 Hints human-reviewed, 55 strategy-covered und 6 benchmark-covered; 8 brauchen noch Human Review. Die späteren Play-Strength-Reviews klassifizieren mehrere Mechanikfamilien weiterhin als nicht produktionsreif.
+- Explizit ausgewählte Proteus-KI-Decks werden von Deckvalidierung und Server akzeptiert; Selected-/Multiplayer-Smokes sind grün.
+- Vier qualifizierte Proteus-Snapshots stehen im versionierten `data/ai/ai-deck-pool-1.1.0.json`. `fixed` und `seeded_random` wählen poolbewusst; Originalset-, Classic-, Proteus- und kombinierter Pool sind getestet.
+- Elf Familien-Szenarien decken alle 114 Pilotdeck-Karten ab. Der feste 16-Spiel-Pilot meldet 0 IllegalActions, 0 Replay-/Redaction-Fehler und 0 % Fallback; vier Originalset-Kontrollen sind grün.
 
-`ai_supported` wird daher bis zur Bereinigung als technische Deckzulassung verstanden, nicht als Nachweis ausreichender Spielstärke für Default-/Random-Pools.
+`ai_supported` bleibt technische Karten-/Deckzulassung; die zusätzliche Default-/Random-Pool-Freigabe wird separat durch `default_pool_ready` und den qualifizierten Deckpool 1.1.0 belegt.
 
 ## Zielzustand
 

@@ -1,10 +1,12 @@
 # Proteus Play-Strength Readiness Classes
 
-Status: `selected_ai_playtest_ready_default_pool_blocked`
+Status: `historical_pre_rollout_review_superseded_by_default_pool_ready`
 
 Datum: 2026-06-13
 
 Bezugsprozess: AI-MAT3-20 aus `docs/architecture/ai/ai-play-strength-maturation-3-process-2026-06-13.md`.
+
+Aktualisierung 2026-07-09: Die nachfolgenden Klassen dokumentieren den damaligen Vorbereitungsstand. Ihre Removal Conditions sind durch das Familieninventar, elf Szenariopakete, die neuen Entscheidungsmodelle, den grünen 16-Spiel-Pilot und KI-Deckpool 1.1.0 geschlossen. Aktueller Status: `default_pool_ready`; führend ist `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`.
 
 ## Ergebnis
 

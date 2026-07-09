@@ -1,6 +1,6 @@
 # Proteus-KI-Release-Reconciliation: automatischer Paketprozess
 
-Status: `in_progress`
+Status: `integration_preflight`
 
 Quelle: `docs/architecture/ai/proteus-ai-release-reconciliation-plan-2026-07-09.md`
 
@@ -104,7 +104,7 @@ Jeder Zustand kann bei einem Sicherheitsbefund nach `blocked` wechseln. Normale 
 | PAI-3  | `done` | Deterministischer Szenariobuilder bindet alle 114 Pilotdeck-Karten genau einmal an elf Familienpakete mit positiven/negativen Entscheidungsassertions, KI-Modelltests, realer Engine-Evidence sowie Hidden-Info-/Replay-/StateHash-Gates.                                                                                          |
 | PAI-4  | `done` | Vier Deckpaarungen über vier feste Seeds liefern 16 Pilotspiele: 0 IllegalActions, 0 Replay-/Redaction-Fehler, 25 % Abschluss-, 75 % Action-Limit-, 12,5 % No-Progress- und 0 % Fallback-Rate; vier Originalset-Kontrollen sind grün. Vier dabei gefundene Engine-Lücken wurden reproduziert, regressionsgetestet und geschlossen. |
 | PAI-5  | `done` | KI-Deckpool 1.1.0 enthält vier qualifizierte Proteus-Snapshots; `fixed` nutzt poolbewusste Defaults, `seeded_random` wählt für Originalset-, Classic- und Proteus-Pools strikt innerhalb des Pools und bleibt im kombinierten Pool explizit validiert.                                                                             |
-| PAI-6  | `next` | Matchstart-Statusanzeige, führender Wissenssync, Browser-Smoke und finales Vollgate.                                                                                                                                                                                                                                               |
+| PAI-6  | `done` | Matchstart unterscheidet Selected/Pilot und Standardpool, die führenden Wissensartefakte sind synchron, der Browser-Smoke blieb fehlerfrei und das Vollgate einschließlich 16-Spiel-Pilotcheck ist grün.                                                                                                                           |
 
 ## Paketfolge
 
