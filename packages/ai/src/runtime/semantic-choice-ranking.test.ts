@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
-import {
-  tacticalPlanMappedChoice,
-} from "./semantic-choice-ranking";
+import { tacticalPlanMappedChoice } from "./semantic-choice-ranking";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
 import type { PlanStepMappingResult } from "../tactical-plans";
 
@@ -108,6 +106,24 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideChoice).toBeUndefined();
     expect(result.overrideBlockedChoice?.action.actionId).toBe("gain");
     expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+  });
+
+  it("keeps tag-clear survival plan mapping over off-plan run pressure", () => {
+    const removeTag = legalAction("remove-tag", "remove_tag");
+    const run = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(run, 9000), choice(removeTag, 10)],
+      tagClearMapping([removeTag]),
+      choice(run, 9000),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_blocked");
+    expect(result.choice?.action.actionId).toBe("remove-tag");
+    expect(result.overrideChoice).toBeUndefined();
+    expect(result.overrideBlockedChoice?.action.actionId).toBe("run-rd");
+    expect(result.overrideBlockedReason).toBe("runner_plan_controller");
+    expect(result.overrideThreshold).toBe(Number.POSITIVE_INFINITY);
   });
 
   it("keeps coverage-plan mapping for close semantic run gaps", () => {
@@ -265,10 +281,7 @@ describe("tacticalPlanMappedChoice", () => {
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
     const result = tacticalPlanMappedChoice(
       aiInput(),
-      [
-        choice(run, 7425, strategicEvidence("exact")),
-        choice(gain, 7025),
-      ],
+      [choice(run, 7425, strategicEvidence("exact")), choice(gain, 7025)],
       coverageMapping([gain]),
       choice(run, 7425, strategicEvidence("exact")),
     );
@@ -288,10 +301,7 @@ describe("tacticalPlanMappedChoice", () => {
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
     const result = tacticalPlanMappedChoice(
       aiInput(),
-      [
-        choice(run, 7785),
-        choice(mappedRun, 7025, strategicEvidence("exact")),
-      ],
+      [choice(run, 7785), choice(mappedRun, 7025, strategicEvidence("exact"))],
       remoteContestMapping([mappedRun]),
       choice(run, 7785),
     );
@@ -347,10 +357,7 @@ describe("tacticalPlanMappedChoice", () => {
     const run = legalAction("run-rd", "start_run", { serverId: "rd" });
     const result = tacticalPlanMappedChoice(
       aiInput(),
-      [
-        choice(run, 7485, strategicEvidence("kind")),
-        choice(gain, 7025),
-      ],
+      [choice(run, 7485, strategicEvidence("kind")), choice(gain, 7025)],
       coverageMapping([gain]),
       choice(run, 7485, strategicEvidence("kind")),
     );
@@ -467,9 +474,7 @@ function scoreComponentEvidence(key: string): string[] {
   return [`semantic_score_component:${key}`];
 }
 
-function coverageMapping(
-  legalActions: LegalAction[],
-): PlanStepMappingResult {
+function coverageMapping(legalActions: LegalAction[]): PlanStepMappingResult {
   return planMapping("runner.obtain_breaker_coverage", legalActions);
 }
 
@@ -482,9 +487,7 @@ function creditBaseMapping(
   return planMapping("runner.build_credit_base", legalActions, overrides);
 }
 
-function centralRunMapping(
-  legalActions: LegalAction[],
-): PlanStepMappingResult {
+function centralRunMapping(legalActions: LegalAction[]): PlanStepMappingResult {
   return planMapping("runner.opportunistic_central_run", legalActions);
 }
 
@@ -493,6 +496,12 @@ function bestHandCardMapping(
 ): PlanStepMappingResult {
   return planMapping("runner.play_best_hand_card", legalActions, {
     stepKind: "install_development_card",
+  });
+}
+
+function tagClearMapping(legalActions: LegalAction[]): PlanStepMappingResult {
+  return planMapping("runner.clear_tags_or_survive", legalActions, {
+    stepKind: "clear_tags",
   });
 }
 
@@ -579,7 +588,7 @@ function aiInput(
   return {
     side: "runner",
     playerView: {
-        stateVersion: 20,
+      stateVersion: 20,
       side: "runner",
       activeSide: "runner",
       phase: "runner_action_phase",

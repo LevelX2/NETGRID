@@ -86,6 +86,8 @@ Commit: `docs(ai): plan runner review followups 2`
 
 Ziel: `runner.clear_tags_or_survive` gegen normale Off-plan-Ausreißer schützen; `clear_tags` und `convert_success_window` nicht mehr über generische Karten-ActionTypes matchen lassen; minimale Step-Prioritäten ergänzen.
 
+Status: erledigt 2026-07-09. Gates grün: gezielte `semantic-choice-ranking`-/`tactical-plan-step-candidate-matching`-Tests, `@netgrid/ai` Typecheck, `git diff --check`.
+
 Kernartefakte:
 
 - `packages/ai/src/runtime/semantic-choice-ranking.ts`

@@ -57,8 +57,7 @@ export function tacticalPlanMappedChoice(
     .map((action) =>
       choices.find(
         (choice) =>
-          !choice.exclusion &&
-          choice.action.actionId === action.actionId,
+          !choice.exclusion && choice.action.actionId === action.actionId,
       ),
     )
     .filter((choice): choice is SemanticRuntimeChoice => Boolean(choice));
@@ -224,10 +223,9 @@ export function tacticalPlanMappedChoice(
     return tacticalPlanBlockedOverrideResult({
       mappedChoice,
       overrideChoice,
-      reason:
-        threshold.reason.endsWith("mapping_protected")
-          ? threshold.reason
-          : "semantic_score_gap_below_threshold",
+      reason: threshold.reason.endsWith("mapping_protected")
+        ? threshold.reason
+        : "semantic_score_gap_below_threshold",
       scoreGap,
       threshold: threshold.scoreGap,
     });
@@ -340,11 +338,14 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   return !runnerPlanOverrideIsHardInterrupt(mapping.plan, overrideChoice);
 }
 
-function runnerPlanTypeRequiresPlanDominance(type: TacticalPlan["type"]): boolean {
+function runnerPlanTypeRequiresPlanDominance(
+  type: TacticalPlan["type"],
+): boolean {
   return (
     type === "runner.contest_remote" ||
     type === "runner.obtain_breaker_coverage" ||
     type === "runner.opportunistic_central_run" ||
+    type === "runner.clear_tags_or_survive" ||
     type === "runner.convert_success_window" ||
     type === "runner.restore_hand_buffer" ||
     type === "runner.develop_hand_card" ||
@@ -426,7 +427,9 @@ function tacticalPlanRemoteContestMappingBlocksRunOverride(
   if (!planTarget?.startsWith("remote_")) return false;
   const overrideTarget = semanticRuntimeServerId(overrideChoice.action);
   if (!overrideTarget || overrideTarget === planTarget) return false;
-  if (!mapping.plan.evidence.includes("runner_run_target_payoff:score_threat")) {
+  if (
+    !mapping.plan.evidence.includes("runner_run_target_payoff:score_threat")
+  ) {
     return false;
   }
   return scoreGap <= 3000;
@@ -452,8 +455,8 @@ function tacticalPlanNonPositiveMappingStillProtected(
   );
   return Boolean(
     route &&
-      route !== "economy_route:unknown" &&
-      route !== "economy_route:basic_credit_fallback",
+    route !== "economy_route:unknown" &&
+    route !== "economy_route:basic_credit_fallback",
   );
 }
 
@@ -468,7 +471,9 @@ export function tacticalPlanMappingOverrideEvidence(
     `tactical_plan_semantic_choice_reason:${result.overrideReason ?? "semantic_score_gap"}`,
     `tactical_plan_mapping_score_gap:${result.scoreGap ?? 0}`,
     ...(result.overrideThreshold !== undefined
-      ? [`tactical_plan_mapping_score_gap_threshold:${result.overrideThreshold}`]
+      ? [
+          `tactical_plan_mapping_score_gap_threshold:${result.overrideThreshold}`,
+        ]
       : []),
   ];
 }
@@ -576,7 +581,8 @@ function tacticalPlanOverrideScoreGapThreshold(
   overrideChoice: SemanticRuntimeChoice,
 ): { scoreGap: number; reason: string } {
   const mappedStrategic = semanticRuntimeChoiceStrategicFitLevel(mappedChoice);
-  const overrideStrategic = semanticRuntimeChoiceStrategicFitLevel(overrideChoice);
+  const overrideStrategic =
+    semanticRuntimeChoiceStrategicFitLevel(overrideChoice);
   if (overrideStrategic !== "none" && mappedStrategic === "none") {
     return {
       scoreGap:
@@ -762,7 +768,9 @@ function semanticRuntimeChoiceHasAnyScoreComponent(
   choice: SemanticRuntimeChoice,
   keys: readonly string[],
 ): boolean {
-  return keys.some((key) => semanticRuntimeChoiceHasScoreComponent(choice, key));
+  return keys.some((key) =>
+    semanticRuntimeChoiceHasScoreComponent(choice, key),
+  );
 }
 
 function mergedAiPublicHistory(input: AiDecisionInput): PublicGameEvent[] {

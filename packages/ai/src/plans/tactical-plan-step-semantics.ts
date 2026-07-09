@@ -8,8 +8,10 @@ export function candidateSemanticsMatchStep(
   const tokens = candidateSemanticTokens(candidate);
   switch (step.kind) {
     case "install_breaker":
-      return hasToken(tokens, "install.card") &&
-        hasAnyToken(tokens, ["breaker", "icebreaker", "program"]);
+      return (
+        hasToken(tokens, "install.card") &&
+        hasAnyToken(tokens, ["breaker", "icebreaker", "program"])
+      );
     case "search_for_answer":
       return hasAnyToken(tokens, [
         "program_search",
@@ -19,7 +21,8 @@ export function candidateSemanticsMatchStep(
         "setup.program_search",
       ]);
     case "setup_search_engine":
-      return hasToken(tokens, "install.card") &&
+      return (
+        hasToken(tokens, "install.card") &&
         hasAnyToken(tokens, [
           "program_search",
           "breaker_search",
@@ -27,7 +30,8 @@ export function candidateSemanticsMatchStep(
           "search_for_answer",
           "setup.program_search",
           "search",
-        ]);
+        ])
+      );
     case "build_bank_counter":
       return hasAnyToken(tokens, [
         "temporary_resource_bank",
@@ -78,13 +82,15 @@ export function candidateSemanticsMatchStep(
         "corp_rez_ice",
       ]);
     case "install_or_prepare_agenda":
-      return hasToken(tokens, "install.card") &&
+      return (
+        hasToken(tokens, "install.card") &&
         hasAnyToken(tokens, [
           "scoreline",
           "score_line",
           "corp_score_agenda",
           "agenda",
-        ]);
+        ])
+      );
     case "advance_score_card":
       return hasAnyToken(tokens, [
         "score.advance_card",
@@ -113,7 +119,8 @@ function candidateSemanticTokens(
     addToken(tokens, support.role);
     addToken(tokens, `${support.strategyId}:${support.role}`);
   }
-  for (const condition of candidate.conditions) addToken(tokens, condition.kind);
+  for (const condition of candidate.conditions)
+    addToken(tokens, condition.kind);
   for (const risk of candidate.risks) addToken(tokens, risk.kind);
   for (const constraint of candidate.constraints) {
     addToken(tokens, constraint.kind);
@@ -164,7 +171,10 @@ function addTokenPart(tokens: Set<string>, value: string): void {
   if (value.length > 0) tokens.add(value);
 }
 
-export function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
+export function actionTypeMatchesStep(
+  step: PlanStep,
+  actionType: string,
+): boolean {
   switch (step.kind) {
     case "install_breaker":
       return actionType === "install_card";
@@ -187,19 +197,9 @@ export function actionTypeMatchesStep(step: PlanStep, actionType: string): boole
     case "gain_credits":
       return actionType === "gain_credit";
     case "clear_tags":
-      return (
-        actionType === "remove_tag" ||
-        actionType === "trigger_ability" ||
-        actionType === "activated_card_ability" ||
-        actionType === "play_event"
-      );
+      return actionType === "remove_tag";
     case "convert_success_window":
-      return (
-        actionType === "trigger_ability" ||
-        actionType === "activated_card_ability" ||
-        actionType === "play_event" ||
-        actionType === "resolve_choice"
-      );
+      return false;
     case "install_development_card":
       return (
         actionType === "install_card" ||
@@ -219,7 +219,10 @@ export function actionTypeMatchesStep(step: PlanStep, actionType: string): boole
       );
     case "build_bank_counter":
     case "cash_out_bank":
-      return actionType === "trigger_ability" || actionType === "activated_card_ability";
+      return (
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability"
+      );
     case "run_target":
     case "probe_central":
       return (
