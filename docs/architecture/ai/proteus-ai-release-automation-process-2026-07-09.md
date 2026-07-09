@@ -98,8 +98,9 @@ Jeder Zustand kann bei einem Sicherheitsbefund nach `blocked` wechseln. Normale 
 | PAI-1 | `done` | Deterministisches Inventar klassifiziert 154/154 Karten in elf Familien und bindet 114 Pilotdeck-Karten an Evidence und Removal Conditions. |
 | PAI-2A | `done` | TargetChoiceShadow klassifiziert Karten-, ICE-, Programm-, Hardware-, Server-, Side-, Counter-, Decline- und Pass-Optionen aus LegalAction-/side-safe Candidate-Evidence und liefert WhyNot-Gründe. |
 | PAI-2B | `done` | ActionSemanticCandidate trägt ein side-sicheres Run-/Access-Modell für Bypass, Zusatzsubroutinen, Redirect, Replacement, Post-run, Ambush-, Damage-, Tag-, Disruption-, Tax- und Payoff-Achsen. |
-| PAI-2C | `next` | X-Kosten- und Timing-Modell. |
-| PAI-2D bis PAI-6 | `pending` | Noch nicht begonnen. |
+| PAI-2C | `done` | Cost-/Timing-Profile binden X-Min/Max/Choice, gewählten Wert, explizite Restreserve sowie Action-, Encounter-, Run-, Turn- und Action-Debt-Dauer ausschließlich aus LegalAction-Payloads. |
+| PAI-2D | `next` | Zufalls- und Bad-Publicity-Modell. |
+| PAI-2E bis PAI-6 | `pending` | Noch nicht begonnen. |
 
 ## Paketfolge
 

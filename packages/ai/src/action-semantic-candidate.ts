@@ -138,6 +138,8 @@ export type ActionCostProfile = {
     min?: number;
     max?: number;
     chosen?: number;
+    postActionReserve?: number;
+    source?: "legal_action_payload";
   };
   additionalCosts: string[];
 };
@@ -152,6 +154,20 @@ export type ActionTimingProfile = {
   scoreWindow?: boolean;
   rezWindow?: boolean;
   responseWindow?: boolean;
+  duration?: {
+    kind:
+      | "current_action"
+      | "current_encounter"
+      | "current_run"
+      | "current_turn"
+      | "next_action"
+      | "action_debt"
+      | "persistent"
+      | "unknown";
+    source: "legal_action_payload" | "action_type" | "timing_point";
+    actions?: number;
+    expiresAt?: string | number;
+  };
 };
 
 export type LegalTarget = {

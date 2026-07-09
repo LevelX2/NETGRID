@@ -33,7 +33,7 @@ export function applyCostAndTimingProfiles(
   };
 }
 
-function costProfileForAction(action: LegalAction): ActionCostProfile {
+export function costProfileForAction(action: LegalAction): ActionCostProfile {
   const clickCost = sumCost(action, "clicks");
   const explicitCreditCost = sumCost(action, "credits");
   const payloadCreditCost =
@@ -126,25 +126,43 @@ function xValueForAction(
 function variableCostForAction(
   action: LegalAction,
 ): ActionCostProfile["variableCost"] | undefined {
+  const xValue = xValueForAction(action);
   const variableRezKind = stringPayload(action, "variableRezKind");
   const variableRezValue = numberPayload(action, "variableRezValue");
   const variableRezAdditionalCost = numberPayload(
     action,
     "variableRezAdditionalCost",
   );
+  const min =
+    numberPayload(action, "xMinValue") ??
+    numberPayload(action, "xMinimum") ??
+    variableRezAdditionalCost;
+  const max =
+    numberPayload(action, "xMaxValue") ??
+    numberPayload(action, "xMaximum") ??
+    numberPayload(action, "variableRezCap");
+  const chosen = typeof xValue === "number" ? xValue : variableRezValue;
+  const postActionReserve =
+    numberPayload(action, "creditsRemainingAfterCost") ??
+    numberPayload(action, "postActionCredits");
   if (
+    xValue === undefined &&
     variableRezKind === undefined &&
     variableRezValue === undefined &&
-    variableRezAdditionalCost === undefined
+    variableRezAdditionalCost === undefined &&
+    min === undefined &&
+    max === undefined
   ) {
     return undefined;
   }
   return {
-    kind: "rez_cost",
-    ...(variableRezValue !== undefined ? { chosen: variableRezValue } : {}),
-    ...(variableRezAdditionalCost !== undefined
-      ? { min: variableRezAdditionalCost }
-      : {}),
+    kind:
+      xValue !== undefined && variableRezKind === undefined ? "x" : "rez_cost",
+    ...(chosen !== undefined ? { chosen } : {}),
+    ...(min !== undefined ? { min } : {}),
+    ...(max !== undefined ? { max } : {}),
+    ...(postActionReserve !== undefined ? { postActionReserve } : {}),
+    source: "legal_action_payload",
   };
 }
 
@@ -162,9 +180,9 @@ function selfDamageForAction(
   ];
 }
 
-function damageTypePayload(action: LegalAction): NonNullable<
-  ActionCostProfile["selfDamage"]
->[number]["type"] {
+function damageTypePayload(
+  action: LegalAction,
+): NonNullable<ActionCostProfile["selfDamage"]>[number]["type"] {
   const value = stringPayload(action, "damageType");
   if (value === "net" || value === "meat" || value === "brain") return value;
   if (value === "core") return "core";
@@ -264,7 +282,14 @@ function additionalCostFields(action: LegalAction): string[] {
     "variableRezKind",
     "variableRezAdditionalCost",
     "variableRezValue",
+    "variableRezCap",
     "xValue",
+    "xMinValue",
+    "xMinimum",
+    "xMaxValue",
+    "xMaximum",
+    "creditsRemainingAfterCost",
+    "postActionCredits",
   ];
   return fields.filter((field) => action.payload?.[field] !== undefined);
 }
@@ -275,9 +300,12 @@ function numberPayload(action: LegalAction, key: string): number | undefined {
   return value;
 }
 
-function timingProfileForAction(action: LegalAction): ActionTimingProfile {
+export function timingProfileForAction(
+  action: LegalAction,
+): ActionTimingProfile {
   const timingPoint = action.timingPoint;
   const turnSide = turnSideForTimingPoint(timingPoint);
+  const duration = durationForAction(action);
   return {
     phase: phaseForTimingPoint(timingPoint),
     ...(turnSide !== undefined ? { turnSide } : {}),
@@ -295,7 +323,65 @@ function timingProfileForAction(action: LegalAction): ActionTimingProfile {
     action.type === "activated_card_ability"
       ? { responseWindow: true }
       : {}),
+    ...(duration ? { duration } : {}),
   };
+}
+
+function durationForAction(
+  action: LegalAction,
+): ActionTimingProfile["duration"] | undefined {
+  if (action.type === "forgo_action") {
+    return {
+      kind: "action_debt",
+      source: "action_type",
+      actions:
+        numberPayload(action, "forgoActionsPending") ??
+        numberPayload(action, "durationActions") ??
+        1,
+    };
+  }
+  const rawDuration =
+    stringPayload(action, "duration") ??
+    stringPayload(action, "cardImplementationDuration") ??
+    stringPayload(action, "modifierDuration");
+  const expiresAt = action.payload?.expiresAt;
+  if (rawDuration === undefined && expiresAt === undefined) return undefined;
+  return {
+    kind: normalizeDuration(rawDuration),
+    source: "legal_action_payload",
+    ...(typeof expiresAt === "string" || typeof expiresAt === "number"
+      ? { expiresAt }
+      : {}),
+  };
+}
+
+function normalizeDuration(
+  value: string | undefined,
+): NonNullable<ActionTimingProfile["duration"]>["kind"] {
+  if (value === undefined) return "unknown";
+  const normalized = value.toLowerCase();
+  if (normalized === "current_action" || normalized === "action") {
+    return "current_action";
+  }
+  if (normalized === "current_encounter" || normalized === "encounter") {
+    return "current_encounter";
+  }
+  if (normalized === "current_run" || normalized === "run") {
+    return "current_run";
+  }
+  if (
+    normalized === "current_turn" ||
+    normalized === "turn" ||
+    normalized === "until_end_of_turn"
+  ) {
+    return "current_turn";
+  }
+  if (normalized === "next_action") return "next_action";
+  if (normalized === "action_debt") return "action_debt";
+  if (normalized === "persistent" || normalized === "game") {
+    return "persistent";
+  }
+  return "unknown";
 }
 
 function scoreWindowForAction(action: LegalAction): boolean {
