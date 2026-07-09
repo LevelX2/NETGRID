@@ -76,13 +76,45 @@ describe("runnerBasicActionPenaltyScoreComponents", () => {
       ),
     ).toBe(false);
   });
+
+  it("penalizes basic setup when a high-priority central pressure goal is ready", () => {
+    const gain = action("gain_credit");
+    gain.source = "basic_action";
+    const run = action("start_run", { serverId: "rd" });
+    const input = inputWithActions([gain, run]);
+    input.playerView.own.credits = 8;
+    (input as AiDecisionInput & { ownRunnerTacticalGoals: unknown[] })
+      .ownRunnerTacticalGoals = [
+      {
+        goalId: "runner.pressure_good_central_target",
+        priority: 900,
+        targetServerId: "rd",
+      },
+    ];
+
+    expect(
+      runnerBasicActionPenaltyScoreComponents(
+        input,
+        gain,
+        "basic_economy_draw",
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_basic_setup_over_ready_pressure",
+          value: -1200,
+          reason: expect.stringContaining("target:rd"),
+        }),
+      ]),
+    );
+  });
 });
 
 function inputWithActions(legalActions: LegalAction[]): AiDecisionInput {
   return {
     side: "runner",
     legalActions,
-    playerView: { own: { clicks: 1 } },
+    playerView: { own: { clicks: 1, credits: 0 } },
   } as AiDecisionInput;
 }
 

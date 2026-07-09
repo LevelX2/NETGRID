@@ -4295,6 +4295,50 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("penalizes central over-ice while an agenda needs an underbuilt remote", () => {
+    const installHqIce = corpAction(
+      "install-third-hq-ice",
+      "install_card",
+      { placement: "ice", serverId: "hq" },
+      "hq-extra-ice",
+    );
+    const input = corpInputWithHqCards(
+      8,
+      [agendaCard("agenda-in-hq"), corpIce("hq-extra-ice")],
+      [installHqIce],
+    );
+    input.playerView.servers = [
+      {
+        id: "hq",
+        label: "HQ",
+        ice: [corpIce("hq-1"), corpIce("hq-2")],
+        root: [],
+      },
+      { id: "rd", label: "R&D", ice: [], root: [] },
+      { id: "remote_1", label: "Remote 1", ice: [], root: [] },
+    ];
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      installHqIce,
+      "basic_install",
+      {
+        ...testDependencies(),
+        rolesForAction: () => ["ice", "protect"],
+      },
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_central_overice_remote_underbuild",
+          value: -2600,
+          reason: expect.stringContaining("underbuilt_remote:remote_1"),
+        }),
+      ]),
+    );
+  });
+
   it("uses board triage so HQ protection beats remote setup under agenda exposure", () => {
     const protectHq = corpAction("protect-hq", "install_card", {
       placement: "ice",

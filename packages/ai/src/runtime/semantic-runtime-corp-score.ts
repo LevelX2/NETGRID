@@ -420,6 +420,15 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       boardTriageState,
     );
     if (lowValueInstallDefer) components.push(lowValueInstallDefer);
+    const centralOvericeRemoteUnderbuild =
+      corpCentralOvericeRemoteUnderbuildComponent(
+        input,
+        action,
+        boardTriageState,
+      );
+    if (centralOvericeRemoteUnderbuild) {
+      components.push(centralOvericeRemoteUnderbuild);
+    }
     if (hqAgendaRelief) components.push(hqAgendaRelief.component);
     addCorpScoringWindowEvidenceComponent(
       components,
@@ -1388,6 +1397,50 @@ function corpLowValueInstallDeferComponent<TConsumer extends string>(
       `ice_count:${iceCount}`,
       `empty_remote:${emptyRemote}`,
       `placement:${String(action.payload?.placement ?? "unknown")}`,
+    ].join("|"),
+  };
+}
+
+function corpCentralOvericeRemoteUnderbuildComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card" || action.payload?.placement !== "ice") {
+    return undefined;
+  }
+  const serverId = corpInstallServerId(action);
+  if (!serverId || !["hq", "rd", "archives"].includes(serverId)) {
+    return undefined;
+  }
+  if (
+    boardTriageState.primary === "protect_hq" ||
+    boardTriageState.primary === "protect_rd"
+  ) {
+    return undefined;
+  }
+  const centralIceCount = corpServerIceCount(input, serverId);
+  if (centralIceCount < 2) return undefined;
+  const underbuiltRemote = input.playerView.servers
+    .filter((server) => server.id.startsWith("remote_"))
+    .filter((server) => server.ice.length < 2)
+    .sort((left, right) => left.id.localeCompare(right.id))[0];
+  if (!underbuiltRemote) return undefined;
+  const agendaNeedsRemote = [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.servers.flatMap((server) => server.root),
+  ].some((card) => card.known !== false && corpVisibleCardIsAgenda(card));
+  if (!agendaNeedsRemote) return undefined;
+  return {
+    key: "corp_central_overice_remote_underbuild",
+    label: "Zentral-Overice bei Remote-Unterbau",
+    value: -2600,
+    reason: [
+      `central:${serverId}`,
+      `central_ice_count:${centralIceCount}`,
+      `underbuilt_remote:${underbuiltRemote.id}`,
+      `underbuilt_remote_ice:${underbuiltRemote.ice.length}`,
+      "agenda_needs_remote:true",
     ].join("|"),
   };
 }

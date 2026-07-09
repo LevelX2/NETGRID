@@ -182,7 +182,16 @@ integrate_main -> blocker
   abilities, unbekannte Quellen und Choice-Aktionen ohne auflösbare Auswahl
   führen zu einem typisierten `SemanticCoverageFallbackError`, statt unter dem
   irreführenden Label `lowest_risk_deterministic` ausgeführt zu werden.
-- `AICSC-6`: `pending`.
+- `AICSC-6`: `done`; bei einem aktiven, hoch priorisierten Zentraldruck-Ziel
+  werden reine Basis-Economy-/Draw-Aktionen zugunsten der passenden legalen
+  Run-Aktion gedämpft. Corp erhält einen eigenständigen Overice-Guard, wenn
+  bereits mindestens zwei ICE auf dem Ziel-Central liegen, eine sichtbare
+  Agenda ein Scoring-Remote benötigt und ein Remote unterbaut ist; echte
+  HQ-/R&D-Schutztriage bleibt ausgenommen. Fokussierte Runner-/Corp-
+  Regressionen sind grün. Der 1×120-Strategy-Smoke meldet 0 IllegalActions,
+  ReplayFailures und Timeouts; größere 3×2×240- und 3×5×480-Läufe wurden nach
+  Überschreiten des 60-Sekunden-Fensters ausdrücklich nicht als bestanden
+  gewertet.
 - `AICSC-7`: `pending`.
 - `AICSC-8`: `pending`.
 
