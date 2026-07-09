@@ -244,6 +244,44 @@ describe("runner run plan path quote", () => {
     expect(quote.canReachAccess).toBe(true);
   });
 
+  it("does not re-quote passed outer ICE while breaking the inner ICE", () => {
+    const passedKeeper = visibleIce({
+      instanceId: "passed-keeper",
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      credits: 2,
+      passedOuterIce: [passedKeeper],
+      legalActions: [
+        pumpAction({ costs: [{ credits: 1 }] }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+
+    expect(
+      quote.iceQuotes.map((iceQuote) => iceQuote.iceRef.instanceId),
+    ).toEqual(["ice-1"]);
+    expect(sequence?.steps.map((step) => step.actionType)).toEqual([
+      "pump_breaker",
+      "pump_breaker",
+    ]);
+    expect(quote.totalKnownCost).toBe(2);
+    expect(quote.expectedRemainingCredits).toBe(0);
+    expect(quote.canReachAccess).toBe(true);
+    expect(quote.cannotReachReason).toBeUndefined();
+  });
+
   it("requires breaking hard future-path modifiers before visible future ICE", () => {
     const input = runnerEncounterInput({
       iceDefinitionId: "onr_v1_261_quandary",
@@ -346,11 +384,13 @@ function runnerEncounterInput(params: {
   extraRig?: VisibleCard[];
   breakerStrength?: number;
   futureIce?: VisibleCard[];
+  passedOuterIce?: VisibleCard[];
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
   legalActions: LegalAction[];
 }): AiDecisionInput {
   const ice = visibleIce(params);
   const futureIce = params.futureIce ?? [];
+  const passedOuterIce = params.passedOuterIce ?? [];
   return {
     side: "runner",
     playerView: {
@@ -400,7 +440,7 @@ function runnerEncounterInput(params: {
         {
           id: "rd",
           label: "R&D",
-          ice: [...futureIce, ice],
+          ice: [...futureIce, ice, ...passedOuterIce],
           root: [],
         },
       ],

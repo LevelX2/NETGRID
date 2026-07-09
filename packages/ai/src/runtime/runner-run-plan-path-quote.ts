@@ -83,17 +83,17 @@ export function quoteRunnerRunPath(
       })
     : undefined;
   const currentIceInstanceId = currentEncounter?.instanceId;
-  const remainingCurrentRunIce =
+  const remainingActiveRunIce =
     activeRunTargetsPlan && activeRun.position?.kind === "ice"
-      ? currentRunRemainingIce(input)
-      : [];
+      ? activeRunRemainingPathIce(input, server?.ice ?? [])
+      : undefined;
   const serverIce =
     activeRunTargetsPlan && activeRun.position?.kind === "server"
       ? []
       : activeRunTargetsPlan && activeRun.phase === "access"
         ? []
-        : activeRunTargetsPlan && remainingCurrentRunIce.length > 0
-          ? remainingCurrentRunIce
+        : remainingActiveRunIce !== undefined
+          ? remainingActiveRunIce
           : (server?.ice ?? []);
   const otherIceQuotes = serverIce
     .filter((ice) => ice.instanceId !== currentIceInstanceId)
@@ -157,6 +157,19 @@ export function quoteRunnerRunPath(
           sequence !== undefined,
       ),
   };
+}
+
+function activeRunRemainingPathIce(
+  input: AiDecisionInput,
+  serverIce: readonly VisibleCard[],
+): VisibleCard[] {
+  const run = input.playerView.run;
+  if (!run || run.position?.kind !== "ice") return [];
+  if (run.phase === "encounter_ice") {
+    return currentRunRemainingIce(input);
+  }
+  const currentOrApproachedIceIndex = Math.max(0, run.position.iceIndex);
+  return serverIce.slice(0, currentOrApproachedIceIndex + 1);
 }
 
 export function runnerRunPlanCurrentEncounterSequence(params: {
