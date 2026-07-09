@@ -49,7 +49,14 @@ const cards = manifestCards.map((manifestCard) => {
       strategyCovered: activeHint.quality?.strategyCovered === true,
       benchmarkCovered: activeHint.quality?.benchmarkCovered === true,
       confidence: activeHint.quality?.confidence ?? "unknown",
-      scenarioRefs: [...(activeHint.scenarioRefs ?? [])].sort(),
+      scenarioRefs: [
+        ...(activeHint.scenarioRefs ?? []),
+        ...(pilotDeckIds.length > 0
+          ? [
+              `data/scenarios/proteus-ai-family-decision-smokes-v1.json#proteus_${classification.family}`,
+            ]
+          : []),
+      ].sort(),
       targetProfileCount: Array.isArray(compiledHint.targetProfiles)
         ? compiledHint.targetProfiles.length
         : 0,
@@ -83,6 +90,7 @@ const inventory = {
     "data/ai/ai-card-hints-active.json",
     "data/ai/ai-card-hints-compiled.json",
     "data/decks/proteus-playtest-decks-2026-05-25.json",
+    "data/scenarios/proteus-ai-family-decision-smokes-v1.json",
   ],
   classificationPolicy: {
     source: "curated_ai_hint_semantics_only",
@@ -235,7 +243,7 @@ function result(family, reason) {
 }
 
 function removalConditionsFor(family, quality, inPilotDeck) {
-  const conditions = [`${family}_decision_smoke_green`];
+  const conditions = inPilotDeck ? [] : [`${family}_decision_smoke_green`];
   if (quality?.hintReviewed !== true) conditions.push("hint_human_reviewed");
   if (quality?.strategyCovered !== true)
     conditions.push("strategy_coverage_or_explicit_non_strategy_decision");
