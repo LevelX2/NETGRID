@@ -9,6 +9,7 @@ import { applyCardActionSourceBinding } from "./actions/action-source-binding";
 import { applyTagEffectSemantics } from "./actions/tag-effect-semantics";
 import { applyTargetContextProjection } from "./actions/action-target-context";
 import { applyBasicActionSemantics } from "./actions/basic-action-semantics";
+import { applyRunAccessDecisionModel } from "./actions/run-access-decision-model";
 
 export const ACTION_SEMANTIC_CANDIDATE_SCHEMA_VERSION =
   "action-semantic-candidate-v1" as const;
@@ -234,6 +235,41 @@ export type ActionRunProjectionSummary = {
   evidence: string[];
 };
 
+export type RunAccessModifierKind =
+  | "bypass_ice"
+  | "additional_subroutines"
+  | "redirect_run"
+  | "access_replacement"
+  | "post_run_followup"
+  | "forced_run_end";
+
+export type RunAccessRiskKind =
+  | "ambush"
+  | "damage"
+  | "tag"
+  | "program_disruption"
+  | "steal_tax"
+  | "access_reduction";
+
+export type RunAccessPayoffKind =
+  | "additional_access"
+  | "free_trash"
+  | "ice_trash"
+  | "information";
+
+export type ActionRunAccessDecisionModel = {
+  schemaVersion: "run-access-decision-model-v1";
+  coverageStatus: "covered" | "partial" | "blocked";
+  serverId?: string;
+  modifiers: RunAccessModifierKind[];
+  accessRisks: RunAccessRiskKind[];
+  payoffs: RunAccessPayoffKind[];
+  unknownRemoteIdentityPreserved: true;
+  hiddenInfoPolicy: "side_safe_visible_only";
+  whyNot: string[];
+  evidence: string[];
+};
+
 export type ActionTagEffectProfile = {
   kind: "remove_tags" | "avoid_tag" | "avoid_next_tag" | "tag_clear_support";
   recipient: "runner";
@@ -304,6 +340,7 @@ export type ActionSemanticCandidate = {
   timingProfile: ActionTimingProfile;
   targetContext?: ActionTargetContext;
   runProjectionSummary?: ActionRunProjectionSummary;
+  runAccessDecisionModel?: ActionRunAccessDecisionModel;
   tagEffectProfile?: ActionTagEffectProfile;
   boardContext: BoardContextSummary;
   confidence: ActionSemanticConfidence;
@@ -445,10 +482,11 @@ function projectActionSemanticCandidate(
     costTimingCandidate,
     action,
   );
-  return applyCardSemanticJoin(
+  const cardSemanticCandidate = applyCardSemanticJoin(
     tagEffectCandidate,
     cardSemanticProfilesByDefinitionId,
   );
+  return applyRunAccessDecisionModel(cardSemanticCandidate, action);
 }
 
 export function buildNeutralActionSemanticCandidate(
