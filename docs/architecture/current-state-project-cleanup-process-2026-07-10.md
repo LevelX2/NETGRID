@@ -119,8 +119,8 @@ integrate_main -> blocker
    nach dessen Main-Integration in PCS-5 geschnitten. Browser-Key-Migrationen
    werden zusammen mit dem Page-Schnitt entfernt.
 4. `PCS-3 Current-State-Dokumente, Reviews und Scripts konsolidieren` –
-   `done`; 125 einmalige nummerierte Generator-/Check-/Apply-Scripts, 172
-   zugehörige Einzelreports/Roh-JSON (16 MB) und 28 ersetzte Prozessseiten
+   `done`; 125 einmalige nummerierte Generator-/Check-/Apply-Scripts, 193
+   zugehörige Einzelreports/Roh-JSON und 28 ersetzte Prozessseiten
    sind durch ein Historienrollup ersetzt. Das aktive Scriptinventar ist von
    163 auf 38 Dateien reduziert. Projektstatus, Wissensindex und AI-README sind
    auf Current State verdichtet. `check:ai:full` und das aktualisierte
@@ -148,8 +148,14 @@ integrate_main -> blocker
    werden bewusst nicht mit dem noch uncommitteten parallelen Engine-Teststand
    gekoppelt; ihre nächsten Schnitte werden durch die Boundary-/Testbudgets
    aus PCS-6 abgesichert.
-7. `PCS-6 Teststufen, Sharding und Package-Boundaries` – `in_progress`
-8. `PCS-7 Asset- und Worktree-Hygiene` – `pending`
+7. `PCS-6 Teststufen, Sharding und Package-Boundaries` – `done`; Paket-,
+   Contract- und Full-Gate-Stufen sind dokumentiert. Die vollständige
+   AI-Suite besitzt drei feste Shards. Der erste Shard deckte 21 verbliebene
+   historische Batchtests auf, deren Generatoren bereits entfernt waren;
+   Tests und zugehörige Rohreports sind nun ebenfalls gelöscht. Alle drei
+   Shards sind mit 514, 630 und 584 Tests grün. Das neue Import-Gate prüft
+   1.688 Produktionsdateien und sein positiver/negativer Selbsttest ist grün.
+8. `PCS-7 Asset- und Worktree-Hygiene` – `in_progress`
 9. `PCS-8 Main-Abgleich, Full Gate und Integration` – `pending`
 
 ## Paketdetails

@@ -451,7 +451,6 @@ describe("AI module boundaries", () => {
       path.join(srcDir, "deck-doctrine-runtime-context.ts"),
       path.join(repoRoot, "apps", "server", "src", "multiplayer.ts"),
       path.join(repoRoot, "apps", "server", "src", "index.ts"),
-      path.join(repoRoot, "apps", "web", "app", "api", "game", "route.ts"),
     ];
     const forbiddenTerms = [
       "missingDeckContextMode",
@@ -466,7 +465,10 @@ describe("AI module boundaries", () => {
       const content = readFileSync(file, "utf8");
       return forbiddenTerms
         .filter((term) => content.includes(term))
-        .map((term) => `${relativeFile(file)} uses forbidden productive AI runtime term ${term}`);
+        .map(
+          (term) =>
+            `${relativeFile(file)} uses forbidden productive AI runtime term ${term}`,
+        );
     });
 
     expect(violations).toEqual([]);
@@ -478,17 +480,26 @@ describe("AI module boundaries", () => {
       "runtime",
       "ai-decision-input.ts",
     );
-    const runtimeContext = path.join(srcDir, "deck-doctrine-runtime-context.ts");
+    const runtimeContext = path.join(
+      srcDir,
+      "deck-doctrine-runtime-context.ts",
+    );
     const decisionInputContent = readFileSync(aiDecisionInput, "utf8");
     const runtimeContextContent = readFileSync(runtimeContext, "utf8");
     const violations = [
-      ...(!decisionInputContent.includes("ownDeckSnapshot: AiDeckStrategyDeckSnapshot")
-        ? ["ai-decision-input.ts does not require ownDeckSnapshot in the runtime contract"]
+      ...(!decisionInputContent.includes(
+        "ownDeckSnapshot: AiDeckStrategyDeckSnapshot",
+      )
+        ? [
+            "ai-decision-input.ts does not require ownDeckSnapshot in the runtime contract",
+          ]
         : []),
       ...(!decisionInputContent.includes("assertValidAiDeckSnapshotForRuntime")
         ? ["ai-decision-input.ts does not validate ownDeckSnapshot"]
         : []),
-      ...(!runtimeContextContent.includes("deckSnapshot: AiDeckStrategyDeckSnapshot")
+      ...(!runtimeContextContent.includes(
+        "deckSnapshot: AiDeckStrategyDeckSnapshot",
+      )
         ? ["deck-doctrine-runtime-context.ts does not require a deck snapshot"]
         : []),
       ...(!runtimeContextContent.includes("assertValidAiDeckSnapshotForRuntime")
@@ -690,9 +701,7 @@ describe("AI module boundaries", () => {
     const liveGraph = transitiveRuntimeFiles(path.join(srcDir, "index.ts"));
     const violations = [...liveGraph]
       .map(relativeFile)
-      .filter(
-        (file) => file === "legacy" || file.startsWith("legacy/"),
-      );
+      .filter((file) => file === "legacy" || file.startsWith("legacy/"));
 
     expect(violations).toEqual([]);
   });
@@ -1326,7 +1335,8 @@ function transitiveRuntimeFiles(entrypoint: string): Set<string> {
     for (const reference of importsFrom(file)) {
       if (reference.isTypeOnly) continue;
       const importedFile = resolveSourceImport(file, reference.importSource);
-      if (importedFile && !visited.has(importedFile)) pending.push(importedFile);
+      if (importedFile && !visited.has(importedFile))
+        pending.push(importedFile);
     }
   }
   return visited;

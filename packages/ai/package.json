@@ -12,6 +12,9 @@
     "lint": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run --maxWorkers=1 --testTimeout=30000",
+    "test:shard:1": "vitest run --maxWorkers=1 --testTimeout=30000 --shard=1/3",
+    "test:shard:2": "vitest run --maxWorkers=1 --testTimeout=30000 --shard=2/3",
+    "test:shard:3": "vitest run --maxWorkers=1 --testTimeout=30000 --shard=3/3",
     "build": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

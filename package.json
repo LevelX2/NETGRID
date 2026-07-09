@@ -33,6 +33,8 @@
     "check:card-function-abstraction": "node scripts/check-card-name-leakage-in-runtime.mjs",
     "check:engine-cardimplementation-architecture-target": "node scripts/check-engine-cardimplementation-architecture-target.mjs",
     "check:engine-cardimplementation-architecture-target:selftest": "node scripts/check-engine-cardimplementation-architecture-target.mjs --self-test",
+    "check:package-boundaries": "node scripts/check-package-boundaries.mjs",
+    "check:package-boundaries:selftest": "node scripts/check-package-boundaries.mjs --self-test",
     "check:ai-hint-quality": "node scripts/check-ai-hint-quality.mjs --write-report",
     "check:ai-strategy-taxonomy": "node scripts/check-ai-strategy-taxonomy.mjs --write-reports",
     "check:ai-deck-doctrine-strategy": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-ai-deck-doctrine-strategy.ts",
@@ -45,6 +47,8 @@
     "lint": "corepack pnpm -r --if-present lint",
     "typecheck": "corepack pnpm -r --if-present typecheck",
     "test": "corepack pnpm -r --if-present test && vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts --passWithNoTests",
+    "test:contracts": "corepack pnpm --filter @netgrid/shared test && vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts",
+    "test:ai:shards": "corepack pnpm --filter @netgrid/ai test:shard:1 && corepack pnpm --filter @netgrid/ai test:shard:2 && corepack pnpm --filter @netgrid/ai test:shard:3",
     "build": "corepack pnpm -r --if-present build",
     "format:check": "prettier --check .",
     "format:changed": "node scripts/check-format-changed.mjs"
