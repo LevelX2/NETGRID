@@ -2,7 +2,6 @@ import {
   createAiSimulationComposition,
   type AiSimulationCompositionDependencies,
 } from "./ai-simulation-composition";
-import { createLegacyBaselineSimulationContext } from "./legacy-baseline-simulation-context";
 import {
   createSemanticRuntimeOrchestrationComposition,
   type SemanticRuntimeOrchestrationCompositionDependencies,
@@ -256,15 +255,6 @@ export function createAiRuntimeSimulationComposition(
     corpScoring,
   );
 
-  const legacyBaselineEntrypoints = createLegacyBaselineSimulationContext({
-    ...dependencies,
-    ...contextDiagnostics,
-    ...runnerSupport,
-    ...corpScoring,
-    extractAiFeatures: contextDiagnostics.extractAiFeatures,
-    scrubEvidence: (evidence) => dependencies.scrubEvidence([...evidence]),
-  });
-
   const runtimeEntrypoints = createSemanticRuntimeOrchestrationComposition(
     semanticRuntimeDependencies,
   );
@@ -283,7 +273,6 @@ export function createAiRuntimeSimulationComposition(
 
   return {
     ...runtimeEntrypoints,
-    ...legacyBaselineEntrypoints,
     ...simulationEntrypoints,
   };
 }

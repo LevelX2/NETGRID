@@ -84,12 +84,6 @@ export type {
   CorpIcePlacementRecommendation,
   CorpServerNeedProfile,
 } from "./runtime/corp-ice-placement/corp-ice-placement";
-export { evaluateStalePunishGoalSwitchShadow } from "./stale-punish-goal-switch-shadow";
-export type {
-  StalePunishGoalSwitchInput,
-  StalePunishGoalSwitchShadow,
-  StalePunishRootCause,
-} from "./stale-punish-goal-switch-shadow";
 export {
   buildTargetRef,
   targetRefFromIdentity,

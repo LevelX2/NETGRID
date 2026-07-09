@@ -27,8 +27,6 @@ export type {
   SimulationWorld,
 } from "./simulation/simulation-types";
 export {
-  chooseCorpBaselineAction,
-  chooseRunnerBaselineAction,
   runAiSelfplayTraceMining,
   runDoctrineQualityBenchmark,
   runMatchProgressionBenchmark,

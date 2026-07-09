@@ -25,15 +25,10 @@ import type {
   TacticalPlanMemorySnapshot,
   TacticalPlanRuntimeResult,
 } from "../tactical-plans";
-import {
-  semanticPilotChoice,
-  semanticPlayStrengthPilotEnabled,
-} from "../decision/pilot-scope-registry";
 import { buildCorpTacticalGoals } from "../decision/corp-tactical-goals";
 import { buildSemanticDecisionFrame } from "../decision/semantic-decision-frame";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
 import { buildMergedTacticalGoals } from "../decision/tactical-goal-merge";
-import { buildSemanticShadowDecision } from "../decision/semantic-shadow-decision";
 import { rememberStrategicIntentState } from "../strategic-intent-memory";
 import type { AiDecisionInputWithDeckCapabilities } from "./ai-decision-input";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
@@ -401,35 +396,7 @@ export function chooseSemanticRuntimeAction(
       initialChoice,
   );
   const choice = runOnlyActionAdjusted.choice;
-  const pilotChoice = semanticPlayStrengthPilotEnabled()
-    ? (() => {
-        const pilotFrame = buildSemanticDecisionFrame({
-          input,
-          actionCandidates: actionSemanticCandidates,
-          tacticalGoals: semanticChoiceTacticalGoals,
-          tacticalPlan: effectivePlanRuntime,
-          deckCapabilities,
-          ...(strategicIntentState ? { strategicIntentState } : {}),
-          ...(corpStrategicIntent ? { corpStrategicIntent } : {}),
-          runner: {
-            ...(runnerRunTargetEvaluations
-              ? { runTargets: runnerRunTargetEvaluations }
-              : {}),
-            ...(runnerEconomyPosture
-              ? { economyPosture: runnerEconomyPosture }
-              : {}),
-          },
-          evidence: ["semantic_runtime:play_strength_pilot_candidate"],
-        });
-        return semanticPilotChoice({
-          frame: pilotFrame,
-          trace: buildSemanticShadowDecision(pilotFrame),
-          currentChoice: choice,
-          choices: runOnlyActionAdjusted.rankedChoices,
-        });
-      })()
-    : undefined;
-  const selectedChoice = pilotChoice?.choice ?? choice;
+  const selectedChoice = choice;
   const coverageSelectionDebug =
     dependencies.semanticRuntimeCoverageSelectionDebug(
       input,
@@ -445,9 +412,7 @@ export function chooseSemanticRuntimeAction(
     ? dependencies.rememberTacticalPlanRuntime(
         input,
         effectivePlanRuntime,
-        pilotChoice
-          ? selectedChoice.action
-          : runOnlyActionAdjusted.memoryAction ?? selectedChoice.action,
+        runOnlyActionAdjusted.memoryAction ?? selectedChoice.action,
       )
     : undefined;
   const newRunnerRunPlan =
@@ -530,7 +495,6 @@ export function chooseSemanticRuntimeAction(
       ...(!persistTacticalPlanMemory && strategicIntentState
         ? ["strategic_intent_memory_preview_only:true"]
         : []),
-      ...(pilotChoice ? pilotChoice.evidence : []),
     ]),
     decisionDebug: dependencies.semanticRuntimeDecisionDebug(
       input,

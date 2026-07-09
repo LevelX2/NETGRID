@@ -3,8 +3,6 @@ import { createAiRuntimeSimulationComposition } from "./simulation/ai-runtime-si
 import { summarizeMatchProgressionMetrics } from "./simulation/match-progression-summary";
 
 const {
-  chooseCorpBaselineAction,
-  chooseRunnerBaselineAction,
   runAiSelfplayTraceMining,
   runDoctrineQualityBenchmark,
   runMatchProgressionBenchmark,
@@ -19,8 +17,6 @@ const {
 });
 
 export {
-  chooseCorpBaselineAction,
-  chooseRunnerBaselineAction,
   runAiSelfplayTraceMining,
   runDoctrineQualityBenchmark,
   runMatchProgressionBenchmark,

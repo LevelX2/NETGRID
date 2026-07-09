@@ -192,7 +192,14 @@ integrate_main -> blocker
   ReplayFailures und Timeouts; größere 3×2×240- und 3×5×480-Läufe wurden nach
   Überschreiten des 60-Sekunden-Fensters ausdrücklich nicht als bestanden
   gewertet.
-- `AICSC-7`: `pending`.
+- `AICSC-7`: `done`; das gesamte `legacy/`-Verzeichnis, die Baseline-
+  Simulationsverdrahtung, der 648-KB-Monolithtest, obsolete Corp-Diagnostik,
+  der frühere Shadow-Pilot im Live-Chooser sowie Controlled-Shadow-, META-,
+  Readiness- und einmalige Cutover-/Shadow-Checkskripte sind entfernt.
+  Weiterhin konsumierte Evaluation- und Target-Fit-Diagnostik blieb erhalten.
+  Der serielle und der vierfach parallele ungeteilte Volltest überschritten
+  jeweils das 60-Sekunden-Fenster; derselbe vollständige Bestand wurde deshalb
+  in drei disjunkten Shards ausgeführt: 287 Testdateien und 1.813 Tests grün.
 - `AICSC-8`: `pending`.
 
 ## Paketdetails
