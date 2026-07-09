@@ -121,6 +121,7 @@ export function publicContextForAction(
     }
   }
   if (legalAction.type === "start_run" && state.run) {
+    context.serverId = state.run.attackedServerId;
     const runAccessCount = Math.max(1, Math.floor(state.run.accessCount ?? 1));
     const runInstalledAccessBonus =
       deps.v1915InstalledAccessBonus(state, state.run.attackedServerId) +

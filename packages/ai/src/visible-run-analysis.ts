@@ -45,12 +45,14 @@ type BreakAssessment = {
   breakerSubtypes: string[];
   endingStrength: number;
   carriesStrengthAcrossIce: boolean;
+  postBreakStealthLoss?: number;
 };
 export type RunnerRunPathCreditBudget = {
   credits: number;
   icebreakerCredits?: number;
   nonNoisyIcebreakerCredits?: number;
   killerCredits?: number;
+  stealthNonNoisyIcebreakerCredits?: number;
 };
 type RunnerRunPathCreditBudgetInput = number | RunnerRunPathCreditBudget;
 type MutableRunnerRunPathCreditBudget = Required<RunnerRunPathCreditBudget>;
@@ -64,6 +66,7 @@ type BreakSubroutineAbilityLike = {
   cost: { credits?: number };
   count?: number;
   iceSubtype?: string;
+  postBreakStealthLoss?: number;
   subroutineBreakTags?: readonly string[];
 };
 type PumpStrengthAbilityLike = {
@@ -208,6 +211,12 @@ export function runnerRunPathCreditBudgetWithVisiblePools(
     ...(rigBudget.killerCredits > 0
       ? { killerCredits: rigBudget.killerCredits }
       : {}),
+    ...(rigBudget.stealthNonNoisyIcebreakerCredits > 0
+      ? {
+          stealthNonNoisyIcebreakerCredits:
+            rigBudget.stealthNonNoisyIcebreakerCredits,
+        }
+      : {}),
   };
 }
 
@@ -218,6 +227,7 @@ export function visibleRunnerRunPathCreditBudgetForRig(
     icebreakerCredits: 0,
     nonNoisyIcebreakerCredits: 0,
     killerCredits: 0,
+    stealthNonNoisyIcebreakerCredits: 0,
   };
   for (const card of rigCards) {
     if (card.known === false) continue;
@@ -225,7 +235,15 @@ export function visibleRunnerRunPathCreditBudgetForRig(
       const amount = normalizeCreditAmount(display.amount);
       if (amount <= 0) continue;
       const use = runPathCreditPoolUse(display.creditPool?.uses ?? []);
-      if (use) budget[use] += amount;
+      if (use) {
+        budget[use] += amount;
+        if (
+          use === "nonNoisyIcebreakerCredits" &&
+          card.subtypes?.some((subtype) => subtypeKey(subtype) === "stealth")
+        ) {
+          budget.stealthNonNoisyIcebreakerCredits += amount;
+        }
+      }
     }
   }
   return budget;
@@ -253,6 +271,7 @@ function normalizeRunnerRunPathCreditBudget(
       icebreakerCredits: 0,
       nonNoisyIcebreakerCredits: 0,
       killerCredits: 0,
+      stealthNonNoisyIcebreakerCredits: 0,
     };
   }
   return {
@@ -262,6 +281,9 @@ function normalizeRunnerRunPathCreditBudget(
       budget.nonNoisyIcebreakerCredits ?? 0,
     ),
     killerCredits: normalizeCreditAmount(budget.killerCredits ?? 0),
+    stealthNonNoisyIcebreakerCredits: normalizeCreditAmount(
+      budget.stealthNonNoisyIcebreakerCredits ?? 0,
+    ),
   };
 }
 
@@ -323,8 +345,15 @@ function spendBreakerCredits(
   const spend = (
     key: Exclude<keyof MutableRunnerRunPathCreditBudget, "credits">,
   ) => {
+    if (key === "stealthNonNoisyIcebreakerCredits") return;
     const amount = Math.min(budget[key], remainingCost);
     budget[key] -= amount;
+    if (key === "nonNoisyIcebreakerCredits") {
+      budget.stealthNonNoisyIcebreakerCredits = Math.max(
+        0,
+        budget.stealthNonNoisyIcebreakerCredits - amount,
+      );
+    }
     remainingCost -= amount;
   };
   if (breakerCanUseKillerCredits(breakAssessment)) spend("killerCredits");
@@ -334,6 +363,27 @@ function spendBreakerCredits(
   spend("icebreakerCredits");
   const cash = Math.min(budget.credits, remainingCost);
   budget.credits -= cash;
+}
+
+function spendBreakerCreditsAndApplySideEffects(
+  budget: MutableRunnerRunPathCreditBudget,
+  breakAssessment: BreakAssessment,
+): void {
+  spendBreakerCredits(budget, breakAssessment);
+  const stealthLoss = Math.max(
+    0,
+    Math.floor(breakAssessment.postBreakStealthLoss ?? 0),
+  );
+  if (stealthLoss <= 0) return;
+  const lostRestrictedCredits = Math.min(
+    budget.stealthNonNoisyIcebreakerCredits,
+    stealthLoss,
+  );
+  budget.stealthNonNoisyIcebreakerCredits -= lostRestrictedCredits;
+  budget.nonNoisyIcebreakerCredits = Math.max(
+    0,
+    budget.nonNoisyIcebreakerCredits - lostRestrictedCredits,
+  );
 }
 
 function applicableRestrictedBreakerCredits(
@@ -525,7 +575,7 @@ function assessKnownRezzedIcePathInternal(
         );
       }
       visibleBreakCost += breakAssessment.cost;
-      spendBreakerCredits(creditBudget, breakAssessment);
+      spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
       creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
       firstKnownIceBreakable = true;
       if (breakAssessment.carriesStrengthAcrossIce) {
@@ -574,7 +624,10 @@ function assessKnownRezzedIcePathInternal(
       }
       visibleBreakCost += payment.cost;
       if (payment.breakAssessment) {
-        spendBreakerCredits(creditBudget, payment.breakAssessment);
+        spendBreakerCreditsAndApplySideEffects(
+          creditBudget,
+          payment.breakAssessment,
+        );
       } else {
         spendGeneralCredits(creditBudget, payment.cost);
       }
@@ -638,7 +691,10 @@ function assessKnownRezzedIcePathInternal(
           : undefined;
         if (breakAssessment && payment?.affordable) {
           visibleBreakCost += breakAssessment.cost;
-          spendBreakerCredits(creditBudget, breakAssessment);
+          spendBreakerCreditsAndApplySideEffects(
+            creditBudget,
+            breakAssessment,
+          );
           creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
           firstKnownIceBreakable = true;
           if (breakAssessment.carriesStrengthAcrossIce) {
@@ -692,7 +748,7 @@ function assessKnownRezzedIcePathInternal(
         : undefined;
       if (breakAssessment) {
         visibleBreakCost += breakAssessment.cost;
-        spendBreakerCredits(creditBudget, breakAssessment);
+        spendBreakerCreditsAndApplySideEffects(creditBudget, breakAssessment);
         creditsAfterAvoidingVisibleIceHazards = creditBudget.credits;
         firstKnownIceBreakable = true;
         if (breakAssessment.carriesStrengthAcrossIce) {
@@ -785,7 +841,7 @@ function runPathEffectBreakAssessment(params: {
     );
   }
   const budgetAfterBreak = cloneRunnerRunPathCreditBudget(params.creditBudget);
-  spendBreakerCredits(budgetAfterBreak, breakAssessment);
+  spendBreakerCreditsAndApplySideEffects(budgetAfterBreak, breakAssessment);
   const futureAfterBreak = assessKnownRezzedIcePathInternal(
     futureIce,
     params.rigCards,
@@ -1977,6 +2033,12 @@ function creditsToBreakVisibleSubroutinesWithBreaker(
     endingStrength,
     carriesStrengthAcrossIce:
       breakerCarriesStrengthAcrossIce(breakerDefinition),
+    ...(breakAbility.postBreakStealthLoss
+      ? {
+          postBreakStealthLoss:
+            breakUses * breakAbility.postBreakStealthLoss,
+        }
+      : {}),
   };
 }
 
@@ -2098,6 +2160,12 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
     endingStrength,
     carriesStrengthAcrossIce:
       breakerCarriesStrengthAcrossIce(breakerDefinition),
+    ...(breakAbility.postBreakStealthLoss
+      ? {
+          postBreakStealthLoss:
+            breakUses * breakAbility.postBreakStealthLoss,
+        }
+      : {}),
   };
 }
 

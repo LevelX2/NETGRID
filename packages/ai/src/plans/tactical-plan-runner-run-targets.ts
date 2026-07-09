@@ -282,7 +282,15 @@ export function runnerRunTargetCurrentStep(
   defaultStep: Parameters<typeof createPlanStep>[0],
 ): PlanStep {
   const evaluation = runnerRunTargetEvaluationForAction(context, action);
-  if (evaluation?.recommendation === "gain_credits_first") {
+  const preserveLastClickForScoreThreat =
+    evaluation?.scoreThreat === true &&
+    evaluation.pathPassability === "reachable" &&
+    evaluation.creditsAfterRun >= 0 &&
+    context.input.playerView.own.clicks <= 1;
+  if (
+    evaluation?.recommendation === "gain_credits_first" &&
+    !preserveLastClickForScoreThreat
+  ) {
     return createPlanStep({
       stepId: `gain_credits_before_run:${evaluation.targetServerId}`,
       kind: "gain_credits",
@@ -293,7 +301,15 @@ export function runnerRunTargetCurrentStep(
       ],
     });
   }
-  return createPlanStep(defaultStep);
+  return createPlanStep({
+    ...defaultStep,
+    rationale: [
+      ...(defaultStep.rationale ?? []),
+      ...(preserveLastClickForScoreThreat
+        ? ["preserve last click for reachable remote score threat"]
+        : []),
+    ],
+  });
 }
 
 export function runnerRunTargetPlanEvidence(

@@ -29,6 +29,8 @@ export function runnerEncounterCreditBudgetForInput(
     icebreakerCredits: visiblePools.icebreakerCredits,
     nonNoisyIcebreakerCredits: visiblePools.nonNoisyIcebreakerCredits,
     killerCredits: visiblePools.killerCredits,
+    stealthNonNoisyIcebreakerCredits:
+      visiblePools.stealthNonNoisyIcebreakerCredits,
   };
 }
 
@@ -157,6 +159,9 @@ function normalizeBudget(
       budget.nonNoisyIcebreakerCredits ?? 0,
     ),
     killerCredits: normalizeCreditAmount(budget.killerCredits ?? 0),
+    stealthNonNoisyIcebreakerCredits: normalizeCreditAmount(
+      budget.stealthNonNoisyIcebreakerCredits ?? 0,
+    ),
   };
 }
 

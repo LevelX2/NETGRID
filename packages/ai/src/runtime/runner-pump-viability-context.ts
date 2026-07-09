@@ -310,6 +310,8 @@ function encounterCreditBudget(
     icebreakerCredits: visiblePools.icebreakerCredits,
     nonNoisyIcebreakerCredits: visiblePools.nonNoisyIcebreakerCredits,
     killerCredits: visiblePools.killerCredits,
+    stealthNonNoisyIcebreakerCredits:
+      visiblePools.stealthNonNoisyIcebreakerCredits,
   };
 }
 
