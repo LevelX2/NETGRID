@@ -2,7 +2,7 @@
 
 ## Status
 
-Integration-Preflight abgeschlossen auf Branch `codex/ai-replay-f4c099` im Worktree `C:\Projekte\NETGRID_AI_REPLAY_F4C099`; lokaler Main-Merge folgt nach diesem Dokumentationscommit.
+Abgeschlossen und lokal nach `main` integriert. Der Arbeitsbranch `codex/ai-replay-f4c099` wurde nach breiter Verifikation per Fast-forward gemerged; ein Push oder Pull Request erfolgte nicht.
 
 ## Quelle und Vorgabe
 

@@ -35,4 +35,4 @@ Alle Änderungen sind funktionsbezogen. Es gibt keine Karten-ID-Sonderregel für
 
 ## Integration
 
-Branch `codex/ai-replay-f4c099` ist für den lokalen Fast-forward-Merge nach `main` vorbereitet. Der endgültige Merge- und Main-Verifikationsstatus wird nach Integration in diesem Report nachgetragen.
+Branch `codex/ai-replay-f4c099` wurde lokal per Fast-forward nach `main` integriert. Die drei fremden ungetrackten Analyseberichte im Hauptworkspace blieben unangetastet. Ein Push oder Pull Request wurde nicht ausgeführt. Nach diesem Statuscommit wird `main` erneut mit den fokussierten Tests, beiden Typechecks und `git diff --check` verifiziert.
