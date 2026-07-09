@@ -157,6 +157,8 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
       ? "agendaActiveCounterBadge"
       : display.id === "project_venice_actions_per_turn"
         ? "projectVeniceActionCounterBadge"
+      : display.id === "project_zurich_credits_per_turn"
+        ? "projectZurichCreditCounterBadge"
       : display.displayKind === "shell"
       ? "shellCounterBadge"
       : display.id === "trace_tag_counter"
@@ -167,6 +169,8 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
       ? "corporate-retreat-active-badge"
       : display.id === "project_venice_actions_per_turn"
         ? "project-venice-action-badge"
+      : display.id === "project_zurich_credits_per_turn"
+        ? "project-zurich-credit-badge"
       : display.displayKind === "shell"
       ? "shell-counter-badge"
       : display.id === "trace_tag_counter"
@@ -185,6 +189,8 @@ function counterDisplayBadgeText(display: NonNullable<VisibleCard["counterDispla
   if (display.id === "corporate_retreat_active") return "Aktiv";
   if (display.id === "project_venice_actions_per_turn")
     return `+${amount} ${amount === 1 ? "Aktion" : "Aktionen"}/Zug`;
+  if (display.id === "project_zurich_credits_per_turn")
+    return `+${amount} ${amount === 1 ? "Credit" : "Credits"}/Zug`;
   if (display.displayKind === "shell") return `${amount} Shell`;
   if (display.id === "trace_tag_counter") return `${amount} Raven`;
   return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;

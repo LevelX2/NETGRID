@@ -2319,6 +2319,19 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe(
       "Project Venice: 2 zusätzliche Aktionen pro Corp-Zug. Beim Scoren wurde der aktuelle Zug sofort angepasst; spätere Corp-Züge erhalten den Wert zu Zugbeginn.",
     );
+    expect(
+      counterDisplayTooltipText({
+        id: "project_zurich_credits_per_turn",
+        amount: 2,
+        displayKind: "generic_counter",
+        label: "Credit/Zug",
+        ariaLabel: "2 Project Zurich zusätzlicher Credit pro Corp-Zug",
+        counterType: "mark",
+        usageHint: "status_marker",
+      }),
+    ).toBe(
+      "Project Zurich: 2 zusätzliche Credits zu Beginn jedes Corp-Zugs. Der Wert stammt aus den Overadvance-Countern beim Scoren.",
+    );
   });
 
   it("keeps advancement counters as separate gems until ten counters", () => {

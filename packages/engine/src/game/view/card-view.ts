@@ -35,6 +35,7 @@ const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
 };
 const CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const PROJECT_VENICE_ID = "onr_proteus_007_project-venice";
+const PROJECT_ZURICH_ID = "onr_proteus_008_project-zurich";
 
 export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
   return visibleKnownCardWithReferenceViewer(state, id, "own");
@@ -467,6 +468,15 @@ function specialCounterDisplays(
             displayKind: "generic_counter" as const,
             label: "Aktion/Zug",
             ariaLabelName: "Project Venice zusätzliche Aktion pro Corp-Zug",
+            counterType: "mark" as const,
+            usageHint: "status_marker" as const,
+          }
+      : definition.id === PROJECT_ZURICH_ID
+        ? {
+            id: "project_zurich_credits_per_turn",
+            displayKind: "generic_counter" as const,
+            label: "Credit/Zug",
+            ariaLabelName: "Project Zurich zusätzlicher Credit pro Corp-Zug",
             counterType: "mark" as const,
             usageHint: "status_marker" as const,
           }

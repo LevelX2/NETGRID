@@ -600,6 +600,8 @@ export function counterDisplayTooltipText(
         return "Corporate Retreat: Die Agenda-Fähigkeit ist noch aktiv. Die Korp kann für 1 Aktion 2 Credits nehmen. Sobald die Korp eine Karte installiert oder rezzt, erlischt die Fähigkeit und der Marker verschwindet.";
       if (display.id === "project_venice_actions_per_turn")
         return `Project Venice: ${amount} zusätzliche ${amount === 1 ? "Aktion" : "Aktionen"} pro Corp-Zug. Beim Scoren wurde der aktuelle Zug sofort angepasst; spätere Corp-Züge erhalten den Wert zu Zugbeginn.`;
+      if (display.id === "project_zurich_credits_per_turn")
+        return `Project Zurich: ${amount} ${amount === 1 ? "zusätzlicher Credit" : "zusätzliche Credits"} zu Beginn jedes Corp-Zugs. Der Wert stammt aus den Overadvance-Countern beim Scoren.`;
       return display.ariaLabel;
     case "bad_publicity":
       return `Bad Publicity: Jede Bad Publicity gibt dem Runner zu Beginn eines Runs 1 temporären Credit. Bei 7 Bad Publicity verliert die Korp.`;

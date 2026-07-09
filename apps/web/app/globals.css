@@ -8015,7 +8015,8 @@ select {
 }
 
 .agendaActiveCounterBadge,
-.projectVeniceActionCounterBadge {
+.projectVeniceActionCounterBadge,
+.projectZurichCreditCounterBadge {
   position: absolute;
   right: 6px;
   top: 30px;

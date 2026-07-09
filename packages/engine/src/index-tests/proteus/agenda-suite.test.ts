@@ -3,6 +3,7 @@ import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
+  getPlayerView,
   hashState,
   replayEvents,
 } from "../../index";
@@ -432,6 +433,18 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     );
     expect(zurich.corp.scoreArea).toContain(zurichId);
     expect(zurich.cardInstances[zurichId]?.counters?.mark).toBe(2);
+    const zurichView = getPlayerView(zurich, "corp").own.scoreArea.find(
+      (visibleCard) => visibleCard.instanceId === zurichId,
+    );
+    expect(zurichView?.counterDisplays).toContainEqual({
+      id: "project_zurich_credits_per_turn",
+      amount: 2,
+      displayKind: "generic_counter",
+      label: "Credit/Zug",
+      ariaLabel: "2 Project Zurich zusätzlicher Credit pro Corp-Zug",
+      counterType: "mark",
+      usageHint: "status_marker",
+    });
     const creditsBefore = zurich.corp.credits;
     zurich = apply(zurich, "corp", (action) => action.type === "end_turn");
     zurich = apply(zurich, "runner", (action) => action.type === "end_turn");
