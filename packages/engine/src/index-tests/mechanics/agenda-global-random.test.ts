@@ -1609,6 +1609,18 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state = applyChoices(state, "corp", [`card_${iceId}`]);
 
     expect(cardCounterAmount(state, iceId, "mark")).toBe(1);
+    const visibleIce = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "rd")
+      ?.ice.find((card) => card.instanceId === iceId);
+    expect(visibleIce?.counterDisplays).toContainEqual({
+      id: "ice_mark_modifier",
+      amount: 1,
+      displayKind: "generic_counter",
+      label: "ICE-Modifikator",
+      ariaLabel: "1 ICE-Mark-Modifikator",
+      counterType: "mark",
+      usageHint: "status_marker",
+    });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       agendaAbility: "scored_rezzed_ice_mark_modifier",

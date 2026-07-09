@@ -159,6 +159,8 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
         ? "projectVeniceActionCounterBadge"
       : display.id === "project_zurich_credits_per_turn"
         ? "projectZurichCreditCounterBadge"
+      : display.id === "ice_mark_modifier"
+        ? "iceMarkModifierCounterBadge"
       : display.displayKind === "shell"
       ? "shellCounterBadge"
       : display.id === "trace_tag_counter"
@@ -171,6 +173,8 @@ export function CounterDisplayBadge({ display, scoreState }: { display: NonNulla
         ? "project-venice-action-badge"
       : display.id === "project_zurich_credits_per_turn"
         ? "project-zurich-credit-badge"
+      : display.id === "ice_mark_modifier"
+        ? "ice-mark-modifier-badge"
       : display.displayKind === "shell"
       ? "shell-counter-badge"
       : display.id === "trace_tag_counter"
@@ -191,6 +195,7 @@ function counterDisplayBadgeText(display: NonNullable<VisibleCard["counterDispla
     return `+${amount} ${amount === 1 ? "Aktion" : "Aktionen"}/Zug`;
   if (display.id === "project_zurich_credits_per_turn")
     return `+${amount} ${amount === 1 ? "Credit" : "Credits"}/Zug`;
+  if (display.id === "ice_mark_modifier") return `+${amount} Stärke`;
   if (display.displayKind === "shell") return `${amount} Shell`;
   if (display.id === "trace_tag_counter") return `${amount} Raven`;
   return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;

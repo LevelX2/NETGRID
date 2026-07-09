@@ -483,10 +483,9 @@ function specialCounterDisplays(
       : {
           id: definition.type === "ice" ? "ice_mark_modifier" : "mark",
           displayKind: "generic_counter" as const,
-          label:
-            definition.type === "ice" ? "ICE-Mark-Counter" : "Mark-Counter",
+          label: definition.type === "ice" ? "ICE-Modifikator" : "Mark-Counter",
           ariaLabelName:
-            definition.type === "ice" ? "ICE-Mark-Counter" : "Mark-Counter",
+            definition.type === "ice" ? "ICE-Mark-Modifikator" : "Mark-Counter",
           counterType: "mark" as const,
           usageHint: "status_marker" as const,
         };

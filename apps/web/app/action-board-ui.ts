@@ -594,8 +594,8 @@ export function counterDisplayTooltipText(
     case "breaker_strength_penalty":
       return `Pattel Antibody: Jeder Pattel-Counter auf einem Icebreaker reduziert dessen Stärke um 1.`;
     case "mark":
-      if (display.id === "ice_transmutation")
-        return `Ice Transmutation: Das gewählte ICE hat +1 Stärke. Jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.`;
+      if (display.id === "ice_mark_modifier")
+        return `Ice Transmutation: Dieses ICE hat +${amount} Stärke. Pro Counter wird jede gedruckte Subroutine einmal direkt nach ihrem ursprünglichen Platz wiederholt.`;
       if (display.id === "corporate_retreat_active")
         return "Corporate Retreat: Die Agenda-Fähigkeit ist noch aktiv. Die Korp kann für 1 Aktion 2 Credits nehmen. Sobald die Korp eine Karte installiert oder rezzt, erlischt die Fähigkeit und der Marker verschwindet.";
       if (display.id === "project_venice_actions_per_turn")

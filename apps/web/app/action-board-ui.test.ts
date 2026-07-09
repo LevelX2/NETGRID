@@ -2282,16 +2282,16 @@ describe("V1.0.6 resource and card-display helpers", () => {
     );
     expect(
       counterDisplayTooltipText({
-        id: "ice_transmutation",
+        id: "ice_mark_modifier",
         amount: 1,
         displayKind: "generic_counter",
-        label: "Ice Transmutation",
-        ariaLabel: "1 Ice Transmutation",
+        label: "ICE-Modifikator",
+        ariaLabel: "1 ICE-Mark-Modifikator",
         counterType: "mark",
         usageHint: "status_marker",
       }),
     ).toBe(
-      "Ice Transmutation: Das gewählte ICE hat +1 Stärke. Jede Subroutine wird direkt nach ihrem ursprünglichen Platz einmal zusätzlich ausgeführt.",
+      "Ice Transmutation: Dieses ICE hat +1 Stärke. Pro Counter wird jede gedruckte Subroutine einmal direkt nach ihrem ursprünglichen Platz wiederholt.",
     );
     expect(
       counterDisplayTooltipText({
