@@ -1,6 +1,6 @@
 # Runner-Plancontroller Review-Followups 2 Prozess 2026-07-09
 
-Status: in Umsetzung
+Status: Paketumsetzung abgeschlossen; lokale Integration vorbereitet
 
 ## Quelle/Vorgabe
 
