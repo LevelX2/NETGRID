@@ -8,7 +8,7 @@ import {
   runAiSelfplayTraceMining,
   summarizeMatchProgressionMetrics,
   type AiSimulationSummary,
-} from "../packages/ai/src/index";
+} from "../packages/ai/src/simulation";
 
 type TraceMiningResult = ReturnType<typeof runAiSelfplayTraceMining>;
 type TraceMiningAggregate = TraceMiningResult["aggregate"];

@@ -27,8 +27,6 @@ import {
 } from "../../engine/src/test-fixtures/mechanic-smoke-fixtures";
 import {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
-  assertAiInputIsSideSafe,
-  analyzeDoctrineQualityCases,
   beliefStateInvariantSignature,
   buildAiDecisionInputDto,
   buildObservedFacts,
@@ -46,30 +44,38 @@ import {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
   evaluateRunnerRunTargets,
-  evaluateV143TuningGate,
-  benchmarkDeckFromFrozenLocalSnapshot,
-  benchmarkDeckFromSnapshot,
-  benchmarkDeckFromLocalEditableDeck,
-  listV143BenchmarkProfiles,
-  listV143ExploitFixtures,
-  createBeliefSimulationWorld,
-  runV143ExploitRegressionFixtures,
-  runV143SimulationLeague,
-  runDoctrineQualityBenchmark,
-  runMatchProgressionBenchmark,
-  formatDoctrineQualityCaseAnalysisReport,
   reconstructBeliefState,
   chooseRunnerAction as chooseSemanticRunnerAction,
   selectAiDecisionSideForState,
+} from "./index";
+import {
+  analyzeDoctrineQualityCases,
+  assertAiInputIsSideSafe,
+  benchmarkDeckFromFrozenLocalSnapshot,
+  benchmarkDeckFromLocalEditableDeck,
+  benchmarkDeckFromSnapshot,
+  chooseCorpBaselineAction,
+  chooseRunnerBaselineAction,
+  createBeliefSimulationWorld,
+  evaluateV143TuningGate,
+  formatDoctrineQualityCaseAnalysisReport,
+  listV143BenchmarkProfiles,
+  listV143ExploitFixtures,
+  runDoctrineQualityBenchmark,
+  runMatchProgressionBenchmark,
+  runV143ExploitRegressionFixtures,
+  runV143SimulationLeague,
   simulateAiGame,
   simulateAiSoak,
   summarizeMatchProgressionMetrics,
   type AiSimulationSummary,
-} from "./index";
-import {
+} from "./simulation";
+/* Legacy-baseline behavior remains simulation-only until AICSC-4 removes it. */
+/*
   chooseCorpBaselineAction,
   chooseRunnerBaselineAction,
 } from "./ai-runtime-public-entrypoints";
+*/
 import {
   assessCorpIcePortfolioAction,
   assessCorpScoreTerminalWindow,

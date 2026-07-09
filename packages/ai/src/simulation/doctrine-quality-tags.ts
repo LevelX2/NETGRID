@@ -6,9 +6,7 @@ import {
   type Side,
   type VisibleCard,
 } from "@netgrid/shared";
-import type {
-  AiSimulationSummary,
-} from "../index";
+import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
 import { countValue as countTag, sortedUnique } from "../runtime/collection";
 import { rolesMatch } from "../runtime/role-match";

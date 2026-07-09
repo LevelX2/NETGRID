@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
   simulateAiGame,
   summarizeDoctrineQualityMetrics,
-} from "../index";
+} from "../simulation";
 
 const originalSemanticAiRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
 

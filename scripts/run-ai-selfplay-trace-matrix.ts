@@ -6,8 +6,10 @@ import {
   benchmarkDeckFromFrozenLocalSnapshot,
   buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries,
   runAiSelfplayTraceMining,
-  type PracticalMicroRuntimeMode,
-  type PracticalMicroRuntimeRuleId,
+} from "../packages/ai/src/simulation";
+import type {
+  PracticalMicroRuntimeMode,
+  PracticalMicroRuntimeRuleId,
 } from "../packages/ai/src/index";
 import { progressAwareAlternativeSnapshot } from "../packages/ai/src/simulation/progress-aware-alternative-snapshot";
 

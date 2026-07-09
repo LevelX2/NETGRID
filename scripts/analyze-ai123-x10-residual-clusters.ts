@@ -5,8 +5,8 @@ import {
   benchmarkDeckFromFrozenLocalSnapshot,
   benchmarkDeckFromSnapshot,
   runAiSelfplayTraceMining,
-} from "../packages/ai/src/index";
-import type { AiSimulationSummary } from "../packages/ai/src/index";
+} from "../packages/ai/src/simulation";
+import type { AiSimulationSummary } from "../packages/ai/src/simulation";
 
 type PairId = "a" | "b" | "c" | "d";
 type ActionEntry = AiSimulationSummary["actionSequence"][number];

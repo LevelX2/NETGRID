@@ -14,7 +14,7 @@ import {
   summarizeMatchProgressionMetrics,
   type AiSimulationSummary,
   type SimulationControllerMode,
-} from "../packages/ai/src/index";
+} from "../packages/ai/src/simulation";
 import { progressAwareAlternativeSnapshot } from "../packages/ai/src/simulation/progress-aware-alternative-snapshot";
 
 type ActionEntry = AiSimulationSummary["actionSequence"][number];

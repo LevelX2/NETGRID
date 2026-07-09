@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import selfplayExploitLeagueData from "../../../../data/ai/ai-selfplay-exploit-league-2026-05-17.json";
-import { listV143BenchmarkProfiles, listV143ExploitFixtures } from "../index";
+import { listV143BenchmarkProfiles, listV143ExploitFixtures } from "../simulation";
 
 describe("V1.4.3 simulation fixture contracts", () => {
   it("provides versioned benchmark profiles and exploit fixtures", () => {

@@ -3,7 +3,8 @@ import { networkInterfaces } from "node:os";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import { WebSocket, WebSocketServer } from "ws";
-import { isAiDeckSnapshotRuntimeError, simulateAiGame } from "@netgrid/ai";
+import { isAiDeckSnapshotRuntimeError } from "@netgrid/ai";
+import { simulateAiGame } from "@netgrid/ai/simulation";
 import type { ApiMatchCardPool } from "@netgrid/shared";
 import { createConnectionAuditLoggerFromEnv, noopConnectionAuditLogger, type ConnectionAuditLogger } from "./connection-audit";
 import {

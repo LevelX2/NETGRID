@@ -1,11 +1,9 @@
 import type { AiDecisionActionAlternative, LegalAction, Side } from "@netgrid/shared";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
 import { hasConcretePassiveScoreLineAvailable } from "./score-window-counts";
-import type {
-  AiSimulationConfig,
-  AiSimulationSummary,
-  SimulationControllerMode,
-} from "../index";
+import type { AiSimulationConfig } from "./ai-simulation-config";
+import type { AiSimulationSummary } from "./ai-simulation-summary";
+import type { SimulationControllerMode } from "./simulation-types";
 
 export type AiSelfplayTraceMiningDetectorId =
   | "illegal_action"

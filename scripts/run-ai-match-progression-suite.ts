@@ -5,7 +5,7 @@ import {
   listMatchProgressionBenchmarkDeckSlots,
   runMatchProgressionBenchmarkSuite,
   type SimulationBenchmarkProfileId,
-} from "../packages/ai/src/index";
+} from "../packages/ai/src/simulation";
 
 const PROFILE_IDS = [
   "random_legal_bot",

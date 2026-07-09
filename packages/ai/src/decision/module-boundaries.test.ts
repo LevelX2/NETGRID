@@ -752,6 +752,27 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps match simulation out of the default package facade", () => {
+    const publicIndex = readFileSync(path.join(srcDir, "index.ts"), "utf8");
+    const packageManifest = JSON.parse(
+      readFileSync(path.join(srcDir, "..", "package.json"), "utf8"),
+    ) as { exports?: Record<string, string> };
+    const violations = [
+      ...(publicIndex.includes('from "./simulation/')
+        ? ["index.ts imports or exports simulation modules"]
+        : []),
+      ...(publicIndex.includes("simulateAiGame") ||
+      publicIndex.includes("runAiSelfplayTraceMining")
+        ? ["index.ts exposes match-simulation entrypoints"]
+        : []),
+      ...(packageManifest.exports?.["./simulation"] === "./src/simulation.ts"
+        ? []
+        : ["package.json misses the explicit ./simulation export"]),
+    ];
+
+    expect(violations).toEqual([]);
+  });
+
   it("keeps the public package facade away from legacy plan contracts", () => {
     const publicIndex = path.join(srcDir, "index.ts");
     const content = readFileSync(publicIndex, "utf8");
@@ -1168,6 +1189,7 @@ describe("AI module boundaries", () => {
           "runtime/semantic-runtime-plan-memory-exclusion.ts",
           "runtime/runner-economy-commitment-composition.ts",
           "runtime/runner-development-support-composition.ts",
+          "runtime/ai-live-runtime-composition.ts",
           "simulation/ai-runtime-simulation-composition.ts",
         ]),
       ],

@@ -162,7 +162,13 @@ integrate_main -> blocker
   Defaultvergleich ist `random_legal_bot` gegen `current_candidate`, alte
   V1.4-Profilnamen und zwei überholte Legacy-Paired-Gate-Scripts sind entfernt,
   aktuelle Diagnose-Scripts akzeptieren nur noch die beiden realen Modi.
-- `AICSC-3`: `pending`.
+- `AICSC-3`: `done`; `@netgrid/ai` exportiert nur noch Live-Verträge,
+  Match-Simulation, Selfplay, Benchmarks und die vorläufig noch für AICSC-4
+  benötigten Baseline-Selector liegen hinter `@netgrid/ai/simulation`.
+  Server, Scripts und Tests verwenden die explizite Fassade; Export- und
+  Boundarytests sichern die Trennung. Die Entfernung der intern noch von
+  Simulationsdiagnostik referenzierten Legacy-Implementierung ist bewusst das
+  unmittelbar folgende Retirement-Paket AICSC-4.
 - `AICSC-4`: `pending`.
 - `AICSC-5`: `pending`.
 - `AICSC-6`: `pending`.

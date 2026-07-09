@@ -28,7 +28,7 @@ import {
   buildServerFeatures,
   visibleCitySurveillanceSourceCount,
 } from "./runtime/ai-feature-server";
-import { createAiRuntimeSimulationComposition } from "./simulation/ai-runtime-simulation-composition";
+import { createAiLiveRuntimeComposition } from "./runtime/ai-live-runtime-composition";
 import {
   cardDefinitionTypeForAi,
   demoCardDefinitionForAi,
@@ -127,14 +127,12 @@ import {
   centralRunStreakWithoutValueForMetrics,
   recentCentralRunSameTargetWithoutRefresh,
 } from "./simulation/central-run-history";
-import { corpIcePortfolioDiagnosticsForSimulationAction } from "./simulation/corp-ice-portfolio-diagnostics";
 import {
   corpVisibleMeatDamagePayoff,
   corpVisibleRunnerDamagePreventionEvidence,
   corpVisibleRunnerResourceTrashEvidence,
 } from "./simulation/corp-tag-punish-visible-payoff";
 import { applyCorpVisibleTagPunishTakenWindowDiagnostics } from "./simulation/corp-visible-tag-punish-taken-diagnostics";
-import { summarizeMatchProgressionMetrics } from "./simulation/match-progression-summary";
 import {
   hasRunnerRemoteTrashAction,
   remoteServerHasScoreThreat,
@@ -174,21 +172,7 @@ import {
   runnerKnownPathAssessmentIsUnbreakableNoAccess,
 } from "./visible-run-analysis";
 
-const {
-  chooseAiAction,
-  chooseCorpAction,
-  chooseCorpBaselineAction,
-  chooseRunnerAction,
-  chooseRunnerBaselineAction,
-  simulateAiGame,
-  runV143ExploitRegressionFixtures,
-  runV143SimulationLeague,
-  runDoctrineQualityBenchmark,
-  runMatchProgressionBenchmark,
-  runMatchProgressionBenchmarkSuite,
-  runAiSelfplayTraceMining,
-  simulateAiSoak,
-} = createAiRuntimeSimulationComposition({
+export const aiLiveRuntimeDependencies = {
   visibleSourceCard: semanticRuntimeVisibleSourceCard,
   serverId: semanticRuntimeServerId,
   buildObservedFacts,
@@ -320,24 +304,22 @@ const {
   tacticalPlanMappingOverrideEvidence,
   tacticalPlanRuntimeAlignedToChoice,
   rememberTacticalPlanRuntime,
-  corpIcePortfolioDiagnosticsForSimulationAction,
-  summarizeMatchProgressionMetrics,
-});
+};
+
+const {
+  chooseAiAction,
+  chooseCorpAction,
+  chooseRunnerAction,
+} = createAiLiveRuntimeComposition(aiLiveRuntimeDependencies);
+
+/*
+ * Keep the dependency object in this module as the single live wiring source.
+ * The explicit simulation facade extends it without making simulation part of
+ * the default package graph.
+ */
 
 export {
   chooseAiAction,
   chooseCorpAction,
-  chooseCorpBaselineAction,
   chooseRunnerAction,
-  chooseRunnerBaselineAction,
-  runAiSelfplayTraceMining,
-  runDoctrineQualityBenchmark,
-  runMatchProgressionBenchmark,
-  runMatchProgressionBenchmarkSuite,
-  runV143ExploitRegressionFixtures,
-  runV143SimulationLeague,
-  simulateAiGame,
-  simulateAiSoak,
 };
-
-export { summarizeMatchProgressionMetrics };

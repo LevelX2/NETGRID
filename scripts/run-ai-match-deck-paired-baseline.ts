@@ -7,7 +7,7 @@ import {
   runAiSelfplayTraceMining,
   summarizeMatchProgressionMetrics,
   type AiSimulationSummary,
-} from "../packages/ai/src/index";
+} from "../packages/ai/src/simulation";
 import type { SimulationControllerMode } from "../packages/ai/src/simulation/simulation-types";
 
 type TraceMiningResult = ReturnType<typeof runAiSelfplayTraceMining>;

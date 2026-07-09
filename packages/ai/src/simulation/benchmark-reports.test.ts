@@ -23,7 +23,7 @@ import {
   runMatchProgressionBenchmark,
   runMatchProgressionBenchmarkSuite,
   type AiSimulationSummary,
-} from "../index";
+} from "../simulation";
 import { resetTacticalPlanMemory } from "../tactical-plans";
 
 describe("benchmark report formatting", () => {
