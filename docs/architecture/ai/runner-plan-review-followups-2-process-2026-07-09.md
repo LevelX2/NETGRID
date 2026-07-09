@@ -105,6 +105,8 @@ Commit: `fix(ai): harden runner plan step matching`
 
 Ziel: Aktiver RunnerRunPlan prüft legale Success-/Follow-up-/Access-Payoff-Aktionen vor normalem Access, damit `access_card` nicht wichtige Vor-Access-Fenster schluckt.
 
+Status: erledigt 2026-07-09. Gates grün: gezielte `runner-run-plan-policy`-Tests, `@netgrid/ai` Typecheck, `git diff --check`.
+
 Kernartefakte:
 
 - `packages/ai/src/runtime/runner-run-plan-policy.ts`

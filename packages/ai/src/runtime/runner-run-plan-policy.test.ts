@@ -70,9 +70,7 @@ describe("runner run plan policy", () => {
       "runner_run_plan_sequence_selected:true",
     );
     expect(selected?.evidence).toContain("sequence_cash_cost:2");
-    expect(selected?.evidence).toContain(
-      "sequence_restricted_credits_spent:2",
-    );
+    expect(selected?.evidence).toContain("sequence_restricted_credits_spent:2");
     expect(selected?.evidence).not.toContain(
       "runner_run_plan_conserve_credits:true",
     );
@@ -124,9 +122,7 @@ describe("runner run plan policy", () => {
     expect(selected?.evidence).toContain(
       "current_encounter_safety_break_sequence:true",
     );
-    expect(selected?.evidence).toContain(
-      "required_subroutine_indexes:0",
-    );
+    expect(selected?.evidence).toContain("required_subroutine_indexes:0");
   });
 
   it("breaks brain damage after pumping even when ETR and access are unaffordable", () => {
@@ -212,9 +208,7 @@ describe("runner run plan policy", () => {
 
     expect(selected?.action.actionId).toBe(breakSubroutine.actionId);
     expect(selected?.evidence).toContain("sequence_cash_cost:2");
-    expect(selected?.evidence).toContain(
-      "sequence_restricted_credits_spent:2",
-    );
+    expect(selected?.evidence).toContain("sequence_restricted_credits_spent:2");
   });
 
   it("chooses a direct break step over continue through an unbroken ETR", () => {
@@ -512,6 +506,93 @@ describe("runner run plan policy", () => {
       "runner_run_plan_revalidation:abort_recommended",
     );
   });
+
+  it("uses successful-run followups before normal access", () => {
+    const successFollowup = action("resolve_choice", {
+      actionId: "credit-subversion-before-access",
+      source: "runner-resource-1",
+      costs: [],
+      timingPoint: "access.resolve_card",
+      expiresAtStateVersion: 170,
+      payload: {
+        sourceCardId: "runner-resource-1",
+        sourceDefinitionId: "onr_proteus_136_credit-subversion",
+        cardImplementationAbilityKey: "successful_run_before_access:0",
+        cardImplementationPrimitiveKind: "successful_run_before_access_effect",
+        cardImplementationEffectKind: "corp_lose_credits",
+      },
+    });
+    const accessCard = action("access_card", {
+      actionId: "access-rd-card",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "access.resolve_card",
+      expiresAtStateVersion: 170,
+      payload: {},
+    });
+    const input = runnerAccessInput({
+      legalActions: [successFollowup, accessCard],
+    });
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: runPlan(),
+      choices: [
+        choice(accessCard, "runner_open_access_card", 9000),
+        choice(successFollowup, "card_ability.trigger", 10),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(successFollowup.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_success_window_selected:true",
+    );
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_success_window_before_access:true",
+    );
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_success_window_signal:successful_run_before_access:0",
+    );
+  });
+
+  it("does not treat generic resolve_choice as a runner success window", () => {
+    const genericChoice = action("resolve_choice", {
+      actionId: "generic-choice",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "access.resolve_card",
+      expiresAtStateVersion: 170,
+      payload: {},
+    });
+    const accessCard = action("access_card", {
+      actionId: "access-rd-card",
+      source: "game_rule",
+      costs: [],
+      timingPoint: "access.resolve_card",
+      expiresAtStateVersion: 170,
+      payload: {},
+    });
+    const input = runnerAccessInput({
+      legalActions: [genericChoice, accessCard],
+    });
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: runPlan(),
+      choices: [
+        choice(accessCard, "runner_open_access_card", 900),
+        choice(genericChoice, "card_ability.trigger", 1200),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(accessCard.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_access_selected:access_card",
+    );
+    expect(selected?.evidence).not.toContain(
+      "runner_run_plan_success_window_selected:true",
+    );
+  });
 });
 
 function runnerEncounterInput(params: {
@@ -679,6 +760,69 @@ function runnerServerMovementInput(params: {
   } as unknown as AiDecisionInput;
 }
 
+function runnerAccessInput(params: {
+  legalActions: LegalAction[];
+}): AiDecisionInput {
+  return {
+    side: "runner",
+    playerView: {
+      stateVersion: 170,
+      side: "runner",
+      activeSide: "runner",
+      timingPoint: "access.resolve_card",
+      phase: "run",
+      turn: 1,
+      click: 3,
+      winner: null,
+      agendaPointsToWin: 7,
+      own: {
+        identity: { instanceId: "runner-id", known: true },
+        gripOrHq: [],
+        heapOrArchives: [],
+        scoreArea: [],
+        rig: [],
+        clicks: 1,
+        credits: 7,
+        tags: 0,
+        badPublicity: 0,
+      },
+      opponent: {
+        identity: { instanceId: "corp-id", known: true },
+        gripOrHqCount: 5,
+        heapOrArchives: [],
+        scoreArea: [],
+        rig: [],
+        clicks: 3,
+        credits: 5,
+        tags: 0,
+        badPublicity: 0,
+      },
+      servers: [
+        {
+          id: "rd",
+          label: "R&D",
+          ice: [],
+          root: [],
+        },
+      ],
+      run: {
+        attackedServerId: "rd",
+        phase: "access",
+        position: { kind: "server", serverId: "rd" },
+        successful: true,
+      },
+      publicEvents: [],
+    },
+    eventTail: [],
+    legalActions: params.legalActions,
+    difficulty: "normal",
+    seed: "runner-run-plan-policy-access-test",
+    decisionId: "runner-run-plan-policy-access-test:170:runner",
+    actionNumber: 3,
+    profileId: "runner-run-plan-profile",
+  } as unknown as AiDecisionInput;
+}
+
 function visibleIce(params: {
   instanceId?: string;
   iceDefinitionId: string;
@@ -697,7 +841,7 @@ function visibleIce(params: {
         ? ["wall"]
         : params.iceDefinitionId === "onr_v1_231_cortical-scrub"
           ? ["sentry", "black_ice", "ap", "brainwipe"]
-        : ["code_gate"],
+          : ["code_gate"],
     rezzed: true,
     strength: params.iceStrength,
     effectiveRunQuote: {

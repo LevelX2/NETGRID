@@ -1,4 +1,4 @@
-import type { AiDecisionInput } from "@netgrid/shared";
+import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
 import type { RunnerRunPlan } from "./runner-run-plan-types";
 import { actionCreditCost } from "./action-cost";
 import { currentEncounteredIceCard } from "./current-encounter";
@@ -25,6 +25,8 @@ export function runnerRunPlanSemanticChoice(params: {
   if (abortChoice) return abortChoice;
   const encounterChoice = runnerRunPlanEncounterChoice(params);
   if (encounterChoice) return encounterChoice;
+  const successWindowChoice = runnerRunPlanSuccessWindowChoice(params);
+  if (successWindowChoice) return successWindowChoice;
   const accessChoice = runnerRunPlanAccessChoice(params);
   if (accessChoice) return accessChoice;
   const selected =
@@ -77,6 +79,43 @@ function runnerRunPlanAbortYieldContinueChoice(params: {
       ...params.plan.revalidation.reasons.map(
         (reason) => `runner_run_plan_abort_yield_reason:${reason}`,
       ),
+    ],
+  });
+}
+
+function runnerRunPlanSuccessWindowChoice(params: {
+  plan: RunnerRunPlan;
+  choices: readonly SemanticRuntimeChoice[];
+}): SemanticRuntimeChoice | undefined {
+  const successWindowChoices = params.choices
+    .filter(
+      (choice) =>
+        !choice.exclusion && runnerRunPlanSuccessWindowActionMatches(choice),
+    )
+    .map((choice) => ({
+      choice,
+      priority: runnerRunPlanSuccessWindowPriority(choice),
+    }))
+    .filter((entry) => entry.priority > 0)
+    .sort(
+      (left, right) =>
+        right.priority - left.priority ||
+        right.choice.score - left.choice.score ||
+        left.choice.action.actionId.localeCompare(right.choice.action.actionId),
+    );
+  const selected = successWindowChoices[0];
+  if (!selected) return undefined;
+  return annotateRunnerRunPlanChoice({
+    choice: selected.choice,
+    plan: params.plan,
+    explanation:
+      "RunnerRunPlan nutzt das legale Success-Window vor dem normalen Zugriff.",
+    extraEvidence: [
+      "runner_run_plan_success_window_selected:true",
+      "runner_run_plan_success_window_before_access:true",
+      `runner_run_plan_success_window_action:${selected.choice.action.actionId}`,
+      `runner_run_plan_success_window_priority:${selected.priority}`,
+      ...runnerRunPlanSuccessWindowMatchedEvidence(selected.choice),
     ],
   });
 }
@@ -354,7 +393,9 @@ function runnerRunPlanConserveCreditsChoice(params: {
   });
 }
 
-function currentEncounterHasUnbrokenSafetyThreat(input: AiDecisionInput): boolean {
+function currentEncounterHasUnbrokenSafetyThreat(
+  input: AiDecisionInput,
+): boolean {
   const continueAction = input.legalActions.find(
     (action) =>
       action.type === "continue_run" &&
@@ -464,6 +505,143 @@ function runnerRunPlanAccessReserveTarget(plan: RunnerRunPlan): number {
     plan.budget.reservedCreditsForTrash,
     plan.budget.reservedCreditsAfterRun,
   );
+}
+
+function runnerRunPlanSuccessWindowActionMatches(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  const action = choice.action;
+  if (action.side !== "runner") return false;
+  if (runnerRunPlanAccessActionTypes.has(action.type)) return false;
+  if (
+    action.type === "start_run" ||
+    action.type === "continue_run" ||
+    action.type === "jack_out" ||
+    action.type === "pump_breaker" ||
+    action.type === "break_subroutine"
+  ) {
+    return false;
+  }
+  const supportedActionType =
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability" ||
+    action.type === "play_event" ||
+    action.type === "resolve_choice";
+  if (!supportedActionType) return false;
+  return runnerRunPlanSuccessWindowPriority(choice) > 0;
+}
+
+function runnerRunPlanSuccessWindowPriority(
+  choice: SemanticRuntimeChoice,
+): number {
+  const signals = runnerRunPlanSuccessWindowSignals(choice);
+  let priority = 0;
+  if (signals.some((signal) => signal.includes("fort.all_rezzed_ice_trash"))) {
+    priority += 700;
+  }
+  if (
+    signals.some(
+      (signal) =>
+        signal.includes("ice.trash_rezzed") ||
+        signal.includes("trash_rezzed_ice"),
+    )
+  ) {
+    priority += 600;
+  }
+  if (
+    signals.some(
+      (signal) =>
+        signal.includes("free_trash") || signal.includes("access.free_trash"),
+    )
+  ) {
+    priority += 500;
+  }
+  if (signals.some((signal) => signal.includes("access.payoff"))) {
+    priority += 300;
+  }
+  if (
+    signals.some(
+      (signal) =>
+        signal.includes("run.followup_run") ||
+        signal.includes("followup_run") ||
+        signal.includes("run.extra_run_after_success") ||
+        signal.includes("extra_run_after_success"),
+    )
+  ) {
+    priority += 220;
+  }
+  if (
+    signals.some(
+      (signal) =>
+        signal.includes("successful_run_before_access") ||
+        signal.includes("run.success_followup") ||
+        signal.includes("success_followup") ||
+        signal.includes("requires_successful_run") ||
+        signal.includes("successful_run"),
+    )
+  ) {
+    priority += 120;
+  }
+  return Math.max(0, priority - actionCreditCost(choice.action) * 10);
+}
+
+function runnerRunPlanSuccessWindowMatchedEvidence(
+  choice: SemanticRuntimeChoice,
+): string[] {
+  return runnerRunPlanSuccessWindowSignals(choice)
+    .filter(signalIsRunnerRunPlanSuccessWindow)
+    .slice(0, 6)
+    .map((signal) => `runner_run_plan_success_window_signal:${signal}`);
+}
+
+function runnerRunPlanSuccessWindowSignals(
+  choice: SemanticRuntimeChoice,
+): string[] {
+  return [
+    choice.scopeId,
+    choice.reasonCode,
+    choice.action.timingPoint,
+    ...choice.evidence,
+    ...payloadStringSignals(choice.action.payload),
+  ]
+    .filter((entry): entry is string => typeof entry === "string")
+    .flatMap(normalizedSignalVariants);
+}
+
+function signalIsRunnerRunPlanSuccessWindow(signal: string): boolean {
+  return (
+    signal.includes("successful_run") ||
+    signal.includes("success_followup") ||
+    signal.includes("requires_successful_run") ||
+    signal.includes("extra_run_after_success") ||
+    signal.includes("run.followup_run") ||
+    signal.includes("access.payoff") ||
+    signal.includes("ice.trash_rezzed") ||
+    signal.includes("fort.all_rezzed_ice_trash") ||
+    signal.includes("free_trash")
+  );
+}
+
+function payloadStringSignals(payload: LegalAction["payload"]): string[] {
+  if (!payload) return [];
+  return Object.values(payload).flatMap((value): string[] => {
+    if (typeof value === "string") return [value];
+    if (Array.isArray(value)) {
+      return value.filter(
+        (entry): entry is string => typeof entry === "string",
+      );
+    }
+    return [];
+  });
+}
+
+function normalizedSignalVariants(signal: string): string[] {
+  const normalized = signal.toLocaleLowerCase("en-US");
+  return [
+    normalized,
+    normalized.replace(/[-_\s]+/g, "."),
+    normalized.replace(/[.\s-]+/g, "_"),
+  ];
 }
 
 function runnerRunPlanAccessTypePriority(actionType: string): number {
