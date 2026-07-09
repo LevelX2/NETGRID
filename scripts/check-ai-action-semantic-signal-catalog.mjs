@@ -113,6 +113,12 @@ function buildReport() {
     },
     runtimeConsumerStatus: "none",
     productiveUseAllowed: false,
+    supportSemantics: {
+      aiSupported: "technical_deck_eligibility_only",
+      semanticCoverage: "reported_separately_by_this_gate",
+      playStrengthReadiness:
+        "requires_strategy_scenario_benchmark_and_runtime_evidence",
+    },
     noEffectFlags: {
       runtimeBehaviorChanges: false,
       actionSelectionChanges: false,
@@ -326,6 +332,8 @@ function checkReports(expectedReport) {
     "keine Runtime-Anbindung",
     "keine Action-Auswahl",
     "kein Scoring",
+    "technische KI-Deckzulassung",
+    "Play-Strength-Readiness",
   ]) {
     if (!markdownLower.includes(requiredText.toLowerCase())) {
       fail(`${markdownReportPath} missing required text: ${requiredText}`);
@@ -339,6 +347,18 @@ function validateReport(reportToValidate) {
   }
   if (reportToValidate.productiveUseAllowed !== false) {
     fail("productiveUseAllowed must be false");
+  }
+  if (
+    reportToValidate.supportSemantics?.aiSupported !==
+    "technical_deck_eligibility_only"
+  ) {
+    fail("ai_supported must remain technical deck eligibility only");
+  }
+  if (
+    reportToValidate.supportSemantics?.playStrengthReadiness !==
+    "requires_strategy_scenario_benchmark_and_runtime_evidence"
+  ) {
+    fail("play-strength readiness must remain a separate evidence gate");
   }
   for (const [flag, value] of Object.entries(
     reportToValidate.noEffectFlags ?? {},
@@ -422,6 +442,8 @@ function renderMarkdownReport(reportToRender) {
     "Diagnosebericht fuer aktive Karten. Der Bericht nutzt Active Hints, Compiled Hints, den Hint-Inspector-Index und den Tactic-Signal-Katalog.",
     "",
     "Keine Runtime-Anbindung, keine Action-Auswahl, kein Scoring und keine Hidden-Info-Projektion.",
+    "",
+    "`ai_supported` bezeichnet nur die technische KI-Deckzulassung. Semantische Abdeckung und Play-Strength-Readiness bleiben getrennte Gates und erfordern Strategie-, Szenario-, Benchmark- und Runtime-Evidence.",
     "",
     "## Summary",
     "",

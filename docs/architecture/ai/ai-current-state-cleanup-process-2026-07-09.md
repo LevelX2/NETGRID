@@ -148,6 +148,23 @@ integrate_main -> blocker
 8. `AICSC-7 Historische Shadow-/META-/Testflächen entfernen`
 9. `AICSC-8 Dokumentation, Full Gate und Main-Integration`
 
+## Fortschritt
+
+- `AICSC-0`: `done` auf Commit `dfd8ef681`; Prozessartefakt, Goal, Branch und
+  Worktree sind angelegt, der parallele Proteus-Scope ist abgegrenzt.
+- `AICSC-1`: `done`; Signal-Katalog und Full-Derived-Facts-Inventar bilden
+  616 aktive Hints ab, fehlende CardImplementations werden nicht mehr durch
+  künstliche `__missing__`-Pfade als vorhanden gezählt, technische
+  `ai_supported`-Zulassung ist ausdrücklich von semantischer Abdeckung und
+  Play-Strength-Readiness getrennt. `check:ai` und `check:ai:full` sind grün.
+- `AICSC-2`: `pending`.
+- `AICSC-3`: `pending`.
+- `AICSC-4`: `pending`.
+- `AICSC-5`: `pending`.
+- `AICSC-6`: `pending`.
+- `AICSC-7`: `pending`.
+- `AICSC-8`: `pending`.
+
 ## Paketdetails
 
 ### AICSC-0 Prozessartefakt und Preflight

@@ -30,7 +30,7 @@ const IMPLEMENTATION_ROOTS = [
 ];
 const OVERLAY_ROOT = "data/ai/hints/overlays";
 const GENERATED_AT = "2026-05-25";
-const EXPECTED_ACTIVE_HINT_COUNT = 564;
+const EXPECTED_ACTIVE_HINT_COUNT = 616;
 
 function repoPath(relativePath) {
   return path.join(REPO_ROOT, relativePath);
@@ -124,6 +124,7 @@ export function buildFullCoverageInventory() {
   const expectedByCard = expectedKindsByCardId();
   const cards = activeHints.map((hint) => {
     const expected = expectedByCard.get(hint.cardId);
+    const implementationFound = implementations.has(hint.cardId);
     const implementationPath =
       implementations.get(hint.cardId) ??
       `${implementationFallbackRoot(hint.cardId)}/__missing__/${hint.cardId}.ts`;
@@ -133,13 +134,13 @@ export function buildFullCoverageInventory() {
       side: hint.side,
       cardType: hint.cardType,
       implementationPath,
-      implementationFound: Boolean(implementationPath),
+      implementationFound,
       fullCoverageScope: true,
       expectedDerivableKinds: expected?.expectedDerivableKinds ?? [],
       expectedManualOverlayNeeded:
         expected?.expectedManualOverlayNeeded ??
         Boolean(hint.quality?.needsHumanReview),
-      coverageClass: implementationPath
+      coverageClass: implementationFound
         ? "legacy_fallback_only"
         : "blocked_missing_implementation",
       rationale:

@@ -110,6 +110,7 @@ const KNOWN_EFFECT_KINDS = new Set([
   "rez_discount",
   "program_trash",
   "ice_trash",
+  "installed_card_trash",
   "hardware_trash",
   "run_lock",
   "no_jack_out",
