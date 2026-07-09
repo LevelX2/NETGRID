@@ -22,10 +22,9 @@ import {
   type UndoResult
 } from "./multiplayer";
 import {
-  DEFAULT_LEGACY_MATCH_STORAGE_PATH,
+  DEFAULT_JSON_STORAGE_PATH,
   DEFAULT_SQLITE_STORAGE_PATH,
   DEFAULT_STORAGE_BACKUP_DIR,
-  LEGACY_SQLITE_STORAGE_PATH,
   SqliteMatchStorage,
   StorageError,
   type StorageKind
@@ -1123,18 +1122,15 @@ export function createConfiguredStorage() {
   if (storageKind === "memory") return new InMemoryMatchStorage();
   if (storageKind === "json") {
     const configuredPath = envValue(process.env, "NETGRID_MATCH_STORAGE_PATH");
-    const storagePath = configuredPath ? resolve(configuredPath) : resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
+    const storagePath = configuredPath ? resolve(configuredPath) : resolve(root, DEFAULT_JSON_STORAGE_PATH);
     return new JsonFileMatchStorage(storagePath);
   }
   const configuredSqlitePath = envValue(process.env, "NETGRID_SQLITE_STORAGE_PATH");
   const sqlitePath = configuredSqlitePath ? resolve(configuredSqlitePath) : resolve(root, DEFAULT_SQLITE_STORAGE_PATH);
-  const legacyJsonPath = envValue(process.env, "NETGRID_LEGACY_MATCH_STORAGE_PATH") ?? resolve(root, DEFAULT_LEGACY_MATCH_STORAGE_PATH);
   const backupDir = envValue(process.env, "NETGRID_STORAGE_BACKUP_DIR") ?? resolve(root, DEFAULT_STORAGE_BACKUP_DIR);
   try {
     return new SqliteMatchStorage({
       dbPath: sqlitePath,
-      ...(configuredSqlitePath ? {} : { legacySqlitePath: resolve(root, LEGACY_SQLITE_STORAGE_PATH) }),
-      legacyJsonPath: resolve(legacyJsonPath),
       backupDir: resolve(backupDir)
     });
   } catch (error) {

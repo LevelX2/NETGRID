@@ -9,8 +9,7 @@ import type { AiDecisionTraceRecord, MatchMode, MatchStatus, MultiplayerStorage,
 export const SQLITE_STORAGE_SCHEMA_VERSION = 1;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
 export const DEFAULT_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netgrid.sqlite";
-export const LEGACY_SQLITE_STORAGE_PATH = "data/runtime/multiplayer/netgrid.sqlite";
-export const DEFAULT_LEGACY_MATCH_STORAGE_PATH = "data/runtime/multiplayer/matches.json";
+export const DEFAULT_JSON_STORAGE_PATH = "data/runtime/multiplayer/matches.json";
 export const DEFAULT_STORAGE_BACKUP_DIR = "data/runtime/backups";
 const PARTIAL_STATE_SNAPSHOTS = Symbol("partialStateSnapshots");
 
@@ -26,18 +25,13 @@ export type StorageHealth = {
   schemaVersion?: number;
   storageFormat?: string;
   matchCount?: number;
-  legacyImport?: "not_applicable" | "pending" | "completed";
   database?: string;
   lastMigrationAt?: string;
-  lastLegacyImportAt?: string;
 };
 
 export type SqliteMatchStorageOptions = {
   dbPath: string;
-  legacySqlitePath?: string;
-  legacyJsonPath?: string;
   backupDir?: string;
-  autoImportLegacy?: boolean;
 };
 
 export type BackupManifest = {
@@ -47,7 +41,7 @@ export type BackupManifest = {
   release: "V1.0.8";
   storageKind: "sqlite";
   schemaVersion: number;
-  source: "default_sqlite" | "configured_sqlite" | "legacy_json_import" | "pre_restore_sqlite";
+  source: "default_sqlite" | "configured_sqlite" | "pre_restore_sqlite";
   files: Array<{ name: string; sizeBytes: number; sha256: string }>;
   matchCount?: number;
   reason?: "manual" | "pre_migration" | "pre_restore" | "pre_cleanup" | "pre_compaction";
@@ -303,7 +297,7 @@ export class StorageError extends Error {
       | "schema_too_new"
       | "schema_too_old"
       | "schema_missing"
-      | "legacy_import_invalid"
+      | "stored_match_invalid"
       | "backup_invalid"
       | "backup_checksum_mismatch"
       | "backup_schema_unsupported",
@@ -317,27 +311,18 @@ export class StorageError extends Error {
 export class SqliteMatchStorage implements MultiplayerStorage {
   private readonly db: DatabaseSync;
   private readonly dbPath: string;
-  private readonly legacyJsonPath: string;
   private readonly backupDir: string;
-  private legacyImportState: NonNullable<StorageHealth["legacyImport"]> = "not_applicable";
 
   constructor(options: SqliteMatchStorageOptions) {
     this.dbPath = resolve(options.dbPath);
-    const legacySqlitePath = options.legacySqlitePath ? resolve(options.legacySqlitePath) : undefined;
-    this.legacyJsonPath = resolve(options.legacyJsonPath ?? DEFAULT_LEGACY_MATCH_STORAGE_PATH);
     this.backupDir = resolve(options.backupDir ?? DEFAULT_STORAGE_BACKUP_DIR);
     mkdirSync(dirname(this.dbPath), { recursive: true });
     mkdirSync(this.backupDir, { recursive: true });
-    if (!existsSync(this.dbPath) && legacySqlitePath && legacySqlitePath !== this.dbPath && existsSync(legacySqlitePath)) {
-      copyFileSync(legacySqlitePath, this.dbPath);
-      this.legacyImportState = "completed";
-    }
     try {
       this.db = new DatabaseSync(this.dbPath);
       this.db.exec("PRAGMA foreign_keys = ON");
       this.db.exec("PRAGMA journal_mode = DELETE");
       this.ensureSchema();
-      if (options.autoImportLegacy !== false) this.importLegacyIfNeeded();
     } catch (error) {
       if (error instanceof StorageError) throw error;
       throw new StorageError("storage_corrupt", "Storage konnte nicht geöffnet werden. Bitte aus einem lokalen Backup wiederherstellen.");
@@ -375,10 +360,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       schemaVersion,
       storageFormat: this.meta("storage_format") ?? SQLITE_STORAGE_FORMAT,
       matchCount: this.matchCount(),
-      legacyImport: this.legacyImportState,
       database: basename(this.dbPath),
-      ...(this.meta("last_migration_at") ? { lastMigrationAt: this.meta("last_migration_at")! } : {}),
-      ...(this.meta("last_legacy_import_at") ? { lastLegacyImportAt: this.meta("last_legacy_import_at")! } : {})
+      ...(this.meta("last_migration_at") ? { lastMigrationAt: this.meta("last_migration_at")! } : {})
     };
   }
 
@@ -965,52 +948,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       source: "configured_sqlite"
     });
     this.createSchema();
-  }
-
-  private importLegacyIfNeeded(): void {
-    if (!existsSync(this.legacyJsonPath)) {
-      this.legacyImportState = "not_applicable";
-      return;
-    }
-    if (this.meta("last_legacy_import_at")) {
-      this.legacyImportState = "completed";
-      return;
-    }
-    if (this.matchCount() > 0) {
-      this.legacyImportState = "pending";
-      return;
-    }
-    const content = readFileSync(this.legacyJsonPath, "utf8");
-    let records: StoredMatch[];
-    try {
-      const parsed = JSON.parse(content) as { matches?: unknown };
-      if (!Array.isArray(parsed.matches)) throw new Error("matches_missing");
-      records = parsed.matches.map((record) => {
-        const normalized = normalizeLegacyStoredMatch(record);
-        validateStoredMatch(normalized);
-        return normalized;
-      });
-    } catch {
-      throw new StorageError("legacy_import_invalid", "Legacy-JSON konnte nicht sicher importiert werden.");
-    }
-
-    createSqliteStorageBackup({
-      ...(existsSync(this.dbPath) ? { dbPath: this.dbPath } : {}),
-      legacyJsonPath: this.legacyJsonPath,
-      backupDir: this.backupDir,
-      schemaVersion: SQLITE_STORAGE_SCHEMA_VERSION,
-      matchCount: 0,
-      reason: "pre_migration",
-      source: "legacy_json_import"
-    });
-
-    this.transaction(() => {
-      for (const record of records) this.saveRecord(record);
-      const now = new Date().toISOString();
-      this.setMeta("last_legacy_import_at", now, now);
-      this.setMeta("legacy_import_source_hash", sha256File(this.legacyJsonPath), now);
-    });
-    this.legacyImportState = "completed";
   }
 
   private recordFromJson(matchId: string, recordJson: string, options: { includeStateSnapshots?: boolean } = {}): StoredMatch {
@@ -1857,7 +1794,6 @@ function dedupeStateSnapshots(record: StoredMatch): void {
 
 export function createSqliteStorageBackup(input: {
   dbPath?: string;
-  legacyJsonPath?: string;
   backupDir: string;
   schemaVersion: number;
   matchCount?: number;
@@ -1873,11 +1809,6 @@ export function createSqliteStorageBackup(input: {
   if (input.dbPath && existsSync(input.dbPath)) {
     const targetName = "netgrid.sqlite";
     copyFileSync(input.dbPath, join(targetDir, targetName));
-    files.push(fileManifestEntry(targetDir, targetName));
-  }
-  if (input.legacyJsonPath && existsSync(input.legacyJsonPath)) {
-    const targetName = "legacy-matches.json";
-    copyFileSync(input.legacyJsonPath, join(targetDir, targetName));
     files.push(fileManifestEntry(targetDir, targetName));
   }
   if (files.length === 0) throw new StorageError("backup_invalid", "Backup konnte keine gültigen Storage-Dateien sichern.");
@@ -1941,11 +1872,9 @@ export function inspectSqliteStorage(dbPath: string): StorageHealth {
       kind: "sqlite",
       schemaVersion: Number(meta("schema_version") ?? 0),
       matchCount: Number(count),
-      legacyImport: meta("last_legacy_import_at") ? "completed" : "not_applicable",
       database: basename(dbPath),
       ...(storageFormat ? { storageFormat } : {}),
-      ...(meta("last_migration_at") ? { lastMigrationAt: meta("last_migration_at")! } : {}),
-      ...(meta("last_legacy_import_at") ? { lastLegacyImportAt: meta("last_legacy_import_at")! } : {})
+      ...(meta("last_migration_at") ? { lastMigrationAt: meta("last_migration_at")! } : {})
     };
   } finally {
     db.close();
@@ -1953,36 +1882,26 @@ export function inspectSqliteStorage(dbPath: string): StorageHealth {
 }
 
 export function validateStoredMatch(value: unknown): asserts value is StoredMatch {
-  if (!value || typeof value !== "object") throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
+  if (!value || typeof value !== "object") throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   const record = value as Partial<StoredMatch>;
   const match = record.match as Partial<StoredMatch["match"]> | undefined;
-  if (!match || typeof match.matchId !== "string" || match.matchId.length === 0) throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
-  if (typeof match.matchVersion !== "number" || !Number.isFinite(match.matchVersion) || match.matchVersion < 1) throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
-  if (!isMatchStatus(match.status) || !isMatchMode(match.mode)) throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
+  if (!match || typeof match.matchId !== "string" || match.matchId.length === 0) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+  if (typeof match.matchVersion !== "number" || !Number.isFinite(match.matchVersion) || match.matchVersion < 1) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
+  if (!isMatchStatus(match.status) || !isMatchMode(match.mode)) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   if (!Array.isArray(record.sessions) || !Array.isArray(record.tokens) || !Array.isArray(record.eventLog) || !Array.isArray(record.actionReceipts) || !Array.isArray(record.undoSnapshots) || !Array.isArray(record.stateSnapshots)) {
-    throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
+    throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   }
   for (const session of record.sessions) {
-    if (session.matchId !== match.matchId || !isSha256Hash(session.sessionTokenHash) || !isSha256Hash(session.reconnectTokenHash)) throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
+    if (session.matchId !== match.matchId || !isSha256Hash(session.sessionTokenHash) || !isSha256Hash(session.reconnectTokenHash)) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   }
   for (const token of record.tokens) {
-    if (token.matchId !== match.matchId || !isSha256Hash(token.tokenHash)) throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
+    if (token.matchId !== match.matchId || !isSha256Hash(token.tokenHash)) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   }
   for (const event of record.eventLog) {
-    if (event.matchId !== match.matchId || "privatePayload" in (event as Record<string, unknown>)) throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
+    if (event.matchId !== match.matchId || "privatePayload" in (event as Record<string, unknown>)) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   }
-  if (record.gameState && record.gameState.matchId !== match.matchId) throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
+  if (record.gameState && record.gameState.matchId !== match.matchId) throw new StorageError("stored_match_invalid", "Match-Record ist strukturell ungültig.");
   rejectClearTokenKeys(record);
-}
-
-export function normalizeLegacyStoredMatch(value: unknown): StoredMatch {
-  if (!value || typeof value !== "object") throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
-  const record = clone(value as StoredMatch);
-  if (!record.match || typeof record.match !== "object") throw new StorageError("legacy_import_invalid", "Match-Record ist strukturell ungültig.");
-  if (!record.match.mode) {
-    record.match.mode = record.match.aiControllers?.runner?.type === "ai" ? "human_corp_vs_runner_ai" : record.match.aiControllers?.corp?.type === "ai" ? "human_runner_vs_corp_ai" : "human_vs_human";
-  }
-  return record;
 }
 
 function assertSqliteBackupUsable(dbPath: string): void {
@@ -2006,7 +1925,7 @@ function rejectClearTokenKeys(value: unknown): void {
   if (!value || typeof value !== "object") return;
   for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
     if (/^(sessionToken|reconnectToken|joinToken|hostSessionToken|hostReconnectToken)$/.test(key)) {
-      throw new StorageError("legacy_import_invalid", "Match-Record enthält unzulässige Token-Felder.");
+      throw new StorageError("stored_match_invalid", "Match-Record enthält unzulässige Token-Felder.");
     }
     rejectClearTokenKeys(child);
   }

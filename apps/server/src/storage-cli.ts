@@ -17,7 +17,7 @@ const backupDir = resolve(envValue(process.env, "NETGRID_STORAGE_BACKUP_DIR") ??
 
 try {
   if (command === "backup") {
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const result = await storage.backup("manual");
     storage.close();
     console.log(JSON.stringify({ ok: true, backupDir: result.backupDir, manifest: result.manifest }, null, 2));
@@ -32,13 +32,8 @@ try {
     } else {
       console.log(JSON.stringify(inspectSqliteStorage(dbPath), null, 2));
     }
-  } else if (command === "import-legacy") {
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: true });
-    const health = await storage.health();
-    storage.close();
-    console.log(JSON.stringify({ ok: true, storage: health }, null, 2));
   } else {
-    throw new Error("Usage: storage-cli <backup|restore|inspect|import-legacy>");
+    throw new Error("Usage: storage-cli <backup|restore|inspect>");
   }
 } catch (error) {
   const message = error instanceof Error ? error.message : "Storage-Befehl fehlgeschlagen.";

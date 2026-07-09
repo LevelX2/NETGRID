@@ -108,8 +108,17 @@ integrate_main -> blocker
    historischer Dokumentation bestand kein Consumer. Web-Typecheck, 38
    Testdateien mit 483 Tests und der Production Build sind grün; die Build-
    Routentabelle enthält `/api/game` nicht mehr.
-3. `PCS-2 Version-0-Kompatibilitätsflächen reduzieren` – `in_progress`
-4. `PCS-3 Current-State-Dokumente, Reviews und Scripts konsolidieren` – `pending`
+3. `PCS-2 Version-0-Kompatibilitätsflächen reduzieren` – `done`; der bereits
+   am 2026-05-06 vollständig importierte separate JSON-/SQLite-Importpfad ist
+   aus Start-Runtime, Storage-CLI, Health-Payload, Backupformat und E2E-Env
+   entfernt. Allgemeine Matchvalidierung verwendet nun
+   `stored_match_invalid`. Server-Typecheck und sechs Testdateien mit 129 Tests
+   sind grün. Ability-Payloadfelder sind entgegen dem ersten Namensbefund noch
+   aktiver Engine-Vertrag und werden erst in PCS-4 normalisiert; Participant-
+   Deckinputs überschneiden sich mit dem aktiven Proteus-Branch und werden
+   nach dessen Main-Integration in PCS-5 geschnitten. Browser-Key-Migrationen
+   werden zusammen mit dem Page-Schnitt entfernt.
+4. `PCS-3 Current-State-Dokumente, Reviews und Scripts konsolidieren` – `in_progress`
 5. `PCS-4 Shared- und Kartenregistrierungsgrenzen modularisieren` – `pending`
 6. `PCS-5 Fachliche Web-/Server-/AI-Modulschnitte` – `pending`
 7. `PCS-6 Teststufen, Sharding und Package-Boundaries` – `pending`

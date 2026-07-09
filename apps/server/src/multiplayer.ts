@@ -655,7 +655,7 @@ export class InMemoryMatchStorage implements MultiplayerStorage {
   }
 
   async health(): Promise<StorageHealth> {
-    return { ok: true, kind: "memory", matchCount: this.records.size, legacyImport: "not_applicable" };
+    return { ok: true, kind: "memory", matchCount: this.records.size };
   }
 }
 
@@ -686,7 +686,7 @@ export class JsonFileMatchStorage implements MultiplayerStorage {
 
   async health(): Promise<StorageHealth> {
     await this.ready;
-    return { ok: true, kind: "json", matchCount: this.records.size, legacyImport: "not_applicable" };
+    return { ok: true, kind: "json", matchCount: this.records.size };
   }
 
   private async loadFromDisk(): Promise<void> {
@@ -1958,7 +1958,7 @@ export class MultiplayerService {
 
   async storageHealth(): Promise<StorageHealth> {
     if (this.storage.health) return this.storage.health();
-    return { ok: true, kind: "memory", legacyImport: "not_applicable" };
+    return { ok: true, kind: "memory" };
   }
 
   async backupStorageForTest(reason?: BackupManifest["reason"]): Promise<{ backupDir: string; manifest: BackupManifest }> {

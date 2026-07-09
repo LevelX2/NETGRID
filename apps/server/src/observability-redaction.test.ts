@@ -58,8 +58,7 @@ describe("V2.7 observability redaction baseline", () => {
         schemaVersion: 1,
         storageFormat: "netgrid_multiplayer_sqlite",
         database: "netgrid.sqlite",
-        matchCount: 12,
-        legacyImport: "completed"
+        matchCount: 12
       },
       config
     );

@@ -441,7 +441,7 @@ describe("Backend 0.5 private storage maintenance", () => {
 
   it("serves a redacted local SQLite storage summary, match list and match detail", async () => {
     const dir = await tempStorageDir();
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups"), autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
     const service = new MultiplayerService(storage, { tokenSalt: "backend-05-maintenance" });
     const active = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Ludwig", seed: "backend-05-active" });
     await service.createMatch({ hostSide: "corp", displayName: "Korp Host", seed: "backend-05-pending" });
@@ -516,7 +516,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "backend-05-ai-traces" });
     const traced = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
@@ -588,7 +588,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     expect(untracedAdvanced.ok).toBe(true);
     storage.close?.();
 
-    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir });
     const reopenedService = new MultiplayerService(reopenedStorage, { tokenSalt: "backend-05-ai-traces" });
     const initialMatches = await reopenedService.storageMaintenanceAiDecisionTraceMatches();
     expect(initialMatches?.map((match) => match.matchId)).toEqual([traced.matchId]);
@@ -658,7 +658,7 @@ describe("Backend 0.5 private storage maintenance", () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "sqlite-ai-undo-trace-prune" });
     try {
       const created = await service.createMatch({
@@ -737,7 +737,7 @@ describe("Backend 0.5 private storage maintenance", () => {
 
   it("issues a local recovery access from maintenance without listing raw token fields", async () => {
     const dir = await tempStorageDir();
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups"), autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
     const service = new MultiplayerService(storage, { tokenSalt: "backend-05-recovery-access" });
     const created = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Ludwig", seed: "backend-05-recovery" });
 
@@ -781,7 +781,7 @@ describe("Backend 0.5 private storage maintenance", () => {
 
   it("previews active cleanup candidates without exposing private storage data", async () => {
     const dir = await tempStorageDir();
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups"), autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups") });
     const service = new MultiplayerService(storage, { tokenSalt: "backend-05-cleanup-preview" });
     const oldActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Alt Aktiv", seed: "backend-05-old-active" });
     const freshActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Frisch Aktiv", seed: "backend-05-fresh-active" });
@@ -821,7 +821,7 @@ describe("Backend 0.5 private storage maintenance", () => {
   it("deletes only whole previewed matches after creating a backup", async () => {
     const dir = await tempStorageDir();
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "backend-05-cleanup-apply" });
     const oldActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Alt Aktiv", seed: "backend-05-delete-old-active" });
     const freshActive = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Frisch Aktiv", seed: "backend-05-keep-fresh-active" });
@@ -867,7 +867,7 @@ describe("Backend 0.5 private storage maintenance", () => {
   it("marks matches as protected and excludes them from automatic cleanup by default without requiring backup", async () => {
     const dir = await tempStorageDir();
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "backend-05-retention-policy" });
     const protectedMatch = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Aufheben", seed: "backend-05-protected" });
     const cleanupMatch = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Weg", seed: "backend-05-auto-delete" });
@@ -942,11 +942,9 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const previousKind = process.env.NETGRID_STORAGE_KIND;
     const previousSqlite = process.env.NETGRID_SQLITE_STORAGE_PATH;
     const previousBackup = process.env.NETGRID_STORAGE_BACKUP_DIR;
-    const previousLegacy = process.env.NETGRID_LEGACY_MATCH_STORAGE_PATH;
     process.env.NETGRID_STORAGE_KIND = "";
     process.env.NETGRID_SQLITE_STORAGE_PATH = join(dir, "configured.sqlite");
     process.env.NETGRID_STORAGE_BACKUP_DIR = join(dir, "backups");
-    process.env.NETGRID_LEGACY_MATCH_STORAGE_PATH = join(dir, "missing-legacy.json");
     try {
       const storage = createConfiguredStorage();
       const service = new MultiplayerService(storage, { tokenSalt: "v108-default-storage" });
@@ -960,7 +958,6 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       restoreEnv("NETGRID_STORAGE_KIND", previousKind);
       restoreEnv("NETGRID_SQLITE_STORAGE_PATH", previousSqlite);
       restoreEnv("NETGRID_STORAGE_BACKUP_DIR", previousBackup);
-      restoreEnv("NETGRID_LEGACY_MATCH_STORAGE_PATH", previousLegacy);
     }
   });
 
@@ -968,7 +965,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-roundtrip" });
     const created = await service.createMatch({ hostSide: "runner", seed: "v108-sqlite-roundtrip" });
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
@@ -979,7 +976,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     expect(before?.privateDeckSnapshots?.runner.cards.length).toBeGreaterThan(0);
     service.closeStorage();
 
-    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir });
     const reopened = await reopenedStorage.load(created.matchId);
     expect(reopened?.match.matchId).toBe(created.matchId);
     expect(reopened?.tokens.every((token) => token.tokenHash.startsWith("sha256:"))).toBe(true);
@@ -998,7 +995,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const record = structuredClone(fixture.record) as StoredMatch;
     const gameState = createGameAfterSetup({ matchId: record.match.matchId, seed: "v108-duplicate-state-snapshot" });
     const snapshot = stateSnapshotForTest(record.match.matchId, gameState, record.match.matchVersion, "snap_duplicate");
@@ -1020,7 +1017,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const record = structuredClone(fixture.record) as StoredMatch;
     const gameState = createGameAfterSetup({ matchId: record.match.matchId, seed: "v108-partial-snapshot-load" });
     record.gameState = gameState;
@@ -1055,7 +1052,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-engine-events" });
     const created = await service.createMatch({ hostSide: "corp", seed: "v108-sqlite-engine-events" });
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
@@ -1097,7 +1094,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     db.close();
     service.closeStorage();
 
-    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir });
     const replayService = new MultiplayerService(reopenedStorage, { tokenSalt: "v108-sqlite-engine-events" });
     const reopened = await reopenedStorage.load(created.matchId);
     expect(reopened?.gameState.eventLog.some((event) => Boolean(event.privatePayload))).toBe(true);
@@ -1111,7 +1108,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-legacy-compaction" });
     const created = await service.createMatch({ hostSide: "corp", seed: "v108-sqlite-legacy-compaction" });
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
@@ -1174,7 +1171,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
       db.close();
     }
 
-    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir });
     const reopenedService = new MultiplayerService(reopenedStorage, { tokenSalt: "v108-sqlite-legacy-compaction" });
     const handle = createNetgridHttpServer(reopenedService, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
     const baseUrl = await listen(handle);
@@ -1272,7 +1269,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-incremental-events" });
     const created = await service.createMatch({ hostSide: "corp", seed: "v108-sqlite-incremental-events" });
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
@@ -1357,7 +1354,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "v108-long-match-guardrail" });
     const created = await service.createMatch({ hostSide: "corp", seed: "v108-long-match-guardrail" });
     const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
@@ -1417,64 +1414,6 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     }
   });
 
-  it("imports the legacy netgrid.sqlite path non-destructively when the NETGRID default is empty", async () => {
-    const dir = await tempStorageDir();
-    const legacyPath = join(dir, "netgrid.sqlite");
-    const dbPath = join(dir, "netgrid.sqlite");
-    const backupDir = join(dir, "backups");
-    const legacyStorage = new SqliteMatchStorage({ dbPath: legacyPath, backupDir, autoImportLegacy: false });
-    const legacyService = new MultiplayerService(legacyStorage, { tokenSalt: "v108-legacy-sqlite-copy" });
-    const created = await legacyService.createMatch({ hostSide: "runner", seed: "v108-legacy-sqlite-copy" });
-    legacyService.closeStorage();
-
-    const storage = new SqliteMatchStorage({ dbPath, legacySqlitePath: legacyPath, backupDir, autoImportLegacy: false });
-    expect((await storage.load(created.matchId))?.match.matchId).toBe(created.matchId);
-    expect((await storage.health()).database).toBe("netgrid.sqlite");
-    expect((await readFile(legacyPath)).byteLength).toBeGreaterThan(0);
-    storage.close();
-  });
-
-  it("imports valid legacy JSON transactionally after creating a pre-migration backup", async () => {
-    const fixture = await storedMatchFixture("v108-legacy-import");
-    const dir = await tempStorageDir();
-    const dbPath = join(dir, "netgrid.sqlite");
-    const legacyPath = join(dir, "matches.json");
-    const backupDir = join(dir, "backups");
-    const legacyRecord = structuredClone(fixture.record) as StoredMatch;
-    delete (legacyRecord.match as Partial<StoredMatch["match"]>).mode;
-    await writeFile(legacyPath, `${JSON.stringify({ matches: [legacyRecord] }, null, 2)}\n`, "utf8");
-
-    const storage = new SqliteMatchStorage({ dbPath, legacyJsonPath: legacyPath, backupDir });
-    const imported = await storage.load(fixture.record.match.matchId);
-    expect(imported?.match.matchId).toBe(fixture.record.match.matchId);
-    expect(imported?.match.mode).toBe("human_vs_human");
-    expect((await storage.health()).legacyImport).toBe("completed");
-    const backups = await listBackupManifests(backupDir);
-    expect(backups.length).toBe(1);
-    expect(backups[0]).toMatchObject({ source: "legacy_json_import", reason: "pre_migration" });
-    const manifestText = JSON.stringify(backups[0]);
-    expect(manifestText).not.toContain(fixture.hostSessionToken);
-    expect(manifestText).not.toContain(fixture.joinToken);
-    expect(manifestText).not.toMatch(/tokenHash|cardInstances|privateDeckSnapshots|decklist/i);
-    expect(await readFile(legacyPath, "utf8")).toContain(fixture.record.match.matchId);
-    storage.close();
-  });
-
-  it("rejects invalid legacy JSON without partial SQLite import", async () => {
-    const fixture = await storedMatchFixture("v108-legacy-invalid");
-    const dir = await tempStorageDir();
-    const dbPath = join(dir, "netgrid.sqlite");
-    const legacyPath = join(dir, "matches.json");
-    const invalid = structuredClone(fixture.record) as StoredMatch;
-    (invalid.match as unknown as { status: string }).status = "future_status";
-    await writeFile(legacyPath, `${JSON.stringify({ matches: [fixture.record, invalid] }, null, 2)}\n`, "utf8");
-
-    expect(() => new SqliteMatchStorage({ dbPath, legacyJsonPath: legacyPath, backupDir: join(dir, "backups") })).toThrow(StorageError);
-    const storage = new SqliteMatchStorage({ dbPath, legacyJsonPath: legacyPath, backupDir: join(dir, "backups"), autoImportLegacy: false });
-    expect(await storage.list()).toEqual([]);
-    storage.close();
-  });
-
   it("rejects newer schema versions and corrupted SQLite files with side-safe errors", async () => {
     const dir = await tempStorageDir();
     const newerPath = join(dir, "newer.sqlite");
@@ -1483,17 +1422,17 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     newer.prepare("INSERT INTO storage_meta (key, value, updated_at) VALUES ('schema_version', '999', '2026-05-06T00:00:00.000Z')").run();
     newer.close();
 
-    expect(() => new SqliteMatchStorage({ dbPath: newerPath, backupDir: join(dir, "backups"), autoImportLegacy: false })).toThrow(/neuer/);
+    expect(() => new SqliteMatchStorage({ dbPath: newerPath, backupDir: join(dir, "backups") })).toThrow(/neuer/);
     const corruptPath = join(dir, "corrupt.sqlite");
     await writeFile(corruptPath, "das ist keine sqlite datei", "utf8");
-    expect(() => new SqliteMatchStorage({ dbPath: corruptPath, backupDir: join(dir, "backups"), autoImportLegacy: false })).toThrow(/Backup/);
+    expect(() => new SqliteMatchStorage({ dbPath: corruptPath, backupDir: join(dir, "backups") })).toThrow(/Backup/);
   });
 
   it("creates validated backups and restores them after a pre-restore backup", async () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "v108-backup-restore" });
     const first = await service.createMatch({ hostSide: "runner", seed: "v108-backup-first" });
     const backup = await service.backupStorageForTest("manual");
@@ -1505,7 +1444,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
 
     const restored = restoreSqliteStorageBackup({ backupDir: backup.backupDir, targetPath: dbPath, backupRootDir: backupDir });
     expect(restored.preRestoreBackupDir).toBeTruthy();
-    const reopened = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const reopened = new SqliteMatchStorage({ dbPath, backupDir });
     expect((await reopened.list()).map((record) => record.match.matchId)).toEqual([first.matchId]);
     const health = inspectSqliteStorage(dbPath);
     expect(health).toMatchObject({ kind: "sqlite", schemaVersion: 1, matchCount: 1 });
@@ -1518,7 +1457,7 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     const dir = await tempStorageDir();
     const dbPath = join(dir, "netgrid.sqlite");
     const backupDir = join(dir, "backups");
-    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const storage = new SqliteMatchStorage({ dbPath, backupDir });
     const service = new MultiplayerService(storage, { tokenSalt: "v108-bad-backup" });
     await service.createMatch({ hostSide: "runner", seed: "v108-bad-backup" });
     const backup = await service.backupStorageForTest("manual");

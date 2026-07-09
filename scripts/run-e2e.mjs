@@ -27,7 +27,6 @@ try {
     NETGRID_STORAGE_KIND: "sqlite",
     NETGRID_SQLITE_STORAGE_PATH: runtimePath,
     NETGRID_STORAGE_BACKUP_DIR: backupDir,
-    NETGRID_LEGACY_MATCH_STORAGE_PATH: path.join(runtimeDir, "legacy-matches.json"),
     NETGRID_TOKEN_SALT: "v1-0-7-e2e-token-salt",
     NETGRID_DEPLOYMENT_PROFILE: "local",
     NETGRID_WEB_BASE_URL: webUrl,

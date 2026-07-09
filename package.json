@@ -34,7 +34,6 @@
     "storage:backup": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
     "storage:restore": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",
     "storage:inspect": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts inspect",
-    "storage:import-legacy": "corepack pnpm --filter @netgrid/server exec tsx src/storage-cli.ts import-legacy",
     "local-transfer:export": "powershell -ExecutionPolicy Bypass -File scripts/export-local-transfer.ps1",
     "local-transfer:import": "powershell -ExecutionPolicy Bypass -File scripts/import-local-transfer.ps1",
     "lint": "corepack pnpm -r --if-present lint",

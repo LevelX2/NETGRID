@@ -207,8 +207,7 @@ export function redactedHealth(storage: StorageHealth, config: DeploymentConfig)
       kind: storage.kind,
       ...(typeof storage.schemaVersion === "number" ? { schemaVersion: storage.schemaVersion } : {}),
       ...(storage.storageFormat ? { storageFormat: storage.storageFormat } : {}),
-      ...(storage.database ? { database: storage.database } : {}),
-      ...(storage.legacyImport ? { legacyImport: storage.legacyImport } : {})
+      ...(storage.database ? { database: storage.database } : {})
     }
   };
 }
