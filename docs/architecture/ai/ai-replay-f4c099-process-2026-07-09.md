@@ -2,7 +2,7 @@
 
 ## Status
 
-In Umsetzung auf Branch `codex/ai-replay-f4c099` im Worktree `C:\Projekte\NETGRID_AI_REPLAY_F4C099`.
+Integration-Preflight abgeschlossen auf Branch `codex/ai-replay-f4c099` im Worktree `C:\Projekte\NETGRID_AI_REPLAY_F4C099`; lokaler Main-Merge folgt nach diesem Dokumentationscommit.
 
 ## Quelle und Vorgabe
 
@@ -20,12 +20,12 @@ Die drei freigegebenen Fehlergruppen werden generisch und side-safe behoben:
 
 - Der bestehende Fix `16febfa69` für bereits passierte ICE bleibt unverändert. Er deckt einen anderen aktiven HQ-Run-Fall im selben Match ab.
 - `Pile Driver` entfernt nach seinem Break drei Credits von Stealth-Karten, bevor ein späterer non-noisy Breaker diese Credits verwenden könnte.
-- Die Umsetzung bleibt AI-intern und nutzt ausschließlich PlayerView, side-gefilterte Events, LegalActions und explizit öffentliche Karten-/Action-Metadaten.
+- Die KI-Auswertung nutzt ausschließlich PlayerView, side-gefilterte Events, LegalActions und explizit öffentliche Karten-/Action-Metadaten. Der Engine-Anteil beschränkt sich auf den bereits öffentlichen strukturierten Server-Identifier im `start_run`-PublicContext.
 - Die fremden ungetrackten Analyseberichte im Hauptworkspace werden nicht verändert oder übernommen.
 
 ## Nicht-Ziele
 
-- Keine Änderung an Engine-Regeln, LegalAction-Erzeugung, `applyAction`, Replay, StateHash oder Randomness.
+- Keine Änderung an Engine-Regeln, LegalAction-Erzeugung, `applyAction`, Replay, StateHash oder Randomness; lediglich der side-sichere PublicContext-Vertrag für `start_run` wurde um `serverId` ergänzt.
 - Keine kartennamensbasierte Sonderregel für `Pile Driver`, `Cloak`, `Codecracker`, `Fire Wall` oder `Keeper`.
 - Keine Nutzung verdeckter Korp-Karten oder späterer Matchinformationen als damalige Entscheidungsgrundlage.
 - Kein Push und kein Pull Request.
