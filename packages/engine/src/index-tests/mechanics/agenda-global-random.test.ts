@@ -1830,7 +1830,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       runnerCreditsAfter: 0,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Economy Operation"/,
+      /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Economy Operation"/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -3398,7 +3398,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       randomCounterAfter: randomBefore + 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
+      /"privatePayload"|"cardInstances"|"hq"\s*:|"rd"\s*:|"Simple Agenda"|"Simple Economy Operation"/,
     );
 
     state = apply(state, "runner", (action) => action.type === "access_card");

@@ -83,6 +83,7 @@ describe("PublicContext golden payload gate", () => {
       installedAccessBonus: 1,
       label: "Run on R&D",
       runPhase: "approach_ice",
+      serverId: "rd",
       serverLabel: "R&D",
       targetIceDefinitionId: "simple_agenda",
       targets: {
