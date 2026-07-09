@@ -16,11 +16,7 @@
         "rules-baseline-mvp-0.8",
         "rules-baseline-mvp-0.94"
       ],
-      "allowedCardStatuses": [
-        "playable",
-        "human_playable",
-        "deck_legal"
-      ],
+      "allowedCardStatuses": ["playable", "human_playable", "deck_legal"],
       "maxCopiesPerCard": 3,
       "copyLimit": {
         "defaultLimit": 3,
@@ -42,12 +38,8 @@
       },
       "requireIdentity": true,
       "allowedIdentityCards": {
-        "runner": [
-          "runner_identity_001"
-        ],
-        "corp": [
-          "corp_identity_001"
-        ]
+        "runner": ["runner_identity_001"],
+        "corp": ["corp_identity_001"]
       },
       "identityRules": {
         "runner": {
@@ -55,10 +47,7 @@
             "faction": "neutral_demo",
             "influenceLimit": 15,
             "minimumDeckCards": 12,
-            "allowedFactions": [
-              "neutral_demo",
-              "onr1996_neutral"
-            ]
+            "allowedFactions": ["neutral_demo", "onr1996_neutral"]
           }
         },
         "corp": {
@@ -66,20 +55,14 @@
             "faction": "neutral_demo",
             "influenceLimit": 15,
             "minimumDeckCards": 18,
-            "allowedFactions": [
-              "neutral_demo",
-              "onr1996_neutral"
-            ]
+            "allowedFactions": ["neutral_demo", "onr1996_neutral"]
           }
         }
       },
       "influence": {
         "enabled": true,
         "missingDataPolicy": "block",
-        "neutralFactions": [
-          "neutral_demo",
-          "onr1996_neutral"
-        ],
+        "neutralFactions": ["neutral_demo", "onr1996_neutral"],
         "defaultInfluenceCost": 1,
         "cardInfluenceCosts": {}
       },
@@ -128,11 +111,7 @@
         "rules-baseline-mvp-0.8",
         "rules-baseline-mvp-0.94"
       ],
-      "allowedCardStatuses": [
-        "playable",
-        "human_playable",
-        "deck_legal"
-      ],
+      "allowedCardStatuses": ["playable", "human_playable", "deck_legal"],
       "maxCopiesPerCard": 3,
       "copyLimit": {
         "defaultLimit": 3,
@@ -154,12 +133,8 @@
       },
       "requireIdentity": true,
       "allowedIdentityCards": {
-        "runner": [
-          "runner_identity_001"
-        ],
-        "corp": [
-          "corp_identity_001"
-        ]
+        "runner": ["runner_identity_001"],
+        "corp": ["corp_identity_001"]
       },
       "identityRules": {
         "runner": {
@@ -190,11 +165,7 @@
       "influence": {
         "enabled": true,
         "missingDataPolicy": "block",
-        "neutralFactions": [
-          "neutral_demo",
-          "onr1996_neutral",
-          "onr_proteus"
-        ],
+        "neutralFactions": ["neutral_demo", "onr1996_neutral", "onr_proteus"],
         "defaultInfluenceCost": 1,
         "cardInfluenceCosts": {}
       },
@@ -226,8 +197,7 @@
         "public_platform_decklists",
         "account_system",
         "ranked_play",
-        "ai_playability",
-        "proteus_ai_support",
+        "default_or_seeded_random_proteus_ai_deck_pool",
         "official_asset_usage",
         "card_text_parser"
       ]
@@ -245,11 +215,7 @@
         "rules-baseline-mvp-0.8",
         "rules-baseline-mvp-0.94"
       ],
-      "allowedCardStatuses": [
-        "playable",
-        "human_playable",
-        "deck_legal"
-      ],
+      "allowedCardStatuses": ["playable", "human_playable", "deck_legal"],
       "maxCopiesPerCard": 3,
       "copyLimit": {
         "defaultLimit": 3,
@@ -271,12 +237,8 @@
       },
       "requireIdentity": true,
       "allowedIdentityCards": {
-        "runner": [
-          "runner_identity_001"
-        ],
-        "corp": [
-          "corp_identity_001"
-        ]
+        "runner": ["runner_identity_001"],
+        "corp": ["corp_identity_001"]
       },
       "identityRules": {
         "runner": {
@@ -307,11 +269,7 @@
       "influence": {
         "enabled": true,
         "missingDataPolicy": "block",
-        "neutralFactions": [
-          "neutral_demo",
-          "onr1996_neutral",
-          "onr_classic"
-        ],
+        "neutralFactions": ["neutral_demo", "onr1996_neutral", "onr_classic"],
         "defaultInfluenceCost": 1,
         "cardInfluenceCosts": {}
       },
@@ -360,11 +318,7 @@
         "rules-baseline-mvp-0.8",
         "rules-baseline-mvp-0.94"
       ],
-      "allowedCardStatuses": [
-        "playable",
-        "human_playable",
-        "deck_legal"
-      ],
+      "allowedCardStatuses": ["playable", "human_playable", "deck_legal"],
       "maxCopiesPerCard": 3,
       "copyLimit": {
         "defaultLimit": 3,
@@ -386,12 +340,8 @@
       },
       "requireIdentity": true,
       "allowedIdentityCards": {
-        "runner": [
-          "runner_identity_001"
-        ],
-        "corp": [
-          "corp_identity_001"
-        ]
+        "runner": ["runner_identity_001"],
+        "corp": ["corp_identity_001"]
       },
       "identityRules": {
         "runner": {

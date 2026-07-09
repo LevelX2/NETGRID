@@ -1,6 +1,6 @@
 # Proteus-KI-Release-Reconciliation: automatischer Paketprozess
 
-Status: `prepared`
+Status: `in_progress`
 
 Quelle: `docs/architecture/ai/proteus-ai-release-reconciliation-plan-2026-07-09.md`
 
@@ -89,6 +89,14 @@ prepared
 ```
 
 Jeder Zustand kann bei einem Sicherheitsbefund nach `blocked` wechseln. Normale Testfehler bleiben im aktuellen Zustand, bis sie behoben sind.
+
+## Fortschritt
+
+| Paket | Status | Ergebnis |
+| --- | --- | --- |
+| PAI-0 | `done` | Zentraler Readiness-Vertrag trennt Hint-, Selected-Playtest- und Default-Pool-Stufe; Driftcheck und Server-Stage-Guard sind grün. |
+| PAI-1 | `next` | Maschinenlesbares 154/154-Kartenfamilien-Inventar. |
+| PAI-2A bis PAI-6 | `pending` | Noch nicht begonnen. |
 
 ## Paketfolge
 

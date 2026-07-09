@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "netgrid.ai-support-readiness.v1",
+  "readinessId": "card-set-ai-readiness-v1",
+  "sets": [
+    {
+      "setId": "proteus",
+      "technicalEligibilityStatus": "ai_supported",
+      "highestApprovedStage": "selected_ai_playtest_ready",
+      "stages": {
+        "hint_ready": {
+          "ready": true,
+          "reason": "Alle 154 Proteus-Karten besitzen aktive und kompilierte AI-Hints."
+        },
+        "selected_ai_playtest_ready": {
+          "ready": true,
+          "reason": "Explizit ausgewählte Proteus-KI-Decks bestehen Deckvalidierung und Multiplayer-Matchstart."
+        },
+        "default_pool_ready": {
+          "ready": false,
+          "reason": "Familienbezogene Decision-Smokes, Pilotkalibrierung und versionierte KI-Deckpool-Promotion fehlen noch."
+        }
+      },
+      "evidence": {
+        "cardCount": 154,
+        "aiSupportedCardCount": 154,
+        "activeHintCount": 154,
+        "compiledHintCount": 154,
+        "uniqueScenarioRefCount": 1,
+        "humanReviewedHintCount": 146,
+        "strategyCoveredHintCount": 55,
+        "benchmarkCoveredHintCount": 6,
+        "selectedDeckSmoke": true,
+        "aiDeckPoolSnapshotCount": 0
+      },
+      "removalConditions": [
+        "proteus_family_inventory_complete",
+        "proteus_family_decision_smokes_green",
+        "proteus_selected_deck_pilot_green",
+        "proteus_ai_deck_pool_promoted"
+      ]
+    }
+  ]
+}

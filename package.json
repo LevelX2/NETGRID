@@ -23,6 +23,7 @@
     "check:ai-hint-compiled-index": "node scripts/check-ai-hint-compiled-index.mjs --check",
     "check:ai-manual-overlays": "node scripts/check-ai-manual-overlays.mjs --check",
     "check:ai-action-semantic-signal-catalog": "node scripts/check-ai-action-semantic-signal-catalog.mjs --check",
+    "check:proteus-ai-readiness": "node scripts/check-proteus-ai-readiness.mjs",
     "check:card-function-abstraction": "node scripts/check-card-name-leakage-in-runtime.mjs",
     "check:engine-cardimplementation-architecture-target": "node scripts/check-engine-cardimplementation-architecture-target.mjs",
     "check:engine-cardimplementation-architecture-target:selftest": "node scripts/check-engine-cardimplementation-architecture-target.mjs --self-test",
