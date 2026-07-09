@@ -35,4 +35,4 @@ Alle Änderungen sind funktionsbezogen. Es gibt keine Karten-ID-Sonderregel für
 
 ## Integration
 
-Branch `codex/ai-replay-f4c099` wurde lokal per Fast-forward nach `main` integriert. Die drei fremden ungetrackten Analyseberichte im Hauptworkspace blieben unangetastet. Ein Push oder Pull Request wurde nicht ausgeführt. Nach diesem Statuscommit wird `main` erneut mit den fokussierten Tests, beiden Typechecks und `git diff --check` verifiziert.
+Branch `codex/ai-replay-f4c099` wurde lokal per Fast-forward nach `main` integriert. Die drei fremden ungetrackten Analyseberichte im Hauptworkspace blieben unangetastet. Ein Push oder Pull Request wurde nicht ausgeführt. Auf `main` sind die fokussierten AI-Regressionen mit 50/50 Tests, die fokussierten Engine-Regressionen mit 61/61 Tests, beide Typechecks und `git diff --check` grün.
