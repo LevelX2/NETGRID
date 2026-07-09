@@ -69,15 +69,41 @@ export function applyOveradvanceScoreEffects(
     );
     const recurringActions = actionGroups * scoredAgenda.actionPerGroup;
     host.counters.setCardCounter(cardId, "mark", recurringActions);
+    const immediateActions = grantCorpScoreTurnActions(host, recurringActions);
     if (legalAction) {
-      applySequencePayloadPatch(legalAction, {
+      const payloadPatch = {
         overadvanceRecurringActions: recurringActions,
         overadvanceActionGroups: actionGroups,
         projectVeniceOveradvance: overadvancedBy,
-      });
+      };
+      applySequencePayloadPatch(
+        legalAction,
+        immediateActions > 0
+          ? {
+              ...payloadPatch,
+              projectVeniceImmediateActions: immediateActions,
+              corpClicksAfterProjectVeniceImmediateActions:
+                host.state.corp.clicks,
+            }
+          : payloadPatch,
+      );
     }
   }
   return { bonusAgendaPoints, overadvancedBy };
+}
+
+function grantCorpScoreTurnActions(
+  host: ScoredAgendaFlowHost,
+  amount: number,
+): number {
+  if (amount <= 0) return 0;
+  if (
+    host.state.activeSide !== "corp" ||
+    host.state.phase !== "corp_action_phase"
+  )
+    return 0;
+  host.state.corp.clicks += amount;
+  return amount;
 }
 
 function excessAdvancements(

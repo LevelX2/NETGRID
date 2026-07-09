@@ -1984,7 +1984,7 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
-  it("restores an empty runner hand buffer before a generic R&D probe", () => {
+  it("uses survival defense before a generic R&D probe after visible damage", () => {
     const input = aiInput("runner", [
       legalAction(
         "run-rd",
@@ -2013,13 +2013,13 @@ describe("Semantic AI runtime cutover", () => {
 
     expect(decision.actionId).toBe("draw");
     expect(decision.reasonCode).toBe("runner.semantic.basic_economy_draw");
-    expect(decision.decisionDebug?.planKind).toBe("runner.restore_hand_buffer");
+    expect(decision.decisionDebug?.planKind).toBe("runner.survival_defense");
     expect(decision.decisionDebug?.scoreBreakdown).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           key: "runner_hand_buffer_need",
-          value: 2500,
-          reason: expect.stringContaining("damage_pressure:true"),
+          value: 2800,
+          reason: expect.stringContaining("damage_threat:critical"),
         }),
       ]),
     );
@@ -2031,6 +2031,74 @@ describe("Semantic AI runtime cutover", () => {
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /privatePayload|cardInstances|fullGameState|decklist/i,
+    );
+  });
+
+  it("does not let non-basic setup actions suppress survival draw before risky R&D runs", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction(
+        "use-seeya",
+        "runner",
+        "activated_card_ability",
+        "SeeYa: setup ability",
+        { credits: 0 },
+        { source: "seeya-instance" },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.gripOrHq = [];
+    input.playerView.own.rig = [
+      visibleCard("seeya-instance", "runner", "hardware", {
+        definitionId: "onr_v1_151_seeya",
+        title: "SeeYa",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("rd-ice", "corp", "ice", {
+          rezzed: false,
+        }),
+      ]),
+      server("archives"),
+    ];
+    input.playerView.publicEvents = [
+      publicEvent("setup-net-damage", "net_damage", 31, {
+        actor: "corp",
+        actionType: "net_damage",
+        damageType: "net",
+        damageAmount: 2,
+        sourceTitle: "Setup!",
+        sourceDefinitionId: "onr_v1_340_setup",
+      }),
+    ];
+    input.playerView.stateVersion = 39;
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("draw");
+    expect(decision.decisionDebug?.planKind).toBe("runner.survival_defense");
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "run-rd",
+        scoreBreakdown: expect.arrayContaining([
+          expect.objectContaining({
+            key: "runner_damage_survival_run_risk",
+            value: -2600,
+            reason: expect.stringContaining("full_exposure:true"),
+          }),
+        ]),
+        whyNot: expect.arrayContaining(["plan_mismatch"]),
+      }),
     );
   });
 
@@ -2963,11 +3031,16 @@ describe("Semantic AI runtime cutover", () => {
       }),
     ];
     input.playerView.publicEvents = [
-      publicEvent("previous-short-circuit-search", "activated_card_ability", 73, {
-        actor: "runner",
-        actionType: "activated_card_ability",
-        hiddenZoneAction: "p3_37_search_stack_to_grip",
-      }),
+      publicEvent(
+        "previous-short-circuit-search",
+        "activated_card_ability",
+        73,
+        {
+          actor: "runner",
+          actionType: "activated_card_ability",
+          hiddenZoneAction: "p3_37_search_stack_to_grip",
+        },
+      ),
     ];
     input.eventTail = input.playerView.publicEvents;
 

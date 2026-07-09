@@ -76,6 +76,67 @@ describe("runner run plan policy", () => {
     );
   });
 
+  it("keeps breaking the inner ICE after the outer ICE was already paid", () => {
+    const pump = pumpAction({ costs: [{ credits: 1 }] });
+    const continueRun = continueAction({
+      encounterWillEndRun: true,
+      unbrokenSubroutineCount: 1,
+    });
+    const passedKeeper = visibleIce({
+      instanceId: "passed-keeper",
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      credits: 2,
+      passedOuterIce: [passedKeeper],
+      legalActions: [pump, continueRun],
+    });
+    const planAfterOuterIce: RunnerRunPlan = {
+      ...runPlan(),
+      pathQuote: {
+        ...runPlan().pathQuote,
+        totalKnownCost: 6,
+        expectedRemainingCredits: 0,
+        canReachAccess: true,
+      },
+      revalidation: {
+        ...runPlan().revalidation,
+        reasons: ["fingerprint:previous"],
+      },
+    };
+
+    const revalidated = revalidateRunnerRunPlan(input, planAfterOuterIce);
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: revalidated,
+      choices: [
+        choice(continueRun, "simple_run_choice", -2397),
+        choice(pump, "encounter_survival", 73),
+      ],
+    });
+
+    expect(
+      revalidated.pathQuote.iceQuotes.map(
+        (iceQuote) => iceQuote.iceRef.instanceId,
+      ),
+    ).toEqual(["ice-1"]);
+    expect(revalidated.pathQuote.totalKnownCost).toBe(2);
+    expect(revalidated.pathQuote.canReachAccess).toBe(true);
+    expect(revalidated.revalidation.status).toBe("adjusted");
+    expect(selected?.action.actionId).toBe(pump.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_sequence_selected:true",
+    );
+    expect(selected?.evidence).not.toContain(
+      "runner_run_plan_conserve_credits:true",
+    );
+  });
+
   it("pumps toward an affordable safety break even when access is unaffordable", () => {
     const pump = pumpAction({
       breakerId: "loony-goon-1",
@@ -605,10 +666,12 @@ function runnerEncounterInput(params: {
   breakerStrength?: number;
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
   futureIce?: VisibleCard[];
+  passedOuterIce?: VisibleCard[];
   legalActions: LegalAction[];
 }): AiDecisionInput {
   const ice = visibleIce(params);
   const futureIce = params.futureIce ?? [];
+  const passedOuterIce = params.passedOuterIce ?? [];
   return {
     side: "runner",
     playerView: {
@@ -658,7 +721,7 @@ function runnerEncounterInput(params: {
         {
           id: "rd",
           label: "R&D",
-          ice: [...futureIce, ice],
+          ice: [...futureIce, ice, ...passedOuterIce],
           root: [],
         },
       ],

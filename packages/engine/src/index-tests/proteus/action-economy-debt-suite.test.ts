@@ -600,18 +600,32 @@ describe("Proteus PRO017 action economy and debt suite", () => {
     expect(state.runner.coreDamage).toBe(1);
   });
 
-  it("Project Venice records overadvance at score and grants recurring Corp actions", () => {
+  it("Project Venice records overadvance at score and grants immediate plus recurring Corp actions", () => {
     let state = nextCorpActionPhase(baseState("pro017-venice"));
-    const veniceId = installCorpAgendaInRemote(state, PROJECT_VENICE, "venice", 10);
+    const veniceId = installCorpAgendaInRemote(state, PROJECT_VENICE, "venice", 7);
+    const clicksBeforeScore = state.corp.clicks;
     state = apply(
       state,
       "corp",
       (action) => action.type === "score_agenda" && action.payload?.cardId === veniceId,
     );
-    expect(state.cardInstances[veniceId]?.counters?.mark).toBe(2);
+    expect(state.cardInstances[veniceId]?.counters?.mark).toBe(1);
+    expect(state.corp.clicks).toBe(clicksBeforeScore + 1);
+    const veniceView = getPlayerView(state, "corp").own.scoreArea.find(
+      (visibleCard) => visibleCard.instanceId === veniceId,
+    );
+    expect(veniceView?.counterDisplays).toContainEqual({
+      id: "project_venice_actions_per_turn",
+      amount: 1,
+      displayKind: "generic_counter",
+      label: "Aktion/Zug",
+      ariaLabel: "1 Project Venice zusätzliche Aktion pro Corp-Zug",
+      counterType: "mark",
+      usageHint: "status_marker",
+    });
 
     state = nextCorpActionPhase(toRunnerTurnFromCorpAction(state));
-    expect(state.corp.clicks).toBe(5);
+    expect(state.corp.clicks).toBe(4);
   });
 
   it("Corporate Guard(R) Temps pays X, grants future actions, and forfeits multi-credit gains proportionally", () => {

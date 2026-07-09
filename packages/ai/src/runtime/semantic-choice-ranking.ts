@@ -347,6 +347,7 @@ function runnerPlanTypeRequiresPlanDominance(
     type === "runner.opportunistic_central_run" ||
     type === "runner.clear_tags_or_survive" ||
     type === "runner.convert_success_window" ||
+    type === "runner.survival_defense" ||
     type === "runner.restore_hand_buffer" ||
     type === "runner.develop_hand_card" ||
     type === "runner.play_best_hand_card" ||
@@ -370,6 +371,11 @@ function runnerPlanOverrideIsHardInterrupt(
     return true;
   }
   if (overrideChoice.action.type !== "start_run") return false;
+  if (mappedPlan.type === "runner.survival_defense") {
+    return semanticRuntimeChoiceHasAnyScoreComponent(overrideChoice, [
+      "runner_hq_known_agenda",
+    ]);
+  }
   return semanticRuntimeChoiceHasAnyScoreComponent(overrideChoice, [
     "runner_hq_known_agenda",
     "runner_rnd_fresh_memory",
@@ -392,7 +398,8 @@ function tacticalPlanHandBufferMappingBlocksProbeRunOverride(
   scoreGap: number,
 ): boolean {
   return (
-    mapping.plan.type === "runner.restore_hand_buffer" &&
+    (mapping.plan.type === "runner.restore_hand_buffer" ||
+      mapping.plan.type === "runner.survival_defense") &&
     overrideChoice.action.type === "start_run" &&
     semanticRuntimeChoiceStrategicFitLevel(overrideChoice) === "none" &&
     scoreGap <= 1800
