@@ -2,6 +2,24 @@
 
 `docs/architecture/ai/` bündelt releaseübergreifende KI-Zielbilder, Schnittstellenregeln und side-sichere Architekturgrenzen. Diese Artefakte geben keine Karten frei und ändern keine Engine-Regeln; sie beschreiben, welche Informationen KI-Pfade nutzen dürfen und wie AI-Hints, Coaching, Simulation und Controller an LegalActions, PlayerViews und Redaction gebunden bleiben.
 
+## Führender Current State ab 2026-07-09
+
+- `@netgrid/ai` ist die Live-Fassade; Match-Simulation, Selfplay und Benchmarks
+  werden ausschließlich über `@netgrid/ai/simulation` importiert.
+- Der Live-Modulgraph ist transitiv frei von `legacy/`; das frühere
+  Legacy-Verzeichnis, Baseline-Selectoren, Runtime-Kill-Switches und
+  Baseline-Simulationsadapter sind gelöscht.
+- Der semantische Coverage-Fallback besitzt keine generische unbekannte
+  Kartenaktion mehr. Er nutzt eine enge sichere LegalAction-Allowlist und
+  bricht ungedeckte nichttriviale Aktionen sichtbar fail-closed ab.
+- Ausführbare Benchmarkprofile sind `random_legal_bot` und
+  `current_candidate`. Historische Shadow-, META-, Cutover- und Pilotdokumente
+  in der folgenden Artefaktliste sind Abschluss-/Entscheidungsevidence, kein
+  aktueller Runtimevertrag.
+- Technisches `ai_supported` bedeutet nur Deckzulassung. Semantische Coverage,
+  Scenario-Evidence, Play Strength und Default-/Random-Pool-Promotion bleiben
+  getrennte Gates.
+
 ## Enthaltene Artefakte
 
 - `ai-controller-spec.md`: Controller-Schnitt für KI-Entscheidungen.
@@ -33,6 +51,7 @@
 - `ai-player-semantic-controller-process-2026-06-23.md`: sequenzieller SEMCTRL-0-bis-SEMCTRL-7-Prozess fuer die pragmatische AI-Spieler-Struktur in Richtung Kartensemantik, Taktiksignale, Strategieanker, DeckDoctrine, taktische Zwischenziele, semantisch verstandene LegalActions und legale Aktionsauswahl.
 - `proteus-ai-release-reconciliation-plan-2026-07-09.md`: verbindlicher Reconciliation- und Rollout-Plan für den widersprüchlichen Proteus-KI-Stand; trennt technische `ai_supported`-Deckzulassung, Selected-Deck-Pilot, familienbezogene Play-Strength-Evidence und spätere Default-/Random-Pool-Promotion.
 - `proteus-ai-release-automation-process-2026-07-09.md`: sequenzieller PAI-0-bis-PAI-6-Paketprozess mit verbindlichem `/Goal`, eigenem Worktree, Commit je Paket, Sicherheitsblockern, Full Gate und finalem lokalen Merge nach `main`.
+- `ai-current-state-cleanup-process-2026-07-09.md`: sequenzieller AICSC-0-bis-AICSC-8-Prozess zur Bereinigung tautologischer Benchmarks, transitiver Legacy-Abhängigkeiten, generischer Coverage-Fallbacks, historischer Shadow-/META-Codeinseln und aktueller strategischer No-Progress-Muster mit eigenem Worktree, Paketcommits und finaler lokaler Main-Integration.
 - `../../reviews/ai/ai-player-semantic-controller-final-report-2026-06-23.md`: Abschlussbericht mit Legacy-/Public-Grenzen, neutraler ankerloser Doctrine, Corp-TacticalGoals, TargetContext-HardGates, Capability-Fallback-Isolation, TacticalPlan-/Debug-Grenzen und FINAL-GREEN.
 - `hq-hand-memory-contract-matrix-2026-06-07.md`: side-sicherer Vertrag für Runner-KI-HQ-Hand-Wissen mit Ereignismatrix, Kandidatengruppen, sicheren Restmengen, erlaubten Invalidierungen und Handoff an die HQ-Memory-Umsetzungspakete.
 - `runner-hand-development-creditbase-contract-2026-06-07.md`: Vertrag für Runner-Handentwicklung und Creditbase mit bestehenden AI-STRAT-Goals, `RunnerHandDevelopmentEvaluation`, `RunnerCreditBasePlan`, Credit-Floors, Run-Übersteuerungen, Hidden-Info-Grenzen und Handoff an die Umsetzungspakete.
@@ -41,6 +60,8 @@
 
 Konkrete Benchmarks, Regressionen und Diagnoseberichte liegen unter `docs/reviews/ai/`. Abgeschlossene Doctrine- und Deck-Legal-Approval-Spuren liegen unter `docs/releases/ai/`.
 
-## Lokaler Play-Strength-Pilot
+## Historischer lokaler Play-Strength-Pilot
 
-Der einzige gültige Env-Name für lokale Play-Strength-Pilot-Scopes ist `NETGRID_AI_PLAY_STRENGTH_PILOT`. Unterstützte Werte sind `basic_setup`, `runner_safe_access`, `corp_score_window` und `all`; mehrere Werte dürfen per Komma, Semikolon oder Whitespace getrennt werden. Der historische/falsche Name `AI_PLAY_STRENGTH_PILOT_SCOPE` wird nicht als Runtime-Vertrag gelesen.
+`NETGRID_AI_PLAY_STRENGTH_PILOT` ist kein Live-Runtime-Schalter mehr. Die
+früheren Scopes bleiben ausschließlich als historische Evaluations- und
+Testbegriffe erhalten; der Live-Chooser führt keinen Shadow-Pilot-Override aus.

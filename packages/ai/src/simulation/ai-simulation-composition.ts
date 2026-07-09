@@ -12,16 +12,17 @@ import {
 } from "./simulation-decision-context";
 import { createQualityTagsForAction } from "./simulation-quality-adapters";
 
-export type AiSimulationCompositionDependencies =
-  Parameters<typeof createQualityTagsForAction>[0] &
-    SimulationDecisionContextDependencies &
-    Omit<
-      AiGameSimulatorDependencies,
-      | "chooseDecisionForSimulation"
-      | "simulationSideUsesSemanticRuntime"
-      | "qualityTagsForAction"
-    > &
-    Omit<AiSimulationEntrypointDependencies, "simulateAiGame">;
+export type AiSimulationCompositionDependencies = Parameters<
+  typeof createQualityTagsForAction
+>[0] &
+  SimulationDecisionContextDependencies &
+  Omit<
+    AiGameSimulatorDependencies,
+    | "chooseDecisionForSimulation"
+    | "simulationSideUsesSemanticRuntime"
+    | "qualityTagsForAction"
+  > &
+  Omit<AiSimulationEntrypointDependencies, "simulateAiGame">;
 
 export function createAiSimulationComposition(
   dependencies: AiSimulationCompositionDependencies,
@@ -32,17 +33,13 @@ export function createAiSimulationComposition(
     rolesForAction: dependencies.rolesForAction,
   });
 
-  const {
-    chooseDecisionForSimulation,
-    simulationSideUsesSemanticRuntime,
-  } = createSimulationDecisionContext({
-    chooseAiAction: dependencies.chooseAiAction,
-    chooseRunnerAction: dependencies.chooseRunnerAction,
-    chooseCorpAction: dependencies.chooseCorpAction,
-    chooseRunnerBaselineAction: dependencies.chooseRunnerBaselineAction,
-    chooseCorpBaselineAction: dependencies.chooseCorpBaselineAction,
-    selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
-  });
+  const { chooseDecisionForSimulation, simulationSideUsesSemanticRuntime } =
+    createSimulationDecisionContext({
+      chooseAiAction: dependencies.chooseAiAction,
+      chooseRunnerAction: dependencies.chooseRunnerAction,
+      chooseCorpAction: dependencies.chooseCorpAction,
+      selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
+    });
 
   const { simulateAiGame } = createAiGameSimulator({
     chooseDecisionForSimulation,
@@ -61,12 +58,6 @@ export function createAiSimulationComposition(
       dependencies.tagPunishWindowDiagnosticsForSimulationAction,
     corpFutureRunIceDiagnosticsForSimulationAction:
       dependencies.corpFutureRunIceDiagnosticsForSimulationAction,
-    corpIcePortfolioDiagnosticsForSimulationAction:
-      dependencies.corpIcePortfolioDiagnosticsForSimulationAction,
-    corpScoreTerminalDiagnosticsForSimulationAction:
-      dependencies.corpScoreTerminalDiagnosticsForSimulationAction,
-    corpEconomyBeforeScoreDiagnosticsForSimulationAction:
-      dependencies.corpEconomyBeforeScoreDiagnosticsForSimulationAction,
     qualityTagsForAction,
   });
 

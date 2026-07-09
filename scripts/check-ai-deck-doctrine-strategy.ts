@@ -164,14 +164,6 @@ function validateProfiles(profiles: AiDeckStrategyProfile[]): void {
 }
 
 function validateNoLegacyDoctrineEffect(): void {
-  const legacyRunnerPlans = fs.readFileSync(
-    path.join(REPO_ROOT, "packages/ai/src/legacy/runner-plans.ts"),
-    "utf8",
-  );
-  const legacyCorpPlans = fs.readFileSync(
-    path.join(REPO_ROOT, "packages/ai/src/legacy/corp-plans.ts"),
-    "utf8",
-  );
   const indexSource = fs.readFileSync(
     path.join(REPO_ROOT, "packages/ai/src/index.ts"),
     "utf8",
@@ -181,8 +173,6 @@ function validateNoLegacyDoctrineEffect(): void {
     "utf8",
   );
   for (const [label, source] of [
-    ["legacy runner plans", legacyRunnerPlans],
-    ["legacy corp plans", legacyCorpPlans],
     ["public exports", indexSource],
     ["runtime ai decision input", runtimeInput],
   ] as const) {

@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 import selfplayExploitLeagueData from "../../../../data/ai/ai-selfplay-exploit-league-2026-05-17.json";
-import {
-  listV143BenchmarkProfiles,
-  listV143ExploitFixtures,
-} from "../index";
+import { listV143BenchmarkProfiles, listV143ExploitFixtures } from "../simulation";
 
 describe("V1.4.3 simulation fixture contracts", () => {
   it("provides versioned benchmark profiles and exploit fixtures", () => {
@@ -12,11 +9,6 @@ describe("V1.4.3 simulation fixture contracts", () => {
 
     expect(profiles.map((profile) => profile.benchmarkProfileId)).toEqual([
       "random_legal_bot",
-      "basic_corp_ai",
-      "basic_runner_ai",
-      "plan_corp_v1_4_0",
-      "plan_runner_v1_4_1",
-      "belief_ai_v1_4_2",
       "current_candidate",
     ]);
     expect(fixtures.map((fixture) => fixture.fixtureId)).toEqual([
@@ -47,13 +39,7 @@ describe("V1.4.3 simulation fixture contracts", () => {
         profileId: string;
         executionMode: string;
         automaticDefault: boolean;
-        runtimeMeasurement?: {
-          elapsedMs: number;
-          games: number;
-          illegalActions: number;
-          replayFailures: number;
-          timeouts: number;
-        };
+        runtimeMeasurementStatus?: string;
       }>;
       exploitClasses: Array<{
         classId: string;
@@ -109,13 +95,9 @@ describe("V1.4.3 simulation fixture contracts", () => {
       executionMode: "manual_optional",
       automaticDefault: false,
     });
-    expect(manualTuning?.runtimeMeasurement).toMatchObject({
-      games: 42,
-      illegalActions: 0,
-      replayFailures: 0,
-      timeouts: 0,
-    });
-    expect(manualTuning?.runtimeMeasurement?.elapsedMs).toBeGreaterThan(10000);
+    expect(manualTuning?.runtimeMeasurementStatus).toBe(
+      "needs_rerun_current_profiles",
+    );
 
     expect(config.exploitClasses.map((entry) => entry.classId)).toEqual(
       expect.arrayContaining([

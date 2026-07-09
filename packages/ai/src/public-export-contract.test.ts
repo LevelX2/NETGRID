@@ -3,6 +3,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import * as ai from "./index";
+import * as simulation from "./simulation";
 
 const repoRoot = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -10,7 +11,7 @@ const repoRoot = path.resolve(
 );
 
 describe("AI public export contract", () => {
-  it("keeps established runtime and benchmark facades exported", () => {
+  it("keeps the default facade limited to live runtime contracts", () => {
     const publicKeys = Object.keys(ai);
     const expectedExports = [
       "chooseAiAction",
@@ -18,22 +19,10 @@ describe("AI public export contract", () => {
       "chooseRunnerAction",
       "buildAiDecisionInput",
       "buildAiDecisionInputDto",
-      "assertAiInputIsSideSafe",
-      "runAiSelfplayTraceMining",
-      "detectAiSelfplaySuspiciousDecisions",
-      "formatAiSelfplayTraceMiningReport",
-      "runMatchProgressionBenchmark",
-      "runMatchProgressionBenchmarkSuite",
-      "formatMatchProgressionBenchmarkReport",
-      "formatMatchProgressionBenchmarkSuiteReport",
-      "runDoctrineQualityBenchmark",
-      "formatDoctrineQualityBenchmarkReport",
-      "evaluateDoctrineQualityGate",
       "summarizeActionSemanticCandidateCoverage",
       "formatActionSemanticCandidateCoverageReport",
       "buildSemanticRuntimeWhyCoverageReport",
       "renderSemanticRuntimeWhyCoverageMarkdown",
-      "buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries",
       "buildDeckStrategyProfile",
       "reconstructBeliefState",
     ];
@@ -47,6 +36,34 @@ describe("AI public export contract", () => {
     expect(publicKeys).not.toContain("chooseRunnerBaselineAction");
     expect(publicKeys).not.toContain("chooseCorpPlanAction");
     expect(publicKeys).not.toContain("chooseRunnerPlanAction");
+    expect(publicKeys).not.toContain("simulateAiGame");
+    expect(publicKeys).not.toContain("runAiSelfplayTraceMining");
+  });
+
+  it("exports benchmarks and selfplay only through the simulation facade", () => {
+    const publicKeys = Object.keys(simulation);
+    const expectedExports = [
+      "assertAiInputIsSideSafe",
+      "runAiSelfplayTraceMining",
+      "detectAiSelfplaySuspiciousDecisions",
+      "formatAiSelfplayTraceMiningReport",
+      "runMatchProgressionBenchmark",
+      "runMatchProgressionBenchmarkSuite",
+      "formatMatchProgressionBenchmarkReport",
+      "formatMatchProgressionBenchmarkSuiteReport",
+      "runDoctrineQualityBenchmark",
+      "formatDoctrineQualityBenchmarkReport",
+      "evaluateDoctrineQualityGate",
+      "buildSemanticRuntimeWhyCoverageReportFromSimulationSummaries",
+      "simulateAiGame",
+    ];
+
+    for (const exportName of expectedExports) {
+      expect(publicKeys).toContain(exportName);
+      expect(typeof simulation[exportName as keyof typeof simulation]).toBe(
+        "function",
+      );
+    }
   });
 
   it("keeps new play-strength diagnostics and evaluation helpers internal by default", () => {

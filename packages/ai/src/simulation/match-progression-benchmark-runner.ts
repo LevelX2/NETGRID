@@ -38,7 +38,7 @@ export function createMatchProgressionBenchmarkRunner(
   function runMatchProgressionBenchmark(
     config: AiDoctrineQualityBenchmarkConfig = {},
   ): AiMatchProgressionBenchmarkResult {
-    const baselineProfileId = config.baselineProfile ?? "belief_ai_v1_4_2";
+    const baselineProfileId = config.baselineProfile ?? "random_legal_bot";
     const candidateProfileId = config.candidateProfile ?? "current_candidate";
     const baselineProfile = benchmarkProfileById(
       baselineProfileId,
@@ -67,9 +67,7 @@ export function createMatchProgressionBenchmarkRunner(
     );
     const comparisonProfileIds = sortedUnique([
       ...(config.comparisonProfiles ?? [
-        "basic_corp_ai",
-        "basic_runner_ai",
-        "belief_ai_v1_4_2",
+        "random_legal_bot",
         "current_candidate",
       ]),
       baselineProfileId,

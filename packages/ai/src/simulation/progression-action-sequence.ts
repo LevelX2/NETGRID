@@ -1,4 +1,4 @@
-import type { AiSimulationSummary } from "../index";
+import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { isRemoteServerTarget } from "../runtime/server-target";
 import { averageNumber } from "./simulation-metric-aggregation";
 

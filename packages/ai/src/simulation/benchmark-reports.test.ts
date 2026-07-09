@@ -23,7 +23,7 @@ import {
   runMatchProgressionBenchmark,
   runMatchProgressionBenchmarkSuite,
   type AiSimulationSummary,
-} from "../index";
+} from "../simulation";
 import { resetTacticalPlanMemory } from "../tactical-plans";
 
 describe("benchmark report formatting", () => {
@@ -33,7 +33,7 @@ describe("benchmark report formatting", () => {
       runnerDeckId: "demo_runner_008",
       corpDeckId: "demo_corp_008",
       maxActions: 20,
-      baselineProfile: "belief_ai_v1_4_2",
+      baselineProfile: "random_legal_bot",
       candidateProfile: "current_candidate",
     });
     const gate = evaluateDoctrineQualityGate(benchmark);
@@ -56,14 +56,14 @@ describe("benchmark report formatting", () => {
       corpDeckId: "demo_corp_008",
       maxActions: 20,
       seeds: ["match-progression-seed-001"],
-      baselineProfile: "belief_ai_v1_4_2",
+      baselineProfile: "random_legal_bot",
       candidateProfile: "current_candidate",
     });
     const report = formatMatchProgressionBenchmarkReport(benchmark);
 
     expect(benchmark.version).toBe("ai-match-progression-v1");
     expect(benchmark.diagnosticOnly).toBe(true);
-    expect(benchmark.baselineProfile).toBe("belief_ai_v1_4_2");
+    expect(benchmark.baselineProfile).toBe("random_legal_bot");
     expect(benchmark.candidateProfile).toBe("current_candidate");
     expect(benchmark.runnerDeckId).toBe("demo_runner_008");
     expect(benchmark.corpDeckId).toBe("demo_corp_008");
@@ -81,10 +81,8 @@ describe("benchmark report formatting", () => {
       benchmark.candidate.scoreOrStealActionsPerMatch,
     ).toBeGreaterThanOrEqual(0);
     expect(benchmark.profileComparisons.map((entry) => entry.profile)).toEqual([
-      "basic_corp_ai",
-      "basic_runner_ai",
-      "belief_ai_v1_4_2",
       "current_candidate",
+      "random_legal_bot",
     ]);
     expect(
       benchmark.candidate.centralPressureRuns +
@@ -109,13 +107,9 @@ describe("benchmark report formatting", () => {
       includeHoldout: false,
       maxActions: 10,
       seeds: ["strategy-suite-seed-001"],
-      baselineProfile: "belief_ai_v1_4_2",
+      baselineProfile: "random_legal_bot",
       candidateProfile: "current_candidate",
-      comparisonProfiles: [
-        "basic_corp_ai",
-        "belief_ai_v1_4_2",
-        "current_candidate",
-      ],
+      comparisonProfiles: ["random_legal_bot", "current_candidate"],
     });
     const report = formatMatchProgressionBenchmarkSuiteReport(suite);
     const slots = listMatchProgressionBenchmarkDeckSlots();
@@ -240,9 +234,9 @@ describe("benchmark report formatting", () => {
       includeHoldout: false,
       maxActions: 10,
       seeds: ["strategy-suite-filter-seed-001"],
-      baselineProfile: "belief_ai_v1_4_2",
+      baselineProfile: "random_legal_bot",
       candidateProfile: "current_candidate",
-      comparisonProfiles: ["belief_ai_v1_4_2", "current_candidate"],
+      comparisonProfiles: ["random_legal_bot", "current_candidate"],
       slotIds: ["strategy_panel_fast_advance_chrome_rush"],
     });
 
@@ -259,7 +253,7 @@ describe("benchmark report formatting", () => {
       suite.slots[0]?.benchmark?.profileComparisons.map(
         (entry) => entry.profile,
       ),
-    ).toEqual(["belief_ai_v1_4_2", "current_candidate"]);
+    ).toEqual(["current_candidate", "random_legal_bot"]);
   }, 120_000);
 
   it("detects suspicious selfplay decisions from redaction-safe synthetic traces", () => {
@@ -502,7 +496,9 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("| passiveActionWithScoreLineAvailable |");
     expect(report).toContain("## Action Type Dominance");
     expect(report).toContain("- Status:");
-    expect(report).toContain("| Side | Top Action Type | Decisions | Top Share | Status |");
+    expect(report).toContain(
+      "| Side | Top Action Type | Decisions | Top Share | Status |",
+    );
     expect(report).toContain("## Action Limit Clusters");
     expect(report).toContain("## Action Limit Subclusters");
     expect(report).toContain("## Why Coverage");

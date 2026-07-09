@@ -1,7 +1,5 @@
-import type {
-  AiSimulationConfig,
-  AiSimulationSummary,
-} from "../index";
+import type { AiSimulationConfig } from "./ai-simulation-config";
+import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { roundNumber as round } from "../runtime/number-rounding";
 import { SOAK_SEEDS_143 } from "./soak-seed-data";
 import type { SimulationBenchmarkProfileId } from "./simulation-types";

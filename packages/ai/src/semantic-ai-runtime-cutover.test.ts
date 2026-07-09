@@ -509,276 +509,6 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
-  it("uses the explicit local basic setup default when the pilot flag is unset", () => {
-    delete process.env[AI_PLAY_STRENGTH_PILOT_ENV];
-    process.env[AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV] = BASIC_SETUP_PILOT_MODE;
-    const rememberedActions: string[] = [];
-    const run = legalAction(
-      "run-hq",
-      "runner",
-      "start_run",
-      "Run HQ",
-      { credits: 0 },
-      { payload: { serverId: "hq" } },
-    );
-    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-      credits: 0,
-    });
-    const input = aiInput("runner", [run, gain]);
-    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
-    const runtimeChoices = [
-      semanticRuntimeChoice(run, 70, "runner.semantic.simple_run_choice"),
-      semanticRuntimeChoice(gain, 120, "runner.semantic.basic_economy_draw"),
-    ];
-
-    const decision = chooseSemanticRuntimeAction(
-      input,
-      {},
-      semanticRuntimeDependencies(runtimeChoices, {
-        initiallySelectedActionId: run.actionId,
-        rememberedActions,
-      }),
-    );
-
-    expect(decision.actionId).toBe("gain-credit");
-    expect(decision.reasonCode).toBe("ai_play_strength.basic_setup_pilot");
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining(["ai_play_strength_pilot:basic_setup"]),
-    );
-    expect(rememberedActions).toEqual(["gain-credit"]);
-  });
-
-  it("keeps reason aligned with reasonCode when the basic setup pilot overrides the runtime choice", () => {
-    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = BASIC_SETUP_PILOT_MODE;
-    const rememberedActions: string[] = [];
-    const run = legalAction(
-      "run-hq",
-      "runner",
-      "start_run",
-      "Run HQ",
-      { credits: 0 },
-      { payload: { serverId: "hq" } },
-    );
-    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-      credits: 0,
-    });
-    const input = aiInput("runner", [run, gain]);
-    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
-    const runtimeChoices = [
-      semanticRuntimeChoice(run, 70, "runner.semantic.simple_run_choice"),
-      semanticRuntimeChoice(gain, 120, "runner.semantic.basic_economy_draw"),
-    ];
-
-    const decision = chooseSemanticRuntimeAction(
-      input,
-      {},
-      semanticRuntimeDependencies(runtimeChoices, {
-        initiallySelectedActionId: run.actionId,
-        rememberedActions,
-      }),
-    );
-    const debugText = JSON.stringify(decision.decisionDebug);
-
-    expect(decision.actionId).toBe("gain-credit");
-    expect(decision.reasonCode).toBe("ai_play_strength.basic_setup_pilot");
-    expect(decision.reason).toBe(decision.reasonCode);
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining(["ai_play_strength_pilot:basic_setup"]),
-    );
-    expect(rememberedActions).toEqual(["gain-credit"]);
-    expect(debugText).not.toMatch(
-      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|tokenHash|fullGameState/i,
-    );
-  });
-
-  it("does not let a forbidden run top action override through the basic setup pilot", () => {
-    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = BASIC_SETUP_PILOT_MODE;
-    const run = legalAction(
-      "run-hq",
-      "runner",
-      "start_run",
-      "Run HQ",
-      { credits: 0 },
-      { payload: { serverId: "hq" } },
-    );
-    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-      credits: 0,
-    });
-    const input = aiInput("runner", [run, gain]);
-    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
-    const runtimeChoices = [
-      semanticRuntimeChoice(run, 160, "runner.semantic.simple_run_choice"),
-      semanticRuntimeChoice(gain, 70, "runner.semantic.basic_economy_draw"),
-    ];
-
-    const decision = chooseSemanticRuntimeAction(
-      input,
-      {},
-      semanticRuntimeDependencies(runtimeChoices, {
-        initiallySelectedActionId: gain.actionId,
-        goal: {
-          goalId: "runner.pressure_good_central_target",
-          family: "pressure",
-          priority: 980,
-          urgency: "high",
-          source: "run_target_evaluation",
-          evidence: ["test_goal:run_access"],
-        },
-      }),
-    );
-
-    expect(decision.actionId).toBe("gain-credit");
-    expect(decision.reasonCode).toBe("runner.semantic.basic_economy_draw");
-    expect(decision.reason).toBe(decision.reasonCode);
-    expect(decision.evidence).not.toEqual(
-      expect.arrayContaining(["ai_play_strength_pilot:basic_setup"]),
-    );
-  });
-
-  it("allows a safe central run through the local runner safe-access pilot", () => {
-    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = RUNNER_SAFE_ACCESS_PILOT_MODE;
-    const rememberedActions: string[] = [];
-    const run = legalAction(
-      "run-hq",
-      "runner",
-      "start_run",
-      "Run HQ",
-      { credits: 0 },
-      { payload: { serverId: "hq" } },
-    );
-    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-      credits: 0,
-    });
-    const input = aiInput("runner", [run, gain]);
-    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
-    const runtimeChoices = [
-      semanticRuntimeChoice(run, 160, "runner.semantic.simple_run_choice"),
-      semanticRuntimeChoice(gain, 70, "runner.semantic.basic_economy_draw"),
-    ];
-
-    const decision = chooseSemanticRuntimeAction(
-      input,
-      {},
-      semanticRuntimeDependencies(runtimeChoices, {
-        initiallySelectedActionId: gain.actionId,
-        rememberedActions,
-        runTargets: [safeRuntimeRunTarget(run.actionId, "hq")],
-        goal: {
-          goalId: "runner.pressure_good_central_target",
-          family: "pressure",
-          priority: 980,
-          urgency: "high",
-          source: "run_target_evaluation",
-          evidence: ["test_goal:run_access"],
-        },
-      }),
-    );
-
-    expect(decision.actionId).toBe("run-hq");
-    expect(decision.reasonCode).toBe(
-      "ai_play_strength.runner_safe_access_pilot",
-    );
-    expect(decision.reason).toBe(decision.reasonCode);
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining(["ai_play_strength_pilot:runner_safe_access"]),
-    );
-    expect(rememberedActions).toEqual(["run-hq"]);
-  });
-
-  it("falls through blocked local pilot scopes in the runtime env", () => {
-    process.env[AI_PLAY_STRENGTH_PILOT_ENV] =
-      `${BASIC_SETUP_PILOT_MODE},${RUNNER_SAFE_ACCESS_PILOT_MODE}`;
-    const run = legalAction(
-      "run-hq",
-      "runner",
-      "start_run",
-      "Run HQ",
-      { credits: 0 },
-      { payload: { serverId: "hq" } },
-    );
-    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-      credits: 0,
-    });
-    const input = aiInput("runner", [run, gain]);
-    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
-    const runtimeChoices = [
-      semanticRuntimeChoice(run, 160, "runner.semantic.simple_run_choice"),
-      semanticRuntimeChoice(gain, 70, "runner.semantic.basic_economy_draw"),
-    ];
-
-    const decision = chooseSemanticRuntimeAction(
-      input,
-      {},
-      semanticRuntimeDependencies(runtimeChoices, {
-        initiallySelectedActionId: gain.actionId,
-        runTargets: [safeRuntimeRunTarget(run.actionId, "hq")],
-        goal: {
-          goalId: "runner.pressure_good_central_target",
-          family: "pressure",
-          priority: 980,
-          urgency: "high",
-          source: "run_target_evaluation",
-          evidence: ["test_goal:run_access"],
-        },
-      }),
-    );
-
-    expect(decision.actionId).toBe("run-hq");
-    expect(decision.reasonCode).toBe(
-      "ai_play_strength.runner_safe_access_pilot",
-    );
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining(["ai_play_strength_pilot:runner_safe_access"]),
-    );
-  });
-
-  it("lets the explicit pilot env override a local basic setup default", () => {
-    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = RUNNER_SAFE_ACCESS_PILOT_MODE;
-    process.env[AI_PLAY_STRENGTH_LOCAL_DEFAULT_ENV] = BASIC_SETUP_PILOT_MODE;
-    const run = legalAction(
-      "run-hq",
-      "runner",
-      "start_run",
-      "Run HQ",
-      { credits: 0 },
-      { payload: { serverId: "hq" } },
-    );
-    const gain = legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-      credits: 0,
-    });
-    const input = aiInput("runner", [run, gain]);
-    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
-    const runtimeChoices = [
-      semanticRuntimeChoice(run, 160, "runner.semantic.simple_run_choice"),
-      semanticRuntimeChoice(gain, 70, "runner.semantic.basic_economy_draw"),
-    ];
-
-    const decision = chooseSemanticRuntimeAction(
-      input,
-      {},
-      semanticRuntimeDependencies(runtimeChoices, {
-        initiallySelectedActionId: gain.actionId,
-        runTargets: [safeRuntimeRunTarget(run.actionId, "hq")],
-        goal: {
-          goalId: "runner.pressure_good_central_target",
-          family: "pressure",
-          priority: 980,
-          urgency: "high",
-          source: "run_target_evaluation",
-          evidence: ["test_goal:run_access"],
-        },
-      }),
-    );
-
-    expect(decision.actionId).toBe("run-hq");
-    expect(decision.reasonCode).toBe(
-      "ai_play_strength.runner_safe_access_pilot",
-    );
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining(["ai_play_strength_pilot:runner_safe_access"]),
-    );
-  });
-
   it("uses semantic runtime as the live corp decision by default", () => {
     const input = aiInput("corp", [
       legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
@@ -865,37 +595,6 @@ describe("Semantic AI runtime cutover", () => {
     );
 
     expect(decision.reasonCode).toBe("corp.semantic.generic_damage");
-  });
-
-  it("allows a legal score_agenda through the local corp score-window pilot", () => {
-    process.env[AI_PLAY_STRENGTH_PILOT_ENV] = CORP_SCORE_WINDOW_PILOT_MODE;
-    const score = legalAction("score", "corp", "score_agenda", "Score agenda", {
-      credits: 0,
-    });
-    const gain = legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
-      credits: 0,
-    });
-    const input = aiInput("corp", [score, gain]);
-    const runtimeChoices = [
-      semanticRuntimeChoice(score, 160, "corp.semantic.simple_score_advance"),
-      semanticRuntimeChoice(gain, 70, "corp.semantic.basic_economy_draw"),
-    ];
-
-    const decision = chooseSemanticRuntimeAction(
-      input,
-      {},
-      semanticRuntimeDependencies(runtimeChoices, {
-        initiallySelectedActionId: gain.actionId,
-      }),
-    );
-
-    expect(decision.actionId).toBe("score");
-    expect(decision.reasonCode).toBe(
-      "ai_play_strength.corp_score_window_pilot",
-    );
-    expect(decision.evidence).toEqual(
-      expect.arrayContaining(["ai_play_strength_pilot:corp_score_window"]),
-    );
   });
 
   it("prefers central ICE protection over another empty remote shell", () => {
@@ -3240,7 +2939,7 @@ describe("Semantic AI runtime cutover", () => {
 
     const decision = chooseRunnerAction(input);
 
-    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.actionId).toBe("draw");
     expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({
         actionId: "run-rd",
@@ -3652,24 +3351,6 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.evidence).toContain("tactical_step:rez_outer_ice");
   });
 
-  it("ignores the historical legacy runtime kill switch in public runtime entrypoints", () => {
-    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "legacy";
-    const input = aiInput("runner", [
-      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
-        credits: 0,
-      }),
-      legalAction("remove-tag", "runner", "remove_tag", "Remove tag", {
-        credits: 2,
-      }),
-    ]);
-    input.playerView.own.tags = 1;
-
-    const decision = chooseRunnerAction(input);
-
-    expect(decision.reasonCode).toContain(".semantic.");
-    expect(decision.evidence).not.toContain("semantic_runtime_force_legacy");
-  });
-
   it("uses semantic coverage fallback instead of legacy when no choice is selectable", () => {
     const input = aiInput("runner", [
       legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
@@ -3705,6 +3386,26 @@ describe("Semantic AI runtime cutover", () => {
         "fallback_action_id:gain-credit",
       ]),
     );
+  });
+
+  it("fails closed when semantic coverage has only opaque card actions", () => {
+    const input = aiInput("corp", [
+      legalAction("opaque-card", "corp", "activated_card_ability", "Opaque", {
+        credits: 0,
+      }, {
+        source: "unknown-card-instance",
+      }),
+    ]);
+
+    expect(() =>
+      chooseSemanticRuntimeAction(
+        input,
+        {},
+        semanticRuntimeDependencies([], {
+          initiallySelectedActionId: "none",
+        }),
+      ),
+    ).toThrow(/no fail-closed fallback for corp: activated_card_ability/);
   });
 
   it("does not expose shadow-only diagnostics through the public AI runtime API", () => {

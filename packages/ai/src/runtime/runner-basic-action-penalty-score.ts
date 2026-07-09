@@ -43,5 +43,46 @@ export function runnerBasicActionPenaltyScoreComponents(
       reason: `actions:${input.playerView.own.clicks}`,
     });
   }
+  const pressureGoal = (
+    input as AiDecisionInput & {
+      ownRunnerTacticalGoals?: readonly {
+        goalId: string;
+        priority: number;
+        targetServerId?: string;
+      }[];
+    }
+  ).ownRunnerTacticalGoals
+    ?.filter(
+      (goal) =>
+        goal.goalId === "runner.pressure_good_central_target" &&
+        goal.priority >= 800,
+    )
+    .sort((left, right) => right.priority - left.priority)[0];
+  const matchingPressureRun = pressureGoal
+    ? input.legalActions.find(
+        (candidate) =>
+          candidate.type === "start_run" &&
+          candidate.payload?.serverId === pressureGoal.targetServerId &&
+          candidate.payload?.knownNoCurrentPayoff !== true,
+      )
+    : undefined;
+  if (
+    matchingPressureRun &&
+    action.source === "basic_action" &&
+    (action.type === "gain_credit" || action.type === "draw_card") &&
+    input.playerView.own.credits >= 4
+  ) {
+    components.push({
+      key: "runner_basic_setup_over_ready_pressure",
+      label: "Basis-Setup vor bereitem Zentraldruck",
+      value: action.type === "gain_credit" ? -1200 : -900,
+      reason: [
+        `goal:${pressureGoal?.goalId}`,
+        `priority:${pressureGoal?.priority}`,
+        `target:${pressureGoal?.targetServerId}`,
+        `run_action:${matchingPressureRun.actionId}`,
+      ].join("|"),
+    });
+  }
   return components;
 }

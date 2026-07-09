@@ -77,28 +77,10 @@ export function profileIdForMode(
   mode: SimulationControllerMode,
 ): string {
   switch (mode) {
-    case "plan_corp_v1_4_0":
-      return side === "corp"
-        ? "corp-ai-v1.4.0-normal"
-        : "runner-ai-v0.9-normal";
-    case "plan_runner_v1_4_1":
-      return side === "runner"
-        ? "runner-ai-v1.4.1-normal"
-        : "corp-ai-v0.9-normal";
-    case "belief_ai_v1_4_2":
-      return side === "runner"
-        ? "runner-ai-v1.4.2-normal"
-        : "corp-ai-v1.4.2-normal";
-    case "basic_runner_ai":
-      return side === "runner"
-        ? "runner-ai-v0.9-normal"
-        : "corp-ai-v0.9-normal";
-    case "basic_corp_ai":
-      return side === "corp" ? "corp-ai-v0.9-normal" : "runner-ai-v0.9-normal";
     case "random_legal_bot":
       return side === "runner"
-        ? "runner-ai-v0.9-normal"
-        : "corp-ai-v0.9-normal";
+        ? "runner-random-legal-control"
+        : "corp-random-legal-control";
     case "current_candidate":
       return side === "runner"
         ? "runner-ai-v1.4.2-normal"

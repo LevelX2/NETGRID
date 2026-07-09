@@ -1,4 +1,4 @@
-import type { AiSimulationSummary } from "../index";
+import type { AiSimulationSummary } from "./ai-simulation-summary";
 import { sortedUnique } from "../runtime/collection";
 import type { AiDoctrineQualityMetrics } from "./doctrine-quality-tags";
 

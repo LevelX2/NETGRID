@@ -4,12 +4,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 
-import { createCorpEconomyBeforeScoreDiagnosticsForSimulationAction } from "./corp-economy-before-score-diagnostics";
 import { createCorpFutureRunIceDiagnosticsForSimulationAction } from "./corp-future-run-ice-diagnostics";
-import {
-  createCorpScoreTerminalChosenFamily,
-  createCorpScoreTerminalDiagnosticsForSimulationAction,
-} from "./corp-score-terminal-diagnostics";
 import { createCentralRunEventGoodForTarget } from "./no-fresh-central";
 import {
   createDefinitionForSimulationAction,
@@ -33,16 +28,6 @@ export function createSimulationActionDiagnosticsContext(
     createCorpFutureRunIceDiagnosticsForSimulationAction(
       sourceDefinitionIdForSimulationAction,
     );
-  const corpScoreTerminalChosenFamily =
-    createCorpScoreTerminalChosenFamily(dependencies.rolesForAction);
-  const corpScoreTerminalDiagnosticsForSimulationAction =
-    createCorpScoreTerminalDiagnosticsForSimulationAction(
-      corpScoreTerminalChosenFamily,
-    );
-  const corpEconomyBeforeScoreDiagnosticsForSimulationAction =
-    createCorpEconomyBeforeScoreDiagnosticsForSimulationAction(
-      corpScoreTerminalChosenFamily,
-    );
   const definitionForSimulationAction = createDefinitionForSimulationAction(
     sourceDefinitionIdForSimulationAction,
   );
@@ -53,8 +38,6 @@ export function createSimulationActionDiagnosticsContext(
   return {
     sourceDefinitionIdForSimulationAction,
     corpFutureRunIceDiagnosticsForSimulationAction,
-    corpScoreTerminalDiagnosticsForSimulationAction,
-    corpEconomyBeforeScoreDiagnosticsForSimulationAction,
     definitionForSimulationAction,
     centralRunEventGoodForTarget,
   };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AiSimulationSummary } from "../index";
+import type { AiSimulationSummary } from "./ai-simulation-summary";
 
 import { progressionEntriesWithRunTargets } from "./progression-action-sequence";
 

@@ -1,13 +1,19 @@
 import type {
   AiBenchmarkCorpArchetype,
-  AiBenchmarkDeckSlotResult,
   AiBenchmarkDeckSlotType,
+} from "./benchmark-deck-types";
+import type { AiBenchmarkDeckSlotResult } from "./ai-match-progression-types";
+import type {
   AiDoctrineQualityBenchmarkResult,
+} from "./doctrine-quality-benchmark-types";
+import type {
   AiDoctrineQualityGateResult,
   AiDoctrineQualityGateThresholds,
+} from "./doctrine-quality-tags";
+import type {
   AiMatchProgressionBenchmarkResult,
   AiMatchProgressionBenchmarkSuiteResult,
-} from "../index";
+} from "./ai-match-progression-types";
 import type { AiSelfplayTraceMiningResult } from "./selfplay-trace-mining";
 import { CORP_STRATEGY_PANEL_TARGETS } from "./benchmark-deck-strategy-panel";
 import { buildSelfplayActionTypeDominanceReport } from "./selfplay-action-type-dominance";

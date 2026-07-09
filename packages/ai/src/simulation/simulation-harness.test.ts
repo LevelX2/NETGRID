@@ -1,22 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   simulateAiGame,
   summarizeDoctrineQualityMetrics,
-} from "../index";
-
-const originalSemanticAiRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
-
-beforeEach(() => {
-  process.env.NETGRID_SEMANTIC_AI_RUNTIME = "legacy";
-});
-
-afterEach(() => {
-  if (originalSemanticAiRuntimeMode === undefined) {
-    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
-  } else {
-    process.env.NETGRID_SEMANTIC_AI_RUNTIME = originalSemanticAiRuntimeMode;
-  }
-});
+} from "../simulation";
 
 describe("AI simulation harness", () => {
   it("runs deterministic AI-vs-AI simulations and replays the event log", () => {

@@ -33,7 +33,7 @@ export function createDoctrineQualityBenchmarkRunner(
   function runDoctrineQualityBenchmark(
     config: AiDoctrineQualityBenchmarkConfig = {},
   ): AiDoctrineQualityBenchmarkResult {
-    const baselineProfileId = config.baselineProfile ?? "belief_ai_v1_4_2";
+    const baselineProfileId = config.baselineProfile ?? "random_legal_bot";
     const candidateProfileId = config.candidateProfile ?? "current_candidate";
     const baselineProfile = benchmarkProfileById(
       baselineProfileId,

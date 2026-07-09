@@ -3024,18 +3024,19 @@
           "timing": "during_run"
         },
         {
+          "amount": 5,
+          "kind": "topdeck_info",
+          "resource": "cards",
+          "scope": "runner",
+          "timing": "during_run"
+        },
+        {
           "kind": "install_discount",
           "scope": "runner",
           "timing": "during_run"
         },
         {
           "kind": "search",
-          "scope": "runner",
-          "timing": "during_run"
-        },
-        {
-          "kind": "topdeck_info",
-          "resource": "cards",
           "scope": "runner",
           "timing": "during_run"
         }
@@ -8404,7 +8405,7 @@
             "meat"
           ],
           "kind": "damage_prevention",
-          "perTurnLimit": 2,
+          "perTurnLimit": 3,
           "resource": "damage",
           "scope": "runner",
           "timing": "prevention_window"
@@ -8412,7 +8413,7 @@
         {
           "amount": 3,
           "kind": "meat_damage_prevention",
-          "perTurnLimit": 2,
+          "perTurnLimit": 3,
           "resource": "meat_damage",
           "scope": "runner",
           "timing": "prevention_window"
@@ -10932,13 +10933,13 @@
         {
           "kind": "action_economy",
           "resource": "credits",
-          "scope": "corp",
+          "scope": "runner",
           "timing": "action"
         },
         {
           "kind": "counter_economy",
           "resource": "credits",
-          "scope": "corp",
+          "scope": "runner",
           "timing": "action"
         }
       ],
@@ -12416,22 +12417,15 @@
       "effects": [
         {
           "kind": "economy",
+          "timing": "persistent",
           "scope": "runner",
-          "target": "economy.installment_credit",
-          "timing": "persistent"
+          "target": "economy.installment_credit"
         },
         {
           "kind": "economy",
+          "timing": "persistent",
           "scope": "runner",
-          "target": "economy.turn_start_credit",
-          "timing": "persistent"
-        },
-        {
-          "amount": 1,
-          "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "action"
+          "target": "economy.turn_start_credit"
         }
       ]
     },
@@ -12797,14 +12791,14 @@
           "amount": 2,
           "kind": "action_economy",
           "resource": "credits",
-          "scope": "corp",
+          "scope": "runner",
           "timing": "action"
         },
         {
           "amount": 2,
           "kind": "counter_economy",
           "resource": "credits",
-          "scope": "corp",
+          "scope": "runner",
           "timing": "action"
         }
       ],
@@ -25055,13 +25049,6 @@
           "kind": "counter_economy",
           "resource": "credits",
           "scope": "corp",
-          "timing": "action"
-        },
-        {
-          "amount": 2,
-          "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "corp",
           "timing": "start_of_turn"
         },
         {
@@ -26457,13 +26444,6 @@
           "kind": "counter_economy",
           "resource": "credits",
           "scope": "corp",
-          "timing": "action"
-        },
-        {
-          "amount": 1,
-          "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "corp",
           "timing": "start_of_turn"
         },
         {
@@ -27421,7 +27401,7 @@
         {
           "kind": "zone_shuffle",
           "resource": "cards",
-          "scope": "hq",
+          "scope": "rnd",
           "timing": "action"
         }
       ],
@@ -28202,20 +28182,6 @@
         },
         {
           "amount": 1,
-          "kind": "action_economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "action"
-        },
-        {
-          "amount": 1,
-          "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "action"
-        },
-        {
-          "amount": 1,
           "kind": "counter_economy",
           "resource": "credits",
           "scope": "corp",
@@ -28234,6 +28200,13 @@
           "resource": "credits",
           "scope": "corp",
           "timing": "start_of_turn"
+        },
+        {
+          "amount": 3,
+          "kind": "action_economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
         },
         {
           "amount": 3,
@@ -41446,57 +41419,69 @@
       "effects": [
         {
           "kind": "global_modifier",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "resource.hidden"
+          "target": "resource.hidden",
+          "timing": "persistent"
         },
         {
           "kind": "prevention_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "hidden.runner_resource"
+          "target": "hidden.runner_resource",
+          "timing": "persistent"
         },
         {
           "kind": "global_modifier",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "resource.hidden_one_shot"
+          "target": "resource.hidden_one_shot",
+          "timing": "persistent"
         },
         {
           "kind": "prevention_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "hidden.one_shot_resource"
+          "target": "hidden.one_shot_resource",
+          "timing": "persistent"
         },
         {
           "kind": "prevention_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "hidden.reveals_on_use"
+          "target": "hidden.reveals_on_use",
+          "timing": "persistent"
         },
         {
           "kind": "prevention_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "hidden.reveals_on_trash"
+          "target": "hidden.reveals_on_trash",
+          "timing": "persistent"
         },
         {
           "kind": "global_modifier",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "resource.sabotage"
+          "target": "resource.sabotage",
+          "timing": "persistent"
         },
         {
           "kind": "tag_punish_payoff",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "corp.economy_pressure"
+          "target": "corp.economy_pressure",
+          "timing": "persistent"
         },
         {
           "kind": "access_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "access.hq_sabotage_credit_loss"
+          "target": "access.hq_sabotage_credit_loss",
+          "timing": "persistent"
+        },
+        {
+          "amount": 3,
+          "kind": "counter_economy",
+          "resource": "credits",
+          "scope": "hq",
+          "timing": "successful_run"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
         }
       ]
     },
@@ -41544,69 +41529,81 @@
       "effects": [
         {
           "kind": "global_modifier",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "resource.hidden"
+          "target": "resource.hidden",
+          "timing": "persistent"
         },
         {
           "kind": "prevention_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "hidden.runner_resource"
+          "target": "hidden.runner_resource",
+          "timing": "persistent"
         },
         {
           "kind": "global_modifier",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "resource.hidden_one_shot"
+          "target": "resource.hidden_one_shot",
+          "timing": "persistent"
         },
         {
           "kind": "prevention_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "hidden.one_shot_resource"
+          "target": "hidden.one_shot_resource",
+          "timing": "persistent"
         },
         {
           "kind": "prevention_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "hidden.reveals_on_use"
+          "target": "hidden.reveals_on_use",
+          "timing": "persistent"
         },
         {
           "kind": "prevention_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "hidden.reveals_on_trash"
+          "target": "hidden.reveals_on_trash",
+          "timing": "persistent"
         },
         {
           "kind": "global_modifier",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "resource.sabotage"
+          "target": "resource.sabotage",
+          "timing": "persistent"
         },
         {
           "kind": "access_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "access.remote_full_trash"
+          "target": "access.remote_full_trash",
+          "timing": "persistent"
         },
         {
           "kind": "remote_tax",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "remote.full_fort_trash"
+          "target": "remote.full_fort_trash",
+          "timing": "persistent"
         },
         {
           "kind": "access_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "access.trash_untrashable"
+          "target": "access.trash_untrashable",
+          "timing": "persistent"
         },
         {
           "kind": "access_replacement",
-          "timing": "persistent",
           "scope": "runner",
-          "target": "access.remote_sabotage_payoff"
+          "target": "access.remote_sabotage_payoff",
+          "timing": "persistent"
+        },
+        {
+          "kind": "ice_trash",
+          "scope": "remote",
+          "target": "remote_fort_ice",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "installed_card_trash",
+          "scope": "remote",
+          "target": "remote_fort_root_and_ice",
+          "timing": "successful_run"
         }
       ],
       "targetProfiles": [
@@ -41621,6 +41618,14 @@
             "hidden_info_dependent_choice"
           ],
           "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_remote_server"
+        },
+        {
+          "kind": "requires_successful_run"
         }
       ]
     },
@@ -42716,40 +42721,33 @@
       "effects": [
         {
           "kind": "global_modifier",
+          "timing": "persistent",
           "scope": "runner",
-          "target": "resource.bbs",
-          "timing": "persistent"
+          "target": "resource.bbs"
         },
         {
           "kind": "global_modifier",
+          "timing": "persistent",
           "scope": "runner",
-          "target": "resource.position",
-          "timing": "persistent"
+          "target": "resource.position"
         },
         {
           "kind": "economy",
+          "timing": "persistent",
           "scope": "runner",
-          "target": "economy.turn_start_credit",
-          "timing": "persistent"
+          "target": "economy.turn_start_credit"
         },
         {
           "kind": "economy",
+          "timing": "persistent",
           "scope": "runner",
-          "target": "economy.action_credit",
-          "timing": "persistent"
+          "target": "economy.action_credit"
         },
         {
           "kind": "economy",
+          "timing": "persistent",
           "scope": "runner",
-          "target": "economy.temporary_resource_bank",
-          "timing": "persistent"
-        },
-        {
-          "amount": 1,
-          "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "corp",
-          "timing": "action"
+          "target": "economy.temporary_resource_bank"
         }
       ]
     },

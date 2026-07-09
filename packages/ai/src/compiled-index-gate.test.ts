@@ -244,20 +244,14 @@ describe("compiled hint index pilot report", () => {
     expect(crystalPalace?.conflicts).toEqual([]);
   });
 
-  it("keeps the historical compiled-index check separate from the runtime compiled artifact", () => {
+  it("keeps the compiled-index check separate from the runtime compiled artifact", () => {
     const aiHintsSource = fs.readFileSync(
       path.join(repoRoot, "packages/ai/src/ai-hints.ts"),
       "utf8",
     );
     expect(aiHintsSource).toContain("ai-card-hints-compiled.json");
-    for (const relativePath of [
-      "packages/ai/src/legacy/corp-plans.ts",
-      "packages/ai/src/legacy/runner-plans.ts",
-    ]) {
-      const source = fs.readFileSync(path.join(repoRoot, relativePath), "utf8");
-      expect(source).not.toContain("check-ai-hint-compiled-index");
-      expect(source).not.toContain("ai-hint-compiled-index-pilot-report");
-    }
+    expect(aiHintsSource).not.toContain("check-ai-hint-compiled-index");
+    expect(aiHintsSource).not.toContain("ai-hint-compiled-index-pilot-report");
   });
 });
 

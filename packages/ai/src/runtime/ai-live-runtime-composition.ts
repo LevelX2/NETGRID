@@ -1,23 +1,19 @@
 import {
-  createAiSimulationComposition,
-  type AiSimulationCompositionDependencies,
-} from "./ai-simulation-composition";
-import {
   createSemanticRuntimeOrchestrationComposition,
   type SemanticRuntimeOrchestrationCompositionDependencies,
-} from "../runtime/semantic-runtime-orchestration-composition";
+} from "./semantic-runtime-orchestration-composition";
 import {
   createSemanticRuntimeCorpScoringComposition,
   type SemanticRuntimeCorpScoringCompositionDependencies,
-} from "../runtime/semantic-runtime-corp-scoring-composition";
+} from "./semantic-runtime-corp-scoring-composition";
 import {
   createRunnerSemanticSupportComposition,
   type RunnerSemanticSupportCompositionDependencies,
-} from "../runtime/runner-semantic-support-composition";
+} from "./runner-semantic-support-composition";
 import {
   createAiContextDiagnosticsComposition,
   type AiContextDiagnosticsCompositionDependencies,
-} from "../runtime/ai-context-diagnostics-composition";
+} from "./ai-context-diagnostics-composition";
 
 type RuntimeScoringDependencyObjects = Pick<
   SemanticRuntimeOrchestrationCompositionDependencies,
@@ -28,7 +24,7 @@ type RuntimeScoringDependencyObjects = Pick<
   | "startRun"
 >;
 
-type AiRuntimeSimulationScoringDependencies = Pick<
+type AiLiveRuntimeScoringDependencies = Pick<
   RuntimeScoringDependencyObjects["badPublicityRelevance"],
   "sourceDefinitionIdForAction" | "actionCreditCost" | "fakedHitCardId"
 > & {
@@ -84,7 +80,7 @@ type RuntimeContextDiagnosticsDependencyKeys =
   | "tagPunishAssessmentForAction"
   | "trashAccessContext";
 
-export type AiRuntimeSimulationCompositionDependencies = Omit<
+export type AiLiveRuntimeCompositionDependencies = Omit<
   SemanticRuntimeOrchestrationCompositionDependencies,
   | "badPublicityRelevance"
   | "corpAdvancementCounterPlacementAssessment"
@@ -98,15 +94,6 @@ export type AiRuntimeSimulationCompositionDependencies = Omit<
   | RuntimeRunnerSupportDependencyKeys
   | RuntimeContextDiagnosticsDependencyKeys
 > &
-  Omit<
-    AiSimulationCompositionDependencies,
-    | "chooseAiAction"
-    | "chooseRunnerAction"
-    | "chooseCorpAction"
-    | "tagPunishWindowDiagnosticsForSimulationAction"
-    | RuntimeRunnerSupportDependencyKeys
-    | RuntimeContextDiagnosticsDependencyKeys
-  > &
   AiContextDiagnosticsCompositionDependencies &
   Omit<
     SemanticRuntimeCorpScoringCompositionDependencies<string>,
@@ -116,10 +103,10 @@ export type AiRuntimeSimulationCompositionDependencies = Omit<
     RunnerSemanticSupportCompositionDependencies,
     RuntimeContextDiagnosticsDependencyKeys
   > &
-  AiRuntimeSimulationScoringDependencies;
+  AiLiveRuntimeScoringDependencies;
 
-function createRuntimeComposedDependencies(
-  dependencies: AiRuntimeSimulationCompositionDependencies,
+export function createRuntimeComposedDependencies(
+  dependencies: AiLiveRuntimeCompositionDependencies,
   contextDiagnostics: AiContextDiagnosticsOutputs,
 ) {
   return {
@@ -137,7 +124,7 @@ function createRuntimeComposedDependencies(
 }
 
 function createSemanticRuntimeDependencies(
-  dependencies: AiRuntimeSimulationCompositionDependencies,
+  dependencies: AiLiveRuntimeCompositionDependencies,
   contextDiagnostics: AiContextDiagnosticsOutputs,
   runnerSupport: RunnerSemanticSupportOutputs,
   corpScoring: SemanticRuntimeCorpScoringOutputs,
@@ -231,48 +218,27 @@ function createSemanticRuntimeDependencies(
   };
 }
 
-export function createAiRuntimeSimulationComposition(
-  dependencies: AiRuntimeSimulationCompositionDependencies,
+export function createAiLiveRuntimeComposition(
+  dependencies: AiLiveRuntimeCompositionDependencies,
 ) {
-  const contextDiagnostics =
-    createAiContextDiagnosticsComposition(dependencies);
-
+  const contextDiagnostics = createAiContextDiagnosticsComposition(dependencies);
   const composedDependencies = createRuntimeComposedDependencies(
     dependencies,
     contextDiagnostics,
   );
-
-  const runnerSupport =
-    createRunnerSemanticSupportComposition(composedDependencies);
-
-  const corpScoring =
-    createSemanticRuntimeCorpScoringComposition(composedDependencies);
-
-  const semanticRuntimeDependencies = createSemanticRuntimeDependencies(
-    dependencies,
-    contextDiagnostics,
-    runnerSupport,
-    corpScoring,
+  const runnerSupport = createRunnerSemanticSupportComposition(
+    composedDependencies,
+  );
+  const corpScoring = createSemanticRuntimeCorpScoringComposition(
+    composedDependencies,
   );
 
-  const runtimeEntrypoints = createSemanticRuntimeOrchestrationComposition(
-    semanticRuntimeDependencies,
+  return createSemanticRuntimeOrchestrationComposition(
+    createSemanticRuntimeDependencies(
+      dependencies,
+      contextDiagnostics,
+      runnerSupport,
+      corpScoring,
+    ),
   );
-
-  const simulationEntrypoints = createAiSimulationComposition({
-    ...dependencies,
-    ...contextDiagnostics,
-    ...runnerSupport,
-    extractFeatures: contextDiagnostics.extractAiFeatures,
-    chooseAiAction: runtimeEntrypoints.chooseAiAction,
-    chooseRunnerAction: runtimeEntrypoints.chooseRunnerAction,
-    chooseCorpAction: runtimeEntrypoints.chooseCorpAction,
-    tagPunishWindowDiagnosticsForSimulationAction:
-      corpScoring.tagPunishWindowDiagnosticsForSimulationAction,
-  });
-
-  return {
-    ...runtimeEntrypoints,
-    ...simulationEntrypoints,
-  };
 }

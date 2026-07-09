@@ -20457,7 +20457,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 1
@@ -20465,6 +20465,7 @@
       "derivedFunctionSignals": [
         "access.hq_sabotage_credit_loss",
         "corp.economy_pressure",
+        "economy.counter",
         "hidden.one_shot_resource",
         "hidden.reveals_on_trash",
         "hidden.reveals_on_use",
@@ -20493,6 +20494,7 @@
       ],
       "supportingEvidenceOnly": [
         "corp.economy_pressure",
+        "economy.counter",
         "hidden.one_shot_resource",
         "hidden.reveals_on_trash",
         "hidden.reveals_on_use",
@@ -20576,9 +20578,13 @@
           "effects"
         ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects",
+          "conditions"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -20599,7 +20605,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 1
@@ -20739,9 +20745,13 @@
         ],
         "compiledMechanicalFactFields": [
           "effects",
+          "conditions",
           "targetProfiles"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects",
+          "conditions"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -22089,14 +22099,13 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.action_credit",
-        "economy.counter",
         "economy.generic",
         "economy.temporary_resource_bank",
         "economy.turn_start_credit",
@@ -22109,7 +22118,6 @@
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
         "economy.action_credit",
-        "economy.counter",
         "economy.generic",
         "economy.temporary_resource_bank",
         "economy.turn_start_credit",
@@ -22163,9 +22171,7 @@
         "compiledMechanicalFactFields": [
           "effects"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -40195,13 +40201,12 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.counter",
         "economy.generic",
         "economy.installment_credit",
         "economy.turn_start_credit"
@@ -40211,7 +40216,6 @@
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
-        "economy.counter",
         "economy.generic",
         "economy.installment_credit",
         "economy.turn_start_credit"
@@ -40256,9 +40260,7 @@
         "compiledMechanicalFactFields": [
           "effects"
         ],
-        "generatedFactFields": [
-          "effects"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {

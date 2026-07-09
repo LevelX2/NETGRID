@@ -393,40 +393,6 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
-  it("marks legacy planner facades and implementations as compatibility-only", () => {
-    const requiredMarkers = [
-      {
-        file: path.join(srcDir, "legacy", "runner-plans.ts"),
-        markers: [
-          "Legacy runner planner",
-          "fallback",
-          "Do not add new semantic",
-        ],
-      },
-      {
-        file: path.join(srcDir, "legacy", "corp-plans.ts"),
-        markers: ["Legacy corp planner", "fallback", "Do not add new semantic"],
-      },
-      {
-        file: path.join(srcDir, "index.ts"),
-        markers: [
-          "Public package facade",
-          "re-export",
-          "intentional public contracts",
-        ],
-      },
-    ];
-
-    const missingMarkers = requiredMarkers.flatMap(({ file, markers }) => {
-      const content = readFileSync(file, "utf8");
-      return markers
-        .filter((marker) => !content.includes(marker))
-        .map((marker) => `${relativeFile(file)} is missing marker: ${marker}`);
-    });
-
-    expect(missingMarkers).toEqual([]);
-  });
-
   it("does not recreate historical plan compatibility facades", () => {
     const forbiddenFacades = [
       path.join(srcDir, "runner-plans.ts"),
@@ -529,59 +495,6 @@ describe("AI module boundaries", () => {
         ? ["deck-doctrine-runtime-context.ts does not validate deck snapshots"]
         : []),
     ];
-
-    expect(violations).toEqual([]);
-  });
-
-  it("freezes legacy planner implementation imports", () => {
-    const expectedImportsByFile = new Map<string, string[]>([
-      [
-        path.join(srcDir, "legacy", "runner-plans.ts"),
-        [
-          "../../../../data/ai/runner-plan-profiles-1.4.1.json",
-          "@netgrid/shared",
-          "../ai-hints",
-          "../belief-state",
-          "../breaker-ontology-consumer",
-          "../visible-run-analysis",
-          "./deck-strategy-plan-weight",
-          "./legacy-runner-access-payoff",
-          "./runner-plan-metadata",
-        ],
-      ],
-      [
-        path.join(srcDir, "legacy", "corp-plans.ts"),
-        [
-          "../../../../data/ai/corp-plan-profiles-1.4.0.json",
-          "@netgrid/shared",
-          "../ai-hints",
-          "../belief-state",
-          "../breaker-ontology-consumer",
-          "../hint-ontology",
-          "../remote-role-ontology-consumer",
-          "../runtime/corp-scoreline/semantic-runtime-corp-scoreline-assessment",
-          "../tag-punish-ontology-consumer",
-          "../visible-run-analysis",
-          "./deck-strategy-plan-weight",
-        ],
-      ],
-    ]);
-
-    const violations = [...expectedImportsByFile.entries()].flatMap(
-      ([file, expectedImports]) => {
-        const actualImports = [
-          ...new Set(
-            importsFrom(file).map((reference) => reference.importSource),
-          ),
-        ].sort();
-        const expected = [...expectedImports].sort();
-        return JSON.stringify(actualImports) === JSON.stringify(expected)
-          ? []
-          : [
-              `${relativeFile(file)} imports ${JSON.stringify(actualImports)}; expected ${JSON.stringify(expected)}`,
-            ];
-      },
-    );
 
     expect(violations).toEqual([]);
   });
@@ -752,6 +665,38 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
+  it("keeps match simulation out of the default package facade", () => {
+    const publicIndex = readFileSync(path.join(srcDir, "index.ts"), "utf8");
+    const packageManifest = JSON.parse(
+      readFileSync(path.join(srcDir, "..", "package.json"), "utf8"),
+    ) as { exports?: Record<string, string> };
+    const violations = [
+      ...(publicIndex.includes('from "./simulation/')
+        ? ["index.ts imports or exports simulation modules"]
+        : []),
+      ...(publicIndex.includes("simulateAiGame") ||
+      publicIndex.includes("runAiSelfplayTraceMining")
+        ? ["index.ts exposes match-simulation entrypoints"]
+        : []),
+      ...(packageManifest.exports?.["./simulation"] === "./src/simulation.ts"
+        ? []
+        : ["package.json misses the explicit ./simulation export"]),
+    ];
+
+    expect(violations).toEqual([]);
+  });
+
+  it("keeps the transitive live package graph free of legacy modules", () => {
+    const liveGraph = transitiveRuntimeFiles(path.join(srcDir, "index.ts"));
+    const violations = [...liveGraph]
+      .map(relativeFile)
+      .filter(
+        (file) => file === "legacy" || file.startsWith("legacy/"),
+      );
+
+    expect(violations).toEqual([]);
+  });
+
   it("keeps the public package facade away from legacy plan contracts", () => {
     const publicIndex = path.join(srcDir, "index.ts");
     const content = readFileSync(publicIndex, "utf8");
@@ -774,7 +719,7 @@ describe("AI module boundaries", () => {
     expect(violations).toEqual([]);
   });
 
-  it("keeps runtime, simulation and diagnostics off legacy planner compatibility facades", () => {
+  it("keeps removed planner compatibility facades out of active areas", () => {
     const checkedAreas = ["runtime", "simulation", "diagnostics", "evaluation"];
     const violations = checkedAreas.flatMap((area) =>
       productionFiles(area as Parameters<typeof productionFiles>[0]).flatMap(
@@ -791,7 +736,7 @@ describe("AI module boundaries", () => {
               violation(
                 file,
                 reference,
-                "use legacy/legacy-entrypoints or a focused non-legacy module",
+                "removed planner facades must not be recreated",
               ),
             ),
       ),
@@ -816,36 +761,6 @@ describe("AI module boundaries", () => {
           ? []
           : [
               `${relative} references semanticRuntimeScoreFromComponents outside score aggregation ownership`,
-            ];
-      });
-
-    expect(violations).toEqual([]);
-  });
-
-  it("keeps legacy action scoring restricted to fallback compositions", () => {
-    const allowedFiles = new Set([
-      "legacy/legacy-action-scorer.ts",
-      "legacy/legacy-action-scoring-composition.ts",
-      "legacy/legacy-entrypoints.ts",
-      "simulation/legacy-baseline-simulation-context.ts",
-    ]);
-    const guardedSymbols = [
-      "scoreActionsForLegacy",
-      "createLegacyActionScoringComposition",
-    ];
-    const violations = collectSourceFiles(srcDir)
-      .filter((file) => !file.endsWith(".test.ts"))
-      .flatMap((file) => {
-        const content = readFileSync(file, "utf8");
-        const referencesGuardedSymbol = guardedSymbols.some((symbol) =>
-          content.includes(symbol),
-        );
-        if (!referencesGuardedSymbol) return [];
-        const relative = relativeFile(file);
-        return allowedFiles.has(relative)
-          ? []
-          : [
-              `${relative} references legacy action scoring outside fallback composition ownership`,
             ];
       });
 
@@ -882,7 +797,6 @@ describe("AI module boundaries", () => {
       "ai-runtime-public-entrypoints.ts",
       "known-central-access-payoff.ts",
       "known-remote-access-payoff.ts",
-      "legacy/legacy-runner-access-payoff.ts",
       "runner-run-target-evaluation.ts",
       "plans/tactical-plan-runner-plans.ts",
     ]);
@@ -1168,6 +1082,7 @@ describe("AI module boundaries", () => {
           "runtime/semantic-runtime-plan-memory-exclusion.ts",
           "runtime/runner-economy-commitment-composition.ts",
           "runtime/runner-development-support-composition.ts",
+          "runtime/ai-live-runtime-composition.ts",
           "simulation/ai-runtime-simulation-composition.ts",
         ]),
       ],
@@ -1398,5 +1313,34 @@ function isRuntimeChooserImport(
     basename === "choose-ai-action" ||
     basename === "semantic-runtime" ||
     basename === "semantic-runtime-score-components"
+  );
+}
+
+function transitiveRuntimeFiles(entrypoint: string): Set<string> {
+  const visited = new Set<string>();
+  const pending = [entrypoint];
+  while (pending.length > 0) {
+    const file = pending.pop();
+    if (!file || visited.has(file)) continue;
+    visited.add(file);
+    for (const reference of importsFrom(file)) {
+      if (reference.isTypeOnly) continue;
+      const importedFile = resolveSourceImport(file, reference.importSource);
+      if (importedFile && !visited.has(importedFile)) pending.push(importedFile);
+    }
+  }
+  return visited;
+}
+
+function resolveSourceImport(
+  file: string,
+  importSource: string,
+): string | undefined {
+  if (!importSource.startsWith(".")) return undefined;
+  const base = path.resolve(path.dirname(file), importSource);
+  const candidates = [base, `${base}.ts`, path.join(base, "index.ts")];
+  return candidates.find(
+    (candidate) =>
+      candidate.startsWith(`${srcDir}${path.sep}`) && existsSync(candidate),
   );
 }
