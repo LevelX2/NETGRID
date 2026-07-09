@@ -2,6 +2,24 @@
 
 `docs/architecture/ai/` bündelt releaseübergreifende KI-Zielbilder, Schnittstellenregeln und side-sichere Architekturgrenzen. Diese Artefakte geben keine Karten frei und ändern keine Engine-Regeln; sie beschreiben, welche Informationen KI-Pfade nutzen dürfen und wie AI-Hints, Coaching, Simulation und Controller an LegalActions, PlayerViews und Redaction gebunden bleiben.
 
+## Führender Current State ab 2026-07-09
+
+- `@netgrid/ai` ist die Live-Fassade; Match-Simulation, Selfplay und Benchmarks
+  werden ausschließlich über `@netgrid/ai/simulation` importiert.
+- Der Live-Modulgraph ist transitiv frei von `legacy/`; das frühere
+  Legacy-Verzeichnis, Baseline-Selectoren, Runtime-Kill-Switches und
+  Baseline-Simulationsadapter sind gelöscht.
+- Der semantische Coverage-Fallback besitzt keine generische unbekannte
+  Kartenaktion mehr. Er nutzt eine enge sichere LegalAction-Allowlist und
+  bricht ungedeckte nichttriviale Aktionen sichtbar fail-closed ab.
+- Ausführbare Benchmarkprofile sind `random_legal_bot` und
+  `current_candidate`. Historische Shadow-, META-, Cutover- und Pilotdokumente
+  in der folgenden Artefaktliste sind Abschluss-/Entscheidungsevidence, kein
+  aktueller Runtimevertrag.
+- Technisches `ai_supported` bedeutet nur Deckzulassung. Semantische Coverage,
+  Scenario-Evidence, Play Strength und Default-/Random-Pool-Promotion bleiben
+  getrennte Gates.
+
 ## Enthaltene Artefakte
 
 - `ai-controller-spec.md`: Controller-Schnitt für KI-Entscheidungen.
@@ -42,6 +60,8 @@
 
 Konkrete Benchmarks, Regressionen und Diagnoseberichte liegen unter `docs/reviews/ai/`. Abgeschlossene Doctrine- und Deck-Legal-Approval-Spuren liegen unter `docs/releases/ai/`.
 
-## Lokaler Play-Strength-Pilot
+## Historischer lokaler Play-Strength-Pilot
 
-Der einzige gültige Env-Name für lokale Play-Strength-Pilot-Scopes ist `NETGRID_AI_PLAY_STRENGTH_PILOT`. Unterstützte Werte sind `basic_setup`, `runner_safe_access`, `corp_score_window` und `all`; mehrere Werte dürfen per Komma, Semikolon oder Whitespace getrennt werden. Der historische/falsche Name `AI_PLAY_STRENGTH_PILOT_SCOPE` wird nicht als Runtime-Vertrag gelesen.
+`NETGRID_AI_PLAY_STRENGTH_PILOT` ist kein Live-Runtime-Schalter mehr. Die
+früheren Scopes bleiben ausschließlich als historische Evaluations- und
+Testbegriffe erhalten; der Live-Chooser führt keinen Shadow-Pilot-Override aus.
