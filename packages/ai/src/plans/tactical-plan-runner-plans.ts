@@ -782,6 +782,7 @@ export function buildRunnerTacticalPlans(
 function runnerSuccessWindowActions(
   context: TacticalPlanBuildContext,
 ): LegalAction[] {
+  if (!context.input.playerView.run?.attackedServerId) return [];
   const legalActionsById = new Map(
     context.input.legalActions.map((action) => [action.actionId, action]),
   );

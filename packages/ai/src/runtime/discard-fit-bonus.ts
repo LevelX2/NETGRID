@@ -27,8 +27,12 @@ export function discardPlanFitBonus(
       bonus += 42;
     if (
       (plan === "pressure_hq" ||
-        plan === "pressure_rnd" ||
-        plan === "contest_remote") &&
+        plan === "pressure_rnd") &&
+      rolesMatch(roles, ["run_pressure", plan, "multiaccess", "breaker_"])
+    )
+      bonus += 36;
+    if (
+      plan === "contest_remote" &&
       rolesMatch(roles, [
         "run_pressure",
         plan,
@@ -99,24 +103,12 @@ export function discardStrategicFitBonus(
       bonus += 30;
     if (
       strategySet.has("runner.hq_pressure") &&
-      rolesMatch(roles, [
-        "pressure_hq",
-        "run_pressure",
-        "multiaccess",
-        "breaker_",
-        "economy",
-      ])
+      rolesMatch(roles, ["pressure_hq", "run_pressure", "multiaccess", "breaker_"])
     )
       bonus += 26;
     if (
       strategySet.has("runner.rnd_pressure") &&
-      rolesMatch(roles, [
-        "pressure_rnd",
-        "run_pressure",
-        "multiaccess",
-        "breaker_",
-        "economy",
-      ])
+      rolesMatch(roles, ["pressure_rnd", "run_pressure", "multiaccess", "breaker_"])
     )
       bonus += 26;
     if (

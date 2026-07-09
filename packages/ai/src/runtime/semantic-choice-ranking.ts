@@ -370,6 +370,9 @@ function runnerPlanOverrideIsHardInterrupt(
   ) {
     return true;
   }
+  if (semanticRuntimeChoiceHasAllowedLoanInterrupt(overrideChoice)) {
+    return true;
+  }
   if (overrideChoice.action.type !== "start_run") return false;
   if (mappedPlan.type === "runner.survival_defense") {
     return semanticRuntimeChoiceHasAnyScoreComponent(overrideChoice, [
@@ -381,6 +384,17 @@ function runnerPlanOverrideIsHardInterrupt(
     "runner_rnd_fresh_memory",
     "runner_goal_fit_tactical_goal_run_target",
   ]);
+}
+
+function semanticRuntimeChoiceHasAllowedLoanInterrupt(
+  choice: SemanticRuntimeChoice,
+): boolean {
+  return choice.scoreBreakdown.some(
+    (component) =>
+      component.key === "runner_loan_liability_assessment" &&
+      typeof component.reason === "string" &&
+      component.reason.includes("why_loan_allowed_despite_risk:"),
+  );
 }
 
 function runnerEconomyCommitmentCanInterruptPlan(

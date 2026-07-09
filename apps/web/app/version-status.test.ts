@@ -11,10 +11,15 @@ describe("web client release status", () => {
 
   it("uses the match end state to suppress transient active-match overlays", () => {
     const pageSource = readFileSync(new URL("./page.tsx", import.meta.url), "utf8");
+    const normalizedPageSource = pageSource.replace(/\s+/g, " ");
 
     expect(pageSource).toContain("const matchEnded = Boolean(");
-    expect(pageSource).toContain("const showAccessReveal = Boolean(accessReveal && !matchEnded");
-    expect(pageSource).toContain("const showFloatingActionPanel = Boolean(activeMatchIsGame && !matchEnded");
-    expect(pageSource).toContain("{activeMatchIsGame && !matchEnded && activeView?.run ? (");
+    expect(normalizedPageSource).toContain(
+      "const showAccessReveal = Boolean( accessReveal && !matchEnded",
+    );
+    expect(normalizedPageSource).toContain(
+      "const showFloatingActionPanel = Boolean( activeMatchIsGame && !matchEnded",
+    );
+    expect(normalizedPageSource).toContain("{activeMatchIsGame && !matchEnded && activeView?.run ? (");
   });
 });

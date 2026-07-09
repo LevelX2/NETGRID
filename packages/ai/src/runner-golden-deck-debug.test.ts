@@ -184,7 +184,8 @@ describe("Runner Golden Deck strategy and debug", () => {
     );
     expect(tacticalDebug).toContain("selected_plan:");
     expect(tacticalDebug).toContain("mapped_legal_actions:run-rd");
-    expect(tacticalDebug).toContain("why_not_other_plan:");
+    expect(tacticalDebug).toContain("why_this_action:");
+    expect(tacticalDebug).toContain("plan_rank|rank=1");
     expect(debugText).not.toMatch(
       /local_realistic_runner_blink_pressure_rig_snapshot_v1|onr_v1_|Blink|cardInstances|privatePayload|fullGameState/i,
     );

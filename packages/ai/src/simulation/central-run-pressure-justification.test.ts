@@ -20,7 +20,7 @@ function reasonsForRoles(roles: string[]): string[] {
     false,
     {
       assessKnownRezzedIcePath: () =>
-        ({ blocked: false, visibleBreakCost: 0 }) as never,
+        ({ blocked: false, visibleBreakCost: 0, creditsAfterPath: 5 }) as never,
       recentCentralRunSameTargetWithoutRefresh: () => false,
       rolesForCardId: () => roles,
       runnerCreditReserveTargetForInput: () => 0,

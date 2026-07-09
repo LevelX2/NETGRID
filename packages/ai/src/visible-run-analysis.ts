@@ -378,10 +378,15 @@ function bestAccessPreservingPayment(
     });
   }
   const bestPayment = paymentOptions.sort(
-    (left, right) =>
-      Number(right.affordable) - Number(left.affordable) ||
-      left.cashSpent - right.cashSpent ||
-      left.cost - right.cost,
+    (left, right) => {
+      const affordabilityDelta =
+        Number(right.affordable) - Number(left.affordable);
+      if (affordabilityDelta !== 0) return affordabilityDelta;
+      if (!left.affordable && !right.affordable) {
+        return left.cost - right.cost || left.cashSpent - right.cashSpent;
+      }
+      return left.cashSpent - right.cashSpent || left.cost - right.cost;
+    },
   )[0];
   return bestPayment ?? projectGeneralCreditPayment(budget, payCost);
 }

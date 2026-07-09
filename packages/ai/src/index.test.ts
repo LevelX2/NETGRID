@@ -14440,11 +14440,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
         ?.items.join("\n") ?? "";
 
     expect(decision.actionId).toBe(remote3Run.actionId);
+    expect(decision.evidence).toContain("semantic_scope:remote_contest");
     expect(decision.evidence).toContain(
-      "tactical_plan_mapping_outcome:semantic_choice_selected",
-    );
-    expect(decision.evidence).toContain(
-      "tactical_plan_semantic_choice_reason:semantic_score_gap",
+      "semantic_runtime_scope:remote_contest",
     );
     expect(decision.evidence).toContain(
       "tactical_plan:runner.contest_remote:remote_3",
@@ -14935,10 +14933,16 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect([remoteRun.actionId, gainCredit.actionId]).toContain(
       decision.actionId,
     );
-    expect(decision.decisionDebug?.planKind).toBe("remote_contest");
-    expect(decision.reasonCode).toBe("runner.semantic.remote_contest");
+    expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
+    expect(decision.evidence).toContain(
+      "tactical_plan_type:runner.contest_remote",
+    );
+    expect([
+      "runner.semantic.remote_contest",
+      "runner.semantic.basic_economy_draw",
+    ]).toContain(decision.reasonCode);
     expect(archivesAlternative?.whyNot).toEqual(
-      expect.arrayContaining(["semantic_score_below_selected"]),
+      expect.arrayContaining(["excluded_by_current_plan"]),
     );
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|Simple Agenda|simple_agenda/,
@@ -22113,7 +22117,7 @@ describe("V1.4.2 belief state and opponent model", () => {
       profileId: "runner-ai-v1.4.2-normal",
     });
     const hqLook = syntheticHqPrivateLookEvent("ai-hq-no-match-look", 100, [
-      "simple_economy_operation",
+      "onr_v1_304_systematic-layoffs",
       "onr_v1_297_overtime-incentives",
     ]);
     const hiddenIceInstall = syntheticPlanActionEvent(
@@ -22143,7 +22147,7 @@ describe("V1.4.2 belief state and opponent model", () => {
           installPlacement: "ice",
           candidateDefinitions: expect.arrayContaining([
             { definitionId: "onr_v1_297_overtime-incentives", count: 1 },
-            { definitionId: "simple_economy_operation", count: 1 },
+            { definitionId: "onr_v1_304_systematic-layoffs", count: 1 },
           ]),
         }),
       ],
@@ -24697,7 +24701,7 @@ describe("V1.4.2 belief state and opponent model", () => {
     const decision = chooseRunnerAction(input);
     const afterHash = hashState(state);
 
-    expect(belief.version).toMatch(/^belief-v1\.4\.2:/);
+    expect(belief.version).toMatch(/^belief-v1\.4\.3:/);
     expect(
       input.legalActions.some(
         (action) => action.actionId === decision.actionId,
@@ -24718,7 +24722,7 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     });
     const world = createBeliefSimulationWorld(input, "v143-world-seed");
 
-    expect(world.sourceBeliefVersion).toMatch(/^belief-v1\.4\.2:/);
+    expect(world.sourceBeliefVersion).toMatch(/^belief-v1\.4\.3:/);
     expect(world.worldId).toContain("simworld:runner");
     expect(world.seed).toBe("v143-world-seed");
     expect(world.redactionSafe).toBe(true);

@@ -1,5 +1,4 @@
 import type { VisibleCard } from "@netgrid/shared";
-import { evaluateKnownCentralAccessPayoff } from "../known-central-access-payoff";
 import {
   runnerPressureProbeTargetAllowed,
   runnerRunTargetHighPayoff,
@@ -34,10 +33,7 @@ export function runnerMeaningfulRunOpportunityAvailable(
     );
     if (isCentralServer(serverId)) {
       if ((server?.ice.length ?? 0) > 0) return false;
-      if (
-        evaluateKnownCentralAccessPayoff(context.input, serverId)
-          .knownNoCurrentPayoff
-      ) {
+      if (centralRunEvaluationKnownNoCurrentPayoff(context, serverId)) {
         return false;
       }
       if (serverId === "rd") return true;
@@ -55,6 +51,17 @@ export function runnerMeaningfulRunOpportunityAvailable(
       ),
     );
   });
+}
+
+function centralRunEvaluationKnownNoCurrentPayoff(
+  context: TacticalPlanBuildContext,
+  serverId: string,
+): boolean {
+  return (context.runnerRunTargetEvaluations ?? []).some(
+    (evaluation) =>
+      evaluation.targetServerId === serverId &&
+      evaluation.knownAccessState === "known_no_current_payoff",
+  );
 }
 
 function remoteRootHasImmediateRunPayoff(

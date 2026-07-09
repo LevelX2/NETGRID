@@ -842,31 +842,32 @@ function hqHiddenInstallDepartureMemory(
     0,
     handCountBeforeDeparture - knownCards.length,
   );
-  if (placement !== "unknown" && matchingCandidateEntries.length === 0) {
-    const candidateGroup =
-      unknownCandidateCount > 0
-        ? {
-            groupId: `${event.eventId}:hidden_install:${placement}:${event.serverId ?? "unknown"}`,
-            reason: `hidden_${placement}_install_unknown_candidates`,
-            sourceEventId: event.eventId,
-            ...(event.serverId ? { serverId: event.serverId } : {}),
-            installPlacement: placement,
-            candidateDefinitions: [],
-            candidateCount: 0,
-            unknownCandidateCount,
-            departureCount: 1,
-            basis: [
-              `install_placement:${placement}`,
-              ...(event.serverId ? [`server:${event.serverId}`] : []),
-              "known_candidates:0",
-              `unknown_candidates:${unknownCandidateCount}`,
-              "known_cards_do_not_match_install_placement",
-            ],
-          }
-        : undefined;
+  if (
+    placement !== "unknown" &&
+    matchingCandidateEntries.length === 0 &&
+    unknownCandidateCount > 0
+  ) {
+    const candidateGroup = {
+      groupId: `${event.eventId}:hidden_install:${placement}:${event.serverId ?? "unknown"}`,
+      reason: `hidden_${placement}_install_unknown_candidates`,
+      sourceEventId: event.eventId,
+      ...(event.serverId ? { serverId: event.serverId } : {}),
+      installPlacement: placement,
+      candidateDefinitions: [],
+      candidateCount: 0,
+      unknownCandidateCount,
+      departureCount: 1,
+      basis: [
+        `install_placement:${placement}`,
+        ...(event.serverId ? [`server:${event.serverId}`] : []),
+        "known_candidates:0",
+        `unknown_candidates:${unknownCandidateCount}`,
+        "known_cards_do_not_match_install_placement",
+      ],
+    };
     return {
       safeEntries: knownCards.slice(),
-      ...(candidateGroup ? { candidateGroup } : {}),
+      candidateGroup,
     };
   }
   const useAllKnownAsFallback = matchingCandidateEntries.length === 0;

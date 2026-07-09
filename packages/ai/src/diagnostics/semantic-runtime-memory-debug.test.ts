@@ -20,7 +20,7 @@ describe("semanticRuntimeMemoryDebug", () => {
 
     const debug = semanticRuntimeMemoryDebug(input);
 
-    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.2:/);
+    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.3:/);
     expect(debug.items).toContain("own_hand_count:1");
     expect(debug.items).toContain("own_hand_current_legal_actions:1");
     expect(debug.items).toContain(
@@ -88,7 +88,7 @@ describe("semanticRuntimeMemoryDebug", () => {
   it("projects corp opponent pressure memory items separately", () => {
     const debug = semanticRuntimeMemoryDebug(aiInput("corp", []));
 
-    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.2:/);
+    expect(debug.memoryVersion).toMatch(/^belief-v1\.4\.3:/);
     expect(debug.items).toContain("runner_runs:0");
     expect(debug.items).toContain("runner_remote_runs:0");
     expect(debug.items).toContain("runner_central_runs:0");

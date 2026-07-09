@@ -122,6 +122,12 @@ function runnerInputWithKnownWallNeed(
               title: "Known Wall",
               subtypes: ["Wall"],
               rezzed: true,
+              effectiveRunQuote: {
+                iceInstanceId: "wall-ice",
+                iceDefinitionId: "wall-ice",
+                effectiveStrength: 0,
+                subroutines: [{ id: "wall-ice-etr", type: "end_the_run" }],
+              },
             }),
           ],
           root: [],

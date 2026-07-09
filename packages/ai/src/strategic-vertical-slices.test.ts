@@ -102,7 +102,9 @@ describe("Deck strategy runtime vertical slices", () => {
     expect(firstMemory?.planId).toBe("runner.opportunistic_central_run:rd");
     expect(second.evidence).toEqual(
       expect.arrayContaining([
-        "tactical_plan_memory_status:satisfied",
+        "runner_run_plan_memory:created",
+        "runner_run_plan_target:rd",
+        "runner_run_plan_revalidation:valid",
       ]),
     );
   });
