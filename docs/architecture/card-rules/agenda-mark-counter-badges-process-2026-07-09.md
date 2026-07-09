@@ -1,6 +1,6 @@
 # Agenda Mark Counter Badges Prozess
 
-Status: aktiv
+Status: integriert
 
 Quelle/Vorgabe: Nach dem Project-Venice-Fix wurde geprüft, welche Agenda-bezogenen Mark-Counter noch ohne verständliche PlayerView-/UI-Erklärung bleiben. Gefunden wurden Project Zurich als Score-Area-Agenda-Mark-Counter und Ice Transmutation als Agenda-Effekt, der einen Mark-Counter auf gewähltes ICE legt.
 
@@ -15,7 +15,7 @@ Project Zurich und Ice Transmutation zeigen keine generischen `Mark-Counter` meh
 ## Annahmen
 
 - Project Zurich speichert den Overadvance-Credit-Wert weiter intern als `mark`, weil der bestehende Start-of-turn-Resolver darauf basiert.
-- Ice Transmutation legt weiterhin einen `mark` auf das gewählte ICE; die Erklärung erfolgt über eine spezifische PlayerView-ID statt über den generischen ICE-Mark-Fallback.
+- Ice Transmutation legt weiterhin einen `mark` auf das gewählte ICE; die Erklärung erfolgt über spezifische PlayerView-Metadaten, Badge-Text und Tooltip auf dem bestehenden `ice_mark_modifier`-Display-Key.
 - Project Venice und Corporate Retreat bleiben unverändert.
 - Die im Hauptworkspace vorhandenen ungetrackten Review-Dateien sind fremde Artefakte und bleiben unberührt.
 
@@ -48,8 +48,10 @@ Bei roten Tests wird eng am aktiven Paket debuggt. Wenn ein bestehender Test zei
 
 1. `prepared`: Worktree und Prozessartefakt existieren.
 2. `zurich-fixed`: Project Zurich hat spezifischen Score-Area-Badge und Tests.
-3. `transmutation-fixed`: Ice Transmutation hat spezifischen ICE-Badge und Tests.
+3. `transmutation-fixed`: Ice Transmutation hat erklärenden ICE-Badge und Tests.
 4. `integrated`: Arbeitsbranch ist lokal nach `main` gemerged und Worktree entfernt.
+
+Aktueller Zustand: `integrated`.
 
 ## Paketfolge
 
@@ -112,12 +114,12 @@ Checks:
 - `git diff --check`
 
 Done-Gate:
-- PlayerView-ID ist Ice-Transmutation-spezifisch.
-- Tooltip erklärt +1 Stärke und Subroutine-Wiederholung.
+- PlayerView-ID bleibt `ice_mark_modifier`; Label, Badge-Text und Tooltip erklären die Ice-Transmutation-Wirkung.
+- Tooltip erklärt Stärke-Bonus und Subroutine-Wiederholung auch bei mehreren Countern.
 - Stärkeberechnung bleibt unverändert.
 
 Commit-Message:
-- `fix(ui): label ice transmutation mark counter`
+- `fix(ui): explain ice transmutation counter`
 
 ### AMB-4 Finale Integration
 
