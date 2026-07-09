@@ -1500,8 +1500,8 @@ describe("MVP 0.2 multiplayer service", () => {
     const created = await service.createMatch({
       hostSide: "runner",
       seed: "deck-v06-match",
-      runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6",
-      corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
+      participantADecks: { runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6", corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6" },
+      participantBDecks: { runnerDeckSnapshotId: "demo_runner_004_snapshot_v0_6", corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6" }
     });
     const stored = await service.loadForTest(created.matchId);
 
@@ -1522,8 +1522,8 @@ describe("MVP 0.2 multiplayer service", () => {
       service.createMatch({
         hostSide: "runner",
         seed: "deck-v06-invalid",
-        runnerDeckSnapshot: invalidSnapshot,
-        corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6"
+        participantADecks: { runnerDeckSnapshot: invalidSnapshot, corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6" },
+        participantBDecks: { runnerDeckSnapshot: invalidSnapshot, corpDeckSnapshotId: "demo_corp_004_snapshot_v0_6" }
       })
     ).rejects.toThrow("deck_snapshot_invalid");
   });
@@ -1631,8 +1631,8 @@ describe("MVP 0.2 multiplayer service", () => {
     const created = await service.createMatch({
       hostSide: "runner",
       seed: "onr-local-server-match",
-      runnerDeckSnapshot: runnerSnapshot,
-      corpDeckSnapshot: corpSnapshot,
+      participantADecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
+      participantBDecks: { runnerDeckSnapshot: runnerSnapshot, corpDeckSnapshot: corpSnapshot },
       settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
     });
     const stored = await service.loadForTest(created.matchId);
@@ -3008,8 +3008,8 @@ describe("MVP 0.2 multiplayer service", () => {
     const created = await service.createMatch({
       hostSide: "corp",
       seed: "mp-v123-mit-west-tier",
-      runnerDeckSnapshotId: "demo_runner_123_snapshot_v1_2_3",
-      corpDeckSnapshotId: "demo_corp_123_snapshot_v1_2_3",
+      participantADecks: { runnerDeckSnapshotId: "demo_runner_123_snapshot_v1_2_3", corpDeckSnapshotId: "demo_corp_123_snapshot_v1_2_3" },
+      participantBDecks: { runnerDeckSnapshotId: "demo_runner_123_snapshot_v1_2_3", corpDeckSnapshotId: "demo_corp_123_snapshot_v1_2_3" },
       settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
     });
     expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
@@ -3082,8 +3082,8 @@ describe("MVP 0.2 multiplayer service", () => {
     const created = await service.createMatch({
       hostSide: "corp",
       seed: "mp-v130-private-local",
-      runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
-      corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0",
+      participantADecks: { runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0", corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" },
+      participantBDecks: { runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0", corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" },
       settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
     });
 
@@ -3104,8 +3104,8 @@ describe("MVP 0.2 multiplayer service", () => {
       service.createMatch({
         hostSide: "runner",
         seed: "mp-v130-invalid-runner",
-        runnerDeckSnapshot: invalidRunner,
-        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
+        participantADecks: { runnerDeckSnapshot: invalidRunner, corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" },
+        participantBDecks: { runnerDeckSnapshot: invalidRunner, corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" }
       })
     ).rejects.toThrow("deck_snapshot_invalid");
 
@@ -3143,8 +3143,8 @@ describe("MVP 0.2 multiplayer service", () => {
       service.createMatch({
         hostSide: "corp",
         seed: "mp-proteus-blocked-originalset",
-        runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
-        corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        participantADecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
+        participantBDecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
         settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset" }
       })
     ).rejects.toThrow("deck_snapshot_card_pool_mismatch");
@@ -3153,8 +3153,8 @@ describe("MVP 0.2 multiplayer service", () => {
       service.createMatch({
         hostSide: "corp",
         seed: "mp-proteus-blocked-classic-only",
-        runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
-        corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+        participantADecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
+        participantBDecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
         settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_classic" }
       })
     ).rejects.toThrow("deck_snapshot_card_pool_mismatch");
@@ -3169,8 +3169,8 @@ describe("MVP 0.2 multiplayer service", () => {
     const created = await service.createMatch({
       hostSide: "corp",
       seed: "mp-proteus-allowed",
-      runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
-      corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+      participantADecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
+      participantBDecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
       settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_proteus" }
     });
 
@@ -3183,8 +3183,8 @@ describe("MVP 0.2 multiplayer service", () => {
     const combinedCreated = await service.createMatch({
       hostSide: "corp",
       seed: "mp-classic-proteus-allowed",
-      runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
-      corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+      participantADecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
+      participantBDecks: { runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25", corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25" },
       settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_classic_proteus" }
     });
     expect((await service.loadForTest(combinedCreated.matchId))?.match.settings.cardPool).toBe("originalset_classic_proteus");
@@ -5723,8 +5723,8 @@ describe("MVP 0.2 multiplayer service", () => {
       hostSide: "corp",
       seed: "server-runner-ai-krash-filter-access",
       runnerDifficulty: "normal",
-      runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
-      corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
+      participantADecks: { runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0", corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" },
+      participantBDecks: { runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0", corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0" }
     });
     const record = await storage.load(created.matchId);
     if (!record) throw new Error("Missing stored match");

@@ -138,8 +138,17 @@ integrate_main -> blocker
    grün. Das bereits auf `main` rote Engine-Architektur-Gate meldet weiterhin
    drei kartenspezifische IDs in `game/view/card-view.ts`; dieser getrennte
    Befund wird nicht durch eine Baselineänderung kaschiert.
-6. `PCS-5 Fachliche Web-/Server-/AI-Modulschnitte` – `in_progress`
-7. `PCS-6 Teststufen, Sharding und Package-Boundaries` – `pending`
+6. `PCS-5 Fachliche Web-/Server-/AI-Modulschnitte` – `done`; der aktuelle
+   Deckrequest-Vertrag liegt in `apps/server/src/deck-request.ts` statt im
+   HTTP-Monolith. Create-Match akzeptiert nur noch participant-scoped
+   Deckpaare; die alte top-level Spiegelung und der
+   `legacyParticipantDeckPair`-Fallback sind entfernt. AI-vs-AI verwendet
+   explizit Participant A. Server-Typecheck sowie acht Testdateien mit 138
+   Tests sind grün. Breite Chronicle-/Page- oder Corp-Score-Umschichtungen
+   werden bewusst nicht mit dem noch uncommitteten parallelen Engine-Teststand
+   gekoppelt; ihre nächsten Schnitte werden durch die Boundary-/Testbudgets
+   aus PCS-6 abgesichert.
+7. `PCS-6 Teststufen, Sharding und Package-Boundaries` – `in_progress`
 8. `PCS-7 Asset- und Worktree-Hygiene` – `pending`
 9. `PCS-8 Main-Abgleich, Full Gate und Integration` – `pending`
 

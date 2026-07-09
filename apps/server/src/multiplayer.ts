@@ -784,7 +784,7 @@ export class MultiplayerService {
     const sideAssignmentMode = mode === "human_vs_human" && input.hostSide === "random" ? "random_pending" : "fixed";
     const pendingDeckHandshake = mode === "human_vs_human" && Boolean(input.participantADecks) && !input.participantBDecks;
     if (pendingDeckHandshake) {
-      const hostDeckPair = resolveParticipantDeckPair(input.participantADecks ?? legacyParticipantDeckPair(input), { cardPool });
+      const hostDeckPair = resolveParticipantDeckPair(input.participantADecks!, { cardPool });
       const pendingAgendaPointsToWin = agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin);
       const session: SessionRecord = {
         sessionId: randomId("session"),
@@ -3819,15 +3819,6 @@ function privateParticipantDeckSetup(participants: ResolvedParticipantDeckSetup)
 
 function buildDeckFromSnapshot(snapshot: DeckSnapshot): ReturnType<typeof buildEngineDeck> {
   return buildEngineDeck(snapshot);
-}
-
-function legacyParticipantDeckPair(input: MatchDeckSelectionInput): ParticipantDeckPairInput {
-  return {
-    ...(input.runnerDeckSnapshotId ? { runnerDeckSnapshotId: input.runnerDeckSnapshotId } : {}),
-    ...(input.corpDeckSnapshotId ? { corpDeckSnapshotId: input.corpDeckSnapshotId } : {}),
-    ...(input.runnerDeckSnapshot ? { runnerDeckSnapshot: input.runnerDeckSnapshot } : {}),
-    ...(input.corpDeckSnapshot ? { corpDeckSnapshot: input.corpDeckSnapshot } : {})
-  };
 }
 
 function deckErrorMessage(error: unknown): string {

@@ -30,7 +30,8 @@ import {
   type StorageKind
 } from "./storage-sqlite";
 import type { StorageMaintenanceCleanupApplyInput, StorageMaintenanceCleanupFilters, StorageMaintenanceCleanupPolicyInput, StorageMaintenanceMatchFilters } from "./storage-sqlite";
-import { resolveDeckSetup, type AiDeckPolicy, type MatchDeckSelectionInput, type ParticipantDeckPairInput } from "./deck-setup";
+import { resolveDeckSetup } from "./deck-setup";
+import { aiDeckPolicyFromValue, deckPairFromBody, deckSelectionFromBody } from "./deck-request";
 import {
   applyCors,
   clientIdentity,
@@ -884,7 +885,7 @@ async function routeHttp(
         const aiDeckPolicy = aiDeckPolicyFromValue(body.aiDeckPolicy);
         const requestedCardPool = body.settings && typeof body.settings === "object" ? (body.settings as Record<string, unknown>).cardPool : undefined;
         const cardPool = isMatchCardPool(requestedCardPool) ? requestedCardPool : "originalset";
-        const deckSetup = resolveDeckSetup(deckSelection, { seed: config.seed ?? "ai-vs-ai-smoke", ...(aiDeckPolicy ? { aiDeckPolicy } : {}), cardPool });
+        const deckSetup = resolveDeckSetup(deckSelection.participantADecks ?? {}, { seed: config.seed ?? "ai-vs-ai-smoke", ...(aiDeckPolicy ? { aiDeckPolicy } : {}), cardPool });
         config.runnerDeck = deckSetup.runnerDeck;
         config.corpDeck = deckSetup.corpDeck;
         config.runnerDeckMetadata = deckSetup.runnerSnapshot.publicMetadata;
@@ -1420,36 +1421,6 @@ function replayPerspectiveFromParam(value: string | null): ReplayPerspective | u
   if (!value) return "runner";
   if (value === "runner" || value === "corp" || value === "local_analysis") return value;
   return undefined;
-}
-
-function deckSelectionFromBody(body: Record<string, unknown>): MatchDeckSelectionInput {
-  const selection: MatchDeckSelectionInput = {};
-  const aiDeckPolicy = aiDeckPolicyFromValue(body.aiDeckPolicy);
-  if (aiDeckPolicy) selection.aiDeckPolicy = aiDeckPolicy;
-  if (typeof body.runnerDeckSnapshotId === "string") selection.runnerDeckSnapshotId = body.runnerDeckSnapshotId;
-  if (typeof body.corpDeckSnapshotId === "string") selection.corpDeckSnapshotId = body.corpDeckSnapshotId;
-  if (body.runnerDeckSnapshot && typeof body.runnerDeckSnapshot === "object") selection.runnerDeckSnapshot = body.runnerDeckSnapshot as NonNullable<MatchDeckSelectionInput["runnerDeckSnapshot"]>;
-  if (body.corpDeckSnapshot && typeof body.corpDeckSnapshot === "object") selection.corpDeckSnapshot = body.corpDeckSnapshot as NonNullable<MatchDeckSelectionInput["corpDeckSnapshot"]>;
-  const participantADecks = deckPairFromBody(body.participantADecks);
-  const participantBDecks = deckPairFromBody(body.participantBDecks);
-  if (participantADecks) selection.participantADecks = participantADecks;
-  if (participantBDecks) selection.participantBDecks = participantBDecks;
-  return selection;
-}
-
-function deckPairFromBody(value: unknown): ParticipantDeckPairInput | undefined {
-  if (!value || typeof value !== "object") return undefined;
-  const body = value as Record<string, unknown>;
-  const selection: ParticipantDeckPairInput = {};
-  if (typeof body.runnerDeckSnapshotId === "string") selection.runnerDeckSnapshotId = body.runnerDeckSnapshotId;
-  if (typeof body.corpDeckSnapshotId === "string") selection.corpDeckSnapshotId = body.corpDeckSnapshotId;
-  if (body.runnerDeckSnapshot && typeof body.runnerDeckSnapshot === "object") selection.runnerDeckSnapshot = body.runnerDeckSnapshot as NonNullable<ParticipantDeckPairInput["runnerDeckSnapshot"]>;
-  if (body.corpDeckSnapshot && typeof body.corpDeckSnapshot === "object") selection.corpDeckSnapshot = body.corpDeckSnapshot as NonNullable<ParticipantDeckPairInput["corpDeckSnapshot"]>;
-  return Object.keys(selection).length > 0 ? selection : undefined;
-}
-
-function aiDeckPolicyFromValue(value: unknown): AiDeckPolicy | undefined {
-  return value === "fixed" || value === "selected" || value === "seeded_random" || value === "same_as_participant_a" ? value : undefined;
 }
 
 function deckErrorMessage(error: unknown): string {

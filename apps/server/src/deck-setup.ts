@@ -33,10 +33,6 @@ export type ParticipantDeckPairInput = {
 };
 
 export type MatchDeckSelectionInput = {
-  runnerDeckSnapshotId?: string;
-  corpDeckSnapshotId?: string;
-  runnerDeckSnapshot?: DeckSnapshot;
-  corpDeckSnapshot?: DeckSnapshot;
   participantADecks?: ParticipantDeckPairInput;
   participantBDecks?: ParticipantDeckPairInput;
   aiDeckPolicy?: AiDeckPolicy;
@@ -81,7 +77,7 @@ const aiDeckPool = aiDeckPoolData.entries as Array<{
 }>;
 
 export function resolveDeckSetup(
-  input: MatchDeckSelectionInput = {},
+  input: ParticipantDeckPairInput = {},
   options: {
     seed?: string;
     aiDeckPolicy?: AiDeckPolicy;
@@ -129,21 +125,7 @@ export function resolveParticipantDeckSetup(
   } = { seed: "default" },
 ): ResolvedParticipantDeckSetup {
   const policy = options.aiDeckPolicy ?? input.aiDeckPolicy ?? "selected";
-  const legacyPair: ParticipantDeckPairInput = {
-    ...(input.runnerDeckSnapshotId
-      ? { runnerDeckSnapshotId: input.runnerDeckSnapshotId }
-      : {}),
-    ...(input.corpDeckSnapshotId
-      ? { corpDeckSnapshotId: input.corpDeckSnapshotId }
-      : {}),
-    ...(input.runnerDeckSnapshot
-      ? { runnerDeckSnapshot: input.runnerDeckSnapshot }
-      : {}),
-    ...(input.corpDeckSnapshot
-      ? { corpDeckSnapshot: input.corpDeckSnapshot }
-      : {}),
-  };
-  const participantAInput = input.participantADecks ?? legacyPair;
+  const participantAInput = input.participantADecks ?? {};
   const setup: ResolvedParticipantDeckSetup = {
     player_a: resolveParticipantPair(
       deckInputForPlayer(
@@ -160,7 +142,7 @@ export function resolveParticipantDeckSetup(
     player_b: resolveParticipantPair(
       deckInputForPlayer(
         "player_b",
-        input.participantBDecks ?? legacyPair,
+        input.participantBDecks ?? {},
         participantAInput,
         options.seed,
         options.aiPlayer,
