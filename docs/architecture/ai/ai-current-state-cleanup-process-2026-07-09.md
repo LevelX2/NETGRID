@@ -2,7 +2,7 @@
 
 ## Status
 
-`in_progress`
+`done`
 
 ## Quelle/Vorgabe
 
@@ -200,11 +200,12 @@ integrate_main -> blocker
   Der serielle und der vierfach parallele ungeteilte Volltest überschritten
   jeweils das 60-Sekunden-Fenster; derselbe vollständige Bestand wurde deshalb
   in drei disjunkten Shards ausgeführt: 287 Testdateien und 1.813 Tests grün.
-- `AICSC-8`: `in_progress`; Current-State-README, Projektstatus, Monatslog und
-  Final Review sind aktualisiert. `check:ai:full`, AI-/Server-/Web-Typecheck,
-  die 287 AI-Testdateien mit 1.813 Tests und `git diff --check` sind grün. Es
-  fehlen nur noch aktueller Main-Abgleich, lokale Main-Integration und
-  Worktree-Entfernung.
+- `AICSC-8`: `done`; Current-State-README, Projektstatus, Monatslog und Final
+  Review sind aktualisiert. `check:ai:full`, AI-/Server-/Web-Typecheck, die 287
+  AI-Testdateien mit 1.813 Tests und `git diff --check` sind grün. Der aktuelle
+  `main` war direkter Vorfahr des Arbeitsbranches; alle Paketcommits wurden per
+  Fast-Forward lokal nach `main` integriert. Der Arbeits-Worktree wird nach
+  diesem Abschlusscommit entfernt.
 
 ## Paketdetails
 
