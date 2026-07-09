@@ -1,7 +1,7 @@
 import profilesData from "../../../data/decks/deck-format-profiles-0.8.json";
 import profilesData130 from "../../../data/decks/deck-format-profiles-1.3.0.json";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.8.json";
-import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
+import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.1.0.json";
 import { createHash } from "node:crypto";
 import {
   aiSupportStageReady,
@@ -89,7 +89,12 @@ export function resolveDeckSetup(
   } = {},
 ): ResolvedDeckSetup {
   if (options.aiDeckPolicy === "fixed")
-    return pairToDeckSetup(resolveParticipantPair({}, options.cardPool));
+    return pairToDeckSetup(
+      resolveParticipantPair(
+        fixedDeckInput(options.cardPool),
+        options.cardPool,
+      ),
+    );
   if (options.aiDeckPolicy === "seeded_random") {
     return pairToDeckSetup(
       resolveParticipantPair(
@@ -241,7 +246,7 @@ function deckInputForPlayer(
   cardPool: MatchCardPool | undefined,
 ): ParticipantDeckPairInput {
   if (player !== aiPlayer) return selected;
-  if (policy === "fixed") return {};
+  if (policy === "fixed") return fixedDeckInput(cardPool);
   if (policy === "same_as_participant_a") return participantAInput;
   if (policy === "seeded_random") {
     return {
@@ -363,7 +368,8 @@ function deterministicSnapshotId(
         aiDeckPool.some(
           (entry) =>
             entry.side === side &&
-            entry.snapshotId === candidate.deckSnapshotId,
+            entry.snapshotId === candidate.deckSnapshotId &&
+            poolEntryAllowedForCardPool(entry, cardPool ?? "originalset"),
         ) &&
         snapshotUsesAiSupportedCards(candidate),
     )
@@ -376,6 +382,39 @@ function deterministicSnapshotId(
   const digest = createHash("sha256").update(`${seed}:${salt}`).digest();
   const value = digest.readUInt32BE(0);
   return candidates[value % candidates.length]!;
+}
+
+function fixedDeckInput(
+  cardPool: MatchCardPool | undefined,
+): ParticipantDeckPairInput {
+  const effectivePool = cardPool ?? "originalset";
+  const fixedTag =
+    effectivePool === "originalset_classic"
+      ? "fixed_classic"
+      : effectivePool === "originalset_proteus"
+        ? "fixed_proteus"
+        : effectivePool === "originalset_classic_proteus"
+          ? "fixed_combined"
+          : "fixed_originalset";
+  const snapshotIdFor = (side: "runner" | "corp") =>
+    aiDeckPool.find(
+      (entry) => entry.side === side && entry.tags.includes(fixedTag),
+    )?.snapshotId;
+  return {
+    runnerDeckSnapshotId: snapshotIdFor("runner") ?? DEFAULT_RUNNER_SNAPSHOT_ID,
+    corpDeckSnapshotId: snapshotIdFor("corp") ?? DEFAULT_CORP_SNAPSHOT_ID,
+  };
+}
+
+function poolEntryAllowedForCardPool(
+  entry: (typeof aiDeckPool)[number],
+  cardPool: MatchCardPool,
+): boolean {
+  if (cardPool === "originalset_proteus") return entry.tags.includes("proteus");
+  if (cardPool === "originalset_classic") return entry.tags.includes("classic");
+  if (cardPool === "originalset")
+    return !entry.tags.includes("proteus") && !entry.tags.includes("classic");
+  return true;
 }
 
 function snapshotUsesAiSupportedCards(snapshot: DeckSnapshot): boolean {

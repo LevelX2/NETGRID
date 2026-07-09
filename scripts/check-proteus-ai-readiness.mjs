@@ -17,7 +17,7 @@ const [
   readJson("data/manifests/proteus-card-support.json"),
   readJson("data/ai/ai-card-hints-active.json"),
   readJson("data/ai/ai-card-hints-compiled.json"),
-  readJson("data/ai/ai-deck-pool-1.0.1.json"),
+  readJson("data/ai/ai-deck-pool-1.1.0.json"),
   readJson("data/scenarios/proteus-ai-family-decision-smokes-v1.json"),
   readJson("data/ai/proteus-ai-selected-pilot-v1.json"),
 ]);

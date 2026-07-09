@@ -30,26 +30,100 @@ describe("AI deck readiness stages", () => {
     );
   });
 
-  it("keeps seeded random on approved pool entries before Proteus promotion", () => {
-    const setup = resolveParticipantDeckSetup(
+  it("uses Proteus snapshots reproducibly for seeded random in the Proteus pool", () => {
+    const options = {
+      seed: "proteus-seeded-after-promotion",
+      aiPlayer: "player_b" as const,
+      aiDeckPolicy: "seeded_random" as const,
+      cardPool: "originalset_proteus" as const,
+    };
+    const first = resolveParticipantDeckSetup({}, options);
+    const second = resolveParticipantDeckSetup({}, options);
+
+    expect(first.player_b.runnerSnapshot.deckSnapshotId).toBe(
+      second.player_b.runnerSnapshot.deckSnapshotId,
+    );
+    expect(first.player_b.corpSnapshot.deckSnapshotId).toBe(
+      second.player_b.corpSnapshot.deckSnapshotId,
+    );
+    for (const snapshot of [
+      first.player_b.runnerSnapshot,
+      first.player_b.corpSnapshot,
+    ]) {
+      expect(
+        snapshot.cards.some((entry) => entry.cardId.startsWith("onr_proteus_")),
+      ).toBe(true);
+    }
+  });
+
+  it.each([
+    ["originalset", "", false],
+    ["originalset_classic", "onr_classic_", true],
+    ["originalset_proteus", "onr_proteus_", true],
+    ["originalset_classic_proteus", "onr_proteus_", true],
+  ] as const)(
+    "uses pool-aware fixed defaults for %s",
+    (cardPool, expectedPrefix, expectsExtension) => {
+      const setup = resolveParticipantDeckSetup(
+        {},
+        {
+          seed: `fixed-${cardPool}`,
+          aiPlayer: "player_b",
+          aiDeckPolicy: "fixed",
+          cardPool,
+        },
+      );
+      const cards = [
+        ...setup.player_b.runnerSnapshot.cards,
+        ...setup.player_b.corpSnapshot.cards,
+      ];
+      expect(
+        cards.some(
+          (entry) =>
+            entry.cardId.startsWith("onr_classic_") ||
+            entry.cardId.startsWith("onr_proteus_"),
+        ),
+      ).toBe(expectsExtension);
+      if (expectedPrefix)
+        expect(
+          cards.some((entry) => entry.cardId.startsWith(expectedPrefix)),
+        ).toBe(true);
+    },
+  );
+
+  it("keeps seeded random within Originalset and combined pool boundaries", () => {
+    const original = resolveParticipantDeckSetup(
       {},
       {
-        seed: "proteus-seeded-before-promotion",
+        seed: "seeded-originalset-guard",
         aiPlayer: "player_b",
         aiDeckPolicy: "seeded_random",
-        cardPool: "originalset_proteus",
+        cardPool: "originalset",
       },
     );
-
+    const combined = resolveParticipantDeckSetup(
+      {},
+      {
+        seed: "seeded-classic-proteus-guard",
+        aiPlayer: "player_b",
+        aiDeckPolicy: "seeded_random",
+        cardPool: "originalset_classic_proteus",
+      },
+    );
     expect(
-      setup.player_b.runnerSnapshot.cards.some((entry) =>
-        entry.cardId.startsWith("onr_proteus_"),
+      [original.player_b.runnerSnapshot, original.player_b.corpSnapshot].some(
+        (snapshot) =>
+          snapshot.cards.some(
+            (entry) =>
+              entry.cardId.startsWith("onr_classic_") ||
+              entry.cardId.startsWith("onr_proteus_"),
+          ),
       ),
     ).toBe(false);
     expect(
-      setup.player_b.corpSnapshot.cards.some((entry) =>
-        entry.cardId.startsWith("onr_proteus_"),
+      [combined.player_b.runnerSnapshot, combined.player_b.corpSnapshot].every(
+        (snapshot) => snapshot.validation.ok,
       ),
-    ).toBe(false);
+    ).toBe(true);
   });
 });

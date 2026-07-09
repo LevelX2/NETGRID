@@ -5,7 +5,7 @@
     {
       "setId": "proteus",
       "technicalEligibilityStatus": "ai_supported",
-      "highestApprovedStage": "selected_ai_playtest_ready",
+      "highestApprovedStage": "default_pool_ready",
       "stages": {
         "hint_ready": {
           "ready": true,
@@ -16,8 +16,8 @@
           "reason": "Vier ausgewählte Proteus-KI-Decks bestehen die feste 16-Spiel-Seed-Matrix sowie LegalAction-, Replay-, Redaction- und Originalset-Kontrollgates."
         },
         "default_pool_ready": {
-          "ready": false,
-          "reason": "Familienbezogene Decision-Smokes, Pilotkalibrierung und versionierte KI-Deckpool-Promotion fehlen noch."
+          "ready": true,
+          "reason": "Vier qualifizierte Proteus-Snapshots sind im versionierten KI-Deckpool 1.1.0 für poolbewusste Fixed- und Seeded-Random-Auswahl freigegeben."
         }
       },
       "evidence": {
@@ -36,9 +36,9 @@
         "selectedPilotIllegalActionCount": 0,
         "selectedPilotReplayFailureCount": 0,
         "selectedPilotRedactionFailureCount": 0,
-        "aiDeckPoolSnapshotCount": 0
+        "aiDeckPoolSnapshotCount": 4
       },
-      "removalConditions": ["proteus_ai_deck_pool_promoted"]
+      "removalConditions": []
     }
   ]
 }

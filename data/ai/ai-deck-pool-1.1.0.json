@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "ai-deck-pool-v1.1.0",
+  "id": "ai-deck-pool-1.1.0",
+  "status": "proteus_pilot_promoted",
+  "description": "Versionierter KI-Deckpool für poolbewusste Fixed-Defaults und deterministische seeded_random Auswahl einschließlich qualifizierter Proteus-Pilotdecks.",
+  "qualificationEvidence": "data/ai/proteus-ai-selected-pilot-v1.json",
+  "entries": [
+    {
+      "snapshotId": "demo_runner_008_snapshot_v0_8",
+      "side": "runner",
+      "tags": [
+        "starter",
+        "runner_ai_safe",
+        "normal",
+        "series_safe",
+        "fixed_originalset"
+      ]
+    },
+    {
+      "snapshotId": "demo_corp_008_snapshot_v0_8",
+      "side": "corp",
+      "tags": [
+        "starter",
+        "corp_ai_safe",
+        "normal",
+        "series_safe",
+        "fixed_originalset"
+      ]
+    },
+    {
+      "snapshotId": "onr_origin_runner_ai_snapshot_v1",
+      "side": "runner",
+      "tags": ["onr_origin", "runner_ai_safe", "normal", "series_safe"]
+    },
+    {
+      "snapshotId": "onr_origin_corp_ai_snapshot_v1",
+      "side": "corp",
+      "tags": ["onr_origin", "corp_ai_safe", "normal", "series_safe"]
+    },
+    {
+      "snapshotId": "onr_origin_runner_ai_event_pressure_snapshot_v1",
+      "side": "runner",
+      "tags": ["onr_origin", "runner_ai_safe", "event_pressure", "series_safe"]
+    },
+    {
+      "snapshotId": "onr_origin_corp_ai_tag_ops_snapshot_v1",
+      "side": "corp",
+      "tags": ["onr_origin", "corp_ai_safe", "tag_ops_control", "series_safe"]
+    },
+    {
+      "snapshotId": "classic_runner_ai_snapshot_v1",
+      "side": "runner",
+      "tags": [
+        "classic",
+        "runner_ai_safe",
+        "normal",
+        "series_safe",
+        "fixed_classic"
+      ]
+    },
+    {
+      "snapshotId": "classic_corp_ai_snapshot_v1",
+      "side": "corp",
+      "tags": [
+        "classic",
+        "corp_ai_safe",
+        "normal",
+        "series_safe",
+        "fixed_classic"
+      ]
+    },
+    {
+      "snapshotId": "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+      "side": "runner",
+      "tags": [
+        "proteus",
+        "proteus_ai_qualified",
+        "runner_ai_safe",
+        "hq_virus_derez",
+        "series_safe",
+        "fixed_proteus",
+        "fixed_combined"
+      ]
+    },
+    {
+      "snapshotId": "proteus_runner_rd_bad_publicity_snapshot_v2026_05_25",
+      "side": "runner",
+      "tags": [
+        "proteus",
+        "proteus_ai_qualified",
+        "runner_ai_safe",
+        "rd_bad_publicity",
+        "series_safe"
+      ]
+    },
+    {
+      "snapshotId": "proteus_corp_region_fast_score_snapshot_v2026_05_25",
+      "side": "corp",
+      "tags": [
+        "proteus",
+        "proteus_ai_qualified",
+        "corp_ai_safe",
+        "region_fast_score",
+        "series_safe",
+        "fixed_proteus",
+        "fixed_combined"
+      ]
+    },
+    {
+      "snapshotId": "proteus_corp_antibody_tax_snapshot_v2026_05_25",
+      "side": "corp",
+      "tags": [
+        "proteus",
+        "proteus_ai_qualified",
+        "corp_ai_safe",
+        "antibody_tax",
+        "series_safe"
+      ]
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { tmpdir } from "node:os";
-import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
+import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.1.0.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import {
   createRuntimeCardsById,
@@ -213,20 +213,29 @@ function runnerLegacyDecision(input: AiDecisionInput) {
     : baselineDecision;
 }
 
-function forcedLegacyDecision(decision: ReturnType<typeof chooseSemanticAiAction>) {
+function forcedLegacyDecision(
+  decision: ReturnType<typeof chooseSemanticAiAction>,
+) {
   return {
     ...decision,
     evidence: [...(decision.evidence ?? []), "semantic_runtime_force_legacy"],
   };
 }
 
-function ensureRunnerRunPlanForActiveRunTestInput(input: AiDecisionInput): void {
+function ensureRunnerRunPlanForActiveRunTestInput(
+  input: AiDecisionInput,
+): void {
   if (input.side !== "runner" || !input.playerView.run) return;
   if (getRunnerRunPlanMemorySnapshot(input)) return;
-  rememberRunnerRunPlanMemorySnapshot(input, runnerRunPlanForActiveRunTestInput(input));
+  rememberRunnerRunPlanMemorySnapshot(
+    input,
+    runnerRunPlanForActiveRunTestInput(input),
+  );
 }
 
-function runnerRunPlanForActiveRunTestInput(input: AiDecisionInput): RunnerRunPlan {
+function runnerRunPlanForActiveRunTestInput(
+  input: AiDecisionInput,
+): RunnerRunPlan {
   const run = input.playerView.run;
   if (!run) throw new Error("runner_run_plan_test_input_requires_active_run");
   const targetServerId = isRunnerRunPlanServerId(run.attackedServerId)
@@ -344,13 +353,22 @@ function runnerRunPlanCurrentEncounterForTestInput(
       server: serverId,
       phase,
       ...(iceInstanceId ? { iceInstanceId } : {}),
-      ...(run.position?.kind === "ice" ? { iceIndex: run.position.iceIndex } : {}),
+      ...(run.position?.kind === "ice"
+        ? { iceIndex: run.position.iceIndex }
+        : {}),
     },
   };
 }
 
-function isRunnerRunPlanServerId(value: string): value is RunnerRunPlanServerId {
-  return value === "hq" || value === "rd" || value === "archives" || /^remote_\d+$/.test(value);
+function isRunnerRunPlanServerId(
+  value: string,
+): value is RunnerRunPlanServerId {
+  return (
+    value === "hq" ||
+    value === "rd" ||
+    value === "archives" ||
+    /^remote_\d+$/.test(value)
+  );
 }
 
 const originalSemanticAiRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
@@ -384,7 +402,8 @@ function buildAiDecisionInput(
   return buildAiDecisionInputRuntime(state, side, {
     ...options,
     ownDeckSnapshot:
-      options.ownDeckSnapshot ?? snapshotById(defaultTestSnapshotIdForSide(side)),
+      options.ownDeckSnapshot ??
+      snapshotById(defaultTestSnapshotIdForSide(side)),
   });
 }
 
@@ -434,7 +453,8 @@ describe("MVP 0.3 AI controller contract", () => {
         .ownDeckStrategyProfile?.warnings,
     ).not.toContain("strategy_profile:neutral_missing_snapshot");
     expect(
-      (corpInput as AiDecisionInputWithDeckCapabilities).ownStrategicIntentState,
+      (corpInput as AiDecisionInputWithDeckCapabilities)
+        .ownStrategicIntentState,
     ).toBeDefined();
     expect(
       (runnerInput as AiDecisionInputWithDeckCapabilities)
@@ -449,7 +469,9 @@ describe("MVP 0.3 AI controller contract", () => {
   });
 
   it("rejects normal AI decision input without ownDeckSnapshot", () => {
-    const state = createGameAfterSetup({ seed: "ai-contract-missing-snapshot" });
+    const state = createGameAfterSetup({
+      seed: "ai-contract-missing-snapshot",
+    });
 
     expect(() =>
       buildAiDecisionInputRuntime(state, "corp", {
@@ -9124,9 +9146,13 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     if (!score || !gain)
       throw new Error("Missing doctrine scoreline fixture actions");
 
-    const deckStrategyProfile = corpStrategyProfileForTest("semantic-scoreline", ["rush"], {
-      score_now: 24,
-    });
+    const deckStrategyProfile = corpStrategyProfileForTest(
+      "semantic-scoreline",
+      ["rush"],
+      {
+        score_now: 24,
+      },
+    );
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
     const strategyInput: AiDecisionInputWithDeckCapabilities = {
       ...input,
@@ -11711,9 +11737,10 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
       selectedOptionIds: ["mulligan"],
     });
     expect(evaluateRunnerOpeningHand(keepInput).decision).toBe("keep");
-    expect(["runner.setup.keep", "runner.semantic.choice_resolution"]).toContain(
-      keepDecision.reasonCode,
-    );
+    expect([
+      "runner.setup.keep",
+      "runner.semantic.choice_resolution",
+    ]).toContain(keepDecision.reasonCode);
     expect(keepDecision.selectedChoices).toEqual({
       choiceId: "setup_mulligan_runner",
       selectedOptionIds: ["keep"],
@@ -12960,8 +12987,10 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(aiVsAi.replayOk).toBe(true);
     expect(JSON.stringify(aiVsAi)).not.toContain("cardInstances");
     expect(
-      aiVsAi.actionSequence.some((entry) =>
-        entry.side === "corp" && entry.reasonCode.startsWith("corp.semantic."),
+      aiVsAi.actionSequence.some(
+        (entry) =>
+          entry.side === "corp" &&
+          entry.reasonCode.startsWith("corp.semantic."),
       ),
     ).toBe(true);
   });
@@ -15601,10 +15630,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
       scopedLegalActions(input, [installNewsgroup, basicCredit]),
       { persistTacticalPlanMemory: false },
     );
-    const installAlternative =
-      decision.decisionDebug?.actionAlternatives?.find(
-        (entry) => entry.actionId === installNewsgroup.actionId,
-      );
+    const installAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === installNewsgroup.actionId,
+    );
     const basicAlternative = decision.decisionDebug?.actionAlternatives?.find(
       (entry) => entry.actionId === basicCredit.actionId,
     );
@@ -15625,15 +15653,12 @@ describe("V1.4.1 plan-based Runner AI", () => {
       }),
     );
     expect(basicAlternative?.whyNot).toEqual(
-      expect.arrayContaining([
-        "plan_mismatch",
-        "excluded_by_current_plan",
-      ]),
+      expect.arrayContaining(["plan_mismatch", "excluded_by_current_plan"]),
     );
+    expect(tacticalDebug).toContain("runner_economy_route:hand_economy_engine");
     expect(tacticalDebug).toContain(
-      "runner_economy_route:hand_economy_engine",
+      "selected_step_kind:install_development_card",
     );
-    expect(tacticalDebug).toContain("selected_step_kind:install_development_card");
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,
     );
@@ -20784,14 +20809,17 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(plannedCorp.errors).toEqual([]);
     expect(plannedCorp.replayOk).toBe(true);
     expect(
-      plannedCorp.actionSequence.some((entry) =>
-        entry.side === "runner" &&
-        entry.reasonCode.startsWith("runner.semantic."),
+      plannedCorp.actionSequence.some(
+        (entry) =>
+          entry.side === "runner" &&
+          entry.reasonCode.startsWith("runner.semantic."),
       ),
     ).toBe(true);
     expect(
-      plannedCorp.actionSequence.some((entry) =>
-        entry.side === "corp" && entry.reasonCode.startsWith("corp.semantic."),
+      plannedCorp.actionSequence.some(
+        (entry) =>
+          entry.side === "corp" &&
+          entry.reasonCode.startsWith("corp.semantic."),
       ),
     ).toBe(true);
   });
@@ -28591,6 +28619,22 @@ describe("MVP 0.3 AI simulation harness", () => {
         ).toBe(true);
       }
     }
+  });
+
+  it("includes only qualified Proteus snapshots in the promoted AI deck pool", () => {
+    const proteusEntries = aiDeckPoolData.entries.filter((entry) =>
+      entry.tags.includes("proteus"),
+    );
+
+    expect(proteusEntries).toHaveLength(4);
+    expect(
+      proteusEntries.every((entry) =>
+        entry.tags.includes("proteus_ai_qualified"),
+      ),
+    ).toBe(true);
+    expect(aiDeckPoolData.qualificationEvidence).toBe(
+      "data/ai/proteus-ai-selected-pilot-v1.json",
+    );
   });
 
   it("marks every active support AI group as AI-supported for custom AI deckbuilding", () => {
