@@ -19,9 +19,11 @@ import {
   activeRunIceInstanceId,
   advancementCounterDisplay,
   approachIceExposeViewingIceId,
+  actionInteractionAmbience,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
   armoredFridgeAblativeCounterBadge,
+  actionsInteractionAmbience,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   breachHighlighterAccessHint,
@@ -31,6 +33,7 @@ import {
   cardCreditCounterVisual,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
+  choiceInteractionAmbience,
   counterDisplayUsesCreditBadge,
   counterDisplayUsesRefreshingCreditBadge,
   counterDisplayBadgeView,
@@ -58,6 +61,7 @@ import {
   inactiveCardZoneAriaSuffix,
   inactiveCardZoneBadgeLabel,
   inactiveCardZoneClassName,
+  interactionAmbienceClassName,
   latestRetainableAccessRevealEvent,
   isConcealedRunnerResourceCard,
   newBloodReorderTargetLabel,
@@ -69,6 +73,7 @@ import {
   runBreakerActionHint,
   runAwareActionButtonLabel,
   runCurrentIceLabel,
+  runWindowInteractionAmbience,
   runnerProgramInstallTrashChoiceInfo,
   runPositionStatusLabel,
   runTargetServerIds,
@@ -430,6 +435,65 @@ describe("V1.0.5 action board UI helpers", () => {
         ),
       ),
     ).toBe("Subroutinen auslösen (Run endet)");
+  });
+
+  it("classifies interaction ambience from safe UI actions, choices, and run phase", () => {
+    const movementRun = view("runner", {
+      phase: "run",
+      run: {
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+        successful: false,
+      },
+    });
+    const movementAction = legalAction(
+      "runner",
+      "continue_run",
+      "game_rule",
+      "ICE passieren",
+      undefined,
+      "run.jack_out_window",
+    );
+    const pumpAction = legalAction(
+      "runner",
+      "pump_breaker",
+      "breaker_1",
+      "Simple Decoder pumpen",
+      { breakerId: "breaker_1", iceId: "ice_1" },
+      "run.encounter_ice",
+    );
+    const trashAction = legalAction(
+      "runner",
+      "trash_accessed_card",
+      "game_rule",
+      "PAD Campaign trashen",
+      undefined,
+      "access.resolve_card",
+    );
+    const traceChoice = {
+      ...choice("runner"),
+      source: "trace.link_bid",
+      prompt: "Trace-Gebot wählen",
+      options: [
+        { id: "bid_0", label: "0 Credits", value: "0" },
+        { id: "bid_2", label: "2 Credits", value: "2" },
+      ],
+    };
+
+    expect(interactionAmbienceClassName("damage")).toBe("ambience-damage");
+    expect(actionInteractionAmbience(trashAction)).toBe("trash");
+    expect(actionInteractionAmbience(pumpAction)).toBe("pump");
+    expect(actionsInteractionAmbience([movementAction, trashAction])).toBe(
+      "trash",
+    );
+    expect(choiceInteractionAmbience(traceChoice)).toBe("trace");
+    expect(
+      runWindowInteractionAmbience(movementRun, [movementAction], "movement"),
+    ).toBe("movement");
+    expect(
+      runWindowInteractionAmbience(movementRun, [pumpAction], "break"),
+    ).toBe("pump");
   });
 
   it("marks ICE in a server with rezzed Tesseract Fort Construction", () => {

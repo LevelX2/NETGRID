@@ -3,7 +3,11 @@
 import { Check, Clipboard, Crosshair, Trash2, X } from "lucide-react";
 import type { LegalAction, PlayerView } from "@netgrid/shared";
 
-import { fieldCardChoiceInfo } from "../../app/action-board-ui";
+import {
+  choiceInteractionAmbience,
+  fieldCardChoiceInfo,
+  interactionAmbienceClassName,
+} from "../../app/action-board-ui";
 
 export function FieldCardChoicePanel({
   choice,
@@ -23,8 +27,11 @@ export function FieldCardChoicePanel({
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
 }) {
   const info = fieldCardChoiceInfo(choice, selected);
+  const ambienceClass = interactionAmbienceClassName(
+    choiceInteractionAmbience(choice, action),
+  );
   return (
-    <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="field-card-choice-panel">
+    <section className={`section setupPanel ${ambienceClass} ${highlighted ? "cueHighlight" : ""}`} data-testid="field-card-choice-panel">
       <h2>
         <Crosshair size={16} />
         {info.title}

@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import type { LegalAction, PlayerView, VisibleCard } from "@netgrid/shared";
 
 import { CardView } from "../cards/CardView";
+import { interactionAmbienceClassName } from "../../app/action-board-ui";
 import { type DisplayVisibleCard } from "../cards/card-view-model";
 import { type CardDisplayMode } from "../settings/settings-model";
 
@@ -75,7 +76,7 @@ export function SecurityPurgeChoicePanel({
       data-testid="security-purge-choice-panel"
     >
       <div
-        className={`cardChoiceDialog securityPurgeDialog ${
+        className={`cardChoiceDialog securityPurgeDialog ${interactionAmbienceClassName("trash")} ${
           highlighted ? "cueHighlight" : ""
         }`}
       >

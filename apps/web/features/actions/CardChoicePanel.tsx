@@ -10,6 +10,8 @@ import {
   cardChoiceReadonlyConfirmationOptionId,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
+  choiceInteractionAmbience,
+  interactionAmbienceClassName,
   newBloodReorderTargetSequenceHint,
   runnerProgramInstallTrashChoiceInfo,
 } from "../../app/action-board-ui";
@@ -82,6 +84,9 @@ export function CardChoicePanel({
   const prompt = choice.prompt.trim();
   const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
   const orderedSelection = cardChoiceUsesOrderedSelection(choice);
+  const ambienceClass = interactionAmbienceClassName(
+    choiceInteractionAmbience(choice, action),
+  );
 
   useEffect(() => {
     setSelected([]);
@@ -100,7 +105,7 @@ export function CardChoicePanel({
 
   const dialog = (
     <section className="cardChoiceOverlay" role="dialog" aria-modal="true" aria-labelledby="card-choice-title" data-testid="card-choice-panel">
-      <div className={`cardChoiceDialog ${highlighted ? "cueHighlight" : ""}${readableCards ? " readableCards" : ""}`}>
+      <div className={`cardChoiceDialog ${ambienceClass} ${highlighted ? "cueHighlight" : ""}${readableCards ? " readableCards" : ""}`}>
         <header className="cardChoiceHeader">
           <div>
             <h2 id="card-choice-title">

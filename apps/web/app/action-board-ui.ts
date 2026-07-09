@@ -144,6 +144,180 @@ export type CostChipView = {
 
 export type ActionButtonTone = "default" | "danger" | "warning";
 
+export type InteractionAmbienceKind =
+  | "access"
+  | "movement"
+  | "damage"
+  | "trace"
+  | "pump"
+  | "trash";
+
+const INTERACTION_AMBIENCE_PRIORITY: InteractionAmbienceKind[] = [
+  "trash",
+  "trace",
+  "pump",
+  "damage",
+  "access",
+  "movement",
+];
+
+export function interactionAmbienceClassName(
+  ambience: InteractionAmbienceKind | null | undefined,
+): string {
+  return ambience ? `ambience-${ambience}` : "";
+}
+
+export function actionInteractionAmbience(
+  action: LegalAction,
+): InteractionAmbienceKind | null {
+  const signalText = actionInteractionSignalText(action);
+  if (
+    action.type === "trash_accessed_card" ||
+    action.type === "trash_resource" ||
+    signalTextHasTrash(signalText)
+  )
+    return "trash";
+  if (signalTextHasTrace(signalText)) return "trace";
+  if (
+    action.type === "pump_breaker" ||
+    action.type === "break_subroutine" ||
+    signalTextHasPump(signalText)
+  )
+    return "pump";
+  if (
+    action.type === "access_card" ||
+    action.type === "steal_agenda" ||
+    action.type === "decline_trash" ||
+    action.timingPoint.startsWith("access.") ||
+    signalTextHasAccess(signalText)
+  )
+    return "access";
+  return null;
+}
+
+export function actionsInteractionAmbience(
+  actions: LegalAction[],
+): InteractionAmbienceKind | null {
+  return highestPriorityInteractionAmbience(
+    actions.map((action) => actionInteractionAmbience(action)),
+  );
+}
+
+export function choiceInteractionAmbience(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  action?: LegalAction,
+): InteractionAmbienceKind | null {
+  const signalText = choiceInteractionSignalText(choice);
+  const choiceAmbience = signalTextHasTrash(signalText)
+    ? "trash"
+    : signalTextHasTrace(signalText)
+      ? "trace"
+      : signalTextHasPump(signalText)
+        ? "pump"
+        : signalTextHasAccess(signalText)
+          ? "access"
+          : null;
+  return highestPriorityInteractionAmbience([
+    choiceAmbience,
+    action ? actionInteractionAmbience(action) : null,
+  ]);
+}
+
+export function runWindowInteractionAmbience(
+  view: PlayerView,
+  actions: LegalAction[],
+  currentStep: RunTimelineStepId | null,
+): InteractionAmbienceKind | null {
+  const choiceAction =
+    view.pendingChoice && actions.find((action) => action.type === "resolve_choice");
+  const choiceAmbience = view.pendingChoice
+    ? choiceInteractionAmbience(view.pendingChoice, choiceAction)
+    : null;
+  const actionAmbience = actionsInteractionAmbience(actions);
+  const phaseAmbience =
+    currentStep === "movement"
+      ? "movement"
+      : currentStep === "access"
+        ? "access"
+        : null;
+  return highestPriorityInteractionAmbience([
+    choiceAmbience,
+    actionAmbience,
+    phaseAmbience,
+  ]);
+}
+
+function highestPriorityInteractionAmbience(
+  candidates: Array<InteractionAmbienceKind | null | undefined>,
+): InteractionAmbienceKind | null {
+  for (const ambience of INTERACTION_AMBIENCE_PRIORITY) {
+    if (candidates.includes(ambience)) return ambience;
+  }
+  return null;
+}
+
+function actionInteractionSignalText(action: LegalAction): string {
+  const payload = action.payload ?? {};
+  const payloadSignals = Object.entries(payload)
+    .map(([key, value]) => {
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+      )
+        return `${key}:${value}`;
+      return key;
+    })
+    .join(" ");
+  return normalizeInteractionSignalText(
+    `${action.type} ${action.source} ${action.timingPoint} ${action.label} ${payloadSignals}`,
+  );
+}
+
+function choiceInteractionSignalText(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+): string {
+  return normalizeInteractionSignalText(
+    [
+      choice.kind,
+      choice.source,
+      choice.prompt,
+      ...choice.options.flatMap((option) => [
+        option.id,
+        option.label,
+        typeof option.value === "string" ? option.value : "",
+      ]),
+    ].join(" "),
+  );
+}
+
+function normalizeInteractionSignalText(value: string): string {
+  return value
+    .normalize("NFKD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
+function signalTextHasTrash(value: string): boolean {
+  return /\btrash|trashen|getrasht|delete|destroy|zerstoer/.test(value);
+}
+
+function signalTextHasTrace(value: string): boolean {
+  return /\btrace\b|trace_|_trace|link bidding|link_bid|linkgebot|verfolg/.test(
+    value,
+  );
+}
+
+function signalTextHasPump(value: string): boolean {
+  return /\bpump|pumpen|breaker|eisbrecher|\bstarke\b|\bstrength\b/.test(
+    value,
+  );
+}
+
+function signalTextHasAccess(value: string): boolean {
+  return /\baccess\b|access_|_access|zugriff|steal|agenda stehlen/.test(value);
+}
+
 export type CardCreditCounterVisual = {
   safeAmount: number;
   showCount: boolean;

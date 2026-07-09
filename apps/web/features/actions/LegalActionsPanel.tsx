@@ -19,7 +19,10 @@ import {
   actionContextTitle,
   actionButtonTone,
   actionSlotDisplay,
+  actionsInteractionAmbience,
+  choiceInteractionAmbience,
   isSingleInstalledCorpExposeChoice,
+  interactionAmbienceClassName,
   runAwareActionButtonLabel,
   shouldUseCardChoicePanel,
   shouldUseFieldCardChoice,
@@ -173,6 +176,9 @@ export function LegalActionsPanel({
     ? primaryActions.find((action) => action.type === "resolve_choice")
     : undefined;
   if (genericChoice && genericChoiceAction) {
+    const genericChoiceAmbienceClass = interactionAmbienceClassName(
+      choiceInteractionAmbience(genericChoice, genericChoiceAction),
+    );
     if (isSecurityPurgeInstallTargetChoice(genericChoice)) {
       return (
         <SecurityPurgeChoicePanel
@@ -204,7 +210,7 @@ export function LegalActionsPanel({
       if (connection !== "online") {
         return (
           <section
-            className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`}
+            className={`section setupPanel ${genericChoiceAmbienceClass} ${highlighted ? "cueHighlight" : ""}`}
             data-testid="card-choice-paused-panel"
           >
             <h2>
@@ -232,7 +238,7 @@ export function LegalActionsPanel({
     }
     return (
       <section
-        className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`}
+        className={`section setupPanel ${genericChoiceAmbienceClass} ${highlighted ? "cueHighlight" : ""}`}
         data-testid="generic-choice-panel"
       >
         <h2>
@@ -284,9 +290,12 @@ export function LegalActionsPanel({
     currentTurnCapacity,
     true,
   );
+  const actionPanelAmbienceClass = interactionAmbienceClassName(
+    actionsInteractionAmbience([...primaryActions, ...contextualActions]),
+  );
   return (
     <section
-      className={`section ${highlighted ? "cueHighlight" : ""}`}
+      className={`section ${actionPanelAmbienceClass} ${highlighted ? "cueHighlight" : ""}`}
       data-testid="legal-actions"
     >
       <div className={`turnActionHeader side-${currentTurnSide}`}>

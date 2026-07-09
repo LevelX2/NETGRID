@@ -13,9 +13,11 @@ import {
   breachProgressLabel,
   currentRunTimelineStep,
   hasLegalAction,
+  interactionAmbienceClassName,
   normalizeVisibleTerms,
   runAwareActionButtonLabel,
   runBreakerActionHint,
+  runWindowInteractionAmbience,
   runWindowActionButtonLabel,
   runWindowStatusLabel,
   serverDisplayLabel,
@@ -113,6 +115,9 @@ export function RunTimelineOverlay({
   };
 
   const currentStep = currentRunTimelineStep(view, legalActions);
+  const ambienceClass = interactionAmbienceClassName(
+    runWindowInteractionAmbience(view, runActions, currentStep),
+  );
   const verticalSteps = [...RUN_TIMELINE_STEPS].reverse();
   const approachedIce = run.approachedIce
     ? enrichVisibleCard(run.approachedIce, cardDetailsById)
@@ -167,7 +172,7 @@ export function RunTimelineOverlay({
       aria-atomic="true"
     >
       <div
-        className={`runTimeline active overlay ${highlighted ? "cueHighlight" : ""}`}
+        className={`runTimeline active overlay ${ambienceClass} ${highlighted ? "cueHighlight" : ""}`}
         data-testid="run-timeline"
         role="status"
       >

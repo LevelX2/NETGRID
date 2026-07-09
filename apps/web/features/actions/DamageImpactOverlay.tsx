@@ -1,6 +1,7 @@
 import { AlertTriangle, Brain, Check, Zap } from "lucide-react";
 
 import type { DamageImpactCue } from "../../app/action-cues";
+import { interactionAmbienceClassName } from "../../app/action-board-ui";
 
 export function DamageImpactOverlay({
   cue,
@@ -43,7 +44,7 @@ export function DamageImpactOverlay({
     : null;
 
   return (
-    <aside className={`damageImpactOverlay damage-${cue.damageType} ${cue.flatline ? "is-flatline" : ""} ${preventedDamage ? "is-prevented" : ""}`} aria-live="assertive" data-testid="damage-impact">
+    <aside className={`damageImpactOverlay ${interactionAmbienceClassName("damage")} damage-${cue.damageType} ${cue.flatline ? "is-flatline" : ""} ${preventedDamage ? "is-prevented" : ""}`} aria-live="assertive" data-testid="damage-impact">
       <div className="damageImpactHeader">
         <span className="damageImpactIcon" aria-hidden="true">
           {preventedDamage ? <Check size={22} /> : cue.flatline ? <AlertTriangle size={22} /> : cue.damageType === "core" ? <Brain size={22} /> : <Zap size={22} />}

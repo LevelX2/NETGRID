@@ -58,4 +58,31 @@ describe("run window layering", () => {
     expect(selectorBlock(".accessRevealActionButton")).toContain("height: auto");
     expect(selectorBlock(".accessRevealActionButton")).toContain("grid-template-columns: auto minmax(0, 1fr) auto");
   });
+
+  it("defines subtle ambience backgrounds for interaction windows", () => {
+    for (const asset of [
+      "/backgrounds/run-movement-ambience.png",
+      "/backgrounds/access-scan-ambience.png",
+      "/backgrounds/damage-impact-ambience.png",
+      "/backgrounds/trace-signal-ambience.png",
+      "/backgrounds/pump-breaker-ambience.png",
+      "/backgrounds/trash-shred-ambience.png",
+    ]) {
+      expect(css).toContain(`url("${asset}")`);
+    }
+    for (const ambience of [
+      "ambience-movement",
+      "ambience-access",
+      "ambience-damage",
+      "ambience-trace",
+      "ambience-pump",
+      "ambience-trash",
+    ]) {
+      expect(css).toContain(`.${ambience}`);
+    }
+    expect(css).toContain("--interaction-ambience-opacity: 0.12");
+    expect(css).toContain("--interaction-ambience-opacity: 0.13");
+    expect(css).toContain("--interaction-ambience-opacity: 0.14");
+    expect(css).toContain("var(--interaction-ambience-image)");
+  });
 });

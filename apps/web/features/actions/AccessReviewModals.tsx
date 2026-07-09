@@ -6,6 +6,7 @@ import {
   accessDecisionLabel,
   accessRevealActionGroups,
 } from "../../app/access-reveal-ui";
+import { interactionAmbienceClassName } from "../../app/action-board-ui";
 import { CardView } from "../cards/CardView";
 import type { DisplayVisibleCard } from "../cards/card-view-model";
 import type { CardDisplayMode } from "../settings/settings-model";
@@ -73,6 +74,16 @@ export function AccessRevealModal({
   const { primaryActions, declineAction } = accessRevealActionGroups(
     reveal.actions,
   );
+  const hasTrashDecision = primaryActions.some(
+    (action) =>
+      action.type === "trash_accessed_card" || action.type === "trash_resource",
+  );
+  const accessAmbienceClass = [
+    interactionAmbienceClassName("access"),
+    hasTrashDecision ? interactionAmbienceClassName("trash") : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
   const runAction = (action: LegalAction) => {
     onAction(action);
     onDismiss();
@@ -122,7 +133,7 @@ export function AccessRevealModal({
       aria-labelledby="access-reveal-title"
     >
       <div className="accessRevealBackdrop" aria-hidden="true" />
-      <section className="accessRevealPanel">
+      <section className={`accessRevealPanel ${accessAmbienceClass}`}>
         <div className="accessRevealHeader">
           <div>
             <p className="eyebrow">{eyebrow}</p>
@@ -289,7 +300,9 @@ export function ExposeReviewModal({
       aria-labelledby="expose-review-title"
     >
       <div className="accessRevealBackdrop" aria-hidden="true" />
-      <section className="accessRevealPanel exposeReviewPanel">
+      <section
+        className={`accessRevealPanel exposeReviewPanel ${interactionAmbienceClassName("access")}`}
+      >
         <div className="accessRevealHeader">
           <div>
             <p className="eyebrow">Ansehen</p>

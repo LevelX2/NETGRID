@@ -4091,6 +4091,213 @@ select {
   border-bottom: 0;
 }
 
+.ambience-movement {
+  --interaction-ambience-image: url("/backgrounds/run-movement-ambience.png");
+  --interaction-ambience-accent: #53d7e6;
+  --interaction-ambience-opacity: 0.13;
+  --interaction-ambience-position: center;
+}
+
+.ambience-access {
+  --interaction-ambience-image: url("/backgrounds/access-scan-ambience.png");
+  --interaction-ambience-accent: #e4b45d;
+  --interaction-ambience-opacity: 0.13;
+  --interaction-ambience-position: center;
+}
+
+.ambience-damage {
+  --interaction-ambience-image: url("/backgrounds/damage-impact-ambience.png");
+  --interaction-ambience-accent: #d95879;
+  --interaction-ambience-opacity: 0.14;
+  --interaction-ambience-position: center;
+}
+
+.ambience-trace {
+  --interaction-ambience-image: url("/backgrounds/trace-signal-ambience.png");
+  --interaction-ambience-accent: #7c96ff;
+  --interaction-ambience-opacity: 0.13;
+  --interaction-ambience-position: center;
+}
+
+.ambience-pump {
+  --interaction-ambience-image: url("/backgrounds/pump-breaker-ambience.png");
+  --interaction-ambience-accent: #9de24e;
+  --interaction-ambience-opacity: 0.12;
+  --interaction-ambience-position: center;
+}
+
+.ambience-trash {
+  --interaction-ambience-image: url("/backgrounds/trash-shred-ambience.png");
+  --interaction-ambience-accent: #f06c3d;
+  --interaction-ambience-opacity: 0.13;
+  --interaction-ambience-position: center;
+}
+
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-movement,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-access,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-damage,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-trace,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-pump,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-trash {
+  position: relative;
+  isolation: isolate;
+}
+
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-movement::before,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-access::before,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-damage::before,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-trace::before,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-pump::before,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-trash::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgb(8 12 16 / 0.78), rgb(8 12 16 / 0.62)),
+    var(--interaction-ambience-image);
+  background-position: center, var(--interaction-ambience-position);
+  background-size: cover;
+  opacity: var(--interaction-ambience-opacity);
+}
+
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-movement > *,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-access > *,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-damage > *,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-trace > *,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-pump > *,
+:where(
+  .accessRevealPanel,
+  .damageImpactOverlay,
+  .runTimeline.overlay,
+  .cardChoiceDialog,
+  .setupPanel,
+  .section
+).ambience-trash > * {
+  position: relative;
+  z-index: 1;
+}
+
 .panel {
   background: var(--panel);
   border: 1px solid var(--line);

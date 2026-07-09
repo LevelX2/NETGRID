@@ -44,5 +44,6 @@ describe("DamageImpactOverlay lifecycle", () => {
     expect(source).toContain('type === "core"');
     expect(source).toContain('"Core Damage"');
     expect(source).toContain("runnerMaxHandSizeAfter");
+    expect(source).toContain('interactionAmbienceClassName("damage")');
   });
 });
