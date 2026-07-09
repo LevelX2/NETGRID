@@ -29,6 +29,12 @@ export type CardSetAiReadiness = {
     strategyCoveredHintCount: number;
     benchmarkCoveredHintCount: number;
     selectedDeckSmoke: boolean;
+    familyScenarioCount: number;
+    familyScenarioPilotCardCount: number;
+    selectedPilotGameCount: number;
+    selectedPilotIllegalActionCount: number;
+    selectedPilotReplayFailureCount: number;
+    selectedPilotRedactionFailureCount: number;
     aiDeckPoolSnapshotCount: number;
   };
   removalConditions: string[];
@@ -136,6 +142,12 @@ function validateSetReadiness(value: unknown): CardSetAiReadiness {
     "humanReviewedHintCount",
     "strategyCoveredHintCount",
     "benchmarkCoveredHintCount",
+    "familyScenarioCount",
+    "familyScenarioPilotCardCount",
+    "selectedPilotGameCount",
+    "selectedPilotIllegalActionCount",
+    "selectedPilotReplayFailureCount",
+    "selectedPilotRedactionFailureCount",
     "aiDeckPoolSnapshotCount",
   ] as const;
   const numericEvidence = Object.fromEntries(

@@ -13,7 +13,7 @@
         },
         "selected_ai_playtest_ready": {
           "ready": true,
-          "reason": "Explizit ausgewählte Proteus-KI-Decks bestehen Deckvalidierung und Multiplayer-Matchstart."
+          "reason": "Vier ausgewählte Proteus-KI-Decks bestehen die feste 16-Spiel-Seed-Matrix sowie LegalAction-, Replay-, Redaction- und Originalset-Kontrollgates."
         },
         "default_pool_ready": {
           "ready": false,
@@ -30,14 +30,15 @@
         "strategyCoveredHintCount": 55,
         "benchmarkCoveredHintCount": 6,
         "selectedDeckSmoke": true,
+        "familyScenarioCount": 11,
+        "familyScenarioPilotCardCount": 114,
+        "selectedPilotGameCount": 16,
+        "selectedPilotIllegalActionCount": 0,
+        "selectedPilotReplayFailureCount": 0,
+        "selectedPilotRedactionFailureCount": 0,
         "aiDeckPoolSnapshotCount": 0
       },
-      "removalConditions": [
-        "proteus_family_inventory_complete",
-        "proteus_family_decision_smokes_green",
-        "proteus_selected_deck_pilot_green",
-        "proteus_ai_deck_pool_promoted"
-      ]
+      "removalConditions": ["proteus_ai_deck_pool_promoted"]
     }
   ]
 }

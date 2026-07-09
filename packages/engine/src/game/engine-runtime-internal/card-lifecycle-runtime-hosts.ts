@@ -235,9 +235,7 @@ import {
   buildRunnerAgendaPointInstallAction,
   buildRunnerSelectedServerInstallAction,
 } from "../turn/runner-install-context-actions";
-import {
-  buildRunnerHostedProgramInstallAction,
-} from "../turn/runner-hosted-install-actions";
+import { buildRunnerHostedProgramInstallAction } from "../turn/runner-hosted-install-actions";
 import { buildRunnerProgramTrashBeforeInstallAction } from "../turn/runner-program-trash-install-actions";
 import { buildRunnerStackSearchProgramToGripAction } from "../turn/runner-hidden-zone-search-actions";
 import {
@@ -655,9 +653,7 @@ import {
   ACCESS_NET_DAMAGE_UPGRADE_SOURCE,
   ACCESS_TRACE_DAMAGE_UPGRADE_SOURCE,
 } from "../../mechanics/server-upgrades";
-import {
-  RUN_TAX_UPGRADE_SOURCES,
-} from "../../mechanics/trace-tags";
+import { RUN_TAX_UPGRADE_SOURCES } from "../../mechanics/trace-tags";
 import { snapshotPersistentStealCostModifiersForSource } from "../../ability-engine/steal-cost-modifiers";
 import { createCardImplementationEffectAdapters } from "../../ability-engine/card-implementation-effect-adapters";
 import { executeCardImplementationEffects } from "../../ability-engine/effect-interpreter";
@@ -810,7 +806,11 @@ export function createCardLifecycleRuntimeHosts(
         ensureTurnFlags: () => ensureRunnerTurnFlags(state),
         requiresDataFortInstallTarget,
         startRunnerProgramTrashBeforeInstallChoice: (cardId, legalAction) =>
-          startRunnerProgramTrashBeforeInstallChoice(state, cardId, legalAction),
+          startRunnerProgramTrashBeforeInstallChoice(
+            state,
+            cardId,
+            legalAction,
+          ),
         forfeitRunnerAgendaForPointCost: (cardId) =>
           forfeitRunnerAgendaForPointCost(state, cardId),
         consumeValuPakProgramInstallAction: (legalAction) =>
@@ -957,8 +957,7 @@ export function createCardLifecycleRuntimeHosts(
         isObligationDebtDefinition,
         spendCorpAgendaPointCost: (requiredPoints) =>
           spendCorpAgendaPointCost(state, requiredPoints),
-        activeObligationCount: () =>
-          activeObligationCount(state),
+        activeObligationCount: () => activeObligationCount(state),
       },
       runner: {
         ensureTurnFlags: () => ensureRunnerTurnFlags(state),
@@ -1092,8 +1091,9 @@ export function createCardLifecycleRuntimeHosts(
     for (const sourceId of sourceIds) {
       const sourceDefinitionId = state.cardInstances[sourceId]!.definitionId;
       const implementation =
-        cardImplementationForDefinitionId(sourceDefinitionId)
-          ?.runnerUtilityLongtail;
+        cardImplementationForDefinitionId(
+          sourceDefinitionId,
+        )?.runnerUtilityLongtail;
       if (implementation?.kind !== "first_prep_credit_gain_bonus") continue;
       bonus += Math.max(0, Math.floor(implementation.amount));
       sourceDefinitionIds.push(sourceDefinitionId);
@@ -1103,8 +1103,9 @@ export function createCardLifecycleRuntimeHosts(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       firstPrepCreditGainBonus: bonus,
-      firstPrepCreditGainBonusSourceDefinitionIds:
-        sourceDefinitionIds.sort().join(","),
+      firstPrepCreditGainBonusSourceDefinitionIds: sourceDefinitionIds
+        .sort()
+        .join(","),
       gainedCredits: gainedCredits + bonus,
       runnerCreditsAfter: state.runner.credits,
     };
@@ -1305,13 +1306,10 @@ export function createCardLifecycleRuntimeHosts(
       | undefined;
     if (!sourceCardId || !state.runner.grip.includes(sourceCardId))
       throw new Error("Die Programmquelle liegt nicht mehr im Grip.");
-    if (
-      state.phase !== "runner_action_phase" ||
-      state.timingPoint !== "runner_action.main"
-    )
-      throw new Error(
-        "Programme koennen nur im Runner-Aktionsfenster installiert werden.",
-      );
+    // The authoritative install action may open this choice immediately before
+    // another resolver moves the game into a run. The pending choice freezes
+    // all other actions, so resolution remains bound to that validated install
+    // even if the phase has advanced in the meantime.
     if (state.runner.clicks <= 0)
       throw new Error("Der Runner hat keinen Klick fuer die Installation.");
     const definition = definitionFor(state, sourceCardId);

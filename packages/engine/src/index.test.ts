@@ -19,12 +19,8 @@ import {
 } from "./index";
 import { collectActiveModifiers } from "./ability-engine/active-modifiers";
 import { executeCardImplementationEffects } from "./ability-engine/effect-interpreter";
-import {
-  cardImplementationCoverageForDefinitionId,
-} from "./card-implementations/coverage";
-import {
-  cardImplementationForDefinitionId,
-} from "./card-implementations/registry";
+import { cardImplementationCoverageForDefinitionId } from "./card-implementations/coverage";
+import { cardImplementationForDefinitionId } from "./card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
 import { publicContextForAction } from "./public-context";
 import {
@@ -442,7 +438,11 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
         candidate.payload?.cardId === schlaghundId,
     );
     expect(action?.costs).toEqual([{ clicks: 1, credits: 9 }]);
-    state = apply(state, "corp", (candidate) => candidate.actionId === action?.actionId);
+    state = apply(
+      state,
+      "corp",
+      (candidate) => candidate.actionId === action?.actionId,
+    );
     expect(state.corp.credits).toBe(11);
     state = resolveTraceWithZeroBids(state);
     expect(state.runner.tags).toBe(1);
@@ -478,7 +478,11 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       traceSuccessTargetDefinitionId: "onr_proteus_150_streetware-distributor",
     });
 
-    state = apply(state, "corp", (action) => action.actionId === legal[0]?.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === legal[0]?.actionId,
+    );
     expect(state.trace).toMatchObject({
       baseTraceStrength: 4,
       successEffect: {
@@ -549,7 +553,11 @@ describe("Proteus PRO007 Corp Operation Economy/Trace/History", () => {
       "onr_proteus_128_airport-locker",
     );
 
-    state = apply(state, "corp", (action) => action.actionId === legal[0]?.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === legal[0]?.actionId,
+    );
     expect(state.trace).toMatchObject({
       baseTraceStrength: 4,
       successEffect: {
@@ -616,7 +624,11 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       0,
     );
     return {
-      state: apply(state, "runner", (candidate) => candidate.actionId === action.actionId),
+      state: apply(
+        state,
+        "runner",
+        (candidate) => candidate.actionId === action.actionId,
+      ),
       action,
       creditCost,
     };
@@ -631,6 +643,13 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     expect(state.runner.tags).toBe(1);
 
     state = runnerMain("proteus-pro008-fast-track");
+    expect(
+      getLegalActions(state, "runner").some(
+        (candidate) =>
+          sourceDefinition(state, candidate) ===
+          "onr_proteus_114_on-the-fast-track",
+      ),
+    ).toBe(false);
     state.runnerTurnFlags = {
       ...(state.runnerTurnFlags ?? {
         stoleAgendaThisTurn: false,
@@ -655,13 +674,20 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
-    if (!getLegalActions(state, "runner").some((action) => action.type === "access_card"))
+    if (
+      !getLegalActions(state, "runner").some(
+        (action) => action.type === "access_card",
+      )
+    )
       state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.runner.credits).toBe(dropBefore - drop.creditCost + 6);
-    expect(state.runnerTurnFlags?.nextAgendaAccessCreditGainPending).toBe(false);
+    expect(state.runnerTurnFlags?.nextAgendaAccessCreditGainPending).toBe(
+      false,
+    );
   });
 
   it("starts All-Hands and Rush Hour central runs with +3 access and noisy breaker lock", () => {
@@ -674,7 +700,11 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     });
 
     state = runnerMain("proteus-pro008-rush-hour");
-    addInstalledRunnerProgramForTest(state, "onr_v1_036_jackhammer", "jackhammer");
+    addInstalledRunnerProgramForTest(
+      state,
+      "onr_v1_036_jackhammer",
+      "jackhammer",
+    );
     const iceId = addRezzedCorpIceForTest(
       state,
       "onr_v1_232_crystal-wall",
@@ -734,9 +764,14 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       publicRevealDefinitionId: "onr_v1_232_crystal-wall",
     });
     expect(
-      getLegalActions(state, "runner").some((action) => action.type === "jack_out"),
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "jack_out",
+      ),
     ).toBe(true);
-    const replay = replayEvents(replayInitial, state.eventLog.slice(replayStart));
+    const replay = replayEvents(
+      replayInitial,
+      state.eventLog.slice(replayStart),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
@@ -749,7 +784,11 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       "rd",
       "demo_wall",
     );
-    state = playEventAction(state, "onr_proteus_105_demolition-run", "rd").state;
+    state = playEventAction(
+      state,
+      "onr_proteus_105_demolition-run",
+      "rd",
+    ).state;
     state.run = {
       ...state.run!,
       phase: "movement",
@@ -759,9 +798,9 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     expect(state.run).toBeUndefined();
     expect(state.runner.tags).toBe(3);
     expect(state.corp.archives).toContain(iceId);
-    expect(state.eventLog.some((event) => event.publicPayload?.tagsAdded === 3)).toBe(
-      true,
-    );
+    expect(
+      state.eventLog.some((event) => event.publicPayload?.tagsAdded === 3),
+    ).toBe(true);
   });
 
   it("gates Remote Detonator on successful data-fort run and revalidates followup actions", () => {
@@ -773,7 +812,9 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     );
     expect(
       getLegalActions(state, "runner").some(
-        (action) => sourceDefinition(state, action) === "onr_proteus_121_remote-detonator",
+        (action) =>
+          sourceDefinition(state, action) ===
+          "onr_proteus_121_remote-detonator",
       ),
     ).toBe(false);
 
@@ -796,7 +837,8 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       "runner",
       (candidate) =>
         candidate.type === "play_event" &&
-        sourceDefinition(state, candidate) === "onr_proteus_121_remote-detonator",
+        sourceDefinition(state, candidate) ===
+          "onr_proteus_121_remote-detonator",
     );
     const stale = applyAction(state, {
       matchId: state.matchId,
@@ -806,21 +848,27 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     });
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
-    state = apply(state, "runner", (candidate) => candidate.actionId === action.actionId);
+    state = apply(
+      state,
+      "runner",
+      (candidate) => candidate.actionId === action.actionId,
+    );
     expect(state.corp.archives).toContain(iceId);
     expect(state.runner.tags).toBe(3);
     const remoteServerTrashTagSequenceEffect =
-      cardImplementationForDefinitionId("onr_proteus_121_remote-detonator")?.abilities
-        ?.flatMap((ability) => ("effects" in ability ? ability.effects : []))
+      cardImplementationForDefinitionId("onr_proteus_121_remote-detonator")
+        ?.abilities?.flatMap((ability) =>
+          "effects" in ability ? ability.effects : [],
+        )
         .find(
           (effect) =>
             effect.kind ===
             "trash_rezzed_ice_on_last_successful_run_fort_and_add_tags",
         );
     expect(remoteServerTrashTagSequenceEffect).toMatchObject({ tagAmount: 3 });
-    expect(state.eventLog.some((event) => event.publicPayload?.tagsAdded === 3)).toBe(
-      true,
-    );
+    expect(
+      state.eventLog.some((event) => event.publicPayload?.tagsAdded === 3),
+    ).toBe(true);
   });
 
   it("offers Disgruntled Ice Technician post-pass derez from the run event source", () => {
@@ -855,7 +903,11 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
           "derez_fully_broken_passed_ice_and_end_run" &&
         action.payload?.cardId === eventId,
     );
-    state = apply(state, "runner", (action) => action.actionId === derez.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === derez.actionId,
+    );
     expect(state.cardInstances[iceId]?.rezzed).toBe(false);
     expect(state.run).toBeUndefined();
   });
@@ -863,7 +915,11 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
   it("rewards Reconnaissance rezzes and tracks Weefle Initiation prevention pool", () => {
     let state = runnerMain("proteus-pro008-recon");
     putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
-    state = playEventAction(state, "onr_proteus_120_reconnaissance", "rd").state;
+    state = playEventAction(
+      state,
+      "onr_proteus_120_reconnaissance",
+      "rd",
+    ).state;
     const beforeRezRunnerCredits = state.runner.credits;
     state = apply(
       state,
@@ -878,7 +934,11 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
     });
 
     state = runnerMain("proteus-pro008-weefle");
-    state = playEventAction(state, "onr_proteus_127_weefle-initiation", "rd").state;
+    state = playEventAction(
+      state,
+      "onr_proteus_127_weefle-initiation",
+      "rd",
+    ).state;
     expect(state.run?.damagePreventionPool).toMatchObject({
       sourceDefinitionId: "onr_proteus_127_weefle-initiation",
       remaining: 7,
@@ -922,7 +982,11 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       state = applyChoice(
         state,
         "runner",
-        traceChoiceOptionIdForDefinition(state, definitionId, "trace_base_link_"),
+        traceChoiceOptionIdForDefinition(
+          state,
+          definitionId,
+          "trace_base_link_",
+        ),
       );
       expect(state.trace?.baseLinkSourceId).toBeDefined();
       state = applyChoice(
@@ -965,7 +1029,9 @@ describe("Proteus PRO008 Runner Event Run/Economy/Followup Suite", () => {
       state = applyChoice(state, "runner", "pass");
       const postBidCost = definitionId.endsWith("back-door-to-rivals") ? 3 : 2;
       expect(state.runner.tags).toBe(0);
-      expect(state.runner.credits).toBe(beforeRunnerBidCredits - 2 - postBidCost + 1);
+      expect(state.runner.credits).toBe(
+        beforeRunnerBidCredits - 2 - postBidCost + 1,
+      );
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceSuccessful: false,
         gainedCredits: 1,
@@ -1010,7 +1076,11 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         predicate(candidate),
     );
     return {
-      state: apply(state, "runner", (candidate) => candidate.actionId === action.actionId),
+      state: apply(
+        state,
+        "runner",
+        (candidate) => candidate.actionId === action.actionId,
+      ),
       cardId,
       action,
     };
@@ -1050,17 +1120,25 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       (action) => action.payload?.selectedCardId === targetIceId,
     );
     state = blackWidow.state;
-    expect(state.cardInstances[blackWidow.cardId]?.selectedCardId).toBe(targetIceId);
+    expect(state.cardInstances[blackWidow.cardId]?.selectedCardId).toBe(
+      targetIceId,
+    );
     const runnerBlackWidow = getPlayerView(state, "runner").own.rig?.find(
       (card) => card.instanceId === blackWidow.cardId,
     );
     const corpBlackWidow = getPlayerView(state, "corp").opponent.rig?.find(
       (card) => card.instanceId === blackWidow.cardId,
     );
-    expect(runnerBlackWidow?.selectedTargetLabel).toBe("ICE auf R&D Position 1");
+    expect(runnerBlackWidow?.selectedTargetLabel).toBe(
+      "ICE auf R&D Position 1",
+    );
     expect(corpBlackWidow?.selectedTargetLabel).toBe("Fire Wall");
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain("Fire Wall");
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(targetIceId);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "Fire Wall",
+    );
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      targetIceId,
+    );
 
     const fubar = installFromGrip(state, "onr_proteus_088_fubar");
     state = fubar.state;
@@ -1084,7 +1162,11 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         action.payload?.selectedSubtype === "sentry",
     );
     expect(fubarChoice.costs).toEqual([]);
-    state = apply(state, "runner", (action) => action.actionId === fubarChoice.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === fubarChoice.actionId,
+    );
     expect(state.cardInstances[fubar.cardId]?.selectedSubtype).toBe("sentry");
     expect(
       getPlayerView(state, "runner").own.rig?.find(
@@ -1113,7 +1195,9 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       (action) => action.payload?.selectedSubtype === "code_gate",
     );
     state = morphing.state;
-    expect(state.cardInstances[morphing.cardId]?.selectedSubtype).toBe("code_gate");
+    expect(state.cardInstances[morphing.cardId]?.selectedSubtype).toBe(
+      "code_gate",
+    );
     expect(
       getPlayerView(state, "runner").own.rig?.find(
         (card) => card.instanceId === morphing.cardId,
@@ -1130,7 +1214,11 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         action.payload?.cardId === morphing.cardId &&
         action.payload?.selectedSubtype === "wall",
     );
-    state = apply(state, "runner", (action) => action.actionId === change.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === change.actionId,
+    );
     expect(state.cardInstances[morphing.cardId]?.selectedSubtype).toBe("wall");
     expect(
       getPlayerView(state, "runner").own.rig?.find(
@@ -1156,10 +1244,7 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       "rd",
       "banpei",
     );
-    const fubar = installFromGrip(
-      state,
-      "onr_proteus_088_fubar",
-    );
+    const fubar = installFromGrip(state, "onr_proteus_088_fubar");
     state = fubar.state;
     state = setEncounter(state, sentryId);
     state = apply(
@@ -1174,13 +1259,17 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     state = setEncounter(state, wallId);
     expect(
       getLegalActions(state, "runner").some(
-        (action) => action.type === "break_subroutine" && action.payload?.breakerId === fubar.cardId,
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.breakerId === fubar.cardId,
       ),
     ).toBe(false);
     state = setEncounter(state, sentryId);
     expect(
       getLegalActions(state, "runner").some(
-        (action) => action.type === "break_subroutine" && action.payload?.breakerId === fubar.cardId,
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.breakerId === fubar.cardId,
       ),
     ).toBe(true);
 
@@ -1258,7 +1347,9 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     expect(state.run?.nextSentryFreeBreakByBreaker?.[bulldozerId]).toBe(wallId);
     state = setEncounter(state, sentryId);
     state.run!.nextSentryFreeBreakByBreaker = { [bulldozerId]: wallId };
-    state.run!.nextSentryFreeBreakTargetIceByBreaker = { [bulldozerId]: sentryId };
+    state.run!.nextSentryFreeBreakTargetIceByBreaker = {
+      [bulldozerId]: sentryId,
+    };
     const freeBreak = mustAction(
       state,
       "runner",
@@ -1267,13 +1358,18 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         action.payload?.breakerId === bulldozerId &&
         action.payload?.nextSentryFreeBreak === true,
     );
-    state = apply(state, "runner", (action) => action.actionId === freeBreak.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === freeBreak.actionId,
+    );
     expect(state.run?.brokenSubroutineIndexes).toContain(0);
-    expect(state.run?.nextSentryFreeBreakByBreaker?.[bulldozerId]).toBeUndefined();
+    expect(
+      state.run?.nextSentryFreeBreakByBreaker?.[bulldozerId],
+    ).toBeUndefined();
     expect(
       state.run?.nextSentryFreeBreakTargetIceByBreaker?.[bulldozerId],
     ).toBeUndefined();
-
   });
 
   it("applies Lockjaw and Personal Touch only to selected icebreakers", () => {
@@ -1305,15 +1401,26 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         action.payload?.cardId === lockjawId &&
         action.payload?.targetCardId === targetId,
     );
-    state = apply(state, "runner", (action) => action.actionId === lockjaw.actionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === lockjaw.actionId,
+    );
     expect(state.cardInstances[lockjawId]?.tapped).toBe(true);
     expect(state.run?.remainderStrengthBonusByBreaker?.[targetId]).toBe(2);
-    expect(state.run?.remainderStrengthBonusByBreaker?.[otherId]).toBeUndefined();
+    expect(
+      state.run?.remainderStrengthBonusByBreaker?.[otherId],
+    ).toBeUndefined();
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.run).toBeUndefined();
     state = setEncounter(
       state,
-      addRezzedCorpIceForTest(state, "onr_v1_245_fire-wall", "rd", "second_wall"),
+      addRezzedCorpIceForTest(
+        state,
+        "onr_v1_245_fire-wall",
+        "rd",
+        "second_wall",
+      ),
     );
     expect(
       getLegalActions(state, "runner").some(
@@ -1330,7 +1437,12 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
     expect(state.cardInstances[lockjawId]?.tapped).toBe(false);
     state = setEncounter(
       state,
-      addRezzedCorpIceForTest(state, "onr_v1_245_fire-wall", "rd", "third_wall"),
+      addRezzedCorpIceForTest(
+        state,
+        "onr_v1_245_fire-wall",
+        "rd",
+        "third_wall",
+      ),
     );
     expect(
       getLegalActions(state, "runner").some(
@@ -1437,11 +1549,16 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
       ...state.cardInstances[hiddenHostedId]!,
       hostedOn: hiddenHostId,
     };
-    const corpHiddenHostedView = getPlayerView(state, "corp").opponent.rig?.find(
-      (card) => card.instanceId === hiddenHostedId,
+    const corpHiddenHostedView = getPlayerView(
+      state,
+      "corp",
+    ).opponent.rig?.find((card) => card.instanceId === hiddenHostedId);
+    expect(corpHiddenHostedView?.hostedOnLabel).toBe(
+      "installierte Runner-Karte",
     );
-    expect(corpHiddenHostedView?.hostedOnLabel).toBe("installierte Runner-Karte");
-    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Airport Locker");
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
+      "Airport Locker",
+    );
     const otherId = addInstalledRunnerProgramForTest(
       state,
       "onr_v1_014_codecracker",
@@ -1481,7 +1598,10 @@ describe("Proteus PRO009 Runner Icebreaker Choice/Modifier Suite", () => {
         action.type === "break_subroutine" &&
         action.payload?.breakerId === hostedId,
     );
-    const replay = replayEvents(replayInitial, state.eventLog.slice(replayStart));
+    const replay = replayEvents(
+      replayInitial,
+      state.eventLog.slice(replayStart),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
@@ -1492,7 +1612,8 @@ describe("MVP 0.1 engine foundation", () => {
     const context = buildPublicAbilitySchemaContext(
       "resolve_choice",
       {
-        v1922RunnerEventAbility: "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+        v1922RunnerEventAbility:
+          "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
         sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
         targetCardDefinitionId: "onr_v1_232_crystal-wall",
         cardId: "corp_hidden_card_instance_1",
@@ -1565,7 +1686,11 @@ describe("MVP 0.1 engine foundation", () => {
     expect(rezAction).toBeDefined();
     expect(getLegalActions(state, "runner").length).toBeGreaterThan(0);
 
-    state = apply(state, "corp", (action) => action.actionId === rezAction?.actionId);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === rezAction?.actionId,
+    );
     expect(state.timingPoint).toBe("runner_action.main");
     expect(state.activeSide).toBe("runner");
     expect(state.cardInstances[upgradeId]?.rezzed).toBe(true);
@@ -2026,7 +2151,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(state.run).toBeUndefined();
     expect(
       getPlayerView(state, "runner").publicEvents.at(-1)?.publicPayload
-      .actionType,
+        .actionType,
     ).toBe("steal_agenda");
   });
 
@@ -2071,9 +2196,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
       type: "upgrade",
       trashCost: 4,
     });
-    expect(getLegalActions(state, "runner").map((action) => action.type)).toEqual(
-      expect.arrayContaining(["trash_accessed_card", "decline_trash"]),
-    );
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toEqual(expect.arrayContaining(["trash_accessed_card", "decline_trash"]));
 
     const corpView = getPlayerView(state, "corp");
     expect(corpView.pendingChoice).toBeUndefined();
@@ -2101,7 +2226,10 @@ describe("MVP 0.1 runs, access and scoring", () => {
       JSON.stringify(corpAfterDecline.publicEvents.at(-1)?.publicPayload),
     ).not.toMatch(/Simple Upgrade|simple_upgrade|upgrade|trashCost/i);
 
-    const replay = replayEvents(replayInitial, state.eventLog.slice(replayStart));
+    const replay = replayEvents(
+      replayInitial,
+      state.eventLog.slice(replayStart),
+    );
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
@@ -3132,9 +3260,9 @@ describe("O:NR v1 Limited local private test access", () => {
         },
       ],
     });
-    expect(JSON.stringify(wallState.eventLog.at(-1)?.publicPayload)).not.toContain(
-      wallState.runner.heap[0],
-    );
+    expect(
+      JSON.stringify(wallState.eventLog.at(-1)?.publicPayload),
+    ).not.toContain(wallState.runner.heap[0]);
   });
 
   it("plays O:NR tagged operations, meat damage operations and Tycho Extension scoring", () => {
@@ -3465,7 +3593,6 @@ describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
     expect(breaker.effectRef).toMatch(/^effect\./);
     expect(breaker.type).toBe("break_subroutine");
   });
-
 });
 
 describe("MVP 0.4 controlled card pool and tags", () => {

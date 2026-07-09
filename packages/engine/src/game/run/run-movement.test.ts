@@ -109,7 +109,8 @@ function makeState(
       attackedServerId: "rd",
       phase: options.phase ?? "encounter_ice",
       position,
-      approachedIceId: options.approachedIceId ?? options.encounteredIceId ?? outer,
+      approachedIceId:
+        options.approachedIceId ?? options.encounteredIceId ?? outer,
       encounteredIceId: options.encounteredIceId ?? outer,
       brokenSubroutineIndexes: [0],
       resolvedSubroutineIndexes: [1],
@@ -127,7 +128,15 @@ function action(
   costs: LegalAction["costs"] = [],
   payload?: LegalAction["payload"],
 ): LegalAction {
-  return buildLegalAction(state, "runner", type, type, "game_rule", costs, payload);
+  return buildLegalAction(
+    state,
+    "runner",
+    type,
+    type,
+    "game_rule",
+    costs,
+    payload,
+  );
 }
 
 function hostFor(
@@ -137,11 +146,14 @@ function hostFor(
     corpRootRezActionsAvailable?: boolean;
     approachExposeAvailable?: boolean;
   } = {},
-): { host: RunMovementHost; calls: {
-  beganEncounter: CardInstanceId[];
-  access: LegalAction[];
-  finish: Array<{ successful: boolean; legalAction?: LegalAction }>;
-} } {
+): {
+  host: RunMovementHost;
+  calls: {
+    beganEncounter: CardInstanceId[];
+    access: LegalAction[];
+    finish: Array<{ successful: boolean; legalAction?: LegalAction }>;
+  };
+} {
   const calls: {
     beganEncounter: CardInstanceId[];
     access: LegalAction[];
@@ -218,6 +230,29 @@ describe("run movement execution", () => {
 
     expect(result).toEqual({ handled: false });
     expect(state.run?.phase).toBe("encounter_ice");
+  });
+
+  it("closes the hidden-resource access-start window before entering access", () => {
+    const state = makeState({ phase: "approach_ice" });
+    state.timingPoint = "game.checkpoint";
+    state.run!.hiddenRunnerResourceAccessStartServerId = "rd";
+    const { host, calls } = hostFor(state);
+    const continueAction = action(state, "continue_run", [], {
+      hiddenRunnerResourceAccessStartContinue: true,
+      serverId: "rd",
+    });
+
+    const result = handleRunMovementAction(host, continueAction);
+
+    expect(result).toMatchObject({
+      handled: true,
+      accessShouldStart: true,
+      stateChanged: true,
+    });
+    expect(state.run?.hiddenRunnerResourceAccessStartServerId).toBeUndefined();
+    expect(state.run?.hiddenRunnerResourceAccessStartWindowClosed).toBe(true);
+    expect(calls.access).toEqual([continueAction]);
+    expect(state.run?.phase).toBe("access");
   });
 
   it("moves past current ICE into the stable jack-out movement window", () => {
@@ -326,7 +361,8 @@ describe("run movement execution", () => {
     };
     const { host, calls } = hostFor(state);
     const pay = action(state, "continue_run", [{ credits: 2 }], {
-      fortRunWindowAbility: "runner_pay_or_end_run_after_passing_ice_on_this_fort",
+      fortRunWindowAbility:
+        "runner_pay_or_end_run_after_passing_ice_on_this_fort",
       decision: "pay",
       paymentAmount: 2,
       passedIceId: "ice_outer",

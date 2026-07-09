@@ -4,14 +4,23 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-const [contract, manifest, activeHints, compiledHints, aiDeckPool] =
-  await Promise.all([
-    readJson("data/ai/card-set-ai-readiness-v1.json"),
-    readJson("data/manifests/proteus-card-support.json"),
-    readJson("data/ai/ai-card-hints-active.json"),
-    readJson("data/ai/ai-card-hints-compiled.json"),
-    readJson("data/ai/ai-deck-pool-1.0.1.json"),
-  ]);
+const [
+  contract,
+  manifest,
+  activeHints,
+  compiledHints,
+  aiDeckPool,
+  familyScenarios,
+  selectedPilot,
+] = await Promise.all([
+  readJson("data/ai/card-set-ai-readiness-v1.json"),
+  readJson("data/manifests/proteus-card-support.json"),
+  readJson("data/ai/ai-card-hints-active.json"),
+  readJson("data/ai/ai-card-hints-compiled.json"),
+  readJson("data/ai/ai-deck-pool-1.0.1.json"),
+  readJson("data/scenarios/proteus-ai-family-decision-smokes-v1.json"),
+  readJson("data/ai/proteus-ai-selected-pilot-v1.json"),
+]);
 
 const readiness = contract.sets?.find((entry) => entry.setId === "proteus");
 assert(readiness, "Proteus readiness entry is missing.");
@@ -44,6 +53,12 @@ const actualEvidence = {
     (entry) => entry.quality?.benchmarkCovered === true,
   ).length,
   selectedDeckSmoke: true,
+  familyScenarioCount: familyScenarios.summary?.familyCount,
+  familyScenarioPilotCardCount: familyScenarios.summary?.coveredPilotCardCount,
+  selectedPilotGameCount: selectedPilot.totals?.games,
+  selectedPilotIllegalActionCount: selectedPilot.totals?.illegalActions,
+  selectedPilotReplayFailureCount: selectedPilot.totals?.replayFailures,
+  selectedPilotRedactionFailureCount: selectedPilot.totals?.redactionFailures,
   aiDeckPoolSnapshotCount: proteusPoolEntries.length,
 };
 
@@ -61,6 +76,10 @@ assert(
 assert(
   readiness.stages?.selected_ai_playtest_ready?.ready === true,
   "Proteus selected_ai_playtest_ready must reflect the selected-deck smoke.",
+);
+assert(
+  selectedPilot.gatePassed === true,
+  "Proteus selected_ai_playtest_ready requires a green selected pilot report.",
 );
 assert(
   readiness.stages?.default_pool_ready?.ready === proteusPoolEntries.length > 0,

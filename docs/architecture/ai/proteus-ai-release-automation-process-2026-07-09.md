@@ -92,34 +92,35 @@ Jeder Zustand kann bei einem Sicherheitsbefund nach `blocked` wechseln. Normale 
 
 ## Fortschritt
 
-| Paket | Status | Ergebnis |
-| --- | --- | --- |
-| PAI-0 | `done` | Zentraler Readiness-Vertrag trennt Hint-, Selected-Playtest- und Default-Pool-Stufe; Driftcheck und Server-Stage-Guard sind grün. |
-| PAI-1 | `done` | Deterministisches Inventar klassifiziert 154/154 Karten in elf Familien und bindet 114 Pilotdeck-Karten an Evidence und Removal Conditions. |
-| PAI-2A | `done` | TargetChoiceShadow klassifiziert Karten-, ICE-, Programm-, Hardware-, Server-, Side-, Counter-, Decline- und Pass-Optionen aus LegalAction-/side-safe Candidate-Evidence und liefert WhyNot-Gründe. |
-| PAI-2B | `done` | ActionSemanticCandidate trägt ein side-sicheres Run-/Access-Modell für Bypass, Zusatzsubroutinen, Redirect, Replacement, Post-run, Ambush-, Damage-, Tag-, Disruption-, Tax- und Payoff-Achsen. |
-| PAI-2C | `done` | Cost-/Timing-Profile binden X-Min/Max/Choice, gewählten Wert, explizite Restreserve sowie Action-, Encounter-, Run-, Turn- und Action-Debt-Dauer ausschließlich aus LegalAction-Payloads. |
-| PAI-2D | `done` | ActionSemanticCandidate bildet Zufall ausschließlich als noch nicht gezogenen Engine-RandomDrawRecord ab und bewertet sichtbare Bad-Publicity-Deltas, Akteursrelevanz und die Verlustschwelle ohne Ergebnisvorwegnahme. |
-| PAI-2E | `done` | Side-sicheres Modell trennt eigene Hidden-Resource-Constraints von abstraktem gegnerischem Risiko, redigiert gegnerische Mengen/Identitäten und hält Runner-Virus-, Corp-Antibody-, Purge- und Payout-Signale strikt auseinander. |
-| PAI-3 | `done` | Deterministischer Szenariobuilder bindet alle 114 Pilotdeck-Karten genau einmal an elf Familienpakete mit positiven/negativen Entscheidungsassertions, KI-Modelltests, realer Engine-Evidence sowie Hidden-Info-/Replay-/StateHash-Gates. |
-| PAI-4 | `next` | Reproduzierbarer Selected-Deck-Pilot mit fester Seed-Matrix und maschinenlesbarem Qualifikationsbericht. |
-| PAI-5 bis PAI-6 | `pending` | Noch nicht begonnen. |
+| Paket  | Status    | Ergebnis                                                                                                                                                                                                                                                                                                                           |
+| ------ | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PAI-0  | `done`    | Zentraler Readiness-Vertrag trennt Hint-, Selected-Playtest- und Default-Pool-Stufe; Driftcheck und Server-Stage-Guard sind grün.                                                                                                                                                                                                  |
+| PAI-1  | `done`    | Deterministisches Inventar klassifiziert 154/154 Karten in elf Familien und bindet 114 Pilotdeck-Karten an Evidence und Removal Conditions.                                                                                                                                                                                        |
+| PAI-2A | `done`    | TargetChoiceShadow klassifiziert Karten-, ICE-, Programm-, Hardware-, Server-, Side-, Counter-, Decline- und Pass-Optionen aus LegalAction-/side-safe Candidate-Evidence und liefert WhyNot-Gründe.                                                                                                                                |
+| PAI-2B | `done`    | ActionSemanticCandidate trägt ein side-sicheres Run-/Access-Modell für Bypass, Zusatzsubroutinen, Redirect, Replacement, Post-run, Ambush-, Damage-, Tag-, Disruption-, Tax- und Payoff-Achsen.                                                                                                                                    |
+| PAI-2C | `done`    | Cost-/Timing-Profile binden X-Min/Max/Choice, gewählten Wert, explizite Restreserve sowie Action-, Encounter-, Run-, Turn- und Action-Debt-Dauer ausschließlich aus LegalAction-Payloads.                                                                                                                                          |
+| PAI-2D | `done`    | ActionSemanticCandidate bildet Zufall ausschließlich als noch nicht gezogenen Engine-RandomDrawRecord ab und bewertet sichtbare Bad-Publicity-Deltas, Akteursrelevanz und die Verlustschwelle ohne Ergebnisvorwegnahme.                                                                                                            |
+| PAI-2E | `done`    | Side-sicheres Modell trennt eigene Hidden-Resource-Constraints von abstraktem gegnerischem Risiko, redigiert gegnerische Mengen/Identitäten und hält Runner-Virus-, Corp-Antibody-, Purge- und Payout-Signale strikt auseinander.                                                                                                  |
+| PAI-3  | `done`    | Deterministischer Szenariobuilder bindet alle 114 Pilotdeck-Karten genau einmal an elf Familienpakete mit positiven/negativen Entscheidungsassertions, KI-Modelltests, realer Engine-Evidence sowie Hidden-Info-/Replay-/StateHash-Gates.                                                                                          |
+| PAI-4  | `done`    | Vier Deckpaarungen über vier feste Seeds liefern 16 Pilotspiele: 0 IllegalActions, 0 Replay-/Redaction-Fehler, 25 % Abschluss-, 75 % Action-Limit-, 12,5 % No-Progress- und 0 % Fallback-Rate; vier Originalset-Kontrollen sind grün. Vier dabei gefundene Engine-Lücken wurden reproduziert, regressionsgetestet und geschlossen. |
+| PAI-5  | `next`    | Versionierte Promotion der vier qualifizierten Snapshots in Fixed/Seeded-Random-Deckpools.                                                                                                                                                                                                                                         |
+| PAI-6  | `pending` | Noch nicht begonnen.                                                                                                                                                                                                                                                                                                               |
 
 ## Paketfolge
 
-| Paket | Titel | Hauptziel | Commit-Vorschlag |
-| --- | --- | --- | --- |
-| PAI-0 | Supportstufen und Driftvertrag | Technische Zulassung, Selected-Pilot und Pool-Readiness trennen | `feat(ai): define Proteus support readiness stages` |
-| PAI-1 | Kartenfamilien-Inventar | 154/154 Karten maschinenlesbar klassifizieren | `data(ai): inventory Proteus readiness families` |
-| PAI-2A | Target-/Choice-Modell | side-safe Ziel- und Choice-Evidence konsumierbar machen | `feat(ai): model Proteus target choice readiness` |
-| PAI-2B | Run-/Access-Modell | Run-Modifikationen und Access-/Ambush-Folgen bewerten | `feat(ai): model Proteus run and access decisions` |
-| PAI-2C | X-Kosten und Timing | variable Kosten, Reserve, Dauer und Ablauf modellieren | `feat(ai): model Proteus cost and timing decisions` |
-| PAI-2D | Zufall und Bad Publicity | sichtbare Outcome-/Schwellenbewertung ergänzen | `feat(ai): model Proteus random and bad publicity decisions` |
-| PAI-2E | Hidden Resources und Virus | side-safe Hidden-/Counter-/Purge-Bewertung ergänzen | `feat(ai): model Proteus hidden resource and virus decisions` |
-| PAI-3 | Familienbezogene Szenarien | konkrete AI-Smokes und Invariance-Gates liefern | `test(ai): add Proteus family decision scenarios` |
-| PAI-4 | Selected-Deck-Pilot | feste Seed-Matrix und Readiness-Auswertung | `test(ai): qualify Proteus selected deck pilot` |
-| PAI-5 | Versionierter KI-Deckpool | Proteus für Fixed/Seeded Random bewusst promoten | `feat(ai): promote Proteus pilot deck pool` |
-| PAI-6 | UI, Wissen und Abschluss | Status sichtbar machen und Vollgate schließen | `feat(web): expose Proteus AI readiness status` |
+| Paket  | Titel                          | Hauptziel                                                       | Commit-Vorschlag                                              |
+| ------ | ------------------------------ | --------------------------------------------------------------- | ------------------------------------------------------------- |
+| PAI-0  | Supportstufen und Driftvertrag | Technische Zulassung, Selected-Pilot und Pool-Readiness trennen | `feat(ai): define Proteus support readiness stages`           |
+| PAI-1  | Kartenfamilien-Inventar        | 154/154 Karten maschinenlesbar klassifizieren                   | `data(ai): inventory Proteus readiness families`              |
+| PAI-2A | Target-/Choice-Modell          | side-safe Ziel- und Choice-Evidence konsumierbar machen         | `feat(ai): model Proteus target choice readiness`             |
+| PAI-2B | Run-/Access-Modell             | Run-Modifikationen und Access-/Ambush-Folgen bewerten           | `feat(ai): model Proteus run and access decisions`            |
+| PAI-2C | X-Kosten und Timing            | variable Kosten, Reserve, Dauer und Ablauf modellieren          | `feat(ai): model Proteus cost and timing decisions`           |
+| PAI-2D | Zufall und Bad Publicity       | sichtbare Outcome-/Schwellenbewertung ergänzen                  | `feat(ai): model Proteus random and bad publicity decisions`  |
+| PAI-2E | Hidden Resources und Virus     | side-safe Hidden-/Counter-/Purge-Bewertung ergänzen             | `feat(ai): model Proteus hidden resource and virus decisions` |
+| PAI-3  | Familienbezogene Szenarien     | konkrete AI-Smokes und Invariance-Gates liefern                 | `test(ai): add Proteus family decision scenarios`             |
+| PAI-4  | Selected-Deck-Pilot            | feste Seed-Matrix und Readiness-Auswertung                      | `test(ai): qualify Proteus selected deck pilot`               |
+| PAI-5  | Versionierter KI-Deckpool      | Proteus für Fixed/Seeded Random bewusst promoten                | `feat(ai): promote Proteus pilot deck pool`                   |
+| PAI-6  | UI, Wissen und Abschluss       | Status sichtbar machen und Vollgate schließen                   | `feat(web): expose Proteus AI readiness status`               |
 
 ## Paketdetails
 

@@ -103,6 +103,11 @@ export function handleRunMovementAction(
 ): RunMovementActionResult {
   if (
     legalAction.type === "continue_run" &&
+    legalAction.payload?.hiddenRunnerResourceAccessStartContinue === true
+  )
+    return continueHiddenRunnerResourceAccessStart(host, legalAction);
+  if (
+    legalAction.type === "continue_run" &&
     host.state.run?.corpPostPassIceReturnToHq
   )
     return resolveCorpPostPassIceReturnToHq(host, legalAction);
@@ -118,6 +123,31 @@ export function handleRunMovementAction(
   )
     return continueFromMovement(host, legalAction);
   return { handled: false };
+}
+
+function continueHiddenRunnerResourceAccessStart(
+  host: RunMovementHost,
+  legalAction: LegalAction,
+): RunMovementActionResult {
+  const run = host.state.run;
+  const serverId = run?.hiddenRunnerResourceAccessStartServerId;
+  if (!run || !serverId)
+    throw new Error("Es ist kein Hidden-Resource-Access-Startfenster offen.");
+  if (
+    legalAction.side !== "runner" ||
+    legalAction.payload?.serverId !== serverId
+  )
+    throw new Error("Die Hidden-Resource-Access-Fortsetzung ist ungueltig.");
+  delete run.hiddenRunnerResourceAccessStartServerId;
+  run.hiddenRunnerResourceAccessStartWindowClosed = true;
+  host.access.startAccessFromSuccessfulRun(legalAction);
+  return {
+    handled: true,
+    runContinues: true,
+    accessShouldStart: true,
+    stateChanged: true,
+    resolvedPayload: legalAction.payload,
+  };
 }
 
 export function buildCorpPostPassIceReturnToHqActions(
