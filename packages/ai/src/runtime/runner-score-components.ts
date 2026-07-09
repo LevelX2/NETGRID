@@ -13,6 +13,7 @@ import {
   runnerCreditYieldScoreComponent,
   type RunnerCreditYieldScoreDependencies,
 } from "./runner-credit-yield-score";
+import { runnerDamageThreatRunScoreComponent } from "../runner-damage-threat-assessment";
 import { runnerEncounterBreakScoreComponents } from "./runner-encounter-break-score";
 import {
   runnerFollowupScoreComponents,
@@ -145,10 +146,17 @@ export function runnerScoreComponents(
     ...runnerInstallScoreComponents(
       input,
       action,
-      { loanInstallAction: loanLiabilityAssessment?.loanInstallAction === true },
+      {
+        loanInstallAction: loanLiabilityAssessment?.loanInstallAction === true,
+      },
       dependencies.install,
     ),
   );
+  const damageThreatRunRisk = runnerDamageThreatRunScoreComponent(
+    input,
+    action,
+  );
+  if (damageThreatRunRisk) components.push(damageThreatRunRisk);
   components.push(
     ...runnerStartRunScoreComponents(input, action, dependencies.startRun),
   );

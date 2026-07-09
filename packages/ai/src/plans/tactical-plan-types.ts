@@ -5,7 +5,10 @@ import type { DeckCapabilityProfile } from "../deck-capabilities";
 import type { CorpStrategicIntentProfile } from "../corp-strategic-intent";
 import type { KnownRemoteAccessCommitment } from "../decision/known-remote-access-commitment";
 import type { TacticalGoalLike } from "../decision/semantic-decision-frame";
-import type { RunnerEconomyPosture, RunnerRunTargetEvaluation } from "../runner-run-target-evaluation";
+import type {
+  RunnerEconomyPosture,
+  RunnerRunTargetEvaluation,
+} from "../runner-run-target-evaluation";
 import type { RunnerHandDevelopmentEvaluation } from "../runner-hand-development";
 import type { RunnerTacticalGoal } from "../runner-tactical-goals";
 import type { RunnerStrategicIntentProfile } from "../runner-strategic-intent";
@@ -29,6 +32,7 @@ export type TacticalPlanType =
   | "runner.opportunistic_central_run"
   | "runner.clear_tags_or_survive"
   | "runner.convert_success_window"
+  | "runner.survival_defense"
   | "runner.restore_hand_buffer"
   | "runner.develop_hand_card"
   | "runner.play_best_hand_card"
@@ -46,6 +50,7 @@ export type PlanStepKind =
   | "pivot_to_alternative"
   | "draw_for_answer"
   | "draw_hand_buffer"
+  | "find_survival_answer"
   | "search_for_answer"
   | "setup_search_engine"
   | "gain_credits"
@@ -87,6 +92,7 @@ export type RequiredCapabilityKind =
   | "card_draw"
   | "tag_clear"
   | "hand_buffer"
+  | "survival"
   | "card_search"
   | "server_access"
   | "bank_capacity"
@@ -152,11 +158,7 @@ export type PlanScoreBreakdown = {
   reason: string;
 };
 
-export type RunnerDrawOverflowSeverity =
-  | "none"
-  | "minor"
-  | "moderate"
-  | "high";
+export type RunnerDrawOverflowSeverity = "none" | "minor" | "moderate" | "high";
 
 export type RunnerDrawOverflowUrgencyOverride =
   | "none"
