@@ -64,6 +64,7 @@ describe("access window choice", () => {
         knownRootDefinitionId: "simple_agenda",
         targetType: "unknown",
         trashCost: 4,
+        stealCost: 5,
         generalTrashCost: 0,
         dedicatedTrashCredits: 4,
         reserveWouldBreak: false,
@@ -72,7 +73,7 @@ describe("access window choice", () => {
     ).toMatchObject({
       target: "agenda",
       intendedAccessAction: "steal",
-      projections: ["agenda_steal"],
+      projections: ["agenda_steal", "agenda_steal_cost"],
     });
 
     expect(

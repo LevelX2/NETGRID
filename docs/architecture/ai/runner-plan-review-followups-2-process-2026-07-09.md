@@ -122,6 +122,8 @@ Commit: `fix(ai): honor success windows in runner run plans`
 
 Ziel: Sichtbare/current-access Steal-Kosten aus LegalActions/Evidence in `AccessDecisionProjection` und RunnerRunPlan-Reserve einführen, ohne verdeckte Kartenwerte zu erraten.
 
+Status: erledigt 2026-07-09. Gates grün: gezielte Access-Projektions-/Invariant-/Window-Tests, `runner-run-plan-memory`-/Access-Policy-Tests, `@netgrid/ai` Typecheck, `git diff --check`.
+
 Kernartefakte:
 
 - `packages/ai/src/decision/access-decision-projection.ts`

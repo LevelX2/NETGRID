@@ -173,6 +173,7 @@ export function buildRunnerRemoteTrashAccessContext(
       : {}),
     targetType,
     trashCost,
+    stealCost: action.type === "steal_agenda" ? stealCostForAction(action) : 0,
     generalTrashCost: generalCreditCost,
     dedicatedTrashCredits,
     reserveWouldBreak: deferredByBudget,
@@ -241,6 +242,18 @@ export function buildRunnerRemoteTrashAccessContext(
     ...(trashable ? { targetType } : {}),
     ...(trashable ? { role } : {}),
   };
+}
+
+function stealCostForAction(action: LegalAction): number {
+  const explicitCost = action.costs
+    .map((cost) => cost.credits)
+    .filter((credits): credits is number => typeof credits === "number")
+    .reduce((sum, credits) => sum + credits, 0);
+  const payloadCost = action.payload?.stealCost;
+  if (typeof payloadCost === "number") {
+    return Math.max(0, Math.floor(payloadCost));
+  }
+  return Math.max(0, Math.floor(explicitCost));
 }
 
 export function createRunnerRemoteTrashAccessContext(dependencies: {

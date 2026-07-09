@@ -57,6 +57,16 @@ describe("access decision invariants", () => {
     ]);
   });
 
+  it("requires steal intent for visible steal costs", () => {
+    expect(
+      accessDecisionInvariantViolations({
+        target: "asset",
+        intendedAccessAction: "decline",
+        stealCost: 5,
+      }),
+    ).toEqual(["steal_cost_requires_steal_intent"]);
+  });
+
   it("keeps target-choice dry runs from materializing selections", () => {
     expect(
       accessDecisionInvariantViolations({
@@ -73,4 +83,3 @@ describe("access decision invariants", () => {
     ]);
   });
 });
-

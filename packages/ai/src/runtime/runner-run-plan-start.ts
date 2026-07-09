@@ -77,6 +77,7 @@ export function createRunnerRunPlanForSelectedAction(params: {
     input,
     targetServerId,
     evaluation: matchingTargetEvaluation,
+    selectedAction,
   });
   const accessIntent = runnerRunAccessIntentFor({
     targetServerId,
@@ -402,6 +403,7 @@ function runnerRunAccessReserveForStealOrTrash(params: {
   input: AiDecisionInput;
   targetServerId: RunnerRunPlanServerId;
   evaluation: RunnerRunTargetEvaluation | undefined;
+  selectedAction: LegalAction;
 }): RunnerRunAccessReserveQuote {
   const payoff = params.evaluation?.accessPayoff;
   if (payoff === "trash_affordable" || payoff === "trash_unaffordable") {
@@ -428,11 +430,40 @@ function runnerRunAccessReserveForStealOrTrash(params: {
   }
 
   if (payoff === "agenda" || payoff === "score_threat") {
+    const payloadStealCost = legalActionStealCost(params.selectedAction);
+    const evidenceStealCost = evidenceNumberValue(params.evaluation?.evidence, [
+      "agenda_steal_cost",
+      "known_agenda_steal_cost",
+      "known_remote_agenda_steal_cost",
+      "access_decision_projection_steal_cost",
+      "runner_run_plan_reserve_steal_cost",
+    ]);
+    const stealReserve = Math.max(
+      0,
+      payloadStealCost ?? 0,
+      evidenceStealCost ?? 0,
+    );
     return {
-      reserveForStealOrTrash: 0,
-      reservedCreditsForSteal: 0,
+      reserveForStealOrTrash: stealReserve,
+      reservedCreditsForSteal: stealReserve,
       reservedCreditsForTrash: 0,
-      evidence: ["runner_run_plan_reserve_steal_cost:unknown_or_zero"],
+      evidence:
+        stealReserve > 0
+          ? [
+              `runner_run_plan_reserve_steal_cost:${stealReserve}`,
+              `runner_run_plan_reserve_payoff:${payoff}`,
+              ...(payloadStealCost !== undefined
+                ? [
+                    "runner_run_plan_reserve_steal_cost_source:legal_action_payload",
+                  ]
+                : []),
+              ...(evidenceStealCost !== undefined
+                ? [
+                    "runner_run_plan_reserve_steal_cost_source:evaluation_evidence",
+                  ]
+                : []),
+            ]
+          : ["runner_run_plan_reserve_steal_cost:unknown_or_zero"],
     };
   }
 
@@ -442,6 +473,15 @@ function runnerRunAccessReserveForStealOrTrash(params: {
     reservedCreditsForTrash: 0,
     evidence: [],
   };
+}
+
+function legalActionStealCost(action: LegalAction): number | undefined {
+  return numberPayloadValueForKeys(action, [
+    "stealCost",
+    "agendaStealCost",
+    "runnerStealCost",
+    "additionalStealCost",
+  ]);
 }
 
 function cheapestKnownRemoteTrashCost(

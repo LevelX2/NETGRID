@@ -4,6 +4,7 @@ export type AccessDecisionInvariantInput = {
   target: AccessTargetKind;
   intendedAccessAction: AccessIntent;
   trashCost?: number;
+  stealCost?: number;
   generalTrashCost?: number;
   targetChoiceWouldSelect?: {
     selectedChoicesCreated: boolean;
@@ -16,7 +17,9 @@ export function assertAccessDecisionInvariants(
 ): void {
   const violations = accessDecisionInvariantViolations(input);
   if (violations.length === 0) return;
-  throw new Error(`Access decision invariant violation: ${violations.join(", ")}`);
+  throw new Error(
+    `Access decision invariant violation: ${violations.join(", ")}`,
+  );
 }
 
 export function accessDecisionInvariantViolations(
@@ -28,6 +31,13 @@ export function accessDecisionInvariantViolations(
   }
   if (input.target === "agenda" && input.intendedAccessAction === "trash") {
     violations.push("agenda_cannot_be_trashed");
+  }
+  if (
+    input.stealCost !== undefined &&
+    input.stealCost > 0 &&
+    input.intendedAccessAction !== "steal"
+  ) {
+    violations.push("steal_cost_requires_steal_intent");
   }
   if (
     input.trashCost !== undefined &&
@@ -56,4 +66,3 @@ export function accessDecisionInvariantViolations(
   }
   return violations;
 }
-

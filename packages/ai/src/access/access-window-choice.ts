@@ -18,6 +18,7 @@ export function projectAccessWindowChoice(params: {
   knownRootDefinitionId?: string;
   targetType: AccessWindowTargetType;
   trashCost: number;
+  stealCost?: number;
   generalTrashCost: number;
   dedicatedTrashCredits: number;
   reserveWouldBreak: boolean;
@@ -41,6 +42,9 @@ export function projectAccessWindowChoice(params: {
           generalTrashCost: params.generalTrashCost,
           dedicatedTrashCredits: params.dedicatedTrashCredits,
         }
+      : {}),
+    ...(intendedAccessAction === "steal" && params.stealCost !== undefined
+      ? { stealCost: params.stealCost }
       : {}),
     reserveWouldBreak: params.reserveWouldBreak,
     finitePoolValueRemaining: params.finitePoolValueRemaining,

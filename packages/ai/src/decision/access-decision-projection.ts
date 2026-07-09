@@ -1,4 +1,7 @@
-import type { AccessIntent, AccessTargetKind } from "../access/access-decision-types";
+import type {
+  AccessIntent,
+  AccessTargetKind,
+} from "../access/access-decision-types";
 import { assertAccessDecisionInvariants } from "../access/access-decision-invariants";
 
 export type AccessDecisionProjectionSource =
@@ -12,6 +15,7 @@ export type AccessDecisionProjectionTarget = AccessTargetKind;
 
 export type AccessDecisionProjectionKind =
   | "agenda_steal"
+  | "agenda_steal_cost"
   | "asset_trash"
   | "node_trash"
   | "upgrade_trash"
@@ -50,6 +54,7 @@ export function projectAccessDecision(params: {
   target: AccessDecisionProjectionTarget;
   intendedAccessAction: AccessDecisionProjectionAction;
   trashCost?: number;
+  stealCost?: number;
   generalTrashCost?: number;
   dedicatedTrashCredits?: number;
   reserveWouldBreak?: boolean;
@@ -60,6 +65,14 @@ export function projectAccessDecision(params: {
   const projections = new Set<AccessDecisionProjectionKind>();
   if (params.target === "agenda" && params.intendedAccessAction === "steal") {
     projections.add("agenda_steal");
+  }
+  if (
+    params.target === "agenda" &&
+    params.intendedAccessAction === "steal" &&
+    params.stealCost !== undefined &&
+    params.stealCost > 0
+  ) {
+    projections.add("agenda_steal_cost");
   }
   if (params.intendedAccessAction === "trash") {
     if (params.target === "asset") projections.add("asset_trash");
@@ -114,7 +127,9 @@ export function projectAccessDecision(params: {
       `access_decision_projection_source:${params.source}`,
       `access_decision_projection_server:${params.serverId}`,
       ...(params.knownRootDefinitionId
-        ? [`access_decision_projection_known_root:${params.knownRootDefinitionId}`]
+        ? [
+            `access_decision_projection_known_root:${params.knownRootDefinitionId}`,
+          ]
         : []),
       `access_decision_projection_target:${params.target}`,
       `access_decision_projection_intended_action:${params.intendedAccessAction}`,
@@ -123,6 +138,9 @@ export function projectAccessDecision(params: {
       ),
       ...(params.trashCost !== undefined
         ? [`access_decision_projection_trash_cost:${params.trashCost}`]
+        : []),
+      ...(params.stealCost !== undefined
+        ? [`access_decision_projection_steal_cost:${params.stealCost}`]
         : []),
       ...(params.generalTrashCost !== undefined
         ? [

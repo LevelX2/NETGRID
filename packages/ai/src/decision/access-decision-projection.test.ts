@@ -28,6 +28,29 @@ describe("access decision projection", () => {
     );
   });
 
+  it("projects visible agenda steal costs consistently", () => {
+    const projection = projectAccessDecision({
+      source: "access_window",
+      serverId: "remote_1",
+      knownRootDefinitionId: "simple_agenda",
+      target: "agenda",
+      intendedAccessAction: "steal",
+      stealCost: 5,
+    });
+
+    expect(projection.projections).toEqual([
+      "agenda_steal",
+      "agenda_steal_cost",
+    ]);
+    expect(projection.evidence).toEqual(
+      expect.arrayContaining([
+        "access_decision_projection:agenda_steal",
+        "access_decision_projection:agenda_steal_cost",
+        "access_decision_projection_steal_cost:5",
+      ]),
+    );
+  });
+
   it("projects asset trash with finite pool and trash-cost waiver", () => {
     const projection = projectAccessDecision({
       source: "access_window",

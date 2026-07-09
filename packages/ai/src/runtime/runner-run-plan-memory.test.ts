@@ -252,6 +252,37 @@ describe("runner run plan memory", () => {
     );
   });
 
+  it("reserves visible agenda steal cost when creating a remote agenda run plan", () => {
+    const startRun = action("start_run", { serverId: "remote_1" });
+    const plan = createRunnerRunPlanForSelectedAction({
+      input: runnerInput({
+        activeRun: false,
+        legalActions: [startRun],
+      }),
+      selectedAction: startRun,
+      runnerRunTargetEvaluations: [
+        runTargetEvaluation(startRun, {
+          targetServerId: "remote_1",
+          targetKind: "remote",
+          accessPayoff: "agenda",
+          evidence: ["agenda_steal_cost:5"],
+        }),
+      ],
+    });
+
+    expect(plan?.accessIntent?.reserveForStealOrTrash).toBe(5);
+    expect(plan?.budget.reservedCreditsForSteal).toBe(5);
+    expect(plan?.budget.reservedCreditsForTrash).toBe(0);
+    expect(plan?.reserve.preserveStealOrTrashCredits).toBe(5);
+    expect(plan?.reserve.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_run_plan_reserve_steal_cost:5",
+        "runner_run_plan_reserve_payoff:agenda",
+        "runner_run_plan_reserve_steal_cost_source:evaluation_evidence",
+      ]),
+    );
+  });
+
   it("creates a run plan from a selected card run action with a concrete target evaluation", () => {
     const runEvent = action("play_event", {
       sourceDefinitionId: "simple_run_event",
@@ -558,6 +589,7 @@ function runTargetEvaluation(
     accessPayoff?: RunnerRunTargetEvaluation["accessPayoff"];
     targetServerId?: string;
     targetKind?: RunnerRunTargetEvaluation["targetKind"];
+    evidence?: string[];
   } = {},
 ): RunnerRunTargetEvaluation {
   const accessPayoff = options.accessPayoff ?? "unknown";
@@ -620,6 +652,6 @@ function runTargetEvaluation(
     scoreThreat: false,
     recommendation: "run_now",
     score: 100,
-    evidence: [`target:${targetServerId}`],
+    evidence: [`target:${targetServerId}`, ...(options.evidence ?? [])],
   };
 }
