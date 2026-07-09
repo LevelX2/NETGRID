@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "netgrid.ai-support-readiness.v1",
+  "readinessId": "card-set-ai-readiness-v1",
+  "sets": [
+    {
+      "setId": "proteus",
+      "technicalEligibilityStatus": "ai_supported",
+      "highestApprovedStage": "default_pool_ready",
+      "stages": {
+        "hint_ready": {
+          "ready": true,
+          "reason": "Alle 154 Proteus-Karten besitzen aktive und kompilierte AI-Hints."
+        },
+        "selected_ai_playtest_ready": {
+          "ready": true,
+          "reason": "Vier ausgewählte Proteus-KI-Decks bestehen die feste 16-Spiel-Seed-Matrix sowie LegalAction-, Replay-, Redaction- und Originalset-Kontrollgates."
+        },
+        "default_pool_ready": {
+          "ready": true,
+          "reason": "Vier qualifizierte Proteus-Snapshots sind im versionierten KI-Deckpool 1.1.0 für poolbewusste Fixed- und Seeded-Random-Auswahl freigegeben."
+        }
+      },
+      "evidence": {
+        "cardCount": 154,
+        "aiSupportedCardCount": 154,
+        "activeHintCount": 154,
+        "compiledHintCount": 154,
+        "uniqueScenarioRefCount": 1,
+        "humanReviewedHintCount": 146,
+        "strategyCoveredHintCount": 55,
+        "benchmarkCoveredHintCount": 6,
+        "selectedDeckSmoke": true,
+        "familyScenarioCount": 11,
+        "familyScenarioPilotCardCount": 114,
+        "selectedPilotGameCount": 16,
+        "selectedPilotIllegalActionCount": 0,
+        "selectedPilotReplayFailureCount": 0,
+        "selectedPilotRedactionFailureCount": 0,
+        "aiDeckPoolSnapshotCount": 4
+      },
+      "removalConditions": []
+    }
+  ]
+}

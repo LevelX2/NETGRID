@@ -5,7 +5,7 @@
   "generatedAt": "2026-05-25",
   "copyrightNote": "Lokale Playtest-Decklisten aus vorhandenen NETGRID-Kartendaten; keine offiziellen Artworks, Logos, Frames oder Card Backs.",
   "gateNotes": [
-    "Proteus ist nach PRO020 als Human-vs-Human-Playtest deck_legal und format_legal, bleibt aber nicht ai_supported.",
+    "Proteus ist nach PRO020 deck_legal, format_legal und technisch ai_supported; die vier Decks sind als selected_ai_playtest_ready freigegeben, aber noch nicht default_pool_ready.",
     "Im Matchstart-Kartenpool Originalset & Protheus sind Protheus-Karten über das private Formatprofil netgrid_private_local_proteus_playtest_v1 legal; das Profil verlangt jetzt deck_legal und human_playable.",
     "Die Originalset-Füllkarten sind zur Spielbarkeit enthalten: Runner brauchen Breaker und Economy, Korp-Decks brauchen Economy und Draw."
   ],

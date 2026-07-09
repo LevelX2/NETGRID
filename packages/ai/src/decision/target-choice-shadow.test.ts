@@ -95,8 +95,12 @@ describe("TargetChoiceShadow", () => {
       requirementId: "discard_choice",
       optionId: "gain",
       kind: "choice_option",
+      optionClass: "choice",
       score: 124,
     });
+    expect(
+      report.rankedOptions.find((option) => option.optionId === "run")?.whyNot,
+    ).toEqual(expect.arrayContaining(["explicitly_avoided"]));
     expect(report.evidence).toEqual(
       expect.arrayContaining([
         "scorecard_version:target-choice-shadow-scorecard-v2",
@@ -125,6 +129,61 @@ describe("TargetChoiceShadow", () => {
       "hq",
       "remote_1",
     ]);
+    expect(report.blockedRequirements).toEqual([]);
+  });
+
+  it("classifies counter, decline and pass choices without creating payloads", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        choiceRequirements: [
+          {
+            choiceId: "proteus_counter_choice",
+            minSelections: 0,
+            maxSelections: 1,
+            optionIds: ["power_counter_1", "decline", "pass"],
+          },
+        ],
+      }),
+      preferredOptionIds: ["power_counter_1"],
+    });
+
+    expect(
+      Object.fromEntries(
+        report.rankedOptions.map((option) => [
+          option.optionId,
+          option.optionClass,
+        ]),
+      ),
+    ).toEqual({
+      power_counter_1: "counter",
+      decline: "decline",
+      pass: "pass",
+    });
+    expect(report.selectionOutput.selectedChoicesCreated).toBe(false);
+    expect(report.selectionOutput.selectedTargetsCreated).toBe(false);
+  });
+
+  it("accepts side options only when the LegalAction exposes allowed sides", () => {
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        targetRequirements: [
+          {
+            id: "chosen_side",
+            kind: "side",
+            visibility: "known_to_actor",
+            allowedSides: ["runner", "corp"],
+          },
+        ],
+      }),
+      preferredOptionIds: ["runner"],
+    });
+
+    expect(report.rankedOptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ optionId: "runner", optionClass: "side" }),
+        expect.objectContaining({ optionId: "corp", optionClass: "side" }),
+      ]),
+    );
     expect(report.blockedRequirements).toEqual([]);
   });
 
@@ -500,7 +559,9 @@ describe("TargetChoiceShadow", () => {
       },
     });
 
-    expect(report.rankedOptions.map((option) => option.optionId)).toEqual(["rd"]);
+    expect(report.rankedOptions.map((option) => option.optionId)).toEqual([
+      "rd",
+    ]);
     expect(report.rankedOptions[0]?.evidence).toEqual(
       expect.arrayContaining(["target_option_source:explicit_side_safe_map"]),
     );
@@ -605,6 +666,63 @@ describe("TargetChoiceShadow", () => {
       selectedChoicesCreated: false,
       selectedTargetsCreated: false,
     });
+  });
+
+  it("preserves side-safe program and hardware target classes behind card requirements", () => {
+    const candidate = semanticCandidate({ actionId: "proteus-card-targets" });
+    if (!candidate.targetContext) throw new Error("Missing target context");
+    const targetContext = candidate.targetContext;
+    candidate.targetContext = {
+      ...targetContext,
+      selectedTargets: [
+        {
+          targetId: "program-visible",
+          targetKind: "program",
+          targetSide: "runner",
+          visibilityScope: "actor_private",
+          evidence: ["legal_action_program_target"],
+        },
+      ],
+      availableTargets: [
+        {
+          targetId: "hardware-visible",
+          targetKind: "hardware",
+          targetSide: "runner",
+          evidence: ["legal_action_hardware_target"],
+        },
+      ],
+      targetKind: "program",
+    };
+    const report = buildTargetChoiceShadowReport({
+      action: action({
+        actionId: "proteus-card-targets",
+        type: "activated_card_ability",
+        targetRequirements: [
+          {
+            id: "installed_card",
+            kind: "card",
+            side: "runner",
+            visibility: "known_to_actor",
+          },
+        ],
+      }),
+      candidate,
+      preferredOptionIds: ["program-visible"],
+    });
+
+    expect(report.rankedOptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          optionId: "program-visible",
+          optionClass: "program",
+        }),
+        expect.objectContaining({
+          optionId: "hardware-visible",
+          optionClass: "hardware",
+        }),
+      ]),
+    );
+    expect(report.blockedRequirements).toEqual([]);
   });
 
   it("covers accessed-card trash and decline contexts as report-only diagnostics", () => {

@@ -206,6 +206,33 @@ function supportActionFor(
 }
 
 describe("PRO011 hidden resource timing hardening", () => {
+  it("removes a dominated lower-net bank action when both would trash the same source", () => {
+    const state = runnerState("pro011-bank-dominance");
+    state.runner.credits = 3;
+    const swissId = installHiddenResource(
+      state,
+      "onr_proteus_152_swiss-bank-account",
+      "pro011_dominance_swiss",
+    );
+    state.runner.credits = 3;
+    state.runnerCostPenaltySupportWindow = {
+      windowId: "runner_cost_penalty_support.test",
+      originalActionId: "runner.install.test",
+      amountDue: 6,
+      kind: "cost",
+      createdAtStateVersion: state.stateVersion,
+      runnerCreditTarget: 6,
+    };
+
+    const supportActions = getLegalActions(state, "runner").filter(
+      (candidate) => candidate.payload?.cardId === swissId,
+    );
+
+    expect(supportActions).toHaveLength(1);
+    expect(supportActions[0]?.payload?.gainCreditsAmount).toBe(6);
+    expect(supportActions[0]?.costs).toEqual([{ credits: 3 }]);
+  });
+
   it("offers bank resources only in runner cost/penalty support windows and trashes Chiba on use", () => {
     let state = runnerState("pro011-1-bank");
     state.runner.credits = 1;
@@ -316,7 +343,8 @@ describe("PRO011 hidden resource timing hardening", () => {
 
     const playScore = getLegalActions(state, "runner").find(
       (candidate) =>
-        candidate.type === "play_event" && candidate.payload?.cardId === scoreId,
+        candidate.type === "play_event" &&
+        candidate.payload?.cardId === scoreId,
     );
     expect(playScore).toBeDefined();
     const opened = applyLegal(state, "runner", playScore!);

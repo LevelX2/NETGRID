@@ -3,10 +3,12 @@
 import { SlidersHorizontal } from "lucide-react";
 
 import {
+  aiDeckReadinessLabel,
   humanAiSideLabel,
   sideSelectionLabel,
   type HumanAiSideSelection,
-  type HumanSideSelection
+  type HumanSideSelection,
+  type MatchCardPoolSelection
 } from "../../app/match-start";
 import type {
   MatchStartPlayerClockGraceSeconds,
@@ -35,6 +37,7 @@ export function MatchStartAdvancedOptions({
   isHumanVsHuman,
   isHumanVsAi,
   hasAiOpponent,
+  matchCardPool,
   humanSideSelection,
   humanAiSideSelection,
   countdownSeconds,
@@ -81,6 +84,7 @@ export function MatchStartAdvancedOptions({
   isHumanVsHuman: boolean;
   isHumanVsAi: boolean;
   hasAiOpponent: boolean;
+  matchCardPool: MatchCardPoolSelection;
   humanSideSelection: HumanSideSelection;
   humanAiSideSelection: HumanAiSideSelection;
   countdownSeconds: 3 | 5 | 10;
@@ -124,6 +128,7 @@ export function MatchStartAdvancedOptions({
   onSelectedParticipantBRunnerLocalDeckId(deckId: string): void;
   onSelectedParticipantBCorpLocalDeckId(deckId: string): void;
 }) {
+  const aiReadiness = aiDeckReadinessLabel(aiDeckPolicy, matchCardPool);
   return (
     <details className="advancedMatchOptions" data-testid="advanced-match-options">
       <summary>
@@ -235,6 +240,10 @@ export function MatchStartAdvancedOptions({
               <option value="fixed">Feste Standard-Decks</option>
               <option value="seeded_random">Deterministisch zufällig</option>
             </select>
+            <small className={`aiDeckReadiness ${aiReadiness.ready ? "ready" : "blocked"}`} data-testid="ai-deck-readiness">
+              <strong>{aiReadiness.title}</strong>
+              <span>{aiReadiness.detail}</span>
+            </small>
           </label>
         ) : null}
       </div>

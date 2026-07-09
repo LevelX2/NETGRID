@@ -85,6 +85,11 @@ export function canResolveOnPlayCardImplementationAbility(
       return deps.rezzedBlackIceTargetCount(state) > 0;
     if (effect.kind === "start_runner_program_install_action_bundle")
       return deps.runnerValuPakInstallableProgramCount(state) > 0;
+    if (effect.kind === "gain_credits_for_runner_trash_history")
+      return (
+        state.runnerTurnFlags?.trashedAdvertisementThisTurn === true ||
+        state.runnerTurnFlags?.trashedTransactionsThisTurn === true
+      );
     return true;
   });
 }

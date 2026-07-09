@@ -43,9 +43,12 @@
 - Aktive Szenarien: `data/scenarios/`.
 - Classic-Endstand: `docs/releases/classic/final-review.md` – 52/52 Karten
   engine-/human-playable und technisch AI-supported.
-- Proteus-Endstand: `docs/releases/proteus/` – 154/154 Karten
-  engine-/human-playable; AI-Play-Strength und Poolpromotion sind separate
-  Gates.
+- Proteus-Endstand: 154/154 Karten engine-/human-playable. Die
+  AI-Reconciliation qualifiziert alle 114 Karten der vier Pilotdecks über elf
+  Familien-Szenarien; vier Snapshots sind im AI-Deckpool 1.1.0 für Fixed- und
+  Seeded-Random-Auswahl freigegeben. Führend sind
+  `data/ai/card-set-ai-readiness-v1.json` und
+  `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`.
 - Originalset-/Releasehistorie liegt unter `docs/releases/v1/`; sie ist keine
   zweite aktuelle Runtimequelle.
 
@@ -61,10 +64,12 @@
 - Proteus-Reconciliation:
   - `docs/architecture/ai/proteus-ai-release-reconciliation-plan-2026-07-09.md`
   - `docs/architecture/ai/proteus-ai-release-automation-process-2026-07-09.md`
+  - `docs/reviews/ai/proteus-ai-release-reconciliation-final-review-2026-07-09.md`
 - Aktive Gates:
   - `corepack pnpm check:ai`
   - `corepack pnpm check:ai:full`
   - `corepack pnpm check:ai-deck-doctrine-strategy`
+  - `corepack pnpm check:proteus-ai-readiness`
 
 ## Betrieb und Qualität
 

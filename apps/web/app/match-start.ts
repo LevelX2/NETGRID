@@ -1,4 +1,5 @@
 import type { ApiMatchStatus, ApiPlayerClockSnapshot } from "@netgrid/shared";
+import readinessData from "../../../data/ai/card-set-ai-readiness-v1.json";
 
 export type PlayMode = "human_vs_human" | "human_vs_ai" | "ai_vs_ai";
 export type HumanSideSelection = "runner" | "corp" | "random";
@@ -8,6 +9,28 @@ export type MatchFormatSelection = "rules_match" | "two_game_side_swap";
 export const MATCH_CARD_POOL_OPTIONS = ["originalset", "originalset_classic", "originalset_proteus", "originalset_classic_proteus"] as const;
 export type MatchCardPoolSelection = (typeof MATCH_CARD_POOL_OPTIONS)[number];
 export type AiDeckPolicySelection = "selected" | "fixed" | "seeded_random" | "same_as_participant_a";
+
+export function aiDeckReadinessLabel(
+  policy: AiDeckPolicySelection,
+  cardPool: MatchCardPoolSelection
+): { title: string; detail: string; ready: boolean } {
+  const includesProteus = cardPool === "originalset_proteus" || cardPool === "originalset_classic_proteus";
+  const usesDefaultPool = policy === "fixed" || policy === "seeded_random";
+  if (!includesProteus) {
+    return {
+      title: usesDefaultPool ? "Standardpool freigegeben" : "Auswahlmodus freigegeben",
+      detail: usesDefaultPool ? "Nur für den gewählten Kartenpool qualifizierte KI-Decks" : "Das gewählte Deck muss KI-unterstützte Karten enthalten",
+      ready: true
+    };
+  }
+  const stage = usesDefaultPool ? "default_pool_ready" : "selected_ai_playtest_ready";
+  const ready = readinessData.sets.find((entry) => entry.setId === "proteus")?.stages[stage].ready === true;
+  return {
+    title: usesDefaultPool ? `Protheus-KI: Standardpool ${ready ? "freigegeben" : "gesperrt"}` : `Protheus-KI: Selected/Pilot ${ready ? "freigegeben" : "gesperrt"}`,
+    detail: usesDefaultPool ? "Vier qualifizierte Pilotdecks · Fixed und Seeded Random" : "Explizit gewählte KI-Decks · side-sicherer Playtest-Stand",
+    ready
+  };
+}
 
 export type DerivedMatchStart = {
   requestedPlayMode: PlayMode;

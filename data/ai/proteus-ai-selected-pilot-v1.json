@@ -1,0 +1,692 @@
+{
+  "schemaVersion": "netgrid.proteus-ai-selected-pilot.v1",
+  "pilotId": "proteus-ai-selected-pilot-v1",
+  "asOf": "2026-07-09",
+  "status": "qualified",
+  "config": {
+    "seeds": [
+      "proteus-pilot-qualifier-01",
+      "proteus-pilot-qualifier-02",
+      "proteus-pilot-holdout-01",
+      "proteus-pilot-holdout-02"
+    ],
+    "maxActions": 180,
+    "pairCount": 4,
+    "controllerModes": {
+      "runner": "current_candidate",
+      "corp": "current_candidate"
+    },
+    "selectedDeckIds": [
+      "proteus_corp_antibody_tax_2026_05_25",
+      "proteus_corp_region_fast_score_2026_05_25",
+      "proteus_runner_hq_virus_derez_2026_05_25",
+      "proteus_runner_rd_bad_publicity_2026_05_25"
+    ]
+  },
+  "thresholds": {
+    "illegalActionsMax": 0,
+    "replayFailuresMax": 0,
+    "redactionFailuresMax": 0,
+    "actionLimitRateMax": 0.75,
+    "noProgressRateMax": 0.25,
+    "weightedFallbackRateMax": 0.35,
+    "originalsetControlFailuresMax": 0
+  },
+  "gateChecks": {
+    "illegalActions": true,
+    "replay": true,
+    "redaction": true,
+    "actionLimit": true,
+    "noProgress": true,
+    "fallback": true,
+    "originalsetControl": true
+  },
+  "gatePassed": true,
+  "totals": {
+    "games": 16,
+    "decisions": 2620,
+    "completedGames": 5,
+    "actionLimitGames": 11,
+    "noProgressGames": 2,
+    "illegalActions": 0,
+    "replayFailures": 0,
+    "redactionFailures": 0
+  },
+  "rates": {
+    "completionRate": 0.313,
+    "actionLimitRate": 0.688,
+    "noProgressRate": 0.125,
+    "weightedFallbackRate": 0
+  },
+  "originalsetControl": {
+    "failures": 0,
+    "games": [
+      {
+        "seed": "originalset-control:proteus-pilot-qualifier-01",
+        "winner": "action_limit_reached",
+        "actions": 180,
+        "finalStateHash": "fnv1a:958a71ee",
+        "replayOk": true,
+        "illegalActions": 0
+      },
+      {
+        "seed": "originalset-control:proteus-pilot-qualifier-02",
+        "winner": "runner",
+        "actions": 133,
+        "finalStateHash": "fnv1a:9aff3f9b",
+        "replayOk": true,
+        "illegalActions": 0
+      },
+      {
+        "seed": "originalset-control:proteus-pilot-holdout-01",
+        "winner": "runner",
+        "actions": 171,
+        "finalStateHash": "fnv1a:87c25057",
+        "replayOk": true,
+        "illegalActions": 0
+      },
+      {
+        "seed": "originalset-control:proteus-pilot-holdout-02",
+        "winner": "runner",
+        "actions": 139,
+        "finalStateHash": "fnv1a:5de86fcc",
+        "replayOk": true,
+        "illegalActions": 0
+      }
+    ]
+  },
+  "pairs": [
+    {
+      "pairId": "proteus_runner_hq_virus_derez_2026_05_25__proteus_corp_region_fast_score_2026_05_25",
+      "runnerDeckId": "proteus_runner_hq_virus_derez_2026_05_25",
+      "corpDeckId": "proteus_corp_region_fast_score_2026_05_25",
+      "aggregate": {
+        "games": 4,
+        "decisions": 564,
+        "findings": 105,
+        "findingsBySeverity": {
+          "critical": 0,
+          "high": 3,
+          "medium": 102,
+          "low": 0
+        },
+        "findingsByDetector": {
+          "illegal_action": 0,
+          "replay_failure": 0,
+          "hidden_info_marker": 0,
+          "no_legal_action_failure": 0,
+          "action_limit_reached": 0,
+          "repeated_no_progress_run": 25,
+          "repeated_known_no_payoff_remote": 0,
+          "repeated_low_value_archives": 3,
+          "recovery_low_value_loop": 0,
+          "bank_over_target_without_funding_need": 0,
+          "risky_self_damage_action": 0,
+          "blink_low_hand_buffer_run": 0,
+          "duplicate_low_delta_install": 0,
+          "overdraw_without_urgency": 0,
+          "plan_step_action_mismatch": 77,
+          "semantic_override_suspicious": 0,
+          "corp_never_scores_long_game": 3,
+          "runner_never_accesses_long_game": 0
+        },
+        "illegalActions": 0,
+        "replayFailures": 0,
+        "actionLimitReached": 2,
+        "allRedactionSafe": true,
+        "redactionSafe": true,
+        "averageGameLength": 141,
+        "corpAgendaScores": 0,
+        "runnerAgendaSteals": 9,
+        "corpFlatlines": 0,
+        "scoreWindowMissed": 0,
+        "unsafeScoreChosen": 0,
+        "passiveActionWithScoreLineAvailable": 0,
+        "actionLimitClusters": {
+          "action_limit_runner_repeated_no_progress_run": 0,
+          "action_limit_runner_remote_contest_blocked": 0,
+          "action_limit_corp_scoreline_stall": 0,
+          "action_limit_setup_economy_loop": 0,
+          "action_limit_low_value_repeat": 1,
+          "action_limit_mixed_or_unknown": 1
+        },
+        "actionLimitSubclusters": {
+          "late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_real_reserve": 0,
+          "runner_late_gain_credit_no_safe_alternative": 0,
+          "corp_late_gain_credit_without_rez_score_protection_need": 0,
+          "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+          "corp_late_gain_credit_no_safe_alternative": 2,
+          "late_draw_for_coverage_or_hand_goal": 0,
+          "late_draw_without_coverage_or_hand_goal": 0,
+          "late_ability_reuse_low_delta": 0,
+          "late_install_low_delta": 0,
+          "late_run_step_stall": 0,
+          "run_microstep_required": 0,
+          "continue_chain_to_access": 0,
+          "break_pump_required": 0,
+          "jackout_loop": 0,
+          "continue_without_progress": 0,
+          "access_pending": 0,
+          "breach_pending": 0,
+          "mixed_unknown": 0
+        }
+      },
+      "games": [
+        {
+          "seed": "proteus-pilot-qualifier-01",
+          "holdout": false,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 21,
+          "finalAgendaPoints": {
+            "runner": 0,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:0f5ed13d",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": true
+        },
+        {
+          "seed": "proteus-pilot-qualifier-02",
+          "holdout": false,
+          "winner": "runner",
+          "gameEndReason": "agenda_points",
+          "actions": 153,
+          "turns": 19,
+          "finalAgendaPoints": {
+            "runner": 7,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:8f472d87",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        },
+        {
+          "seed": "proteus-pilot-holdout-01",
+          "holdout": true,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 27,
+          "finalAgendaPoints": {
+            "runner": 2,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:7c615d79",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        },
+        {
+          "seed": "proteus-pilot-holdout-02",
+          "holdout": true,
+          "winner": "runner",
+          "gameEndReason": "agenda_points",
+          "actions": 51,
+          "turns": 5,
+          "finalAgendaPoints": {
+            "runner": 8,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:feb7a070",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        }
+      ]
+    },
+    {
+      "pairId": "proteus_runner_hq_virus_derez_2026_05_25__proteus_corp_antibody_tax_2026_05_25",
+      "runnerDeckId": "proteus_runner_hq_virus_derez_2026_05_25",
+      "corpDeckId": "proteus_corp_antibody_tax_2026_05_25",
+      "aggregate": {
+        "games": 4,
+        "decisions": 712,
+        "findings": 88,
+        "findingsBySeverity": {
+          "critical": 0,
+          "high": 1,
+          "medium": 87,
+          "low": 0
+        },
+        "findingsByDetector": {
+          "illegal_action": 0,
+          "replay_failure": 0,
+          "hidden_info_marker": 0,
+          "no_legal_action_failure": 0,
+          "action_limit_reached": 0,
+          "repeated_no_progress_run": 12,
+          "repeated_known_no_payoff_remote": 0,
+          "repeated_low_value_archives": 1,
+          "recovery_low_value_loop": 0,
+          "bank_over_target_without_funding_need": 1,
+          "risky_self_damage_action": 0,
+          "blink_low_hand_buffer_run": 0,
+          "duplicate_low_delta_install": 0,
+          "overdraw_without_urgency": 0,
+          "plan_step_action_mismatch": 74,
+          "semantic_override_suspicious": 0,
+          "corp_never_scores_long_game": 1,
+          "runner_never_accesses_long_game": 0
+        },
+        "illegalActions": 0,
+        "replayFailures": 0,
+        "actionLimitReached": 3,
+        "allRedactionSafe": true,
+        "redactionSafe": true,
+        "averageGameLength": 178,
+        "corpAgendaScores": 5,
+        "runnerAgendaSteals": 6,
+        "corpFlatlines": 0,
+        "scoreWindowMissed": 0,
+        "unsafeScoreChosen": 0,
+        "passiveActionWithScoreLineAvailable": 0,
+        "actionLimitClusters": {
+          "action_limit_runner_repeated_no_progress_run": 0,
+          "action_limit_runner_remote_contest_blocked": 0,
+          "action_limit_corp_scoreline_stall": 0,
+          "action_limit_setup_economy_loop": 2,
+          "action_limit_low_value_repeat": 0,
+          "action_limit_mixed_or_unknown": 1
+        },
+        "actionLimitSubclusters": {
+          "late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_real_reserve": 1,
+          "runner_late_gain_credit_no_safe_alternative": 0,
+          "corp_late_gain_credit_without_rez_score_protection_need": 0,
+          "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+          "corp_late_gain_credit_no_safe_alternative": 1,
+          "late_draw_for_coverage_or_hand_goal": 1,
+          "late_draw_without_coverage_or_hand_goal": 0,
+          "late_ability_reuse_low_delta": 0,
+          "late_install_low_delta": 0,
+          "late_run_step_stall": 0,
+          "run_microstep_required": 0,
+          "continue_chain_to_access": 0,
+          "break_pump_required": 0,
+          "jackout_loop": 0,
+          "continue_without_progress": 0,
+          "access_pending": 0,
+          "breach_pending": 0,
+          "mixed_unknown": 0
+        }
+      },
+      "games": [
+        {
+          "seed": "proteus-pilot-qualifier-01",
+          "holdout": false,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 27,
+          "finalAgendaPoints": {
+            "runner": 3,
+            "corp": 2
+          },
+          "finalStateHash": "fnv1a:5fe996c2",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        },
+        {
+          "seed": "proteus-pilot-qualifier-02",
+          "holdout": false,
+          "winner": "runner",
+          "gameEndReason": "agenda_points",
+          "actions": 172,
+          "turns": 23,
+          "finalAgendaPoints": {
+            "runner": 7,
+            "corp": 5
+          },
+          "finalStateHash": "fnv1a:7af74f0c",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        },
+        {
+          "seed": "proteus-pilot-holdout-01",
+          "holdout": true,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 29,
+          "finalAgendaPoints": {
+            "runner": 2,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:203fbc37",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        },
+        {
+          "seed": "proteus-pilot-holdout-02",
+          "holdout": true,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 29,
+          "finalAgendaPoints": {
+            "runner": 3,
+            "corp": 4
+          },
+          "finalStateHash": "fnv1a:cbb22bde",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        }
+      ]
+    },
+    {
+      "pairId": "proteus_runner_rd_bad_publicity_2026_05_25__proteus_corp_region_fast_score_2026_05_25",
+      "runnerDeckId": "proteus_runner_rd_bad_publicity_2026_05_25",
+      "corpDeckId": "proteus_corp_region_fast_score_2026_05_25",
+      "aggregate": {
+        "games": 4,
+        "decisions": 641,
+        "findings": 184,
+        "findingsBySeverity": {
+          "critical": 0,
+          "high": 2,
+          "medium": 182,
+          "low": 0
+        },
+        "findingsByDetector": {
+          "illegal_action": 0,
+          "replay_failure": 0,
+          "hidden_info_marker": 0,
+          "no_legal_action_failure": 0,
+          "action_limit_reached": 0,
+          "repeated_no_progress_run": 24,
+          "repeated_known_no_payoff_remote": 0,
+          "repeated_low_value_archives": 0,
+          "recovery_low_value_loop": 97,
+          "bank_over_target_without_funding_need": 3,
+          "risky_self_damage_action": 0,
+          "blink_low_hand_buffer_run": 0,
+          "duplicate_low_delta_install": 0,
+          "overdraw_without_urgency": 0,
+          "plan_step_action_mismatch": 106,
+          "semantic_override_suspicious": 0,
+          "corp_never_scores_long_game": 2,
+          "runner_never_accesses_long_game": 0
+        },
+        "illegalActions": 0,
+        "replayFailures": 0,
+        "actionLimitReached": 3,
+        "allRedactionSafe": true,
+        "redactionSafe": true,
+        "averageGameLength": 160.25,
+        "corpAgendaScores": 3,
+        "runnerAgendaSteals": 6,
+        "corpFlatlines": 0,
+        "scoreWindowMissed": 0,
+        "unsafeScoreChosen": 0,
+        "passiveActionWithScoreLineAvailable": 0,
+        "actionLimitClusters": {
+          "action_limit_runner_repeated_no_progress_run": 0,
+          "action_limit_runner_remote_contest_blocked": 0,
+          "action_limit_corp_scoreline_stall": 0,
+          "action_limit_setup_economy_loop": 1,
+          "action_limit_low_value_repeat": 2,
+          "action_limit_mixed_or_unknown": 0
+        },
+        "actionLimitSubclusters": {
+          "late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_real_reserve": 1,
+          "runner_late_gain_credit_no_safe_alternative": 0,
+          "corp_late_gain_credit_without_rez_score_protection_need": 0,
+          "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+          "corp_late_gain_credit_no_safe_alternative": 1,
+          "late_draw_for_coverage_or_hand_goal": 0,
+          "late_draw_without_coverage_or_hand_goal": 0,
+          "late_ability_reuse_low_delta": 0,
+          "late_install_low_delta": 0,
+          "late_run_step_stall": 0,
+          "run_microstep_required": 0,
+          "continue_chain_to_access": 0,
+          "break_pump_required": 1,
+          "jackout_loop": 0,
+          "continue_without_progress": 0,
+          "access_pending": 0,
+          "breach_pending": 0,
+          "mixed_unknown": 0
+        }
+      },
+      "games": [
+        {
+          "seed": "proteus-pilot-qualifier-01",
+          "holdout": false,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 21,
+          "finalAgendaPoints": {
+            "runner": 0,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:93b79de8",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": true
+        },
+        {
+          "seed": "proteus-pilot-qualifier-02",
+          "holdout": false,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 22,
+          "finalAgendaPoints": {
+            "runner": 4,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:fa84ce2f",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        },
+        {
+          "seed": "proteus-pilot-holdout-01",
+          "holdout": true,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 29,
+          "finalAgendaPoints": {
+            "runner": 0,
+            "corp": 5
+          },
+          "finalStateHash": "fnv1a:054ead39",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        },
+        {
+          "seed": "proteus-pilot-holdout-02",
+          "holdout": true,
+          "winner": "runner",
+          "gameEndReason": "agenda_points",
+          "actions": 101,
+          "turns": 9,
+          "finalAgendaPoints": {
+            "runner": 7,
+            "corp": 2
+          },
+          "finalStateHash": "fnv1a:01ba1c07",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        }
+      ]
+    },
+    {
+      "pairId": "proteus_runner_rd_bad_publicity_2026_05_25__proteus_corp_antibody_tax_2026_05_25",
+      "runnerDeckId": "proteus_runner_rd_bad_publicity_2026_05_25",
+      "corpDeckId": "proteus_corp_antibody_tax_2026_05_25",
+      "aggregate": {
+        "games": 4,
+        "decisions": 703,
+        "findings": 147,
+        "findingsBySeverity": {
+          "critical": 0,
+          "high": 1,
+          "medium": 146,
+          "low": 0
+        },
+        "findingsByDetector": {
+          "illegal_action": 0,
+          "replay_failure": 0,
+          "hidden_info_marker": 0,
+          "no_legal_action_failure": 0,
+          "action_limit_reached": 0,
+          "repeated_no_progress_run": 21,
+          "repeated_known_no_payoff_remote": 0,
+          "repeated_low_value_archives": 2,
+          "recovery_low_value_loop": 88,
+          "bank_over_target_without_funding_need": 2,
+          "risky_self_damage_action": 0,
+          "blink_low_hand_buffer_run": 0,
+          "duplicate_low_delta_install": 0,
+          "overdraw_without_urgency": 0,
+          "plan_step_action_mismatch": 75,
+          "semantic_override_suspicious": 0,
+          "corp_never_scores_long_game": 1,
+          "runner_never_accesses_long_game": 0
+        },
+        "illegalActions": 0,
+        "replayFailures": 0,
+        "actionLimitReached": 3,
+        "allRedactionSafe": true,
+        "redactionSafe": true,
+        "averageGameLength": 175.75,
+        "corpAgendaScores": 5,
+        "runnerAgendaSteals": 6,
+        "corpFlatlines": 0,
+        "scoreWindowMissed": 0,
+        "unsafeScoreChosen": 0,
+        "passiveActionWithScoreLineAvailable": 0,
+        "actionLimitClusters": {
+          "action_limit_runner_repeated_no_progress_run": 0,
+          "action_limit_runner_remote_contest_blocked": 0,
+          "action_limit_corp_scoreline_stall": 0,
+          "action_limit_setup_economy_loop": 1,
+          "action_limit_low_value_repeat": 1,
+          "action_limit_mixed_or_unknown": 1
+        },
+        "actionLimitSubclusters": {
+          "late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_without_funding_need": 0,
+          "runner_late_gain_credit_real_reserve": 1,
+          "runner_late_gain_credit_no_safe_alternative": 0,
+          "corp_late_gain_credit_without_rez_score_protection_need": 0,
+          "corp_late_gain_credit_real_rez_or_protection_reserve": 0,
+          "corp_late_gain_credit_no_safe_alternative": 1,
+          "late_draw_for_coverage_or_hand_goal": 1,
+          "late_draw_without_coverage_or_hand_goal": 0,
+          "late_ability_reuse_low_delta": 0,
+          "late_install_low_delta": 0,
+          "late_run_step_stall": 0,
+          "run_microstep_required": 0,
+          "continue_chain_to_access": 0,
+          "break_pump_required": 0,
+          "jackout_loop": 0,
+          "continue_without_progress": 0,
+          "access_pending": 0,
+          "breach_pending": 0,
+          "mixed_unknown": 0
+        }
+      },
+      "games": [
+        {
+          "seed": "proteus-pilot-qualifier-01",
+          "holdout": false,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 23,
+          "finalAgendaPoints": {
+            "runner": 2,
+            "corp": 3
+          },
+          "finalStateHash": "fnv1a:31331c75",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0.006,
+          "noProgress": false
+        },
+        {
+          "seed": "proteus-pilot-qualifier-02",
+          "holdout": false,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 30,
+          "finalAgendaPoints": {
+            "runner": 5,
+            "corp": 5
+          },
+          "finalStateHash": "fnv1a:52d5479e",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        },
+        {
+          "seed": "proteus-pilot-holdout-01",
+          "holdout": true,
+          "winner": "runner",
+          "gameEndReason": "agenda_points",
+          "actions": 163,
+          "turns": 21,
+          "finalAgendaPoints": {
+            "runner": 7,
+            "corp": 0
+          },
+          "finalStateHash": "fnv1a:cd437b0f",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        },
+        {
+          "seed": "proteus-pilot-holdout-02",
+          "holdout": true,
+          "winner": "action_limit_reached",
+          "gameEndReason": null,
+          "actions": 180,
+          "turns": 28,
+          "finalAgendaPoints": {
+            "runner": 0,
+            "corp": 5
+          },
+          "finalStateHash": "fnv1a:7362e367",
+          "replayOk": true,
+          "illegalActions": 0,
+          "fallbackRate": 0,
+          "noProgress": false
+        }
+      ]
+    }
+  ]
+}

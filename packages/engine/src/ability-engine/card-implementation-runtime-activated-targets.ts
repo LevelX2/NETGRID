@@ -27,14 +27,19 @@ export function activatedAbilityPayload(
 ): Record<string, string | number | boolean> {
   const advancementCounterCreditPayout =
     gainCreditsPerAdvancementCounterOnSourceEffect(ability);
-  const hostedCreditAddAmount = hostedCreditAddAmountForActivatedAbility(
-    ability,
-  );
-  const hostedCreditTakeEffect = hostedCreditTakeEffectForActivatedAbility(
-    ability,
-  );
-  const hostedCreditTakeAmount = hostedCreditTakeAmountForActivatedAbility(
-    ability,
+  const hostedCreditAddAmount =
+    hostedCreditAddAmountForActivatedAbility(ability);
+  const hostedCreditTakeEffect =
+    hostedCreditTakeEffectForActivatedAbility(ability);
+  const hostedCreditTakeAmount =
+    hostedCreditTakeAmountForActivatedAbility(ability);
+  const directCreditGain = ability.effects.reduce(
+    (sum, effect) =>
+      effect.kind === "gain_credits" &&
+      (effect.recipient === "runner" || effect.recipient === "controller")
+        ? sum + effect.amount
+        : sum,
+    0,
   );
   return {
     cardId,
@@ -42,8 +47,8 @@ export function activatedAbilityPayload(
     cardImplementationAbilityIndex: abilityIndex,
     cardImplementationAbilityTiming: ability.timing,
     ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
-    ...(hostedCreditTakeAmount > 0
-      ? { gainCreditsAmount: hostedCreditTakeAmount }
+    ...(hostedCreditTakeAmount + directCreditGain > 0
+      ? { gainCreditsAmount: hostedCreditTakeAmount + directCreditGain }
       : {}),
     ...(hostedCreditAddAmount > 0
       ? {
@@ -214,7 +219,7 @@ export function copySameFortIceSubroutineEffect(
   | undefined {
   return ability.effects.length === 1 &&
     ability.effects[0]?.kind === "copy_same_fort_ice_subroutine_for_run"
-      ? ability.effects[0]
+    ? ability.effects[0]
     : undefined;
 }
 
@@ -262,7 +267,9 @@ export function ownRezzedIceTargetIds(state: GameState): CardInstanceId[] {
     .sort();
 }
 
-export function rezzedInstalledIceTargetIds(state: GameState): CardInstanceId[] {
+export function rezzedInstalledIceTargetIds(
+  state: GameState,
+): CardInstanceId[] {
   return ownRezzedIceTargetIds(state);
 }
 

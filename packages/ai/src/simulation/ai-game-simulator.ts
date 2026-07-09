@@ -231,7 +231,7 @@ function simulateAiGame(
       if (sideSelection.terminal) break;
       errors.push(
         sideSelection.error ??
-          `No legal actions for either side at ${state.stateVersion} (activeSide ${state.activeSide}, phase ${state.phase}, timingPoint ${state.timingPoint}).`,
+          `No legal actions for either side at ${state.stateVersion} (activeSide ${state.activeSide}, phase ${state.phase}, timingPoint ${state.timingPoint}, runPhase ${state.run?.phase ?? "none"}, pendingChoice ${state.pendingChoice?.source ?? "none"}).`,
       );
       break;
     }
@@ -288,6 +288,10 @@ function simulateAiGame(
           `side:${side}`,
           `action:${simulationSafeSelectedActionId(action, actionPlacement(action))}`,
           `timing:${action.timingPoint}`,
+          `statePhase:${state.phase}`,
+          `stateTiming:${state.timingPoint}`,
+          `runPhase:${state.run?.phase ?? "none"}`,
+          `pendingChoice:${state.pendingChoice ? "yes" : "no"}`,
           `choiceKeys:${Object.keys(decision.selectedChoices ?? {}).join(",") || "none"}`,
           `message:${result.error.message}`,
         ].join(" "),

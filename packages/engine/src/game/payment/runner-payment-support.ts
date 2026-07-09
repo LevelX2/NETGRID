@@ -23,8 +23,11 @@ function supportAbilityCreditNet(
   availableCredits: number,
 ): number {
   const instance = state.cardInstances[cardId];
-  if (!instance || instance.tapped === true) return 0;
-  const implementation = cardImplementationForDefinitionId(instance.definitionId);
+  if (!instance || instance.controller !== "runner" || instance.tapped === true)
+    return 0;
+  const implementation = cardImplementationForDefinitionId(
+    instance.definitionId,
+  );
   const abilities = implementation?.abilities ?? [];
   let bestNet = 0;
   for (const ability of abilities) {
@@ -163,7 +166,9 @@ export function runnerCostPenaltySupportOriginalActionReady(
 ): boolean {
   const window = state.runnerCostPenaltySupportWindow;
   if (!window) return false;
-  return state.runner.credits >= (window.runnerCreditTarget ?? window.amountDue);
+  return (
+    state.runner.credits >= (window.runnerCreditTarget ?? window.amountDue)
+  );
 }
 
 export function syncPendingChoiceAfterRunnerCostPenaltySupport(

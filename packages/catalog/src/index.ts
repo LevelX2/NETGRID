@@ -1,8 +1,5 @@
 import { createRuntimeCardsFromCardSets } from "./card-set-loader";
-import {
-  CATALOG_RARITY_CODES,
-  CATALOG_RARITY_LABELS,
-} from "./rarity";
+import { CATALOG_RARITY_CODES, CATALOG_RARITY_LABELS } from "./rarity";
 import type {
   CardSnapshot,
   CatalogCard,
@@ -120,6 +117,7 @@ export const FORBIDDEN_CATALOG_PAYLOAD_KEYS = [
 ] as const;
 
 export * from "./catalog-pipeline";
+export * from "./ai-support-readiness";
 export * from "./card-set-loader";
 export * from "./rarity";
 
@@ -378,7 +376,8 @@ export function createSourceRegistryV2(
         sourceId: "v131-card-set-support",
         sourceType: "manual_review",
         scope: "versioned_project",
-        pathOrReference: "data/cards/*-cards.json + data/manifests/*-card-support.json",
+        pathOrReference:
+          "data/cards/*-cards.json + data/manifests/*-card-support.json",
         provenance: "Active card data and support status split by set.",
         usageDecision: "allowed_project_data",
         reviewStatus: "reviewed",
@@ -529,17 +528,12 @@ function unique<T extends string>(values: T[]): T[] {
 
 function raritySearchTerms(rarity: CatalogRarity | undefined): string[] {
   if (!rarity) return [];
-  return [
-    rarity.code,
-    rarity.labelDe,
-    rarity.labelEn,
-    rarity.sourceValue,
-  ];
+  return [rarity.code, rarity.labelDe, rarity.labelEn, rarity.sourceValue];
 }
 
-function cloneRarityField(
-  rarity: CatalogRarity | null | undefined,
-): { rarity?: CatalogRarity } {
+function cloneRarityField(rarity: CatalogRarity | null | undefined): {
+  rarity?: CatalogRarity;
+} {
   return rarity ? { rarity: { ...rarity } } : {};
 }
 

@@ -9,6 +9,9 @@ import { applyCardActionSourceBinding } from "./actions/action-source-binding";
 import { applyTagEffectSemantics } from "./actions/tag-effect-semantics";
 import { applyTargetContextProjection } from "./actions/action-target-context";
 import { applyBasicActionSemantics } from "./actions/basic-action-semantics";
+import { applyRunAccessDecisionModel } from "./actions/run-access-decision-model";
+import { applyRandomBadPublicityModel } from "./actions/random-bad-publicity-model";
+import { applyHiddenResourceVirusModel } from "./actions/hidden-resource-virus-model";
 
 export const ACTION_SEMANTIC_CANDIDATE_SCHEMA_VERSION =
   "action-semantic-candidate-v1" as const;
@@ -137,6 +140,8 @@ export type ActionCostProfile = {
     min?: number;
     max?: number;
     chosen?: number;
+    postActionReserve?: number;
+    source?: "legal_action_payload";
   };
   additionalCosts: string[];
 };
@@ -151,6 +156,20 @@ export type ActionTimingProfile = {
   scoreWindow?: boolean;
   rezWindow?: boolean;
   responseWindow?: boolean;
+  duration?: {
+    kind:
+      | "current_action"
+      | "current_encounter"
+      | "current_run"
+      | "current_turn"
+      | "next_action"
+      | "action_debt"
+      | "persistent"
+      | "unknown";
+    source: "legal_action_payload" | "action_type" | "timing_point";
+    actions?: number;
+    expiresAt?: string | number;
+  };
 };
 
 export type LegalTarget = {
@@ -234,6 +253,102 @@ export type ActionRunProjectionSummary = {
   evidence: string[];
 };
 
+export type RunAccessModifierKind =
+  | "bypass_ice"
+  | "additional_subroutines"
+  | "redirect_run"
+  | "access_replacement"
+  | "post_run_followup"
+  | "forced_run_end";
+
+export type RunAccessRiskKind =
+  | "ambush"
+  | "damage"
+  | "tag"
+  | "program_disruption"
+  | "steal_tax"
+  | "access_reduction";
+
+export type RunAccessPayoffKind =
+  | "additional_access"
+  | "free_trash"
+  | "ice_trash"
+  | "information";
+
+export type ActionRunAccessDecisionModel = {
+  schemaVersion: "run-access-decision-model-v1";
+  coverageStatus: "covered" | "partial" | "blocked";
+  serverId?: string;
+  modifiers: RunAccessModifierKind[];
+  accessRisks: RunAccessRiskKind[];
+  payoffs: RunAccessPayoffKind[];
+  unknownRemoteIdentityPreserved: true;
+  hiddenInfoPolicy: "side_safe_visible_only";
+  whyNot: string[];
+  evidence: string[];
+};
+
+export type ActionRandomOutcomeModel = {
+  schemaVersion: "random-outcome-model-v1";
+  outcomeStatus: "not_drawn";
+  purpose?: string;
+  randomCounterAfter?: number;
+  source: "engine_random_draw_records_only";
+  futureOutcomeAccess: "forbidden";
+  deterministicProjection: true;
+  evidence: string[];
+};
+
+export type ActionBadPublicityDecisionModel = {
+  schemaVersion: "bad-publicity-decision-model-v1";
+  delta?: number;
+  current?: number;
+  after?: number;
+  lossThreshold: 7;
+  thresholdStatus: "reached" | "not_reached" | "unknown";
+  actorRelevance: "payoff" | "risk" | "support";
+  source: "legal_action_payload" | "side_safe_semantics";
+  hiddenInfoPolicy: "side_safe_visible_only";
+  evidence: string[];
+};
+
+export type ActionRandomBadPublicityModel = {
+  randomOutcome?: ActionRandomOutcomeModel;
+  badPublicity?: ActionBadPublicityDecisionModel;
+};
+
+export type ActionHiddenResourceModel = {
+  schemaVersion: "hidden-resource-model-v1";
+  perspective:
+    | "own_private_constraint"
+    | "opponent_abstract_risk"
+    | "hidden_info_blocked";
+  available?: number;
+  required?: number;
+  sufficiency: "sufficient" | "insufficient" | "unknown";
+  opponentIdentityPreserved: true;
+  hiddenInfoPolicy: "actor_private_or_abstract_only";
+  evidence: string[];
+};
+
+export type ActionVirusCounterModel = {
+  schemaVersion: "virus-counter-model-v1";
+  counterFamily: "runner_virus" | "corp_antibody";
+  counterType?: string;
+  amountAdded?: number;
+  countersAfter?: number;
+  purgePressure: "purge_action" | "purge_window" | "none";
+  payoutWindow: "available" | "not_signaled";
+  antibodySeparatedFromRunnerVirus: true;
+  source: "legal_action_payload" | "side_safe_semantics" | "action_type";
+  evidence: string[];
+};
+
+export type ActionHiddenResourceVirusModel = {
+  hiddenResource?: ActionHiddenResourceModel;
+  virusCounter?: ActionVirusCounterModel;
+};
+
 export type ActionTagEffectProfile = {
   kind: "remove_tags" | "avoid_tag" | "avoid_next_tag" | "tag_clear_support";
   recipient: "runner";
@@ -304,6 +419,9 @@ export type ActionSemanticCandidate = {
   timingProfile: ActionTimingProfile;
   targetContext?: ActionTargetContext;
   runProjectionSummary?: ActionRunProjectionSummary;
+  runAccessDecisionModel?: ActionRunAccessDecisionModel;
+  randomBadPublicityModel?: ActionRandomBadPublicityModel;
+  hiddenResourceVirusModel?: ActionHiddenResourceVirusModel;
   tagEffectProfile?: ActionTagEffectProfile;
   boardContext: BoardContextSummary;
   confidence: ActionSemanticConfidence;
@@ -445,10 +563,19 @@ function projectActionSemanticCandidate(
     costTimingCandidate,
     action,
   );
-  return applyCardSemanticJoin(
+  const cardSemanticCandidate = applyCardSemanticJoin(
     tagEffectCandidate,
     cardSemanticProfilesByDefinitionId,
   );
+  const runAccessCandidate = applyRunAccessDecisionModel(
+    cardSemanticCandidate,
+    action,
+  );
+  const randomBadPublicityCandidate = applyRandomBadPublicityModel(
+    runAccessCandidate,
+    action,
+  );
+  return applyHiddenResourceVirusModel(randomBadPublicityCandidate, action);
 }
 
 export function buildNeutralActionSemanticCandidate(

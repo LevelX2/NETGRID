@@ -108,9 +108,7 @@ export function buildAiDecisionInput(
   const deckDoctrineRuntimeContext = buildDeckDoctrineRuntimeContext({
     side,
     deckSnapshot: ownDeckSnapshot,
-    ...(expectedDeckSnapshot
-      ? { expectedDeckSnapshot }
-      : {}),
+    ...(expectedDeckSnapshot ? { expectedDeckSnapshot } : {}),
   });
   const input = buildAiDecisionInputDto({
     side,
@@ -224,7 +222,7 @@ export function selectAiDecisionSideForState(
     ...(terminal
       ? {}
       : {
-          error: `No legal actions for either side at ${state.stateVersion} (activeSide ${state.activeSide}, phase ${state.phase}, timingPoint ${state.timingPoint}).`,
+          error: `No legal actions for either side at ${state.stateVersion} (activeSide ${state.activeSide}, phase ${state.phase}, timingPoint ${state.timingPoint}, runPhase ${state.run?.phase ?? "none"}, pendingChoice ${state.pendingChoice ? "yes" : "no"}, costPenaltyWindow ${state.runnerCostPenaltySupportWindow ? "yes" : "no"}).`,
         }),
   };
 }

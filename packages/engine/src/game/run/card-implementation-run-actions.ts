@@ -55,9 +55,9 @@ export function buildRunnerDuringRunCardImplementationActions(
       definition,
       "during_run",
     );
-    const boost =
-      host.cards.cardImplementationForDefinitionId?.(definition.id)
-        ?.runnerRunStrengthBoost;
+    const boost = host.cards.cardImplementationForDefinitionId?.(
+      definition.id,
+    )?.runnerRunStrengthBoost;
     if (
       !boost ||
       host.state.cardInstances[cardId]?.tapped ||
@@ -101,7 +101,44 @@ export function buildRunnerCostPenaltySupportCardImplementationActions(
       "runner_cost_penalty_support",
     );
   }
-  return { handled: true, legalActions };
+  return {
+    handled: true,
+    legalActions: removeDominatedTrashingPaymentSupportActions(legalActions),
+  };
+}
+
+function removeDominatedTrashingPaymentSupportActions(
+  actions: readonly LegalAction[],
+): LegalAction[] {
+  const bestNetBySource = new Map<string, number>();
+  for (const action of actions) {
+    if (action.payload?.cardImplementationTrashSourceCost !== true) continue;
+    const source = String(action.payload?.cardId ?? action.source);
+    const net = paymentSupportNetCredits(action);
+    bestNetBySource.set(
+      source,
+      Math.max(bestNetBySource.get(source) ?? 0, net),
+    );
+  }
+  return actions.filter((action) => {
+    if (action.payload?.cardImplementationTrashSourceCost !== true) return true;
+    const source = String(action.payload?.cardId ?? action.source);
+    return (
+      paymentSupportNetCredits(action) >= (bestNetBySource.get(source) ?? 0)
+    );
+  });
+}
+
+function paymentSupportNetCredits(action: LegalAction): number {
+  const creditCost = action.costs.reduce(
+    (sum, cost) => sum + Math.max(0, Math.floor(cost.credits ?? 0)),
+    0,
+  );
+  const creditGain = Math.max(
+    0,
+    Math.floor(Number(action.payload?.gainCreditsAmount ?? 0)),
+  );
+  return creditGain - creditCost;
 }
 
 export function buildRunnerAccessStartCardImplementationActions(

@@ -3388,6 +3388,29 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("uses a fail-closed fallback for a sole legal Runner start-run action", () => {
+    const input = aiInput("runner", [
+      legalAction("forced-run-rd", "runner", "start_run", "Run R&D", { credits: 0 }, {
+        source: "game_rule",
+        payload: { serverId: "rd", effectKind: "run" },
+      }),
+    ]);
+
+    const decision = chooseSemanticRuntimeAction(
+      input,
+      {},
+      semanticRuntimeDependencies([], {
+        initiallySelectedActionId: "none",
+      }),
+    );
+
+    expect(decision.actionId).toBe("forced-run-rd");
+    expect(decision.fallbackUsed).toBe(true);
+    expect(decision.evidence).toContain(
+      "fallback_action_policy:required_run_start",
+    );
+  });
+
   it("fails closed when semantic coverage has only opaque card actions", () => {
     const input = aiInput("corp", [
       legalAction("opaque-card", "corp", "activated_card_ability", "Opaque", {
