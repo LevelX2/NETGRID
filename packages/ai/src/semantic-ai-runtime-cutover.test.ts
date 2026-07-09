@@ -3707,6 +3707,26 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("fails closed when semantic coverage has only opaque card actions", () => {
+    const input = aiInput("corp", [
+      legalAction("opaque-card", "corp", "activated_card_ability", "Opaque", {
+        credits: 0,
+      }, {
+        source: "unknown-card-instance",
+      }),
+    ]);
+
+    expect(() =>
+      chooseSemanticRuntimeAction(
+        input,
+        {},
+        semanticRuntimeDependencies([], {
+          initiallySelectedActionId: "none",
+        }),
+      ),
+    ).toThrow(/no fail-closed fallback for corp: activated_card_ability/);
+  });
+
   it("does not expose shadow-only diagnostics through the public AI runtime API", () => {
     const exportedKeys = Object.keys(aiPublicApi);
 

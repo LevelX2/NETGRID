@@ -177,7 +177,11 @@ integrate_main -> blocker
   aus `index.test.ts` entfernt. Der nur noch simulations-/testseitige
   Legacy-Quarantänebestand wird zusammen mit den übrigen historischen
   Testflächen in AICSC-7 physisch gelöscht.
-- `AICSC-5`: `pending`.
+- `AICSC-5`: `done`; der Coverage-Fallback wählt nur noch eine explizite,
+  nebenwirkungsarme Allowlist aus vorhandenen LegalActions. Opaque Karten-
+  abilities, unbekannte Quellen und Choice-Aktionen ohne auflösbare Auswahl
+  führen zu einem typisierten `SemanticCoverageFallbackError`, statt unter dem
+  irreführenden Label `lowest_risk_deterministic` ausgeführt zu werden.
 - `AICSC-6`: `pending`.
 - `AICSC-7`: `pending`.
 - `AICSC-8`: `pending`.

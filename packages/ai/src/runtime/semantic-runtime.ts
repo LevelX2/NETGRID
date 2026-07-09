@@ -546,6 +546,18 @@ export function chooseSemanticRuntimeAction(
   };
 }
 
+export class SemanticCoverageFallbackError extends Error {
+  constructor(
+    readonly side: AiDecisionInput["side"],
+    readonly legalActionTypes: readonly string[],
+  ) {
+    super(
+      `Semantic coverage has no fail-closed fallback for ${side}: ${legalActionTypes.join(",") || "no_legal_actions"}`,
+    );
+    this.name = "SemanticCoverageFallbackError";
+  }
+}
+
 function isSchlaghundTagDamageAction(
   input: AiDecisionInput,
   action: LegalAction,
@@ -572,13 +584,24 @@ function semanticCoverageFallbackDecision(
   choices: readonly SemanticRuntimeChoice[],
   dependencies: SemanticRuntimeDependencies,
 ): AiDecision {
-  const rankedFallbackActions = [...input.legalActions].sort(
+  const rankedFallbackActions = input.legalActions
+    .filter((action) => failClosedFallbackPolicyForAction(input, action) !== undefined)
+    .sort(
     (left, right) =>
       fallbackPolicyRank(input, left) - fallbackPolicyRank(input, right) ||
       left.actionId.localeCompare(right.actionId),
-  );
+    );
   const action = rankedFallbackActions[0];
-  const policy = action ? fallbackPolicyForAction(input, action) : "none";
+  if (!action) {
+    throw new SemanticCoverageFallbackError(
+      input.side,
+      [...new Set(input.legalActions.map((candidate) => candidate.type))].sort(),
+    );
+  }
+  const policy = failClosedFallbackPolicyForAction(input, action);
+  if (!policy) {
+    throw new SemanticCoverageFallbackError(input.side, [action.type]);
+  }
   const evidence = dependencies.scrubEvidence([
     "semantic_coverage_fallback:true",
     "fallback_reason:no_semantic_candidate",
@@ -589,23 +612,10 @@ function semanticCoverageFallbackDecision(
       ? [`fallback_action_type:${action.type}`, `fallback_action_id:${action.actionId}`]
       : ["fallback_action:none"]),
   ]);
-  if (!action) {
-    return {
-      actionId: "",
-      reasonCode: `${input.side}.semantic.coverage_fallback.no_legal_action`,
-      explanation:
-        "Semantic Runtime fand keine auswaehlbare Aktion und die Engine lieferte keine LegalActions.",
-      consideredActionIds: [],
-      fallbackUsed: true,
-      evidence,
-      decisionDebug: semanticCoverageFallbackDebug(input, undefined, evidence),
-      timeoutUsed: false,
-      profileId: input.profileId,
-      difficulty: input.difficulty,
-      reason: `${input.side}.semantic.coverage_fallback.no_legal_action`,
-    };
-  }
   const selectedChoices = dependencies.selectedChoicesForDecision(input, action);
+  if ((action.choiceRequirements?.length ?? 0) > 0 && !selectedChoices) {
+    throw new SemanticCoverageFallbackError(input.side, [action.type]);
+  }
   const reasonCode = `${input.side}.semantic.coverage_fallback.${policy}`;
   return {
     actionId: action.actionId,
@@ -625,7 +635,7 @@ function semanticCoverageFallbackDecision(
 }
 
 function fallbackPolicyRank(input: AiDecisionInput, action: LegalAction): number {
-  switch (fallbackPolicyForAction(input, action)) {
+  switch (failClosedFallbackPolicyForAction(input, action)) {
     case "mandatory_choice":
       return 0;
     case "direct_closeout":
@@ -642,12 +652,12 @@ function fallbackPolicyRank(input: AiDecisionInput, action: LegalAction): number
       return 6;
     case "end_turn":
       return 7;
-    case "lowest_risk_deterministic":
-      return 20;
+    case undefined:
+      return Number.POSITIVE_INFINITY;
   }
 }
 
-function fallbackPolicyForAction(
+function failClosedFallbackPolicyForAction(
   input: AiDecisionInput,
   action: LegalAction,
 ):
@@ -659,7 +669,7 @@ function fallbackPolicyForAction(
   | "economy_basic"
   | "draw_setup"
   | "end_turn"
-  | "lowest_risk_deterministic" {
+  | undefined {
   if (action.type === "resolve_choice") return "mandatory_choice";
   if (action.type === "score_agenda" || action.type === "steal_agenda") {
     return "direct_closeout";
@@ -675,10 +685,24 @@ function fallbackPolicyForAction(
   if (action.type === "access_card" || action.type === "trash_accessed_card") {
     return "access_resolution";
   }
-  if (action.type === "gain_credit") return "economy_basic";
-  if (action.type === "draw_card") return "draw_setup";
-  if (action.type === "end_turn") return "end_turn";
-  return "lowest_risk_deterministic";
+  if (action.type === "gain_credit" && action.source === "basic_action") {
+    return "economy_basic";
+  }
+  if (
+    (action.type === "draw_card" && action.source === "basic_action") ||
+    action.type === "mandatory_draw"
+  ) {
+    return "draw_setup";
+  }
+  if (
+    action.type === "end_turn" ||
+    action.type === "jack_out" ||
+    action.type === "decline_trash" ||
+    action.type === "decline_rez"
+  ) {
+    return "end_turn";
+  }
+  return undefined;
 }
 
 function semanticCoverageFallbackDebug(
