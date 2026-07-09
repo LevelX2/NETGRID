@@ -104,8 +104,11 @@ integrate_main -> blocker
 ## Paketfolge und Fortschritt
 
 1. `PCS-0 Prozess, Parallelitätsgrenze und Preflight` – `done`
-2. `PCS-1 Verwaiste Web-Demo-Runtime entfernen` – `in_progress`
-3. `PCS-2 Version-0-Kompatibilitätsflächen reduzieren` – `pending`
+2. `PCS-1 Verwaiste Web-Demo-Runtime entfernen` – `done`; außerhalb
+   historischer Dokumentation bestand kein Consumer. Web-Typecheck, 38
+   Testdateien mit 483 Tests und der Production Build sind grün; die Build-
+   Routentabelle enthält `/api/game` nicht mehr.
+3. `PCS-2 Version-0-Kompatibilitätsflächen reduzieren` – `in_progress`
 4. `PCS-3 Current-State-Dokumente, Reviews und Scripts konsolidieren` – `pending`
 5. `PCS-4 Shared- und Kartenregistrierungsgrenzen modularisieren` – `pending`
 6. `PCS-5 Fachliche Web-/Server-/AI-Modulschnitte` – `pending`
