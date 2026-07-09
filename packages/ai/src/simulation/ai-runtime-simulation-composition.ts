@@ -279,10 +279,6 @@ export function createAiRuntimeSimulationComposition(
     chooseAiAction: runtimeEntrypoints.chooseAiAction,
     chooseRunnerAction: runtimeEntrypoints.chooseRunnerAction,
     chooseCorpAction: runtimeEntrypoints.chooseCorpAction,
-    chooseRunnerBaselineAction:
-      legacyBaselineEntrypoints.chooseRunnerBaselineAction,
-    chooseCorpBaselineAction:
-      legacyBaselineEntrypoints.chooseCorpBaselineAction,
     tagPunishWindowDiagnosticsForSimulationAction:
       corpScoring.tagPunishWindowDiagnosticsForSimulationAction,
   });

@@ -9,11 +9,6 @@ import {
 
 const PROFILE_IDS = [
   "random_legal_bot",
-  "basic_corp_ai",
-  "basic_runner_ai",
-  "plan_corp_v1_4_0",
-  "plan_runner_v1_4_1",
-  "belief_ai_v1_4_2",
   "current_candidate",
 ] as const satisfies readonly SimulationBenchmarkProfileId[];
 
@@ -21,7 +16,9 @@ const repoRoot = findRepoRoot(process.cwd());
 const args = parseArgs(process.argv.slice(2));
 
 if (args.listSlots) {
-  console.log(JSON.stringify(listMatchProgressionBenchmarkDeckSlots(), null, 2));
+  console.log(
+    JSON.stringify(listMatchProgressionBenchmarkDeckSlots(), null, 2),
+  );
   process.exit(0);
 }
 

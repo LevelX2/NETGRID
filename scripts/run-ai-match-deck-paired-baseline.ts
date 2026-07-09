@@ -48,9 +48,9 @@ type MatchRecord = {
 
 type LegId =
   | "current_vs_current"
-  | "basic_runner_vs_current_corp"
-  | "current_runner_vs_basic_corp"
-  | "basic_vs_basic";
+  | "random_runner_vs_current_corp"
+  | "current_runner_vs_random_corp"
+  | "random_vs_random";
 
 type BenchmarkLeg = {
   legId: LegId;
@@ -93,23 +93,23 @@ const ALL_LEGS: Record<LegId, BenchmarkLeg> = {
     runnerControllerMode: "current_candidate",
     corpControllerMode: "current_candidate",
   },
-  basic_runner_vs_current_corp: {
-    legId: "basic_runner_vs_current_corp",
-    label: "Basic Runner vs current Corp",
-    runnerControllerMode: "basic_runner_ai",
+  random_runner_vs_current_corp: {
+    legId: "random_runner_vs_current_corp",
+    label: "Random-Legal Runner vs current Corp",
+    runnerControllerMode: "random_legal_bot",
     corpControllerMode: "current_candidate",
   },
-  current_runner_vs_basic_corp: {
-    legId: "current_runner_vs_basic_corp",
-    label: "Current Runner vs basic Corp",
+  current_runner_vs_random_corp: {
+    legId: "current_runner_vs_random_corp",
+    label: "Current Runner vs Random-Legal Corp",
     runnerControllerMode: "current_candidate",
-    corpControllerMode: "basic_corp_ai",
+    corpControllerMode: "random_legal_bot",
   },
-  basic_vs_basic: {
-    legId: "basic_vs_basic",
-    label: "Basic Runner vs basic Corp",
-    runnerControllerMode: "basic_runner_ai",
-    corpControllerMode: "basic_corp_ai",
+  random_vs_random: {
+    legId: "random_vs_random",
+    label: "Random-Legal Runner vs Random-Legal Corp",
+    runnerControllerMode: "random_legal_bot",
+    corpControllerMode: "random_legal_bot",
   },
 };
 
@@ -339,18 +339,18 @@ type PairedOutput = ReturnType<typeof buildOutput>;
 function comparisonSummary(results: readonly LegOutput[]) {
   const byId = new Map(results.map((entry) => [entry.legId, entry]));
   const current = byId.get("current_vs_current");
-  const corpVsBasicRunner = byId.get("basic_runner_vs_current_corp");
-  const runnerVsBasicCorp = byId.get("current_runner_vs_basic_corp");
-  const basic = byId.get("basic_vs_basic");
+  const corpVsRandomRunner = byId.get("random_runner_vs_current_corp");
+  const runnerVsRandomCorp = byId.get("current_runner_vs_random_corp");
+  const randomControl = byId.get("random_vs_random");
   return {
     currentVsCurrent: legScore(current),
-    currentCorpAgainstBasicRunner: legScore(corpVsBasicRunner),
-    currentRunnerAgainstBasicCorp: legScore(runnerVsBasicCorp),
-    basicVsBasic: legScore(basic),
+    currentCorpAgainstRandomRunner: legScore(corpVsRandomRunner),
+    currentRunnerAgainstRandomCorp: legScore(runnerVsRandomCorp),
+    randomVsRandom: legScore(randomControl),
     deltas: {
-      currentCorpVsBasicCorp: deltaLeg(corpVsBasicRunner, basic),
-      currentRunnerVsBasicRunner: deltaLeg(runnerVsBasicCorp, basic),
-      mirrorConfoundingCheck: deltaLeg(current, corpVsBasicRunner),
+      currentCorpVsRandomCorp: deltaLeg(corpVsRandomRunner, randomControl),
+      currentRunnerVsRandomRunner: deltaLeg(runnerVsRandomCorp, randomControl),
+      mirrorConfoundingCheck: deltaLeg(current, corpVsRandomRunner),
     },
   };
 }
@@ -372,13 +372,17 @@ function legScore(leg: LegOutput | undefined) {
   };
 }
 
-function deltaLeg(candidate: LegOutput | undefined, baseline: LegOutput | undefined) {
+function deltaLeg(
+  candidate: LegOutput | undefined,
+  baseline: LegOutput | undefined,
+) {
   if (!candidate || !baseline) return undefined;
   return {
     corpWins: candidate.aggregate.corpWins - baseline.aggregate.corpWins,
     runnerWins: candidate.aggregate.runnerWins - baseline.aggregate.runnerWins,
     actionLimitReached:
-      candidate.aggregate.actionLimitReached - baseline.aggregate.actionLimitReached,
+      candidate.aggregate.actionLimitReached -
+      baseline.aggregate.actionLimitReached,
     averageCorpAgendaPoints: round(
       candidate.aggregate.averageCorpAgendaPoints -
         baseline.aggregate.averageCorpAgendaPoints,
@@ -623,8 +627,8 @@ function markdownReport(output: PairedOutput): string {
     "",
     "## Interpretation",
     "",
-    "- `basic_runner_vs_current_corp` isolates current Corp strength against a fixed/simple Runner.",
-    "- `current_runner_vs_basic_corp` isolates whether the current Runner improved or regressed against a fixed/simple Corp.",
+    "- `random_runner_vs_current_corp` isolates current Corp behavior against an explicit Random-Legal control.",
+    "- `current_runner_vs_random_corp` isolates current Runner behavior against an explicit Random-Legal control.",
     "- `current_vs_current` alone is not sufficient, because both sides can move at once.",
     "",
   ].join("\n");
@@ -639,9 +643,9 @@ function parseArgs(argv: string[]): PairedArgs {
   let seedPrefix = "latest-match-baseline";
   let legs: LegId[] = [
     "current_vs_current",
-    "basic_runner_vs_current_corp",
-    "current_runner_vs_basic_corp",
-    "basic_vs_basic",
+    "random_runner_vs_current_corp",
+    "current_runner_vs_random_corp",
+    "random_vs_random",
   ];
   let out = "docs/reviews/ai/ai-match-deck-paired-baseline.json";
   let markdownOut: string | undefined;

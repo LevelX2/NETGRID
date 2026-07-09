@@ -4,9 +4,7 @@ import {
   profileIdForMode,
   simulationDeckConfig,
 } from "./simulation-config-helpers";
-import type {
-  SimulationBenchmarkProfile,
-} from "./simulation-types";
+import type { SimulationBenchmarkProfile } from "./simulation-types";
 import type {
   V143LeagueConfig,
   V143SimulationRunResult,
@@ -80,8 +78,7 @@ export function createV143ProfileRunner(
       {} as Record<AiSimulationSummary["winner"], number>,
     );
     const exploitRefs =
-      profile.benchmarkProfileId === "current_candidate" ||
-      profile.benchmarkProfileId === "belief_ai_v1_4_2"
+      profile.benchmarkProfileId === "current_candidate"
         ? dependencies
             .runExploitRegressionFixtures(config)
             .filter((result) => !result.passed)

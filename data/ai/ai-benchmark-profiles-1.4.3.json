@@ -7,31 +7,6 @@
       "corpMode": "random_legal_bot"
     },
     {
-      "benchmarkProfileId": "basic_corp_ai",
-      "runnerMode": "random_legal_bot",
-      "corpMode": "basic_corp_ai"
-    },
-    {
-      "benchmarkProfileId": "basic_runner_ai",
-      "runnerMode": "basic_runner_ai",
-      "corpMode": "random_legal_bot"
-    },
-    {
-      "benchmarkProfileId": "plan_corp_v1_4_0",
-      "runnerMode": "basic_runner_ai",
-      "corpMode": "plan_corp_v1_4_0"
-    },
-    {
-      "benchmarkProfileId": "plan_runner_v1_4_1",
-      "runnerMode": "plan_runner_v1_4_1",
-      "corpMode": "basic_corp_ai"
-    },
-    {
-      "benchmarkProfileId": "belief_ai_v1_4_2",
-      "runnerMode": "belief_ai_v1_4_2",
-      "corpMode": "belief_ai_v1_4_2"
-    },
-    {
       "benchmarkProfileId": "current_candidate",
       "runnerMode": "current_candidate",
       "corpMode": "current_candidate"

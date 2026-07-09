@@ -157,7 +157,11 @@ integrate_main -> blocker
   künstliche `__missing__`-Pfade als vorhanden gezählt, technische
   `ai_supported`-Zulassung ist ausdrücklich von semantischer Abdeckung und
   Play-Strength-Readiness getrennt. `check:ai` und `check:ai:full` sind grün.
-- `AICSC-2`: `pending`.
+- `AICSC-2`: `done`; ausführbare Benchmarkprofile sind auf den ehrlichen
+  Random-Legal-Control und den aktuellen Semantic Candidate reduziert. Der
+  Defaultvergleich ist `random_legal_bot` gegen `current_candidate`, alte
+  V1.4-Profilnamen und zwei überholte Legacy-Paired-Gate-Scripts sind entfernt,
+  aktuelle Diagnose-Scripts akzeptieren nur noch die beiden realen Modi.
 - `AICSC-3`: `pending`.
 - `AICSC-4`: `pending`.
 - `AICSC-5`: `pending`.

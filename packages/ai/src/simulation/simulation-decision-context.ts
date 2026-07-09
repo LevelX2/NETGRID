@@ -24,8 +24,6 @@ export type SimulationDecisionContextDependencies = {
     input: AiDecisionInput,
     options?: AiSimulationConfig["aiDecisionRuntimeOptions"],
   ) => AiDecision;
-  chooseRunnerBaselineAction: (input: AiDecisionInput) => AiDecision;
-  chooseCorpBaselineAction: (input: AiDecisionInput) => AiDecision;
   selectedChoicesForDecision: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -58,29 +56,11 @@ export function createSimulationDecisionContext(
         return chooseRandomLegalDecision(input, simulationRng, {
           selectedChoicesForDecision: dependencies.selectedChoicesForDecision,
         });
-      case "basic_runner_ai":
-        return side === "runner"
-          ? dependencies.chooseRunnerBaselineAction(input)
-          : dependencies.chooseCorpBaselineAction(input);
-      case "basic_corp_ai":
-        return side === "corp"
-          ? dependencies.chooseCorpBaselineAction(input)
-          : dependencies.chooseRunnerBaselineAction(input);
-      case "plan_corp_v1_4_0":
-        return side === "corp"
-          ? dependencies.chooseCorpAction(input, config.aiDecisionRuntimeOptions)
-          : dependencies.chooseRunnerBaselineAction(input);
-      case "plan_runner_v1_4_1":
-        return side === "runner"
-          ? dependencies.chooseRunnerAction(
-              input,
-              config.aiDecisionRuntimeOptions,
-            )
-          : dependencies.chooseCorpBaselineAction(input);
-      case "belief_ai_v1_4_2":
-        return dependencies.chooseAiAction(input, config.aiDecisionRuntimeOptions);
       case "current_candidate":
-        return dependencies.chooseAiAction(input, config.aiDecisionRuntimeOptions);
+        return dependencies.chooseAiAction(
+          input,
+          config.aiDecisionRuntimeOptions,
+        );
     }
   }
 
@@ -88,7 +68,9 @@ export function createSimulationDecisionContext(
     side: Side,
     config: AiSimulationConfig,
   ): boolean {
-    return simulationModeUsesSemanticRuntime(controllerModeForSide(side, config));
+    return simulationModeUsesSemanticRuntime(
+      controllerModeForSide(side, config),
+    );
   }
 
   return {
@@ -100,5 +82,5 @@ export function createSimulationDecisionContext(
 function simulationModeUsesSemanticRuntime(
   mode: SimulationControllerMode,
 ): boolean {
-  return mode === "belief_ai_v1_4_2" || mode === "current_candidate";
+  return mode === "current_candidate";
 }

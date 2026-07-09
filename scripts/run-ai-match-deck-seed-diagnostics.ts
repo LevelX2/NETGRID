@@ -174,7 +174,11 @@ const output = {
     ),
     flags: flagCounts(summary.actionSequence),
   },
-  corpKeyWindows: keyWindows(summary.actionSequence, "corp", args.maxAlternatives),
+  corpKeyWindows: keyWindows(
+    summary.actionSequence,
+    "corp",
+    args.maxAlternatives,
+  ),
   runnerKeyWindows: keyWindows(
     summary.actionSequence,
     "runner",
@@ -222,7 +226,8 @@ function keyWindows(
 }
 
 function isKeyWindow(entry: ActionEntry): boolean {
-  if (entry.scoreActionsAvailable && entry.scoreActionsAvailable > 0) return true;
+  if (entry.scoreActionsAvailable && entry.scoreActionsAvailable > 0)
+    return true;
   if (entry.finalAdvance) return true;
   if (entry.unsafeFinalAdvance) return true;
   if (entry.protectedFinalAdvance) return true;
@@ -560,11 +565,6 @@ function parseArgs(argv: string[]): Args {
 function parseControllerMode(value: string): SimulationControllerMode {
   const modes: SimulationControllerMode[] = [
     "random_legal_bot",
-    "basic_corp_ai",
-    "basic_runner_ai",
-    "plan_corp_v1_4_0",
-    "plan_runner_v1_4_1",
-    "belief_ai_v1_4_2",
     "current_candidate",
   ];
   if (!modes.includes(value as SimulationControllerMode)) {
