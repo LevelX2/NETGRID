@@ -11,6 +11,7 @@ import { applyTargetContextProjection } from "./actions/action-target-context";
 import { applyBasicActionSemantics } from "./actions/basic-action-semantics";
 import { applyRunAccessDecisionModel } from "./actions/run-access-decision-model";
 import { applyRandomBadPublicityModel } from "./actions/random-bad-publicity-model";
+import { applyHiddenResourceVirusModel } from "./actions/hidden-resource-virus-model";
 
 export const ACTION_SEMANTIC_CANDIDATE_SCHEMA_VERSION =
   "action-semantic-candidate-v1" as const;
@@ -316,6 +317,38 @@ export type ActionRandomBadPublicityModel = {
   badPublicity?: ActionBadPublicityDecisionModel;
 };
 
+export type ActionHiddenResourceModel = {
+  schemaVersion: "hidden-resource-model-v1";
+  perspective:
+    | "own_private_constraint"
+    | "opponent_abstract_risk"
+    | "hidden_info_blocked";
+  available?: number;
+  required?: number;
+  sufficiency: "sufficient" | "insufficient" | "unknown";
+  opponentIdentityPreserved: true;
+  hiddenInfoPolicy: "actor_private_or_abstract_only";
+  evidence: string[];
+};
+
+export type ActionVirusCounterModel = {
+  schemaVersion: "virus-counter-model-v1";
+  counterFamily: "runner_virus" | "corp_antibody";
+  counterType?: string;
+  amountAdded?: number;
+  countersAfter?: number;
+  purgePressure: "purge_action" | "purge_window" | "none";
+  payoutWindow: "available" | "not_signaled";
+  antibodySeparatedFromRunnerVirus: true;
+  source: "legal_action_payload" | "side_safe_semantics" | "action_type";
+  evidence: string[];
+};
+
+export type ActionHiddenResourceVirusModel = {
+  hiddenResource?: ActionHiddenResourceModel;
+  virusCounter?: ActionVirusCounterModel;
+};
+
 export type ActionTagEffectProfile = {
   kind: "remove_tags" | "avoid_tag" | "avoid_next_tag" | "tag_clear_support";
   recipient: "runner";
@@ -388,6 +421,7 @@ export type ActionSemanticCandidate = {
   runProjectionSummary?: ActionRunProjectionSummary;
   runAccessDecisionModel?: ActionRunAccessDecisionModel;
   randomBadPublicityModel?: ActionRandomBadPublicityModel;
+  hiddenResourceVirusModel?: ActionHiddenResourceVirusModel;
   tagEffectProfile?: ActionTagEffectProfile;
   boardContext: BoardContextSummary;
   confidence: ActionSemanticConfidence;
@@ -537,7 +571,11 @@ function projectActionSemanticCandidate(
     cardSemanticCandidate,
     action,
   );
-  return applyRandomBadPublicityModel(runAccessCandidate, action);
+  const randomBadPublicityCandidate = applyRandomBadPublicityModel(
+    runAccessCandidate,
+    action,
+  );
+  return applyHiddenResourceVirusModel(randomBadPublicityCandidate, action);
 }
 
 export function buildNeutralActionSemanticCandidate(
