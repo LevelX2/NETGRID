@@ -1,7 +1,7 @@
 # RunnerRunPlan Remaining ICE Fix Review 2026-07-09
 
-Status: umgesetzt und lokal verifiziert  
-Aktiver Agent: card-enablement-ai-knowledge-agent  
+Status: umgesetzt und lokal verifiziert
+Aktiver Agent: card-enablement-ai-knowledge-agent
 Scope: Runner-KI, aktive Run-Fortsetzung, side-sichere Pfadquote
 
 ## Befund
