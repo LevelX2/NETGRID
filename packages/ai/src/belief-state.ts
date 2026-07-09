@@ -420,6 +420,7 @@ function revealedOpponentEntries(input: AiDecisionInput, classifications: Belief
     if (!definitionId) continue;
     const revealedOpponentFamilySet = new Set(["access", "reveal", "expose", "rez", "score", "steal", "trash"]);
     if (!revealedOpponentFamilySet.has(classification.family)) continue;
+    if (beliefDefinitionSide(definitionId) === input.side) continue;
     entries.push({
       key: `opponent-event:${classification.eventId}:${definitionId}`,
       side: input.side,
@@ -1442,6 +1443,10 @@ function beliefRemoteServerId(serverId: string): boolean {
 
 function beliefDefinitionType(definitionId: string): string | undefined {
   return DEMO_CARDS_BY_ID[definitionId]?.type ?? RUNTIME_CARDS[definitionId]?.type;
+}
+
+function beliefDefinitionSide(definitionId: string): Side | undefined {
+  return DEMO_CARDS_BY_ID[definitionId]?.side ?? RUNTIME_CARDS[definitionId]?.side;
 }
 
 function beliefDefinitionTrashCost(definitionId: string): number | undefined {
