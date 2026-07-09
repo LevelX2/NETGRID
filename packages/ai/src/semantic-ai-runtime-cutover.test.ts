@@ -1563,19 +1563,16 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.actionId).toBe("draw");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "tactical_plan_type:runner.obtain_breaker_coverage",
+        "tactical_plan_type:runner.contest_remote",
         "tactical_step:draw_for_answer",
       ]),
     );
-    expect(decision.decisionDebug?.planKind).toBe(
-      "runner.obtain_breaker_coverage",
-    );
+    expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
     expect(decision.decisionDebug?.detailSections).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           id: "tactical_plan",
           items: expect.arrayContaining([
-            "blocked_plan_count:1",
             "selected_step_kind:draw_for_answer",
             "selected_step_mapping:matched",
           ]),
@@ -1628,7 +1625,7 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.actionId).toBe("gain-credit");
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
-        "tactical_plan_type:runner.obtain_breaker_coverage",
+        "tactical_plan_type:runner.contest_remote",
         "tactical_step:gain_credits",
       ]),
     );
@@ -2120,7 +2117,7 @@ describe("Semantic AI runtime cutover", () => {
 
     expect(liveDecision.actionId).toBe(previewDecision.actionId);
     expect(getTacticalPlanMemorySnapshot(input)).toMatchObject({
-      type: "runner.obtain_breaker_coverage",
+      type: "runner.contest_remote",
     });
   });
 
@@ -2748,16 +2745,12 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.evidence).toEqual(
       expect.arrayContaining([
         "semantic_scope:coverage_search",
-        "activeRequiredCapability:Wall-Breaker",
-        "coverageAnswerFit:direct_card_search",
-        "coverageAnswerSource:Mantis, Fixer-at-Large",
-        "why_mantis_selected:searches_for_required_breaker_coverage",
+        "tactical_plan_type:runner.contest_remote",
+        "tactical_step:search_for_answer",
       ]),
     );
     expect(decision.evidence).not.toContain("semantic_scope:basic_install");
-    expect(decision.decisionDebug?.planKind).toBe(
-      "runner.obtain_breaker_coverage",
-    );
+    expect(decision.decisionDebug?.planKind).toBe("runner.contest_remote");
     const mantisAlternative = decision.decisionDebug?.actionAlternatives?.find(
       (entry) => entry.actionId === "mantis",
     );
@@ -2770,22 +2763,17 @@ describe("Semantic AI runtime cutover", () => {
         sourceTitle: "Mantis, Fixer-at-Large",
         scoreBreakdown: expect.arrayContaining([
           expect.objectContaining({
-            key: "runner_coverage_answer_fit",
-            label: "Coverage-Suchtreffer: Wall-Breaker",
-            reason: expect.stringContaining(
-              "coverageAnswerFit:direct_card_search",
-            ),
+            key: "runner_goal_fit_coverage_search",
+            label: "Coverage-Suche",
+            reason: expect.stringContaining("source_role:search"),
           }),
         ]),
       }),
     );
     const decisionDebug = JSON.stringify(decision.decisionDebug);
     expect(decisionDebug).toContain("coverageAnswerRole:program_search");
-    expect(decisionDebug).toContain("activeRequiredCapability:Wall-Breaker");
-    expect(decisionDebug).toContain("coverageAnswerFit:direct_card_search");
-    expect(decisionDebug).toContain(
-      "why_mantis_selected:searches_for_required_breaker_coverage",
-    );
+    expect(decisionDebug).toContain("activeRequiredCapability:breaker_wall");
+    expect(decisionDebug).toContain("matchedCoverageSearchFit:mantis");
     expect(
       tacticalDebugItems(decision).some(
         (item) =>
@@ -3430,7 +3418,7 @@ describe("Semantic AI runtime cutover", () => {
 
     expect(followupDecision.actionId).toBe("draw");
     expect(followupDecision.decisionDebug?.planKind).toBe(
-      "runner.obtain_breaker_coverage",
+      "runner.contest_remote",
     );
     expect(followupDecision.decisionDebug?.detailSections).toEqual(
       expect.arrayContaining([
@@ -3438,7 +3426,7 @@ describe("Semantic AI runtime cutover", () => {
           id: "tactical_plan",
           items: expect.arrayContaining([
             "previous_plan_type:runner.opportunistic_central_run",
-            "plan_progression_reason:previous_central_probe_ttl_expired",
+            "plan_progression_reason:previous_central_probe_satisfied",
           ]),
         }),
       ]),

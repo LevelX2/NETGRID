@@ -41,6 +41,182 @@ describe("runner run plan policy", () => {
     expect(selected?.evidence).toContain("pump_required_count:2");
   });
 
+  it("does not conserve into ETR when non-noisy recurring credits pay part of Codecracker pumps", () => {
+    const pump = pumpAction({ costs: [{ credits: 1 }] });
+    const continueRun = continueAction({
+      encounterWillEndRun: true,
+      unbrokenSubroutineCount: 1,
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      credits: 2,
+      extraRig: [quietPrograms()],
+      legalActions: [pump, continueRun],
+    });
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: runPlan(),
+      choices: [
+        choice(continueRun, "simple_run_choice", 900),
+        choice(pump, "encounter_survival", 100),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(pump.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_sequence_selected:true",
+    );
+    expect(selected?.evidence).toContain("sequence_cash_cost:2");
+    expect(selected?.evidence).toContain(
+      "sequence_restricted_credits_spent:2",
+    );
+    expect(selected?.evidence).not.toContain(
+      "runner_run_plan_conserve_credits:true",
+    );
+  });
+
+  it("pumps toward an affordable safety break even when access is unaffordable", () => {
+    const pump = pumpAction({
+      breakerId: "loony-goon-1",
+      costs: [{ credits: 1 }],
+    });
+    const continueRun = continueAction({
+      encounterWillEndRun: true,
+      unbrokenSubroutineCount: 2,
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_231_cortical-scrub",
+      iceTitle: "Cortical Scrub",
+      iceStrength: 3,
+      breaker: loonyGoon(),
+      credits: 2,
+      extraRig: [quietPrograms()],
+      subroutines: [
+        {
+          id: "cortical-scrub-core-damage",
+          type: "do_damage",
+          unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+        },
+        {
+          id: "cortical-scrub-etr",
+          type: "end_the_run",
+        },
+      ],
+      legalActions: [pump, continueRun],
+    });
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: runPlan(),
+      choices: [
+        choice(pump, "encounter_survival", 900),
+        choice(continueRun, "simple_run_choice", -2397),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(pump.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_safety_sequence_selected:true",
+    );
+    expect(selected?.evidence).toContain(
+      "current_encounter_safety_break_sequence:true",
+    );
+    expect(selected?.evidence).toContain(
+      "required_subroutine_indexes:0",
+    );
+  });
+
+  it("breaks brain damage after pumping even when ETR and access are unaffordable", () => {
+    const breakBrainDamage = breakAction({
+      actionId: "break-cortical-scrub-brain-damage",
+      breakerId: "loony-goon-1",
+      costs: [{ credits: 1 }],
+      subroutineIndex: 0,
+    });
+    const breakEndTheRun = breakAction({
+      actionId: "break-cortical-scrub-etr",
+      breakerId: "loony-goon-1",
+      costs: [{ credits: 1 }],
+      subroutineIndex: 1,
+    });
+    const continueRun = continueAction({
+      encounterWillEndRun: true,
+      unbrokenSubroutineCount: 2,
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_231_cortical-scrub",
+      iceTitle: "Cortical Scrub",
+      iceStrength: 3,
+      breaker: { ...loonyGoon(), strength: 3 },
+      credits: 1,
+      subroutines: [
+        {
+          id: "cortical-scrub-core-damage",
+          type: "do_damage",
+          unbrokenRunEffect: { causesDamageOrProgramTrash: true },
+        },
+        {
+          id: "cortical-scrub-etr",
+          type: "end_the_run",
+        },
+      ],
+      legalActions: [breakBrainDamage, breakEndTheRun, continueRun],
+    });
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: runPlan(),
+      choices: [
+        choice(continueRun, "simple_run_choice", -2397),
+        choice(breakEndTheRun, "encounter_survival", 1000),
+        choice(breakBrainDamage, "encounter_survival", 100),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(breakBrainDamage.actionId);
+    expect(selected?.evidence).toContain(
+      "runner_run_plan_safety_sequence_selected:true",
+    );
+    expect(selected?.evidence).toContain(
+      "current_encounter_safety_break_sequence:true",
+    );
+  });
+
+  it("chooses a legal direct break when restricted breaker credits preserve cash reserve", () => {
+    const breakSubroutine = breakAction({ costs: [{ credits: 4 }] });
+    const continueRun = continueAction({
+      encounterWillEndRun: true,
+      unbrokenSubroutineCount: 1,
+    });
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      breakerStrength: 4,
+      credits: 2,
+      extraRig: [quietPrograms()],
+      legalActions: [breakSubroutine, continueRun],
+    });
+
+    const selected = runnerRunPlanSemanticChoice({
+      input,
+      plan: runPlan(),
+      choices: [
+        choice(continueRun, "simple_run_choice", 900),
+        choice(breakSubroutine, "encounter_survival", 100),
+      ],
+    });
+
+    expect(selected?.action.actionId).toBe(breakSubroutine.actionId);
+    expect(selected?.evidence).toContain("sequence_cash_cost:2");
+    expect(selected?.evidence).toContain(
+      "sequence_restricted_credits_spent:2",
+    );
+  });
+
   it("chooses a direct break step over continue through an unbroken ETR", () => {
     const breakSubroutine = breakAction({ costs: [] });
     const continueRun = continueAction({
@@ -342,6 +518,9 @@ function runnerEncounterInput(params: {
   iceDefinitionId: string;
   iceTitle: string;
   iceStrength: number;
+  credits?: number;
+  breaker?: VisibleCard;
+  extraRig?: VisibleCard[];
   breakerStrength?: number;
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
   futureIce?: VisibleCard[];
@@ -367,7 +546,7 @@ function runnerEncounterInput(params: {
         heapOrArchives: [],
         scoreArea: [],
         rig: [
-          {
+          params.breaker ?? {
             instanceId: "codecracker-1",
             known: true,
             title: "Codecracker",
@@ -376,9 +555,10 @@ function runnerEncounterInput(params: {
             subtypes: ["icebreaker"],
             strength: params.breakerStrength ?? 0,
           },
+          ...(params.extraRig ?? []),
         ],
         clicks: 3,
-        credits: 7,
+        credits: params.credits ?? 7,
         tags: 0,
         badPublicity: 0,
       },
@@ -515,6 +695,8 @@ function visibleIce(params: {
     subtypes:
       params.iceDefinitionId === "onr_v1_253_laser-wire"
         ? ["wall"]
+        : params.iceDefinitionId === "onr_v1_231_cortical-scrub"
+          ? ["sentry", "black_ice", "ap", "brainwipe"]
         : ["code_gate"],
     rezzed: true,
     strength: params.iceStrength,
@@ -530,6 +712,43 @@ function visibleIce(params: {
       ],
     },
   };
+}
+
+function loonyGoon(): VisibleCard {
+  return {
+    instanceId: "loony-goon-1",
+    known: true,
+    title: "Loony Goon",
+    definitionId: "onr_v1_040_loony-goon",
+    type: "program",
+    subtypes: ["icebreaker", "killer"],
+    strength: 0,
+  };
+}
+
+function quietPrograms(): VisibleCard {
+  return {
+    instanceId: "quiet-1",
+    known: true,
+    title: "Vewy Vewy Quiet",
+    definitionId: "onr_v1_071_vewy-vewy-quiet",
+    type: "program",
+    subtypes: ["stealth"],
+    counterDisplays: [
+      {
+        id: "quiet-1-recurring",
+        counterType: "recurring_credit",
+        amount: 2,
+        displayKind: "recurring_credit",
+        label: "Recurring credits",
+        ariaLabel: "2 recurring credits",
+        creditPool: {
+          kind: "recurring_credit",
+          uses: ["using_icebreaker_during_run_non_noisy"],
+        },
+      },
+    ],
+  } as VisibleCard;
 }
 
 function runPlan(): RunnerRunPlan {
@@ -634,13 +853,17 @@ function choice(
   };
 }
 
-function pumpAction(params: { costs: LegalAction["costs"] }): LegalAction {
+function pumpAction(params: {
+  costs: LegalAction["costs"];
+  breakerId?: string;
+}): LegalAction {
+  const breakerId = params.breakerId ?? "codecracker-1";
   return action("pump_breaker", {
-    actionId: "pump-codecracker",
-    source: "codecracker-1",
+    actionId: `pump-${breakerId}`,
+    source: breakerId,
     costs: params.costs,
     payload: {
-      breakerId: "codecracker-1",
+      breakerId,
       iceId: "ice-1",
       pumpStrengthAmount: 1,
     },
@@ -649,15 +872,17 @@ function pumpAction(params: { costs: LegalAction["costs"] }): LegalAction {
 
 function breakAction(params: {
   actionId?: string;
+  breakerId?: string;
   costs: LegalAction["costs"];
   subroutineIndex?: number;
 }): LegalAction {
+  const breakerId = params.breakerId ?? "codecracker-1";
   return action("break_subroutine", {
     actionId: params.actionId ?? "break-codecracker",
-    source: "codecracker-1",
+    source: breakerId,
     costs: params.costs,
     payload: {
-      breakerId: "codecracker-1",
+      breakerId,
       iceId: "ice-1",
       subroutineIndex: params.subroutineIndex ?? 0,
     },

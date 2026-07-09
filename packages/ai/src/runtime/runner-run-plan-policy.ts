@@ -6,6 +6,7 @@ import { isImmediateSafetyThreatSubroutine } from "./encounter-subroutine";
 import {
   quoteRunnerRunPath,
   runnerRunPlanCurrentEncounterRequiresBreak,
+  runnerRunPlanCurrentEncounterSafeSequence,
   runnerRunPlanCurrentEncounterSequence,
 } from "./runner-run-plan-path-quote";
 import type { SemanticRuntimeChoice } from "./semantic-runtime-types";
@@ -192,7 +193,26 @@ function runnerRunPlanAbortChoice(params: {
   const jackOutChoice = params.choices.find(
     (choice) => !choice.exclusion && choice.action.type === "jack_out",
   );
-  if (!jackOutChoice) return undefined;
+  if (!jackOutChoice) {
+    const continueChoice = params.choices.find(
+      (choice) =>
+        !choice.exclusion &&
+        choice.action.type === "continue_run" &&
+        choice.action.payload?.encounterContinue === true,
+    );
+    if (!continueChoice) return undefined;
+    return annotateRunnerRunPlanChoice({
+      choice: continueChoice,
+      plan: params.plan,
+      explanation:
+        "RunnerRunPlan lässt die Encounter-Subroutinen auslösen, weil keine access-erhaltende Sequenz bezahlbar ist und kein Jack-out legal ist.",
+      extraEvidence: [
+        "runner_run_plan_conserve_credits:true",
+        "runner_run_plan_encounter_sequence_missing:true",
+        "runner_run_plan_no_jack_out_available:true",
+      ],
+    });
+  }
   return annotateRunnerRunPlanChoice({
     choice: jackOutChoice,
     plan: params.plan,
@@ -213,6 +233,36 @@ function runnerRunPlanEncounterChoice(params: {
   plan: RunnerRunPlan;
   choices: readonly SemanticRuntimeChoice[];
 }): SemanticRuntimeChoice | undefined {
+  const safeSequence = runnerRunPlanCurrentEncounterSafeSequence({
+    input: params.input,
+    plan: params.plan,
+  });
+  const safeSequenceActionId = safeSequence?.steps[0]?.actionId;
+  if (safeSequenceActionId) {
+    const safetyChoice = params.choices.find(
+      (choice) =>
+        !choice.exclusion && choice.action.actionId === safeSequenceActionId,
+    );
+    if (safetyChoice) {
+      return annotateRunnerRunPlanChoice({
+        choice: safetyChoice,
+        plan: params.plan,
+        explanation:
+          "RunnerRunPlan wählt den nächsten Safety-Step, um unmittelbaren permanenten Schaden oder Programmverlust zu verhindern.",
+        extraEvidence: [
+          "runner_run_plan_safety_sequence_selected:true",
+          `runner_run_plan_sequence_cost:${safeSequence.totalCost}`,
+          `runner_run_plan_sequence_uses_pump:${safeSequence.usesPump}`,
+          `runner_run_plan_sequence_uses_break:${safeSequence.usesBreak}`,
+          ...safeSequence.riskTags.map(
+            (riskTag) => `runner_run_plan_sequence_risk:${riskTag}`,
+          ),
+          ...(safeSequence.evidence ?? []),
+        ],
+      });
+    }
+  }
+
   const sequence = runnerRunPlanCurrentEncounterSequence({
     input: params.input,
     plan: params.plan,

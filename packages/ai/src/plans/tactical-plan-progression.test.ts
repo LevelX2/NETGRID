@@ -3,6 +3,7 @@ import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
 import {
   normalizedPlanContinuityValue,
   progressTacticalPlans,
+  rankTacticalPlans,
 } from "./tactical-plan-progression";
 import type { TacticalPlanMemorySnapshot } from "./tactical-plan-types";
 
@@ -67,6 +68,70 @@ describe("tactical plan progression", () => {
           ),
         }),
       ]),
+    );
+  });
+
+  it("satisfies an expired opportunistic central probe so blocked objective setup can resume", () => {
+    const centralPlan = createTacticalPlan({
+      planId: "runner.opportunistic_central_run:hq",
+      side: "runner",
+      type: "runner.opportunistic_central_run",
+      status: "active",
+      priority: 1000,
+      horizonTurns: 1,
+      target: { kind: "server", id: "hq" },
+      currentStep: createPlanStep({
+        stepId: "probe_central:hq",
+        kind: "probe_central",
+        desiredActionSemantics: ["run.start"],
+      }),
+      stateVersion: 12,
+    });
+    const blockedRemotePlan = createTacticalPlan({
+      planId: "runner.contest_remote:remote_1",
+      side: "runner",
+      type: "runner.contest_remote",
+      status: "blocked",
+      priority: 940,
+      horizonTurns: 2,
+      target: { kind: "server", id: "remote_1" },
+      currentStep: createPlanStep({
+        stepId: "draw_for_answer:remote_1",
+        kind: "draw_for_answer",
+        desiredActionSemantics: ["draw.card"],
+      }),
+      stateVersion: 12,
+    });
+    const previousPlan: TacticalPlanMemorySnapshot = {
+      schemaVersion: "tactical-plan-v1",
+      memoryId: "previous-hq-probe",
+      side: "runner",
+      planId: "runner.opportunistic_central_run:hq",
+      type: "runner.opportunistic_central_run",
+      status: "satisfied",
+      target: { kind: "server", id: "hq" },
+      selectedStepKind: "probe_central",
+      selectedActionId: "run-hq",
+      blockedBy: [],
+      ttlDecisionsRemaining: 0,
+      planProgressionReason: "selected_new_plan",
+      updatedAtStateVersion: 11,
+    };
+
+    const progressed = progressTacticalPlans(
+      [centralPlan, blockedRemotePlan],
+      previousPlan,
+    );
+    const ranked = rankTacticalPlans(progressed.plans);
+
+    expect(
+      progressed.plans.find(
+        (plan) => plan.planId === "runner.opportunistic_central_run:hq",
+      )?.status,
+    ).toBe("satisfied");
+    expect(ranked[0]?.planId).toBe("runner.contest_remote:remote_1");
+    expect(progressed.planProgressionReason).toBe(
+      "previous_central_probe_satisfied",
     );
   });
 });

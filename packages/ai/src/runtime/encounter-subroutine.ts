@@ -8,8 +8,17 @@ export function isImmediateSafetyThreatSubroutine(
   subroutine: VisibleEncounterSubroutine,
 ): boolean {
   const type = subroutine.type.toLowerCase();
+  const damageTypeValue = (subroutine as { damageType?: unknown }).damageType;
+  const damageType =
+    typeof damageTypeValue === "string" ? damageTypeValue : undefined;
   return (
+    type === "brain_damage" ||
+    type === "core_damage" ||
+    type === "do_brain_damage" ||
+    type === "do_core_damage" ||
     type === "do_damage" ||
+    damageType === "brain" ||
+    damageType === "core" ||
     type === "give_runner_tag" ||
     type === "initiate_trace" ||
     type === "trash_installed_program" ||

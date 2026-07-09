@@ -15,6 +15,7 @@ import {
 } from "./encounter-action";
 import {
   isImmediateSafetyThreatSubroutine,
+  isEndRunSubroutine,
   type VisibleEncounterSubroutine,
 } from "./encounter-subroutine";
 import type { EncounterRunRemainderEffectAssessment } from "./runner-run-remainder-effect-assessment";
@@ -40,7 +41,7 @@ export type RunnerPumpViabilityContextDependencies = {
   encounterFuturePathAfterPumpBreakAssessment: (
     input: AiDecisionInput,
     server: VisibleServer,
-    creditsAfterPumpAndBreak: number,
+    creditBudgetAfterPumpAndBreak: number | RunnerRunPathCreditBudget,
   ) => { blocksPump: boolean; creditsAfterPath: number; evidence: string[] };
   encounterRemotePayoffAfterBreakAssessment: (
     input: AiDecisionInput,
@@ -176,13 +177,23 @@ export function createRunnerPumpViabilityContext(
         ],
       };
 
+    const currentQuote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+    const requiredBreakCount =
+      currentQuote?.subroutines.filter(
+        (subroutine) =>
+          isImmediateSafetyThreatSubroutine(subroutine) ||
+          (encounterContinue?.payload?.encounterWillEndRun === true &&
+            isEndRunSubroutine(subroutine)),
+      ).length ??
+      (encounterContinue?.payload?.encounterWillEndRun === true
+        ? endTheRunCount
+        : 0);
     const estimatedBreakCost =
-      endTheRunCount > 0 &&
-      encounterContinue?.payload?.encounterWillEndRun === true
+      requiredBreakCount > 0
         ? creditsToBreakEndTheRunSubroutinesWithBreaker(
             breaker,
             encounteredIce,
-            endTheRunCount,
+            requiredBreakCount,
             (breaker.strength ?? 0) + requiredPumps * pumpAmount,
           )?.cost
         : dependencies.estimatedEncounterBreakCost(input, action);
@@ -216,7 +227,6 @@ export function createRunnerPumpViabilityContext(
           )
         : undefined;
     if (server) {
-      const currentQuote = currentEncounteredIceCard(input)?.effectiveRunQuote;
       const hasImmediateSafetyThreat =
         currentQuote?.subroutines.some(isImmediateSafetyThreatSubroutine) ??
         false;
@@ -229,7 +239,7 @@ export function createRunnerPumpViabilityContext(
         : dependencies.encounterFuturePathAfterPumpBreakAssessment(
             input,
             server,
-            creditsAfterPumpAndBreak,
+            breakPayment.budget,
           );
       if (futurePath.blocksPump)
         return {

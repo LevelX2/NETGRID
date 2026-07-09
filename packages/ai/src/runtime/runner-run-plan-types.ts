@@ -114,6 +114,9 @@ export type RunnerRunLegalActionRef = {
 export type RunnerRunEncounterActionSequence = {
   steps: RunnerRunLegalActionRef[];
   totalCost: number;
+  cashCost: number;
+  restrictedCreditCost: number;
+  creditsAfterSequence: number;
   usesPump: boolean;
   usesBreak: boolean;
   usesBypass: boolean;

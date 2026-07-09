@@ -1,6 +1,9 @@
 import type { AiDecisionInput } from "@netgrid/shared";
 
-import type { assessKnownRezzedIcePath } from "../visible-run-analysis";
+import type {
+  assessKnownRezzedIcePath,
+  RunnerRunPathCreditBudget,
+} from "../visible-run-analysis";
 
 type KnownIcePathAssessment = ReturnType<typeof assessKnownRezzedIcePath>;
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
@@ -19,14 +22,18 @@ export function createRunnerPumpFuturePathContext(
   encounterFuturePathAfterPumpBreakAssessment: (
     input: AiDecisionInput,
     server: VisibleServer,
-    creditsAfterPumpAndBreak: number,
+    creditBudgetAfterPumpAndBreak: number | RunnerRunPathCreditBudget,
   ) => { blocksPump: boolean; creditsAfterPath: number; evidence: string[] };
 } {
   const encounterFuturePathAfterPumpBreakAssessment = (
     input: AiDecisionInput,
     server: VisibleServer,
-    creditsAfterPumpAndBreak: number,
+    creditBudgetAfterPumpAndBreak: number | RunnerRunPathCreditBudget,
   ): { blocksPump: boolean; creditsAfterPath: number; evidence: string[] } => {
+    const creditsAfterPumpAndBreak =
+      typeof creditBudgetAfterPumpAndBreak === "number"
+        ? creditBudgetAfterPumpAndBreak
+        : creditBudgetAfterPumpAndBreak.credits;
     const run = input.playerView.run;
     if (run?.position?.kind !== "ice")
       return {
@@ -44,7 +51,7 @@ export function createRunnerPumpFuturePathContext(
     const pathAssessment = dependencies.assessKnownRezzedIcePath(
       futureIce,
       input.playerView.own.rig ?? [],
-      creditsAfterPumpAndBreak,
+      creditBudgetAfterPumpAndBreak,
       server.root,
     );
     const pathEvidence = dependencies.knownIcePathReason(

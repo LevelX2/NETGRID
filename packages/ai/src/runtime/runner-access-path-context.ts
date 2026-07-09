@@ -6,6 +6,10 @@ import {
   isImmediateSafetyThreatSubroutine,
   type VisibleEncounterSubroutine,
 } from "./encounter-subroutine";
+import {
+  runnerEncounterPaymentForAction,
+  spendRunnerEncounterActionCost,
+} from "./runner-encounter-credit-budget";
 
 type KnownIcePathAssessment = ReturnType<typeof assessKnownRezzedIcePath>;
 type VisibleServer = AiDecisionInput["playerView"]["servers"][number];
@@ -153,8 +157,8 @@ export function createRunnerAccessPathContext(
         evidence: ["break_preserves_immediate_safety:true"],
       };
 
-    const creditsAfterBreak =
-      input.playerView.own.credits - dependencies.actionCreditCost(action);
+    const breakPayment = runnerEncounterPaymentForAction(input, action);
+    const creditsAfterBreak = breakPayment.creditsAfterPayment;
     const remainingCurrentEndRunAfterBreak =
       quote && breakIndexes.size > 0
         ? quote.subroutines.filter(
@@ -170,8 +174,12 @@ export function createRunnerAccessPathContext(
     if (
       currentEncounterContinue?.payload?.encounterWillEndRun === true &&
       remainingCurrentEndRunAfterBreak > 0 &&
-      creditsAfterBreak <
-        (dependencies.estimatedEncounterBreakCost(input, action) ?? 1)
+      !spendRunnerEncounterActionCost({
+        input,
+        action,
+        budget: breakPayment.budget,
+        cost: dependencies.estimatedEncounterBreakCost(input, action) ?? 1,
+      }).affordable
     )
       return {
         canPreserveAccessPath: false,
@@ -205,7 +213,7 @@ export function createRunnerAccessPathContext(
     const pathAssessment = dependencies.assessKnownRezzedIcePath(
       futureIce,
       input.playerView.own.rig ?? [],
-      creditsAfterBreak,
+      breakPayment.budget,
       server.root,
     );
     if (

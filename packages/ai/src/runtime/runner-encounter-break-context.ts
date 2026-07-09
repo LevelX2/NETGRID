@@ -6,6 +6,7 @@ import {
 } from "@netgrid/shared";
 
 import { breakerIdForEncounterAction } from "./encounter-action";
+import { runnerEncounterPaymentForAction } from "./runner-encounter-credit-budget";
 
 export type RunnerEncounterBreakContextDependencies = {
   actionCreditCost: (action: LegalAction) => number;
@@ -62,8 +63,8 @@ export function createRunnerEncounterBreakContext(
     action: LegalAction,
   ): { preserveReserve: boolean; evidence: string[] } => {
     const reserveTarget = dependencies.runnerCreditReserveTarget(input);
-    const creditsAfterBreak =
-      input.playerView.own.credits - dependencies.actionCreditCost(action);
+    const payment = runnerEncounterPaymentForAction(input, action);
+    const creditsAfterBreak = payment.creditsAfterPayment;
     const preserveReserve = creditsAfterBreak < Math.max(2, reserveTarget - 1);
     return {
       preserveReserve,
@@ -72,6 +73,7 @@ export function createRunnerEncounterBreakContext(
             "break_skipped_to_preserve_trash_reserve:true",
             `break_credits_after:${creditsAfterBreak}`,
             `break_reserve_target:${reserveTarget}`,
+            `break_restricted_credits_spent:${payment.restrictedSpent}`,
           ]
         : [],
     };

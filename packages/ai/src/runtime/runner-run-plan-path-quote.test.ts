@@ -210,6 +210,42 @@ describe("runner run plan path quote", () => {
     expect(quote.expectedRemainingCredits).toBe(3);
   });
 
+  it("uses visible non-noisy recurring credits as non-cash pump budget against Keeper", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_252_keeper",
+      iceTitle: "Keeper",
+      iceStrength: 4,
+      credits: 2,
+      extraRig: [quietPrograms()],
+      legalActions: [
+        pumpAction({ costs: [{ credits: 1 }] }),
+        continueAction({
+          encounterWillEndRun: true,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const sequence = quote.iceQuotes[0]?.cheapestAccessPreservingSequence;
+
+    expect(sequence?.steps.map((step) => step.actionType)).toEqual([
+      "pump_breaker",
+      "pump_breaker",
+      "pump_breaker",
+      "pump_breaker",
+    ]);
+    expect(sequence?.totalCost).toBe(4);
+    expect(sequence?.cashCost).toBe(2);
+    expect(sequence?.restrictedCreditCost).toBe(2);
+    expect(sequence?.evidence).toContain("sequence_cash_cost:2");
+    expect(sequence?.evidence).toContain(
+      "sequence_restricted_credits_spent:2",
+    );
+    expect(quote.expectedRemainingCredits).toBe(0);
+    expect(quote.canReachAccess).toBe(true);
+  });
+
   it("does not re-quote passed ICE after the active run reaches the server", () => {
     const input = runnerServerMovementInput({
       iceDefinitionId: "onr_v1_252_keeper",
@@ -256,6 +292,8 @@ function runnerEncounterInput(params: {
   iceDefinitionId: string;
   iceTitle: string;
   iceStrength: number;
+  credits?: number;
+  extraRig?: VisibleCard[];
   breakerStrength?: number;
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
   legalActions: LegalAction[];
@@ -288,9 +326,10 @@ function runnerEncounterInput(params: {
             subtypes: ["icebreaker"],
             strength: params.breakerStrength ?? 0,
           },
+          ...(params.extraRig ?? []),
         ],
         clicks: 3,
-        credits: 7,
+        credits: params.credits ?? 7,
         tags: 0,
         badPublicity: 0,
       },
@@ -440,6 +479,31 @@ function visibleIce(params: {
       ],
     },
   };
+}
+
+function quietPrograms(): VisibleCard {
+  return {
+    instanceId: "quiet-1",
+    known: true,
+    title: "Vewy Vewy Quiet",
+    definitionId: "onr_v1_071_vewy-vewy-quiet",
+    type: "program",
+    subtypes: ["stealth"],
+    counterDisplays: [
+      {
+        id: "quiet-1-recurring",
+        counterType: "recurring_credit",
+        amount: 2,
+        displayKind: "recurring_credit",
+        label: "Recurring credits",
+        ariaLabel: "2 recurring credits",
+        creditPool: {
+          kind: "recurring_credit",
+          uses: ["using_icebreaker_during_run_non_noisy"],
+        },
+      },
+    ],
+  } as VisibleCard;
 }
 
 function runPlan(): RunnerRunPlan {

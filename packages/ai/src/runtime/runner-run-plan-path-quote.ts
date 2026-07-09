@@ -17,6 +17,10 @@ import {
   currentRunRemainingIce,
 } from "./current-encounter";
 import {
+  isEndRunSubroutine,
+  isImmediateSafetyThreatSubroutine,
+} from "./encounter-subroutine";
+import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
 } from "./encounter-action";
@@ -33,6 +37,10 @@ import type {
   RunnerRunSubroutineQuote,
   RunnerRunSubroutineThreatClass,
 } from "./runner-run-plan-types";
+import {
+  runnerEncounterPaymentForActions,
+  spendRunnerEncounterBreakerCost,
+} from "./runner-encounter-credit-budget";
 
 export function quoteRunnerRunPath(
   input: AiDecisionInput,
@@ -96,7 +104,7 @@ export function quoteRunnerRunPath(
       sum +
       Math.max(
         0,
-        quote.cheapestAccessPreservingSequence?.totalCost ??
+        quote.cheapestAccessPreservingSequence?.cashCost ??
           quote.breakerCoverage
             .map((coverage) => coverage.estimatedCost)
             .filter((cost): cost is number => cost !== undefined)
@@ -158,6 +166,17 @@ export function runnerRunPlanCurrentEncounterSequence(params: {
   )?.cheapestAccessPreservingSequence;
 }
 
+export function runnerRunPlanCurrentEncounterSafeSequence(params: {
+  input: AiDecisionInput;
+  plan: RunnerRunPlan;
+}): RunnerRunEncounterActionSequence | undefined {
+  return quoteRunnerRunPath(params.input, params.plan).iceQuotes.find(
+    (quote) =>
+      quote.iceRef.instanceId ===
+      currentEncounteredIceCard(params.input)?.instanceId,
+  )?.cheapestSafeSequence;
+}
+
 export function runnerRunPlanCurrentEncounterRequiresBreak(params: {
   input: AiDecisionInput;
 }): boolean {
@@ -177,9 +196,16 @@ function quoteIceEncounter(params: {
   const { input, plan, ice, currentEncounter } = params;
   const subroutineQuotes = subroutineQuotesForIce(input, ice, currentEncounter);
   const breakerCoverage = breakerCoverageQuotesForIce(input, ice);
-  const cheapestAccessPreservingSequence = currentEncounter
+  const quotedSequence = currentEncounter
     ? cheapestCurrentEncounterSequence({ input, plan, ice })
     : cheapestKnownIceSequence({ input, plan, ice });
+  const cheapestAccessPreservingSequence =
+    quotedSequence?.preservesAccessObjective === true
+      ? quotedSequence
+      : undefined;
+  const cheapestSafeSequence = currentEncounter
+    ? cheapestCurrentSafetySequence({ input, plan, ice })
+    : undefined;
   const effectiveStrength = effectiveIceStrength(ice);
   return {
     iceRef: {
@@ -196,9 +222,9 @@ function quoteIceEncounter(params: {
     ...(cheapestAccessPreservingSequence
       ? {
           cheapestAccessPreservingSequence,
-          cheapestSafeSequence: cheapestAccessPreservingSequence,
         }
       : {}),
+    ...(cheapestSafeSequence ? { cheapestSafeSequence } : {}),
     bypassOptions: [],
     postEncounterModifiers: modifierQuotesForIce(ice),
   };
@@ -244,7 +270,44 @@ function cheapestCurrentEncounterSequence(params: {
   return [directBreak, pumpBreak]
     .filter(
       (sequence): sequence is RunnerRunEncounterActionSequence =>
-        sequence !== undefined,
+        sequence !== undefined && sequence.preservesAccessObjective,
+    )
+    .sort(
+      (left, right) =>
+        left.totalCost - right.totalCost ||
+        (left.usesPump === right.usesPump ? 0 : left.usesPump ? 1 : -1),
+    )[0];
+}
+
+function cheapestCurrentSafetySequence(params: {
+  input: AiDecisionInput;
+  plan: RunnerRunPlan;
+  ice: VisibleCard;
+}): RunnerRunEncounterActionSequence | undefined {
+  const { input, plan, ice } = params;
+  if (!ice.known || !ice.definitionId) return undefined;
+  const requiredSubroutineIndexes = currentSafetyBreakSubroutineIndexes(input, ice);
+  if (requiredSubroutineIndexes.size <= 0) return undefined;
+  const directBreak = cheapestDirectBreakSequence({
+    input,
+    plan,
+    ice,
+    requiredSubroutineIndexes,
+    preservesAccessObjective: false,
+    evidence: ["current_encounter_safety_break_sequence:true"],
+  });
+  const pumpBreak = cheapestPumpBreakSequence({
+    input,
+    plan,
+    ice,
+    requiredSubroutineIndexes,
+    preservesAccessObjective: false,
+    evidence: ["current_encounter_safety_break_sequence:true"],
+  });
+  return [directBreak, pumpBreak]
+    .filter(
+      (sequence): sequence is RunnerRunEncounterActionSequence =>
+        sequence !== undefined && !sequence.violatesReserve,
     )
     .sort(
       (left, right) =>
@@ -273,6 +336,8 @@ function cheapestKnownIceSequence(params: {
   return sequenceForActions({
     actions: [],
     totalCost: assessment.cost,
+    estimatedBreakCost: assessment.cost,
+    estimatedBreakBreakerId: assessment.breakerInstanceId,
     usesPump: false,
     usesBreak: true,
     evidence: [
@@ -289,6 +354,8 @@ function cheapestDirectBreakSequence(params: {
   plan: RunnerRunPlan;
   ice: VisibleCard;
   requiredSubroutineIndexes: ReadonlySet<number>;
+  preservesAccessObjective?: boolean;
+  evidence?: string[];
 }): RunnerRunEncounterActionSequence | undefined {
   const { input, plan, ice, requiredSubroutineIndexes } = params;
   const selectedBreakActions = selectBreakActionsForRequiredSubroutines(
@@ -306,10 +373,14 @@ function cheapestDirectBreakSequence(params: {
     usesPump: false,
     usesBreak: true,
     evidence: [
+      ...(params.evidence ?? []),
       "current_encounter_direct_break_sequence:true",
       `break_action_count:${selectedBreakActions.length}`,
       `required_subroutine_indexes:${formatSubroutineIndexes(requiredSubroutineIndexes)}`,
     ],
+    ...(params.preservesAccessObjective !== undefined
+      ? { preservesAccessObjective: params.preservesAccessObjective }
+      : {}),
     plan,
     input,
   });
@@ -320,6 +391,8 @@ function cheapestPumpBreakSequence(params: {
   plan: RunnerRunPlan;
   ice: VisibleCard;
   requiredSubroutineIndexes: ReadonlySet<number>;
+  preservesAccessObjective?: boolean;
+  evidence?: string[];
 }): RunnerRunEncounterActionSequence | undefined {
   const { input, plan, ice, requiredSubroutineIndexes } = params;
   if (!ice.definitionId) return undefined;
@@ -332,6 +405,10 @@ function cheapestPumpBreakSequence(params: {
         ice,
         pumpAction,
         requiredSubroutineIndexes,
+        ...(params.preservesAccessObjective !== undefined
+          ? { preservesAccessObjective: params.preservesAccessObjective }
+          : {}),
+        ...(params.evidence !== undefined ? { evidence: params.evidence } : {}),
       }),
     )
     .filter(
@@ -353,6 +430,8 @@ function pumpBreakSequenceForAction(params: {
   ice: VisibleCard;
   pumpAction: LegalAction;
   requiredSubroutineIndexes: ReadonlySet<number>;
+  preservesAccessObjective?: boolean;
+  evidence?: string[];
 }): RunnerRunEncounterActionSequence | undefined {
   const { input, plan, ice, pumpAction, requiredSubroutineIndexes } = params;
   const breakerId = breakerIdForEncounterAction(pumpAction);
@@ -401,6 +480,8 @@ function pumpBreakSequenceForAction(params: {
   return sequenceForActions({
     actions: [...pumpSteps, ...selectedBreakSteps],
     totalCost,
+    estimatedBreakCost: postPumpBreakCost,
+    estimatedBreakBreakerId: breakerId,
     usesPump: true,
     usesBreak: true,
     riskTags:
@@ -408,6 +489,7 @@ function pumpBreakSequenceForAction(params: {
         ? ["break_action_expected_after_pump"]
         : [],
     evidence: [
+      ...(params.evidence ?? []),
       "current_encounter_pump_break_sequence:true",
       `breaker:${breaker.instanceId}`,
       `pump_required_count:${requiredPumps}`,
@@ -415,6 +497,9 @@ function pumpBreakSequenceForAction(params: {
       `break_estimated_cost_after_pump:${postPumpBreakCost}`,
       `required_subroutine_indexes:${formatSubroutineIndexes(requiredSubroutineIndexes)}`,
     ],
+    ...(params.preservesAccessObjective !== undefined
+      ? { preservesAccessObjective: params.preservesAccessObjective }
+      : {}),
     plan,
     input,
   });
@@ -423,6 +508,9 @@ function pumpBreakSequenceForAction(params: {
 function sequenceForActions(params: {
   actions: readonly LegalAction[];
   totalCost: number;
+  estimatedBreakCost?: number;
+  estimatedBreakBreakerId?: string;
+  preservesAccessObjective?: boolean;
   usesPump: boolean;
   usesBreak: boolean;
   riskTags?: string[];
@@ -431,22 +519,72 @@ function sequenceForActions(params: {
   input: AiDecisionInput;
 }): RunnerRunEncounterActionSequence {
   const reserveTarget = runnerRunPlanReserveTarget(params.plan);
-  const violatesReserve =
-    params.input.playerView.own.credits - params.totalCost < reserveTarget;
+  const payment =
+    params.actions.length > 0
+      ? runnerEncounterPaymentForActions(params.input, params.actions)
+      : undefined;
+  const concreteActionCost = params.actions.reduce(
+    (sum, action) => sum + actionCreditCost(action),
+    0,
+  );
+  const estimatedRemainingCost = Math.max(
+    0,
+    Math.max(0, params.totalCost) - concreteActionCost,
+  );
+  const estimatedPayment =
+    estimatedRemainingCost > 0
+      ? spendRunnerEncounterBreakerCost({
+          input: params.input,
+          breakerId: params.estimatedBreakBreakerId,
+          budget:
+            payment?.budget ?? {
+              credits: params.input.playerView.own.credits,
+              icebreakerCredits: 0,
+              nonNoisyIcebreakerCredits: 0,
+              killerCredits: 0,
+            },
+          cost: estimatedRemainingCost,
+        })
+      : undefined;
+  const cashCost = (payment?.cashCost ?? 0) + (estimatedPayment?.cashCost ?? 0);
+  const restrictedSpent =
+    (payment?.restrictedSpent ?? 0) +
+    (estimatedPayment?.restrictedSpent ?? 0);
+  const affordable =
+    (payment?.affordable ?? true) && (estimatedPayment?.affordable ?? true);
+  const creditsAfterSequence =
+    estimatedPayment?.creditsAfterPayment ??
+    payment?.creditsAfterPayment ??
+    params.input.playerView.own.credits - cashCost;
+  const violatesReserve = creditsAfterSequence < reserveTarget;
   return {
     steps: params.actions.map(legalActionRef),
     totalCost: params.totalCost,
+    cashCost,
+    restrictedCreditCost: restrictedSpent,
+    creditsAfterSequence,
     usesPump: params.usesPump,
     usesBreak: params.usesBreak,
     usesBypass: false,
     usesPrevention: false,
-    preservesAccessObjective: !violatesReserve,
-    violatesReserve,
-    riskTags: params.riskTags ?? [],
+    preservesAccessObjective:
+      (params.preservesAccessObjective ?? true) && affordable && !violatesReserve,
+    violatesReserve: !affordable || violatesReserve,
+    riskTags: [
+      ...(params.riskTags ?? []),
+      ...(!affordable ? ["sequence_unaffordable"] : []),
+    ],
     evidence: [
       ...params.evidence,
       `sequence_total_cost:${params.totalCost}`,
+      `sequence_cash_cost:${cashCost}`,
+      `sequence_restricted_credits_spent:${restrictedSpent}`,
+      `sequence_credits_after:${creditsAfterSequence}`,
       `sequence_reserve_target:${reserveTarget}`,
+      `sequence_affordable:${affordable}`,
+      ...(estimatedRemainingCost > 0
+        ? [`sequence_estimated_remaining_cost:${estimatedRemainingCost}`]
+        : []),
     ],
   };
 }
@@ -544,8 +682,8 @@ function threatClassForSubroutine(
     VisibleCard["effectiveRunQuote"]
   >["subroutines"][number],
 ): RunnerRunSubroutineThreatClass {
-  if (subroutine.type === "end_the_run") return "must_break_for_access";
-  if (subroutine.unbrokenRunEffect?.causesDamageOrProgramTrash === true) {
+  if (isEndRunSubroutine(subroutine)) return "must_break_for_access";
+  if (isImmediateSafetyThreatSubroutine(subroutine)) {
     return "must_break_for_survival";
   }
   if (
@@ -736,6 +874,30 @@ function currentRequiredBreakSubroutineIndexes(
       (_, index) => index,
     ),
   );
+}
+
+function currentSafetyBreakSubroutineIndexes(
+  input: AiDecisionInput,
+  ice: VisibleCard,
+): Set<number> {
+  const continueAction = encounterContinueAction(input);
+  const unbrokenCount =
+    typeof continueAction?.payload?.unbrokenSubroutineCount === "number"
+      ? continueAction.payload.unbrokenSubroutineCount
+      : undefined;
+  if (unbrokenCount === 0) return new Set();
+
+  const quoteSubroutines = ice.effectiveRunQuote?.subroutines ?? [];
+  if (quoteSubroutines.length > 0) {
+    return new Set(
+      quoteSubroutines.flatMap((subroutine, index) =>
+        threatClassForSubroutine(subroutine) === "must_break_for_survival"
+          ? [index]
+          : [],
+      ),
+    );
+  }
+  return new Set();
 }
 
 function formatSubroutineIndexes(indexes: ReadonlySet<number>): string {

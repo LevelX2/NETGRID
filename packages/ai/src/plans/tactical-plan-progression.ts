@@ -63,6 +63,7 @@ export function progressTacticalPlans(
     if (previousCentralProbeSatisfied) {
       return {
         ...plan,
+        status: plan.status === "abandoned" ? plan.status : "satisfied",
         evidence: [
           ...plan.evidence,
           `previous_plan:${previousPlan.planId}`,
