@@ -239,10 +239,60 @@ describe("runner run plan path quote", () => {
     expect(sequence?.cashCost).toBe(2);
     expect(sequence?.restrictedCreditCost).toBe(2);
     expect(sequence?.evidence).toContain("sequence_cash_cost:2");
-    expect(sequence?.evidence).toContain(
-      "sequence_restricted_credits_spent:2",
-    );
+    expect(sequence?.evidence).toContain("sequence_restricted_credits_spent:2");
     expect(quote.expectedRemainingCredits).toBe(0);
+    expect(quote.canReachAccess).toBe(true);
+  });
+
+  it("requires breaking hard future-path modifiers before visible future ICE", () => {
+    const input = runnerEncounterInput({
+      iceDefinitionId: "onr_v1_261_quandary",
+      iceTitle: "Quandary",
+      iceStrength: 2,
+      breakerStrength: 2,
+      futureIce: [
+        visibleIce({
+          instanceId: "future-ice-1",
+          iceDefinitionId: "onr_v1_261_quandary",
+          iceTitle: "Future Quandary",
+          iceStrength: 2,
+        }),
+      ],
+      subroutines: [
+        {
+          id: "future-breaking-lock",
+          type: "corp_gain_credit",
+          unbrokenRunEffect: { preventsFutureBreaking: true },
+        },
+      ],
+      legalActions: [
+        breakAction({ costs: [], subroutineIndex: 0 }),
+        continueAction({
+          encounterWillEndRun: false,
+          unbrokenSubroutineCount: 1,
+        }),
+      ],
+    });
+
+    const quote = quoteRunnerRunPath(input, runPlan());
+    const currentIceQuote = quote.iceQuotes[0];
+    const sequence = currentIceQuote?.cheapestAccessPreservingSequence;
+
+    expect(currentIceQuote?.subroutineQuotes[0]?.threatClass).toBe(
+      "must_break_for_access",
+    );
+    expect(currentIceQuote?.subroutineQuotes[0]?.evidence).toContain(
+      "subroutine_future_path_modifier_required:true",
+    );
+    expect(sequence?.steps.map((step) => step.actionType)).toEqual([
+      "break_subroutine",
+    ]);
+    expect(sequence?.evidence).toContain(
+      "current_encounter_future_path_modifier_required:true",
+    );
+    expect(sequence?.evidence).toContain(
+      "run_remainder_effect_must_break:true",
+    );
     expect(quote.canReachAccess).toBe(true);
   });
 
@@ -295,10 +345,12 @@ function runnerEncounterInput(params: {
   credits?: number;
   extraRig?: VisibleCard[];
   breakerStrength?: number;
+  futureIce?: VisibleCard[];
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
   legalActions: LegalAction[];
 }): AiDecisionInput {
   const ice = visibleIce(params);
+  const futureIce = params.futureIce ?? [];
   return {
     side: "runner",
     playerView: {
@@ -348,14 +400,14 @@ function runnerEncounterInput(params: {
         {
           id: "rd",
           label: "R&D",
-          ice: [ice],
+          ice: [...futureIce, ice],
           root: [],
         },
       ],
       run: {
         attackedServerId: "rd",
         phase: "encounter_ice",
-        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        position: { kind: "ice", serverId: "rd", iceIndex: futureIce.length },
         encounteredIce: ice,
         successful: false,
       },
@@ -450,13 +502,14 @@ function runnerServerMovementInput(params: {
 }
 
 function visibleIce(params: {
+  instanceId?: string;
   iceDefinitionId: string;
   iceTitle: string;
   iceStrength: number;
   subroutines?: NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"];
 }): VisibleCard {
   return {
-    instanceId: "ice-1",
+    instanceId: params.instanceId ?? "ice-1",
     known: true,
     title: params.iceTitle,
     definitionId: params.iceDefinitionId,

@@ -141,6 +141,8 @@ Commit: `fix(ai): reserve visible agenda steal costs`
 
 Ziel: Harte sichtbare Future-Path-Modifikatoren als Plan-Budget-/Safety-Risiko behandeln; vorhandene Spezialcredit-Modelle auf Doppelungen prüfen und nur an der Budgetquelle konsolidieren.
 
+Status: erledigt 2026-07-09. Gates grün: gezielte `runner-run-plan-path-quote`-/Policy-Tests, `@netgrid/ai` Typecheck, `git diff --check`. Spezialcredit-Modelle wurden nicht durch neue Score- oder Display-Korrekturen ergänzt; die bestehende Budgetquelle (`runner-encounter-credit-budget`/sichtbare Rig-Pools) bleibt maßgeblich.
+
 Kernartefakte:
 
 - `packages/ai/src/runtime/runner-run-plan-path-quote.ts`

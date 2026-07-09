@@ -24,6 +24,10 @@ import {
   breakerIdForEncounterAction,
   pumpStrengthAmountForAction,
 } from "./encounter-action";
+import {
+  encounterRunRemainderEffectAssessment,
+  type EncounterRunRemainderEffectAssessment,
+} from "./runner-run-remainder-effect-assessment";
 import { breakSubroutineIndexesForAction } from "./subroutine-indexes";
 import { findVisibleCard } from "./visible-card-lookup";
 import type {
@@ -237,10 +241,14 @@ function cheapestCurrentEncounterSequence(params: {
 }): RunnerRunEncounterActionSequence | undefined {
   const { input, plan, ice } = params;
   if (!ice.known || !ice.definitionId) return undefined;
+  const futurePathAssessment = encounterRunRemainderEffectAssessment(input);
   const requiredSubroutineIndexes = currentRequiredBreakSubroutineIndexes(
     input,
     ice,
+    futurePathAssessment,
   );
+  const futurePathEvidence =
+    futurePathModifierRequiredEvidence(futurePathAssessment);
   if (requiredSubroutineIndexes.size <= 0) {
     const continueAction = encounterContinueAction(input);
     if (!continueAction) return undefined;
@@ -260,12 +268,14 @@ function cheapestCurrentEncounterSequence(params: {
     plan,
     ice,
     requiredSubroutineIndexes,
+    evidence: futurePathEvidence,
   });
   const pumpBreak = cheapestPumpBreakSequence({
     input,
     plan,
     ice,
     requiredSubroutineIndexes,
+    evidence: futurePathEvidence,
   });
   return [directBreak, pumpBreak]
     .filter(
@@ -286,7 +296,10 @@ function cheapestCurrentSafetySequence(params: {
 }): RunnerRunEncounterActionSequence | undefined {
   const { input, plan, ice } = params;
   if (!ice.known || !ice.definitionId) return undefined;
-  const requiredSubroutineIndexes = currentSafetyBreakSubroutineIndexes(input, ice);
+  const requiredSubroutineIndexes = currentSafetyBreakSubroutineIndexes(
+    input,
+    ice,
+  );
   if (requiredSubroutineIndexes.size <= 0) return undefined;
   const directBreak = cheapestDirectBreakSequence({
     input,
@@ -536,20 +549,18 @@ function sequenceForActions(params: {
       ? spendRunnerEncounterBreakerCost({
           input: params.input,
           breakerId: params.estimatedBreakBreakerId,
-          budget:
-            payment?.budget ?? {
-              credits: params.input.playerView.own.credits,
-              icebreakerCredits: 0,
-              nonNoisyIcebreakerCredits: 0,
-              killerCredits: 0,
-            },
+          budget: payment?.budget ?? {
+            credits: params.input.playerView.own.credits,
+            icebreakerCredits: 0,
+            nonNoisyIcebreakerCredits: 0,
+            killerCredits: 0,
+          },
           cost: estimatedRemainingCost,
         })
       : undefined;
   const cashCost = (payment?.cashCost ?? 0) + (estimatedPayment?.cashCost ?? 0);
   const restrictedSpent =
-    (payment?.restrictedSpent ?? 0) +
-    (estimatedPayment?.restrictedSpent ?? 0);
+    (payment?.restrictedSpent ?? 0) + (estimatedPayment?.restrictedSpent ?? 0);
   const affordable =
     (payment?.affordable ?? true) && (estimatedPayment?.affordable ?? true);
   const creditsAfterSequence =
@@ -568,7 +579,9 @@ function sequenceForActions(params: {
     usesBypass: false,
     usesPrevention: false,
     preservesAccessObjective:
-      (params.preservesAccessObjective ?? true) && affordable && !violatesReserve,
+      (params.preservesAccessObjective ?? true) &&
+      affordable &&
+      !violatesReserve,
     violatesReserve: !affordable || violatesReserve,
     riskTags: [
       ...(params.riskTags ?? []),
@@ -653,15 +666,28 @@ function subroutineQuotesForIce(
   const allBroken =
     currentEncounter &&
     encounterContinueAction(input)?.payload?.unbrokenSubroutineCount === 0;
+  const futurePathAssessment = currentEncounter
+    ? encounterRunRemainderEffectAssessment(input)
+    : undefined;
   if (quoteSubroutines.length > 0) {
-    return quoteSubroutines.map((subroutine, index) => ({
-      index,
-      threatClass: allBroken
+    return quoteSubroutines.map((subroutine, index) => {
+      const baseThreatClass = threatClassForSubroutine(subroutine);
+      const threatClass = allBroken
         ? "irrelevant_to_current_plan"
-        : threatClassForSubroutine(subroutine),
-      broken: allBroken,
-      evidence: [`subroutine_type:${subroutine.type}`],
-    }));
+        : currentThreatClassForSubroutine(subroutine, futurePathAssessment);
+      return {
+        index,
+        threatClass,
+        broken: allBroken,
+        evidence: [
+          `subroutine_type:${subroutine.type}`,
+          ...(baseThreatClass === "future_path_modifier" &&
+          threatClass === "must_break_for_access"
+            ? ["subroutine_future_path_modifier_required:true"]
+            : []),
+        ],
+      };
+    });
   }
   if (!ice.definitionId) return [];
   return Array.from(
@@ -675,6 +701,22 @@ function subroutineQuotesForIce(
       evidence: ["subroutine_type:end_the_run"],
     }),
   );
+}
+
+function currentThreatClassForSubroutine(
+  subroutine: NonNullable<
+    VisibleCard["effectiveRunQuote"]
+  >["subroutines"][number],
+  futurePathAssessment: EncounterRunRemainderEffectAssessment | undefined,
+): RunnerRunSubroutineThreatClass {
+  const threatClass = threatClassForSubroutine(subroutine);
+  if (
+    threatClass === "future_path_modifier" &&
+    futurePathAssessment?.mustBreak === true
+  ) {
+    return "must_break_for_access";
+  }
+  return threatClass;
 }
 
 function threatClassForSubroutine(
@@ -845,6 +887,9 @@ function currentEndTheRunThreatCount(
 function currentRequiredBreakSubroutineIndexes(
   input: AiDecisionInput,
   ice: VisibleCard,
+  futurePathAssessment:
+    | EncounterRunRemainderEffectAssessment
+    | undefined = encounterRunRemainderEffectAssessment(input),
 ): Set<number> {
   const continueAction = encounterContinueAction(input);
   const unbrokenCount =
@@ -863,7 +908,11 @@ function currentRequiredBreakSubroutineIndexes(
         if (threatClass === "must_break_for_access") {
           return continueWillEndRun ? [index] : [];
         }
-        return threatClass === "must_break_for_survival" ? [index] : [];
+        if (threatClass === "must_break_for_survival") return [index];
+        return threatClass === "future_path_modifier" &&
+          futurePathAssessment?.mustBreak === true
+          ? [index]
+          : [];
       }),
     );
   }
@@ -898,6 +947,16 @@ function currentSafetyBreakSubroutineIndexes(
     );
   }
   return new Set();
+}
+
+function futurePathModifierRequiredEvidence(
+  assessment: EncounterRunRemainderEffectAssessment,
+): string[] {
+  if (!assessment.mustBreak) return [];
+  return [
+    "current_encounter_future_path_modifier_required:true",
+    ...assessment.evidence,
+  ];
 }
 
 function formatSubroutineIndexes(indexes: ReadonlySet<number>): string {
