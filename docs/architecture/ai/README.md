@@ -1,67 +1,86 @@
 # AI-Architektur
 
-`docs/architecture/ai/` bündelt releaseübergreifende KI-Zielbilder, Schnittstellenregeln und side-sichere Architekturgrenzen. Diese Artefakte geben keine Karten frei und ändern keine Engine-Regeln; sie beschreiben, welche Informationen KI-Pfade nutzen dürfen und wie AI-Hints, Coaching, Simulation und Controller an LegalActions, PlayerViews und Redaction gebunden bleiben.
+## Current State
 
-## Führender Current State ab 2026-07-09
-
-- `@netgrid/ai` ist die Live-Fassade; Match-Simulation, Selfplay und Benchmarks
-  werden ausschließlich über `@netgrid/ai/simulation` importiert.
-- Der Live-Modulgraph ist transitiv frei von `legacy/`; das frühere
-  Legacy-Verzeichnis, Baseline-Selectoren, Runtime-Kill-Switches und
-  Baseline-Simulationsadapter sind gelöscht.
-- Der semantische Coverage-Fallback besitzt keine generische unbekannte
-  Kartenaktion mehr. Er nutzt eine enge sichere LegalAction-Allowlist und
-  bricht ungedeckte nichttriviale Aktionen sichtbar fail-closed ab.
+- `@netgrid/ai` ist die produktive Live-Fassade.
+- Match-Simulation, Selfplay und Benchmarks werden ausschließlich über
+  `@netgrid/ai/simulation` importiert.
+- Die KI konsumiert nur side-sichere `PlayerView`, erlaubte `PublicEvents`,
+  vorhandene `LegalActions` und ausdrücklich erlaubte Metadaten.
+- Die Engine bleibt alleinige Regelautorität. Die KI erzeugt keine
+  LegalActions und führt keine Ersatzaction außerhalb der gewählten Action-ID
+  aus.
+- Der Live-Modulgraph ist frei von alten Planern, Baseline-Controllern,
+  Shadow-/META-Runtime und Kill-Switches.
+- Der Semantic-Coverage-Restpfad ist fail-closed. Nur ausdrücklich sichere,
+  nebenwirkungsarme Engine-Fortsetzungen sind erlaubt.
 - Ausführbare Benchmarkprofile sind `random_legal_bot` und
-  `current_candidate`. Historische Shadow-, META-, Cutover- und Pilotdokumente
-  in der folgenden Artefaktliste sind Abschluss-/Entscheidungsevidence, kein
-  aktueller Runtimevertrag.
-- Technisches `ai_supported` bedeutet nur Deckzulassung. Semantische Coverage,
-  Scenario-Evidence, Play Strength und Default-/Random-Pool-Promotion bleiben
-  getrennte Gates.
+  `current_candidate`.
+- Technisches `ai_supported`, semantische Coverage, Szenario-Evidence,
+  Play Strength und Default-/Random-Pool-Promotion sind getrennte Gates.
 
-## Enthaltene Artefakte
+## Führende Artefakte
 
-- `ai-controller-spec.md`: Controller-Schnitt für KI-Entscheidungen.
-- `ai-decision-trace-contract-2026-05-22.md`: lokaler Vertrag für versionierte KI-Entscheidungslogs, Trace-Redaction, Meta/Drilldown, Export und Live-Follow.
-- `ai-simulation-test-matrix.md`: übergreifende Testmatrix für KI-Simulation.
-- `ai-hints-structure-decision-2026-05-15.md`: Strukturentscheidung für aktive AI-Hints.
-- `coaching-boundary-spec-2026-05-17.md`: side-sichere Grenze für AI-Coaching und Hinweise.
-- `ki-zielbild-metaebene-2026-06-01-v5.md`: Zielbild der künftigen semantischen KI-Kette von Kartensemantik über DeckDoctrine und taktische Zwischenziele bis zu semantisch verstandenen LegalActions.
-- `ki-roadmap-neue-ki-spieler-2026-06-02-v1.md`: Roadmap für neue semantische KI-Spieler mit read-only Foundation, Action-Semantik-Brücke, Shadow Mode und bereichsweisem Cutover.
-- `taktiksignale-strategieanker-guide-2026-06-02-v3.md`: Leitfaden für Taktiksignale, Strategieanker, Rollen, TargetProfiles, Conditions, Risiken und Constraints.
-- `action-semantics-bridge-automation-process-2026-06-04.md`: sequenzieller AI034-bis-AI043-Prozess für die read-only Action-Semantik-Brücke mit Preflight, Szenario-Coverage, erweitertem Candidate-/Gate-Schema, eigenem Arbeits-Worktree, lokalen Merge-nach-`main`-Regeln und Handoff.
-- `controlled-shadow-mode-automation-process-2026-06-04.md`: sequenzieller AI051-bis-AI060-Prozess für Controlled Shadow Mode nach AI050 mit Trace-Vertrag, Szenario-Korpus, Semantic-Shadow-Decision, Legacy-Vergleich, Deviation-Triage, Metriken, default-off Runtime-Harness, Batch-Report, Regression-Fixtures, Shadow-Readiness-Review, eigenem Umsetzungs-Worktree und lokalem Merge nach `main`; kein produktiver Cutover.
-- `semantic-ai-core-meta-automation-process-2026-06-04.md`: Semantic AI Core META 1 bis META 6 für DeckStrategicProfile, DeckDoctrine, mehrzügige TacticalGoalState-Verfolgung, Semantic Decision Score, WhyNot, Cutover Safety Envelope, Agreement-only Canary, testinternen Scoped Override Pilot und Stabilisierung. Ergebnis: `limited_rollout_candidate_for_selected_scopes`, `fullProductionReady: false`, `legacyRemovalReady: false`, Legacy bleibt Fallback.
-- `semantic-ai-production-readiness-automation-process-2026-06-04.md`: Semantic AI Production Readiness META 7 bis META 12 für Multi-Run Evaluation, Human-Review-Closure, Internal Canary, Production-Safe Shadow, limited scoped Cutover, Scope Expansion, Kalibrierung und Legacy-Freeze-Stabilisierung. Ergebnis: `limitedScopedProductionActive: true` für `basic_economy_draw`, `tag_removal`, `simple_score_advance` und `basic_install`; `legacy_freeze_for_selected_scopes_ready`; Full Production, Bulk-Aktivierung und Legacy Removal bleiben ausgeschlossen.
-- `ai-play-strength-decision-spine-automation-process-2026-06-11.md`: sequenzieller AI-PLAY-0-bis-AI-PLAY-9-Prozess für einen side-sicheren Play-Strength-Entscheidungsrücken aus DecisionFrame, TacticalGoalUtility, ActionGoalFit, Threat-/Opportunity-Projektionen, SemanticShadowDecision, Mistake-Snapshot-Suite, lokalem Basic-/Setup-Pilot und Diagnostics-Extraktion. Default bleibt ohne neue Runtime-Wirkung; der Pilot ist nur per lokalem Flag aktiv.
-- `ai-play-strength-decision-spine-followup-automation-process-2026-06-11.md`: Review-Folgeprozess mit Pilot-Reason-Fix, Runtime-Entrypoint-Regression, EconomyContext, erweitertem Snapshot-Korpus, Shadow-vs-Runtime-Report, diagnostischem Kalibrierungsbenchmark und reiner Debug-Helper-Extraktion. Keine Engine-, LegalAction-, Replay-, StateHash-, Randomness- oder Hidden-Info-Vertragsänderung.
-- `ai-structural-play-strength-consolidation-process-2026-06-12.md`: sequenzieller AI-CONS-0-bis-AI-CONS-11-Prozess fuer die lokale Konsolidierung des Play-Strength-Spine mit Modulgrenzen, Pilot-Scope-Registry, Real-Engine-Corpus, Shadow-League-Baseline, Calibration-Evidence, DoctrineGoalSynthesis, TargetChoiceShadow, Debug-Diagnostik und `index.ts`-Debt-Map.
-- `ai-structure-play-strength-maturation-process-2026-06-12.md`: sequenzieller AI-MAT-0-bis-AI-MAT-20-Folgeprozess fuer Delta-Haertung nach dem Konsolidierungsabschluss: Audit-/Git-Disziplin, Pilot-Scope-Zerlegung, Multi-Scope-Umgebung, Runner/Corp-Pilots, Remote-Contest-Diagnostik, Target-/Doctrine-Debug, Corpus- und League-Metadaten, Modulgrenzen und vorbereitete `index.ts`-Extraktion. Die Serie bleibt diagnostisch und aendert keine Engine-Regelautoritaet.
-- `ai-play-strength-maturation-2-process-2026-06-13.md`: abgeschlossener sequenzieller AI-MAT2-0-bis-AI-MAT2-23-Folgeprozess fuer Repo-/Report-Sync, stabilen Pilot-Env-Vertrag, harte Corpus- und Fixture-Disziplin, getrennte Pilot-Metriken, strukturierte Run-/Target-Entscheidungssignale, DoctrineGoal-Erweiterung, ShadowLeague-/Calibration-/Selfplay-Diagnostik, Originalset-/Proteus-Worklists, den ersten `semantic-runtime-debug.ts`-Schnitt und Public-/Import-Contract-Guards. FINAL-GREEN wurde lokal ausgeführt und nach `main` integriert; keine neue Engine-Regelautoritaet und kein produktiver RemoteContest-Cutover.
-- `ai-play-strength-maturation-3-process-2026-06-13.md`: sequenzieller AI-MAT3-0-bis-AI-MAT3-22-Folgeprozess fuer den Maturation-II-Statussync, geklaerte Calibration-/Corpus-Begriffe, Pilot-Cutover-Readiness, ShadowLeague-Followups, weitere `index.ts`-Debug-/Report-Schnitte, TargetChoice-Scorecards und Coverage, DoctrineGoal-Coverage, RemoteContest-Readiness, lokale Default-Kandidatenberichte, Selfplay-Clusterung, Originalset-/Proteus-Paketklassifikation und interne Exportgrenzen. Keine Pilot-Default-Aktivierung und keine Engine-Regelautoritaet.
-- `../../reviews/ai/ai-play-strength-maturation-3-final-report-2026-06-13.md`: abgeschlossener Bericht fuer AI-MAT3-0 bis AI-MAT3-22 inklusive FINAL-GREEN, lokalem Merge nach `main` und Main-Verifikation.
-- `ai-index-rest-debt-after-debug-cuts-2026-06-13.md`: AI-MAT3-6-Messung der `packages/ai/src/index.ts`-Restschuld nach Legacy-Debug- und Simulation-Report-Formatter-Schnitten; priorisiert weitere fachliche Diagnosegrenzen statt mechanischer LOC-Reduktion.
-- `ai-play-strength-maturation-4-automation-process-2026-06-13.md`: sequenzieller AI-MAT4-0-bis-AI-MAT4-26-Prozess fuer Testzahl-Sync, Placement Guide, weitere `index.ts`-Schnitte, lokale Default-Dry-Runs, TargetChoice-Readiness, DoctrineGoal-ActionFit, Originalset-/Proteus-Semantikpakete, Selfplay-Promotion, Delta-Metriken, Boundary-Guards und Abschlussbericht.
-- `ai-play-strength-development-placement-guide-2026-06-13.md`: aktive Entwicklerregel fuer neue AI-Fixes; ordnet Run-Fixes, Risiken, Zielwahl, Doctrine-/Decklinien, Pilot-Policy, Evaluation, Diagnostics, Reports, Legacy, Runtime und Simulation konkreten Modulbereichen zu und verbietet neue Fachlogik direkt in `index.ts` ohne begruendeten Public-Facade-Schnitt.
-- `../../reviews/ai/ai-play-strength-maturation-4-final-report-2026-06-13.md`: Abschlussbericht fuer AI-MAT4-0 bis AI-MAT4-26 mit Placement Guide, weiteren `index.ts`-Schnitten, Default-Dry-Runs, TargetChoice-Readiness, DoctrineGoal-ActionFit, Selfplay-Promotion, Delta-Metriken, Boundary-Guards und Public-Export-Contract.
-- `ai-access-intelligence-consolidation-process-2026-06-21.md`: sequenzieller AI-ACCESS-0-bis-AI-ACCESS-19-Prozess fuer Access-Decision-Typen, Remote-Root-Wert, Trash-Spendability, Reserve, Ranking, Outcome-Memory, Fingerprint, Feedback, TacticalPlans, RunTargetEvaluation, TargetChoice-Dry-Run, Corpus, Loop-Detection, `index.ts`-Schnitt und Boundary-Guards.
-- `ai-access-intelligence-placement-guide-2026-06-21.md`: aktive Entwicklerregel fuer neue Access-Intelligence-Fixes; ordnet Projektion, Outcome-Memory, Fingerprint, TargetChoice-Dry-Run, RunTargetEvaluation, Evaluation und `index.ts`-Schnitte den zulaessigen Modulbereichen zu und haelt Access-Internals public-export-geschlossen.
-- `../../reviews/ai/ai-access-intelligence-consolidation-final-report-2026-06-21.md`: Abschlussbericht fuer AI-ACCESS-0 bis AI-ACCESS-19; FINAL-GREEN und Main-Integration werden nach dem Dokumentationspaket separat verifiziert.
-- `ai-player-semantic-controller-process-2026-06-23.md`: sequenzieller SEMCTRL-0-bis-SEMCTRL-7-Prozess fuer die pragmatische AI-Spieler-Struktur in Richtung Kartensemantik, Taktiksignale, Strategieanker, DeckDoctrine, taktische Zwischenziele, semantisch verstandene LegalActions und legale Aktionsauswahl.
-- `proteus-ai-release-reconciliation-plan-2026-07-09.md`: verbindlicher Reconciliation- und Rollout-Plan für den widersprüchlichen Proteus-KI-Stand; trennt technische `ai_supported`-Deckzulassung, Selected-Deck-Pilot, familienbezogene Play-Strength-Evidence und spätere Default-/Random-Pool-Promotion.
-- `proteus-ai-release-automation-process-2026-07-09.md`: sequenzieller PAI-0-bis-PAI-6-Paketprozess mit verbindlichem `/Goal`, eigenem Worktree, Commit je Paket, Sicherheitsblockern, Full Gate und finalem lokalen Merge nach `main`.
-- `ai-current-state-cleanup-process-2026-07-09.md`: sequenzieller AICSC-0-bis-AICSC-8-Prozess zur Bereinigung tautologischer Benchmarks, transitiver Legacy-Abhängigkeiten, generischer Coverage-Fallbacks, historischer Shadow-/META-Codeinseln und aktueller strategischer No-Progress-Muster mit eigenem Worktree, Paketcommits und finaler lokaler Main-Integration.
-- `../../reviews/ai/ai-player-semantic-controller-final-report-2026-06-23.md`: Abschlussbericht mit Legacy-/Public-Grenzen, neutraler ankerloser Doctrine, Corp-TacticalGoals, TargetContext-HardGates, Capability-Fallback-Isolation, TacticalPlan-/Debug-Grenzen und FINAL-GREEN.
-- `hq-hand-memory-contract-matrix-2026-06-07.md`: side-sicherer Vertrag für Runner-KI-HQ-Hand-Wissen mit Ereignismatrix, Kandidatengruppen, sicheren Restmengen, erlaubten Invalidierungen und Handoff an die HQ-Memory-Umsetzungspakete.
-- `runner-hand-development-creditbase-contract-2026-06-07.md`: Vertrag für Runner-Handentwicklung und Creditbase mit bestehenden AI-STRAT-Goals, `RunnerHandDevelopmentEvaluation`, `RunnerCreditBasePlan`, Credit-Floors, Run-Übersteuerungen, Hidden-Info-Grenzen und Handoff an die Umsetzungspakete.
+- `ai-controller-spec.md`: öffentlicher Controller- und LegalAction-Vertrag.
+- `ai-decision-trace-contract-2026-05-22.md`: lokaler Trace-, Redaction- und
+  Debugvertrag.
+- `ai-simulation-test-matrix.md`: aktuelle Sicherheits- und
+  Simulationsgrenzen.
+- `ai-hints-structure-decision-2026-05-15.md`: Struktur der aktiven AI-Hints.
+- `taktiksignale-strategieanker-guide-2026-06-02-v3.md`: aktuelle Begriffe für
+  Taktiksignale, Strategieanker, TargetProfiles, Conditions und Constraints.
+- `ai-play-strength-development-placement-guide-2026-06-13.md`: zulässige
+  Modulbereiche für neue AI-Fixes.
+- `ai-access-intelligence-placement-guide-2026-06-21.md`: Modulgrenzen für
+  Access-Projektion und Access-Memory.
+- `action-semantic-signal-invariant-classes-2026-06-27.md`: Invarianten für
+  aktuelle Action-Signale.
+- `hq-hand-memory-contract-matrix-2026-06-07.md`: side-sicherer Vertrag für
+  Runner-HQ-Wissen.
+- `runner-hand-development-creditbase-contract-2026-06-07.md`: aktueller
+  Handentwicklungs-/Creditbase-Vertrag.
+- `coaching-boundary-spec-2026-05-17.md`: Grenze für späteres side-sicheres
+  Coaching.
+- `ai-current-state-cleanup-process-2026-07-09.md`: abgeschlossener
+  Runtime-/Legacy-Cleanup.
+- `proteus-ai-release-reconciliation-plan-2026-07-09.md` und
+  `proteus-ai-release-automation-process-2026-07-09.md`: paralleler
+  Proteus-Rollout; erst nach Main-Integration führend.
 
-## Regel
+## Aktive Gates
 
-Konkrete Benchmarks, Regressionen und Diagnoseberichte liegen unter `docs/reviews/ai/`. Abgeschlossene Doctrine- und Deck-Legal-Approval-Spuren liegen unter `docs/releases/ai/`.
+```text
+corepack pnpm check:ai
+corepack pnpm check:ai:full
+corepack pnpm check:ai-deck-doctrine-strategy
+corepack pnpm --filter @netgrid/ai typecheck
+corepack pnpm --filter @netgrid/ai test
+```
 
-## Historischer lokaler Play-Strength-Pilot
+Die aktuelle vollständige Derived-Facts-Prüfung umfasst 616 aktive Hints, 527
+CardImplementations, 390 generierte Facts und 137 noch über kompilierte Hints
+abgedeckte Karten. Warnungen sind Qualitätsschuld, keine versteckten
+Runtime-Fallbacks.
 
-`NETGRID_AI_PLAY_STRENGTH_PILOT` ist kein Live-Runtime-Schalter mehr. Die
-früheren Scopes bleiben ausschließlich als historische Evaluations- und
-Testbegriffe erhalten; der Live-Chooser führt keinen Shadow-Pilot-Override aus.
+## Historie und Retention
+
+Nummerierte AI020-bis-AI212-Einzelprozesse, Shadow-/META-Zwischenstände,
+Cutover-Dry-Runs und Roh-Scorecards sind kein aktueller Vertrag. Ihr
+verbleibender Erkenntniswert ist verdichtet in:
+
+- `docs/reviews/ai/ai-historical-process-rollup-2026-07-10.md`
+- `docs/reviews/ai/ai-current-state-cleanup-final-review-2026-07-09.md`
+
+Neue Reports werden nur versioniert, wenn sie ein aktuelles Gate, eine
+reproduzierbare Regression, eine Architekturentscheidung oder eine konkrete
+Removal Condition tragen. Umfangreiche Rohläufe gehören nach `data/local/`.
+
+## Verbotene Rückfälle
+
+- kein FullGameState oder gegnerische Hidden-Zone-Daten im AI-Input;
+- keine Action-Erzeugung außerhalb der Engine;
+- kein alphabetischer oder beliebiger Catch-all für ungedeckte Aktionen;
+- keine historisch benannten Controllerprofile, die auf den aktuellen Chooser
+  zeigen;
+- keine Shadow-/Legacy-Runtime als stiller Fallback;
+- keine Behauptung von Play-Strength-Readiness allein aus `ai_supported`.

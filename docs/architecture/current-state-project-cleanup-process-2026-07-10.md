@@ -118,8 +118,16 @@ integrate_main -> blocker
    Deckinputs überschneiden sich mit dem aktiven Proteus-Branch und werden
    nach dessen Main-Integration in PCS-5 geschnitten. Browser-Key-Migrationen
    werden zusammen mit dem Page-Schnitt entfernt.
-4. `PCS-3 Current-State-Dokumente, Reviews und Scripts konsolidieren` – `in_progress`
-5. `PCS-4 Shared- und Kartenregistrierungsgrenzen modularisieren` – `pending`
+4. `PCS-3 Current-State-Dokumente, Reviews und Scripts konsolidieren` –
+   `done`; 125 einmalige nummerierte Generator-/Check-/Apply-Scripts, 172
+   zugehörige Einzelreports/Roh-JSON (16 MB) und 28 ersetzte Prozessseiten
+   sind durch ein Historienrollup ersetzt. Das aktive Scriptinventar ist von
+   163 auf 38 Dateien reduziert. Projektstatus, Wissensindex und AI-README sind
+   auf Current State verdichtet. `check:ai:full` und das aktualisierte
+   Card-Function-Abstraction-Gate sind grün; alle Root-Scriptziele existieren.
+   `docs/codex/CODEX_STATUS.md` bleibt bis zum Proteus-Merge parallel besessen
+   und wird in PCS-8 abschließend konsolidiert.
+5. `PCS-4 Shared- und Kartenregistrierungsgrenzen modularisieren` – `in_progress`
 6. `PCS-5 Fachliche Web-/Server-/AI-Modulschnitte` – `pending`
 7. `PCS-6 Teststufen, Sharding und Package-Boundaries` – `pending`
 8. `PCS-7 Asset- und Worktree-Hygiene` – `pending`

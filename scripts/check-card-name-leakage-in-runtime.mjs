@@ -474,6 +474,7 @@ function listFiles() {
   return output
     .split(/\r?\n/)
     .filter(Boolean)
+    .filter((path) => existsSync(resolve(repoRoot, path)))
     .filter((path) => path !== "scripts/check-card-name-leakage-in-runtime.mjs")
     .filter((path) => /\.(ts|tsx|mjs|js)$/.test(path));
 }
