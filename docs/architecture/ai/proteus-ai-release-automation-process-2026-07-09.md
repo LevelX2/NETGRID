@@ -95,8 +95,9 @@ Jeder Zustand kann bei einem Sicherheitsbefund nach `blocked` wechseln. Normale 
 | Paket | Status | Ergebnis |
 | --- | --- | --- |
 | PAI-0 | `done` | Zentraler Readiness-Vertrag trennt Hint-, Selected-Playtest- und Default-Pool-Stufe; Driftcheck und Server-Stage-Guard sind grün. |
-| PAI-1 | `next` | Maschinenlesbares 154/154-Kartenfamilien-Inventar. |
-| PAI-2A bis PAI-6 | `pending` | Noch nicht begonnen. |
+| PAI-1 | `done` | Deterministisches Inventar klassifiziert 154/154 Karten in elf Familien und bindet 114 Pilotdeck-Karten an Evidence und Removal Conditions. |
+| PAI-2A | `next` | Side-safe Target-/Choice-Modell. |
+| PAI-2B bis PAI-6 | `pending` | Noch nicht begonnen. |
 
 ## Paketfolge
 
