@@ -413,10 +413,7 @@ for (const sourceCard of agendas) {
     },
     art: `art/${artFileName}`,
     rendered: {
-      svg: `rendered/svg/${sourceCard.cardId}.svg`,
-      full: `rendered/full/${sourceCard.cardId}.png`,
-      preview: `rendered/preview/${sourceCard.cardId}.png`,
-      thumb: `rendered/thumb/${sourceCard.cardId}.png`
+      full: `rendered/full/${sourceCard.cardId}.png`
     }
   });
 }

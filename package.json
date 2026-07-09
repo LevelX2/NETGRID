@@ -31,6 +31,7 @@
     "check:proteus-ai-family-scenarios": "node scripts/build-proteus-ai-family-scenarios.mjs --check",
     "check:proteus-ai-selected-pilot": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/run-proteus-ai-selected-pilot.ts --check",
     "check:card-function-abstraction": "node scripts/check-card-name-leakage-in-runtime.mjs",
+    "check:card-asset-retention": "node scripts/check-card-asset-retention.mjs",
     "check:engine-cardimplementation-architecture-target": "node scripts/check-engine-cardimplementation-architecture-target.mjs",
     "check:engine-cardimplementation-architecture-target:selftest": "node scripts/check-engine-cardimplementation-architecture-target.mjs --self-test",
     "check:package-boundaries": "node scripts/check-package-boundaries.mjs",

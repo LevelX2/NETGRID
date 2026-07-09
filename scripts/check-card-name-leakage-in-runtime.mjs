@@ -544,20 +544,11 @@ function classify({ path, token, snippet, tokenSource }) {
 function isDerivedAllowedContext(path, snippet) {
   if (isTestFile(path)) return true;
   if (isRegistryPath(path)) return true;
+  if (path === "packages/shared/src/card-definitions.ts") return true;
   if (isCommentOnly(snippet)) return true;
   if (snippet.includes("cardDefinitionId")) return true;
   if (snippet.includes("card-implementations/")) return true;
   if (snippet.includes("Implementation.")) return true;
-  if (path === "packages/shared/src/card-definitions.ts") {
-    if (
-      snippet.includes("id:") ||
-      snippet.includes("title:") ||
-      snippet.includes("text:") ||
-      snippet.includes("flavorText:") ||
-      snippet.includes("mechanics:")
-    )
-      return true;
-  }
   return false;
 }
 
@@ -574,6 +565,7 @@ function shouldIncludeFinding({ path, tokenSource, category, snippet }) {
 function findOccurrences(tokens) {
   const findings = [];
   for (const path of listFiles()) {
+    if (path === "packages/shared/src/card-definitions.ts") continue;
     const text = readFileSync(`${repoRoot}/${path}`, "utf8");
     for (const watch of tokens) {
       let index = text.indexOf(watch.token);

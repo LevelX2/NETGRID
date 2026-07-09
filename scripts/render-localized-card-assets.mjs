@@ -1,5 +1,5 @@
 import { chromium } from "@playwright/test";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -13,44 +13,32 @@ const frame = JSON.parse(await readFile(framePath, "utf8"));
 
 const WIDTH = frame.canvas.width;
 const HEIGHT = frame.canvas.height;
-const sizes = frame.derivedSizes;
 const zones = frame.zones;
 
-await Promise.all([
-  mkdir(path.join(skinRoot, "rendered", "svg"), { recursive: true }),
-  mkdir(path.join(skinRoot, "rendered", "full"), { recursive: true }),
-  mkdir(path.join(skinRoot, "rendered", "preview"), { recursive: true }),
-  mkdir(path.join(skinRoot, "rendered", "thumb"), { recursive: true })
-]);
+await mkdir(path.join(skinRoot, "rendered", "full"), { recursive: true });
 
 if (!Array.isArray(cardsData.cards) || cardsData.cards.length === 0) {
   throw new Error("cards.de.json contains no renderable cards.");
 }
-
-for (const card of cardsData.cards) {
-  const svg = await renderCardSvg(card);
-  const svgPath = path.join(skinRoot, card.rendered.svg);
-  await writeFile(svgPath, stripTrailingWhitespace(svg), "utf8");
-}
+const requestedCardId = argumentValue("--card");
+const cardsToRender = requestedCardId
+  ? cardsData.cards.filter((card) => card.cardId === requestedCardId)
+  : cardsData.cards;
+if (cardsToRender.length === 0) throw new Error(`Unknown localized card id: ${requestedCardId}`);
 
 const browser = await chromium.launch();
 try {
   const page = await browser.newPage({ viewport: { width: WIDTH, height: HEIGHT }, deviceScaleFactor: 1 });
-  for (const card of cardsData.cards) {
-    const svgPath = path.join(skinRoot, card.rendered.svg);
-    const svg = await readFile(svgPath, "utf8");
-    for (const [sizeName, size] of Object.entries(sizes)) {
-      const outPath = path.join(skinRoot, card.rendered[sizeName]);
-      await page.setViewportSize({ width: size.width, height: size.height });
-      await page.setContent(
-        `<!doctype html><html><head><style>html,body{margin:0;width:${size.width}px;height:${size.height}px;background:transparent;overflow:hidden;}img{display:block;width:${size.width}px;height:${size.height}px;}</style></head><body><img src="data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}" /></body></html>`,
-        { waitUntil: "load" }
-      );
-      await page.screenshot({ path: outPath, omitBackground: true });
-    }
+  for (const card of cardsToRender) {
+    const svg = stripTrailingWhitespace(await renderCardSvg(card));
+    const outPath = path.join(skinRoot, card.rendered.full);
+    await page.setViewportSize({ width: WIDTH, height: HEIGHT });
+    await page.setContent(
+      `<!doctype html><html><head><style>html,body{margin:0;width:${WIDTH}px;height:${HEIGHT}px;background:transparent;overflow:hidden;}svg{display:block;width:${WIDTH}px;height:${HEIGHT}px;}</style></head><body>${svg}</body></html>`,
+      { waitUntil: "load" }
+    );
+    await page.screenshot({ path: outPath, omitBackground: true });
   }
-
-  await renderContactSheet(page);
 } finally {
   await browser.close();
 }
@@ -479,37 +467,6 @@ function measureText(value, fontSize, factor = 0.63) {
   }, 0);
 }
 
-async function renderContactSheet(page) {
-  const columns = 6;
-  const cardWidth = 186;
-  const cardHeight = 260;
-  const labelHeight = 46;
-  const gap = 20;
-  const padding = 24;
-  const rows = Math.ceil(cardsData.cards.length / columns);
-  const width = padding * 2 + columns * cardWidth + (columns - 1) * gap;
-  const height = padding * 2 + rows * (cardHeight + labelHeight) + (rows - 1) * gap;
-  await page.setViewportSize({ width, height });
-  const slots = (
-    await Promise.all(
-      cardsData.cards.map(async (card) => {
-        const imagePath = path.join(skinRoot, card.rendered.preview);
-        const previewBase64 = (await readFile(imagePath)).toString("base64");
-        return `<div class="slot"><img src="data:image/png;base64,${previewBase64}"><div class="label">${escapeHtml(card.localizedTitle)}</div></div>`;
-      })
-    )
-  ).join("");
-  await page.setContent(`<!doctype html><html><head><style>
-    html,body{margin:0;width:${width}px;height:${height}px;background:#111820;overflow:hidden;}
-    body{font-family:Segoe UI,Arial,sans-serif;}
-    .grid{display:grid;grid-template-columns:repeat(${columns},${cardWidth}px);gap:${gap}px;padding:${padding}px;}
-    .slot{width:${cardWidth}px;height:${cardHeight + labelHeight}px;}
-    img{display:block;width:${cardWidth}px;height:${cardHeight}px;}
-    .label{height:${labelHeight}px;color:#e6fbff;font-size:14px;line-height:16px;font-weight:700;letter-spacing:0;overflow:hidden;padding-top:6px;}
-  </style></head><body><div class="grid">${slots}</div></body></html>`, { waitUntil: "load" });
-  await page.screenshot({ path: path.join(skinRoot, "rendered", "agenda-preview-contact-sheet.png"), omitBackground: false });
-}
-
 function escapeXml(value) {
   return String(value)
     .replace(/&/g, "&amp;")
@@ -522,6 +479,10 @@ function stripTrailingWhitespace(value) {
   return value.replace(/[ \t]+$/gm, "");
 }
 
-function escapeHtml(value) {
-  return escapeXml(value).replace(/'/g, "&#39;");
+function argumentValue(name) {
+  const index = process.argv.indexOf(name);
+  if (index < 0) return undefined;
+  const value = process.argv[index + 1];
+  if (!value || value.startsWith("--")) throw new Error(`${name} requires a value.`);
+  return value;
 }

@@ -38,6 +38,10 @@ data/local-assets/card-images/generated-*/**/*_sample*.png
 data/local-assets/card-images/generated-*/**/*.raw-backup.png
 data/local-assets/card-images/onr-1996/
 data/local-assets/card-images/onr-1996/**
+# Only localized full-size runtime images are versioned. Review derivatives are local.
+data/card-assets/localized/de/rendered/*
+!data/card-assets/localized/de/rendered/full/
+!data/card-assets/localized/de/rendered/full/**
 tmp*/
 *.log
 npm-debug.log*

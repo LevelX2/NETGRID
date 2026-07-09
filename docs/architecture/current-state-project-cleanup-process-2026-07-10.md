@@ -155,8 +155,16 @@ integrate_main -> blocker
    Tests und zugehörige Rohreports sind nun ebenfalls gelöscht. Alle drei
    Shards sind mit 514, 630 und 584 Tests grün. Das neue Import-Gate prüft
    1.688 Produktionsdateien und sein positiver/negativer Selbsttest ist grün.
-8. `PCS-7 Asset- und Worktree-Hygiene` – `in_progress`
-9. `PCS-8 Main-Abgleich, Full Gate und Integration` – `pending`
+8. `PCS-7 Asset- und Worktree-Hygiene` – `done`; die Web-Runtime konsumiert
+   nur Full-PNGs. 142 reproduzierbare SVG-, Preview-, Thumb-, Kontaktbogen-
+   und Style-Variant-Dateien mit rund 182,5 MB sind entfernt; Art-Quellen,
+   33 Full-PNGs und 37 aktive Basis-Fallbackbilder bleiben. Renderer und
+   Manifest erzeugen nur noch Full-PNGs; das Retention-Gate ist mit 33 Karten
+   und 113,3 MB grün. Project Babylon wurde aus aktuellen Quellen korrekt
+   regeneriert. Web-Typecheck, 38 Testdateien mit 485 Tests, Production Build
+   und Card-Function-Abstraction sind grün. Fremde Worktrees bleiben wegen
+   fehlendem Eigentumsnachweis und aktivem Teststand unangetastet.
+9. `PCS-8 Main-Abgleich, Full Gate und Integration` – `in_progress`
 
 ## Paketdetails
 
