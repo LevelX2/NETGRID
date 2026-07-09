@@ -4,7 +4,7 @@ import type { DeckDefinition } from "@netgrid/shared";
 import {
   runAiSelfplayTraceMining,
   simulateAiGame,
-} from "../packages/ai/src/index";
+} from "../packages/ai/src/simulation";
 
 type PlaytestDeckFile = {
   decks: DeckDefinition[];

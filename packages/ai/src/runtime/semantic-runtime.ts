@@ -608,6 +608,8 @@ function fallbackPolicyRank(input: AiDecisionInput, action: LegalAction): number
       return 2;
     case "required_run_continue":
       return 3;
+    case "required_run_start":
+      return 3;
     case "access_resolution":
       return 4;
     case "economy_basic":
@@ -629,6 +631,7 @@ function failClosedFallbackPolicyForAction(
   | "direct_closeout"
   | "tag_clear"
   | "required_run_continue"
+  | "required_run_start"
   | "access_resolution"
   | "economy_basic"
   | "draw_setup"
@@ -646,6 +649,13 @@ function failClosedFallbackPolicyForAction(
     return "tag_clear";
   }
   if (action.type === "continue_run") return "required_run_continue";
+  if (
+    action.type === "start_run" &&
+    input.side === "runner" &&
+    input.legalActions.length === 1
+  ) {
+    return "required_run_start";
+  }
   if (action.type === "access_card" || action.type === "trash_accessed_card") {
     return "access_resolution";
   }
