@@ -1242,8 +1242,9 @@ describe("tactical plan model", () => {
     expect(rdPlan?.blockers.map((blocker) => blocker.kind)).not.toContain(
       "missing_breaker_coverage",
     );
-    expect(rdPlan?.requiredCapabilities.map((capability) => capability.kind))
-      .not.toContain("breaker_sentry");
+    expect(
+      rdPlan?.requiredCapabilities.map((capability) => capability.kind),
+    ).not.toContain("breaker_sentry");
     expect(rdPlan?.evidence).toEqual(
       expect.arrayContaining([
         "runner_run_target_recommendation:gain_credits_first",
@@ -2350,9 +2351,9 @@ describe("tactical plan model", () => {
       type: "runner.develop_hand_card",
     });
     expect(result.selectedStep?.kind).toBe("gain_credits");
-    expect(result.selectedPlan?.blockers.map((blocker) => blocker.kind)).toEqual(
-      expect.arrayContaining(["missing_credits"]),
-    );
+    expect(
+      result.selectedPlan?.blockers.map((blocker) => blocker.kind),
+    ).toEqual(expect.arrayContaining(["missing_credits"]));
     expect(result.selectedPlan?.evidence).toEqual(
       expect.arrayContaining([
         "hand_card_funding_plan:true",
@@ -2429,11 +2430,7 @@ describe("tactical plan model", () => {
     input.playerView.own.gripOrHq = [
       visibleCard("single-card", "runner", "event"),
     ];
-    input.playerView.servers = [
-      server("hq"),
-      server("rd"),
-      server("archives"),
-    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
 
     const result = evaluateTacticalPlans({
       input,
@@ -2462,6 +2459,72 @@ describe("tactical plan model", () => {
     );
     expect(result.planAlternatives.map((plan) => plan.type)).not.toContain(
       "runner.restore_hand_buffer",
+    );
+  });
+
+  it("selects survival defense under visible damage before risky R&D pressure", () => {
+    const rdRun = legalAction("run-rd", "runner", "start_run", {
+      serverId: "rd",
+    });
+    const draw = legalAction("draw", "runner", "draw_card");
+    const useSeeya = legalAction(
+      "use-seeya",
+      "runner",
+      "activated_card_ability",
+      {},
+      { source: "seeya-instance" },
+    );
+    const input = aiInput("runner", [rdRun, useSeeya, draw]);
+    input.playerView.stateVersion = 39;
+    input.playerView.own.credits = 2;
+    input.playerView.own.gripOrHq = [];
+    input.playerView.own.rig = [
+      visibleCard("seeya-instance", "runner", "hardware", {
+        definitionId: "onr_v1_151_seeya",
+        title: "SeeYa",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("rd-ice", "corp", "ice", {
+          rezzed: false,
+        }),
+      ]),
+      server("archives"),
+    ];
+    input.playerView.publicEvents = [
+      publicEvent("setup-net-damage", 32, "net_damage", {
+        actor: "corp",
+        actionType: "net_damage",
+        damageType: "net",
+        damageAmount: 2,
+        sourceTitle: "Setup!",
+        sourceDefinitionId: "onr_v1_340_setup",
+      }),
+    ];
+
+    const result = evaluateTacticalPlans({
+      input,
+      candidates: [
+        candidateForAction(rdRun),
+        candidateForUntargetedAction(useSeeya),
+        candidateForUntargetedAction(draw),
+      ],
+    });
+
+    expect(result.selectedPlan).toMatchObject({
+      planId: "runner.survival_defense",
+      type: "runner.survival_defense",
+    });
+    expect(result.selectedPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "runner_damage_threat_level:critical",
+        "runner_damage_risky_servers:rd",
+      ]),
+    );
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(
+      draw.actionId,
     );
   });
 

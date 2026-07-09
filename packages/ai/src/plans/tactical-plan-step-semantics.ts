@@ -20,6 +20,18 @@ export function candidateSemanticsMatchStep(
         "search_for_answer",
         "setup.program_search",
       ]);
+    case "find_survival_answer":
+      return hasAnyToken(tokens, [
+        "damage.prevent",
+        "damage_prevention",
+        "flatline_prevention",
+        "net_damage_prevention",
+        "survival",
+        "survival.flatline_prevention",
+        "draw.card",
+        "economy.gain_credit",
+        "search.stack",
+      ]);
     case "setup_search_engine":
       return (
         hasToken(tokens, "install.card") &&
@@ -186,6 +198,15 @@ export function actionTypeMatchesStep(
       return actionType === "draw_card";
     case "draw_hand_buffer":
       return actionType === "draw_card";
+    case "find_survival_answer":
+      return (
+        actionType === "draw_card" ||
+        actionType === "gain_credit" ||
+        actionType === "install_card" ||
+        actionType === "play_event" ||
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability"
+      );
     case "search_for_answer":
       return (
         actionType === "trigger_ability" ||

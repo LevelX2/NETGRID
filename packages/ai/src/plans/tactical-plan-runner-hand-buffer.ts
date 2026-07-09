@@ -1,5 +1,5 @@
 import type { AiDecisionInput, VisibleCard } from "@netgrid/shared";
-import { runnerVisibleDamagePressure } from "../runner-visible-damage-pressure";
+import { runnerDamageThreatAssessment } from "../runner-damage-threat-assessment";
 import { runnerRunTargetHighPayoff } from "../runner-run-target-guidance";
 import {
   assessRunnerDrawOverflow,
@@ -10,14 +10,8 @@ import {
   legalActionCreditGainForPlan,
   type TacticalPlanCreditValueDependencies,
 } from "./tactical-plan-action-values";
-import {
-  createPlanStep,
-  createTacticalPlan,
-} from "./tactical-plan-builders";
-import {
-  actionServerId,
-  isRemoteServer,
-} from "./tactical-plan-server-targets";
+import { createPlanStep, createTacticalPlan } from "./tactical-plan-builders";
+import { actionServerId, isRemoteServer } from "./tactical-plan-server-targets";
 import { runnerMeaningfulRunOpportunityAvailable } from "./tactical-plan-runner-support-actions";
 import type {
   TacticalPlan,
@@ -76,41 +70,59 @@ export function runnerHandBufferAssessment(input: AiDecisionInput): {
   active: boolean;
   handCount: number;
   damagePressure: boolean;
+  damageThreatLevel: ReturnType<typeof runnerDamageThreatAssessment>["level"];
+  recommendedHandFloor: number;
   planPriority: number;
   reason: string;
   evidence: string[];
 } {
   const handCount = input.playerView.own.gripOrHq.length;
-  const damagePressure = runnerVisibleDamagePressure(input);
-  const active = handCount <= 1 || (damagePressure && handCount <= 2);
+  const damageThreat = runnerDamageThreatAssessment(input);
+  const damagePressure = damageThreat.level !== "none";
+  const active =
+    handCount <= 1 ||
+    (damagePressure && handCount < damageThreat.recommendedHandFloor);
   const planPriority =
-    handCount <= 0
-      ? damagePressure
-        ? 1280
-        : 1220
-      : handCount === 1
-        ? damagePressure
-          ? 1140
-          : 1060
-        : damagePressure
-          ? 980
-          : 0;
+    damageThreat.level === "critical"
+      ? handCount <= 0
+        ? 1720
+        : 1560
+      : damageThreat.level === "confirmed"
+        ? handCount <= 1
+          ? 1460
+          : 1240
+        : damageThreat.level === "suspected"
+          ? handCount < damageThreat.recommendedHandFloor
+            ? 1080
+            : 0
+          : handCount <= 0
+            ? 1220
+            : handCount === 1
+              ? 1060
+              : 0;
   const reason =
-    handCount <= 0
-      ? "empty_hand"
-      : damagePressure
-        ? "low_hand_damage_pressure"
-        : "low_hand";
+    damageThreat.level === "critical"
+      ? "critical_damage_survival"
+      : damagePressure && handCount < damageThreat.recommendedHandFloor
+        ? "low_hand_damage_threat"
+        : handCount <= 0
+          ? "empty_hand"
+          : "low_hand";
   return {
     active,
     handCount,
     damagePressure,
+    damageThreatLevel: damageThreat.level,
+    recommendedHandFloor: damageThreat.recommendedHandFloor,
     planPriority,
     reason,
     evidence: [
       `runner_hand_buffer_count:${handCount}`,
       `runner_hand_buffer_damage_pressure:${damagePressure}`,
+      `runner_hand_buffer_damage_threat:${damageThreat.level}`,
+      `runner_hand_buffer_floor:${damageThreat.recommendedHandFloor}`,
       `runner_hand_buffer_reason:${reason}`,
+      ...damageThreat.evidence,
     ],
   };
 }
@@ -131,11 +143,26 @@ export function runnerHandBufferPlans(
   runnerGoalEvidence: readonly string[],
   dependencies: TacticalPlanCreditValueDependencies,
 ): TacticalPlan[] {
-  if (!context.input.legalActions.some((action) => action.type === "draw_card")) {
+  const hasSurvivalAction = context.input.legalActions.some((action) =>
+    [
+      "draw_card",
+      "gain_credit",
+      "install_card",
+      "play_event",
+      "trigger_ability",
+      "activated_card_ability",
+    ].includes(action.type),
+  );
+  if (!hasSurvivalAction) {
     return [];
   }
-  if (runnerHasNonBasicHandBufferAlternative(context.input)) return [];
   const assessment = runnerHandBufferAssessment(context.input);
+  if (
+    !assessment.damagePressure &&
+    runnerHasNonBasicHandBufferAlternative(context.input)
+  ) {
+    return [];
+  }
   if (!assessment.active) return [];
   if (
     !assessment.damagePressure &&
@@ -149,40 +176,75 @@ export function runnerHandBufferPlans(
   ) {
     return [];
   }
-  if (runnerHighPayoffRunAvailable(context)) return [];
+  if (
+    assessment.damageThreatLevel !== "critical" &&
+    runnerHighPayoffRunAvailable(context)
+  ) {
+    return [];
+  }
+  const survivalPlanActive = assessment.damagePressure;
+  const planId = survivalPlanActive
+    ? "runner.survival_defense"
+    : "runner.restore_hand_buffer";
+  const capabilityKind = survivalPlanActive ? "survival" : "hand_buffer";
+  const capabilityId = survivalPlanActive
+    ? "runner.survival_defense"
+    : "runner.hand_buffer";
+  const targetId = survivalPlanActive
+    ? "runner_survival_defense"
+    : "runner_hand_buffer";
+  const stepKind = survivalPlanActive
+    ? "find_survival_answer"
+    : "draw_hand_buffer";
+  const stepId = survivalPlanActive
+    ? "find_survival_answer"
+    : "draw_for_hand_buffer";
   return [
     createTacticalPlan({
-      planId: "runner.restore_hand_buffer",
+      planId,
       side: "runner",
-      type: "runner.restore_hand_buffer",
+      type: survivalPlanActive
+        ? "runner.survival_defense"
+        : "runner.restore_hand_buffer",
       status: "active",
       priority: assessment.planPriority,
       horizonTurns: 1,
-      target: { kind: "capability", id: "runner_hand_buffer" },
+      target: { kind: "capability", id: targetId },
       requiredCapabilities: [
         {
-          capabilityId: "runner.hand_buffer",
-          kind: "hand_buffer",
+          capabilityId,
+          kind: capabilityKind,
           side: "runner",
-          target: { kind: "capability", id: "runner_hand_buffer" },
+          target: { kind: "capability", id: targetId },
           evidence: assessment.evidence,
         },
       ],
       currentStep: createPlanStep({
-        stepId: "draw_for_hand_buffer",
-        kind: "draw_hand_buffer",
-        desiredActionSemantics: ["draw.card"],
+        stepId,
+        kind: stepKind,
+        desiredActionSemantics: survivalPlanActive
+          ? [
+              "draw.card",
+              "damage.prevent",
+              "flatline_prevention",
+              "net_damage_prevention",
+              "survival",
+              "economy.gain_credit",
+            ]
+          : ["draw.card"],
         requiredCapabilities: [
           {
-            capabilityId: "runner.hand_buffer",
-            kind: "hand_buffer",
+            capabilityId,
+            kind: capabilityKind,
             side: "runner",
-            target: { kind: "capability", id: "runner_hand_buffer" },
+            target: { kind: "capability", id: targetId },
             evidence: assessment.evidence,
           },
         ],
         rationale: [
-          "runner hand buffer is too low for safe pressure",
+          survivalPlanActive
+            ? "visible damage threat makes survival setup higher priority than pressure"
+            : "runner hand buffer is too low for safe pressure",
           ...assessment.evidence,
         ],
       }),
@@ -203,12 +265,14 @@ export function runnerHandBufferPlans(
 export function runnerHighPayoffRunAvailable(
   context: TacticalPlanBuildContext,
 ): boolean {
-  if ((context.runnerRunTargetEvaluations ?? []).some(
-    (evaluation) =>
-      evaluation.pathPassability === "reachable" &&
-      evaluation.creditsAfterRun >= 0 &&
-      runnerRunTargetHighPayoff(evaluation),
-  )) {
+  if (
+    (context.runnerRunTargetEvaluations ?? []).some(
+      (evaluation) =>
+        evaluation.pathPassability === "reachable" &&
+        evaluation.creditsAfterRun >= 0 &&
+        runnerRunTargetHighPayoff(evaluation),
+    )
+  ) {
     return true;
   }
   return context.input.legalActions.some((action) => {
