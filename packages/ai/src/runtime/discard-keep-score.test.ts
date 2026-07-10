@@ -30,6 +30,37 @@ describe("discard keep score", () => {
     );
   });
 
+  it("preserves a reviewed advancement burst while a visible agenda can use it", () => {
+    const systematicLayoffs = corpCard(
+      "onr_v1_304_systematic-layoffs",
+      "operation",
+    );
+    const agenda = corpCard("simple_agenda", "agenda");
+    const burst = score(
+      systematicLayoffs,
+      ["operation"],
+      "corp",
+      [],
+      {},
+      {
+        extraGrip: [agenda],
+      },
+    );
+    const neutral = score(
+      corpCard("neutral-operation", "operation"),
+      ["operation"],
+      "corp",
+      [],
+      {},
+      { extraGrip: [agenda] },
+    );
+
+    expect(burst.baseValue).toBeGreaterThan(neutral.baseValue + 300);
+    expect(burst.evidence).toContain(
+      "discard_score:corp_visible_agenda_advancement_burst",
+    );
+  });
+
   it("ignores substring-only Corp discard role noise", () => {
     const benignRole = score(corpCard("benign-role", "operation"), [
       "neutral_support",

@@ -9,6 +9,9 @@ import { sortedUnique } from "./collection";
 import { matchingBreakerRoleNeedles } from "./breaker-role-match";
 import { rolesMatch } from "./role-match";
 import { isRunnerNonAdditiveUtilityRole } from "./runner-role-classification";
+import { createAiHintsByCard } from "../ai-hints";
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type DiscardCandidateScore = {
   total: number;
@@ -81,6 +84,11 @@ export function discardKeepScore(
     (duplicateCount > 1 || installedSameDefinition) &&
     roles.some((role) => isRunnerNonAdditiveUtilityRole(role));
   let baseValue = 100;
+  const corpAdvancementBurstSupportsVisibleAgenda =
+    input.side === "corp" &&
+    type === "operation" &&
+    corpCardIsReviewedAdvancementBurst(card.definitionId) &&
+    corpHasVisibleAgendaDevelopmentTarget(input, dependencies);
 
   if (input.side === "corp") {
     if (type === "agenda") baseValue += 330;
@@ -90,6 +98,7 @@ export function discardKeepScore(
     if (type === "operation") baseValue += economyRole ? 120 : 40;
     if (economyRole) baseValue += input.playerView.own.credits < 5 ? 135 : 55;
     if (rolesMatch(roles, ["score", "remote"])) baseValue += 70;
+    if (corpAdvancementBurstSupportsVisibleAgenda) baseValue += 420;
   } else {
     const breakerRoleNeedles = matchingBreakerRoleNeedles(roles);
     if (breakerRoleNeedles.length > 0) {
@@ -157,10 +166,45 @@ export function discardKeepScore(
     strategicFit,
     evidence: sortedUnique([
       "discard_score:base",
+      ...(corpAdvancementBurstSupportsVisibleAgenda
+        ? ["discard_score:corp_visible_agenda_advancement_burst"]
+        : []),
       ...(planFit > 0 ? ["discard_score:planfit"] : []),
       ...(strategicFit > 0 ? ["discard_score:strategicfit"] : []),
     ]),
   };
+}
+
+function corpCardIsReviewedAdvancementBurst(definitionId: string): boolean {
+  const hint = AI_HINTS_BY_CARD.get(definitionId);
+  return (
+    hint?.aiSupportStatus === "ai_supported" &&
+    hint.quality?.hintReviewed === true &&
+    (hint.effects ?? []).some(
+      (effect) =>
+        effect.timing === "action" &&
+        effect.resource === "advancement_counters" &&
+        (effect.amount ?? 0) > 0 &&
+        (effect.kind === "advance_burst" ||
+          effect.kind === "score_acceleration"),
+    )
+  );
+}
+
+function corpHasVisibleAgendaDevelopmentTarget(
+  input: AiDecisionInput,
+  dependencies: DiscardKeepScoreDependencies,
+): boolean {
+  return [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.servers.flatMap((server) => server.root),
+  ].some(
+    (candidate) =>
+      candidate.known !== false &&
+      (candidate.type === "agenda" ||
+        dependencies.definitionTypeForCardId(candidate.definitionId) ===
+          "agenda"),
+  );
 }
 
 export function createDiscardKeepScore(
