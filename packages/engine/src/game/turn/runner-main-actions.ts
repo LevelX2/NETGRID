@@ -709,7 +709,7 @@ export function buildRunnerMainActions(
       if (
         !canPlayCardImplementation &&
         resolver?.canPlay &&
-        !resolver.canPlay(state)
+        !resolver.canPlay(state, definition)
       )
         continue;
       if (!canPlayCardImplementation && resolver?.legalActions) {

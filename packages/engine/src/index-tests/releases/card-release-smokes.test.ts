@@ -3105,6 +3105,36 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       correct,
       "onr_v1_111_social-engineering",
     );
+    correct.runner.credits = 2;
+    expect(
+      getLegalActions(correct, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          action.payload?.cardId === correctEventId,
+      ),
+    ).toBe(false);
+    correct.runner.credits = 3;
+    const exactThresholdAction = getLegalActions(correct, "runner").find(
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === correctEventId,
+    );
+    expect(exactThresholdAction).toBeDefined();
+    const exactThresholdResult = applyAction(structuredClone(correct), {
+      matchId: correct.matchId,
+      side: "runner",
+      actionId: exactThresholdAction?.actionId ?? "",
+      clientKnownStateVersion: correct.stateVersion,
+      idempotencyKey: "p358-social-exact-threshold",
+    });
+    expect(exactThresholdResult.ok).toBe(true);
+    if (exactThresholdResult.ok) {
+      expect(exactThresholdResult.state.runner.credits).toBe(2);
+      expect(exactThresholdResult.state.pendingChoice?.source).toContain(
+        "hidden_zone.secret_spend_guess_then_targeted_bypass_run.hide",
+      );
+    }
+    correct.runner.credits = 5;
     correct = apply(
       correct,
       "runner",

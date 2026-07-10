@@ -739,7 +739,7 @@ import {
 type RunnerEventResolver = {
   name: string;
   requiresServer?: boolean;
-  canPlay?: (state: GameState) => boolean;
+  canPlay?: (state: GameState, definition: CardDefinition) => boolean;
   canPlayForServer?: (
     state: GameState,
     serverId: Exclude<ServerId, "new_remote">,
@@ -1143,7 +1143,8 @@ export const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   [RUN_ACCESS_PRESSURE_EVENT_SOURCE]: {
     name: "runner_event_secret_spend_guess_targeted_bypass_run",
-    canPlay: (state) => state.runner.credits >= 2,
+    canPlay: (state, definition) =>
+      state.runner.credits - (definition.cost ?? 0) >= 2,
     resolve: (state, legalAction) => {
       if (state.runner.credits < 2)
         throw new Error("Die Secret-Spend-Guess-Faehigkeit benoetigt mindestens 2 Credits.");
