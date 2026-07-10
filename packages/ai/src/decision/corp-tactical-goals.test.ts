@@ -16,6 +16,8 @@ describe("corp tactical goals", () => {
       candidate.actionId === "rez-rd"
         ? {
             ...candidate,
+            sourceKind: "card",
+            sourceDefinitionId: "onr_v1_237_data-wall",
             targetContext: {
               selectedTargets: [
                 {
@@ -56,6 +58,19 @@ describe("corp tactical goals", () => {
     expect(JSON.stringify(goals)).not.toMatch(
       /cardInstances|privatePayload|fullGameState|sessionToken|decklist/i,
     );
+  });
+
+  it("does not turn a visible root-card rez action into an ICE-defense goal", () => {
+    const frame = frameFor([legalAction("rez-vapor-ops", "rez_ice")]);
+    frame.actionCandidates = frame.actionCandidates.map((candidate) => ({
+      ...candidate,
+      sourceKind: "card",
+      sourceDefinitionId: "onr_v1_347_vapor-ops",
+    }));
+
+    expect(buildCorpTacticalGoals(frame).map((goal) => goal.goalId)).toEqual([
+      "corp.tactical.turn_flow",
+    ]);
   });
 
   it("does not invent tag-punish or damage goals without visible action evidence", () => {

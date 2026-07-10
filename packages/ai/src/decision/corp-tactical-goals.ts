@@ -1,3 +1,4 @@
+import { CARD_DEFINITIONS_BY_ID } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import type { SemanticDecisionFrame, TacticalGoalLike } from "./semantic-decision-frame";
 
@@ -63,7 +64,10 @@ function goalSpecsForCandidate(candidate: ActionSemanticCandidate): CorpGoalSpec
       evidence: [...evidence, "corp_goal:advance_or_score_closeout"],
     });
   }
-  if (semantic === "corp_window.rez") {
+  if (
+    semantic === "corp_window.rez" &&
+    candidateSourceIsVisibleIce(candidate)
+  ) {
     specs.push({
       goalId: "corp.tactical.rez_relevant_ice",
       family: "corp_ice_defense",
@@ -120,6 +124,16 @@ function goalSpecsForCandidate(candidate: ActionSemanticCandidate): CorpGoalSpec
   }
 
   return specs;
+}
+
+function candidateSourceIsVisibleIce(
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const definitionId = candidate.sourceDefinitionId;
+  return (
+    definitionId !== undefined &&
+    CARD_DEFINITIONS_BY_ID[definitionId]?.type === "ice"
+  );
 }
 
 function goal(spec: CorpGoalSpec): TacticalGoalLike {

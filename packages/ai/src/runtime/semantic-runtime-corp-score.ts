@@ -2458,8 +2458,22 @@ function corpRootRezTimingComponent(
     effects.some((effect) =>
       ["on_access", "during_run", "successful_run"].includes(effect.timing),
     ) || hint?.remoteRole?.kind === "agenda_steal_tax";
-  if (!runRelevant) return undefined;
   const run = input.playerView.run;
+  if (!runRelevant) {
+    if (!run) return undefined;
+    return {
+      key: "corp_root_rez_defer_irrelevant_during_run",
+      label: "Nicht runrelevante Root-Karte verdeckt lassen",
+      value: -4000,
+      reason: [
+        "root_rez_timing:no_current_run_effect",
+        `card:${sourceCard.instanceId}`,
+        `server:${location.id}`,
+        `attacked_server:${run.attackedServerId}`,
+        `timing:${input.playerView.timingPoint}`,
+      ].join("|"),
+    };
+  }
   if (!run || run.attackedServerId !== location.id) {
     return {
       key: "corp_root_rez_defer_until_relevant_run",
@@ -2576,6 +2590,7 @@ function corpTacticalGoalFitScoreComponent(
     action,
     scopeId,
     actionSemanticCandidate,
+    visibleSourceCardForAction(input, action),
   );
   if (!goal) return undefined;
   return {
@@ -2841,10 +2856,17 @@ function highestPriorityCorpGoalForAction(
   action: LegalAction,
   scopeId: string,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  sourceCard: VisibleCard | undefined,
 ): TacticalGoalLike | undefined {
   return goals
     .filter((goal) =>
-      corpGoalMatchesAction(goal, action, scopeId, actionSemanticCandidate),
+      corpGoalMatchesAction(
+        goal,
+        action,
+        scopeId,
+        actionSemanticCandidate,
+        sourceCard,
+      ),
     )
     .sort((left, right) => right.priority - left.priority)[0];
 }
@@ -2854,6 +2876,7 @@ function corpGoalMatchesAction(
   action: LegalAction,
   scopeId: string,
   actionSemanticCandidate: ActionSemanticCandidate | undefined,
+  sourceCard: VisibleCard | undefined,
 ): boolean {
   switch (goal.goalId) {
     case "corp.tactical.score_closeout":
@@ -2864,7 +2887,7 @@ function corpGoalMatchesAction(
     case "corp.tactical.advance_scoreline":
       return action.type === "advance_card";
     case "corp.tactical.rez_relevant_ice":
-      return action.type === "rez_ice";
+      return action.type === "rez_ice" && sourceCard?.type === "ice";
     case "corp.tactical.prepare_remote":
     case "corp.tactical.protect_central":
       return action.type === "install_card";

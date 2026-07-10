@@ -5137,7 +5137,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
           source: "boardstate",
           evidence: ["test_goal"],
         },
-        action: corpAction("rez-ice", "rez_ice"),
+        action: corpAction("rez-ice", "rez_ice", {}, "corp-test-ice"),
         scopeId: "simple_rez",
         expectedValue: 780,
       },
@@ -5172,8 +5172,31 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     ];
 
     for (const testCase of cases) {
+      const baseInput = corpInputWithGoals([testCase.goal]);
+      const input =
+        testCase.action.type === "rez_ice"
+          ? ({
+              ...baseInput,
+              playerView: {
+                ...baseInput.playerView,
+                servers: [
+                  {
+                    id: "rd",
+                    label: "R&D",
+                    ice: [
+                      corpIce("corp-test-ice", {
+                        definitionId: "onr_v1_237_data-wall",
+                        title: "Data Wall",
+                      }),
+                    ],
+                    root: [],
+                  },
+                ],
+              },
+            } as unknown as AiDecisionInput)
+          : baseInput;
       const components = semanticRuntimeCorpScoreComponents(
-        corpInputWithGoals([testCase.goal]),
+        input,
         testCase.action,
         testCase.scopeId,
         testDependencies(),
@@ -6155,6 +6178,159 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
   });
 
+  it("keeps a non-run-relevant root hidden in the observed three-ICE rez window", () => {
+    const vaporOps = corpCard("vapor-ops", "asset", {
+      definitionId: "onr_v1_347_vapor-ops",
+      title: "Vapor Ops",
+      rezzed: false,
+      advancementCounters: 2,
+    });
+    const corticalScrub = corpIce("cortical-scrub", {
+      definitionId: "onr_v1_231_cortical-scrub",
+      title: "Cortical Scrub",
+      rezzed: true,
+    });
+    const keeper = corpIce("keeper", {
+      definitionId: "onr_v1_252_keeper",
+      title: "Keeper",
+    });
+    const shotgunWire = corpIce("shotgun-wire", {
+      definitionId: "onr_v1_269_shotgun-wire",
+      title: "Shotgun Wire",
+    });
+    const rezVaporOps = corpAction(
+      "rez-vapor-ops",
+      "rez_ice",
+      {},
+      vaporOps.instanceId,
+    );
+    const rezShotgunWire = corpAction(
+      "rez-shotgun-wire",
+      "rez_ice",
+      {},
+      shotgunWire.instanceId,
+    );
+    const declineRez = corpAction("decline-rez", "decline_rez");
+    const goal: TacticalGoalLike = {
+      goalId: "corp.tactical.rez_relevant_ice",
+      family: "corp_ice_defense",
+      priority: 760,
+      urgency: "medium",
+      targetServerId: "remote_1",
+      source: "boardstate",
+      evidence: ["test_goal"],
+    };
+    const base = corpInputWithGoals(
+      [goal],
+      [rezVaporOps, rezShotgunWire, declineRez],
+    );
+    const input = {
+      ...base,
+      playerView: {
+        ...base.playerView,
+        timingPoint: "run.approach_ice",
+        own: { ...base.playerView.own, credits: 10 },
+        run: {
+          attackedServerId: "remote_1",
+          phase: "approach_ice",
+          position: { kind: "ice", serverId: "remote_1", iceIndex: 2 },
+          successful: false,
+        },
+        servers: [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [corticalScrub, keeper, shotgunWire],
+            root: [vaporOps],
+          },
+        ],
+      },
+    } as unknown as AiDecisionInput;
+
+    const vaporComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      rezVaporOps,
+      "simple_rez",
+      testDependencies(),
+    );
+    const iceComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      rezShotgunWire,
+      "simple_rez",
+      testDependencies(),
+    );
+    const declineComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      declineRez,
+      "simple_rez",
+      testDependencies(),
+    );
+
+    expect(vaporComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_root_rez_defer_irrelevant_during_run",
+          value: -4000,
+          reason: expect.stringContaining(
+            "root_rez_timing:no_current_run_effect",
+          ),
+        }),
+      ]),
+    );
+    expect(vaporComponents.map((component) => component.key)).not.toContain(
+      "corp_goal_fit_tactical_goal",
+    );
+    expect(iceComponents.map((component) => component.key)).toContain(
+      "corp_goal_fit_tactical_goal",
+    );
+    expect(totalScore(vaporComponents)).toBeLessThan(
+      totalScore(declineComponents),
+    );
+    expect(totalScore(vaporComponents)).toBeLessThan(totalScore(iceComponents));
+  });
+
+  it("does not conceal a non-run-relevant root outside a Runner run", () => {
+    const vaporOps = corpCard("vapor-ops", "asset", {
+      definitionId: "onr_v1_347_vapor-ops",
+      title: "Vapor Ops",
+      rezzed: false,
+      advancementCounters: 2,
+    });
+    const action = corpAction(
+      "rez-vapor-ops",
+      "rez_ice",
+      {},
+      vaporOps.instanceId,
+    );
+    const base = corpInputWithGoals([]);
+    const input = {
+      ...base,
+      playerView: {
+        ...base.playerView,
+        timingPoint: "corp_action.main",
+        servers: [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [],
+            root: [vaporOps],
+          },
+        ],
+      },
+    } as unknown as AiDecisionInput;
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      action,
+      "simple_rez",
+      testDependencies(),
+    );
+
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_root_rez_defer_irrelevant_during_run",
+    );
+  });
+
   it("penalizes action-id encoded zero-effect X rez actions without extra defense semantics", () => {
     const actionId = "corp.rez_ice.test_ice.test_ice.x_strength.0.0";
     const components = semanticRuntimeCorpScoreComponents(
@@ -6248,6 +6424,7 @@ function corpInputWithGoals(
         scoreArea: [],
         rig: [],
       },
+      opponent: runnerOpponent(),
       servers: [],
       legalActions,
     },
