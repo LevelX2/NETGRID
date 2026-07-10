@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -144,10 +148,7 @@ describe("corp ICE placement server need and density", () => {
         corpIce("hq-ice-2", { rulesText: "Tax the runner." }),
         agenda("agenda-in-hq"),
       ],
-      servers: [
-        server("hq", [corpIce("installed-hq-ice")]),
-        server("rd", []),
-      ],
+      servers: [server("hq", [corpIce("installed-hq-ice")]), server("rd", [])],
       stackOrRdCount: 30,
     });
 
@@ -442,7 +443,49 @@ describe("corp ICE placement candidate scoring", () => {
     expect(candidate?.components.postInstallReserve).toBeLessThan(0);
     expect(candidate?.recommendation).not.toBe("install_now");
     expect(candidate?.evidence).toContain("zero_effect_risk:true");
-    expect(candidate?.evidence).toContain("component_post_install_reserve:-900");
+    expect(candidate?.evidence).toContain(
+      "component_post_install_reserve:-900",
+    );
+  });
+
+  it("rejects an expensive sixth central layer that costs the runner only one credit", () => {
+    const marginalWall = corpIce("marginal-wall", {
+      definitionId: "simple_barrier_ice",
+      title: "Marginal Wall",
+      subtypes: ["Barrier"],
+      rulesText: "*End the run.",
+      rezCost: 1,
+    });
+    const existingIce = Array.from({ length: 5 }, (_, index) =>
+      corpIce(`rd-layer-${index + 1}`, {
+        definitionId: "simple_barrier_ice",
+        rulesText: "*End the run.",
+        rezzed: true,
+      }),
+    );
+    const input = corpInput({
+      credits: 8,
+      hq: [marginalWall],
+      servers: [server("hq", []), server("rd", existingIce)],
+      runnerRig: [
+        card("runner-fracter", "program", {
+          definitionId: "simple_fracter",
+          subtypes: ["Program", "Icebreaker", "Fracter"],
+          strength: 3,
+        }),
+      ],
+    });
+
+    const candidate = candidateFor(input, marginalWall, "rd", {
+      actionCreditCost: 5,
+      iceRezCost: 1,
+    });
+
+    expect(candidate?.components.marginalLayerValue).toBeLessThanOrEqual(-2500);
+    expect(candidate?.recommendation).not.toBe("install_now");
+    expect(candidate?.evidence).toContain(
+      `component_marginal_layer_value:${candidate?.components.marginalLayerValue}`,
+    );
   });
 
   it("prioritizes a scoreline remote over quiet central over-icing", () => {
@@ -458,8 +501,12 @@ describe("corp ICE placement candidate scoring", () => {
       credits: 6,
       hq: [remoteWall, hqWall],
       servers: [
-        server("hq", [corpIce("existing-hq-wall", { rulesText: "*End the run." })]),
-        server("rd", [corpIce("existing-rd-wall", { rulesText: "*End the run." })]),
+        server("hq", [
+          corpIce("existing-hq-wall", { rulesText: "*End the run." }),
+        ]),
+        server("rd", [
+          corpIce("existing-rd-wall", { rulesText: "*End the run." }),
+        ]),
         server("remote_1", [], [agenda("remote-agenda")]),
       ],
     });
@@ -577,7 +624,11 @@ describe("corp ICE placement candidate scoring", () => {
       ],
     });
 
-    const firstIceCandidate = candidateFor(firstIceInput, vacuumLink, "remote_1");
+    const firstIceCandidate = candidateFor(
+      firstIceInput,
+      vacuumLink,
+      "remote_1",
+    );
     const layeredCandidate = candidateFor(layeredInput, vacuumLink, "remote_1");
 
     expect(firstIceCandidate?.components.futureRunSynergy).toBeLessThan(0);
@@ -642,14 +693,16 @@ describe("corp ICE placement candidate scoring", () => {
   });
 });
 
-function corpInput(overrides: {
-  credits?: number;
-  hq?: VisibleCard[];
-  archives?: VisibleCard[];
-  servers?: AiDecisionInput["playerView"]["servers"];
-  stackOrRdCount?: number;
-  runnerRig?: VisibleCard[];
-} = {}): AiDecisionInput {
+function corpInput(
+  overrides: {
+    credits?: number;
+    hq?: VisibleCard[];
+    archives?: VisibleCard[];
+    servers?: AiDecisionInput["playerView"]["servers"];
+    stackOrRdCount?: number;
+    runnerRig?: VisibleCard[];
+  } = {},
+): AiDecisionInput {
   return {
     side: "corp",
     legalActions: [],

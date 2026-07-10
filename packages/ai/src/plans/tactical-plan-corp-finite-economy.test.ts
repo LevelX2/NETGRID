@@ -5,6 +5,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import { buildCorpFiniteEconomyPlans } from "./tactical-plan-corp-finite-economy";
+import { buildCorpTacticalPlans } from "./tactical-plan-corp-plans";
 
 describe("Corp finite economy plans", () => {
   it("installs a reviewed finite economy asset when no pool is active", () => {
@@ -104,6 +105,19 @@ describe("Corp finite economy plans", () => {
       },
       nextSteps: [{ kind: "drain_finite_economy" }],
     });
+  });
+
+  it("does not misclassify a root rez as an ICE-defense plan", () => {
+    const setup = card("setup", "onr_v1_340_setup", "asset", {
+      rezzed: false,
+    });
+    const rez = action("rez-setup", "rez_ice", setup.instanceId);
+
+    const plans = buildCorpTacticalPlans({
+      input: corpInput({ root: [setup], actions: [rez] }),
+    });
+
+    expect(plans.some((plan) => plan.type === "corp.rez_defense")).toBe(false);
   });
 });
 

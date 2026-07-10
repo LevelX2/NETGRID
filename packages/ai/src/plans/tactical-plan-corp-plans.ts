@@ -197,7 +197,9 @@ export function buildCorpTacticalPlans(
     );
   }
   for (const action of input.legalActions.filter(
-    (candidate) => candidate.type === "rez_ice",
+    (candidate) =>
+      candidate.type === "rez_ice" &&
+      visibleCardForAction(input.playerView, candidate)?.type === "ice",
   )) {
     const serverId =
       actionServerId(action) ?? visibleSourceServerId(input.playerView, action);

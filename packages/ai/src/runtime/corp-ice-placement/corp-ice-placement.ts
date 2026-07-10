@@ -127,6 +127,7 @@ export type CorpIcePlacementCandidate = {
     opportunityCost: number;
     visibleZeroEffect: number;
     postInstallReserve: number;
+    marginalLayerValue: number;
   };
   evidence: string[];
 };
@@ -192,10 +193,15 @@ export function corpIcePlacementCandidateForAction<
     params.sourceCard ?? visibleSourceCardForCorpIcePlacement(input, action);
   if (!sourceCard || sourceCard.known === false) return undefined;
 
-  const serverNeed = buildCorpServerNeedProfile(input, serverId, params.server, {
-    immediateServerNeedBonus: params.immediateServerNeedBonus,
-    hasUrgentScoreline: params.hasUrgentScoreline,
-  });
+  const serverNeed = buildCorpServerNeedProfile(
+    input,
+    serverId,
+    params.server,
+    {
+      immediateServerNeedBonus: params.immediateServerNeedBonus,
+      hasUrgentScoreline: params.hasUrgentScoreline,
+    },
+  );
   const profile = buildCorpIceCardPlacementProfile(sourceCard, {
     rezCost: params.iceRezCost,
   });
@@ -215,11 +221,7 @@ export function corpIcePlacementCandidateForAction<
 
   const components = {
     serverNeed: serverNeedScore,
-    immediateStopValue: corpImmediateStopValue(
-      profile,
-      serverNeed,
-      affordable,
-    ),
+    immediateStopValue: corpImmediateStopValue(profile, serverNeed, affordable),
     futureRunSynergy: corpFutureRunSynergyValue(
       profile,
       firstIce,
@@ -248,8 +250,17 @@ export function corpIcePlacementCandidateForAction<
       creditsAfterInstall,
       visibleDefenseFit,
     }),
+    marginalLayerValue: corpMarginalIceLayerValue({
+      serverNeed,
+      visibleDefenseFit,
+      actionCreditCost,
+      urgentScoreline: params.hasUrgentScoreline === true,
+    }),
   };
-  const score = Object.values(components).reduce((sum, value) => sum + value, 0);
+  const score = Object.values(components).reduce(
+    (sum, value) => sum + value,
+    0,
+  );
   const recommendation = corpIcePlacementRecommendationForScore(
     score,
     components,
@@ -282,6 +293,7 @@ export function corpIcePlacementCandidateForAction<
       ...(deferReason ? [`defer_reason:${deferReason}`] : []),
       `component_visible_zero_effect:${components.visibleZeroEffect}`,
       `component_post_install_reserve:${components.postInstallReserve}`,
+      `component_marginal_layer_value:${components.marginalLayerValue}`,
       ...serverNeed.evidence,
       ...profile.evidence,
       ...visibleDefenseFit.evidence,
@@ -305,7 +317,7 @@ export function corpIcePlacementScoreComponent<
       ? candidate.score
       : badFirstIce
         ? Math.min(candidate.score, -1800)
-      : Math.min(candidate.score, 0);
+        : Math.min(candidate.score, 0);
   return {
     key: "corp_ice_placement_evaluator",
     label: "ICE-Platzierung",
@@ -419,7 +431,10 @@ export function buildCorpServerNeedProfile<
       : false;
 
   let serverNeed = 0;
-  const evidence: string[] = [`server_kind:${serverKind}`, `ice_count:${iceCount}`];
+  const evidence: string[] = [
+    `server_kind:${serverKind}`,
+    `ice_count:${iceCount}`,
+  ];
   if (serverKind === "hq") {
     if (hqAgendaRisk) {
       serverNeed += 900;
@@ -529,11 +544,10 @@ export function buildCorpIceCardPlacementProfile(
 
   const immediateStop =
     structuredSubroutines.some(subroutineLooksLikeImmediateStop) ||
-    rolesMatch([...hintRoles, ...hintEffectKinds], [
-      "etr_ice",
-      "end_run",
-      "etr",
-    ]) ||
+    rolesMatch(
+      [...hintRoles, ...hintEffectKinds],
+      ["etr_ice", "end_run", "etr"],
+    ) ||
     tokensIncludePhrase(tokens, ["end", "the", "run"]);
   const softStop =
     structuredSubroutines.some(subroutineLooksLikeSoftStop) ||
@@ -555,15 +569,15 @@ export function buildCorpIceCardPlacementProfile(
   const programTrash =
     multiProgramTrash ||
     structuredSubroutines.some(subroutineLooksLikeProgramTrash) ||
-    rolesMatch([...hintRoles, ...hintEffectKinds], [
-      "program_trash",
-      "program_trash_ice",
-    ]) ||
+    rolesMatch(
+      [...hintRoles, ...hintEffectKinds],
+      ["program_trash", "program_trash_ice"],
+    ) ||
     (tokenSet.has("trash") && tokenSet.has("program"));
-  const runRewind = rolesMatch([...hintTacticSignals, ...hintEffectKinds], [
-    "run.corp_run_rewind",
-    "corp_run_rewind",
-  ]);
+  const runRewind = rolesMatch(
+    [...hintTacticSignals, ...hintEffectKinds],
+    ["run.corp_run_rewind", "corp_run_rewind"],
+  );
   const tagTrace =
     structuredSubroutines.some(subroutineLooksLikeTraceOrTag) ||
     rolesMatch([...hintRoles, ...hintEffectKinds], ["trace", "tag"]) ||
@@ -580,48 +594,49 @@ export function buildCorpIceCardPlacementProfile(
     tokensIncludePhrase(tokens, ["cannot", "jack", "out"]) ||
     tokensIncludePhrase(tokens, ["may", "not", "jack", "out"]);
   const nextIceModifier =
-    rolesMatch([...hintTacticSignals, ...hintEffectKinds], [
-      "next_ice_lock",
-      "future_encounter_effect",
-    ]) ||
+    rolesMatch(
+      [...hintTacticSignals, ...hintEffectKinds],
+      ["next_ice_lock", "future_encounter_effect"],
+    ) ||
     tokensIncludePhrase(tokens, ["next", "ice"]) ||
     tokensIncludePhrase(tokens, ["next", "piece", "of", "ice"]);
   const futureIceModifier =
-    rolesMatch([...hintEffectKinds], [
-      "future_run_effect",
-      "future_encounter_effect",
-    ]) ||
+    rolesMatch(
+      [...hintEffectKinds],
+      ["future_run_effect", "future_encounter_effect"],
+    ) ||
     structuredSubroutines.some(subroutineHasFutureRunEffect) ||
     tokensIncludePhrase(tokens, ["remainder", "of", "this", "run"]) ||
     tokensIncludePhrase(tokens, ["for", "the", "rest", "of", "the", "run"]);
   const outsideIceScaling =
-    rolesMatch([...hintRiskTags, ...hintTacticSignals], [
-      "outer_ice_scaling",
-      "outside_ice_scaling",
-      "position_scaling",
-    ]) ||
+    rolesMatch(
+      [...hintRiskTags, ...hintTacticSignals],
+      ["outer_ice_scaling", "outside_ice_scaling", "position_scaling"],
+    ) ||
     (tokenSet.has("outside") && tokenSet.has("ice"));
   const innerIceScaling =
-    rolesMatch([...hintRiskTags, ...hintTacticSignals], [
-      "inner_ice_scaling",
-      "inside_ice_scaling",
-    ]) ||
+    rolesMatch(
+      [...hintRiskTags, ...hintTacticSignals],
+      ["inner_ice_scaling", "inside_ice_scaling"],
+    ) ||
     tokenSet.has("inside") ||
     tokenSet.has("inner");
   const variableRez =
     tokenSet.has("x") ||
     rolesMatch([...hintRiskTags, ...hintTacticSignals], ["variable_rez"]);
-  const modeChoice =
-    rolesMatch([...hintTacticSignals, ...targetProfileKinds], [
-      "type_choice_or_mode_choice",
-      "mode_choice",
-    ]);
+  const modeChoice = rolesMatch(
+    [...hintTacticSignals, ...targetProfileKinds],
+    ["type_choice_or_mode_choice", "mode_choice"],
+  );
   const mobileReposition =
-    rolesMatch([...hintRiskTags, ...hintTacticSignals, ...hintEffectKinds], [
-      "same_fort_reposition",
-      "mobile_position_change",
-      "move_self_to_outermost_position_on_other_fort",
-    ]) ||
+    rolesMatch(
+      [...hintRiskTags, ...hintTacticSignals, ...hintEffectKinds],
+      [
+        "same_fort_reposition",
+        "mobile_position_change",
+        "move_self_to_outermost_position_on_other_fort",
+      ],
+    ) ||
     (tokenSet.has("move") && tokenSet.has("ice")) ||
     tokenSet.has("reposition");
   const maintenanceOrBounceRisk =
@@ -635,10 +650,10 @@ export function buildCorpIceCardPlacementProfile(
     nextIceModifier ||
     futureIceModifier ||
     mobileReposition ||
-    rolesMatch([...hintRiskTags, ...hintTacticSignals], [
-      "position_dependent_ice",
-      "position_scaling",
-    ]);
+    rolesMatch(
+      [...hintRiskTags, ...hintTacticSignals],
+      ["position_dependent_ice", "position_scaling"],
+    );
   const wantsInner = outsideIceScaling || innerIceScaling || runRewind;
   const wantsOuter = nextIceModifier || futureIceModifier;
   const wantsFollowupIce = wantsInner || wantsOuter;
@@ -696,7 +711,8 @@ export function buildCorpIceDensityProfile(
     cardLooksLikeIce,
   ).length;
   const installedIce = (input.playerView.servers ?? []).reduce(
-    (count, server) => count + (server.ice?.filter(cardLooksLikeIce).length ?? 0),
+    (count, server) =>
+      count + (server.ice?.filter(cardLooksLikeIce).length ?? 0),
     0,
   );
   const remainingDeckCount = safeNonNegativeInteger(
@@ -707,7 +723,9 @@ export function buildCorpIceDensityProfile(
   const knownDensity =
     knownCorpCardCount > 0 ? knownIceSeen / knownCorpCardCount : undefined;
   const remainingIceEstimate =
-    knownDensity === undefined ? 0 : Math.round(remainingDeckCount * knownDensity);
+    knownDensity === undefined
+      ? 0
+      : Math.round(remainingDeckCount * knownDensity);
   const iceDensityClass =
     knownDensity === undefined
       ? "unknown"
@@ -774,7 +792,9 @@ export function corpIcePlacementEvaluationForActions<
         input,
         action,
         serverId: dependencies.serverIdForAction(action),
-        server: dependencies.serverForId(dependencies.serverIdForAction(action)),
+        server: dependencies.serverForId(
+          dependencies.serverIdForAction(action),
+        ),
         sourceCard,
         actionCreditCost: dependencies.actionCreditCost?.(action),
         iceRezCost: sourceCard
@@ -786,13 +806,14 @@ export function corpIcePlacementEvaluationForActions<
       Boolean(candidate),
     )
     .sort((left, right) => right.score - left.score);
-  const serverNeeds = uniqueStrings(candidates.map((candidate) => candidate.serverId)).map(
-    (serverId) =>
-      buildCorpServerNeedProfile(
-        input,
-        serverId,
-        dependencies.serverForId(serverId),
-      ),
+  const serverNeeds = uniqueStrings(
+    candidates.map((candidate) => candidate.serverId),
+  ).map((serverId) =>
+    buildCorpServerNeedProfile(
+      input,
+      serverId,
+      dependencies.serverForId(serverId),
+    ),
   );
   const handIceProfiles = (input.playerView.own.gripOrHq ?? [])
     .filter(cardLooksLikeIce)
@@ -811,7 +832,10 @@ export function corpIcePlacementEvaluationForActions<
     evidence: [
       `candidate_count:${candidates.length}`,
       ...(bestInstall
-        ? [`best_action:${bestInstall.actionId}`, `best_score:${bestInstall.score}`]
+        ? [
+            `best_action:${bestInstall.actionId}`,
+            `best_score:${bestInstall.score}`,
+          ]
         : []),
       `best_defer_reason:${bestDeferReason}`,
     ],
@@ -876,7 +900,12 @@ function corpImmediateStopValue(
   if (profile.multiProgramTrash || profile.persistentDamageCounter) {
     return serverNeed.serverNeed >= 1000 ? 350 : 225;
   }
-  if (profile.tax || profile.damage || profile.programTrash || profile.tagTrace) {
+  if (
+    profile.tax ||
+    profile.damage ||
+    profile.programTrash ||
+    profile.tagTrace
+  ) {
     return serverNeed.serverNeed >= 1000 ? 250 : 150;
   }
   return serverNeed.serverNeed >= 900 ? -650 : -250;
@@ -955,7 +984,10 @@ function corpPlacementOpportunityCostValue(params: {
   creditsAfterInstall: number;
   hasBetterImmediateIceAlternative: boolean;
 }): number {
-  if (params.hasBetterImmediateIceAlternative && params.profile.deadAsFirstIce) {
+  if (
+    params.hasBetterImmediateIceAlternative &&
+    params.profile.deadAsFirstIce
+  ) {
     return -500;
   }
   if (!params.affordable && params.creditsAfterInstall < 3) {
@@ -993,7 +1025,9 @@ function corpVisibleIceDefenseFit(
   const visibleBreakCost = corpVisibleRunnerBreakCostForIce(input, sourceCard);
   const runnerCredits = corpVisibleRunnerContestCredits(input);
   const runnerCanAffordVisibleBreak =
-    visibleBreakCost !== undefined ? runnerCredits >= visibleBreakCost : undefined;
+    visibleBreakCost !== undefined
+      ? runnerCredits >= visibleBreakCost
+      : undefined;
   const hasVisibleBreakerTax =
     visibleBreakerCoverage &&
     visibleBreakCost !== undefined &&
@@ -1055,6 +1089,29 @@ function corpPostInstallReserveValue(params: {
     return 0;
   }
   return params.creditsAfterInstall <= 0 ? -900 : -500;
+}
+
+function corpMarginalIceLayerValue(params: {
+  serverNeed: CorpServerNeedProfile;
+  visibleDefenseFit: CorpVisibleIceDefenseFit;
+  actionCreditCost: number;
+  urgentScoreline: boolean;
+}): number {
+  if (params.serverNeed.iceCount < 3) return 0;
+  const visibleBreakCost = params.visibleDefenseFit.visibleBreakCost;
+  if (
+    !params.visibleDefenseFit.visibleBreakerCoverage ||
+    visibleBreakCost === undefined ||
+    visibleBreakCost > 1
+  ) {
+    return 0;
+  }
+  const extraLayerCount = params.serverNeed.iceCount - 2;
+  const installTax = Math.max(0, params.actionCreditCost) * 220;
+  const weakLayerTax = visibleBreakCost === 0 ? 900 : 550;
+  const depthTax = extraLayerCount * 450;
+  const urgentReduction = params.urgentScoreline ? 900 : 0;
+  return -Math.max(500, weakLayerTax + depthTax + installTax - urgentReduction);
 }
 
 function corpVisibleRunnerBreakCostForIce(
@@ -1155,9 +1212,7 @@ function corpIcePlacementResultingPosition(
   return "outermost";
 }
 
-function corpServerKind(
-  serverId: string,
-): CorpServerNeedProfile["serverKind"] {
+function corpServerKind(serverId: string): CorpServerNeedProfile["serverKind"] {
   if (serverId === "hq") return "hq";
   if (serverId === "rd") return "rd";
   if (serverId === "archives") return "archives";
@@ -1185,8 +1240,10 @@ function corpCentralPressureFromVisibleInput(
   if (serverId !== "hq" && serverId !== "rd") return false;
   const runnerAgendaPoints = input.playerView.opponent?.agendaPoints ?? 0;
   const rig = input.playerView.opponent?.rig ?? [];
-  const centralEvents = [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])]
-    .filter((event) => eventServerId(event.publicPayload) === serverId).length;
+  const centralEvents = [
+    ...(input.playerView.publicEvents ?? []),
+    ...(input.eventTail ?? []),
+  ].filter((event) => eventServerId(event.publicPayload) === serverId).length;
   if (serverId === "hq") {
     return semanticCorpHasAgendaInHq(input) || centralEvents >= 2;
   }
@@ -1198,8 +1255,10 @@ function corpCentralPressureFromVisibleInput(
 }
 
 function corpArchivesPressureFromVisibleInput(input: AiDecisionInput): boolean {
-  return [...(input.playerView.publicEvents ?? []), ...(input.eventTail ?? [])]
-    .some((event) => eventServerId(event.publicPayload) === "archives");
+  return [
+    ...(input.playerView.publicEvents ?? []),
+    ...(input.eventTail ?? []),
+  ].some((event) => eventServerId(event.publicPayload) === "archives");
 }
 
 function eventServerId(payload: Record<string, unknown>): string | undefined {
@@ -1297,7 +1356,9 @@ function corpIcePlacementActionCreditCost(action: LegalAction): number {
   return (action.costs ?? []).reduce(
     (sum, cost) =>
       sum +
-      safeNonNegativeInteger((cost as { credits?: number | undefined }).credits),
+      safeNonNegativeInteger(
+        (cost as { credits?: number | undefined }).credits,
+      ),
     0,
   );
 }

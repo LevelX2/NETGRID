@@ -13,6 +13,44 @@ import {
 import type { CorpScoringWindowAssessment } from "./semantic-runtime-corp-scoring-window";
 
 describe("semantic runtime corp board triage", () => {
+  it("protects an open central before creating the first empty remote", () => {
+    const corticalScrub = iceCard("cortical-scrub", {
+      definitionId: "onr_v1_231_cortical-scrub",
+      title: "Cortical Scrub",
+      subtypes: ["Sentry"],
+      rulesText: "Do 1 core damage. End the run.",
+    });
+    const installRd = corpAction(
+      "install-cortical-rd",
+      "install_card",
+      { placement: "ice", serverId: "rd" },
+      corticalScrub.instanceId,
+    );
+    const installRemote = corpAction(
+      "install-cortical-new-remote",
+      "install_card",
+      { placement: "ice", serverId: "new_remote" },
+      corticalScrub.instanceId,
+    );
+    const input = corpInput({
+      actionNumber: 4,
+      corpHq: [corticalScrub],
+      legalActions: [installRd, installRemote],
+      servers: [centralServer("hq", []), centralServer("rd", [])],
+    });
+
+    const triage = semanticRuntimeCorpBoardTriage(input, testDependencies());
+
+    expect(triage).toMatchObject({
+      primary: "protect_rd",
+      severity: "high",
+      targetServerId: "rd",
+    });
+    expect(triage.evidence).toContain(
+      "corp_board_triage_opening_central_baseline:true",
+    );
+  });
+
   it("normalizes boardstate triage values into the AI-COMPLETE-17 consumer scale", () => {
     expect(normalizedCorpBoardTriageValue(0)).toBe(0);
     expect(normalizedCorpBoardTriageValue(850)).toBe(17);
@@ -703,9 +741,7 @@ describe("semantic runtime corp board triage", () => {
     );
 
     expect(triage.primary).not.toBe("force_scoreline_clock");
-    expect(triage.evidence).not.toContain(
-      "corp_hq_agenda_flood_pressure:true",
-    );
+    expect(triage.evidence).not.toContain("corp_hq_agenda_flood_pressure:true");
     expect(punishComponent?.key).not.toBe("corp_board_triage_mismatch");
   });
 
@@ -2181,9 +2217,13 @@ describe("semantic runtime corp board triage", () => {
   });
 
   it("keeps funding triage on an existing score remote instead of a new-remote scoreline", () => {
-    const activeAdvance = corpAction("advance-active-scoreline", "advance_card", {
-      serverId: "remote_1",
-    });
+    const activeAdvance = corpAction(
+      "advance-active-scoreline",
+      "advance_card",
+      {
+        serverId: "remote_1",
+      },
+    );
     const newRemoteAgenda = corpAction("new-remote-scoreline", "install_card", {
       placement: "root",
       serverId: "new_remote",
@@ -2199,9 +2239,11 @@ describe("semantic runtime corp board triage", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", [iceCard("rd-ice")]),
-        remoteServer("remote_1", [iceCard("remote-ice")], [
-          agendaCard("active-agenda", 2),
-        ]),
+        remoteServer(
+          "remote_1",
+          [iceCard("remote-ice")],
+          [agendaCard("active-agenda", 2)],
+        ),
       ],
     });
     const dependencies = testDependencies({
@@ -2265,7 +2307,9 @@ describe("semantic runtime corp board triage", () => {
       targetServerId: "remote_1",
     });
     expect(triage.evidence).toContain("corp_board_triage_target:remote_1");
-    expect(triage.evidence).not.toContain("corp_board_triage_target:new_remote");
+    expect(triage.evidence).not.toContain(
+      "corp_board_triage_target:new_remote",
+    );
     expect(creditComponent).toMatchObject({
       key: "corp_board_triage_alignment",
     });
@@ -2365,11 +2409,15 @@ describe("semantic runtime corp board triage", () => {
       placement: "root",
       serverId: "remote_1",
     });
-    const remoteSupport = corpAction("remote-scoreline-support", "install_card", {
-      placement: "root",
-      serverId: "remote_1",
-      cardDefinitionId: "support_asset",
-    });
+    const remoteSupport = corpAction(
+      "remote-scoreline-support",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardDefinitionId: "support_asset",
+      },
+    );
     const gainCredit = corpAction("gain-credit", "gain_credit");
     const input = corpInput({
       corpHq: [agendaCard("hq-agenda-1", 2), assetCard("support-asset")],
@@ -2704,12 +2752,16 @@ describe("semantic runtime corp board triage", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", []),
-        remoteServer("remote_1", [], [
-          agendaCard("low-value-agenda", 1, {
-            advancementRequirement: 6,
-            advancementCounters: 5,
-          }),
-        ]),
+        remoteServer(
+          "remote_1",
+          [],
+          [
+            agendaCard("low-value-agenda", 1, {
+              advancementRequirement: 6,
+              advancementCounters: 5,
+            }),
+          ],
+        ),
       ],
     });
     const dependencies = testDependencies({
@@ -2778,12 +2830,16 @@ describe("semantic runtime corp board triage", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", []),
-        remoteServer("remote_1", [], [
-          agendaCard("low-value-agenda", 1, {
-            advancementRequirement: 6,
-            advancementCounters: 5,
-          }),
-        ]),
+        remoteServer(
+          "remote_1",
+          [],
+          [
+            agendaCard("low-value-agenda", 1, {
+              advancementRequirement: 6,
+              advancementCounters: 5,
+            }),
+          ],
+        ),
       ],
     });
     const dependencies = testDependencies({
@@ -2842,12 +2898,16 @@ describe("semantic runtime corp board triage", () => {
       servers: [
         centralServer("hq", [iceCard("hq-ice")]),
         centralServer("rd", []),
-        remoteServer("remote_1", [], [
-          agendaCard("low-value-agenda", 1, {
-            advancementRequirement: 6,
-            advancementCounters: 5,
-          }),
-        ]),
+        remoteServer(
+          "remote_1",
+          [],
+          [
+            agendaCard("low-value-agenda", 1, {
+              advancementRequirement: 6,
+              advancementCounters: 5,
+            }),
+          ],
+        ),
       ],
     });
     const dependencies = testDependencies({
@@ -2894,9 +2954,13 @@ function corpInput(overrides: {
   runnerAgendaPoints?: number;
   runnerRig?: VisibleCard[];
   eventTail?: AiDecisionInput["eventTail"];
+  actionNumber?: number;
 }): AiDecisionInput {
   return {
     side: "corp",
+    ...(overrides.actionNumber !== undefined
+      ? { actionNumber: overrides.actionNumber }
+      : {}),
     legalActions: overrides.legalActions,
     eventTail: overrides.eventTail ?? [],
     playerView: {
@@ -2940,7 +3004,8 @@ function testDependencies(
     corpScoreNowSafetyGate: () => ({ allowed: true, evidence: [] }),
     corpActionIsScoreLine: (_input, action) =>
       action.actionId.includes("scoreline") || action.type === "advance_card",
-    corpAdvanceCompletesScore: options.corpAdvanceCompletesScore ?? (() => false),
+    corpAdvanceCompletesScore:
+      options.corpAdvanceCompletesScore ?? (() => false),
     corpScoringWindowAssessment: (_input, action) =>
       options.scoringWindowByActionId?.[action.actionId],
     corpRemoteRezFloorAssessment: () => undefined,

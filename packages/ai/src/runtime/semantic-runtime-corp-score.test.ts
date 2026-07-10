@@ -6024,18 +6024,134 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_downstream_rez_floor_preservation",
-          value: -30,
+          value: -1800,
           reason: expect.stringContaining("inner_rez_floor:6"),
         }),
         expect.objectContaining({
           key: "corp_downstream_rez_floor_preservation",
-          reason: expect.stringContaining("reserve_raw_value:-1500"),
-        }),
-        expect.objectContaining({
-          key: "corp_downstream_rez_floor_preservation",
-          reason: expect.stringContaining("reserve_normalized_value:-30"),
+          reason: expect.stringContaining("downstream_reserve_value:-1800"),
         }),
       ]),
+    );
+  });
+
+  it("never rezzes an access ambush whose effect resolves while unrezzed", () => {
+    const setup = corpCard("setup", "asset", {
+      definitionId: "onr_v1_340_setup",
+      title: "Setup!",
+      rezzed: false,
+    });
+    const action = corpAction("rez-setup", "rez_ice", {}, setup.instanceId);
+    const base = corpInputWithGoals([]);
+    const input = {
+      ...base,
+      playerView: {
+        ...base.playerView,
+        timingPoint: "run.approach_ice",
+        run: {
+          attackedServerId: "remote_1",
+          phase: "approach_ice",
+          position: { kind: "ice", serverId: "remote_1", iceIndex: 0 },
+          successful: false,
+        },
+        servers: [
+          {
+            id: "remote_1",
+            label: "Remote 1",
+            ice: [corpIce("remote-wall")],
+            root: [setup],
+          },
+        ],
+      },
+    } as unknown as AiDecisionInput;
+
+    const components = semanticRuntimeCorpScoreComponents(
+      input,
+      action,
+      "simple_rez",
+      testDependencies(),
+    );
+
+    expect(components).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_root_rez_unnecessary_access_ambush",
+          value: -5000,
+        }),
+      ]),
+    );
+    expect(components.map((component) => component.key)).not.toContain(
+      "corp_effective_defense_zero_effect_risk",
+    );
+  });
+
+  it("rezzes a run-relevant root only at the last relevant window", () => {
+    const redHerrings = corpCard("red-herrings", "upgrade", {
+      definitionId: "onr_v1_366_red-herrings",
+      title: "Red Herrings",
+      rezzed: false,
+    });
+    const action = corpAction(
+      "rez-red-herrings",
+      "rez_ice",
+      {},
+      redHerrings.instanceId,
+    );
+    const base = corpInputWithGoals([]);
+    const inputAtPosition = (iceIndex: number) =>
+      ({
+        ...base,
+        playerView: {
+          ...base.playerView,
+          timingPoint: "run.approach_ice",
+          run: {
+            attackedServerId: "remote_1",
+            phase: "approach_ice",
+            position: { kind: "ice", serverId: "remote_1", iceIndex },
+            successful: false,
+          },
+          servers: [
+            {
+              id: "remote_1",
+              label: "Remote 1",
+              ice: [corpIce("inner-wall"), corpIce("outer-wall")],
+              root: [redHerrings],
+            },
+          ],
+        },
+      }) as unknown as AiDecisionInput;
+
+    const earlyComponents = semanticRuntimeCorpScoreComponents(
+      inputAtPosition(1),
+      action,
+      "simple_rez",
+      testDependencies(),
+    );
+    const latestComponents = semanticRuntimeCorpScoreComponents(
+      inputAtPosition(0),
+      action,
+      "simple_rez",
+      testDependencies(),
+    );
+
+    expect(earlyComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_root_rez_defer_until_last_window",
+          value: -3600,
+        }),
+      ]),
+    );
+    expect(latestComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_root_rez_latest_relevant_window",
+          value: 1600,
+        }),
+      ]),
+    );
+    expect(totalScore(latestComponents)).toBeGreaterThan(
+      totalScore(earlyComponents),
     );
   });
 
