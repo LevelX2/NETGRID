@@ -197,6 +197,8 @@ export function evaluateKnownRemoteAccessPayoff(
           stateVersion: input.playerView.stateVersion,
         })
       : undefined;
+    const intendedAccessAction =
+      trashProjection.accessDecision === "trash" ? "trash" : "decline";
     const accessProjection = projectAccessDecision({
       source: "pre_run",
       serverId,
@@ -206,14 +208,17 @@ export function evaluateKnownRemoteAccessPayoff(
         cheapestTrashRoot.type === "upgrade"
           ? cheapestTrashRoot.type
           : "unknown",
-      intendedAccessAction:
-        trashProjection.accessDecision === "trash" ? "trash" : "decline",
-      trashCost: cheapestTrashCost,
-      generalTrashCost: trashProjection.generalTrashCost,
-      dedicatedTrashCredits: Math.max(
-        0,
-        cheapestTrashCost - trashProjection.generalTrashCost,
-      ),
+      intendedAccessAction,
+      ...(intendedAccessAction === "trash"
+        ? {
+            trashCost: cheapestTrashCost,
+            generalTrashCost: trashProjection.generalTrashCost,
+            dedicatedTrashCredits: Math.max(
+              0,
+              cheapestTrashCost - trashProjection.generalTrashCost,
+            ),
+          }
+        : {}),
       reserveWouldBreak:
         trashProjection.declineReason === "reserve_would_break",
       finitePoolValueRemaining: trashProjection.finitePoolValueRemaining,
