@@ -237,6 +237,47 @@ describe("semanticRuntimeCorpScoringWindowAssessment", () => {
     });
   });
 
+  it("does not charge a click for scoring after a visible two-counter burst", () => {
+    const agenda = agendaCard("project-zurich", {
+      definitionId: "onr_proteus_008_project-zurich",
+      advancementRequirement: 3,
+    });
+    const systematicLayoffs = operationCard("systematic-layoffs", {
+      definitionId: "onr_v1_304_systematic-layoffs",
+      title: "Systematic Layoffs",
+      cost: 5,
+      rulesText:
+        "Add two advancement counters to any combination of installed cards that can be advanced.",
+    });
+    const action = corpAction(
+      "install-systematic-closeout-agenda",
+      "install_card",
+      {
+        cardType: "agenda",
+        placement: "root",
+        serverId: "remote_1",
+      },
+      agenda.instanceId,
+    );
+
+    const assessment = assess(
+      corpInput({
+        ownCredits: 9,
+        ownClicks: 3,
+        runnerCredits: 9,
+        hq: [agenda, systematicLayoffs],
+        servers: protectedCentralServers([remoteServer("remote_1", [])]),
+      }),
+      action,
+    );
+
+    expect(assessment).toMatchObject({
+      windowKind: "durable",
+      scoreHorizon: "immediate",
+      recommendedNextStep: "install_agenda",
+    });
+  });
+
   it("bounds visible in-turn advancement burst text to exact tokens", () => {
     const agenda = agendaCard("agenda-in-hq", {
       advancementRequirement: 3,

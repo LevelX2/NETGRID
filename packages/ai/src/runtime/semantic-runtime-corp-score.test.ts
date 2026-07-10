@@ -132,12 +132,16 @@ describe("semanticRuntimeCorpScoreComponents", () => {
   });
 
   it("does not treat scored hidden-zone reveal agenda actions as low-credit funding", () => {
-    const revealRdTop = corpAction("security-directors-reveal-rd", "gain_credit", {
-      cardId: "security-directors",
-      abilityFamily: "hidden-zone",
-      effectKind: "hidden_zone",
-      agendaAbility: "v1919_scored_agenda_reveal_rd_top",
-    });
+    const revealRdTop = corpAction(
+      "security-directors-reveal-rd",
+      "gain_credit",
+      {
+        cardId: "security-directors",
+        abilityFamily: "hidden-zone",
+        effectKind: "hidden_zone",
+        agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+      },
+    );
 
     const components = semanticRuntimeCorpScoreComponents(
       corpInputWithHqCards(0, [], [revealRdTop]),
@@ -161,12 +165,16 @@ describe("semanticRuntimeCorpScoreComponents", () => {
   });
 
   it("penalizes non-credit gain wrappers when real credit actions are legal", () => {
-    const revealRdTop = corpAction("security-directors-reveal-rd", "gain_credit", {
-      cardId: "security-directors",
-      abilityFamily: "hidden-zone",
-      effectKind: "hidden_zone",
-      agendaAbility: "v1919_scored_agenda_reveal_rd_top",
-    });
+    const revealRdTop = corpAction(
+      "security-directors-reveal-rd",
+      "gain_credit",
+      {
+        cardId: "security-directors",
+        abilityFamily: "hidden-zone",
+        effectKind: "hidden_zone",
+        agendaAbility: "v1919_scored_agenda_reveal_rd_top",
+      },
+    );
     const basicCredit = corpAction(revealRdTop.actionId, "gain_credit");
 
     const components = semanticRuntimeCorpScoreComponents(
@@ -745,7 +753,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       corporateCoup.instanceId,
     );
     coupAbility.costs = [{ clicks: 1 }];
-    const input = corpInputWithScoreAreaCards(0, [corporateCoup], [coupAbility]);
+    const input = corpInputWithScoreAreaCards(
+      0,
+      [corporateCoup],
+      [coupAbility],
+    );
 
     const abilityComponents = semanticRuntimeCorpScoreComponents(
       input,
@@ -2143,11 +2155,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       {},
       "basic_action",
     );
-    const input = corpInputWithHqCards(6, [agenda], [
-      installExistingRemote,
-      installNewRemote,
-      gainCredit,
-    ]);
+    const input = corpInputWithHqCards(
+      6,
+      [agenda],
+      [installExistingRemote, installNewRemote, gainCredit],
+    );
     input.playerView.servers = [
       { id: "hq", label: "HQ", ice: [], root: [] },
       { id: "rd", label: "R&D", ice: [], root: [] },
@@ -2207,9 +2219,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_board_triage_alignment",
-          reason: expect.stringContaining(
-            "corp_active_scoreline_clock:true",
-          ),
+          reason: expect.stringContaining("corp_active_scoreline_clock:true"),
         }),
         expect.objectContaining({
           key: "corp_existing_score_remote_pipeline",
@@ -2221,9 +2231,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_board_triage_mismatch",
-          reason: expect.stringContaining(
-            "triage_action_server:new_remote",
-          ),
+          reason: expect.stringContaining("triage_action_server:new_remote"),
         }),
         expect.objectContaining({
           key: "corp_remote_sprawl_penalty",
@@ -2253,10 +2261,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       { placement: "ice", serverId: "new_remote" },
       "new-remote-ice",
     );
-    const input = corpInputWithHqCards(6, [agenda], [
-      installExistingAgenda,
-      installNewRemoteIce,
-    ]);
+    const input = corpInputWithHqCards(
+      6,
+      [agenda],
+      [installExistingAgenda, installNewRemoteIce],
+    );
     input.playerView.own.gripOrHq.push(
       corpIce("new-remote-ice", {
         definitionId: "simple_barrier_ice",
@@ -2349,11 +2358,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       {},
       "corp_accounts_receivable",
     );
-    const input = corpInputWithHqCards(6, [accountsReceivableCard()], [
-      drawCard,
-      gainCredit,
-      accountsReceivable,
-    ]);
+    const input = corpInputWithHqCards(
+      6,
+      [accountsReceivableCard()],
+      [drawCard, gainCredit, accountsReceivable],
+    );
     input.playerView.servers = [
       { id: "hq", label: "HQ", ice: [], root: [] },
       { id: "rd", label: "R&D", ice: [], root: [] },
@@ -2780,14 +2789,10 @@ describe("semanticRuntimeCorpScoreComponents", () => {
   });
 
   it("funds an active score remote before adding ICE that misses the rez floor", () => {
-    const installRemoteIce = corpAction(
-      "install-remote-ice",
-      "install_card",
-      {
-        placement: "ice",
-        serverId: "remote_1",
-      },
-    );
+    const installRemoteIce = corpAction("install-remote-ice", "install_card", {
+      placement: "ice",
+      serverId: "remote_1",
+    });
     const gainCredit = corpAction(
       "gain-credit",
       "gain_credit",
@@ -2874,10 +2879,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       {},
       "basic_action",
     );
-    const input = corpInputWithHqCards(3, [agendaCard("agenda-in-hq"), expensiveIce], [
-      installRemoteIce,
-      gainCredit,
-    ]);
+    const input = corpInputWithHqCards(
+      3,
+      [agendaCard("agenda-in-hq"), expensiveIce],
+      [installRemoteIce, gainCredit],
+    );
     input.playerView.servers = [
       { id: "hq", label: "HQ", ice: [], root: [] },
       { id: "rd", label: "R&D", ice: [], root: [] },
@@ -2891,9 +2897,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     const dependencies = {
       ...testDependencies(),
       rolesForAction: (_input: AiDecisionInput, action: LegalAction) =>
-        action.actionId === installRemoteIce.actionId
-          ? ["ice", "protect"]
-          : [],
+        action.actionId === installRemoteIce.actionId ? ["ice", "protect"] : [],
       corpHasRemoteRezFloorFundingNeed: () => true,
       corpScoringWindowAssessment: (
         _input: AiDecisionInput,
@@ -3271,9 +3275,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_board_triage_mismatch",
-          reason: expect.stringContaining(
-            "triage_primary:fund_score_remote",
-          ),
+          reason: expect.stringContaining("triage_primary:fund_score_remote"),
         }),
       ]),
     );
@@ -3281,9 +3283,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       expect.arrayContaining([
         expect.objectContaining({
           key: "corp_board_triage_alignment",
-          reason: expect.stringContaining(
-            "triage_primary:fund_score_remote",
-          ),
+          reason: expect.stringContaining("triage_primary:fund_score_remote"),
         }),
       ]),
     );
@@ -3317,11 +3317,7 @@ describe("semanticRuntimeCorpScoreComponents", () => {
     );
     const input = corpInputWithHqCards(
       8,
-      [
-        agendaCard("agenda-1", 4),
-        agendaCard("agenda-2", 2),
-        nightShiftCard(),
-      ],
+      [agendaCard("agenda-1", 4), agendaCard("agenda-2", 2), nightShiftCard()],
       [installAgenda, nightShift, gainCredit],
     );
     input.playerView.opponent = runnerOpponent({
@@ -3347,10 +3343,8 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       ...testDependencies(),
       corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
         action.actionId === installAgenda.actionId,
-      corpInstallRemoteScore: (
-        _input: AiDecisionInput,
-        action: LegalAction,
-      ) => (action.actionId === installAgenda.actionId ? -2200 : 0),
+      corpInstallRemoteScore: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId ? -2200 : 0,
       corpRemoteScoreContestabilityAssessment: (
         _input: AiDecisionInput,
         action: LegalAction,
@@ -3477,10 +3471,8 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       ...testDependencies(),
       corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
         action.actionId === advanceAgenda.actionId,
-      corpAdvanceRemoteScore: (
-        _input: AiDecisionInput,
-        action: LegalAction,
-      ) => (action.actionId === advanceAgenda.actionId ? 1450 : 0),
+      corpAdvanceRemoteScore: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === advanceAgenda.actionId ? 1450 : 0,
       corpRemoteScoreContestabilityAssessment: (
         _input: AiDecisionInput,
         action: LegalAction,
@@ -3583,10 +3575,8 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       ...testDependencies(),
       corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
         action.actionId === installAgenda.actionId,
-      corpInstallRemoteScore: (
-        _input: AiDecisionInput,
-        action: LegalAction,
-      ) => (action.actionId === installAgenda.actionId ? -2200 : 0),
+      corpInstallRemoteScore: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId ? -2200 : 0,
       corpRemoteScoreContestabilityAssessment: (
         _input: AiDecisionInput,
         action: LegalAction,
@@ -3842,10 +3832,8 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       ...testDependencies(),
       corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
         action.actionId === installAgenda.actionId,
-      corpInstallRemoteScore: (
-        _input: AiDecisionInput,
-        action: LegalAction,
-      ) => (action.actionId === installAgenda.actionId ? -2200 : 0),
+      corpInstallRemoteScore: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId ? -2200 : 0,
       corpScoringWindowAssessment: (
         _input: AiDecisionInput,
         action: LegalAction,
@@ -3882,6 +3870,71 @@ describe("semanticRuntimeCorpScoreComponents", () => {
           reason: expect.stringContaining(
             "scoreline_exposes_game_ending_steal:true",
           ),
+        }),
+      ]),
+    );
+    expect(
+      totalScoreFor(input, gainCredit, "basic_economy_draw", dependencies),
+    ).toBeGreaterThan(totalScore(installComponents));
+  });
+
+  it("penalizes an ordinary delayed scoreline that the runner can steal before scoring", () => {
+    const installAgenda = corpAction(
+      "install-contestable-agenda",
+      "install_card",
+      {
+        placement: "root",
+        serverId: "remote_1",
+        cardType: "agenda",
+      },
+      "project-babylon",
+    );
+    const gainCredit = corpAction("gain-credit", "gain_credit", {});
+    const input = corpInputWithHqCards(
+      8,
+      [agendaCard("project-babylon", 1)],
+      [installAgenda, gainCredit],
+    );
+    input.playerView.opponent = runnerOpponent({
+      agendaPoints: 2,
+      credits: 6,
+    });
+    const dependencies = {
+      ...testDependencies(),
+      corpActionIsScoreLine: (_input: AiDecisionInput, action: LegalAction) =>
+        action.actionId === installAgenda.actionId,
+      corpInstallRemoteScore: () => 900,
+      corpScoringWindowAssessment: (
+        _input: AiDecisionInput,
+        action: LegalAction,
+      ) =>
+        action.actionId === installAgenda.actionId
+          ? scoringWindow({
+              serverId: "remote_1",
+              windowKind: "unsafe",
+              scoreHorizon: "next_turn",
+              runnerCanContestBeforeScore: true,
+              runnerCanReachAccessBeforeScore: true,
+              agendaStealRelevantBeforeScore: true,
+              agendaStealSeverity: "normal",
+              recommendedNextStep: "build_remote_ice",
+              evidence: ["test_ordinary_contestable_scoreline"],
+            })
+          : undefined,
+    };
+
+    const installComponents = semanticRuntimeCorpScoreComponents(
+      input,
+      installAgenda,
+      "basic_install",
+      dependencies,
+    );
+
+    expect(installComponents).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "corp_unsafe_delayed_scoreline_exposure",
+          value: -4200,
         }),
       ]),
     );
@@ -4246,10 +4299,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       {},
       "basic_action",
     );
-    const input = corpInputWithHqCards(6, [corpIce("rd-extra-ice")], [
-      installRdIce,
-      gainCredit,
-    ]);
+    const input = corpInputWithHqCards(
+      6,
+      [corpIce("rd-extra-ice")],
+      [installRdIce, gainCredit],
+    );
     input.playerView.servers = [
       { id: "hq", label: "HQ", ice: [], root: [] },
       {
@@ -5172,13 +5226,20 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       "basic_install",
       {
         ...testDependencies(),
-        rolesForAction: () => ["upgrade", "agenda", "remote_upgrade_agenda_support"],
+        rolesForAction: () => [
+          "upgrade",
+          "agenda",
+          "remote_upgrade_agenda_support",
+        ],
         corpActionIsScoreLine: () => true,
       },
       semanticCandidate(
         installHq.actionId,
         "install.card",
-        ["remote.agenda_difficulty_discount", "score.agenda_difficulty_discount"],
+        [
+          "remote.agenda_difficulty_discount",
+          "score.agenda_difficulty_discount",
+        ],
         "install_card",
       ),
     );
@@ -5236,7 +5297,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       "basic_install",
       {
         ...testDependencies(),
-        rolesForAction: () => ["upgrade", "agenda", "remote_upgrade_agenda_support"],
+        rolesForAction: () => [
+          "upgrade",
+          "agenda",
+          "remote_upgrade_agenda_support",
+        ],
         corpActionIsScoreLine: () => true,
       },
       candidateForWashington,
@@ -5259,7 +5324,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       "basic_install",
       {
         ...testDependencies(),
-        rolesForAction: () => ["upgrade", "agenda", "remote_upgrade_agenda_support"],
+        rolesForAction: () => [
+          "upgrade",
+          "agenda",
+          "remote_upgrade_agenda_support",
+        ],
         corpActionIsScoreLine: () => true,
       },
       candidateForWashington,
@@ -5318,7 +5387,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       "basic_install",
       {
         ...testDependencies(),
-        rolesForAction: () => ["upgrade", "remote_support", "build_scoring_remote"],
+        rolesForAction: () => [
+          "upgrade",
+          "remote_support",
+          "build_scoring_remote",
+        ],
       },
       panicCandidate,
     );
@@ -5340,7 +5413,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       "basic_install",
       {
         ...testDependencies(),
-        rolesForAction: () => ["upgrade", "remote_support", "build_scoring_remote"],
+        rolesForAction: () => [
+          "upgrade",
+          "remote_support",
+          "build_scoring_remote",
+        ],
       },
       {
         ...panicCandidate,
@@ -5396,7 +5473,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       "basic_install",
       {
         ...testDependencies(),
-        rolesForAction: () => ["upgrade", "remote_support", "build_scoring_remote"],
+        rolesForAction: () => [
+          "upgrade",
+          "remote_support",
+          "build_scoring_remote",
+        ],
       },
       simonCandidate,
     );
@@ -5418,7 +5499,11 @@ describe("semanticRuntimeCorpScoreComponents", () => {
       "basic_install",
       {
         ...testDependencies(),
-        rolesForAction: () => ["upgrade", "remote_support", "build_scoring_remote"],
+        rolesForAction: () => [
+          "upgrade",
+          "remote_support",
+          "build_scoring_remote",
+        ],
       },
       {
         ...simonCandidate,

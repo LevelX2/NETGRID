@@ -178,6 +178,13 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     dependencies,
   );
   if (gameEndingExposure) components.push(gameEndingExposure);
+  const unsafeDelayedExposure = corpUnsafeDelayedScorelineExposureComponent(
+    input,
+    action,
+    dependencies,
+    boardTriageState,
+  );
+  if (unsafeDelayedExposure) components.push(unsafeDelayedExposure);
   const scorelineFunding = corpScorelineFundingAssessmentComponent(
     input,
     action,
@@ -867,6 +874,60 @@ function corpGameEndingScorelineExposurePenaltyComponent<
   };
 }
 
+function corpUnsafeDelayedScorelineExposureComponent<TConsumer extends string>(
+  input: AiDecisionInput,
+  action: LegalAction,
+  dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
+  boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "install_card" && action.type !== "advance_card") {
+    return undefined;
+  }
+  const roles = dependencies.rolesForAction(input, action);
+  if (!dependencies.corpActionIsScoreLine(input, action, roles)) {
+    return undefined;
+  }
+  if (
+    dependencies.corpAdvanceCompletesScore?.(input, action) === true ||
+    boardTriageState.primary === "force_scoreline_clock"
+  ) {
+    return undefined;
+  }
+  const assessment = dependencies.corpScoringWindowAssessment?.(
+    input,
+    action,
+    roles,
+  );
+  if (
+    !assessment ||
+    assessment.scoreHorizon === "immediate" ||
+    assessment.windowKind !== "unsafe"
+  ) {
+    return undefined;
+  }
+  if (
+    !assessment.runnerCanReachAccessBeforeScore ||
+    !assessment.agendaStealRelevantBeforeScore
+  ) {
+    return undefined;
+  }
+  return {
+    key: "corp_unsafe_delayed_scoreline_exposure",
+    label: "Unsichere verzögerte Scoreline",
+    value: -4200,
+    reason: [
+      "unsafe_delayed_scoreline:true",
+      `action:${action.type}`,
+      `server:${assessment.serverId}`,
+      `score_horizon:${assessment.scoreHorizon}`,
+      `recommended_next_step:${assessment.recommendedNextStep}`,
+      `runner_can_reach_access_before_score:${assessment.runnerCanReachAccessBeforeScore}`,
+      `agenda_steal_relevant_before_score:${assessment.agendaStealRelevantBeforeScore}`,
+      ...assessment.evidence,
+    ].join("|"),
+  };
+}
+
 function corpScorelineFundingAssessmentComponent<TConsumer extends string>(
   input: AiDecisionInput,
   action: LegalAction,
@@ -978,6 +1039,29 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
   const closesBeforeRunner =
     dependencies.corpAdvanceCompletesScore?.(input, action) === true ||
     scoringWindow?.scoreHorizon === "immediate";
+  if (
+    !closesBeforeRunner &&
+    scoringWindow?.windowKind === "unsafe" &&
+    scoringWindow.runnerCanReachAccessBeforeScore === true &&
+    scoringWindow.agendaStealRelevantBeforeScore === true &&
+    boardTriageState.primary !== "force_scoreline_clock"
+  ) {
+    return {
+      key: "corp_active_remote_agenda_unsafe_advance",
+      label: "Unsichere Remote-Agenda",
+      value: -5200,
+      reason: [
+        "active_remote_agenda:true",
+        "unsafe_delayed_advance:true",
+        `server:${state.serverId}`,
+        `card:${state.cardId}`,
+        `score_horizon:${scoringWindow.scoreHorizon}`,
+        `recommended_next_step:${scoringWindow.recommendedNextStep}`,
+        ...scoringWindow.evidence,
+        ...state.evidence,
+      ].join("|"),
+    };
+  }
   const scoringWindowNeedsFunding =
     scoringWindow?.recommendedNextStep === "gain_credit" ||
     scoringWindow?.corpCanRezRelevantIce === false ||

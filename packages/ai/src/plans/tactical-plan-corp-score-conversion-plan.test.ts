@@ -9,6 +9,97 @@ import { mapPlanStepToLegalActions } from "../tactical-plans";
 import { buildCorpTacticalPlans } from "./tactical-plan-corp-plans";
 
 describe("Corp score-conversion TacticalPlan integration", () => {
+  it("keeps a visible agenda scoreline as a multi-turn plan without semantic candidate hints", () => {
+    const agenda = card("retreat", "onr_v1_050_corporate-retreat", "agenda", {
+      advancementRequirement: 4,
+    });
+    const supportAsset = card("support", "simple_asset", "asset");
+    const install = legalAction("install-retreat", "install_card", "retreat", {
+      serverId: "remote_1",
+      placement: "root",
+    });
+
+    const plan = buildCorpTacticalPlans({
+      input: corpInput(agenda, supportAsset, [install], 3, 4),
+    }).find(
+      (entry) => entry.planId === "corp.create_score_window:install-retreat",
+    );
+
+    expect(plan).toMatchObject({
+      type: "corp.create_score_window",
+      horizonTurns: 3,
+      target: { kind: "server", id: "remote_1" },
+    });
+  });
+
+  it("projects a reviewed advancement operation that becomes legal after agenda installation", () => {
+    const agenda = card("zurich", "onr_proteus_008_project-zurich", "agenda", {
+      advancementRequirement: 3,
+    });
+    const layoffs = card(
+      "layoffs",
+      "onr_v1_304_systematic-layoffs",
+      "operation",
+      { cost: 5 },
+    );
+    const vapor = card("vapor", "onr_v1_347_vapor-ops", "asset", {
+      advancementCounters: 0,
+      rezzed: true,
+    });
+    const install = legalAction("install", "install_card", agenda.instanceId, {
+      serverId: "remote_1",
+      placement: "root",
+    });
+    const beforeInstall = corpInput(agenda, vapor, [install], 3, 9, [layoffs]);
+
+    const plan = buildCorpTacticalPlans({ input: beforeInstall }).find(
+      (entry) => entry.planId === "corp.create_score_window:conversion:zurich",
+    );
+
+    expect(plan).toMatchObject({
+      status: "active",
+      currentStep: { actionCandidateIds: ["install"] },
+    });
+    expect(plan?.nextSteps.map((step) => step.kind)).toEqual([
+      "convert_advancement",
+      "advance_score_card",
+      "score_agenda",
+    ]);
+    expect(plan?.nextSteps[0]?.rationale).toContain(
+      "score_conversion:projected_from_visible_hand",
+    );
+
+    const installedAgenda = { ...agenda, advancementCounters: 0 };
+    const playLayoffs = legalAction(
+      "play-layoffs",
+      "play_operation",
+      layoffs.instanceId,
+      {
+        scoreConversionCapability: "place_advancement",
+        scoreConversionAdvancementAmount: 2,
+        scoreConversionAdvancementMode: "up_to_distinct_targets_one_each",
+      },
+    );
+    playLayoffs.payload!.scoreConversionAdvancementMode = "single_target";
+    playLayoffs.costs = [{ clicks: 1, credits: 5 }];
+    const afterInstall = corpInput(
+      layoffs,
+      vapor,
+      [playLayoffs],
+      2,
+      9,
+      [],
+      installedAgenda,
+    );
+    const followupPlan = buildCorpTacticalPlans({ input: afterInstall }).find(
+      (entry) => entry.planId === "corp.create_score_window:conversion:zurich",
+    );
+    expect(followupPlan?.currentStep).toMatchObject({
+      kind: "convert_advancement",
+      actionCandidateIds: ["play-layoffs"],
+    });
+  });
+
   it("selects an unprotected agenda install only for a complete conversion", () => {
     const agenda = card("agenda", "simple_agenda", "agenda", {
       advancementRequirement: 3,
@@ -102,6 +193,8 @@ function corpInput(
   actions: LegalAction[],
   clicks = 2,
   credits = 0,
+  extraHq: VisibleCard[] = [],
+  installedAgenda?: VisibleCard,
 ): AiDecisionInput {
   return {
     side: "corp",
@@ -116,7 +209,7 @@ function corpInput(
         credits,
         clicks,
         agendaPoints: 0,
-        gripOrHq: [agenda],
+        gripOrHq: [agenda, ...extraHq],
         stackOrRdCount: 20,
         heapOrArchives: [],
         scoreArea: [],
@@ -139,7 +232,12 @@ function corpInput(
         { id: "hq", label: "HQ", ice: [], root: [] },
         { id: "rd", label: "R&D", ice: [], root: [] },
         { id: "archives", label: "Archives", ice: [], root: [] },
-        { id: "remote_1", label: "Remote 1", ice: [], root: [vapor] },
+        {
+          id: "remote_1",
+          label: "Remote 1",
+          ice: [],
+          root: [vapor, ...(installedAgenda ? [installedAgenda] : [])],
+        },
       ],
       publicEvents: [],
       legalActions: actions,

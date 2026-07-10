@@ -22,7 +22,10 @@ import type {
   TacticalPlan,
   TacticalPlanBuildContext,
 } from "./tactical-plan-types";
-import { visibleSourceServerId } from "./tactical-plan-visible-cards";
+import {
+  visibleCardForAction,
+  visibleSourceServerId,
+} from "./tactical-plan-visible-cards";
 import { buildCorpScoreConversionPlans } from "./tactical-plan-corp-score-conversion-plan";
 
 export function buildCorpTacticalPlans(
@@ -121,11 +124,20 @@ export function buildCorpTacticalPlans(
       }),
     );
   }
-  const scorelineInstallActionIds = new Set(
-    (context.candidates ?? [])
+  const scorelineInstallActionIds = new Set([
+    ...(context.candidates ?? [])
       .filter(corpCandidateIsScorelineInstall)
       .map((candidate) => candidate.actionId),
-  );
+    ...input.legalActions
+      .filter(
+        (action) =>
+          action.side === "corp" &&
+          action.type === "install_card" &&
+          action.payload?.placement !== "ice" &&
+          visibleCardForAction(input.playerView, action)?.type === "agenda",
+      )
+      .map((action) => action.actionId),
+  ]);
   for (const action of input.legalActions.filter(
     (candidate) =>
       candidate.type === "install_card" &&
@@ -163,7 +175,7 @@ export function buildCorpTacticalPlans(
         priority:
           (remoteIsProtected(input.playerView, serverId) ? 940 : 780) +
           strategicBoost,
-        horizonTurns: 1,
+        horizonTurns: 3,
         target: { kind: "server", id: serverId },
         blockers,
         currentStep,

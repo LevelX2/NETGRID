@@ -123,6 +123,14 @@ function currentActionIdForStep(
         actionCardId(action) === path.agendaCardId,
     )?.actionId;
   }
+  if (step.kind === "place_advancement" && step.sourceCardId) {
+    return legalActions.find(
+      (action) =>
+        action.side === "corp" &&
+        actionCardId(action) === step.sourceCardId &&
+        action.payload?.scoreConversionCapability === "place_advancement",
+    )?.actionId;
+  }
   if (step.kind === "score_ready") {
     return legalActions.find(
       (action) =>

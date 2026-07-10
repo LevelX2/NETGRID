@@ -436,9 +436,11 @@ function scoringWindowAdvancementRequirement(
   }
   const runtimeRequirement =
     card.definitionId !== undefined
-      ? (RUNTIME_CARDS[card.definitionId] as
-          | { numeric?: { advancementRequirement?: number | null } }
-          | undefined)?.numeric?.advancementRequirement
+      ? (
+          RUNTIME_CARDS[card.definitionId] as
+            | { numeric?: { advancementRequirement?: number | null } }
+            | undefined
+        )?.numeric?.advancementRequirement
       : undefined;
   if (
     typeof runtimeRequirement === "number" &&
@@ -480,12 +482,27 @@ function scoringWindowVisibleInTurnAdvancementBurstAvailable<
     const operationCost = scoringWindowVisibleOperationCost(card);
     if (operationCost > creditsAfterAction) return false;
     const basicAdvancesNeeded = Math.max(0, requirement - burstCounters);
-    const clicksNeeded = 1 + basicAdvancesNeeded + 1;
+    const clicksNeeded = 1 + basicAdvancesNeeded;
     return remainingCorpClicksAfterAction >= clicksNeeded;
   });
 }
 
 function scoringWindowVisibleAdvancementBurstAmount(card: VisibleCard): number {
+  const structuredAmount = card.definitionId
+    ? Math.max(
+        0,
+        ...(AI_HINTS_BY_CARD.get(card.definitionId)?.effects ?? [])
+          .filter(
+            (effect) =>
+              effect.timing === "action" &&
+              effect.resource === "advancement_counters" &&
+              (effect.kind === "advance_burst" ||
+                effect.kind === "score_acceleration"),
+          )
+          .map((effect) => effect.amount ?? 0),
+      )
+    : 0;
+  if (structuredAmount > 0) return structuredAmount;
   const tokens = scoringWindowVisibleCardTextTokens(card);
   const amountToken = tokens.find(
     (token, index) =>
@@ -924,11 +941,7 @@ function iceHasDurableScoringAccessStop(ice: VisibleCard): boolean {
   }
   const signals = scoringWindowCardSignals(ice);
   return signals.some((signal) =>
-    scoringWindowSignalMatches(signal, [
-      "etr_ice",
-      "end_run",
-      "run_lock",
-    ]),
+    scoringWindowSignalMatches(signal, ["etr_ice", "end_run", "run_lock"]),
   );
 }
 
