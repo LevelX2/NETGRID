@@ -11,7 +11,7 @@
 - Runposition: ICE-Index 2
 
 Die Analyse erfolgte read-only aus
-`data/runtime/multiplayer/netgrid.sqlite`. Spaetere verdeckte Informationen
+`data/runtime/multiplayer/netgrid.sqlite`. Spätere verdeckte Informationen
 wurden nicht als damalige Entscheidungsgrundlage verwendet.
 
 ## Sichtbarer Kontext
@@ -27,7 +27,7 @@ Im Root lag Vapor Ops ungerezzt mit zwei Advancement-Countern. Die Corp hatte
 
 ## Fehlentscheidung
 
-Die Corp-KI waehlt im ersten Rez-Fenster:
+Die Corp-KI wählt im ersten Rez-Fenster:
 
 | Alternative | Score |
 |---|---:|
@@ -36,13 +36,13 @@ Die Corp-KI waehlt im ersten Rez-Fenster:
 | Rez ablehnen | -645 |
 
 Vapor Ops erhielt `+760` durch
-`corp.tactical.rez_relevant_ice` und `+750` fuer zahlbare Rez-Kosten von null.
+`corp.tactical.rez_relevant_ice` und `+750` für zahlbare Rez-Kosten von null.
 Der technische Aktionstyp `rez_ice` bezeichnet auch Root-Rez-Aktionen. Sowohl
-Zielbildung als auch Zielabgleich behandelten ihn ohne Pruefung der sichtbaren
+Zielbildung als auch Zielabgleich behandelten ihn ohne Prüfung der sichtbaren
 Kartenquelle als echtes ICE.
 
 Die bestehende Funktion `corpRootRezTimingComponent` erfasste
-Access-Ambushes und runrelevante Root-Effekte. Fuer eine ausschliesslich im
+Access-Ambushes und runrelevante Root-Effekte. Für eine ausschließlich im
 Corp-Hauptzug nutzbare Root-Karte lieferte sie jedoch keine Komponente. Damit
 blieb der strategische Wert der Geheimhaltung unbewertet.
 
@@ -50,19 +50,19 @@ blieb der strategische Wert der Geheimhaltung unbewertet.
 
 - `corp.tactical.rez_relevant_ice` passt nur auf Aktionen mit sichtbarer
   ICE-Quelle.
-- Eine Root-Karte ohne Effekt im aktuellen Runfenster wird waehrend des Runs
+- Eine Root-Karte ohne Effekt im aktuellen Runfenster wird während des Runs
   nicht gerezzt.
 - Das Vertagen ist im Score-Breakdown explizit erkennbar.
 - Vapor Ops kann im Corp-Hauptzug gerezzt und unmittelbar verwendet werden.
-- Zugriffsschutz und andere runrelevante Root-Karten behalten ihre spaete
+- Zugriffsschutz und andere runrelevante Root-Karten behalten ihre späte
   Rez-Logik.
 
 ## Regressionen
 
 1. Drei-ICE-Remote mit Vapor Ops im Root: Root-Rez verliert gegen Ablehnen und
-   gegen das tatsaechlich approached ICE.
+   gegen das tatsächlich approached ICE.
 2. Taktisches Rez-Ziel: Root-Karte passt nicht, echtes ICE passt weiterhin.
-3. Nicht angegriffener oder zu frueher runrelevanter Root-Schutz wird
+3. Nicht angegriffener oder zu früher runrelevanter Root-Schutz wird
    vertagt; im letzten sinnvollen Fenster bleibt er positiv.
-4. Ausserhalb eines Runs erhaelt eine Corp-Main-Root-Karte keine
+4. Außerhalb eines Runs erhält eine Corp-Main-Root-Karte keine
    Geheimhaltungsstrafe.
