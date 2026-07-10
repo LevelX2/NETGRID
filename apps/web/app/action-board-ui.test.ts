@@ -3465,10 +3465,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("mirrors run-timing actions into the Run window without changing their card context", () => {
     const smc = card("smc_1", "Self-Modifying Code", "program");
     const breaker = card("breaker_1", "Simple Decoder", "program");
+    const pileDriver = card("pile_driver_1", "Pile Driver", "program");
     const running = view("runner", {
       own: {
         ...view("runner").own,
-        rig: [smc, breaker],
+        rig: [smc, breaker, pileDriver],
       },
       run: {
         attackedServerId: "rd",
@@ -3572,6 +3573,62 @@ describe("V1.0.6 resource and card-display helpers", () => {
     );
     expect(runWindowActionButtonLabel(running, breakAction)).toBe(
       "Simple Decoder: Subroutine 1 brechen",
+    );
+    const pileDriverBreakActions = [
+      legalAction(
+        "runner",
+        "break_subroutine",
+        "pile_driver_1",
+        "Pile Driver: Subroutine 1 brechen",
+        {
+          breakerId: "pile_driver_1",
+          iceId: "ice_1",
+          subroutineIndexes: "0",
+          breakSubroutineCount: 1,
+          multiBreakSubroutines: true,
+        },
+        "run.encounter_ice",
+      ),
+      legalAction(
+        "runner",
+        "break_subroutine",
+        "pile_driver_1",
+        "Pile Driver: 2 Subroutinen brechen",
+        {
+          breakerId: "pile_driver_1",
+          iceId: "ice_1",
+          subroutineIndexes: "0,1",
+          breakSubroutineCount: 2,
+          multiBreakSubroutines: true,
+        },
+        "run.encounter_ice",
+      ),
+      legalAction(
+        "runner",
+        "break_subroutine",
+        "pile_driver_1",
+        "Pile Driver: Subroutine 2 brechen",
+        {
+          breakerId: "pile_driver_1",
+          iceId: "ice_1",
+          subroutineIndexes: "1",
+          breakSubroutineCount: 1,
+          multiBreakSubroutines: true,
+        },
+        "run.encounter_ice",
+      ),
+    ];
+    expect(
+      pileDriverBreakActions.map((action) =>
+        runWindowActionButtonLabel(running, action),
+      ),
+    ).toEqual([
+      "Pile Driver: Subroutine 1 brechen",
+      "Pile Driver: Subroutinen 1 und 2 brechen",
+      "Pile Driver: Subroutine 2 brechen",
+    ]);
+    expect(actionButtonLabel(pileDriverBreakActions[1]!)).toBe(
+      "Subroutinen 1 und 2 brechen (Pile Driver)",
     );
     const resolveSubroutines = legalAction(
       "runner",

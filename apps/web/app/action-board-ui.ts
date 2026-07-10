@@ -1269,16 +1269,46 @@ function pumpBreakerActionLabel(action: LegalAction): string {
 }
 
 function breakSubroutineActionLabel(action: LegalAction): string {
-  const rawIndex = action.payload?.subroutineIndex;
-  const hasIndex =
-    typeof rawIndex === "number" && Number.isFinite(rawIndex) && rawIndex >= 0;
-  const base = hasIndex
-    ? `Subroutine ${Math.floor(rawIndex) + 1} brechen`
-    : "Subroutine brechen";
+  const base = breakSubroutineTargetLabel(action);
   const breakerName =
     breakerNameFromActionLabel(action.label, "subroutine \\d+ brechen") ??
+    breakerNameFromActionLabel(action.label, "\\d+ subroutinen brechen") ??
     breakerNameFromActionLabel(action.label, "subroutine brechen");
   return breakerName ? `${base} (${normalizeVisibleTerms(breakerName)})` : base;
+}
+
+function breakSubroutineTargetLabel(action: LegalAction): string {
+  const selectedIndexes = selectedSubroutineIndexes(action);
+  if (selectedIndexes.length === 1) {
+    return `Subroutine ${selectedIndexes[0]! + 1} brechen`;
+  }
+  if (selectedIndexes.length > 1) {
+    return `Subroutinen ${formatSubroutineNumbers(selectedIndexes)} brechen`;
+  }
+  return "Subroutine brechen";
+}
+
+function selectedSubroutineIndexes(action: LegalAction): number[] {
+  const rawIndexes = action.payload?.subroutineIndexes;
+  if (typeof rawIndexes === "string") {
+    const indexes = rawIndexes
+      .split(",")
+      .map((value) => Number(value.trim()))
+      .filter((value) => Number.isInteger(value) && value >= 0);
+    if (indexes.length > 0) return indexes;
+  }
+  const rawIndex = action.payload?.subroutineIndex;
+  return typeof rawIndex === "number" &&
+    Number.isFinite(rawIndex) &&
+    rawIndex >= 0
+    ? [Math.floor(rawIndex)]
+    : [];
+}
+
+function formatSubroutineNumbers(indexes: number[]): string {
+  const numbers = indexes.map((index) => String(index + 1));
+  if (numbers.length === 2) return `${numbers[0]} und ${numbers[1]}`;
+  return `${numbers.slice(0, -1).join(", ")} und ${numbers.at(-1)}`;
 }
 
 function breakerNameFromActionLabel(
@@ -2529,11 +2559,7 @@ function compactRunWindowBreakerLabel(
   if (action.type === "pump_breaker") {
     return `${breakerTitle ? `${breakerTitle} ` : ""}+1 Stärke`;
   }
-  const rawIndex = action.payload?.subroutineIndex;
-  const subroutineLabel =
-    typeof rawIndex === "number" && Number.isFinite(rawIndex) && rawIndex >= 0
-      ? `Subroutine ${Math.floor(rawIndex) + 1} brechen`
-      : "Subroutine brechen";
+  const subroutineLabel = breakSubroutineTargetLabel(action);
   return `${breakerTitle ? `${breakerTitle}: ` : ""}${subroutineLabel}`;
 }
 
