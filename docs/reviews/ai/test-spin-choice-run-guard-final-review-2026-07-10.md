@@ -55,7 +55,7 @@ nicht in diesen Fix hineingezogen.
 - fokussierte/angrenzende Engine-Tests: 3 Dateien, 27 Tests;
 - Engine-Typecheck: grün;
 - AI-Typecheck: grün;
-- vollständige Engine-Suite: 180 Dateien, 1.619 Tests;
+- vollständige Engine-Suite: 180 Dateien, 1.623 Tests;
 - `git diff --check`: grün.
 
 ## Grenzen und Nicht-Ziele

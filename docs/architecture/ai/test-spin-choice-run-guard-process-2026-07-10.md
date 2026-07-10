@@ -127,4 +127,4 @@ das Goal erst danach ab.
 - Seed 11 sowie alle 25 Seeds des Proteus-HQ-Matchups liefen ohne
   IllegalAction oder Replayfehler und vollständig redaction-safe.
 - Engine-Typecheck, AI-Typecheck, 27 fokussierte/angrenzende Tests und die
-  vollständige Engine-Suite mit 180 Dateien und 1.619 Tests sind grün.
+  vollständige Engine-Suite mit 180 Dateien und 1.623 Tests sind grün.
