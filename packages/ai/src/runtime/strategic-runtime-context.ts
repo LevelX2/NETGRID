@@ -27,6 +27,7 @@ import {
   classifyTagPunishLegalActionFromOntology,
   type StructuredTagPunishLegalActionAssessment,
 } from "../tag-punish-ontology-consumer";
+import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 
 export type StrategicRuntimeContext = {
   roleStatuses: StrategicRoleStatusSnapshot[];
@@ -813,31 +814,6 @@ function sourceDefinitionIdForAction(
   return sourceCardInstanceId !== undefined
     ? visibleDefinitions[sourceCardInstanceId]
     : undefined;
-}
-
-function visibleSourceDefinitionsByInstanceId(
-  playerView: PlayerView,
-): Readonly<Record<CardInstanceId, CardDefinitionId>> {
-  const entries = [
-    playerView.own.identity,
-    ...playerView.own.gripOrHq,
-    ...playerView.own.heapOrArchives,
-    ...playerView.own.scoreArea,
-    ...(playerView.own.rig ?? []),
-  ]
-    .filter(
-      (
-        card,
-      ): card is typeof card & {
-        instanceId: CardInstanceId;
-        definitionId: CardDefinitionId;
-      } => card.known && card.definitionId !== undefined,
-    )
-    .map((card) => [card.instanceId, card.definitionId] as const);
-  return Object.fromEntries(entries) as Record<
-    CardInstanceId,
-    CardDefinitionId
-  >;
 }
 
 function stringPayload(action: LegalAction, key: string): string | undefined {

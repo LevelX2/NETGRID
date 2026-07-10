@@ -2,8 +2,6 @@ import type {
   AiDecision,
   AiDecisionDebug,
   AiDecisionInput,
-  CardDefinitionId,
-  CardInstanceId,
   LegalAction,
 } from "@netgrid/shared";
 import { AI_DECISION_DEBUG_SCHEMA_VERSION } from "@netgrid/shared";
@@ -48,6 +46,7 @@ import { runnerRunPlanSemanticChoice } from "./runner-run-plan-policy";
 import { revalidateRunnerRunPlan } from "./runner-run-plan-revalidation";
 import { createRunnerRunPlanForSelectedAction } from "./runner-run-plan-start";
 import { sourceDefinitionIdForAction } from "./visible-card-lookup";
+import { visibleSourceDefinitionsByInstanceId } from "./visible-source-definitions";
 
 export type {
   SemanticRuntimeChoice,
@@ -180,7 +179,7 @@ export function chooseSemanticRuntimeAction(
     observerSide: input.side,
     stateVersion: input.playerView.stateVersion,
     visibleSourceDefinitionsByInstanceId:
-      visibleSourceDefinitionsByInstanceId(input),
+      visibleSourceDefinitionsByInstanceId(input.playerView),
     cardSemanticProfilesByDefinitionId:
       buildActionCardSemanticProfilesByDefinitionId(),
   });
@@ -720,31 +719,6 @@ function semanticCoverageFallbackWhyNot(evidence: readonly string[]): string[] {
   ];
 }
 
-
-function visibleSourceDefinitionsByInstanceId(
-  input: AiDecisionInput,
-): Readonly<Record<CardInstanceId, CardDefinitionId>> {
-  const entries = [
-    input.playerView.own.identity,
-    ...input.playerView.own.gripOrHq,
-    ...input.playerView.own.heapOrArchives,
-    ...input.playerView.own.scoreArea,
-    ...(input.playerView.own.rig ?? []),
-  ]
-    .filter(
-      (
-        card,
-      ): card is typeof card & {
-        instanceId: CardInstanceId;
-        definitionId: CardDefinitionId;
-      } => card.known && card.definitionId !== undefined,
-    )
-    .map((card) => [card.instanceId, card.definitionId] as const);
-  return Object.fromEntries(entries) as Record<
-    CardInstanceId,
-    CardDefinitionId
-  >;
-}
 
 function emptyTacticalPlanRuntimeResult(): TacticalPlanRuntimeResult {
   return {

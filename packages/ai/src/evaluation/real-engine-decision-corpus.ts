@@ -15,6 +15,7 @@ import type { AiPlayStrengthPilotScope } from "../decision/pilot-scope-registry"
 import type { DeckDoctrineV2Diagnostic } from "../deck-doctrine-strategy";
 import { findForbiddenSemanticPath } from "../diagnostics/semantic-redaction";
 import type { AiMistakeClass } from "./mistake-taxonomy";
+import { visibleSourceDefinitionsByInstanceId } from "../runtime/visible-source-definitions";
 
 export type RealEngineDecisionCorpusScenario = {
   scenarioId: string;
@@ -68,6 +69,9 @@ export function buildRealEngineDecisionCorpusSample(
     legalActions: scenario.input.legalActions,
     observerSide: scenario.input.side,
     stateVersion: scenario.input.playerView.stateVersion,
+    visibleSourceDefinitionsByInstanceId: visibleSourceDefinitionsByInstanceId(
+      scenario.input.playerView,
+    ),
     ...(availableTargetsByActionId ? { availableTargetsByActionId } : {}),
   });
   const frame = buildSemanticDecisionFrame({
