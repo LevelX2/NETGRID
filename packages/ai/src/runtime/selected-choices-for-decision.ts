@@ -142,6 +142,19 @@ export function selectedChoicesForDecision(
   }
   if (
     choice.kind === "select_cards" &&
+    isHqToNewRemoteOptionalRezChoice(choice)
+  ) {
+    return {
+      choiceId: choice.choiceId,
+      selectedOptionIds: selectedAffordableOptionalRezOptionIds(
+        input,
+        choice,
+        selectableOptions,
+      ),
+    };
+  }
+  if (
+    choice.kind === "select_cards" &&
     isHqToNewRemoteInstallRezChoice(choice)
   ) {
     return {
@@ -208,6 +221,45 @@ export function selectedChoicesForDecision(
   return selectedOptionId !== undefined
     ? { choiceId: choice.choiceId, selectedOptionIds: [selectedOptionId] }
     : { choiceId: choice.choiceId, selectedOptionIds: [] };
+}
+
+function isHqToNewRemoteOptionalRezChoice(choice: PendingChoice): boolean {
+  return (
+    choice.source.startsWith(
+      "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:",
+    ) ||
+    choice.source.startsWith(
+      "card_implementation.hq_to_new_remote_install_rez.rez:",
+    )
+  );
+}
+
+function selectedAffordableOptionalRezOptionIds(
+  input: AiDecisionInput,
+  choice: PendingChoice,
+  selectableOptions: PendingChoiceOptions,
+): string[] {
+  const sourceParts = choice.source.split(":");
+  const temporaryCredits = Number.parseInt(sourceParts.at(-2) ?? "", 10);
+  if (!Number.isInteger(temporaryCredits) || temporaryCredits < 0) return [];
+  let creditsRemaining = input.playerView.own.credits + temporaryCredits;
+  const installedCardsById = new Map(
+    input.playerView.servers.flatMap((server) =>
+      [...server.ice, ...server.root].map((card) => [card.instanceId, card]),
+    ),
+  );
+  const selected: string[] = [];
+  for (const option of selectableOptions) {
+    const card = installedCardsById.get(choiceCardInstanceId(option));
+    const rezCost = card?.rezCost;
+    if (!Number.isFinite(rezCost) || rezCost === undefined || rezCost < 0)
+      continue;
+    if (rezCost > creditsRemaining) continue;
+    selected.push(option.id);
+    creditsRemaining -= rezCost;
+    if (selected.length >= choice.maxSelections) break;
+  }
+  return selected.length >= choice.minSelections ? selected : [];
 }
 
 function isHqToNewRemoteInstallRezChoice(choice: PendingChoice): boolean {

@@ -150,6 +150,118 @@ describe("selectedChoicesForDecision", () => {
       selectedOptionIds: [],
     });
   });
+
+  it("selects only an affordable subset for the optional Data Fort Reclamation rez choice", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_cards",
+          source:
+            "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:12",
+          minSelections: 0,
+          maxSelections: 4,
+          options: [
+            { id: "card_puzzle_1", label: "Puzzle", value: "puzzle_1" },
+            {
+              id: "card_colonel_1",
+              label: "Colonel Failure",
+              value: "colonel_1",
+            },
+            { id: "card_syd_1", label: "Syd", value: "syd_1" },
+            { id: "card_dreff_1", label: "Dr. Dreff", value: "dreff_1" },
+          ],
+        },
+        {
+          credits: 4,
+          servers: [
+            visibleServer("remote_1", [
+              visibleRezCard("puzzle_1", "ice", 2),
+              visibleRezCard("colonel_1", "ice", 17),
+              visibleRezCard("syd_1", "asset", 0),
+              visibleRezCard("dreff_1", "upgrade", 0),
+            ]),
+          ],
+        },
+      ),
+      resolveChoiceAction(),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["card_puzzle_1", "card_syd_1", "card_dreff_1"],
+    });
+  });
+
+  it("declines an optional Data Fort Reclamation rez choice when no card is affordable", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_cards",
+          source:
+            "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:12",
+          minSelections: 0,
+          maxSelections: 1,
+          options: [
+            {
+              id: "card_colonel_1",
+              label: "Colonel Failure",
+              value: "colonel_1",
+            },
+          ],
+        },
+        {
+          credits: 0,
+          servers: [
+            visibleServer("remote_1", [
+              visibleRezCard("colonel_1", "ice", 17),
+            ]),
+          ],
+        },
+      ),
+      resolveChoiceAction(),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: [],
+    });
+  });
+
+  it("uses regular Corp credits after temporary rez credits", () => {
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_cards",
+          source:
+            "card_implementation_primitive.score_install_hq_cards_into_new_remote_then_rez.rez:data_fort_agenda:remote_1:10:12",
+          minSelections: 0,
+          maxSelections: 2,
+          options: [
+            { id: "card_ice_1", label: "ICE A", value: "ice_1" },
+            { id: "card_ice_2", label: "ICE B", value: "ice_2" },
+          ],
+        },
+        {
+          credits: 3,
+          servers: [
+            visibleServer("remote_1", [
+              visibleRezCard("ice_1", "ice", 8),
+              visibleRezCard("ice_2", "ice", 5),
+            ]),
+          ],
+        },
+      ),
+      resolveChoiceAction(),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["card_ice_1", "card_ice_2"],
+    });
+  });
 });
 
 function inputWithChoice(
@@ -162,14 +274,18 @@ function inputWithChoice(
   },
   options: {
     gripOrHq?: AiDecisionInput["playerView"]["own"]["gripOrHq"];
+    credits?: number;
+    servers?: AiDecisionInput["playerView"]["servers"];
   } = {},
 ): AiDecisionInput {
   return {
     side: "corp",
     playerView: {
       own: {
+        credits: options.credits ?? 5,
         gripOrHq: options.gripOrHq ?? [],
       },
+      servers: options.servers ?? [],
       pendingChoice: {
         choiceId: "choice_multi",
         side: "corp",
@@ -188,6 +304,31 @@ function inputWithChoice(
       },
     },
   } as unknown as AiDecisionInput;
+}
+
+function visibleRezCard(
+  instanceId: string,
+  type: "asset" | "ice" | "upgrade",
+  rezCost: number,
+): AiDecisionInput["playerView"]["servers"][number]["ice"][number] {
+  return {
+    instanceId,
+    known: true,
+    type,
+    rezCost,
+  } as AiDecisionInput["playerView"]["servers"][number]["ice"][number];
+}
+
+function visibleServer(
+  id: "remote_1",
+  cards: AiDecisionInput["playerView"]["servers"][number]["ice"],
+): AiDecisionInput["playerView"]["servers"][number] {
+  return {
+    id,
+    label: "Remote 1",
+    ice: cards.filter((card) => card.type === "ice"),
+    root: cards.filter((card) => card.type !== "ice"),
+  };
 }
 
 function visibleCard(
