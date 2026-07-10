@@ -1,6 +1,6 @@
 # Universal Fast Advance Play-Strength Process
 
-Status: `in_progress`
+Status: `ready_for_main_sync`
 
 Datum: 2026-07-10
 
@@ -185,4 +185,10 @@ lokal nach main mergen und den Goal erst danach als complete markieren.`
   Plan-Mismatches 126 → 18 nach korrigierter Detector-Auswertung; 0 illegale
   Aktionen, Replay- oder Redaction-Fehler. Die sechs Action-Limits werden in
   FA005 als verbleibende Aussagegrenze bewertet.
-- FA005: `pending`.
+- FA005: `completed` – Final Review mit Deckliste, A/B-Auswertung,
+  Detector-Korrektur und Restgrenzen erstellt. Vollständig grün: Engine 180
+  Testdateien/1.602 Tests; AI 278 Testdateien/1.765 Tests über drei Shards;
+  Engine-/AI-Typecheck, `check:ai`, Doctrine-, Format- und Diff-Gate. Der
+  identische Nachtest enthält 0 illegale Aktionen, Replay-, Redaction- oder
+  Fallbackfehler. Sechs reguläre Action-Limits bleiben als nicht blockierende
+  Stichproben-/Play-Strength-Grenze dokumentiert.

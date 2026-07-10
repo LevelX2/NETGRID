@@ -223,8 +223,17 @@ Roadblock-Lücke bleibt ein separates Engine-/LegalAction-Finding.
 - Die Matchup-Rangfolge aus jeweils fünf Spielen ist nicht stabil genug für
   eine Pool- oder Balanceentscheidung.
 
+## Verifizierter Nachtest nach Umsetzung
+
+Der identische 20-Spiel-Lauf wurde nach den vier freigegebenen Anpassungen mit
+denselben Decks und Seeds wiederholt. Ergebnis: 9 Corp-Siege, 5 Runner-Siege
+und 6 Action-Limits; 0 illegale Aktionen, Replay- oder Redactionfehler. Die
+vollständige A/B-Auswertung, die korrigierte Detector-Analyse und die
+Aussagegrenzen stehen in
+`docs/reviews/ai/universal-fast-advance-playstrength-final-review-2026-07-10.md`.
+
 ## Gate
 
-Keine Code-, Hint-, Ontologie-, Engine- oder Teständerung wurde vorgenommen.
-Die vier freigabereifen Punkte dürfen erst nach Nutzerfreigabe in einem
-eigenen Worktree paketiert und umgesetzt werden.
+Die Nutzerfreigabe für alle vier Punkte erfolgte am 2026-07-10. Umsetzung und
+Verifikation liefen sequenziell im eigenen Worktree; der Abschlussstand ist im
+Final Review dokumentiert.
