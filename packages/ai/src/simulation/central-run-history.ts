@@ -45,6 +45,10 @@ export function centralRunStreakWithoutValueForMetrics(
       typeof event.publicPayload.actionType === "string"
         ? event.publicPayload.actionType
         : event.type;
+    const actor =
+      typeof event.publicPayload.actor === "string"
+        ? event.publicPayload.actor
+        : undefined;
     if (
       actionType === "steal_agenda" ||
       actionType === "trash_accessed_card" ||
@@ -62,7 +66,7 @@ export function centralRunStreakWithoutValueForMetrics(
         (actionType === "draw_card" ||
           actionType === "mandatory_draw" ||
           actionType === "shuffle_stack")) ||
-      actionType === "install_card"
+      (actor === "runner" && actionType === "install_card")
     )
       break;
   }

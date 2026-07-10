@@ -73,12 +73,30 @@ describe("runnerActionLooksLikeRecovery", () => {
 
     expect(count).toBe(1);
   });
+
+  it("does not let Corp installs reset Runner recovery history", () => {
+    const input = {
+      playerView: { stateVersion: 20 },
+    } as AiDecisionInput;
+    const count = runnerRecentRecoveryActions(input, undefined, {
+      publicHistory: () => [
+        event({ actor: "runner", note: "junkyard bbs" }, 18),
+        event({ actor: "corp", actionType: "install_card" }, 19),
+      ],
+      eventVersion: (entry) => Number(entry.publicPayload.version),
+      sourceDefinitionIdForAction: () => undefined,
+    });
+
+    expect(count).toBe(1);
+  });
 });
 
-function dependencies(options: {
-  sourceCard?: Partial<VisibleCard>;
-  roles?: readonly string[];
-} = {}) {
+function dependencies(
+  options: {
+    sourceCard?: Partial<VisibleCard>;
+    roles?: readonly string[];
+  } = {},
+) {
   return {
     sourceCard: () => options.sourceCard as VisibleCard | undefined,
     rolesForAction: () => options.roles ?? [],

@@ -1196,6 +1196,12 @@ function selfplayEntryDetectorFindings(
       summary.actionSequence,
       previousSameRun + 1,
       actionIndex,
+    ) &&
+    !centralAccessTargetRefreshedBetween(
+      summary.actionSequence,
+      previousSameRun + 1,
+      actionIndex,
+      entry.targetServerId,
     );
   if (
     enabled.has("repeated_no_progress_run") &&
@@ -1641,6 +1647,30 @@ function hasMeaningfulProgressBetween(
     .some(selfplayEntryIsMeaningfulProgress);
 }
 
+function centralAccessTargetRefreshedBetween(
+  entries: AiSimulationSummary["actionSequence"],
+  fromIndex: number,
+  toIndex: number,
+  targetServerId: string | undefined,
+): boolean {
+  if (targetServerId !== "hq" && targetServerId !== "rd") return false;
+  return entries
+    .slice(Math.max(0, fromIndex), Math.max(0, toIndex))
+    .some((entry) => {
+      if (entry.side !== "corp") return false;
+      if (
+        entry.actionType === "mandatory_draw" ||
+        entry.actionType === "draw_card"
+      )
+        return true;
+      return (
+        targetServerId === "hq" &&
+        (entry.actionType === "install_card" ||
+          entry.actionType === "play_operation")
+      );
+    });
+}
+
 function selfplayEntryIsMeaningfulProgress(
   entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
@@ -1834,6 +1864,8 @@ function selfplayPlanMismatchHasKnownExplanation(
 ): boolean {
   return selfplayEntryHasStructuredSignal(entry, [
     "tactical_plan_mapping_outcome:semantic_choice_selected",
+    "tactical_plan_mapping_outcome:plan_mapping_selected",
+    "tactical_plan_mapping_outcome:semantic_choice_blocked",
     "selected_by_plan_mapping",
     "runner_recent_same_server_runs",
     "runner_repeated_low_value_central_run",

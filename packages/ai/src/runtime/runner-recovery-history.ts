@@ -74,11 +74,11 @@ export function runnerRecentRecoveryActions(
       typeof event.publicPayload.actionType === "string"
         ? event.publicPayload.actionType
         : event.type;
-    if (runnerRecoveryProgressEvent(actionType)) break;
     const actor =
       typeof event.publicPayload.actor === "string"
         ? event.publicPayload.actor
         : undefined;
+    if (runnerRecoveryProgressEvent(actionType, actor)) break;
     if (actor !== "runner") continue;
     seenRunnerActions += 1;
     if (publicEventLooksLikeRecovery(event, currentSource)) {
@@ -89,13 +89,17 @@ export function runnerRecentRecoveryActions(
   return count;
 }
 
-function runnerRecoveryProgressEvent(actionType: string): boolean {
+function runnerRecoveryProgressEvent(
+  actionType: string,
+  actor?: string,
+): boolean {
   return (
-    actionType === "steal_agenda" ||
-    actionType === "score_agenda" ||
-    actionType === "trash_accessed_card" ||
-    actionType === "install_card" ||
-    actionType === "start_run"
+    (actor === "runner" &&
+      (actionType === "steal_agenda" ||
+        actionType === "trash_accessed_card" ||
+        actionType === "install_card" ||
+        actionType === "start_run")) ||
+    actionType === "score_agenda"
   );
 }
 

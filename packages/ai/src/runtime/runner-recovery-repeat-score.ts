@@ -15,9 +15,17 @@ type RunnerSafeProgressTarget = {
 };
 
 export type RunnerLowValueRecoveryRepeatScoreDependencies = {
-  actionLooksLikeRecovery: (input: AiDecisionInput, action: LegalAction) => boolean;
-  recentRecoveryActions: (input: AiDecisionInput, action: LegalAction) => number;
-  fundingNeedContext: (input: AiDecisionInput) => RunnerRecoveryFundingNeedContext;
+  actionLooksLikeRecovery: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => boolean;
+  recentRecoveryActions: (
+    input: AiDecisionInput,
+    action: LegalAction,
+  ) => number;
+  fundingNeedContext: (
+    input: AiDecisionInput,
+  ) => RunnerRecoveryFundingNeedContext;
   sourceDefinitionId: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -26,7 +34,9 @@ export type RunnerLowValueRecoveryRepeatScoreDependencies = {
 
 export type RunnerLateNoFundingCreditRepeatScoreDependencies = {
   recentBasicCreditActions: (input: AiDecisionInput) => number;
-  fundingNeedContext: (input: AiDecisionInput) => RunnerRecoveryFundingNeedContext;
+  fundingNeedContext: (
+    input: AiDecisionInput,
+  ) => RunnerRecoveryFundingNeedContext;
   safeProgressTargets: (input: AiDecisionInput) => RunnerSafeProgressTarget[];
 };
 
@@ -38,10 +48,7 @@ export type RunnerLateNoFundingCreditSafeProgressTargetsDependencies<
     target?: string | undefined;
   };
   pressureReadyTargets: (input: AiDecisionInput) => TTarget[];
-  recentStartRunsOnServer: (
-    input: AiDecisionInput,
-    serverId: string,
-  ) => number;
+  recentStartRunsOnServer: (input: AiDecisionInput, serverId: string) => number;
 };
 
 export function runnerLowValueRecoveryRepeatScoreComponent(
@@ -55,7 +62,7 @@ export function runnerLowValueRecoveryRepeatScoreComponent(
   if (recentRepeats <= 0) return undefined;
   const fundingNeed = dependencies.fundingNeedContext(input);
   if (fundingNeed.active) return undefined;
-  const penalty = Math.min(520, 180 + recentRepeats * 140);
+  const penalty = Math.min(1800, 420 + recentRepeats * 360);
   return {
     key: "runner_low_value_recovery_repeat",
     label: "Recovery-Wiederholung",
@@ -85,8 +92,8 @@ export function runnerLateNoFundingCreditRepeatScoreComponent(
   const credits = input.playerView.own.credits;
   if (credits < 3 && recentCredits < 2) return undefined;
   const penalty = Math.min(
-    860,
-    260 + recentCredits * 180 + Math.max(0, credits - 4) * 60,
+    2200,
+    520 + recentCredits * 320 + Math.max(0, credits - 4) * 100,
   );
   return {
     key: "runner_late_no_funding_credit_repeat",
@@ -114,10 +121,13 @@ export function runnerLateNoFundingCreditSafeProgressTargets<
   dependencies: RunnerLateNoFundingCreditSafeProgressTargetsDependencies<TTarget>,
 ): TTarget[] {
   const closeout = dependencies.closeout(input);
-  if (!closeout.opportunity || !closeout.target) return [];
-  return dependencies.pressureReadyTargets(input).filter((target) => {
-    if (dependencies.recentStartRunsOnServer(input, target.serverId) > 0)
-      return false;
-    return target.serverId === closeout.target;
-  });
+  const freshPressure = dependencies
+    .pressureReadyTargets(input)
+    .filter((target) => {
+      if (dependencies.recentStartRunsOnServer(input, target.serverId) > 0)
+        return false;
+      return true;
+    });
+  if (!closeout.opportunity || !closeout.target) return freshPressure;
+  return freshPressure.filter((target) => target.serverId === closeout.target);
 }

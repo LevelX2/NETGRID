@@ -134,6 +134,48 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("run-remote-positive");
   });
 
+  it("does not flag a repeated central after the Corp refreshed that central", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-rd-before-refresh",
+        targetServerId: "rd",
+      }),
+      selfplayAction("corp", 2, "mandatory_draw", {
+        selectedActionId: "corp-mandatory-draw",
+      }),
+      selfplayAction("runner", 3, "start_run", {
+        selectedActionId: "run-rd-after-refresh",
+        targetServerId: "rd",
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["repeated_no_progress_run"],
+    });
+
+    expect(findings).toEqual([]);
+  });
+
+  it("still flags a same-window repeated central without refresh", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "run-hq-first",
+        targetServerId: "hq",
+      }),
+      selfplayAction("runner", 2, "start_run", {
+        selectedActionId: "run-hq-repeat",
+        targetServerId: "hq",
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["repeated_no_progress_run"],
+    });
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("run-hq-repeat");
+  });
+
   it("bounds no-legal-action failure errors to structured tokens", () => {
     const positive = {
       ...selfplaySummary([
@@ -567,6 +609,25 @@ describe("SelfplayTraceMining", () => {
 
     expect(findings).toHaveLength(1);
     expect(findings[0]?.selectedActionId).toBe("plan-kind-positive");
+  });
+
+  it("accepts actions selected by the current mapped plan step", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "draw_card", {
+        selectedActionId: "mapped-draw-for-run-plan",
+        planKind: "runner.run_pressure",
+        debugFacts: [
+          "tactical_plan_mapping_outcome:plan_mapping_selected",
+          "tactical_step:draw_for_answer",
+        ],
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["plan_step_action_mismatch"],
+    });
+
+    expect(findings).toEqual([]);
   });
 
   it("bounds run plan-mismatch funding and reserve explanations to structured entries", () => {

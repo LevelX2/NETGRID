@@ -482,6 +482,74 @@ describe("tacticalPlanMappedChoice", () => {
     expect(result.overrideBlockedReason).toBe("runner_plan_controller");
   });
 
+  it("lets a stale plan run yield when generic goal fit is its only support", () => {
+    const repeatedRd = legalAction("run-rd", "start_run", { serverId: "rd" });
+    const remote = legalAction("run-remote", "start_run", {
+      serverId: "remote_1",
+    });
+    const mapped = choice(
+      repeatedRd,
+      -50,
+      scoreComponentEvidence("runner_goal_fit_tactical_goal_run_target"),
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput([runEvent({ serverId: "rd" })]),
+      [choice(remote, 1200), mapped],
+      centralRunMapping([repeatedRd]),
+      choice(remote, 1200),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-remote");
+    expect(result.overrideReason).toBe("mapped_nonpositive_against_positive");
+  });
+
+  it("does not let a Corp install erase a same-window stale Runner run", () => {
+    const repeatedHq = legalAction("run-hq", "start_run", { serverId: "hq" });
+    const remote = legalAction("run-remote", "start_run", {
+      serverId: "remote_1",
+    });
+    const corpInstall = {
+      eventId: "corp-install",
+      type: "install_card",
+      stateVersionBefore: 19,
+      stateVersionAfter: 20,
+      stateHashAfter: "corp-install-hash",
+      publicPayload: { actor: "corp", actionType: "install_card" },
+    } as AiDecisionInput["eventTail"][number];
+    const result = tacticalPlanMappedChoice(
+      aiInput([runEvent({ serverId: "hq" }), corpInstall]),
+      [choice(remote, 1200), choice(repeatedHq, -50)],
+      centralRunMapping([repeatedHq]),
+      choice(remote, 1200),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-remote");
+  });
+
+  it("lets a no-funding recovery plan yield to positive pressure", () => {
+    const gain = legalAction("gain", "gain_credit");
+    const run = legalAction("run-remote", "start_run", {
+      serverId: "remote_1",
+    });
+    const mapped = choice(
+      gain,
+      400,
+      scoreComponentEvidence("runner_late_no_funding_credit_repeat"),
+    );
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(run, 1200), mapped],
+      creditBaseMapping([gain]),
+      choice(run, 1200),
+    );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("run-remote");
+    expect(result.overrideReason).toBe("low_value_recovery_mapping_yield");
+  });
+
   it("keeps a repeated run when its plan carries an explicit score threat", () => {
     const repeatedRd = legalAction("run-rd", "start_run", { serverId: "rd" });
     const remote = legalAction("run-remote", "start_run", {

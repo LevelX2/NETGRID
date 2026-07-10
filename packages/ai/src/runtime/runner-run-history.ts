@@ -20,13 +20,13 @@ export function runnerRecentStartRunsOnServer(
       typeof event.publicPayload.actionType === "string"
         ? event.publicPayload.actionType
         : event.type;
-    if (input.playerView.stateVersion - dependencies.eventVersion(event) > 18)
-      break;
-    if (runnerRunProgressEvent(actionType)) break;
     const actor =
       typeof event.publicPayload.actor === "string"
         ? event.publicPayload.actor
         : undefined;
+    if (input.playerView.stateVersion - dependencies.eventVersion(event) > 18)
+      break;
+    if (runnerRunProgressEvent(actionType, actor)) break;
     if (actor !== "runner" || actionType !== "start_run") continue;
     seenRunnerActions += 1;
     const target = dependencies.serverIdFromEvent(event);
@@ -54,11 +54,11 @@ export function runnerRecentBasicCreditActions(
       typeof event.publicPayload.actionType === "string"
         ? event.publicPayload.actionType
         : event.type;
-    if (runnerRunProgressEvent(actionType)) break;
     const actor =
       typeof event.publicPayload.actor === "string"
         ? event.publicPayload.actor
         : undefined;
+    if (runnerRunProgressEvent(actionType, actor)) break;
     if (actor !== "runner") continue;
     seenRunnerActions += 1;
     if (actionType === "gain_credit") count += 1;
@@ -67,12 +67,15 @@ export function runnerRecentBasicCreditActions(
   return count;
 }
 
-export function runnerRunProgressEvent(actionType: string): boolean {
+export function runnerRunProgressEvent(
+  actionType: string,
+  actor?: string,
+): boolean {
   return (
-    actionType === "steal_agenda" ||
-    actionType === "score_agenda" ||
-    actionType === "trash_accessed_card" ||
-    actionType === "advance_card" ||
-    actionType === "install_card"
+    (actor === "runner" &&
+      (actionType === "steal_agenda" ||
+        actionType === "trash_accessed_card" ||
+        actionType === "install_card")) ||
+    actionType === "score_agenda"
   );
 }

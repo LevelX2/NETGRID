@@ -175,5 +175,14 @@ lokal nach main mergen und den Goal erst danach als complete markieren.`
   scorebare Agenden. Fokussiert grün: 5 Testdateien/119 Tests plus 2
   Engine-Testdateien/22 Tests, AI-/Engine-Typecheck, `check:ai`,
   Doctrine- und Format-Gate.
-- FA004: `pending`.
+- FA004: `completed` – Der Plan-Controller lässt negative stale Runs und
+  No-Funding-Recovery jetzt gegen positive Druckalternativen weichen;
+  allgemeiner Goal-Fit zählt nicht mehr als frischer Access-Payoff. Nur
+  Runner-Fortschritt setzt die Run-/Recovery-Historie zurück. Der Detector
+  erkennt Corp-seitige HQ-/R&D-Refreshes und tatsächlich gemappte
+  Zwischenschritte. Fokussiert grün: 7 Testdateien/102 Tests und AI-Typecheck.
+  Identischer 20-Spiel-Gegenlauf: stale Runs 105 → 8, Recovery-Loops 31 → 24,
+  Plan-Mismatches 126 → 18 nach korrigierter Detector-Auswertung; 0 illegale
+  Aktionen, Replay- oder Redaction-Fehler. Die sechs Action-Limits werden in
+  FA005 als verbleibende Aussagegrenze bewertet.
 - FA005: `pending`.

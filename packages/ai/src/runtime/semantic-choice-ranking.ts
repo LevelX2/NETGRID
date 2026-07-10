@@ -175,6 +175,12 @@ export function tacticalPlanMappedChoice(
       overrideChoice,
       scoreGap,
     );
+    const lowValueRecoveryShouldYield =
+      tacticalPlanLowValueRecoveryMappingShouldYield(
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      );
     const corpBoardTriageMismatchShouldYield =
       tacticalPlanCorpBoardTriageMismatchShouldYield(
         mappedChoice,
@@ -188,6 +194,7 @@ export function tacticalPlanMappedChoice(
         mappedActionIds,
         {
           repeatedRunShouldYield,
+          lowValueRecoveryShouldYield,
           corpBoardTriageMismatchShouldYield,
           deferredDevelopmentInstallShouldYield,
         },
@@ -204,6 +211,7 @@ export function tacticalPlanMappedChoice(
     if (
       mappedNonPositiveAgainstPositive ||
       repeatedRunShouldYield ||
+      lowValueRecoveryShouldYield ||
       corpBoardTriageMismatchShouldYield ||
       scoreGap > threshold.scoreGap
     ) {
@@ -215,9 +223,11 @@ export function tacticalPlanMappedChoice(
           ? "mapped_nonpositive_against_positive"
           : repeatedRunShouldYield
             ? "repeated_run_mapping_yield"
-            : corpBoardTriageMismatchShouldYield
-              ? "corp_board_triage_mismatch_yield"
-              : threshold.reason,
+            : lowValueRecoveryShouldYield
+              ? "low_value_recovery_mapping_yield"
+              : corpBoardTriageMismatchShouldYield
+                ? "corp_board_triage_mismatch_yield"
+                : threshold.reason,
         overrideThreshold: threshold.scoreGap,
         scoreGap,
       };
@@ -336,6 +346,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   mappedActionIds: ReadonlySet<string>,
   exceptions: {
     repeatedRunShouldYield: boolean;
+    lowValueRecoveryShouldYield: boolean;
     corpBoardTriageMismatchShouldYield: boolean;
     deferredDevelopmentInstallShouldYield: boolean;
   },
@@ -344,6 +355,7 @@ function tacticalPlanRunnerMappingBlocksOffPlanOverride(
   if (!runnerPlanTypeRequiresPlanDominance(mapping.plan.type)) return false;
   if (mappedActionIds.has(overrideChoice.action.actionId)) return false;
   if (exceptions.repeatedRunShouldYield) return false;
+  if (exceptions.lowValueRecoveryShouldYield) return false;
   if (exceptions.corpBoardTriageMismatchShouldYield) return false;
   if (exceptions.deferredDevelopmentInstallShouldYield) return false;
   return !runnerPlanOverrideIsHardInterrupt(mapping.plan, overrideChoice);
@@ -478,13 +490,30 @@ function tacticalPlanRepeatedRunMappingShouldYield(
     semanticRuntimeChoiceHasAnyScoreComponent(mappedChoice, [
       "runner_hq_known_agenda",
       "runner_rnd_fresh_memory",
-      "runner_goal_fit_tactical_goal_run_target",
     ])
   ) {
     return false;
   }
   const overrideServerId = semanticRuntimeServerId(overrideChoice.action);
   return Boolean(overrideServerId && overrideServerId !== serverId);
+}
+
+function tacticalPlanLowValueRecoveryMappingShouldYield(
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  if (scoreGap <= 0 || overrideChoice.score <= 0) return false;
+  if (
+    overrideChoice.action.type === "gain_credit" ||
+    overrideChoice.action.type === "draw_card"
+  )
+    return false;
+  return semanticRuntimeChoiceHasAnyScoreComponent(mappedChoice, [
+    "runner_low_value_recovery_repeat",
+    "runner_late_no_funding_credit_repeat",
+    "runner_basic_setup_over_ready_pressure",
+  ]);
 }
 
 function tacticalPlanRemoteContestMappingBlocksRunOverride(
@@ -798,12 +827,12 @@ function semanticRuntimeRecentRunnerStartRunsOnServer(
       typeof event.publicPayload.actionType === "string"
         ? event.publicPayload.actionType
         : event.type;
-    if (input.playerView.stateVersion - aiEventVersion(event) > 18) break;
-    if (semanticRuntimeRunnerRunProgressEvent(actionType)) break;
     const actor =
       typeof event.publicPayload.actor === "string"
         ? event.publicPayload.actor
         : undefined;
+    if (input.playerView.stateVersion - aiEventVersion(event) > 18) break;
+    if (semanticRuntimeRunnerRunProgressEvent(actionType, actor)) break;
     if (actor !== "runner" || actionType !== "start_run") continue;
     seenRunnerActions += 1;
     const target = aiServerIdFromEvent(event);
@@ -857,13 +886,16 @@ function mergedAiPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
   );
 }
 
-function semanticRuntimeRunnerRunProgressEvent(actionType: string): boolean {
+function semanticRuntimeRunnerRunProgressEvent(
+  actionType: string,
+  actor?: string,
+): boolean {
   return (
-    actionType === "steal_agenda" ||
-    actionType === "score_agenda" ||
-    actionType === "trash_accessed_card" ||
-    actionType === "advance_card" ||
-    actionType === "install_card"
+    (actor === "runner" &&
+      (actionType === "steal_agenda" ||
+        actionType === "trash_accessed_card" ||
+        actionType === "install_card")) ||
+    actionType === "score_agenda"
   );
 }
 
