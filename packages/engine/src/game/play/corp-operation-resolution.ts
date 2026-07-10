@@ -37,7 +37,10 @@ import {
 type CorpOperationResolver = {
   name: string;
   canPlay?: (host: CorpOperationResolutionHost) => boolean;
-  resolve: (host: CorpOperationResolutionHost, legalAction: LegalAction) => void;
+  resolve: (
+    host: CorpOperationResolutionHost,
+    legalAction: LegalAction,
+  ) => void;
 };
 
 export type CorpOperationResolutionHost = {
@@ -132,10 +135,10 @@ export type CorpOperationResolutionHost = {
       legalAction: LegalAction,
       sourceDefinitionId: CardDefinitionId,
     ) => void;
-    resolveCorpOperationAddAdvancementCounters: (legalAction: LegalAction) => void;
-    resolveAdvancementPlacementOperation: (
+    resolveCorpOperationAddAdvancementCounters: (
       legalAction: LegalAction,
     ) => void;
+    resolveAdvancementPlacementOperation: (legalAction: LegalAction) => void;
   };
   operations: {
     hardwareTrashByCounterEligibleHardwareIds: () => CardInstanceId[];
@@ -201,7 +204,8 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   },
   v098_hq_rd_swap_operation: {
     name: "corp_operation_swap_hq_rd",
-    canPlay: (host) => host.state.corp.hq.length > 1 && host.state.corp.rd.length > 0,
+    canPlay: (host) =>
+      host.state.corp.hq.length > 1 && host.state.corp.rd.length > 0,
     resolve: (host) => {
       host.corp.swapCorpHqAndRdTop();
     },
@@ -217,7 +221,9 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     name: "onr_v1922_corp_operation_private_archives_to_hq",
     canPlay: (host) => host.state.corp.archives.length > 0,
     resolve: (host, legalAction) => {
-      const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+      const sourceCardId = String(
+        legalAction.payload?.cardId ?? "",
+      ) as CardInstanceId;
       if (
         !sourceCardId ||
         definitionFor(host.state, sourceCardId).id !==
@@ -231,7 +237,9 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     name: "onr_v1922_corp_operation_private_rd_top5_reorder",
     canPlay: (host) => host.state.corp.rd.length >= 2,
     resolve: (host, legalAction) => {
-      const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+      const sourceCardId = String(
+        legalAction.payload?.cardId ?? "",
+      ) as CardInstanceId;
       if (
         !sourceCardId ||
         definitionFor(host.state, sourceCardId).id !==
@@ -250,7 +258,9 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     resolve: (host, legalAction) => {
       if (
         !host.state.corp.hq.some((cardId) =>
-          host.cards.isCorpInstallableCardType(definitionFor(host.state, cardId)),
+          host.cards.isCorpInstallableCardType(
+            definitionFor(host.state, cardId),
+          ),
         )
       ) {
         throw new Error(
@@ -302,22 +312,28 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   },
   [AGENDA_ADVANCE_OPERATION_SOURCE]: {
     name: "onr_v1919_corp_operation_advance_installed_agenda",
-    canPlay: (host) => host.board.installedAgendaOperationTarget() !== undefined,
+    canPlay: (host) =>
+      host.board.installedAgendaOperationTarget() !== undefined,
     resolve: (host, legalAction) => {
       const targetAgendaId = host.board.installedAgendaOperationTarget();
       if (!targetAgendaId)
         throw new Error(
           "Project Consultants findet keine installierte Agenda.",
         );
-      mustInstance(host.state.cardInstances, targetAgendaId).advancementCounters += 1;
+      mustInstance(
+        host.state.cardInstances,
+        targetAgendaId,
+      ).advancementCounters += 1;
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         v1919OperationAbility: "advance_installed_agenda",
         targetCardId: targetAgendaId,
         targetCardDefinitionId: definitionFor(host.state, targetAgendaId).id,
         addedAdvancementCounters: 1,
-        advancementCountersAfter:
-          mustInstance(host.state.cardInstances, targetAgendaId).advancementCounters,
+        advancementCountersAfter: mustInstance(
+          host.state.cardInstances,
+          targetAgendaId,
+        ).advancementCounters,
       };
     },
   },
@@ -376,8 +392,10 @@ export function canPlayCorpOperation(
       host.state.corp.clicks >= corpUtilityPlayClickCost(utility) &&
       canPlayCorpUtilityOperation(host, definition, utility)
     );
-  const implementationResolver =
-    cardImplementationCorpOperationResolver(host, definition);
+  const implementationResolver = cardImplementationCorpOperationResolver(
+    host,
+    definition,
+  );
   if (implementationResolver)
     return implementationResolver.canPlay?.(host) ?? true;
   const resolver = CORP_OPERATION_RESOLVERS[definition.id];
@@ -403,8 +421,10 @@ export function resolveCorpOperation(
     resolveCorpUtilityOperation(host, definition, legalAction, utility);
     return;
   }
-  const implementationResolver =
-    cardImplementationCorpOperationResolver(host, definition);
+  const implementationResolver = cardImplementationCorpOperationResolver(
+    host,
+    definition,
+  );
   if (implementationResolver) {
     implementationResolver.resolve(host, legalAction);
     return;
@@ -436,7 +456,8 @@ export function canPlayCorpUtilityOperation(
     case "corp_archives_to_hq":
       return host.state.corp.archives.some((cardId) => {
         const sourceCardId = host.state.corp.hq.find(
-          (candidate) => definitionFor(host.state, candidate).id === _definition.id,
+          (candidate) =>
+            definitionFor(host.state, candidate).id === _definition.id,
         );
         if (cardId === sourceCardId) return false;
         if (utility.filter?.cardType === "ice")
@@ -551,11 +572,9 @@ export function resolveCorpUtilityOperation(
         throw new Error("Badtimes braucht einen getaggten Runner.");
       }
       const sourceCardId = sourceCardIdFromAction(legalAction);
-      if (!sourceCardId)
-        throw new Error("Badtimes braucht eine Quellenkarte.");
+      if (!sourceCardId) throw new Error("Badtimes braucht eine Quellenkarte.");
       const amount = Math.max(0, Math.floor(utility.amount));
-      if (amount <= 0)
-        throw new Error("Badtimes-MU-Reduktion ist ungueltig.");
+      if (amount <= 0) throw new Error("Badtimes-MU-Reduktion ist ungueltig.");
       host.state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn = [
         ...(host.state.temporaryRunnerMemoryLimitModifiersUntilEndOfTurn ?? []),
         {
@@ -576,14 +595,20 @@ export function resolveCorpUtilityOperation(
     }
     case "corp_archives_to_hq": {
       const sourceCardId = sourceCardIdFromAction(legalAction);
-      if (!sourceCardId || definitionFor(host.state, sourceCardId).id !== definition.id)
+      if (
+        !sourceCardId ||
+        definitionFor(host.state, sourceCardId).id !== definition.id
+      )
         throw new Error("Off-Site Backups fehlt als Quelle.");
       host.hiddenZone.startCorpArchivesToHqChoice(legalAction, sourceCardId);
       return;
     }
     case "draw_corp_cards_then_shuffle_hq_card_into_rd": {
       const sourceCardId = sourceCardIdFromAction(legalAction);
-      if (!sourceCardId || definitionFor(host.state, sourceCardId).id !== definition.id)
+      if (
+        !sourceCardId ||
+        definitionFor(host.state, sourceCardId).id !== definition.id
+      )
         throw new Error("Corporate Shuffle fehlt als Quelle.");
       const rdBefore = host.state.corp.rd.length;
       for (let index = 0; index < utility.drawCount; index += 1) {
@@ -604,7 +629,10 @@ export function resolveCorpUtilityOperation(
     }
     case "corp_rd_top_reorder": {
       const sourceCardId = sourceCardIdFromAction(legalAction);
-      if (!sourceCardId || definitionFor(host.state, sourceCardId).id !== definition.id)
+      if (
+        !sourceCardId ||
+        definitionFor(host.state, sourceCardId).id !== definition.id
+      )
         throw new Error("Planning Consultants fehlt als Quelle.");
       host.hiddenZone.startCorpRdTopReorderChoice(legalAction, sourceCardId);
       return;
@@ -629,7 +657,8 @@ export function resolveCorpUtilityOperation(
       host.economy.gainCorpCredits(gainedCredits);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1951CorpUtilityAbility: "gain_credits_from_stolen_agenda_advancement_history",
+        v1951CorpUtilityAbility:
+          "gain_credits_from_stolen_agenda_advancement_history",
         stolenAgendaAdvancementCountersLastTurn: advancementCounters,
         gainedCredits,
         corpCreditsAfter: host.state.corp.credits,
@@ -684,9 +713,9 @@ export function hasPrintedCostOnPlayCardImplementation(
 export function onPlayCardImplementationClickCostForDefinition(
   definition: CardDefinition,
 ): number {
-  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.find(
-    isPrintedCostOnPlayAbility,
-  );
+  const ability = cardImplementationForDefinitionId(
+    definition.id,
+  )?.abilities?.find(isPrintedCostOnPlayAbility);
   return ability ? onPlayCardImplementationClickCost(ability) : 1;
 }
 
@@ -782,7 +811,10 @@ export function cardImplementationOperationLegalActions(
   const freeRezEffect = onPlayCardImplementationEffects(definition).find(
     (effect) => effect.kind === "free_rez_installed_ice_with_counters",
   ) as
-    | Extract<CardEffectImplementation, { kind: "free_rez_installed_ice_with_counters" }>
+    | Extract<
+        CardEffectImplementation,
+        { kind: "free_rez_installed_ice_with_counters" }
+      >
     | undefined;
   if (freeRezEffect) {
     const actions: LegalAction[] = [];
@@ -834,7 +866,18 @@ export function cardImplementationOperationLegalActions(
   }
   const needsResourceTarget =
     onPlayCardImplementationNeedsLastTurnResourceTarget(definition);
-  if (!needsResourceTarget && additionalCost === 0) return [];
+  const advancementDistribution = onPlayCardImplementationEffects(
+    definition,
+  ).find((effect) => effect.kind === "distribute_advancement_counters");
+  const advancementPayload = advancementDistribution
+    ? {
+        cardImplementationEffectKind: "distribute_advancement_counters",
+        advancementCounterAmount: advancementDistribution.amount,
+        advancementCounterChoiceMode: advancementDistribution.distribution,
+      }
+    : {};
+  if (!needsResourceTarget && additionalCost === 0 && !advancementDistribution)
+    return [];
   if (!needsResourceTarget)
     return [
       host.actions.buildLegalAction(
@@ -846,33 +889,41 @@ export function cardImplementationOperationLegalActions(
         [{ clicks: clickCost, credits: totalCost }],
         {
           cardId,
-          ...(additionalCost > 0 ? { additionalTracePlayCost: additionalCost } : {}),
+          ...advancementPayload,
+          ...(additionalCost > 0
+            ? { additionalTracePlayCost: additionalCost }
+            : {}),
         },
       ),
     ];
-  return host.runner.runnerLastTurnInstalledResourceIds().map((targetCardId) => {
-    return host.actions.buildLegalAction(
-      host.state,
-      "corp",
-      "play_operation",
-      `${definition.title} spielen`,
-      cardId,
-      [{ clicks: clickCost, credits: totalCost }],
-      {
+  return host.runner
+    .runnerLastTurnInstalledResourceIds()
+    .map((targetCardId) => {
+      return host.actions.buildLegalAction(
+        host.state,
+        "corp",
+        "play_operation",
+        `${definition.title} spielen`,
         cardId,
-        ...runnerLastTurnResourceTargetPayload(host, targetCardId),
-        ...(additionalCost > 0 ? { additionalTracePlayCost: additionalCost } : {}),
-      },
-    );
-  });
+        [{ clicks: clickCost, credits: totalCost }],
+        {
+          cardId,
+          ...runnerLastTurnResourceTargetPayload(host, targetCardId),
+          ...(additionalCost > 0
+            ? { additionalTracePlayCost: additionalCost }
+            : {}),
+        },
+      );
+    });
 }
 
 function cardImplementationCorpOperationResolver(
   host: CorpOperationResolutionHost,
   definition: CardDefinition,
 ): CorpOperationResolver | undefined {
-  const hiddenLongtail = cardImplementationForDefinitionId(definition.id)
-    ?.hiddenReplacementLongtail;
+  const hiddenLongtail = cardImplementationForDefinitionId(
+    definition.id,
+  )?.hiddenReplacementLongtail;
   if (hiddenLongtail?.kind === "conceal_and_reorder_installed_ice") {
     return {
       name: "card_implementation_corp_operation_conceal_and_reorder_installed_ice",
@@ -925,7 +976,8 @@ function runnerLastTurnResourceTargetPayload(
   targetCardId: CardInstanceId,
 ): Record<string, string | number | boolean> {
   if (host.runner.isConcealedRunnerResource(targetCardId)) {
-    const hiddenResourceSlotId = host.runner.hiddenRunnerResourceSlotId(targetCardId);
+    const hiddenResourceSlotId =
+      host.runner.hiddenRunnerResourceSlotId(targetCardId);
     return {
       traceSuccessTargetCardId: hiddenResourceSlotId,
       traceSuccessTargetResourceSlotId: hiddenResourceSlotId,

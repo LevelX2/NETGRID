@@ -47,7 +47,9 @@ export type RunContinuationExecutionHost = {
       iceDefinition: CardDefinition,
     ) => readonly SubroutineDefinition[];
     resolutionHost: () => EncounterResolutionHost;
-    printedEffectHost: (legalAction?: LegalAction) => EncounterPrintedEffectHost;
+    printedEffectHost: (
+      legalAction?: LegalAction,
+    ) => EncounterPrintedEffectHost;
     printedNonTraceHost: (
       legalAction?: LegalAction,
     ) => EncounterPrintedNonTraceHost;
@@ -64,7 +66,10 @@ export type RunContinuationExecutionHost = {
       amount: number;
       source: string;
     }) => CoreDamageSummary;
-    setDamagePayload: (legalAction: LegalAction, summary: CoreDamageSummary) => void;
+    setDamagePayload: (
+      legalAction: LegalAction,
+      summary: CoreDamageSummary,
+    ) => void;
   };
   cleanup: {
     resetBreakerStrength: () => void;
@@ -109,8 +114,7 @@ export function continueRun(
     payOrEndRunPayment.paidPayOrEndRunIndexes ?? new Set<number>();
   const paidPayOrTrashProgramIndexes =
     payOrEndRunPayment.paidPayOrTrashProgramIndexes ?? new Set<number>();
-  const printedNonTraceHost =
-    host.encounter.printedNonTraceHost(legalAction);
+  const printedNonTraceHost = host.encounter.printedNonTraceHost(legalAction);
   for (let index = 0; index < subroutines.length; index += 1) {
     const subroutine = subroutines[index];
     if (

@@ -30,7 +30,9 @@ export type EncounterEntryHost = {
     ) => readonly string[];
   };
   servers: {
-    mustServer: (serverId: Exclude<ServerId, "new_remote"> | string) => CorpServer;
+    mustServer: (
+      serverId: Exclude<ServerId, "new_remote"> | string,
+    ) => CorpServer;
     publicServerLabel: (
       serverId: Exclude<ServerId, "new_remote">,
     ) => string | undefined;
@@ -194,7 +196,9 @@ function resolveRandomStrengthOrDerezAutoPassEncounter(
   if (iceEncounter.visibility !== "public" || iceEncounter.dieFaces !== 6)
     throw new Error("Random-Encounter-Profil ist ungueltig.");
   if (!host.callbacks.rollDie)
-    throw new Error("Random-Encounter braucht einen deterministischen Wuerfel.");
+    throw new Error(
+      "Random-Encounter braucht einen deterministischen Wuerfel.",
+    );
   const dieRoll = host.callbacks.rollDie(
     `card_implementation.die.${encounteredDefinition.id}.encounter.${run.runId}.${encounteredIceId}`,
   );
@@ -319,8 +323,8 @@ export function isApproachIceExposeWindowOpen(
 ): boolean {
   return Boolean(
     host.state.timingPoint === "run.approach_ice" &&
-      host.state.activeSide === "runner" &&
-      approachIceExposeCanBeOfferedForCurrentIce(host),
+    host.state.activeSide === "runner" &&
+    approachIceExposeCanBeOfferedForCurrentIce(host),
   );
 }
 
@@ -329,9 +333,9 @@ export function isApproachIceExposeViewingWindowOpen(
 ): boolean {
   return Boolean(
     host.state.timingPoint === "run.approach_ice" &&
-      host.state.activeSide === "runner" &&
-      host.state.run?.approachIceExposeViewingIceId &&
-      host.state.run?.approachIceExposeViewingSourceCardId,
+    host.state.activeSide === "runner" &&
+    host.state.run?.approachIceExposeViewingIceId &&
+    host.state.run?.approachIceExposeViewingSourceCardId,
   );
 }
 
@@ -498,13 +502,18 @@ export function resolveApproachIceExposeAbility(
     throw new Error("Approach-Expose passt nicht zum aktuellen ICE.");
   if (!isApproachIceExposeWindowOpen(host))
     throw new Error("Approach-Expose ist in diesem Fenster nicht legal.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
   const availableSources = installedApproachIceExposeSources(host);
   const decision = String(legalAction.payload?.approachIceExposeDecision ?? "");
   if (decision === "expose") {
     if (
       !availableSources.includes(sourceCardId) &&
-      !(run.eventApproachIceExposeBeforeRez && run.successfulRunSourceCardId === sourceCardId)
+      !(
+        run.eventApproachIceExposeBeforeRez &&
+        run.successfulRunSourceCardId === sourceCardId
+      )
     )
       throw new Error("Die Approach-Expose-Quelle ist nicht installiert.");
     const definition = host.cards.definitionFor(approachedIceId);
@@ -621,7 +630,9 @@ function grantEncounterTemporaryTraceCredits(
 function installedApproachIceExposeSources(
   host: EncounterEntryHost,
 ): CardInstanceId[] {
-  const used = new Set(host.state.run?.approachIceExposeUsedSourceIdsThisRun ?? []);
+  const used = new Set(
+    host.state.run?.approachIceExposeUsedSourceIdsThisRun ?? [],
+  );
   return host.cards
     .runnerInstalledCardIds()
     .slice()
@@ -691,7 +702,10 @@ function markApproachIceExposeUsedForSource(
 function runEncounterInterventionsForDefinition(
   definitionId: string,
 ): readonly CardRunEncounterInterventionImplementation[] {
-  return cardImplementationForDefinitionId(definitionId)?.runEncounterInterventions ?? [];
+  return (
+    cardImplementationForDefinitionId(definitionId)
+      ?.runEncounterInterventions ?? []
+  );
 }
 
 function hasRunEncounterInterventionKind(

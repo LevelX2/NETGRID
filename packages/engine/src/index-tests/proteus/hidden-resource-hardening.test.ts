@@ -539,8 +539,10 @@ describe("PRO011 hidden resource timing hardening", () => {
         (action) => action.type === "continue_run",
       );
       expect(continuation).toBeDefined();
-      state = apply(state, "runner", (action) =>
-        action.actionId === continuation!.actionId,
+      state = apply(
+        state,
+        "runner",
+        (action) => action.actionId === continuation!.actionId,
       );
     }
     expect(state.run?.encounteredIceId).toBe(snowbankId);

@@ -1,12 +1,22 @@
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 
 type VisibleCorpServer = AiDecisionInput["playerView"]["servers"][number];
 
 type CorpAdvancementCounterPlacementProfile = {
+  totalCounters: number;
   maxTargets: number;
   counterPerTarget: number;
   distinctTargets: boolean;
   effectOnly: boolean;
+  distribution:
+    | "single_target"
+    | "any_combination"
+    | "up_to_distinct_targets_one_each";
+  transferSourceCardId?: string;
 };
 
 type CorpAdvancementCounterWitness =
@@ -52,6 +62,7 @@ type CorpAdvancementCounterTargetAssessment = {
 
 export type CorpAdvancementCounterPlacementAssessment = {
   dominatedByBasicAdvance: boolean;
+  noConcreteConversion: boolean;
   selectedTargets: number;
   maxTargets: number;
   basicAdvanceEquivalentAvailable: boolean;
@@ -101,19 +112,16 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
   if (!profile) return undefined;
   const targets = semanticRuntimeCorpBasicAdvanceEquivalentTargets(
     input,
+    profile,
     dependencies,
-  ).sort(
-    (left, right) =>
-      right.value - left.value ||
-      left.card.instanceId.localeCompare(right.card.instanceId),
   );
-  const meaningfulTargets = targets.filter((target) => target.value > 0);
-  const selectedTargets = Math.min(
-    profile.maxTargets,
-    meaningfulTargets.length,
+  const selectedTargetAssessments = bestCorpAdvancementCounterPlacements(
+    targets,
+    profile,
+    dependencies,
   );
-  const selectedTargetAssessments = meaningfulTargets.slice(0, selectedTargets);
-  const basicAdvanceEquivalentAvailable = meaningfulTargets.length > 0;
+  const selectedTargets = selectedTargetAssessments.length;
+  const basicAdvanceEquivalentAvailable = targets.length > 0;
   const bestBasicEquivalent: "advance_card" | "gain_credit" | "draw_card" =
     basicAdvanceEquivalentAvailable
       ? "advance_card"
@@ -121,7 +129,9 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
         ? "gain_credit"
         : "draw_card";
   const secondCounterValue =
-    selectedTargets >= 2 ? (meaningfulTargets[1]?.value ?? 0) : 0;
+    profile.totalCounters >= 2
+      ? selectedTargetAssessments.reduce((sum, target) => sum + target.value, 0)
+      : 0;
   const bestWitness = bestCorpAdvancementCounterWitness(
     selectedTargetAssessments,
   );
@@ -145,7 +155,9 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
         ? 150
         : 20
       : 0;
-  const cardSpendPenalty = 180 + dependencies.actionCreditCost(action) * 40;
+  const cardSpendPenalty =
+    (action.type === "play_operation" ? 180 : 60) +
+    dependencies.actionCreditCost(action) * 40;
   const netAdvancementValue =
     boardDeltaValue +
     windowValue +
@@ -158,11 +170,21 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
     profile.distinctTargets &&
     basicAdvanceEquivalentAvailable &&
     (selectedTargets <= 1 || netAdvancementValue <= 0);
-  const scoreValue = dominatedByBasicAdvance
-    ? -5200
-    : netAdvancementValue > 0
-      ? 1200 + Math.min(2600, netAdvancementValue * 8)
-      : -1200 + netAdvancementValue * 6;
+  const noConcreteConversion =
+    selectedTargets === 0 ||
+    !selectedTargetAssessments.some((target) =>
+      corpAdvancementCounterWitnessHasConcreteConversion(target.witness),
+    );
+  const scoreValue =
+    dominatedByBasicAdvance || noConcreteConversion
+      ? -5200
+      : bestWitness === "score_now"
+        ? 5200 + Math.min(2600, Math.max(0, netAdvancementValue) * 4)
+        : bestWitness === "score_next_action"
+          ? 2600 + Math.min(1800, Math.max(0, netAdvancementValue) * 3)
+          : netAdvancementValue > 0
+            ? 1200 + Math.min(2600, netAdvancementValue * 8)
+            : -1200 + netAdvancementValue * 6;
   const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
     input,
     action,
@@ -172,10 +194,13 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
     `advancement_source:${sourceDefinitionId || "unknown"}`,
     `advancement_selected_targets:${selectedTargets}`,
     `advancement_max_targets:${profile.maxTargets}`,
+    `advancement_total_counters:${profile.totalCounters}`,
+    `advancement_distribution:${profile.distribution}`,
     `advancement_distinct_targets:${profile.distinctTargets}`,
     `advancement_counter_per_target:${profile.counterPerTarget}`,
     `basic_advance_equivalent_available:${basicAdvanceEquivalentAvailable}`,
     `dominated_by_basic_advance:${dominatedByBasicAdvance}`,
+    `advancement_no_concrete_conversion:${noConcreteConversion}`,
     `card_spend_without_incremental_counter_value:${dominatedByBasicAdvance}`,
     `advancement_second_counter_value:${secondCounterValue}`,
     `best_basic_equivalent:${bestBasicEquivalent}`,
@@ -201,6 +226,7 @@ export function semanticRuntimeCorpAdvancementCounterPlacementAssessment(
   ];
   return {
     dominatedByBasicAdvance,
+    noConcreteConversion,
     selectedTargets,
     maxTargets: profile.maxTargets,
     basicAdvanceEquivalentAvailable,
@@ -222,22 +248,68 @@ function corpAdvancementCounterPlacementProfileForAction(
   action: LegalAction,
   dependencies: SemanticRuntimeCorpAdvancementCounterDependencies,
 ): CorpAdvancementCounterPlacementProfile | undefined {
-  if (action.type !== "play_operation") return undefined;
+  if (
+    action.type !== "play_operation" &&
+    action.type !== "activated_card_ability"
+  )
+    return undefined;
   const sourceDefinitionId = dependencies.sourceDefinitionIdForAction(
     input,
     action,
   );
   if (!sourceDefinitionId) return undefined;
-  const text = dependencies.normalizedRulesTextForDefinition(sourceDefinitionId);
+  const effectKind = action.payload?.cardImplementationEffectKind;
+  const payloadAmount = action.payload?.advancementCounterAmount;
+  const payloadMode = action.payload?.advancementCounterChoiceMode;
+  if (
+    effectKind === "distribute_advancement_counters" &&
+    typeof payloadAmount === "number" &&
+    Number.isInteger(payloadAmount) &&
+    payloadAmount > 0 &&
+    (payloadMode === "single_target" ||
+      payloadMode === "any_combination" ||
+      payloadMode === "up_to_distinct_targets_one_each")
+  ) {
+    return {
+      totalCounters: payloadAmount,
+      maxTargets: payloadMode === "single_target" ? 1 : payloadAmount,
+      counterPerTarget:
+        payloadMode === "up_to_distinct_targets_one_each" ? 1 : payloadAmount,
+      distinctTargets: payloadMode === "up_to_distinct_targets_one_each",
+      effectOnly: action.type === "play_operation",
+      distribution: payloadMode,
+    };
+  }
+  if (
+    action.type === "activated_card_ability" &&
+    effectKind === "move_advancement_counters"
+  ) {
+    const sourceCard = dependencies.actionSourceCard(input, action);
+    const transferableCounters = sourceCard?.advancementCounters ?? 0;
+    if (transferableCounters <= 0 || !sourceCard) return undefined;
+    return {
+      totalCounters: transferableCounters,
+      maxTargets: 1,
+      counterPerTarget: transferableCounters,
+      distinctTargets: false,
+      effectOnly: false,
+      distribution: "single_target",
+      transferSourceCardId: sourceCard.instanceId,
+    };
+  }
+  const text =
+    dependencies.normalizedRulesTextForDefinition(sourceDefinitionId);
   if (
     sourceDefinitionId === dependencies.teamRestructuringCardId ||
     corpAdvancementTextAddsOneCounterToUpToTwoCards(text)
   ) {
     return {
+      totalCounters: 2,
       maxTargets: 2,
       counterPerTarget: 1,
       distinctTargets: true,
       effectOnly: true,
+      distribution: "up_to_distinct_targets_one_each",
     };
   }
   return undefined;
@@ -268,8 +340,9 @@ function corpAdvancementTextAddsOneCounterToUpToTwoCards(
 
 function semanticRuntimeCorpBasicAdvanceEquivalentTargets(
   input: AiDecisionInput,
+  profile: CorpAdvancementCounterPlacementProfile,
   dependencies: SemanticRuntimeCorpAdvancementCounterDependencies,
-): CorpAdvancementCounterTargetAssessment[] {
+): Array<{ card: VisibleCard; server: VisibleCorpServer }> {
   const locatedTargets = input.legalActions
     .filter(
       (action) => action.side === "corp" && action.type === "advance_card",
@@ -288,29 +361,110 @@ function semanticRuntimeCorpBasicAdvanceEquivalentTargets(
         card: VisibleCard;
         server: VisibleCorpServer;
       } => Boolean(located),
+    )
+    .filter(
+      (located) => located.card.instanceId !== profile.transferSourceCardId,
     );
-  return locatedTargets
-    .map((located) =>
-      semanticRuntimeCorpAdvancementTargetAssessment(
-        located.card,
-        located.server,
-        semanticRuntimeCorpHasTransferDestination(
-          located.card.instanceId,
-          locatedTargets,
-          dependencies,
-        ),
+  return locatedTargets;
+}
+
+function bestCorpAdvancementCounterPlacements(
+  targets: readonly { card: VisibleCard; server: VisibleCorpServer }[],
+  profile: CorpAdvancementCounterPlacementProfile,
+  dependencies: SemanticRuntimeCorpAdvancementCounterDependencies,
+): CorpAdvancementCounterTargetAssessment[] {
+  if (targets.length === 0) return [];
+  const assessment = (
+    target: { card: VisibleCard; server: VisibleCorpServer },
+    addedCounters: number,
+  ) =>
+    semanticRuntimeCorpAdvancementTargetAssessment(
+      target.card,
+      target.server,
+      semanticRuntimeCorpHasTransferDestination(
+        target.card.instanceId,
+        targets,
         dependencies,
       ),
-    )
-    .filter((target): target is CorpAdvancementCounterTargetAssessment =>
-      Boolean(target),
+      addedCounters,
+      dependencies,
     );
+  if (profile.distribution === "single_target") {
+    return targets
+      .map((target) => assessment(target, profile.totalCounters))
+      .filter((target): target is CorpAdvancementCounterTargetAssessment =>
+        Boolean(target),
+      )
+      .sort(compareCorpAdvancementTargets)
+      .slice(0, 1);
+  }
+  if (profile.distribution === "up_to_distinct_targets_one_each") {
+    return targets
+      .map((target) => assessment(target, 1))
+      .filter((target): target is CorpAdvancementCounterTargetAssessment =>
+        Boolean(target),
+      )
+      .filter((target) => target.value > 0)
+      .sort(compareCorpAdvancementTargets)
+      .slice(0, profile.maxTargets);
+  }
+  let best: CorpAdvancementCounterTargetAssessment[] = [];
+  let bestValue = Number.NEGATIVE_INFINITY;
+  const placements = new Array<number>(targets.length).fill(0);
+  const visit = (targetIndex: number, remaining: number): void => {
+    if (targetIndex === targets.length) {
+      if (remaining !== 0) return;
+      const candidate = placements
+        .map((amount, index) =>
+          amount > 0 ? assessment(targets[index]!, amount) : undefined,
+        )
+        .filter((target): target is CorpAdvancementCounterTargetAssessment =>
+          Boolean(target),
+        );
+      const value = candidate.reduce(
+        (sum, target) =>
+          sum + target.value + target.windowValue - target.weakTargetPenalty,
+        0,
+      );
+      if (
+        value > bestValue ||
+        (value === bestValue &&
+          candidate.map((target) => target.card.instanceId).join("|") <
+            best.map((target) => target.card.instanceId).join("|"))
+      ) {
+        bestValue = value;
+        best = candidate;
+      }
+      return;
+    }
+    for (let amount = remaining; amount >= 0; amount -= 1) {
+      placements[targetIndex] = amount;
+      visit(targetIndex + 1, remaining - amount);
+    }
+    placements[targetIndex] = 0;
+  };
+  visit(0, profile.totalCounters);
+  return best;
+}
+
+function compareCorpAdvancementTargets(
+  left: CorpAdvancementCounterTargetAssessment,
+  right: CorpAdvancementCounterTargetAssessment,
+): number {
+  return (
+    right.value +
+      right.windowValue -
+      right.weakTargetPenalty -
+      (left.value + left.windowValue - left.weakTargetPenalty) ||
+    left.card.instanceId.localeCompare(right.card.instanceId)
+  );
 }
 
 function semanticRuntimeCorpAdvancementTargetAssessment(
   card: VisibleCard,
   server: VisibleCorpServer,
   hasTransferDestination: boolean,
+  addedCounters: number,
   dependencies: SemanticRuntimeCorpAdvancementCounterDependencies,
 ): CorpAdvancementCounterTargetAssessment | undefined {
   const definitionId = card.definitionId;
@@ -320,7 +474,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
   const counters = card.advancementCounters ?? 0;
   const remaining =
     typeof requirement === "number"
-      ? Math.max(0, requirement - counters - 1)
+      ? Math.max(0, requirement - counters - addedCounters)
       : 99;
   const protectedBonus = Math.min(server.ice.length, 2) * 12;
   const text = dependencies.normalizedRulesTextForDefinition(definitionId);
@@ -328,6 +482,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
     text,
     requirement,
     counters,
+    addedCounters,
   );
   if (type === "agenda") {
     const targetClass: CorpAdvancementCounterTargetClass =
@@ -358,8 +513,14 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       card,
       server,
       value:
-        140 +
-        (remaining === 0 ? 100 : remaining <= 2 ? 45 : 0) +
+        addedCounters * 90 +
+        (remaining === 0
+          ? 760
+          : remaining <= 1
+            ? 260
+            : remaining <= 2
+              ? 80
+              : 0) +
         protectedBonus,
       witness,
       targetClass,
@@ -405,7 +566,7 @@ function semanticRuntimeCorpAdvancementTargetAssessment(
       value:
         55 +
         protectedBonus +
-        creditCashout * 12 +
+        creditCashout * 12 * addedCounters +
         (corpAdvancementCashoutScalesPerCounter(text) ? 45 : 0),
       witness: "counter_cashout_credit",
       targetClass: "counter_cashout_credit",
@@ -481,6 +642,7 @@ function corpAgendaOveradvanceThresholdAssessment(
   text: string,
   requirement: number | undefined,
   counters: number,
+  addedCounters: number,
 ):
   | {
       thresholdSize: number;
@@ -494,7 +656,7 @@ function corpAgendaOveradvanceThresholdAssessment(
   const thresholdSize = corpAgendaOveradvanceThresholdSize(text);
   if (!thresholdSize || typeof requirement !== "number") return undefined;
   const currentOver = Math.max(0, counters - requirement);
-  const afterActionOver = Math.max(0, counters + 1 - requirement);
+  const afterActionOver = Math.max(0, counters + addedCounters - requirement);
   const hitsThreshold =
     afterActionOver > currentOver &&
     afterActionOver > 0 &&
@@ -614,9 +776,9 @@ function semanticRuntimeCorpLooksLikeTransferDestination(
   if (corpAdvancementLooksLikeTransferSource(text)) return false;
   return Boolean(
     corpAdvancementAmbushTargetClass(text) ||
-      (corpAdvancementCreditCashoutValue(text) >= 4 &&
-        corpAdvancementCashoutScalesPerCounter(text)) ||
-      corpAdvancementLooksLikeActionCashout(text),
+    (corpAdvancementCreditCashoutValue(text) >= 4 &&
+      corpAdvancementCashoutScalesPerCounter(text)) ||
+    corpAdvancementLooksLikeActionCashout(text),
   );
 }
 
@@ -818,6 +980,12 @@ function corpAdvancementCounterWitnessHasWindowValue(
     witness === "access_hardware_trash_ambush" ||
     witness === "transfer_destination_visible"
   );
+}
+
+function corpAdvancementCounterWitnessHasConcreteConversion(
+  witness: CorpAdvancementCounterWitness,
+): boolean {
+  return witness !== "counter_bank_only" && witness !== "none";
 }
 
 function bestCorpAdvancementCounterWitness(

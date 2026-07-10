@@ -73,13 +73,13 @@ Runner-Archetypen:
 
 ## Ergebnis
 
-| Runner | Corp-Siege | Runner-Siege | Action-Limit/ungültig | Corp-AP Ø | Runner-AP Ø | erster Corp-Scorezug Ø |
-|---|---:|---:|---:|---:|---:|---:|
-| Blink Pressure Rig | 2 | 2 | 1 | 5,6 | 4,6 | 6,2 |
-| Classic Prep Economy Pressure | 1 | 2 | 2 | 3,6 | 5,8 | 11,8 |
-| Proteus HQ Virus & Derez | 1 | 2 | 2 | 3,2 | 5,2 | 9,5 |
-| Proteus R&D Virus & Bad Publicity | 3 | 2 | 0 | 4,6 | 3,8 | 11,0 |
-| **Gesamt** | **7** | **8** | **5** | **4,25** | **4,85** | **9,47** |
+| Runner                            | Corp-Siege | Runner-Siege | Action-Limit/ungültig | Corp-AP Ø | Runner-AP Ø | erster Corp-Scorezug Ø |
+| --------------------------------- | ---------: | -----------: | --------------------: | --------: | ----------: | ---------------------: |
+| Blink Pressure Rig                |          2 |            2 |                     1 |       5,6 |         4,6 |                    6,2 |
+| Classic Prep Economy Pressure     |          1 |            2 |                     2 |       3,6 |         5,8 |                   11,8 |
+| Proteus HQ Virus & Derez          |          1 |            2 |                     2 |       3,2 |         5,2 |                    9,5 |
+| Proteus R&D Virus & Bad Publicity |          3 |            2 |                     0 |       4,6 |         3,8 |                   11,0 |
+| **Gesamt**                        |      **7** |        **8** |                 **5** |  **4,25** |    **4,85** |               **9,47** |
 
 Von den fünf nicht regulär abgeschlossenen Spielen waren vier echte
 240-Aktions-Limits. Ein weiteres Spiel endete bei StateVersion 199 in einem

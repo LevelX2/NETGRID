@@ -125,15 +125,7 @@ function hostFor(
   const host: CorpOperationResolutionHost = {
     state: targetState,
     actions: {
-      buildLegalAction: (
-        _state,
-        side,
-        type,
-        label,
-        source,
-        costs,
-        payload,
-      ) =>
+      buildLegalAction: (_state, side, type, label, source, costs, payload) =>
         ({
           actionId: `${side}.${type}.${source}`,
           side,
@@ -166,7 +158,8 @@ function hostFor(
     },
     runner: {
       requireRunnerTagged: () => {
-        if (targetState.runner.tags <= 0) throw new Error("Runner ist nicht getaggt.");
+        if (targetState.runner.tags <= 0)
+          throw new Error("Runner ist nicht getaggt.");
       },
       runnerLastTurnInstalledResourceIds: () => [RESOURCE_ID],
       isConcealedRunnerResource: (cardId) => cardId === HIDDEN_RESOURCE_ID,
@@ -180,16 +173,19 @@ function hostFor(
     },
     zones: {
       trashRunnerInstalledCardToHeap: (cardId) => {
-        targetState.runner.rig.resources = targetState.runner.rig.resources.filter(
-          (id) => id !== cardId,
-        );
+        targetState.runner.rig.resources =
+          targetState.runner.rig.resources.filter((id) => id !== cardId);
         targetState.runner.heap.push(cardId);
         calls.push(`trashRunner:${cardId}`);
       },
     },
     damage: {
-      resolveDamageOperation: (_legalAction, damageType, amount, sourceDefinitionId) =>
-        calls.push(`damage:${damageType}:${amount}:${sourceDefinitionId}`),
+      resolveDamageOperation: (
+        _legalAction,
+        damageType,
+        amount,
+        sourceDefinitionId,
+      ) => calls.push(`damage:${damageType}:${amount}:${sourceDefinitionId}`),
       addRunnerTagsWithPrevention: (_legalAction, amount, source) =>
         calls.push(`tag:${amount}:${source}`),
     },
@@ -209,13 +205,15 @@ function hostFor(
       moveAdvancementOptions: () => [RESOURCE_ID],
       resolveAgendaCounterOperation: (_legalAction, sourceDefinitionId) =>
         calls.push(`agendaCounter:${sourceDefinitionId}`),
-      resolveCorpOperationAddAdvancementCounters: () => calls.push("managementShakeUp"),
+      resolveCorpOperationAddAdvancementCounters: () =>
+        calls.push("managementShakeUp"),
       resolveAdvancementPlacementOperation: () =>
         calls.push("systematicLayoffs"),
     },
     operations: {
       hardwareTrashByCounterEligibleHardwareIds: () => [RESOURCE_ID],
-      resolveHardwareTrashByCounterOperation: () => calls.push("hardwareTrashByCounter"),
+      resolveHardwareTrashByCounterOperation: () =>
+        calls.push("hardwareTrashByCounter"),
     },
     cardImplementation: {
       canPlayPrintedCostOnPlay: () => true,
@@ -262,12 +260,24 @@ describe("corp-operation-resolution", () => {
     const calls: string[] = [];
     const host = hostFor(targetState, calls);
 
-    resolveCorpOperation(host, definition("simple_economy_operation"), action());
+    resolveCorpOperation(
+      host,
+      definition("simple_economy_operation"),
+      action(),
+    );
     expect(targetState.corp.credits).toBe(10);
 
     resolveCorpOperation(host, definition("simple_draw_operation"), action());
-    resolveCorpOperation(host, definition("v111_core_damage_operation"), action());
-    resolveCorpOperation(host, definition("simple_tag_punishment_operation"), action());
+    resolveCorpOperation(
+      host,
+      definition("v111_core_damage_operation"),
+      action(),
+    );
+    resolveCorpOperation(
+      host,
+      definition("simple_tag_punishment_operation"),
+      action(),
+    );
 
     expect(calls).toEqual([
       "drawCorpCard",
@@ -330,9 +340,9 @@ describe("corp-operation-resolution", () => {
     const host = hostFor(targetState, calls);
     const utilityAction = action();
 
-    expect(canPlayCorpOperation(host, definition("onr_v1_289_edgerunner-inc-temps"))).toBe(
-      true,
-    );
+    expect(
+      canPlayCorpOperation(host, definition("onr_v1_289_edgerunner-inc-temps")),
+    ).toBe(true);
 
     resolveCorpOperation(
       host,
@@ -371,6 +381,29 @@ describe("corp-operation-resolution", () => {
     });
   });
 
+  it("publishes advancement distribution semantics on operation LegalActions", () => {
+    const targetState = state();
+    const host = hostFor(targetState);
+    const printedDefinition = definition("onr_v1_304_systematic-layoffs", {
+      title: "Systematic Layoffs",
+      cost: 5,
+    });
+
+    const actions = cardImplementationOperationLegalActions(
+      host,
+      OPERATION_ID,
+      printedDefinition,
+    );
+
+    expect(actions).toHaveLength(1);
+    expect(actions[0]?.payload).toMatchObject({
+      cardId: OPERATION_ID,
+      cardImplementationEffectKind: "distribute_advancement_counters",
+      advancementCounterAmount: 2,
+      advancementCounterChoiceMode: "any_combination",
+    });
+  });
+
   it("builds two-click Classic double operation actions", () => {
     const targetState = state();
     targetState.corp.hq = [OPERATION_ID];
@@ -402,7 +435,11 @@ describe("corp-operation-resolution", () => {
     targetState.corp.clicks = 1;
     expect(canPlayCorpOperation(host, cardDefinition)).toBe(false);
     expect(
-      cardImplementationOperationLegalActions(host, OPERATION_ID, cardDefinition),
+      cardImplementationOperationLegalActions(
+        host,
+        OPERATION_ID,
+        cardDefinition,
+      ),
     ).toEqual([]);
   });
 });

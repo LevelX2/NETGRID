@@ -18,7 +18,13 @@ export type SemanticRuntimeActionExclusionDependencies = {
   corpAdvancementCounterPlacementAssessment: (
     input: AiDecisionInput,
     action: LegalAction,
-  ) => { dominatedByBasicAdvance?: boolean; evidence: string[] } | undefined;
+  ) =>
+    | {
+        dominatedByBasicAdvance?: boolean;
+        noConcreteConversion?: boolean;
+        evidence: string[];
+      }
+    | undefined;
   runnerSelfDamageSurvivalExclusion: (
     input: AiDecisionInput,
     action: LegalAction,
@@ -79,6 +85,13 @@ export function semanticRuntimeActionExclusion(
     return {
       key: "corp_advancement_counter_placement_dominated_by_basic_advance",
       label: "Basic-Advance-Dominanz",
+      reason: corpAdvancementPlacement.evidence.join("|"),
+    };
+  }
+  if (corpAdvancementPlacement?.noConcreteConversion) {
+    return {
+      key: "corp_advancement_counter_placement_without_conversion",
+      label: "Advancement ohne Conversion",
       reason: corpAdvancementPlacement.evidence.join("|"),
     };
   }

@@ -41,6 +41,10 @@ export function activatedAbilityPayload(
         : sum,
     0,
   );
+  const advancementDistribution = distributeAdvancementCountersEffect(ability);
+  const advancementMove = ability.effects.find(
+    (effect) => effect.kind === "move_advancement_counters",
+  );
   return {
     cardId,
     cardImplementationAbility: "activated",
@@ -100,6 +104,20 @@ export function activatedAbilityPayload(
       ? {
           cardImplementationRandomHqDiscardCost:
             randomCorpHqDiscardCostForActivatedAbility(ability),
+        }
+      : {}),
+    ...(advancementDistribution
+      ? {
+          cardImplementationEffectKind: "distribute_advancement_counters",
+          advancementCounterAmount: advancementDistribution.amount,
+          advancementCounterChoiceMode: advancementDistribution.distribution,
+        }
+      : {}),
+    ...(advancementMove
+      ? {
+          cardImplementationEffectKind: "move_advancement_counters",
+          advancementCounterMoveMaximum: advancementMove.maxAmount,
+          advancementCounterMoveSource: advancementMove.source,
         }
       : {}),
     ...(ability.timing === "runner_cost_penalty_support" &&

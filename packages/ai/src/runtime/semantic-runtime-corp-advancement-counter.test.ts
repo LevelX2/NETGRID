@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  VisibleCard,
+} from "@netgrid/shared";
 import { semanticRuntimeCorpAdvancementCounterPlacementAssessment } from "./semantic-runtime-corp-advancement-counter";
 
 describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
@@ -95,7 +99,9 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
   });
 
   it("derives generic counter-bank targets from bounded rules text tokens", () => {
-    const assessment = assessmentForAssetRulesText("This card can be advanced.");
+    const assessment = assessmentForAssetRulesText(
+      "This card can be advanced.",
+    );
 
     expect(assessment?.advancementWitness).toBe("counter_bank_only");
     expect(assessment?.evidence).toContain(
@@ -104,9 +110,7 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
   });
 
   it("ignores generic counter-bank substring noise in rules text tokens", () => {
-    const assessment = assessmentForAssetRulesText(
-      "Encounter protocol only.",
-    );
+    const assessment = assessmentForAssetRulesText("Encounter protocol only.");
 
     expect(assessment?.advancementWitness).toBe("none");
     expect(assessment?.evidence).not.toContain(
@@ -144,7 +148,157 @@ describe("semanticRuntimeCorpAdvancementCounterPlacementAssessment", () => {
 
     expect(assessment).toBeUndefined();
   });
+
+  it("converts a public two-counter distribution into an immediate score line", () => {
+    const assessment = assessmentForSemanticPayload({
+      amount: 2,
+      mode: "any_combination",
+      target: corpCard("two-counter-agenda", {
+        type: "agenda",
+        advancementCounters: 1,
+        advancementRequirement: 3,
+      }),
+    });
+
+    expect(assessment?.advancementWitness).toBe("score_now");
+    expect(assessment?.noConcreteConversion).toBe(false);
+    expect(assessment?.scoreValue).toBeGreaterThan(5000);
+    expect(assessment?.evidence).toContain("advancement_total_counters:2");
+    expect(assessment?.evidence).toContain(
+      "advancement_distribution:any_combination",
+    );
+  });
+
+  it("rejects an advancement burst when only a generic counter bank is visible", () => {
+    const assessment = assessmentForSemanticPayload({
+      amount: 3,
+      mode: "any_combination",
+      target: corpCard("counter-bank", {
+        type: "asset",
+        advancementCounters: 0,
+      }),
+      targetRulesText: "This card can be advanced.",
+    });
+
+    expect(assessment?.advancementWitness).toBe("counter_bank_only");
+    expect(assessment?.noConcreteConversion).toBe(true);
+    expect(assessment?.scoreValue).toBe(-5200);
+  });
+
+  it("recognizes a visible counter transfer into an immediate score line", () => {
+    const agenda = corpCard("transfer-agenda", {
+      type: "agenda",
+      advancementCounters: 1,
+      advancementRequirement: 3,
+    });
+    const source = corpCard("transfer-source", {
+      type: "asset",
+      advancementCounters: 2,
+    });
+    const advanceAgenda = corpAction("advance_card", {
+      cardId: agenda.instanceId,
+    });
+    const advanceSource = corpAction("advance_card", {
+      cardId: source.instanceId,
+    });
+    const transfer = corpAction("activated_card_ability", {
+      cardId: source.instanceId,
+      cardImplementationEffectKind: "move_advancement_counters",
+      advancementCounterMoveMaximum: "all",
+    });
+    transfer.source = source.instanceId;
+    const input = corpInput({
+      root: [agenda, source],
+      legalActions: [advanceAgenda, advanceSource, transfer],
+    });
+
+    const assessment = semanticRuntimeCorpAdvancementCounterPlacementAssessment(
+      input,
+      transfer,
+      semanticPayloadDependencies([agenda, source], {
+        [agenda.definitionId!]: "",
+        [source.definitionId!]:
+          "Move any number of advancement counters to another installed card.",
+      }),
+    );
+
+    expect(assessment?.advancementWitness).toBe("score_now");
+    expect(assessment?.selectedTargets).toBe(1);
+    expect(assessment?.noConcreteConversion).toBe(false);
+  });
 });
+
+function assessmentForSemanticPayload(input: {
+  amount: number;
+  mode: "single_target" | "any_combination" | "up_to_distinct_targets_one_each";
+  target: VisibleCard;
+  targetRulesText?: string;
+}) {
+  const advance = corpAction("advance_card", {
+    cardId: input.target.instanceId,
+  });
+  const placement = corpAction("play_operation", {
+    cardId: "semantic-advancement-source-instance",
+    cardImplementationEffectKind: "distribute_advancement_counters",
+    advancementCounterAmount: String(input.amount),
+    advancementCounterChoiceMode: input.mode,
+  });
+  placement.payload!.advancementCounterAmount = input.amount;
+  const decisionInput = corpInput({
+    root: [input.target],
+    legalActions: [advance, placement],
+  });
+  return semanticRuntimeCorpAdvancementCounterPlacementAssessment(
+    decisionInput,
+    placement,
+    semanticPayloadDependencies([input.target], {
+      [input.target.definitionId!]: input.targetRulesText ?? "",
+      "semantic-advancement-source-instance": "",
+    }),
+  );
+}
+
+function semanticPayloadDependencies(
+  cards: VisibleCard[],
+  rulesText: Record<string, string>,
+) {
+  return {
+    sourceDefinitionIdForAction: (
+      _input: AiDecisionInput,
+      action: LegalAction,
+    ) =>
+      action.type === "activated_card_ability"
+        ? cards.find((card) => card.instanceId === action.source)?.definitionId
+        : "semantic-advancement-source-instance",
+    normalizedRulesTextForDefinition: (definitionId: string) =>
+      rulesText[definitionId] ?? "",
+    actionCreditCost: () => 0,
+    actionSourceCard: (_input: AiDecisionInput, action: LegalAction) =>
+      cards.find(
+        (card) =>
+          card.instanceId === action.source ||
+          card.instanceId === action.payload?.cardId,
+      ),
+    visibleServerCard: (_input: AiDecisionInput, cardId: string) => {
+      const card = cards.find((candidate) => candidate.instanceId === cardId);
+      return card
+        ? {
+            card,
+            server: {
+              id: "remote_1" as const,
+              label: "Remote 1",
+              ice: [],
+              root: cards,
+            },
+          }
+        : undefined;
+    },
+    cardType: (card: VisibleCard) => card.type,
+    cardAdvancementRequirement: (card: VisibleCard) =>
+      card.advancementRequirement,
+    teamRestructuringCardId: "custom-team-restructuring",
+  };
+}
 
 function assessmentForAgendaRulesText(agendaRulesText: string) {
   return assessmentForTargetRulesText(agendaRulesText, {
@@ -171,8 +325,7 @@ function assessmentForAssetRulesText(
 function assessmentForTargetRulesText(
   targetRulesText: string,
   targetOverrides: Partial<VisibleCard>,
-  sourceRulesText =
-    "add one advancement counter to each of up to two installed cards that can be advanced",
+  sourceRulesText = "add one advancement counter to each of up to two installed cards that can be advanced",
 ) {
   const target = corpCard("custom-advance-target", targetOverrides);
   const advanceAction = corpAction("advance_card", {

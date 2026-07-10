@@ -46,7 +46,9 @@ function corpAdvancementCounterChoiceScore(
       : undefined;
     const runtime = definitionId ? RUNTIME_CARDS[definitionId] : undefined;
     const isAgenda =
-      definition?.type === "agenda" || runtime?.type === "agenda";
+      located.card.type === "agenda" ||
+      definition?.type === "agenda" ||
+      runtime?.type === "agenda";
     const requirement =
       located.card.advancementRequirement ??
       definition?.advancementRequirement ??
@@ -62,8 +64,16 @@ function corpAdvancementCounterChoiceScore(
     return (
       sum +
       placement.amount * 12 +
-      (isAgenda ? 90 : 20) +
-      (remaining === 0 ? 80 : remaining <= 2 ? 35 : 0) +
+      (isAgenda ? 240 : 20) +
+      (isAgenda
+        ? remaining === 0
+          ? 700
+          : remaining === 1
+            ? 260
+            : remaining === 2
+              ? 70
+              : 0
+        : 0) +
       Math.min(serverIce, 3) * 18 +
       rezzedIce * 12
     );

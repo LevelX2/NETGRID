@@ -168,6 +168,12 @@ lokal nach main mergen und den Goal erst danach als complete markieren.`
   Runzustand; Pay-or-End-the-Run-Zahlungen suspendieren die
   Subroutinenauflösung bis Hidden-Payment-Support abgeschlossen ist. Fokussiert
   grün: 6 Testdateien/46 Tests, Engine-Typecheck und `git diff --check`.
-- FA003: `pending`.
+- FA003: `completed` – Advancement-LegalActions veröffentlichen Countermenge,
+  Verteilungsmodus und Transferart. Die Corp bewertet die beste sichtbare
+  Verteilung, priorisiert sofortige bzw. nächste Scoreaktionen und schließt
+  Bursts ohne konkrete Conversion aus; die Choice konzentriert Counter auf
+  scorebare Agenden. Fokussiert grün: 5 Testdateien/119 Tests plus 2
+  Engine-Testdateien/22 Tests, AI-/Engine-Typecheck, `check:ai`,
+  Doctrine- und Format-Gate.
 - FA004: `pending`.
 - FA005: `pending`.

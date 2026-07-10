@@ -34,6 +34,7 @@ type SemanticRuntimeCorpRezFloorAssessment = {
 
 type SemanticRuntimeCorpAdvancementPlacementAssessment = {
   dominatedByBasicAdvance: boolean;
+  noConcreteConversion: boolean;
   scoreValue: number;
   evidence: string[];
 };
@@ -136,10 +137,7 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
-  const boardTriageState = semanticRuntimeCorpBoardTriage(
-    input,
-    dependencies,
-  );
+  const boardTriageState = semanticRuntimeCorpBoardTriage(input, dependencies);
   const tacticalGoalFit = corpTacticalGoalFitScoreComponent(
     input,
     action,
@@ -154,35 +152,37 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     actionSemanticCandidate,
   );
   if (boardTriage) components.push(boardTriage);
-  const activeScorelineAdvance =
-    corpActiveRemoteAgendaAdvanceClockComponent(
-      input,
-      action,
-      dependencies,
-      boardTriageState,
-    );
+  const activeScorelineAdvance = corpActiveRemoteAgendaAdvanceClockComponent(
+    input,
+    action,
+    dependencies,
+    boardTriageState,
+  );
   if (activeScorelineAdvance) components.push(activeScorelineAdvance);
-  const activeScoreRemoteFunding =
-    corpActiveScoreRemoteReserveFundingComponent(input, action);
+  const activeScoreRemoteFunding = corpActiveScoreRemoteReserveFundingComponent(
+    input,
+    action,
+  );
   if (activeScoreRemoteFunding) components.push(activeScoreRemoteFunding);
-  const activeScorelineOffPath =
-    corpActiveScorelineOffPathPenaltyComponent(
-      input,
-      action,
-      dependencies,
-      boardTriageState,
-      actionSemanticCandidate,
-    );
+  const activeScorelineOffPath = corpActiveScorelineOffPathPenaltyComponent(
+    input,
+    action,
+    dependencies,
+    boardTriageState,
+    actionSemanticCandidate,
+  );
   if (activeScorelineOffPath) components.push(activeScorelineOffPath);
-  const gameEndingExposure =
-    corpGameEndingScorelineExposurePenaltyComponent(
-      input,
-      action,
-      dependencies,
-    );
+  const gameEndingExposure = corpGameEndingScorelineExposurePenaltyComponent(
+    input,
+    action,
+    dependencies,
+  );
   if (gameEndingExposure) components.push(gameEndingExposure);
-  const scorelineFunding =
-    corpScorelineFundingAssessmentComponent(input, action, dependencies);
+  const scorelineFunding = corpScorelineFundingAssessmentComponent(
+    input,
+    action,
+    dependencies,
+  );
   if (scorelineFunding) components.push(scorelineFunding);
   if (action.type === "score_agenda") {
     components.push({
@@ -403,14 +403,13 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
       roles,
     );
     if (rootPayloadPlan) components.push(rootPayloadPlan);
-    const scoreRemotePipeline =
-      corpExistingScoreRemotePipelineComponent(
-        input,
-        action,
-        dependencies,
-        roles,
-        boardTriageState,
-      );
+    const scoreRemotePipeline = corpExistingScoreRemotePipelineComponent(
+      input,
+      action,
+      dependencies,
+      roles,
+      boardTriageState,
+    );
     if (scoreRemotePipeline) components.push(scoreRemotePipeline);
     const lowValueInstallDefer = corpLowValueInstallDeferComponent(
       input,
@@ -516,10 +515,14 @@ export function semanticRuntimeCorpScoreComponents<TConsumer extends string>(
     components.push({
       key: advancementPlacement.dominatedByBasicAdvance
         ? "corp_advancement_counter_placement_dominated_by_basic_advance"
-        : "corp_advancement_counter_placement_incremental_value",
+        : advancementPlacement.noConcreteConversion
+          ? "corp_advancement_counter_placement_without_conversion"
+          : "corp_advancement_counter_placement_incremental_value",
       label: advancementPlacement.dominatedByBasicAdvance
         ? "Basic-Advance-Dominanz"
-        : "Advancement-Mehrwert",
+        : advancementPlacement.noConcreteConversion
+          ? "Advancement ohne Conversion"
+          : "Advancement-Mehrwert",
       value: advancementPlacement.scoreValue,
       reason: advancementPlacement.evidence.join("|"),
     });
@@ -1041,14 +1044,13 @@ function corpActiveRemoteAgendaAdvanceClockComponent<TConsumer extends string>(
   ) {
     if (boardTriageState.severity === "critical") return undefined;
   }
-  const runnerAgendaPoints = positiveOrZeroNumber(
-    input.playerView.opponent?.agendaPoints,
-  ) ?? 0;
+  const runnerAgendaPoints =
+    positiveOrZeroNumber(input.playerView.opponent?.agendaPoints) ?? 0;
   const severityBonus =
     runnerAgendaPoints >= 5 ||
     state.agendaPointsAtRisk >= 3 ||
     scoringWindow?.agendaStealSeverity === "near_win" ||
-        scoringWindow?.agendaStealSeverity === "game_ending"
+    scoringWindow?.agendaStealSeverity === "game_ending"
       ? 700
       : 0;
   const tempoAdvanceBonus =
@@ -1118,8 +1120,12 @@ function corpActiveRemoteAgendaCanTempoAdvanceUnderClock<
     };
   }
   const sameTurnCloseout =
-    corpSameTurnScoreCloseoutComponent(input, action, dependencies, undefined) !==
-    undefined;
+    corpSameTurnScoreCloseoutComponent(
+      input,
+      action,
+      dependencies,
+      undefined,
+    ) !== undefined;
   if (
     scoringWindow?.windowKind === "unsafe" ||
     scoringWindow?.runnerCanContestBeforeScore === true ||
@@ -1158,7 +1164,8 @@ function corpStrongSameRemoteIceInstallForScoreline<TConsumer extends string>(
       recommendation: string;
     }
   | undefined {
-  const legalActions = input.legalActions ?? input.playerView.legalActions ?? [];
+  const legalActions =
+    input.legalActions ?? input.playerView.legalActions ?? [];
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,
   );
@@ -1220,9 +1227,7 @@ function corpActiveScoreRemoteReserveFundingComponent(
   };
 }
 
-function corpActiveScorelineOffPathPenaltyComponent<
-  TConsumer extends string,
->(
+function corpActiveScorelineOffPathPenaltyComponent<TConsumer extends string>(
   input: AiDecisionInput,
   action: LegalAction,
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
@@ -1457,9 +1462,7 @@ function corpActiveRemoteScorelineState(
           const requirement = corpVisibleAdvancementRequirement(card);
           const counters = positiveOrZeroNumber(card.advancementCounters) ?? 0;
           const advancesRemaining =
-            requirement === undefined
-              ? 0
-              : Math.max(0, requirement - counters);
+            requirement === undefined ? 0 : Math.max(0, requirement - counters);
           const unrezzedRemoteRezCost = corpVisibleUnrezzedRezCost(server.ice);
           const reserveFloor = Math.min(
             8,
@@ -1525,9 +1528,7 @@ function corpPreparedScoreRemotePipeline(
     )[0];
 }
 
-function corpPreparedScoreRemoteAgendaSearchComponent<
-  TConsumer extends string,
->(
+function corpPreparedScoreRemoteAgendaSearchComponent<TConsumer extends string>(
   input: AiDecisionInput,
   action: LegalAction,
   dependencies: SemanticRuntimeCorpScoreDependencies<TConsumer>,
@@ -1538,7 +1539,8 @@ function corpPreparedScoreRemoteAgendaSearchComponent<
   const pipeline = corpPreparedScoreRemotePipeline(input);
   if (!pipeline) return undefined;
   if (corpHqAgendaCount(input) > 0) return undefined;
-  const rdCount = positiveOrZeroNumber(input.playerView.own.stackOrRdCount) ?? 0;
+  const rdCount =
+    positiveOrZeroNumber(input.playerView.own.stackOrRdCount) ?? 0;
   if (rdCount <= 0) return undefined;
   if (
     (boardTriageState.primary === "protect_hq" ||
@@ -1654,10 +1656,7 @@ function corpHqAgendaReliefScorelineContext<TConsumer extends string>(
   }
   if (
     action.type !== "advance_card" &&
-    !(
-      action.type === "install_card" &&
-      action.payload?.placement !== "ice"
-    )
+    !(action.type === "install_card" && action.payload?.placement !== "ice")
   ) {
     return undefined;
   }
@@ -1978,11 +1977,7 @@ function corpNonAgendaRootBlocksScoreRemoteComponent<TConsumer extends string>(
       return false;
     }
     const candidateRoles = dependencies.rolesForAction(input, candidate);
-    return dependencies.corpActionIsScoreLine(
-      input,
-      candidate,
-      candidateRoles,
-    );
+    return dependencies.corpActionIsScoreLine(input, candidate, candidateRoles);
   });
   if (!agendaInstall) return undefined;
   return {
@@ -2005,7 +2000,9 @@ function corpHqAgendaFloodDrawRiskComponent<TConsumer extends string>(
   boardTriageState: ReturnType<typeof semanticRuntimeCorpBoardTriage>,
 ): AiDecisionScoreComponent | undefined {
   if (boardTriageState.primary !== "force_scoreline_clock") return undefined;
-  if (!boardTriageState.evidence.includes("corp_hq_agenda_flood_pressure:true")) {
+  if (
+    !boardTriageState.evidence.includes("corp_hq_agenda_flood_pressure:true")
+  ) {
     return undefined;
   }
   const burstEconomyOperation = corpBurstEconomyOperationForAction(
@@ -2015,7 +2012,7 @@ function corpHqAgendaFloodDrawRiskComponent<TConsumer extends string>(
     actionSemanticCandidate,
   );
   const drawCards =
-    action.type === "draw_card" ? 1 : burstEconomyOperation?.drawCards ?? 0;
+    action.type === "draw_card" ? 1 : (burstEconomyOperation?.drawCards ?? 0);
   if (drawCards <= 0) return undefined;
   return {
     key: "corp_hq_agenda_flood_draw_risk",
@@ -2182,7 +2179,9 @@ function corpRemoteScorelineIceFundingPenaltyComponent<
         ? [`recommended_next_step:${scoringWindow.recommendedNextStep}`]
         : []),
       ...(scoringWindow?.dynamicProtectionReserve !== undefined
-        ? [`dynamic_protection_reserve:${scoringWindow.dynamicProtectionReserve}`]
+        ? [
+            `dynamic_protection_reserve:${scoringWindow.dynamicProtectionReserve}`,
+          ]
         : []),
     ].join("|"),
   };
@@ -2788,7 +2787,9 @@ function corpActionTargetsVisibleAgenda(
 }
 
 function corpVisibleCardIsAgenda(card: VisibleCard): boolean {
-  return card.type === "agenda" || visibleCardDefinition(card)?.type === "agenda";
+  return (
+    card.type === "agenda" || visibleCardDefinition(card)?.type === "agenda"
+  );
 }
 
 function corpBurstEconomyOperationForAction<TConsumer extends string>(
@@ -2919,8 +2920,7 @@ function corpBurstEconomyAbilityForVisibleCard(
     "drawCardsAmount",
   );
   const gain = payloadGain?.amount ?? corpCreditGainFromRulesText(rulesText);
-  const drawCards =
-    payloadDrawCards ?? corpDrawCountFromRulesText(rulesText);
+  const drawCards = payloadDrawCards ?? corpDrawCountFromRulesText(rulesText);
   if (gain <= 0 && drawCards <= 0) return undefined;
   const cost = positiveOrZeroNumber(fallbackCost) ?? 0;
   const netGain = gain - cost;
@@ -2969,12 +2969,16 @@ function corpCreditGainFromActionPayload(
     "hostedCreditTakeAmount",
   );
   const takesHostedCredits =
-    booleanPayloadValue(action.payload, "cardImplementationTakesHostedCredits") ===
-      true || hostedCreditTakeAmount !== undefined;
+    booleanPayloadValue(
+      action.payload,
+      "cardImplementationTakesHostedCredits",
+    ) === true || hostedCreditTakeAmount !== undefined;
   if (takesHostedCredits) {
     evidence.push("ability_payload_takes_hosted_credits:true");
     if (hostedCreditTakeAmount !== undefined) {
-      evidence.push(`ability_payload_hosted_credit_take:${hostedCreditTakeAmount}`);
+      evidence.push(
+        `ability_payload_hosted_credit_take:${hostedCreditTakeAmount}`,
+      );
       amount = Math.min(amount, hostedCreditTakeAmount);
     }
     const visibleHostedCredits = visibleHostedCreditCounterAmount(sourceCard);
@@ -2991,7 +2995,9 @@ function corpCreditGainFromActionPayload(
   return { amount, evidence };
 }
 
-function visibleHostedCreditCounterAmount(card: VisibleCard): number | undefined {
+function visibleHostedCreditCounterAmount(
+  card: VisibleCard,
+): number | undefined {
   const counters = card.counters;
   if (!counters) return undefined;
   const counterValues = counters as Partial<Record<string, number>>;
