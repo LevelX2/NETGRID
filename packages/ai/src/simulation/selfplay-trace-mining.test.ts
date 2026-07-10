@@ -184,6 +184,63 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("archives-positive");
   });
 
+  it("requires stable visible Archives with no unknown cards for repeat findings", () => {
+    const stable = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        selectedActionId: "archives-stable-1",
+        targetServerId: "archives",
+        runnerArchivesUnknownCardCount: 0,
+        runnerArchivesKnownAgenda: false,
+        runnerArchivesVisibleFingerprint: "fnv1a:stable",
+      }),
+      selfplayAction("runner", 2, "start_run", {
+        selectedActionId: "archives-stable-2",
+        targetServerId: "archives",
+        runnerArchivesUnknownCardCount: 0,
+        runnerArchivesKnownAgenda: false,
+        runnerArchivesVisibleFingerprint: "fnv1a:stable",
+      }),
+    ]);
+    const freshUnknown = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        targetServerId: "archives",
+        runnerArchivesUnknownCardCount: 0,
+        runnerArchivesKnownAgenda: false,
+        runnerArchivesVisibleFingerprint: "fnv1a:before",
+      }),
+      selfplayAction("runner", 2, "start_run", {
+        selectedActionId: "archives-fresh-unknown",
+        targetServerId: "archives",
+        runnerArchivesUnknownCardCount: 1,
+        runnerArchivesKnownAgenda: false,
+        runnerArchivesVisibleFingerprint: "fnv1a:before",
+      }),
+    ]);
+    const changed = selfplaySummary([
+      selfplayAction("runner", 1, "start_run", {
+        targetServerId: "archives",
+        runnerArchivesUnknownCardCount: 0,
+        runnerArchivesKnownAgenda: false,
+        runnerArchivesVisibleFingerprint: "fnv1a:before",
+      }),
+      selfplayAction("runner", 2, "start_run", {
+        selectedActionId: "archives-changed",
+        targetServerId: "archives",
+        runnerArchivesUnknownCardCount: 0,
+        runnerArchivesKnownAgenda: false,
+        runnerArchivesVisibleFingerprint: "fnv1a:after",
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions(
+      [stable, freshUnknown, changed],
+      { detectorIds: ["repeated_low_value_archives"] },
+    );
+
+    expect(findings).toHaveLength(1);
+    expect(findings[0]?.selectedActionId).toBe("archives-stable-2");
+  });
+
   it("bounds bank over-target signals to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "gain_credit", {
@@ -292,6 +349,32 @@ describe("SelfplayTraceMining", () => {
     expect(findings[0]?.selectedActionId).toBe("recovery-entry-positive-2");
   });
 
+  it("ignores mandatory run microsteps in recovery and plan mismatch detectors", () => {
+    const summary = selfplaySummary([
+      selfplayAction("runner", 1, "continue_run", {
+        selectedActionId: "continue-recovery-1",
+        reasonCode: "runner.recovery.heap",
+        planKind: "runner.run_pressure",
+      }),
+      selfplayAction("runner", 2, "continue_run", {
+        selectedActionId: "continue-recovery-2",
+        reasonCode: "runner.recovery.heap",
+        planKind: "runner.run_pressure",
+      }),
+      selfplayAction("runner", 3, "resolve_choice", {
+        selectedActionId: "resolve-run-choice",
+        reasonCode: "runner.recovery.heap",
+        planKind: "runner.run_pressure",
+      }),
+    ]);
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["recovery_low_value_loop", "plan_step_action_mismatch"],
+    });
+
+    expect(findings).toEqual([]);
+  });
+
   it("bounds recovery coverage signals to structured entries", () => {
     const positive = selfplaySummary([
       selfplayAction("runner", 1, "trigger_ability", {
@@ -333,9 +416,7 @@ describe("SelfplayTraceMining", () => {
       selfplayAction("runner", 2, "trigger_ability", {
         selectedActionId: "funding-positive-2",
         reasonCode: "runner.recovery",
-        debugFacts: [
-          "runner_credit_base_recommendation:fund_useful_hand_card",
-        ],
+        debugFacts: ["runner_credit_base_recommendation:fund_useful_hand_card"],
       }),
     ]);
     const noise = selfplaySummary([
@@ -402,9 +483,7 @@ describe("SelfplayTraceMining", () => {
     const noise = selfplaySummary([
       selfplayAction("runner", 1, "trigger_ability", {
         selectedActionId: "override-noise",
-        debugFacts: [
-          "semantic_runtime_actual_differs_from_legacy_debugish",
-        ],
+        debugFacts: ["semantic_runtime_actual_differs_from_legacy_debugish"],
       }),
     ]);
 

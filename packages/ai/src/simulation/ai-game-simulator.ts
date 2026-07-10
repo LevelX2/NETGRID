@@ -18,6 +18,7 @@ import {
 import type { AiDeckStrategyDeckSnapshot } from "../deck-strategy-snapshot";
 import { buildAiDecisionInput, selectAiDecisionSideForState } from "../runtime/ai-decision-input";
 import { resetRunnerRunPlanMemory } from "../runtime/runner-run-plan-memory";
+import { fnv1a } from "../runtime/stable-hash";
 import { resetTacticalPlanMemory } from "../tactical-plans";
 import { sortedUniqueProgressionCardTargetTypes } from "../runtime/progression-card-target";
 import { advancementCountersAddedForSimulationAction } from "../runtime/simulation-action-event";
@@ -388,6 +389,12 @@ function simulateAiGame(
       input,
       action,
     );
+    const runnerArchivesVisibility =
+      runnerArchivesVisibilityDiagnosticsForSimulationAction(
+        input,
+        action,
+        targetServerId,
+      );
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
@@ -438,6 +445,7 @@ function simulateAiGame(
       ...runnerEconomySetup,
       ...tagPunishDiagnostics,
       ...corpFutureRunIce,
+      ...runnerArchivesVisibility,
       ...(typeof action.payload?.placement === "string"
         ? { installPlacement: action.payload.placement }
         : {}),
@@ -483,6 +491,47 @@ function actionPlacement(action: LegalAction): string | undefined {
   return typeof action.payload?.placement === "string"
     ? action.payload.placement
     : undefined;
+}
+
+function runnerArchivesVisibilityDiagnosticsForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string | undefined,
+): ActionSequenceEntryDiagnostics {
+  if (
+    input.side !== "runner" ||
+    action.type !== "start_run" ||
+    targetServerId !== "archives"
+  ) {
+    return {};
+  }
+  const visibleArchives =
+    input.playerView.servers.find((server) => server.id === "archives")?.root ??
+    [];
+  const knownCards = visibleArchives.filter(
+    (card) => card.known && typeof card.definitionId === "string",
+  );
+  const unknownCardCount = Math.max(
+    0,
+    input.playerView.opponent.discardCount - knownCards.length,
+  );
+  const visibleFingerprint = fnv1a(
+    knownCards
+      .map(
+        (card) =>
+          `${card.instanceId}:${card.definitionId ?? "unknown"}:${card.type ?? "unknown"}`,
+      )
+      .sort()
+      .join("|"),
+  );
+  return {
+    runnerArchivesKnownCardCount: knownCards.length,
+    runnerArchivesUnknownCardCount: unknownCardCount,
+    runnerArchivesKnownAgenda: knownCards.some(
+      (card) => card.type === "agenda",
+    ),
+    runnerArchivesVisibleFingerprint: `fnv1a:${visibleFingerprint}`,
+  };
 }
 
 function simulationDecisionScopeId(params: {

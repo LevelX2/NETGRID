@@ -34,6 +34,10 @@ export type AiSimulationActionSequenceEntry = {
   fallbackUsed: boolean;
   timeoutUsed: boolean;
   targetServerId?: string;
+  runnerArchivesKnownCardCount?: number;
+  runnerArchivesUnknownCardCount?: number;
+  runnerArchivesKnownAgenda?: boolean;
+  runnerArchivesVisibleFingerprint?: string;
   corpFutureRunIceInstallOpportunity?: boolean;
   corpFutureRunIceInstalled?: boolean;
   corpFutureRunIceClass?:
@@ -698,5 +702,4 @@ export type AiSimulationActionSequenceEntry = {
   qualityTags: string[];
   stateHashAfter: string;
   installPlacement?: string;
-
 };

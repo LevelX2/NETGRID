@@ -1,4 +1,8 @@
-import type { AiDecisionActionAlternative, LegalAction, Side } from "@netgrid/shared";
+import type {
+  AiDecisionActionAlternative,
+  LegalAction,
+  Side,
+} from "@netgrid/shared";
 import { FORBIDDEN_AI_INPUT_FIELDS } from "../runtime/ai-decision-input";
 import { hasConcretePassiveScoreLineAvailable } from "./score-window-counts";
 import type { AiSimulationConfig } from "./ai-simulation-config";
@@ -282,7 +286,8 @@ export function extractAiSelfplayDecisionPoints(
         actionIndex,
         side: entry.side,
         stateVersion: entry.stateVersionBefore,
-        selectedActionId: sanitizeSelfplayText(selectedActionId) ?? "[redacted]",
+        selectedActionId:
+          sanitizeSelfplayText(selectedActionId) ?? "[redacted]",
         selectedActionType: entry.actionType,
         ...(entry.planKind
           ? { planKind: sanitizeSelfplayText(entry.planKind) ?? "[redacted]" }
@@ -313,7 +318,8 @@ export function extractAiSelfplayDecisionPoints(
       };
       return {
         ...point,
-        redactionSafe: point.redactionSafe && isSelfplayTraceRedactionSafe(point),
+        redactionSafe:
+          point.redactionSafe && isSelfplayTraceRedactionSafe(point),
       };
     }),
   );
@@ -491,7 +497,7 @@ function classifySelfplayActionLimitSubcluster(
       (left, right) =>
         right.count - left.count ||
         left.subcluster.localeCompare(right.subcluster),
-  );
+    );
   const [best, second] = ranked;
   if (!best || best.count <= 0) return "mixed_unknown";
   if (second && second.count > 0 && best.count === second.count) {
@@ -533,7 +539,7 @@ function classifySelfplayActionLimitSubclusterEntry(
   if (
     (entry.actionType === "install_card" ||
       entry.actionType === "play_event") &&
-      entryHasLowDeltaSignal(text)
+    entryHasLowDeltaSignal(text)
   ) {
     return "late_install_low_delta";
   }
@@ -553,7 +559,10 @@ function classifyLateRunStepSubclusterEntry(
   windowIndex: number,
   text: string,
 ): AiSelfplayActionLimitSubclusterId | undefined {
-  if (entry.actionType === "break_subroutine" || entry.actionType === "pump_breaker") {
+  if (
+    entry.actionType === "break_subroutine" ||
+    entry.actionType === "pump_breaker"
+  ) {
     return "break_pump_required";
   }
   if (entry.actionType === "jack_out") {
@@ -587,15 +596,17 @@ function runWindowHasAccessOrBreachAfter(
 ): boolean {
   // A continue action followed by access is required run microflow, not a
   // no-progress loop, so the lookahead is intentionally narrow and positive.
-  return window.slice(windowIndex + 1, windowIndex + 5).some(
-    (entry) =>
-      entry.side === "runner" &&
-      (entry.actionType === "access_card" ||
-        entry.actionType === "steal_agenda" ||
-        entry.actionType === "trash_accessed_card" ||
-        entry.actionType === "decline_trash" ||
-        selfplayEntryTextHasBreachPendingSignal(selfplayEntryText(entry))),
-  );
+  return window
+    .slice(windowIndex + 1, windowIndex + 5)
+    .some(
+      (entry) =>
+        entry.side === "runner" &&
+        (entry.actionType === "access_card" ||
+          entry.actionType === "steal_agenda" ||
+          entry.actionType === "trash_accessed_card" ||
+          entry.actionType === "decline_trash" ||
+          selfplayEntryTextHasBreachPendingSignal(selfplayEntryText(entry))),
+    );
 }
 
 function classifyLateGainCreditSubclusterEntry(
@@ -958,10 +969,7 @@ function selfplayEntryTextHasDrawOrCoverageNeedSignal(text: string): boolean {
     tokensIncludePhrase(tokens, ["hand", "goal"]) ||
     tokensIncludePhrase(tokens, ["draw", "for", "answer"]) ||
     tokensIncludePhrase(tokens, ["search", "or", "draw"]) ||
-    tokensIncludePhrase(tokens, [
-      "supportsdraworsearchneed",
-      "true",
-    ])
+    tokensIncludePhrase(tokens, ["supportsdraworsearchneed", "true"])
   );
 }
 
@@ -1035,7 +1043,9 @@ function tokensIncludePhrase(
   phrase: readonly string[],
 ): boolean {
   return tokens.some((token, index) =>
-    phrase.every((phraseToken, offset) => tokens[index + offset] === phraseToken),
+    phrase.every(
+      (phraseToken, offset) => tokens[index + offset] === phraseToken,
+    ),
   );
 }
 
@@ -1106,7 +1116,11 @@ function selfplayEntryDetectorFindings(
     entry.side === "runner" &&
     entry.actionType === "start_run" &&
     entry.targetServerId === "archives" &&
-    (repeatedNoProgressRun ||
+    (repeatedLowValueArchivesWithStableVisibleState(
+      summary.actionSequence,
+      actionIndex,
+      entry,
+    ) ||
       selfplayEntryHasStructuredSignal(entry, ["archives_known_no_agenda"]))
   ) {
     findings.push(
@@ -1123,6 +1137,7 @@ function selfplayEntryDetectorFindings(
   if (
     enabled.has("recovery_low_value_loop") &&
     entry.side === "runner" &&
+    !selfplayReactiveSemanticOverride(entry.actionType) &&
     selfplayEntryTextHasRecoveryLoopSignal(text) &&
     repeatedReasonWithoutProgress(summary.actionSequence, actionIndex, entry)
   ) {
@@ -1445,6 +1460,34 @@ function previousRunnerRunOnSameServer(
   return undefined;
 }
 
+function repeatedLowValueArchivesWithStableVisibleState(
+  entries: AiSimulationSummary["actionSequence"],
+  actionIndex: number,
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  const previousIndex = previousRunnerRunOnSameServer(
+    entries,
+    actionIndex,
+    entry,
+  );
+  if (previousIndex === undefined) return false;
+  const previous = entries[previousIndex];
+  if (!previous) return false;
+  if (
+    entry.runnerArchivesUnknownCardCount !== 0 ||
+    previous.runnerArchivesUnknownCardCount !== 0 ||
+    entry.runnerArchivesKnownAgenda === true ||
+    previous.runnerArchivesKnownAgenda === true ||
+    !entry.runnerArchivesVisibleFingerprint ||
+    !previous.runnerArchivesVisibleFingerprint ||
+    entry.runnerArchivesVisibleFingerprint !==
+      previous.runnerArchivesVisibleFingerprint
+  ) {
+    return false;
+  }
+  return !hasMeaningfulProgressBetween(entries, previousIndex + 1, actionIndex);
+}
+
 function hasMeaningfulProgressBetween(
   entries: AiSimulationSummary["actionSequence"],
   fromIndex: number,
@@ -1584,10 +1627,7 @@ function selfplayPlanActionMismatch(
       "contest",
       "access",
     ]) &&
-    entry.actionType !== "start_run" &&
-    entry.actionType !== "access_card" &&
-    entry.actionType !== "trash_accessed_card" &&
-    entry.actionType !== "steal_agenda" &&
+    !selfplayRunPlanCompatibleAction(entry.actionType) &&
     !selfplayEntryHasFundingOrReserveExplanation(entry) &&
     !selfplayPlanMismatchHasKnownExplanation(entry)
   )
@@ -1608,6 +1648,14 @@ function selfplayPlanActionMismatch(
   )
     return true;
   return false;
+}
+
+function selfplayRunPlanCompatibleAction(
+  actionType: AiSimulationSummary["actionSequence"][number]["actionType"],
+): boolean {
+  return (
+    actionType === "start_run" || selfplayReactiveSemanticOverride(actionType)
+  );
 }
 
 function selfplayEntryHasFundingOrReserveExplanation(
@@ -1692,9 +1740,7 @@ function safeSelfplayActionAlternatives(
   return alternatives
     .map(safeSelfplayActionAlternative)
     .filter(
-      (
-        alternative,
-      ): alternative is AiSelfplayDecisionPointActionAlternative =>
+      (alternative): alternative is AiSelfplayDecisionPointActionAlternative =>
         alternative !== undefined,
     );
 }
@@ -1713,8 +1759,10 @@ function safeSelfplayActionAlternative(
     whyChosen: safeSelfplayFacts(alternative.whyChosen ?? []),
     whyNot: safeSelfplayFacts(alternative.whyNot ?? []),
   };
-  if (alternative.excluded !== undefined) result.excluded = alternative.excluded;
-  if (alternative.priority !== undefined) result.priority = alternative.priority;
+  if (alternative.excluded !== undefined)
+    result.excluded = alternative.excluded;
+  if (alternative.priority !== undefined)
+    result.priority = alternative.priority;
   const label = sanitizeSelfplayText(alternative.label);
   if (label) result.label = label;
   const source = sanitizeSelfplayText(alternative.source);

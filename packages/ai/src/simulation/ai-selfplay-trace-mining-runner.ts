@@ -47,8 +47,7 @@ export function createAiSelfplayTraceMiningRunner(
     const maxActions = config.maxActions ?? 100;
     const runnerControllerMode =
       config.runnerControllerMode ?? "current_candidate";
-    const corpControllerMode =
-      config.corpControllerMode ?? "current_candidate";
+    const corpControllerMode = config.corpControllerMode ?? "current_candidate";
     const summaries = seeds.map((seed) =>
       dependencies.simulateAiGame({
         seed,
@@ -77,8 +76,7 @@ export function createAiSelfplayTraceMiningRunner(
         ...(config.corpDeck
           ? { corpDeck: config.corpDeck }
           : {
-              corpDeckId:
-                config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
+              corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
             }),
         ...(config.runnerDeckMetadata
           ? { runnerDeckMetadata: config.runnerDeckMetadata }
@@ -110,11 +108,15 @@ export function createAiSelfplayTraceMiningRunner(
             (detector) => detector !== "action_limit_reached",
           )
         : DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS);
-    const findings = detectAiSelfplaySuspiciousDecisions(summaries, {
-      detectorIds: effectiveDetectorIds,
-      longGameActionThreshold:
-        config.longGameActionThreshold ?? Math.max(20, Math.floor(maxActions * 0.75)),
-    });
+    const findings = detectAiSelfplaySuspiciousDecisions(
+      selfplayFindingDetectionSummaries(summaries),
+      {
+        detectorIds: effectiveDetectorIds,
+        longGameActionThreshold:
+          config.longGameActionThreshold ??
+          Math.max(20, Math.floor(maxActions * 0.75)),
+      },
+    );
     if (config.includeActionAlternativesForFindings === true) {
       retainActionAlternativesForFindingWindows(
         summaries,
@@ -201,4 +203,15 @@ export function createAiSelfplayTraceMiningRunner(
   }
 
   return { runAiSelfplayTraceMining };
+}
+
+function selfplayFindingDetectionSummaries(
+  summaries: readonly AiSimulationSummary[],
+): AiSimulationSummary[] {
+  return summaries.map((summary) => ({
+    ...summary,
+    actionSequence: summary.actionSequence.map(
+      ({ actionAlternatives: _actionAlternatives, ...entry }) => entry,
+    ),
+  }));
 }
