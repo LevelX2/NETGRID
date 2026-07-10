@@ -384,7 +384,8 @@ function tacticalPlanCorpScoreConversionBlocksOffPlanOverride(
   return (
     mapping.plan.side === "corp" &&
     mapping.plan.type === "corp.create_score_window" &&
-    mapping.plan.status === "active" &&
+    (mapping.plan.status === "active" ||
+      mapping.plan.status === "progressing") &&
     mapping.plan.evidence.includes(
       "corp_score_conversion_same_turn_guaranteed:true",
     ) &&

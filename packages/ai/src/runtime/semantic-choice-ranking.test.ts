@@ -9,24 +9,61 @@ import {
 } from "../tactical-plans";
 
 describe("tacticalPlanMappedChoice", () => {
-  it("keeps a guaranteed Corp score-conversion sequence on its exact next action", () => {
+  it.each(["active", "progressing"] as const)(
+    "keeps a %s guaranteed Corp score-conversion sequence on its exact next action",
+    (status) => {
+      const nextScoreAction =
+        status === "active"
+          ? legalAction("install-agenda", "install_card")
+          : legalAction("advance-agenda", "advance_card");
+      const offPlanCredit = legalAction("gain", "gain_credit");
+      const mapping = scoreConversionMapping([nextScoreAction], { status });
+
+      const result = tacticalPlanMappedChoice(
+        aiInput(),
+        [choice(offPlanCredit, 5000), choice(nextScoreAction, 50)],
+        mapping,
+        choice(offPlanCredit, 5000),
+      );
+
+      expect(result.outcome).toBe("semantic_choice_blocked");
+      expect(result.choice?.action.actionId).toBe(nextScoreAction.actionId);
+      expect(result.overrideBlockedChoice?.action.actionId).toBe("gain");
+      expect(result.overrideBlockedReason).toBe(
+        "corp_score_conversion_plan_controller",
+      );
+    },
+  );
+
+  it("does not protect a blocked score-conversion path", () => {
     const installAgenda = legalAction("install-agenda", "install_card");
     const offPlanCredit = legalAction("gain", "gain_credit");
-    const mapping = scoreConversionMapping([installAgenda]);
-
     const result = tacticalPlanMappedChoice(
       aiInput(),
       [choice(offPlanCredit, 5000), choice(installAgenda, 50)],
-      mapping,
+      scoreConversionMapping([installAgenda], { status: "blocked" }),
       choice(offPlanCredit, 5000),
     );
 
-    expect(result.outcome).toBe("semantic_choice_blocked");
-    expect(result.choice?.action.actionId).toBe("install-agenda");
-    expect(result.overrideBlockedChoice?.action.actionId).toBe("gain");
-    expect(result.overrideBlockedReason).toBe(
-      "corp_score_conversion_plan_controller",
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("gain");
+  });
+
+  it("does not protect a progressing score window without conversion guarantee", () => {
+    const installAgenda = legalAction("install-agenda", "install_card");
+    const offPlanCredit = legalAction("gain", "gain_credit");
+    const result = tacticalPlanMappedChoice(
+      aiInput(),
+      [choice(offPlanCredit, 5000), choice(installAgenda, 50)],
+      scoreConversionMapping([installAgenda], {
+        status: "progressing",
+        evidence: [],
+      }),
+      choice(offPlanCredit, 5000),
     );
+
+    expect(result.outcome).toBe("semantic_choice_selected");
+    expect(result.choice?.action.actionId).toBe("gain");
   });
 
   it("keeps runner plan mapping over a clear off-plan semantic run gap", () => {
@@ -638,7 +675,13 @@ describe("tacticalPlanMappedChoice", () => {
   });
 });
 
-function scoreConversionMapping(actions: LegalAction[]): PlanStepMappingResult {
+function scoreConversionMapping(
+  actions: LegalAction[],
+  overrides: {
+    status?: "active" | "progressing" | "blocked";
+    evidence?: string[];
+  } = {},
+): PlanStepMappingResult {
   const step = createPlanStep({
     stepId: "score_conversion:install_score_target:agenda",
     kind: "install_or_prepare_agenda",
@@ -650,12 +693,12 @@ function scoreConversionMapping(actions: LegalAction[]): PlanStepMappingResult {
       planId: "corp.create_score_window:conversion:agenda",
       side: "corp",
       type: "corp.create_score_window",
-      status: "active",
+      status: overrides.status ?? "active",
       priority: 970,
       horizonTurns: 1,
       target: { kind: "card", id: "agenda" },
       currentStep: step,
-      evidence: [
+      evidence: overrides.evidence ?? [
         "corp_score_conversion_same_turn_guaranteed:true",
         "corp_score_sequence:same_turn_conversion",
       ],
