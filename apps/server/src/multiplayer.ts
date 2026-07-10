@@ -73,12 +73,14 @@ import {
 } from "./deck-setup";
 import {
   projectEngineEventToServerRecord,
+  projectEngineEventToPublicEvent,
   projectReplayEventsForPerspective,
   type ReplayPerspective,
   type ServerEventRecord
 } from "./event-projection";
 import { envValue, LOCAL_DEFAULT_SERVER_BASE_URL, LOCAL_DEFAULT_TOKEN_SALT, LOCAL_DEFAULT_WEB_BASE_URL } from "./internet-hardening";
 import { buildSidePayload } from "./multiplayer-payload";
+import { chronicleTurnNumberForEvent } from "./chronicle-turn-context";
 import type {
   BackupManifest,
   StorageHealth,
@@ -3225,6 +3227,12 @@ function aiDecisionTraceFor(record: StoredMatch, event: GameEvent, side: Side, l
   const planKind = typeof traceJson.planKind === "string" ? traceJson.planKind : undefined;
   const score = typeof traceJson.score === "number" ? traceJson.score : undefined;
   const confidence = typeof traceJson.confidence === "number" ? traceJson.confidence : undefined;
+  const chronologicalEvents = [
+    ...record.eventLog.map((entry) => entry.publicPayload),
+    projectEngineEventToPublicEvent(event),
+  ];
+  const turn =
+    chronicleTurnNumberForEvent(chronologicalEvents, event.eventId) ?? 1;
   return {
     traceId: `ai_trace_${record.match.matchId}_${decisionIndex}`,
     matchId: record.match.matchId,
@@ -3232,7 +3240,7 @@ function aiDecisionTraceFor(record: StoredMatch, event: GameEvent, side: Side, l
     stateVersion: event.stateVersionBefore,
     matchVersion: record.match.matchVersion,
     side,
-    turn: event.stateVersionBefore,
+    turn,
     decisionIndex,
     selectedActionId: decision.actionId,
     selectedActionType,

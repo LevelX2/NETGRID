@@ -603,6 +603,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       matchId: traced.matchId,
       eventId: expect.any(String),
       side: "corp",
+      turn: 1,
       schemaVersion: "ai-decision-trace-v1",
       meta: expect.objectContaining({ actor: "corp" })
     });
