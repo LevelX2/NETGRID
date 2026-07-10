@@ -7,11 +7,16 @@ export function selectedCorpAdvancementCounterChoiceOptionId(
   selectableOptions: NonNullable<
     AiDecisionInput["playerView"]["pendingChoice"]
   >["options"],
+  plannedTargetCardId?: string,
 ): string | undefined {
   return selectableOptions
     .map((option) => ({
       option,
-      score: corpAdvancementCounterChoiceScore(input, option.value),
+      score: corpAdvancementCounterChoiceScore(
+        input,
+        option.value,
+        plannedTargetCardId,
+      ),
     }))
     .sort(
       (left, right) =>
@@ -23,20 +28,10 @@ export function selectedCorpAdvancementCounterChoiceOptionId(
 function corpAdvancementCounterChoiceScore(
   input: AiDecisionInput,
   value: string | number | boolean | undefined,
+  plannedTargetCardId: string | undefined,
 ): number {
   if (typeof value !== "string") return 0;
-  const placements = value
-    .split("|")
-    .map((part) => {
-      const [cardId, amountRaw] = part.split(":");
-      const amount = Number(amountRaw);
-      return cardId && Number.isFinite(amount) && amount > 0
-        ? { cardId, amount }
-        : undefined;
-    })
-    .filter((entry): entry is { cardId: string; amount: number } =>
-      Boolean(entry),
-    );
+  const placements = advancementPlacements(value);
   return placements.reduce((sum, placement) => {
     const located = findVisibleCorpServerCard(input, placement.cardId);
     if (!located) return sum;
@@ -57,6 +52,10 @@ function corpAdvancementCounterChoiceScore(
     const countersAfter =
       (located.card.advancementCounters ?? 0) + placement.amount;
     const remaining = Math.max(0, requirement - countersAfter);
+    const requiredAmount = Math.max(
+      0,
+      requirement - (located.card.advancementCounters ?? 0),
+    );
     const serverIce = located.server.ice.length;
     const rezzedIce = located.server.ice.filter(
       (ice) => ice.rezzed === true,
@@ -64,10 +63,14 @@ function corpAdvancementCounterChoiceScore(
     return (
       sum +
       placement.amount * 12 +
+      (plannedTargetCardId === placement.cardId ? 5000 : 0) +
+      (plannedTargetCardId && plannedTargetCardId !== placement.cardId
+        ? -1200
+        : 0) +
       (isAgenda ? 240 : 20) +
       (isAgenda
         ? remaining === 0
-          ? 700
+          ? 700 + (placement.amount === requiredAmount ? 500 : 0)
           : remaining === 1
             ? 260
             : remaining === 2
@@ -78,4 +81,37 @@ function corpAdvancementCounterChoiceScore(
       rezzedIce * 12
     );
   }, 0);
+}
+
+function advancementPlacements(
+  value: string,
+): Array<{ cardId: string; amount: number }> {
+  const moveParts = value.split("|");
+  if (
+    moveParts.length === 3 &&
+    !value.includes(":") &&
+    positiveAmount(moveParts[2]) !== undefined
+  ) {
+    return [
+      {
+        cardId: moveParts[1]!,
+        amount: positiveAmount(moveParts[2])!,
+      },
+    ];
+  }
+  return value
+    .split("|")
+    .map((part) => {
+      const [cardId, amountRaw] = part.split(":");
+      const amount = positiveAmount(amountRaw);
+      return cardId && amount !== undefined ? { cardId, amount } : undefined;
+    })
+    .filter((entry): entry is { cardId: string; amount: number } =>
+      Boolean(entry),
+    );
+}
+
+function positiveAmount(value: string | undefined): number | undefined {
+  const amount = Number(value);
+  return Number.isFinite(amount) && amount > 0 ? amount : undefined;
 }

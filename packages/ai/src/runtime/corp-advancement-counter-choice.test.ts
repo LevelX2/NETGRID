@@ -36,6 +36,49 @@ describe("selectedCorpAdvancementCounterChoiceOptionId", () => {
       selectedCorpAdvancementCounterChoiceOptionId(input, options as never),
     ).toBe("agenda_score");
   });
+
+  it("parses move choices and binds them to the planned agenda", () => {
+    const plannedAgenda = card("planned-agenda", "simple_agenda", {
+      type: "agenda",
+      advancementRequirement: 3,
+      advancementCounters: 0,
+    });
+    const otherAgenda = card("other-agenda", "simple_agenda", {
+      type: "agenda",
+      advancementRequirement: 3,
+      advancementCounters: 1,
+    });
+    const vapor = card("vapor", "onr_v1_347_vapor-ops", {
+      type: "asset",
+      advancementCounters: 3,
+    });
+    const input = decisionInput([plannedAgenda, otherAgenda, vapor]);
+    const options = [
+      {
+        id: "alphabetically_first_wrong_target",
+        label: "2 auf andere Agenda",
+        value: `${vapor.instanceId}|${otherAgenda.instanceId}|2`,
+      },
+      {
+        id: "planned_exact_fit",
+        label: "3 auf geplante Agenda",
+        value: `${vapor.instanceId}|${plannedAgenda.instanceId}|3`,
+      },
+      {
+        id: "planned_short",
+        label: "2 auf geplante Agenda",
+        value: `${vapor.instanceId}|${plannedAgenda.instanceId}|2`,
+      },
+    ];
+
+    expect(
+      selectedCorpAdvancementCounterChoiceOptionId(
+        input,
+        options as never,
+        plannedAgenda.instanceId,
+      ),
+    ).toBe("planned_exact_fit");
+  });
 });
 
 function card(

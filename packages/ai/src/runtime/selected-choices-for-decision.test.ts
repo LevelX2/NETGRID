@@ -262,6 +262,64 @@ describe("selectedChoicesForDecision", () => {
       selectedOptionIds: ["card_ice_1", "card_ice_2"],
     });
   });
+
+  it("routes advancement move choices through the Corp score chooser", () => {
+    const agenda = {
+      ...visibleCard("agenda_1", "agenda"),
+      definitionId: "simple_agenda",
+      advancementRequirement: 3,
+      advancementCounters: 1,
+    };
+    const vapor = {
+      ...visibleCard("vapor_1", "asset"),
+      definitionId: "onr_v1_347_vapor-ops",
+      advancementCounters: 2,
+    };
+    const decision = selectedChoicesForDecision(
+      inputWithChoice(
+        {
+          kind: "select_option",
+          source:
+            "p3_34.move_advancement:onr_v1_347_vapor-ops:vapor_1:source_card:all:8",
+          minSelections: 1,
+          maxSelections: 1,
+          options: [
+            {
+              id: "move_to_vapor_decoy",
+              label: "1 auf Decoy",
+              value: "vapor_1|decoy_1|1",
+            },
+            {
+              id: "move_to_score",
+              label: "2 auf Agenda",
+              value: "vapor_1|agenda_1|2",
+            },
+          ],
+        },
+        {
+          servers: [
+            {
+              id: "remote_1",
+              label: "Remote 1",
+              ice: [],
+              root: [
+                agenda,
+                vapor,
+                { ...visibleCard("decoy_1", "asset"), advancementCounters: 0 },
+              ],
+            },
+          ],
+        },
+      ),
+      resolveChoiceAction(),
+      unusedDependencies(),
+    );
+
+    expect(decision).toEqual({
+      choiceId: "choice_multi",
+      selectedOptionIds: ["move_to_score"],
+    });
+  });
 });
 
 function inputWithChoice(
@@ -280,6 +338,9 @@ function inputWithChoice(
 ): AiDecisionInput {
   return {
     side: "corp",
+    seed: "selected-choice-test",
+    decisionId: "selected-choice-test:7",
+    profileId: "selected-choice-test",
     playerView: {
       own: {
         credits: options.credits ?? 5,

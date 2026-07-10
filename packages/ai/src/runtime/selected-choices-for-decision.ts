@@ -23,6 +23,7 @@ import {
 import { selectedSetupMulliganChoiceOptionId } from "./setup-mulligan-choice-option";
 import { selectedShellTradersStartTurnChoiceOptionId } from "./shell-traders-choice-option";
 import { latestTraceContext } from "./trace-context";
+import { getTacticalPlanMemorySnapshot } from "../plans/plan-memory";
 
 type PendingChoice = NonNullable<
   AiDecisionInput["playerView"]["pendingChoice"]
@@ -129,11 +130,19 @@ export function selectedChoicesForDecision(
   if (
     input.side === "corp" &&
     (choice.source.startsWith("p3_34.distribute_advancement") ||
+      choice.source.startsWith("p3_34.move_advancement") ||
       choice.source.startsWith("v1919.systematic_layoffs_advancement"))
   ) {
+    const planMemory = getTacticalPlanMemorySnapshot(input);
+    const plannedTargetCardId =
+      planMemory?.type === "corp.create_score_window" &&
+      planMemory.target?.kind === "card"
+        ? planMemory.target.id
+        : undefined;
     const selected = selectedCorpAdvancementCounterChoiceOptionId(
       input,
       selectableOptions,
+      plannedTargetCardId,
     );
     return {
       choiceId: choice.choiceId,
